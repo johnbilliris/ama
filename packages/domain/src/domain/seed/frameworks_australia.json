@@ -1,0 +1,24 @@
+[
+  {
+    "framework_id": "aiims-national",
+    "name": "Australasian Inter-service Incident Management System",
+    "framework_type": "aiims",
+    "principles": ["management by objectives", "unity of command", "span of control"],
+    "control_model": "incident_management_team",
+    "approval_rules": [{"action": "public_alert", "requires": "incident_commander"}],
+    "escalation_rules": [{"condition": "cross-border impact", "escalateTo": "state_controller"}],
+    "span_of_control_guidance": "1 supervisor to 5 resources",
+    "status": "active"
+  },
+  {
+    "framework_id": "nsw-flood-communications",
+    "name": "NSW Flood Communications Protocol",
+    "framework_type": "communications",
+    "principles": ["plain language", "multilingual support"],
+    "control_model": "public_information_cell",
+    "approval_rules": [{"action": "evacuation_alert", "requires": "public_information_officer"}],
+    "escalation_rules": [{"condition": "warning upgraded", "escalateTo": "incident_commander"}],
+    "span_of_control_guidance": "Dedicated approval queue for public messaging",
+    "status": "active"
+  }
+]

@@ -1,0 +1,526 @@
+openapi: 3.1.0
+info:
+  title: Disaster Response Coordination Hub API
+  version: 0.1.0
+  summary: Control-plane API for multi-agency disaster coordination, signal ingestion, approvals, alerts, and rehearsal workflows.
+servers:
+  - url: https://api.example.gov.au
+security:
+  - bearerAuth: []
+paths:
+  /organisations:
+    get:
+      tags: [Organisations]
+      summary: List organisations for one or more jurisdictions.
+      parameters:
+        - in: query
+          name: jurisdictionId
+          schema:
+            type: string
+        - in: query
+          name: category
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Matching organisations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organisation'
+  /frameworks:
+    get:
+      tags: [Frameworks]
+      summary: List framework assignments and rules for a jurisdiction or organisation.
+      parameters:
+        - in: query
+          name: jurisdictionId
+          schema:
+            type: string
+        - in: query
+          name: organisationId
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Matching frameworks.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OperatingFramework'
+  /personas/{personaId}/workspace:
+    get:
+      tags: [Workspaces]
+      summary: Get a role-specific operational workspace for a persona.
+      parameters:
+        - in: path
+          name: personaId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: incidentId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Workspace payload for the persona.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonaWorkspace'
+  /signals:
+    post:
+      tags: [Signals]
+      summary: Ingest a normalized signal envelope.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalEnvelope'
+      responses:
+        '202':
+          description: Signal accepted for evaluation.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [signalId, status]
+                properties:
+                  signalId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [accepted]
+    get:
+      tags: [Signals]
+      summary: Query incident signals.
+      parameters:
+        - in: query
+          name: incidentId
+          schema:
+            type: string
+        - in: query
+          name: validationStatus
+          schema:
+            $ref: '#/components/schemas/ValidationStatus'
+      responses:
+        '200':
+          description: Matching signals.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Signal'
+  /incidents/{incidentId}/dashboard:
+    get:
+      tags: [Incidents]
+      summary: Get the shared operating picture for an incident.
+      parameters:
+        - in: path
+          name: incidentId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Incident dashboard.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentDashboard'
+  /recommendations/{recommendationId}/approvals:
+    post:
+      tags: [Approvals]
+      summary: Record an approval decision for a recommendation.
+      parameters:
+        - in: path
+          name: recommendationId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalDecisionInput'
+      responses:
+        '200':
+          description: Approval decision recorded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalDecision'
+  /tasks/{taskId}:
+    patch:
+      tags: [Tasks]
+      summary: Update task ownership or status.
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ownerPersonaId:
+                  type: string
+                status:
+                  $ref: '#/components/schemas/TaskStatus'
+                blockingReason:
+                  type: string
+      responses:
+        '200':
+          description: Task updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoordinationTask'
+  /alerts/{alertId}/publish:
+    post:
+      tags: [Alerts]
+      summary: Publish an approved public alert.
+      parameters:
+        - in: path
+          name: alertId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [publishedByPersonaId]
+              properties:
+                publishedByPersonaId:
+                  type: string
+      responses:
+        '200':
+          description: Alert published.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicAlert'
+  /scenarios/{scenarioRunId}/runs:
+    post:
+      tags: [Scenarios]
+      summary: Start a rehearsal or replay execution.
+      parameters:
+        - in: path
+          name: scenarioRunId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requestedByPersonaId]
+              properties:
+                requestedByPersonaId:
+                  type: string
+      responses:
+        '202':
+          description: Scenario run queued.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ValidationStatus:
+      type: string
+      enum: [pending, validated, contradicted, rejected, escalated]
+    TaskStatus:
+      type: string
+      enum: [new, acknowledged, in_progress, blocked, completed, cancelled]
+    IncidentType:
+      type: string
+      enum: [bushfire, flood, cyclone, storm, earthquake, other]
+    RecommendationType:
+      type: string
+      enum: [evacuation, resource_allocation, coordination, public_alert, infrastructure_action]
+    Organisation:
+      type: object
+      required: [organisationId, name, category, jurisdictionIds, operatingRole, status]
+      properties:
+        organisationId:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        jurisdictionIds:
+          type: array
+          items:
+            type: string
+        operatingRole:
+          type: string
+        authorityLevel:
+          type: string
+        status:
+          type: string
+    OperatingFramework:
+      type: object
+      required: [frameworkId, name, frameworkType, principles, status]
+      properties:
+        frameworkId:
+          type: string
+        name:
+          type: string
+        frameworkType:
+          type: string
+        principles:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+    SignalEnvelope:
+      type: object
+      required:
+        - source
+        - category
+        - occurredAt
+        - receivedAt
+        - location
+        - payload
+        - confidenceScore
+        - freshnessScore
+        - validationStatus
+        - provenance
+      properties:
+        source:
+          type: object
+          required: [dataSourceId, name, kind]
+          properties:
+            dataSourceId:
+              type: string
+            name:
+              type: string
+            kind:
+              type: string
+        incidentId:
+          type: string
+        category:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        receivedAt:
+          type: string
+          format: date-time
+        jurisdictionId:
+          type: string
+        location:
+          type: object
+          required: [type, coordinates, precisionMeters]
+          properties:
+            type:
+              type: string
+            coordinates:
+              type: array
+              items: {}
+            precisionMeters:
+              type: number
+        payload:
+          type: object
+          additionalProperties: true
+        confidenceScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        freshnessScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        validationStatus:
+          $ref: '#/components/schemas/ValidationStatus'
+        provenance:
+          type: object
+          required: [collectionMethod, sourceUri]
+          properties:
+            collectionMethod:
+              type: string
+            sourceUri:
+              type: string
+            validationNotes:
+              type: string
+    Signal:
+      allOf:
+        - $ref: '#/components/schemas/SignalEnvelope'
+        - type: object
+          required: [signalId]
+          properties:
+            signalId:
+              type: string
+    Recommendation:
+      type: object
+      required: [recommendationId, type, summary, explanation, confidenceLevel, status, requiredApprovalLevel]
+      properties:
+        recommendationId:
+          type: string
+        type:
+          $ref: '#/components/schemas/RecommendationType'
+        summary:
+          type: string
+        explanation:
+          type: string
+        confidenceLevel:
+          type: string
+          enum: [low, medium, high]
+        status:
+          type: string
+          enum: [proposed, under_review, approved, rejected, escalated, executed, expired]
+        requiredApprovalLevel:
+          type: string
+    ApprovalDecisionInput:
+      type: object
+      required: [approverPersonaId, outcome, rationale]
+      properties:
+        approverPersonaId:
+          type: string
+        outcome:
+          type: string
+          enum: [approved, rejected, escalated, timed_out]
+        rationale:
+          type: string
+        conditions:
+          type: array
+          items:
+            type: string
+    ApprovalDecision:
+      allOf:
+        - $ref: '#/components/schemas/ApprovalDecisionInput'
+        - type: object
+          required: [approvalDecisionId, decidedAt]
+          properties:
+            approvalDecisionId:
+              type: string
+            decidedAt:
+              type: string
+              format: date-time
+    CoordinationTask:
+      type: object
+      required: [taskId, summary, status, priority, ownerOrganisationId]
+      properties:
+        taskId:
+          type: string
+        summary:
+          type: string
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          type: string
+          enum: [critical, high, normal, low]
+        ownerOrganisationId:
+          type: string
+        ownerPersonaId:
+          type: string
+        blockingReason:
+          type: string
+    IncidentDashboard:
+      type: object
+      required: [incident, participatingOrganisations, activeRecommendations, activeTasks, signalSummary]
+      properties:
+        incident:
+          type: object
+          required: [incidentId, title, incidentType, status, severity]
+          properties:
+            incidentId:
+              type: string
+            title:
+              type: string
+            incidentType:
+              $ref: '#/components/schemas/IncidentType'
+            status:
+              type: string
+            severity:
+              type: string
+        participatingOrganisations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organisation'
+        activeRecommendations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recommendation'
+        activeTasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoordinationTask'
+        signalSummary:
+          type: object
+          required: [authoritativeCount, communityCount, contradictedCount]
+          properties:
+            authoritativeCount:
+              type: integer
+            communityCount:
+              type: integer
+            contradictedCount:
+              type: integer
+    PersonaWorkspace:
+      type: object
+      required: [personaId, organisationId, incidentId, tasks, inboundRequests, dependencies]
+      properties:
+        personaId:
+          type: string
+        organisationId:
+          type: string
+        incidentId:
+          type: string
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/CoordinationTask'
+        inboundRequests:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        dependencies:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    PublicAlert:
+      type: object
+      required: [alertId, status, approvalMode, languages, channelSet]
+      properties:
+        alertId:
+          type: string
+        status:
+          type: string
+          enum: [draft, pending_approval, approved, published, superseded, cancelled]
+        approvalMode:
+          type: string
+          enum: [human_approved, autonomous, escalated]
+        languages:
+          type: array
+          items:
+            type: string
+        channelSet:
+          type: array
+          items:
+            type: string
+        publishedAt:
+          type: string
+          format: date-time

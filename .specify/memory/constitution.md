@@ -60,6 +60,10 @@ Alerts must be understood quickly and acted upon correctly.
 
 All outbound alerts MUST be logged with audience, content, time, channel, and approval mode (autonomous vs human-approved).
 
+### VI. Cloud Platform
+
+The system MUST run on Microsoft's Azure cloud platform and the system MUST only be deployed to Azure regions within Australia.
+
 ## Non-Functional Requirements
 
 - The system MUST be resilient to partial outages and intermittent connectivity during disasters.
@@ -103,4 +107,4 @@ This constitution supersedes all other project practices and templates.
 - Model/policy updates affecting public guidance MUST be tracked with versioning, evaluation evidence, and a controlled rollout.
 - Cross-agency integrations MUST document ownership, data-sharing boundaries, and emergency operating procedures.
 
-**Version**: 1.0.0 | **Ratified**: 2026-03-02 | **Last Amended**: 2026-03-02
+**Version**: 1.0.1 | **Ratified**: 2026-03-02 | **Last Amended**: 2026-03-09

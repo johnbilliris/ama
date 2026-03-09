@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - "001-disaster-response-hub"
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.3
+      - name: Validate workspace structure
+        run: |
+          test -f pyproject.toml
+          test -f apps/api/pyproject.toml
+          test -f apps/agents/pyproject.toml
+          test -f apps/web/package.json

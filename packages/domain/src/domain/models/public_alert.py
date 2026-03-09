@@ -1,0 +1,17 @@
+from datetime import datetime
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+class PublicAlert(BaseModel):
+    alert_id: str
+    incident_id: str
+    status: Literal["draft", "pending_approval", "approved", "published", "superseded", "cancelled"] = "draft"
+    approval_mode: Literal["human_approved", "autonomous", "escalated"] = "human_approved"
+    audience_segments: list[str] = Field(default_factory=list)
+    languages: list[str] = Field(default_factory=list)
+    accessibility_attributes: list[str] = Field(default_factory=list)
+    channel_set: list[str] = Field(default_factory=list)
+    content_blocks: dict[str, str] = Field(default_factory=dict)
+    published_at: datetime | None = None

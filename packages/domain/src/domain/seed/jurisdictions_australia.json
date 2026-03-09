@@ -1,0 +1,29 @@
+[
+  {
+    "jurisdiction_id": "commonwealth",
+    "name": "Commonwealth of Australia",
+    "level": "commonwealth",
+    "parent_jurisdiction_id": null,
+    "policy_set_id": "policy-commonwealth",
+    "geospatial_boundary": {"type": "Polygon", "coordinates": []},
+    "status": "active"
+  },
+  {
+    "jurisdiction_id": "nsw",
+    "name": "New South Wales",
+    "level": "state",
+    "parent_jurisdiction_id": "commonwealth",
+    "policy_set_id": "policy-nsw",
+    "geospatial_boundary": {"type": "Polygon", "coordinates": [[[141.0, -37.5], [153.7, -37.5], [153.7, -28.1], [141.0, -28.1], [141.0, -37.5]]]},
+    "status": "active"
+  },
+  {
+    "jurisdiction_id": "vic",
+    "name": "Victoria",
+    "level": "state",
+    "parent_jurisdiction_id": "commonwealth",
+    "policy_set_id": "policy-vic",
+    "geospatial_boundary": {"type": "Polygon", "coordinates": [[[140.9, -39.2], [150.0, -39.2], [150.0, -33.9], [140.9, -33.9], [140.9, -39.2]]]},
+    "status": "active"
+  }
+]
