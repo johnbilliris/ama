@@ -5,5 +5,7 @@ class EvacuationAgent:
             "scenarioType": scenario_type,
             "jurisdictions": jurisdictions,
             "routePressure": route_pressure,
-            "recommendation": "Validate assembly areas and transport corridors before public release.",
+            "recommendation": (
+                "Validate assembly areas and transport corridors before public release."
+            ),
         }

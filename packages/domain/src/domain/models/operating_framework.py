@@ -6,7 +6,9 @@ from pydantic import BaseModel, Field
 class OperatingFramework(BaseModel):
     framework_id: str
     name: str
-    framework_type: Literal["aiims", "agency_specific", "jurisdictional_policy", "communications", "other"]
+    framework_type: Literal[
+        "aiims", "agency_specific", "jurisdictional_policy", "communications", "other"
+    ]
     principles: list[str] = Field(default_factory=list)
     control_model: str
     approval_rules: list[dict[str, Any]] = Field(default_factory=list)

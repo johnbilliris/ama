@@ -2,13 +2,17 @@
 described in quickstart.md: signal ingestion, dashboard, approval, alert
 publish, preparedness replay, and cross-agency isolation."""
 
+from app.main import create_app
+from app.services.state_store import (
+    ALERTS,
+    PERSONAS,
+    RECOMMENDATIONS,
+    TASKS,
+    reset_state,
+)
 from fastapi.testclient import TestClient
 
-from app.main import create_app
-from app.services.rehearsal_orchestrator import RehearsalOrchestrator
-from app.services.state_store import ALERTS, INCIDENTS, PERSONAS, RECOMMENDATIONS, TASKS, reset_state
 from packages.domain.src.domain.models.coordination_task import CoordinationTask
-from packages.domain.src.domain.models.incident import Incident
 from packages.domain.src.domain.models.persona import Persona
 from packages.domain.src.domain.models.public_alert import PublicAlert
 from packages.domain.src.domain.models.recommendation import Recommendation
@@ -39,7 +43,11 @@ def test_quickstart_full_rehearsal_flow() -> None:
             "confidenceScore": 0.95,
             "freshnessScore": 0.9,
             "validationStatus": "validated",
-            "provenance": {"sourceUri": "https://example.gov.au", "collectionMethod": "api", "sourceKind": "authoritative"},
+            "provenance": {
+                "sourceUri": "https://example.gov.au",
+                "collectionMethod": "api",
+                "sourceKind": "authoritative",
+            },
         },
     )
     assert ingest.status_code == 200

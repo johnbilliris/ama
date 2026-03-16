@@ -1,11 +1,10 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
+from app.services.state_store import ALERTS
 from fastapi import HTTPException
 
-from app.services.state_store import ALERTS
 from packages.domain.src.domain.models.public_alert import PublicAlert
-
 
 DELIVERY_TEMPLATES: dict[str, dict[str, str]] = {
     "evacuation": {
@@ -24,15 +23,29 @@ DELIVERY_TEMPLATES: dict[str, dict[str, str]] = {
 
 
 CHANNEL_ADAPTERS = {
-    "sms": lambda alert: {"channel": "sms", "recipients": alert.audience_segments, "headline": alert.content_blocks.get("headline", "")},
-    "push": lambda alert: {"channel": "push", "recipients": alert.audience_segments, "headline": alert.content_blocks.get("headline", "")},
-    "email": lambda alert: {"channel": "email", "recipients": alert.audience_segments, "body": alert.content_blocks.get("body", "")},
+    "sms": lambda alert: {
+        "channel": "sms",
+        "recipients": alert.audience_segments,
+        "headline": alert.content_blocks.get("headline", ""),
+    },
+    "push": lambda alert: {
+        "channel": "push",
+        "recipients": alert.audience_segments,
+        "headline": alert.content_blocks.get("headline", ""),
+    },
+    "email": lambda alert: {
+        "channel": "email",
+        "recipients": alert.audience_segments,
+        "body": alert.content_blocks.get("body", ""),
+    },
 }
 
 
 def _validate_publishable(alert: PublicAlert) -> None:
     if alert.status not in {"approved", "pending_approval"}:
-        raise HTTPException(status_code=409, detail=f"Alert status '{alert.status}' is not publishable")
+        raise HTTPException(
+            status_code=409, detail=f"Alert status '{alert.status}' is not publishable"
+        )
     if not alert.content_blocks.get("headline"):
         raise HTTPException(status_code=422, detail="Alert must have a headline before publishing")
     if not alert.channel_set:
@@ -52,7 +65,7 @@ class PublicAlertService:
         alert = ALERTS[alert_id]
         _validate_publishable(alert)
         alert.status = "published"
-        alert.published_at = datetime.now(timezone.utc)
+        alert.published_at = datetime.now(UTC)
         alert.content_blocks["publishedBy"] = published_by_persona_id
         return alert
 

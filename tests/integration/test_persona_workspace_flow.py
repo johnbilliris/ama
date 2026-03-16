@@ -1,9 +1,9 @@
 import pytest
-from fastapi import HTTPException
-
 from app.services.persona_workspace_service import PersonaWorkspaceService
 from app.services.state_store import PERSONAS, TASKS, reset_state
 from app.services.task_orchestration_service import TaskOrchestrationService
+from fastapi import HTTPException
+
 from packages.domain.src.domain.models.coordination_task import CoordinationTask
 from packages.domain.src.domain.models.persona import Persona
 

@@ -1,6 +1,5 @@
-from fastapi import APIRouter
-
 from app.services.organisation_intelligence_service import OrganisationIntelligenceService
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/organisations", tags=["organisations"])
 

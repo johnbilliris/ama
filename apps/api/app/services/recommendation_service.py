@@ -1,13 +1,21 @@
 from uuid import uuid4
 
 from app.services.state_store import ALERTS, APPROVALS, RECOMMENDATIONS
+
 from packages.domain.src.domain.models.approval_decision import ApprovalDecision
 from packages.domain.src.domain.models.public_alert import PublicAlert
 from packages.domain.src.domain.models.recommendation import Recommendation
 
 
 class RecommendationService:
-    def record_approval(self, recommendation_id: str, approver_persona_id: str, outcome: str, rationale: str, conditions: list[str] | None = None) -> ApprovalDecision:
+    def record_approval(
+        self,
+        recommendation_id: str,
+        approver_persona_id: str,
+        outcome: str,
+        rationale: str,
+        conditions: list[str] | None = None,
+    ) -> ApprovalDecision:
         recommendation = RECOMMENDATIONS[recommendation_id]
         recommendation.status = "approved" if outcome == "approved" else "rejected"
 

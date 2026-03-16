@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.services.exercise_metrics_service import ExerciseKPI, ExerciseMetricsService
 
@@ -12,9 +12,9 @@ def test_exercise_metrics_comparison_passes_all_criteria() -> None:
         jurisdiction_id="nsw",
         organisation_ids=["ses-nsw", "bom-national"],
         run_type="baseline",
-        timestamp_activation=datetime(2026, 3, 9, 9, 0, tzinfo=timezone.utc),
-        timestamp_first_coordinated_action=datetime(2026, 3, 9, 9, 45, tzinfo=timezone.utc),
-        timestamp_evacuation_decision=datetime(2026, 3, 9, 15, 0, tzinfo=timezone.utc),
+        timestamp_activation=datetime(2026, 3, 9, 9, 0, tzinfo=UTC),
+        timestamp_first_coordinated_action=datetime(2026, 3, 9, 9, 45, tzinfo=UTC),
+        timestamp_evacuation_decision=datetime(2026, 3, 9, 15, 0, tzinfo=UTC),
         time_to_assignment_minutes=38,
         resource_utilization_ratio=0.62,
         unfilled_priority_requests=4,
@@ -26,9 +26,9 @@ def test_exercise_metrics_comparison_passes_all_criteria() -> None:
         jurisdiction_id="nsw",
         organisation_ids=["ses-nsw", "bom-national"],
         run_type="hub_enabled",
-        timestamp_activation=datetime(2026, 3, 9, 9, 0, tzinfo=timezone.utc),
-        timestamp_first_coordinated_action=datetime(2026, 3, 9, 9, 18, tzinfo=timezone.utc),
-        timestamp_evacuation_decision=datetime(2026, 3, 9, 11, 30, tzinfo=timezone.utc),
+        timestamp_activation=datetime(2026, 3, 9, 9, 0, tzinfo=UTC),
+        timestamp_first_coordinated_action=datetime(2026, 3, 9, 9, 18, tzinfo=UTC),
+        timestamp_evacuation_decision=datetime(2026, 3, 9, 11, 30, tzinfo=UTC),
         time_to_assignment_minutes=14,
         resource_utilization_ratio=0.81,
         unfilled_priority_requests=1,

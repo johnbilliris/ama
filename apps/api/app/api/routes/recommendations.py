@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
-
 from app.services.recommendation_service import RecommendationService
 from app.services.state_store import RECOMMENDATIONS
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 
@@ -15,7 +14,9 @@ class ApprovalDecisionInput(BaseModel):
 
 
 @router.post("/{recommendation_id}/approvals")
-async def record_approval(recommendation_id: str, payload: ApprovalDecisionInput) -> dict[str, object]:
+async def record_approval(
+    recommendation_id: str, payload: ApprovalDecisionInput
+) -> dict[str, object]:
     if recommendation_id not in RECOMMENDATIONS:
         raise HTTPException(status_code=404, detail="Recommendation not found")
 

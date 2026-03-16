@@ -1,7 +1,7 @@
-from fastapi.testclient import TestClient
-
 from app.main import create_app
 from app.services.state_store import ALERTS, INCIDENTS, RECOMMENDATIONS, reset_state
+from fastapi.testclient import TestClient
+
 from packages.domain.src.domain.models.incident import Incident
 from packages.domain.src.domain.models.public_alert import PublicAlert
 from packages.domain.src.domain.models.recommendation import Recommendation
@@ -54,7 +54,11 @@ def test_signal_ingestion_dashboard_and_alert_contracts() -> None:
             "confidenceScore": 0.95,
             "freshnessScore": 0.9,
             "validationStatus": "validated",
-            "provenance": {"sourceUri": "https://example.gov.au", "collectionMethod": "api", "sourceKind": "authoritative"},
+            "provenance": {
+                "sourceUri": "https://example.gov.au",
+                "collectionMethod": "api",
+                "sourceKind": "authoritative",
+            },
         },
     )
     assert ingest_response.status_code == 200

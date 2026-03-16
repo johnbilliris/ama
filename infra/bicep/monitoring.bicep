@@ -7,6 +7,12 @@ param location string = 'australiaeast'
 @description('Environment prefix')
 param envPrefix string = 'drh'
 
+@description('Email recipient for alert notifications')
+param actionGroupEmail string = 'ops@example.com'
+
+@description('Webhook endpoint for alert notifications')
+param actionGroupWebhook string = 'https://example.com/alerts'
+
 @description('Tags applied to all resources')
 param tags object = {
   project: 'disaster-response-hub'
@@ -46,6 +52,30 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
+resource incidentActionGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
+  name: '${envPrefix}-ops-ag'
+  location: 'global'
+  tags: tags
+  properties: {
+    enabled: true
+    groupShortName: 'drhops'
+    emailReceivers: [
+      {
+        name: 'OperationsEmail'
+        emailAddress: actionGroupEmail
+        useCommonAlertSchema: true
+      }
+    ]
+    webhookReceivers: [
+      {
+        name: 'OperationsWebhook'
+        serviceUri: actionGroupWebhook
+        useCommonAlertSchema: true
+      }
+    ]
+  }
+}
+
 // ── Alert rule: high error rate ──
 
 resource highErrorRateAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
@@ -75,6 +105,11 @@ resource highErrorRateAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
     }
     enabled: true
     autoMitigate: true
+    actions: [
+      {
+        actionGroupId: incidentActionGroup.id
+      }
+    ]
   }
 }
 
@@ -107,6 +142,11 @@ resource latencyAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
     }
     enabled: true
     autoMitigate: true
+    actions: [
+      {
+        actionGroupId: incidentActionGroup.id
+      }
+    ]
   }
 }
 
@@ -115,3 +155,4 @@ resource latencyAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
 output logAnalyticsId string = logAnalytics.id
 output appInsightsId string = appInsights.id
 output appInsightsConnectionString string = appInsights.properties.ConnectionString
+output actionGroupId string = incidentActionGroup.id

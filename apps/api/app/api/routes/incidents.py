@@ -1,7 +1,6 @@
-from fastapi import APIRouter, HTTPException
-
 from app.services.dashboard_service import DashboardService
 from app.services.state_store import INCIDENTS
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter(prefix="/incidents", tags=["incidents"])
 

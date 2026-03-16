@@ -1,6 +1,7 @@
 from app.services.degraded_mode_service import DegradedModeService
-from app.services.recommendation_guardrails import apply_recommendation_guardrails
 from app.services.provenance_scoring_service import ProvenanceScoringService
+from app.services.recommendation_guardrails import apply_recommendation_guardrails
+
 from packages.domain.src.domain.models.recommendation import Recommendation
 
 
