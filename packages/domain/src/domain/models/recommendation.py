@@ -14,3 +14,6 @@ class Recommendation(BaseModel):
     confidence_level: Literal["low", "medium", "high"] = "medium"
     status: Literal["proposed", "under_review", "approved", "rejected", "escalated", "executed", "expired"] = "proposed"
     proposed_by_agent: str = "risk_assessment"
+    generation_method: Literal["llm", "template", "template_fallback", "safety_fallback"] = "template"
+    model_deployment_id: str | None = None
+    token_usage: dict[str, int] | None = None

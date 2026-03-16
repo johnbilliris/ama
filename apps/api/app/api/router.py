@@ -1,5 +1,8 @@
 from fastapi import APIRouter
 
+from app.api.dead_letters import router as dead_letters_router
+from app.api.handoffs import router as handoffs_router
+from app.api.health import router as health_router
 from app.api.routes.alerts import router as alerts_router
 from app.api.routes.frameworks import router as frameworks_router
 from app.api.routes.incidents import router as incidents_router
@@ -20,9 +23,7 @@ api_router.include_router(tasks_router)
 api_router.include_router(organisations_router)
 api_router.include_router(frameworks_router)
 api_router.include_router(scenarios_router)
-
-
-@api_router.get("/health", tags=["system"])
-async def healthcheck() -> dict[str, str]:
-    return {"status": "ok"}
+api_router.include_router(handoffs_router)
+api_router.include_router(dead_letters_router)
+api_router.include_router(health_router)
 

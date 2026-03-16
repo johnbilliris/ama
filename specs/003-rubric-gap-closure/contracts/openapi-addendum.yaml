@@ -1,0 +1,357 @@
+# Contract Addendum: Rubric Gap Closure (Feature 003)
+#
+# This file defines the NEW and MODIFIED API surface introduced by feature 003.
+# It extends the base OpenAPI contract from specs/001-disaster-response-hub/contracts/openapi.yaml
+# and packages/schemas/openapi.yaml.
+#
+# New endpoints: dead-letter management, handoff status, health checks
+# Modified schemas: Recommendation, PublicAlert, TimelineEvent (new fields)
+# New schemas: DeadLetterEntry, AgentHandoffEvent, ModelDeployment, ErrorResponse
+
+openapi: 3.1.0
+info:
+  title: Disaster Response Coordination Hub API — Feature 003 Addendum
+  version: 0.2.0
+  summary: Additions for AI integration, agent handoff orchestration, dead-letter management, and structured error handling.
+
+paths:
+  /dead-letters:
+    get:
+      tags: [Operations]
+      summary: List dead-letter entries for operator review.
+      description: Returns dead-lettered payloads matching the specified filters. Scoped to the caller's tenant.
+      parameters:
+        - in: query
+          name: entryType
+          schema:
+            type: string
+            enum: [handoff_failure, ingestion_failure, event_delivery_failure]
+        - in: query
+          name: resolution
+          schema:
+            type: string
+            enum: [pending, replayed, discarded, escalated]
+            default: pending
+        - in: query
+          name: incidentId
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Matching dead-letter entries.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, total]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DeadLetterEntry'
+                  total:
+                    type: integer
+
+  /dead-letters/{entryId}/resolve:
+    post:
+      tags: [Operations]
+      summary: Resolve a dead-letter entry (replay, discard, or escalate).
+      parameters:
+        - in: path
+          name: entryId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resolution, resolvedByPersonaId]
+              properties:
+                resolution:
+                  type: string
+                  enum: [replayed, discarded, escalated]
+                resolvedByPersonaId:
+                  type: string
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Dead-letter entry resolved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeadLetterEntry'
+        '404':
+          description: Entry not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /incidents/{incidentId}/handoffs:
+    get:
+      tags: [Incidents]
+      summary: List agent handoff events for an incident.
+      parameters:
+        - in: path
+          name: incidentId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, delivered, retrying, failed, dead_lettered]
+      responses:
+        '200':
+          description: Handoff events for the incident.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentHandoffEvent'
+
+  /health:
+    get:
+      tags: [Operations]
+      summary: Container health check endpoint.
+      security: []
+      responses:
+        '200':
+          description: Service is healthy.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, version]
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded]
+                  version:
+                    type: string
+                  dependencies:
+                    type: object
+                    additionalProperties:
+                      type: string
+                      enum: [healthy, degraded, unavailable, stub]
+
+components:
+  schemas:
+    # ── New schemas ──
+
+    ErrorResponse:
+      type: object
+      description: Structured error response returned by all API failure modes (FR-023).
+      required: [correlationId, statusCode, errorCategory, message]
+      properties:
+        correlationId:
+          type: string
+          format: uuid
+          description: Request correlation ID from resilience middleware.
+        statusCode:
+          type: integer
+          description: HTTP status code.
+        errorCategory:
+          type: string
+          enum: [validation_error, dependency_failure, authorization_error, not_found, internal_error, rate_limited]
+        message:
+          type: string
+          description: Non-leaking, user-safe error description.
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              reason:
+                type: string
+
+    DeadLetterEntry:
+      type: object
+      required: [entryId, entryType, correlationId, originalPayload, failureReason, failureCode, sourceService, targetService, tenantScopeKey, createdAt, resolution]
+      properties:
+        entryId:
+          type: string
+        entryType:
+          type: string
+          enum: [handoff_failure, ingestion_failure, event_delivery_failure]
+        correlationId:
+          type: string
+        originalPayload:
+          type: object
+          additionalProperties: true
+        failureReason:
+          type: string
+        failureCode:
+          type: string
+          enum: [CIRCUIT_OPEN, TIMEOUT, VALIDATION_ERROR, DELIVERY_FAILED, MAX_RETRIES_EXCEEDED]
+        retryCount:
+          type: integer
+          minimum: 0
+        sourceService:
+          type: string
+        targetService:
+          type: string
+        incidentId:
+          type: string
+          nullable: true
+        tenantScopeKey:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        reviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        reviewedBy:
+          type: string
+          nullable: true
+        resolution:
+          type: string
+          enum: [pending, replayed, discarded, escalated]
+
+    AgentHandoffEvent:
+      type: object
+      required: [handoffId, sourceAgent, targetAgent, scopeKey, confidence, incidentId, status, retryCount, createdAt]
+      properties:
+        handoffId:
+          type: string
+        sourceAgent:
+          type: string
+        targetAgent:
+          type: string
+        scopeKey:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        payload:
+          type: object
+          additionalProperties: true
+        incidentId:
+          type: string
+        status:
+          type: string
+          enum: [pending, delivered, retrying, failed, dead_lettered]
+        retryCount:
+          type: integer
+          minimum: 0
+          maximum: 3
+        timelineEventId:
+          type: string
+          nullable: true
+        deadLetterEntryId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+        failedAt:
+          type: string
+          format: date-time
+          nullable: true
+        failureReason:
+          type: string
+          nullable: true
+
+    ModelDeployment:
+      type: object
+      description: Azure OpenAI model endpoint configuration.
+      required: [deploymentId, endpointUrl, modelName, tokenBudgetInput, tokenBudgetOutput, purpose, status]
+      properties:
+        deploymentId:
+          type: string
+        endpointUrl:
+          type: string
+          format: uri
+        modelName:
+          type: string
+        modelVersion:
+          type: string
+        apiVersion:
+          type: string
+        tokenBudgetInput:
+          type: integer
+          minimum: 1
+        tokenBudgetOutput:
+          type: integer
+          minimum: 1
+        contentSafetyPolicy:
+          type: string
+          enum: [rule_based, azure_content_safety, none]
+        fallbackMode:
+          type: string
+          enum: [template, error]
+        timeoutSeconds:
+          type: number
+          minimum: 0.1
+          maximum: 120
+        purpose:
+          type: string
+          enum: [reasoning, drafting]
+        status:
+          type: string
+          enum: [active, disabled, degraded]
+
+    # ── Modified schemas (new fields only) ──
+
+    RecommendationAddendum:
+      description: New fields added to the existing Recommendation schema.
+      type: object
+      properties:
+        generationMethod:
+          type: string
+          enum: [llm, template, template_fallback, safety_fallback]
+          description: How the recommendation explanation was produced.
+        modelDeploymentId:
+          type: string
+          nullable: true
+          description: Azure OpenAI deployment used for generation.
+        tokenUsage:
+          type: object
+          nullable: true
+          properties:
+            inputTokens:
+              type: integer
+            outputTokens:
+              type: integer
+
+    PublicAlertAddendum:
+      description: New fields added to the existing PublicAlert schema.
+      type: object
+      properties:
+        generationMethod:
+          type: string
+          enum: [llm, template, template_fallback, safety_fallback]
+        modelDeploymentId:
+          type: string
+          nullable: true
+        contentSafetyResult:
+          type: string
+          enum: [passed, failed_with_fallback, not_checked]
