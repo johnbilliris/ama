@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
 import time
 from collections.abc import Callable
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -21,7 +21,7 @@ class AgentHandoffEvent(BaseModel):
     next_retry_at: datetime | None = None
     timeline_event_id: str | None = None
     dead_letter_entry_id: str | None = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     delivered_at: datetime | None = None
     failed_at: datetime | None = None
     failure_reason: str | None = None
@@ -64,17 +64,17 @@ def deliver_handoff_with_retry(
             deliver(handoff)
             handoff.status = "delivered"
             handoff.retry_count = attempt - 1
-            handoff.delivered_at = datetime.now(timezone.utc)
+            handoff.delivered_at = datetime.now(UTC)
             return handoff
         except Exception as error:
             handoff.status = "retrying" if attempt < max_retries else "failed"
             handoff.retry_count = attempt
             handoff.failure_reason = str(error)
-            handoff.next_retry_at = datetime.now(timezone.utc)
+            handoff.next_retry_at = datetime.now(UTC)
             if attempt < max_retries:
                 time.sleep(retry_sleep)
 
     handoff.status = "dead_lettered"
-    handoff.failed_at = datetime.now(timezone.utc)
+    handoff.failed_at = datetime.now(UTC)
     handoff.dead_letter_entry_id = on_dead_letter(handoff)
     return handoff

@@ -1,8 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 
-from fastapi.testclient import TestClient
-
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def test_api_latency_regression(benchmark) -> None:

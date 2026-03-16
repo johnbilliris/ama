@@ -5,7 +5,6 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-
 _ERROR_CATEGORY_BY_STATUS = {
     400: "validation_error",
     401: "authorization_error",

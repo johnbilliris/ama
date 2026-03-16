@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -13,4 +13,4 @@ class Incident(BaseModel):
     affected_jurisdiction_ids: list[str]
     participating_organisation_ids: list[str] = Field(default_factory=list)
     owning_framework_ids: list[str] = Field(default_factory=list)
-    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

@@ -1,5 +1,4 @@
 import pytest
-
 from app.services.rehearsal_orchestrator import RehearsalOrchestrator
 
 

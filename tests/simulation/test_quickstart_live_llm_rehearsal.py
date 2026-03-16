@@ -5,7 +5,6 @@ import pytest
 from apps.agents.communication.agent import CommunicationAgent
 from apps.agents.risk_assessment.agent import RiskAssessmentAgent
 
-
 LIVE_ENV_VARS = [
     "AZURE_OPENAI_ENDPOINT",
     "AZURE_OPENAI_API_KEY",

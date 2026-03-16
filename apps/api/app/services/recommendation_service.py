@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from app.services.state_store import ALERTS, APPROVALS, RECOMMENDATIONS
+
 from packages.domain.src.domain.models.approval_decision import ApprovalDecision
 from packages.domain.src.domain.models.public_alert import PublicAlert
 from packages.domain.src.domain.models.recommendation import Recommendation

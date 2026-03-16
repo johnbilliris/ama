@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from app.services.state_store import INCIDENTS, SIGNALS
 from app.validators.signal_envelope import SignalEnvelope
+
 from packages.domain.src.domain.models.incident import Incident
 from packages.domain.src.domain.models.signal import Signal
 

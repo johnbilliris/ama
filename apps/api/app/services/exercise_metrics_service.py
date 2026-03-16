@@ -4,7 +4,7 @@ Captures KPIs from rehearsal runs and compares baseline vs hub-enabled results
 for success criteria SC-004 through SC-007.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, Field

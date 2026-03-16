@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
+from app.services.state_store import DEAD_LETTERS
 from fastapi import HTTPException
 
-from app.services.state_store import DEAD_LETTERS
 from packages.domain.src.domain.models.dead_letter_entry import DeadLetterEntry, ResolutionState
 
 
@@ -75,7 +75,7 @@ class DeadLetterService:
 
         entry.resolution = resolution
         entry.reviewed_by = resolved_by_persona_id
-        entry.reviewed_at = datetime.now(timezone.utc)
+        entry.reviewed_at = datetime.now(UTC)
         if notes:
             entry.original_payload["resolution_notes"] = notes
         DEAD_LETTERS[entry.entry_id] = entry

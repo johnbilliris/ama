@@ -1,4 +1,5 @@
 from common.llm_mixin import LLMCallMixin
+
 from packages.domain.src.domain.models.public_alert import PublicAlert
 
 

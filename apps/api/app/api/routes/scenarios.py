@@ -1,7 +1,6 @@
+from app.services.rehearsal_orchestrator import RehearsalOrchestrator
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
-
-from app.services.rehearsal_orchestrator import RehearsalOrchestrator
 
 router = APIRouter(prefix="/scenarios", tags=["scenarios"])
 

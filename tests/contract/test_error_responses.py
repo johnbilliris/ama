@@ -1,6 +1,5 @@
-from fastapi.testclient import TestClient
-
 from app.main import create_app
+from fastapi.testclient import TestClient
 
 
 def test_error_responses_are_structured_json() -> None:

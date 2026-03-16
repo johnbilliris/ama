@@ -1,7 +1,5 @@
-from fastapi import APIRouter, Query
-
 from app.services.state_store import HANDOFF_EVENTS
-
+from fastapi import APIRouter, Query
 
 router = APIRouter(tags=["incidents"])
 

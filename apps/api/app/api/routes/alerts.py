@@ -1,10 +1,9 @@
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-
 from app.services.public_alert_service import DELIVERY_TEMPLATES, PublicAlertService
 from app.services.state_store import ALERTS
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
 service = PublicAlertService()

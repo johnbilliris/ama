@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 AUSTRALIAN_AZURE_REGIONS = {"Australia East", "Australia Southeast"}
 
 

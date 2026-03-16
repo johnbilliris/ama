@@ -1,6 +1,5 @@
-from fastapi import HTTPException
-
 from app.services.state_store import PERSONAS, TASKS
+from fastapi import HTTPException
 
 
 class PersonaWorkspaceService:

@@ -2,7 +2,6 @@ import os
 
 from fastapi import APIRouter
 
-
 router = APIRouter(tags=["system"])
 
 

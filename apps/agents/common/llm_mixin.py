@@ -3,7 +3,6 @@ import logging
 from common.content_safety import ContentSafetyValidator
 from common.llm_client import LLMClient
 
-
 logger = logging.getLogger(__name__)
 
 

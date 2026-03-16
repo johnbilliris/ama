@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from app.services.seed_service import SeedService
+
 from packages.domain.src.domain.models.framework_assignment import FrameworkAssignment
 from packages.domain.src.domain.models.jurisdiction import Jurisdiction
 from packages.domain.src.domain.models.operating_framework import OperatingFramework

@@ -1,5 +1,6 @@
-from common.llm_mixin import LLMCallMixin
 from common.handoffs import AgentHandoffEvent, build_handoff
+from common.llm_mixin import LLMCallMixin
+
 from packages.domain.src.domain.models.recommendation import Recommendation
 
 

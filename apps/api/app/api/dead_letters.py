@@ -1,10 +1,8 @@
 from typing import Literal
 
+from app.services.dead_letter_service import DeadLetterService
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
-
-from app.services.dead_letter_service import DeadLetterService
-
 
 ResolutionType = Literal["replayed", "discarded", "escalated"]
 

@@ -1,6 +1,5 @@
-from fastapi import APIRouter
-
 from app.services.persona_workspace_service import PersonaWorkspaceService
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/personas", tags=["personas"])
 

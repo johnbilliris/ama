@@ -1,10 +1,9 @@
-from fastapi import APIRouter
-
 from app.services.ingestion.authoritative_ingestion import AuthoritativeIngestionService
 from app.services.ingestion.community_ingestion import CommunityIngestionService
 from app.services.ingestion.iot_ingestion import IoTIngestionService
 from app.services.state_store import SIGNALS
 from app.validators.signal_envelope import SignalEnvelope
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/signals", tags=["signals"])
 

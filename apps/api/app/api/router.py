@@ -1,5 +1,3 @@
-from fastapi import APIRouter
-
 from app.api.dead_letters import router as dead_letters_router
 from app.api.handoffs import router as handoffs_router
 from app.api.health import router as health_router
@@ -12,6 +10,7 @@ from app.api.routes.recommendations import router as recommendations_router
 from app.api.routes.scenarios import router as scenarios_router
 from app.api.routes.signals import router as signals_router
 from app.api.routes.tasks import router as tasks_router
+from fastapi import APIRouter
 
 api_router = APIRouter()
 api_router.include_router(signals_router)

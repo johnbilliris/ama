@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from app.services.preparedness_analysis_service import PreparednessAnalysisService
+
 from apps.agents.evacuation.agent import EvacuationAgent
 from packages.domain.src.domain.models.scenario_run import ScenarioRun
 

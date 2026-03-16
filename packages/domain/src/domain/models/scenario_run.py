@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -13,4 +13,4 @@ class ScenarioRun(BaseModel):
     framework_ids: list[str] = Field(default_factory=list)
     coordination_gap_summary: list[str] = Field(default_factory=list)
     generated_findings: list[str] = Field(default_factory=list)
-    started_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

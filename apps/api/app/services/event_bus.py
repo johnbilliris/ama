@@ -1,10 +1,11 @@
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Callable
+from datetime import UTC, datetime
 from uuid import uuid4
 
 from app.services.dead_letter_service import DeadLetterService
 from app.services.state_store import HANDOFF_EVENTS, TIMELINE_EVENTS
+
 from packages.domain.src.domain.models.timeline_event import TimelineEvent
 
 
@@ -53,7 +54,7 @@ class EventBus:
                         "scopeKey": envelope.scope_key,
                         "status": "delivered",
                         "retryCount": int(envelope.payload.get("retryCount", 0) or 0),
-                        "createdAt": datetime.now(timezone.utc).isoformat(),
+                        "createdAt": datetime.now(UTC).isoformat(),
                     }
                 )
                 TIMELINE_EVENTS.setdefault(incident_id, []).append(

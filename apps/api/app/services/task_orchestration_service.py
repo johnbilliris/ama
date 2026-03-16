@@ -1,6 +1,6 @@
+from app.services.state_store import PERSONAS, TASKS
 from fastapi import HTTPException
 
-from app.services.state_store import PERSONAS, TASKS
 from packages.domain.src.domain.models.coordination_task import CoordinationTask
 
 

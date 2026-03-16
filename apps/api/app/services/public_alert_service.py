@@ -1,11 +1,10 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
+from app.services.state_store import ALERTS
 from fastapi import HTTPException
 
-from app.services.state_store import ALERTS
 from packages.domain.src.domain.models.public_alert import PublicAlert
-
 
 DELIVERY_TEMPLATES: dict[str, dict[str, str]] = {
     "evacuation": {
@@ -52,7 +51,7 @@ class PublicAlertService:
         alert = ALERTS[alert_id]
         _validate_publishable(alert)
         alert.status = "published"
-        alert.published_at = datetime.now(timezone.utc)
+        alert.published_at = datetime.now(UTC)
         alert.content_blocks["publishedBy"] = published_by_persona_id
         return alert
 

@@ -8,7 +8,6 @@ from packages.domain.src.domain.models.recommendation import Recommendation
 from packages.domain.src.domain.models.signal import Signal
 from packages.domain.src.domain.models.timeline_event import TimelineEvent
 
-
 INCIDENTS: dict[str, Incident] = {}
 SIGNALS: dict[str, Signal] = {}
 RECOMMENDATIONS: dict[str, Recommendation] = {}
