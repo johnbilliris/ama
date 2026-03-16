@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - "001-disaster-response-hub"
+      - "003-rubric-gap-closure"
   pull_request:
 
 jobs:
@@ -27,3 +28,26 @@ jobs:
           test -f apps/api/pyproject.toml
           test -f apps/agents/pyproject.toml
           test -f apps/web/package.json
+      - name: Install Python tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest ruff pytest-benchmark
+          pip install -e apps/api
+          pip install -e apps/agents
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: python-test
+        run: pytest tests/contract tests/integration
+
+      - name: python-lint
+        run: ruff check apps tests packages
+
+      - name: ts-typecheck
+        run: pnpm --filter ./apps/web exec tsc --noEmit
+
+      - name: web-build
+        run: pnpm --filter ./apps/web build
+
+      - name: perf-benchmark
+        run: pytest tests/benchmark/test_api_performance.py -q

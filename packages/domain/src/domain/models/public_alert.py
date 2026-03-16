@@ -15,3 +15,6 @@ class PublicAlert(BaseModel):
     channel_set: list[str] = Field(default_factory=list)
     content_blocks: dict[str, str] = Field(default_factory=dict)
     published_at: datetime | None = None
+    generation_method: Literal["llm", "template", "template_fallback", "safety_fallback"] = "template"
+    model_deployment_id: str | None = None
+    content_safety_result: Literal["passed", "failed_with_fallback", "not_checked"] = "not_checked"

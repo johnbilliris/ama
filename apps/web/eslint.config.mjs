@@ -8,7 +8,8 @@ export default [
       "node_modules/**",
       "coverage/**",
       "dist/**",
-      "build/**"
+      "build/**",
+      "**/*.min.js"
     ]
   }
 ];

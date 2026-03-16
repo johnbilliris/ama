@@ -10,6 +10,8 @@ Provides:
 import time
 import uuid
 from collections import defaultdict
+from collections.abc import Callable
+from importlib import import_module
 from typing import Any
 
 from fastapi import FastAPI, Request, Response
@@ -76,3 +78,16 @@ class ResilienceMiddleware(BaseHTTPMiddleware):
 def add_resilience_middleware(app: FastAPI) -> None:
     """Wire all resilience middleware onto *app*."""
     app.add_middleware(ResilienceMiddleware)
+
+
+TransientDependencyError = RuntimeError
+
+
+def retry_transient_dependency_call(func: Callable[..., Any]) -> Callable[..., Any]:
+    tenacity = import_module("tenacity")
+    return tenacity.retry(
+        retry=tenacity.retry_if_exception_type(TransientDependencyError),
+        wait=tenacity.wait_exponential_jitter(initial=0.5, max=5),
+        stop=tenacity.stop_after_attempt(3),
+        reraise=True,
+    )(func)
