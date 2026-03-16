@@ -8,7 +8,14 @@ from packages.domain.src.domain.models.recommendation import Recommendation
 
 
 class RecommendationService:
-    def record_approval(self, recommendation_id: str, approver_persona_id: str, outcome: str, rationale: str, conditions: list[str] | None = None) -> ApprovalDecision:
+    def record_approval(
+        self,
+        recommendation_id: str,
+        approver_persona_id: str,
+        outcome: str,
+        rationale: str,
+        conditions: list[str] | None = None,
+    ) -> ApprovalDecision:
         recommendation = RECOMMENDATIONS[recommendation_id]
         recommendation.status = "approved" if outcome == "approved" else "rejected"
 

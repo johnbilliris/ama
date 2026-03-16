@@ -35,7 +35,11 @@ class LLMCallMixin:
             token_usage = response.get("token_usage", {"input_tokens": 0, "output_tokens": 0})
             output_tokens = int(token_usage.get("output_tokens", 0))
             if output_tokens > max_output_tokens:
-                logger.warning("Token budget exceeded: output_tokens=%s max_output_tokens=%s", output_tokens, max_output_tokens)
+                logger.warning(
+                    "Token budget exceeded: output_tokens=%s max_output_tokens=%s",
+                    output_tokens,
+                    max_output_tokens,
+                )
                 text = text[: max(80, int(len(text) * 0.8))]
 
             safety = self._content_safety.validate(

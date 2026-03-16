@@ -17,7 +17,8 @@ class RiskAssessmentAgent(LLMCallMixin):
         response = self._generate_with_fallback(
             purpose="reasoning",
             prompt=(
-                "Create a concise public alert recommendation explanation that includes signal IDs. "
+                "Create a concise public alert recommendation explanation"
+                " that includes signal IDs. "
                 f"Incident: {incident_id}; Signals: {cited_signals}."
             ),
             template_text=template_explanation,
@@ -42,7 +43,9 @@ class RiskAssessmentAgent(LLMCallMixin):
             token_usage=response["token_usage"],
         )
 
-    def build_communication_handoff(self, recommendation: Recommendation) -> AgentHandoffEvent | None:
+    def build_communication_handoff(
+        self, recommendation: Recommendation
+    ) -> AgentHandoffEvent | None:
         if recommendation.type != "public_alert" or recommendation.confidence_level != "high":
             return None
 

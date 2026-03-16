@@ -7,10 +7,14 @@ from packages.domain.src.domain.models.scenario_run import ScenarioRun
 
 
 class RehearsalOrchestrator:
-    def run(self, scenario_name: str, scenario_type: str, jurisdiction_ids: list[str]) -> ScenarioRun:
+    def run(
+        self, scenario_name: str, scenario_type: str, jurisdiction_ids: list[str]
+    ) -> ScenarioRun:
         analysis = PreparednessAnalysisService().analyse(scenario_type, jurisdiction_ids)
         evacuation_review = EvacuationAgent().review(scenario_type, jurisdiction_ids)
-        organisation_ids = [organisation["organisation_id"] for organisation in analysis["organisations"]]
+        organisation_ids = [
+            organisation["organisation_id"] for organisation in analysis["organisations"]
+        ]
         framework_ids = [framework["framework_id"] for framework in analysis["frameworks"]]
         findings = list(analysis["findings"])
         findings.append(evacuation_review["recommendation"])

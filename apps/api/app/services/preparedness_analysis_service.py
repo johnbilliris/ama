@@ -10,7 +10,11 @@ from packages.domain.src.domain.models.organisation import Organisation
 
 class PreparednessAnalysisService:
     def __init__(self, seed_root: Path | None = None) -> None:
-        self.seed_root = seed_root or Path(__file__).resolve().parents[4] / "packages" / "domain" / "src" / "domain" / "seed"
+        self.seed_root = (
+            seed_root
+            or Path(__file__).resolve().parents[4]
+            / "packages" / "domain" / "src" / "domain" / "seed"
+        )
 
     def get_context(self) -> dict[str, list[object]]:
         seeds = SeedService().load(self.seed_root)
@@ -25,7 +29,10 @@ class PreparednessAnalysisService:
         organisations = [
             organisation
             for organisation in context["organisations"]
-            if any(jurisdiction_id in organisation.jurisdiction_ids for jurisdiction_id in jurisdiction_ids)
+            if any(
+                jurisdiction_id in organisation.jurisdiction_ids
+                for jurisdiction_id in jurisdiction_ids
+            )
         ]
         frameworks = context["frameworks"]
         assignments = [
@@ -42,16 +49,24 @@ class PreparednessAnalysisService:
             gaps.append("Insufficient multi-agency coverage for cross-organisational rehearsal.")
         if not any(framework.framework_type == "communications" for framework in frameworks):
             gaps.append("No communications framework assigned for public messaging rehearsal.")
-        if scenario_type == "cyclone" and not any("commonwealth" in organisation.jurisdiction_ids for organisation in organisations):
+        if scenario_type == "cyclone" and not any(
+            "commonwealth" in organisation.jurisdiction_ids
+            for organisation in organisations
+        ):
             gaps.append("Cyclone scenario lacks commonwealth meteorology support.")
 
         findings = [
-            f"{len(organisations)} organisations available across {len(jurisdiction_ids)} jurisdictions.",
+            f"{len(organisations)} organisations available"
+            f" across {len(jurisdiction_ids)} jurisdictions.",
             f"{len(assignments)} framework assignments synthesized for rehearsal analysis.",
         ]
 
         return {
-            "jurisdictions": [item.model_dump(mode="json") for item in context["jurisdictions"] if item.jurisdiction_id in jurisdiction_ids],
+            "jurisdictions": [
+                item.model_dump(mode="json")
+                for item in context["jurisdictions"]
+                if item.jurisdiction_id in jurisdiction_ids
+            ],
             "organisations": [item.model_dump(mode="json") for item in organisations],
             "frameworks": [item.model_dump(mode="json") for item in frameworks],
             "assignments": [item.model_dump(mode="json") for item in assignments],

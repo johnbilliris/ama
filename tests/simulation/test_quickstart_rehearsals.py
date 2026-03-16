@@ -43,7 +43,11 @@ def test_quickstart_full_rehearsal_flow() -> None:
             "confidenceScore": 0.95,
             "freshnessScore": 0.9,
             "validationStatus": "validated",
-            "provenance": {"sourceUri": "https://example.gov.au", "collectionMethod": "api", "sourceKind": "authoritative"},
+            "provenance": {
+                "sourceUri": "https://example.gov.au",
+                "collectionMethod": "api",
+                "sourceKind": "authoritative",
+            },
         },
     )
     assert ingest.status_code == 200

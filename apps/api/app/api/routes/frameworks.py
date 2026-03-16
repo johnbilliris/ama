@@ -6,5 +6,7 @@ router = APIRouter(prefix="/frameworks", tags=["frameworks"])
 
 @router.get("")
 async def list_frameworks(jurisdictionId: str | None = None) -> list[dict[str, object]]:
-    analysis = PreparednessAnalysisService().analyse("flood", [jurisdictionId] if jurisdictionId else ["nsw"])
+    analysis = PreparednessAnalysisService().analyse(
+        "flood", [jurisdictionId] if jurisdictionId else ["nsw"]
+    )
     return analysis["frameworks"]

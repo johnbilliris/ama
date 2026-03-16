@@ -7,11 +7,19 @@ from packages.domain.src.domain.models.organisation import Organisation
 
 class OrganisationIntelligenceService:
     def __init__(self, seed_root: Path | None = None) -> None:
-        self.seed_root = seed_root or Path(__file__).resolve().parents[4] / "packages" / "domain" / "src" / "domain" / "seed"
+        self.seed_root = (
+            seed_root
+            or Path(__file__).resolve().parents[4]
+            / "packages" / "domain" / "src" / "domain" / "seed"
+        )
 
     def list_organisations(self, jurisdiction_id: str | None = None) -> list[Organisation]:
         seeds = SeedService().load(self.seed_root)
         organisations = [Organisation(**item) for item in seeds["organisations"]]
         if jurisdiction_id is None:
             return organisations
-        return [organisation for organisation in organisations if jurisdiction_id in organisation.jurisdiction_ids]
+        return [
+            organisation
+            for organisation in organisations
+            if jurisdiction_id in organisation.jurisdiction_ids
+        ]

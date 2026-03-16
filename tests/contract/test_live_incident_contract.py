@@ -54,7 +54,11 @@ def test_signal_ingestion_dashboard_and_alert_contracts() -> None:
             "confidenceScore": 0.95,
             "freshnessScore": 0.9,
             "validationStatus": "validated",
-            "provenance": {"sourceUri": "https://example.gov.au", "collectionMethod": "api", "sourceKind": "authoritative"},
+            "provenance": {
+                "sourceUri": "https://example.gov.au",
+                "collectionMethod": "api",
+                "sourceKind": "authoritative",
+            },
         },
     )
     assert ingest_response.status_code == 200

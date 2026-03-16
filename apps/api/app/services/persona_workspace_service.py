@@ -11,14 +11,24 @@ class PersonaWorkspaceService:
         visible_tasks = [
             task.model_dump(mode="json")
             for task in TASKS.values()
-            if task.assigned_persona_id == persona_id or task.assigned_organisation_id == persona.organisation_id
+            if (
+                task.assigned_persona_id == persona_id
+                or task.assigned_organisation_id == persona.organisation_id
+            )
         ]
 
-        dependency_ids = {dependency_id for task in visible_tasks for dependency_id in task.get("dependency_task_ids", [])}
+        dependency_ids = {
+            dependency_id
+            for task in visible_tasks
+            for dependency_id in task.get("dependency_task_ids", [])
+        }
         dependency_chain = [
             task.model_dump(mode="json")
             for task in TASKS.values()
-            if task.task_id in dependency_ids and task.assigned_organisation_id == persona.organisation_id
+            if (
+                task.task_id in dependency_ids
+                and task.assigned_organisation_id == persona.organisation_id
+            )
         ]
 
         return {

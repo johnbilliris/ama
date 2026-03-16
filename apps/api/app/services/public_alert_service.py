@@ -23,15 +23,29 @@ DELIVERY_TEMPLATES: dict[str, dict[str, str]] = {
 
 
 CHANNEL_ADAPTERS = {
-    "sms": lambda alert: {"channel": "sms", "recipients": alert.audience_segments, "headline": alert.content_blocks.get("headline", "")},
-    "push": lambda alert: {"channel": "push", "recipients": alert.audience_segments, "headline": alert.content_blocks.get("headline", "")},
-    "email": lambda alert: {"channel": "email", "recipients": alert.audience_segments, "body": alert.content_blocks.get("body", "")},
+    "sms": lambda alert: {
+        "channel": "sms",
+        "recipients": alert.audience_segments,
+        "headline": alert.content_blocks.get("headline", ""),
+    },
+    "push": lambda alert: {
+        "channel": "push",
+        "recipients": alert.audience_segments,
+        "headline": alert.content_blocks.get("headline", ""),
+    },
+    "email": lambda alert: {
+        "channel": "email",
+        "recipients": alert.audience_segments,
+        "body": alert.content_blocks.get("body", ""),
+    },
 }
 
 
 def _validate_publishable(alert: PublicAlert) -> None:
     if alert.status not in {"approved", "pending_approval"}:
-        raise HTTPException(status_code=409, detail=f"Alert status '{alert.status}' is not publishable")
+        raise HTTPException(
+            status_code=409, detail=f"Alert status '{alert.status}' is not publishable"
+        )
     if not alert.content_blocks.get("headline"):
         raise HTTPException(status_code=422, detail="Alert must have a headline before publishing")
     if not alert.channel_set:

@@ -5,7 +5,9 @@ from fastapi.testclient import TestClient
 def test_error_responses_are_structured_json() -> None:
     client = TestClient(create_app())
 
-    response = client.post("/api/dead-letters/missing-entry/resolve", json={"resolution": "replayed"})
+    response = client.post(
+        "/api/dead-letters/missing-entry/resolve", json={"resolution": "replayed"}
+    )
 
     assert response.status_code == 422
     payload = response.json()

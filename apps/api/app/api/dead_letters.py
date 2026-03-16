@@ -39,7 +39,9 @@ async def list_dead_letters(
 
 
 @router.post("/dead-letters/{entry_id}/resolve")
-async def resolve_dead_letter(entry_id: str, payload: ResolveDeadLetterRequest) -> dict[str, object]:
+async def resolve_dead_letter(
+    entry_id: str, payload: ResolveDeadLetterRequest
+) -> dict[str, object]:
     resolved = service.resolve_entry(
         entry_id=entry_id,
         resolution=payload.resolution,

@@ -11,7 +11,10 @@ class MonitoringAgent:
         }
 
     def build_high_risk_handoff(self, envelope: SignalEnvelope) -> AgentHandoffEvent | None:
-        is_high_risk = envelope.category in {"fire", "weather", "hydrology"} and envelope.confidenceScore >= 0.8
+        is_high_risk = (
+            envelope.category in {"fire", "weather", "hydrology"}
+            and envelope.confidenceScore >= 0.8
+        )
         if not is_high_risk or not envelope.incidentId:
             return None
 

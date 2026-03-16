@@ -17,7 +17,10 @@ class TaskOrchestrationService:
             raise HTTPException(status_code=404, detail="Task not found")
         if persona is None:
             raise HTTPException(status_code=404, detail="Persona not found")
-        if task.assigned_persona_id != persona_id and task.assigned_organisation_id != persona.organisation_id:
+        if (
+            task.assigned_persona_id != persona_id
+            and task.assigned_organisation_id != persona.organisation_id
+        ):
             raise HTTPException(status_code=403, detail="Cross-agency task access denied")
 
         task.status = status
