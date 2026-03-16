@@ -1,0 +1,5 @@
+exercise_id,scenario_type,jurisdiction_id,organisation_ids,run_type,timestamp_activation,timestamp_first_coordinated_action,timestamp_evacuation_decision,time_to_assignment_minutes,resource_utilization_ratio,unfilled_priority_requests,ux_clarity_mean,ux_scanability_mean,ux_distinctiveness_mean,ux_decision_confidence_mean,participant_count,org_type_count,persona_type_count,notes
+EX-001,flood,nsw,"ses-nsw,bom-national",baseline,2026-03-09T09:00:00Z,2026-03-09T09:45:00Z,2026-03-09T15:00:00Z,38,0.62,4,,,,,,,Baseline tabletop — NSW Flood
+EX-002,flood,nsw,"ses-nsw,bom-national",hub_enabled,2026-03-09T09:00:00Z,2026-03-09T09:18:00Z,2026-03-09T11:30:00Z,14,0.81,1,4.2,4.5,4.1,4.3,12,3,5,Hub-enabled exercise — NSW Flood
+EX-003,bushfire,vic,"cfa-vic,bom-national",baseline,2026-03-09T10:00:00Z,2026-03-09T10:55:00Z,2026-03-09T18:00:00Z,42,0.58,6,,,,,,,Baseline tabletop — VIC Bushfire
+EX-004,bushfire,vic,"cfa-vic,bom-national",hub_enabled,2026-03-09T10:00:00Z,2026-03-09T10:22:00Z,2026-03-09T13:00:00Z,16,0.79,2,4.4,4.6,4.3,4.5,15,4,6,Hub-enabled exercise — VIC Bushfire

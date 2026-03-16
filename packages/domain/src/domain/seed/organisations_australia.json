@@ -1,0 +1,35 @@
+[
+  {
+    "organisation_id": "ses-nsw",
+    "name": "NSW State Emergency Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": ["nsw"],
+    "operating_role": "flood_response",
+    "authority_level": "state_controller",
+    "contact_channels": [{"type": "email", "value": "ops@ses.nsw.gov.au"}],
+    "participation_conditions": ["AIIMS activation", "State flood plan active"],
+    "status": "active"
+  },
+  {
+    "organisation_id": "cfa-vic",
+    "name": "Country Fire Authority",
+    "category": "emergency_service",
+    "jurisdiction_ids": ["vic"],
+    "operating_role": "bushfire_response",
+    "authority_level": "regional_controller",
+    "contact_channels": [{"type": "email", "value": "ops@cfa.vic.gov.au"}],
+    "participation_conditions": ["State bushfire readiness"],
+    "status": "active"
+  },
+  {
+    "organisation_id": "bom-national",
+    "name": "Bureau of Meteorology",
+    "category": "commonwealth",
+    "jurisdiction_ids": ["commonwealth"],
+    "operating_role": "authoritative_forecast",
+    "authority_level": "national_advisory",
+    "contact_channels": [{"type": "api", "value": "https://api.bom.gov.au"}],
+    "participation_conditions": ["National severe weather support"],
+    "status": "active"
+  }
+]

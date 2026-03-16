@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.gov.au/schemas/signal-envelope.schema.json",
+  "title": "Signal Envelope",
+  "type": "object",
+  "required": [
+    "source",
+    "category",
+    "occurredAt",
+    "receivedAt",
+    "location",
+    "payload",
+    "confidenceScore",
+    "freshnessScore",
+    "validationStatus",
+    "provenance"
+  ],
+  "properties": {
+    "source": {
+      "type": "object",
+      "required": ["dataSourceId", "name", "kind"],
+      "properties": {
+        "dataSourceId": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "kind": {
+          "type": "string",
+          "enum": ["authoritative", "sensor", "iot", "field_report", "social", "community", "derived"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "incidentId": { "type": "string" },
+    "category": {
+      "type": "string",
+      "enum": ["weather", "hydrology", "fire", "geohazard", "infrastructure", "community_report", "social_report", "resource_status"]
+    },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "receivedAt": { "type": "string", "format": "date-time" },
+    "jurisdictionId": { "type": "string" },
+    "location": {
+      "type": "object",
+      "required": ["type", "coordinates", "precisionMeters"],
+      "properties": {
+        "type": { "type": "string", "enum": ["Point", "Polygon"] },
+        "coordinates": {
+          "type": "array",
+          "minItems": 1,
+          "items": {}
+        },
+        "precisionMeters": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "confidenceScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "freshnessScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "validationStatus": {
+      "type": "string",
+      "enum": ["pending", "validated", "contradicted", "rejected", "escalated"]
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["collectionMethod", "sourceUri"],
+      "properties": {
+        "collectionMethod": { "type": "string", "minLength": 1 },
+        "sourceUri": { "type": "string", "minLength": 1 },
+        "collector": { "type": "string" },
+        "validationNotes": { "type": "string" },
+        "sourceTimestamp": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

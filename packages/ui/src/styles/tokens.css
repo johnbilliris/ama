@@ -1,0 +1,11 @@
+:root {
+  --ama-color-ink: #102033;
+  --ama-color-fog: #edf4f7;
+  --ama-color-signal: #e5532d;
+  --ama-color-ocean: #0d6b79;
+  --ama-color-alert: #bf2f4a;
+  --ama-color-safe: #2c7a57;
+  --ama-shadow-panel: 0 16px 40px rgba(16, 32, 51, 0.12);
+  --ama-radius-panel: 24px;
+  --ama-font-display: "Segoe UI", "Helvetica Neue", sans-serif;
+}
