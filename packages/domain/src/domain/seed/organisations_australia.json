@@ -1,35 +1,1012 @@
 [
   {
-    "organisation_id": "ses-nsw",
-    "name": "NSW State Emergency Service",
-    "category": "emergency_service",
-    "jurisdiction_ids": ["nsw"],
-    "operating_role": "flood_response",
-    "authority_level": "state_controller",
-    "contact_channels": [{"type": "email", "value": "ops@ses.nsw.gov.au"}],
-    "participation_conditions": ["AIIMS activation", "State flood plan active"],
-    "status": "active"
-  },
-  {
-    "organisation_id": "cfa-vic",
-    "name": "Country Fire Authority",
-    "category": "emergency_service",
-    "jurisdiction_ids": ["vic"],
-    "operating_role": "bushfire_response",
-    "authority_level": "regional_controller",
-    "contact_channels": [{"type": "email", "value": "ops@cfa.vic.gov.au"}],
-    "participation_conditions": ["State bushfire readiness"],
+    "organisation_id": "nema",
+    "name": "National Emergency Management Agency",
+    "category": "commonwealth",
+    "jurisdiction_ids": [
+      "commonwealth"
+    ],
+    "operating_role": "national_emergency_coordination",
+    "authority_level": "national_coordinator",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://nema.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "National coordination for all major disasters"
+    ],
     "status": "active"
   },
   {
     "organisation_id": "bom-national",
     "name": "Bureau of Meteorology",
     "category": "commonwealth",
-    "jurisdiction_ids": ["commonwealth"],
+    "jurisdiction_ids": [
+      "commonwealth"
+    ],
     "operating_role": "authoritative_forecast",
     "authority_level": "national_advisory",
-    "contact_channels": [{"type": "api", "value": "https://api.bom.gov.au"}],
-    "participation_conditions": ["National severe weather support"],
+    "contact_channels": [
+      {
+        "type": "api",
+        "value": "https://api.bom.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "National severe weather support"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "ga-national",
+    "name": "Geoscience Australia",
+    "category": "commonwealth",
+    "jurisdiction_ids": [
+      "commonwealth"
+    ],
+    "operating_role": "geohazard_monitoring",
+    "authority_level": "national_advisory",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.ga.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "Earthquake, tsunami, and geohazard monitoring"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "afp",
+    "name": "Australian Federal Police",
+    "category": "commonwealth",
+    "jurisdiction_ids": [
+      "commonwealth",
+      "act"
+    ],
+    "operating_role": "federal_law_enforcement",
+    "authority_level": "national_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.afp.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "Federal jurisdiction",
+      "ACT policing contract"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "adf",
+    "name": "Australian Defence Force",
+    "category": "commonwealth",
+    "jurisdiction_ids": [
+      "commonwealth"
+    ],
+    "operating_role": "defence_aid_to_civil_community",
+    "authority_level": "national_dacc",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.defence.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "Defence Assistance to the Civil Community (DACC) activation"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "abf",
+    "name": "Australian Border Force",
+    "category": "commonwealth",
+    "jurisdiction_ids": [
+      "commonwealth"
+    ],
+    "operating_role": "border_protection",
+    "authority_level": "national_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.abf.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "Maritime and border emergencies"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "asa",
+    "name": "Airservices Australia",
+    "category": "commonwealth",
+    "jurisdiction_ids": [
+      "commonwealth"
+    ],
+    "operating_role": "aviation_fire_rescue",
+    "authority_level": "national_regulator",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.airservicesaustralia.com"
+      }
+    ],
+    "participation_conditions": [
+      "Aviation fire and rescue services at major airports"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "rfds",
+    "name": "Royal Flying Doctor Service",
+    "category": "community",
+    "jurisdiction_ids": [
+      "commonwealth"
+    ],
+    "operating_role": "aeromedical_retrieval",
+    "authority_level": "national_service",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.flyingdoctor.org.au"
+      }
+    ],
+    "participation_conditions": [
+      "Remote and rural medical retrieval"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "frnsw",
+    "name": "Fire and Rescue New South Wales",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "nsw"
+    ],
+    "operating_role": "urban_fire_rescue",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.fire.nsw.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Urban fire and hazmat response"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "nsw-rfs",
+    "name": "New South Wales Rural Fire Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "nsw"
+    ],
+    "operating_role": "bushfire_response",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.rfs.nsw.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Rural fire districts"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "ses-nsw",
+    "name": "New South Wales State Emergency Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "nsw"
+    ],
+    "operating_role": "flood_storm_response",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.ses.nsw.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "State flood plan active"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "nswpf",
+    "name": "New South Wales Police Force",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "nsw"
+    ],
+    "operating_role": "law_enforcement_emergency_coordination",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.police.nsw.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "State emergency coordination",
+      "Law enforcement"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "nsw-ambulance",
+    "name": "NSW Ambulance",
+    "category": "health",
+    "jurisdiction_ids": [
+      "nsw"
+    ],
+    "operating_role": "emergency_medical_services",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.ambulance.nsw.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "Pre-hospital emergency medical care"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "mrnsw",
+    "name": "Marine Rescue New South Wales",
+    "category": "volunteer",
+    "jurisdiction_ids": [
+      "nsw"
+    ],
+    "operating_role": "marine_rescue",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.marinerescuensw.com.au"
+      }
+    ],
+    "participation_conditions": [
+      "Marine search and rescue operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "frv",
+    "name": "Fire Rescue Victoria",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "vic"
+    ],
+    "operating_role": "urban_fire_rescue",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.frv.vic.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Metropolitan fire district"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "cfa-vic",
+    "name": "Country Fire Authority",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "vic"
+    ],
+    "operating_role": "bushfire_response",
+    "authority_level": "state_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.cfa.vic.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "State bushfire readiness",
+      "Rural fire districts"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "ses-vic",
+    "name": "Victoria State Emergency Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "vic"
+    ],
+    "operating_role": "flood_storm_response",
+    "authority_level": "state_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.ses.vic.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Storm and flood operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "vicpol",
+    "name": "Victoria Police",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "vic"
+    ],
+    "operating_role": "law_enforcement_emergency_coordination",
+    "authority_level": "state_chief_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.police.vic.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "State emergency coordination",
+      "Law enforcement"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "av",
+    "name": "Ambulance Victoria",
+    "category": "health",
+    "jurisdiction_ids": [
+      "vic"
+    ],
+    "operating_role": "emergency_medical_services",
+    "authority_level": "state_ceo",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.ambulance.vic.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "Pre-hospital emergency medical care"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "qfd",
+    "name": "Queensland Fire Department",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "qld"
+    ],
+    "operating_role": "fire_rescue_ses",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.qfes.qld.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Fire rescue and SES operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "ses-qld",
+    "name": "Queensland State Emergency Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "qld"
+    ],
+    "operating_role": "flood_storm_response",
+    "authority_level": "state_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.qfes.qld.gov.au/about-us/frontline-services/state-emergency-service"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Cyclone and flood operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "qps",
+    "name": "Queensland Police Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "qld"
+    ],
+    "operating_role": "law_enforcement_emergency_coordination",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.police.qld.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "State disaster coordination",
+      "Law enforcement"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "qas",
+    "name": "Queensland Ambulance Service",
+    "category": "health",
+    "jurisdiction_ids": [
+      "qld"
+    ],
+    "operating_role": "emergency_medical_services",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.ambulance.qld.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "Pre-hospital emergency medical care"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "samfs",
+    "name": "South Australian Metropolitan Fire Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "sa"
+    ],
+    "operating_role": "urban_fire_rescue",
+    "authority_level": "state_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.mfs.sa.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Metropolitan fire district"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "sacfs",
+    "name": "South Australian Country Fire Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "sa"
+    ],
+    "operating_role": "bushfire_response",
+    "authority_level": "state_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.cfs.sa.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Rural fire districts"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "ses-sa",
+    "name": "South Australian State Emergency Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "sa"
+    ],
+    "operating_role": "flood_storm_response",
+    "authority_level": "state_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.ses.sa.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Storm and flood operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "sapol",
+    "name": "South Australia Police",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "sa"
+    ],
+    "operating_role": "law_enforcement_emergency_coordination",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.police.sa.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "State emergency coordination",
+      "Law enforcement"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "saas",
+    "name": "SA Ambulance Service",
+    "category": "health",
+    "jurisdiction_ids": [
+      "sa"
+    ],
+    "operating_role": "emergency_medical_services",
+    "authority_level": "state_ceo",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.saambulance.com.au"
+      }
+    ],
+    "participation_conditions": [
+      "Pre-hospital emergency medical care"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "dfes-wa",
+    "name": "Department of Fire and Emergency Services",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "wa"
+    ],
+    "operating_role": "fire_rescue_ses",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.dfes.wa.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Fire rescue and SES operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "wapol",
+    "name": "Western Australia Police Force",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "wa"
+    ],
+    "operating_role": "law_enforcement_emergency_coordination",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.police.wa.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "State emergency coordination",
+      "Law enforcement"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "sja-wa",
+    "name": "St John Western Australia",
+    "category": "health",
+    "jurisdiction_ids": [
+      "wa"
+    ],
+    "operating_role": "emergency_medical_services",
+    "authority_level": "state_contract",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://stjohnwa.com.au"
+      }
+    ],
+    "participation_conditions": [
+      "Government-contracted ambulance service"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "tfs",
+    "name": "Tasmania Fire Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "tas"
+    ],
+    "operating_role": "fire_rescue",
+    "authority_level": "state_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.fire.tas.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Fire and rescue operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "ses-tas",
+    "name": "Tasmania State Emergency Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "tas"
+    ],
+    "operating_role": "flood_storm_response",
+    "authority_level": "state_director",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.ses.tas.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Storm and flood operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "taspol",
+    "name": "Tasmania Police",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "tas"
+    ],
+    "operating_role": "law_enforcement_emergency_coordination",
+    "authority_level": "state_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.police.tas.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "State emergency coordination",
+      "Law enforcement"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "at",
+    "name": "Ambulance Tasmania",
+    "category": "health",
+    "jurisdiction_ids": [
+      "tas"
+    ],
+    "operating_role": "emergency_medical_services",
+    "authority_level": "state_ceo",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.ambulance.tas.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "Pre-hospital emergency medical care"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "act-esa",
+    "name": "ACT Emergency Services Agency",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "act"
+    ],
+    "operating_role": "emergency_services_coordination",
+    "authority_level": "territory_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://esa.act.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "ACT emergency coordination umbrella"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "act-fr",
+    "name": "ACT Fire and Rescue",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "act"
+    ],
+    "operating_role": "urban_fire_rescue",
+    "authority_level": "territory_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://esa.act.gov.au/actfr"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Urban fire and rescue"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "act-rfs",
+    "name": "ACT Rural Fire Service",
+    "category": "volunteer",
+    "jurisdiction_ids": [
+      "act"
+    ],
+    "operating_role": "bushfire_response",
+    "authority_level": "territory_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://esa.act.gov.au/actrfs"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Rural fire districts"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "ses-act",
+    "name": "ACT State Emergency Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "act"
+    ],
+    "operating_role": "flood_storm_response",
+    "authority_level": "territory_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://esa.act.gov.au/actses"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Storm and flood operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "act-policing",
+    "name": "ACT Policing",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "act"
+    ],
+    "operating_role": "law_enforcement_emergency_coordination",
+    "authority_level": "territory_chief_police_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.police.act.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "AFP-contracted policing for ACT"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "act-ambulance",
+    "name": "ACT Ambulance Service",
+    "category": "health",
+    "jurisdiction_ids": [
+      "act"
+    ],
+    "operating_role": "emergency_medical_services",
+    "authority_level": "territory_chief_officer",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://esa.act.gov.au/actambu"
+      }
+    ],
+    "participation_conditions": [
+      "Pre-hospital emergency medical care"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "ntfrs",
+    "name": "Northern Territory Fire and Rescue Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "nt"
+    ],
+    "operating_role": "fire_rescue",
+    "authority_level": "territory_director",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://pfes.nt.gov.au/fire-and-rescue"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Fire and rescue operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "bushfires-nt",
+    "name": "Bushfires NT",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "nt"
+    ],
+    "operating_role": "bushfire_response",
+    "authority_level": "territory_director",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://pfes.nt.gov.au/fire-and-rescue/bushfires-nt"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Bushfire management"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "ntes",
+    "name": "Northern Territory Emergency Service",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "nt"
+    ],
+    "operating_role": "cyclone_flood_response",
+    "authority_level": "territory_director",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://pfes.nt.gov.au/emergency-service"
+      }
+    ],
+    "participation_conditions": [
+      "AIIMS activation",
+      "Cyclone and flood operations"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "ntpf",
+    "name": "Northern Territory Police Force",
+    "category": "emergency_service",
+    "jurisdiction_ids": [
+      "nt"
+    ],
+    "operating_role": "law_enforcement_emergency_coordination",
+    "authority_level": "territory_commissioner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://pfes.nt.gov.au/police"
+      }
+    ],
+    "participation_conditions": [
+      "Territory emergency coordination",
+      "Law enforcement"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "sja-nt",
+    "name": "St John Northern Territory",
+    "category": "health",
+    "jurisdiction_ids": [
+      "nt"
+    ],
+    "operating_role": "emergency_medical_services",
+    "authority_level": "territory_contract",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.stjohnnt.org.au"
+      }
+    ],
+    "participation_conditions": [
+      "Government-contracted ambulance service"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "arc",
+    "name": "Australian Red Cross",
+    "category": "community",
+    "jurisdiction_ids": [
+      "commonwealth"
+    ],
+    "operating_role": "humanitarian_relief",
+    "authority_level": "national_partner",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.redcross.org.au"
+      }
+    ],
+    "participation_conditions": [
+      "Disaster relief coordination",
+      "Evacuation centre support"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "sja-national",
+    "name": "St John Ambulance Australia",
+    "category": "volunteer",
+    "jurisdiction_ids": [
+      "commonwealth"
+    ],
+    "operating_role": "first_aid_event_support",
+    "authority_level": "national_service",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.stjohn.org.au"
+      }
+    ],
+    "participation_conditions": [
+      "First aid and event medical support"
+    ],
+    "status": "active"
+  },
+  {
+    "organisation_id": "surf-lifesaving",
+    "name": "Surf Life Saving Australia",
+    "category": "volunteer",
+    "jurisdiction_ids": [
+      "commonwealth"
+    ],
+    "operating_role": "coastal_rescue",
+    "authority_level": "national_service",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://sls.com.au"
+      }
+    ],
+    "participation_conditions": [
+      "Coastal and marine rescue operations"
+    ],
     "status": "active"
   }
 ]
