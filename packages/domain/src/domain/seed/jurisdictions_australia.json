@@ -5,7 +5,10 @@
     "level": "commonwealth",
     "parent_jurisdiction_id": null,
     "policy_set_id": "policy-commonwealth",
-    "geospatial_boundary": {"type": "Polygon", "coordinates": []},
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": []
+    },
     "status": "active"
   },
   {
@@ -14,7 +17,33 @@
     "level": "state",
     "parent_jurisdiction_id": "commonwealth",
     "policy_set_id": "policy-nsw",
-    "geospatial_boundary": {"type": "Polygon", "coordinates": [[[141.0, -37.5], [153.7, -37.5], [153.7, -28.1], [141.0, -28.1], [141.0, -37.5]]]},
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            141.0,
+            -37.5
+          ],
+          [
+            153.7,
+            -37.5
+          ],
+          [
+            153.7,
+            -28.1
+          ],
+          [
+            141.0,
+            -28.1
+          ],
+          [
+            141.0,
+            -37.5
+          ]
+        ]
+      ]
+    },
     "status": "active"
   },
   {
@@ -23,7 +52,243 @@
     "level": "state",
     "parent_jurisdiction_id": "commonwealth",
     "policy_set_id": "policy-vic",
-    "geospatial_boundary": {"type": "Polygon", "coordinates": [[[140.9, -39.2], [150.0, -39.2], [150.0, -33.9], [140.9, -33.9], [140.9, -39.2]]]},
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            140.9,
+            -39.2
+          ],
+          [
+            150.0,
+            -39.2
+          ],
+          [
+            150.0,
+            -33.9
+          ],
+          [
+            140.9,
+            -33.9
+          ],
+          [
+            140.9,
+            -39.2
+          ]
+        ]
+      ]
+    },
+    "status": "active"
+  },
+  {
+    "jurisdiction_id": "qld",
+    "name": "Queensland",
+    "level": "state",
+    "parent_jurisdiction_id": "commonwealth",
+    "policy_set_id": "policy-qld",
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            138.0,
+            -29.0
+          ],
+          [
+            153.6,
+            -29.0
+          ],
+          [
+            153.6,
+            -10.0
+          ],
+          [
+            138.0,
+            -10.0
+          ],
+          [
+            138.0,
+            -29.0
+          ]
+        ]
+      ]
+    },
+    "status": "active"
+  },
+  {
+    "jurisdiction_id": "sa",
+    "name": "South Australia",
+    "level": "state",
+    "parent_jurisdiction_id": "commonwealth",
+    "policy_set_id": "policy-sa",
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            129.0,
+            -38.1
+          ],
+          [
+            141.0,
+            -38.1
+          ],
+          [
+            141.0,
+            -26.0
+          ],
+          [
+            129.0,
+            -26.0
+          ],
+          [
+            129.0,
+            -38.1
+          ]
+        ]
+      ]
+    },
+    "status": "active"
+  },
+  {
+    "jurisdiction_id": "wa",
+    "name": "Western Australia",
+    "level": "state",
+    "parent_jurisdiction_id": "commonwealth",
+    "policy_set_id": "policy-wa",
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            112.9,
+            -35.1
+          ],
+          [
+            129.0,
+            -35.1
+          ],
+          [
+            129.0,
+            -13.7
+          ],
+          [
+            112.9,
+            -13.7
+          ],
+          [
+            112.9,
+            -35.1
+          ]
+        ]
+      ]
+    },
+    "status": "active"
+  },
+  {
+    "jurisdiction_id": "tas",
+    "name": "Tasmania",
+    "level": "state",
+    "parent_jurisdiction_id": "commonwealth",
+    "policy_set_id": "policy-tas",
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            143.8,
+            -43.6
+          ],
+          [
+            148.5,
+            -43.6
+          ],
+          [
+            148.5,
+            -39.5
+          ],
+          [
+            143.8,
+            -39.5
+          ],
+          [
+            143.8,
+            -43.6
+          ]
+        ]
+      ]
+    },
+    "status": "active"
+  },
+  {
+    "jurisdiction_id": "act",
+    "name": "Australian Capital Territory",
+    "level": "territory",
+    "parent_jurisdiction_id": "commonwealth",
+    "policy_set_id": "policy-act",
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            148.7,
+            -35.9
+          ],
+          [
+            149.4,
+            -35.9
+          ],
+          [
+            149.4,
+            -35.1
+          ],
+          [
+            148.7,
+            -35.1
+          ],
+          [
+            148.7,
+            -35.9
+          ]
+        ]
+      ]
+    },
+    "status": "active"
+  },
+  {
+    "jurisdiction_id": "nt",
+    "name": "Northern Territory",
+    "level": "territory",
+    "parent_jurisdiction_id": "commonwealth",
+    "policy_set_id": "policy-nt",
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            129.0,
+            -26.0
+          ],
+          [
+            138.0,
+            -26.0
+          ],
+          [
+            138.0,
+            -10.9
+          ],
+          [
+            129.0,
+            -10.9
+          ],
+          [
+            129.0,
+            -26.0
+          ]
+        ]
+      ]
+    },
     "status": "active"
   }
 ]
