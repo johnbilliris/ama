@@ -1,0 +1,972 @@
+openapi: 3.1.0
+info:
+  title: Disaster Response Hub — Data Source Governance API
+  description: >
+    API addendum for feature 005: Data Source Identification, Constitutional Review,
+    and Governance Assignment. Extends the base Disaster Response Coordination Hub API.
+  version: 0.2.0
+
+servers:
+  - url: https://api.example.gov.au
+
+security:
+  - bearerAuth: []
+
+paths:
+  /data-sources:
+    get:
+      operationId: listDataSources
+      summary: List all registered data sources with optional filters
+      tags: [Data Sources]
+      parameters:
+        - name: kind
+          in: query
+          schema:
+            $ref: '#/components/schemas/DataSourceKind'
+        - name: sub_category
+          in: query
+          schema:
+            type: string
+        - name: trust_tier
+          in: query
+          schema:
+            $ref: '#/components/schemas/TrustTier'
+        - name: compliance_status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ComplianceStatus'
+        - name: governance_status
+          in: query
+          schema:
+            $ref: '#/components/schemas/GovernanceStatus'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/DataSourceStatus'
+        - name: agent_name
+          in: query
+          schema:
+            $ref: '#/components/schemas/AgentName'
+        - name: geographic_coverage
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of data sources matching filters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataSourceRegistryEntry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: registerDataSource
+      summary: Register a new data source in the governance registry
+      tags: [Data Sources]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataSourceRegistration'
+      responses:
+        '201':
+          description: Data source registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSourceRegistryEntry'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /data-sources/{dataSourceId}:
+    get:
+      operationId: getDataSource
+      summary: Get a single data source with full governance details
+      tags: [Data Sources]
+      parameters:
+        - $ref: '#/components/parameters/DataSourceId'
+      responses:
+        '200':
+          description: Data source details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSourceRegistryEntry'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      operationId: updateDataSource
+      summary: Update data source metadata (triggers re-review if material change)
+      tags: [Data Sources]
+      parameters:
+        - $ref: '#/components/parameters/DataSourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataSourceUpdate'
+      responses:
+        '200':
+          description: Data source updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSourceRegistryEntry'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /data-sources/{dataSourceId}/deactivate:
+    post:
+      operationId: deactivateDataSource
+      summary: Deactivate a data source (retains history, excludes from ingestion)
+      tags: [Data Sources]
+      parameters:
+        - $ref: '#/components/parameters/DataSourceId'
+      responses:
+        '200':
+          description: Data source deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSourceRegistryEntry'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot deactivate — source has active handoff chains in use during an active incident
+
+  /data-sources/{dataSourceId}/compliance:
+    get:
+      operationId: getComplianceProfile
+      summary: Get all constitutional assessments for a data source
+      tags: [Governance — Compliance]
+      parameters:
+        - $ref: '#/components/parameters/DataSourceId'
+      responses:
+        '200':
+          description: List of constitutional assessments (current and historical)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_source_id:
+                    type: string
+                  current_assessments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConstitutionalAssessment'
+                  historical_assessments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConstitutionalAssessment'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      operationId: createAssessment
+      summary: Record a constitutional assessment for a specific principle
+      tags: [Governance — Compliance]
+      parameters:
+        - $ref: '#/components/parameters/DataSourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConstitutionalAssessmentCreate'
+      responses:
+        '201':
+          description: Assessment recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConstitutionalAssessment'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /data-sources/{dataSourceId}/governance:
+    get:
+      operationId: getGovernanceAssignments
+      summary: Get agent assignments and handoff chain for a data source
+      tags: [Governance — Agent Assignment]
+      parameters:
+        - $ref: '#/components/parameters/DataSourceId'
+      responses:
+        '200':
+          description: Agent assignments and handoff chain
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_source_id:
+                    type: string
+                  assignments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AgentGovernanceAssignment'
+                  handoff_chain:
+                    $ref: '#/components/schemas/HandoffChainDefinition'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /data-sources/{dataSourceId}/governance/assignments:
+    post:
+      operationId: assignAgent
+      summary: Assign an agent to a data source
+      tags: [Governance — Agent Assignment]
+      parameters:
+        - $ref: '#/components/parameters/DataSourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentAssignmentCreate'
+      responses:
+        '201':
+          description: Agent assigned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentGovernanceAssignment'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Source is non-compliant — assignments blocked until remediation
+
+  /data-sources/{dataSourceId}/governance/handoff-chain:
+    put:
+      operationId: defineHandoffChain
+      summary: Define or replace the handoff chain for a data source
+      tags: [Governance — Agent Assignment]
+      parameters:
+        - $ref: '#/components/parameters/DataSourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HandoffChainCreate'
+      responses:
+        '200':
+          description: Handoff chain defined
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoffChainDefinition'
+        '400':
+          description: Validation failed — invalid agent name, broken chain continuity, or incompatible payload contract
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /data-sources/{dataSourceId}/governance/grace-period:
+    post:
+      operationId: manageGracePeriod
+      summary: Override grace period (extend or immediately block a compliance-lapsed source)
+      tags: [Governance — Compliance]
+      parameters:
+        - $ref: '#/components/parameters/DataSourceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  enum: [extend, block]
+                extend_hours:
+                  type: integer
+                  minimum: 1
+                  description: Hours to extend grace period (required when action is extend)
+                rationale:
+                  type: string
+                  description: Justification for the override
+      responses:
+        '200':
+          description: Grace period updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSourceRegistryEntry'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Source is not in compliance_lapsed state
+
+  /governance/dashboard:
+    get:
+      operationId: getGovernanceDashboard
+      summary: Consolidated governance dashboard with summary counts and filtered source list
+      tags: [Governance — Dashboard]
+      parameters:
+        - name: compliance_status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ComplianceStatus'
+        - name: governance_status
+          in: query
+          schema:
+            $ref: '#/components/schemas/GovernanceStatus'
+        - name: kind
+          in: query
+          schema:
+            $ref: '#/components/schemas/DataSourceKind'
+        - name: agent_name
+          in: query
+          schema:
+            $ref: '#/components/schemas/AgentName'
+        - name: geographic_coverage
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Governance dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GovernanceDashboard'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /governance/handoff-lookup:
+    get:
+      operationId: lookupHandoffChain
+      summary: Low-latency handoff chain lookup for agent runtime consumption (NFR-001)
+      tags: [Governance — Runtime]
+      parameters:
+        - name: data_source_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Handoff chain for the data source (served from cache when available)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoffChainDefinition'
+          headers:
+            X-Cache-Status:
+              schema:
+                type: string
+                enum: [HIT, MISS]
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /governance/precedence:
+    get:
+      operationId: listPrecedenceRules
+      summary: List functional-domain precedence rules with optional filters
+      tags: [Governance — Precedence]
+      parameters:
+        - name: hazard_type
+          in: query
+          schema:
+            type: string
+        - name: jurisdiction_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of precedence rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FunctionalDomainPrecedence'
+
+    post:
+      operationId: setPrecedence
+      summary: Set or update functional-domain precedence for a hazard type
+      tags: [Governance — Precedence]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FunctionalDomainPrecedenceCreate'
+      responses:
+        '201':
+          description: Precedence rule set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FunctionalDomainPrecedence'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /data-sources/{dataSourceId}/audit:
+    get:
+      operationId: getAuditTrail
+      summary: Get the complete governance audit trail for a data source
+      tags: [Governance — Audit]
+      parameters:
+        - $ref: '#/components/parameters/DataSourceId'
+        - name: action
+          in: query
+          schema:
+            type: string
+            description: Filter by action type
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Audit trail entries ordered by timestamp descending
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GovernanceAuditEntry'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  parameters:
+    DataSourceId:
+      name: dataSourceId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    DataSourceKind:
+      type: string
+      enum: [authoritative, sensor, iot, field_report, social, community, derived]
+
+    TrustTier:
+      type: string
+      enum:
+        - tier_1_authoritative_government
+        - tier_2_verified_institutional
+        - tier_3_operational_sensor
+        - tier_4_field_reports
+        - tier_5_community_volunteer
+        - tier_6_social_unverified
+        - tier_7_derived_computed
+
+    ComplianceStatus:
+      type: string
+      enum: [unassessed, compliant, partially_compliant, non_compliant, compliance_lapsed]
+
+    GovernanceStatus:
+      type: string
+      enum: [unassigned, assigned, fully_governed]
+
+    DataSourceStatus:
+      type: string
+      enum: [available, degraded, offline, deactivated]
+
+    AgentName:
+      type: string
+      enum: [monitoring, risk_assessment, evacuation, resource_allocation, communication]
+
+    ConstitutionalPrinciple:
+      type: string
+      enum:
+        - life_safety_first
+        - multi_agent_coordination
+        - data_trust_provenance_freshness
+        - privacy_security_regional_policy
+        - multilingual_accessible_actionable
+        - cloud_platform
+
+    SignalCategory:
+      type: string
+      enum: [weather, hydrology, fire, geohazard, infrastructure, community_report, social_report, resource_status]
+
+    DataSourceRegistryEntry:
+      type: object
+      required:
+        - data_source_id
+        - name
+        - kind
+        - sub_category
+        - provider
+        - trust_tier
+        - authority_rank
+        - status
+        - compliance_status
+        - governance_status
+      properties:
+        data_source_id:
+          type: string
+        name:
+          type: string
+        kind:
+          $ref: '#/components/schemas/DataSourceKind'
+        sub_category:
+          type: string
+        provider:
+          type: string
+        collection_method:
+          type: string
+        data_type:
+          type: string
+        update_frequency:
+          type: string
+        geographic_coverage:
+          type: string
+        trust_tier:
+          $ref: '#/components/schemas/TrustTier'
+        authority_rank:
+          type: integer
+          minimum: 1
+          maximum: 7
+        status:
+          $ref: '#/components/schemas/DataSourceStatus'
+        compliance_status:
+          $ref: '#/components/schemas/ComplianceStatus'
+        governance_status:
+          $ref: '#/components/schemas/GovernanceStatus'
+        grace_period_start:
+          type: string
+          format: date-time
+        grace_period_end:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    DataSourceRegistration:
+      type: object
+      required: [name, kind, sub_category, provider, trust_tier]
+      properties:
+        name:
+          type: string
+        kind:
+          $ref: '#/components/schemas/DataSourceKind'
+        sub_category:
+          type: string
+        provider:
+          type: string
+        collection_method:
+          type: string
+        data_type:
+          type: string
+        update_frequency:
+          type: string
+        geographic_coverage:
+          type: string
+        trust_tier:
+          $ref: '#/components/schemas/TrustTier'
+
+    DataSourceUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        sub_category:
+          type: string
+        provider:
+          type: string
+        collection_method:
+          type: string
+        data_type:
+          type: string
+        update_frequency:
+          type: string
+        geographic_coverage:
+          type: string
+        trust_tier:
+          $ref: '#/components/schemas/TrustTier'
+        status:
+          $ref: '#/components/schemas/DataSourceStatus'
+
+    ConstitutionalAssessment:
+      type: object
+      required:
+        - assessment_id
+        - data_source_id
+        - principle
+        - compliance_status
+        - explanation
+        - assessor_id
+        - assessed_at
+        - is_current
+        - triggered_by
+      properties:
+        assessment_id:
+          type: string
+        data_source_id:
+          type: string
+        principle:
+          $ref: '#/components/schemas/ConstitutionalPrinciple'
+        compliance_status:
+          type: string
+          enum: [compliant, partially_compliant, non_compliant, not_applicable]
+        explanation:
+          type: string
+        conditions:
+          type: array
+          items:
+            type: string
+        gaps:
+          type: array
+          items:
+            type: string
+        assessor_id:
+          type: string
+        assessed_at:
+          type: string
+          format: date-time
+        superseded_by:
+          type: string
+        is_current:
+          type: boolean
+        triggered_by:
+          type: string
+          enum: [initial_review, source_change, constitution_amendment]
+
+    ConstitutionalAssessmentCreate:
+      type: object
+      required: [principle, compliance_status, explanation, assessor_id]
+      properties:
+        principle:
+          $ref: '#/components/schemas/ConstitutionalPrinciple'
+        compliance_status:
+          type: string
+          enum: [compliant, partially_compliant, non_compliant, not_applicable]
+        explanation:
+          type: string
+        conditions:
+          type: array
+          items:
+            type: string
+        gaps:
+          type: array
+          items:
+            type: string
+        assessor_id:
+          type: string
+        triggered_by:
+          type: string
+          enum: [initial_review, source_change, constitution_amendment]
+          default: initial_review
+
+    AgentGovernanceAssignment:
+      type: object
+      required:
+        - assignment_id
+        - data_source_id
+        - agent_name
+        - role
+        - scope_of_responsibility
+        - assigned_by
+        - assigned_at
+        - status
+      properties:
+        assignment_id:
+          type: string
+        data_source_id:
+          type: string
+        agent_name:
+          $ref: '#/components/schemas/AgentName'
+        role:
+          type: string
+          enum: [primary, secondary]
+        scope_of_responsibility:
+          type: string
+        operational_conditions:
+          type: array
+          items:
+            type: string
+        assigned_by:
+          type: string
+        assigned_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, revoked]
+
+    AgentAssignmentCreate:
+      type: object
+      required: [agent_name, role, scope_of_responsibility, assigned_by]
+      properties:
+        agent_name:
+          $ref: '#/components/schemas/AgentName'
+        role:
+          type: string
+          enum: [primary, secondary]
+        scope_of_responsibility:
+          type: string
+        operational_conditions:
+          type: array
+          items:
+            type: string
+        assigned_by:
+          type: string
+
+    HandoffChainDefinition:
+      type: object
+      required: [chain_id, data_source_id, steps, status]
+      properties:
+        chain_id:
+          type: string
+        data_source_id:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/HandoffStep'
+          minItems: 1
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, draft, deprecated]
+
+    HandoffStep:
+      type: object
+      required: [step_order, source_agent, target_agent]
+      properties:
+        step_order:
+          type: integer
+          minimum: 1
+        source_agent:
+          type: string
+        target_agent:
+          type: string
+        confidence_threshold:
+          type: number
+          minimum: 0
+          maximum: 1
+        category_filter:
+          type: array
+          items:
+            $ref: '#/components/schemas/SignalCategory'
+        payload_contract_ref:
+          type: string
+
+    HandoffChainCreate:
+      type: object
+      required: [steps, created_by]
+      properties:
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/HandoffStep'
+          minItems: 1
+        created_by:
+          type: string
+
+    FunctionalDomainPrecedence:
+      type: object
+      required:
+        - precedence_id
+        - hazard_type
+        - primary_data_source_id
+        - rationale
+        - created_by
+        - created_at
+      properties:
+        precedence_id:
+          type: string
+        hazard_type:
+          $ref: '#/components/schemas/SignalCategory'
+        jurisdiction_id:
+          type: string
+        primary_data_source_id:
+          type: string
+        rationale:
+          type: string
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    FunctionalDomainPrecedenceCreate:
+      type: object
+      required: [hazard_type, primary_data_source_id, rationale, created_by]
+      properties:
+        hazard_type:
+          $ref: '#/components/schemas/SignalCategory'
+        jurisdiction_id:
+          type: string
+        primary_data_source_id:
+          type: string
+        rationale:
+          type: string
+        created_by:
+          type: string
+
+    GovernanceAuditEntry:
+      type: object
+      required: [audit_entry_id, data_source_id, action, actor_id, timestamp, details]
+      properties:
+        audit_entry_id:
+          type: string
+        data_source_id:
+          type: string
+        action:
+          type: string
+          enum:
+            - registered
+            - updated
+            - deactivated
+            - assessment_created
+            - assessment_superseded
+            - approved
+            - conditionally_approved
+            - rejected
+            - agent_assigned
+            - agent_revoked
+            - handoff_defined
+            - handoff_updated
+            - handoff_deprecated
+            - rereview_triggered
+            - grace_period_started
+            - grace_period_extended
+            - grace_period_expired
+            - auto_blocked
+            - precedence_set
+        actor_id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        details:
+          type: object
+        related_entity_id:
+          type: string
+
+    GovernanceDashboard:
+      type: object
+      required: [summary, sources]
+      properties:
+        summary:
+          type: object
+          properties:
+            total_sources:
+              type: integer
+            compliant:
+              type: integer
+            partially_compliant:
+              type: integer
+            non_compliant:
+              type: integer
+            unassessed:
+              type: integer
+            compliance_lapsed:
+              type: integer
+            assigned:
+              type: integer
+            unassigned:
+              type: integer
+            fully_governed:
+              type: integer
+            rereview_pending:
+              type: integer
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataSourceRegistryEntry'
+
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Insufficient permissions for this governance action
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Data source not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
