@@ -13,4 +13,5 @@ def bootstrap_seed_data(seed_root: Path) -> dict[str, list[dict[str, object]]]:
         "jurisdictions": load_seed_file(seed_root / "jurisdictions_australia.json"),
         "frameworks": load_seed_file(seed_root / "frameworks_australia.json"),
         "organisations": load_seed_file(seed_root / "organisations_australia.json"),
+        "data_sources": load_seed_file(seed_root / "data_sources_australia.json"),
     }

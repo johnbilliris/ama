@@ -1,4 +1,6 @@
+from app.api.data_sources import router as data_sources_router
 from app.api.dead_letters import router as dead_letters_router
+from app.api.governance import router as governance_router
 from app.api.handoffs import router as handoffs_router
 from app.api.health import router as health_router
 from app.api.routes.alerts import router as alerts_router
@@ -25,4 +27,6 @@ api_router.include_router(scenarios_router)
 api_router.include_router(handoffs_router)
 api_router.include_router(dead_letters_router)
 api_router.include_router(health_router)
+api_router.include_router(data_sources_router)
+api_router.include_router(governance_router)
 
