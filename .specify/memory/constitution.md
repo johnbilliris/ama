@@ -72,6 +72,7 @@ The system MUST run on Microsoft's Azure cloud platform and the system MUST only
 - The system MUST maintain an append-only audit trail for safety-critical recommendations and actions.
 - The system MUST support multi-tenancy boundaries where required for different agencies/regions (data and policy isolation).
 - The system MUST support Australia-wide operations, including remote/low-connectivity environments, without assuming consistent mobile coverage.
+- The system MUST be designed in accordance to the Well-Architected Framework of the Cloud Platform.
 
 Success targets (from capstone):
 
@@ -107,4 +108,4 @@ This constitution supersedes all other project practices and templates.
 - Model/policy updates affecting public guidance MUST be tracked with versioning, evaluation evidence, and a controlled rollout.
 - Cross-agency integrations MUST document ownership, data-sharing boundaries, and emergency operating procedures.
 
-**Version**: 1.0.1 | **Ratified**: 2026-03-02 | **Last Amended**: 2026-03-09
+**Version**: 1.0.2 | **Ratified**: 2026-03-02 | **Last Amended**: 2026-03-25
