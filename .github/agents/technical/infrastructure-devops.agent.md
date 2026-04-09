@@ -1,5 +1,7 @@
 ---
+name: infrastructure-devops-agent
 description: Infrastructure and DevOps agent — Azure AU infrastructure, Bicep IaC (planning, authoring, AVM), Container Apps, CI/CD pipelines, and monitoring for the disaster response hub.
+user-invocable: true
 tools: ["changes", "codebase", "edit/editFiles", "extensions", "fetch", "findTestFiles", "githubRepo", "new", "openSimpleBrowser", "problems", "runCommands", "runTasks", "runTests", "search", "searchResults", "terminalLastCommand", "terminalSelection", "testFailure", "usages", "vscodeAPI", "microsoft.docs.mcp", "azure_design_architecture", "azure_get_deployment_best_practices", "azure_get_schema_for_Bicep", "get_bicep_best_practices", "bestpractices", "bicepschema", "azure_get_azure_verified_module", "azure-mcp/azureterraformbestpractices", "azure-mcp/bicepschema", "azure-mcp/search", "todos"]
 handoffs:
   - label: Ask about architecture decisions

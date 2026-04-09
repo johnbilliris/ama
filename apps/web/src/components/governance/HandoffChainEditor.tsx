@@ -42,7 +42,7 @@ export function HandoffChainEditor({ dataSourceId, apiBase = "/api/v1", onSaved 
 
   const updateStep = (index: number, field: keyof HandoffStepData, value: unknown) => {
     const updated = [...steps];
-    (updated[index] as Record<string, unknown>)[field] = value;
+    updated[index] = { ...updated[index], [field]: value };
     setSteps(updated);
   };
 

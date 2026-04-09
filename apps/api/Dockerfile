@@ -1,17 +1,23 @@
 FROM python:3.12-slim AS builder
 
 WORKDIR /app
-COPY pyproject.toml ./
-COPY app ./app
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir .
+COPY apps/api/pyproject.toml ./apps/api/
+COPY apps/api/app/ ./apps/api/app/
+COPY packages/ ./packages/
+RUN pip install --no-cache-dir --upgrade pip && \
+    cd apps/api && pip install --no-cache-dir .
 
 FROM python:3.12-slim AS runtime
+
+ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 RUN useradd -m -u 10001 appuser
 WORKDIR /app
 COPY --from=builder /usr/local /usr/local
-COPY app ./app
+COPY apps/api/app/ ./app/
+COPY packages/ ./packages/
+COPY apps/agents/evacuation/ ./apps/agents/evacuation/
 
 USER appuser
 EXPOSE 8000

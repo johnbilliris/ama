@@ -6,11 +6,11 @@ description: 'Detailed evaluator for the Azure Master Architect Program rubric t
 # AMA Rubric Grader
 
 ## When to Use This Skill
-- Respond with a criterion-by-criterion evaluation whenever someone asks you to score a submission or demo against the Azure Master Architect Program criteria described in [AMA_Rubric_Asia.md](AMA_Rubric_Asia.md).
+- Respond with a criterion-by-criterion evaluation whenever someone asks you to score a submission or demo against the Azure Master Architect Program criteria described in [AMA_Rubric_Asia.md](..\..\..\AMA_Rubric_Asia.md).
 - Use when the prompt asks for a full rubric assessment, grade bands, improvement ideas, or a holistic score summary.
 
 ## Prerequisites
-- Access to the rubric file at [AMA_Rubric_Asia.md](AMA_Rubric_Asia.md) as the scoring baseline.
+- Access to the rubric file at [AMA_Rubric_Asia.md](..\..\..\AMA_Rubric_Asia.md) as the scoring baseline.
 - Ability to read project artifacts that live outside the `.github` folder for evidence supporting each score.
 - Clarity on which deliverable (demo, codebase, documentation, etc.) is under review.
 
@@ -25,7 +25,7 @@ description: 'Detailed evaluator for the Azure Master Architect Program rubric t
 ## Troubleshooting
 - **Missing evidence**: If no file contains support for a criterion, explain why the documentation/code falls short and default to Needs Improvement with a note on what to supply.
 - **Ambiguous deliverables**: Ask the user to clarify which feature or component they want graded before continuing.
-- **Grade band confusion**: Revisit the tally rules in [AMA_Rubric_Asia.md](AMA_Rubric_Asia.md) to ensure the total matches the described grade ranges.
+- **Grade band confusion**: Revisit the tally rules in [AMA_Rubric_Asia.md](..\..\..\AMA_Rubric_Asia.md) to ensure the total matches the described grade ranges.
 
 ## References
-- [AMA_Rubric_Asia.md](AMA_Rubric_Asia.md) - Source rubric definitions and scoring bands.
+- [AMA_Rubric_Asia.md](..\..\..\AMA_Rubric_Asia.md) - Source rubric definitions and scoring bands.

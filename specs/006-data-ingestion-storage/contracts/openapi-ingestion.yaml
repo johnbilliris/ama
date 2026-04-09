@@ -1,0 +1,446 @@
+openapi: 3.1.0
+info:
+  title: Disaster Response Hub — Ingestion & Simulation API Extensions
+  version: 0.2.0
+  description: >
+    API contract extensions for signal ingestion pipelines, simulation management,
+    and pipeline observability. Extends the existing Hub API (v0.1.0).
+
+paths:
+  /signals:
+    post:
+      summary: Ingest a signal (existing, unchanged)
+      operationId: ingestSignal
+      tags: [signals]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalEnvelope'
+      responses:
+        '200':
+          description: Signal accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signalId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [accepted]
+        '422':
+          description: Schema validation failed — routed to dead-letter queue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    get:
+      summary: List signals with extended filters
+      operationId: listSignals
+      tags: [signals]
+      parameters:
+        - name: incidentId
+          in: query
+          schema:
+            type: string
+        - name: jurisdictionId
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: dataSourceId
+          in: query
+          schema:
+            type: string
+        - name: since
+          in: query
+          description: ISO 8601 datetime — return signals with occurredAt >= this value
+          schema:
+            type: string
+            format: date-time
+        - name: validationStatus
+          in: query
+          schema:
+            type: string
+            enum: [pending, validated, contradicted, rejected, escalated]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of signals matching filters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Signal'
+                  total:
+                    type: integer
+
+  /simulations/scenarios:
+    get:
+      summary: List simulation scenario templates
+      operationId: listScenarios
+      tags: [simulation]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SimulationScenario'
+    post:
+      summary: Create a simulation scenario template
+      operationId: createScenario
+      tags: [simulation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationScenarioInput'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationScenario'
+
+  /simulations/runs:
+    post:
+      summary: Start a simulation run from a scenario template
+      operationId: startSimulationRun
+      tags: [simulation]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scenarioId, requestedByPersonaId]
+              properties:
+                scenarioId:
+                  type: string
+                requestedByPersonaId:
+                  type: string
+                timeCompressionRatio:
+                  type: number
+                  description: Override scenario default compression ratio
+                misinformationRatio:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+      responses:
+        '202':
+          description: Simulation run accepted and starting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationRun'
+
+  /simulations/runs/{runId}:
+    get:
+      summary: Get simulation run status and progress
+      operationId: getSimulationRun
+      tags: [simulation]
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationRun'
+
+  /simulations/runs/{runId}/abort:
+    post:
+      summary: Abort a running simulation
+      operationId: abortSimulationRun
+      tags: [simulation]
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requestedByPersonaId]
+              properties:
+                requestedByPersonaId:
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationRun'
+
+  /ingestion/status:
+    get:
+      summary: Get pipeline health and observability status
+      operationId: getIngestionStatus
+      tags: [ingestion]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pipelines:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PipelineStatus'
+                  totalSignalsLastHour:
+                    type: integer
+                  degradedSources:
+                    type: integer
+
+components:
+  schemas:
+    SignalEnvelope:
+      type: object
+      required: [source, category, occurredAt, receivedAt, location, payload, confidenceScore, freshnessScore, validationStatus, provenance]
+      properties:
+        source:
+          type: object
+          required: [dataSourceId, name, kind]
+          properties:
+            dataSourceId:
+              type: string
+            name:
+              type: string
+            kind:
+              type: string
+              enum: [authoritative, sensor, iot, field_report, social, community, derived]
+        incidentId:
+          type: string
+        category:
+          type: string
+          enum: [weather, hydrology, fire, geohazard, infrastructure, community_report, social_report, resource_status]
+        occurredAt:
+          type: string
+          format: date-time
+        receivedAt:
+          type: string
+          format: date-time
+        jurisdictionId:
+          type: string
+        location:
+          type: object
+          required: [type, coordinates, precisionMeters]
+          properties:
+            type:
+              type: string
+              enum: [Point, Polygon]
+            coordinates:
+              type: array
+            precisionMeters:
+              type: number
+              minimum: 0
+        payload:
+          type: object
+          additionalProperties: true
+        confidenceScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        freshnessScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        validationStatus:
+          type: string
+          enum: [pending, validated, contradicted, rejected, escalated]
+        provenance:
+          type: object
+          required: [collectionMethod, sourceUri]
+          properties:
+            collectionMethod:
+              type: string
+            sourceUri:
+              type: string
+            collector:
+              type: string
+            validationNotes:
+              type: string
+            sourceTimestamp:
+              type: string
+              format: date-time
+            simulationRunId:
+              type: string
+              description: Present only for simulated signals
+
+    Signal:
+      type: object
+      properties:
+        signal_id:
+          type: string
+        incident_id:
+          type: string
+        data_source_id:
+          type: string
+        category:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        received_at:
+          type: string
+          format: date-time
+        jurisdiction_id:
+          type: string
+        location:
+          type: object
+        payload:
+          type: object
+        confidence_score:
+          type: number
+        freshness_score:
+          type: number
+        validation_status:
+          type: string
+        provenance:
+          type: object
+
+    SimulationScenarioInput:
+      type: object
+      required: [name, scenarioType, targetRegion, targetJurisdictionIds, activatedDataSourceIds]
+      properties:
+        name:
+          type: string
+        scenarioType:
+          type: string
+          enum: [bushfire, flood, cyclone, severe_storm]
+        targetRegion:
+          type: object
+          description: GeoJSON Polygon
+        targetJurisdictionIds:
+          type: array
+          items:
+            type: string
+        activatedDataSourceIds:
+          type: array
+          items:
+            type: string
+        timeCompressionRatio:
+          type: number
+          default: 1.0
+        misinformationRatio:
+          type: number
+          default: 0.15
+        historicalOverlayPath:
+          type: string
+
+    SimulationScenario:
+      allOf:
+        - $ref: '#/components/schemas/SimulationScenarioInput'
+        - type: object
+          properties:
+            scenarioId:
+              type: string
+            createdBy:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+
+    SimulationRun:
+      type: object
+      properties:
+        runId:
+          type: string
+        scenarioId:
+          type: string
+        status:
+          type: string
+          enum: [configuring, running, completed, aborted]
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        currentPhase:
+          type: string
+        signalsGenerated:
+          type: object
+          additionalProperties:
+            type: integer
+        totalSignals:
+          type: integer
+        timeCompressionRatio:
+          type: number
+        misinformationRatio:
+          type: number
+        createdBy:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    PipelineStatus:
+      type: object
+      properties:
+        pipelineId:
+          type: string
+        sourceClass:
+          type: string
+        dataSourceIds:
+          type: array
+          items:
+            type: string
+        circuitBreakerState:
+          type: string
+          enum: [closed, open, half_open]
+        lastSuccessfulPoll:
+          type: string
+          format: date-time
+        signalsLastHour:
+          type: integer
+        dedupHitRatePercent:
+          type: number
+        normalisationLatencyP95Ms:
+          type: number
+        deadLetterDepth:
+          type: integer
+
+    ValidationError:
+      type: object
+      properties:
+        detail:
+          type: string
+        validationErrors:
+          type: array
+          items:
+            type: string
+        deadLetterEntryId:
+          type: string

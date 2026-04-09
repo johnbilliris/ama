@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: disaster-response-hub
+metadata:
+  template: disaster-response-hub@0.1.0
+
+# ---------- Infrastructure ----------
+infra:
+  provider: bicep
+  path: infra
+  module: main
+
+# ---------- Hooks ----------
+hooks:
+  postprovision:
+    windows:
+      shell: pwsh
+      run: ./scripts/seed-database.ps1
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: ./scripts/seed-database.sh
+      interactive: true
+      continueOnError: false
+
+# ---------- Services ----------
+services:
+  api:
+    project: ./apps/api
+    language: python
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ../..
+
+  agents:
+    project: ./apps/agents
+    language: python
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ../..
+
+  ingestion:
+    project: ./apps/ingestion
+    language: python
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ../..
+
+  web:
+    project: ./apps/web
+    language: js
+    host: appservice
+    dist: .next/standalone
+    config:
+      packageManager: pnpm
+    hooks:
+      prepackage:
+        windows:
+          shell: pwsh
+          run: pnpm run build
+        posix:
+          shell: sh
+          run: pnpm run build
+
+# ---------- Pipeline ----------
+pipeline:
+  provider: github

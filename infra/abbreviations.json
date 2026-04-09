@@ -1,0 +1,13 @@
+{
+  "appContainerApps":           "ca-",
+  "appManagedEnvironments":     "cae-",
+  "cacheRedis":                 "redis-",
+  "cognitiveServicesAccounts":  "cog-",
+  "containerRegistryRegistries":"cr",
+  "documentDBDatabaseAccounts": "cosmos-",
+  "insightsComponents":         "appi-",
+  "operationalInsightsWorkspaces": "log-",
+  "storageStorageAccounts":     "st",
+  "webServerFarms":             "plan-",
+  "webSitesAppService":         "app-"
+}
