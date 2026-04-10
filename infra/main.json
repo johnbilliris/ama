@@ -1,0 +1,1150 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "languageVersion": "2.0",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "3565060829245128979"
+    }
+  },
+  "parameters": {
+    "environmentName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "metadata": {
+        "description": "Name of the environment — used as a prefix for all resources"
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Primary location for all resources"
+      }
+    },
+    "actionGroupEmail": {
+      "type": "string",
+      "defaultValue": "ops@example.com",
+      "metadata": {
+        "description": "Alert email recipient"
+      }
+    },
+    "actionGroupWebhook": {
+      "type": "string",
+      "defaultValue": "https://example.com/alerts",
+      "metadata": {
+        "description": "Alert webhook endpoint"
+      }
+    },
+    "apiImage": {
+      "type": "string",
+      "defaultValue": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
+      "metadata": {
+        "description": "API container image (set by azd deploy)"
+      }
+    },
+    "agentsImage": {
+      "type": "string",
+      "defaultValue": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
+      "metadata": {
+        "description": "Agents container image (set by azd deploy)"
+      }
+    },
+    "ingestionImage": {
+      "type": "string",
+      "defaultValue": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
+      "metadata": {
+        "description": "Ingestion container image (set by azd deploy)"
+      }
+    },
+    "principalId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Principal ID for RBAC role assignments (set by azd)"
+      }
+    },
+    "principalType": {
+      "type": "string",
+      "defaultValue": "User",
+      "allowedValues": [
+        "User",
+        "ServicePrincipal"
+      ],
+      "metadata": {
+        "description": "Principal type for RBAC assignments"
+      }
+    }
+  },
+  "variables": {
+    "$fxv#0": {
+      "appContainerApps": "ca-",
+      "appManagedEnvironments": "cae-",
+      "cacheRedis": "redis-",
+      "cognitiveServicesAccounts": "cog-",
+      "containerRegistryRegistries": "cr",
+      "documentDBDatabaseAccounts": "cosmos-",
+      "insightsComponents": "appi-",
+      "operationalInsightsWorkspaces": "log-",
+      "storageStorageAccounts": "st",
+      "webServerFarms": "plan-",
+      "webSitesAppService": "app-"
+    },
+    "abbrs": "[variables('$fxv#0')]",
+    "tags": {
+      "azd-env-name": "[parameters('environmentName')]",
+      "project": "disaster-response-hub"
+    },
+    "uniqueSuffix": "[uniqueString(resourceGroup().id)]",
+    "blobContainers": [
+      "raw-payloads",
+      "binary-assets",
+      "audit",
+      "simulation"
+    ]
+  },
+  "resources": {
+    "containerRegistry": {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2023-07-01",
+      "name": "[format('{0}{1}{2}', variables('abbrs').containerRegistryRegistries, replace(parameters('environmentName'), '-', ''), take(variables('uniqueSuffix'), 6))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "sku": {
+        "name": "Basic"
+      },
+      "properties": {
+        "adminUserEnabled": true
+      }
+    },
+    "storage": {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "allowBlobPublicAccess": false,
+        "minimumTlsVersion": "TLS1_2",
+        "supportsHttpsTrafficOnly": true
+      }
+    },
+    "blobService": {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}/{1}', format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6)), 'default')]",
+      "dependsOn": [
+        "storage"
+      ]
+    },
+    "blobContainerResources": {
+      "copy": {
+        "name": "blobContainerResources",
+        "count": "[length(variables('blobContainers'))]"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}/{1}/{2}', format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6)), 'default', variables('blobContainers')[copyIndex()])]",
+      "properties": {
+        "publicAccess": "None"
+      },
+      "dependsOn": [
+        "blobService"
+      ]
+    },
+    "storageBlobContributorAssignment": {
+      "condition": "[not(empty(parameters('principalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.Storage/storageAccounts/{0}', format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6)))]",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))), parameters('principalId'), 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+        "principalId": "[parameters('principalId')]",
+        "principalType": "[parameters('principalType')]"
+      },
+      "dependsOn": [
+        "storage"
+      ]
+    },
+    "storageApiRoleAssignment": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.Storage/storageAccounts/{0}', format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6)))]",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))), resourceId('Microsoft.App/containerApps', take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+        "principalId": "[reference('apiContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "apiContainerApp",
+        "storage"
+      ]
+    },
+    "storageAgentsRoleAssignment": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.Storage/storageAccounts/{0}', format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6)))]",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))), resourceId('Microsoft.App/containerApps', take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+        "principalId": "[reference('agentsContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "agentsContainerApp",
+        "storage"
+      ]
+    },
+    "storageIngestionRoleAssignment": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.Storage/storageAccounts/{0}', format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6)))]",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))), resourceId('Microsoft.App/containerApps', take(format('{0}ingest-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+        "principalId": "[reference('ingestionContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "ingestionContainerApp",
+        "storage"
+      ]
+    },
+    "cosmos": {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2023-11-15",
+      "name": "[take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "kind": "GlobalDocumentDB",
+      "properties": {
+        "databaseAccountOfferType": "Standard",
+        "publicNetworkAccess": "Enabled",
+        "locations": [
+          {
+            "locationName": "[parameters('location')]",
+            "failoverPriority": 0
+          }
+        ],
+        "disableKeyBasedMetadataWriteAccess": true
+      }
+    },
+    "cosmosDb": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub')]",
+      "properties": {
+        "resource": {
+          "id": "disaster-hub"
+        }
+      },
+      "dependsOn": [
+        "cosmos"
+      ]
+    },
+    "signalsContainer": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'signals')]",
+      "properties": {
+        "resource": {
+          "id": "signals",
+          "partitionKey": {
+            "paths": [
+              "/scope",
+              "/jurisdictionId",
+              "/dataSourceId"
+            ],
+            "kind": "MultiHash",
+            "version": 2
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "compositeIndexes": [
+              [
+                {
+                  "path": "/jurisdictionId",
+                  "order": "ascending"
+                },
+                {
+                  "path": "/category",
+                  "order": "ascending"
+                },
+                {
+                  "path": "/occurred_at",
+                  "order": "descending"
+                }
+              ]
+            ]
+          }
+        },
+        "options": {
+          "autoscaleSettings": {
+            "maxThroughput": 4000
+          }
+        }
+      },
+      "dependsOn": [
+        "cosmosDb"
+      ]
+    },
+    "simulationContainer": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'simulation')]",
+      "properties": {
+        "resource": {
+          "id": "simulation",
+          "partitionKey": {
+            "paths": [
+              "/scenario_id"
+            ],
+            "kind": "Hash"
+          }
+        },
+        "options": {
+          "autoscaleSettings": {
+            "maxThroughput": 1000
+          }
+        }
+      },
+      "dependsOn": [
+        "cosmosDb"
+      ]
+    },
+    "seedContainer": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'seed')]",
+      "properties": {
+        "resource": {
+          "id": "seed",
+          "partitionKey": {
+            "paths": [
+              "/kind"
+            ],
+            "kind": "Hash"
+          }
+        },
+        "options": {
+          "autoscaleSettings": {
+            "maxThroughput": 1000
+          }
+        }
+      },
+      "dependsOn": [
+        "cosmosDb"
+      ]
+    },
+    "governanceContainer": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'governance')]",
+      "properties": {
+        "resource": {
+          "id": "governance",
+          "partitionKey": {
+            "paths": [
+              "/partitionKey"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "compositeIndexes": [
+              [
+                {
+                  "path": "/type",
+                  "order": "ascending"
+                },
+                {
+                  "path": "/data_source_id",
+                  "order": "ascending"
+                }
+              ]
+            ]
+          }
+        },
+        "options": {
+          "autoscaleSettings": {
+            "maxThroughput": 1000
+          }
+        }
+      },
+      "dependsOn": [
+        "cosmosDb"
+      ]
+    },
+    "cosmosDataContributorAssignment": {
+      "condition": "[not(empty(parameters('principalId')))]",
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), parameters('principalId'), '00000000-0000-0000-0000-000000000002'))]",
+      "properties": {
+        "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002', resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)))]",
+        "principalId": "[parameters('principalId')]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44))]"
+      },
+      "dependsOn": [
+        "cosmos"
+      ]
+    },
+    "redis": {
+      "type": "Microsoft.Cache/redis",
+      "apiVersion": "2024-03-01",
+      "name": "[format('{0}{1}-{2}', variables('abbrs').cacheRedis, parameters('environmentName'), take(variables('uniqueSuffix'), 6))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "properties": {
+        "sku": {
+          "name": "Basic",
+          "family": "C",
+          "capacity": 0
+        },
+        "enableNonSslPort": false,
+        "minimumTlsVersion": "1.2"
+      }
+    },
+    "openAi": {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2024-10-01",
+      "name": "[take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64)]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "kind": "OpenAI",
+      "sku": {
+        "name": "S0"
+      },
+      "properties": {
+        "customSubDomainName": "[format('{0}-openai-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6))]",
+        "publicNetworkAccess": "Enabled",
+        "disableLocalAuth": false
+      }
+    },
+    "managedEnvironment": {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2024-03-01",
+      "name": "[take(format('{0}{1}', variables('abbrs').appManagedEnvironments, parameters('environmentName')), 60)]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "properties": {
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference('monitoring').outputs.logAnalyticsCustomerId.value]",
+            "sharedKey": "[listOutputsWithSecureValues('logAnalyticsSharedKey', '2025-04-01').sharedKey]"
+          }
+        }
+      },
+      "dependsOn": [
+        "logAnalyticsSharedKey",
+        "monitoring"
+      ]
+    },
+    "aspireDashboard": {
+      "type": "Microsoft.App/managedEnvironments/dotNetComponents",
+      "apiVersion": "2024-10-02-preview",
+      "name": "[format('{0}/{1}', take(format('{0}{1}', variables('abbrs').appManagedEnvironments, parameters('environmentName')), 60), 'aspire-dashboard')]",
+      "properties": {
+        "componentType": "AspireDashboard"
+      },
+      "dependsOn": [
+        "managedEnvironment"
+      ]
+    },
+    "apiContainerApp": {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2024-03-01",
+      "name": "[take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)]",
+      "location": "[parameters('location')]",
+      "tags": "[union(variables('tags'), createObject('azd-service-name', 'api'))]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', take(format('{0}{1}', variables('abbrs').appManagedEnvironments, parameters('environmentName')), 60))]",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": 8000
+          },
+          "registries": [
+            {
+              "server": "[reference('containerRegistry').loginServer]",
+              "username": "[listCredentials('containerRegistry', '2023-07-01').username]",
+              "passwordSecretRef": "acr-password"
+            }
+          ],
+          "secrets": [
+            {
+              "name": "acr-password",
+              "value": "[listCredentials('containerRegistry', '2023-07-01').passwords[0].value]"
+            }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "api",
+              "image": "[parameters('apiImage')]",
+              "resources": {
+                "cpu": "[json('1.0')]",
+                "memory": "2Gi"
+              },
+              "env": [
+                {
+                  "name": "COSMOS_ENDPOINT",
+                  "value": "[reference('cosmos').documentEndpoint]"
+                },
+                {
+                  "name": "COSMOS_DATABASE",
+                  "value": "disaster-hub"
+                },
+                {
+                  "name": "STORAGE_ACCOUNT_NAME",
+                  "value": "[format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))]"
+                },
+                {
+                  "name": "REDIS_HOST",
+                  "value": "[reference('redis').hostName]"
+                },
+                {
+                  "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                  "value": "[reference('monitoring').outputs.appInsightsConnectionString.value]"
+                },
+                {
+                  "name": "AZURE_OPENAI_ENDPOINT",
+                  "value": "[reference('openAi').endpoint]"
+                },
+                {
+                  "name": "OTEL_SERVICE_NAME",
+                  "value": "api"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 4
+          }
+        }
+      },
+      "dependsOn": [
+        "containerRegistry",
+        "cosmos",
+        "managedEnvironment",
+        "monitoring",
+        "openAi",
+        "redis",
+        "storage"
+      ]
+    },
+    "agentsContainerApp": {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2024-03-01",
+      "name": "[take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)]",
+      "location": "[parameters('location')]",
+      "tags": "[union(variables('tags'), createObject('azd-service-name', 'agents'))]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', take(format('{0}{1}', variables('abbrs').appManagedEnvironments, parameters('environmentName')), 60))]",
+        "configuration": {
+          "ingress": {
+            "external": false,
+            "targetPort": 8080
+          },
+          "registries": [
+            {
+              "server": "[reference('containerRegistry').loginServer]",
+              "username": "[listCredentials('containerRegistry', '2023-07-01').username]",
+              "passwordSecretRef": "acr-password"
+            }
+          ],
+          "secrets": [
+            {
+              "name": "acr-password",
+              "value": "[listCredentials('containerRegistry', '2023-07-01').passwords[0].value]"
+            }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "agents",
+              "image": "[parameters('agentsImage')]",
+              "resources": {
+                "cpu": "[json('1.0')]",
+                "memory": "2Gi"
+              },
+              "env": [
+                {
+                  "name": "COSMOS_ENDPOINT",
+                  "value": "[reference('cosmos').documentEndpoint]"
+                },
+                {
+                  "name": "COSMOS_DATABASE",
+                  "value": "disaster-hub"
+                },
+                {
+                  "name": "STORAGE_ACCOUNT_NAME",
+                  "value": "[format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))]"
+                },
+                {
+                  "name": "REDIS_HOST",
+                  "value": "[reference('redis').hostName]"
+                },
+                {
+                  "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                  "value": "[reference('monitoring').outputs.appInsightsConnectionString.value]"
+                },
+                {
+                  "name": "AZURE_OPENAI_ENDPOINT",
+                  "value": "[reference('openAi').endpoint]"
+                },
+                {
+                  "name": "API_ENDPOINT",
+                  "value": "[format('https://{0}', reference('apiContainerApp').configuration.ingress.fqdn)]"
+                },
+                {
+                  "name": "OTEL_SERVICE_NAME",
+                  "value": "agents"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 3
+          }
+        }
+      },
+      "dependsOn": [
+        "apiContainerApp",
+        "containerRegistry",
+        "cosmos",
+        "managedEnvironment",
+        "monitoring",
+        "openAi",
+        "redis",
+        "storage"
+      ]
+    },
+    "ingestionContainerApp": {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2024-03-01",
+      "name": "[take(format('{0}ingest-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)]",
+      "location": "[parameters('location')]",
+      "tags": "[union(variables('tags'), createObject('azd-service-name', 'ingestion'))]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', take(format('{0}{1}', variables('abbrs').appManagedEnvironments, parameters('environmentName')), 60))]",
+        "configuration": {
+          "ingress": {
+            "external": false,
+            "targetPort": 8081
+          },
+          "registries": [
+            {
+              "server": "[reference('containerRegistry').loginServer]",
+              "username": "[listCredentials('containerRegistry', '2023-07-01').username]",
+              "passwordSecretRef": "acr-password"
+            }
+          ],
+          "secrets": [
+            {
+              "name": "acr-password",
+              "value": "[listCredentials('containerRegistry', '2023-07-01').passwords[0].value]"
+            }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "ingestion",
+              "image": "[parameters('ingestionImage')]",
+              "resources": {
+                "cpu": "[json('1.0')]",
+                "memory": "2Gi"
+              },
+              "env": [
+                {
+                  "name": "COSMOS_ENDPOINT",
+                  "value": "[reference('cosmos').documentEndpoint]"
+                },
+                {
+                  "name": "COSMOS_DATABASE",
+                  "value": "disaster-hub"
+                },
+                {
+                  "name": "STORAGE_ACCOUNT_NAME",
+                  "value": "[format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))]"
+                },
+                {
+                  "name": "REDIS_HOST",
+                  "value": "[reference('redis').hostName]"
+                },
+                {
+                  "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                  "value": "[reference('monitoring').outputs.appInsightsConnectionString.value]"
+                },
+                {
+                  "name": "OTEL_SERVICE_NAME",
+                  "value": "ingestion"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 6,
+            "rules": [
+              {
+                "name": "cpu-scaling",
+                "custom": {
+                  "type": "cpu",
+                  "metadata": {
+                    "type": "Utilization",
+                    "value": "70"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "dependsOn": [
+        "containerRegistry",
+        "cosmos",
+        "managedEnvironment",
+        "monitoring",
+        "redis",
+        "storage"
+      ]
+    },
+    "appServicePlan": {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2023-12-01",
+      "name": "[take(format('{0}{1}', variables('abbrs').webServerFarms, parameters('environmentName')), 40)]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "sku": {
+        "name": "B1",
+        "tier": "Basic"
+      },
+      "kind": "linux",
+      "properties": {
+        "reserved": true
+      }
+    },
+    "webApp": {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-12-01",
+      "name": "[take(format('{0}{1}-{2}', variables('abbrs').webSitesAppService, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 60)]",
+      "location": "[parameters('location')]",
+      "tags": "[union(variables('tags'), createObject('azd-service-name', 'web'))]",
+      "kind": "app,linux",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', take(format('{0}{1}', variables('abbrs').webServerFarms, parameters('environmentName')), 40))]",
+        "httpsOnly": true,
+        "siteConfig": {
+          "linuxFxVersion": "NODE|22-lts",
+          "appSettings": [
+            {
+              "name": "API_ENDPOINT",
+              "value": "[format('https://{0}', reference('apiContainerApp').configuration.ingress.fqdn)]"
+            },
+            {
+              "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+              "value": "false"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference('monitoring').outputs.appInsightsConnectionString.value]"
+            },
+            {
+              "name": "OTEL_SERVICE_NAME",
+              "value": "web"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "apiContainerApp",
+        "appServicePlan",
+        "monitoring"
+      ]
+    },
+    "envDiagnostic": {
+      "type": "Microsoft.Insights/diagnosticSettings",
+      "apiVersion": "2021-05-01-preview",
+      "scope": "[format('Microsoft.App/managedEnvironments/{0}', take(format('{0}{1}', variables('abbrs').appManagedEnvironments, parameters('environmentName')), 60))]",
+      "name": "env-diagnostics",
+      "properties": {
+        "workspaceId": "[reference('monitoring').outputs.logAnalyticsId.value]",
+        "logs": [
+          {
+            "category": "ContainerAppConsoleLogs",
+            "enabled": true
+          },
+          {
+            "category": "ContainerAppSystemLogs",
+            "enabled": true
+          }
+        ],
+        "metrics": [
+          {
+            "category": "AllMetrics",
+            "enabled": true
+          }
+        ]
+      },
+      "dependsOn": [
+        "managedEnvironment",
+        "monitoring"
+      ]
+    },
+    "monitoring": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "monitoring",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "envPrefix": {
+            "value": "[parameters('environmentName')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "actionGroupEmail": {
+            "value": "[parameters('actionGroupEmail')]"
+          },
+          "actionGroupWebhook": {
+            "value": "[parameters('actionGroupWebhook')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "4574559810649970444"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for all monitoring resources"
+              }
+            },
+            "envPrefix": {
+              "type": "string",
+              "metadata": {
+                "description": "Environment name for resource naming"
+              }
+            },
+            "actionGroupEmail": {
+              "type": "string",
+              "defaultValue": "ops@example.com",
+              "metadata": {
+                "description": "Email recipient for alert notifications"
+              }
+            },
+            "actionGroupWebhook": {
+              "type": "string",
+              "defaultValue": "https://example.com/alerts",
+              "metadata": {
+                "description": "Webhook endpoint for alert notifications"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "metadata": {
+                "description": "Tags applied to all resources"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2023-09-01",
+              "name": "[take(format('log-{0}', parameters('envPrefix')), 63)]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "sku": {
+                  "name": "PerGB2018"
+                },
+                "retentionInDays": 90,
+                "features": {
+                  "enableLogAccessUsingOnlyResourcePermissions": true
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Insights/components",
+              "apiVersion": "2020-02-02",
+              "name": "[take(format('appi-{0}', parameters('envPrefix')), 255)]",
+              "location": "[parameters('location')]",
+              "kind": "web",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "Application_Type": "web",
+                "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', take(format('log-{0}', parameters('envPrefix')), 63))]",
+                "RetentionInDays": 90,
+                "IngestionMode": "LogAnalytics",
+                "DisableLocalAuth": true
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', take(format('log-{0}', parameters('envPrefix')), 63))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Insights/actionGroups",
+              "apiVersion": "2023-01-01",
+              "name": "[take(format('ag-{0}', parameters('envPrefix')), 260)]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "enabled": true,
+                "groupShortName": "[take(format('drh{0}', parameters('envPrefix')), 12)]",
+                "emailReceivers": [
+                  {
+                    "name": "OperationsEmail",
+                    "emailAddress": "[parameters('actionGroupEmail')]",
+                    "useCommonAlertSchema": true
+                  }
+                ],
+                "webhookReceivers": [
+                  {
+                    "name": "OperationsWebhook",
+                    "serviceUri": "[parameters('actionGroupWebhook')]",
+                    "useCommonAlertSchema": true
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[take(format('alert-errors-{0}', parameters('envPrefix')), 260)]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "severity": 1,
+                "scopes": [
+                  "[resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('envPrefix')), 255))]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT15M",
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "HighServerErrors",
+                      "metricName": "requests/failed",
+                      "metricNamespace": "microsoft.insights/components",
+                      "operator": "GreaterThan",
+                      "threshold": 10,
+                      "timeAggregation": "Count",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                },
+                "enabled": true,
+                "autoMitigate": true,
+                "actions": [
+                  {
+                    "actionGroupId": "[resourceId('Microsoft.Insights/actionGroups', take(format('ag-{0}', parameters('envPrefix')), 260))]"
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Insights/actionGroups', take(format('ag-{0}', parameters('envPrefix')), 260))]",
+                "[resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('envPrefix')), 255))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[take(format('alert-latency-{0}', parameters('envPrefix')), 260)]",
+              "location": "global",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "severity": 2,
+                "scopes": [
+                  "[resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('envPrefix')), 255))]"
+                ],
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT15M",
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "HighLatency",
+                      "metricName": "requests/duration",
+                      "metricNamespace": "microsoft.insights/components",
+                      "operator": "GreaterThan",
+                      "threshold": 5000,
+                      "timeAggregation": "Maximum",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                },
+                "enabled": true,
+                "autoMitigate": true,
+                "actions": [
+                  {
+                    "actionGroupId": "[resourceId('Microsoft.Insights/actionGroups', take(format('ag-{0}', parameters('envPrefix')), 260))]"
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Insights/actionGroups', take(format('ag-{0}', parameters('envPrefix')), 260))]",
+                "[resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('envPrefix')), 255))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "logAnalyticsId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.OperationalInsights/workspaces', take(format('log-{0}', parameters('envPrefix')), 63))]"
+            },
+            "logAnalyticsCustomerId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', take(format('log-{0}', parameters('envPrefix')), 63)), '2023-09-01').customerId]"
+            },
+            "appInsightsId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('envPrefix')), 255))]"
+            },
+            "appInsightsConnectionString": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('envPrefix')), 255)), '2020-02-02').ConnectionString]"
+            },
+            "actionGroupId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/actionGroups', take(format('ag-{0}', parameters('envPrefix')), 260))]"
+            }
+          }
+        }
+      }
+    },
+    "logAnalyticsSharedKey": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "log-analytics-key",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "logAnalyticsId": {
+            "value": "[reference('monitoring').outputs.logAnalyticsId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "9648445287879728256"
+            }
+          },
+          "parameters": {
+            "logAnalyticsId": {
+              "type": "string"
+            }
+          },
+          "resources": {
+            "logAnalytics": {
+              "existing": true,
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2023-09-01",
+              "name": "[last(split(parameters('logAnalyticsId'), '/'))]"
+            }
+          },
+          "outputs": {
+            "sharedKey": {
+              "type": "securestring",
+              "value": "[listKeys('logAnalytics', '2023-09-01').primarySharedKey]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "monitoring"
+      ]
+    }
+  },
+  "outputs": {
+    "AZURE_CONTAINER_REGISTRY_ENDPOINT": {
+      "type": "string",
+      "value": "[reference('containerRegistry').loginServer]"
+    },
+    "AZURE_CONTAINER_REGISTRY_NAME": {
+      "type": "string",
+      "value": "[format('{0}{1}{2}', variables('abbrs').containerRegistryRegistries, replace(parameters('environmentName'), '-', ''), take(variables('uniqueSuffix'), 6))]"
+    },
+    "AZURE_COSMOS_ENDPOINT": {
+      "type": "string",
+      "value": "[reference('cosmos').documentEndpoint]"
+    },
+    "AZURE_COSMOS_DATABASE": {
+      "type": "string",
+      "value": "disaster-hub"
+    },
+    "AZURE_STORAGE_ACCOUNT_NAME": {
+      "type": "string",
+      "value": "[format('{0}{1}{2}', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))]"
+    },
+    "AZURE_REDIS_HOST": {
+      "type": "string",
+      "value": "[reference('redis').hostName]"
+    },
+    "AZURE_OPENAI_ENDPOINT": {
+      "type": "string",
+      "value": "[reference('openAi').endpoint]"
+    },
+    "AZURE_APP_INSIGHTS_CONNECTION_STRING": {
+      "type": "string",
+      "value": "[reference('monitoring').outputs.appInsightsConnectionString.value]"
+    },
+    "SERVICE_API_ENDPOINT_URL": {
+      "type": "string",
+      "value": "[format('https://{0}', reference('apiContainerApp').configuration.ingress.fqdn)]"
+    },
+    "SERVICE_WEB_ENDPOINT_URL": {
+      "type": "string",
+      "value": "[format('https://{0}', reference('webApp').defaultHostName)]"
+    }
+  }
+}

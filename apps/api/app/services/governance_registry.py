@@ -42,8 +42,6 @@ class GovernanceRegistryService:
         except Exception:
             logger.exception("audit_trail_write_failure", extra={"data_source_id": data_source_id, "action": action})
             raise
-        )
-        return self._repo.append_audit(entry)
 
     # --- Seed catalogue ---
 

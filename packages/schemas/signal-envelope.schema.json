@@ -69,7 +69,8 @@
         "sourceUri": { "type": "string", "minLength": 1 },
         "collector": { "type": "string" },
         "validationNotes": { "type": "string" },
-        "sourceTimestamp": { "type": "string", "format": "date-time" }
+        "sourceTimestamp": { "type": "string", "format": "date-time" },
+        "simulationRunId": { "type": "string" }
       },
       "additionalProperties": false
     }

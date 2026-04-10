@@ -9,6 +9,10 @@ class AuthenticatedPrincipal:
     roles: tuple[str, ...]
     persona_id: str | None = None
 
+    @property
+    def has_simulation_role(self) -> bool:
+        return "SimulationUser" in self.roles
+
 
 def extract_principal_from_claims(claims: dict[str, object]) -> AuthenticatedPrincipal:
     return AuthenticatedPrincipal(

@@ -1,10 +1,14 @@
 from datetime import UTC, datetime
+import logging
 from typing import Any
 
+from app.core.tenant_context import get_current_tenant
 from app.services.state_store import ALERTS
 from fastapi import HTTPException
 
 from packages.domain.src.domain.models.public_alert import PublicAlert
+
+logger = logging.getLogger(__name__)
 
 DELIVERY_TEMPLATES: dict[str, dict[str, str]] = {
     "evacuation": {
@@ -81,6 +85,15 @@ class PublicAlertService:
         alert = ALERTS[alert_id]
         if alert.status != "published":
             raise HTTPException(status_code=409, detail="Alert must be published before delivery")
+
+        tenant = get_current_tenant()
+        if tenant and tenant.is_simulation:
+            logger.info(
+                "alert_delivery_blocked_simulation tenant_id=%s alert_id=%s",
+                tenant.tenant_id, alert_id,
+            )
+            return [{"channel": "simulation", "status": "published (simulation)", "alert_id": alert_id}]
+
         results = []
         for channel in alert.channel_set:
             adapter = CHANNEL_ADAPTERS.get(channel)

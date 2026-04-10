@@ -8,9 +8,30 @@ def require_role(principal: AuthenticatedPrincipal, expected_role: str) -> Authe
     return principal
 
 
-def build_tenant_context(principal: AuthenticatedPrincipal) -> TenantContext:
+def require_simulation_role(principal: AuthenticatedPrincipal) -> AuthenticatedPrincipal:
+    if not principal.has_simulation_role:
+        raise PermissionError("Principal is missing required role: SimulationUser")
+    return principal
+
+
+async def require_simulation_participant(
+    principal: AuthenticatedPrincipal,
+    tenant_id: str,
+    simulation_repository: object,
+) -> AuthenticatedPrincipal:
+    repo = simulation_repository  # type: ignore[assignment]
+    is_member = await repo.is_participant(tenant_id, principal.subject)
+    if not is_member:
+        raise PermissionError(
+            f"User {principal.subject} is not a participant of simulation {tenant_id}"
+        )
+    return principal
+
+
+def build_tenant_context(principal: AuthenticatedPrincipal, tenant_id: str = "live") -> TenantContext:
     return TenantContext(
         agency_id=principal.agency_id,
         jurisdiction_ids=principal.jurisdiction_ids,
         persona_id=principal.persona_id,
+        tenant_id=tenant_id,
     )
