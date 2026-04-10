@@ -133,6 +133,38 @@ resource latencyAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
   }
 }
 
+// ── Alert: simulation tenant high error rate (filtered by tenant_id custom dimension) ──
+
+resource simulationErrorAlert 'Microsoft.Insights/scheduledQueryRules@2023-03-15-preview' = {
+  name: take('alert-sim-errors-${envPrefix}', 260)
+  location: location
+  tags: tags
+  properties: {
+    displayName: 'Simulation Tenant Errors'
+    description: 'Fires when a simulation tenant exceeds error threshold; filtered by tenant_id custom dimension'
+    severity: 2
+    enabled: true
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT15M'
+    scopes: [appInsights.id]
+    criteria: {
+      allOf: [
+        {
+          query: 'requests | where customDimensions.tenant_id startswith "sim-" | where success == false | summarize FailedCount = count() by tostring(customDimensions.tenant_id) | where FailedCount > 20'
+          timeAggregation: 'Count'
+          operator: 'GreaterThan'
+          threshold: 0
+          dimensions: [
+            { name: 'customDimensions.tenant_id', operator: 'Include', values: ['*'] }
+          ]
+          failingPeriods: { numberOfEvaluationPeriods: 1, minFailingPeriodsToAlert: 1 }
+        }
+      ]
+    }
+    actions: { actionGroups: [actionGroup.id] }
+  }
+}
+
 // ── Outputs ──
 
 output logAnalyticsId string = logAnalytics.id

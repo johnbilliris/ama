@@ -14,6 +14,7 @@ class AgentHandoffEvent(BaseModel):
     scope_key: str
     confidence: float
     payload: dict[str, object]
+    tenant_id: str = "live"
     status: str = "pending"
     retry_count: int = 0
     max_retries: int = 3
@@ -35,6 +36,7 @@ def build_handoff(
     scope_key: str,
     payload: dict[str, object],
     confidence: float,
+    tenant_id: str = "live",
 ) -> AgentHandoffEvent:
     return AgentHandoffEvent(
         handoff_id=f"handoff-{uuid4().hex}",
@@ -44,6 +46,7 @@ def build_handoff(
         scope_key=scope_key,
         payload=payload,
         confidence=confidence,
+        tenant_id=tenant_id,
     )
 
 

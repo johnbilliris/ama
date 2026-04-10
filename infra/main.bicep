@@ -215,6 +215,23 @@ resource simulationContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases
     resource: {
       id: 'simulation'
       partitionKey: { paths: ['/scenario_id'], kind: 'Hash' }
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        compositeIndexes: [
+          [
+            { path: '/document_type', order: 'ascending' }
+            { path: '/status', order: 'ascending' }
+          ]
+          [
+            { path: '/document_type', order: 'ascending' }
+            { path: '/created_at', order: 'descending' }
+          ]
+          [
+            { path: '/document_type', order: 'ascending' }
+            { path: '/expires_at', order: 'ascending' }
+          ]
+        ]
+      }
     }
     options: { autoscaleSettings: { maxThroughput: 1000 } }
   }

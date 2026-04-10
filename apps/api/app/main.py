@@ -31,6 +31,13 @@ def create_app() -> FastAPI:
     )
     add_error_handler_middleware(app)
     add_resilience_middleware(app)
+
+    from app.middleware.auth_middleware import add_auth_middleware
+    from app.middleware.tenant_middleware import add_tenant_middleware
+
+    add_tenant_middleware(app)
+    add_auth_middleware(app)
+
     app.include_router(api_router, prefix=settings.api_prefix)
     return app
 

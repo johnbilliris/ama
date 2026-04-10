@@ -65,6 +65,15 @@ def add_error_handler_middleware(app: FastAPI) -> None:
             correlation_id=correlation_id,
         )
 
+    @app.exception_handler(PermissionError)
+    async def handle_permission_error(request: Request, error: PermissionError) -> JSONResponse:
+        correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+        return _error_response(
+            status_code=403,
+            message=str(error),
+            correlation_id=correlation_id,
+        )
+
     @app.exception_handler(Exception)
     async def handle_unexpected_error(request: Request, _: Exception) -> JSONResponse:
         correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))

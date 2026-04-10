@@ -11,6 +11,7 @@ from app.api.routes.personas import router as personas_router
 from app.api.routes.recommendations import router as recommendations_router
 from app.api.routes.scenarios import router as scenarios_router
 from app.api.routes.signals import router as signals_router
+from app.api.routes.simulations import router as simulations_router
 from app.api.routes.tasks import router as tasks_router
 from fastapi import APIRouter
 
@@ -24,6 +25,7 @@ api_router.include_router(tasks_router)
 api_router.include_router(organisations_router)
 api_router.include_router(frameworks_router)
 api_router.include_router(scenarios_router)
+api_router.include_router(simulations_router)
 api_router.include_router(handoffs_router)
 api_router.include_router(dead_letters_router)
 api_router.include_router(health_router)
