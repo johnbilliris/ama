@@ -12,3 +12,9 @@ dependencies = [
   "azure-storage-blob>=12.24.0",
   "azure-identity>=1.19.0",
 ]
+
+[tool.pytest.ini_options]
+markers = [
+  "integration: integration tests requiring mock external services (Cosmos DB, Service Bus)",
+  "simulation: extended scenario simulation tests",
+]
