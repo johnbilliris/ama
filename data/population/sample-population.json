@@ -1,0 +1,634 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "region": "Far North Queensland",
+    "last_updated": "2026-04-16T00:00:00Z"
+  },
+  "facilities": [
+    {
+      "facility_id": "fac-001",
+      "name": "Cairns Aged Care Residence",
+      "type": "aged_care",
+      "coordinates": {
+        "lat": -16.93,
+        "lng": 145.77
+      },
+      "capacity": 80,
+      "vulnerability_category": "elderly_aged_care",
+      "special_considerations": [
+        "wheelchair_users",
+        "oxygen_supply"
+      ],
+      "nearest_node_id": "node-001"
+    },
+    {
+      "facility_id": "fac-002",
+      "name": "TrinityCare Aged Care",
+      "type": "aged_care",
+      "coordinates": {
+        "lat": -16.79,
+        "lng": 145.69
+      },
+      "capacity": 60,
+      "vulnerability_category": "elderly_aged_care",
+      "special_considerations": [
+        "wheelchair_users",
+        "dementia_care"
+      ],
+      "nearest_node_id": "node-009"
+    },
+    {
+      "facility_id": "fac-003",
+      "name": "Atherton Aged Care Facility",
+      "type": "aged_care",
+      "coordinates": {
+        "lat": -17.27,
+        "lng": 145.48
+      },
+      "capacity": 45,
+      "vulnerability_category": "elderly_aged_care",
+      "special_considerations": [
+        "wheelchair_users"
+      ],
+      "nearest_node_id": "node-032"
+    },
+    {
+      "facility_id": "fac-004",
+      "name": "Cairns Disability Support Centre",
+      "type": "disability_care",
+      "coordinates": {
+        "lat": -16.94,
+        "lng": 145.74
+      },
+      "capacity": 40,
+      "vulnerability_category": "mobility_impaired",
+      "special_considerations": [
+        "wheelchair_users",
+        "assisted_transport",
+        "sensory_impairment"
+      ],
+      "nearest_node_id": "node-004"
+    },
+    {
+      "facility_id": "fac-005",
+      "name": "FNQ Disability Services Innisfail",
+      "type": "disability_care",
+      "coordinates": {
+        "lat": -17.53,
+        "lng": 146.03
+      },
+      "capacity": 25,
+      "vulnerability_category": "mobility_impaired",
+      "special_considerations": [
+        "wheelchair_users",
+        "assisted_transport"
+      ],
+      "nearest_node_id": "node-042"
+    },
+    {
+      "facility_id": "fac-006",
+      "name": "Cairns Hospital",
+      "type": "hospital",
+      "coordinates": {
+        "lat": -16.92,
+        "lng": 145.772
+      },
+      "capacity": 531,
+      "vulnerability_category": "medical_dependent",
+      "special_considerations": [
+        "critical_care_patients",
+        "neonatal",
+        "dialysis",
+        "ventilator_dependent"
+      ],
+      "nearest_node_id": "node-001"
+    },
+    {
+      "facility_id": "fac-007",
+      "name": "Innisfail Hospital",
+      "type": "hospital",
+      "coordinates": {
+        "lat": -17.524,
+        "lng": 146.028
+      },
+      "capacity": 62,
+      "vulnerability_category": "medical_dependent",
+      "special_considerations": [
+        "critical_care_patients",
+        "dialysis"
+      ],
+      "nearest_node_id": "node-042"
+    },
+    {
+      "facility_id": "fac-008",
+      "name": "Atherton Hospital",
+      "type": "hospital",
+      "coordinates": {
+        "lat": -17.265,
+        "lng": 145.483
+      },
+      "capacity": 38,
+      "vulnerability_category": "medical_dependent",
+      "special_considerations": [
+        "emergency_department"
+      ],
+      "nearest_node_id": "node-032"
+    },
+    {
+      "facility_id": "fac-009",
+      "name": "Cairns State High School",
+      "type": "school",
+      "coordinates": {
+        "lat": -16.925,
+        "lng": 145.766
+      },
+      "capacity": 1200,
+      "vulnerability_category": "children_schools_childcare",
+      "special_considerations": [
+        "minors",
+        "bus_dependent"
+      ],
+      "nearest_node_id": "node-001"
+    },
+    {
+      "facility_id": "fac-010",
+      "name": "Smithfield State High School",
+      "type": "school",
+      "coordinates": {
+        "lat": -16.835,
+        "lng": 145.693
+      },
+      "capacity": 950,
+      "vulnerability_category": "children_schools_childcare",
+      "special_considerations": [
+        "minors",
+        "bus_dependent"
+      ],
+      "nearest_node_id": "node-003"
+    },
+    {
+      "facility_id": "fac-011",
+      "name": "Mossman State High School",
+      "type": "school",
+      "coordinates": {
+        "lat": -16.46,
+        "lng": 145.375
+      },
+      "capacity": 420,
+      "vulnerability_category": "children_schools_childcare",
+      "special_considerations": [
+        "minors",
+        "bus_dependent"
+      ],
+      "nearest_node_id": "node-015"
+    },
+    {
+      "facility_id": "fac-012",
+      "name": "Edmonton Aged Care Village",
+      "type": "aged_care",
+      "coordinates": {
+        "lat": -17.02,
+        "lng": 145.735
+      },
+      "capacity": 55,
+      "vulnerability_category": "elderly_aged_care",
+      "special_considerations": [
+        "wheelchair_users",
+        "oxygen_supply",
+        "limited_mobility"
+      ],
+      "nearest_node_id": "node-005"
+    },
+    {
+      "facility_id": "fac-013",
+      "name": "Mareeba Hospital",
+      "type": "hospital",
+      "coordinates": {
+        "lat": -16.995,
+        "lng": 145.425
+      },
+      "capacity": 30,
+      "vulnerability_category": "medical_dependent",
+      "special_considerations": [
+        "emergency_department"
+      ],
+      "nearest_node_id": "node-028"
+    },
+    {
+      "facility_id": "fac-014",
+      "name": "Gordonvale State School",
+      "type": "school",
+      "coordinates": {
+        "lat": -17.085,
+        "lng": 145.785
+      },
+      "capacity": 350,
+      "vulnerability_category": "children_schools_childcare",
+      "special_considerations": [
+        "minors"
+      ],
+      "nearest_node_id": "node-039"
+    },
+    {
+      "facility_id": "fac-015",
+      "name": "Tully Hospital",
+      "type": "hospital",
+      "coordinates": {
+        "lat": -17.934,
+        "lng": 145.935
+      },
+      "capacity": 24,
+      "vulnerability_category": "medical_dependent",
+      "special_considerations": [
+        "emergency_department"
+      ],
+      "nearest_node_id": "node-046"
+    }
+  ],
+  "population_density": [
+    {
+      "area_name": "Cairns CBD",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.76,
+              -16.93
+            ],
+            [
+              145.795,
+              -16.93
+            ],
+            [
+              145.795,
+              -16.905
+            ],
+            [
+              145.76,
+              -16.905
+            ],
+            [
+              145.76,
+              -16.93
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 15000,
+      "vulnerable_population_estimate": 2250
+    },
+    {
+      "area_name": "Cairns Northern Suburbs",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.73,
+              -16.905
+            ],
+            [
+              145.78,
+              -16.905
+            ],
+            [
+              145.78,
+              -16.85
+            ],
+            [
+              145.73,
+              -16.85
+            ],
+            [
+              145.73,
+              -16.905
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 28000,
+      "vulnerable_population_estimate": 4200
+    },
+    {
+      "area_name": "Cairns Southern Suburbs",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.71,
+              -17.03
+            ],
+            [
+              145.79,
+              -17.03
+            ],
+            [
+              145.79,
+              -16.93
+            ],
+            [
+              145.71,
+              -16.93
+            ],
+            [
+              145.71,
+              -17.03
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 35000,
+      "vulnerable_population_estimate": 5250
+    },
+    {
+      "area_name": "Northern Beaches",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.65,
+              -16.8
+            ],
+            [
+              145.72,
+              -16.8
+            ],
+            [
+              145.72,
+              -16.7
+            ],
+            [
+              145.65,
+              -16.7
+            ],
+            [
+              145.65,
+              -16.8
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 12000,
+      "vulnerable_population_estimate": 1800
+    },
+    {
+      "area_name": "Port Douglas - Mossman",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.35,
+              -16.55
+            ],
+            [
+              145.48,
+              -16.55
+            ],
+            [
+              145.48,
+              -16.42
+            ],
+            [
+              145.35,
+              -16.42
+            ],
+            [
+              145.35,
+              -16.55
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 14500,
+      "vulnerable_population_estimate": 2175
+    },
+    {
+      "area_name": "Atherton Tablelands",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.35,
+              -17.4
+            ],
+            [
+              145.65,
+              -17.4
+            ],
+            [
+              145.65,
+              -17.1
+            ],
+            [
+              145.35,
+              -17.1
+            ],
+            [
+              145.35,
+              -17.4
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 22000,
+      "vulnerable_population_estimate": 3300
+    },
+    {
+      "area_name": "Innisfail - Mission Beach",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.9,
+              -17.9
+            ],
+            [
+              146.15,
+              -17.9
+            ],
+            [
+              146.15,
+              -17.45
+            ],
+            [
+              145.9,
+              -17.45
+            ],
+            [
+              145.9,
+              -17.9
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 18000,
+      "vulnerable_population_estimate": 2700
+    },
+    {
+      "area_name": "Mareeba",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.38,
+              -17.03
+            ],
+            [
+              145.47,
+              -17.03
+            ],
+            [
+              145.47,
+              -16.96
+            ],
+            [
+              145.38,
+              -16.96
+            ],
+            [
+              145.38,
+              -17.03
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 11000,
+      "vulnerable_population_estimate": 1650
+    },
+    {
+      "area_name": "Gordonvale - Babinda",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.75,
+              -17.35
+            ],
+            [
+              145.95,
+              -17.35
+            ],
+            [
+              145.95,
+              -17.05
+            ],
+            [
+              145.75,
+              -17.05
+            ],
+            [
+              145.75,
+              -17.35
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 8500,
+      "vulnerable_population_estimate": 1275
+    },
+    {
+      "area_name": "Tully - Cardwell",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.88,
+              -18.3
+            ],
+            [
+              146.1,
+              -18.3
+            ],
+            [
+              146.1,
+              -17.88
+            ],
+            [
+              145.88,
+              -17.88
+            ],
+            [
+              145.88,
+              -18.3
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 9500,
+      "vulnerable_population_estimate": 1425
+    },
+    {
+      "area_name": "Daintree - Cape Tribulation",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.35,
+              -16.3
+            ],
+            [
+              145.5,
+              -16.3
+            ],
+            [
+              145.5,
+              -16.05
+            ],
+            [
+              145.35,
+              -16.05
+            ],
+            [
+              145.35,
+              -16.3
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 1200,
+      "vulnerable_population_estimate": 180
+    },
+    {
+      "area_name": "Cooktown",
+      "boundary": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              145.2,
+              -15.52
+            ],
+            [
+              145.3,
+              -15.52
+            ],
+            [
+              145.3,
+              -15.43
+            ],
+            [
+              145.2,
+              -15.43
+            ],
+            [
+              145.2,
+              -15.52
+            ]
+          ]
+        ]
+      },
+      "population_estimate": 2600,
+      "vulnerable_population_estimate": 390
+    }
+  ]
+}

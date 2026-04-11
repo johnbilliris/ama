@@ -18,7 +18,8 @@ dependencies = [
   "fastapi>=0.115.0",
   "uvicorn>=0.34.0",
   "pytest-benchmark>=5.1.0",
-  "locust>=2.32.0"
+  "locust>=2.32.0",
+  "shapely>=2.0.0"
 ]
 
 [tool.hatch.build.targets.wheel]

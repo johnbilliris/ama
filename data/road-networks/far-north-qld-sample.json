@@ -1,0 +1,3644 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "region": "Far North Queensland",
+    "coordinate_system": "WGS84",
+    "last_updated": "2026-04-16T00:00:00Z"
+  },
+  "nodes": [
+    {
+      "id": "node-001",
+      "name": "Cairns CBD",
+      "coordinates": {
+        "lat": -16.9186,
+        "lng": 145.7781
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-002",
+      "name": "Cairns North",
+      "coordinates": {
+        "lat": -16.878,
+        "lng": 145.7554
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-003",
+      "name": "Smithfield",
+      "coordinates": {
+        "lat": -16.8333,
+        "lng": 145.695
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-004",
+      "name": "Earlville",
+      "coordinates": {
+        "lat": -16.947,
+        "lng": 145.735
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-005",
+      "name": "Edmonton",
+      "coordinates": {
+        "lat": -17.0167,
+        "lng": 145.7333
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-006",
+      "name": "Mount Sheridan",
+      "coordinates": {
+        "lat": -16.98,
+        "lng": 145.735
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-007",
+      "name": "Redlynch",
+      "coordinates": {
+        "lat": -16.88,
+        "lng": 145.687
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-008",
+      "name": "Barron Gorge Junction",
+      "coordinates": {
+        "lat": -16.852,
+        "lng": 145.66
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-009",
+      "name": "Trinity Beach",
+      "coordinates": {
+        "lat": -16.7833,
+        "lng": 145.6917
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-010",
+      "name": "Palm Cove",
+      "coordinates": {
+        "lat": -16.745,
+        "lng": 145.67
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-011",
+      "name": "Ellis Beach",
+      "coordinates": {
+        "lat": -16.72,
+        "lng": 145.635
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-012",
+      "name": "Wangetti",
+      "coordinates": {
+        "lat": -16.655,
+        "lng": 145.57
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-013",
+      "name": "Craiglie Junction",
+      "coordinates": {
+        "lat": -16.53,
+        "lng": 145.47
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-014",
+      "name": "Port Douglas",
+      "coordinates": {
+        "lat": -16.4833,
+        "lng": 145.45
+      },
+      "type": "intersection",
+      "is_assembly_area": true
+    },
+    {
+      "id": "node-015",
+      "name": "Mossman",
+      "coordinates": {
+        "lat": -16.4589,
+        "lng": 145.3726
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-016",
+      "name": "Rex Range Junction",
+      "coordinates": {
+        "lat": -16.55,
+        "lng": 145.38
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-017",
+      "name": "Daintree Ferry",
+      "coordinates": {
+        "lat": -16.2667,
+        "lng": 145.4083
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-018",
+      "name": "Daintree Village",
+      "coordinates": {
+        "lat": -16.25,
+        "lng": 145.4167
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-019",
+      "name": "Cow Bay",
+      "coordinates": {
+        "lat": -16.24,
+        "lng": 145.43
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-020",
+      "name": "Cape Tribulation",
+      "coordinates": {
+        "lat": -16.1,
+        "lng": 145.4667
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-021",
+      "name": "Wujal Wujal",
+      "coordinates": {
+        "lat": -15.9167,
+        "lng": 145.3333
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-022",
+      "name": "Rossville",
+      "coordinates": {
+        "lat": -15.75,
+        "lng": 145.23
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-023",
+      "name": "Cooktown",
+      "coordinates": {
+        "lat": -15.4748,
+        "lng": 145.2467
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-024",
+      "name": "Hope Vale",
+      "coordinates": {
+        "lat": -15.3,
+        "lng": 145.12
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-025",
+      "name": "Kuranda",
+      "coordinates": {
+        "lat": -16.8167,
+        "lng": 145.6333
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-026",
+      "name": "Speewah",
+      "coordinates": {
+        "lat": -16.84,
+        "lng": 145.61
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-027",
+      "name": "Koah",
+      "coordinates": {
+        "lat": -16.85,
+        "lng": 145.55
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-028",
+      "name": "Mareeba",
+      "coordinates": {
+        "lat": -16.9933,
+        "lng": 145.4222
+      },
+      "type": "intersection",
+      "is_assembly_area": true
+    },
+    {
+      "id": "node-029",
+      "name": "Mount Molloy",
+      "coordinates": {
+        "lat": -16.6833,
+        "lng": 145.3333
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-030",
+      "name": "Walkamin",
+      "coordinates": {
+        "lat": -17.1333,
+        "lng": 145.4333
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-031",
+      "name": "Tolga",
+      "coordinates": {
+        "lat": -17.2,
+        "lng": 145.47
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-032",
+      "name": "Atherton",
+      "coordinates": {
+        "lat": -17.2686,
+        "lng": 145.4847
+      },
+      "type": "intersection",
+      "is_assembly_area": true
+    },
+    {
+      "id": "node-033",
+      "name": "Yungaburra",
+      "coordinates": {
+        "lat": -17.2667,
+        "lng": 145.5833
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-034",
+      "name": "Malanda",
+      "coordinates": {
+        "lat": -17.35,
+        "lng": 145.5833
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-035",
+      "name": "Herberton",
+      "coordinates": {
+        "lat": -17.3833,
+        "lng": 145.3833
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-036",
+      "name": "Ravenshoe",
+      "coordinates": {
+        "lat": -17.6,
+        "lng": 145.4833
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-037",
+      "name": "Millaa Millaa",
+      "coordinates": {
+        "lat": -17.5,
+        "lng": 145.6167
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-038",
+      "name": "Kairi",
+      "coordinates": {
+        "lat": -17.21,
+        "lng": 145.55
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-039",
+      "name": "Gordonvale",
+      "coordinates": {
+        "lat": -17.0833,
+        "lng": 145.7833
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-040",
+      "name": "Gillies Range Junction",
+      "coordinates": {
+        "lat": -17.1,
+        "lng": 145.72
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-041",
+      "name": "Babinda",
+      "coordinates": {
+        "lat": -17.3333,
+        "lng": 145.9167
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-042",
+      "name": "Innisfail",
+      "coordinates": {
+        "lat": -17.5236,
+        "lng": 146.0292
+      },
+      "type": "intersection",
+      "is_assembly_area": true
+    },
+    {
+      "id": "node-043",
+      "name": "South Johnstone",
+      "coordinates": {
+        "lat": -17.595,
+        "lng": 146.0
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-044",
+      "name": "Mourilyan",
+      "coordinates": {
+        "lat": -17.58,
+        "lng": 146.05
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-045",
+      "name": "Mission Beach",
+      "coordinates": {
+        "lat": -17.8667,
+        "lng": 146.1
+      },
+      "type": "endpoint",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-046",
+      "name": "Tully",
+      "coordinates": {
+        "lat": -17.9333,
+        "lng": 145.9333
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-047",
+      "name": "Cardwell",
+      "coordinates": {
+        "lat": -18.2667,
+        "lng": 146.0333
+      },
+      "type": "endpoint",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-048",
+      "name": "Palmerston Highway Junction",
+      "coordinates": {
+        "lat": -17.52,
+        "lng": 145.75
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-049",
+      "name": "Lake Eacham",
+      "coordinates": {
+        "lat": -17.29,
+        "lng": 145.62
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    },
+    {
+      "id": "node-050",
+      "name": "Lakeland",
+      "coordinates": {
+        "lat": -15.87,
+        "lng": 144.86
+      },
+      "type": "intersection",
+      "is_assembly_area": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-001",
+      "from_node": "node-001",
+      "to_node": "node-002",
+      "name": "Mulgrave Road North",
+      "distance_km": 6.1,
+      "capacity_vehicles_per_hour": 1800,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7781,
+            -16.9186
+          ],
+          [
+            145.7554,
+            -16.878
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-002",
+      "from_node": "node-002",
+      "to_node": "node-003",
+      "name": "Captain Cook Highway",
+      "distance_km": 10.6,
+      "capacity_vehicles_per_hour": 1500,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7554,
+            -16.878
+          ],
+          [
+            145.695,
+            -16.8333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-003",
+      "from_node": "node-003",
+      "to_node": "node-009",
+      "name": "Captain Cook Highway North",
+      "distance_km": 6.7,
+      "capacity_vehicles_per_hour": 1200,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.695,
+            -16.8333
+          ],
+          [
+            145.6917,
+            -16.7833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-004",
+      "from_node": "node-009",
+      "to_node": "node-010",
+      "name": "Captain Cook Highway North",
+      "distance_km": 5.8,
+      "capacity_vehicles_per_hour": 1200,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.6917,
+            -16.7833
+          ],
+          [
+            145.67,
+            -16.745
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-005",
+      "from_node": "node-010",
+      "to_node": "node-011",
+      "name": "Captain Cook Highway North",
+      "distance_km": 6.0,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.67,
+            -16.745
+          ],
+          [
+            145.635,
+            -16.72
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-006",
+      "from_node": "node-011",
+      "to_node": "node-012",
+      "name": "Captain Cook Highway North",
+      "distance_km": 14.0,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.635,
+            -16.72
+          ],
+          [
+            145.57,
+            -16.655
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-007",
+      "from_node": "node-012",
+      "to_node": "node-013",
+      "name": "Captain Cook Highway North",
+      "distance_km": 22.8,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.57,
+            -16.655
+          ],
+          [
+            145.47,
+            -16.53
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-008",
+      "from_node": "node-013",
+      "to_node": "node-014",
+      "name": "Port Douglas Road",
+      "distance_km": 6.7,
+      "capacity_vehicles_per_hour": 1200,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.47,
+            -16.53
+          ],
+          [
+            145.45,
+            -16.4833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-009",
+      "from_node": "node-013",
+      "to_node": "node-015",
+      "name": "Captain Cook Highway West",
+      "distance_km": 15.7,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.47,
+            -16.53
+          ],
+          [
+            145.3726,
+            -16.4589
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-010",
+      "from_node": "node-014",
+      "to_node": "node-015",
+      "name": "Davidson Street",
+      "distance_km": 11.3,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.45,
+            -16.4833
+          ],
+          [
+            145.3726,
+            -16.4589
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-011",
+      "from_node": "node-015",
+      "to_node": "node-017",
+      "name": "Mossman-Daintree Road",
+      "distance_km": 26.1,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.3726,
+            -16.4589
+          ],
+          [
+            145.4083,
+            -16.2667
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-012",
+      "from_node": "node-015",
+      "to_node": "node-016",
+      "name": "Rex Range Road South",
+      "distance_km": 13.2,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.3726,
+            -16.4589
+          ],
+          [
+            145.38,
+            -16.55
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-013",
+      "from_node": "node-017",
+      "to_node": "node-018",
+      "name": "Daintree Village Road",
+      "distance_km": 2.5,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4083,
+            -16.2667
+          ],
+          [
+            145.4167,
+            -16.25
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-014",
+      "from_node": "node-017",
+      "to_node": "node-019",
+      "name": "Cape Tribulation Road South",
+      "distance_km": 4.9,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4083,
+            -16.2667
+          ],
+          [
+            145.43,
+            -16.24
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-015",
+      "from_node": "node-018",
+      "to_node": "node-019",
+      "name": "Daintree-Cow Bay Road",
+      "distance_km": 2.5,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4167,
+            -16.25
+          ],
+          [
+            145.43,
+            -16.24
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-016",
+      "from_node": "node-019",
+      "to_node": "node-020",
+      "name": "Cape Tribulation Road North",
+      "distance_km": 20.9,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.43,
+            -16.24
+          ],
+          [
+            145.4667,
+            -16.1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-017",
+      "from_node": "node-020",
+      "to_node": "node-021",
+      "name": "Bloomfield Track South",
+      "distance_km": 44.8,
+      "capacity_vehicles_per_hour": 100,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4667,
+            -16.1
+          ],
+          [
+            145.3333,
+            -15.9167
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-018",
+      "from_node": "node-021",
+      "to_node": "node-022",
+      "name": "Bloomfield Track North",
+      "distance_km": 32.4,
+      "capacity_vehicles_per_hour": 200,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.3333,
+            -15.9167
+          ],
+          [
+            145.23,
+            -15.75
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-019",
+      "from_node": "node-022",
+      "to_node": "node-023",
+      "name": "Cooktown Development Road South",
+      "distance_km": 39.8,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.23,
+            -15.75
+          ],
+          [
+            145.2467,
+            -15.4748
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-020",
+      "from_node": "node-023",
+      "to_node": "node-024",
+      "name": "Hope Vale Road",
+      "distance_km": 28.5,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.2467,
+            -15.4748
+          ],
+          [
+            145.12,
+            -15.3
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-021",
+      "from_node": "node-001",
+      "to_node": "node-004",
+      "name": "Mulgrave Road South",
+      "distance_km": 6.7,
+      "capacity_vehicles_per_hour": 2000,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7781,
+            -16.9186
+          ],
+          [
+            145.735,
+            -16.947
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-022",
+      "from_node": "node-004",
+      "to_node": "node-006",
+      "name": "Bruce Highway South Section A",
+      "distance_km": 4.4,
+      "capacity_vehicles_per_hour": 1500,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.735,
+            -16.947
+          ],
+          [
+            145.735,
+            -16.98
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-023",
+      "from_node": "node-006",
+      "to_node": "node-005",
+      "name": "Bruce Highway South Section B",
+      "distance_km": 4.9,
+      "capacity_vehicles_per_hour": 1500,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.735,
+            -16.98
+          ],
+          [
+            145.7333,
+            -17.0167
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-024",
+      "from_node": "node-002",
+      "to_node": "node-007",
+      "name": "Redlynch Intake Road",
+      "distance_km": 9.5,
+      "capacity_vehicles_per_hour": 1200,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7554,
+            -16.878
+          ],
+          [
+            145.687,
+            -16.88
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-025",
+      "from_node": "node-007",
+      "to_node": "node-008",
+      "name": "Barron Gorge Road",
+      "distance_km": 5.9,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.687,
+            -16.88
+          ],
+          [
+            145.66,
+            -16.852
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-026",
+      "from_node": "node-003",
+      "to_node": "node-007",
+      "name": "Kamerunga Road",
+      "distance_km": 6.3,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.695,
+            -16.8333
+          ],
+          [
+            145.687,
+            -16.88
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-027",
+      "from_node": "node-001",
+      "to_node": "node-007",
+      "name": "Cairns Western Arterial Road",
+      "distance_km": 13.8,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7781,
+            -16.9186
+          ],
+          [
+            145.687,
+            -16.88
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-028",
+      "from_node": "node-004",
+      "to_node": "node-005",
+      "name": "Edmonton Drive",
+      "distance_km": 9.3,
+      "capacity_vehicles_per_hour": 1200,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.735,
+            -16.947
+          ],
+          [
+            145.7333,
+            -17.0167
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-029",
+      "from_node": "node-002",
+      "to_node": "node-004",
+      "name": "Sheridan Street South",
+      "distance_km": 9.6,
+      "capacity_vehicles_per_hour": 1500,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7554,
+            -16.878
+          ],
+          [
+            145.735,
+            -16.947
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-030",
+      "from_node": "node-003",
+      "to_node": "node-008",
+      "name": "Smithfield-Barron Gorge Road",
+      "distance_km": 5.5,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.695,
+            -16.8333
+          ],
+          [
+            145.66,
+            -16.852
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-031",
+      "from_node": "node-001",
+      "to_node": "node-003",
+      "name": "Cairns Western Arterial North",
+      "distance_km": 18.2,
+      "capacity_vehicles_per_hour": 1200,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7781,
+            -16.9186
+          ],
+          [
+            145.695,
+            -16.8333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-032",
+      "from_node": "node-008",
+      "to_node": "node-009",
+      "name": "Lake Placid-Trinity Beach Road",
+      "distance_km": 11.7,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.66,
+            -16.852
+          ],
+          [
+            145.6917,
+            -16.7833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-033",
+      "from_node": "node-002",
+      "to_node": "node-009",
+      "name": "Cairns Northern Access Road",
+      "distance_km": 18.8,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7554,
+            -16.878
+          ],
+          [
+            145.6917,
+            -16.7833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-034",
+      "from_node": "node-006",
+      "to_node": "node-039",
+      "name": "Mount Sheridan-Gordonvale Road",
+      "distance_km": 15.1,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.735,
+            -16.98
+          ],
+          [
+            145.7833,
+            -17.0833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-035",
+      "from_node": "node-008",
+      "to_node": "node-025",
+      "name": "Kuranda Range Road",
+      "distance_km": 8.7,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.66,
+            -16.852
+          ],
+          [
+            145.6333,
+            -16.8167
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-036",
+      "from_node": "node-025",
+      "to_node": "node-026",
+      "name": "Kennedy Highway Section A",
+      "distance_km": 4.7,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.6333,
+            -16.8167
+          ],
+          [
+            145.61,
+            -16.84
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-037",
+      "from_node": "node-026",
+      "to_node": "node-027",
+      "name": "Kennedy Highway Section B",
+      "distance_km": 8.4,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.61,
+            -16.84
+          ],
+          [
+            145.55,
+            -16.85
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-038",
+      "from_node": "node-027",
+      "to_node": "node-028",
+      "name": "Kennedy Highway Section C",
+      "distance_km": 27.2,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.55,
+            -16.85
+          ],
+          [
+            145.4222,
+            -16.9933
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-039",
+      "from_node": "node-025",
+      "to_node": "node-027",
+      "name": "Speewah Bypass Road",
+      "distance_km": 14.4,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.6333,
+            -16.8167
+          ],
+          [
+            145.55,
+            -16.85
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-040",
+      "from_node": "node-016",
+      "to_node": "node-029",
+      "name": "Mulligan Highway Section A",
+      "distance_km": 20.3,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.38,
+            -16.55
+          ],
+          [
+            145.3333,
+            -16.6833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-041",
+      "from_node": "node-029",
+      "to_node": "node-028",
+      "name": "Mulligan Highway Section B",
+      "distance_km": 42.9,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.3333,
+            -16.6833
+          ],
+          [
+            145.4222,
+            -16.9933
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-042",
+      "from_node": "node-029",
+      "to_node": "node-050",
+      "name": "Mulligan Highway North",
+      "distance_km": 124.3,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.3333,
+            -16.6833
+          ],
+          [
+            144.86,
+            -15.87
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-043",
+      "from_node": "node-050",
+      "to_node": "node-023",
+      "name": "Cooktown Development Road",
+      "distance_km": 72.4,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            144.86,
+            -15.87
+          ],
+          [
+            145.2467,
+            -15.4748
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-044",
+      "from_node": "node-028",
+      "to_node": "node-030",
+      "name": "Kennedy Highway South Section A",
+      "distance_km": 18.7,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4222,
+            -16.9933
+          ],
+          [
+            145.4333,
+            -17.1333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-045",
+      "from_node": "node-030",
+      "to_node": "node-031",
+      "name": "Kennedy Highway South Section B",
+      "distance_km": 10.1,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4333,
+            -17.1333
+          ],
+          [
+            145.47,
+            -17.2
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-046",
+      "from_node": "node-031",
+      "to_node": "node-032",
+      "name": "Atherton-Tolga Road",
+      "distance_km": 9.3,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.47,
+            -17.2
+          ],
+          [
+            145.4847,
+            -17.2686
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-047",
+      "from_node": "node-032",
+      "to_node": "node-033",
+      "name": "Gillies Highway West Section A",
+      "distance_km": 13.6,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4847,
+            -17.2686
+          ],
+          [
+            145.5833,
+            -17.2667
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-048",
+      "from_node": "node-033",
+      "to_node": "node-034",
+      "name": "Malanda-Yungaburra Road",
+      "distance_km": 11.1,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.5833,
+            -17.2667
+          ],
+          [
+            145.5833,
+            -17.35
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-049",
+      "from_node": "node-034",
+      "to_node": "node-037",
+      "name": "Millaa Millaa Road",
+      "distance_km": 22.2,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.5833,
+            -17.35
+          ],
+          [
+            145.6167,
+            -17.5
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-050",
+      "from_node": "node-037",
+      "to_node": "node-036",
+      "name": "Millaa Millaa-Ravenshoe Road",
+      "distance_km": 23.4,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.6167,
+            -17.5
+          ],
+          [
+            145.4833,
+            -17.6
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-051",
+      "from_node": "node-032",
+      "to_node": "node-035",
+      "name": "Herberton Road",
+      "distance_km": 21.7,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4847,
+            -17.2686
+          ],
+          [
+            145.3833,
+            -17.3833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-052",
+      "from_node": "node-035",
+      "to_node": "node-036",
+      "name": "Herberton-Ravenshoe Road",
+      "distance_km": 34.2,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.3833,
+            -17.3833
+          ],
+          [
+            145.4833,
+            -17.6
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-053",
+      "from_node": "node-033",
+      "to_node": "node-049",
+      "name": "Lake Eacham Road",
+      "distance_km": 5.6,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.5833,
+            -17.2667
+          ],
+          [
+            145.62,
+            -17.29
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-054",
+      "from_node": "node-038",
+      "to_node": "node-033",
+      "name": "Kairi-Yungaburra Road",
+      "distance_km": 8.7,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.55,
+            -17.21
+          ],
+          [
+            145.5833,
+            -17.2667
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-055",
+      "from_node": "node-031",
+      "to_node": "node-038",
+      "name": "Tolga-Kairi Road",
+      "distance_km": 10.3,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.47,
+            -17.2
+          ],
+          [
+            145.55,
+            -17.21
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-056",
+      "from_node": "node-049",
+      "to_node": "node-034",
+      "name": "Lake Eacham-Malanda Road",
+      "distance_km": 9.3,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.62,
+            -17.29
+          ],
+          [
+            145.5833,
+            -17.35
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-057",
+      "from_node": "node-032",
+      "to_node": "node-034",
+      "name": "Atherton-Malanda Direct Road",
+      "distance_km": 18.0,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4847,
+            -17.2686
+          ],
+          [
+            145.5833,
+            -17.35
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-058",
+      "from_node": "node-035",
+      "to_node": "node-034",
+      "name": "Wild River Road",
+      "distance_km": 32.3,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.3833,
+            -17.3833
+          ],
+          [
+            145.5833,
+            -17.35
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-059",
+      "from_node": "node-030",
+      "to_node": "node-032",
+      "name": "Walkamin-Atherton Road",
+      "distance_km": 20.8,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4333,
+            -17.1333
+          ],
+          [
+            145.4847,
+            -17.2686
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-060",
+      "from_node": "node-028",
+      "to_node": "node-031",
+      "name": "Mareeba-Tolga Road",
+      "distance_km": 28.2,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4222,
+            -16.9933
+          ],
+          [
+            145.47,
+            -17.2
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-061",
+      "from_node": "node-028",
+      "to_node": "node-038",
+      "name": "Mareeba-Kairi Road",
+      "distance_km": 36.0,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4222,
+            -16.9933
+          ],
+          [
+            145.55,
+            -17.21
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-062",
+      "from_node": "node-036",
+      "to_node": "node-046",
+      "name": "Tully Falls Road",
+      "distance_km": 96.6,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4833,
+            -17.6
+          ],
+          [
+            145.9333,
+            -17.9333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-063",
+      "from_node": "node-038",
+      "to_node": "node-049",
+      "name": "Kairi-Lake Eacham Road",
+      "distance_km": 15.1,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.55,
+            -17.21
+          ],
+          [
+            145.62,
+            -17.29
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-064",
+      "from_node": "node-031",
+      "to_node": "node-033",
+      "name": "Tolga-Yungaburra Road",
+      "distance_km": 17.0,
+      "capacity_vehicles_per_hour": 700,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.47,
+            -17.2
+          ],
+          [
+            145.5833,
+            -17.2667
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-065",
+      "from_node": "node-032",
+      "to_node": "node-036",
+      "name": "Atherton-Ravenshoe Road",
+      "distance_km": 47.9,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4847,
+            -17.2686
+          ],
+          [
+            145.4833,
+            -17.6
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-066",
+      "from_node": "node-030",
+      "to_node": "node-035",
+      "name": "Walkamin-Herberton Road",
+      "distance_km": 39.6,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4333,
+            -17.1333
+          ],
+          [
+            145.3833,
+            -17.3833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-067",
+      "from_node": "node-034",
+      "to_node": "node-036",
+      "name": "Malanda-Ravenshoe Road",
+      "distance_km": 38.7,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.5833,
+            -17.35
+          ],
+          [
+            145.4833,
+            -17.6
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-068",
+      "from_node": "node-039",
+      "to_node": "node-040",
+      "name": "Gillies Highway East Section",
+      "distance_km": 10.5,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7833,
+            -17.0833
+          ],
+          [
+            145.72,
+            -17.1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-069",
+      "from_node": "node-040",
+      "to_node": "node-033",
+      "name": "Gillies Highway West Section",
+      "distance_km": 42.4,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.72,
+            -17.1
+          ],
+          [
+            145.5833,
+            -17.2667
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-070",
+      "from_node": "node-040",
+      "to_node": "node-038",
+      "name": "Gillies Range-Kairi Connector",
+      "distance_km": 32.7,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.72,
+            -17.1
+          ],
+          [
+            145.55,
+            -17.21
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-071",
+      "from_node": "node-040",
+      "to_node": "node-030",
+      "name": "Gillies-Walkamin Connector",
+      "distance_km": 43.0,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.72,
+            -17.1
+          ],
+          [
+            145.4333,
+            -17.1333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-072",
+      "from_node": "node-005",
+      "to_node": "node-039",
+      "name": "Bruce Highway South Section C",
+      "distance_km": 10.9,
+      "capacity_vehicles_per_hour": 1500,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7333,
+            -17.0167
+          ],
+          [
+            145.7833,
+            -17.0833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-073",
+      "from_node": "node-039",
+      "to_node": "node-041",
+      "name": "Bruce Highway South Section D",
+      "distance_km": 37.4,
+      "capacity_vehicles_per_hour": 1200,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7833,
+            -17.0833
+          ],
+          [
+            145.9167,
+            -17.3333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-074",
+      "from_node": "node-041",
+      "to_node": "node-042",
+      "name": "Bruce Highway South Section E",
+      "distance_km": 29.2,
+      "capacity_vehicles_per_hour": 1200,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.9167,
+            -17.3333
+          ],
+          [
+            146.0292,
+            -17.5236
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-075",
+      "from_node": "node-042",
+      "to_node": "node-043",
+      "name": "Bruce Highway South Section F",
+      "distance_km": 10.2,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.0292,
+            -17.5236
+          ],
+          [
+            146.0,
+            -17.595
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-076",
+      "from_node": "node-043",
+      "to_node": "node-044",
+      "name": "South Johnstone-Mourilyan Road",
+      "distance_km": 6.7,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.0,
+            -17.595
+          ],
+          [
+            146.05,
+            -17.58
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-077",
+      "from_node": "node-042",
+      "to_node": "node-044",
+      "name": "Innisfail-Mourilyan Road",
+      "distance_km": 8.0,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.0292,
+            -17.5236
+          ],
+          [
+            146.05,
+            -17.58
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-078",
+      "from_node": "node-044",
+      "to_node": "node-045",
+      "name": "Mission Beach Road North",
+      "distance_km": 42.0,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.05,
+            -17.58
+          ],
+          [
+            146.1,
+            -17.8667
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-079",
+      "from_node": "node-043",
+      "to_node": "node-046",
+      "name": "Bruce Highway South Section G",
+      "distance_km": 45.9,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.0,
+            -17.595
+          ],
+          [
+            145.9333,
+            -17.9333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-080",
+      "from_node": "node-046",
+      "to_node": "node-047",
+      "name": "Bruce Highway South Section H",
+      "distance_km": 46.3,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.9333,
+            -17.9333
+          ],
+          [
+            146.0333,
+            -18.2667
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-081",
+      "from_node": "node-045",
+      "to_node": "node-046",
+      "name": "El Arish-Mission Beach Road",
+      "distance_km": 24.9,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.1,
+            -17.8667
+          ],
+          [
+            145.9333,
+            -17.9333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-082",
+      "from_node": "node-042",
+      "to_node": "node-048",
+      "name": "Palmerston Highway East",
+      "distance_km": 44.4,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.0292,
+            -17.5236
+          ],
+          [
+            145.75,
+            -17.52
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-083",
+      "from_node": "node-048",
+      "to_node": "node-037",
+      "name": "Palmerston Highway West Section A",
+      "distance_km": 21.5,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.75,
+            -17.52
+          ],
+          [
+            145.6167,
+            -17.5
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-084",
+      "from_node": "node-048",
+      "to_node": "node-049",
+      "name": "Palmerston Highway-Lake Eacham Road",
+      "distance_km": 43.6,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.75,
+            -17.52
+          ],
+          [
+            145.62,
+            -17.29
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-085",
+      "from_node": "node-048",
+      "to_node": "node-034",
+      "name": "Palmerston-Malanda Connector",
+      "distance_km": 38.8,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.75,
+            -17.52
+          ],
+          [
+            145.5833,
+            -17.35
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-086",
+      "from_node": "node-027",
+      "to_node": "node-029",
+      "name": "Koah-Mount Molloy Road",
+      "distance_km": 41.4,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.55,
+            -16.85
+          ],
+          [
+            145.3333,
+            -16.6833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-087",
+      "from_node": "node-026",
+      "to_node": "node-008",
+      "name": "Speewah-Barron Road",
+      "distance_km": 7.1,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.61,
+            -16.84
+          ],
+          [
+            145.66,
+            -16.852
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-088",
+      "from_node": "node-010",
+      "to_node": "node-003",
+      "name": "Palm Cove-Smithfield Connector",
+      "distance_km": 14.2,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.67,
+            -16.745
+          ],
+          [
+            145.695,
+            -16.8333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-089",
+      "from_node": "node-041",
+      "to_node": "node-048",
+      "name": "Babinda-Palmerston Road",
+      "distance_km": 40.9,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.9167,
+            -17.3333
+          ],
+          [
+            145.75,
+            -17.52
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-090",
+      "from_node": "node-043",
+      "to_node": "node-045",
+      "name": "South Johnstone-Mission Beach Road",
+      "distance_km": 44.8,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.0,
+            -17.595
+          ],
+          [
+            146.1,
+            -17.8667
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-091",
+      "from_node": "node-037",
+      "to_node": "node-049",
+      "name": "Millaa Millaa-Lake Eacham Road",
+      "distance_km": 30.4,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.6167,
+            -17.5
+          ],
+          [
+            145.62,
+            -17.29
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-092",
+      "from_node": "node-050",
+      "to_node": "node-022",
+      "name": "Lakeland-Rossville Road",
+      "distance_km": 58.5,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            144.86,
+            -15.87
+          ],
+          [
+            145.23,
+            -15.75
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-093",
+      "from_node": "node-007",
+      "to_node": "node-009",
+      "name": "Redlynch-Trinity Beach Road",
+      "distance_km": 16.1,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.687,
+            -16.88
+          ],
+          [
+            145.6917,
+            -16.7833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-094",
+      "from_node": "node-004",
+      "to_node": "node-039",
+      "name": "Earlville-Gordonvale Road",
+      "distance_km": 20.8,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.735,
+            -16.947
+          ],
+          [
+            145.7833,
+            -17.0833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-095",
+      "from_node": "node-021",
+      "to_node": "node-050",
+      "name": "Wujal Wujal-Lakeland Road",
+      "distance_km": 81.4,
+      "capacity_vehicles_per_hour": 200,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.3333,
+            -15.9167
+          ],
+          [
+            144.86,
+            -15.87
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-096",
+      "from_node": "node-027",
+      "to_node": "node-016",
+      "name": "Koah-Rex Range Road",
+      "distance_km": 53.1,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.55,
+            -16.85
+          ],
+          [
+            145.38,
+            -16.55
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-097",
+      "from_node": "node-044",
+      "to_node": "node-046",
+      "name": "Mourilyan-Tully Road",
+      "distance_km": 53.5,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.05,
+            -17.58
+          ],
+          [
+            145.9333,
+            -17.9333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-098",
+      "from_node": "node-001",
+      "to_node": "node-006",
+      "name": "Cairns Southern Bypass",
+      "distance_km": 10.7,
+      "capacity_vehicles_per_hour": 1500,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7781,
+            -16.9186
+          ],
+          [
+            145.735,
+            -16.98
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-099",
+      "from_node": "node-007",
+      "to_node": "node-025",
+      "name": "Redlynch-Kuranda Road",
+      "distance_km": 14.5,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.687,
+            -16.88
+          ],
+          [
+            145.6333,
+            -16.8167
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-100",
+      "from_node": "node-025",
+      "to_node": "node-003",
+      "name": "Kuranda-Smithfield Connector",
+      "distance_km": 10.2,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.6333,
+            -16.8167
+          ],
+          [
+            145.695,
+            -16.8333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-101",
+      "from_node": "node-028",
+      "to_node": "node-032",
+      "name": "Mareeba-Atherton Direct",
+      "distance_km": 37.6,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4222,
+            -16.9933
+          ],
+          [
+            145.4847,
+            -17.2686
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-102",
+      "from_node": "node-029",
+      "to_node": "node-015",
+      "name": "Mount Molloy-Mossman Road",
+      "distance_km": 32.9,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.3333,
+            -16.6833
+          ],
+          [
+            145.3726,
+            -16.4589
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-103",
+      "from_node": "node-040",
+      "to_node": "node-049",
+      "name": "Gillies Range-Lake Eacham Road",
+      "distance_km": 35.5,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.72,
+            -17.1
+          ],
+          [
+            145.62,
+            -17.29
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-104",
+      "from_node": "node-001",
+      "to_node": "node-005",
+      "name": "Bruce Highway Direct",
+      "distance_km": 14.3,
+      "capacity_vehicles_per_hour": 1500,
+      "surface_type": "sealed",
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7781,
+            -16.9186
+          ],
+          [
+            145.7333,
+            -17.0167
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-105",
+      "from_node": "node-009",
+      "to_node": "node-011",
+      "name": "Northern Beaches Bypass",
+      "distance_km": 12.1,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.6917,
+            -16.7833
+          ],
+          [
+            145.635,
+            -16.72
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-106",
+      "from_node": "node-013",
+      "to_node": "node-016",
+      "name": "Craiglie-Rex Range Road",
+      "distance_km": 12.8,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.47,
+            -16.53
+          ],
+          [
+            145.38,
+            -16.55
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-107",
+      "from_node": "node-017",
+      "to_node": "node-020",
+      "name": "Daintree Ferry-Cape Trib Direct",
+      "distance_km": 29.3,
+      "capacity_vehicles_per_hour": 300,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4083,
+            -16.2667
+          ],
+          [
+            145.4667,
+            -16.1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-108",
+      "from_node": "node-021",
+      "to_node": "node-023",
+      "name": "Coastal Track North",
+      "distance_km": 90.0,
+      "capacity_vehicles_per_hour": 150,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.3333,
+            -15.9167
+          ],
+          [
+            145.2467,
+            -15.4748
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-109",
+      "from_node": "node-026",
+      "to_node": "node-028",
+      "name": "Speewah-Mareeba Road",
+      "distance_km": 34.1,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.61,
+            -16.84
+          ],
+          [
+            145.4222,
+            -16.9933
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-110",
+      "from_node": "node-028",
+      "to_node": "node-035",
+      "name": "Mareeba-Herberton Road",
+      "distance_km": 56.6,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4222,
+            -16.9933
+          ],
+          [
+            145.3833,
+            -17.3833
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-111",
+      "from_node": "node-030",
+      "to_node": "node-038",
+      "name": "Walkamin-Kairi Road",
+      "distance_km": 18.1,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4333,
+            -17.1333
+          ],
+          [
+            145.55,
+            -17.21
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-112",
+      "from_node": "node-031",
+      "to_node": "node-049",
+      "name": "Tolga-Lake Eacham Road",
+      "distance_km": 24.5,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.47,
+            -17.2
+          ],
+          [
+            145.62,
+            -17.29
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-113",
+      "from_node": "node-040",
+      "to_node": "node-031",
+      "name": "Gillies Range-Tolga Connector",
+      "distance_km": 43.2,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.72,
+            -17.1
+          ],
+          [
+            145.47,
+            -17.2
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-114",
+      "from_node": "node-042",
+      "to_node": "node-046",
+      "name": "Innisfail-Tully Road",
+      "distance_km": 56.0,
+      "capacity_vehicles_per_hour": 1000,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.0292,
+            -17.5236
+          ],
+          [
+            145.9333,
+            -17.9333
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-115",
+      "from_node": "node-045",
+      "to_node": "node-047",
+      "name": "Mission Beach-Cardwell Road",
+      "distance_km": 58.5,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            146.1,
+            -17.8667
+          ],
+          [
+            146.0333,
+            -18.2667
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-116",
+      "from_node": "node-014",
+      "to_node": "node-016",
+      "name": "Port Douglas-Rex Range Road",
+      "distance_km": 14.7,
+      "capacity_vehicles_per_hour": 500,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.45,
+            -16.4833
+          ],
+          [
+            145.38,
+            -16.55
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-117",
+      "from_node": "node-002",
+      "to_node": "node-006",
+      "name": "Cairns North-Mount Sheridan Road",
+      "distance_km": 15.0,
+      "capacity_vehicles_per_hour": 800,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7554,
+            -16.878
+          ],
+          [
+            145.735,
+            -16.98
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-118",
+      "from_node": "node-018",
+      "to_node": "node-020",
+      "name": "Daintree Village-Cape Trib Road",
+      "distance_km": 24.5,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4167,
+            -16.25
+          ],
+          [
+            145.4667,
+            -16.1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-119",
+      "from_node": "node-002",
+      "to_node": "node-008",
+      "name": "Cairns North-Barron Gorge Road",
+      "distance_km": 14.8,
+      "capacity_vehicles_per_hour": 600,
+      "surface_type": "sealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.7554,
+            -16.878
+          ],
+          [
+            145.66,
+            -16.852
+          ]
+        ]
+      }
+    },
+    {
+      "id": "edge-120",
+      "from_node": "node-036",
+      "to_node": "node-047",
+      "name": "Ravenshoe-Cardwell Road",
+      "distance_km": 150.8,
+      "capacity_vehicles_per_hour": 400,
+      "surface_type": "unsealed",
+      "accessibility_features": [],
+      "closure_status": "open",
+      "closure_reason": null,
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            145.4833,
+            -17.6
+          ],
+          [
+            146.0333,
+            -18.2667
+          ]
+        ]
+      }
+    }
+  ],
+  "assembly_areas": [
+    {
+      "assembly_area_id": "aa-001",
+      "name": "Cairns Convention Centre",
+      "coordinates": {
+        "lat": -16.922,
+        "lng": 145.774
+      },
+      "capacity_persons": 3000,
+      "accessibility_features": [
+        "wheelchair_accessible",
+        "medical_facilities"
+      ],
+      "assigned_zones": [
+        1,
+        2,
+        3
+      ],
+      "node_id": "node-001"
+    },
+    {
+      "assembly_area_id": "aa-002",
+      "name": "Port Douglas Community Hall",
+      "coordinates": {
+        "lat": -16.485,
+        "lng": 145.452
+      },
+      "capacity_persons": 1000,
+      "accessibility_features": [
+        "wheelchair_accessible"
+      ],
+      "assigned_zones": [
+        1,
+        2
+      ],
+      "node_id": "node-014"
+    },
+    {
+      "assembly_area_id": "aa-003",
+      "name": "Atherton Showgrounds",
+      "coordinates": {
+        "lat": -17.27,
+        "lng": 145.487
+      },
+      "capacity_persons": 2000,
+      "accessibility_features": [
+        "wheelchair_accessible",
+        "medical_facilities",
+        "helicopter_landing"
+      ],
+      "assigned_zones": [
+        2,
+        3
+      ],
+      "node_id": "node-032"
+    },
+    {
+      "assembly_area_id": "aa-004",
+      "name": "Innisfail Civic Centre",
+      "coordinates": {
+        "lat": -17.525,
+        "lng": 146.031
+      },
+      "capacity_persons": 1500,
+      "accessibility_features": [
+        "wheelchair_accessible",
+        "medical_facilities"
+      ],
+      "assigned_zones": [
+        1,
+        2,
+        3
+      ],
+      "node_id": "node-042"
+    },
+    {
+      "assembly_area_id": "aa-005",
+      "name": "Mareeba Rodeo Grounds",
+      "coordinates": {
+        "lat": -16.995,
+        "lng": 145.425
+      },
+      "capacity_persons": 2500,
+      "accessibility_features": [
+        "wheelchair_accessible",
+        "helicopter_landing"
+      ],
+      "assigned_zones": [
+        2,
+        3
+      ],
+      "node_id": "node-028"
+    }
+  ]
+}
