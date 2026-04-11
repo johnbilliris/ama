@@ -1,0 +1,222 @@
+[
+  {
+    "template_id": "evacuation-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO BÃO NGHIÊM TRỌNG — {location}",
+    "body_template": "Một cơn bão nghiêm trọng đang tiến gần {location}. Điều kiện thời tiết dự kiến sẽ xấu đi từ {time}. Gió giật có thể vượt quá {wind_speed}. {severity_detail}.",
+    "action_items_template": "SƠ TÁN ngay lập tức nếu được chỉ đạo bởi dịch vụ khẩn cấp. Di chuyển đến vùng đất cao hơn. Nghe đài ABC Radio để cập nhật thông tin. Gọi 000 cho các trường hợp khẩn cấp đe dọa tính mạng. Truy cập {help_url} để biết các trung tâm sơ tán."
+  },
+  {
+    "template_id": "evacuation-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO BÃO — {location}",
+    "body_template": "Một cơn bão đang tiến gần {location}. Điều kiện thời tiết có thể xấu đi từ {time}. Dự kiến có gió giật. {severity_detail}.",
+    "action_items_template": "Chuẩn bị sơ tán nếu được chỉ đạo. Cố định các vật dụng không chắc chắn. Nghe đài ABC Radio để cập nhật. Gọi 000 cho trường hợp khẩn cấp. Truy cập {help_url} để biết thêm thông tin."
+  },
+  {
+    "template_id": "evacuation-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO KHẨN CẤP CHÁY RỪNG — {location}",
+    "body_template": "Một đám cháy rừng nguy hiểm đang đe dọa {location}. Đám cháy đã mất kiểm soát và gây nguy hiểm nghiêm trọng đến tính mạng. Tình hình dự kiến xấu đi từ {time}. {severity_detail}.",
+    "action_items_template": "RỜI ĐI NGAY nếu đường thoát an toàn. Đã quá muộn để ở lại. Thực hiện kế hoạch sinh tồn cháy rừng của bạn. Gọi 000 cho các trường hợp khẩn cấp đe dọa tính mạng. Truy cập {help_url} để biết vị trí nơi trú ẩn."
+  },
+  {
+    "template_id": "evacuation-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO CHÁY RỪNG — {location}",
+    "body_template": "Một đám cháy rừng đang bùng phát gần {location}. Tình hình có thể thay đổi nhanh chóng từ {time}. {severity_detail}.",
+    "action_items_template": "Chuẩn bị rời đi. Theo dõi tình hình chặt chẽ. Thực hiện kế hoạch sinh tồn cháy rừng. Gọi 000 cho trường hợp khẩn cấp. Truy cập {help_url} để cập nhật."
+  },
+  {
+    "template_id": "evacuation-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO LŨ LỤT LỚN — {location}",
+    "body_template": "Lũ lụt lớn đang xảy ra hoặc dự kiến tại {location}. Mực nước đang dâng nhanh. Lũ quét có thể xảy ra từ {time}. {severity_detail}.",
+    "action_items_template": "SƠ TÁN các vùng trũng ngay lập tức. KHÔNG đi vào vùng nước lũ. Di chuyển đến vùng đất cao. Gọi 132 500 để được SES hỗ trợ. Truy cập {help_url} để biết các trung tâm sơ tán."
+  },
+  {
+    "template_id": "evacuation-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO LŨ LỤT — {location}",
+    "body_template": "Có khả năng xảy ra lũ lụt tại {location}. Mực nước có thể dâng từ {time}. {severity_detail}.",
+    "action_items_template": "Chuẩn bị sơ tán các vùng trũng. Tránh xa vùng nước lũ. Gọi 132 500 để được SES hỗ trợ. Truy cập {help_url} để cập nhật."
+  },
+  {
+    "template_id": "evacuation-storm-severe",
+    "hazard_type": "storm",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO GIÔNG BÃO NGHIÊM TRỌNG — {location}",
+    "body_template": "Một cơn giông bão nghiêm trọng đang tiến đến {location}. Dự kiến gió phá hoại, mưa lớn và mưa đá lớn từ {time}. {severity_detail}.",
+    "action_items_template": "Tìm nơi trú ẩn ngay lập tức. Ở trong nhà tránh xa cửa sổ. Cố định các vật dụng ngoài trời. Gọi 000 cho trường hợp khẩn cấp. Truy cập {help_url} để cập nhật."
+  },
+  {
+    "template_id": "evacuation-earthquake-severe",
+    "hazard_type": "earthquake",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO ĐỘNG ĐẤT — {location}",
+    "body_template": "Một trận động đất mạnh đã xảy ra gần {location}. Dự kiến sẽ có dư chấn. Các tòa nhà có thể bị hư hại. {severity_detail}.",
+    "action_items_template": "Nằm xuống, Che chắn, Bám chặt. Tránh xa các tòa nhà bị hư hại. Kiểm tra rò rỉ khí gas. Gọi 000 cho trường hợp khẩn cấp. Truy cập {help_url} để cập nhật."
+  },
+  {
+    "template_id": "evacuation-tsunami-severe",
+    "hazard_type": "tsunami",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO SÓNG THẦN — {location}",
+    "body_template": "Cảnh báo sóng thần đã được ban hành cho {location}. Các đợt sóng nguy hiểm dự kiến từ {time}. {severity_detail}.",
+    "action_items_template": "DI CHUYỂN đến vùng đất cao ngay lập tức. KHÔNG ra bãi biển. Tránh xa các khu vực ven biển. Gọi 000 cho trường hợp khẩn cấp. Truy cập {help_url} để biết các vùng an toàn."
+  },
+  {
+    "template_id": "evacuation-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO KHẨN CẤP — {location}",
+    "body_template": "Tình trạng khẩn cấp đang diễn ra tại {location}. Tình hình có thể nguy hiểm từ {time}. {severity_detail}.",
+    "action_items_template": "Tuân theo chỉ đạo của dịch vụ khẩn cấp. Chuẩn bị sơ tán nếu được yêu cầu. Gọi 000 cho trường hợp khẩn cấp. Truy cập {help_url} để biết thêm thông tin."
+  },
+  {
+    "template_id": "shelter-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "vi",
+    "title_template": "TRÚ ẨN TẠI CHỖ — BÃO — {location}",
+    "body_template": "Đã quá muộn để sơ tán an toàn khỏi {location}. Trú ẩn ở phần kiên cố nhất của tòa nhà, tránh xa cửa sổ. Tâm bão dự kiến đến vào {time}. {severity_detail}.",
+    "action_items_template": "Ở trong nhà tại phòng kiên cố nhất. Tránh xa cửa sổ. Nếu tòa nhà bị hư hại, trú ẩn dưới bàn chắc chắn. Gọi 000 cho các trường hợp khẩn cấp đe dọa tính mạng."
+  },
+  {
+    "template_id": "shelter-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "vi",
+    "title_template": "TRÚ ẨN TẠI CHỖ — CHÁY RỪNG — {location}",
+    "body_template": "Đã quá muộn để rời khỏi {location}. Mặt trận lửa sắp đến. Trú ẩn trong tòa nhà, đóng tất cả cửa sổ và cửa ra vào. {severity_detail}.",
+    "action_items_template": "Đi đến phòng có hai lối thoát. Đóng tất cả cửa ra vào và cửa sổ. Đổ đầy nước vào bồn rửa. Nằm sát mặt đất. Gọi 000 cho các trường hợp khẩn cấp đe dọa tính mạng."
+  },
+  {
+    "template_id": "shelter-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "vi",
+    "title_template": "TRÚ ẨN TẠI CHỖ — {location}",
+    "body_template": "Khuyến cáo trú ẩn tại chỗ cho {location}. Ở trong nhà cho đến khi có thông báo mới. {severity_detail}.",
+    "action_items_template": "Ở trong nhà. Đóng cửa sổ và cửa ra vào. Theo dõi các bản tin khẩn cấp. Gọi 000 cho trường hợp khẩn cấp."
+  },
+  {
+    "template_id": "allclear-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "vi",
+    "title_template": "HẾT NGUY HIỂM — Mối đe dọa bão đã qua — {location}",
+    "body_template": "Mối đe dọa bão tại {location} đã qua. Bây giờ an toàn để rời nơi trú ẩn. Chú ý mảnh vỡ và cơ sở hạ tầng bị hư hại. {severity_detail}.",
+    "action_items_template": "Kiểm tra tài sản của bạn xem có bị hư hại không. Tránh xa dây điện bị đứt. Báo cáo thiệt hại cho SES theo số 132 500. Truy cập {help_url} để được hỗ trợ phục hồi."
+  },
+  {
+    "template_id": "allclear-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "vi",
+    "title_template": "HẾT NGUY HIỂM — Cháy rừng đã được kiểm soát — {location}",
+    "body_template": "Đám cháy rừng gần {location} đã được kiểm soát. Mối đe dọa trực tiếp đã qua. Cảnh giác với các đám cháy nhỏ lẻ. {severity_detail}.",
+    "action_items_template": "Kiểm tra tài sản của bạn xem có tàn lửa và đám cháy nhỏ lẻ không. Báo cáo bất kỳ đám cháy nào cho số 000. Truy cập {help_url} để biết thông tin phục hồi."
+  },
+  {
+    "template_id": "allclear-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "vi",
+    "title_template": "HẾT NGUY HIỂM — Nước lũ đang rút — {location}",
+    "body_template": "Nước lũ tại {location} đang rút. Mối đe dọa lũ lụt trực tiếp đã qua. KHÔNG đi vào vùng nước lũ. {severity_detail}.",
+    "action_items_template": "KHÔNG lái xe qua vùng nước lũ. Báo cáo thiệt hại đường bộ. Gọi SES theo số 132 500 để được hỗ trợ. Truy cập {help_url} để biết thông tin phục hồi."
+  },
+  {
+    "template_id": "allclear-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "vi",
+    "title_template": "HẾT NGUY HIỂM — {location}",
+    "body_template": "Tình trạng khẩn cấp tại {location} đã được giải quyết. Các hoạt động bình thường có thể được tiếp tục. {severity_detail}.",
+    "action_items_template": "Kiểm tra thiệt hại. Tuân theo các hướng dẫn còn lại từ dịch vụ khẩn cấp. Truy cập {help_url} để biết thêm thông tin."
+  },
+  {
+    "template_id": "warning-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "vi",
+    "title_template": "THEO DÕI BÃO — {location}",
+    "body_template": "Một cơn bão có thể ảnh hưởng đến {location} từ {time}. Điều kiện thời tiết có thể xấu đi. {severity_detail}.",
+    "action_items_template": "Theo dõi tình hình. Chuẩn bị bộ dụng cụ khẩn cấp. Gia cố nhà cửa. Nghe đài ABC Radio để cập nhật. Truy cập {help_url} để biết mẹo chuẩn bị."
+  },
+  {
+    "template_id": "warning-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "vi",
+    "title_template": "THÔNG BÁO CHÁY RỪNG — {location}",
+    "body_template": "Một đám cháy rừng đã được báo cáo gần {location}. Không có mối đe dọa trực tiếp nhưng tình hình có thể thay đổi. {severity_detail}.",
+    "action_items_template": "Luôn cập nhật thông tin. Kích hoạt kế hoạch sinh tồn cháy rừng. Theo dõi cập nhật từ cơ quan phòng cháy. Truy cập {help_url} để biết thêm thông tin."
+  },
+  {
+    "template_id": "warning-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "vi",
+    "title_template": "THEO DÕI LŨ LỤT — {location}",
+    "body_template": "Có khả năng xảy ra lũ lụt tại {location}. Mực nước sông có thể dâng từ {time}. {severity_detail}.",
+    "action_items_template": "Theo dõi mực nước sông. Chuẩn bị di chuyển đồ đạc có giá trị lên vùng cao. Gọi SES theo số 132 500 để nhận bao cát. Truy cập {help_url} để cập nhật."
+  },
+  {
+    "template_id": "warning-storm-moderate",
+    "hazard_type": "storm",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "vi",
+    "title_template": "CẢNH BÁO GIÔNG BÃO — {location}",
+    "body_template": "Giông bão dự kiến ảnh hưởng đến {location} từ {time}. Có thể có gió mạnh gây thiệt hại và mưa lớn. {severity_detail}.",
+    "action_items_template": "Cố định các vật dụng không chắc chắn. Di chuyển xe vào nơi có mái che. Luôn cập nhật thông tin. Truy cập {help_url} để cập nhật."
+  },
+  {
+    "template_id": "warning-general-moderate",
+    "hazard_type": "general",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "vi",
+    "title_template": "THÔNG TIN KHẨN CẤP — {location}",
+    "body_template": "Một tình trạng khẩn cấp đang phát triển tại {location}. Hãy cập nhật thông tin và chuẩn bị tuân theo chỉ đạo từ dịch vụ khẩn cấp. {severity_detail}.",
+    "action_items_template": "Theo dõi các bản tin khẩn cấp. Chuẩn bị bộ dụng cụ khẩn cấp. Tuân theo hướng dẫn từ dịch vụ khẩn cấp. Truy cập {help_url} để biết thêm thông tin."
+  }
+]

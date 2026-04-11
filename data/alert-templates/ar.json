@@ -1,0 +1,222 @@
+[
+  {
+    "template_id": "evacuation-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "ar",
+    "title_template": "تحذير إعصار شديد — {location}",
+    "body_template": "إعصار شديد يقترب من {location}. من المتوقع أن تتدهور الأحوال الجوية اعتباراً من {time}. قد تتجاوز هبات الرياح {wind_speed}. {severity_detail}.",
+    "action_items_template": "قم بالإخلاء فوراً إذا وجهتك خدمات الطوارئ. انتقل إلى أرض مرتفعة. استمع إلى راديو ABC للحصول على التحديثات. اتصل بالرقم 000 لحالات الطوارئ المهددة للحياة. قم بزيارة {help_url} لمعرفة مراكز الإخلاء."
+  },
+  {
+    "template_id": "evacuation-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "ar",
+    "title_template": "تحذير إعصار — {location}",
+    "body_template": "إعصار يقترب من {location}. قد تتدهور الأحوال الجوية اعتباراً من {time}. من المتوقع هبات رياح. {severity_detail}.",
+    "action_items_template": "استعد للإخلاء إذا صدرت التوجيهات. قم بتأمين الأغراض غير المثبتة. استمع إلى راديو ABC للتحديثات. اتصل بالرقم 000 لحالات الطوارئ. قم بزيارة {help_url} للحصول على المعلومات."
+  },
+  {
+    "template_id": "evacuation-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "ar",
+    "title_template": "تحذير طوارئ حريق أحراش — {location}",
+    "body_template": "حريق أحراش خطير يهدد {location}. الحريق خارج السيطرة ويشكل تهديداً خطيراً على الحياة. من المتوقع أن تسوء الأوضاع اعتباراً من {time}. {severity_detail}.",
+    "action_items_template": "غادر الآن إذا كان طريقك آمناً. فات الأوان للبقاء. اتبع خطة النجاة من حرائق الأحراش. اتصل بالرقم 000 لحالات الطوارئ المهددة للحياة. قم بزيارة {help_url} لمعرفة مواقع الملاجئ."
+  },
+  {
+    "template_id": "evacuation-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "ar",
+    "title_template": "تحذير حريق أحراش — {location}",
+    "body_template": "حريق أحراش مشتعل بالقرب من {location}. قد تتغير الأوضاع بسرعة اعتباراً من {time}. {severity_detail}.",
+    "action_items_template": "استعد للمغادرة. راقب الأوضاع عن كثب. اتبع خطة النجاة من حرائق الأحراش. اتصل بالرقم 000 لحالات الطوارئ. قم بزيارة {help_url} للتحديثات."
+  },
+  {
+    "template_id": "evacuation-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "ar",
+    "title_template": "تحذير فيضان كبير — {location}",
+    "body_template": "فيضان كبير يحدث أو متوقع في {location}. مستويات المياه ترتفع بسرعة. فيضانات مفاجئة محتملة اعتباراً من {time}. {severity_detail}.",
+    "action_items_template": "أخلِ المناطق المنخفضة فوراً. لا تدخل مياه الفيضان. انتقل إلى أرض مرتفعة. اتصل بالرقم 132 500 لمساعدة SES. قم بزيارة {help_url} لمعرفة مراكز الإخلاء."
+  },
+  {
+    "template_id": "evacuation-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "ar",
+    "title_template": "تحذير فيضان — {location}",
+    "body_template": "فيضان محتمل في {location}. قد ترتفع مستويات المياه اعتباراً من {time}. {severity_detail}.",
+    "action_items_template": "استعد لإخلاء المناطق المنخفضة. تجنب مياه الفيضان. اتصل بالرقم 132 500 لمساعدة SES. قم بزيارة {help_url} للتحديثات."
+  },
+  {
+    "template_id": "evacuation-storm-severe",
+    "hazard_type": "storm",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "ar",
+    "title_template": "تحذير عاصفة شديدة — {location}",
+    "body_template": "عاصفة شديدة تقترب من {location}. من المتوقع رياح مدمرة وأمطار غزيرة وبرد كبير اعتباراً من {time}. {severity_detail}.",
+    "action_items_template": "ابحث عن ملجأ فوراً. ابقَ في الداخل بعيداً عن النوافذ. قم بتأمين الأغراض الخارجية غير المثبتة. اتصل بالرقم 000 لحالات الطوارئ. قم بزيارة {help_url} للتحديثات."
+  },
+  {
+    "template_id": "evacuation-earthquake-severe",
+    "hazard_type": "earthquake",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "ar",
+    "title_template": "تنبيه زلزال — {location}",
+    "body_template": "وقع زلزال كبير بالقرب من {location}. من المتوقع حدوث هزات ارتدادية. قد تكون هناك أضرار في المباني. {severity_detail}.",
+    "action_items_template": "انخفض، احتمِ، تمسك. ابتعد عن المباني المتضررة. تحقق من تسرب الغاز. اتصل بالرقم 000 لحالات الطوارئ. قم بزيارة {help_url} للتحديثات."
+  },
+  {
+    "template_id": "evacuation-tsunami-severe",
+    "hazard_type": "tsunami",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "ar",
+    "title_template": "تحذير تسونامي — {location}",
+    "body_template": "صدر تحذير من تسونامي لمنطقة {location}. من المتوقع أمواج خطيرة اعتباراً من {time}. {severity_detail}.",
+    "action_items_template": "انتقل إلى أرض مرتفعة فوراً. لا تذهب إلى الشاطئ. ابتعد عن المناطق الساحلية. اتصل بالرقم 000 لحالات الطوارئ. قم بزيارة {help_url} لمعرفة المناطق الآمنة."
+  },
+  {
+    "template_id": "evacuation-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "ar",
+    "title_template": "تحذير طوارئ — {location}",
+    "body_template": "توجد حالة طوارئ في {location}. قد تكون الأوضاع خطيرة اعتباراً من {time}. {severity_detail}.",
+    "action_items_template": "اتبع تعليمات خدمات الطوارئ. استعد للإخلاء إذا صدرت التوجيهات. اتصل بالرقم 000 لحالات الطوارئ. قم بزيارة {help_url} للحصول على المعلومات."
+  },
+  {
+    "template_id": "shelter-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "ar",
+    "title_template": "احتمِ في مكانك — إعصار — {location}",
+    "body_template": "فات الأوان للإخلاء بأمان من {location}. احتمِ في أقوى جزء من المبنى بعيداً عن النوافذ. من المتوقع وصول مركز الإعصار في {time}. {severity_detail}.",
+    "action_items_template": "ابقَ في الداخل في أقوى غرفة. ابتعد عن النوافذ. إذا تضرر المبنى، احتمِ تحت طاولة متينة. اتصل بالرقم 000 لحالات الطوارئ المهددة للحياة."
+  },
+  {
+    "template_id": "shelter-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "ar",
+    "title_template": "احتمِ في مكانك — حريق أحراش — {location}",
+    "body_template": "فات الأوان لمغادرة {location}. جبهة النار وشيكة. احتمِ في مبنى وأغلق جميع النوافذ والأبواب. {severity_detail}.",
+    "action_items_template": "اذهب إلى غرفة بها مخرجان. أغلق جميع الأبواب والنوافذ. املأ الأحواض بالماء. ابقَ منخفضاً على الأرض. اتصل بالرقم 000 لحالات الطوارئ المهددة للحياة."
+  },
+  {
+    "template_id": "shelter-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "ar",
+    "title_template": "احتمِ في مكانك — {location}",
+    "body_template": "يُنصح سكان {location} بالاحتماء في أماكنهم. ابقَ في الداخل حتى إشعار آخر. {severity_detail}.",
+    "action_items_template": "ابقَ في الداخل. أغلق النوافذ والأبواب. تابع بث الطوارئ. اتصل بالرقم 000 لحالات الطوارئ."
+  },
+  {
+    "template_id": "allclear-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "ar",
+    "title_template": "انتهاء الخطر — زوال تهديد الإعصار — {location}",
+    "body_template": "تهديد الإعصار في {location} قد زال. أصبح من الآمن الآن مغادرة الملجأ. احذر من الحطام والبنية التحتية المتضررة. {severity_detail}.",
+    "action_items_template": "تفقد ممتلكاتك بحثاً عن أضرار. تجنب خطوط الكهرباء المتساقطة. أبلغ عن الأضرار لـ SES على الرقم 132 500. قم بزيارة {help_url} للحصول على مساعدة التعافي."
+  },
+  {
+    "template_id": "allclear-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "ar",
+    "title_template": "انتهاء الخطر — احتواء حريق الأحراش — {location}",
+    "body_template": "تم احتواء حريق الأحراش بالقرب من {location}. التهديد المباشر قد زال. كن يقظاً لحرائق متفرقة. {severity_detail}.",
+    "action_items_template": "تفقد ممتلكاتك بحثاً عن جمرات وحرائق متفرقة. أبلغ عن أي حرائق بالاتصال بالرقم 000. قم بزيارة {help_url} للحصول على معلومات التعافي."
+  },
+  {
+    "template_id": "allclear-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "ar",
+    "title_template": "انتهاء الخطر — انحسار مياه الفيضان — {location}",
+    "body_template": "مياه الفيضان في {location} تنحسر. تهديد الفيضان المباشر قد زال. لا تدخل مياه الفيضان. {severity_detail}.",
+    "action_items_template": "لا تقد سيارتك عبر مياه الفيضان. أبلغ عن أضرار الطرق. اتصل بـ SES على الرقم 132 500 للمساعدة. قم بزيارة {help_url} للحصول على معلومات التعافي."
+  },
+  {
+    "template_id": "allclear-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "ar",
+    "title_template": "انتهاء الخطر — {location}",
+    "body_template": "حالة الطوارئ في {location} قد انتهت. يمكن استئناف الأنشطة العادية. {severity_detail}.",
+    "action_items_template": "تحقق من وجود أضرار. اتبع أي تعليمات متبقية من خدمات الطوارئ. قم بزيارة {help_url} للحصول على المعلومات."
+  },
+  {
+    "template_id": "warning-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "ar",
+    "title_template": "مراقبة إعصار — {location}",
+    "body_template": "قد يؤثر إعصار على {location} اعتباراً من {time}. قد تتدهور الأوضاع. {severity_detail}.",
+    "action_items_template": "راقب الأوضاع. جهّز حقيبة طوارئ. قم بتأمين ممتلكاتك. استمع إلى راديو ABC للتحديثات. قم بزيارة {help_url} لنصائح الاستعداد."
+  },
+  {
+    "template_id": "warning-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "ar",
+    "title_template": "إرشادات حريق أحراش — {location}",
+    "body_template": "تم الإبلاغ عن حريق أحراش بالقرب من {location}. لا يوجد تهديد مباشر لكن الأوضاع قد تتغير. {severity_detail}.",
+    "action_items_template": "ابقَ على اطلاع. فعّل خطة النجاة من حرائق الأحراش. تابع تحديثات وكالات الإطفاء. قم بزيارة {help_url} للحصول على المعلومات."
+  },
+  {
+    "template_id": "warning-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "ar",
+    "title_template": "مراقبة فيضان — {location}",
+    "body_template": "فيضان محتمل في {location}. قد ترتفع مستويات الأنهار اعتباراً من {time}. {severity_detail}.",
+    "action_items_template": "راقب مستويات الأنهار. استعد لنقل الأشياء الثمينة إلى أرض مرتفعة. اتصل بـ SES على الرقم 132 500 للحصول على أكياس رمل. قم بزيارة {help_url} للتحديثات."
+  },
+  {
+    "template_id": "warning-storm-moderate",
+    "hazard_type": "storm",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "ar",
+    "title_template": "تحذير عاصفة — {location}",
+    "body_template": "من المتوقع أن تؤثر عواصف على {location} اعتباراً من {time}. رياح مدمرة وأمطار غزيرة محتملة. {severity_detail}.",
+    "action_items_template": "قم بتأمين الأغراض غير المثبتة. انقل المركبات تحت مظلة. ابقَ على اطلاع. قم بزيارة {help_url} للتحديثات."
+  },
+  {
+    "template_id": "warning-general-moderate",
+    "hazard_type": "general",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "ar",
+    "title_template": "معلومات طوارئ — {location}",
+    "body_template": "حالة طوارئ تتطور في {location}. ابقَ على اطلاع واستعد لاتباع تعليمات خدمات الطوارئ. {severity_detail}.",
+    "action_items_template": "تابع بث الطوارئ. جهّز حقيبة طوارئ. اتبع تعليمات خدمات الطوارئ. قم بزيارة {help_url} للحصول على المعلومات."
+  }
+]

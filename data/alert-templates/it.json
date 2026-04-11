@@ -1,0 +1,222 @@
+[
+  {
+    "template_id": "evacuation-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "it",
+    "title_template": "AVVISO CICLONE GRAVE — {location}",
+    "body_template": "Un ciclone grave si sta avvicinando a {location}. Le condizioni dovrebbero peggiorare a partire dalle {time}. Le raffiche di vento potrebbero superare {wind_speed}. {severity_detail}.",
+    "action_items_template": "EVACUARE immediatamente se indicato dai servizi di emergenza. Spostarsi su un terreno più elevato. Ascoltare ABC Radio per aggiornamenti. Chiamare 000 per emergenze che mettono in pericolo la vita. Visitare {help_url} per i centri di evacuazione."
+  },
+  {
+    "template_id": "evacuation-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "it",
+    "title_template": "AVVISO CICLONE — {location}",
+    "body_template": "Un ciclone si sta avvicinando a {location}. Le condizioni potrebbero peggiorare a partire dalle {time}. Sono previste raffiche di vento. {severity_detail}.",
+    "action_items_template": "Prepararsi a evacuare se richiesto. Mettere in sicurezza gli oggetti non fissati. Ascoltare ABC Radio per aggiornamenti. Chiamare 000 per emergenze. Visitare {help_url} per informazioni."
+  },
+  {
+    "template_id": "evacuation-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "it",
+    "title_template": "AVVISO DI EMERGENZA INCENDIO BOSCHIVO — {location}",
+    "body_template": "Un pericoloso incendio boschivo sta minacciando {location}. L'incendio è fuori controllo e rappresenta una grave minaccia per la vita. Le condizioni dovrebbero peggiorare a partire dalle {time}. {severity_detail}.",
+    "action_items_template": "PARTIRE ORA se il percorso è libero. È troppo tardi per restare. Seguire il piano di sopravvivenza agli incendi boschivi. Chiamare 000 per emergenze che mettono in pericolo la vita. Visitare {help_url} per le posizioni dei rifugi."
+  },
+  {
+    "template_id": "evacuation-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "it",
+    "title_template": "AVVISO INCENDIO BOSCHIVO — {location}",
+    "body_template": "Un incendio boschivo sta bruciando vicino a {location}. Le condizioni potrebbero cambiare rapidamente a partire dalle {time}. {severity_detail}.",
+    "action_items_template": "Prepararsi a partire. Monitorare attentamente le condizioni. Seguire il piano di sopravvivenza agli incendi boschivi. Chiamare 000 per emergenze. Visitare {help_url} per aggiornamenti."
+  },
+  {
+    "template_id": "evacuation-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "it",
+    "title_template": "AVVISO ALLUVIONE GRAVE — {location}",
+    "body_template": "Un'alluvione grave è in corso o prevista a {location}. I livelli dell'acqua stanno salendo rapidamente. Alluvioni improvvise sono possibili a partire dalle {time}. {severity_detail}.",
+    "action_items_template": "EVACUARE immediatamente le zone basse. NON entrare nelle acque alluvionali. Spostarsi su un terreno più elevato. Chiamare 132 500 per assistenza SES. Visitare {help_url} per i centri di evacuazione."
+  },
+  {
+    "template_id": "evacuation-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "it",
+    "title_template": "AVVISO ALLUVIONE — {location}",
+    "body_template": "Alluvioni possibili a {location}. I livelli dell'acqua potrebbero salire a partire dalle {time}. {severity_detail}.",
+    "action_items_template": "Prepararsi a evacuare le zone basse. Evitare le acque alluvionali. Chiamare 132 500 per assistenza SES. Visitare {help_url} per aggiornamenti."
+  },
+  {
+    "template_id": "evacuation-storm-severe",
+    "hazard_type": "storm",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "it",
+    "title_template": "AVVISO TEMPESTA GRAVE — {location}",
+    "body_template": "Una tempesta grave si sta avvicinando a {location}. Venti distruttivi, forti precipitazioni e grandine di grandi dimensioni sono previsti a partire dalle {time}. {severity_detail}.",
+    "action_items_template": "Cercare riparo immediatamente. Restare al chiuso lontano dalle finestre. Mettere in sicurezza gli oggetti esterni non fissati. Chiamare 000 per emergenze. Visitare {help_url} per aggiornamenti."
+  },
+  {
+    "template_id": "evacuation-earthquake-severe",
+    "hazard_type": "earthquake",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "it",
+    "title_template": "ALLERTA TERREMOTO — {location}",
+    "body_template": "Un terremoto significativo si è verificato vicino a {location}. Sono previste scosse di assestamento. Potrebbero esserci danni agli edifici. {severity_detail}.",
+    "action_items_template": "Abbassarsi, Coprirsi, Tenersi. Allontanarsi dagli edifici danneggiati. Controllare eventuali fughe di gas. Chiamare 000 per emergenze. Visitare {help_url} per aggiornamenti."
+  },
+  {
+    "template_id": "evacuation-tsunami-severe",
+    "hazard_type": "tsunami",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "it",
+    "title_template": "AVVISO TSUNAMI — {location}",
+    "body_template": "È stato emesso un avviso di tsunami per {location}. Onde pericolose sono previste a partire dalle {time}. {severity_detail}.",
+    "action_items_template": "SPOSTARSI su un terreno elevato immediatamente. NON andare in spiaggia. Restare lontani dalle zone costiere. Chiamare 000 per emergenze. Visitare {help_url} per le zone sicure."
+  },
+  {
+    "template_id": "evacuation-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "it",
+    "title_template": "AVVISO DI EMERGENZA — {location}",
+    "body_template": "Esiste una situazione di emergenza a {location}. Le condizioni potrebbero essere pericolose a partire dalle {time}. {severity_detail}.",
+    "action_items_template": "Seguire le indicazioni dei servizi di emergenza. Prepararsi a evacuare se richiesto. Chiamare 000 per emergenze. Visitare {help_url} per informazioni."
+  },
+  {
+    "template_id": "shelter-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "it",
+    "title_template": "RIPARO SUL POSTO — CICLONE — {location}",
+    "body_template": "È troppo tardi per evacuare in sicurezza da {location}. Ripararsi nella parte più resistente dell'edificio, lontano dalle finestre. Il nucleo del ciclone è previsto per le {time}. {severity_detail}.",
+    "action_items_template": "Restare al chiuso nella stanza più resistente. Restare lontani dalle finestre. Se l'edificio è danneggiato, ripararsi sotto un tavolo robusto. Chiamare 000 per emergenze che mettono in pericolo la vita."
+  },
+  {
+    "template_id": "shelter-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "it",
+    "title_template": "RIPARO SUL POSTO — INCENDIO BOSCHIVO — {location}",
+    "body_template": "È troppo tardi per lasciare {location}. Il fronte del fuoco è imminente. Ripararsi in un edificio, chiudere tutte le finestre e le porte. {severity_detail}.",
+    "action_items_template": "Andare in una stanza con due uscite. Chiudere tutte le porte e le finestre. Riempire i lavandini con acqua. Restare bassi a terra. Chiamare 000 per emergenze che mettono in pericolo la vita."
+  },
+  {
+    "template_id": "shelter-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "it",
+    "title_template": "RIPARO SUL POSTO — {location}",
+    "body_template": "Si raccomanda il riparo sul posto per {location}. Restare al chiuso fino a nuovo avviso. {severity_detail}.",
+    "action_items_template": "Restare al chiuso. Chiudere finestre e porte. Monitorare le trasmissioni di emergenza. Chiamare 000 per emergenze."
+  },
+  {
+    "template_id": "allclear-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "it",
+    "title_template": "CESSATO ALLARME — Minaccia ciclone passata — {location}",
+    "body_template": "La minaccia del ciclone per {location} è passata. Ora è sicuro lasciare il rifugio. Fare attenzione ai detriti e alle infrastrutture danneggiate. {severity_detail}.",
+    "action_items_template": "Controllare la propria proprietà per danni. Evitare i cavi elettrici caduti. Segnalare i danni al SES al 132 500. Visitare {help_url} per assistenza al recupero."
+  },
+  {
+    "template_id": "allclear-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "it",
+    "title_template": "CESSATO ALLARME — Incendio boschivo contenuto — {location}",
+    "body_template": "L'incendio boschivo vicino a {location} è stato contenuto. La minaccia immediata è passata. Restare vigili per focolai isolati. {severity_detail}.",
+    "action_items_template": "Controllare la propria proprietà per braci e focolai isolati. Segnalare eventuali incendi al 000. Visitare {help_url} per informazioni sul recupero."
+  },
+  {
+    "template_id": "allclear-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "it",
+    "title_template": "CESSATO ALLARME — Acque alluvionali in calo — {location}",
+    "body_template": "Le acque alluvionali a {location} stanno calando. La minaccia immediata di alluvione è passata. NON entrare nelle acque alluvionali. {severity_detail}.",
+    "action_items_template": "NON guidare attraverso acque alluvionali. Segnalare danni stradali. Chiamare SES al 132 500 per assistenza. Visitare {help_url} per informazioni sul recupero."
+  },
+  {
+    "template_id": "allclear-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "it",
+    "title_template": "CESSATO ALLARME — {location}",
+    "body_template": "La situazione di emergenza a {location} è stata risolta. Le attività normali possono riprendere. {severity_detail}.",
+    "action_items_template": "Controllare eventuali danni. Seguire le eventuali istruzioni rimanenti dei servizi di emergenza. Visitare {help_url} per informazioni."
+  },
+  {
+    "template_id": "warning-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "it",
+    "title_template": "SORVEGLIANZA CICLONE — {location}",
+    "body_template": "Un ciclone potrebbe colpire {location} a partire dalle {time}. Le condizioni potrebbero peggiorare. {severity_detail}.",
+    "action_items_template": "Monitorare le condizioni. Preparare un kit di emergenza. Mettere in sicurezza la propria proprietà. Ascoltare ABC Radio per aggiornamenti. Visitare {help_url} per consigli di preparazione."
+  },
+  {
+    "template_id": "warning-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "it",
+    "title_template": "INFORMAZIONI INCENDIO BOSCHIVO — {location}",
+    "body_template": "È stato segnalato un incendio boschivo vicino a {location}. Non c'è minaccia immediata ma le condizioni potrebbero cambiare. {severity_detail}.",
+    "action_items_template": "Restare informati. Attivare il piano di sopravvivenza agli incendi boschivi. Monitorare gli aggiornamenti delle agenzie antincendio. Visitare {help_url} per informazioni."
+  },
+  {
+    "template_id": "warning-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "it",
+    "title_template": "SORVEGLIANZA ALLUVIONE — {location}",
+    "body_template": "Alluvioni possibili a {location}. I livelli dei fiumi potrebbero salire a partire dalle {time}. {severity_detail}.",
+    "action_items_template": "Monitorare i livelli dei fiumi. Prepararsi a spostare oggetti di valore su un terreno più alto. Chiamare SES al 132 500 per sacchi di sabbia. Visitare {help_url} per aggiornamenti."
+  },
+  {
+    "template_id": "warning-storm-moderate",
+    "hazard_type": "storm",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "it",
+    "title_template": "AVVISO TEMPESTA — {location}",
+    "body_template": "Tempeste previste che colpiranno {location} a partire dalle {time}. Venti dannosi e forti piogge sono possibili. {severity_detail}.",
+    "action_items_template": "Mettere in sicurezza gli oggetti non fissati. Spostare i veicoli al coperto. Restare informati. Visitare {help_url} per aggiornamenti."
+  },
+  {
+    "template_id": "warning-general-moderate",
+    "hazard_type": "general",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "it",
+    "title_template": "INFORMAZIONI DI EMERGENZA — {location}",
+    "body_template": "Una situazione di emergenza si sta sviluppando a {location}. Restare informati e prepararsi a seguire le indicazioni dei servizi di emergenza. {severity_detail}.",
+    "action_items_template": "Monitorare le trasmissioni di emergenza. Preparare un kit di emergenza. Seguire le istruzioni dei servizi di emergenza. Visitare {help_url} per informazioni."
+  }
+]

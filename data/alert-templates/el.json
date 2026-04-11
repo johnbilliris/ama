@@ -1,0 +1,222 @@
+[
+  {
+    "template_id": "evacuation-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "el",
+    "title_template": "ΣΟΒΑΡΗ ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΚΥΚΛΩΝΑ — {location}",
+    "body_template": "Ένας σοβαρός κυκλώνας πλησιάζει στην περιοχή {location}. Οι συνθήκες αναμένεται να επιδεινωθούν από τις {time}. Οι ριπές ανέμου μπορεί να υπερβούν τα {wind_speed}. {severity_detail}.",
+    "action_items_template": "ΕΚΚΕΝΩΣΤΕ αμέσως εάν σας δοθεί εντολή από τις υπηρεσίες έκτακτης ανάγκης. Μετακινηθείτε σε υψηλότερο έδαφος. Ακούστε το ABC Radio για ενημερώσεις. Καλέστε 000 για απειλητικές για τη ζωή καταστάσεις. Επισκεφθείτε {help_url} για κέντρα εκκένωσης."
+  },
+  {
+    "template_id": "evacuation-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "el",
+    "title_template": "ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΚΥΚΛΩΝΑ — {location}",
+    "body_template": "Ένας κυκλώνας πλησιάζει στην περιοχή {location}. Οι συνθήκες μπορεί να επιδεινωθούν από τις {time}. Αναμένονται ριπές ανέμου. {severity_detail}.",
+    "action_items_template": "Ετοιμαστείτε για εκκένωση εάν δοθεί εντολή. Ασφαλίστε τα χαλαρά αντικείμενα. Ακούστε το ABC Radio για ενημερώσεις. Καλέστε 000 για έκτακτες ανάγκες. Επισκεφθείτε {help_url} για πληροφορίες."
+  },
+  {
+    "template_id": "evacuation-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "el",
+    "title_template": "ΕΚΤΑΚΤΗ ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΔΑΣΙΚΗΣ ΠΥΡΚΑΓΙΑΣ — {location}",
+    "body_template": "Μια επικίνδυνη δασική πυρκαγιά απειλεί την περιοχή {location}. Η φωτιά είναι εκτός ελέγχου και αποτελεί σοβαρή απειλή για τη ζωή. Οι συνθήκες αναμένεται να επιδεινωθούν από τις {time}. {severity_detail}.",
+    "action_items_template": "ΦΥΓΕΤΕ ΤΩΡΑ αν ο δρόμος σας είναι ελεύθερος. Είναι πολύ αργά για να μείνετε. Ακολουθήστε το σχέδιο επιβίωσης από πυρκαγιά. Καλέστε 000 για απειλητικές για τη ζωή καταστάσεις. Επισκεφθείτε {help_url} για τοποθεσίες καταφυγίων."
+  },
+  {
+    "template_id": "evacuation-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "el",
+    "title_template": "ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΔΑΣΙΚΗΣ ΠΥΡΚΑΓΙΑΣ — {location}",
+    "body_template": "Μια δασική πυρκαγιά καίει κοντά στην περιοχή {location}. Οι συνθήκες μπορεί να αλλάξουν γρήγορα από τις {time}. {severity_detail}.",
+    "action_items_template": "Ετοιμαστείτε να φύγετε. Παρακολουθήστε τις συνθήκες προσεκτικά. Ακολουθήστε το σχέδιο επιβίωσης από πυρκαγιά. Καλέστε 000 για έκτακτες ανάγκες. Επισκεφθείτε {help_url} για ενημερώσεις."
+  },
+  {
+    "template_id": "evacuation-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "el",
+    "title_template": "ΣΟΒΑΡΗ ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΠΛΗΜΜΥΡΑΣ — {location}",
+    "body_template": "Σοβαρές πλημμύρες συμβαίνουν ή αναμένονται στην περιοχή {location}. Η στάθμη του νερού ανεβαίνει ραγδαία. Αιφνίδιες πλημμύρες είναι πιθανές από τις {time}. {severity_detail}.",
+    "action_items_template": "ΕΚΚΕΝΩΣΤΕ τις χαμηλές περιοχές αμέσως. ΜΗΝ μπαίνετε σε νερά πλημμύρας. Μετακινηθείτε σε υψηλότερο έδαφος. Καλέστε 132 500 για βοήθεια SES. Επισκεφθείτε {help_url} για κέντρα εκκένωσης."
+  },
+  {
+    "template_id": "evacuation-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "el",
+    "title_template": "ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΠΛΗΜΜΥΡΑΣ — {location}",
+    "body_template": "Πλημμύρες είναι πιθανές στην περιοχή {location}. Η στάθμη του νερού μπορεί να ανέβει από τις {time}. {severity_detail}.",
+    "action_items_template": "Ετοιμαστείτε να εκκενώσετε τις χαμηλές περιοχές. Αποφύγετε τα νερά πλημμύρας. Καλέστε 132 500 για βοήθεια SES. Επισκεφθείτε {help_url} για ενημερώσεις."
+  },
+  {
+    "template_id": "evacuation-storm-severe",
+    "hazard_type": "storm",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "el",
+    "title_template": "ΣΟΒΑΡΗ ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΚΑΤΑΙΓΙΔΑΣ — {location}",
+    "body_template": "Μια σοβαρή καταιγίδα πλησιάζει στην περιοχή {location}. Καταστροφικοί άνεμοι, ισχυρές βροχοπτώσεις και μεγάλο χαλάζι αναμένονται από τις {time}. {severity_detail}.",
+    "action_items_template": "Αναζητήστε καταφύγιο αμέσως. Μείνετε σε εσωτερικό χώρο μακριά από παράθυρα. Ασφαλίστε τα χαλαρά εξωτερικά αντικείμενα. Καλέστε 000 για έκτακτες ανάγκες. Επισκεφθείτε {help_url} για ενημερώσεις."
+  },
+  {
+    "template_id": "evacuation-earthquake-severe",
+    "hazard_type": "earthquake",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "el",
+    "title_template": "ΕΙΔΟΠΟΙΗΣΗ ΣΕΙΣΜΟΥ — {location}",
+    "body_template": "Ένας σημαντικός σεισμός σημειώθηκε κοντά στην περιοχή {location}. Αναμένονται μετασεισμοί. Μπορεί να έχουν προκληθεί ζημιές σε κτίρια. {severity_detail}.",
+    "action_items_template": "Πέστε κάτω, Καλυφθείτε, Κρατηθείτε. Απομακρυνθείτε από κατεστραμμένα κτίρια. Ελέγξτε για διαρροές αερίου. Καλέστε 000 για έκτακτες ανάγκες. Επισκεφθείτε {help_url} για ενημερώσεις."
+  },
+  {
+    "template_id": "evacuation-tsunami-severe",
+    "hazard_type": "tsunami",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "el",
+    "title_template": "ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΤΣΟΥΝΑΜΙ — {location}",
+    "body_template": "Εκδόθηκε προειδοποίηση τσουνάμι για την περιοχή {location}. Επικίνδυνα κύματα αναμένονται από τις {time}. {severity_detail}.",
+    "action_items_template": "ΜΕΤΑΚΙΝΗΘΕΙΤΕ σε υψηλό έδαφος αμέσως. ΜΗΝ πηγαίνετε στην παραλία. Μείνετε μακριά από παράκτιες περιοχές. Καλέστε 000 για έκτακτες ανάγκες. Επισκεφθείτε {help_url} για ασφαλείς ζώνες."
+  },
+  {
+    "template_id": "evacuation-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "el",
+    "title_template": "ΕΚΤΑΚΤΗ ΠΡΟΕΙΔΟΠΟΙΗΣΗ — {location}",
+    "body_template": "Υπάρχει κατάσταση έκτακτης ανάγκης στην περιοχή {location}. Οι συνθήκες μπορεί να είναι επικίνδυνες από τις {time}. {severity_detail}.",
+    "action_items_template": "Ακολουθήστε τις οδηγίες των υπηρεσιών έκτακτης ανάγκης. Ετοιμαστείτε για εκκένωση εάν δοθεί εντολή. Καλέστε 000 για έκτακτες ανάγκες. Επισκεφθείτε {help_url} για πληροφορίες."
+  },
+  {
+    "template_id": "shelter-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "el",
+    "title_template": "ΚΑΤΑΦΥΓΙΟ ΣΤΟ ΧΩΡΟ — ΚΥΚΛΩΝΑΣ — {location}",
+    "body_template": "Είναι πολύ αργά για ασφαλή εκκένωση από την περιοχή {location}. Καταφυγείτε στο πιο ανθεκτικό μέρος του κτιρίου σας μακριά από παράθυρα. Ο πυρήνας του κυκλώνα αναμένεται στις {time}. {severity_detail}.",
+    "action_items_template": "Μείνετε σε εσωτερικό χώρο στο πιο ανθεκτικό δωμάτιο. Μείνετε μακριά από παράθυρα. Αν το κτίριο υποστεί ζημιά, καταφυγείτε κάτω από ένα ανθεκτικό τραπέζι. Καλέστε 000 για απειλητικές για τη ζωή καταστάσεις."
+  },
+  {
+    "template_id": "shelter-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "el",
+    "title_template": "ΚΑΤΑΦΥΓΙΟ ΣΤΟ ΧΩΡΟ — ΔΑΣΙΚΗ ΠΥΡΚΑΓΙΑ — {location}",
+    "body_template": "Είναι πολύ αργά για να φύγετε από την περιοχή {location}. Το μέτωπο της φωτιάς είναι επικείμενο. Καταφυγείτε σε κτίριο, κλείστε όλα τα παράθυρα και τις πόρτες. {severity_detail}.",
+    "action_items_template": "Πηγαίνετε σε δωμάτιο με δύο εξόδους. Κλείστε όλες τις πόρτες και τα παράθυρα. Γεμίστε τους νεροχύτες με νερό. Μείνετε χαμηλά στο έδαφος. Καλέστε 000 για απειλητικές για τη ζωή καταστάσεις."
+  },
+  {
+    "template_id": "shelter-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "el",
+    "title_template": "ΚΑΤΑΦΥΓΙΟ ΣΤΟ ΧΩΡΟ — {location}",
+    "body_template": "Συνιστάται καταφύγιο στο χώρο για την περιοχή {location}. Παραμείνετε σε εσωτερικό χώρο μέχρι νεωτέρας. {severity_detail}.",
+    "action_items_template": "Μείνετε σε εσωτερικό χώρο. Κλείστε παράθυρα και πόρτες. Παρακολουθήστε τις εκπομπές έκτακτης ανάγκης. Καλέστε 000 για έκτακτες ανάγκες."
+  },
+  {
+    "template_id": "allclear-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "el",
+    "title_template": "ΛΗΞΗ ΣΥΝΑΓΕΡΜΟΥ — Η απειλή κυκλώνα πέρασε — {location}",
+    "body_template": "Η απειλή κυκλώνα για την περιοχή {location} έχει περάσει. Είναι πλέον ασφαλές να εγκαταλείψετε το καταφύγιο. Προσέξτε τα συντρίμμια και τις κατεστραμμένες υποδομές. {severity_detail}.",
+    "action_items_template": "Ελέγξτε την ιδιοκτησία σας για ζημιές. Αποφύγετε τα πεσμένα ηλεκτρικά καλώδια. Αναφέρετε ζημιές στο SES στο 132 500. Επισκεφθείτε {help_url} για βοήθεια αποκατάστασης."
+  },
+  {
+    "template_id": "allclear-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "el",
+    "title_template": "ΛΗΞΗ ΣΥΝΑΓΕΡΜΟΥ — Δασική πυρκαγιά υπό έλεγχο — {location}",
+    "body_template": "Η δασική πυρκαγιά κοντά στην περιοχή {location} έχει τεθεί υπό έλεγχο. Η άμεση απειλή έχει περάσει. Παραμείνετε σε εγρήγορση για μεμονωμένες εστίες. {severity_detail}.",
+    "action_items_template": "Ελέγξτε την ιδιοκτησία σας για σπινθήρες και μεμονωμένες εστίες φωτιάς. Αναφέρετε οποιαδήποτε φωτιά στο 000. Επισκεφθείτε {help_url} για πληροφορίες αποκατάστασης."
+  },
+  {
+    "template_id": "allclear-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "el",
+    "title_template": "ΛΗΞΗ ΣΥΝΑΓΕΡΜΟΥ — Τα νερά πλημμύρας υποχωρούν — {location}",
+    "body_template": "Τα νερά πλημμύρας στην περιοχή {location} υποχωρούν. Η άμεση απειλή πλημμύρας έχει περάσει. ΜΗΝ μπαίνετε σε νερά πλημμύρας. {severity_detail}.",
+    "action_items_template": "ΜΗΝ οδηγείτε μέσα σε νερά πλημμύρας. Αναφέρετε ζημιές σε δρόμους. Καλέστε SES στο 132 500 για βοήθεια. Επισκεφθείτε {help_url} για πληροφορίες αποκατάστασης."
+  },
+  {
+    "template_id": "allclear-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "el",
+    "title_template": "ΛΗΞΗ ΣΥΝΑΓΕΡΜΟΥ — {location}",
+    "body_template": "Η κατάσταση έκτακτης ανάγκης στην περιοχή {location} έχει επιλυθεί. Οι κανονικές δραστηριότητες μπορούν να συνεχιστούν. {severity_detail}.",
+    "action_items_template": "Ελέγξτε για ζημιές. Ακολουθήστε τυχόν εναπομείνασες οδηγίες από τις υπηρεσίες έκτακτης ανάγκης. Επισκεφθείτε {help_url} για πληροφορίες."
+  },
+  {
+    "template_id": "warning-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "el",
+    "title_template": "ΠΑΡΑΚΟΛΟΥΘΗΣΗ ΚΥΚΛΩΝΑ — {location}",
+    "body_template": "Ένας κυκλώνας μπορεί να επηρεάσει την περιοχή {location} από τις {time}. Οι συνθήκες μπορεί να επιδεινωθούν. {severity_detail}.",
+    "action_items_template": "Παρακολουθήστε τις συνθήκες. Ετοιμάστε κιτ έκτακτης ανάγκης. Ασφαλίστε την ιδιοκτησία σας. Ακούστε το ABC Radio για ενημερώσεις. Επισκεφθείτε {help_url} για συμβουλές προετοιμασίας."
+  },
+  {
+    "template_id": "warning-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "el",
+    "title_template": "ΕΝΗΜΕΡΩΣΗ ΔΑΣΙΚΗΣ ΠΥΡΚΑΓΙΑΣ — {location}",
+    "body_template": "Αναφέρθηκε δασική πυρκαγιά κοντά στην περιοχή {location}. Δεν υπάρχει άμεση απειλή αλλά οι συνθήκες μπορεί να αλλάξουν. {severity_detail}.",
+    "action_items_template": "Μείνετε ενημερωμένοι. Ενεργοποιήστε το σχέδιο επιβίωσης από πυρκαγιά. Παρακολουθήστε ενημερώσεις από τις πυροσβεστικές υπηρεσίες. Επισκεφθείτε {help_url} για πληροφορίες."
+  },
+  {
+    "template_id": "warning-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "el",
+    "title_template": "ΠΑΡΑΚΟΛΟΥΘΗΣΗ ΠΛΗΜΜΥΡΑΣ — {location}",
+    "body_template": "Πλημμύρες είναι πιθανές στην περιοχή {location}. Η στάθμη των ποταμών μπορεί να ανέβει από τις {time}. {severity_detail}.",
+    "action_items_template": "Παρακολουθήστε τη στάθμη των ποταμών. Ετοιμαστείτε να μεταφέρετε πολύτιμα αντικείμενα σε υψηλότερο σημείο. Καλέστε SES στο 132 500 για σάκους άμμου. Επισκεφθείτε {help_url} για ενημερώσεις."
+  },
+  {
+    "template_id": "warning-storm-moderate",
+    "hazard_type": "storm",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "el",
+    "title_template": "ΠΡΟΕΙΔΟΠΟΙΗΣΗ ΚΑΤΑΙΓΙΔΑΣ — {location}",
+    "body_template": "Καταιγίδες αναμένονται να επηρεάσουν την περιοχή {location} από τις {time}. Καταστροφικοί άνεμοι και ισχυρή βροχόπτωση είναι πιθανά. {severity_detail}.",
+    "action_items_template": "Ασφαλίστε τα χαλαρά αντικείμενα. Μετακινήστε τα οχήματα σε σκεπαστό χώρο. Μείνετε ενημερωμένοι. Επισκεφθείτε {help_url} για ενημερώσεις."
+  },
+  {
+    "template_id": "warning-general-moderate",
+    "hazard_type": "general",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "el",
+    "title_template": "ΠΛΗΡΟΦΟΡΙΕΣ ΕΚΤΑΚΤΗΣ ΑΝΑΓΚΗΣ — {location}",
+    "body_template": "Μια κατάσταση έκτακτης ανάγκης αναπτύσσεται στην περιοχή {location}. Μείνετε ενημερωμένοι και ετοιμαστείτε να ακολουθήσετε τις οδηγίες των υπηρεσιών έκτακτης ανάγκης. {severity_detail}.",
+    "action_items_template": "Παρακολουθήστε τις εκπομπές έκτακτης ανάγκης. Ετοιμάστε κιτ έκτακτης ανάγκης. Ακολουθήστε τις οδηγίες των υπηρεσιών έκτακτης ανάγκης. Επισκεφθείτε {help_url} για πληροφορίες."
+  }
+]

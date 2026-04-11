@@ -1,0 +1,222 @@
+[
+  {
+    "template_id": "evacuation-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "en-AU",
+    "title_template": "SEVERE CYCLONE WARNING — {location}",
+    "body_template": "A severe cyclone is approaching {location}. Conditions are expected to deteriorate from {time}. Wind gusts may exceed {wind_speed}. {severity_detail}.",
+    "action_items_template": "EVACUATE immediately if directed by emergency services. Move to higher ground. Listen to ABC Radio for updates. Call 000 for life-threatening emergencies. Visit {help_url} for evacuation centres."
+  },
+  {
+    "template_id": "evacuation-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "en-AU",
+    "title_template": "CYCLONE WARNING — {location}",
+    "body_template": "A cyclone is approaching {location}. Conditions may deteriorate from {time}. Wind gusts are expected. {severity_detail}.",
+    "action_items_template": "Prepare to evacuate if directed. Secure loose items. Listen to ABC Radio for updates. Call 000 for emergencies. Visit {help_url} for information."
+  },
+  {
+    "template_id": "evacuation-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "en-AU",
+    "title_template": "EMERGENCY BUSHFIRE WARNING — {location}",
+    "body_template": "A dangerous bushfire is threatening {location}. The fire is out of control and poses a serious threat to life. Conditions are expected to worsen from {time}. {severity_detail}.",
+    "action_items_template": "LEAVE NOW if your path is clear. It is too late to stay. Follow your bushfire survival plan. Call 000 for life-threatening emergencies. Visit {help_url} for shelter locations."
+  },
+  {
+    "template_id": "evacuation-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "en-AU",
+    "title_template": "BUSHFIRE WARNING — {location}",
+    "body_template": "A bushfire is burning near {location}. Conditions may change rapidly from {time}. {severity_detail}.",
+    "action_items_template": "Prepare to leave. Monitor conditions closely. Follow your bushfire survival plan. Call 000 for emergencies. Visit {help_url} for updates."
+  },
+  {
+    "template_id": "evacuation-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "en-AU",
+    "title_template": "MAJOR FLOOD WARNING — {location}",
+    "body_template": "Major flooding is occurring or expected at {location}. Water levels are rising rapidly. Flash flooding is possible from {time}. {severity_detail}.",
+    "action_items_template": "EVACUATE low-lying areas immediately. Do NOT enter floodwater. Move to higher ground. Call 132 500 for SES assistance. Visit {help_url} for evacuation centres."
+  },
+  {
+    "template_id": "evacuation-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "en-AU",
+    "title_template": "FLOOD WARNING — {location}",
+    "body_template": "Flooding is possible at {location}. Water levels may rise from {time}. {severity_detail}.",
+    "action_items_template": "Prepare to evacuate low-lying areas. Avoid floodwater. Call 132 500 for SES assistance. Visit {help_url} for updates."
+  },
+  {
+    "template_id": "evacuation-storm-severe",
+    "hazard_type": "storm",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "en-AU",
+    "title_template": "SEVERE STORM WARNING — {location}",
+    "body_template": "A severe storm is approaching {location}. Destructive winds, heavy rainfall, and large hail are expected from {time}. {severity_detail}.",
+    "action_items_template": "Seek shelter immediately. Stay indoors away from windows. Secure loose outdoor items. Call 000 for emergencies. Visit {help_url} for updates."
+  },
+  {
+    "template_id": "evacuation-earthquake-severe",
+    "hazard_type": "earthquake",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "en-AU",
+    "title_template": "EARTHQUAKE ALERT — {location}",
+    "body_template": "A significant earthquake has occurred near {location}. Aftershocks are expected. Building damage may have occurred. {severity_detail}.",
+    "action_items_template": "Drop, Cover, Hold On. Move away from damaged buildings. Check for gas leaks. Call 000 for emergencies. Visit {help_url} for updates."
+  },
+  {
+    "template_id": "evacuation-tsunami-severe",
+    "hazard_type": "tsunami",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "en-AU",
+    "title_template": "TSUNAMI WARNING — {location}",
+    "body_template": "A tsunami warning has been issued for {location}. Dangerous waves are expected from {time}. {severity_detail}.",
+    "action_items_template": "MOVE to high ground immediately. Do NOT go to the beach. Stay away from coastal areas. Call 000 for emergencies. Visit {help_url} for safe zones."
+  },
+  {
+    "template_id": "evacuation-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "en-AU",
+    "title_template": "EMERGENCY WARNING — {location}",
+    "body_template": "An emergency situation exists at {location}. Conditions may be dangerous from {time}. {severity_detail}.",
+    "action_items_template": "Follow emergency services directions. Prepare to evacuate if directed. Call 000 for emergencies. Visit {help_url} for information."
+  },
+  {
+    "template_id": "shelter-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "en-AU",
+    "title_template": "SHELTER IN PLACE — CYCLONE — {location}",
+    "body_template": "It is too late to safely evacuate from {location}. Shelter in the strongest part of your building away from windows. The cyclone core is expected from {time}. {severity_detail}.",
+    "action_items_template": "Stay indoors in the strongest room. Stay away from windows. If your building is damaged, shelter under a sturdy table. Call 000 for life-threatening emergencies."
+  },
+  {
+    "template_id": "shelter-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "en-AU",
+    "title_template": "SHELTER IN PLACE — BUSHFIRE — {location}",
+    "body_template": "It is too late to leave {location}. The fire front is imminent. Shelter in a building, close all windows and doors. {severity_detail}.",
+    "action_items_template": "Go to a room with two exits. Close all doors and windows. Fill sinks with water. Stay low to the ground. Call 000 for life-threatening emergencies."
+  },
+  {
+    "template_id": "shelter-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "en-AU",
+    "title_template": "SHELTER IN PLACE — {location}",
+    "body_template": "Shelter in place is recommended for {location}. Remain indoors until further notice. {severity_detail}.",
+    "action_items_template": "Stay indoors. Close windows and doors. Monitor emergency broadcasts. Call 000 for emergencies."
+  },
+  {
+    "template_id": "allclear-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "en-AU",
+    "title_template": "ALL CLEAR — Cyclone Threat Passed — {location}",
+    "body_template": "The cyclone threat for {location} has passed. It is now safe to leave shelter. Be aware of debris and damaged infrastructure. {severity_detail}.",
+    "action_items_template": "Check your property for damage. Avoid downed power lines. Report damage to SES on 132 500. Visit {help_url} for recovery assistance."
+  },
+  {
+    "template_id": "allclear-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "en-AU",
+    "title_template": "ALL CLEAR — Bushfire Contained — {location}",
+    "body_template": "The bushfire near {location} has been contained. The immediate threat has passed. Remain vigilant for spot fires. {severity_detail}.",
+    "action_items_template": "Check your property for embers and spot fires. Report any fires to 000. Visit {help_url} for recovery information."
+  },
+  {
+    "template_id": "allclear-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "en-AU",
+    "title_template": "ALL CLEAR — Flood Waters Receding — {location}",
+    "body_template": "Flood waters at {location} are receding. The immediate flood threat has passed. Do NOT enter floodwater. {severity_detail}.",
+    "action_items_template": "Do NOT drive through floodwater. Report road damage. Call SES on 132 500 for assistance. Visit {help_url} for recovery information."
+  },
+  {
+    "template_id": "allclear-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "en-AU",
+    "title_template": "ALL CLEAR — {location}",
+    "body_template": "The emergency situation at {location} has been resolved. Normal activities may resume. {severity_detail}.",
+    "action_items_template": "Check for damage. Follow any remaining instructions from emergency services. Visit {help_url} for information."
+  },
+  {
+    "template_id": "warning-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "en-AU",
+    "title_template": "CYCLONE WATCH — {location}",
+    "body_template": "A cyclone may affect {location} from {time}. Conditions may deteriorate. {severity_detail}.",
+    "action_items_template": "Monitor conditions. Prepare an emergency kit. Secure your property. Listen to ABC Radio for updates. Visit {help_url} for preparation tips."
+  },
+  {
+    "template_id": "warning-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "en-AU",
+    "title_template": "BUSHFIRE ADVICE — {location}",
+    "body_template": "A bushfire has been reported near {location}. There is no immediate threat but conditions may change. {severity_detail}.",
+    "action_items_template": "Stay informed. Activate your bushfire survival plan. Monitor fire agencies for updates. Visit {help_url} for information."
+  },
+  {
+    "template_id": "warning-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "en-AU",
+    "title_template": "FLOOD WATCH — {location}",
+    "body_template": "Flooding is possible at {location}. River levels may rise from {time}. {severity_detail}.",
+    "action_items_template": "Monitor river levels. Prepare to move valuables to higher ground. Call SES on 132 500 for sandbags. Visit {help_url} for updates."
+  },
+  {
+    "template_id": "warning-storm-moderate",
+    "hazard_type": "storm",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "en-AU",
+    "title_template": "STORM WARNING — {location}",
+    "body_template": "Storms are expected to affect {location} from {time}. Damaging winds and heavy rain are possible. {severity_detail}.",
+    "action_items_template": "Secure loose items. Move vehicles under cover. Stay informed. Visit {help_url} for updates."
+  },
+  {
+    "template_id": "warning-general-moderate",
+    "hazard_type": "general",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "en-AU",
+    "title_template": "EMERGENCY INFORMATION — {location}",
+    "body_template": "An emergency situation is developing at {location}. Stay informed and prepare to follow directions from emergency services. {severity_detail}.",
+    "action_items_template": "Monitor emergency broadcasts. Prepare an emergency kit. Follow instructions from emergency services. Visit {help_url} for information."
+  }
+]

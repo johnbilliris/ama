@@ -1,0 +1,222 @@
+[
+  {
+    "template_id": "evacuation-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "zh-Hans",
+    "title_template": "严重气旋警告 — {location}",
+    "body_template": "一场严重气旋正在逼近{location}。预计从{time}起天气状况将恶化。阵风可能超过{wind_speed}。{severity_detail}。",
+    "action_items_template": "如接到紧急服务部门指示，请立即撤离。转移到高处。收听ABC广播获取最新信息。如遇危及生命的紧急情况，请拨打000。访问{help_url}查询疏散中心。"
+  },
+  {
+    "template_id": "evacuation-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "zh-Hans",
+    "title_template": "气旋警告 — {location}",
+    "body_template": "一场气旋正在逼近{location}。预计从{time}起天气状况可能恶化。预计将有阵风。{severity_detail}。",
+    "action_items_template": "如接到指示，请做好撤离准备。固定松动物品。收听ABC广播获取最新信息。如遇紧急情况，请拨打000。访问{help_url}获取更多信息。"
+  },
+  {
+    "template_id": "evacuation-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "zh-Hans",
+    "title_template": "紧急丛林火灾警告 — {location}",
+    "body_template": "一场危险的丛林火灾正在威胁{location}。火势失控，对生命构成严重威胁。预计从{time}起情况将恶化。{severity_detail}。",
+    "action_items_template": "如果道路畅通，请立即离开。现在留下已经太迟了。请执行您的丛林火灾求生计划。如遇危及生命的紧急情况，请拨打000。访问{help_url}查询避难所位置。"
+  },
+  {
+    "template_id": "evacuation-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "zh-Hans",
+    "title_template": "丛林火灾警告 — {location}",
+    "body_template": "一场丛林火灾正在{location}附近燃烧。从{time}起情况可能迅速变化。{severity_detail}。",
+    "action_items_template": "做好离开的准备。密切关注情况变化。执行您的丛林火灾求生计划。如遇紧急情况，请拨打000。访问{help_url}获取最新信息。"
+  },
+  {
+    "template_id": "evacuation-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "zh-Hans",
+    "title_template": "重大洪水警告 — {location}",
+    "body_template": "{location}正在发生或预计将发生重大洪水。水位正在迅速上涨。从{time}起可能发生山洪暴发。{severity_detail}。",
+    "action_items_template": "立即撤离低洼地区。请勿进入洪水区域。转移到高处。如需SES援助，请拨打132 500。访问{help_url}查询疏散中心。"
+  },
+  {
+    "template_id": "evacuation-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "evacuation",
+    "language_code": "zh-Hans",
+    "title_template": "洪水警告 — {location}",
+    "body_template": "{location}可能发生洪水。从{time}起水位可能上涨。{severity_detail}。",
+    "action_items_template": "做好撤离低洼地区的准备。远离洪水。如需SES援助，请拨打132 500。访问{help_url}获取最新信息。"
+  },
+  {
+    "template_id": "evacuation-storm-severe",
+    "hazard_type": "storm",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "zh-Hans",
+    "title_template": "严重风暴警告 — {location}",
+    "body_template": "一场严重风暴正在逼近{location}。预计从{time}起将出现破坏性大风、强降雨和大冰雹。{severity_detail}。",
+    "action_items_template": "立即寻找避难所。留在室内远离窗户。固定室外松动物品。如遇紧急情况，请拨打000。访问{help_url}获取最新信息。"
+  },
+  {
+    "template_id": "evacuation-earthquake-severe",
+    "hazard_type": "earthquake",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "zh-Hans",
+    "title_template": "地震警报 — {location}",
+    "body_template": "{location}附近发生了一次显著地震。预计将有余震。建筑物可能已受损。{severity_detail}。",
+    "action_items_template": "趴下、掩护、抓紧。远离受损建筑物。检查是否有燃气泄漏。如遇紧急情况，请拨打000。访问{help_url}获取最新信息。"
+  },
+  {
+    "template_id": "evacuation-tsunami-severe",
+    "hazard_type": "tsunami",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "zh-Hans",
+    "title_template": "海啸警告 — {location}",
+    "body_template": "已对{location}发布海啸警告。预计从{time}起将出现危险海浪。{severity_detail}。",
+    "action_items_template": "立即转移到高处。请勿前往海滩。远离沿海地区。如遇紧急情况，请拨打000。访问{help_url}查询安全区域。"
+  },
+  {
+    "template_id": "evacuation-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "evacuation",
+    "language_code": "zh-Hans",
+    "title_template": "紧急警告 — {location}",
+    "body_template": "{location}存在紧急状况。从{time}起情况可能十分危险。{severity_detail}。",
+    "action_items_template": "请听从紧急服务部门的指示。如接到指示，请做好撤离准备。如遇紧急情况，请拨打000。访问{help_url}获取更多信息。"
+  },
+  {
+    "template_id": "shelter-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "zh-Hans",
+    "title_template": "就地避难 — 气旋 — {location}",
+    "body_template": "现在从{location}安全撤离已经太迟了。请在建筑物最坚固的部分避难，远离窗户。预计气旋核心将于{time}到达。{severity_detail}。",
+    "action_items_template": "留在室内最坚固的房间。远离窗户。如果建筑物受损，请躲在坚固的桌子下面。如遇危及生命的紧急情况，请拨打000。"
+  },
+  {
+    "template_id": "shelter-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "zh-Hans",
+    "title_template": "就地避难 — 丛林火灾 — {location}",
+    "body_template": "现在离开{location}已经太迟了。火线即将到达。请在建筑物内避难，关闭所有门窗。{severity_detail}。",
+    "action_items_template": "前往有两个出口的房间。关闭所有门窗。在水槽中蓄水。保持低姿势。如遇危及生命的紧急情况，请拨打000。"
+  },
+  {
+    "template_id": "shelter-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "shelter_in_place",
+    "language_code": "zh-Hans",
+    "title_template": "就地避难 — {location}",
+    "body_template": "建议{location}居民就地避难。在接到进一步通知前请留在室内。{severity_detail}。",
+    "action_items_template": "留在室内。关闭门窗。关注紧急广播。如遇紧急情况，请拨打000。"
+  },
+  {
+    "template_id": "allclear-cyclone-severe",
+    "hazard_type": "cyclone",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "zh-Hans",
+    "title_template": "警报解除 — 气旋威胁已过 — {location}",
+    "body_template": "{location}的气旋威胁已经过去。现在可以安全离开避难所。请注意碎片和受损的基础设施。{severity_detail}。",
+    "action_items_template": "检查您的财产是否受损。远离倒落的电线。如需报告损坏情况，请拨打SES电话132 500。访问{help_url}获取恢复援助信息。"
+  },
+  {
+    "template_id": "allclear-bushfire-severe",
+    "hazard_type": "bushfire",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "zh-Hans",
+    "title_template": "警报解除 — 丛林火灾已控制 — {location}",
+    "body_template": "{location}附近的丛林火灾已被控制。直接威胁已经过去。请对余烬保持警惕。{severity_detail}。",
+    "action_items_template": "检查您的财产是否有余烬和零星火点。如发现火情，请拨打000报告。访问{help_url}获取恢复信息。"
+  },
+  {
+    "template_id": "allclear-flood-severe",
+    "hazard_type": "flood",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "zh-Hans",
+    "title_template": "警报解除 — 洪水正在消退 — {location}",
+    "body_template": "{location}的洪水正在消退。直接洪水威胁已经过去。请勿进入洪水区域。{severity_detail}。",
+    "action_items_template": "请勿驾车通过洪水区域。报告道路损坏情况。如需SES援助，请拨打132 500。访问{help_url}获取恢复信息。"
+  },
+  {
+    "template_id": "allclear-general-severe",
+    "hazard_type": "general",
+    "severity": "severe",
+    "alert_type": "all_clear",
+    "language_code": "zh-Hans",
+    "title_template": "警报解除 — {location}",
+    "body_template": "{location}的紧急状况已经解除。可以恢复正常活动。{severity_detail}。",
+    "action_items_template": "检查是否有损坏。遵循紧急服务部门的剩余指示。访问{help_url}获取更多信息。"
+  },
+  {
+    "template_id": "warning-cyclone-moderate",
+    "hazard_type": "cyclone",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "zh-Hans",
+    "title_template": "气旋监视 — {location}",
+    "body_template": "一场气旋可能从{time}起影响{location}。天气状况可能恶化。{severity_detail}。",
+    "action_items_template": "关注天气状况。准备应急包。加固您的房屋。收听ABC广播获取最新信息。访问{help_url}获取准备建议。"
+  },
+  {
+    "template_id": "warning-bushfire-moderate",
+    "hazard_type": "bushfire",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "zh-Hans",
+    "title_template": "丛林火灾通告 — {location}",
+    "body_template": "{location}附近报告发生丛林火灾。目前没有直接威胁，但情况可能发生变化。{severity_detail}。",
+    "action_items_template": "保持关注。启动您的丛林火灾求生计划。关注消防部门的最新信息。访问{help_url}获取更多信息。"
+  },
+  {
+    "template_id": "warning-flood-moderate",
+    "hazard_type": "flood",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "zh-Hans",
+    "title_template": "洪水监视 — {location}",
+    "body_template": "{location}可能发生洪水。从{time}起河流水位可能上涨。{severity_detail}。",
+    "action_items_template": "关注河流水位。准备将贵重物品转移到高处。如需沙袋，请拨打SES电话132 500。访问{help_url}获取最新信息。"
+  },
+  {
+    "template_id": "warning-storm-moderate",
+    "hazard_type": "storm",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "zh-Hans",
+    "title_template": "风暴警告 — {location}",
+    "body_template": "预计从{time}起风暴将影响{location}。可能出现破坏性大风和强降雨。{severity_detail}。",
+    "action_items_template": "固定松动物品。将车辆移至遮蔽处。保持关注。访问{help_url}获取最新信息。"
+  },
+  {
+    "template_id": "warning-general-moderate",
+    "hazard_type": "general",
+    "severity": "moderate",
+    "alert_type": "general_warning",
+    "language_code": "zh-Hans",
+    "title_template": "紧急信息 — {location}",
+    "body_template": "{location}正在发展紧急状况。请保持关注并做好听从紧急服务部门指示的准备。{severity_detail}。",
+    "action_items_template": "关注紧急广播。准备应急包。听从紧急服务部门的指示。访问{help_url}获取更多信息。"
+  }
+]
