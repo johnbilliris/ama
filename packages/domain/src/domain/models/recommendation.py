@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class Recommendation(BaseModel):
@@ -23,3 +24,21 @@ class Recommendation(BaseModel):
     ] = "template"
     model_deployment_id: str | None = None
     token_usage: dict[str, int] | None = None
+
+    # --- Extended fields (012-risk-assessment-agent) ---
+    assessment_id: str = ""
+    confidence_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    severity_level: Literal["low", "moderate", "high", "critical"] = "moderate"
+    override_by_user_id: str | None = None
+    override_by_role: str | None = None
+    override_justification: str | None = None
+    override_timestamp: datetime | None = None
+    incident_scope_key: str = ""
+    tenant_id: str = "live"
+
+    @field_validator("confidence_score")
+    @classmethod
+    def _validate_confidence_range(cls, v: float) -> float:
+        if v < 0.0 or v > 1.0:
+            raise ValueError("confidence_score must be between 0.0 and 1.0")
+        return v
