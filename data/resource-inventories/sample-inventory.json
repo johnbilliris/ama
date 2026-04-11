@@ -1,0 +1,257 @@
+{
+  "resources": [
+    {
+      "resource_id": "veh-amb-001",
+      "resource_type": "vehicle",
+      "resource_sub_type": "ambulance",
+      "capabilities": ["medical_transport", "patient_stabilization"],
+      "location": {"lat": -33.8688, "lon": 151.2093},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "veh-amb-002",
+      "resource_type": "vehicle",
+      "resource_sub_type": "ambulance",
+      "capabilities": ["medical_transport", "patient_stabilization", "advanced_life_support"],
+      "location": {"lat": -33.9173, "lon": 151.2313},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "veh-ft-001",
+      "resource_type": "vehicle",
+      "resource_sub_type": "fire_truck",
+      "capabilities": ["firefighting", "water_delivery", "rescue"],
+      "location": {"lat": -33.8836, "lon": 151.2006},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "veh-ft-002",
+      "resource_type": "vehicle",
+      "resource_sub_type": "fire_truck",
+      "capabilities": ["firefighting", "water_delivery"],
+      "location": {"lat": -33.7969, "lon": 151.2845},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "veh-bus-001",
+      "resource_type": "vehicle",
+      "resource_sub_type": "bus",
+      "capabilities": ["passenger_transport"],
+      "location": {"lat": -33.8523, "lon": 151.2108},
+      "status": "available",
+      "capacity": 50,
+      "initial_capacity": 50,
+      "flags": []
+    },
+    {
+      "resource_id": "veh-bus-002",
+      "resource_type": "vehicle",
+      "resource_sub_type": "bus",
+      "capabilities": ["passenger_transport", "wheelchair_accessible"],
+      "location": {"lat": -33.8901, "lon": 151.2743},
+      "status": "available",
+      "capacity": 30,
+      "initial_capacity": 30,
+      "flags": []
+    },
+    {
+      "resource_id": "veh-heli-001",
+      "resource_type": "vehicle",
+      "resource_sub_type": "helicopter",
+      "capabilities": ["aerial_support", "aerial_transport", "medical_transport"],
+      "location": {"lat": -33.9465, "lon": 151.1772},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "veh-wt-001",
+      "resource_type": "vehicle",
+      "resource_sub_type": "water_tanker",
+      "capabilities": ["water_delivery", "firefighting_support"],
+      "location": {"lat": -33.8000, "lon": 151.2000},
+      "status": "available",
+      "capacity": 10000,
+      "initial_capacity": 10000,
+      "flags": []
+    },
+    {
+      "resource_id": "veh-wt-002",
+      "resource_type": "vehicle",
+      "resource_sub_type": "water_tanker",
+      "capabilities": ["water_delivery", "firefighting_support"],
+      "location": {"lat": -33.9200, "lon": 151.1500},
+      "status": "available",
+      "capacity": 8000,
+      "initial_capacity": 8000,
+      "flags": []
+    },
+    {
+      "resource_id": "per-para-001",
+      "resource_type": "personnel",
+      "resource_sub_type": "paramedic",
+      "capabilities": ["medical_treatment", "patient_stabilization", "triage"],
+      "location": {"lat": -33.8688, "lon": 151.2093},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "per-para-002",
+      "resource_type": "personnel",
+      "resource_sub_type": "paramedic",
+      "capabilities": ["medical_treatment", "advanced_life_support"],
+      "location": {"lat": -33.9100, "lon": 151.2600},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "per-ff-001",
+      "resource_type": "personnel",
+      "resource_sub_type": "firefighter",
+      "capabilities": ["firefighting", "rescue", "hazmat"],
+      "location": {"lat": -33.8836, "lon": 151.2006},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "per-ff-002",
+      "resource_type": "personnel",
+      "resource_sub_type": "firefighter",
+      "capabilities": ["firefighting", "rescue"],
+      "location": {"lat": -33.7500, "lon": 151.3000},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "per-ses-001",
+      "resource_type": "personnel",
+      "resource_sub_type": "ses_volunteer",
+      "capabilities": ["flood_rescue", "storm_damage", "sandbagging"],
+      "location": {"lat": -33.8400, "lon": 151.1800},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "per-pol-001",
+      "resource_type": "personnel",
+      "resource_sub_type": "police",
+      "capabilities": ["traffic_control", "crowd_management", "security"],
+      "location": {"lat": -33.8750, "lon": 151.2050},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    },
+    {
+      "resource_id": "sup-water-001",
+      "resource_type": "supply",
+      "resource_sub_type": "water",
+      "capabilities": ["drinking_water"],
+      "location": {"lat": -33.8600, "lon": 151.2100},
+      "status": "available",
+      "capacity": 5000,
+      "initial_capacity": 5000,
+      "flags": []
+    },
+    {
+      "resource_id": "sup-food-001",
+      "resource_type": "supply",
+      "resource_sub_type": "food",
+      "capabilities": ["emergency_rations"],
+      "location": {"lat": -33.8600, "lon": 151.2100},
+      "status": "available",
+      "capacity": 2000,
+      "initial_capacity": 2000,
+      "flags": []
+    },
+    {
+      "resource_id": "sup-medkit-001",
+      "resource_type": "supply",
+      "resource_sub_type": "medical_kit",
+      "capabilities": ["medical_supply", "first_aid"],
+      "location": {"lat": -33.8688, "lon": 151.2093},
+      "status": "available",
+      "capacity": 100,
+      "initial_capacity": 100,
+      "flags": []
+    },
+    {
+      "resource_id": "sup-gen-001",
+      "resource_type": "supply",
+      "resource_sub_type": "generator",
+      "capabilities": ["power_supply"],
+      "location": {"lat": -33.8500, "lon": 151.2200},
+      "status": "available",
+      "capacity": 5,
+      "initial_capacity": 5,
+      "flags": []
+    },
+    {
+      "resource_id": "sup-fuel-001",
+      "resource_type": "supply",
+      "resource_sub_type": "fuel",
+      "capabilities": ["fuel_supply"],
+      "location": {"lat": -33.8400, "lon": 151.2300},
+      "status": "available",
+      "capacity": 3000,
+      "initial_capacity": 3000,
+      "flags": []
+    },
+    {
+      "resource_id": "fac-evac-001",
+      "resource_type": "facility",
+      "resource_sub_type": "evacuation_centre",
+      "capabilities": ["shelter", "catering", "first_aid"],
+      "location": {"lat": -33.8900, "lon": 151.2700},
+      "status": "available",
+      "capacity": 500,
+      "initial_capacity": 500,
+      "flags": []
+    },
+    {
+      "resource_id": "fac-hosp-001",
+      "resource_type": "facility",
+      "resource_sub_type": "hospital",
+      "capabilities": ["medical_treatment", "surgery", "intensive_care"],
+      "location": {"lat": -33.8800, "lon": 151.2350},
+      "status": "available",
+      "capacity": 200,
+      "initial_capacity": 200,
+      "flags": []
+    },
+    {
+      "resource_id": "fac-staging-001",
+      "resource_type": "facility",
+      "resource_sub_type": "staging_area",
+      "capabilities": ["logistics", "coordination", "equipment_storage"],
+      "location": {"lat": -33.8300, "lon": 151.1900},
+      "status": "available",
+      "capacity": null,
+      "initial_capacity": null,
+      "flags": []
+    }
+  ]
+}
