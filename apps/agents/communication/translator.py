@@ -263,12 +263,13 @@ class MultilingualTranslator(LLMCallMixin):
             return score
 
         except Exception:
-            # Embedding service outage → skip per CHK051
+            # Embedding service outage → return conservative score and flag for review
             logger.warning(
-                "Back-translation failed for %s, skipping quality check per CHK051",
+                "Back-translation failed for %s, returning conservative score (0.5) per CHK051",
                 content.language_code,
             )
-            return 1.0  # Don't penalise on outage
+            content.back_translation_flagged = True
+            return 0.5
 
     @staticmethod
     def _compute_similarity(text_a: str, text_b: str) -> float:

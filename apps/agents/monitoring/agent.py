@@ -152,13 +152,11 @@ class MonitoringAgent:
 
             # T023: async timeout
             response = await asyncio.wait_for(
-                asyncio.get_event_loop().run_in_executor(
-                    None,
-                    lambda: self._llm_client.generate_response(
-                        purpose="reasoning",
-                        prompt=prompt,
-                        max_output_tokens=10,
-                    ),
+                asyncio.to_thread(
+                    self._llm_client.generate_response,
+                    purpose="reasoning",
+                    prompt=prompt,
+                    max_output_tokens=10,
                 ),
                 timeout=self._config.llm_eval_timeout_seconds,
             )
@@ -270,23 +268,12 @@ def create_app(
         """Structured health endpoint per contracts/health-endpoint.md."""
         now = datetime.now(UTC)
 
-        # LLM connectivity check
+        # LLM connectivity check — configuration-only, no live call
         llm_status = "offline"
         llm_latency = 0
         llm_agent = app.state.agent
         if llm_agent and llm_agent._llm_client:
-            try:
-                import time
-                start = time.perf_counter()
-                llm_agent._llm_client.generate_response(
-                    purpose="reasoning",
-                    prompt="health check ping",
-                    max_output_tokens=5,
-                )
-                llm_latency = round((time.perf_counter() - start) * 1000)
-                llm_status = "healthy" if llm_latency < 5000 else "degraded"
-            except Exception:
-                llm_status = "offline"
+            llm_status = "configured"
 
         # Data source freshness
         freshness_summary = "healthy"

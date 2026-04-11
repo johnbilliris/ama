@@ -1,6 +1,6 @@
 """Tests for communication.pipeline — CommunicationProcessingPipeline."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -85,9 +85,7 @@ class TestPipelineIntake:
 
 
 class TestPipelineEndToEnd:
-    @patch.object(MultilingualTranslator, "translate_all")
-    @patch.object(MultilingualTranslator, "back_translate_and_score", return_value=0.95)
-    def test_full_pipeline_returns_alert(self, mock_bt, mock_translate):
+    def test_full_pipeline_returns_alert(self):
         from communication.models import ContentBlock, GenerationMethod
 
         en_block = ContentBlock(
@@ -97,16 +95,19 @@ class TestPipelineEndToEnd:
             action_items="Evacuate immediately",
             generation_method=GenerationMethod.llm,
         )
-        mock_translate.return_value = {"en-AU": en_block}
 
-        pipeline = _make_pipeline()
+        mock_translator = MagicMock(spec=MultilingualTranslator)
+        mock_translator.translate_all.return_value = {"en-AU": en_block}
+        mock_translator.back_translate_and_score.return_value = 0.95
+
+        pipeline = _make_pipeline(translator=mock_translator)
         event = _make_handoff()
         result = pipeline.process_handoff(event)
 
-        if result is not None:
-            assert isinstance(result, PublicAlert)
-            assert result.incident_id == "inc-1"
-            assert result.version >= 1
+        assert result is not None
+        assert isinstance(result, PublicAlert)
+        assert result.incident_id == "inc-1"
+        assert result.version >= 1
 
     def test_processed_count_increments(self):
         pipeline = _make_pipeline()

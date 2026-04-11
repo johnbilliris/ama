@@ -10,10 +10,12 @@ class ContentSafetyResult:
 
 class ContentSafetyValidator:
     def __init__(self) -> None:
+        # Only block truly inappropriate terms.
+        # Disaster-context words (kill, attack, bomb) removed to avoid
+        # false positives in legitimate disaster comms like "bushfire killed
+        # livestock" or "bomb cyclone".
+        # TODO: Integrate Azure AI Content Safety service for production.
         self._blocked_keywords = {
-            "kill",
-            "attack",
-            "bomb",
             "terror",
             "hate",
         }

@@ -209,21 +209,14 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         minReplicas: 1
         maxReplicas: 5
         rules: [
+          // Service Bus KEDA scaler replaced with HTTP concurrent requests
+          // scaler — original had empty secretRef which breaks auth at runtime.
           {
-            name: 'queue-depth'
-            custom: {
-              type: 'azure-servicebus'
+            name: 'http-concurrency'
+            http: {
               metadata: {
-                namespace: serviceBusNamespaceName
-                queueName: communicationHandoffsQueue.name
-                messageCount: '10'
+                concurrentRequests: '10'
               }
-              auth: [
-                {
-                  secretRef: ''
-                  triggerParameter: 'connection'
-                }
-              ]
             }
           }
         ]

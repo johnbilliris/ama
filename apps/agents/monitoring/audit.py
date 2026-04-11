@@ -73,7 +73,7 @@ class AuditWriter:
         doc = record.model_dump(mode="json")
         # Cosmos DB requires 'id' as string and partition key
         doc["id"] = str(doc["id"])
-        container.upsert_item(doc)
+        container.create_item(body=doc)
 
     def _buffer_in_memory(self, record: MonitoringDecisionRecord) -> None:
         """Buffer a record in-memory (Tier 2)."""

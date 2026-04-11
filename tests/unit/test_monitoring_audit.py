@@ -35,7 +35,7 @@ class TestAuditWriterCosmosDB:
         record = _make_record()
         writer.write(record)
 
-        mock_cosmos.upsert_item.assert_called_once()
+        mock_cosmos.create_item.assert_called_once()
         assert writer.get_status() == "healthy"
         assert writer.buffer_depth == 0
 
@@ -59,7 +59,7 @@ class TestAuditWriterMemoryBuffer:
         from monitoring.config import MonitoringConfig
 
         mock_cosmos = MagicMock()
-        mock_cosmos.upsert_item.side_effect = Exception("Cosmos unavailable")
+        mock_cosmos.create_item.side_effect = Exception("Cosmos unavailable")
         writer = AuditWriter(config=MonitoringConfig(), cosmos_client=mock_cosmos)
 
         record = _make_record()
@@ -139,7 +139,7 @@ class TestAuditWriterFlush:
 
         mock_cosmos = MagicMock()
         # First writes fail, then flush succeeds
-        mock_cosmos.upsert_item.side_effect = [
+        mock_cosmos.create_item.side_effect = [
             Exception("fail"),
             Exception("fail"),
             None,  # flush succeeds
@@ -152,7 +152,7 @@ class TestAuditWriterFlush:
         assert writer.buffer_depth == 2
 
         # Reset mock to succeed for flush
-        mock_cosmos.upsert_item.side_effect = None
+        mock_cosmos.create_item.side_effect = None
         flushed = writer.flush()
         assert flushed == 2
         assert writer.buffer_depth == 0

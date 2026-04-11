@@ -6,6 +6,7 @@ Values are read once at module import and frozen for the lifetime of the process
 
 from __future__ import annotations
 
+import hashlib
 import os
 from dataclasses import dataclass, field
 
@@ -78,3 +79,19 @@ class MonitoringConfig:
             "social": self.staleness_threshold_social_minutes,
         }
         return thresholds.get(source_type, self.staleness_threshold_social_minutes)
+
+    def compute_config_hash(self) -> str:
+        """Produce a deterministic SHA-256 hash of all active configuration values."""
+        config_str = (
+            f"escalation_confidence_threshold={self.escalation_confidence_threshold};"
+            f"signal_dedup_window_minutes={self.signal_dedup_window_minutes};"
+            f"retrospective_lookback_hours={self.retrospective_lookback_hours};"
+            f"staleness_threshold_authoritative_minutes={self.staleness_threshold_authoritative_minutes};"
+            f"staleness_threshold_iot_minutes={self.staleness_threshold_iot_minutes};"
+            f"staleness_threshold_social_minutes={self.staleness_threshold_social_minutes};"
+            f"llm_eval_timeout_seconds={self.llm_eval_timeout_seconds};"
+            f"suspicious_confidence_penalty={self.suspicious_confidence_penalty};"
+            f"audit_buffer_capacity={self.audit_buffer_capacity};"
+            f"max_reasoning_summary_length={self.max_reasoning_summary_length};"
+        )
+        return hashlib.sha256(config_str.encode()).hexdigest()
