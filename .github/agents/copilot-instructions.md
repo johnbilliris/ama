@@ -32,6 +32,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-09
 - Azure Cosmos DB (existing — no new storage for this feature) (feature/014-azure-openai-integration)
 - Python 3.12 + FastAPI ≥ 0.115, pytest-benchmark ≥ 5.1, pytest-asyncio, Pydantic ≥ 2.10, tenacity ≥ 9.0 (feature/015-performance-benchmarks)
 - JSON files in repo-root `.benchmarks/` directory (no database) (feature/015-performance-benchmarks)
+- Python 3.12 + FastAPI, httpx (TestClient), argparse, Pydantic, existing agent modules (016-automated-demo-script)
+- In-memory state stores (`state_store.py` dicts); seed JSON files in `data/` (016-automated-demo-script)
 
 - Python 3.12 for API and agents; TypeScript 5.6 for web UI + Microsoft Agent Framework (Python SDK), FastAPI, Pydantic, Azure SDKs, Next.js 15, React 19, Tailwind CSS, Azure Cosmos DB client, Azure Service Bus/Event Hubs clients (001-disaster-response-hub)
 
@@ -52,9 +54,9 @@ cd src; pytest; ruff check .
 Python 3.12 for API and agents; TypeScript 5.6 for web UI: Follow standard conventions
 
 ## Recent Changes
+- 016-automated-demo-script: Added Python 3.12 + FastAPI, httpx (TestClient), argparse, Pydantic, existing agent modules
 - feature/015-performance-benchmarks: Added Python 3.12 + FastAPI ≥ 0.115, pytest-benchmark ≥ 5.1, pytest-asyncio, Pydantic ≥ 2.10, tenacity ≥ 9.0
 - feature/014-azure-openai-integration: Added Python 3.12 + FastAPI, Pydantic v2, tenacity (retry), azure-identity (DefaultAzureCredential), openai (Azure OpenAI SDK), opentelemetry-api + opentelemetry-sdk
-- feature/013-root-readme: Added Markdown (GitHub-Flavoured Markdown with Mermaid support) + GitHub GFM renderer, Mermaid diagram renderer (built into GitHub)
 
 
 <!-- MANUAL ADDITIONS START -->
