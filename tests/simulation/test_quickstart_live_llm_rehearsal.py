@@ -7,7 +7,6 @@ from apps.agents.risk_assessment.agent import RiskAssessmentAgent
 
 LIVE_ENV_VARS = [
     "AZURE_OPENAI_ENDPOINT",
-    "AZURE_OPENAI_API_KEY",
     "AZURE_OPENAI_REASONING_DEPLOYMENT",
     "AZURE_OPENAI_DRAFTING_DEPLOYMENT",
 ]

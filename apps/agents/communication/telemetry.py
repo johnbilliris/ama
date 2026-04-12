@@ -232,6 +232,27 @@ embedding_service_available = _meter.create_up_down_counter(
     description="Whether embedding service is available",
 )
 
+# LLM metrics (spec-014)
+llm_call_count = _meter.create_counter("llm.call.count", description="Total LLM API calls", unit="calls")
+llm_call_duration = _meter.create_histogram("llm.call.duration_ms", description="LLM call latency", unit="ms")
+llm_tokens_input = _meter.create_counter(
+    "llm.tokens.input", description="Cumulative input tokens consumed", unit="tokens",
+)
+llm_tokens_output = _meter.create_counter(
+    "llm.tokens.output", description="Cumulative output tokens consumed", unit="tokens",
+)
+llm_fallback_count = _meter.create_counter("llm.fallback.count", description="LLM fallback events", unit="events")
+llm_error_count = _meter.create_counter("llm.error.count", description="LLM error events", unit="events")
+llm_circuit_breaker_state_change = _meter.create_counter(
+    "llm.circuit_breaker.state_change", description="Circuit breaker state transitions", unit="events",
+)
+llm_budget_exceeded = _meter.create_counter(
+    "llm.budget.exceeded", description="Monthly budget threshold breaches", unit="events",
+)
+llm_confidence_below_threshold = _meter.create_counter(
+    "llm.confidence.below_threshold", description="Outputs flagged for human review", unit="events",
+)
+
 
 # ---------------------------------------------------------------------------
 # Convenience: metrics namespace
@@ -264,6 +285,15 @@ class metrics:
     channel_degraded = channel_degraded
     audit_tier_gauge = audit_tier_gauge
     embedding_service_available = embedding_service_available
+    llm_call_count = llm_call_count
+    llm_call_duration = llm_call_duration
+    llm_tokens_input = llm_tokens_input
+    llm_tokens_output = llm_tokens_output
+    llm_fallback_count = llm_fallback_count
+    llm_error_count = llm_error_count
+    llm_circuit_breaker_state_change = llm_circuit_breaker_state_change
+    llm_budget_exceeded = llm_budget_exceeded
+    llm_confidence_below_threshold = llm_confidence_below_threshold
 
 
 # ---------------------------------------------------------------------------

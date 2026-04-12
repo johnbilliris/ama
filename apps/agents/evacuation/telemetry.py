@@ -282,7 +282,22 @@ version_conflict_retries = _counter(
     "Optimistic concurrency retries",
 )
 
-# --- Handoff Success ------------------------------------------------------
+# --- LLM metrics (spec-014) -----------------------------------------------
+llm_call_count = _counter("llm.call.count", "Total LLM API calls", unit="calls")
+llm_call_duration = _histogram("llm.call.duration_ms", "LLM call latency", unit="ms")
+llm_tokens_input = _counter("llm.tokens.input", "Cumulative input tokens consumed", unit="tokens")
+llm_tokens_output = _counter("llm.tokens.output", "Cumulative output tokens consumed", unit="tokens")
+llm_fallback_count = _counter("llm.fallback.count", "LLM fallback events", unit="events")
+llm_error_count = _counter("llm.error.count", "LLM error events", unit="events")
+llm_circuit_breaker_state_change = _counter(
+    "llm.circuit_breaker.state_change", "Circuit breaker state transitions", unit="events",
+)
+llm_budget_exceeded = _counter("llm.budget.exceeded", "Monthly budget threshold breaches", unit="events")
+llm_confidence_below_threshold = _counter(
+    "llm.confidence.below_threshold", "Outputs flagged for human review", unit="events",
+)
+
+# --- Handoff Success------------------------------------------------------
 handoff_success_rate = _gauge(
     "evacuation.handoff_success_rate",
     "Successfully processed vs total handoffs received",

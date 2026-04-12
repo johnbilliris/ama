@@ -231,6 +231,53 @@ class ResourceAllocationMetrics:
                 "resource_allocation.handoff_success_rate",
                 description="Delivered vs dead-lettered handoff ratio",
             )
+
+            # LLM metrics (spec-014)
+            self.llm_call_count = meter.create_counter(
+                "llm.call.count",
+                description="Total LLM API calls",
+                unit="calls",
+            )
+            self.llm_call_duration = meter.create_histogram(
+                "llm.call.duration_ms",
+                description="LLM call latency",
+                unit="ms",
+            )
+            self.llm_tokens_input = meter.create_counter(
+                "llm.tokens.input",
+                description="Cumulative input tokens consumed",
+                unit="tokens",
+            )
+            self.llm_tokens_output = meter.create_counter(
+                "llm.tokens.output",
+                description="Cumulative output tokens consumed",
+                unit="tokens",
+            )
+            self.llm_fallback_count = meter.create_counter(
+                "llm.fallback.count",
+                description="LLM fallback events",
+                unit="events",
+            )
+            self.llm_error_count = meter.create_counter(
+                "llm.error.count",
+                description="LLM error events",
+                unit="events",
+            )
+            self.llm_circuit_breaker_state_change = meter.create_counter(
+                "llm.circuit_breaker.state_change",
+                description="Circuit breaker state transitions",
+                unit="events",
+            )
+            self.llm_budget_exceeded = meter.create_counter(
+                "llm.budget.exceeded",
+                description="Monthly budget threshold breaches",
+                unit="events",
+            )
+            self.llm_confidence_below_threshold = meter.create_counter(
+                "llm.confidence.below_threshold",
+                description="Outputs flagged for human review",
+                unit="events",
+            )
         else:
             # Assign no-op attributes so callers never need to guard
             for attr in (
@@ -263,6 +310,15 @@ class ResourceAllocationMetrics:
                 "plan_expired_count",
                 "transport_dispatch_latency",
                 "handoff_success_rate",
+                "llm_call_count",
+                "llm_call_duration",
+                "llm_tokens_input",
+                "llm_tokens_output",
+                "llm_fallback_count",
+                "llm_error_count",
+                "llm_circuit_breaker_state_change",
+                "llm_budget_exceeded",
+                "llm_confidence_below_threshold",
             ):
                 setattr(self, attr, _NoOpMetric())
 

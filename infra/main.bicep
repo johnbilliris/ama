@@ -385,7 +385,7 @@ resource openAi 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   properties: {
     customSubDomainName: '${environmentName}-openai-${take(uniqueSuffix, 6)}'
     publicNetworkAccess: 'Enabled'
-    disableLocalAuth: false
+    disableLocalAuth: true
   }
 }
 
@@ -464,6 +464,8 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'REDIS_HOST', value: redis.properties.hostName }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
             { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
+            { name: 'AZURE_OPENAI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
+            { name: 'AZURE_OPENAI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
             { name: 'OTEL_SERVICE_NAME', value: 'api' }
           ]
           probes: [
@@ -534,6 +536,8 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'REDIS_HOST', value: redis.properties.hostName }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
             { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
+            { name: 'AZURE_OPENAI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
+            { name: 'AZURE_OPENAI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
             { name: 'API_ENDPOINT', value: 'https://${apiContainerApp.properties.configuration.ingress.fqdn}' }
             { name: 'OTEL_SERVICE_NAME', value: 'agents' }
           ]
@@ -702,6 +706,21 @@ resource envDiagnostic 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview
       { category: 'ContainerAppSystemLogs', enabled: true }
     ]
     metrics: [{ category: 'AllMetrics', enabled: true }]
+  }
+}
+
+module openAiDeployments './modules/azure-openai.bicep' = {
+  name: 'azure-openai-deployments'
+  params: {
+    openAiAccountName: openAi.name
+    location: location
+    envPrefix: environmentName
+    tags: tags
+    agentPrincipalIds: [
+      apiContainerApp.identity.principalId
+      agentsContainerApp.identity.principalId
+    ]
+    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsId
   }
 }
 
