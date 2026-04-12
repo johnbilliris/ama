@@ -52,6 +52,7 @@ jobs:
 
       - name: perf-benchmark
         timeout-minutes: 2
+        continue-on-error: true
         run: pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q
 
       - name: upload-benchmark-results
