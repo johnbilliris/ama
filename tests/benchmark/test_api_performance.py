@@ -1,22 +1,70 @@
-from concurrent.futures import ThreadPoolExecutor
+"""Health endpoint latency benchmarks for all five agents.
 
-from app.main import create_app
-from fastapi.testclient import TestClient
+Each agent's ``GET /health`` is benchmarked via an in-process
+:class:`~fastapi.testclient.TestClient` (ASGI transport, no TCP sockets).
+Safety-critical agents (risk, evacuation) have a tighter SLO (< 75 ms).
+"""
+
+from __future__ import annotations
+
+import pytest
+from conftest import set_benchmark_metadata
+
+# ── Monitoring (general) ─────────────────────────────────────────────────────
 
 
-def test_api_latency_regression(benchmark) -> None:
-    app = create_app()
-    client = TestClient(app)
+@pytest.mark.benchmark(group="health")
+def test_health_monitoring(benchmark, monitoring_client) -> None:
+    set_benchmark_metadata(
+        benchmark, agent="monitoring", metric_type="health", slo_target_s=0.100
+    )
+    response = benchmark(monitoring_client.get, "/health")
+    assert response.status_code == 200
 
-    def call_health() -> int:
-        response = client.get("/api/health")
-        return response.status_code
 
-    def run_batch() -> list[int]:
-        with ThreadPoolExecutor(max_workers=50) as executor:
-            return list(executor.map(lambda _: call_health(), range(50)))
+# ── Risk Assessment (safety-critical) ────────────────────────────────────────
 
-    statuses = benchmark(run_batch)
 
-    assert statuses
-    assert all(status == 200 for status in statuses)
+@pytest.mark.benchmark(group="health")
+def test_health_risk(benchmark, risk_client) -> None:
+    set_benchmark_metadata(
+        benchmark, agent="risk", metric_type="health", slo_target_s=0.075
+    )
+    response = benchmark(risk_client.get, "/health")
+    assert response.status_code == 200
+
+
+# ── Evacuation (safety-critical) ─────────────────────────────────────────────
+
+
+@pytest.mark.benchmark(group="health")
+def test_health_evacuation(benchmark, evacuation_client) -> None:
+    set_benchmark_metadata(
+        benchmark, agent="evacuation", metric_type="health", slo_target_s=0.075
+    )
+    response = benchmark(evacuation_client.get, "/health")
+    assert response.status_code == 200
+
+
+# ── Resource Allocation (general) ────────────────────────────────────────────
+
+
+@pytest.mark.benchmark(group="health")
+def test_health_resource(benchmark, resource_client) -> None:
+    set_benchmark_metadata(
+        benchmark, agent="resource", metric_type="health", slo_target_s=0.100
+    )
+    response = benchmark(resource_client.get, "/health")
+    assert response.status_code == 200
+
+
+# ── Communication (general) ──────────────────────────────────────────────────
+
+
+@pytest.mark.benchmark(group="health")
+def test_health_communication(benchmark, communication_client) -> None:
+    set_benchmark_metadata(
+        benchmark, agent="communication", metric_type="health", slo_target_s=0.100
+    )
+    response = benchmark(communication_client.get, "/health")
+    assert response.status_code == 200

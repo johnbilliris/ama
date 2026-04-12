@@ -19,9 +19,9 @@
 
 **Purpose**: Project initialization, directory structure, and shared configuration
 
-- [ ] T001 Create `.benchmarks/` directory at repo root with empty `.gitkeep` file
-- [ ] T002 Add `.benchmarks/current.json` to `.gitignore` (keep `baseline.json` tracked)
-- [ ] T003 Create shared benchmark fixtures and configuration in `tests/benchmark/conftest.py` with session-scoped TestClient fixtures for all 5 agents (monitoring, risk, evacuation, resource, communication), `run_async()` helper, `set_benchmark_metadata()` helper, and `pytest_sessionfinish` hook for regression comparison invocation
+- [X] T001 Create `.benchmarks/` directory at repo root with empty `.gitkeep` file
+- [X] T002 Add `.benchmarks/current.json` to `.gitignore` (keep `baseline.json` tracked)
+- [X] T003 Create shared benchmark fixtures and configuration in `tests/benchmark/conftest.py` with session-scoped TestClient fixtures for all 5 agents (monitoring, risk, evacuation, resource, communication), `run_async()` helper, `set_benchmark_metadata()` helper, and `pytest_sessionfinish` hook for regression comparison invocation
 
 ---
 
@@ -31,12 +31,12 @@
 
 **⚠️ CRITICAL**: No user story benchmark can deliver regression detection value until this phase is complete
 
-- [ ] T004 Implement `ComparisonReport` and `MetricComparison` dataclasses in `tests/benchmark/compare_benchmarks.py` per data-model.md schema (timestamp, commit_sha, overall_status, has_failures, results list)
-- [ ] T005 Implement `DEFAULT_SLO_TARGETS` constant dict in `tests/benchmark/compare_benchmarks.py` mapping all benchmark function names to SLO thresholds (health: 0.100/0.075 s, pipeline: 2.0 s, LLM: 0.500 s) per contracts/comparison-wrapper.md
-- [ ] T006 Implement `load_benchmark_json()` helper in `tests/benchmark/compare_benchmarks.py` that loads and validates pytest-benchmark JSON from a Path, returns None on corrupted/malformed input with `logging.warning()`
-- [ ] T007 Implement `get_commit_sha()` helper in `tests/benchmark/compare_benchmarks.py` that returns current git SHA via `git rev-parse HEAD` subprocess call, or `"unknown"` if unavailable
-- [ ] T008 Implement `compare_benchmarks()` function in `tests/benchmark/compare_benchmarks.py` with full regression detection logic: ≥ 50% → FAILURE, ≥ 20% → WARNING, < 20% → PASS, missing baseline → FIRST_RUN, baseline-only metric → BASELINE_ONLY, zero baseline median → skip with warning
-- [ ] T009 Implement `format_report()` function in `tests/benchmark/compare_benchmarks.py` that renders `ComparisonReport` as human-readable CI output with status emoji (✅/⚠️/❌/🆕), metric names, SLO values, and percentage changes per contracts/comparison-wrapper.md output format
+- [X] T004 Implement `ComparisonReport` and `MetricComparison` dataclasses in `tests/benchmark/compare_benchmarks.py` per data-model.md schema (timestamp, commit_sha, overall_status, has_failures, results list)
+- [X] T005 Implement `DEFAULT_SLO_TARGETS` constant dict in `tests/benchmark/compare_benchmarks.py` mapping all benchmark function names to SLO thresholds (health: 0.100/0.075 s, pipeline: 2.0 s, LLM: 0.500 s) per contracts/comparison-wrapper.md
+- [X] T006 Implement `load_benchmark_json()` helper in `tests/benchmark/compare_benchmarks.py` that loads and validates pytest-benchmark JSON from a Path, returns None on corrupted/malformed input with `logging.warning()`
+- [X] T007 Implement `get_commit_sha()` helper in `tests/benchmark/compare_benchmarks.py` that returns current git SHA via `git rev-parse HEAD` subprocess call, or `"unknown"` if unavailable
+- [X] T008 Implement `compare_benchmarks()` function in `tests/benchmark/compare_benchmarks.py` with full regression detection logic: ≥ 50% → FAILURE, ≥ 20% → WARNING, < 20% → PASS, missing baseline → FIRST_RUN, baseline-only metric → BASELINE_ONLY, zero baseline median → skip with warning
+- [X] T009 Implement `format_report()` function in `tests/benchmark/compare_benchmarks.py` that renders `ComparisonReport` as human-readable CI output with status emoji (✅/⚠️/❌/🆕), metric names, SLO values, and percentage changes per contracts/comparison-wrapper.md output format
 
 **Checkpoint**: Comparison wrapper ready — all regression detection logic is testable independently with synthetic JSON inputs
 
@@ -50,11 +50,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Replace `tests/benchmark/test_api_performance.py` — remove existing concurrent-batch load test and implement `test_health_monitoring()` function benchmarking `GET /health` via monitoring TestClient with `@pytest.mark.benchmark(group="health")`, `set_benchmark_metadata(agent="monitoring", metric_type="health", slo_target_s=0.100)`, and `assert response.status_code == 200`
-- [ ] T011 [P] [US1] Add `test_health_risk()` function in `tests/benchmark/test_api_performance.py` benchmarking risk agent `GET /health` with SLO target 0.075 s (safety-critical)
-- [ ] T012 [P] [US1] Add `test_health_evacuation()` function in `tests/benchmark/test_api_performance.py` benchmarking evacuation agent `GET /health` with SLO target 0.075 s (safety-critical)
-- [ ] T013 [P] [US1] Add `test_health_resource()` function in `tests/benchmark/test_api_performance.py` benchmarking resource agent `GET /health` with SLO target 0.100 s (general)
-- [ ] T014 [P] [US1] Add `test_health_communication()` function in `tests/benchmark/test_api_performance.py` benchmarking communication agent `GET /health` with SLO target 0.100 s (general)
+- [X] T010 [US1] Replace `tests/benchmark/test_api_performance.py` — remove existing concurrent-batch load test and implement `test_health_monitoring()` function benchmarking `GET /health` via monitoring TestClient with `@pytest.mark.benchmark(group="health")`, `set_benchmark_metadata(agent="monitoring", metric_type="health", slo_target_s=0.100)`, and `assert response.status_code == 200`
+- [X] T011 [P] [US1] Add `test_health_risk()` function in `tests/benchmark/test_api_performance.py` benchmarking risk agent `GET /health` with SLO target 0.075 s (safety-critical)
+- [X] T012 [P] [US1] Add `test_health_evacuation()` function in `tests/benchmark/test_api_performance.py` benchmarking evacuation agent `GET /health` with SLO target 0.075 s (safety-critical)
+- [X] T013 [P] [US1] Add `test_health_resource()` function in `tests/benchmark/test_api_performance.py` benchmarking resource agent `GET /health` with SLO target 0.100 s (general)
+- [X] T014 [P] [US1] Add `test_health_communication()` function in `tests/benchmark/test_api_performance.py` benchmarking communication agent `GET /health` with SLO target 0.100 s (general)
 
 **Checkpoint**: All 5 agent health endpoints are benchmarked with SLO targets. Running the suite produces regression detection for every agent. This is the MVP — delivers immediate regression detection.
 
@@ -68,8 +68,8 @@
 
 ### Implementation for User Story 5
 
-- [ ] T015 [US5] Wire `pytest_sessionfinish` hook in `tests/benchmark/conftest.py` to call `compare_benchmarks()` from `compare_benchmarks.py`, print `format_report()` output, and set `session.exitstatus = 1` when `report.has_failures` is True
-- [ ] T016 [US5] Create initial `.benchmarks/baseline.json` placeholder file (empty JSON structure `{"benchmarks": []}`) so first CI run treats all metrics as FIRST_RUN per FR-012
+- [X] T015 [US5] Wire `pytest_sessionfinish` hook in `tests/benchmark/conftest.py` to call `compare_benchmarks()` from `compare_benchmarks.py`, print `format_report()` output, and set `session.exitstatus = 1` when `report.has_failures` is True
+- [X] T016 [US5] Create initial `.benchmarks/baseline.json` placeholder file (empty JSON structure `{"benchmarks": []}`) so first CI run treats all metrics as FIRST_RUN per FR-012
 
 **Checkpoint**: End-to-end regression detection pipeline works — benchmark results are stored, compared, and produce clear pass/fail signals in CI
 
@@ -83,12 +83,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Create `tests/benchmark/test_pipeline_performance.py` with pipeline fixture factories — instantiate each agent's pipeline class with mocked dependencies (LLMClient=MagicMock, Cosmos containers=None, AuditWriter with cosmos_client=None) per research.md R-008
-- [ ] T018 [US2] Implement `test_pipeline_monitoring()` in `tests/benchmark/test_pipeline_performance.py` using `asyncio.run()` wrapper to benchmark async `process_signal()` with `@pytest.mark.benchmark(group="pipeline")` and SLO target 2.0 s per research.md R-005
-- [ ] T019 [P] [US2] Implement `test_pipeline_risk()` in `tests/benchmark/test_pipeline_performance.py` benchmarking sync `process_handoff()` on `AssessmentProcessingPipeline` with SLO target 2.0 s
-- [ ] T020 [P] [US2] Implement `test_pipeline_evacuation()` in `tests/benchmark/test_pipeline_performance.py` benchmarking sync `process_handoff()` on `EvacuationProcessingPipeline` with SLO target 2.0 s
-- [ ] T021 [P] [US2] Implement `test_pipeline_resource()` in `tests/benchmark/test_pipeline_performance.py` benchmarking sync `process_handoff()` on `AllocationProcessingPipeline` with SLO target 2.0 s
-- [ ] T022 [P] [US2] Implement `test_pipeline_communication()` in `tests/benchmark/test_pipeline_performance.py` benchmarking sync `process_handoff()` on `CommunicationProcessingPipeline` with SLO target 2.0 s
+- [X] T017 [US2] Create `tests/benchmark/test_pipeline_performance.py` with pipeline fixture factories — instantiate each agent's pipeline class with mocked dependencies (LLMClient=MagicMock, Cosmos containers=None, AuditWriter with cosmos_client=None) per research.md R-008
+- [X] T018 [US2] Implement `test_pipeline_monitoring()` in `tests/benchmark/test_pipeline_performance.py` using `asyncio.run()` wrapper to benchmark async `process_signal()` with `@pytest.mark.benchmark(group="pipeline")` and SLO target 2.0 s per research.md R-005
+- [X] T019 [P] [US2] Implement `test_pipeline_risk()` in `tests/benchmark/test_pipeline_performance.py` benchmarking sync `process_handoff()` on `AssessmentProcessingPipeline` with SLO target 2.0 s
+- [X] T020 [P] [US2] Implement `test_pipeline_evacuation()` in `tests/benchmark/test_pipeline_performance.py` benchmarking sync `process_handoff()` on `EvacuationProcessingPipeline` with SLO target 2.0 s
+- [X] T021 [P] [US2] Implement `test_pipeline_resource()` in `tests/benchmark/test_pipeline_performance.py` benchmarking sync `process_handoff()` on `AllocationProcessingPipeline` with SLO target 2.0 s
+- [X] T022 [P] [US2] Implement `test_pipeline_communication()` in `tests/benchmark/test_pipeline_performance.py` benchmarking sync `process_handoff()` on `CommunicationProcessingPipeline` with SLO target 2.0 s
 
 **Checkpoint**: All 5 agent pipelines are benchmarked with mocked dependencies. Processing latency is tracked independently of external service calls.
 
@@ -102,8 +102,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US3] Create `tests/benchmark/test_llm_performance.py` with `mock_llm_client` fixture that instantiates `LLMClient` from `apps/agents/common/llm_client.py` and patches `_client.chat.completions.create` to return a pre-built MagicMock response instantly (choices with message content, usage with token counts) per research.md R-012
-- [ ] T024 [US3] Implement `test_llm_client_overhead()` in `tests/benchmark/test_llm_performance.py` with `@pytest.mark.benchmark(group="llm")`, `set_benchmark_metadata(agent="shared", metric_type="llm", slo_target_s=0.500)`, calling `generate_response(purpose="reasoning", prompt="...")` and asserting `"text" in result`
+- [X] T023 [US3] Create `tests/benchmark/test_llm_performance.py` with `mock_llm_client` fixture that instantiates `LLMClient` from `apps/agents/common/llm_client.py` and patches `_client.chat.completions.create` to return a pre-built MagicMock response instantly (choices with message content, usage with token counts) per research.md R-012
+- [X] T024 [US3] Implement `test_llm_client_overhead()` in `tests/benchmark/test_llm_performance.py` with `@pytest.mark.benchmark(group="llm")`, `set_benchmark_metadata(agent="shared", metric_type="llm", slo_target_s=0.500)`, calling `generate_response(purpose="reasoning", prompt="...")` and asserting `"text" in result`
 
 **Checkpoint**: LLM client overhead is benchmarked independently. Changes to retry/parsing logic will be caught by regression detection.
 
@@ -117,10 +117,10 @@
 
 ### Implementation for User Story 4
 
-- [ ] T025 [US4] Create `tests/benchmark/test_circuit_breaker_performance.py` with imports from `apps/agents/common/circuit_breaker.py` (CircuitBreaker, CircuitState) and a short `recovery_timeout` constant (0.1 s) for fast benchmarking per contracts/benchmark-modules.md
-- [ ] T026 [P] [US4] Implement `test_cb_closed_to_open()` in `tests/benchmark/test_circuit_breaker_performance.py` with `@pytest.mark.benchmark(group="circuit-breaker")` — drive 3 `record_failure()` calls, assert `state == CircuitState.OPEN`, record transition time
-- [ ] T027 [P] [US4] Implement `test_cb_open_to_half_open()` in `tests/benchmark/test_circuit_breaker_performance.py` — after triggering OPEN state, sleep for `recovery_timeout`, assert `state == CircuitState.HALF_OPEN`, record timing
-- [ ] T028 [US4] Implement `test_cb_full_recovery()` in `tests/benchmark/test_circuit_breaker_performance.py` — full cycle CLOSED→OPEN→HALF_OPEN→CLOSED with `set_benchmark_metadata(agent="shared", metric_type="circuit_breaker", slo_target_s=recovery_timeout * 2)`, assert complete recovery within 2× timeout
+- [X] T025 [US4] Create `tests/benchmark/test_circuit_breaker_performance.py` with imports from `apps/agents/common/circuit_breaker.py` (CircuitBreaker, CircuitState) and a short `recovery_timeout` constant (0.1 s) for fast benchmarking per contracts/benchmark-modules.md
+- [X] T026 [P] [US4] Implement `test_cb_closed_to_open()` in `tests/benchmark/test_circuit_breaker_performance.py` with `@pytest.mark.benchmark(group="circuit-breaker")` — drive 3 `record_failure()` calls, assert `state == CircuitState.OPEN`, record transition time
+- [X] T027 [P] [US4] Implement `test_cb_open_to_half_open()` in `tests/benchmark/test_circuit_breaker_performance.py` — after triggering OPEN state, sleep for `recovery_timeout`, assert `state == CircuitState.HALF_OPEN`, record timing
+- [X] T028 [US4] Implement `test_cb_full_recovery()` in `tests/benchmark/test_circuit_breaker_performance.py` — full cycle CLOSED→OPEN→HALF_OPEN→CLOSED with `set_benchmark_metadata(agent="shared", metric_type="circuit_breaker", slo_target_s=recovery_timeout * 2)`, assert complete recovery within 2× timeout
 
 **Checkpoint**: Circuit breaker state machine is benchmarked with timing data. Result schema supports future chaos experiment comparison (SC-008).
 
@@ -130,12 +130,12 @@
 
 **Purpose**: CI integration, gitignore update, and documentation
 
-- [ ] T029 Update `.github/workflows/ci.yml` — replace existing `perf-benchmark` step: change command to `pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q`, add `timeout-minutes: 2` per SC-007
-- [ ] T030 Add `upload-benchmark-results` step in `.github/workflows/ci.yml` after `perf-benchmark` using `actions/upload-artifact@v4` with `if: always()`, `name: benchmark-results`, `path: .benchmarks/current.json`, `retention-days: 30` per contracts/ci-workflow.md
-- [ ] T031 Add feature branch `"015-performance-benchmarks"` to `on.push.branches` list in `.github/workflows/ci.yml` for feature development CI triggers
-- [ ] T032 Run full benchmark suite locally (`pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -v --benchmark-group-by=group`) and verify: all benchmarks pass, JSON output is valid, comparison report renders correctly, exit code is 0
-- [ ] T033 Generate initial baseline by copying verified `current.json` to `.benchmarks/baseline.json` and commit as initial benchmark baseline
-- [ ] T034 Run quickstart.md validation — execute all commands from `specs/feature/015-performance-benchmarks/quickstart.md` and verify they work as documented
+- [X] T029 Update `.github/workflows/ci.yml` — replace existing `perf-benchmark` step: change command to `pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q`, add `timeout-minutes: 2` per SC-007
+- [X] T030 Add `upload-benchmark-results` step in `.github/workflows/ci.yml` after `perf-benchmark` using `actions/upload-artifact@v4` with `if: always()`, `name: benchmark-results`, `path: .benchmarks/current.json`, `retention-days: 30` per contracts/ci-workflow.md
+- [X] T031 Add feature branch `"015-performance-benchmarks"` to `on.push.branches` list in `.github/workflows/ci.yml` for feature development CI triggers
+- [X] T032 Run full benchmark suite locally (`pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -v --benchmark-group-by=group`) and verify: all benchmarks pass, JSON output is valid, comparison report renders correctly, exit code is 0
+- [X] T033 Generate initial baseline by copying verified `current.json` to `.benchmarks/baseline.json` and commit as initial benchmark baseline
+- [X] T034 Run quickstart.md validation — execute all commands from `specs/feature/015-performance-benchmarks/quickstart.md` and verify they work as documented
 
 ---
 
