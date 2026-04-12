@@ -112,6 +112,52 @@ class EvacuationConfig:
         default_factory=lambda: os.getenv("AZURE_SERVICEBUS_CONNECTION", "")
     )
 
+    # --- LLM Configuration ---
+    llm_model_tier: str = field(
+        default_factory=lambda: os.getenv("LLM_MODEL_TIER", "reasoning")
+    )
+    llm_temperature: float = field(
+        default_factory=lambda: float(os.getenv("LLM_TEMPERATURE", "0.0"))
+    )
+    llm_max_output_tokens: int = field(
+        default_factory=lambda: int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "4000"))
+    )
+    llm_confidence_threshold: float = field(
+        default_factory=lambda: float(os.getenv("LLM_CONFIDENCE_THRESHOLD", "0.7"))
+    )
+    llm_fallback_reduction_factor: float = field(
+        default_factory=lambda: float(
+            os.getenv("LLM_FALLBACK_REDUCTION_FACTOR", "0.5")
+        )
+    )
+    llm_monthly_budget_usd: float = field(
+        default_factory=lambda: float(os.getenv("LLM_MONTHLY_BUDGET_USD", "50.0"))
+    )
+
+    def __post_init__(self) -> None:
+        """Validate LLM configuration values immediately after construction."""
+        if self.llm_model_tier not in ("reasoning", "drafting"):
+            raise ValueError(
+                f"Invalid LLM_MODEL_TIER: {self.llm_model_tier}"
+            )
+        if not (0.0 <= self.llm_temperature <= 2.0):
+            raise ValueError(
+                f"LLM_TEMPERATURE must be 0.0–2.0, got {self.llm_temperature}"
+            )
+        if self.llm_max_output_tokens <= 0 or self.llm_max_output_tokens > 16384:
+            raise ValueError(
+                f"LLM_MAX_OUTPUT_TOKENS must be 1–16384, got {self.llm_max_output_tokens}"
+            )
+        if not (0.0 <= self.llm_confidence_threshold <= 1.0):
+            raise ValueError(
+                f"LLM_CONFIDENCE_THRESHOLD must be 0.0–1.0, got {self.llm_confidence_threshold}"
+            )
+        if not (0.0 <= self.llm_fallback_reduction_factor <= 1.0):
+            raise ValueError(
+                "LLM_FALLBACK_REDUCTION_FACTOR must be 0.0–1.0, "
+                f"got {self.llm_fallback_reduction_factor}"
+            )
+
     def mobilisation_time_for(self, hazard_type: str) -> int:
         """Return mobilisation time in minutes for a given hazard type."""
         mapping = {
@@ -144,5 +190,11 @@ class EvacuationConfig:
             f"audit_buffer_capacity={self.audit_buffer_capacity};"
             f"max_summary_length={self.max_summary_length};"
             f"replan_rate_limit_seconds={self.replan_rate_limit_seconds};"
+            f"llm_model_tier={self.llm_model_tier};"
+            f"llm_temperature={self.llm_temperature};"
+            f"llm_max_output_tokens={self.llm_max_output_tokens};"
+            f"llm_confidence_threshold={self.llm_confidence_threshold};"
+            f"llm_fallback_reduction_factor={self.llm_fallback_reduction_factor};"
+            f"llm_monthly_budget_usd={self.llm_monthly_budget_usd};"
         )
         return hashlib.sha256(config_str.encode()).hexdigest()

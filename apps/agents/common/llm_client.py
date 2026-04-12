@@ -1,34 +1,45 @@
 import logging
-import os
 import time
 from importlib import import_module
 from uuid import uuid4
 
+from common.llm_config import LLMClientConfig
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 logger = logging.getLogger(__name__)
 
 
 class LLMClient:
-    def __init__(self) -> None:
-        endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-        api_key = os.getenv("AZURE_OPENAI_API_KEY")
-        self._reasoning_deployment = os.getenv("AZURE_OPENAI_REASONING_DEPLOYMENT", "")
-        self._drafting_deployment = os.getenv("AZURE_OPENAI_DRAFTING_DEPLOYMENT", "")
+    """Azure OpenAI client using managed identity authentication (DefaultAzureCredential).
+
+    API key authentication is explicitly forbidden — only Entra ID tokens are used.
+    """
+
+    def __init__(self, config: LLMClientConfig | None = None) -> None:
+        self._config = config or LLMClientConfig()
+        endpoint = self._config.endpoint
 
         self._client: object | None = None
-        if endpoint and api_key:
-            azure_openai_cls = getattr(import_module("openai"), "AzureOpenAI")
-            self._client = azure_openai_cls(
-                api_key=api_key,
-                azure_endpoint=endpoint,
-                api_version="2024-10-21",
-            )
+        if endpoint:
+            try:
+                identity_mod = import_module("azure.identity")
+                default_credential = getattr(identity_mod, "DefaultAzureCredential")()
+                token_provider = getattr(identity_mod, "get_bearer_token_provider")(
+                    default_credential,
+                    "https://cognitiveservices.azure.com/.default",
+                )
+                azure_openai_cls = getattr(import_module("openai"), "AzureOpenAI")
+                self._client = azure_openai_cls(
+                    azure_ad_token_provider=token_provider,
+                    azure_endpoint=endpoint,
+                    api_version=self._config.api_version,
+                )
+            except Exception:
+                logger.warning("Failed to initialise Azure OpenAI client with managed identity; client disabled")
+                self._client = None
 
     def _deployment_for(self, purpose: str) -> str:
-        if purpose == "reasoning":
-            return self._reasoning_deployment
-        return self._drafting_deployment
+        return self._config.deployment_for(purpose)
 
     def generate_response(
         self,
@@ -38,7 +49,24 @@ class LLMClient:
         correlation_id: str | None = None,
         max_output_tokens: int = 300,
         timeout_seconds: float = 30.0,
+        temperature: float = 0.0,
     ) -> dict[str, object]:
+        """Send a prompt to Azure OpenAI and return the response with metadata.
+
+        Args:
+            purpose: Model tier selector ("reasoning" or "drafting").
+            prompt: The user prompt to send.
+            correlation_id: Tracing ID; generated if not provided.
+            max_output_tokens: Maximum tokens in the response.
+            timeout_seconds: Request timeout.
+            temperature: Model temperature (0.0 = deterministic, 0.3 = creative).
+
+        Returns:
+            dict with keys: text, deployment_id, correlation_id, latency_ms, token_usage.
+
+        Raises:
+            RuntimeError: If client is not configured or deployment is missing.
+        """
         if self._client is None:
             raise RuntimeError("Azure OpenAI client is not configured")
 
@@ -55,6 +83,7 @@ class LLMClient:
             max_output_tokens=max_output_tokens,
             timeout_seconds=timeout_seconds,
             correlation_id=resolved_correlation_id,
+            temperature=temperature,
         )
 
         elapsed_ms = round((time.perf_counter() - start) * 1000, 2)
@@ -105,6 +134,7 @@ class LLMClient:
         max_output_tokens: int,
         timeout_seconds: float,
         correlation_id: str,
+        temperature: float = 0.0,
     ) -> object:
         """Call the LLM API with retry for transient errors (429, 503)."""
         return self._client.chat.completions.create(
@@ -121,7 +151,7 @@ class LLMClient:
                 {"role": "user", "content": prompt},
             ],
             max_tokens=max_output_tokens,
-            temperature=0,
+            temperature=temperature,
             timeout=timeout_seconds,
             extra_headers={"X-Correlation-ID": correlation_id},
         )
