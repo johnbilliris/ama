@@ -14,10 +14,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from evacuation.models import EvacuationZone
 from shapely.geometry import LineString, Polygon, shape
 from shapely.ops import unary_union
-
-from evacuation.models import EvacuationZone
 
 logger = logging.getLogger(__name__)
 

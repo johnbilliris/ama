@@ -1,4 +1,4 @@
-"""Communication Agent — multilingual alert generation, content safety, AIIMS approval, and multi-channel public dissemination."""
+"""Communication Agent - multilingual alert generation, content safety, AIIMS approval, multi-channel dissemination."""
 
 from communication.config import CommunicationConfig
 

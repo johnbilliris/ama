@@ -1,12 +1,8 @@
 """Unit tests for AuditWriter with three-tier degradation (Phase 3: T018)."""
 
-import json
 import os
 import tempfile
-from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import MagicMock
 
 
 def _make_record(signal_id: str = "sig-test"):

@@ -9,19 +9,19 @@ Tests the full pipeline with fire-category handoffs:
 Marked @pytest.mark.simulation — skipped in unit test runs.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "apps", "agents"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
+from unittest.mock import patch
+
 import pytest
 from common.handoffs import AgentHandoffEvent, build_handoff
-from risk_assessment.pipeline import AssessmentProcessingPipeline
 from risk_assessment.config import RiskAssessmentConfig
-from risk_assessment.audit import AuditWriter
 from risk_assessment.models import DecisionType, RiskAssessmentDecisionRecord
-from unittest.mock import patch
+from risk_assessment.pipeline import AssessmentProcessingPipeline
 
 pytestmark = pytest.mark.simulation
 

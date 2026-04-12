@@ -12,8 +12,9 @@ module exports no-op stubs so production code runs without instrumentation overh
 from __future__ import annotations
 
 import logging
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,6 @@ _OTEL_AVAILABLE = False
 try:
     from opentelemetry import trace
     from opentelemetry.metrics import get_meter
-    from opentelemetry.trace import StatusCode
 
     _OTEL_AVAILABLE = True
 except ImportError:
@@ -62,7 +62,7 @@ class _NoOpSpan:
     def add_event(self, name: str, attributes: dict | None = None) -> None:
         pass
 
-    def __enter__(self) -> "_NoOpSpan":
+    def __enter__(self) -> _NoOpSpan:
         return self
 
     def __exit__(self, *args: Any) -> None:

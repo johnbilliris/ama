@@ -14,7 +14,6 @@ import math
 
 from resource_allocation.config import ResourceAllocationConfig
 
-
 # Earth radius in km (mean radius)
 _EARTH_RADIUS_KM = 6371.0
 

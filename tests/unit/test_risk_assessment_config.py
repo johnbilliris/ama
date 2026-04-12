@@ -1,9 +1,7 @@
 """Tests for risk_assessment.config – defaults, env overrides, helpers."""
 
-import pytest
 
 from risk_assessment.config import RiskAssessmentConfig
-
 
 # ---------------------------------------------------------------------------
 # Default values

@@ -10,9 +10,6 @@ Covers:
 
 from __future__ import annotations
 
-import os
-import pytest
-
 from resource_allocation.config import ResourceAllocationConfig
 
 

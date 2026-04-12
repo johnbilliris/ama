@@ -1,8 +1,6 @@
 import logging
 from typing import Any
 
-from shapely.geometry import Point, shape
-
 from app.services.state_store import INCIDENTS
 
 logger = logging.getLogger(__name__)

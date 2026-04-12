@@ -2,9 +2,9 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
-
 from app.repositories.governance_repository import GovernanceRepository
 from app.services.governance_registry import GovernanceRegistryService
+
 from packages.domain.src.domain.models.data_source import DataSource
 
 SEED_ROOT = Path(__file__).resolve().parents[2] / "packages" / "domain" / "src" / "domain" / "seed"
@@ -57,14 +57,23 @@ class TestDataSourceListing:
 
     def test_filter_by_kind(self, service: GovernanceRegistryService) -> None:
         service.register_source(_make_source(data_source_id="ds-a", kind="authoritative"), actor_id="t")
-        service.register_source(_make_source(data_source_id="ds-b", kind="social", sub_category="social_twitter", trust_tier="tier_6_social_unverified"), actor_id="t")
+        service.register_source(
+            _make_source(
+                data_source_id="ds-b", kind="social",
+                sub_category="social_twitter", trust_tier="tier_6_social_unverified",
+            ),
+            actor_id="t",
+        )
         results = service.list_sources(kind="social")
         assert len(results) == 1
         assert results[0].kind == "social"
 
     def test_filter_by_trust_tier(self, service: GovernanceRegistryService) -> None:
         service.register_source(_make_source(data_source_id="ds-a"), actor_id="t")
-        service.register_source(_make_source(data_source_id="ds-b", trust_tier="tier_6_social_unverified"), actor_id="t")
+        service.register_source(
+            _make_source(data_source_id="ds-b", trust_tier="tier_6_social_unverified"),
+            actor_id="t",
+        )
         results = service.list_sources(trust_tier="tier_1_authoritative_government")
         assert len(results) == 1
 

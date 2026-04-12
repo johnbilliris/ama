@@ -1,10 +1,7 @@
-import pytest
-from uuid import uuid4
 
+import pytest
 from app.repositories.simulation_repository import SimulationRepository
 from app.services.simulation_service import SimulationService
-
-from packages.domain.src.domain.models.simulation_tenant import SimulationTenant
 
 
 @pytest.fixture

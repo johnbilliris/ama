@@ -10,17 +10,13 @@ Covers:
 from __future__ import annotations
 
 import pytest
-from datetime import UTC, datetime
-
 from resource_allocation.models import (
     AllocationDecisionRecord,
     AuditBufferEntry,
     ConfidenceLevel,
     DecisionType,
     DemandFulfilmentStatus,
-    DeploymentTimeline,
     InputSnapshot,
-    OverrideMetadata,
     PlanStatus,
     PriorityTier,
     ResourceAssignment,
@@ -32,11 +28,9 @@ from resource_allocation.models import (
     ScoringRationale,
     ShortfallDetail,
     Traceability,
-    TradeOffAnalysis,
     UrgencyLevel,
     confidence_to_level,
 )
-
 
 # ---------------------------------------------------------------------------
 # Enum completeness

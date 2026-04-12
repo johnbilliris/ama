@@ -11,7 +11,6 @@ Covers:
 from __future__ import annotations
 
 import time
-import pytest
 
 from resource_allocation.dedup import HandoffDeduplicator
 

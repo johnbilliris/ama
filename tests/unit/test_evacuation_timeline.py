@@ -1,9 +1,8 @@
 """Tests for evacuation.timeline — clearance time, phases, shelter-in-place (T034)."""
 
 import pytest
-
 from evacuation.config import EvacuationConfig
-from evacuation.timeline import ShelterInPlaceRecommendation, TimelineEstimator
+from evacuation.timeline import TimelineEstimator
 
 
 def _make_zone(zone_number, pop=5000, vuln=750):

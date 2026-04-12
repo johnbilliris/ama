@@ -1,13 +1,9 @@
 """Unit tests for SignalProcessingPipeline (Phase 5: T037–T041, T055, T067)."""
 
-import asyncio
-from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-
 from monitoring.config import MonitoringConfig
-from monitoring.models import DecisionType
 
 
 def _make_valid_signal(
@@ -40,8 +36,6 @@ def _make_valid_signal(
 
 def _make_pipeline(**kwargs):
     from monitoring.audit import AuditWriter
-    from monitoring.dedup import SignalDeduplicator
-    from monitoring.freshness import DataFreshnessTracker
     from monitoring.pipeline import SignalProcessingPipeline
 
     config = MonitoringConfig()

@@ -1,11 +1,8 @@
 """Tests for communication.segmentation — AudienceSegmenter."""
 
-import pytest
 
-from communication.config import CommunicationConfig
 from communication.models import SegmentPriority, UrgencyLevel
 from communication.segmentation import AudienceSegmenter
-
 
 # ---------------------------------------------------------------------------
 # Zone-based segmentation

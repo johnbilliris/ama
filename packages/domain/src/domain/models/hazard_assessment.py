@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class HazardMap(BaseModel):

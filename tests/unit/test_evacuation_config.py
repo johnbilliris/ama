@@ -1,11 +1,8 @@
 """Tests for evacuation.config — defaults, hash, mobilisation, env overrides (T013)."""
 
-import hashlib
 
-import pytest
 
 from evacuation.config import EvacuationConfig
-
 
 # ---------------------------------------------------------------------------
 # Default values

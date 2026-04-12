@@ -12,18 +12,17 @@ from __future__ import annotations
 
 import re
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-
 
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
 
 
-class AlertStatus(str, Enum):
+class AlertStatus(StrEnum):
     """Alert lifecycle states (10 values per data-model.md)."""
 
     drafting = "drafting"
@@ -53,7 +52,7 @@ VALID_STATUS_TRANSITIONS: dict[AlertStatus, set[AlertStatus]] = {
 }
 
 
-class ChangeType(str, Enum):
+class ChangeType(StrEnum):
     """Alert version change types (4 values)."""
 
     initial = "initial"
@@ -62,7 +61,7 @@ class ChangeType(str, Enum):
     all_clear = "all_clear"
 
 
-class ChannelType(str, Enum):
+class ChannelType(StrEnum):
     """Delivery channel types (3 values)."""
 
     sms = "sms"
@@ -70,7 +69,7 @@ class ChannelType(str, Enum):
     emergency_broadcast = "emergency_broadcast"
 
 
-class DeliveryStatus(str, Enum):
+class DeliveryStatus(StrEnum):
     """Per-channel delivery status (5 values)."""
 
     pending = "pending"
@@ -80,7 +79,7 @@ class DeliveryStatus(str, Enum):
     retrying = "retrying"
 
 
-class GenerationMethod(str, Enum):
+class GenerationMethod(StrEnum):
     """How content was generated (4 values)."""
 
     llm = "llm"
@@ -89,7 +88,7 @@ class GenerationMethod(str, Enum):
     safety_fallback = "safety_fallback"
 
 
-class ContentSafetyResult(str, Enum):
+class ContentSafetyResult(StrEnum):
     """Overall content safety validation result (3 values)."""
 
     passed = "passed"
@@ -97,14 +96,14 @@ class ContentSafetyResult(str, Enum):
     not_checked = "not_checked"
 
 
-class ApprovalMode(str, Enum):
+class ApprovalMode(StrEnum):
     """How the alert was approved (2 values)."""
 
     human_approved = "human_approved"
     escalated = "escalated"
 
 
-class UrgencyLevel(str, Enum):
+class UrgencyLevel(StrEnum):
     """Zone-based urgency level (3 values)."""
 
     immediate = "immediate"
@@ -112,7 +111,7 @@ class UrgencyLevel(str, Enum):
     advisory = "advisory"
 
 
-class SegmentPriority(str, Enum):
+class SegmentPriority(StrEnum):
     """Audience segment priority (3 values)."""
 
     critical = "critical"
@@ -120,7 +119,7 @@ class SegmentPriority(str, Enum):
     moderate = "moderate"
 
 
-class CommunicationDecisionType(str, Enum):
+class CommunicationDecisionType(StrEnum):
     """All possible communication decision types (18 values per data-model.md)."""
 
     handoff_received = "handoff_received"
@@ -214,7 +213,7 @@ class AudienceSegment(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def _vulnerable_must_be_critical(self) -> "AudienceSegment":
+    def _vulnerable_must_be_critical(self) -> AudienceSegment:
         if self.vulnerability_categories and self.priority != SegmentPriority.critical:
             raise ValueError(
                 "Segments with vulnerability_categories must have priority=critical"
@@ -307,7 +306,7 @@ class PublicAlert(BaseModel):
         return max(0.0, min(1.0, v))
 
     @model_validator(mode="after")
-    def _validate_alert_rules(self) -> "PublicAlert":
+    def _validate_alert_rules(self) -> PublicAlert:
         # content_blocks must contain en-AU
         if self.content_blocks and "en-AU" not in self.content_blocks:
             raise ValueError("content_blocks must contain 'en-AU' key")

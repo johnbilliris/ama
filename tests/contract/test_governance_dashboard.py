@@ -2,9 +2,9 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
-
 from app.repositories.governance_repository import GovernanceRepository
 from app.services.governance_registry import GovernanceRegistryService
+
 from packages.domain.src.domain.models.constitutional_assessment import ConstitutionalAssessment
 from packages.domain.src.domain.models.data_source import DataSource
 
@@ -42,7 +42,7 @@ class TestDashboardSummary:
     def test_counts_by_compliance_status(self, service: GovernanceRegistryService) -> None:
         s1 = _register(service)
         s2 = _register(service)
-        s3 = _register(service)
+        _register(service)
         _assess(service, s1.data_source_id, "compliant")
         _assess(service, s2.data_source_id, "non_compliant", gaps=["gap1"])
         summary = service.get_dashboard_summary()

@@ -1,13 +1,11 @@
 """Tests for communication.agent — FastAPI endpoints."""
 
-import pytest
-from fastapi.testclient import TestClient
-
 from communication.agent import create_app
 from communication.approval import ApprovalWorkflow
 from communication.audit import AuditWriter
 from communication.config import CommunicationConfig
 from communication.models import AlertStatus, ContentBlock, PublicAlert
+from fastapi.testclient import TestClient
 
 
 def _make_app(**overrides):

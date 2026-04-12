@@ -2,8 +2,6 @@
 
 from unittest.mock import MagicMock
 
-import pytest
-
 from communication.audit import AuditWriter
 from communication.config import CommunicationConfig
 from communication.models import CommunicationDecisionRecord, CommunicationDecisionType

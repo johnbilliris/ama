@@ -62,7 +62,7 @@ class _NoOpSpan:
     def add_event(self, name: str, attributes: dict | None = None) -> None:  # noqa: D102
         pass
 
-    def __enter__(self) -> "_NoOpSpan":  # noqa: D105
+    def __enter__(self) -> _NoOpSpan:  # noqa: D105
         return self
 
     def __exit__(self, *args: Any) -> None:  # noqa: D105

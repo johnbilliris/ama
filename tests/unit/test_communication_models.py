@@ -1,10 +1,9 @@
 """Tests for communication.models — enums, Pydantic v2 models, and validation rules."""
 
-from datetime import UTC, datetime
 
 import pytest
-
 from communication.models import (
+    VALID_STATUS_TRANSITIONS,
     AlertStatus,
     ApprovalMode,
     AudienceSegment,
@@ -21,9 +20,7 @@ from communication.models import (
     PublicAlert,
     SegmentPriority,
     UrgencyLevel,
-    VALID_STATUS_TRANSITIONS,
 )
-
 
 # ---------------------------------------------------------------------------
 # AlertStatus enum

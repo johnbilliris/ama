@@ -12,9 +12,7 @@ Covers:
 
 from __future__ import annotations
 
-import math
 import pytest
-
 from resource_allocation.config import ResourceAllocationConfig
 from resource_allocation.models import (
     ResourceDemand,

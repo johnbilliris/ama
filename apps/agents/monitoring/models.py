@@ -11,18 +11,17 @@ Entities:
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
-
 
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
 
 
-class DecisionType(str, Enum):
+class DecisionType(StrEnum):
     """All possible monitoring decision types (9 values per data-model.md)."""
 
     summarised = "summarised"
@@ -36,7 +35,7 @@ class DecisionType(str, Enum):
     validation_failed = "validation_failed"
 
 
-class FreshnessStatus(str, Enum):
+class FreshnessStatus(StrEnum):
     """Data source freshness health status."""
 
     healthy = "healthy"
@@ -44,7 +43,7 @@ class FreshnessStatus(str, Enum):
     offline = "offline"
 
 
-class SourceType(str, Enum):
+class SourceType(StrEnum):
     """Data source classification."""
 
     authoritative = "authoritative"

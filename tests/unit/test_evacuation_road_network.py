@@ -2,16 +2,13 @@
 
 import json
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
 
 import pytest
-from shapely.geometry import LineString
-
 from evacuation.road_network import (
-    MAX_EDGES,
     MAX_NODES,
     RoadNetworkLoader,
 )
+from shapely.geometry import LineString
 
 SAMPLE_FILE = "data/road-networks/far-north-qld-sample.json"
 

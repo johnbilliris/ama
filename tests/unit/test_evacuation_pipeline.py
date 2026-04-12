@@ -1,10 +1,9 @@
 """Tests for evacuation.pipeline — end-to-end pipeline with mocks (T024)."""
 
-import pytest
 
 from common.handoffs import AgentHandoffEvent
 from evacuation.config import EvacuationConfig
-from evacuation.models import DecisionType, EvacuationPlan
+from evacuation.models import EvacuationPlan
 from evacuation.pipeline import EvacuationProcessingPipeline
 from evacuation.road_network import RoadNetworkLoader
 

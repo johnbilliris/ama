@@ -11,18 +11,14 @@ Covers:
 
 from __future__ import annotations
 
-import pytest
-from datetime import UTC, datetime
-
-from resource_allocation.config import ResourceAllocationConfig
 from resource_allocation.matcher import ResourceMatcher
 from resource_allocation.models import (
+    PriorityTier,
     ResourceDemand,
     ResourceInventoryItem,
     ResourceStatus,
     ResourceType,
     UrgencyLevel,
-    PriorityTier,
 )
 
 

@@ -1,9 +1,6 @@
 """Tests for evacuation.audit — three-tier degradation strategy (T049)."""
 
-import json
-from pathlib import Path
 
-import pytest
 
 from evacuation.audit import AuditWriter
 from evacuation.config import EvacuationConfig
@@ -97,7 +94,7 @@ class TestMemoryBuffer:
 
 class TestFileSpill:
     def test_spills_to_file_when_buffer_full(self, tmp_path):
-        cfg = EvacuationConfig()
+        EvacuationConfig()
         # Use object.__new__ to bypass frozen dataclass
         small_cfg = EvacuationConfig.__new__(EvacuationConfig)
         object.__setattr__(small_cfg, "audit_buffer_capacity", 2)

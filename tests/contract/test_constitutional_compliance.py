@@ -2,9 +2,9 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
-
 from app.repositories.governance_repository import GovernanceRepository
 from app.services.governance_registry import GovernanceRegistryService
+
 from packages.domain.src.domain.models.constitutional_assessment import ConstitutionalAssessment
 from packages.domain.src.domain.models.data_source import DataSource
 
@@ -24,7 +24,12 @@ def _register_source(service: GovernanceRegistryService, ds_id: str = "") -> Dat
     return service.register_source(source, actor_id="tester")
 
 
-def _make_assessment(data_source_id: str, principle: str = "life_safety_first", status: str = "compliant", **kw) -> ConstitutionalAssessment:
+def _make_assessment(
+    data_source_id: str,
+    principle: str = "life_safety_first",
+    status: str = "compliant",
+    **kw,
+) -> ConstitutionalAssessment:
     defaults = {
         "assessment_id": f"assess-{uuid4().hex[:12]}",
         "data_source_id": data_source_id,

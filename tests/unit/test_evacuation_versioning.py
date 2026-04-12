@@ -1,9 +1,7 @@
 """Tests for evacuation.versioning — version assignment, plan ID format, conflicts (T017)."""
 
 import pytest
-
 from evacuation.versioning import VersionConflictError, VersionCounter
-
 
 # ---------------------------------------------------------------------------
 # Version assignment without Cosmos

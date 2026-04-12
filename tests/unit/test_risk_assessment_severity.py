@@ -1,11 +1,8 @@
 """Tests for risk_assessment.severity – SeverityComputer."""
 
 import pytest
-
 from risk_assessment.models import SeverityLevel
 from risk_assessment.severity import (
-    CATEGORY_FALLBACK_SEVERITY,
-    DISASTER_TYPE_SEVERITY,
     SeverityComputer,
 )
 

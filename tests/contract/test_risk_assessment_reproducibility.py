@@ -4,7 +4,6 @@ from apps.agents.risk_assessment.agent import RiskAssessmentAgent
 from apps.agents.risk_assessment.config import RiskAssessmentConfig
 from apps.agents.risk_assessment.correlation import (
     ContradictionResult,
-    CorrelationResult,
     SignalCorrelator,
 )
 

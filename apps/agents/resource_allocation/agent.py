@@ -10,18 +10,15 @@ Provides:
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel as _BaseModel
-
 from common.handoffs import AgentHandoffEvent
 from common.llm_mixin import LLMCallMixin
-
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel as _BaseModel
 from resource_allocation.audit import AuditWriter
 from resource_allocation.config import ResourceAllocationConfig
 from resource_allocation.dedup import HandoffDeduplicator
@@ -30,13 +27,11 @@ from resource_allocation.matcher import ResourceMatcher
 from resource_allocation.models import (
     AllocationDecisionRecord,
     DecisionType,
-    OverrideMetadata,
     PlanStatus,
     ResourceDeploymentPlan,
     ResourceStatus,
 )
 from resource_allocation.pipeline import AllocationProcessingPipeline
-from resource_allocation.templates import generate_plan_summary
 from resource_allocation.versioning import VersionCounter
 
 logger = logging.getLogger(__name__)

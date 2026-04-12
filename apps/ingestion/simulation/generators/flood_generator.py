@@ -19,7 +19,6 @@ class FloodGenerator:
         steps = max(int(duration_hours * 2), 10)
         rise_fraction = 0.35
         peak_fraction = 0.15
-        recession_fraction = 0.50
 
         rise_steps = int(steps * rise_fraction)
         peak_steps = int(steps * peak_fraction)

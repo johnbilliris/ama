@@ -2,8 +2,6 @@
 
 from unittest.mock import patch
 
-import pytest
-
 from risk_assessment.dedup import HandoffDeduplicator
 
 

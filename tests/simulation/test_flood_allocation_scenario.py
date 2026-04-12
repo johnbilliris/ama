@@ -5,21 +5,16 @@ End-to-end pipeline test with realistic flood resource demands.
 
 from __future__ import annotations
 
-import pytest
-
 from common.handoffs import AgentHandoffEvent
-
 from resource_allocation.audit import AuditWriter
 from resource_allocation.config import ResourceAllocationConfig
 from resource_allocation.dedup import HandoffDeduplicator
 from resource_allocation.inventory import ResourceInventoryManager
 from resource_allocation.matcher import ResourceMatcher
 from resource_allocation.models import (
-    ConfidenceLevel,
     ResourceInventoryItem,
     ResourceStatus,
     ResourceType,
-    UrgencyLevel,
 )
 from resource_allocation.pipeline import AllocationProcessingPipeline
 from resource_allocation.versioning import VersionCounter

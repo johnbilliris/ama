@@ -16,18 +16,11 @@ from datetime import UTC, datetime, timedelta
 
 from common.handoffs import AgentHandoffEvent, build_handoff
 from common.llm_mixin import LLMCallMixin
-
-from packages.domain.src.domain.models.hazard_assessment import HazardAssessment, HazardMap
-from packages.domain.src.domain.models.recommendation import Recommendation
-
 from risk_assessment.config import RiskAssessmentConfig
-from risk_assessment.correlation import ContradictionResult, CorrelationResult, SignalCorrelator
+from risk_assessment.correlation import ContradictionResult, CorrelationResult
 from risk_assessment.models import (
-    AssessmentType,
-    ConfidenceLevel,
     DecisionType,
     RiskAssessmentDecisionRecord,
-    SeverityLevel,
     confidence_to_level,
 )
 from risk_assessment.severity import SeverityComputer
@@ -35,6 +28,9 @@ from risk_assessment.templates import (
     generate_assessment_summary,
     generate_recommendation_explanation,
 )
+
+from packages.domain.src.domain.models.hazard_assessment import HazardAssessment
+from packages.domain.src.domain.models.recommendation import Recommendation
 
 logger = logging.getLogger(__name__)
 
@@ -510,7 +506,7 @@ class RiskAssessmentAgent(LLMCallMixin):
 # ``from __future__ import annotations`` (PEP 563) can resolve them when
 # FastAPI inspects endpoint signatures.
 
-from pydantic import BaseModel as _PydanticBaseModel
+from pydantic import BaseModel as _PydanticBaseModel  # noqa: E402
 
 
 class _HealthCheckDetail(_PydanticBaseModel):

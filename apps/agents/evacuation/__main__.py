@@ -11,7 +11,6 @@ import logging
 import os
 
 import uvicorn
-
 from evacuation.agent import EvacuationAgent, create_app
 from evacuation.config import EvacuationConfig
 

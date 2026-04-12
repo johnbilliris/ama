@@ -15,18 +15,17 @@ from __future__ import annotations
 
 import re
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-
 
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
 
 
-class DecisionType(str, Enum):
+class DecisionType(StrEnum):
     """All possible evacuation decision types (15 values per data-model.md)."""
 
     handoff_received = "handoff_received"
@@ -46,7 +45,7 @@ class DecisionType(str, Enum):
     content_safety_failure = "content_safety_failure"
 
 
-class ConfidenceLevel(str, Enum):
+class ConfidenceLevel(StrEnum):
     """Discrete confidence level derived from numeric confidence score."""
 
     low = "low"
@@ -54,7 +53,7 @@ class ConfidenceLevel(str, Enum):
     high = "high"
 
 
-class PlanStatus(str, Enum):
+class PlanStatus(StrEnum):
     """Lifecycle status of an evacuation plan (7 states)."""
 
     proposed = "proposed"
@@ -66,7 +65,7 @@ class PlanStatus(str, Enum):
     paused = "paused"
 
 
-class VulnerabilityCategory(str, Enum):
+class VulnerabilityCategory(StrEnum):
     """Categories of vulnerable populations requiring special transport."""
 
     mobility_impaired = "mobility_impaired"
@@ -75,7 +74,7 @@ class VulnerabilityCategory(str, Enum):
     children_schools_childcare = "children_schools_childcare"
 
 
-class ClosureReason(str, Enum):
+class ClosureReason(StrEnum):
     """Reasons a road segment may be excluded from evacuation routes."""
 
     emergency_services_closure = "emergency_services_closure"

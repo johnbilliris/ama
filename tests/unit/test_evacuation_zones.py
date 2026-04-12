@@ -1,14 +1,10 @@
 """Tests for evacuation.zones — zone computation, classification, capacity (T015)."""
 
-import pytest
-from shapely.geometry import LineString, Polygon
-
 from evacuation.zones import (
-    DEFAULT_ZONE_2_BUFFER,
-    DEFAULT_ZONE_3_BUFFER,
     ZONE_CAPACITY_FACTORS,
     ZoneComputer,
 )
+from shapely.geometry import LineString, Polygon
 
 
 def _simple_hazard_geojson():

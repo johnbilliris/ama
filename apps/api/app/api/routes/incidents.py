@@ -1,7 +1,7 @@
+from app.repositories.simulation_repository import SimulationRepository
 from app.services.dashboard_service import DashboardService
 from app.services.resource_governor import ResourceGovernor
 from app.services.state_store import INCIDENTS
-from app.repositories.simulation_repository import SimulationRepository
 from fastapi import APIRouter, HTTPException
 
 router = APIRouter(prefix="/incidents", tags=["incidents"])

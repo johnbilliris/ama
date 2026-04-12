@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 from collections import deque
 from datetime import UTC, datetime
 from pathlib import Path
@@ -136,7 +135,7 @@ class AuditWriter:
         if file_path.exists():
             try:
                 remaining_lines: list[str] = []
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
                         if not line:

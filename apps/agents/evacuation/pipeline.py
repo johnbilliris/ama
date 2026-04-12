@@ -15,14 +15,13 @@ Stages:
 
 from __future__ import annotations
 
-import json
 import logging
 import time
 from datetime import UTC, datetime
 from typing import Any
 
 from common.handoffs import AgentHandoffEvent
-
+from evacuation import telemetry as tel
 from evacuation.audit import AuditWriter
 from evacuation.config import EvacuationConfig
 from evacuation.dedup import HandoffDeduplicator
@@ -41,14 +40,11 @@ from evacuation.models import (
 from evacuation.road_network import RoadNetworkLoader
 from evacuation.router import RouteComputer
 from evacuation.templates import (
-    generate_change_summary_template,
     generate_plan_summary_template,
-    generate_route_rationale_template,
 )
 from evacuation.timeline import TimelineEstimator
 from evacuation.transport import TransportCoordinator
 from evacuation.versioning import VersionCounter
-from evacuation import telemetry as tel
 from evacuation.zones import ZoneComputer
 
 logger = logging.getLogger(__name__)
@@ -120,7 +116,7 @@ class EvacuationProcessingPipeline:
         with tel.start_span("evacuation.process_handoff", attributes={
             "handoff_id": handoff.handoff_id,
             "incident_id": handoff.incident_id,
-        }) as root_span:
+        }):
             pipeline_start = time.monotonic()
             tenant_id = handoff.tenant_id or "live"
             incident_id = handoff.incident_id
@@ -188,7 +184,7 @@ class EvacuationProcessingPipeline:
                         )
 
             # Stage 6 — Transport coordination
-            with tel.start_span("evacuation.coordinate_transport") as s6:
+            with tel.start_span("evacuation.coordinate_transport"):
                 transport_reqs = self._stage_6_transport_coordination(
                     handoff, zones, incident_scope_key, tenant_id, assumptions,
                 )
@@ -200,7 +196,7 @@ class EvacuationProcessingPipeline:
                 tel.transport_vehicles_estimated.set(float(total_vehicles))
 
             # Stage 7 — Timeline estimation
-            with tel.start_span("evacuation.estimate_timeline") as s7:
+            with tel.start_span("evacuation.estimate_timeline"):
                 phases, shelter_zones, timeline_assumptions = self._stage_7_timeline_estimation(
                     handoff, zones, routes, transport_reqs, assessment_data,
                     incident_scope_key, tenant_id,
@@ -237,7 +233,7 @@ class EvacuationProcessingPipeline:
                             tel.emit_time_deficit_detected("", "all", deficit)
 
             # Stage 8 — Plan summary generation
-            with tel.start_span("evacuation.generate_summary") as s8:
+            with tel.start_span("evacuation.generate_summary"):
                 summary, generation_method, confidence_score = self._stage_8_plan_summary(
                     handoff, zones, routes, transport_reqs, phases, assessment_data,
                     incident_scope_key, tenant_id, assumptions,
@@ -1126,7 +1122,7 @@ class EvacuationProcessingPipeline:
         pipeline_start: float,
     ) -> None:
         """Reconcile audit records and verify completeness."""
-        t0 = time.monotonic()
+        time.monotonic()
 
         # Attempt to flush any buffered audit records
         flushed = self._audit_writer.flush()

@@ -20,7 +20,7 @@ from typing import Any
 
 from common.handoffs import AgentHandoffEvent
 from common.llm_mixin import LLMCallMixin
-
+from evacuation import telemetry as tel
 from evacuation.config import EvacuationConfig
 from evacuation.models import (
     DecisionType,
@@ -32,7 +32,6 @@ from evacuation.models import (
 from evacuation.pipeline import EvacuationProcessingPipeline
 from evacuation.replanner import DynamicReplanner
 from evacuation.road_network import RoadNetworkLoader
-from evacuation import telemetry as tel
 
 logger = logging.getLogger(__name__)
 
@@ -273,7 +272,7 @@ class EvacuationAgent(LLMCallMixin):
 # FastAPI application — health, override, and replan endpoints
 # ---------------------------------------------------------------------------
 
-from pydantic import BaseModel as _PydanticBaseModel
+from pydantic import BaseModel as _PydanticBaseModel  # noqa: E402
 
 
 class _RoadNetworkDetail(_PydanticBaseModel):

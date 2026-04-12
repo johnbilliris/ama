@@ -1,9 +1,7 @@
 """Contract tests for evacuation handoff — AgentHandoffEvent validation (T022)."""
 
 import pytest
-
 from common.handoffs import AgentHandoffEvent, build_handoff
-
 
 # ---------------------------------------------------------------------------
 # Valid AgentHandoffEvent

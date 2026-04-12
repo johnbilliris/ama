@@ -10,18 +10,17 @@ Entities:
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator
-
 
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
 
 
-class DecisionType(str, Enum):
+class DecisionType(StrEnum):
     """All possible risk assessment decision types (12 values per data-model.md)."""
 
     handoff_received = "handoff_received"
@@ -38,7 +37,7 @@ class DecisionType(str, Enum):
     content_safety_failure = "content_safety_failure"
 
 
-class AssessmentType(str, Enum):
+class AssessmentType(StrEnum):
     """Hazard assessment type derived from signal category."""
 
     spread_prediction = "spread_prediction"
@@ -48,7 +47,7 @@ class AssessmentType(str, Enum):
     community_impact = "community_impact"
 
 
-class ConfidenceLevel(str, Enum):
+class ConfidenceLevel(StrEnum):
     """Discrete confidence level derived from numeric confidence score."""
 
     low = "low"
@@ -56,7 +55,7 @@ class ConfidenceLevel(str, Enum):
     high = "high"
 
 
-class SeverityLevel(str, Enum):
+class SeverityLevel(StrEnum):
     """AIDR-aligned 4-level severity."""
 
     low = "low"

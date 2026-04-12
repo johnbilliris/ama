@@ -1,25 +1,36 @@
 from datetime import UTC, datetime
-from typing import Any
 from uuid import uuid4
-
-from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel
 
 from app.services.governance_cache import GovernanceCacheService
 from app.services.governance_registry import GovernanceRegistryService
-from packages.domain.src.domain.models.agent_governance import AgentName, AssignmentRole
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel
+
+from packages.domain.src.domain.models.agent_governance import (
+    AgentGovernanceAssignment,
+    AgentName,
+    AssignmentRole,
+)
 from packages.domain.src.domain.models.constitutional_assessment import (
     AssessmentComplianceStatus,
     AssessmentTrigger,
     ConstitutionalAssessment,
     ConstitutionalPrinciple,
 )
-from packages.domain.src.domain.models.agent_governance import AgentGovernanceAssignment
-from packages.domain.src.domain.models.functional_domain_precedence import FunctionalDomainPrecedence
-from packages.domain.src.domain.models.handoff_chain import HandoffChainDefinition, HandoffStep, SignalCategory
+from packages.domain.src.domain.models.functional_domain_precedence import (
+    FunctionalDomainPrecedence,
+)
+from packages.domain.src.domain.models.handoff_chain import (
+    HandoffChainDefinition,
+    HandoffStep,
+    SignalCategory,
+)
 
 GOVERNANCE_WRITE_ROLES = frozenset({"governance_lead", "safety_lead", "system_architect"})
-GOVERNANCE_READ_ROLES = frozenset({"governance_lead", "safety_lead", "system_architect", "incident_commander", "executive", "auditor"})
+GOVERNANCE_READ_ROLES = frozenset({
+    "governance_lead", "safety_lead", "system_architect",
+    "incident_commander", "executive", "auditor",
+})
 
 
 def _get_user_role(request: Request) -> str:
@@ -91,7 +102,10 @@ async def manage_grace_period(data_source_id: str, body: GracePeriodAction) -> d
     if body.action == "extend":
         if not body.extend_hours or body.extend_hours < 1:
             raise HTTPException(status_code=400, detail="extend_hours must be >= 1 for extend action.")
-        result = _service.extend_grace_period(data_source_id, body.extend_hours, actor_id="api-user", rationale=body.rationale)
+        result = _service.extend_grace_period(
+            data_source_id, body.extend_hours,
+            actor_id="api-user", rationale=body.rationale,
+        )
     elif body.action == "block":
         result = _service.block_source_immediately(data_source_id, actor_id="api-user")
     else:

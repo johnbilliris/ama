@@ -1,8 +1,5 @@
 import pytest
 
-from app.repositories.signal_repository import SignalRepository
-from app.services.scenario_seeding_service import ScenarioSeedingService
-
 from packages.domain.src.domain.models.scenario_template import (
     BenchmarkTargets,
     ScenarioTemplate,

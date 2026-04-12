@@ -2,8 +2,6 @@
 
 import time
 
-import pytest
-
 
 class TestSignalDeduplicator:
     """T011: Deduplication service tests."""

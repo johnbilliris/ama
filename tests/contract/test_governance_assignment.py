@@ -2,13 +2,15 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
-
 from app.repositories.governance_repository import GovernanceRepository
 from app.services.governance_registry import GovernanceRegistryService
+
 from packages.domain.src.domain.models.agent_governance import AgentGovernanceAssignment
 from packages.domain.src.domain.models.constitutional_assessment import ConstitutionalAssessment
 from packages.domain.src.domain.models.data_source import DataSource
-from packages.domain.src.domain.models.functional_domain_precedence import FunctionalDomainPrecedence
+from packages.domain.src.domain.models.functional_domain_precedence import (
+    FunctionalDomainPrecedence,
+)
 from packages.domain.src.domain.models.handoff_chain import HandoffChainDefinition, HandoffStep
 
 
@@ -32,7 +34,9 @@ def _approved_source(service: GovernanceRegistryService) -> DataSource:
     return service.get_source(src.data_source_id)
 
 
-def _assign_primary(service: GovernanceRegistryService, ds_id: str, agent: str = "monitoring") -> AgentGovernanceAssignment:
+def _assign_primary(
+    service: GovernanceRegistryService, ds_id: str, agent: str = "monitoring",
+) -> AgentGovernanceAssignment:
     assignment = AgentGovernanceAssignment(
         assignment_id=f"assign-{uuid4().hex[:12]}", data_source_id=ds_id,
         agent_name=agent, role="primary", scope_of_responsibility="signal ingestion",
@@ -80,7 +84,10 @@ class TestHandoffChainValidation:
         chain = HandoffChainDefinition(
             chain_id=f"chain-{uuid4().hex[:12]}", data_source_id=src.data_source_id,
             steps=[
-                HandoffStep(step_order=1, source_agent="monitoring", target_agent="risk_assessment", confidence_threshold=0.8),
+                HandoffStep(
+                    step_order=1, source_agent="monitoring",
+                    target_agent="risk_assessment", confidence_threshold=0.8,
+                ),
                 HandoffStep(step_order=2, source_agent="risk_assessment", target_agent="evacuation"),
             ],
             created_by="arch", created_at=datetime.now(UTC),
@@ -109,7 +116,10 @@ class TestHandoffChainValidation:
         _assign_primary(service, src.data_source_id)
         chain = HandoffChainDefinition(
             chain_id="chain-bad2", data_source_id=src.data_source_id,
-            steps=[HandoffStep(step_order=1, source_agent="monitoring", target_agent="risk_assessment", confidence_threshold=1.5)],
+            steps=[HandoffStep(
+                step_order=1, source_agent="monitoring",
+                target_agent="risk_assessment", confidence_threshold=1.5,
+            )],
             created_by="arch", created_at=datetime.now(UTC),
         )
         with pytest.raises(Exception, match="between 0 and 1"):

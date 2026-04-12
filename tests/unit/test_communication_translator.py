@@ -1,10 +1,8 @@
 """Tests for communication.translator — MultilingualTranslator."""
 
 import pytest
-
 from communication.models import ContentBlock, GenerationMethod
 from communication.translator import MultilingualTranslator
-
 
 # ---------------------------------------------------------------------------
 # cosine similarity (static method)

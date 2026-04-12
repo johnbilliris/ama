@@ -1,5 +1,4 @@
 import pytest
-
 from app.repositories.simulation_repository import SimulationRepository
 from app.services.resource_governor import ResourceGovernor, TokenBucket
 
@@ -33,7 +32,6 @@ class TestResourceGovernor:
 
     @pytest.mark.asyncio
     async def test_declare_incident_throttles(self, governor, repo):
-        from datetime import UTC, datetime
         from uuid import uuid4
 
         tenant_id = f"sim-{uuid4()}"

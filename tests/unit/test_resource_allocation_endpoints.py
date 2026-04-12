@@ -10,12 +10,8 @@ Covers:
 from __future__ import annotations
 
 import pytest
-from datetime import UTC, datetime
-from unittest.mock import MagicMock
-
 from resource_allocation.agent import ResourceAllocationAgent, create_app
 from resource_allocation.config import ResourceAllocationConfig
-from resource_allocation.models import DecisionType, PlanStatus
 
 
 class TestOverrideEndpoint:

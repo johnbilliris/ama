@@ -4,14 +4,16 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import HTTPException
-
 from app.repositories.governance_repository import GovernanceRepository
 from app.validators.governance_validators import validate_agent_name, validate_handoff_chain
+from fastapi import HTTPException
+
 from packages.domain.src.domain.models.agent_governance import AgentGovernanceAssignment
 from packages.domain.src.domain.models.constitutional_assessment import ConstitutionalAssessment
 from packages.domain.src.domain.models.data_source import DataSource
-from packages.domain.src.domain.models.functional_domain_precedence import FunctionalDomainPrecedence
+from packages.domain.src.domain.models.functional_domain_precedence import (
+    FunctionalDomainPrecedence,
+)
 from packages.domain.src.domain.models.governance_audit import GovernanceAuditEntry
 from packages.domain.src.domain.models.handoff_chain import HandoffChainDefinition
 from packages.domain.src.domain.seed.bootstrap import bootstrap_seed_data
@@ -27,7 +29,10 @@ class GovernanceRegistryService:
 
     # --- Audit helper ---
 
-    def _audit(self, data_source_id: str, action: str, actor_id: str, details: dict | None = None, related_entity_id: str | None = None) -> GovernanceAuditEntry:
+    def _audit(
+        self, data_source_id: str, action: str, actor_id: str,
+        details: dict | None = None, related_entity_id: str | None = None,
+    ) -> GovernanceAuditEntry:
         entry = GovernanceAuditEntry(
             audit_entry_id=f"audit-{uuid4().hex}",
             data_source_id=data_source_id,
@@ -104,7 +109,10 @@ class GovernanceRegistryService:
         if assessment.compliance_status == "partially_compliant" and not assessment.conditions:
             raise HTTPException(status_code=400, detail="Conditions required for partially_compliant status.")
         if assessment.compliance_status in ("partially_compliant", "non_compliant") and not assessment.gaps:
-            raise HTTPException(status_code=400, detail="Gaps required for partially_compliant or non_compliant status.")
+            raise HTTPException(
+                status_code=400,
+                detail="Gaps required for partially_compliant or non_compliant status.",
+            )
 
         current = [
             a for a in self._repo.get_current_assessments(assessment.data_source_id)
@@ -114,10 +122,17 @@ class GovernanceRegistryService:
             prev.is_current = False
             prev.superseded_by = assessment.assessment_id
             self._repo.save_assessment(prev)
-            self._audit(assessment.data_source_id, "assessment_superseded", actor_id, related_entity_id=prev.assessment_id)
+            self._audit(
+                assessment.data_source_id, "assessment_superseded",
+                actor_id, related_entity_id=prev.assessment_id,
+            )
 
         saved = self._repo.save_assessment(assessment)
-        self._audit(assessment.data_source_id, "assessment_created", actor_id, {"principle": assessment.principle, "status": assessment.compliance_status}, related_entity_id=saved.assessment_id)
+        self._audit(
+            assessment.data_source_id, "assessment_created", actor_id,
+            {"principle": assessment.principle, "status": assessment.compliance_status},
+            related_entity_id=saved.assessment_id,
+        )
         self._derive_compliance_status(assessment.data_source_id)
         return saved
 
@@ -155,29 +170,48 @@ class GovernanceRegistryService:
         for source in self._repo.list_sources():
             current = self._repo.get_current_assessments(source.data_source_id)
             if current:
-                self._audit(source.data_source_id, "rereview_triggered", actor_id, {"triggered_by": "constitution_amendment"})
+                self._audit(
+                    source.data_source_id, "rereview_triggered",
+                    actor_id, {"triggered_by": "constitution_amendment"},
+                )
                 flagged += 1
         return flagged
 
     # --- Grace period ---
 
-    def start_grace_period(self, data_source_id: str, actor_id: str, grace_hours: int = DEFAULT_GRACE_PERIOD_HOURS) -> DataSource:
+    def start_grace_period(
+        self, data_source_id: str, actor_id: str,
+        grace_hours: int = DEFAULT_GRACE_PERIOD_HOURS,
+    ) -> DataSource:
         source = self.get_source(data_source_id)
         now = datetime.now(UTC)
         source.compliance_status = "compliance_lapsed"
         source.grace_period_start = now
         source.grace_period_end = now + timedelta(hours=grace_hours)
         saved = self._repo.save_source(source)
-        self._audit(data_source_id, "grace_period_started", actor_id, {"grace_hours": grace_hours, "expires_at": saved.grace_period_end.isoformat()})
+        self._audit(
+            data_source_id, "grace_period_started", actor_id,
+            {"grace_hours": grace_hours, "expires_at": saved.grace_period_end.isoformat()},
+        )
         return saved
 
-    def extend_grace_period(self, data_source_id: str, extend_hours: int, actor_id: str, rationale: str = "") -> DataSource:
+    def extend_grace_period(
+        self, data_source_id: str, extend_hours: int,
+        actor_id: str, rationale: str = "",
+    ) -> DataSource:
         source = self.get_source(data_source_id)
         if source.compliance_status != "compliance_lapsed":
             raise HTTPException(status_code=409, detail="Source is not in compliance_lapsed state.")
         source.grace_period_end = source.grace_period_end + timedelta(hours=extend_hours)
         saved = self._repo.save_source(source)
-        self._audit(data_source_id, "grace_period_extended", actor_id, {"extend_hours": extend_hours, "rationale": rationale, "new_end": saved.grace_period_end.isoformat()})
+        self._audit(
+            data_source_id, "grace_period_extended", actor_id,
+            {
+                "extend_hours": extend_hours,
+                "rationale": rationale,
+                "new_end": saved.grace_period_end.isoformat(),
+            },
+        )
         return saved
 
     def block_source_immediately(self, data_source_id: str, actor_id: str) -> DataSource:
@@ -222,12 +256,16 @@ class GovernanceRegistryService:
                 self._repo.save_assignment(ep)
 
         saved = self._repo.save_assignment(assignment)
-        self._audit(assignment.data_source_id, "agent_assigned", actor_id, {"agent": assignment.agent_name, "role": assignment.role}, related_entity_id=saved.assignment_id)
+        self._audit(
+            assignment.data_source_id, "agent_assigned", actor_id,
+            {"agent": assignment.agent_name, "role": assignment.role},
+            related_entity_id=saved.assignment_id,
+        )
         self._derive_governance_status(assignment.data_source_id)
         return saved
 
     def define_handoff_chain(self, chain: HandoffChainDefinition, actor_id: str) -> HandoffChainDefinition:
-        source = self.get_source(chain.data_source_id)
+        self.get_source(chain.data_source_id)
         assignments = self._repo.get_assignments_for_source(chain.data_source_id)
         primary = next((a for a in assignments if a.role == "primary"), None)
         primary_agent = primary.agent_name if primary else None
@@ -238,10 +276,16 @@ class GovernanceRegistryService:
         if existing:
             existing.status = "deprecated"
             self._repo.save_chain(existing)
-            self._audit(chain.data_source_id, "handoff_deprecated", actor_id, related_entity_id=existing.chain_id)
+            self._audit(
+                chain.data_source_id, "handoff_deprecated",
+                actor_id, related_entity_id=existing.chain_id,
+            )
 
         saved = self._repo.save_chain(chain)
-        self._audit(chain.data_source_id, "handoff_defined", actor_id, {"steps": len(chain.steps)}, related_entity_id=saved.chain_id)
+        self._audit(
+            chain.data_source_id, "handoff_defined", actor_id,
+            {"steps": len(chain.steps)}, related_entity_id=saved.chain_id,
+        )
         self._derive_governance_status(chain.data_source_id)
         return saved
 
@@ -273,10 +317,15 @@ class GovernanceRegistryService:
 
     def set_precedence(self, precedence: FunctionalDomainPrecedence, actor_id: str) -> FunctionalDomainPrecedence:
         saved = self._repo.save_precedence(precedence)
-        self._audit(precedence.primary_data_source_id, "precedence_set", actor_id, {"hazard_type": precedence.hazard_type, "jurisdiction": precedence.jurisdiction_id})
+        self._audit(
+            precedence.primary_data_source_id, "precedence_set", actor_id,
+            {"hazard_type": precedence.hazard_type, "jurisdiction": precedence.jurisdiction_id},
+        )
         return saved
 
-    def list_precedence(self, hazard_type: str | None = None, jurisdiction_id: str | None = None) -> list[FunctionalDomainPrecedence]:
+    def list_precedence(
+        self, hazard_type: str | None = None, jurisdiction_id: str | None = None,
+    ) -> list[FunctionalDomainPrecedence]:
         return self._repo.list_precedence(hazard_type, jurisdiction_id)
 
     # --- Governance gaps ---
@@ -306,7 +355,13 @@ class GovernanceRegistryService:
         for s in lapsed:
             if s.grace_period_end:
                 remaining = (s.grace_period_end - datetime.now(UTC)).total_seconds() / 3600
-                logger.warning("grace_period_expiry_warning", extra={"data_source_id": s.data_source_id, "hours_remaining": round(remaining, 1)})
+                logger.warning(
+                    "grace_period_expiry_warning",
+                    extra={
+                        "data_source_id": s.data_source_id,
+                        "hours_remaining": round(remaining, 1),
+                    },
+                )
 
         return {
             "total_sources": len(sources),
@@ -323,7 +378,10 @@ class GovernanceRegistryService:
 
     # --- Audit trail ---
 
-    def get_audit_trail(self, data_source_id: str, action: str | None = None, from_dt: datetime | None = None, to_dt: datetime | None = None) -> list[GovernanceAuditEntry]:
+    def get_audit_trail(
+        self, data_source_id: str, action: str | None = None,
+        from_dt: datetime | None = None, to_dt: datetime | None = None,
+    ) -> list[GovernanceAuditEntry]:
         return self._repo.get_audit_trail(data_source_id, action, from_dt, to_dt)
 
     # --- Handoff lookup ---
@@ -332,5 +390,12 @@ class GovernanceRegistryService:
         start = time.monotonic()
         result = self._repo.get_chain_for_source(data_source_id)
         elapsed_ms = (time.monotonic() - start) * 1000
-        logger.info("handoff_chain_lookup", extra={"data_source_id": data_source_id, "latency_ms": round(elapsed_ms, 2), "found": result is not None})
+        logger.info(
+            "handoff_chain_lookup",
+            extra={
+                "data_source_id": data_source_id,
+                "latency_ms": round(elapsed_ms, 2),
+                "found": result is not None,
+            },
+        )
         return result

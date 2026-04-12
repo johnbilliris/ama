@@ -1,6 +1,5 @@
 """Contract tests for evacuation reproducibility (T046)."""
 
-import pytest
 
 from common.handoffs import AgentHandoffEvent
 from evacuation.config import EvacuationConfig

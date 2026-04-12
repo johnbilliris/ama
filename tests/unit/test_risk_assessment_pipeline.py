@@ -1,14 +1,11 @@
 """Tests for risk_assessment.pipeline – AssessmentProcessingPipeline."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 
 from common.handoffs import AgentHandoffEvent
 from risk_assessment.audit import AuditWriter
 from risk_assessment.config import RiskAssessmentConfig
 from risk_assessment.pipeline import AssessmentProcessingPipeline
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -69,7 +66,7 @@ class TestHandoffValidation:
         pipeline = _make_pipeline()
         handoff = _make_handoff()
         handoff.target_agent = "some_other_agent"
-        result = pipeline.process_handoff(handoff)
+        pipeline.process_handoff(handoff)
         assert pipeline.rejection_count >= 1
 
 
@@ -132,7 +129,7 @@ class TestEndToEnd:
     def test_no_escalation_when_below_thresholds(self):
         pipeline = _make_pipeline()
         handoff = _make_handoff(category="fire", confidence=0.3)
-        result = pipeline.process_handoff(handoff)
+        pipeline.process_handoff(handoff)
         assert pipeline.escalation_count == 0
 
     def test_simulation_tenant_blocks_live_escalation(self):
@@ -142,6 +139,6 @@ class TestEndToEnd:
             confidence=0.95,
             tenant_id="simulation",
         )
-        result = pipeline.process_handoff(handoff, tenant_id="simulation")
+        pipeline.process_handoff(handoff, tenant_id="simulation")
         # Simulation tenants should not escalate to live systems
         assert pipeline.escalation_count == 0

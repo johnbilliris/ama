@@ -18,14 +18,10 @@ from resource_allocation.models import (
     ResourceAssignment,
     ResourceDemand,
     ResourceInventoryItem,
-    ResourceStatus,
     ScoringRationale,
     ShortfallDetail,
-    TradeOffAnalysis,
 )
 from resource_allocation.scoring import (
-    check_capability_match,
-    check_type_compatibility,
     compute_score,
     estimate_travel_time,
     haversine_distance,
@@ -179,7 +175,11 @@ class ResourceMatcher:
             dem_loc.get("lat", 0.0), dem_loc.get("lon", 0.0),
         )
 
-        res_type = resource.resource_type.value if hasattr(resource.resource_type, "value") else str(resource.resource_type)
+        res_type = (
+            resource.resource_type.value
+            if hasattr(resource.resource_type, "value")
+            else str(resource.resource_type)
+        )
         travel_time = estimate_travel_time(
             distance_km=distance_km,
             resource_type=res_type,

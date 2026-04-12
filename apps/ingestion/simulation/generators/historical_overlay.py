@@ -1,7 +1,6 @@
 import json
 import logging
-import random
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,6 @@
 """Tests for risk_assessment.correlation – SignalCorrelator & ContradictionDetector."""
 
 import pytest
-
 from risk_assessment.config import RiskAssessmentConfig
 from risk_assessment.correlation import (
     ContradictionDetector,

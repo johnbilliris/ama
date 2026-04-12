@@ -15,12 +15,12 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
-from typing import Any, Callable
+from typing import Any
 from uuid import uuid4
 
 from common.handoffs import AgentHandoffEvent
-
 from resource_allocation.audit import AuditWriter
 from resource_allocation.config import ResourceAllocationConfig
 from resource_allocation.dedup import HandoffDeduplicator
@@ -28,7 +28,6 @@ from resource_allocation.inventory import ResourceInventoryManager
 from resource_allocation.matcher import ResourceMatcher
 from resource_allocation.models import (
     AllocationDecisionRecord,
-    ConfidenceLevel,
     DecisionType,
     DeploymentTimeline,
     InputSnapshot,
@@ -37,6 +36,7 @@ from resource_allocation.models import (
     ResourceAssignment,
     ResourceDemand,
     ResourceDeploymentPlan,
+    ResourceInventoryItem,
     ResourceType,
     ShortfallDetail,
     Traceability,
@@ -198,7 +198,7 @@ class AllocationProcessingPipeline:
             self._write_audit(
                 handoff_id=handoff.handoff_id,
                 decision_type=DecisionType.duplicate_discarded,
-                rationale=f"Duplicate handoff within dedup window",
+                rationale="Duplicate handoff within dedup window",
                 config_hash=config_hash,
                 incident_scope_key=incident_scope_key,
                 tenant_id=handoff.tenant_id,
@@ -321,7 +321,7 @@ class AllocationProcessingPipeline:
         """Extract demands from evacuation transport requirements."""
         payload = handoff.payload or {}
         requirements = payload.get("transportRequirements", [])
-        evacuation_plan_id = payload.get("evacuationPlanId", "")
+        payload.get("evacuationPlanId", "")
         demands = []
 
         for req in requirements:
@@ -428,7 +428,11 @@ class AllocationProcessingPipeline:
         # Keyword-based extraction
         resource_keywords = {
             "water tanker": {"type": "vehicle", "sub_type": "water_tanker", "capabilities": ["water_delivery"]},
-            "ambulance": {"type": "vehicle", "sub_type": "ambulance", "capabilities": ["medical_transport", "patient_stabilization"]},
+            "ambulance": {
+                "type": "vehicle",
+                "sub_type": "ambulance",
+                "capabilities": ["medical_transport", "patient_stabilization"],
+            },
             "fire truck": {"type": "vehicle", "sub_type": "fire_truck", "capabilities": ["firefighting"]},
             "helicopter": {"type": "vehicle", "sub_type": "helicopter", "capabilities": ["aerial_support"]},
             "paramedic": {"type": "personnel", "sub_type": "paramedic", "capabilities": ["medical_treatment"]},
@@ -521,8 +525,6 @@ class AllocationProcessingPipeline:
         incident_scope_key: str,
     ) -> list[ResourceInventoryItem]:
         """Load and filter eligible resources from inventory."""
-        from resource_allocation.models import ResourceInventoryItem
-
         all_eligible: list[ResourceInventoryItem] = []
         seen_ids: set[str] = set()
 

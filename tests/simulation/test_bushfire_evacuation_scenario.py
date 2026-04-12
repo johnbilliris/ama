@@ -1,7 +1,6 @@
 """Simulation test — bushfire evacuation scenario (T058)."""
 
 import pytest
-
 from common.handoffs import AgentHandoffEvent
 from evacuation.config import EvacuationConfig
 from evacuation.models import EvacuationPlan

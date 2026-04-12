@@ -1,10 +1,9 @@
-from app.core.tenant_context import TenantContext
-from app.services.tenant_partitioning import TenantPartitioningService
-
-import pytest
 from uuid import uuid4
 
+import pytest
+from app.core.tenant_context import TenantContext
 from app.repositories.signal_repository import SignalRepository
+from app.services.tenant_partitioning import TenantPartitioningService
 
 
 def test_tenant_scope_differs_across_agencies() -> None:

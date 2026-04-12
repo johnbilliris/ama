@@ -25,7 +25,7 @@ def generate_plan_summary(
 
     parts = [
         f"RESOURCE DEPLOYMENT PLAN (Incident: {incident_id}, Version: {version})",
-        f"Generated via template due to LLM unavailability.",
+        "Generated via template due to LLM unavailability.",
         "",
     ]
 

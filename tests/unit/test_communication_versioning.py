@@ -1,9 +1,7 @@
 """Tests for communication.versioning — VersionCounter."""
 
-import pytest
 
 from communication.versioning import VersionCounter
-
 
 # ---------------------------------------------------------------------------
 # Local counter (no Cosmos)

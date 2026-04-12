@@ -1,7 +1,4 @@
-import asyncio
 from datetime import UTC, datetime, timedelta
-
-import pytest
 
 from apps.api.app.services.ingestion.pipeline_base import CircuitBreakerState
 
@@ -75,7 +72,6 @@ class TestCircuitBreakerStateTransitions:
         cb.record_failure()
         assert cb.state == "open"
         assert cb.total_trips == 1
-        first_backoff = cb.backoff_until
         cb.backoff_until = datetime.now(UTC) - timedelta(seconds=1)
         cb.should_allow_request()
         cb.record_failure()

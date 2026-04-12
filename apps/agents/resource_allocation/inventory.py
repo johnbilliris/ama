@@ -22,7 +22,6 @@ from resource_allocation.config import ResourceAllocationConfig
 from resource_allocation.models import (
     ResourceInventoryItem,
     ResourceStatus,
-    ResourceType,
 )
 
 logger = logging.getLogger(__name__)
@@ -60,7 +59,7 @@ class ResourceInventoryManager:
             logger.warning("Inventory file not found: %s", path)
             return []
 
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             data = json.load(f)
 
         items = data if isinstance(data, list) else data.get("resources", [])
@@ -131,7 +130,9 @@ class ResourceInventoryManager:
         )
         return True
 
-    def flag_operational_limits(self, resources: list[ResourceInventoryItem] | None = None) -> list[ResourceInventoryItem]:
+    def flag_operational_limits(
+        self, resources: list[ResourceInventoryItem] | None = None,
+    ) -> list[ResourceInventoryItem]:
         """Flag resources that have hit operational limits.
 
         Checks:

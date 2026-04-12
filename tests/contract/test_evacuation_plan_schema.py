@@ -3,14 +3,13 @@
 import re
 
 import pytest
-
 from evacuation.models import (
     ConfidenceLevel,
+    DataSnapshot,
     EvacuationPlan,
     HazardSummary,
     PlanStatus,
     Traceability,
-    DataSnapshot,
 )
 
 

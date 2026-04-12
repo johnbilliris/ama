@@ -9,7 +9,6 @@ from __future__ import annotations
 import logging
 import random
 import time
-from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 

@@ -26,8 +26,8 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 try:
-    from opentelemetry import trace
     from opentelemetry import metrics as otel_metrics
+    from opentelemetry import trace
 
     _HAS_OTEL = True
 except ImportError:  # pragma: no cover
@@ -457,7 +457,7 @@ def emit_time_deficit_detected(
 class _NoOpContextManager:
     """Minimal context manager returned when OTel is absent."""
 
-    def __enter__(self) -> "_NoOpContextManager":
+    def __enter__(self) -> _NoOpContextManager:
         return self
 
     def __exit__(self, *args: Any) -> None:

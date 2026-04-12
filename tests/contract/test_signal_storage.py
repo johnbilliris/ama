@@ -1,10 +1,13 @@
-import asyncio
 from datetime import UTC, datetime
 
 import pytest
 
-from packages.domain.src.domain.repositories.signal_repository import SignalRepository, SIGNALS_STORE, _SIGNAL_SCOPES
 from packages.domain.src.domain.models.signal import Signal
+from packages.domain.src.domain.repositories.signal_repository import (
+    _SIGNAL_SCOPES,
+    SIGNALS_STORE,
+    SignalRepository,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -61,7 +64,7 @@ class TestSignalRepository:
         await repo.save(vic_signal)
 
         nsw_results = await repo.query_by_jurisdiction("nsw")
-        vic_results = await repo.query_by_jurisdiction("vic")
+        await repo.query_by_jurisdiction("vic")
         assert any(s.signal_id == "sig-nsw" for s in nsw_results)
         assert not any(s.signal_id == "sig-vic" for s in nsw_results)
 
@@ -73,7 +76,7 @@ class TestSignalRepository:
         await repo.save(sim_signal, scope="sim_run-001")
 
         live_results = await repo.query_by_incident("inc-001", scope="live")
-        sim_results = await repo.query_by_incident("inc-001", scope="sim_run-001")
+        await repo.query_by_incident("inc-001", scope="sim_run-001")
 
         live_ids = {s.signal_id for s in live_results}
         assert "sig-live" in live_ids

@@ -7,6 +7,7 @@ They are skipped by default unless SERVICEBUS_CONNECTION_STRING is set.
 from __future__ import annotations
 
 import os
+
 import pytest
 
 pytestmark = pytest.mark.skipif(

@@ -8,7 +8,9 @@ from typing import Any
 from packages.domain.src.domain.models.agent_governance import AgentGovernanceAssignment
 from packages.domain.src.domain.models.constitutional_assessment import ConstitutionalAssessment
 from packages.domain.src.domain.models.data_source import DataSource
-from packages.domain.src.domain.models.functional_domain_precedence import FunctionalDomainPrecedence
+from packages.domain.src.domain.models.functional_domain_precedence import (
+    FunctionalDomainPrecedence,
+)
 from packages.domain.src.domain.models.governance_audit import GovernanceAuditEntry
 from packages.domain.src.domain.models.handoff_chain import HandoffChainDefinition
 
@@ -93,10 +95,14 @@ class GovernanceRepository:
     def save_precedence(self, precedence: FunctionalDomainPrecedence) -> FunctionalDomainPrecedence:
         return self._backend.save_precedence(precedence)
 
-    def list_precedence(self, hazard_type: str | None = None, jurisdiction_id: str | None = None) -> list[FunctionalDomainPrecedence]:
+    def list_precedence(
+        self, hazard_type: str | None = None, jurisdiction_id: str | None = None,
+    ) -> list[FunctionalDomainPrecedence]:
         return self._backend.list_precedence(hazard_type, jurisdiction_id)
 
-    def resolve_precedence(self, hazard_type: str, jurisdiction_id: str | None = None) -> FunctionalDomainPrecedence | None:
+    def resolve_precedence(
+        self, hazard_type: str, jurisdiction_id: str | None = None,
+    ) -> FunctionalDomainPrecedence | None:
         return self._backend.resolve_precedence(hazard_type, jurisdiction_id)
 
     # ------------------------------------------------------------------
@@ -184,7 +190,9 @@ class _InMemoryBackend:
         self._precedence[precedence.precedence_id] = precedence
         return precedence
 
-    def list_precedence(self, hazard_type: str | None = None, jurisdiction_id: str | None = None) -> list[FunctionalDomainPrecedence]:
+    def list_precedence(
+        self, hazard_type: str | None = None, jurisdiction_id: str | None = None,
+    ) -> list[FunctionalDomainPrecedence]:
         results = list(self._precedence.values())
         if hazard_type:
             results = [p for p in results if p.hazard_type == hazard_type]
@@ -192,7 +200,9 @@ class _InMemoryBackend:
             results = [p for p in results if p.jurisdiction_id == jurisdiction_id]
         return results
 
-    def resolve_precedence(self, hazard_type: str, jurisdiction_id: str | None = None) -> FunctionalDomainPrecedence | None:
+    def resolve_precedence(
+        self, hazard_type: str, jurisdiction_id: str | None = None,
+    ) -> FunctionalDomainPrecedence | None:
         if jurisdiction_id:
             override = next(
                 (p for p in self._precedence.values()
@@ -382,7 +392,9 @@ class _CosmosBackend:
         self._upsert(doc)
         return precedence
 
-    def list_precedence(self, hazard_type: str | None = None, jurisdiction_id: str | None = None) -> list[FunctionalDomainPrecedence]:
+    def list_precedence(
+        self, hazard_type: str | None = None, jurisdiction_id: str | None = None,
+    ) -> list[FunctionalDomainPrecedence]:
         clauses = ["c.type = @type"]
         params: list[dict[str, object]] = [{"name": "@type", "value": _TYPE_PRECEDENCE}]
         if hazard_type:
@@ -395,10 +407,13 @@ class _CosmosBackend:
         docs = self._query(sql, params, partition_key=_PRECEDENCE_PK)
         return [FunctionalDomainPrecedence.model_validate(d) for d in docs]
 
-    def resolve_precedence(self, hazard_type: str, jurisdiction_id: str | None = None) -> FunctionalDomainPrecedence | None:
+    def resolve_precedence(
+        self, hazard_type: str, jurisdiction_id: str | None = None,
+    ) -> FunctionalDomainPrecedence | None:
         if jurisdiction_id:
             docs = self._query(
-                "SELECT * FROM c WHERE c.type = @type AND c.hazard_type = @ht AND c.jurisdiction_id = @jid",
+                "SELECT * FROM c WHERE c.type = @type"
+                " AND c.hazard_type = @ht AND c.jurisdiction_id = @jid",
                 [
                     {"name": "@type", "value": _TYPE_PRECEDENCE},
                     {"name": "@ht", "value": hazard_type},

@@ -1,7 +1,5 @@
 import asyncio
 
-import pytest
-
 from apps.ingestion.simulation.generators.flood_generator import FloodGenerator
 from apps.ingestion.simulation.generators.weather_generator import WeatherGenerator
 from apps.ingestion.simulation.simulation_runner import SimulationRun, SimulationRunner

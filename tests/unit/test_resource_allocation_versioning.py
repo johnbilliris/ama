@@ -10,8 +10,7 @@ Covers:
 from __future__ import annotations
 
 import pytest
-
-from resource_allocation.versioning import VersionCounter, VersionConflictError
+from resource_allocation.versioning import VersionConflictError, VersionCounter
 
 
 class TestVersionCounter:

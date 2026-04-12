@@ -1,17 +1,13 @@
 """Tests for evacuation.transport — vehicle types, quantities, priorities (T031)."""
 
-import math
 
-import pytest
 
-from evacuation.config import EvacuationConfig
 from evacuation.models import VulnerabilityCategory
 from evacuation.transport import (
+    _PRIORITY_ORDER,
     PRIORITY_MAP,
-    VEHICLE_CAPACITY,
     VEHICLE_TYPE_MAP,
     TransportCoordinator,
-    _PRIORITY_ORDER,
 )
 
 

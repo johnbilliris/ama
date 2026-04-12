@@ -2,9 +2,13 @@
 
 import pytest
 
-from packages.domain.src.domain.models.simulation_tenant import SimulationTenant, ResourceLimits, ResourceConsumption
-from packages.domain.src.domain.models.scenario_template import ScenarioTemplate, SignalTimelineEntry, BenchmarkTargets
-from packages.domain.src.domain.models.exercise_report import ExerciseReport, SignalSummary
+from packages.domain.src.domain.models.exercise_report import ExerciseReport
+from packages.domain.src.domain.models.scenario_template import (
+    ScenarioTemplate,
+)
+from packages.domain.src.domain.models.simulation_tenant import (
+    SimulationTenant,
+)
 
 
 class TestSimulationTenantContract:
@@ -53,7 +57,10 @@ class TestSimulationTenantContract:
         assert "limit" in response
         assert "offset" in response
         sim = response["simulations"][0]
-        for key in ("tenant_id", "scenario_type", "status", "created_at", "participant_count", "signal_count", "storage_bytes"):
+        for key in (
+            "tenant_id", "scenario_type", "status", "created_at",
+            "participant_count", "signal_count", "storage_bytes",
+        ):
             assert key in sim
 
     def test_detail_response_full_document(self):
@@ -89,7 +96,7 @@ class TestSimulationTenantContract:
             )
 
     def test_status_transition_contract(self):
-        """Status transitions must follow contract: provisioning → active → paused ↔ active → archiving → archived → deleted."""
+        """Status transitions must follow contract: provisioning → active → paused ↔ active → archiving → archived → deleted."""  # noqa: E501
         tenant = SimulationTenant(
             tenant_id="sim-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             scenario_id="sc-001",

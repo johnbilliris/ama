@@ -4,7 +4,7 @@ import time
 from importlib import import_module
 from uuid import uuid4
 
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 logger = logging.getLogger(__name__)
 

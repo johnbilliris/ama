@@ -1,8 +1,6 @@
 """Tests for evacuation.router — Dijkstra, closures, multi-path, congestion (T028)."""
 
 import pytest
-
-from evacuation.config import EvacuationConfig
 from evacuation.road_network import RoadNetworkLoader
 from evacuation.router import RouteComputer
 

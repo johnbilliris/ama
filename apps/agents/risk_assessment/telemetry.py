@@ -13,8 +13,9 @@ overhead.
 from __future__ import annotations
 
 import logging
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Generator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,6 @@ _OTEL_AVAILABLE = False
 try:
     from opentelemetry import trace
     from opentelemetry.metrics import get_meter
-    from opentelemetry.trace import StatusCode
 
     _OTEL_AVAILABLE = True
 except ImportError:
@@ -63,7 +63,7 @@ class _NoOpSpan:
     def add_event(self, name: str, attributes: dict | None = None) -> None:  # noqa: D102
         pass
 
-    def __enter__(self) -> "_NoOpSpan":  # noqa: D105
+    def __enter__(self) -> _NoOpSpan:  # noqa: D105
         return self
 
     def __exit__(self, *args: Any) -> None:  # noqa: D105

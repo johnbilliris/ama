@@ -8,7 +8,6 @@ Bug fixes applied:
 """
 
 import asyncio
-import json
 import logging
 import os
 from datetime import UTC, datetime, timedelta
@@ -28,7 +27,6 @@ if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
 from app.validators.signal_envelope import SignalEnvelope
 from common.content_safety import ContentSafetyValidator
 from common.handoffs import AgentHandoffEvent, build_handoff
-
 from monitoring.config import MonitoringConfig
 
 logger = logging.getLogger(__name__)
@@ -178,7 +176,7 @@ class MonitoringAgent:
             )
             return "held_for_review"
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             # T024: Timeout → fail-safe-CLOSED
             logger.warning("LLM evaluation timed out, holding for review (fail-safe-CLOSED)")
             return "llm_timeout"

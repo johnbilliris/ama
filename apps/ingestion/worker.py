@@ -74,7 +74,7 @@ class PipelineWorker:
         for pipeline_id, task in self._tasks.items():
             try:
                 await asyncio.wait_for(task, timeout=30)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 task.cancel()
                 logger.warning("Pipeline %s forcibly cancelled after timeout", pipeline_id)
             except Exception:
@@ -111,8 +111,8 @@ class PipelineWorker:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    from http.server import HTTPServer, BaseHTTPRequestHandler
     import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
 
     # configure_azure_monitor() (called at module level) may have already
     # added handlers to the root logger, which makes basicConfig() a no-op.

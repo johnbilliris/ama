@@ -139,7 +139,7 @@ class AuditWriter:
         if file_path.exists():
             try:
                 remaining_lines: list[str] = []
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
                         if not line:

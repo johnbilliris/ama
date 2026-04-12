@@ -11,13 +11,10 @@ Compound confidence penalty stacking per CHK031:
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 import numpy as np
-
 from common.content_safety import ContentSafetyValidator
 from common.llm_mixin import LLMCallMixin
-
 from communication.config import CommunicationConfig
 from communication.models import ContentBlock, GenerationMethod
 from communication.templates import TemplateLoader
@@ -152,7 +149,11 @@ class MultilingualTranslator(LLMCallMixin):
         )
 
         gen_method_str = str(response["generation_method"])
-        gen_method = GenerationMethod(gen_method_str) if gen_method_str in GenerationMethod.__members__ else GenerationMethod.template_fallback
+        gen_method = (
+            GenerationMethod(gen_method_str)
+            if gen_method_str in GenerationMethod.__members__
+            else GenerationMethod.template_fallback
+        )
 
         safety_result = str(response.get("content_safety_result", "passed"))
 

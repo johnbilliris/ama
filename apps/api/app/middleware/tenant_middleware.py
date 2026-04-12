@@ -1,11 +1,10 @@
 import logging
 from typing import Any
 
-from fastapi import FastAPI, Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-
 from app.core.auth import AuthenticatedPrincipal, extract_principal_from_claims
 from app.core.tenant_context import TenantContext, set_current_tenant
+from fastapi import FastAPI, Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 logger = logging.getLogger(__name__)
 

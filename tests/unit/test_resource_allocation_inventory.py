@@ -14,18 +14,14 @@ from __future__ import annotations
 
 import json
 import os
-import tempfile
-import pytest
-from datetime import UTC, datetime
 
 from resource_allocation.config import ResourceAllocationConfig
-from resource_allocation.inventory import ResourceInventoryManager, VALID_TRANSITIONS
+from resource_allocation.inventory import ResourceInventoryManager
 from resource_allocation.models import (
     ResourceDemand,
     ResourceInventoryItem,
     ResourceStatus,
     ResourceType,
-    UrgencyLevel,
 )
 
 

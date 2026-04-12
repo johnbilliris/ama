@@ -1,7 +1,6 @@
 import ftplib
 import io
 import logging
-from typing import Any
 
 from apps.ingestion.pipelines.bom_warnings import BomWarningsPipeline
 

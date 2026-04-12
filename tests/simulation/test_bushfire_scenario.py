@@ -1,7 +1,5 @@
-import pytest
 
 from apps.ingestion.simulation.generators.fire_generator import FireGenerator
-
 
 REQUIRED_ENVELOPE_KEYS = {
     "source", "category", "occurredAt", "receivedAt",

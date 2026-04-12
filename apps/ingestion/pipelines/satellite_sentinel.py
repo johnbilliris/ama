@@ -29,7 +29,10 @@ class SentinelSatellitePipeline(IngestionPipelineBase):
     async def poll_source(self) -> list[dict[str, Any]]:
         async with httpx.AsyncClient(timeout=120) as client:
             resp = await client.get(self._endpoint_url, params={
-                "q": "platformname:Sentinel-2 AND footprint:\"Intersects(POLYGON((112 -44,154 -44,154 -10,112 -10,112 -44)))\"",
+                "q": (
+                    "platformname:Sentinel-2 AND "
+                    "footprint:\"Intersects(POLYGON((112 -44,154 -44,154 -10,112 -10,112 -44)))\""
+                ),
                 "rows": "10",
                 "format": "json",
             })
@@ -46,8 +49,14 @@ class SentinelSatellitePipeline(IngestionPipelineBase):
                 "source_name": "Copernicus Sentinel-2",
                 "source_kind": "sensor",
                 "product_type": self._product_type,
-                "source_uri": entry.get("link", [{}])[0].get("href", "") if isinstance(entry.get("link"), list) else "",
-                "timestamp": entry.get("date", [{}])[0].get("content", "") if isinstance(entry.get("date"), list) else "",
+                "source_uri": (
+                    entry.get("link", [{}])[0].get("href", "")
+                    if isinstance(entry.get("link"), list) else ""
+                ),
+                "timestamp": (
+                    entry.get("date", [{}])[0].get("content", "")
+                    if isinstance(entry.get("date"), list) else ""
+                ),
                 "coverage_bbox": [112.0, -44.0, 154.0, -10.0],
                 "file_format": "jp2",
                 "product_code": entry.get("title", ""),

@@ -21,13 +21,9 @@ from __future__ import annotations
 import logging
 import time
 from datetime import UTC, datetime, timedelta
-from uuid import uuid4
-
-from pydantic import ValidationError
 
 from common.content_safety import ContentSafetyValidator
 from common.handoffs import AgentHandoffEvent
-
 from communication.audit import AuditWriter
 from communication.config import CommunicationConfig
 from communication.dedup import HandoffDeduplicator
@@ -45,12 +41,10 @@ from communication.models import (
     DeliveryRecord,
     GenerationMethod,
     PublicAlert,
-    SegmentPriority,
-    UrgencyLevel,
 )
 from communication.segmentation import AudienceSegmenter
-from communication.templates import TemplateLoader
 from communication.telemetry import CustomEventEmitter, metrics, pipeline_span
+from communication.templates import TemplateLoader
 from communication.translator import MultilingualTranslator
 from communication.versioning import VersionCounter
 
@@ -534,7 +528,11 @@ class CommunicationProcessingPipeline:
                 status=AlertStatus.pending_review,
                 change_type=change_type,
                 change_summary=str(event.payload.get("change_summary")) if change_type != ChangeType.initial else None,
-                referenced_alert_id=str(event.payload.get("referenced_alert_id")) if change_type in (ChangeType.correction, ChangeType.all_clear) else None,
+                referenced_alert_id=(
+                    str(event.payload.get("referenced_alert_id"))
+                    if change_type in (ChangeType.correction, ChangeType.all_clear)
+                    else None
+                ),
                 content_blocks=content_blocks,
                 audience_segments=[s.segment_id for s in segments],
                 languages=list(content_blocks.keys()),

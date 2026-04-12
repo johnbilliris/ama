@@ -1,10 +1,8 @@
-import asyncio
-from datetime import UTC, datetime
 
 import pytest
-
 from app.services.ingestion.incident_association import IncidentAssociationService
 from app.services.state_store import INCIDENTS, reset_state
+
 from packages.domain.src.domain.models.incident import Incident
 
 

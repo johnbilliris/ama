@@ -1,19 +1,16 @@
 """Tests for Risk Assessment Agent FastAPI endpoints (health + override)."""
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "apps", "agents"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from unittest.mock import MagicMock
 
-import pytest
 from fastapi.testclient import TestClient
-
 from risk_assessment.agent import RiskAssessmentAgent, create_app
 from risk_assessment.config import RiskAssessmentConfig
-
 
 # ---------------------------------------------------------------------------
 # Helpers

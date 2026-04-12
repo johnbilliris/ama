@@ -49,7 +49,7 @@ class TemplateLoader:
         for file_path in json_files:
             lang_code = file_path.stem  # e.g., "en-AU" from "en-AU.json"
             try:
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     templates = json.load(f)
                 if not isinstance(templates, list):
                     raise ValueError(f"Expected JSON array in {file_path}")
@@ -147,8 +147,8 @@ class TemplateLoader:
             # Ultimate fallback — generic warning
             return (
                 f"EMERGENCY ALERT — {values.get('location', '[unknown]')}",
-                f"An emergency situation exists. Follow emergency services directions.",
-                f"Call 000 for emergencies.",
+                "An emergency situation exists. Follow emergency services directions.",
+                "Call 000 for emergencies.",
                 language_code != "en-AU",
             )
 

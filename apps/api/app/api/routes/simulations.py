@@ -1,17 +1,16 @@
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, Field
-
 from app.api.dependencies.rbac import (
     require_simulation_participant,
     require_simulation_role,
 )
 from app.core.auth import extract_principal_from_claims
-from app.repositories.simulation_repository import SimulationRepository
 from app.repositories.signal_repository import SignalRepository
+from app.repositories.simulation_repository import SimulationRepository
+from app.services.exercise_report_service import ExerciseReportService
+from app.services.scenario_seeding_service import ScenarioSeedingService
 from app.services.simulation_audit_writer import SimulationAuditWriter
 from app.services.simulation_service import SimulationService
-from app.services.scenario_seeding_service import ScenarioSeedingService
-from app.services.exercise_report_service import ExerciseReportService
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/simulations", tags=["simulation"])
 

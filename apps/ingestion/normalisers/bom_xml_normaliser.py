@@ -67,7 +67,7 @@ def normalise_bom_xml(raw_payload: dict[str, Any]) -> dict[str, Any]:
 
     location = {"type": "Point", "coordinates": [149.13, -35.28], "precisionMeters": 50000}
     for area in root.findall(".//p:area", BOM_NS) or root.findall(".//area") or []:
-        parent_el = area.get("parent-aac", "")
+        area.get("parent-aac", "")
         for point in area.findall("p:point", BOM_NS) or area.findall("point") or []:
             lat = point.get("latitude")
             lon = point.get("longitude")

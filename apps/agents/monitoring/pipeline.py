@@ -16,20 +16,17 @@ from __future__ import annotations
 import hashlib
 import logging
 import time
-from datetime import UTC, datetime
-
-from pydantic import ValidationError
 
 from app.validators.signal_envelope import SignalEnvelope
 from common.content_safety import ContentSafetyValidator
 from common.handoffs import AgentHandoffEvent, deliver_handoff_with_retry
-
-from monitoring.agent import ESCALATION_CATEGORIES, MonitoringAgent
+from monitoring.agent import MonitoringAgent
 from monitoring.audit import AuditWriter
 from monitoring.config import MonitoringConfig
 from monitoring.dedup import SignalDeduplicator
 from monitoring.freshness import DataFreshnessTracker
 from monitoring.models import DecisionType, MonitoringDecisionRecord
+from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
 

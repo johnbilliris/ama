@@ -4,7 +4,6 @@ from typing import Any
 import httpx
 
 from apps.api.app.services.ingestion.pipeline_base import IngestionPipelineBase
-from apps.ingestion.normalisers.geojson_normaliser import normalise_geojson_collection
 
 logger = logging.getLogger(__name__)
 

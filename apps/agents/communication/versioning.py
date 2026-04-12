@@ -11,11 +11,9 @@ from __future__ import annotations
 import logging
 import random
 import time
-from datetime import UTC, datetime, timedelta
-from uuid import uuid4
+from datetime import UTC, datetime
 
 from communication.config import CommunicationConfig
-from communication.models import AlertStatus, ChangeType, PublicAlert
 
 logger = logging.getLogger(__name__)
 

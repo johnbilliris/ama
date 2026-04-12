@@ -12,12 +12,7 @@ Covers:
 
 from __future__ import annotations
 
-import pytest
-from datetime import UTC, datetime
-from unittest.mock import MagicMock
-
 from common.handoffs import AgentHandoffEvent
-
 from resource_allocation.audit import AuditWriter
 from resource_allocation.config import ResourceAllocationConfig
 from resource_allocation.dedup import HandoffDeduplicator

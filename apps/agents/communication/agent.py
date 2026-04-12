@@ -13,27 +13,23 @@ import logging
 import os
 from datetime import UTC, datetime
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-
 from common.handoffs import AgentHandoffEvent
-
 from communication.approval import ApprovalConflictError, ApprovalWorkflow
 from communication.audit import AuditWriter
 from communication.config import CommunicationConfig
 from communication.dedup import HandoffDeduplicator
 from communication.delivery import MultiChannelDeliveryService
 from communication.models import (
-    AlertStatus,
     CommunicationDecisionRecord,
     CommunicationDecisionType,
 )
 from communication.pipeline import CommunicationProcessingPipeline
 from communication.segmentation import AudienceSegmenter
-from communication.telemetry import metrics
 from communication.templates import TemplateLoader
 from communication.translator import MultilingualTranslator
 from communication.versioning import VersionCounter
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -227,7 +223,7 @@ def create_app(
         now = datetime.now(UTC)
 
         try:
-            alert = workflow.process_approval(
+            workflow.process_approval(
                 alert_id=alert_id,
                 user_id=request.user_id,
                 role=request.role,
@@ -275,7 +271,7 @@ def create_app(
         now = datetime.now(UTC)
 
         try:
-            alert = workflow.process_approval(
+            workflow.process_approval(
                 alert_id=alert_id,
                 user_id=request.user_id,
                 role=request.role,
@@ -361,7 +357,7 @@ def create_app(
         now = datetime.now(UTC)
 
         try:
-            alert = workflow.cancel_alert(
+            workflow.cancel_alert(
                 alert_id=alert_id,
                 user_id=request.user_id,
                 role=request.role,

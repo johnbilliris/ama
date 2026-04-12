@@ -17,24 +17,20 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import UTC, datetime
-
-from pydantic import ValidationError
 
 from common.handoffs import AgentHandoffEvent, deliver_handoff_with_retry
-
-from packages.domain.src.domain.models.hazard_assessment import HazardAssessment
-from packages.domain.src.domain.models.recommendation import Recommendation
-
 from risk_assessment.agent import RiskAssessmentAgent
 from risk_assessment.audit import AuditWriter
 from risk_assessment.config import RiskAssessmentConfig
-from risk_assessment.correlation import ContradictionDetector, SignalCorrelator
+from risk_assessment.correlation import ContradictionDetector, ContradictionResult, CorrelationResult, SignalCorrelator
 from risk_assessment.dedup import HandoffDeduplicator
 from risk_assessment.models import DecisionType, RiskAssessmentDecisionRecord
 from risk_assessment.severity import SeverityComputer
 from risk_assessment.telemetry import CustomEventEmitter, metrics, pipeline_span
 from risk_assessment.versioning import VersionCounter
+
+from packages.domain.src.domain.models.hazard_assessment import HazardAssessment
+from packages.domain.src.domain.models.recommendation import Recommendation
 
 logger = logging.getLogger(__name__)
 
@@ -312,8 +308,8 @@ class AssessmentProcessingPipeline:
         self,
         handoff: AgentHandoffEvent,
         signals: list[dict],
-        correlation: "CorrelationResult",
-        contradiction: "ContradictionResult",
+        correlation: CorrelationResult,
+        contradiction: ContradictionResult,
         tenant_id: str,
     ) -> HazardAssessment:
         """Stage 5: Generate versioned hazard assessment."""

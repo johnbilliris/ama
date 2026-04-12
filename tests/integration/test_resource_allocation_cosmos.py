@@ -7,9 +7,8 @@ They are skipped by default unless COSMOS_ENDPOINT is set.
 from __future__ import annotations
 
 import os
-import pytest
 
-from resource_allocation.config import ResourceAllocationConfig
+import pytest
 
 pytestmark = pytest.mark.skipif(
     not os.getenv("COSMOS_ENDPOINT"),

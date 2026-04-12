@@ -1,8 +1,6 @@
 """Tests for risk_assessment.audit – AuditWriter three-tier degradation."""
 
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import MagicMock
 
 from risk_assessment.audit import AuditWriter
 from risk_assessment.config import RiskAssessmentConfig

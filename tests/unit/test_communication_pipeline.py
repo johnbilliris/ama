@@ -2,8 +2,6 @@
 
 from unittest.mock import MagicMock
 
-import pytest
-
 from common.handoffs import AgentHandoffEvent
 from communication.audit import AuditWriter
 from communication.config import CommunicationConfig

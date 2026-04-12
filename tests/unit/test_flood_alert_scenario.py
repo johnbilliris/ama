@@ -2,22 +2,19 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from common.handoffs import AgentHandoffEvent
 from communication.config import CommunicationConfig
+from communication.delivery import MultiChannelDeliveryService
 from communication.models import (
     AlertStatus,
     AudienceSegment,
     ChannelType,
     ContentBlock,
     DeliveryStatus,
-    GenerationMethod,
     PublicAlert,
     SegmentPriority,
     UrgencyLevel,
 )
-from communication.delivery import MultiChannelDeliveryService
 from communication.pipeline import CommunicationProcessingPipeline
 from communication.segmentation import AudienceSegmenter
 

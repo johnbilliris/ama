@@ -4,10 +4,10 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
-from packages.domain.src.domain.models.scenario_template import ScenarioTemplate
-
 from app.repositories.signal_repository import SignalRepository
 from app.services.simulation_audit_writer import SimulationAuditWriter
+
+from packages.domain.src.domain.models.scenario_template import ScenarioTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ class ScenarioSeedingService:
             raise ValueError(f"Template '{template_id}' not found")
 
         injected = 0
-        base_time = datetime.now(UTC)
+        datetime.now(UTC)
         for entry in template.signal_timeline:
             delay = entry.offset_seconds / time_multiplier if time_multiplier > 0 else 0
             if delay > 0:

@@ -4,17 +4,16 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+from app.repositories.signal_repository import SignalRepository
+from app.repositories.simulation_repository import SimulationRepository
+
 from packages.domain.src.domain.models.exercise_report import (
     AlertSummary,
-    BenchmarkComparison,
     ExerciseReport,
     PerformanceMetrics,
     RecommendationSummary,
     SignalSummary,
 )
-
-from app.repositories.signal_repository import SignalRepository
-from app.repositories.simulation_repository import SimulationRepository
 
 logger = logging.getLogger(__name__)
 

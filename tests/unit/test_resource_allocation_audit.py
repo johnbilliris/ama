@@ -10,9 +10,7 @@ Covers:
 
 from __future__ import annotations
 
-import json
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from resource_allocation.audit import AuditWriter
 from resource_allocation.config import ResourceAllocationConfig

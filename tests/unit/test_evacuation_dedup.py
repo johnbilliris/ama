@@ -1,12 +1,8 @@
 """Tests for evacuation.dedup — TTL-based in-memory deduplication (T016)."""
 
 import time
-from unittest.mock import patch
-
-import pytest
 
 from evacuation.dedup import HandoffDeduplicator
-
 
 # ---------------------------------------------------------------------------
 # Basic duplicate detection

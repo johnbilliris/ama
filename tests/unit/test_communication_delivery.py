@@ -2,9 +2,6 @@
 
 import math
 
-import pytest
-
-from communication.config import CommunicationConfig
 from communication.delivery import MultiChannelDeliveryService
 from communication.models import (
     AudienceSegment,

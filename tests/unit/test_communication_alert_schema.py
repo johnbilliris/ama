@@ -3,16 +3,13 @@
 import re
 
 import pytest
-from pydantic import ValidationError
-
 from communication.models import (
     AlertStatus,
-    ChangeType,
     ContentBlock,
-    ContentSafetyResult,
     GenerationMethod,
     PublicAlert,
 )
+from pydantic import ValidationError
 
 
 class TestPublicAlertSchema:

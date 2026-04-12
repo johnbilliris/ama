@@ -1,10 +1,6 @@
 import pytest
-
 from app.repositories.simulation_repository import SimulationRepository
 from app.services.simulation_service import SimulationService
-from app.validators.simulation_validators import SimulationValidators
-
-from packages.domain.src.domain.models.simulation_tenant import SimulationTenant
 
 
 @pytest.fixture

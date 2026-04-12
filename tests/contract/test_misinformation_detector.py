@@ -1,4 +1,3 @@
-import pytest
 from datetime import UTC, datetime, timedelta
 
 from apps.api.app.services.ingestion.misinformation_detector import MisinformationDetector
@@ -90,9 +89,18 @@ class TestDuplicateAmplification:
         detector = MisinformationDetector()
         now = datetime.now(UTC)
         signals = [
-            _make_signal(text="Massive bushfire near Blue Mountains evacuate now", occurred_at=now.isoformat()),
-            _make_signal(text="Massive bushfire near Blue Mountains evacuate now", occurred_at=(now + timedelta(seconds=30)).isoformat()),
-            _make_signal(text="Massive bushfire near Blue Mountains evacuate now please share", occurred_at=(now + timedelta(seconds=60)).isoformat()),
+            _make_signal(
+                text="Massive bushfire near Blue Mountains evacuate now",
+                occurred_at=now.isoformat(),
+            ),
+            _make_signal(
+                text="Massive bushfire near Blue Mountains evacuate now",
+                occurred_at=(now + timedelta(seconds=30)).isoformat(),
+            ),
+            _make_signal(
+                text="Massive bushfire near Blue Mountains evacuate now please share",
+                occurred_at=(now + timedelta(seconds=60)).isoformat(),
+            ),
         ]
         flagged = detector.duplicate_amplification_detection(signals, similarity_threshold=0.9, window_minutes=5)
         assert len(flagged) >= 1

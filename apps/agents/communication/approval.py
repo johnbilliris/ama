@@ -15,11 +15,8 @@ from communication.config import CommunicationConfig
 from communication.models import (
     AlertStatus,
     ApprovalMode,
-    CommunicationDecisionRecord,
-    CommunicationDecisionType,
     EscalationEvent,
     PublicAlert,
-    VALID_STATUS_TRANSITIONS,
 )
 
 logger = logging.getLogger(__name__)

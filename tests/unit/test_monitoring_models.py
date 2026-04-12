@@ -1,6 +1,5 @@
 """Unit tests for monitoring agent models, enums, and config (Phase 1: T002–T008)."""
 
-import os
 from datetime import UTC, datetime
 
 import pytest

@@ -2,9 +2,9 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
-
 from app.repositories.governance_repository import GovernanceRepository
 from app.services.governance_registry import GovernanceRegistryService
+
 from packages.domain.src.domain.models.constitutional_assessment import ConstitutionalAssessment
 from packages.domain.src.domain.models.data_source import DataSource
 

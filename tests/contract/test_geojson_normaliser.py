@@ -1,4 +1,3 @@
-import pytest
 
 from apps.ingestion.normalisers.geojson_normaliser import (
     normalise_geojson,
@@ -30,7 +29,10 @@ NSW_RFS_SAMPLE = {
         {
             "type": "Feature",
             "id": "fire-002",
-            "geometry": {"type": "Polygon", "coordinates": [[[150.1, -33.8], [150.4, -33.8], [150.4, -33.6], [150.1, -33.6], [150.1, -33.8]]]},
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[[150.1, -33.8], [150.4, -33.8], [150.4, -33.6], [150.1, -33.6], [150.1, -33.8]]],
+            },
             "properties": {
                 "title": "Hawkesbury Grass Fire",
                 "category": "Nat Haz Grass Fire",

@@ -2,14 +2,10 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from common.handoffs import AgentHandoffEvent
 from communication.config import CommunicationConfig
 from communication.models import (
     AlertStatus,
-    ContentBlock,
-    GenerationMethod,
     SegmentPriority,
     UrgencyLevel,
 )

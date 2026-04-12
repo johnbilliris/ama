@@ -2,8 +2,6 @@
 
 from datetime import UTC, datetime, timedelta
 
-import pytest
-
 
 class TestDataFreshnessTracker:
     """T012: Freshness tracker tests — all 4 status transitions."""

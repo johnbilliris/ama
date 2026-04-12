@@ -1,8 +1,6 @@
-import pytest
 
 from apps.ingestion.simulation.generators.weather_generator import WeatherGenerator
 from apps.ingestion.simulation.scenario_templates import SEVERE_STORM_TEMPLATE
-
 
 REQUIRED_ENVELOPE_KEYS = {
     "source", "category", "occurredAt", "receivedAt",

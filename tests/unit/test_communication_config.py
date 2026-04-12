@@ -1,9 +1,7 @@
 """Tests for communication.config — CommunicationConfig dataclass and config hashing."""
 
 import pytest
-
 from communication.config import CommunicationConfig
-
 
 # ---------------------------------------------------------------------------
 # Default values

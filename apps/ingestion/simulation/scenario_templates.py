@@ -19,7 +19,10 @@ BUSHFIRE_TEMPLATE: dict[str, Any] = {
         {
             "name": "peak",
             "duration_seconds": 900,
-            "sources": ["nsw-rfs-fires-near-me", "bom-warnings", "epa-air-quality", "ga-sentinel-hotspots", "twitter-disaster"],
+            "sources": [
+                "nsw-rfs-fires-near-me", "bom-warnings", "epa-air-quality",
+                "ga-sentinel-hotspots", "twitter-disaster",
+            ],
             "params": {"severity": "extreme", "alert_level": "Emergency Warning"},
         },
         {

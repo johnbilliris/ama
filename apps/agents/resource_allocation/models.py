@@ -16,18 +16,17 @@ from __future__ import annotations
 
 import re
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator
-
 
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
 
 
-class DecisionType(str, Enum):
+class DecisionType(StrEnum):
     """All possible resource allocation decision types (16 values per data-model.md)."""
 
     handoff_received = "handoff_received"
@@ -48,7 +47,7 @@ class DecisionType(str, Enum):
     content_safety_failure = "content_safety_failure"
 
 
-class ConfidenceLevel(str, Enum):
+class ConfidenceLevel(StrEnum):
     """Discrete confidence level derived from numeric confidence score."""
 
     low = "low"
@@ -56,7 +55,7 @@ class ConfidenceLevel(str, Enum):
     high = "high"
 
 
-class PlanStatus(str, Enum):
+class PlanStatus(StrEnum):
     """Resource deployment plan lifecycle status."""
 
     proposed = "proposed"
@@ -67,7 +66,7 @@ class PlanStatus(str, Enum):
     expired = "expired"
 
 
-class ResourceStatus(str, Enum):
+class ResourceStatus(StrEnum):
     """Resource availability state machine (7 states)."""
 
     available = "available"
@@ -79,7 +78,7 @@ class ResourceStatus(str, Enum):
     unavailable = "unavailable"
 
 
-class ResourceType(str, Enum):
+class ResourceType(StrEnum):
     """Resource category."""
 
     vehicle = "vehicle"
@@ -88,7 +87,7 @@ class ResourceType(str, Enum):
     facility = "facility"
 
 
-class DemandFulfilmentStatus(str, Enum):
+class DemandFulfilmentStatus(StrEnum):
     """Demand fulfilment tracking status."""
 
     pending = "pending"
@@ -98,7 +97,7 @@ class DemandFulfilmentStatus(str, Enum):
     closed = "closed"
 
 
-class PriorityTier(str, Enum):
+class PriorityTier(StrEnum):
     """Three-tier priority hierarchy."""
 
     tier_1_life_safety = "tier_1_life_safety"
@@ -106,7 +105,7 @@ class PriorityTier(str, Enum):
     tier_3_environment = "tier_3_environment"
 
 
-class UrgencyLevel(str, Enum):
+class UrgencyLevel(StrEnum):
     """AIDR-aligned 4-level urgency."""
 
     critical = "critical"

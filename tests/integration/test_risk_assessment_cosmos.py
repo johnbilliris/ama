@@ -10,20 +10,19 @@ Tests verify correct Cosmos DB interaction patterns:
 Marked @pytest.mark.integration — skipped in unit test runs.
 """
 
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "apps", "agents"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
-import pytest
-from unittest.mock import MagicMock, patch, call
-from datetime import UTC, datetime, timedelta
+from unittest.mock import MagicMock, patch
 
-from risk_assessment.config import RiskAssessmentConfig
+import pytest
 from risk_assessment.audit import AuditWriter
-from risk_assessment.versioning import VersionCounter, VersionConflictError
+from risk_assessment.config import RiskAssessmentConfig
 from risk_assessment.models import DecisionType, RiskAssessmentDecisionRecord
+from risk_assessment.versioning import VersionCounter
 
 pytestmark = pytest.mark.integration
 

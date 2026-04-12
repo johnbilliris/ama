@@ -20,7 +20,7 @@ class GovernanceCacheService:
             self.misses += 1
             return None
         chain, expiry = entry
-        if time.monotonic() > expiry:
+        if time.monotonic() >= expiry:
             del self._store[data_source_id]
             self.misses += 1
             return None

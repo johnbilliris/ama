@@ -6,7 +6,6 @@ Uses mocks — does not require actual Azure Service Bus connection.
 import json
 
 import pytest
-
 from common.handoffs import AgentHandoffEvent
 from evacuation.config import EvacuationConfig
 from evacuation.models import EvacuationPlan

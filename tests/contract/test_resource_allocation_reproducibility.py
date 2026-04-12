@@ -5,10 +5,7 @@ Verifies that the same handoff + inventory + config produces identical plans.
 
 from __future__ import annotations
 
-import pytest
-
 from common.handoffs import AgentHandoffEvent
-
 from resource_allocation.audit import AuditWriter
 from resource_allocation.config import ResourceAllocationConfig
 from resource_allocation.dedup import HandoffDeduplicator

@@ -1,7 +1,5 @@
-import pytest
 
 from apps.ingestion.simulation.generators.cyclone_generator import CycloneGenerator
-
 
 REQUIRED_ENVELOPE_KEYS = {
     "source", "category", "occurredAt", "receivedAt",

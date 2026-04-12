@@ -51,7 +51,7 @@ class RiverGaugePipeline(IngestionPipelineBase):
         payloads: list[dict[str, Any]] = []
         # Use first 10 gauges to keep poll lightweight
         for row in ts_list[1:11]:
-            station_no, station_name, ts_id, ts_name = row[0], row[1], row[2], row[3]
+            station_no, station_name, ts_id, _ts_name = row[0], row[1], row[2], row[3]
             try:
                 async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
                     val_params = {

@@ -3,7 +3,6 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-
 from risk_assessment.models import (
     AssessmentType,
     AuditBufferEntry,
@@ -13,12 +12,12 @@ from risk_assessment.models import (
     SeverityLevel,
     confidence_to_level,
 )
+
 from packages.domain.src.domain.models.hazard_assessment import (
     HazardAssessment,
     HazardMap,
 )
 from packages.domain.src.domain.models.recommendation import Recommendation
-
 
 # ---------------------------------------------------------------------------
 # DecisionType enum

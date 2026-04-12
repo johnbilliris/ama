@@ -5,9 +5,6 @@ Verifies ResourceDeploymentPlan output matches schema per data-model.md.
 
 from __future__ import annotations
 
-import pytest
-from datetime import UTC, datetime
-
 from resource_allocation.models import (
     ConfidenceLevel,
     DeploymentTimeline,

@@ -1,7 +1,5 @@
-import pytest
 
 from apps.ingestion.simulation.generators.flood_generator import FloodGenerator
-
 
 REQUIRED_ENVELOPE_KEYS = {
     "source", "category", "occurredAt", "receivedAt",
@@ -37,15 +35,15 @@ class TestFloodHydrograph:
         assert levels[-1] < max(levels), "Hydrograph should recede after peak"
 
         # Should cross minor threshold
-        crossed_minor = any(l >= 3.0 for l in levels)
+        crossed_minor = any(lv >= 3.0 for lv in levels)
         assert crossed_minor, "Should cross minor threshold (3.0)"
 
         # Should cross moderate threshold
-        crossed_moderate = any(l >= 5.0 for l in levels)
+        crossed_moderate = any(lv >= 5.0 for lv in levels)
         assert crossed_moderate, "Should cross moderate threshold (5.0)"
 
         # Should cross major threshold
-        crossed_major = any(l >= 7.0 for l in levels)
+        crossed_major = any(lv >= 7.0 for lv in levels)
         assert crossed_major, "Should cross major threshold (7.0)"
 
     def test_hydrograph_has_realistic_shape(self) -> None:
@@ -53,7 +51,7 @@ class TestFloodHydrograph:
         points = gen.generate_hydrograph(duration_hours=24.0, peak_level=6.0)
 
         times = [t for t, _ in points]
-        levels = [l for _, l in points]
+        levels = [lv for _, lv in points]
 
         # Times should be monotonically increasing
         for i in range(1, len(times)):

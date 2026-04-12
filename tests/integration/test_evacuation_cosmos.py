@@ -3,20 +3,15 @@
 Uses mocks — does not require actual Cosmos DB connection.
 """
 
-import json
 
 import pytest
-
-from evacuation.config import EvacuationConfig
 from evacuation.models import (
     DecisionType,
     EvacuationDecisionRecord,
     EvacuationPlan,
     HazardSummary,
-    PlanStatus,
     Traceability,
 )
-
 
 # ---------------------------------------------------------------------------
 # Mock Cosmos container

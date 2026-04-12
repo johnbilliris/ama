@@ -1,12 +1,10 @@
 """Tests for evacuation.agent endpoints — health, override, replan (T043)."""
 
 import pytest
-from fastapi.testclient import TestClient
-
-from evacuation.agent import EvacuationAgent, _VALID_ACTIONS, create_app
+from evacuation.agent import EvacuationAgent, create_app
 from evacuation.config import EvacuationConfig
-from evacuation.models import PlanStatus
 from evacuation.road_network import RoadNetworkLoader
+from fastapi.testclient import TestClient
 
 SAMPLE_FILE = "data/road-networks/far-north-qld-sample.json"
 

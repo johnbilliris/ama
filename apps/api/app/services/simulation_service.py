@@ -2,15 +2,15 @@ import logging
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from packages.domain.src.domain.models.simulation_tenant import (
-    ResourceLimits,
-    SimulationTenant,
-)
-
 from app.core.settings import get_settings
 from app.repositories.simulation_repository import SimulationRepository
 from app.services.simulation_audit_writer import SimulationAuditWriter
 from app.validators.simulation_validators import SimulationValidators
+
+from packages.domain.src.domain.models.simulation_tenant import (
+    ResourceLimits,
+    SimulationTenant,
+)
 
 logger = logging.getLogger(__name__)
 

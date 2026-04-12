@@ -15,7 +15,6 @@ from risk_assessment.telemetry import (  # noqa: E402
     _NoOpMetric,
     _NoOpSpan,
     _NoOpTracer,
-    _OTEL_AVAILABLE,
     events,
     metrics,
     pipeline_span,

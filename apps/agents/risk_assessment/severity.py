@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from risk_assessment.models import SeverityLevel
 
-
 # Signal category → default assessment type mapping
 CATEGORY_TO_ASSESSMENT_TYPE: dict[str, str] = {
     "fire": "spread_prediction",

@@ -1,9 +1,7 @@
 """Tests for evacuation.models — enums, validators, and serialisation (T012)."""
 
-from datetime import UTC, datetime
 
 import pytest
-
 from evacuation.models import (
     AuditBufferEntry,
     ClosureReason,
@@ -11,13 +9,10 @@ from evacuation.models import (
     DecisionType,
     EvacuationDecisionRecord,
     EvacuationPlan,
-    HazardSummary,
     PlanStatus,
-    Traceability,
     VulnerabilityCategory,
     confidence_to_level,
 )
-
 
 # ---------------------------------------------------------------------------
 # DecisionType enum

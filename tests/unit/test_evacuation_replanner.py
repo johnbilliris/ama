@@ -1,12 +1,9 @@
 """Tests for evacuation.replanner — triggers, rate limiting, change detection (T038)."""
 
-import time
 
-import pytest
 
 from evacuation.config import EvacuationConfig
 from evacuation.replanner import DynamicReplanner
-
 
 # ---------------------------------------------------------------------------
 # Trigger conditions (6 triggers)

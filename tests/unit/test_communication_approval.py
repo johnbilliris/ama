@@ -1,7 +1,6 @@
 """Tests for communication.approval — ApprovalWorkflow."""
 
 import pytest
-
 from communication.approval import ApprovalConflictError, ApprovalWorkflow
 from communication.models import AlertStatus, ApprovalMode, ContentBlock, PublicAlert
 

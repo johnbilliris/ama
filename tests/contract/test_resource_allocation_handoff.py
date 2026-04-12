@@ -5,9 +5,6 @@ Verifies AgentHandoffEvent schema validation for both risk_assessment and evacua
 
 from __future__ import annotations
 
-import pytest
-from datetime import UTC, datetime
-
 from common.handoffs import AgentHandoffEvent
 
 

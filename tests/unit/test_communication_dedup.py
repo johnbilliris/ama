@@ -1,9 +1,7 @@
 """Tests for communication.dedup — HandoffDeduplicator with dual dedup keys."""
 
-import pytest
 
 from communication.dedup import HandoffDeduplicator
-
 
 # ---------------------------------------------------------------------------
 # By-ID dedup
