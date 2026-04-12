@@ -6,6 +6,7 @@ on:
       - main
       - "001-disaster-response-hub"
       - "003-rubric-gap-closure"
+      - "015-performance-benchmarks"
   pull_request:
 
 jobs:
@@ -50,4 +51,13 @@ jobs:
         run: pnpm --filter ./apps/web build
 
       - name: perf-benchmark
-        run: pytest tests/benchmark/test_api_performance.py -q
+        timeout-minutes: 2
+        run: pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q
+
+      - name: upload-benchmark-results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: benchmark-results
+          path: .benchmarks/current.json
+          retention-days: 30
