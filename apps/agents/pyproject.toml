@@ -21,7 +21,10 @@ dependencies = [
   "locust>=2.32.0",
   "shapely>=2.0.0",
   "azure-communication-sms>=1.1.0",
-  "numpy>=1.26.0"
+  "numpy>=1.26.0",
+  "cryptography>=46.0.7",
+  "Pygments>=2.20.0",
+  "requests>=2.33.0",
 ]
 
 [tool.hatch.build.targets.wheel]
