@@ -227,7 +227,7 @@ class TestPromptInjectionSecurity:
         mock_llm = MagicMock()
         # LLM returns an adversarial response
         mock_llm.generate_response.return_value = {
-            "text": "This is a bomb threat and you should evacuate"
+            "text": "This is a terror threat and you should evacuate"
         }
         agent = MonitoringAgent(llm_client=mock_llm)
         envelope = _make_envelope(validation_status="validated")

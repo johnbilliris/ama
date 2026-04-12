@@ -7,6 +7,7 @@ from packages.domain.src.domain.models.signal import Signal
 logger = logging.getLogger(__name__)
 
 SIGNALS_STORE: dict[str, Signal] = {}
+_SIGNAL_SCOPES: dict[str, str] = {}
 
 
 class SignalRepository:
@@ -41,6 +42,7 @@ class SignalRepository:
             await container.upsert_item(doc)
         else:
             SIGNALS_STORE[signal.signal_id] = signal
+            _SIGNAL_SCOPES[signal.signal_id] = scope
 
     async def save_with_fanout(
         self,
@@ -52,7 +54,12 @@ class SignalRepository:
         for jid in affected_jurisdiction_ids:
             if jid != (signal.jurisdiction_id or "national"):
                 ref = signal.model_copy(update={"jurisdiction_id": jid})
-                await self.save(ref, scope)
+                if self._cosmos:
+                    await self.save(ref, scope)
+                else:
+                    ref_key = f"{ref.signal_id}:ref:{jid}"
+                    SIGNALS_STORE[ref_key] = ref
+                    _SIGNAL_SCOPES[ref_key] = scope
 
     async def query_by_incident(
         self,
@@ -72,8 +79,9 @@ class SignalRepository:
             items = container.query_items(query=query, parameters=params, max_item_count=limit)
             return [Signal(**item) async for item in items]
         return [
-            s for s in SIGNALS_STORE.values()
+            s for key, s in SIGNALS_STORE.items()
             if s.incident_id == incident_id
+            and _SIGNAL_SCOPES.get(key, "live") == scope
         ][:limit]
 
     async def query_by_jurisdiction(

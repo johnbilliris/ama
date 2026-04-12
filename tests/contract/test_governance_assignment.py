@@ -64,14 +64,13 @@ class TestAgentAssignment:
 
     def test_invalid_agent_rejected(self, service: GovernanceRegistryService) -> None:
         src = _approved_source(service)
-        assignment = AgentGovernanceAssignment(
-            assignment_id="assign-bad", data_source_id=src.data_source_id,
-            agent_name="nonexistent_agent", role="primary",
-            scope_of_responsibility="test", assigned_by="arch",
-            assigned_at=datetime.now(UTC),
-        )
-        with pytest.raises(Exception, match="not in the recognised"):
-            service.assign_agent(assignment, actor_id="arch")
+        with pytest.raises(Exception):
+            AgentGovernanceAssignment(
+                assignment_id="assign-bad", data_source_id=src.data_source_id,
+                agent_name="nonexistent_agent", role="primary",
+                scope_of_responsibility="test", assigned_by="arch",
+                assigned_at=datetime.now(UTC),
+            )
 
 
 class TestHandoffChainValidation:

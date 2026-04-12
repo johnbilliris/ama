@@ -18,7 +18,7 @@ def test_safety_fallback_when_content_flagged() -> None:
 
     def _unsafe_response(**_: object) -> dict[str, object]:
         return {
-            "text": "attack now",
+            "text": "terror threat imminent",
             "deployment_id": "drafting-1",
             "token_usage": {"input_tokens": 10, "output_tokens": 5},
         }

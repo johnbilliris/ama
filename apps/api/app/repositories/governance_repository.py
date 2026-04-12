@@ -140,7 +140,8 @@ class _InMemoryBackend:
         return source
 
     def get_source(self, data_source_id: str) -> DataSource | None:
-        return self._sources.get(data_source_id)
+        source = self._sources.get(data_source_id)
+        return source.model_copy() if source else None
 
     def list_sources(self, **filters: str | None) -> list[DataSource]:
         results = list(self._sources.values())

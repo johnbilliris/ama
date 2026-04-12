@@ -3,15 +3,17 @@ from datetime import UTC, datetime
 
 import pytest
 
-from packages.domain.src.domain.repositories.signal_repository import SignalRepository, SIGNALS_STORE
+from packages.domain.src.domain.repositories.signal_repository import SignalRepository, SIGNALS_STORE, _SIGNAL_SCOPES
 from packages.domain.src.domain.models.signal import Signal
 
 
 @pytest.fixture(autouse=True)
 def clean_store():
     SIGNALS_STORE.clear()
+    _SIGNAL_SCOPES.clear()
     yield
     SIGNALS_STORE.clear()
+    _SIGNAL_SCOPES.clear()
 
 
 @pytest.fixture
