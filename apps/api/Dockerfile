@@ -17,10 +17,15 @@ WORKDIR /app
 COPY --from=builder /usr/local /usr/local
 COPY apps/api/app/ ./app/
 COPY packages/ ./packages/
+COPY apps/__init__.py ./apps/
+COPY apps/agents/__init__.py ./apps/agents/
+COPY apps/agents/common/ ./apps/agents/common/
 COPY apps/agents/evacuation/ ./apps/agents/evacuation/
+
+ENV PYTHONPATH="/app/apps/agents:${PYTHONPATH}"
 
 USER appuser
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -f http://localhost:8000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -f http://localhost:8000/api/health || exit 1
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

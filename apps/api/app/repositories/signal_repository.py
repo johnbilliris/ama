@@ -19,18 +19,18 @@ class SignalRepository:
         db = self._client.get_database_client(self._db_name)
         return db.get_container_client(self._container_name)
 
-    async def create_signal(self, signal_doc: dict[str, Any], tenant_id: str) -> dict[str, Any]:
+    async def create_signal(self, tenant_id: str, signal_doc: dict[str, Any]) -> dict[str, Any]:
         signal_doc["scope"] = tenant_id
         container = self._get_container()
         if container:
             container.upsert_item(signal_doc)
         else:
-            key = f"{tenant_id}:{signal_doc.get('id', '')}"
+            key = f"{tenant_id}:{signal_doc.get('signal_id', signal_doc.get('id', ''))}"
             self._in_memory[key] = signal_doc
         return signal_doc
 
     async def get_signal(
-        self, signal_id: str, tenant_id: str, partition_key: str
+        self, tenant_id: str, signal_id: str, partition_key: str | None = None,
     ) -> dict[str, Any] | None:
         container = self._get_container()
         if container:

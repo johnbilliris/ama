@@ -466,6 +466,27 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'OTEL_SERVICE_NAME', value: 'api' }
           ]
+          probes: [
+            {
+              type: 'Liveness'
+              httpGet: { path: '/api/health', port: 8000 }
+              initialDelaySeconds: 15
+              periodSeconds: 30
+            }
+            {
+              type: 'Readiness'
+              httpGet: { path: '/api/health', port: 8000 }
+              initialDelaySeconds: 5
+              periodSeconds: 10
+            }
+            {
+              type: 'Startup'
+              httpGet: { path: '/api/health', port: 8000 }
+              initialDelaySeconds: 5
+              periodSeconds: 10
+              failureThreshold: 6
+            }
+          ]
         }
       ]
       scale: { minReplicas: 1, maxReplicas: 4 }
