@@ -1,0 +1,243 @@
+# .github/workflows/drift-detection.yml — Weekly infrastructure drift detection
+#
+# Compares live Azure infrastructure against IaC definitions and reports
+# drift findings as GitHub Issues.
+#
+# Schedule: Saturday 16:00 UTC = Sunday 02:00 AEST
+#
+# See: specs/feature/017-cd-pipeline/contracts/drift-detection-workflow.md
+
+name: drift-detection
+
+on:
+  schedule:
+    - cron: "0 16 * * 6"       # Saturday 16:00 UTC = Sunday 02:00 AEST
+  workflow_dispatch:             # Manual trigger for on-demand checks
+
+permissions:
+  id-token: write                # OIDC token for Azure login
+  contents: read                 # Checkout repository (Bicep files)
+  issues: write                  # Create issues for drift findings
+
+jobs:
+  detect-drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        environment: [staging, production]
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run What-If analysis
+        id: what-if
+        run: |
+          set +e
+
+          ENVIRONMENT="${{ matrix.environment }}"
+          RG="rg-drh-${ENVIRONMENT}"
+          TEMPLATE="infra/main.bicep"
+          PARAMS="infra/main.parameters.${ENVIRONMENT}.json"
+
+          echo "🔍 Running What-If analysis for ${ENVIRONMENT}..."
+          echo "   Resource Group: ${RG}"
+          echo "   Template: ${TEMPLATE}"
+          echo "   Parameters: ${PARAMS}"
+
+          # Check resource group exists
+          if ! az group show --name "${RG}" -o none 2>/dev/null; then
+            echo "::warning::Resource group ${RG} does not exist — environment not provisioned"
+            echo "rg-exists=false" >> "$GITHUB_OUTPUT"
+            echo "drift-detected=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "rg-exists=true" >> "$GITHUB_OUTPUT"
+
+          # Run what-if
+          WHAT_IF_OUTPUT=$(az deployment group what-if \
+            --resource-group "${RG}" \
+            --template-file "${TEMPLATE}" \
+            --parameters "@${PARAMS}" \
+            --result-format FullResourcePayloads \
+            --no-pretty-print \
+            -o json 2>&1)
+
+          WHAT_IF_EXIT=$?
+          if [[ ${WHAT_IF_EXIT} -ne 0 ]]; then
+            echo "::error::What-If command failed with exit code ${WHAT_IF_EXIT}"
+            echo "${WHAT_IF_OUTPUT}"
+            echo "what-if-success=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          echo "what-if-success=true" >> "$GITHUB_OUTPUT"
+
+          # Save raw output
+          echo "${WHAT_IF_OUTPUT}" > what-if-output.json
+
+      - name: Parse drift results
+        id: parse-drift
+        if: steps.what-if.outputs.rg-exists == 'true' && steps.what-if.outputs.what-if-success == 'true'
+        run: |
+          ENVIRONMENT="${{ matrix.environment }}"
+
+          # Define false-positive properties to filter out
+          IGNORE_PROPS='[
+            "provisioningState",
+            "etag",
+            "identity.principalId",
+            "identity.tenantId",
+            "properties.createdAt",
+            "properties.lastModifiedAt",
+            "properties.uniqueId",
+            "systemData",
+            "properties.hostNames",
+            "properties.defaultHostName",
+            "properties.outboundIpAddresses",
+            "properties.possibleOutboundIpAddresses"
+          ]'
+
+          # Extract meaningful changes (Create, Delete, Modify — not NoChange or Ignore)
+          DRIFT_CHANGES=$(jq -r --argjson ignore "${IGNORE_PROPS}" '
+            .changes // [] |
+            map(select(.changeType != "NoChange" and .changeType != "Ignore")) |
+            map({
+              resourceId: .resourceId,
+              resourceType: (.targetResourceType // .beforeResourceType // "unknown"),
+              changeType: .changeType,
+              propertyChanges: (
+                if .changeType == "Modify" then
+                  (.delta // []) |
+                  map(select(
+                    . as $prop |
+                    ($ignore | map(. as $pat | $prop.path | test($pat)) | any) | not
+                  )) |
+                  map({
+                    path: .path,
+                    expected: (.after // "null" | tostring),
+                    actual: (.before // "null" | tostring)
+                  })
+                else []
+                end
+              )
+            }) |
+            # Remove Modify entries where all property changes were filtered
+            map(select(.changeType != "Modify" or (.propertyChanges | length > 0)))
+          ' what-if-output.json 2>/dev/null || echo "[]")
+
+          DRIFT_COUNT=$(echo "${DRIFT_CHANGES}" | jq 'length')
+
+          if [[ "${DRIFT_COUNT}" -eq 0 ]] || [[ "${DRIFT_COUNT}" == "null" ]]; then
+            echo "✅ No drift detected for ${ENVIRONMENT}"
+            echo "drift-detected=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "⚠️ Drift detected: ${DRIFT_COUNT} resources with changes in ${ENVIRONMENT}"
+            echo "drift-detected=true" >> "$GITHUB_OUTPUT"
+
+            # Save for report generation
+            echo "${DRIFT_CHANGES}" > drift-changes.json
+          fi
+          echo "drift-count=${DRIFT_COUNT}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate drift report
+        id: drift-report
+        if: steps.parse-drift.outputs.drift-detected == 'true'
+        run: |
+          ENVIRONMENT="${{ matrix.environment }}"
+          RG="rg-drh-${ENVIRONMENT}"
+          DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # Count metrics
+          RESOURCES_WITH_DRIFT=$(jq 'length' drift-changes.json)
+          PROPERTIES_MODIFIED=$(jq '[.[] | select(.changeType == "Modify") | .propertyChanges | length] | add // 0' drift-changes.json)
+          RESOURCES_TO_CREATE=$(jq '[.[] | select(.changeType == "Create")] | length' drift-changes.json)
+          RESOURCES_TO_DELETE=$(jq '[.[] | select(.changeType == "Delete")] | length' drift-changes.json)
+
+          # Build drift table rows
+          DRIFT_TABLE=$(jq -r '
+            .[] |
+            if .changeType == "Modify" then
+              .resourceId as $rid |
+              .resourceType as $rtype |
+              .changeType as $ct |
+              .propertyChanges[] |
+              "| \($rid | split("/") | last) | \($rtype) | \($ct) | \(.path) | \(.expected) | \(.actual) |"
+            else
+              "| \(.resourceId | split("/") | last) | \(.resourceType) | \(.changeType) | — | — | — |"
+            end
+          ' drift-changes.json)
+
+          # Compose report body
+          REPORT="## Infrastructure Drift Report
+
+          **Environment**: ${ENVIRONMENT}
+          **Resource Group**: ${RG}
+          **Detected**: ${DATE}
+          **Workflow Run**: [View run](${RUN_URL})
+
+          ### Summary
+
+          | Metric | Count |
+          |--------|-------|
+          | Resources with drift | ${RESOURCES_WITH_DRIFT} |
+          | Properties modified | ${PROPERTIES_MODIFIED} |
+          | Resources to create | ${RESOURCES_TO_CREATE} |
+          | Resources to delete | ${RESOURCES_TO_DELETE} |
+
+          ### Drifted Resources
+
+          | Resource | Type | Change | Property | Expected | Actual |
+          |----------|------|--------|----------|----------|--------|
+          ${DRIFT_TABLE}
+
+          ### Filtered (Likely False Positives)
+
+          The following system-managed properties were excluded from this report:
+          - \`provisioningState\`, \`etag\`, \`identity.principalId\`, timestamps, \`uniqueId\`, \`systemData\`, \`hostNames\`, \`defaultHostName\`, \`outboundIpAddresses\`
+
+          ### Next Steps
+
+          1. Review each drifted resource to determine if the change was intentional
+          2. If unintentional: run \`azd provision\` to restore IaC-defined state
+          3. If intentional: update the Bicep templates to match the desired state
+          4. Close this issue when drift is resolved"
+
+          # Save report for issue creation
+          echo "${REPORT}" > drift-report.md
+          echo "report-generated=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Issue for drift
+        if: steps.parse-drift.outputs.drift-detected == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ENVIRONMENT="${{ matrix.environment }}"
+          DATE=$(date -u +"%Y-%m-%d")
+          TITLE="Infrastructure drift detected: ${ENVIRONMENT} (${DATE})"
+
+          gh issue create \
+            --title "${TITLE}" \
+            --body-file drift-report.md \
+            --label "infrastructure-drift"
+
+      - name: Report clean state
+        if: steps.parse-drift.outputs.drift-detected == 'false' || steps.what-if.outputs.rg-exists == 'false'
+        run: |
+          ENVIRONMENT="${{ matrix.environment }}"
+          echo "## Drift Detection: ${ENVIRONMENT}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${{ steps.what-if.outputs.rg-exists }}" == "false" ]]; then
+            echo "⚠️ Resource group not provisioned — skipped" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "✅ No infrastructure drift detected" >> "$GITHUB_STEP_SUMMARY"
+          fi

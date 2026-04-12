@@ -1,0 +1,482 @@
+# .github/workflows/cd.yml — Continuous Deployment pipeline
+#
+# Triggers on successful CI completion for the main branch.
+# Deploys to staging → runs quality gates → promotes to production (with approval).
+#
+# See: specs/feature/017-cd-pipeline/contracts/cd-workflow.md
+
+name: cd
+
+on:
+  workflow_run:
+    workflows: ["ci"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  id-token: write      # OIDC token for Azure login
+  contents: read       # Checkout repository
+  issues: write        # Create issues for critical failures
+  actions: read        # Read workflow run status
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Job 1: Deploy to Staging
+# ─────────────────────────────────────────────────────────────────────────────
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment: staging
+    timeout-minutes: 20
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+
+    outputs:
+      deployment-status: ${{ steps.set-status.outputs.status }}
+      revision-api: ${{ steps.record-revisions.outputs.revision-api }}
+      revision-agents: ${{ steps.record-revisions.outputs.revision-agents }}
+      revision-ingestion: ${{ steps.record-revisions.outputs.revision-ingestion }}
+      revision-web: ${{ steps.record-revisions.outputs.revision-web }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Azure Developer CLI
+        uses: Azure/setup-azd@v2
+
+      - name: Create resource group
+        run: |
+          az group create \
+            --name rg-drh-staging \
+            --location australiaeast \
+            --output none
+
+      - name: Configure azd environment
+        run: |
+          azd env new drh-staging --no-prompt || true
+          azd env set AZURE_ENV_NAME drh-staging
+          azd env set AZURE_LOCATION australiaeast
+          azd env set AZURE_SUBSCRIPTION_ID "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+        env:
+          AZURE_ENV_NAME: drh-staging
+
+      - name: Provision infrastructure
+        run: azd provision --no-prompt
+        env:
+          AZURE_ENV_NAME: drh-staging
+
+      - name: Deploy services
+        run: azd deploy --no-prompt
+        env:
+          AZURE_ENV_NAME: drh-staging
+
+      - name: Health checks (parallel)
+        id: health-check
+        run: |
+          set +e  # Don't exit on individual check failure
+
+          RESOURCE_GROUP="rg-drh-staging"
+          TIMEOUT=30
+          RETRIES=3
+          INTERVAL=10
+          FAILED=0
+
+          check_health() {
+            local svc="$1" path="$2" host_type="$3"
+            local app_name="drh-staging-${svc}"
+            local fqdn
+
+            if [[ "${host_type}" == "containerapp" ]]; then
+              fqdn=$(az containerapp show --name "${app_name}" \
+                --resource-group "${RESOURCE_GROUP}" \
+                --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null)
+            else
+              fqdn=$(az webapp show --name "${app_name}" \
+                --resource-group "${RESOURCE_GROUP}" \
+                --query "defaultHostName" -o tsv 2>/dev/null)
+            fi
+
+            if [[ -z "${fqdn}" ]]; then
+              echo "::error::Could not resolve FQDN for ${svc}"
+              return 1
+            fi
+
+            local url="https://${fqdn}${path}"
+            for attempt in $(seq 1 "${RETRIES}"); do
+              local code
+              code=$(curl -s -o /dev/null -w "%{http_code}" --max-time "${TIMEOUT}" "${url}" 2>/dev/null || echo "000")
+              if [[ "${code}" =~ ^2[0-9]{2}$ ]]; then
+                echo "✅ ${svc}: HEALTHY (HTTP ${code})"
+                return 0
+              fi
+              echo "⏳ ${svc}: attempt ${attempt}/${RETRIES} — HTTP ${code}"
+              [[ ${attempt} -lt ${RETRIES} ]] && sleep "${INTERVAL}"
+            done
+            echo "::error::Health check failed for ${svc}"
+            return 1
+          }
+
+          # Run health checks in parallel (background processes)
+          check_health "api"       "/api/health" "containerapp" &
+          PID_API=$!
+          check_health "agents"    "/health"     "containerapp" &
+          PID_AGENTS=$!
+          check_health "ingestion" "/health"     "containerapp" &
+          PID_INGESTION=$!
+          check_health "web"       "/"           "appservice" &
+          PID_WEB=$!
+
+          # Wait for all and collect results
+          wait $PID_API       || FAILED=$((FAILED + 1))
+          wait $PID_AGENTS    || FAILED=$((FAILED + 1))
+          wait $PID_INGESTION || FAILED=$((FAILED + 1))
+          wait $PID_WEB       || FAILED=$((FAILED + 1))
+
+          if [[ $FAILED -gt 0 ]]; then
+            echo "health-passed=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          echo "health-passed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Record known-good revisions
+        id: record-revisions
+        if: success()
+        run: |
+          RG="rg-drh-staging"
+          ENV="drh-staging"
+
+          # Container Apps — get current active revision
+          for svc in api agents ingestion; do
+            rev=$(az containerapp show \
+              --name "${ENV}-${svc}" \
+              --resource-group "${RG}" \
+              --query "properties.latestRevisionName" -o tsv 2>/dev/null || echo "")
+            echo "revision-${svc}=${rev}" >> "$GITHUB_OUTPUT"
+            echo "📌 ${svc} revision: ${rev}"
+          done
+
+          # App Service — get deployment ID
+          web_deploy=$(az webapp show \
+            --name "${ENV}-web" \
+            --resource-group "${RG}" \
+            --query "id" -o tsv 2>/dev/null || echo "")
+          echo "revision-web=${web_deploy}" >> "$GITHUB_OUTPUT"
+          echo "📌 web deployment: ${web_deploy}"
+
+      - name: Rollback on health failure
+        id: rollback
+        if: failure() && steps.health-check.outcome == 'failure'
+        run: |
+          chmod +x scripts/rollback.sh
+          scripts/rollback.sh \
+            --environment staging \
+            --resource-group rg-drh-staging
+          echo "rollback-result=success" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: Create critical failure issue
+        if: failure() && steps.rollback.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "CRITICAL: Rollback failed in staging" \
+            --body "## 🚨 Critical Deployment Failure
+
+          **Environment**: staging
+          **Resource Group**: rg-drh-staging
+          **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          **Trigger**: CI run #${{ github.event.workflow_run.id }}
+
+          ### What happened
+          1. Deployment to staging completed
+          2. Health checks **failed**
+          3. Automated rollback was triggered
+          4. Rollback also **failed** — manual intervention required
+
+          ### Required Actions
+          1. Check the [workflow run logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          2. Manually verify service health in Azure Portal
+          3. If needed, manually roll back using: \`scripts/rollback.sh --environment staging --resource-group rg-drh-staging\`
+          4. Investigate root cause before re-deploying
+          " \
+            --label "critical"
+
+      - name: Set deployment status
+        id: set-status
+        if: always()
+        run: |
+          if [[ "${{ steps.health-check.outcome }}" == "success" ]]; then
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ steps.rollback.outcome }}" == "success" ]]; then
+            echo "status=rolled-back" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=critical-failure" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deployment summary
+        if: always()
+        run: |
+          STATUS="${{ steps.set-status.outputs.status }}"
+          echo "## Staging Deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          case "${STATUS}" in
+            success)
+              echo "✅ **Status**: Deployed successfully" >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            rolled-back)
+              echo "⚠️ **Status**: Rolled back (health check failure)" >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            critical-failure)
+              echo "🚨 **Status**: CRITICAL FAILURE — manual intervention required" >> "$GITHUB_STEP_SUMMARY"
+              ;;
+          esac
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Job 2: Deployment Gates
+  # ───────────────────────────────────────────────────────────────────────────
+
+  deployment-gates:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: needs.deploy-staging.outputs.deployment-status == 'success'
+    timeout-minutes: 10
+
+    outputs:
+      gates-passed: ${{ steps.gate-summary.outputs.gates-passed }}
+      gate-failures: ${{ steps.gate-summary.outputs.gate-failures }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Lint check (ruff)
+        id: lint-gate
+        run: |
+          pip install ruff
+          if ruff check apps tests packages; then
+            echo "result=passed" >> "$GITHUB_OUTPUT"
+          else
+            echo "result=failed" >> "$GITHUB_OUTPUT"
+          fi
+        continue-on-error: true
+
+      - name: Security scan (pip-audit)
+        id: security-gate
+        run: |
+          pip install -e . 2>/dev/null || true
+          pip install pip-audit
+          if pip-audit; then
+            echo "result=passed" >> "$GITHUB_OUTPUT"
+          else
+            echo "result=failed" >> "$GITHUB_OUTPUT"
+          fi
+        continue-on-error: true
+
+      - name: Gate summary
+        id: gate-summary
+        run: |
+          LINT="${{ steps.lint-gate.outputs.result }}"
+          SECURITY="${{ steps.security-gate.outputs.result }}"
+          FAILURES="[]"
+          PASSED="true"
+
+          echo "## Deployment Gates" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Gate | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|--------|" >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "${LINT}" == "passed" ]]; then
+            echo "| Lint (ruff) | ✅ Passed |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Lint (ruff) | ❌ Failed |" >> "$GITHUB_STEP_SUMMARY"
+            PASSED="false"
+            FAILURES=$(echo "${FAILURES}" | jq -c '. + ["lint"]')
+          fi
+
+          if [[ "${SECURITY}" == "passed" ]]; then
+            echo "| Security (pip-audit) | ✅ Passed |" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| Security (pip-audit) | ❌ Failed |" >> "$GITHUB_STEP_SUMMARY"
+            PASSED="false"
+            FAILURES=$(echo "${FAILURES}" | jq -c '. + ["security"]')
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${PASSED}" == "true" ]]; then
+            echo "✅ All gates passed — ready for production" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ Gate failures detected — production deployment blocked" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "gates-passed=${PASSED}" >> "$GITHUB_OUTPUT"
+          echo "gate-failures=${FAILURES}" >> "$GITHUB_OUTPUT"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Job 3: Deploy to Production
+  # ───────────────────────────────────────────────────────────────────────────
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deployment-gates
+    if: needs.deployment-gates.outputs.gates-passed == 'true'
+    environment: production
+    timeout-minutes: 20
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install Azure Developer CLI
+        uses: Azure/setup-azd@v2
+
+      - name: Create resource group
+        run: |
+          az group create \
+            --name rg-drh-production \
+            --location australiaeast \
+            --output none
+
+      - name: Configure azd environment
+        run: |
+          azd env new drh-production --no-prompt || true
+          azd env set AZURE_ENV_NAME drh-production
+          azd env set AZURE_LOCATION australiaeast
+          azd env set AZURE_SUBSCRIPTION_ID "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+        env:
+          AZURE_ENV_NAME: drh-production
+
+      - name: Provision infrastructure
+        run: azd provision --no-prompt
+        env:
+          AZURE_ENV_NAME: drh-production
+
+      - name: Deploy services
+        run: azd deploy --no-prompt
+        env:
+          AZURE_ENV_NAME: drh-production
+
+      - name: Health checks (parallel)
+        id: health-check
+        run: |
+          set +e
+
+          RESOURCE_GROUP="rg-drh-production"
+          TIMEOUT=30
+          RETRIES=3
+          INTERVAL=10
+          FAILED=0
+
+          check_health() {
+            local svc="$1" path="$2" host_type="$3"
+            local app_name="drh-production-${svc}"
+            local fqdn
+
+            if [[ "${host_type}" == "containerapp" ]]; then
+              fqdn=$(az containerapp show --name "${app_name}" \
+                --resource-group "${RESOURCE_GROUP}" \
+                --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null)
+            else
+              fqdn=$(az webapp show --name "${app_name}" \
+                --resource-group "${RESOURCE_GROUP}" \
+                --query "defaultHostName" -o tsv 2>/dev/null)
+            fi
+
+            if [[ -z "${fqdn}" ]]; then
+              echo "::error::Could not resolve FQDN for ${svc}"
+              return 1
+            fi
+
+            local url="https://${fqdn}${path}"
+            for attempt in $(seq 1 "${RETRIES}"); do
+              local code
+              code=$(curl -s -o /dev/null -w "%{http_code}" --max-time "${TIMEOUT}" "${url}" 2>/dev/null || echo "000")
+              if [[ "${code}" =~ ^2[0-9]{2}$ ]]; then
+                echo "✅ ${svc}: HEALTHY (HTTP ${code})"
+                return 0
+              fi
+              echo "⏳ ${svc}: attempt ${attempt}/${RETRIES} — HTTP ${code}"
+              [[ ${attempt} -lt ${RETRIES} ]] && sleep "${INTERVAL}"
+            done
+            echo "::error::Health check failed for ${svc}"
+            return 1
+          }
+
+          check_health "api"       "/api/health" "containerapp" &
+          PID_API=$!
+          check_health "agents"    "/health"     "containerapp" &
+          PID_AGENTS=$!
+          check_health "ingestion" "/health"     "containerapp" &
+          PID_INGESTION=$!
+          check_health "web"       "/"           "appservice" &
+          PID_WEB=$!
+
+          wait $PID_API       || FAILED=$((FAILED + 1))
+          wait $PID_AGENTS    || FAILED=$((FAILED + 1))
+          wait $PID_INGESTION || FAILED=$((FAILED + 1))
+          wait $PID_WEB       || FAILED=$((FAILED + 1))
+
+          if [[ $FAILED -gt 0 ]]; then
+            echo "health-passed=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          echo "health-passed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Record known-good revisions
+        id: record-revisions
+        if: success()
+        run: |
+          RG="rg-drh-production"
+          ENV="drh-production"
+
+          for svc in api agents ingestion; do
+            rev=$(az containerapp show \
+              --name "${ENV}-${svc}" \
+              --resource-group "${RG}" \
+              --query "properties.latestRevisionName" -o tsv 2>/dev/null || echo "")
+            echo "revision-${svc}=${rev}" >> "$GITHUB_OUTPUT"
+            echo "📌 ${svc} revision: ${rev}"
+          done
+
+          web_deploy=$(az webapp show \
+            --name "${ENV}-web" \
+            --resource-group "${RG}" \
+            --query "id" -o tsv 2>/dev/null || echo "")
+          echo "revision-web=${web_deploy}" >> "$GITHUB_OUTPUT"
+          echo "📌 web deployment: ${web_deploy}"
+
+      - name: Production deployment summary
+        if: always()
+        run: |
+          echo "## Production Deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "${{ steps.health-check.outcome }}" == "success" ]]; then
+            echo "✅ **Status**: Deployed successfully" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ **Status**: Deployment failed" >> "$GITHUB_STEP_SUMMARY"
+          fi
