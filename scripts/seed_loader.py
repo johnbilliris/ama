@@ -12,7 +12,6 @@ Usage:
 """
 import argparse
 import json
-import sys
 from pathlib import Path
 
 SEED_ROOT = Path(__file__).resolve().parent.parent / "packages" / "domain" / "src" / "domain" / "seed"
@@ -89,8 +88,8 @@ def seed_cosmos(endpoint: str, database: str, data: dict[str, list[dict]]) -> No
 
 def seed_blob_containers(storage_account: str) -> None:
     try:
-        from azure.storage.blob import BlobServiceClient
         from azure.identity import DefaultAzureCredential
+        from azure.storage.blob import BlobServiceClient
     except ImportError:
         print("  azure-storage-blob not installed — skipping blob seed")
         return
