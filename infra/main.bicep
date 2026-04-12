@@ -45,6 +45,7 @@ var abbrs = loadJsonContent('./abbreviations.json')
 var tags = {
   'azd-env-name': environmentName
   project: 'disaster-response-hub'
+  SecurityControl: 'Ignore'
 }
 var uniqueSuffix = uniqueString(resourceGroup().id)
 

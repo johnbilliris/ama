@@ -150,12 +150,12 @@ resource simulationErrorAlert 'Microsoft.Insights/scheduledQueryRules@2023-03-15
     criteria: {
       allOf: [
         {
-          query: 'requests | where customDimensions.tenant_id startswith "sim-" | where success == false | summarize FailedCount = count() by tostring(customDimensions.tenant_id) | where FailedCount > 20'
+          query: 'requests | extend tenant_id = tostring(customDimensions.tenant_id) | where tenant_id startswith "sim-" | where success == false | summarize FailedCount = count() by tenant_id | where FailedCount > 20'
           timeAggregation: 'Count'
           operator: 'GreaterThan'
           threshold: 0
           dimensions: [
-            { name: 'customDimensions.tenant_id', operator: 'Include', values: ['*'] }
+            { name: 'tenant_id', operator: 'Include', values: ['*'] }
           ]
           failingPeriods: { numberOfEvaluationPeriods: 1, minFailingPeriodsToAlert: 1 }
         }
