@@ -1,14 +1,18 @@
+import logging
 import os
 
 from fastapi import APIRouter
 
 router = APIRouter(tags=["system"])
+logger = logging.getLogger(__name__)
 
 
 def _dependency_status(env_name: str) -> str:
     value = os.getenv(env_name)
     if not value:
         return "stub"
+    # Basic reachability: env var configured means the dependency is expected
+    # In production, this would perform an actual connectivity check
     return "healthy"
 
 
@@ -20,9 +24,14 @@ async def healthcheck() -> dict[str, object]:
         "openai": _dependency_status("AZURE_OPENAI_ENDPOINT"),
     }
 
-    status = "healthy"
-    if any(value == "unavailable" for value in dependencies.values()):
+    # Determine overall status based on dependency health
+    statuses = set(dependencies.values())
+    if "unavailable" in statuses:
         status = "degraded"
+    elif statuses == {"stub"}:
+        status = "healthy"  # No dependencies configured — running in stub mode
+    else:
+        status = "healthy"
 
     return {
         "status": status,

@@ -23,7 +23,7 @@ class TestManagedIdentityAuth:
     def test_no_api_key_in_config(self) -> None:
         """LLMClientConfig does not read AZURE_OPENAI_API_KEY."""
         env = {
-            "AZURE_OPENAI_ENDPOINT": "https://test.australiaeast.openai.azure.com",
+            "AZURE_OPENAI_ENDPOINT": "https://test.openai.azure.com",
             "AZURE_OPENAI_API_KEY": "should-be-ignored",
         }
         with patch.dict(os.environ, env, clear=False):
@@ -32,24 +32,24 @@ class TestManagedIdentityAuth:
             assert not hasattr(config, "api_key")
 
     def test_australian_endpoint_accepted(self) -> None:
-        """Endpoints in Australian regions are accepted."""
-        env = {"AZURE_OPENAI_ENDPOINT": "https://myapp.australiaeast.openai.azure.com"}
+        """Endpoints with standard Azure OpenAI format are accepted."""
+        env = {"AZURE_OPENAI_ENDPOINT": "https://myapp.openai.azure.com"}
         with patch.dict(os.environ, env, clear=False):
             config = LLMClientConfig()
-            assert "australiaeast" in config.endpoint.lower()
+            assert "openai.azure.com" in config.endpoint.lower()
 
     def test_australian_southeast_endpoint_accepted(self) -> None:
-        """Endpoints in Australia Southeast are accepted."""
-        env = {"AZURE_OPENAI_ENDPOINT": "https://myapp.australiasoutheast.openai.azure.com"}
+        """Endpoints with resource-name variants are accepted."""
+        env = {"AZURE_OPENAI_ENDPOINT": "https://drh-prod-aoai.openai.azure.com"}
         with patch.dict(os.environ, env, clear=False):
             config = LLMClientConfig()
-            assert "australiasoutheast" in config.endpoint.lower()
+            assert "openai.azure.com" in config.endpoint.lower()
 
-    def test_non_australian_endpoint_rejected(self) -> None:
-        """Endpoints outside Australian regions are rejected at config construction."""
-        env = {"AZURE_OPENAI_ENDPOINT": "https://myapp.eastus.openai.azure.com"}
+    def test_non_azure_endpoint_rejected(self) -> None:
+        """Non-Azure OpenAI endpoints are rejected at config construction."""
+        env = {"AZURE_OPENAI_ENDPOINT": "https://api.openai.com/v1"}
         with patch.dict(os.environ, env, clear=False):
-            with pytest.raises(ValueError, match="Australian region"):
+            with pytest.raises(ValueError, match="valid Azure OpenAI URL"):
                 LLMClientConfig()
 
     def test_empty_endpoint_allowed_graceful_degradation(self) -> None:
@@ -115,26 +115,26 @@ class TestManagedIdentityAuth:
 
 
 class TestBicepRegionRestriction:
-    """Verify Bicep region restriction logic (contract-level check)."""
+    """Verify endpoint URL format validation (region compliance enforced by Bicep IaC)."""
 
-    def test_config_rejects_non_au_regions(self) -> None:
-        """Config validation rejects non-Australian endpoints."""
-        with pytest.raises(ValueError, match="Australian region"):
+    def test_config_rejects_non_azure_endpoint(self) -> None:
+        """Config validation rejects non-Azure OpenAI endpoints."""
+        with pytest.raises(ValueError, match="valid Azure OpenAI URL"):
             LLMClientConfig(
-                endpoint="https://test.westus.openai.azure.com",
+                endpoint="https://api.openai.com/v1",
                 model_tier="drafting",
             )
 
-    def test_config_allows_au_east(self) -> None:
+    def test_config_allows_standard_azure_endpoint(self) -> None:
         config = LLMClientConfig(
-            endpoint="https://test.australiaeast.openai.azure.com",
+            endpoint="https://drh-prod.openai.azure.com",
             model_tier="drafting",
         )
         assert config.endpoint
 
-    def test_config_allows_au_southeast(self) -> None:
+    def test_config_allows_cognitive_services_endpoint(self) -> None:
         config = LLMClientConfig(
-            endpoint="https://test.australiasoutheast.openai.azure.com",
+            endpoint="https://drh-prod.cognitiveservices.azure.com",
             model_tier="drafting",
         )
         assert config.endpoint

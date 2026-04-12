@@ -163,10 +163,13 @@ class LLMCallMixin:
                     "content_safety_result": safety.result,
                     "circuit_breaker_state": self._circuit_breaker.state.value,
                     "confidence_adjustment": None,
+                    "correlation_id": correlation_id,
+                    "requires_human_review": True,
                 }
 
-            # Success path
+            # Success path — apply confidence gating
             self._circuit_breaker.record_success()
+            gating = self._apply_confidence_gating(confidence=1.0, generation_method="llm")
             return {
                 "text": text,
                 "generation_method": "llm",
@@ -174,7 +177,9 @@ class LLMCallMixin:
                 "token_usage": token_usage,
                 "content_safety_result": "passed",
                 "circuit_breaker_state": self._circuit_breaker.state.value,
-                "confidence_adjustment": None,
+                "confidence_adjustment": gating.get("confidence_adjustment"),
+                "correlation_id": correlation_id,
+                "requires_human_review": gating.get("requires_human_review", False),
             }
 
         except Exception as error:

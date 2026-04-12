@@ -72,10 +72,17 @@ class LLMClientConfig:
         """Validate configuration values immediately after construction."""
         if self.endpoint:
             hostname = self.endpoint.lower()
-            if "australiaeast" not in hostname and "australiasoutheast" not in hostname:
+            # Azure OpenAI endpoints use format: https://<resource>.openai.azure.com/
+            # The resource name doesn't contain the region, so we validate the
+            # endpoint is a valid Azure OpenAI URL rather than checking for region
+            # in the hostname. Region compliance is enforced by Bicep IaC (FR-009).
+            if not (
+                hostname.startswith("https://")
+                and ("openai.azure.com" in hostname or "cognitiveservices.azure.com" in hostname)
+            ):
                 raise ValueError(
-                    f"AZURE_OPENAI_ENDPOINT must be in an Australian region "
-                    f"(australiaeast or australiasoutheast), got: {self.endpoint}"
+                    f"AZURE_OPENAI_ENDPOINT must be a valid Azure OpenAI URL "
+                    f"(https://<resource>.openai.azure.com), got: {self.endpoint}"
                 )
         if self.model_tier not in ("reasoning", "drafting"):
             raise ValueError(f"Invalid LLM_MODEL_TIER: {self.model_tier}")
