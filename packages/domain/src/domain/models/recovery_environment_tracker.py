@@ -67,6 +67,7 @@ class RecoveryIndicator(BaseModel):
     is_regressed: bool = False
     regression_cause: str | None = None
     linked_alert_id: str | None = None
+    catalogue_indicator_id: str | None = None
 
     @model_validator(mode="after")
     def _validate_k_anonymity(self) -> "RecoveryIndicator":
@@ -85,6 +86,13 @@ class RecoveryIndicator(BaseModel):
         if self.is_regressed and not self.regression_cause:
             msg = "regression_cause is required when is_regressed is True"
             raise ValueError(msg)
+        if self.catalogue_indicator_id is not None:
+            import re
+            if not re.match(r"^aidr:(overarching|social|economic|built|natural):[a-z0-9-]+:ind:\d+$", self.catalogue_indicator_id):
+                raise ValueError(
+                    f"catalogue_indicator_id must match 'aidr:{{domain}}:{{outcome-slug}}:ind:{{index}}' pattern, "
+                    f"got '{self.catalogue_indicator_id}'"
+                )
         return self
 
 
