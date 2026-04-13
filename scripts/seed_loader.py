@@ -37,6 +37,15 @@ PARTITION_KEY_MAP = {
     "data_sources":  "data_source",
 }
 
+CATALOGUE_ROOT = SEED_ROOT / "recovery-catalogue"
+CATALOGUE_DOMAIN_FILES = [
+    "overarching.json",
+    "social.json",
+    "economic.json",
+    "built.json",
+    "natural.json",
+]
+
 
 def load_seed_data() -> dict[str, list[dict]]:
     data = {}
@@ -108,6 +117,100 @@ def seed_blob_containers(storage_account: str) -> None:
             print(f"    Container exists: {name}")
 
 
+def load_catalogue_data() -> list[dict]:
+    """Load recovery-catalogue seed data and flatten into individual documents.
+
+    Each domain JSON file is flattened so that every outcome, activity, and
+    indicator becomes a standalone document with ``kind`` and ``domain`` fields.
+    The evaluation-questions file is loaded as a single document.
+    """
+    docs: list[dict] = []
+
+    for filename in CATALOGUE_DOMAIN_FILES:
+        path = CATALOGUE_ROOT / filename
+        if not path.exists():
+            print(f"  WARNING: {filename} not found at {path}")
+            continue
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        domain = raw.get("domain", filename.replace(".json", ""))
+
+        for outcome in raw.get("outcomes", []):
+            outcome_id = outcome["outcome_id"]
+            # Flatten outcome (without nested activities/indicators)
+            outcome_doc = {
+                k: v for k, v in outcome.items() if k not in ("activities", "indicators")
+            }
+            outcome_doc.update({"id": outcome_id, "kind": "outcome", "domain": domain})
+            docs.append(outcome_doc)
+
+            # Flatten activities
+            for activity in outcome.get("activities", []):
+                activity_doc = {
+                    **activity,
+                    "id": activity["activity_id"],
+                    "kind": "activity",
+                    "domain": domain,
+                    "outcome_id": outcome_id,
+                }
+                docs.append(activity_doc)
+
+            # Flatten indicators
+            for indicator in outcome.get("indicators", []):
+                indicator_doc = {
+                    **indicator,
+                    "id": indicator["indicator_id"],
+                    "kind": "indicator",
+                    "domain": domain,
+                    "outcome_id": outcome_id,
+                }
+                docs.append(indicator_doc)
+
+        print(f"  Loaded {filename}: {len(raw.get('outcomes', []))} outcomes → domain '{domain}'")
+
+    # Evaluation questions (single document)
+    eq_path = CATALOGUE_ROOT / "evaluation-questions.json"
+    if eq_path.exists():
+        eq_data = json.loads(eq_path.read_text(encoding="utf-8"))
+        eq_doc = {
+            "id": "evaluation-questions",
+            "kind": "evaluation_questions",
+            "domain": "_evaluation",
+            **eq_data,
+        }
+        docs.append(eq_doc)
+        print(f"  Loaded evaluation-questions.json: {len(eq_data.get('evaluation_domains', []))} domains")
+    else:
+        print(f"  WARNING: evaluation-questions.json not found at {eq_path}")
+
+    return docs
+
+
+def seed_catalogue(endpoint: str, database: str, data: list[dict]) -> None:
+    """Upsert flattened recovery-catalogue items into the ``recovery-catalogue`` container."""
+    try:
+        from azure.cosmos import CosmosClient
+        from azure.identity import DefaultAzureCredential
+    except ImportError:
+        print("  azure-cosmos or azure-identity not installed — skipping catalogue seed")
+        return
+
+    print(f"\n  Connecting to Cosmos DB for catalogue: {endpoint}")
+    credential = DefaultAzureCredential()
+    client = CosmosClient(endpoint, credential=credential)
+    db = client.get_database_client(database)
+    container = db.get_container_client("recovery-catalogue")
+
+    upserted = 0
+    for doc in data:
+        try:
+            container.upsert_item(doc)
+            upserted += 1
+        except Exception as exc:
+            print(f"    ERROR upserting catalogue/{doc.get('id', '?')}: {exc}")
+
+    print(f"  Seeded {upserted:>4} catalogue items into recovery-catalogue")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed disaster-response-hub databases")
     parser.add_argument("--cosmos-endpoint", default="", help="Cosmos DB endpoint URL")
@@ -121,12 +224,18 @@ def main() -> None:
     total = sum(len(v) for v in data.values())
     print(f"\n  Total: {total} seed records across {len(data)} categories")
 
+    print("\nLoading recovery catalogue data...")
+    catalogue_data = load_catalogue_data()
+    print(f"\n  Total: {len(catalogue_data)} catalogue documents")
+
     if args.dry_run or (not args.cosmos_endpoint and not args.storage_account):
         print("\n  DRY RUN — seed data validated, no Azure writes")
         return
 
     if args.cosmos_endpoint:
         seed_cosmos(args.cosmos_endpoint, args.cosmos_database, data)
+        if catalogue_data:
+            seed_catalogue(args.cosmos_endpoint, args.cosmos_database, catalogue_data)
 
     if args.storage_account:
         seed_blob_containers(args.storage_account)

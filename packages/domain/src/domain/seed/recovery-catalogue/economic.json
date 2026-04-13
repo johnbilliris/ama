@@ -1,0 +1,723 @@
+{
+  "domain": "economic",
+  "outcomes": [
+    {
+      "outcome_id": "aidr:economic:business-continuity-recovery",
+      "objective_type": "sustainability",
+      "title": "Business continuity and recovery achieved",
+      "description": "Disaster-affected businesses have resumed operations, restored revenue streams, and rebuilt customer bases, with targeted support provided to address barriers to business recovery across all sectors.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:business-continuity-recovery:act:1",
+          "title": "Deliver business recovery advisory services",
+          "description": "Provide specialist business advisory services to disaster-affected businesses, including financial planning, insurance navigation, supply chain restoration, and marketing strategy support."
+        },
+        {
+          "activity_id": "aidr:economic:business-continuity-recovery:act:2",
+          "title": "Administer business recovery grants and concessional loans",
+          "description": "Distribute financial assistance to eligible businesses through grants and low-interest loan programs designed to support business restart, equipment replacement, and working capital needs."
+        },
+        {
+          "activity_id": "aidr:economic:business-continuity-recovery:act:3",
+          "title": "Facilitate shared temporary business premises",
+          "description": "Establish temporary business hubs or shared workspace facilities where displaced businesses can resume operations while permanent premises are repaired or rebuilt."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:business-continuity-recovery:ind:1",
+          "title": "Business operational status post-disaster",
+          "description": "Percentage of disaster-affected businesses that have resumed full operations, are partially operational, or have permanently closed, tracked by industry sector and business size.",
+          "data_collection_methodology": "Business recovery tracking survey administered quarterly to registered businesses in affected areas, supplemented by ABR data on business registrations and cancellations.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:business-continuity-recovery:ind:2",
+          "title": "Business revenue recovery levels",
+          "description": "Average revenue levels of disaster-affected businesses as a proportion of pre-disaster turnover, tracked by industry sector over time.",
+          "data_collection_methodology": "Confidential business survey collecting revenue data at 6-monthly intervals, with aggregate analysis by sector and comparison to pre-disaster ABS business statistics.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:business-continuity-recovery:ind:3",
+          "title": "Business confidence in recovery trajectory",
+          "description": "Self-assessed confidence levels of business operators regarding their recovery trajectory and future business viability.",
+          "data_collection_methodology": "Business confidence survey using standardised sentiment measures, administered quarterly with results analysed by sector, size, and geographic location.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:employment-rates-restored",
+      "objective_type": "sustainability",
+      "title": "Employment rates restored to pre-disaster levels",
+      "description": "Employment levels across the disaster-affected area have recovered to pre-disaster rates, with displaced workers re-employed and job losses from business closures offset by new employment opportunities.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:employment-rates-restored:act:1",
+          "title": "Implement local employment and skills matching programs",
+          "description": "Establish employment support services that match displaced workers with available positions, including roles in the rebuilding and recovery sector, and provide retraining where needed."
+        },
+        {
+          "activity_id": "aidr:economic:employment-rates-restored:act:2",
+          "title": "Create recovery-related employment opportunities",
+          "description": "Maximise local employment in recovery and rebuilding activities through local procurement requirements, apprenticeship programs, and community employment initiatives."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:employment-rates-restored:ind:1",
+          "title": "Local unemployment and underemployment rates",
+          "description": "Unemployment and underemployment rates in the disaster-affected area compared to pre-disaster levels and regional averages.",
+          "data_collection_methodology": "ABS labour force statistics at the local government area level, supplemented by Centrelink data on income support recipients, analysed quarterly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:employment-rates-restored:ind:2",
+          "title": "Employment services utilisation and placement rates",
+          "description": "Uptake of employment support services by disaster-affected workers and the rate of successful job placement outcomes.",
+          "data_collection_methodology": "Employment service provider data on client registrations, services delivered, and placement outcomes, reported monthly with demographic disaggregation.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:economic-diversity-maintained",
+      "objective_type": "resilience",
+      "title": "Economic diversity maintained and enhanced",
+      "description": "The local economy has maintained or improved its diversity of industries, employment types, and income sources, reducing vulnerability to future economic shocks from disaster or other causes.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:economic-diversity-maintained:act:1",
+          "title": "Support economic diversification initiatives",
+          "description": "Invest in programs that encourage the development of new industries, business types, and economic activities that broaden the local economic base and reduce sectoral concentration risk."
+        },
+        {
+          "activity_id": "aidr:economic:economic-diversity-maintained:act:2",
+          "title": "Conduct economic resilience planning",
+          "description": "Facilitate local economic resilience planning that assesses economic vulnerability to future shocks and develops strategies for building a more diverse and adaptable economy."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:economic-diversity-maintained:ind:1",
+          "title": "Economic diversity index",
+          "description": "Herfindahl-Hirschman or equivalent diversity index measuring the concentration and diversity of local economic activity across industry sectors.",
+          "data_collection_methodology": "Analysis of ABS National Accounts data and business registration statistics at local government area level, calculated annually.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:economic-diversity-maintained:ind:2",
+          "title": "New business formation rates",
+          "description": "Rate of new business registrations in the disaster-affected area, including analysis of industry sector diversity among new businesses.",
+          "data_collection_methodology": "Australian Business Register data on new registrations in the affected area, analysed quarterly by industry sector and compared to pre-disaster trends.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:access-goods-services",
+      "objective_type": "sustainability",
+      "title": "Access to essential goods and services restored",
+      "description": "Community members have reliable access to essential goods and services including food, fuel, banking, postal services, and retail, with supply chains restored and service gaps addressed.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:access-goods-services:act:1",
+          "title": "Facilitate essential service restoration and gap-filling",
+          "description": "Work with government and private sector providers to restore essential services and implement alternative arrangements where permanent service restoration is delayed."
+        },
+        {
+          "activity_id": "aidr:economic:access-goods-services:act:2",
+          "title": "Support local retail and service sector recovery",
+          "description": "Assist local retail businesses and service providers to resume operations through financial assistance, temporary premises, and community buy-local campaigns."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:access-goods-services:ind:1",
+          "title": "Essential service availability",
+          "description": "Availability and accessibility of essential goods and services in the disaster-affected area, measured against a defined list of essential services needed for community functioning.",
+          "data_collection_methodology": "Essential services audit conducted quarterly, mapping availability and accessibility of defined essential services against community need benchmarks.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:access-goods-services:ind:2",
+          "title": "Community satisfaction with goods and services access",
+          "description": "Community members' satisfaction with their ability to access everyday goods and services without unreasonable difficulty or additional cost.",
+          "data_collection_methodology": "Community access survey administered biannually, measuring satisfaction with accessibility, availability, and affordability of essential goods and services.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:financial-security-individuals",
+      "objective_type": "sustainability",
+      "title": "Financial security for individuals and households",
+      "description": "Disaster-affected individuals and households have achieved financial stability, with disaster-related debts managed, income streams restored, and access to appropriate financial services and support.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:financial-security-individuals:act:1",
+          "title": "Provide financial counselling and literacy support",
+          "description": "Fund free financial counselling services for disaster-affected individuals and families to help them manage disaster-related financial pressures, navigate insurance claims, and plan for recovery."
+        },
+        {
+          "activity_id": "aidr:economic:financial-security-individuals:act:2",
+          "title": "Administer personal hardship and recovery grants",
+          "description": "Deliver financial assistance programs including emergency relief payments, recovery grants, and longer-term financial support to individuals and households experiencing disaster-related financial hardship."
+        },
+        {
+          "activity_id": "aidr:economic:financial-security-individuals:act:3",
+          "title": "Coordinate financial hardship provisions with institutions",
+          "description": "Liaise with banks, utilities, insurers, and other financial institutions to ensure appropriate hardship provisions are available and accessible to disaster-affected customers."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:financial-security-individuals:ind:1",
+          "title": "Household financial stress indicators",
+          "description": "Levels of financial stress among disaster-affected households measured through indicators including mortgage arrears, utility disconnections, and reliance on emergency relief.",
+          "data_collection_methodology": "Financial stress survey administered to disaster-affected households at 6-monthly intervals, supplemented by utility and financial institution hardship data.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:financial-security-individuals:ind:2",
+          "title": "Financial counselling service utilisation and outcomes",
+          "description": "Number of disaster-affected individuals accessing financial counselling services and the outcomes achieved including debt resolution, insurance settlement, and financial plan establishment.",
+          "data_collection_methodology": "Financial counselling service data on client numbers, presenting issues, and resolution outcomes, reported quarterly with demographic analysis.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:supply-chain-stability",
+      "objective_type": "sustainability",
+      "title": "Supply chain stability restored",
+      "description": "Supply chains critical to the local economy and community have been restored, with businesses and essential services able to reliably source inputs and deliver outputs to customers and markets.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:supply-chain-stability:act:1",
+          "title": "Map and address critical supply chain disruptions",
+          "description": "Identify critical supply chain vulnerabilities and disruptions affecting the disaster-affected area and implement targeted interventions to restore supply chain functioning."
+        },
+        {
+          "activity_id": "aidr:economic:supply-chain-stability:act:2",
+          "title": "Support local supply chain diversification",
+          "description": "Assist businesses to diversify their supply chains to reduce reliance on single suppliers or transport routes that may be vulnerable to future disruption."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:supply-chain-stability:ind:1",
+          "title": "Critical supply chain disruption status",
+          "description": "Number and severity of ongoing supply chain disruptions affecting businesses and essential services in the disaster-affected area.",
+          "data_collection_methodology": "Supply chain disruption monitoring through business surveys and key informant reports from major employers and service providers, collected monthly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:supply-chain-stability:ind:2",
+          "title": "Business-reported supply chain reliability",
+          "description": "Business operators' assessment of the reliability and adequacy of their supply chains compared to pre-disaster performance.",
+          "data_collection_methodology": "Business survey incorporating supply chain reliability questions, administered quarterly as part of broader business recovery monitoring.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:business-confidence-investment",
+      "objective_type": "resilience",
+      "title": "Business confidence and investment restored",
+      "description": "Business and investor confidence in the disaster-affected area has recovered, demonstrated by sustained investment levels, business expansion plans, and positive economic sentiment indicators.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:business-confidence-investment:act:1",
+          "title": "Promote the area as open for business and investment",
+          "description": "Implement marketing and investment attraction campaigns that communicate the area's recovery progress, business opportunities, and competitive advantages to potential investors."
+        },
+        {
+          "activity_id": "aidr:economic:business-confidence-investment:act:2",
+          "title": "Facilitate business networking and confidence-building events",
+          "description": "Organise business forums, networking events, and economic development workshops that bring business leaders together to share recovery experiences and explore growth opportunities."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:business-confidence-investment:ind:1",
+          "title": "Business confidence index",
+          "description": "Local business confidence levels measured through survey-based sentiment indicators covering current trading conditions, future outlook, and investment intentions.",
+          "data_collection_methodology": "Local business confidence survey administered quarterly using questions aligned with national business confidence surveys for benchmarking purposes.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:business-confidence-investment:ind:2",
+          "title": "Investment and development activity levels",
+          "description": "Value and volume of development applications, building approvals, and capital investment in the disaster-affected area compared to pre-disaster trends.",
+          "data_collection_methodology": "Local government development application and building approval data analysed quarterly, supplemented by investment inquiry tracking from economic development agencies.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:agricultural-recovery",
+      "objective_type": "sustainability",
+      "title": "Agricultural sector recovery achieved",
+      "description": "Agricultural enterprises have recovered productive capacity, with farm infrastructure rebuilt, livestock and crops re-established, and agricultural supply chains restored to support viable farming operations.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:agricultural-recovery:act:1",
+          "title": "Deliver agricultural recovery grants and technical support",
+          "description": "Provide financial assistance and specialist agronomic advisory services to disaster-affected farmers to support farm infrastructure repair, livestock replacement, and crop re-establishment."
+        },
+        {
+          "activity_id": "aidr:economic:agricultural-recovery:act:2",
+          "title": "Support farm mental health and resilience programs",
+          "description": "Fund targeted mental health and wellbeing support programs for farming families experiencing compounding stress from disaster impacts on their livelihoods and properties."
+        },
+        {
+          "activity_id": "aidr:economic:agricultural-recovery:act:3",
+          "title": "Facilitate agricultural industry coordination and knowledge sharing",
+          "description": "Bring together farmers, industry bodies, and research organisations to share recovery knowledge, coordinate replanting schedules, and plan for long-term agricultural resilience."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:agricultural-recovery:ind:1",
+          "title": "Agricultural production recovery levels",
+          "description": "Agricultural output in the disaster-affected area as a proportion of pre-disaster production levels, measured by value and volume across major commodity types.",
+          "data_collection_methodology": "Agricultural production data from ABS agricultural surveys and industry bodies, analysed annually with comparison to pre-disaster production baselines.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:agricultural-recovery:ind:2",
+          "title": "Farm infrastructure and capacity restoration",
+          "description": "Proportion of disaster-damaged farm infrastructure including fencing, water systems, machinery sheds, and irrigation that has been repaired or replaced.",
+          "data_collection_methodology": "Farm infrastructure recovery survey administered to affected agricultural properties at 6-monthly intervals, tracking repair status across infrastructure categories.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:agricultural-recovery:ind:3",
+          "title": "Farmer wellbeing and recovery confidence",
+          "description": "Self-reported wellbeing and recovery confidence levels of disaster-affected farming families, including financial stress, mental health, and outlook indicators.",
+          "data_collection_methodology": "Farmer wellbeing survey using validated instruments, administered annually through agricultural networks and extension services with confidential reporting.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:tourism-recovery",
+      "objective_type": "sustainability",
+      "title": "Tourism sector recovery achieved",
+      "description": "The tourism industry in the disaster-affected area has recovered, with visitor numbers, accommodation occupancy, and tourism revenue returning to viable levels and the area's tourism reputation restored.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:tourism-recovery:act:1",
+          "title": "Implement tourism recovery marketing campaigns",
+          "description": "Deliver targeted marketing campaigns to restore visitor confidence, communicate that the area is open for tourism, and promote unique recovery-related visitor experiences."
+        },
+        {
+          "activity_id": "aidr:economic:tourism-recovery:act:2",
+          "title": "Support tourism operators to rebuild capacity",
+          "description": "Provide grants, training, and business advisory support to tourism operators to repair facilities, update offerings, and rebuild their businesses to be competitive and sustainable."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:tourism-recovery:ind:1",
+          "title": "Visitor numbers and tourism revenue",
+          "description": "Visitor numbers, length of stay, and tourism expenditure in the disaster-affected area compared to pre-disaster levels and tourism recovery benchmarks.",
+          "data_collection_methodology": "Tourism research data from visitor surveys, accommodation occupancy statistics, and regional tourism satellite accounts, analysed quarterly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:tourism-recovery:ind:2",
+          "title": "Tourism operator viability and confidence",
+          "description": "Tourism business operators' assessment of their current viability, bookings pipeline, and confidence in the area's tourism recovery trajectory.",
+          "data_collection_methodology": "Tourism operator survey administered quarterly, collecting data on occupancy rates, forward bookings, revenue trends, and business confidence levels.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:local-economic-development",
+      "objective_type": "resilience",
+      "title": "Local economic development opportunities leveraged",
+      "description": "The recovery process has been used as an opportunity to invest in longer-term local economic development, creating new economic opportunities and strengthening the area's competitive advantages.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:local-economic-development:act:1",
+          "title": "Develop local economic recovery and development strategy",
+          "description": "Create a strategic economic development plan that leverages recovery investment to build long-term economic opportunities, infrastructure, and competitive advantages for the area."
+        },
+        {
+          "activity_id": "aidr:economic:local-economic-development:act:2",
+          "title": "Support innovation and entrepreneurship in recovery",
+          "description": "Establish programs that support local entrepreneurs and innovators to develop new business opportunities arising from changed conditions and recovery investment flows."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:local-economic-development:ind:1",
+          "title": "Gross regional product trends",
+          "description": "Gross regional product for the disaster-affected area compared to pre-disaster trajectory and comparable regions, measuring overall economic health and growth.",
+          "data_collection_methodology": "Economic modelling using ABS regional accounts data and local economic indicators, produced annually with trend analysis against pre-disaster projections.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:local-economic-development:ind:2",
+          "title": "Economic development initiatives established",
+          "description": "Number and scale of economic development projects and initiatives that have been established or accelerated as a result of recovery investment and planning.",
+          "data_collection_methodology": "Economic development project register maintained by local government and regional development agencies, tracking project status, value, and employment outcomes.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:insurance-financial-assistance",
+      "objective_type": "sustainability",
+      "title": "Insurance and financial assistance processes completed",
+      "description": "Insurance claims have been resolved fairly and efficiently, government financial assistance has been distributed to eligible recipients, and disputes have been managed through appropriate resolution mechanisms.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:insurance-financial-assistance:act:1",
+          "title": "Provide insurance advocacy and navigation support",
+          "description": "Fund independent insurance advocacy services to assist disaster-affected residents and businesses to navigate the insurance claims process and resolve disputes."
+        },
+        {
+          "activity_id": "aidr:economic:insurance-financial-assistance:act:2",
+          "title": "Streamline government financial assistance delivery",
+          "description": "Simplify and expedite government grant and financial assistance application and assessment processes to reduce administrative burden on disaster-affected applicants."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:insurance-financial-assistance:ind:1",
+          "title": "Insurance claim resolution rates and timeliness",
+          "description": "Proportion of disaster-related insurance claims resolved and average time to settlement, with analysis of disputed and declined claims.",
+          "data_collection_methodology": "Insurance industry data from the Insurance Council of Australia disaster statistics, supplemented by community insurance experience surveys conducted quarterly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:insurance-financial-assistance:ind:2",
+          "title": "Government assistance distribution rates",
+          "description": "Proportion of eligible applicants who have received government financial assistance, average processing times, and any identified gaps in assistance eligibility.",
+          "data_collection_methodology": "Government grant program administrative data on applications received, processed, approved, and paid, analysed monthly with demographic and geographic disaggregation.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:workforce-development",
+      "objective_type": "resilience",
+      "title": "Workforce skills and capacity developed",
+      "description": "The local workforce has been upskilled and diversified through recovery-related training and development, building a more adaptable and capable workforce for the future economy.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:workforce-development:act:1",
+          "title": "Deliver recovery-related vocational training programs",
+          "description": "Provide funded training programs in construction, trades, and other skills needed for the rebuilding effort, creating pathways for local residents into recovery employment."
+        },
+        {
+          "activity_id": "aidr:economic:workforce-development:act:2",
+          "title": "Support workforce transition and retraining",
+          "description": "Assist workers in industries that have not recovered to retrain for employment in growing sectors, including subsidised training, career counselling, and placement support."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:workforce-development:ind:1",
+          "title": "Training and skills program participation",
+          "description": "Number of disaster-affected residents participating in funded training and skills development programs, with completion rates and qualification outcomes.",
+          "data_collection_methodology": "Training provider enrolment and completion data aggregated across all recovery-funded skills programs, reported quarterly with demographic analysis.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:workforce-development:ind:2",
+          "title": "Employment outcomes from workforce development programs",
+          "description": "Employment placement rates and job retention outcomes for participants in recovery-related workforce development programs.",
+          "data_collection_methodology": "Post-program employment tracking of training participants at 3, 6, and 12 months after program completion, collected through participant surveys and employer verification.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:small-business-support",
+      "objective_type": "sustainability",
+      "title": "Small business recovery supported",
+      "description": "Small and micro businesses, which form the backbone of many disaster-affected communities, have received targeted support addressing their specific recovery challenges including limited resources, cash flow pressures, and workforce constraints.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:small-business-support:act:1",
+          "title": "Deliver small business mentoring and peer support programs",
+          "description": "Establish mentoring programs pairing experienced business operators with disaster-affected small business owners, and create peer support networks for shared problem-solving."
+        },
+        {
+          "activity_id": "aidr:economic:small-business-support:act:2",
+          "title": "Provide small business cash flow and working capital support",
+          "description": "Offer targeted financial assistance addressing the specific cash flow challenges of small businesses including low-interest working capital loans, grant programs, and tax relief measures."
+        },
+        {
+          "activity_id": "aidr:economic:small-business-support:act:3",
+          "title": "Facilitate small business hub and co-working facilities",
+          "description": "Provide temporary and affordable shared business premises where displaced small businesses can operate while permanent premises are repaired, reducing overhead costs during recovery."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:small-business-support:ind:1",
+          "title": "Small business survival and recovery rates",
+          "description": "Percentage of disaster-affected small businesses that remain operational at 6, 12, and 24 months post-disaster, with analysis by industry sector and level of damage sustained.",
+          "data_collection_methodology": "Longitudinal tracking of registered small businesses in the affected area through ABR data and direct survey follow-up at 6-monthly intervals.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:small-business-support:ind:2",
+          "title": "Small business owner wellbeing and satisfaction",
+          "description": "Self-reported wellbeing levels and satisfaction with recovery support among small business operators in the disaster-affected area.",
+          "data_collection_methodology": "Small business owner survey covering wellbeing, business recovery progress, and satisfaction with support services, administered biannually.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:industry-diversification",
+      "objective_type": "resilience",
+      "title": "Industry diversification pursued",
+      "description": "Recovery planning has deliberately pursued industry diversification to reduce the community's economic vulnerability to single-sector shocks, creating a more balanced and resilient economic structure.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:industry-diversification:act:1",
+          "title": "Conduct economic opportunity assessment for new industries",
+          "description": "Commission analysis of potential new industry opportunities for the area based on competitive advantages, infrastructure, workforce skills, and emerging market trends."
+        },
+        {
+          "activity_id": "aidr:economic:industry-diversification:act:2",
+          "title": "Attract and incubate new industry sectors",
+          "description": "Implement targeted industry attraction and incubation programs to establish new economic sectors in the disaster-affected area, including renewable energy, technology, and value-added manufacturing."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:industry-diversification:ind:1",
+          "title": "Industry sector employment distribution",
+          "description": "Distribution of employment across industry sectors in the disaster-affected area, measuring changes in concentration and diversity compared to pre-disaster patterns.",
+          "data_collection_methodology": "ABS census and labour force data analysed at local government area level, with industry sector classification at ANZSIC division level, reviewed annually.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:industry-diversification:ind:2",
+          "title": "New industry establishment outcomes",
+          "description": "Number and scale of new industry ventures established in the disaster-affected area as a result of diversification initiatives, including jobs created and investment value.",
+          "data_collection_methodology": "Economic development agency tracking of industry attraction and incubation outcomes, with verification through business registration and employment data.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:trade-export-recovery",
+      "objective_type": "sustainability",
+      "title": "Trade and export activity restored",
+      "description": "Export-oriented businesses and trade links have been restored, with transport infrastructure and logistics chains supporting the movement of goods and services to domestic and international markets.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:trade-export-recovery:act:1",
+          "title": "Restore trade infrastructure and logistics",
+          "description": "Prioritise repair and restoration of transport infrastructure, port facilities, and logistics networks critical to trade and export activity in the affected region."
+        },
+        {
+          "activity_id": "aidr:economic:trade-export-recovery:act:2",
+          "title": "Support exporters to restore market relationships",
+          "description": "Assist export-oriented businesses to re-establish international market relationships, fulfil delayed orders, and rebuild their reputation with overseas buyers and partners."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:trade-export-recovery:ind:1",
+          "title": "Export volume and value recovery",
+          "description": "Volume and value of exports from the disaster-affected region compared to pre-disaster levels, tracked by commodity type and destination market.",
+          "data_collection_methodology": "Trade statistics from ABS international trade data and regional export surveys, analysed quarterly with commodity and market disaggregation.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:trade-export-recovery:ind:2",
+          "title": "Trade infrastructure operational status",
+          "description": "Operational status and capacity of trade-related infrastructure including roads, rail, ports, and logistics facilities in the affected area.",
+          "data_collection_methodology": "Infrastructure operational status reports from transport and logistics operators, collected monthly and benchmarked against pre-disaster capacity.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:economic-infrastructure-restored",
+      "objective_type": "sustainability",
+      "title": "Economic infrastructure restored",
+      "description": "Infrastructure that underpins economic activity has been repaired or rebuilt, including commercial precincts, industrial facilities, transport networks, and digital connectivity essential for business operations.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:economic-infrastructure-restored:act:1",
+          "title": "Prioritise economically critical infrastructure repair",
+          "description": "Develop and implement a prioritised infrastructure repair program focused on infrastructure with the greatest economic impact, including roads, bridges, power, and telecommunications."
+        },
+        {
+          "activity_id": "aidr:economic:economic-infrastructure-restored:act:2",
+          "title": "Upgrade economic infrastructure during rebuilding",
+          "description": "Leverage rebuilding investment to upgrade economic infrastructure to modern standards, incorporating improved resilience, digital capability, and energy efficiency."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:economic-infrastructure-restored:ind:1",
+          "title": "Economic infrastructure restoration progress",
+          "description": "Percentage of damaged economic infrastructure that has been repaired or rebuilt to operational standard, tracked by infrastructure type and economic criticality.",
+          "data_collection_methodology": "Infrastructure recovery register maintained by coordinating agencies, tracking damage assessment, repair status, and operational capacity for all economic infrastructure assets.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:economic-infrastructure-restored:ind:2",
+          "title": "Infrastructure reliability and service levels",
+          "description": "Reliability and performance of economic infrastructure services including power, telecommunications, water, and transport compared to pre-disaster service levels.",
+          "data_collection_methodology": "Infrastructure service performance data from utility providers and transport operators, collected monthly and compared to service level benchmarks.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:economic-infrastructure-restored:ind:3",
+          "title": "Business impact of infrastructure disruptions",
+          "description": "Business-reported impact of any ongoing infrastructure disruptions on their operations, costs, and recovery progress.",
+          "data_collection_methodology": "Business impact survey questions included in quarterly business recovery monitoring, measuring infrastructure-related business disruption and cost impacts.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:income-levels-restored",
+      "objective_type": "sustainability",
+      "title": "Income levels restored for affected populations",
+      "description": "Household and individual income levels in the disaster-affected area have recovered to pre-disaster levels, with income inequality not worsened by the disaster and its aftermath.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:income-levels-restored:act:1",
+          "title": "Monitor and address income recovery gaps",
+          "description": "Track income recovery across different population groups and implement targeted interventions to address persistent income gaps affecting particular demographics or geographic areas."
+        },
+        {
+          "activity_id": "aidr:economic:income-levels-restored:act:2",
+          "title": "Support income diversification for vulnerable households",
+          "description": "Provide training, mentoring, and micro-enterprise support to help households that have lost primary income sources develop alternative income streams."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:income-levels-restored:ind:1",
+          "title": "Median household income trends",
+          "description": "Median household income in the disaster-affected area compared to pre-disaster levels and comparable non-affected areas, adjusted for inflation.",
+          "data_collection_methodology": "ABS census income data supplemented by ATO taxation statistics and Centrelink income support data, analysed at statistical area level annually.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:income-levels-restored:ind:2",
+          "title": "Income inequality indicators",
+          "description": "Gini coefficient or equivalent income inequality measure for the disaster-affected area, tracking whether the disaster has widened pre-existing income disparities.",
+          "data_collection_methodology": "Income distribution analysis using ABS income survey data and taxation statistics, calculated annually with comparison to pre-disaster baseline.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:commercial-property-recovery",
+      "objective_type": "sustainability",
+      "title": "Commercial property sector recovered",
+      "description": "Commercial and industrial property in the disaster-affected area has been repaired or rebuilt, with occupancy rates, rental values, and property investment levels returning to viable levels.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:commercial-property-recovery:act:1",
+          "title": "Support commercial property repair and rebuilding",
+          "description": "Facilitate access to insurance, grants, and financing for commercial and industrial property owners to repair or rebuild damaged premises to appropriate standards."
+        },
+        {
+          "activity_id": "aidr:economic:commercial-property-recovery:act:2",
+          "title": "Revitalise commercial precincts and town centres",
+          "description": "Invest in town centre and commercial precinct revitalisation including streetscaping, public amenities, and place-making initiatives that attract businesses and customers back to affected commercial areas."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:commercial-property-recovery:ind:1",
+          "title": "Commercial property occupancy rates",
+          "description": "Occupancy rates for commercial and industrial properties in the disaster-affected area compared to pre-disaster levels and regional averages.",
+          "data_collection_methodology": "Commercial property vacancy data from real estate industry databases and local government rates records, analysed quarterly by property type and location.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:commercial-property-recovery:ind:2",
+          "title": "Commercial property rebuild completion rates",
+          "description": "Proportion of damaged commercial and industrial properties that have been repaired or rebuilt to operational standard.",
+          "data_collection_methodology": "Building permit completion data from local government, cross-referenced with initial damage assessments, tracked monthly until rebuild program completion.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:economic:economic-preparedness",
+      "objective_type": "resilience",
+      "title": "Economic preparedness for future events enhanced",
+      "description": "Businesses and economic institutions in the area have improved their preparedness for future disaster events, including better business continuity plans, insurance coverage, and supply chain resilience.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:economic:economic-preparedness:act:1",
+          "title": "Promote business continuity planning uptake",
+          "description": "Deliver business continuity planning workshops and provide templates and tools to help businesses develop and maintain plans for managing future disaster disruptions."
+        },
+        {
+          "activity_id": "aidr:economic:economic-preparedness:act:2",
+          "title": "Improve disaster insurance literacy and coverage",
+          "description": "Educate businesses and property owners about disaster insurance options, policy terms, and the importance of adequate coverage, to improve insurance take-up and reduce underinsurance."
+        },
+        {
+          "activity_id": "aidr:economic:economic-preparedness:act:3",
+          "title": "Build economic resilience networks",
+          "description": "Establish local business and economic resilience networks that facilitate mutual support, resource sharing, and coordinated response during future disaster events."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:economic:economic-preparedness:ind:1",
+          "title": "Business continuity plan adoption rates",
+          "description": "Proportion of businesses in the disaster-affected area that have current business continuity plans addressing natural disaster risks.",
+          "data_collection_methodology": "Business preparedness survey administered annually, measuring business continuity plan existence, currency, and comprehensiveness across business size and sector categories.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:economic-preparedness:ind:2",
+          "title": "Disaster insurance coverage levels",
+          "description": "Proportion of businesses and properties in the disaster-affected area with adequate disaster insurance coverage, including trends in underinsurance and non-insurance.",
+          "data_collection_methodology": "Insurance coverage survey of businesses and property owners conducted annually, supplemented by aggregated insurer data on policy coverage in the affected area.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:economic:economic-preparedness:ind:3",
+          "title": "Economic resilience network participation",
+          "description": "Number of businesses and economic organisations actively participating in local economic resilience networks and mutual support arrangements.",
+          "data_collection_methodology": "Network membership and activity records maintained by economic resilience network coordinators, reported biannually with participation trend analysis.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    }
+  ]
+}

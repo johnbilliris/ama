@@ -1,0 +1,59 @@
+{
+  "evaluation_domains": [
+    {
+      "domain": "governance",
+      "description": "How well was the recovery program governed?",
+      "questions": [
+        "Were clear governance structures established for the recovery program?",
+        "Were roles and responsibilities clearly defined and understood?",
+        "Were decisions made in a timely and transparent manner?",
+        "Was there appropriate escalation and resolution of issues?",
+        "Were resources allocated effectively and accounted for?"
+      ]
+    },
+    {
+      "domain": "community_engagement",
+      "description": "How effectively were communities engaged in recovery?",
+      "questions": [
+        "Were affected communities consulted in recovery planning?",
+        "Were community needs and priorities reflected in recovery activities?",
+        "Were vulnerable groups specifically engaged and supported?",
+        "Was information provided in accessible formats and languages?",
+        "Were community feedback mechanisms established and responsive?"
+      ]
+    },
+    {
+      "domain": "effectiveness",
+      "description": "Did the recovery program achieve its intended outcomes?",
+      "questions": [
+        "To what extent were recovery outcomes achieved?",
+        "Were sustainability objectives met (community managing own recovery)?",
+        "Were resilience objectives met (community better prepared)?",
+        "Were there unintended positive or negative outcomes?",
+        "How did outcomes vary across different domains and populations?"
+      ]
+    },
+    {
+      "domain": "efficiency",
+      "description": "Were recovery resources used efficiently?",
+      "questions": [
+        "Were recovery activities delivered in a cost-effective manner?",
+        "Were timelines and milestones met?",
+        "Were there delays and what caused them?",
+        "Could the same outcomes have been achieved with fewer resources?",
+        "Were there economies of scale or synergies across programs?"
+      ]
+    },
+    {
+      "domain": "implementation",
+      "description": "How well was the recovery program implemented?",
+      "questions": [
+        "Were recovery activities implemented as planned?",
+        "Were there adaptations required during implementation?",
+        "Were monitoring data used to inform implementation decisions?",
+        "Were partnerships and coordination effective?",
+        "Were lessons captured and applied during implementation?"
+      ]
+    }
+  ]
+}
