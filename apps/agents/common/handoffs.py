@@ -50,6 +50,60 @@ def build_handoff(
     )
 
 
+def build_recovery_handoff(
+    *,
+    incident_id: str,
+    source_agent: str,
+    recovery_data: dict[str, object],
+    confidence: float = 0.8,
+) -> AgentHandoffEvent:
+    """Build a recovery-phase handoff (Risk Assessment → recovery agents).
+
+    Uses category_filter=["recovery_assessment"] per FR-054.
+    """
+    return build_handoff(
+        incident_id=incident_id,
+        source_agent=source_agent,
+        target_agent="recovery_service",
+        scope_key="recovery_assessment",
+        payload={
+            "category": "recovery_assessment",
+            **recovery_data,
+        },
+        confidence=confidence,
+    )
+
+
+def build_lessons_capture_handoff(
+    *,
+    incident_id: str,
+    source_agent: str,
+    incident_level: int,
+    trigger_source: str = "incident_closure",
+    scenario_run_id: str | None = None,
+    confidence: float = 1.0,
+) -> AgentHandoffEvent:
+    """Build a lessons-capture handoff (incident closure Level 2+ → lessons service).
+
+    Uses category_filter=["lessons_capture"] per FR-054.
+    """
+    payload: dict[str, object] = {
+        "category": "lessons_capture",
+        "incident_level": incident_level,
+        "trigger_source": trigger_source,
+    }
+    if scenario_run_id:
+        payload["scenario_run_id"] = scenario_run_id
+    return build_handoff(
+        incident_id=incident_id,
+        source_agent=source_agent,
+        target_agent="lessons_service",
+        scope_key="lessons_capture",
+        payload=payload,
+        confidence=confidence,
+    )
+
+
 def deliver_handoff_with_retry(
     *,
     handoff: AgentHandoffEvent,

@@ -12,6 +12,8 @@ SignalCategory = Literal[
     "community_report",
     "social_report",
     "resource_status",
+    "recovery_assessment",
+    "lessons_capture",
 ]
 
 ChainStatus = Literal["active", "draft", "deprecated"]

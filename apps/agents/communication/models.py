@@ -381,3 +381,37 @@ class AuditBufferEntry(BaseModel):
     buffered_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     retry_count: int = 0
     last_retry_at: datetime | None = None
+
+
+# ---------------------------------------------------------------------------
+# AWS Warning Request / Response (Phase 3 — US1)
+# ---------------------------------------------------------------------------
+
+
+class AwsWarningRequest(BaseModel):
+    """Request payload to build an AWS three-tier warning alert."""
+
+    incident_id: str
+    warning_tier: str = Field(
+        ..., pattern=r"^(advice|watch_and_act|emergency_warning)$"
+    )
+    hazard_type: str
+    affected_areas: list[str] = Field(default_factory=list)
+    action_statement_override: str | None = None
+    supersedes_alert_id: str | None = None
+    is_all_clear: bool = False
+    tier_skip_justification: str | None = None
+    approval_user_id: str | None = None
+
+
+class AwsWarningResponse(BaseModel):
+    """Response payload after creating an AWS warning alert."""
+
+    alert_id: str
+    warning_tier: str | None = None
+    colour_code: str | None = None
+    hazard_icon: str | None = None
+    action_statement: str | None = None
+    principles_checklist: dict[str, bool] = Field(default_factory=dict)
+    chain_position: int = 1
+    generation_method: str = "template"

@@ -36,6 +36,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-09
 - In-memory state stores (`state_store.py` dicts); seed JSON files in `data/` (016-automated-demo-script)
 - YAML (GitHub Actions workflows), Bash (rollback script), Bicep (IaC parameters), JSON (parameter files) + GitHub Actions, Azure Developer CLI (`azd`), Azure CLI (`az`), `pip-audit`, `ruff`, `gh` CLI (feature/017-cd-pipeline)
 - N/A (pipeline orchestration — no application data storage) (feature/017-cd-pipeline)
+- Python 3.10+ (confirmed from existing agents and `pyproject.toml`) + FastAPI (ASGI agents + API), Pydantic (domain models), Azure OpenAI SDK (LLM), azure-servicebus (agent messaging), azure-cosmos (state store) (018-aidr-guidance-integration)
+- Azure Cosmos DB (5 existing containers: `signals`, `disaster-hub`, `simulation`, `seed`, `governance`; new containers needed: `recovery`, `lessons`), Azure Blob Storage (audit blobs) (018-aidr-guidance-integration)
 
 - Python 3.12 for API and agents; TypeScript 5.6 for web UI + Microsoft Agent Framework (Python SDK), FastAPI, Pydantic, Azure SDKs, Next.js 15, React 19, Tailwind CSS, Azure Cosmos DB client, Azure Service Bus/Event Hubs clients (001-disaster-response-hub)
 
@@ -56,9 +58,9 @@ cd src; pytest; ruff check .
 Python 3.12 for API and agents; TypeScript 5.6 for web UI: Follow standard conventions
 
 ## Recent Changes
+- 018-aidr-guidance-integration: Added Python 3.10+ (confirmed from existing agents and `pyproject.toml`) + FastAPI (ASGI agents + API), Pydantic (domain models), Azure OpenAI SDK (LLM), azure-servicebus (agent messaging), azure-cosmos (state store)
 - feature/017-cd-pipeline: Added YAML (GitHub Actions workflows), Bash (rollback script), Bicep (IaC parameters), JSON (parameter files) + GitHub Actions, Azure Developer CLI (`azd`), Azure CLI (`az`), `pip-audit`, `ruff`, `gh` CLI
 - 016-automated-demo-script: Added Python 3.12 + FastAPI, httpx (TestClient), argparse, Pydantic, existing agent modules
-- feature/015-performance-benchmarks: Added Python 3.12 + FastAPI ≥ 0.115, pytest-benchmark ≥ 5.1, pytest-asyncio, Pydantic ≥ 2.10, tenacity ≥ 9.0
 
 
 <!-- MANUAL ADDITIONS START -->

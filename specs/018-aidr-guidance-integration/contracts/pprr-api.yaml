@@ -1,0 +1,118 @@
+# API Contract: PPRR Lifecycle
+
+**Base path**: `/api/pprr`  
+**FRs**: FR-026–031, FR-050, FR-053  
+**Service**: PPRR Service (platform API)  
+**Auth**: Existing platform auth (Incident Controller or emergency manager)
+
+---
+
+## Endpoints
+
+### POST /api/incidents/{incident_id}/pprr/transition
+
+**New** — Transition an incident's PPRR phase.
+
+**Request body**:
+```json
+{
+  "target_phase": "recovery",
+  "transition_rationale": "Flood waters receded, damage assessment commencing",
+  "authorising_user": "user-em-001",
+  "overlap_active": true,
+  "overlap_end_expected_at": "2025-08-15T00:00:00Z"
+}
+```
+
+**Response**: `200 OK`
+```json
+{
+  "incident_id": "inc-2025-003",
+  "previous_phase": "response",
+  "current_phase": "recovery",
+  "overlap_active": true,
+  "transition_recorded_at": "2025-07-20T16:00:00Z",
+  "timeline_event_id": "te-transition-001"
+}
+```
+
+**Validation**:
+- `target_phase` must be a valid PPRR phase
+- Transition must be authorised by a user (Constitution NN-1)
+- Creates a `TimelineEvent` with PPRR transition payload (FR-053)
+- Overlap periods explicitly represented via `overlap_active` flag
+
+**Performance**: ≤5 seconds (NFR-003).
+
+### GET /api/incidents/{incident_id}/pprr
+
+**New** — Get the current PPRR phase for an incident.
+
+**Response**: `200 OK`
+```json
+{
+  "incident_id": "inc-2025-003",
+  "pprr_phase": "recovery",
+  "phase_started_at": "2025-07-20T16:00:00Z",
+  "overlap_active": true,
+  "overlap_phases": ["response", "recovery"],
+  "phase_history": [
+    {"phase": "response", "started_at": "2025-07-15T08:00:00Z", "ended_at": "2025-07-20T16:00:00Z"},
+    {"phase": "recovery", "started_at": "2025-07-20T16:00:00Z", "ended_at": null}
+  ]
+}
+```
+
+### POST /api/pprr/contexts
+
+**New** — Create a PPRR phase context for a region or scenario (non-incident PPRR, R-001).
+
+**Request body**:
+```json
+{
+  "context_type": "region",
+  "context_reference_id": "jurisdiction-nsw",
+  "pprr_phase": "preparedness",
+  "activated_by": "user-em-001",
+  "notes": "Pre-cyclone season preparedness activities for NSW"
+}
+```
+
+**Response**: `201 Created` with `PprrPhaseContext` object.
+
+**Validation**:
+- `pprr_phase` restricted to `prevention` or `preparedness` (Response/Recovery require an incident)
+- `context_reference_id` must reference valid jurisdiction or scenario template
+
+### GET /api/pprr/contexts
+
+**New** — List all active PPRR phase contexts.
+
+**Query params**: `?context_type=region&pprr_phase=preparedness`
+
+**Response**: `200 OK` with list of `PprrPhaseContext` objects.
+
+### POST /api/pprr/contexts/{context_id}/transition-to-incident
+
+**New** — Transition a PPRR context to a real incident (e.g., preparedness → response when a hazard materialises).
+
+**Request body**:
+```json
+{
+  "incident_id": "inc-2025-004",
+  "transition_rationale": "Cyclone materialised, transitioning to active incident"
+}
+```
+
+**Response**: `200 OK` — Context is deactivated, incident's `pprr_phase` set to `response`.
+
+---
+
+## Graceful Degradation
+
+- If PPRR service unavailable: agents continue operating in current phase
+- Phase transition requests queued and applied on recovery
+
+## Observability Metrics
+
+- `pprr_phase_transition_count` — Number of phase transitions per incident

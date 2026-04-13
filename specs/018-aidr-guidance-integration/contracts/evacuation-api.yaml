@@ -1,0 +1,133 @@
+# API Contract: Evacuation (Five-Stage Framework)
+
+**Base path**: `/api/incidents/{incident_id}/evacuation`  
+**FRs**: FR-018–025  
+**Agent**: Evacuation Agent  
+**Auth**: Existing platform auth (Incident Controller or evacuation authority)
+
+---
+
+## Endpoints
+
+### POST /api/incidents/{incident_id}/evacuation/stages
+
+**New** — Initialise the five-stage evacuation lifecycle for an incident.
+
+**Request body**:
+```json
+{
+  "evacuation_plan_id": "ep-cyclone-cairns-v1",
+  "decision_authority": "user-ic-001",
+  "decision_rationale": "Category 4 cyclone forecast to make landfall within 48 hours",
+  "evacuation_type": "pre_warned",
+  "evacuation_approach": "directed",
+  "evacuation_scope": "phased",
+  "authorized_by": "user-ic-001"
+}
+```
+
+**Response**: `201 Created`
+```json
+{
+  "stage_id": "es-a1b2c3d4",
+  "incident_id": "inc-2025-002",
+  "evacuation_plan_id": "ep-cyclone-cairns-v1",
+  "current_stage": "decision",
+  "decision_authority": "user-ic-001",
+  "decision_rationale": "Category 4 cyclone forecast...",
+  "evacuation_type": "pre_warned",
+  "evacuation_approach": "directed",
+  "evacuation_scope": "phased",
+  "stage_started_at": "2025-07-20T08:00:00Z",
+  "re_entry_count": 0
+}
+```
+
+### POST /api/incidents/{incident_id}/evacuation/stages/{stage_id}/transition
+
+**New** — Transition to the next evacuation stage.
+
+**Request body**:
+```json
+{
+  "target_stage": "warning",
+  "transition_rationale": "Decision confirmed, issuing evacuation warnings",
+  "authorized_by": "user-ic-001"
+}
+```
+
+**Response**: `200 OK` with updated `EvacuationStage`.
+
+**Validation** (R-010 state machine):
+- Valid forward transitions: decision→warning→withdrawal→shelter→return→completed
+- Valid re-entry transitions: any active stage → decision
+- Valid alternative: decision → shelter_in_place
+- Invalid transitions return `422 Unprocessable Entity` with explanation
+
+### GET /api/incidents/{incident_id}/evacuation/stages/{stage_id}
+
+**New** — Get current evacuation stage status with all stage-specific fields.
+
+**Response**: `200 OK` with full `EvacuationStage` object.
+
+### PUT /api/incidents/{incident_id}/evacuation/stages/{stage_id}/withdrawal
+
+**New** — Update withdrawal progress tracking (FR-021).
+
+**Request body**:
+```json
+{
+  "population_total": 15000,
+  "population_moved": 8500,
+  "vulnerable_population_status": {
+    "elderly": "transport_in_progress",
+    "disability": "transport_complete",
+    "cald_communities": "awaiting_translated_instructions",
+    "pregnant_breastfeeding": "priority_transport_allocated",
+    "pets_assistance_animals": "transport_in_progress",
+    "children": "school_buses_deployed"
+  }
+}
+```
+
+### PUT /api/incidents/{incident_id}/evacuation/stages/{stage_id}/shelter
+
+**New** — Update shelter stage tracking (FR-022).
+
+**Request body**:
+```json
+{
+  "active_shelter_ids": ["shelter-001", "shelter-002"],
+  "total_shelter_capacity": 5000,
+  "current_shelter_occupancy": 3200,
+  "vulnerable_population_status": {
+    "disability": "accessible_facilities_confirmed",
+    "pets_assistance_animals": "animal_holding_area_active"
+  }
+}
+```
+
+### PUT /api/incidents/{incident_id}/evacuation/stages/{stage_id}/return
+
+**New** — Update return stage tracking (FR-023).
+
+**Request body**:
+```json
+{
+  "safety_conditions_met": true,
+  "safety_certifier": "user-safety-officer-001",
+  "return_completion_rate": 0.72
+}
+```
+
+---
+
+## Graceful Degradation
+
+- Evacuation agent uses existing circuit breaker pattern
+- Stage transitions buffer locally if API unavailable
+- Stage data persisted to local audit before Cosmos write
+
+## Observability Metrics
+
+- `evacuation_stage_duration` — Time spent in each stage

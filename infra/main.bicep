@@ -271,6 +271,18 @@ resource governanceContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases
   }
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+// AIDR Guidance Integration — Recovery, Lessons, AIIMS, Evacuation, PPRR containers
+// ────────────────────────────────────────────────────────────────────────────────
+
+module recoveryLessons './modules/recovery-lessons.bicep' = {
+  name: 'recovery-lessons'
+  params: {
+    cosmosAccountName: cosmos.name
+    cosmosDbName: cosmosDb.name
+  }
+}
+
 // Cosmos DB data-plane RBAC — grants the deploying principal read/write access
 // Required for postprovision seed script and local development
 resource cosmosDataContributorAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-11-15' = if (!empty(principalId)) {
