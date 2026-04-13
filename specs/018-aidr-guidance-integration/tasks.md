@@ -80,16 +80,16 @@
 
 ### Implementation for User Story 1
 
-- [ ] T017 [P] [US1] Create AWS nested-model warning builder with tier-colour mapping, hazard icon selection, action statement templates, and supersession chain management in `apps/agents/communication/warning_builder.py` per FR-002/FR-003/R-004
-- [ ] T018 [P] [US1] Extend Communication Agent models with AWS warning request/response schemas in `apps/agents/communication/models.py` per FR-048
-- [ ] T019 [US1] Extend Communication Agent in `apps/agents/communication/agent.py` to generate three-tier AWS warnings using the warning builder, support tier escalation/de-escalation (FR-004), issue all-clear notifications (FR-005), handle tier-skip for sudden-onset hazards with justification logging, and enforce IC approval with AIIMS delegation chain timeout (5 min Emergency Warning, 15 min lower tiers)
-- [ ] T020 [US1] Add warning compliance validation call within the Communication Agent's warning generation flow — invoke `warning_compliance.py` validator before publish, populate `warning_principles_checklist` on `PublicAlert`, enforce NFR-001 ≤5s validation time
-- [ ] T021 [US1] Add vulnerable population accessibility handling in Communication Agent — CALD translations, disability-accessible formats, extended population groups per FR-007/Constitution §VI-C and AIDR Evacuation Planning Handbook 2023
-- [ ] T022 [US1] Implement graceful degradation for AWS warnings — template-based fallback when LLM unavailable (`generation_method = "template_fallback"`), local buffering when Cosmos unavailable, local-only validation per R-002
-- [ ] T023 [US1] Add warning chain query endpoint `GET /api/alerts/{alert_id}/chain` — traverse singly-linked `superseded_warning_id` chain, return ordered chain with tier/status/timestamp per warning-api.yaml contract
-- [ ] T024 [US1] Add CAP (Common Alerting Protocol) XML rendering endpoint `GET /api/alerts/{alert_id}/cap` per R-009 — serialize `PublicAlert` with AWS fields to CAP 1.2 XML format
-- [ ] T025 [US1] Add warning compliance validation endpoint `POST /api/alerts/{alert_id}/validate-compliance` returning AWS compliance status and ten-principle checklist per warning-api.yaml contract
-- [ ] T026 [US1] Add observability metrics for US1 — emit `warning_compliance_rate` and `tier_transition_latency` telemetry per NFR-010
+- [X] T017 [P] [US1] Create AWS nested-model warning builder with tier-colour mapping, hazard icon selection, action statement templates, and supersession chain management in `apps/agents/communication/warning_builder.py` per FR-002/FR-003/R-004
+- [X] T018 [P] [US1] Extend Communication Agent models with AWS warning request/response schemas in `apps/agents/communication/models.py` per FR-048
+- [X] T019 [US1] Extend Communication Agent in `apps/agents/communication/agent.py` to generate three-tier AWS warnings using the warning builder, support tier escalation/de-escalation (FR-004), issue all-clear notifications (FR-005), handle tier-skip for sudden-onset hazards with justification logging, and enforce IC approval with AIIMS delegation chain timeout (5 min Emergency Warning, 15 min lower tiers)
+- [X] T020 [US1] Add warning compliance validation call within the Communication Agent's warning generation flow — invoke `warning_compliance.py` validator before publish, populate `warning_principles_checklist` on `PublicAlert`, enforce NFR-001 ≤5s validation time
+- [X] T021 [US1] Add vulnerable population accessibility handling in Communication Agent — CALD translations, disability-accessible formats, extended population groups per FR-007/Constitution §VI-C and AIDR Evacuation Planning Handbook 2023
+- [X] T022 [US1] Implement graceful degradation for AWS warnings — template-based fallback when LLM unavailable (`generation_method = "template_fallback"`), local buffering when Cosmos unavailable, local-only validation per R-002
+- [X] T023 [US1] Add warning chain query endpoint `GET /api/alerts/{alert_id}/chain` — traverse singly-linked `superseded_warning_id` chain, return ordered chain with tier/status/timestamp per warning-api.yaml contract
+- [X] T024 [US1] Add CAP (Common Alerting Protocol) XML rendering endpoint `GET /api/alerts/{alert_id}/cap` per R-009 — serialize `PublicAlert` with AWS fields to CAP 1.2 XML format
+- [X] T025 [US1] Add warning compliance validation endpoint `POST /api/alerts/{alert_id}/validate-compliance` returning AWS compliance status and ten-principle checklist per warning-api.yaml contract
+- [X] T026 [US1] Add observability metrics for US1 — emit `warning_compliance_rate` and `tier_transition_latency` telemetry per NFR-010
 
 **Checkpoint**: AWS three-tier warning generation fully functional — warnings have correct tiers, colours, icons, action statements, chain linkage, and 100% principle compliance (SC-001, SC-006)
 
@@ -105,13 +105,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T027 [P] [US2] Create AIIMS service with role assignment CRUD, one-function-per-agent-per-incident enforcement, coverage ratio calculation, Level 3 full-coverage validation, and incident level change logic in `apps/api/app/services/aiims_service.py`
-- [ ] T028 [US2] Create AIIMS API routes in `apps/api/app/api/routes/aiims.py` per aiims-api.yaml contract — `POST /api/incidents/{incident_id}/aiims/assignments` (assign agent to AIIMS function), `GET /api/incidents/{incident_id}/aiims/structure` (COP display), `PUT /api/incidents/{incident_id}/aiims/assignments/{assignment_id}` (reassign/deactivate), `POST /api/incidents/{incident_id}/level` (change incident level with TimelineEvent creation)
-- [ ] T029 [US2] Wire AIIMS role consultation into agent startup — when incident starts, check `FrameworkAssignment` for AIIMS applicability, create `AiimsRoleAssignment` records for each agent using default mapping from `aiims_mapping.py`, agents query own assignment for current AIIMS function per R-005
-- [ ] T030 [US2] Add Level 2+ shared COP establishment — when incident escalates to Level 2, ensure shared COP includes AIIMS structure display; at Level 3, validate all six functions assigned per FR-016/FR-017
-- [ ] T031 [US2] Implement graceful degradation for AIIMS — static fallback to default AIIMS mapping from configuration when role assignment service unavailable, COP displays last-known assignments with staleness indicator per R-002
-- [ ] T032 [US2] Add Level 2+ incident closure auto-trigger for lessons capture — create `TimelineEvent` with `lessons_capture_triggered` payload when Level 2+ incident transitions to `closed` per FR-038/R-007
-- [ ] T033 [US2] Add observability metric `aiims_role_coverage_ratio` per NFR-010
+- [X] T027 [P] [US2] Create AIIMS service with role assignment CRUD, one-function-per-agent-per-incident enforcement, coverage ratio calculation, Level 3 full-coverage validation, and incident level change logic in `apps/api/app/services/aiims_service.py`
+- [X] T028 [US2] Create AIIMS API routes in `apps/api/app/api/routes/aiims.py` per aiims-api.yaml contract — `POST /api/incidents/{incident_id}/aiims/assignments` (assign agent to AIIMS function), `GET /api/incidents/{incident_id}/aiims/structure` (COP display), `PUT /api/incidents/{incident_id}/aiims/assignments/{assignment_id}` (reassign/deactivate), `POST /api/incidents/{incident_id}/level` (change incident level with TimelineEvent creation)
+- [X] T029 [US2] Wire AIIMS role consultation into agent startup — when incident starts, check `FrameworkAssignment` for AIIMS applicability, create `AiimsRoleAssignment` records for each agent using default mapping from `aiims_mapping.py`, agents query own assignment for current AIIMS function per R-005
+- [X] T030 [US2] Add Level 2+ shared COP establishment — when incident escalates to Level 2, ensure shared COP includes AIIMS structure display; at Level 3, validate all six functions assigned per FR-016/FR-017
+- [X] T031 [US2] Implement graceful degradation for AIIMS — static fallback to default AIIMS mapping from configuration when role assignment service unavailable, COP displays last-known assignments with staleness indicator per R-002
+- [X] T032 [US2] Add Level 2+ incident closure auto-trigger for lessons capture — create `TimelineEvent` with `lessons_capture_triggered` payload when Level 2+ incident transitions to `closed` per FR-038/R-007
+- [X] T033 [US2] Add observability metric `aiims_role_coverage_ratio` per NFR-010
 
 **Checkpoint**: AIIMS role management fully operational — every incident has six-function mapping visible in COP, incident levels escalate/de-escalate correctly (SC-002)
 
@@ -127,14 +127,14 @@
 
 ### Implementation for User Story 3
 
-- [ ] T034 [P] [US3] Create evacuation stage state machine logic in `apps/agents/evacuation/stages.py` per R-010 — implement valid forward transitions (decision→warning→withdrawal→shelter→return→completed), re-entry transitions (any stage → decision), shelter-in-place path (decision → shelter_in_place → decision), re_entry_count increment, TimelineEvent generation for each transition
-- [ ] T035 [P] [US3] Extend Evacuation Agent models in `apps/agents/evacuation/models.py` with `EvacuationStage` integration — request/response schemas for stage initialisation, transition, withdrawal tracking, shelter tracking, and return tracking per evacuation-api.yaml
-- [ ] T036 [US3] Extend Evacuation Agent in `apps/agents/evacuation/agent.py` with five-stage lifecycle management — Decision stage captures authority/rationale/type/approach/scope (FR-019), Warning stage coordinates with Communication Agent (FR-020), Withdrawal stage tracks population movement with vulnerable priority (FR-021), Shelter stage tracks capacity/welfare/vulnerable status (FR-022), Return stage manages phased re-entry with safety validation (FR-023)
-- [ ] T037 [US3] Add shelter-in-place support in Evacuation Agent — rationale capture, ongoing condition monitoring, re-evaluation path back to Decision stage per FR-024
-- [ ] T038 [US3] Add support for both pre-warned and immediate evacuation types per FR-025, including tier-skip integration with US1 warning builder for sudden-onset events
-- [ ] T039 [US3] Create evacuation API routes in `apps/api/app/api/routes/evacuation.py` (if not already handled by agent endpoints) per evacuation-api.yaml — `POST .../evacuation/stages` (initialise), `POST .../stages/{stage_id}/transition` (advance), `GET .../stages/{stage_id}` (status), `PUT .../stages/{stage_id}/withdrawal` (progress), `PUT .../stages/{stage_id}/shelter` (capacity), `PUT .../stages/{stage_id}/return` (safety)
-- [ ] T040 [US3] Implement graceful degradation for evacuation stages — use existing circuit breaker pattern in `apps/agents/common/circuit_breaker.py`, buffer stage transitions locally when API unavailable, persist to local audit before Cosmos write per R-002
-- [ ] T041 [US3] Add observability metric `evacuation_stage_duration` per NFR-010
+- [X] T034 [P] [US3] Create evacuation stage state machine logic in `apps/agents/evacuation/stages.py` per R-010 — implement valid forward transitions (decision→warning→withdrawal→shelter→return→completed), re-entry transitions (any stage → decision), shelter-in-place path (decision → shelter_in_place → decision), re_entry_count increment, TimelineEvent generation for each transition
+- [X] T035 [P] [US3] Extend Evacuation Agent models in `apps/agents/evacuation/models.py` with `EvacuationStage` integration — request/response schemas for stage initialisation, transition, withdrawal tracking, shelter tracking, and return tracking per evacuation-api.yaml
+- [X] T036 [US3] Extend Evacuation Agent in `apps/agents/evacuation/agent.py` with five-stage lifecycle management — Decision stage captures authority/rationale/type/approach/scope (FR-019), Warning stage coordinates with Communication Agent (FR-020), Withdrawal stage tracks population movement with vulnerable priority (FR-021), Shelter stage tracks capacity/welfare/vulnerable status (FR-022), Return stage manages phased re-entry with safety validation (FR-023)
+- [X] T037 [US3] Add shelter-in-place support in Evacuation Agent — rationale capture, ongoing condition monitoring, re-evaluation path back to Decision stage per FR-024
+- [X] T038 [US3] Add support for both pre-warned and immediate evacuation types per FR-025, including tier-skip integration with US1 warning builder for sudden-onset events
+- [X] T039 [US3] Create evacuation API routes in `apps/api/app/api/routes/evacuation.py` (if not already handled by agent endpoints) per evacuation-api.yaml — `POST .../evacuation/stages` (initialise), `POST .../stages/{stage_id}/transition` (advance), `GET .../stages/{stage_id}` (status), `PUT .../stages/{stage_id}/withdrawal` (progress), `PUT .../stages/{stage_id}/shelter` (capacity), `PUT .../stages/{stage_id}/return` (safety)
+- [X] T040 [US3] Implement graceful degradation for evacuation stages — use existing circuit breaker pattern in `apps/agents/common/circuit_breaker.py`, buffer stage transitions locally when API unavailable, persist to local audit before Cosmos write per R-002
+- [X] T041 [US3] Add observability metric `evacuation_stage_duration` per NFR-010
 
 **Checkpoint**: Five-stage evacuation lifecycle fully functional — stages progress sequentially with re-entry support, shelter-in-place alternative, and vulnerable population prioritisation at every stage (SC-003, SC-009)
 

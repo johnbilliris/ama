@@ -4,6 +4,9 @@ from app.api.governance import router as governance_router
 from app.api.handoffs import router as handoffs_router
 from app.api.health import router as health_router
 from app.api.routes.alerts import router as alerts_router
+from app.api.routes.aiims import level_router as aiims_level_router
+from app.api.routes.aiims import router as aiims_router
+from app.api.routes.evacuation import router as evacuation_router
 from app.api.routes.frameworks import router as frameworks_router
 from app.api.routes.incidents import router as incidents_router
 from app.api.routes.organisations import router as organisations_router
@@ -13,6 +16,7 @@ from app.api.routes.scenarios import router as scenarios_router
 from app.api.routes.signals import router as signals_router
 from app.api.routes.simulations import router as simulations_router
 from app.api.routes.tasks import router as tasks_router
+from app.api.routes.warning_chain import router as warning_chain_router
 from fastapi import APIRouter
 
 api_router = APIRouter()
@@ -31,4 +35,8 @@ api_router.include_router(dead_letters_router)
 api_router.include_router(health_router)
 api_router.include_router(data_sources_router)
 api_router.include_router(governance_router)
+api_router.include_router(warning_chain_router)
+api_router.include_router(aiims_router)
+api_router.include_router(aiims_level_router)
+api_router.include_router(evacuation_router)
 
