@@ -106,8 +106,8 @@
 
 ### Implementation for User Story 4
 
-- [ ] T021 [US4] Create keyword search bar component: text input with placeholder, clear (×) button, 300ms debounce before emitting value change, consume `keyword` state from filter hook in `packages/ui/src/components/disaster-map/search-bar.tsx`
-- [ ] T022 [US4] Integrate search bar into page layout: render above map alongside filter controls, wire keyword value to filter hook (triggers API re-fetch with `keyword` param), display "No incidents match your criteria" message with reset option when zero results returned in `apps/web/src/app/disasters/page.tsx`
+- [x] T021 [US4] Create keyword search bar component: text input with placeholder, clear (×) button, 300ms debounce before emitting value change, consume `keyword` state from filter hook in `packages/ui/src/components/disaster-map/search-bar.tsx`
+- [x] T022 [US4] Integrate search bar into page layout: render above map alongside filter controls, wire keyword value to filter hook (triggers API re-fetch with `keyword` param), display "No incidents match your criteria" message with reset option when zero results returned in `apps/web/src/app/disasters/page.tsx`
 
 **Checkpoint**: User Stories 1–4 all work independently — map, filters, detail sidebar, and keyword search all functional.
 
