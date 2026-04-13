@@ -111,3 +111,80 @@ class AuditBufferEntry(BaseModel):
     buffered_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     retry_count: int = 0
     last_retry_at: datetime | None = None
+
+
+# ---------------------------------------------------------------------------
+# M&E Framework request/response models (FRs: FR-008–014)
+# ---------------------------------------------------------------------------
+
+
+class CreateMEFrameworkRequest(BaseModel):
+    """Request to create a new M&E framework for an incident programme."""
+
+    incident_id: str
+    program_name: str
+    affected_community_definition: str = ""
+    created_by: str = ""
+
+
+class SelectOutcomesRequest(BaseModel):
+    """Request to select outcomes from the catalogue for a framework."""
+
+    outcomes: list[dict]  # [{catalogue_outcome_id, domain, objective_type, community_restatement?}]
+
+
+class CreateProgramLogicRequest(BaseModel):
+    """Request to create a program logic model for a framework."""
+
+    model_type: str = "ex_ante"
+    resources_inputs: list[dict] = []
+    activities: list[dict] = []
+    outputs: list[dict] = []
+    intermediate_outcomes: list[dict] = []
+    final_outcomes: list[dict] = []
+    outcome_chain_links: list[dict] = []
+    timeline_months: int | None = None
+
+
+class SetStandardsRequest(BaseModel):
+    """Request to set standards of success for selected indicators."""
+
+    standards: list[dict]  # [{catalogue_outcome_id, indicator_id, threshold_value, threshold_operator, ...}]
+
+
+class SetCollectionScheduleRequest(BaseModel):
+    """Request to set an indicator data-collection schedule."""
+
+    schedules: list[dict]  # [{indicator_id, frequency, next_due_date}]
+
+
+class MonitoringReportResponse(BaseModel):
+    """Response for a monitoring report snapshot."""
+
+    framework_id: str
+    incident_id: str
+    indicators_status: list[dict]
+    overdue_indicators: list[str]
+    staleness_warnings: list[str]
+    generated_at: str
+
+
+class CreateEvaluationRequest(BaseModel):
+    """Request to generate an evaluation report."""
+
+    evaluation_period_start: str
+    evaluation_period_end: str
+    generated_by: str = "manual"
+    created_by: str = ""
+
+
+class EvaluationReportResponse(BaseModel):
+    """Response for a generated evaluation report."""
+
+    report_id: str
+    framework_id: str
+    domain_findings: dict
+    summary: str
+    recommendations: list[dict]
+    generated_by: str
+    created_at: str
