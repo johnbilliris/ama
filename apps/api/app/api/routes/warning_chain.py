@@ -11,6 +11,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from apps.agents.common.warning_compliance import validate_warning_compliance
+from apps.agents.communication.edxl_serialiser import serialize_to_edxl
 from apps.agents.communication.warning_builder import (
     get_chain_position,
     traverse_chain,
@@ -157,3 +158,19 @@ async def validate_compliance(alert_id: str) -> dict[str, object]:
         "principle_compliance_rate": result.principle_compliance_rate,
         "errors": result.errors,
     }
+
+
+# ---- GET /api/alerts/{alert_id}/edxl ----
+
+
+@router.get(
+    "/{alert_id}/edxl",
+    response_class=Response,
+    responses={200: {"content": {"application/xml": {}}}},
+)
+async def get_edxl_xml(alert_id: str) -> Response:
+    """Render a PublicAlert as EDXL-DE XML."""
+    if alert_id not in ALERTS:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    xml = serialize_to_edxl(ALERTS[alert_id])
+    return Response(content=xml, media_type="application/xml")
