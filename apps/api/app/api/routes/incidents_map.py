@@ -6,6 +6,7 @@ Always excludes rehearsal-status incidents server-side.
 """
 
 import logging
+import time
 from datetime import UTC, datetime
 from typing import Annotated
 
@@ -26,6 +27,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/incidents", tags=["incidents"])
 
 _repo = IncidentMapRepository()
+
+# ── Telemetry counters (T032) ──
+_request_count = 0
+_error_count = 0
 
 # ── Allowed enum values ──────────────────────────────────────────────────
 
@@ -103,6 +108,9 @@ async def get_incidents_map(
     page_size: Annotated[int, Query(ge=1, le=500, description="Items per page")] = 200,
 ) -> IncidentFeatureCollection:
     """Return map incidents as a GeoJSON FeatureCollection."""
+    global _request_count, _error_count
+    _request_count += 1
+    request_start = time.monotonic()
 
     # Validate comma-separated params
     incident_types = _parse_csv(type, VALID_TYPES, "type")
@@ -134,8 +142,33 @@ async def get_incidents_map(
         )
         unmapped_count = await _repo.count_unmapped(**filter_kwargs)
     except Exception:
-        logger.exception("Cosmos DB query failed for /incidents/map")
+        _error_count += 1
+        error_rate = _error_count / max(_request_count, 1)
+        logger.exception(
+            "Cosmos DB query failed for /incidents/map",
+            extra={
+                "metric": "disaster_mapper.api_error_rate",
+                "error_rate": error_rate,
+                "request_count": _request_count,
+                "error_count": _error_count,
+            },
+        )
         raise HTTPException(status_code=503, detail="Service temporarily unavailable")
+
+    elapsed_ms = (time.monotonic() - request_start) * 1000
+    logger.info(
+        "incidents/map served %d features in %.1fms (page %d)",
+        len(items),
+        elapsed_ms,
+        page,
+        extra={
+            "metric": "disaster_mapper.api_response_ms",
+            "elapsed_ms": elapsed_ms,
+            "feature_count": len(items),
+            "total": total,
+            "unmapped_count": unmapped_count,
+        },
+    )
 
     features = [_to_feature(doc) for doc in items]
 

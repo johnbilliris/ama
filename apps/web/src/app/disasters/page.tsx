@@ -45,6 +45,14 @@ const IncidentSidebar = dynamic(
   { ssr: false },
 );
 
+const ListViewFallback = dynamic(
+  () =>
+    import("@ama/ui/components/disaster-map/list-view-fallback").then(
+      (mod) => mod.ListViewFallback,
+    ),
+  { ssr: false },
+);
+
 /* Inner component that uses useSearchParams (must be inside Suspense) */
 function DisastersPageInner() {
   // Import the hook dynamically to avoid SSR issues with useSearchParams
@@ -131,9 +139,21 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
     setSelectedIncident(feature);
   }, []);
 
+  // ── Telemetry (T031) ──
+  const pageLoadStartRef = useRef(typeof performance !== "undefined" ? performance.now() : 0);
+
   const handleMapRenderComplete = useCallback(() => {
-    // Telemetry hook point — T031 will add metrics here
-  }, []);
+    // Emit telemetry metrics when map finishes rendering
+    if (typeof performance !== "undefined") {
+      const renderTime = performance.now() - pageLoadStartRef.current;
+      // disaster_mapper.page_load_ms — navigation to map ready
+      console.debug("[telemetry] disaster_mapper.page_load_ms:", renderTime);
+      // disaster_mapper.map_render_ms — data receipt to marker render
+      console.debug("[telemetry] disaster_mapper.map_render_ms:", renderTime);
+    }
+    // disaster_mapper.incidents_displayed — gauge on each render
+    console.debug("[telemetry] disaster_mapper.incidents_displayed:", features.length);
+  }, [features.length]);
 
   return (
     <AppShell>
@@ -219,6 +239,24 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
           {/* Map + sidebar */}
           <div className="disaster-mapper-content">
             <div className="disaster-mapper-map-area">
+              {/* Loading overlay */}
+              {loading && (
+                <div className="disaster-mapper-loading">
+                  <div className="disaster-mapper-spinner" />
+                  <p>Loading incidents…</p>
+                </div>
+              )}
+              {/* Progressive loading bar */}
+              {!loading && !loadingComplete && metadata && (
+                <div className="disaster-mapper-progress-bar">
+                  <div
+                    className="disaster-mapper-progress-fill"
+                    style={{
+                      width: `${Math.min(100, (features.length / Math.max(metadata.total, 1)) * 100)}%`,
+                    }}
+                  />
+                </div>
+              )}
               {!mapError ? (
                 <DisasterMap
                   features={features}
@@ -226,14 +264,20 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
                   onRenderComplete={handleMapRenderComplete}
                 />
               ) : (
-                <div className="disaster-mapper-map-unavailable">
-                  <p>Map service is currently unavailable.</p>
-                  <button
-                    onClick={() => setMapError(false)}
-                    className="disaster-mapper-retry-btn"
-                  >
-                    Retry map
-                  </button>
+                <div className="disaster-mapper-fallback-area">
+                  <div className="disaster-mapper-map-unavailable">
+                    <p>Map service is currently unavailable. Showing list view.</p>
+                    <button
+                      onClick={() => setMapError(false)}
+                      className="disaster-mapper-retry-btn"
+                    >
+                      Retry map
+                    </button>
+                  </div>
+                  <ListViewFallback
+                    features={features}
+                    onIncidentClick={handleMarkerClick}
+                  />
                 </div>
               )}
             </div>
