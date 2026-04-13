@@ -858,6 +858,34 @@ body {
   font-size: 0.85rem;
 }
 
+.disaster-mapper-severity-badge {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.disaster-mapper-severity-badge.disaster-mapper-severity--advice {
+  background: rgba(255, 193, 7, 0.18);
+  color: #8c6d00;
+  border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+.disaster-mapper-severity-badge.disaster-mapper-severity--watch {
+  background: rgba(255, 140, 0, 0.18);
+  color: #8a4b00;
+  border: 1px solid rgba(255, 140, 0, 0.4);
+}
+
+.disaster-mapper-severity-badge.disaster-mapper-severity--emergency {
+  background: rgba(211, 47, 47, 0.18);
+  color: #991b2c;
+  border: 1px solid rgba(211, 47, 47, 0.4);
+}
+
 .disaster-mapper-filter-toggle {
   display: none;
   width: 100%;

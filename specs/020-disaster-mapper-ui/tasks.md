@@ -91,8 +91,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] Create incident detail sidebar component: display incident title, type, severity with AWS colour and tier label, status, affected jurisdiction IDs, start date (ISO 8601 formatted), PPRR phase, incident level (1–3), prominent workspace link (`<a>` or `<Link>`) to `/incidents/{incident_id}`, close button — accept selected incident Feature properties as prop — in `packages/ui/src/components/disaster-map/incident-sidebar.tsx`
-- [ ] T020 [US3] Wire marker click events to sidebar: add `map.events.add('click', symbolLayer, ...)` handler on individual-marker SymbolLayer in disaster-map.tsx, extract clicked feature properties, lift selected-incident state to page, pass to sidebar component, handle close callback and marker-switch (clicking different marker updates selection) in `packages/ui/src/components/disaster-map/disaster-map.tsx` and `apps/web/src/app/disasters/page.tsx`
+- [x] T019 [US3] Create incident detail sidebar component: display incident title, type, severity with AWS colour and tier label, status, affected jurisdiction IDs, start date (ISO 8601 formatted), PPRR phase, incident level (1–3), prominent workspace link (`<a>` or `<Link>`) to `/incidents/{incident_id}`, close button — accept selected incident Feature properties as prop — in `packages/ui/src/components/disaster-map/incident-sidebar.tsx`
+- [x] T020 [US3] Wire marker click events to sidebar: add `map.events.add('click', symbolLayer, ...)` handler on individual-marker SymbolLayer in disaster-map.tsx, extract clicked feature properties, lift selected-incident state to page, pass to sidebar component, handle close callback and marker-switch (clicking different marker updates selection) in `packages/ui/src/components/disaster-map/disaster-map.tsx` and `apps/web/src/app/disasters/page.tsx`
 
 **Checkpoint**: User Stories 1, 2, AND 3 all work independently — map, filters, and incident detail drill-down all functional.
 

@@ -37,6 +37,14 @@ const FilterPanel = dynamic(
   { ssr: false },
 );
 
+const IncidentSidebar = dynamic(
+  () =>
+    import("@ama/ui/components/disaster-map/incident-sidebar").then(
+      (mod) => mod.IncidentSidebar,
+    ),
+  { ssr: false },
+);
+
 /* Inner component that uses useSearchParams (must be inside Suspense) */
 function DisastersPageInner() {
   // Import the hook dynamically to avoid SSR issues with useSearchParams
@@ -232,52 +240,10 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
 
             {/* Sidebar for selected incident */}
             {selectedIncident && (
-              <aside className="disaster-mapper-sidebar" role="complementary">
-                <div className="disaster-mapper-sidebar-header">
-                  <h2>{selectedIncident.properties.title}</h2>
-                  <button
-                    onClick={() => setSelectedIncident(null)}
-                    className="disaster-mapper-close-btn"
-                    aria-label="Close incident details"
-                  >
-                    ×
-                  </button>
-                </div>
-                <dl className="disaster-mapper-detail-list">
-                  <dt>Type</dt>
-                  <dd>{selectedIncident.properties.incident_type}</dd>
-                  <dt>Status</dt>
-                  <dd>{selectedIncident.properties.status}</dd>
-                  <dt>Severity</dt>
-                  <dd
-                    className={`disaster-mapper-severity disaster-mapper-severity--${selectedIncident.properties.severity_tier}`}
-                  >
-                    {selectedIncident.properties.severity_tier}
-                  </dd>
-                  <dt>Start date</dt>
-                  <dd>{selectedIncident.properties.started_at}</dd>
-                  {selectedIncident.properties.pprr_phase && (
-                    <>
-                      <dt>PPRR Phase</dt>
-                      <dd>{selectedIncident.properties.pprr_phase}</dd>
-                    </>
-                  )}
-                  <dt>Incident Level</dt>
-                  <dd>{selectedIncident.properties.incident_level}</dd>
-                  <dt>Jurisdictions</dt>
-                  <dd>
-                    {selectedIncident.properties.affected_jurisdiction_ids.join(
-                      ", ",
-                    ) || "—"}
-                  </dd>
-                </dl>
-                <a
-                  href={`/incidents/${selectedIncident.properties.incident_id}`}
-                  className="disaster-mapper-workspace-link"
-                >
-                  Open Workspace →
-                </a>
-              </aside>
+              <IncidentSidebar
+                incident={selectedIncident.properties}
+                onClose={() => setSelectedIncident(null)}
+              />
             )}
           </div>
         </div>
