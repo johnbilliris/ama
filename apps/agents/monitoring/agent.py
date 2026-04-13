@@ -483,6 +483,85 @@ def create_app(
         except ValueError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
+    # ------------------------------------------------------------------
+    # Recovery Catalogue endpoints (FRs: FR-015–024, FR-026)
+    # ------------------------------------------------------------------
+
+    from monitoring.catalogue_service import CatalogueService
+
+    app.state.catalogue_service = CatalogueService()
+
+    class SuggestActivitiesRequest(PydanticBaseModel):
+        lagging_indicator_ids: list[str]
+
+    @app.get("/catalogue/outcomes")
+    async def list_catalogue_outcomes(domain: str | None = None, objective_type: str | None = None) -> list[dict]:
+        """List all recovery outcomes with optional domain/objective-type filter."""
+        return app.state.catalogue_service.list_outcomes(domain=domain, objective_type=objective_type)
+
+    @app.get("/catalogue/outcomes/{outcome_id}")
+    async def get_catalogue_outcome(outcome_id: str) -> dict:
+        """Retrieve a single outcome by ID."""
+        result = app.state.catalogue_service.get_outcome(outcome_id)
+        if not result:
+            raise HTTPException(status_code=404, detail=f"Outcome {outcome_id} not found")
+        return result
+
+    @app.get("/catalogue/domains/{domain}/summary")
+    async def get_catalogue_domain_summary(domain: str) -> dict:
+        """Return aggregate counts for a recovery domain."""
+        return app.state.catalogue_service.get_domain_summary(domain)
+
+    @app.get("/catalogue/evaluation-questions/{domain}")
+    async def get_catalogue_evaluation_questions(domain: str) -> dict:
+        """Retrieve evaluation questions for a domain."""
+        result = app.state.catalogue_service.get_evaluation_questions(domain)
+        if not result:
+            raise HTTPException(status_code=404, detail=f"No evaluation questions for domain '{domain}'")
+        return result
+
+    @app.post("/catalogue/suggest-activities")
+    async def suggest_catalogue_activities(request: SuggestActivitiesRequest) -> list[dict]:
+        """Suggest catalogue activities that address lagging indicators."""
+        return app.state.catalogue_service.suggest_activities(request.lagging_indicator_ids)
+
+    # ------------------------------------------------------------------
+    # AI Analysis endpoints (FRs: FR-025–028)
+    # ------------------------------------------------------------------
+
+    from monitoring.indicator_analysis import IndicatorAnalysisService
+
+    app.state.analysis_service = IndicatorAnalysisService(
+        catalogue_service=app.state.catalogue_service,
+    )
+
+    class CrossDomainRequest(PydanticBaseModel):
+        indicator_data: list[dict]
+
+    class RecommendationsRequest(PydanticBaseModel):
+        lagging_indicator_ids: list[str]
+
+    class CommunitySummaryRequest(PydanticBaseModel):
+        indicator_data: list[dict]
+        domain_filter: str | None = None
+
+    @app.post("/analysis/cross-domain")
+    async def analysis_cross_domain(request: CrossDomainRequest) -> dict:
+        """Analyse cross-domain correlations in recovery indicator data."""
+        return app.state.analysis_service.analyse_cross_domain_correlations(request.indicator_data)
+
+    @app.post("/analysis/recommendations")
+    async def analysis_recommendations(request: RecommendationsRequest) -> list[dict]:
+        """Recommend AIDR catalogue activities for lagging indicators."""
+        return app.state.analysis_service.recommend_activities(request.lagging_indicator_ids)
+
+    @app.post("/analysis/community-summary")
+    async def analysis_community_summary(request: CommunitySummaryRequest) -> dict:
+        """Generate a plain-language recovery summary for community communication."""
+        return app.state.analysis_service.generate_community_summary(
+            request.indicator_data, domain_filter=request.domain_filter,
+        )
+
     return app
 
 
