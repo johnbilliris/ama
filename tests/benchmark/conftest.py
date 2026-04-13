@@ -11,9 +11,17 @@ import asyncio
 import os
 from pathlib import Path
 
+import sys
+
 import pytest
-from compare_benchmarks import compare_benchmarks, format_report
 from fastapi.testclient import TestClient
+
+# Ensure the benchmark directory is on sys.path so local modules can be imported
+_BENCHMARK_DIR = str(Path(__file__).resolve().parent)
+if _BENCHMARK_DIR not in sys.path:
+    sys.path.insert(0, _BENCHMARK_DIR)
+
+from compare_benchmarks import compare_benchmarks, format_report  # noqa: E402
 
 # ── Agent TestClient fixtures (session-scoped) ────────────────────────────────
 

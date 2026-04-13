@@ -3,6 +3,7 @@ from app.api.dead_letters import router as dead_letters_router
 from app.api.governance import router as governance_router
 from app.api.handoffs import router as handoffs_router
 from app.api.health import router as health_router
+from app.api.routes.health import router as aidr_health_router
 from app.api.routes.aiims import level_router as aiims_level_router
 from app.api.routes.aiims import router as aiims_router
 from app.api.routes.alerts import router as alerts_router
@@ -47,3 +48,4 @@ api_router.include_router(lessons_router)
 api_router.include_router(pprr_router)
 api_router.include_router(pprr_context_router)
 api_router.include_router(recovery_router)
+api_router.include_router(aidr_health_router)

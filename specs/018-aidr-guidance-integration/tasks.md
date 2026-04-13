@@ -235,37 +235,37 @@
 
 ### Graceful Degradation Verification
 
-- [ ] T069 [P] Verify graceful degradation for all AIDR capabilities per R-002/Constitution NN-5 — AWS warnings (template fallback), AIIMS (static mapping fallback), PPRR (queue transitions), evacuation (circuit breaker), recovery (staleness indicator), lessons (local buffer) — ensure no single service failure blocks platform operation
+- [X] T069 [P] Verify graceful degradation for all AIDR capabilities per R-002/Constitution NN-5 — AWS warnings (template fallback), AIIMS (static mapping fallback), PPRR (queue transitions), evacuation (circuit breaker), recovery (staleness indicator), lessons (local buffer) — ensure no single service failure blocks platform operation
 
 ### Existing Spec Alignment (FR-043–047)
 
-- [ ] T070 [P] Update Monitoring Agent spec (010) to include AIDR-aligned warning classifications, escalation thresholds, and explicit Total Warning System situational-awareness role per FR-043
-- [ ] T071 [P] Update Risk Assessment Agent spec (012) to align hazard-severity scales with AIDR guidance and explicit monitoring-and-prediction role per FR-044
-- [ ] T072 [P] Update Resource Allocation Agent in `apps/agents/resource_allocation/agent.py` to use AIDR/AIIMS-aligned prioritisation language and support recovery-phase resource allocation mode per FR-045
-- [ ] T073 [P] Update disaster response hub spec (001) to reference AIIMS functional structure, PPRR lifecycle, and Shared Responsibility Model per FR-046
-- [ ] T074 [P] Add AIIMS role mapping section to all agent specifications identifying which AIIMS function each agent fulfils per FR-047/SC-008
+- [X] T070 [P] Update Monitoring Agent spec (010) to include AIDR-aligned warning classifications, escalation thresholds, and explicit Total Warning System situational-awareness role per FR-043
+- [X] T071 [P] Update Risk Assessment Agent spec (012) to align hazard-severity scales with AIDR guidance and explicit monitoring-and-prediction role per FR-044
+- [X] T072 [P] Update Resource Allocation Agent in `apps/agents/resource_allocation/agent.py` to use AIDR/AIIMS-aligned prioritisation language and support recovery-phase resource allocation mode per FR-045
+- [X] T073 [P] Update disaster response hub spec (001) to reference AIIMS functional structure, PPRR lifecycle, and Shared Responsibility Model per FR-046
+- [X] T074 [P] Add AIIMS role mapping section to all agent specifications identifying which AIIMS function each agent fulfils per FR-047/SC-008
 
 ### Health Endpoints and Observability
 
-- [ ] T075 [P] Add health endpoints for each new AIDR capability (AIIMS service, PPRR service, recovery service, lessons service) responding ≤1s per NFR-009
-- [ ] T076 Verify all seven telemetry metrics are emitted correctly — `warning_compliance_rate`, `tier_transition_latency`, `evacuation_stage_duration`, `recovery_indicator_update_frequency`, `lesson_resolution_time`, `pprr_phase_transition_count`, `aiims_role_coverage_ratio` per NFR-010
+- [X] T075 [P] Add health endpoints for each new AIDR capability (AIIMS service, PPRR service, recovery service, lessons service) responding ≤1s per NFR-009
+- [X] T076 Verify all seven telemetry metrics are emitted correctly — `warning_compliance_rate`, `tier_transition_latency`, `evacuation_stage_duration`, `recovery_indicator_update_frequency`, `lesson_resolution_time`, `pprr_phase_transition_count`, `aiims_role_coverage_ratio` per NFR-010
 
 ### Data Sovereignty and Interoperability
 
-- [ ] T077 [P] Verify all AIDR data (warnings, recovery, lessons, evacuation, PPRR) resides exclusively in Azure Australia East and Australia Southeast per NFR-015/Constitution NN-2
-- [ ] T078 [P] Ensure all new FastAPI endpoints expose OpenAPI schemas (built-in) and verify GeoJSON format usage for location data in warnings, evacuation zones, and recovery areas per R-009/Constitution NN-4
+- [X] T077 [P] Verify all AIDR data (warnings, recovery, lessons, evacuation, PPRR) resides exclusively in Azure Australia East and Australia Southeast per NFR-015/Constitution NN-2
+- [X] T078 [P] Ensure all new FastAPI endpoints expose OpenAPI schemas (built-in) and verify GeoJSON format usage for location data in warnings, evacuation zones, and recovery areas per R-009/Constitution NN-4
 
 ### Final Validation
 
-- [ ] **T080** [P] [US1] Implement EDXL-DE message envelope serialiser for warning delivery pipeline per R-009/Constitution NN-4 — serialize PublicAlert with AWS fields to EDXL-DE XML format, add endpoint `GET /api/alerts/{alert_id}/edxl`, include contract test in `tests/contract/test_edxl_contract.py` (`apps/agents/communication/edxl_serialiser.py`)
-- [ ] **T081** [P] Create contract tests for all 6 API contracts validating request/response schemas against YAML definitions (`tests/contract/test_warning_contract.py`, `tests/contract/test_aiims_contract.py`, `tests/contract/test_evacuation_contract.py`, `tests/contract/test_pprr_contract.py`, `tests/contract/test_recovery_contract.py`, `tests/contract/test_lessons_contract.py`)
-- [ ] **T082** [P] Create integration tests for 5 Cosmos DB containers verifying CRUD operations, partition key routing, and TTL policies (`tests/integration/test_aidr_cosmos.py`)
-- [ ] **T083** [P] Create simulation scenario tests validating end-to-end AIDR flows: bushfire escalation (AWS → evacuation), cyclone multi-stage evacuation, flood PPRR lifecycle, post-disaster recovery tracking (`tests/simulation/test_aidr_scenarios.py`)
-- [ ] **T084** [P] Create benchmark tests validating NFR-001–008 performance and concurrency targets: warning generation ≤2s, AIIMS assignment ≤5s, PPRR transition ≤5s, evacuation stage ≤3s, ≥10 concurrent recovery ops, ≥50 concurrent lessons (`tests/benchmark/test_aidr_performance.py`)
+- [X] **T080** [P] [US1] Implement EDXL-DE message envelope serialiser for warning delivery pipeline per R-009/Constitution NN-4 — serialize PublicAlert with AWS fields to EDXL-DE XML format, add endpoint `GET /api/alerts/{alert_id}/edxl`, include contract test in `tests/contract/test_edxl_contract.py` (`apps/agents/communication/edxl_serialiser.py`)
+- [X] **T081** [P] Create contract tests for all 6 API contracts validating request/response schemas against YAML definitions (`tests/contract/test_warning_contract.py`, `tests/contract/test_aiims_contract.py`, `tests/contract/test_evacuation_contract.py`, `tests/contract/test_pprr_contract.py`, `tests/contract/test_recovery_contract.py`, `tests/contract/test_lessons_contract.py`)
+- [X] **T082** [P] Create integration tests for 5 Cosmos DB containers verifying CRUD operations, partition key routing, and TTL policies (`tests/integration/test_aidr_cosmos.py`)
+- [X] **T083** [P] Create simulation scenario tests validating end-to-end AIDR flows: bushfire escalation (AWS → evacuation), cyclone multi-stage evacuation, flood PPRR lifecycle, post-disaster recovery tracking (`tests/simulation/test_aidr_scenarios.py`)
+- [X] **T084** [P] Create benchmark tests validating NFR-001–008 performance and concurrency targets: warning generation ≤2s, AIIMS assignment ≤5s, PPRR transition ≤5s, evacuation stage ≤3s, ≥10 concurrent recovery ops, ≥50 concurrent lessons (`tests/benchmark/test_aidr_performance.py`)
 
 ### Final Validation
 
-- [ ] T079 Run `specs/018-aidr-guidance-integration/quickstart.md` validation end-to-end to confirm developer onboarding path works
+- [X] T079 Run `specs/018-aidr-guidance-integration/quickstart.md` validation end-to-end to confirm developer onboarding path works
 
 ---
 
