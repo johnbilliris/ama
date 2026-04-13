@@ -8,4 +8,9 @@
   --ama-shadow-panel: 0 16px 40px rgba(16, 32, 51, 0.12);
   --ama-radius-panel: 24px;
   --ama-font-display: "Segoe UI", "Helvetica Neue", sans-serif;
+
+  /* Australian Warning System severity colour tokens */
+  --ama-aws-advice: #FFC107;
+  --ama-aws-watch: #FF8C00;
+  --ama-aws-emergency: #D32F2F;
 }

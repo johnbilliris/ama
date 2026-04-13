@@ -40,6 +40,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-09
 - Azure Cosmos DB (5 existing containers: `signals`, `disaster-hub`, `simulation`, `seed`, `governance`; new containers needed: `recovery`, `lessons`), Azure Blob Storage (audit blobs) (018-aidr-guidance-integration)
 - Python 3.10+ (confirmed from `pyproject.toml` and existing agents) + FastAPI (ASGI agents + API), Pydantic (domain models with `Literal[]` unions, no Enums), Azure OpenAI SDK via `LLMClient`/`LLMCallMixin` (AI analysis), azure-servicebus (agent handoffs), azure-cosmos (state store), tenacity (retry logic) (019-aidr-additional-guidances)
 - Azure Cosmos DB (extending existing DB with 3 new containers: `emergency-plans`, `recovery-programmes`, `recovery-catalogue`; existing containers `recovery`, `lessons` from spec 018 retained). Azure Blob Storage for audit blobs and plan document exports. (019-aidr-additional-guidances)
+- TypeScript 5.8 (frontend), Python 3.11+ (backend) + Next.js 15.5, React 19, `azure-maps-control` 3.x (frontend); FastAPI, Pydantic v2, `azure-cosmos` (backend) (020-disaster-mapper-ui)
+- Azure Cosmos DB (`disaster-hub` database, `incidents` container) (020-disaster-mapper-ui)
 
 - Python 3.12 for API and agents; TypeScript 5.6 for web UI + Microsoft Agent Framework (Python SDK), FastAPI, Pydantic, Azure SDKs, Next.js 15, React 19, Tailwind CSS, Azure Cosmos DB client, Azure Service Bus/Event Hubs clients (001-disaster-response-hub)
 
@@ -60,9 +62,9 @@ cd src; pytest; ruff check .
 Python 3.12 for API and agents; TypeScript 5.6 for web UI: Follow standard conventions
 
 ## Recent Changes
+- 020-disaster-mapper-ui: Added TypeScript 5.8 (frontend), Python 3.11+ (backend) + Next.js 15.5, React 19, `azure-maps-control` 3.x (frontend); FastAPI, Pydantic v2, `azure-cosmos` (backend)
 - 019-aidr-additional-guidances: Added Python 3.10+ (confirmed from `pyproject.toml` and existing agents) + FastAPI (ASGI agents + API), Pydantic (domain models with `Literal[]` unions, no Enums), Azure OpenAI SDK via `LLMClient`/`LLMCallMixin` (AI analysis), azure-servicebus (agent handoffs), azure-cosmos (state store), tenacity (retry logic)
 - 018-aidr-guidance-integration: Added Python 3.10+ (confirmed from existing agents and `pyproject.toml`) + FastAPI (ASGI agents + API), Pydantic (domain models), Azure OpenAI SDK (LLM), azure-servicebus (agent messaging), azure-cosmos (state store)
-- feature/017-cd-pipeline: Added YAML (GitHub Actions workflows), Bash (rollback script), Bicep (IaC parameters), JSON (parameter files) + GitHub Actions, Azure Developer CLI (`azd`), Azure CLI (`az`), `pip-audit`, `ruff`, `gh` CLI
 
 
 <!-- MANUAL ADDITIONS START -->

@@ -65,6 +65,19 @@ module monitoring './modules/monitoring.bicep' = {
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
+// Azure Maps (Disaster Mapper UI — data sovereignty: Australia East only)
+// ────────────────────────────────────────────────────────────────────────────────
+
+module azureMaps './modules/azure-maps.bicep' = {
+  name: 'azure-maps'
+  params: {
+    location: 'australiaeast'
+    envPrefix: environmentName
+    tags: tags
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
 // Container Registry (for Container Apps images)
 // ────────────────────────────────────────────────────────────────────────────────
 

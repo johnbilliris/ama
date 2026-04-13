@@ -1,5 +1,5 @@
 from datetime import UTC, datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -25,3 +25,4 @@ class Incident(BaseModel):
     started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     pprr_phase: PprrPhase | None = None
     incident_level: IncidentLevel = 1
+    location: dict[str, Any] | None = None
