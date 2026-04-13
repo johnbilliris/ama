@@ -1,0 +1,139 @@
+# API Contract: Warning (AWS Three-Tier)
+
+**Base path**: `/api/alerts` (extends existing alerts router)  
+**FRs**: FR-001–007, FR-048  
+**Agent**: Communication Agent  
+**Auth**: Existing platform auth (Incident Controller or delegated authority)
+
+---
+
+## Endpoints
+
+### POST /api/alerts
+
+**Extended** — Existing endpoint now accepts AWS warning fields.
+
+**Request body** (additional fields):
+```json
+{
+  "alert_id": "ca-bushfire-sydney-v1",
+  "incident_id": "inc-2025-001",
+  "warning_tier": "advice",
+  "hazard_icon": "fire",
+  "action_statement": "A bushfire has started near Katoomba. Stay informed and monitor conditions.",
+  "superseded_warning_id": null,
+  "tier_skip_justification": null,
+  "is_all_clear": false,
+  "audience_segments": ["general_public", "cald_communities"],
+  "languages": ["en-AU", "zh-Hans", "ar"],
+  "accessibility_attributes": ["plain_language", "screen_reader", "auslan_video"]
+}
+```
+
+**Response**: `201 Created` with full `PublicAlert` object including computed `colour_code` and `warning_principles_checklist`.
+
+**Validation**:
+- `warning_tier` → `colour_code` auto-derived (advice=yellow, watch_and_act=orange, emergency_warning=red)
+- `action_statement` required when `warning_tier` is set
+- `is_all_clear=true` requires `warning_tier=null` and `superseded_warning_id` set
+- Warning principles checklist auto-populated by compliance validator (NFR-001: ≤5s)
+
+### GET /api/alerts/{alert_id}/chain
+
+**New** — Retrieve the full warning chain for a given alert.
+
+**Response**: `200 OK`
+```json
+{
+  "chain": [
+    {
+      "alert_id": "ca-bushfire-sydney-v1",
+      "warning_tier": "advice",
+      "colour_code": "yellow",
+      "status": "superseded",
+      "published_at": "2025-07-20T10:00:00Z"
+    },
+    {
+      "alert_id": "ca-bushfire-sydney-v2",
+      "warning_tier": "watch_and_act",
+      "colour_code": "orange",
+      "status": "published",
+      "published_at": "2025-07-20T14:00:00Z",
+      "superseded_warning_id": "ca-bushfire-sydney-v1"
+    }
+  ],
+  "is_closed": false,
+  "hazard_icon": "fire",
+  "incident_id": "inc-2025-001"
+}
+```
+
+### GET /api/alerts/{alert_id}/cap
+
+**New** — Render the alert as a CAP (Common Alerting Protocol) XML document.
+
+**Response**: `200 OK` with `Content-Type: application/xml`
+```xml
+<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
+  <identifier>ca-bushfire-sydney-v1</identifier>
+  <sender>aidr-hub</sender>
+  <status>Actual</status>
+  <msgType>Alert</msgType>
+  <scope>Public</scope>
+  <info>
+    <category>Fire</category>
+    <event>Bushfire</event>
+    <responseType>Monitor</responseType>
+    <urgency>Expected</urgency>
+    <severity>Minor</severity>
+    <certainty>Observed</certainty>
+    <headline>Advice - Bushfire near Katoomba</headline>
+    <description>A bushfire has started near Katoomba.</description>
+    <instruction>Stay informed and monitor conditions.</instruction>
+    <area>
+      <areaDesc>Katoomba, Blue Mountains</areaDesc>
+    </area>
+  </info>
+</alert>
+```
+
+### POST /api/alerts/{alert_id}/validate-compliance
+
+**New** — Validate a warning against AWS three-tier model and ten warning principles.
+
+**Response**: `200 OK`
+```json
+{
+  "alert_id": "ca-bushfire-sydney-v1",
+  "aws_compliant": true,
+  "principles_checklist": {
+    "life_saving": true,
+    "empowering": true,
+    "trusted": true,
+    "risk_scaled": true,
+    "timely_targeted": true,
+    "impact_conveying": true,
+    "action_calling": true,
+    "clearly_communicated": true,
+    "accessible": true,
+    "bigger_picture": true
+  },
+  "validation_time_ms": 342,
+  "issues": []
+}
+```
+
+**Performance**: ≤5 seconds (NFR-001).
+
+---
+
+## Graceful Degradation
+
+- If LLM unavailable: warning generated via template fallback (`generation_method = "template_fallback"`)
+- If Cosmos DB unavailable: warning buffered in-memory, synced on recovery
+- Warning compliance validation runs locally (no external dependency)
+
+## Observability Metrics
+
+- `warning_compliance_rate` — % of warnings passing all 10 principles
+- `tier_transition_latency` — Time between tier changes in a warning chain

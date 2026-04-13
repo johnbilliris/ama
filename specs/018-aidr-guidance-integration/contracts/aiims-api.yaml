@@ -1,0 +1,112 @@
+# API Contract: AIIMS Role Management
+
+**Base path**: `/api/incidents/{incident_id}/aiims`  
+**FRs**: FR-013–017, FR-049  
+**Service**: AIIMS Service (platform API)  
+**Auth**: Existing platform auth (Incident Controller or platform administrator)
+
+---
+
+## Endpoints
+
+### POST /api/incidents/{incident_id}/aiims/assignments
+
+**New** — Assign an agent to an AIIMS functional role for an incident.
+
+**Request body**:
+```json
+{
+  "agent_identifier": "monitoring",
+  "aiims_function": "intelligence",
+  "assigned_by": "user-ic-001",
+  "notes": "Initial incident setup"
+}
+```
+
+**Response**: `201 Created`
+```json
+{
+  "assignment_id": "aiims-a1b2c3d4",
+  "incident_id": "inc-2025-001",
+  "agent_identifier": "monitoring",
+  "aiims_function": "intelligence",
+  "assigned_at": "2025-07-20T10:00:00Z",
+  "assigned_by": "user-ic-001",
+  "is_active": true
+}
+```
+
+**Validation**:
+- Agent can hold only one AIIMS function per incident (FR-013)
+- `aiims_function` must be one of: control, intelligence, planning, operations, logistics, public_information
+- Duplicate assignment returns `409 Conflict`
+
+**Performance**: ≤5 seconds (NFR-002).
+
+### GET /api/incidents/{incident_id}/aiims/structure
+
+**New** — Retrieve the current AIIMS functional structure for an incident (COP display).
+
+**Response**: `200 OK`
+```json
+{
+  "incident_id": "inc-2025-001",
+  "incident_level": 2,
+  "structure": {
+    "control": {"agent_identifier": "incident_controller", "assignment_id": "aiims-001", "assigned_at": "..."},
+    "intelligence": {"agent_identifier": "monitoring", "assignment_id": "aiims-002", "assigned_at": "..."},
+    "planning": {"agent_identifier": "resource_allocation", "assignment_id": "aiims-003", "assigned_at": "..."},
+    "operations": {"agent_identifier": "evacuation", "assignment_id": "aiims-004", "assigned_at": "..."},
+    "logistics": {"agent_identifier": "resource_allocation", "assignment_id": "aiims-005", "assigned_at": "..."},
+    "public_information": {"agent_identifier": "communication", "assignment_id": "aiims-006", "assigned_at": "..."}
+  },
+  "coverage_ratio": 1.0,
+  "all_functions_assigned": true
+}
+```
+
+**Notes**: `coverage_ratio` = (assigned functions) / 6. SC-002 requires 1.0 for active incidents.
+
+### PUT /api/incidents/{incident_id}/aiims/assignments/{assignment_id}
+
+**New** — Reassign or deactivate an AIIMS role assignment (CHK021: mid-incident changes).
+
+**Request body**:
+```json
+{
+  "is_active": false,
+  "unassigned_at": "2025-07-20T14:00:00Z",
+  "notes": "Agent replaced due to failure"
+}
+```
+
+### POST /api/incidents/{incident_id}/level
+
+**New** — Change the incident level (Level 1/2/3).
+
+**Request body**:
+```json
+{
+  "new_level": 2,
+  "rationale": "Multi-agency coordination required due to fire spread",
+  "authorising_user": "user-ic-001"
+}
+```
+
+**Response**: `200 OK` with updated `Incident` including `incident_level: 2`.
+
+**Side effects**:
+- Creates a `TimelineEvent` with incident level change payload
+- At Level 2+: ensures shared COP is established (FR-016)
+- At Level 3: validates all 6 AIIMS functions are assigned
+
+---
+
+## Graceful Degradation
+
+- If AIIMS service unavailable: agents use static default AIIMS mapping from configuration
+- COP displays last-known assignments with staleness indicator
+
+## Observability Metrics
+
+- `aiims_role_coverage_ratio` — Ratio of assigned AIIMS functions to total (6)

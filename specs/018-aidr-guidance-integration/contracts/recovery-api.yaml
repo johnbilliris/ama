@@ -1,0 +1,141 @@
+# API Contract: Recovery Tracking
+
+**Base path**: `/api/incidents/{incident_id}/recovery`  
+**FRs**: FR-032–037, SC-005  
+**Service**: Recovery Service (platform API)  
+**Auth**: Existing platform auth (Recovery Coordinator, Incident Controller, or community access for FR-037)
+
+---
+
+## Endpoints
+
+### POST /api/incidents/{incident_id}/recovery
+
+**New** — Initialise recovery tracking for an incident.
+
+**Request body**:
+```json
+{
+  "recovery_principles_applied": ["understand_context", "community_led"],
+  "community_input_summary": "Initial community consultation held in Lismore on 2025-07-18"
+}
+```
+
+**Response**: `201 Created`
+```json
+{
+  "tracker_id": "rt-a1b2c3d4",
+  "incident_id": "inc-2025-003",
+  "status": "active",
+  "created_at": "2025-07-20T16:00:00Z",
+  "indicators": [],
+  "recovery_principles_applied": ["understand_context", "community_led"]
+}
+```
+
+**Side effects**: Initialises empty indicator slots for all 21 AIDR-defined indicators.
+
+### GET /api/incidents/{incident_id}/recovery/dashboard
+
+**New** — Recovery dashboard endpoint (NFR-004: ≤10s load time).
+
+**Response**: `200 OK`
+```json
+{
+  "tracker_id": "rt-a1b2c3d4",
+  "incident_id": "inc-2025-003",
+  "status": "active",
+  "environments": {
+    "social": {
+      "indicators": [
+        {"indicator_name": "wealth", "value": 0.65, "unit": "index", "baseline_value": 1.0, "target_value": 0.9, "is_regressed": false, "last_updated_at": "2025-07-19T10:00:00Z", "update_source": "manual", "data_classification": "sensitive", "population_coverage": 15000},
+        {"indicator_name": "employment", "value": 0.72, "unit": "ratio", "baseline_value": 0.95, "target_value": 0.85, "is_regressed": false, "last_updated_at": "2025-07-19T10:00:00Z", "update_source": "manual", "data_classification": "sensitive", "population_coverage": 15000}
+      ],
+      "indicator_count": 7,
+      "updated_count": 2,
+      "regression_count": 0
+    },
+    "built": { "indicator_count": 5, "updated_count": 0, "regression_count": 0, "indicators": [] },
+    "economic": { "indicator_count": 5, "updated_count": 0, "regression_count": 0, "indicators": [] },
+    "natural": { "indicator_count": 4, "updated_count": 0, "regression_count": 0, "indicators": [] }
+  },
+  "total_indicators": 21,
+  "total_updated": 2,
+  "total_regressed": 0,
+  "last_updated_at": "2025-07-19T10:00:00Z"
+}
+```
+
+**Performance**: ≤10 seconds (NFR-004).
+
+### PUT /api/incidents/{incident_id}/recovery/indicators/{indicator_name}
+
+**New** — Update a recovery indicator value.
+
+**Request body**:
+```json
+{
+  "value": 0.55,
+  "unit": "index",
+  "update_source": "manual",
+  "data_source_id": null,
+  "population_coverage": 15000,
+  "data_classification": "sensitive",
+  "linked_alert_id": "ca-flood-lismore-v2"
+}
+```
+
+**Response**: `200 OK` with updated `RecoveryIndicator`.
+
+**Validation**:
+- Social environment indicators with `data_classification = "sensitive"` require `population_coverage ≥ 10` (NFR-014)
+- Regression auto-detected: if new `value` worse than `baseline_value`, sets `is_regressed = true`
+- `linked_alert_id` links to warning for Total Warning System feedback loop (FR-012, SC-010)
+
+### POST /api/incidents/{incident_id}/recovery/indicators/batch
+
+**New** — Batch import indicators (for future automated collection).
+
+**Request body**:
+```json
+{
+  "indicators": [
+    {"indicator_name": "air_quality", "environment": "natural", "value": 0.4, "unit": "aqi_index", "update_source": "imported"},
+    {"indicator_name": "water_quality", "environment": "natural", "value": 0.7, "unit": "index", "update_source": "imported"}
+  ]
+}
+```
+
+### GET /api/incidents/{incident_id}/recovery/community
+
+**New** — Community-facing recovery view (FR-037). Simplified, non-expert presentation.
+
+**Response**: `200 OK`
+```json
+{
+  "incident_title": "Lismore Floods 2025",
+  "recovery_status": "active",
+  "summary": "Recovery is underway across all four environments...",
+  "environments": [
+    {"name": "Social", "status": "improving", "key_indicator": "Community services restoration at 65%"},
+    {"name": "Built", "status": "in_progress", "key_indicator": "Infrastructure repairs 30% complete"},
+    {"name": "Economic", "status": "early_stage", "key_indicator": "Local business reopening at 45%"},
+    {"name": "Natural", "status": "monitoring", "key_indicator": "Water quality testing ongoing"}
+  ],
+  "community_input_link": "/recovery/inc-2025-003/feedback",
+  "last_updated": "2025-07-19"
+}
+```
+
+**Notes**: Excludes sensitive data. No individual-level information. Public access with minimal auth.
+
+---
+
+## Graceful Degradation (NFR-012)
+
+- If recovery indicator data sources unavailable: dashboard displays last-known values with staleness indicator
+- Staleness: indicators show `last_updated_at` and a visual warning if older than 7 days
+
+## Observability Metrics
+
+- `recovery_indicator_update_frequency` — Average time between indicator updates

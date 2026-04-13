@@ -1,0 +1,180 @@
+# API Contract: Lessons Management
+
+**Base path**: `/api/lessons`  
+**FRs**: FR-038–042, FR-052  
+**Service**: Lessons Service (platform API)  
+**Auth**: Existing platform auth (QA officer, Incident Controller, platform administrator)
+
+---
+
+## Endpoints
+
+### POST /api/lessons
+
+**New** — Capture a lesson from an incident or exercise.
+
+**Request body**:
+```json
+{
+  "incident_id": "inc-2025-001",
+  "scenario_run_id": null,
+  "title": "Delayed warning escalation due to IC unavailability",
+  "description": "During the Katoomba bushfire, warning escalation from Advice to Watch and Act was delayed by 12 minutes because the IC was unreachable and the delegation chain was not configured.",
+  "aiims_function": "control",
+  "pprr_phase": "response",
+  "severity": "high",
+  "created_by": "user-qa-001",
+  "tags": ["delegation", "warning_escalation", "ic_availability"]
+}
+```
+
+**Response**: `201 Created`
+```json
+{
+  "lesson_id": "les-a1b2c3d4",
+  "incident_id": "inc-2025-001",
+  "title": "Delayed warning escalation due to IC unavailability",
+  "status": "identified",
+  "aiims_function": "control",
+  "pprr_phase": "response",
+  "severity": "high",
+  "created_at": "2025-07-20T18:00:00Z"
+}
+```
+
+**Validation**:
+- At least one of `incident_id` or `scenario_run_id` must be provided
+- `aiims_function` and `pprr_phase` are optional but recommended (FR-039)
+
+**Performance**: ≤5 seconds for template presentation and initial save (NFR-005).
+
+### GET /api/lessons
+
+**New** — List lessons register with filtering.
+
+**Query params**: `?incident_id=inc-2025-001&status=identified&aiims_function=control&pprr_phase=response&severity=high`
+
+**Response**: `200 OK` with paginated list of `Lesson` objects.
+
+### GET /api/lessons/{lesson_id}
+
+**New** — Get a single lesson with full detail.
+
+### PUT /api/lessons/{lesson_id}/assign
+
+**New** — Assign a lesson to a responsible party with target date (FR-041).
+
+**Request body**:
+```json
+{
+  "assigned_to": "user-dev-002",
+  "target_resolution_date": "2025-10-20T00:00:00Z"
+}
+```
+
+### PUT /api/lessons/{lesson_id}/resolve
+
+**New** — Mark a lesson as resolved with resolution reference (FR-041).
+
+**Request body**:
+```json
+{
+  "resolution_reference": "https://github.com/org/repo/pull/142",
+  "resolution_notes": "Delegation chain configuration added to IC setup checklist. Auto-escalation timeout configured at 5 minutes for Emergency Warning.",
+  "resolved_by": "user-dev-002"
+}
+```
+
+**Validation**:
+- If lesson `is_contradictory = true`, `escalation_approved_by` must be set before resolution
+- Sets `status = "resolved"` and `resolved_at = now()`
+
+### PUT /api/lessons/{lesson_id}/flag-contradictory
+
+**New** — Flag a lesson as contradicting existing configuration (edge case).
+
+**Request body**:
+```json
+{
+  "contradicts_config_ref": "apps/agents/communication/config.py:ESCALATION_TIMEOUT",
+  "notes": "Lesson suggests reducing timeout, but current config already has 15-minute timeout per spec 008"
+}
+```
+
+**Response**: Sets `is_contradictory = true`. Resolution now requires `escalation_approved_by`.
+
+### GET /api/lessons/trends
+
+**New** — Analyse lesson trends across the register (FR-040).
+
+**Query params**: `?time_window_days=90&min_event_count=3`
+
+**Response**: `200 OK`
+```json
+{
+  "analysis_period": {"from": "2025-04-20", "to": "2025-07-20"},
+  "total_lessons": 47,
+  "status_summary": {"identified": 12, "in_progress": 8, "resolved": 25, "rejected": 2},
+  "recurring_themes": [
+    {"theme": "delegation_chain", "count": 5, "severity_distribution": {"high": 3, "medium": 2}, "aiims_functions": ["control"]},
+    {"theme": "warning_accessibility", "count": 4, "severity_distribution": {"medium": 4}, "aiims_functions": ["public_information"]}
+  ],
+  "unresolved_items": 20,
+  "overdue_items": 3,
+  "closure_rate_90_days": 0.83,
+  "by_aiims_function": {"control": 12, "intelligence": 8, "planning": 6, "operations": 10, "logistics": 5, "public_information": 6},
+  "by_pprr_phase": {"prevention": 2, "preparedness": 5, "response": 30, "recovery": 10}
+}
+```
+
+**Performance**: ≤30 seconds (NFR-006).
+
+### GET /api/lessons/verify-pr
+
+**New** — Quality gate verification for PR lesson references (FR-042).
+
+**Query params**: `?lesson_ids=les-001,les-002`
+
+**Response**: `200 OK`
+```json
+{
+  "lessons": [
+    {"lesson_id": "les-001", "status": "in_progress", "exists": true, "title": "..."},
+    {"lesson_id": "les-002", "status": "identified", "exists": true, "title": "..."}
+  ],
+  "all_valid": true
+}
+```
+
+**Notes**: Called by CI/CD pipeline (GitHub Actions) during PR checks.
+
+---
+
+## Auto-Trigger (FR-038)
+
+When an incident with `incident_level ≥ 2` transitions to `closed` status, or when an `ExerciseReport` is generated, the event bus creates a `TimelineEvent` with:
+```json
+{
+  "event_type": "system",
+  "payload": {
+    "action": "lessons_capture_triggered",
+    "trigger_source": "incident_closure",
+    "incident_level": 2,
+    "incident_id": "inc-2025-001"
+  }
+}
+```
+
+The lessons service monitors for these events and creates a pending lessons-capture session.
+
+---
+
+## Graceful Degradation (NFR-011)
+
+- If lessons register (Cosmos) unavailable: lessons buffered locally and synchronised on recovery
+- Incident operations NOT blocked by lessons subsystem failures
+- Buffered lessons carry a `buffered_at` timestamp for audit
+
+## Observability Metrics
+
+- `lesson_resolution_time` — Time from `identified` to `resolved`
