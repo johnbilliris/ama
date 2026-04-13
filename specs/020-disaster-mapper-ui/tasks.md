@@ -121,9 +121,9 @@
 
 ### Implementation for User Story 5
 
-- [ ] T023 [US5] Add responsive breakpoint (768px) layout: full-screen map container on mobile, side-panel grid on desktop, mobile-friendly search bar sizing, and touch-gesture support (pinch-to-zoom, two-finger pan) in `apps/web/src/app/globals.css` and `packages/ui/src/components/disaster-map/disaster-map.tsx`
-- [ ] T024 [US5] Implement collapsible bottom sheet behaviour for filter panel on viewports below 768px — toggle open/close via button, max-height constraint to keep map visible, swipe-to-dismiss gesture — in `packages/ui/src/components/disaster-map/filter-panel.tsx`
-- [ ] T025 [US5] Implement overlay card variant for incident detail sidebar on viewports below 768px — replace side-panel with bottom card overlay, tap-outside-to-close, smooth entry/exit transition — in `packages/ui/src/components/disaster-map/incident-sidebar.tsx`
+- [x] T023 [US5] Add responsive breakpoint (768px) layout: full-screen map container on mobile, side-panel grid on desktop, mobile-friendly search bar sizing, and touch-gesture support (pinch-to-zoom, two-finger pan) in `apps/web/src/app/globals.css` and `packages/ui/src/components/disaster-map/disaster-map.tsx`
+- [x] T024 [US5] Implement collapsible bottom sheet behaviour for filter panel on viewports below 768px — toggle open/close via button, max-height constraint to keep map visible, swipe-to-dismiss gesture — in `packages/ui/src/components/disaster-map/filter-panel.tsx`
+- [x] T025 [US5] Implement overlay card variant for incident detail sidebar on viewports below 768px — replace side-panel with bottom card overlay, tap-outside-to-close, smooth entry/exit transition — in `packages/ui/src/components/disaster-map/incident-sidebar.tsx`
 
 **Checkpoint**: All five user stories functional — desktop and mobile layouts both work correctly down to 360px minimum viewport width.
 

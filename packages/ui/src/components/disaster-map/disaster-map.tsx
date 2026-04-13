@@ -71,6 +71,9 @@ export function DisasterMap({
               }
             : undefined,
           style: "road",
+          // Touch gesture support for mobile
+          dragRotateInteraction: false,
+          touchInteraction: true,
         });
 
         mapRef.current = map;
