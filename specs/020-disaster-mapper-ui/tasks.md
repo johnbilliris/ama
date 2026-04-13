@@ -36,14 +36,14 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 [P] Extend Incident model with `location: dict[str, Any] | None = None` field in `packages/domain/src/domain/models/incident.py` — add `Any` to typing imports, keep field optional for backwards compatibility per R-006
-- [ ] T004 [P] Create GeoJSON Pydantic response models (`GeoJSONPoint`, `IncidentFeatureProperties`, `IncidentFeature`, `IncidentFeatureCollection`, `IncidentMapMetadata`) with `SEVERITY_TO_AWS_TIER` mapping dict in `apps/api/app/models/geojson.py` per data-model.md schema
-- [ ] T005 [P] Add Australian Warning System severity colour tokens (`--ama-aws-advice: #FFC107`, `--ama-aws-watch: #FF8C00`, `--ama-aws-emergency: #D32F2F`) to `packages/ui/src/styles/tokens.css`
-- [ ] T006 [P] Create Azure Maps Bicep module (`Microsoft.Maps/accounts@2024-07-01-preview`, Gen2 SKU, `australiaeast` only via `@allowed`, `disableLocalAuth: true`) in `infra/modules/azure-maps.bicep` following `monitoring.bicep` pattern per R-004
-- [ ] T007 Wire Azure Maps module into `infra/main.bicep` with parameter bindings, outputs (account name, resource ID), and CORS configuration for web app origin
-- [ ] T008 Create `IncidentMapRepository` with dynamic Cosmos DB query builder — base query excludes `rehearsal` status and requires `IS_DEFINED(c.location) AND c.location.type = 'Point'`, dynamic WHERE clauses for type/severity/status/pprr_phase/keyword/year_start/year_end, `ORDER BY c.started_at DESC` with OFFSET/LIMIT pagination, and separate unmapped count query — in `apps/api/app/repositories/incident_map_repository.py` per data-model.md query shape
-- [ ] T009 Create `GET /api/v1/incidents/map` endpoint with query parameter validation (type, severity, status, pprr_phase, keyword, year_start, year_end, page default 1, page_size default 200 max 500), input sanitisation, and GeoJSON FeatureCollection response in `apps/api/app/api/routes/incidents_map.py` per contracts/incidents-map-api.md
-- [ ] T010 Register `incidents_map` router import and `api_router.include_router()` call in `apps/api/app/api/router.py`
+- [x] T003 [P] Extend Incident model with `location: dict[str, Any] | None = None` field in `packages/domain/src/domain/models/incident.py` — add `Any` to typing imports, keep field optional for backwards compatibility per R-006
+- [x] T004 [P] Create GeoJSON Pydantic response models (`GeoJSONPoint`, `IncidentFeatureProperties`, `IncidentFeature`, `IncidentFeatureCollection`, `IncidentMapMetadata`) with `SEVERITY_TO_AWS_TIER` mapping dict in `apps/api/app/models/geojson.py` per data-model.md schema
+- [x] T005 [P] Add Australian Warning System severity colour tokens (`--ama-aws-advice: #FFC107`, `--ama-aws-watch: #FF8C00`, `--ama-aws-emergency: #D32F2F`) to `packages/ui/src/styles/tokens.css`
+- [x] T006 [P] Create Azure Maps Bicep module (`Microsoft.Maps/accounts@2024-07-01-preview`, Gen2 SKU, `australiaeast` only via `@allowed`, `disableLocalAuth: true`) in `infra/modules/azure-maps.bicep` following `monitoring.bicep` pattern per R-004
+- [x] T007 Wire Azure Maps module into `infra/main.bicep` with parameter bindings, outputs (account name, resource ID), and CORS configuration for web app origin
+- [x] T008 Create `IncidentMapRepository` with dynamic Cosmos DB query builder — base query excludes `rehearsal` status and requires `IS_DEFINED(c.location) AND c.location.type = 'Point'`, dynamic WHERE clauses for type/severity/status/pprr_phase/keyword/year_start/year_end, `ORDER BY c.started_at DESC` with OFFSET/LIMIT pagination, and separate unmapped count query — in `apps/api/app/repositories/incident_map_repository.py` per data-model.md query shape
+- [x] T009 Create `GET /api/v1/incidents/map` endpoint with query parameter validation (type, severity, status, pprr_phase, keyword, year_start, year_end, page default 1, page_size default 200 max 500), input sanitisation, and GeoJSON FeatureCollection response in `apps/api/app/api/routes/incidents_map.py` per contracts/incidents-map-api.md
+- [x] T010 Register `incidents_map` router import and `api_router.include_router()` call in `apps/api/app/api/router.py`
 
 **Checkpoint**: Foundation ready — backend API, infrastructure, domain model, and shared design tokens all in place. User story implementation can now begin.
 

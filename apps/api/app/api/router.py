@@ -10,6 +10,7 @@ from app.api.routes.alerts import router as alerts_router
 from app.api.routes.evacuation import router as evacuation_router
 from app.api.routes.frameworks import router as frameworks_router
 from app.api.routes.incidents import router as incidents_router
+from app.api.routes.incidents_map import router as incidents_map_router
 from app.api.routes.lessons import router as lessons_router
 from app.api.routes.organisations import router as organisations_router
 from app.api.routes.personas import router as personas_router
@@ -31,6 +32,7 @@ from fastapi import APIRouter
 api_router = APIRouter()
 api_router.include_router(signals_router)
 api_router.include_router(incidents_router)
+api_router.include_router(incidents_map_router)
 api_router.include_router(recommendations_router)
 api_router.include_router(alerts_router)
 api_router.include_router(personas_router)
