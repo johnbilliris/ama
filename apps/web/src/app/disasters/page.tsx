@@ -5,10 +5,11 @@
  *
  * Interactive Azure Maps view of incident markers across Australia.
  * Loads data progressively from the incidents/map API endpoint.
+ * Supports multi-criteria URL-synced filtering and keyword search.
  */
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { AppShell } from "@ama/ui/components/layout/app-shell";
 import type {
   IncidentFeature,
@@ -19,7 +20,7 @@ import {
   type MapFilterParams,
 } from "../../lib/api/incidents-map";
 
-/* Dynamic import — SSR disabled for Azure Maps */
+/* Dynamic imports — SSR disabled for Azure Maps and filter components */
 const DisasterMap = dynamic(
   () =>
     import("@ama/ui/components/disaster-map/disaster-map").then(
@@ -28,7 +29,44 @@ const DisasterMap = dynamic(
   { ssr: false },
 );
 
-export default function DisastersPage() {
+const FilterPanel = dynamic(
+  () =>
+    import("@ama/ui/components/disaster-map/filter-panel").then(
+      (mod) => mod.FilterPanel,
+    ),
+  { ssr: false },
+);
+
+/* Inner component that uses useSearchParams (must be inside Suspense) */
+function DisastersPageInner() {
+  // Import the hook dynamically to avoid SSR issues with useSearchParams
+  const [hookModule, setHookModule] = useState<typeof import("@ama/ui/components/disaster-map/use-disaster-map-filters") | null>(null);
+
+  useEffect(() => {
+    import("@ama/ui/components/disaster-map/use-disaster-map-filters").then(setHookModule);
+  }, []);
+
+  if (!hookModule) {
+    return <DisastersPageContent filters={{}} setFilter={() => {}} resetAll={() => {}} keywordInput="" setKeywordInput={() => {}} />;
+  }
+
+  return <DisastersPageWithFilters hookModule={hookModule} />;
+}
+
+function DisastersPageWithFilters({ hookModule }: { hookModule: typeof import("@ama/ui/components/disaster-map/use-disaster-map-filters") }) {
+  const { filters, setFilter, resetAll, keywordInput, setKeywordInput } = hookModule.useDisasterMapFilters();
+  return <DisastersPageContent filters={filters} setFilter={setFilter} resetAll={resetAll} keywordInput={keywordInput} setKeywordInput={setKeywordInput} />;
+}
+
+interface DisastersPageContentProps {
+  filters: MapFilterParams;
+  setFilter: <K extends keyof MapFilterParams>(key: K, value: MapFilterParams[K]) => void;
+  resetAll: () => void;
+  keywordInput: string;
+  setKeywordInput: (value: string) => void;
+}
+
+function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setKeywordInput }: DisastersPageContentProps) {
   const [features, setFeatures] = useState<IncidentFeature[]>([]);
   const [metadata, setMetadata] = useState<IncidentMapMetadata | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,8 +75,8 @@ export default function DisastersPage() {
   const [selectedIncident, setSelectedIncident] =
     useState<IncidentFeature | null>(null);
   const [mapError, setMapError] = useState(false);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
-  const [filters] = useState<MapFilterParams>({});
 
   // ── Load data ──
   const loadData = useCallback(
@@ -96,10 +134,39 @@ export default function DisastersPage() {
         <header className="disaster-mapper-header">
           <p className="disaster-mapper-kicker">Situational Awareness</p>
           <h1 className="disaster-mapper-title">Disaster Mapper</h1>
-          <p className="disaster-mapper-status">
+          <div className="disaster-mapper-header-controls">
+            {/* Search bar */}
+            <div className="disaster-mapper-search-wrapper">
+              <input
+                type="search"
+                className="disaster-mapper-search-input"
+                placeholder="Search incidents by title…"
+                value={keywordInput}
+                onChange={(e) => setKeywordInput(e.target.value)}
+                aria-label="Search incidents by keyword"
+              />
+              {keywordInput && (
+                <button
+                  className="disaster-mapper-search-clear"
+                  onClick={() => setKeywordInput("")}
+                  aria-label="Clear search"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+            <button
+              className="disaster-mapper-filter-toggle-btn"
+              onClick={() => setFilterPanelOpen((v) => !v)}
+              aria-expanded={filterPanelOpen}
+            >
+              {filterPanelOpen ? "Hide Filters" : "Show Filters"}
+            </button>
+          </div>
+          <p className="disaster-mapper-status" aria-live="polite">
             {loading
               ? "Loading incidents…"
-              : `${features.length} incident${features.length !== 1 ? "s" : ""} displayed`}
+              : `Showing ${features.length} incident${features.length !== 1 ? "s" : ""}`}
             {!loadingComplete && !loading && " (loading more…)"}
           </p>
         </header>
@@ -117,77 +184,102 @@ export default function DisastersPage() {
           </div>
         )}
 
-        {/* Map + sidebar layout */}
-        <div className="disaster-mapper-content">
-          <div className="disaster-mapper-map-area">
-            {!mapError ? (
-              <DisasterMap
-                features={features}
-                onMarkerClick={handleMarkerClick}
-                onRenderComplete={handleMapRenderComplete}
-              />
-            ) : (
-              <div className="disaster-mapper-map-unavailable">
-                <p>Map service is currently unavailable.</p>
-                <button
-                  onClick={() => setMapError(false)}
-                  className="disaster-mapper-retry-btn"
+        {/* No results message */}
+        {!loading && features.length === 0 && !error && (
+          <div className="disaster-mapper-no-results" role="status">
+            <p>No incidents match your criteria.</p>
+            <button
+              onClick={resetAll}
+              className="disaster-mapper-retry-btn"
+            >
+              Reset filters
+            </button>
+          </div>
+        )}
+
+        {/* Main content: filter panel + map + sidebar */}
+        <div className="disaster-mapper-body">
+          {/* Filter panel */}
+          <FilterPanel
+            filters={filters}
+            onFilterChange={setFilter}
+            onReset={resetAll}
+            isOpen={filterPanelOpen}
+            onToggle={() => setFilterPanelOpen((v) => !v)}
+          />
+
+          {/* Map + sidebar */}
+          <div className="disaster-mapper-content">
+            <div className="disaster-mapper-map-area">
+              {!mapError ? (
+                <DisasterMap
+                  features={features}
+                  onMarkerClick={handleMarkerClick}
+                  onRenderComplete={handleMapRenderComplete}
+                />
+              ) : (
+                <div className="disaster-mapper-map-unavailable">
+                  <p>Map service is currently unavailable.</p>
+                  <button
+                    onClick={() => setMapError(false)}
+                    className="disaster-mapper-retry-btn"
+                  >
+                    Retry map
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar for selected incident */}
+            {selectedIncident && (
+              <aside className="disaster-mapper-sidebar" role="complementary">
+                <div className="disaster-mapper-sidebar-header">
+                  <h2>{selectedIncident.properties.title}</h2>
+                  <button
+                    onClick={() => setSelectedIncident(null)}
+                    className="disaster-mapper-close-btn"
+                    aria-label="Close incident details"
+                  >
+                    ×
+                  </button>
+                </div>
+                <dl className="disaster-mapper-detail-list">
+                  <dt>Type</dt>
+                  <dd>{selectedIncident.properties.incident_type}</dd>
+                  <dt>Status</dt>
+                  <dd>{selectedIncident.properties.status}</dd>
+                  <dt>Severity</dt>
+                  <dd
+                    className={`disaster-mapper-severity disaster-mapper-severity--${selectedIncident.properties.severity_tier}`}
+                  >
+                    {selectedIncident.properties.severity_tier}
+                  </dd>
+                  <dt>Start date</dt>
+                  <dd>{selectedIncident.properties.started_at}</dd>
+                  {selectedIncident.properties.pprr_phase && (
+                    <>
+                      <dt>PPRR Phase</dt>
+                      <dd>{selectedIncident.properties.pprr_phase}</dd>
+                    </>
+                  )}
+                  <dt>Incident Level</dt>
+                  <dd>{selectedIncident.properties.incident_level}</dd>
+                  <dt>Jurisdictions</dt>
+                  <dd>
+                    {selectedIncident.properties.affected_jurisdiction_ids.join(
+                      ", ",
+                    ) || "—"}
+                  </dd>
+                </dl>
+                <a
+                  href={`/incidents/${selectedIncident.properties.incident_id}`}
+                  className="disaster-mapper-workspace-link"
                 >
-                  Retry map
-                </button>
-              </div>
+                  Open Workspace →
+                </a>
+              </aside>
             )}
           </div>
-
-          {/* Sidebar for selected incident */}
-          {selectedIncident && (
-            <aside className="disaster-mapper-sidebar" role="complementary">
-              <div className="disaster-mapper-sidebar-header">
-                <h2>{selectedIncident.properties.title}</h2>
-                <button
-                  onClick={() => setSelectedIncident(null)}
-                  className="disaster-mapper-close-btn"
-                  aria-label="Close incident details"
-                >
-                  ×
-                </button>
-              </div>
-              <dl className="disaster-mapper-detail-list">
-                <dt>Type</dt>
-                <dd>{selectedIncident.properties.incident_type}</dd>
-                <dt>Status</dt>
-                <dd>{selectedIncident.properties.status}</dd>
-                <dt>Severity</dt>
-                <dd
-                  className={`disaster-mapper-severity disaster-mapper-severity--${selectedIncident.properties.severity_tier}`}
-                >
-                  {selectedIncident.properties.severity_tier}
-                </dd>
-                <dt>Start date</dt>
-                <dd>{selectedIncident.properties.started_at}</dd>
-                {selectedIncident.properties.pprr_phase && (
-                  <>
-                    <dt>PPRR Phase</dt>
-                    <dd>{selectedIncident.properties.pprr_phase}</dd>
-                  </>
-                )}
-                <dt>Incident Level</dt>
-                <dd>{selectedIncident.properties.incident_level}</dd>
-                <dt>Jurisdictions</dt>
-                <dd>
-                  {selectedIncident.properties.affected_jurisdiction_ids.join(
-                    ", ",
-                  ) || "—"}
-                </dd>
-              </dl>
-              <a
-                href={`/incidents/${selectedIncident.properties.incident_id}`}
-                className="disaster-mapper-workspace-link"
-              >
-                Open Workspace →
-              </a>
-            </aside>
-          )}
         </div>
 
         {/* Metadata notices */}
@@ -207,5 +299,13 @@ export default function DisastersPage() {
         )}
       </div>
     </AppShell>
+  );
+}
+
+export default function DisastersPage() {
+  return (
+    <Suspense fallback={<div className="disaster-mapper-page"><p>Loading…</p></div>}>
+      <DisastersPageInner />
+    </Suspense>
   );
 }

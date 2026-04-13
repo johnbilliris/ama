@@ -37,3 +37,13 @@ export interface IncidentMapMetadata {
   page_size: number;
   fetched_at: string;
 }
+
+export interface MapFilterParams {
+  type?: string;
+  severity?: string;
+  status?: string;
+  pprr_phase?: string;
+  keyword?: string;
+  year_start?: number;
+  year_end?: number;
+}

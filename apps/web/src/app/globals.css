@@ -690,3 +690,212 @@ body {
     padding: 0.5rem 1rem;
   }
 }
+
+/* ── Filter panel body layout ── */
+
+.disaster-mapper-body {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 0;
+  gap: 0;
+}
+
+.disaster-mapper-header-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.disaster-mapper-search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.disaster-mapper-search-input {
+  width: 100%;
+  padding: 0.6rem 2rem 0.6rem 0.9rem;
+  border-radius: 14px;
+  border: 1px solid rgba(13, 107, 121, 0.18);
+  background: #fff;
+  font-size: 0.9rem;
+}
+
+.disaster-mapper-search-clear {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #506168;
+  padding: 0 0.25rem;
+}
+
+.disaster-mapper-filter-toggle-btn {
+  border: 1px solid rgba(13, 107, 121, 0.18);
+  border-radius: 14px;
+  padding: 0.6rem 1rem;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.disaster-mapper-no-results {
+  text-align: center;
+  padding: 1rem;
+  color: #506168;
+}
+
+/* ── Filter panel ── */
+
+.disaster-mapper-filter-panel {
+  background: rgba(255, 255, 255, 0.94);
+  border-right: 1px solid rgba(13, 107, 121, 0.12);
+  padding: 1rem;
+  overflow-y: auto;
+  font-size: 0.85rem;
+}
+
+.disaster-mapper-filter-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.disaster-mapper-filter-group {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.disaster-mapper-filter-group legend {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.disaster-mapper-filter-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.disaster-mapper-filter-actions button {
+  border: 0;
+  background: none;
+  color: var(--ama-color-ocean);
+  cursor: pointer;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.disaster-mapper-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0;
+  cursor: pointer;
+}
+
+.disaster-mapper-checkbox input[type="checkbox"] {
+  accent-color: var(--ama-color-ocean);
+}
+
+.disaster-mapper-year-selectors {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.disaster-mapper-year-selectors label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.disaster-mapper-year-selectors select {
+  border-radius: 10px;
+  border: 1px solid rgba(13, 107, 121, 0.18);
+  padding: 0.4rem 0.5rem;
+  background: #fff;
+}
+
+.disaster-mapper-severity-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.disaster-mapper-severity-dot--advice {
+  background: var(--ama-aws-advice);
+}
+
+.disaster-mapper-severity-dot--watch-and-act {
+  background: var(--ama-aws-watch);
+}
+
+.disaster-mapper-severity-dot--emergency-warning {
+  background: var(--ama-aws-emergency);
+}
+
+.disaster-mapper-filter-reset {
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  border-radius: 14px;
+  padding: 0.5rem 1rem;
+  background: rgba(220, 53, 69, 0.06);
+  color: #991b2c;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.disaster-mapper-filter-toggle {
+  display: none;
+  width: 100%;
+  border: 0;
+  background: none;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .disaster-mapper-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .disaster-mapper-filter-panel {
+    border-right: none;
+    border-bottom: 1px solid rgba(13, 107, 121, 0.12);
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  .disaster-mapper-filter-panel:not(.disaster-mapper-filter-panel--open) {
+    max-height: 2.5rem;
+    overflow: hidden;
+  }
+
+  .disaster-mapper-filter-toggle {
+    display: block;
+  }
+
+  .disaster-mapper-header-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .disaster-mapper-search-wrapper {
+    max-width: 100%;
+  }
+}
