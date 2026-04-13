@@ -1,0 +1,235 @@
+# API Contract: Monitoring & Evaluation Framework
+
+**Base path**: `/api/incidents/{incident_id}/me-framework`  
+**FRs**: FR-008–014, FR-022, FR-023, FR-024, FR-030, FR-031, FR-032, FR-033  
+**Service**: Monitoring Agent (`apps/agents/monitoring/`) extension + Platform API  
+**Auth**: Recovery Coordinator (configure/manage), Incident Controller (view)
+
+---
+
+## Endpoints
+
+### POST /api/incidents/{incident_id}/me-framework
+
+**New** — Initialise an M&E framework for a recovery program.
+
+**Request body**:
+```json
+{
+  "program_name": "Lismore Bushfire Community Recovery 2025",
+  "affected_community_definition": "Lismore LGA communities affected by January 2025 bushfire",
+  "active_evaluation_domains": ["governance", "community_engagement", "effectiveness", "efficiency", "implementation"],
+  "created_by": "recovery-coordinator-001"
+}
+```
+
+**Response**: `201 Created`
+```json
+{
+  "framework_id": "mef-a1b2c3d4",
+  "incident_id": "inc-2025-fire-001",
+  "program_name": "Lismore Bushfire Community Recovery 2025",
+  "status": "configuring",
+  "selected_outcomes": [],
+  "active_evaluation_domains": ["governance", "community_engagement", "effectiveness", "efficiency", "implementation"],
+  "created_at": "2025-07-19T10:00:00Z"
+}
+```
+
+**Side effects**: Links to existing `RecoveryEnvironmentTracker` for the incident (if exists from spec 018).
+
+### GET /api/incidents/{incident_id}/me-framework
+
+**New** — Retrieve the M&E framework configuration for an incident.
+
+**Response**: `200 OK` — Full `MEFramework` document.
+
+### POST /api/incidents/{incident_id}/me-framework/outcomes
+
+**New** — Select outcomes from the AIDR catalogue for tracking (FR-009).
+
+**Request body**:
+```json
+{
+  "outcomes": [
+    {
+      "catalogue_outcome_id": "aidr:social:community-health-levels",
+      "community_restatement": "Lismore community health returns to pre-fire baseline levels"
+    },
+    {
+      "catalogue_outcome_id": "aidr:economic:business-continuity",
+      "community_restatement": null
+    },
+    {
+      "catalogue_outcome_id": "aidr:built:essential-services-infrastructure",
+      "community_restatement": "All water and power services restored to Lismore CBD and suburbs"
+    }
+  ]
+}
+```
+
+**Response**: `200 OK`
+```json
+{
+  "framework_id": "mef-a1b2c3d4",
+  "selected_outcomes": [
+    {
+      "catalogue_outcome_id": "aidr:social:community-health-levels",
+      "domain": "social",
+      "objective_type": "sustainability",
+      "community_restatement": "Lismore community health returns to pre-fire baseline levels",
+      "suggested_indicators": [
+        {"indicator_id": "aidr:social:community-health-levels:ind:1", "title": "Mental health service utilisation rate"},
+        {"indicator_id": "aidr:social:community-health-levels:ind:2", "title": "Community wellbeing self-assessment score"}
+      ],
+      "suggested_activities": [
+        {"activity_id": "aidr:social:community-health-levels:act:1", "title": "Establish community health outreach programs"}
+      ]
+    }
+  ]
+}
+```
+
+**Side effects**: Auto-suggests indicators and activities from the AIDR catalogue for each selected outcome.
+
+### POST /api/incidents/{incident_id}/me-framework/program-logic
+
+**New** — Create or update the program logic model (FR-010).
+
+**Request body**:
+```json
+{
+  "model_type": "ex_ante",
+  "resources_inputs": [
+    {"element_id": "res-1", "description": "Federal disaster recovery funding ($2M)"}
+  ],
+  "activities": [
+    {"element_id": "act-1", "description": "Community health outreach program", "catalogue_activity_id": "aidr:social:community-health-levels:act:1"}
+  ],
+  "outputs": [
+    {"element_id": "out-1", "description": "500 community members receive health assessments"}
+  ],
+  "intermediate_outcomes": [
+    {"element_id": "int-1", "description": "Reduced mental health service wait times by 40%"}
+  ],
+  "final_outcomes": [
+    {"element_id": "fin-1", "description": "Community health levels return to baseline", "catalogue_outcome_id": "aidr:social:community-health-levels", "objective_type": "sustainability", "domain": "social"}
+  ],
+  "outcome_chain_links": [
+    {"from_element_id": "res-1", "to_element_id": "act-1", "link_type": "enables"},
+    {"from_element_id": "act-1", "to_element_id": "out-1", "link_type": "produces"},
+    {"from_element_id": "out-1", "to_element_id": "int-1", "link_type": "contributes_to"},
+    {"from_element_id": "int-1", "to_element_id": "fin-1", "link_type": "contributes_to"}
+  ],
+  "timeline_months": 24
+}
+```
+
+**Response**: `201 Created` with full `ProgramLogicModel`.
+
+### POST /api/incidents/{incident_id}/me-framework/standards
+
+**New** — Define standards of success for selected outcomes (FR-012).
+
+**Request body**:
+```json
+{
+  "standards": [
+    {
+      "catalogue_outcome_id": "aidr:social:community-health-levels",
+      "indicator_id": "aidr:social:community-health-levels:ind:1",
+      "threshold_value": 0.85,
+      "threshold_operator": "gte",
+      "stakeholder_label": "primary",
+      "notes": "Mental health service utilisation within 15% of pre-disaster baseline"
+    }
+  ]
+}
+```
+
+**Response**: `200 OK` with updated standards list.
+
+### POST /api/incidents/{incident_id}/me-framework/collection-schedule
+
+**New** — Set up indicator data collection schedule (FR-013).
+
+**Request body**:
+```json
+{
+  "schedules": [
+    {
+      "indicator_id": "aidr:social:community-health-levels:ind:1",
+      "frequency": "monthly",
+      "next_due_date": "2025-08-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+**Response**: `200 OK` with updated collection schedules.
+
+### GET /api/incidents/{incident_id}/me-framework/monitoring-report
+
+**New** — Generate a monitoring report tracking program progress (FR-013).
+
+**Response**: `200 OK`
+```json
+{
+  "framework_id": "mef-a1b2c3d4",
+  "report_period": "2025-07-01 to 2025-07-31",
+  "outcomes_tracked": 12,
+  "indicators_collected": 28,
+  "indicators_overdue": 3,
+  "domain_summaries": {
+    "social": {
+      "outcomes_on_track": 5,
+      "outcomes_lagging": 2,
+      "outcomes_not_started": 1,
+      "trend": "improving"
+    },
+    "economic": { "outcomes_on_track": 3, "outcomes_lagging": 1, "trend": "stagnant" }
+  },
+  "standards_of_success": {
+    "meeting_standard": 8,
+    "below_standard": 4,
+    "no_data": 0
+  },
+  "alerts": [
+    {"indicator_id": "aidr:economic:employment:ind:1", "alert": "Below standard of success for 2 consecutive periods", "severity": "concern"}
+  ]
+}
+```
+
+**Performance**: ≤10 seconds (NFR-003 aligned with spec 018 recovery dashboard target).
+
+### POST /api/incidents/{incident_id}/me-framework/evaluation
+
+**New** — Generate an evaluation report addressing KEQ domains (FR-014, SC-009).
+
+**Request body**:
+```json
+{
+  "evaluation_period_start": "2025-01-01T00:00:00Z",
+  "evaluation_period_end": "2025-07-01T00:00:00Z",
+  "generated_by": "ai_assisted",
+  "created_by": "recovery-coordinator-001"
+}
+```
+
+**Response**: `201 Created` with `EvaluationReport` document containing findings across all active evaluation domains.
+
+**Side effects**: AI-generated content passes through `ContentSafetyValidator` (FR-028). Report stored in `recovery-programmes` Cosmos container.
+
+---
+
+## Graceful Degradation
+
+- If indicator data delayed: monitoring reports proceed with available data; staleness indicators shown (edge case handling).
+- If AIDR catalogue unavailable: M&E framework continues with already-selected outcomes; new outcome selection blocked with `503`.
+- If LLM unavailable for evaluation: manual evaluation generation still works; AI-assisted reports return `503` for the AI content.
+
+## Observability Metrics
+
+- `me_framework_completion_rate` — Gauge: ratio of fully configured M&E frameworks
+- `recovery_indicator_collection_rate` — Gauge: on-time collections / scheduled collections
+- `outcome_achievement_rate` — Gauge: outcomes meeting standard of success / total tracked outcomes

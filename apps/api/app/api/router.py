@@ -16,7 +16,11 @@ from app.api.routes.personas import router as personas_router
 from app.api.routes.pprr import context_router as pprr_context_router
 from app.api.routes.pprr import router as pprr_router
 from app.api.routes.recovery import router as recovery_router
+from app.api.routes.emergency_plans import router as emergency_plans_router
+from app.api.routes.ai_analysis import router as ai_analysis_router
+from app.api.routes.me_frameworks import router as me_frameworks_router
 from app.api.routes.recommendations import router as recommendations_router
+from app.api.routes.recovery_catalogue import router as recovery_catalogue_router
 from app.api.routes.scenarios import router as scenarios_router
 from app.api.routes.signals import router as signals_router
 from app.api.routes.simulations import router as simulations_router
@@ -48,4 +52,8 @@ api_router.include_router(lessons_router)
 api_router.include_router(pprr_router)
 api_router.include_router(pprr_context_router)
 api_router.include_router(recovery_router)
+api_router.include_router(emergency_plans_router)
+api_router.include_router(me_frameworks_router)
+api_router.include_router(recovery_catalogue_router)
+api_router.include_router(ai_analysis_router)
 api_router.include_router(aidr_health_router)

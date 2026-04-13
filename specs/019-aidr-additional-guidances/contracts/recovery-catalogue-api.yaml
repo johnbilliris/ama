@@ -1,0 +1,206 @@
+# API Contract: AIDR Recovery Catalogue
+
+**Base path**: `/api/recovery-catalogue`  
+**FRs**: FR-015–021, FR-026  
+**Service**: Platform API (`apps/api/`)  
+**Auth**: Authenticated users (read-only catalogue browsing); Recovery Coordinator for indicator suggestions
+
+---
+
+## Endpoints
+
+### GET /api/recovery-catalogue/outcomes
+
+**New** — Browse outcomes by domain (FR-015).
+
+**Query parameters**:
+- `domain` (optional) — Filter by `overarching|social|economic|built|natural`
+- `objective_type` (optional) — Filter by `sustainability|resilience`
+- `has_indicators` (optional) — Filter to outcomes with developed indicators (`true|false`)
+
+**Response**: `200 OK`
+```json
+{
+  "total_outcomes": 61,
+  "filtered_count": 24,
+  "domain": "social",
+  "outcomes": [
+    {
+      "outcome_id": "aidr:social:community-health-levels",
+      "domain": "social",
+      "objective_type": "sustainability",
+      "title": "Community health levels are restored",
+      "description": "Physical and mental health outcomes for the affected community return to or improve upon pre-disaster baselines.",
+      "activity_count": 4,
+      "indicator_count": 6,
+      "has_developed_activities": true
+    },
+    {
+      "outcome_id": "aidr:social:access-to-housing",
+      "domain": "social",
+      "objective_type": "sustainability",
+      "title": "Access to safe and secure housing",
+      "description": "All affected community members have access to appropriate housing solutions.",
+      "activity_count": 3,
+      "indicator_count": 5,
+      "has_developed_activities": true
+    }
+  ]
+}
+```
+
+**Performance**: ≤3 seconds (catalogue is small and partitioned by domain; single-partition query).
+
+### GET /api/recovery-catalogue/outcomes/{outcome_id}
+
+**New** — Retrieve a specific outcome with all associated activities and indicators (FR-020, FR-021).
+
+**Response**: `200 OK`
+```json
+{
+  "outcome_id": "aidr:social:community-health-levels",
+  "domain": "social",
+  "objective_type": "sustainability",
+  "title": "Community health levels are restored",
+  "description": "Physical and mental health outcomes...",
+  "activities": [
+    {
+      "activity_id": "aidr:social:community-health-levels:act:1",
+      "title": "Establish community health outreach programs",
+      "description": "Deploy multidisciplinary health teams..."
+    },
+    {
+      "activity_id": "aidr:social:community-health-levels:act:2",
+      "title": "Provide psychosocial support services",
+      "description": "Ensure access to counselling and mental health..."
+    }
+  ],
+  "indicators": [
+    {
+      "indicator_id": "aidr:social:community-health-levels:ind:1",
+      "title": "Mental health service utilisation rate",
+      "description": "Proportion of affected population accessing mental health services",
+      "data_collection_methodology": "Health service records; community surveys",
+      "indicator_type": "quantitative"
+    },
+    {
+      "indicator_id": "aidr:social:community-health-levels:ind:2",
+      "title": "Community wellbeing self-assessment score",
+      "description": "Aggregated self-reported wellbeing score from community surveys",
+      "data_collection_methodology": "Periodic community wellbeing surveys",
+      "indicator_type": "both"
+    }
+  ]
+}
+```
+
+### GET /api/recovery-catalogue/outcomes/{outcome_id}/activities
+
+**New** — List activities associated with an outcome (FR-020).
+
+**Response**: `200 OK` — List of `CatalogueActivity` objects.
+
+### GET /api/recovery-catalogue/outcomes/{outcome_id}/indicators
+
+**New** — List indicators associated with an outcome (FR-021).
+
+**Response**: `200 OK` — List of `CatalogueIndicator` objects.
+
+### GET /api/recovery-catalogue/domains/{domain}/summary
+
+**New** — Domain-level summary view (FR-016–019).
+
+**Response**: `200 OK`
+```json
+{
+  "domain": "social",
+  "total_outcomes": 24,
+  "sustainability_outcomes": 18,
+  "resilience_outcomes": 6,
+  "total_activities": 72,
+  "total_indicators": 96,
+  "outcomes_without_activities": 2,
+  "outcome_categories": [
+    {"category": "Health", "outcome_count": 4},
+    {"category": "Housing", "outcome_count": 3},
+    {"category": "Social Networks", "outcome_count": 3},
+    {"category": "Education", "outcome_count": 2}
+  ]
+}
+```
+
+### POST /api/recovery-catalogue/suggest-activities
+
+**New** — Suggest activities from the catalogue for lagging indicators (FR-026).
+
+**Request body**:
+```json
+{
+  "lagging_indicators": [
+    {
+      "catalogue_indicator_id": "aidr:social:community-health-levels:ind:1",
+      "current_value": 0.45,
+      "standard_value": 0.85,
+      "trend": "declining"
+    }
+  ]
+}
+```
+
+**Response**: `200 OK`
+```json
+{
+  "suggestions": [
+    {
+      "for_indicator_id": "aidr:social:community-health-levels:ind:1",
+      "suggested_activities": [
+        {
+          "activity_id": "aidr:social:community-health-levels:act:1",
+          "title": "Establish community health outreach programs",
+          "relevance_score": 0.92,
+          "rationale": "This activity directly addresses mental health service gaps indicated by declining utilisation rates."
+        },
+        {
+          "activity_id": "aidr:social:community-health-levels:act:2",
+          "title": "Provide psychosocial support services",
+          "relevance_score": 0.87,
+          "rationale": "Psychosocial support can stabilise and reverse declining mental health outcomes."
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Note**: If AI-assisted, rationale is generated via LLM and passed through content safety validation (FR-028).
+
+### GET /api/recovery-catalogue/evaluation-questions/{domain}
+
+**New** — Retrieve standard evaluation questions for a KEQ domain (FR-011, seeded reference data).
+
+**Response**: `200 OK`
+```json
+{
+  "evaluation_domain": "effectiveness",
+  "questions": [
+    "To what extent have program outcomes been achieved?",
+    "What factors have contributed to or hindered the achievement of outcomes?",
+    "Are there any unintended outcomes (positive or negative)?",
+    "How do outcomes vary across different population groups?",
+    "Are outcomes sustainable beyond the life of the program?"
+  ]
+}
+```
+
+---
+
+## Graceful Degradation
+
+- Catalogue data is immutable and seeded at deployment — availability follows Cosmos DB SLA.
+- If AI unavailable for activity suggestions: return catalogue-matched activities without LLM-generated rationale.
+- Catalogue endpoints may be cached aggressively (R-013: 1-hour TTL) due to immutability.
+
+## Observability Metrics
+
+- `catalogue_query_count` — Counter: catalogue lookups per domain
+- `catalogue_suggestion_latency_ms` — Histogram: time to generate activity suggestions
