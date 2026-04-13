@@ -283,6 +283,15 @@ module recoveryLessons './modules/recovery-lessons.bicep' = {
   }
 }
 
+// Emergency Planning — 3 new containers: emergency-plans, recovery-programmes, recovery-catalogue
+module emergencyPlanning './modules/emergency-planning.bicep' = {
+  name: 'emergency-planning'
+  params: {
+    cosmosAccountName: cosmos.name
+    cosmosDbName: cosmosDb.name
+  }
+}
+
 // Cosmos DB data-plane RBAC — grants the deploying principal read/write access
 // Required for postprovision seed script and local development
 resource cosmosDataContributorAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-11-15' = if (!empty(principalId)) {
