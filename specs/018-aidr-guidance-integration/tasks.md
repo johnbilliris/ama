@@ -25,9 +25,9 @@
 
 **Purpose**: Project initialisation, branch creation, and infrastructure provisioning for five new Cosmos DB containers
 
-- [ ] T001 Create and checkout feature branch `018-aidr-guidance-integration` from main
-- [ ] T002 [P] Create Cosmos DB infrastructure module for five new containers (recovery, lessons, aiims-assignments, evacuation-stages, pprr-contexts) in `infra/modules/recovery-lessons.bicep` with partition keys per R-013: `/incident_id` for recovery, lessons, aiims-assignments, evacuation-stages; `/context_reference_id` for pprr-contexts
-- [ ] T003 [P] Extend `infra/main.bicep` to reference the new `recovery-lessons.bicep` module, scoped to Azure Australia East (NFR-015)
+- [X] T001 Create and checkout feature branch `018-aidr-guidance-integration` from main
+- [X] T002 [P] Create Cosmos DB infrastructure module for five new containers (recovery, lessons, aiims-assignments, evacuation-stages, pprr-contexts) in `infra/modules/recovery-lessons.bicep` with partition keys per R-013: `/incident_id` for recovery, lessons, aiims-assignments, evacuation-stages; `/context_reference_id` for pprr-contexts
+- [X] T003 [P] Extend `infra/main.bicep` to reference the new `recovery-lessons.bicep` module, scoped to Azure Australia East (NFR-015)
 
 ---
 
@@ -39,32 +39,32 @@
 
 ### Domain Model Extensions (Existing Models)
 
-- [ ] T004 [P] Extend `Incident` model with `pprr_phase: Literal["prevention", "preparedness", "response", "recovery"] | None = None`, `incident_level: Literal[1, 2, 3] = 1`, and expanded `incident_type` Literal adding `"tsunami"`, `"extreme_heat"`, `"pandemic"` in `packages/domain/src/domain/models/incident.py` per E-001
-- [ ] T005 [P] Extend `PublicAlert` model with AWS warning fields (`warning_tier`, `colour_code`, `hazard_icon`, `action_statement`, `superseded_warning_id`, `tier_skip_justification`, `is_all_clear`, `warning_principles_checklist`) in `packages/domain/src/domain/models/public_alert.py` per E-002, including Pydantic validators for tier-to-colour mapping and all-clear constraints
-- [ ] T006 [P] Extend `HandoffChainDefinition` `SignalCategory` Literal with `"recovery_assessment"` and `"lessons_capture"` values in `packages/domain/src/domain/models/handoff_chain.py` per E-003
+- [X] T004 [P] Extend `Incident` model with `pprr_phase: Literal["prevention", "preparedness", "response", "recovery"] | None = None`, `incident_level: Literal[1, 2, 3] = 1`, and expanded `incident_type` Literal adding `"tsunami"`, `"extreme_heat"`, `"pandemic"` in `packages/domain/src/domain/models/incident.py` per E-001
+- [X] T005 [P] Extend `PublicAlert` model with AWS warning fields (`warning_tier`, `colour_code`, `hazard_icon`, `action_statement`, `superseded_warning_id`, `tier_skip_justification`, `is_all_clear`, `warning_principles_checklist`) in `packages/domain/src/domain/models/public_alert.py` per E-002, including Pydantic validators for tier-to-colour mapping and all-clear constraints
+- [X] T006 [P] Extend `HandoffChainDefinition` `SignalCategory` Literal with `"recovery_assessment"` and `"lessons_capture"` values in `packages/domain/src/domain/models/handoff_chain.py` per E-003
 
 ### New Domain Models
 
-- [ ] T007 [P] Create `AiimsRoleAssignment` model in `packages/domain/src/domain/models/aiims_role_assignment.py` per N-001 with `AiimsFunction` Literal type, assignment tracking fields, delegation support, and validation rules (one function per agent per incident)
-- [ ] T008 [P] Create `EvacuationStage` model in `packages/domain/src/domain/models/evacuation_stage.py` per N-002 with `EvacStageName`, `EvacuationType`, `EvacuationApproach`, `EvacuationScope` Literal types, five-stage fields, shelter-in-place fields, re-entry counter, and audit fields
-- [ ] T009 [P] Create `RecoveryEnvironmentTracker` and `RecoveryIndicator` models in `packages/domain/src/domain/models/recovery_environment_tracker.py` per N-003 with 21 AIDR-defined indicators, `RecoveryEnvironment`/`IndicatorUpdateSource`/`DataClassification` Literals, k-anonymity validator (population_coverage ≥ 10 for sensitive social data per R-012), and regression detection fields
-- [ ] T010 [P] Create `Lesson` model in `packages/domain/src/domain/models/lesson.py` per N-004 with `LessonStatus`/`LessonSeverity` Literals, AIIMS function and PPRR phase categorisation, assignment tracking, contradictory-lesson fields, and validator requiring at least one of `incident_id` or `scenario_run_id`
-- [ ] T011 [P] Create `PprrPhaseContext` model in `packages/domain/src/domain/models/pprr_phase_context.py` per N-005/R-001 with `context_type: Literal["region", "scenario"]`, phase restricted to prevention/preparedness, and transition-to-incident linkage
+- [X] T007 [P] Create `AiimsRoleAssignment` model in `packages/domain/src/domain/models/aiims_role_assignment.py` per N-001 with `AiimsFunction` Literal type, assignment tracking fields, delegation support, and validation rules (one function per agent per incident)
+- [X] T008 [P] Create `EvacuationStage` model in `packages/domain/src/domain/models/evacuation_stage.py` per N-002 with `EvacStageName`, `EvacuationType`, `EvacuationApproach`, `EvacuationScope` Literal types, five-stage fields, shelter-in-place fields, re-entry counter, and audit fields
+- [X] T009 [P] Create `RecoveryEnvironmentTracker` and `RecoveryIndicator` models in `packages/domain/src/domain/models/recovery_environment_tracker.py` per N-003 with 21 AIDR-defined indicators, `RecoveryEnvironment`/`IndicatorUpdateSource`/`DataClassification` Literals, k-anonymity validator (population_coverage ≥ 10 for sensitive social data per R-012), and regression detection fields
+- [X] T010 [P] Create `Lesson` model in `packages/domain/src/domain/models/lesson.py` per N-004 with `LessonStatus`/`LessonSeverity` Literals, AIIMS function and PPRR phase categorisation, assignment tracking, contradictory-lesson fields, and validator requiring at least one of `incident_id` or `scenario_run_id`
+- [X] T011 [P] Create `PprrPhaseContext` model in `packages/domain/src/domain/models/pprr_phase_context.py` per N-005/R-001 with `context_type: Literal["region", "scenario"]`, phase restricted to prevention/preparedness, and transition-to-incident linkage
 
 ### Shared Agent Utilities
 
-- [ ] T012 [P] Create AIIMS role constants, default agent-to-function mapping, and static fallback validation in `apps/agents/common/aiims_mapping.py` per R-005 three-tier hierarchy (OperatingFramework → FrameworkAssignment → AiimsRoleAssignment)
-- [ ] T013 [P] Create PPRR phase transition logic with managed transition validation, overlap period tracking, and TimelineEvent payload generation in `apps/agents/common/pprr_lifecycle.py` per R-001/FR-031/FR-053
-- [ ] T014 [P] Create AWS three-tier warning compliance validator and ten-principle checker in `apps/agents/common/warning_compliance.py` per FR-006/SC-006 — validates tier/colour/icon consistency, action statement presence, and all 10 warning principles (life_saving, empowering, trusted, risk_scaled, timely_targeted, impact_conveying, action_calling, clearly_communicated, accessible, bigger_picture)
-- [ ] **T085** [P] Create shared vulnerable population constants and utility in `apps/agents/common/vulnerable_populations.py` defining canonical population groups per Constitution §VI-C and AIDR Evacuation Planning Handbook extensions (elderly, children, people with disabilities, CALD communities, pregnant/breastfeeding women, people with health needs, people with pets/assistance animals)
+- [X] T012 [P] Create AIIMS role constants, default agent-to-function mapping, and static fallback validation in `apps/agents/common/aiims_mapping.py` per R-005 three-tier hierarchy (OperatingFramework → FrameworkAssignment → AiimsRoleAssignment)
+- [X] T013 [P] Create PPRR phase transition logic with managed transition validation, overlap period tracking, and TimelineEvent payload generation in `apps/agents/common/pprr_lifecycle.py` per R-001/FR-031/FR-053
+- [X] T014 [P] Create AWS three-tier warning compliance validator and ten-principle checker in `apps/agents/common/warning_compliance.py` per FR-006/SC-006 — validates tier/colour/icon consistency, action statement presence, and all 10 warning principles (life_saving, empowering, trusted, risk_scaled, timely_targeted, impact_conveying, action_calling, clearly_communicated, accessible, bigger_picture)
+- [X] **T085** [P] Create shared vulnerable population constants and utility in `apps/agents/common/vulnerable_populations.py` defining canonical population groups per Constitution §VI-C and AIDR Evacuation Planning Handbook extensions (elderly, children, people with disabilities, CALD communities, pregnant/breastfeeding women, people with health needs, people with pets/assistance animals)
 
 ### Handoff Chain Extensions
 
-- [ ] T015 Extend handoff builders in `apps/agents/common/handoffs.py` with recovery-phase handoff (Risk Assessment → recovery agents, `category_filter=["recovery_assessment"]`) and lessons-capture handoff (incident closure Level 2+ → lessons service, `category_filter=["lessons_capture"]`) per FR-054
+- [X] T015 Extend handoff builders in `apps/agents/common/handoffs.py` with recovery-phase handoff (Risk Assessment → recovery agents, `category_filter=["recovery_assessment"]`) and lessons-capture handoff (incident closure Level 2+ → lessons service, `category_filter=["lessons_capture"]`) per FR-054
 
 ### TimelineEvent Payload Schemas
 
-- [ ] T016 Document and validate new TimelineEvent payload schemas (PPRR phase transition, incident level change, evacuation stage transition, lessons capture trigger) as structured dict schemas referenced in `packages/domain/src/domain/models/timeline_event.py` per FR-053
+- [X] T016 Document and validate new TimelineEvent payload schemas (PPRR phase transition, incident level change, evacuation stage transition, lessons capture trigger) as structured dict schemas referenced in `packages/domain/src/domain/models/timeline_event.py` per FR-053
 
 **Checkpoint**: All domain models, shared utilities, and infrastructure ready — user story implementation can now begin in parallel
 
