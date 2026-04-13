@@ -150,14 +150,14 @@
 
 ### Implementation for User Story 4
 
-- [ ] T042 [P] [US4] Create PPRR service with phase transition logic, overlap period management, TimelineEvent creation (FR-053 payload), PprrPhaseContext CRUD for non-incident phases, and transition-to-incident linkage in `apps/api/app/services/pprr_service.py`
-- [ ] T043 [US4] Create PPRR API routes in `apps/api/app/api/routes/pprr.py` per pprr-api.yaml — `POST /api/incidents/{incident_id}/pprr/transition` (phase transition with overlap), `GET /api/incidents/{incident_id}/pprr` (current phase + history), `POST /api/pprr/contexts` (create non-incident phase context), `GET /api/pprr/contexts` (list active contexts), `PUT /api/pprr/contexts/{context_id}/transition-to-incident` (link to incident)
-- [ ] T044 [US4] Implement Prevention phase capabilities — hazard risk assessment support and mitigation-option analysis integration per FR-028
-- [ ] T045 [US4] Implement Preparedness phase capabilities — scenario rehearsal integration with existing simulation (spec 007), community readiness assessment, resource pre-positioning plans, warning system testing per FR-029
-- [ ] T046 [US4] Implement Response phase concurrent recovery planning — when in Response phase, enable parallel Recovery phase activation per FR-030/FR-035
-- [ ] T047 [US4] Implement managed transition logic — overlap periods where multiple phases active simultaneously, non-abrupt phase switching per FR-031, and concurrent phase support for overlapping incidents (edge case: conflicting PPRR phases)
-- [ ] T048 [US4] Implement graceful degradation for PPRR transitions — agents continue in current phase when transition service unavailable, phase transition requests queued and applied on recovery per R-002
-- [ ] T049 [US4] Add observability metric `pprr_phase_transition_count` per NFR-010
+- [X] T042 [P] [US4] Create PPRR service with phase transition logic, overlap period management, TimelineEvent creation (FR-053 payload), PprrPhaseContext CRUD for non-incident phases, and transition-to-incident linkage in `apps/api/app/services/pprr_service.py`
+- [X] T043 [US4] Create PPRR API routes in `apps/api/app/api/routes/pprr.py` per pprr-api.yaml — `POST /api/incidents/{incident_id}/pprr/transition` (phase transition with overlap), `GET /api/incidents/{incident_id}/pprr` (current phase + history), `POST /api/pprr/contexts` (create non-incident phase context), `GET /api/pprr/contexts` (list active contexts), `PUT /api/pprr/contexts/{context_id}/transition-to-incident` (link to incident)
+- [X] T044 [US4] Implement Prevention phase capabilities — hazard risk assessment support and mitigation-option analysis integration per FR-028
+- [X] T045 [US4] Implement Preparedness phase capabilities — scenario rehearsal integration with existing simulation (spec 007), community readiness assessment, resource pre-positioning plans, warning system testing per FR-029
+- [X] T046 [US4] Implement Response phase concurrent recovery planning — when in Response phase, enable parallel Recovery phase activation per FR-030/FR-035
+- [X] T047 [US4] Implement managed transition logic — overlap periods where multiple phases active simultaneously, non-abrupt phase switching per FR-031, and concurrent phase support for overlapping incidents (edge case: conflicting PPRR phases)
+- [X] T048 [US4] Implement graceful degradation for PPRR transitions — agents continue in current phase when transition service unavailable, phase transition requests queued and applied on recovery per R-002
+- [X] T049 [US4] Add observability metric `pprr_phase_transition_count` per NFR-010
 
 **Checkpoint**: Full PPRR lifecycle operational — Prevention and Preparedness work without incidents, Response enables concurrent Recovery, transitions are managed with overlap, concurrent phases for overlapping incidents (SC-004)
 
@@ -173,14 +173,14 @@
 
 ### Implementation for User Story 5
 
-- [ ] T050 [P] [US5] Create recovery service with tracker initialisation (21 AIDR indicators), indicator CRUD, regression detection logic, staleness tracking (24-hour SLA for community-response per SC-010), recovery principle validation, and dashboard data assembly in `apps/api/app/services/recovery_service.py` per R-003/R-006
-- [ ] T051 [US5] Create recovery API routes in `apps/api/app/api/routes/recovery.py` per recovery-api.yaml — `POST /api/incidents/{incident_id}/recovery` (initialise tracker), `GET /api/incidents/{incident_id}/recovery/dashboard` (dashboard ≤10s per NFR-004), `PUT /api/incidents/{incident_id}/recovery/indicators/{indicator_name}` (update indicator), `POST /api/incidents/{incident_id}/recovery/indicators/batch` (batch import for future automation), `GET /api/incidents/{incident_id}/recovery/community` (community-visible view per FR-037)
-- [ ] T052 [US5] Implement k-anonymity enforcement — Pydantic validator rejects Social environment sensitive indicators with `population_coverage < 10` per NFR-014/R-012, `data_classification` defaults to `"sensitive"` for health/employment social indicators
-- [ ] T053 [US5] Implement community-response indicator linkage for Total Warning System feedback loop — `linked_alert_id` on `RecoveryIndicator` references the originating `PublicAlert`, 24-hour SLA alerting when indicators not submitted after warning issuance per FR-012/SC-010/R-008
-- [ ] T054 [US5] Implement recovery-mode agent behaviour — Resource Allocation Agent prioritises reconstruction resources (FR-045 cross-ref), Communication Agent generates community-facing recovery updates aligned with six principles (FR-033), Monitoring Agent monitors recovery indicators for regression (edge case) in respective agent files per R-006
-- [ ] T055 [US5] Add content safety validation for LLM-generated recovery recommendations and community-facing content using existing content safety pipeline per NFR-013
-- [ ] T056 [US5] Implement graceful degradation for recovery dashboard — display last-known indicator values with staleness indicator when data sources unavailable per NFR-012/R-002
-- [ ] T057 [US5] Add observability metric `recovery_indicator_update_frequency` per NFR-010
+- [X] T050 [P] [US5] Create recovery service with tracker initialisation (21 AIDR indicators), indicator CRUD, regression detection logic, staleness tracking (24-hour SLA for community-response per SC-010), recovery principle validation, and dashboard data assembly in `apps/api/app/services/recovery_service.py` per R-003/R-006
+- [X] T051 [US5] Create recovery API routes in `apps/api/app/api/routes/recovery.py` per recovery-api.yaml — `POST /api/incidents/{incident_id}/recovery` (initialise tracker), `GET /api/incidents/{incident_id}/recovery/dashboard` (dashboard ≤10s per NFR-004), `PUT /api/incidents/{incident_id}/recovery/indicators/{indicator_name}` (update indicator), `POST /api/incidents/{incident_id}/recovery/indicators/batch` (batch import for future automation), `GET /api/incidents/{incident_id}/recovery/community` (community-visible view per FR-037)
+- [X] T052 [US5] Implement k-anonymity enforcement — Pydantic validator rejects Social environment sensitive indicators with `population_coverage < 10` per NFR-014/R-012, `data_classification` defaults to `"sensitive"` for health/employment social indicators
+- [X] T053 [US5] Implement community-response indicator linkage for Total Warning System feedback loop — `linked_alert_id` on `RecoveryIndicator` references the originating `PublicAlert`, 24-hour SLA alerting when indicators not submitted after warning issuance per FR-012/SC-010/R-008
+- [X] T054 [US5] Implement recovery-mode agent behaviour — Resource Allocation Agent prioritises reconstruction resources (FR-045 cross-ref), Communication Agent generates community-facing recovery updates aligned with six principles (FR-033), Monitoring Agent monitors recovery indicators for regression (edge case) in respective agent files per R-006
+- [X] T055 [US5] Add content safety validation for LLM-generated recovery recommendations and community-facing content using existing content safety pipeline per NFR-013
+- [X] T056 [US5] Implement graceful degradation for recovery dashboard — display last-known indicator values with staleness indicator when data sources unavailable per NFR-012/R-002
+- [X] T057 [US5] Add observability metric `recovery_indicator_update_frequency` per NFR-010
 
 **Checkpoint**: Recovery tracking fully operational — dashboard shows all 21 indicators across four environments, regression detected, community view available, social data privacy enforced (SC-005, SC-010)
 
@@ -198,10 +198,10 @@
 
 ### Implementation for User Story 6
 
-- [ ] T058 [US6] Extend Monitoring Agent in `apps/agents/monitoring/agent.py` to produce explicit situational-awareness output that feeds the Total Warning System monitoring-and-prediction element per FR-009/FR-043
-- [ ] T059 [US6] Extend Risk Assessment Agent in `apps/agents/risk_assessment/agent.py` to produce hazard prediction outputs that satisfy the monitoring-and-prediction element per FR-010/FR-044
-- [ ] T060 [US6] Ensure Communication Agent's message construction (US1) satisfies the message-construction and communication elements, with interpretation aids — plain language summaries, CALD translations, accessibility formats per FR-011
-- [ ] T061 [US6] Wire community-response indicator capture (US5) as the feedback-loop closure element — verify indicators link to originating warning via `linked_alert_id`, 24-hour SLA enforced per FR-012/SC-010
+- [X] T058 [US6] Extend Monitoring Agent in `apps/agents/monitoring/agent.py` to produce explicit situational-awareness output that feeds the Total Warning System monitoring-and-prediction element per FR-009/FR-043
+- [X] T059 [US6] Extend Risk Assessment Agent in `apps/agents/risk_assessment/agent.py` to produce hazard prediction outputs that satisfy the monitoring-and-prediction element per FR-010/FR-044
+- [X] T060 [US6] Ensure Communication Agent's message construction (US1) satisfies the message-construction and communication elements, with interpretation aids — plain language summaries, CALD translations, accessibility formats per FR-011
+- [X] T061 [US6] Wire community-response indicator capture (US5) as the feedback-loop closure element — verify indicators link to originating warning via `linked_alert_id`, 24-hour SLA enforced per FR-012/SC-010
 
 **Checkpoint**: Total Warning System fully connected — all six elements produce outputs that feed the next, community-response feedback loop closed within 24 hours (SC-010)
 
@@ -217,13 +217,13 @@
 
 ### Implementation for User Story 7
 
-- [ ] T062 [P] [US7] Create lessons service with lesson CRUD, auto-trigger logic (Level 2+ closure or exercise completion creates lessons-capture event), AIIMS/PPRR categorisation, assignment tracking with target resolution dates, trend analysis engine (recurring themes, unresolved items, by-function/by-phase breakdown), and SC-007 closure rate tracking (90% within 90 days) in `apps/api/app/services/lessons_service.py` per R-007
-- [ ] T063 [US7] Create lessons API routes in `apps/api/app/api/routes/lessons.py` per lessons-api.yaml — `POST /api/lessons` (capture, ≤5s per NFR-005), `GET /api/lessons` (register with filtering), `GET /api/lessons/{lesson_id}` (detail), `PUT /api/lessons/{lesson_id}/assign` (assignment per FR-041), `PUT /api/lessons/{lesson_id}/resolve` (resolution with PR reference), `PUT /api/lessons/{lesson_id}/flag-contradictory` (edge case), `GET /api/lessons/trends` (trend analysis ≤30s per NFR-006), `GET /api/lessons/verify-pr` (quality gate verification per FR-042)
-- [ ] T064 [US7] Implement exercise-to-lesson linkage — connect lessons captured from exercises to `ExerciseReport` via `scenario_run_id`, enabling correlation with exercise performance metrics (`coordination_gaps`, `benchmark_comparison`) per FR-052
-- [ ] T065 [US7] Implement contradictory-lesson handling — flag lessons that contradict existing agent config, require escalated IC/admin approval before resolution, link conflicting config and lesson for audit per edge case spec
-- [ ] T066 [US7] Implement PR quality gate CI script — lightweight GitHub Actions check that verifies PR descriptions referencing lesson IDs match open lessons in the register per FR-042/R-007
-- [ ] T067 [US7] Implement graceful degradation for lessons — buffer lessons locally when register/Cosmos unavailable, sync on recovery, ensure incident operations not blocked by lessons subsystem failures per NFR-011/R-002
-- [ ] T068 [US7] Add observability metrics `lesson_resolution_time` per NFR-010
+- [X] T062 [P] [US7] Create lessons service with lesson CRUD, auto-trigger logic (Level 2+ closure or exercise completion creates lessons-capture event), AIIMS/PPRR categorisation, assignment tracking with target resolution dates, trend analysis engine (recurring themes, unresolved items, by-function/by-phase breakdown), and SC-007 closure rate tracking (90% within 90 days) in `apps/api/app/services/lessons_service.py` per R-007
+- [X] T063 [US7] Create lessons API routes in `apps/api/app/api/routes/lessons.py` per lessons-api.yaml — `POST /api/lessons` (capture, ≤5s per NFR-005), `GET /api/lessons` (register with filtering), `GET /api/lessons/{lesson_id}` (detail), `PUT /api/lessons/{lesson_id}/assign` (assignment per FR-041), `PUT /api/lessons/{lesson_id}/resolve` (resolution with PR reference), `PUT /api/lessons/{lesson_id}/flag-contradictory` (edge case), `GET /api/lessons/trends` (trend analysis ≤30s per NFR-006), `GET /api/lessons/verify-pr` (quality gate verification per FR-042)
+- [X] T064 [US7] Implement exercise-to-lesson linkage — connect lessons captured from exercises to `ExerciseReport` via `scenario_run_id`, enabling correlation with exercise performance metrics (`coordination_gaps`, `benchmark_comparison`) per FR-052
+- [X] T065 [US7] Implement contradictory-lesson handling — flag lessons that contradict existing agent config, require escalated IC/admin approval before resolution, link conflicting config and lesson for audit per edge case spec
+- [X] T066 [US7] Implement PR quality gate CI script — lightweight GitHub Actions check that verifies PR descriptions referencing lesson IDs match open lessons in the register per FR-042/R-007
+- [X] T067 [US7] Implement graceful degradation for lessons — buffer lessons locally when register/Cosmos unavailable, sync on recovery, ensure incident operations not blocked by lessons subsystem failures per NFR-011/R-002
+- [X] T068 [US7] Add observability metrics `lesson_resolution_time` per NFR-010
 
 **Checkpoint**: Lessons management fully operational — auto-capture after Level 2+ incidents and exercises, trend analysis surfaces recurring themes, PR quality gate enforces lesson-linked changes (SC-007)
 
