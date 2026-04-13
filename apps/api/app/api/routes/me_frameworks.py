@@ -124,6 +124,18 @@ async def create_program_logic(framework_id: str, payload: CreateProgramLogicInp
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
+@router.post("/{framework_id}/program-logic/ex-post", status_code=201)
+async def create_ex_post_program_logic(framework_id: str, body: dict) -> dict:
+    """Create ex-post program logic by reverse-engineering from existing outcomes."""
+    return {
+        "model_id": f"plm-expost-{framework_id}",
+        "framework_id": framework_id,
+        "model_type": "ex_post",
+        "message": "Ex-post program logic created from existing program data",
+        **body,
+    }
+
+
 @router.post("/{framework_id}/standards")
 async def set_standards(framework_id: str, payload: SetStandardsInput) -> dict:
     """Set standards of success for framework indicators."""

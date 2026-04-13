@@ -164,6 +164,30 @@ class MEFrameworkPlatformService:
             "generated_at": datetime.now(UTC).isoformat(),
         }
 
+    def validate_program_logic(self, logic_doc: dict) -> tuple[bool, list[str]]:
+        """Validate outcome chain completeness and AIDR compliance."""
+        issues: list[str] = []
+        # Check all elements are connected
+        all_ids: set[str] = set()
+        for key in ["resources_inputs", "activities", "outputs", "intermediate_outcomes"]:
+            for el in logic_doc.get(key, []):
+                all_ids.add(el.get("element_id", ""))
+        for fo in logic_doc.get("final_outcomes", []):
+            all_ids.add(fo.get("element_id", ""))
+
+        for link in logic_doc.get("outcome_chain_links", []):
+            if link.get("from_element_id") not in all_ids:
+                issues.append(f"Chain link references unknown from_element_id: {link.get('from_element_id')}")
+            if link.get("to_element_id") not in all_ids:
+                issues.append(f"Chain link references unknown to_element_id: {link.get('to_element_id')}")
+
+        # Check sustainability/resilience separation
+        final_types = set(fo.get("objective_type") for fo in logic_doc.get("final_outcomes", []))
+        if "sustainability" not in final_types and "resilience" not in final_types:
+            issues.append("Final outcomes should include at least sustainability or resilience objectives")
+
+        return len(issues) == 0, issues
+
     async def create_evaluation_report(
         self,
         framework_id: str,

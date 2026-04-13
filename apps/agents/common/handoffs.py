@@ -158,6 +158,20 @@ def build_plan_activation_handoff(
     )
 
 
+def build_evaluation_lessons_handoff(
+    *, incident_id: str, report_id: str, recommendations: list[dict],
+) -> AgentHandoffEvent:
+    """Build a handoff from evaluation report recommendations to lessons management."""
+    return build_handoff(
+        incident_id=incident_id,
+        source_agent="monitoring",
+        target_agent="lessons_management",
+        scope_key=f"evaluation_lessons:{report_id}",
+        payload={"report_id": report_id, "recommendations": recommendations},
+        confidence=0.85,
+    )
+
+
 def build_me_framework_handoff(
     *,
     incident_id: str,

@@ -56,6 +56,18 @@ def build_deactivation_update(
     }
 
 
+def link_stakeholder_engagement(
+    planning_engagement_log: list[dict],
+    recovery_community_definition: str,
+) -> dict:
+    """Link planning stakeholder engagement to recovery community-led approach."""
+    return {
+        "planning_stakeholders": len(planning_engagement_log),
+        "recovery_community": recovery_community_definition,
+        "continuity_status": "linked" if planning_engagement_log else "no_planning_data",
+    }
+
+
 def should_trigger_me_framework(plan_doc: dict) -> bool:
     """Check if plan activation should trigger M&E framework initialisation.
 

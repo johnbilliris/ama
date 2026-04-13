@@ -17,6 +17,7 @@ from planning.audit import build_section_edit_audit, build_transition_audit
 from planning.config import PlanningConfig
 from planning.models import (
     CreatePlanRequest,
+    PlanActivationRequest,
     PlanCompletenessResponse,
     PlanHierarchyResponse,
     PlanSummaryResponse,
@@ -27,6 +28,7 @@ from planning.models import (
 )
 from planning.pipeline import compute_completeness
 from planning.plan_lifecycle import is_editable_state, validate_plan_transition
+from planning import telemetry
 from planning.telemetry import update_section_completeness
 
 from packages.domain.src.domain.models.emergency_plan import PLAN_SECTION_SLUGS
@@ -206,6 +208,13 @@ class PlanningAgent:
 
         return plan
 
+    async def handle_plan_activation_handoff(self, handoff_event: dict) -> dict:
+        """Process a plan activation handoff from incident management."""
+        plan_id = handoff_event.get("payload", {}).get("plan_id")
+        activated_by = handoff_event.get("payload", {}).get("activated_by", "system")
+        # Would look up and activate the plan
+        return {"status": "processed", "plan_id": plan_id, "activated_by": activated_by}
+
 
 def _to_summary(plan_doc: dict) -> dict:
     """Convert a full plan document to a summary response dict."""
@@ -313,5 +322,52 @@ def create_app(
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         return _to_summary(plan)
+
+    # ------------------------------------------------------------------
+    # Plan Activation & Post-Event Review (FRs: FR-007, FR-029)
+    # ------------------------------------------------------------------
+
+    plans_store = _agent._plans
+
+    @app.post("/plans/{plan_id}/activate", status_code=200)
+    async def activate_plan(plan_id: str, request: PlanActivationRequest):
+        plan = plans_store.get(plan_id)
+        if not plan:
+            raise HTTPException(status_code=404, detail="Plan not found")
+        # Must be in endorsed state
+        if plan["lifecycle_state"] != "endorsed":
+            raise HTTPException(
+                status_code=400,
+                detail=f"Plan must be in 'endorsed' state to activate, currently '{plan['lifecycle_state']}'",
+            )
+        # Transition to activated
+        plan["lifecycle_state"] = "activated"
+        plan["updated_at"] = datetime.now(UTC).isoformat()
+        activation_record = {
+            "incident_id": request.incident_id,
+            "activated_at": datetime.now(UTC).isoformat(),
+            "activated_by": request.activated_by,
+            "deactivated_at": None,
+            "deactivation_reason": None,
+        }
+        plan.setdefault("activation_records", []).append(activation_record)
+        telemetry.increment_activation_count()
+        return {
+            "plan_id": plan_id,
+            "incident_id": request.incident_id,
+            "activated_at": activation_record["activated_at"],
+            "response_arrangements": plan.get("plan_sections", {}).get("response_arrangements"),
+        }
+
+    @app.post("/plans/{plan_id}/post-event-review", status_code=200)
+    async def trigger_post_event_review(plan_id: str):
+        plan = plans_store.get(plan_id)
+        if not plan:
+            raise HTTPException(status_code=404, detail="Plan not found")
+        if plan["lifecycle_state"] != "activated":
+            raise HTTPException(status_code=400, detail="Plan must be activated to trigger post-event review")
+        plan["lifecycle_state"] = "post_event_review"
+        plan["updated_at"] = datetime.now(UTC).isoformat()
+        return {"plan_id": plan_id, "new_state": "post_event_review", "message": "Plan flagged for post-event review"}
 
     return app

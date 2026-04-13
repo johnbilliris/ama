@@ -81,3 +81,43 @@ llm_budget_exceeded = _meter.create_counter(
 llm_confidence_below_threshold = _meter.create_counter(
     "llm.confidence.below_threshold", description="Outputs flagged for human review", unit="events",
 )
+
+# ---------------------------------------------------------------------------
+# M&E metrics (FRs: FR-008–014)
+# ---------------------------------------------------------------------------
+
+_me_metrics: dict[str, float] = {
+    "me_framework_completion_rate": 0.0,
+    "recovery_indicator_collection_rate": 0.0,
+    "outcome_achievement_rate": 0.0,
+}
+
+me_framework_completion = _meter.create_counter(
+    "me.framework.completion", description="M&E framework completion events", unit="events",
+)
+me_indicator_collection = _meter.create_counter(
+    "me.indicator.collection", description="Indicator data collection events", unit="events",
+)
+me_outcome_achievement = _meter.create_counter(
+    "me.outcome.achievement", description="Outcome achievement evaluations", unit="events",
+)
+
+
+def get_me_metrics() -> dict[str, float]:
+    """Return current M&E metric snapshot."""
+    return dict(_me_metrics)
+
+
+def update_me_framework_completion_rate(rate: float) -> None:
+    _me_metrics["me_framework_completion_rate"] = rate
+    me_framework_completion.add(1, {"rate": str(rate)})
+
+
+def update_recovery_indicator_collection_rate(rate: float) -> None:
+    _me_metrics["recovery_indicator_collection_rate"] = rate
+    me_indicator_collection.add(1, {"rate": str(rate)})
+
+
+def update_outcome_achievement_rate(rate: float) -> None:
+    _me_metrics["outcome_achievement_rate"] = rate
+    me_outcome_achievement.add(1, {"rate": str(rate)})

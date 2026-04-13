@@ -99,6 +99,13 @@ async def transition_plan(plan_id: str, payload: TransitionInput, region_id: str
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
+@router.get("/by-incident/{incident_id}")
+async def get_plans_for_incident(incident_id: str):
+    """Find emergency plans relevant to an incident's region."""
+    # Would query by region linked to the incident
+    return {"incident_id": incident_id, "plans": [], "message": "Query plans by incident region"}
+
+
 @router.get("/{plan_id}/completeness")
 async def get_completeness(plan_id: str, region_id: str = "") -> dict:
     try:

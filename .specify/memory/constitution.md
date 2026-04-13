@@ -280,6 +280,9 @@ The platform SHALL embody the shared responsibility model:
 | Australian Warning System Companion     | 2022 | V-A                        |
 | Community Recovery Handbook             | 2018 | VII, VII-A, VII-B, VII-C   |
 | Emergency Management Arrangements       | 2023 | II, PPRR, Shared Resp, NCM |
+| Emergency Planning Handbook             | 2020 | FR-001–007, FR-007a          |
+| M&E Framework for Disaster Recovery     | v2   | FR-008–014, VII-A            |
+| Outcomes, Activities and Indicators     | 2020 | FR-015–024, VII-B            |
 
 ---
 *Version 1.1.0 · Last Amended 2025-07-17*
