@@ -1,0 +1,191 @@
+# API Contract: AI-Assisted Analysis
+
+**Base path**: `/api/incidents/{incident_id}/analysis`  
+**FRs**: FR-025–028  
+**Service**: Monitoring Agent (`apps/agents/monitoring/`) — indicator analysis extension  
+**Auth**: Recovery Coordinator (request analysis), Incident Controller (view)
+
+---
+
+## Endpoints
+
+### POST /api/incidents/{incident_id}/analysis/cross-domain
+
+**New** — Run AI-assisted cross-domain correlation analysis (FR-025).
+
+**Request body**:
+```json
+{
+  "domains_to_analyse": ["social", "economic", "built", "natural"],
+  "lookback_periods": 3,
+  "include_recommendations": true,
+  "requested_by": "recovery-coordinator-001"
+}
+```
+
+**Response**: `200 OK`
+```json
+{
+  "incident_id": "inc-2025-fire-001",
+  "analysis_timestamp": "2025-07-19T16:00:00Z",
+  "indicators_analysed": 42,
+  "correlations": [
+    {
+      "correlation_id": "corr-001",
+      "primary_domain": "built",
+      "primary_indicator": "essential_services",
+      "secondary_domain": "economic",
+      "secondary_indicator": "business_continuity",
+      "correlation_type": "positive",
+      "strength": "strong",
+      "description": "Delays in essential services restoration (water, power) in the built environment are strongly correlated with reduced business reopening rates in the economic domain.",
+      "evidence": {
+        "primary_trend": "stagnant",
+        "secondary_trend": "declining",
+        "data_points": 6,
+        "time_lag_periods": 1
+      }
+    },
+    {
+      "correlation_id": "corr-002",
+      "primary_domain": "social",
+      "primary_indicator": "access_to_housing",
+      "secondary_domain": "social",
+      "secondary_indicator": "social_belonging",
+      "correlation_type": "positive",
+      "strength": "moderate",
+      "description": "Housing displacement is moderately correlated with reduced social connectedness, as displaced residents lose proximity to their existing social networks.",
+      "evidence": {
+        "primary_trend": "improving",
+        "secondary_trend": "improving",
+        "data_points": 4,
+        "time_lag_periods": 0
+      }
+    }
+  ],
+  "content_safety_result": "passed",
+  "generated_by": "ai_assisted"
+}
+```
+
+**Performance**: ≤30 seconds for up to 50 active indicators (NFR-004).
+
+**Validation**:
+- At least 2 data collection periods required per indicator for meaningful trend analysis.
+- All AI-generated correlation descriptions pass content safety validation (FR-028).
+- If insufficient data points for statistical significance, `strength` is `"insufficient_data"` and description notes the limitation.
+
+### POST /api/incidents/{incident_id}/analysis/recommendations
+
+**New** — Generate activity recommendations for lagging indicators (FR-026).
+
+**Request body**:
+```json
+{
+  "lagging_threshold": 0.7,
+  "requested_by": "recovery-coordinator-001"
+}
+```
+
+**Response**: `200 OK`
+```json
+{
+  "incident_id": "inc-2025-fire-001",
+  "recommendations": [
+    {
+      "indicator_id": "aidr:economic:employment:ind:1",
+      "indicator_title": "Employment rate in affected area",
+      "current_value": 0.62,
+      "standard_value": 0.85,
+      "gap_percentage": 27,
+      "recommended_activities": [
+        {
+          "activity_id": "aidr:economic:employment:act:1",
+          "title": "Establish local employment support programs",
+          "rationale": "Employment rate is 27% below the standard of success. This activity directly targets workforce re-engagement through skills retraining and job placement services.",
+          "priority": "high"
+        },
+        {
+          "activity_id": "aidr:economic:economic-diversity:act:2",
+          "title": "Support alternative livelihood development",
+          "rationale": "Diversifying economic activity can reduce dependency on sectors disrupted by the disaster.",
+          "priority": "medium"
+        }
+      ]
+    }
+  ],
+  "content_safety_result": "passed",
+  "generated_by": "ai_assisted"
+}
+```
+
+**Note**: Recommendations are sourced from the AIDR catalogue (`recovery-catalogue` container) and enriched with LLM-generated rationale. All AI content passes content safety validation (FR-028).
+
+### POST /api/incidents/{incident_id}/analysis/community-summary
+
+**New** — Generate a plain-language community-facing recovery summary (FR-027).
+
+**Request body**:
+```json
+{
+  "target_audience": "community",
+  "domains_to_include": ["social", "economic", "built", "natural"],
+  "requested_by": "recovery-coordinator-001"
+}
+```
+
+**Response**: `200 OK`
+```json
+{
+  "incident_id": "inc-2025-fire-001",
+  "summary_title": "Lismore Bushfire Recovery Update — July 2025",
+  "plain_language_summary": "Recovery is progressing across the Lismore community. Housing repairs are ahead of schedule with 72% of affected homes now habitable. The community health program has reached over 2,000 residents. Local businesses are reopening, though some areas still face power supply challenges. Environmental rehabilitation of fire-affected bushland is in early stages with native species re-planting underway.",
+  "domain_summaries": [
+    {
+      "domain": "social",
+      "status": "improving",
+      "key_highlight": "Community health outreach has reached 2,100 residents",
+      "areas_of_focus": "Ongoing psychosocial support for displaced families"
+    },
+    {
+      "domain": "economic",
+      "status": "mixed",
+      "key_highlight": "65% of local businesses have reopened",
+      "areas_of_focus": "Employment support programs being expanded"
+    },
+    {
+      "domain": "built",
+      "status": "progressing",
+      "key_highlight": "72% of affected housing restored",
+      "areas_of_focus": "Essential services in outer areas still being restored"
+    },
+    {
+      "domain": "natural",
+      "status": "early_stage",
+      "key_highlight": "Environmental assessment complete",
+      "areas_of_focus": "Native species re-planting program commenced"
+    }
+  ],
+  "content_safety_result": "passed",
+  "generated_by": "ai_assisted"
+}
+```
+
+**Validation**:
+- All AI-generated content passes `ContentSafetyValidator` (FR-028).
+- Excludes sensitive social data (no individual-level information).
+- Language level targets general public comprehension (SC-007: 85% rated "clear and understandable").
+
+---
+
+## Graceful Degradation
+
+- If LLM unavailable: cross-domain analysis returns statistical correlations without natural-language descriptions; recommendations return matched activities without LLM-generated rationale; community summaries return structured data without plain-language text.
+- If indicator data insufficient: analysis returns `insufficient_data` flag with minimum data requirements noted.
+- If content safety fails: AI content is withheld; response includes `content_safety_result: "failed"` and falls back to structured (non-AI) data.
+
+## Observability Metrics
+
+- `ai_analysis_latency_ms` — Histogram: time to complete cross-domain analysis
+- `ai_recommendation_count` — Counter: activity recommendations generated
+- `ai_content_safety_failures` — Counter: content safety validation failures

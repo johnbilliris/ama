@@ -93,6 +93,20 @@ class MonitoringConfig:
         default_factory=lambda: float(os.getenv("LLM_MONTHLY_BUDGET_USD", "50.0"))
     )
 
+    # M&E Configuration
+    max_concurrent_me_frameworks: int = field(
+        default_factory=lambda: int(os.getenv("MAX_CONCURRENT_ME_FRAMEWORKS", "10"))
+    )
+    indicator_staleness_days: int = field(
+        default_factory=lambda: int(os.getenv("INDICATOR_STALENESS_DAYS", "7"))
+    )
+    ai_analysis_timeout_seconds: float = field(
+        default_factory=lambda: float(os.getenv("AI_ANALYSIS_TIMEOUT_SECONDS", "30"))
+    )
+    catalogue_cache_ttl_seconds: int = field(
+        default_factory=lambda: int(os.getenv("CATALOGUE_CACHE_TTL_SECONDS", "3600"))
+    )
+
     def __post_init__(self) -> None:
         """Validate LLM configuration values immediately after construction."""
         if self.llm_model_tier not in ("reasoning", "drafting"):

@@ -1,0 +1,277 @@
+# API Contract: Emergency Planning Agent
+
+**Base path**: `/api/planning`  
+**FRs**: FR-001–007, FR-007a, FR-029  
+**Service**: Planning Agent (`apps/agents/planning/`)  
+**Auth**: AIIMS role-based — Planning Officer (create/edit), Incident Controller (activate), Designated Authority (endorse)
+
+---
+
+## Endpoints
+
+### POST /api/planning/plans
+
+**New** — Create a new emergency plan and initialise the 9-step planning process.
+
+**Request body**:
+```json
+{
+  "title": "Lismore Region Flood Emergency Plan 2025",
+  "region_id": "nsw-northern-rivers",
+  "hazard_types": ["flood", "storm"],
+  "hierarchy_level": "regional",
+  "parent_plan_id": "ep-nsw-state-flood-2024",
+  "security_rating": "official",
+  "authority": "Northern Rivers Emergency Management Committee",
+  "created_by": "planning-officer-001"
+}
+```
+
+**Response**: `201 Created`
+```json
+{
+  "plan_id": "ep-a1b2c3d4",
+  "title": "Lismore Region Flood Emergency Plan 2025",
+  "region_id": "nsw-northern-rivers",
+  "hazard_types": ["flood", "storm"],
+  "hierarchy_level": "regional",
+  "parent_plan_id": "ep-nsw-state-flood-2024",
+  "lifecycle_state": "draft",
+  "version": 1,
+  "security_rating": "official",
+  "planning_process": {
+    "current_step": 1,
+    "total_steps": 9,
+    "steps_completed": 0
+  },
+  "created_at": "2025-07-19T10:00:00Z"
+}
+```
+
+**Side effects**: Creates both the EmergencyPlan and PlanningProcessRecord documents. Initialises all 27 plan sections with `is_complete: false`.
+
+### GET /api/planning/plans/{plan_id}
+
+**New** — Retrieve a full emergency plan with all sections and process status.
+
+**Response**: `200 OK` — Full `EmergencyPlan` with nested `PlanningProcessRecord`.
+
+**Performance**: ≤2 seconds (single document read from Cosmos).
+
+### GET /api/planning/plans
+
+**New** — List plans, filtered by region, hierarchy level, or lifecycle state.
+
+**Query parameters**:
+- `region_id` (optional) — Filter by geographic region
+- `hierarchy_level` (optional) — Filter by `national|state|regional|local`
+- `lifecycle_state` (optional) — Filter by lifecycle state
+- `hazard_type` (optional) — Filter by hazard type
+
+**Response**: `200 OK` — Paginated list of plan summaries.
+
+### PUT /api/planning/plans/{plan_id}/sections/{section_slug}
+
+**New** — Update a specific plan section content.
+
+**Request body**:
+```json
+{
+  "content": "## Aim and Objectives\n\nThis plan aims to...",
+  "edited_by": "planning-officer-001"
+}
+```
+
+**Response**: `200 OK` with updated `PlanSection`.
+
+**Validation**:
+- `section_slug` must be one of the 27 defined section slugs.
+- Only permitted when `lifecycle_state` is `draft`, `in_consultation`, or `post_event_review`.
+
+### POST /api/planning/plans/{plan_id}/transition
+
+**New** — Transition a plan to a new lifecycle state (FR-006).
+
+**Request body**:
+```json
+{
+  "target_state": "in_consultation",
+  "authorised_by": "planning-officer-001",
+  "authorisation_role": "planning_officer",
+  "rationale": "All initial sections drafted, ready for stakeholder consultation",
+  "incident_id": null
+}
+```
+
+**Response**: `200 OK`
+```json
+{
+  "plan_id": "ep-a1b2c3d4",
+  "previous_state": "draft",
+  "current_state": "in_consultation",
+  "transitioned_at": "2025-07-19T14:00:00Z",
+  "authorised_by": "planning-officer-001"
+}
+```
+
+**Validation**:
+- Transition must be valid per the state machine (FR-006 transitions table).
+- `authorisation_role` must match the required role for the transition.
+- `incident_id` required when transitioning to `activated` state.
+
+**Error responses**:
+- `400 Bad Request` — Invalid transition or missing authorization
+- `403 Forbidden` — Insufficient role for this transition
+- `409 Conflict` — Plan already in requested state
+
+### POST /api/planning/plans/{plan_id}/activate
+
+**New** — Activate a plan for a live incident (FR-007). Shortcut for `transition` to `activated`.
+
+**Request body**:
+```json
+{
+  "incident_id": "inc-2025-floods-001",
+  "activated_by": "incident-controller-001"
+}
+```
+
+**Response**: `200 OK`
+```json
+{
+  "plan_id": "ep-a1b2c3d4",
+  "incident_id": "inc-2025-floods-001",
+  "lifecycle_state": "activated",
+  "activation_record": {
+    "incident_id": "inc-2025-floods-001",
+    "activated_at": "2025-07-19T16:00:00Z",
+    "activated_by": "incident-controller-001"
+  },
+  "response_arrangements": { "...": "plan's response section content" },
+  "roles_responsibilities": { "...": "plan's roles section content" },
+  "resource_requirements": { "...": "plan's resource section content" },
+  "communication_protocols": { "...": "plan's communication section content" }
+}
+```
+
+**Performance**: ≤10 seconds for activation and content retrieval (SC-008).
+
+**Validation**:
+- Plan must be in `endorsed` state.
+- If plan is being revised (edge case), activates last endorsed version.
+- Only Incident Controller role can activate.
+
+### GET /api/planning/plans/by-region/{region_id}/hierarchy
+
+**New** — Display plan hierarchy for a region (FR-005).
+
+**Response**: `200 OK`
+```json
+{
+  "region_id": "nsw-northern-rivers",
+  "hierarchy": [
+    {
+      "plan_id": "ep-national-flood-2024",
+      "title": "National Flood Emergency Plan",
+      "hierarchy_level": "national",
+      "lifecycle_state": "endorsed",
+      "children": [
+        {
+          "plan_id": "ep-nsw-state-flood-2024",
+          "title": "NSW State Flood Emergency Plan",
+          "hierarchy_level": "state",
+          "lifecycle_state": "endorsed",
+          "children": [
+            {
+              "plan_id": "ep-a1b2c3d4",
+              "title": "Lismore Region Flood Emergency Plan 2025",
+              "hierarchy_level": "regional",
+              "lifecycle_state": "draft",
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "interoperability_flags": [
+    {"issue": "Terminology mismatch: parent uses 'evacuation centre', child uses 'relief centre'", "plans": ["ep-nsw-state-flood-2024", "ep-a1b2c3d4"]}
+  ]
+}
+```
+
+### PUT /api/planning/plans/{plan_id}/process/steps/{step_number}
+
+**New** — Update a planning process step status (FR-001).
+
+**Request body**:
+```json
+{
+  "is_complete": true,
+  "completed_by": "planning-officer-001",
+  "notes": "Risk assessment completed across all four environments"
+}
+```
+
+**Response**: `200 OK` with updated `StepCompletion`.
+
+### GET /api/planning/plans/{plan_id}/completeness
+
+**New** — Validate plan completeness against AIDR requirements (FR-004).
+
+**Response**: `200 OK`
+```json
+{
+  "plan_id": "ep-a1b2c3d4",
+  "total_sections": 27,
+  "complete_sections": 22,
+  "incomplete_sections": ["financial_management", "exercise_schedule", "relief_arrangements", "recovery_arrangements", "public_education"],
+  "planning_principles": {
+    "risk_informed": true,
+    "reducing_unknowns": true,
+    "collaborative_inclusive": true,
+    "strategic": true,
+    "solutions_oriented": false,
+    "iterative": true,
+    "adaptive_capacity": false,
+    "shared_responsibility": true
+  },
+  "overall_readiness": 0.81
+}
+```
+
+---
+
+## Health Endpoint
+
+### GET /health
+
+Standard agent health endpoint (per project conventions).
+
+**Response**: `200 OK`
+```json
+{
+  "status": "healthy",
+  "agent_version": "0.1.0",
+  "timestamp": "2025-07-19T10:00:00Z",
+  "checks": {
+    "llm_connectivity": { "status": "configured", "last_checked_at": "...", "latency_ms": 0 },
+    "cosmos_connectivity": { "status": "healthy", "container": "emergency-plans" },
+    "plan_assembly_pipeline": { "status": "ready" }
+  }
+}
+```
+
+---
+
+## Graceful Degradation
+
+- If Cosmos DB unavailable: health endpoint returns `degraded`, plan reads return `503` with cached last-known plan (if available).
+- If LLM unavailable: plan generation works without AI-assisted completeness suggestions; manual completeness checking still functional.
+- If activated plan version conflicts with in-progress draft: activates last endorsed version (edge case handling).
+
+## Observability Metrics
+
+- `emergency_plan_activation_count` — Counter: plan activations per region
+- `plan_currency_compliance_ratio` — Gauge: ratio of plans within review schedule
+- `plan_section_completeness` — Gauge: average section completeness across active plans

@@ -1,0 +1,925 @@
+{
+  "domain": "social",
+  "outcomes": [
+    {
+      "outcome_id": "aidr:social:community-health-levels",
+      "objective_type": "sustainability",
+      "title": "Community health levels restored",
+      "description": "Physical health outcomes across the affected community have been restored to at least pre-disaster levels, with health services addressing both immediate disaster-related health impacts and longer-term chronic health conditions exacerbated by the disaster.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:community-health-levels:act:1",
+          "title": "Conduct community health needs assessments",
+          "description": "Undertake comprehensive health needs assessments to identify disaster-related health impacts and emerging health issues across the affected population, with particular attention to vulnerable groups."
+        },
+        {
+          "activity_id": "aidr:social:community-health-levels:act:2",
+          "title": "Deliver targeted health promotion and prevention programs",
+          "description": "Implement health promotion initiatives addressing identified post-disaster health risks including respiratory conditions, waterborne illness, and chronic disease management disruptions."
+        },
+        {
+          "activity_id": "aidr:social:community-health-levels:act:3",
+          "title": "Coordinate health service recovery and surge capacity",
+          "description": "Work with health service providers to restore disrupted services, address backlogs, and maintain surge capacity for ongoing disaster-related health presentations."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:community-health-levels:ind:1",
+          "title": "Self-reported health status compared to pre-disaster baseline",
+          "description": "Proportion of community members reporting their health status as good, very good, or excellent compared to pre-disaster survey data.",
+          "data_collection_methodology": "Population health survey using SF-12 or equivalent validated health status instrument, administered annually and benchmarked against pre-disaster data.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:community-health-levels:ind:2",
+          "title": "Rates of disaster-related health presentations",
+          "description": "Trends in emergency department and GP presentations for disaster-related health conditions including respiratory illness, injury follow-up, and stress-related conditions.",
+          "data_collection_methodology": "Health service utilisation data extracted from hospital and primary care information systems, analysed monthly with trend comparison to pre-disaster patterns.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:community-health-levels:ind:3",
+          "title": "Community health service accessibility",
+          "description": "Assessment of whether health services are accessible, available, and meeting the needs of the disaster-affected community.",
+          "data_collection_methodology": "Health service access audit combining service mapping, wait time analysis, and community satisfaction surveys conducted biannually.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:adequate-affordable-housing",
+      "objective_type": "sustainability",
+      "title": "Access to adequate and affordable housing",
+      "description": "All disaster-affected residents have access to safe, adequate, and affordable housing that meets their needs, whether through repair of existing homes, rebuilding, or relocation to suitable alternative accommodation.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:adequate-affordable-housing:act:1",
+          "title": "Provide temporary and transitional housing support",
+          "description": "Ensure displaced residents have access to appropriate temporary accommodation while permanent housing solutions are being arranged, including rental assistance and emergency housing."
+        },
+        {
+          "activity_id": "aidr:social:adequate-affordable-housing:act:2",
+          "title": "Facilitate housing repair and rebuilding programs",
+          "description": "Coordinate and support programs that assist residents with repairing, rebuilding, or replacing disaster-damaged homes, including financial assistance, builder coordination, and quality assurance."
+        },
+        {
+          "activity_id": "aidr:social:adequate-affordable-housing:act:3",
+          "title": "Monitor and address housing affordability impacts",
+          "description": "Track housing market changes resulting from the disaster and implement measures to prevent displacement of vulnerable residents due to increased housing costs."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:adequate-affordable-housing:ind:1",
+          "title": "Percentage of displaced residents in permanent housing",
+          "description": "Proportion of disaster-displaced residents who have secured permanent housing solutions, whether through return to repaired homes, rebuilding, or relocation.",
+          "data_collection_methodology": "Housing recovery tracking database maintained by recovery coordinators, updated monthly through direct follow-up with displaced households.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:adequate-affordable-housing:ind:2",
+          "title": "Housing affordability index in affected areas",
+          "description": "Changes in housing affordability metrics including rental costs, mortgage stress levels, and housing cost as a proportion of household income in disaster-affected areas.",
+          "data_collection_methodology": "Analysis of real estate market data, rental databases, and household income surveys conducted quarterly and compared to pre-disaster benchmarks.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:adequate-affordable-housing:ind:3",
+          "title": "Resident satisfaction with housing outcomes",
+          "description": "Level of satisfaction among disaster-affected residents with their housing situation including adequacy, safety, location, and affordability.",
+          "data_collection_methodology": "Housing satisfaction survey administered to disaster-affected residents at 6-monthly intervals, covering multiple dimensions of housing quality and suitability.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:social-networks-connectedness",
+      "objective_type": "sustainability",
+      "title": "Social networks and community connectedness restored",
+      "description": "Social networks, friendships, and community connections that were disrupted by the disaster have been rebuilt, and new connections formed during recovery have been strengthened and sustained.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:social-networks-connectedness:act:1",
+          "title": "Fund community connection events and activities",
+          "description": "Support regular community gatherings, social events, and shared activities that bring people together and help rebuild social networks disrupted by displacement and disaster impacts."
+        },
+        {
+          "activity_id": "aidr:social:social-networks-connectedness:act:2",
+          "title": "Support community groups and associations to re-establish",
+          "description": "Provide resources and assistance to community groups, sporting clubs, and social organisations to resume activities and rebuild membership following disaster disruption."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:social-networks-connectedness:ind:1",
+          "title": "Social network density and quality measures",
+          "description": "Assessment of the number and quality of social connections maintained by community members, including close relationships, neighbourhood contacts, and community group memberships.",
+          "data_collection_methodology": "Social network survey using validated social capital instruments, administered annually to a representative sample of disaster-affected residents.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:social-networks-connectedness:ind:2",
+          "title": "Community group and association activity levels",
+          "description": "Number of active community groups, clubs, and associations operating in the affected area compared to pre-disaster levels, and their membership and activity frequency.",
+          "data_collection_methodology": "Community organisation census conducted annually, collecting data on group status, membership numbers, and activity frequency from all registered community organisations.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:education-learning-continuity",
+      "objective_type": "sustainability",
+      "title": "Education and learning continuity maintained",
+      "description": "Education services from early childhood through to tertiary have been restored, learning disruptions minimised, and students supported to recover academically and socially from disaster impacts.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:education-learning-continuity:act:1",
+          "title": "Restore education facility access and functionality",
+          "description": "Repair or provide alternative education facilities to ensure all students have access to appropriate learning environments as quickly as possible after the disaster."
+        },
+        {
+          "activity_id": "aidr:social:education-learning-continuity:act:2",
+          "title": "Provide student wellbeing and academic catch-up support",
+          "description": "Implement programs to support students' emotional wellbeing and help them recover from learning disruptions, including counselling services, tutoring, and modified assessment arrangements."
+        },
+        {
+          "activity_id": "aidr:social:education-learning-continuity:act:3",
+          "title": "Support educators and education staff recovery",
+          "description": "Provide wellbeing support and professional development to teachers and education staff who may themselves be disaster-affected while supporting student recovery."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:education-learning-continuity:ind:1",
+          "title": "Student attendance and enrolment rates",
+          "description": "School attendance rates and enrolment numbers in disaster-affected areas compared to pre-disaster levels and state averages.",
+          "data_collection_methodology": "Education department administrative data on attendance and enrolment, analysed at school and regional level on a term-by-term basis.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:education-learning-continuity:ind:2",
+          "title": "Student academic performance recovery",
+          "description": "Student academic achievement outcomes in disaster-affected schools compared to pre-disaster trends and comparable non-affected schools.",
+          "data_collection_methodology": "Analysis of standardised test results (e.g., NAPLAN) and school-based assessment data, comparing trajectories before and after the disaster.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:education-learning-continuity:ind:3",
+          "title": "Student and educator wellbeing assessment",
+          "description": "Self-reported wellbeing levels of students and education staff in disaster-affected schools, including indicators of psychological distress and resilience.",
+          "data_collection_methodology": "Wellbeing surveys administered through school wellbeing programs at the start and end of each school year, using age-appropriate validated instruments.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:psychosocial-support-wellbeing",
+      "objective_type": "sustainability",
+      "title": "Psychosocial support and community wellbeing",
+      "description": "Comprehensive psychosocial support is available and accessible to all affected community members, promoting emotional recovery, wellbeing, and positive mental health outcomes across the recovery journey.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:psychosocial-support-wellbeing:act:1",
+          "title": "Deliver tiered psychosocial support programs",
+          "description": "Implement a continuum of psychosocial support from community-level wellbeing activities through to targeted psychological interventions for those with more complex needs."
+        },
+        {
+          "activity_id": "aidr:social:psychosocial-support-wellbeing:act:2",
+          "title": "Train community members in psychological first aid",
+          "description": "Build community capacity to provide peer support by training community leaders, volunteers, and front-line workers in psychological first aid and mental health literacy."
+        },
+        {
+          "activity_id": "aidr:social:psychosocial-support-wellbeing:act:3",
+          "title": "Establish community wellbeing monitoring and outreach",
+          "description": "Implement proactive outreach and monitoring programs to identify individuals and groups experiencing psychosocial distress and connect them with appropriate support services."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:psychosocial-support-wellbeing:ind:1",
+          "title": "Community psychological distress levels",
+          "description": "Prevalence of psychological distress in the disaster-affected population measured using validated screening tools, tracked over time to monitor recovery trajectories.",
+          "data_collection_methodology": "Population-level psychological distress screening using Kessler-10 or equivalent, administered at 6-monthly intervals to a representative community sample.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:psychosocial-support-wellbeing:ind:2",
+          "title": "Psychosocial service utilisation and accessibility",
+          "description": "Uptake of psychosocial support services by affected community members, including any barriers to access such as wait times, cost, cultural appropriateness, and geographic availability.",
+          "data_collection_methodology": "Service utilisation data from psychosocial support providers combined with community access survey measuring awareness, barriers, and satisfaction.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:safety-and-security",
+      "objective_type": "sustainability",
+      "title": "Community safety and security maintained",
+      "description": "Community members feel safe and secure in their neighbourhoods, with crime rates, family violence, and antisocial behaviour managed effectively and any disaster-related increases addressed through targeted interventions.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:safety-and-security:act:1",
+          "title": "Implement community safety programs in affected areas",
+          "description": "Deliver targeted crime prevention and community safety programs addressing post-disaster security concerns including property crime, scams, and domestic violence."
+        },
+        {
+          "activity_id": "aidr:social:safety-and-security:act:2",
+          "title": "Coordinate multi-agency safety responses",
+          "description": "Establish partnerships between police, community services, and recovery agencies to address safety concerns holistically, recognising the links between disaster stress and safety risks."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:safety-and-security:ind:1",
+          "title": "Crime rates in disaster-affected areas",
+          "description": "Reported crime statistics for disaster-affected areas compared to pre-disaster baseline and non-affected comparison areas, with analysis of disaster-related crime patterns.",
+          "data_collection_methodology": "Police crime statistics analysed at local government area level, with monthly reporting and trend analysis compared to 3-year pre-disaster averages.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:safety-and-security:ind:2",
+          "title": "Community perceptions of safety",
+          "description": "Community members' self-reported feelings of safety and security in their homes and neighbourhoods following the disaster.",
+          "data_collection_methodology": "Community safety perception survey administered biannually, using validated safety and security measures with demographic disaggregation.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:community-capacity-leadership",
+      "objective_type": "resilience",
+      "title": "Community capacity and leadership strengthened",
+      "description": "Local leadership skills, community organisational capacity, and collective problem-solving abilities have been enhanced through the recovery process, leaving the community better equipped to address future challenges.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:community-capacity-leadership:act:1",
+          "title": "Deliver leadership development programs for community members",
+          "description": "Provide training and mentoring opportunities for emerging and existing community leaders to strengthen their skills in governance, project management, advocacy, and community engagement."
+        },
+        {
+          "activity_id": "aidr:social:community-capacity-leadership:act:2",
+          "title": "Support community organisations to build capacity",
+          "description": "Provide grants, training, and technical assistance to local community organisations to strengthen their governance, management, and service delivery capabilities."
+        },
+        {
+          "activity_id": "aidr:social:community-capacity-leadership:act:3",
+          "title": "Create pathways for community participation in decision-making",
+          "description": "Establish formal and informal mechanisms for community members to contribute to recovery decision-making, building civic engagement skills and democratic participation."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:community-capacity-leadership:ind:1",
+          "title": "Number of community leaders trained and active",
+          "description": "Count of community members who have completed leadership development programs and are actively contributing to community recovery and development activities.",
+          "data_collection_methodology": "Training program completion records cross-referenced with community leadership role tracking database, reviewed quarterly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:community-capacity-leadership:ind:2",
+          "title": "Community organisation capacity assessment scores",
+          "description": "Self-assessed and independently verified capacity levels of local community organisations across governance, management, and service delivery dimensions.",
+          "data_collection_methodology": "Organisational capacity assessment tool administered annually to community organisations, combining self-assessment with independent verification of key capabilities.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:cultural-heritage-identity",
+      "objective_type": "sustainability",
+      "title": "Cultural heritage and community identity preserved",
+      "description": "Important cultural heritage assets, practices, and community identity markers have been protected, restored, or adapted following the disaster, maintaining cultural continuity and community sense of place.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:cultural-heritage-identity:act:1",
+          "title": "Document and protect cultural heritage assets at risk",
+          "description": "Identify, document, and implement protective measures for tangible and intangible cultural heritage assets threatened or damaged by the disaster, including buildings, sites, traditions, and stories."
+        },
+        {
+          "activity_id": "aidr:social:cultural-heritage-identity:act:2",
+          "title": "Support cultural expression and identity activities",
+          "description": "Fund and facilitate cultural events, arts projects, and storytelling initiatives that help communities process disaster experiences and maintain cultural identity and sense of place."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:cultural-heritage-identity:ind:1",
+          "title": "Status of identified cultural heritage assets",
+          "description": "Condition and accessibility of identified cultural heritage assets including heritage buildings, sites, collections, and culturally significant landscapes.",
+          "data_collection_methodology": "Cultural heritage asset condition survey conducted annually, using standardised heritage condition assessment criteria and photographic documentation.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:social:cultural-heritage-identity:ind:2",
+          "title": "Community cultural identity and sense of place measures",
+          "description": "Community members' reported connection to place, cultural identity, and sense of belonging in their disaster-affected community.",
+          "data_collection_methodology": "Sense of place and cultural identity survey using validated psychosocial instruments, administered annually with qualitative follow-up through community workshops.",
+          "indicator_type": "qualitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:vulnerable-populations-recovery",
+      "objective_type": "sustainability",
+      "title": "Vulnerable populations supported in recovery",
+      "description": "People who were vulnerable before the disaster or who have become vulnerable due to disaster impacts receive targeted, culturally appropriate support that addresses their specific recovery needs and prevents widening inequity.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:vulnerable-populations-recovery:act:1",
+          "title": "Identify and proactively reach vulnerable populations",
+          "description": "Implement outreach programs to identify individuals and groups with heightened vulnerability, including those not accessing mainstream recovery services, and connect them with appropriate support."
+        },
+        {
+          "activity_id": "aidr:social:vulnerable-populations-recovery:act:2",
+          "title": "Provide tailored recovery support for vulnerable groups",
+          "description": "Design and deliver recovery assistance programs that are adapted to the specific needs, circumstances, and cultural contexts of identified vulnerable population groups."
+        },
+        {
+          "activity_id": "aidr:social:vulnerable-populations-recovery:act:3",
+          "title": "Monitor equity in recovery outcomes",
+          "description": "Track recovery outcomes disaggregated by vulnerability factors to identify and address emerging inequities in the distribution of recovery benefits and services."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:vulnerable-populations-recovery:ind:1",
+          "title": "Recovery outcome equity gap analysis",
+          "description": "Comparison of recovery outcomes between vulnerable population groups and the broader community, measuring whether gaps are narrowing or widening over time.",
+          "data_collection_methodology": "Disaggregated analysis of recovery outcome data by vulnerability indicators including age, disability, income, cultural background, and housing tenure, reported quarterly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:vulnerable-populations-recovery:ind:2",
+          "title": "Vulnerable populations service access and satisfaction",
+          "description": "Extent to which identified vulnerable populations are accessing recovery services and their satisfaction with the appropriateness and effectiveness of support received.",
+          "data_collection_methodology": "Targeted surveys and interviews with vulnerable population groups, conducted by culturally appropriate researchers at 6-monthly intervals.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:access-to-health-services",
+      "objective_type": "sustainability",
+      "title": "Access to health services restored",
+      "description": "Health service infrastructure and workforce capacity have been restored to meet community needs, ensuring equitable access to primary care, specialist services, and allied health across the disaster-affected area.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:access-to-health-services:act:1",
+          "title": "Rebuild and restore health service infrastructure",
+          "description": "Repair or replace damaged health facilities and equipment, and establish temporary services where permanent facilities are being rebuilt."
+        },
+        {
+          "activity_id": "aidr:social:access-to-health-services:act:2",
+          "title": "Address health workforce gaps and retention",
+          "description": "Implement strategies to recruit, retain, and support health professionals in disaster-affected areas, including incentives, accommodation support, and professional development."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:access-to-health-services:ind:1",
+          "title": "Health service availability and wait times",
+          "description": "Availability of GP, specialist, and allied health services in the disaster-affected area, measured by provider-to-population ratios and average wait times.",
+          "data_collection_methodology": "Health service mapping and wait time data collection from health providers and Medicare statistics, analysed quarterly against pre-disaster benchmarks.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:access-to-health-services:ind:2",
+          "title": "Health facility operational status",
+          "description": "Operational status of health facilities in the affected area as a percentage of pre-disaster capacity, including hospitals, clinics, pharmacies, and allied health practices.",
+          "data_collection_methodology": "Health facility status register maintained by the health recovery coordinator, updated monthly with data from facility operators.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:mental-health-recovery",
+      "objective_type": "sustainability",
+      "title": "Mental health recovery supported",
+      "description": "Community mental health outcomes are improving, with accessible and appropriate mental health services available to address the range of disaster-related psychological impacts from normal stress responses through to complex trauma.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:mental-health-recovery:act:1",
+          "title": "Expand mental health service capacity in affected areas",
+          "description": "Increase availability of clinical mental health services including psychologists, psychiatrists, and counsellors in disaster-affected areas through recruitment, telehealth, and visiting services."
+        },
+        {
+          "activity_id": "aidr:social:mental-health-recovery:act:2",
+          "title": "Implement community mental health literacy programs",
+          "description": "Deliver education programs that reduce stigma around mental health, improve recognition of warning signs, and increase knowledge of available support and self-care strategies."
+        },
+        {
+          "activity_id": "aidr:social:mental-health-recovery:act:3",
+          "title": "Provide specialist trauma-informed services",
+          "description": "Ensure availability of specialist trauma-focused psychological therapies for individuals experiencing PTSD, complex grief, and other severe disaster-related mental health conditions."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:mental-health-recovery:ind:1",
+          "title": "Mental health service utilisation rates",
+          "description": "Volume of mental health service access by disaster-affected community members across service tiers, including GP mental health plans, psychological services, and specialist psychiatric care.",
+          "data_collection_methodology": "Mental health service utilisation data from Medicare, state mental health services, and funded recovery counselling programs, analysed monthly with demographic disaggregation.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:mental-health-recovery:ind:2",
+          "title": "Prevalence of PTSD and clinical depression",
+          "description": "Estimated prevalence rates of post-traumatic stress disorder and clinical depression in the disaster-affected population compared to population norms and trajectory over time.",
+          "data_collection_methodology": "Epidemiological survey using validated clinical screening instruments (PCL-5, PHQ-9) administered to representative community samples at annual intervals.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:mental-health-recovery:ind:3",
+          "title": "Community mental health literacy levels",
+          "description": "Community awareness of mental health issues, ability to recognise distress, knowledge of available services, and attitudes toward help-seeking.",
+          "data_collection_methodology": "Mental health literacy survey administered annually using validated instruments, with results compared to national benchmarks and pre-program baselines.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:family-household-recovery",
+      "objective_type": "sustainability",
+      "title": "Family and household recovery supported",
+      "description": "Families and households have been supported to recover from disaster impacts on daily life, relationships, and functioning, with services addressing the diverse needs of different household types and compositions.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:family-household-recovery:act:1",
+          "title": "Provide family support and case management services",
+          "description": "Deliver integrated case management services to disaster-affected families, coordinating access to housing, financial, health, and social support services based on individual household needs."
+        },
+        {
+          "activity_id": "aidr:social:family-household-recovery:act:2",
+          "title": "Support family relationship and functioning programs",
+          "description": "Fund relationship counselling, parenting support, and family strengthening programs to address the strain that disaster recovery places on family relationships and household functioning."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:family-household-recovery:ind:1",
+          "title": "Household recovery progress measures",
+          "description": "Self-assessed recovery progress of disaster-affected households across key life domains including housing, finances, health, employment, and social connections.",
+          "data_collection_methodology": "Household recovery survey using multi-domain recovery assessment tool, administered at 6-monthly intervals to a panel of disaster-affected households.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:social:family-household-recovery:ind:2",
+          "title": "Family violence and relationship breakdown rates",
+          "description": "Trends in family violence reports, intervention orders, and relationship breakdown indicators in disaster-affected areas compared to pre-disaster patterns.",
+          "data_collection_methodology": "Police family violence statistics, family court data, and family service provider data analysed quarterly with trend comparison to pre-disaster baseline.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:social-infrastructure-restored",
+      "objective_type": "sustainability",
+      "title": "Social infrastructure and services restored",
+      "description": "Community facilities, social services, and shared spaces that support community life have been repaired, rebuilt, or replaced, enabling communities to resume social activities and access essential services.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:social-infrastructure-restored:act:1",
+          "title": "Prioritise and fund social infrastructure repair and rebuilding",
+          "description": "Develop prioritised programs to repair, rebuild, or replace community facilities including halls, libraries, community centres, sports facilities, and shared public spaces."
+        },
+        {
+          "activity_id": "aidr:social:social-infrastructure-restored:act:2",
+          "title": "Restore community service delivery",
+          "description": "Support community service organisations to resume and adapt service delivery to meet post-disaster community needs, including temporary arrangements while permanent facilities are restored."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:social-infrastructure-restored:ind:1",
+          "title": "Community facility restoration progress",
+          "description": "Percentage of damaged community facilities that have been repaired, rebuilt, or replaced to operational standard, tracked by facility type and location.",
+          "data_collection_methodology": "Community infrastructure recovery register maintained by local government, tracking damage status, repair progress, and re-opening dates for all affected facilities.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:social-infrastructure-restored:ind:2",
+          "title": "Community service availability and utilisation",
+          "description": "Availability and uptake of community services in disaster-affected areas, measuring whether services have returned to adequate levels to meet community needs.",
+          "data_collection_methodology": "Service provider reporting on service availability, capacity, and client numbers, collected quarterly and compared to pre-disaster service levels.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:recreation-leisure-activities",
+      "objective_type": "sustainability",
+      "title": "Recreation and leisure activities restored",
+      "description": "Recreational facilities, sporting clubs, arts activities, and leisure opportunities have been restored, enabling community members to participate in activities that support wellbeing, social connection, and quality of life.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:recreation-leisure-activities:act:1",
+          "title": "Restore recreational facilities and open spaces",
+          "description": "Repair and reopen parks, playgrounds, sports fields, walking trails, and other recreational facilities damaged by the disaster."
+        },
+        {
+          "activity_id": "aidr:social:recreation-leisure-activities:act:2",
+          "title": "Support sporting and recreational clubs to resume activities",
+          "description": "Provide grants and assistance to sporting clubs, arts groups, and recreational organisations to replace equipment, repair facilities, and resume regular activities."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:recreation-leisure-activities:ind:1",
+          "title": "Recreational facility operational status",
+          "description": "Percentage of recreational facilities and open spaces in the disaster-affected area that are fully operational and accessible to the community.",
+          "data_collection_methodology": "Recreation facility status audit conducted quarterly by local government, documenting operational status, condition, and accessibility of all recreational assets.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:recreation-leisure-activities:ind:2",
+          "title": "Community participation in recreational activities",
+          "description": "Levels of community participation in organised sport, arts, cultural, and recreational activities compared to pre-disaster benchmarks.",
+          "data_collection_methodology": "Participation data collected from sports associations, arts organisations, and recreation providers on a seasonal basis, supplemented by community activity surveys.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:community-confidence-optimism",
+      "objective_type": "resilience",
+      "title": "Community confidence and optimism restored",
+      "description": "Community members express confidence in the future of their community and optimism about recovery prospects, reflecting restored morale and collective belief in the community's ability to thrive.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:community-confidence-optimism:act:1",
+          "title": "Celebrate recovery milestones and achievements",
+          "description": "Publicly acknowledge and celebrate recovery milestones, community achievements, and individual stories of resilience to build collective confidence and positive momentum."
+        },
+        {
+          "activity_id": "aidr:social:community-confidence-optimism:act:2",
+          "title": "Communicate recovery progress transparently",
+          "description": "Provide regular, honest, and accessible updates on recovery progress, addressing both achievements and ongoing challenges to maintain community trust and realistic optimism."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:community-confidence-optimism:ind:1",
+          "title": "Community confidence and optimism index",
+          "description": "Composite measure of community members' confidence in their community's future, optimism about recovery outcomes, and belief in collective capacity to overcome challenges.",
+          "data_collection_methodology": "Community sentiment survey administered biannually using validated hope and optimism scales, with results disaggregated by demographics and geographic area.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:social:community-confidence-optimism:ind:2",
+          "title": "Population retention and return rates",
+          "description": "Trends in population movement including return of displaced residents, new arrivals, and departures as an indirect indicator of community confidence and future prospects.",
+          "data_collection_methodology": "Analysis of population data from census, electoral roll, utility connections, and school enrolments to track population trends in disaster-affected areas.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:volunteering-civic-participation",
+      "objective_type": "resilience",
+      "title": "Volunteering and civic participation enhanced",
+      "description": "The disaster experience has catalysed increased volunteering and civic participation, with more community members actively contributing to community life, recovery activities, and local decision-making.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:volunteering-civic-participation:act:1",
+          "title": "Coordinate and support volunteer engagement in recovery",
+          "description": "Establish volunteer coordination mechanisms that effectively match volunteer offers with recovery needs, provide appropriate training, and manage volunteer wellbeing."
+        },
+        {
+          "activity_id": "aidr:social:volunteering-civic-participation:act:2",
+          "title": "Foster ongoing civic participation pathways",
+          "description": "Create opportunities for community members who engaged during the disaster response and recovery to continue contributing through ongoing volunteering and civic participation roles."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:volunteering-civic-participation:ind:1",
+          "title": "Volunteer participation rates",
+          "description": "Number and proportion of community members actively volunteering in recovery and community development activities, including hours contributed and retention rates.",
+          "data_collection_methodology": "Volunteer management system data aggregated across recovery programs and community organisations, reported quarterly with demographic analysis.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:volunteering-civic-participation:ind:2",
+          "title": "Civic engagement and participation levels",
+          "description": "Community members' participation in public meetings, consultations, governance bodies, and community decision-making processes related to recovery and community development.",
+          "data_collection_methodology": "Attendance records from public meetings and consultations, combined with annual civic participation survey measuring engagement across multiple dimensions.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:social-inclusion-equity",
+      "objective_type": "sustainability",
+      "title": "Social inclusion and equity promoted",
+      "description": "Recovery processes actively promote social inclusion and equity, ensuring that all community members have fair access to recovery support and that pre-existing inequities are not widened by the disaster.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:social-inclusion-equity:act:1",
+          "title": "Apply equity lens to all recovery programs",
+          "description": "Systematically assess recovery programs and services for equity impacts, ensuring that resource distribution and program design address the needs of disadvantaged and marginalised groups."
+        },
+        {
+          "activity_id": "aidr:social:social-inclusion-equity:act:2",
+          "title": "Remove barriers to recovery service access",
+          "description": "Identify and address barriers that prevent disadvantaged groups from accessing recovery services, including language, cultural, geographic, financial, and administrative barriers."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:social-inclusion-equity:ind:1",
+          "title": "Equity in recovery service access",
+          "description": "Analysis of recovery service utilisation patterns by demographic and socioeconomic factors to identify whether disadvantaged groups are accessing services proportionate to their needs.",
+          "data_collection_methodology": "Service utilisation data disaggregated by equity indicators including income, cultural background, disability status, and geographic location, analysed quarterly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:social-inclusion-equity:ind:2",
+          "title": "Recovery outcome equity indicators",
+          "description": "Comparison of recovery outcomes across different population groups to measure whether the recovery process is reducing, maintaining, or widening pre-existing social inequities.",
+          "data_collection_methodology": "Disaggregated analysis of key recovery outcome indicators by socioeconomic and demographic characteristics, reported biannually with trend analysis.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:access-to-information",
+      "objective_type": "sustainability",
+      "title": "Access to timely and accurate recovery information",
+      "description": "Community members have reliable access to clear, accurate, and timely information about recovery programs, services, and progress through multiple accessible channels and formats.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:access-to-information:act:1",
+          "title": "Establish multi-channel recovery communication systems",
+          "description": "Implement comprehensive communication systems using multiple channels including digital, print, radio, face-to-face, and community networks to ensure all community segments can access recovery information."
+        },
+        {
+          "activity_id": "aidr:social:access-to-information:act:2",
+          "title": "Provide accessible and translated information materials",
+          "description": "Produce recovery information in multiple languages and accessible formats including Easy Read, audio, and visual formats to reach diverse community members including those with disabilities."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:access-to-information:ind:1",
+          "title": "Community information access and awareness",
+          "description": "Proportion of community members who report they can easily access accurate information about recovery services, programs, and progress when they need it.",
+          "data_collection_methodology": "Information access survey administered biannually, measuring awareness of information channels, ease of access, and perceived accuracy and usefulness of information received.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:social:access-to-information:ind:2",
+          "title": "Communication channel reach and engagement",
+          "description": "Reach and engagement metrics across recovery communication channels, measuring how effectively information is reaching different community segments.",
+          "data_collection_methodology": "Communication analytics including website visits, social media engagement, newsletter distribution, event attendance, and media coverage, reported monthly.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:child-youth-wellbeing",
+      "objective_type": "sustainability",
+      "title": "Child and youth wellbeing supported",
+      "description": "Children and young people affected by the disaster are supported through age-appropriate services and programs that address their specific developmental, educational, social, and emotional recovery needs.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:child-youth-wellbeing:act:1",
+          "title": "Deliver child and youth focused recovery programs",
+          "description": "Implement age-appropriate programs that support children and young people to process disaster experiences, build coping skills, and maintain positive developmental trajectories."
+        },
+        {
+          "activity_id": "aidr:social:child-youth-wellbeing:act:2",
+          "title": "Strengthen child and family support services",
+          "description": "Enhance early childhood, child protection, and family support services to address increased demand and complexity of need resulting from disaster impacts on families with children."
+        },
+        {
+          "activity_id": "aidr:social:child-youth-wellbeing:act:3",
+          "title": "Engage young people in recovery planning and activities",
+          "description": "Create meaningful opportunities for young people to contribute to recovery planning and community rebuilding, recognising their capacity and ensuring their voices are heard."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:child-youth-wellbeing:ind:1",
+          "title": "Child and youth wellbeing outcome measures",
+          "description": "Validated measures of child and youth wellbeing across emotional, social, and developmental domains for disaster-affected children compared to age-appropriate norms.",
+          "data_collection_methodology": "Strengths and Difficulties Questionnaire (SDQ) or equivalent child wellbeing instrument administered through schools and early childhood services at annual intervals.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:child-youth-wellbeing:ind:2",
+          "title": "Youth engagement in recovery activities",
+          "description": "Level of meaningful participation by young people in recovery planning, community activities, and peer support programs.",
+          "data_collection_methodology": "Youth participation records from recovery programs and youth-led initiatives, supplemented by youth experience surveys conducted biannually.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:elder-care-support",
+      "objective_type": "sustainability",
+      "title": "Elder care and support services maintained",
+      "description": "Older community members receive appropriate support to recover from disaster impacts, with aged care services restored and enhanced to address the particular vulnerabilities and needs of elderly residents.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:elder-care-support:act:1",
+          "title": "Restore and enhance aged care services",
+          "description": "Rebuild disrupted aged care service capacity including home care, residential care, and community-based support services for older people in the disaster-affected area."
+        },
+        {
+          "activity_id": "aidr:social:elder-care-support:act:2",
+          "title": "Implement proactive outreach to isolated older residents",
+          "description": "Establish regular welfare checking and outreach programs for older residents who may be isolated, have lost social connections, or have difficulty accessing recovery services."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:elder-care-support:ind:1",
+          "title": "Aged care service availability and access",
+          "description": "Availability and accessibility of aged care services in the disaster-affected area compared to pre-disaster levels, including wait times, service gaps, and unmet demand.",
+          "data_collection_methodology": "Aged care service provider data on capacity, wait lists, and service delivery volumes, collected quarterly and compared to pre-disaster service levels.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:elder-care-support:ind:2",
+          "title": "Older persons recovery wellbeing measures",
+          "description": "Self-reported wellbeing and recovery progress of older community members, including social isolation levels, health status, and housing satisfaction.",
+          "data_collection_methodology": "Older persons wellbeing survey administered biannually through aged care service providers and community organisations, using age-appropriate instruments.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:disability-support-services",
+      "objective_type": "sustainability",
+      "title": "Disability support services restored and accessible",
+      "description": "People with disabilities have equitable access to recovery support and their ongoing disability services have been restored, with recovery processes designed to be inclusive and accessible to people of all abilities.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:disability-support-services:act:1",
+          "title": "Restore disability service capacity and continuity",
+          "description": "Rebuild disrupted disability support services including NDIS service provision, respite care, and specialist accommodation to ensure continuity of care for people with disabilities."
+        },
+        {
+          "activity_id": "aidr:social:disability-support-services:act:2",
+          "title": "Ensure recovery services are disability accessible",
+          "description": "Audit and adapt recovery services, information, and facilities to ensure they are fully accessible to people with physical, sensory, intellectual, and psychosocial disabilities."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:disability-support-services:ind:1",
+          "title": "Disability service restoration status",
+          "description": "Operational status of disability support services in the affected area as a proportion of pre-disaster capacity, including specialist services, accommodation, and community supports.",
+          "data_collection_methodology": "Disability service provider operational data collected quarterly, measuring service capacity, client numbers, and wait times against pre-disaster benchmarks.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:disability-support-services:ind:2",
+          "title": "Recovery service accessibility for people with disabilities",
+          "description": "Assessment of the accessibility of recovery services, information, and physical environments for people with different types of disabilities.",
+          "data_collection_methodology": "Accessibility audit of recovery services conducted biannually using universal design criteria, supplemented by feedback from disability advocacy organisations.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:multicultural-community-support",
+      "objective_type": "sustainability",
+      "title": "Multicultural community support provided",
+      "description": "Culturally and linguistically diverse community members are supported through culturally appropriate recovery services, with language barriers addressed and cultural needs respected throughout the recovery process.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:multicultural-community-support:act:1",
+          "title": "Provide culturally and linguistically appropriate recovery services",
+          "description": "Ensure recovery services are delivered in a culturally sensitive manner with language support, cultural liaison workers, and materials in community languages."
+        },
+        {
+          "activity_id": "aidr:social:multicultural-community-support:act:2",
+          "title": "Engage multicultural community leaders in recovery planning",
+          "description": "Partner with multicultural community organisations and leaders to ensure recovery planning and service design reflects the needs and priorities of culturally diverse communities."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:multicultural-community-support:ind:1",
+          "title": "CALD community recovery service access",
+          "description": "Utilisation of recovery services by culturally and linguistically diverse (CALD) community members relative to their representation in the affected population.",
+          "data_collection_methodology": "Service utilisation data disaggregated by cultural background and language, compared to census population data for the affected area, reported quarterly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:multicultural-community-support:ind:2",
+          "title": "Cultural appropriateness of recovery services",
+          "description": "Assessment of whether recovery services meet the cultural and linguistic needs of diverse community members, including availability of interpreting, translated materials, and culturally safe practices.",
+          "data_collection_methodology": "Cultural appropriateness review conducted annually combining service audit, community feedback sessions with CALD groups, and multicultural organisation consultations.",
+          "indicator_type": "qualitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:community-self-determination",
+      "objective_type": "resilience",
+      "title": "Community self-determination in recovery",
+      "description": "Communities exercise genuine self-determination in their recovery, making meaningful choices about recovery priorities, approaches, and pace, with external agencies supporting rather than directing community decisions.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:community-self-determination:act:1",
+          "title": "Empower community-led recovery decision-making",
+          "description": "Create governance and engagement structures that give communities genuine decision-making power over recovery priorities, resource allocation, and implementation approaches."
+        },
+        {
+          "activity_id": "aidr:social:community-self-determination:act:2",
+          "title": "Resource community-driven recovery initiatives",
+          "description": "Provide flexible funding and support that enables communities to design and implement their own recovery projects based on locally identified priorities and aspirations."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:community-self-determination:ind:1",
+          "title": "Community control over recovery decisions",
+          "description": "Extent to which affected communities have genuine influence over recovery priorities, resource allocation, and implementation approaches, as assessed by community members and independent observers.",
+          "data_collection_methodology": "Community empowerment survey and independent governance review conducted annually, assessing decision-making power distribution and community influence on recovery direction.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:social:community-self-determination:ind:2",
+          "title": "Community-initiated recovery projects funded and delivered",
+          "description": "Number and value of recovery projects that were initiated, designed, and led by community groups rather than external agencies.",
+          "data_collection_methodology": "Recovery program database tracking project origins, leadership, and community involvement levels, with classification of community-led versus agency-led initiatives.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:social:social-preparedness",
+      "objective_type": "resilience",
+      "title": "Social preparedness for future disasters enhanced",
+      "description": "The community's social preparedness for future disasters has been strengthened through improved social networks, community planning, mutual aid arrangements, and shared understanding of risks and response procedures.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:social:social-preparedness:act:1",
+          "title": "Develop community social preparedness plans",
+          "description": "Support communities to develop social preparedness plans that identify vulnerable members, establish mutual aid networks, and define community support arrangements for future emergencies."
+        },
+        {
+          "activity_id": "aidr:social:social-preparedness:act:2",
+          "title": "Build neighbourhood mutual aid networks",
+          "description": "Facilitate the establishment and maintenance of neighbourhood-level mutual aid and support networks that can activate quickly in future emergency situations."
+        },
+        {
+          "activity_id": "aidr:social:social-preparedness:act:3",
+          "title": "Integrate disaster preparedness into community services",
+          "description": "Work with community service providers to embed disaster preparedness and response capabilities into their operations, including client vulnerability identification and continuity planning."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:social:social-preparedness:ind:1",
+          "title": "Community social preparedness assessment",
+          "description": "Assessment of community social preparedness levels including existence of mutual aid networks, vulnerable person registers, community emergency plans, and social recovery arrangements.",
+          "data_collection_methodology": "Social preparedness audit conducted annually using structured assessment criteria, incorporating community self-assessment and independent verification.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:social:social-preparedness:ind:2",
+          "title": "Active neighbourhood mutual aid networks",
+          "description": "Number and coverage of active neighbourhood mutual aid networks that have been established or strengthened as a result of the disaster recovery process.",
+          "data_collection_methodology": "Network mapping exercise conducted annually, documenting active mutual aid groups, their coverage areas, membership, and activity levels.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:social:social-preparedness:ind:3",
+          "title": "Community service provider disaster readiness",
+          "description": "Proportion of community service providers in the affected area that have current disaster preparedness and business continuity plans that address client vulnerability.",
+          "data_collection_methodology": "Survey of community service organisations assessing disaster preparedness planning, conducted annually with follow-up verification of plan currency and quality.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    }
+  ]
+}

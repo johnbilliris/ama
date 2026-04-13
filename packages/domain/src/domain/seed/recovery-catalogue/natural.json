@@ -1,0 +1,270 @@
+{
+  "domain": "natural",
+  "outcomes": [
+    {
+      "outcome_id": "aidr:natural:environmental-health-risks",
+      "objective_type": "sustainability",
+      "title": "Environmental health risks managed",
+      "description": "Environmental health hazards resulting from the disaster, including contaminated soil, water pollution, hazardous materials release, and waste accumulation, have been identified, assessed, and remediated to protect public health and environmental quality.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:natural:environmental-health-risks:act:1",
+          "title": "Conduct environmental contamination assessments",
+          "description": "Undertake systematic environmental sampling and assessment to identify contamination from disaster impacts including asbestos release, chemical spills, sediment pollution, and hazardous waste dispersal."
+        },
+        {
+          "activity_id": "aidr:natural:environmental-health-risks:act:2",
+          "title": "Implement environmental remediation programs",
+          "description": "Deliver targeted remediation programs to address identified contamination including soil remediation, water treatment, hazardous material removal, and debris disposal at approved facilities."
+        },
+        {
+          "activity_id": "aidr:natural:environmental-health-risks:act:3",
+          "title": "Manage disaster waste and debris safely",
+          "description": "Coordinate the safe collection, sorting, transport, and disposal of disaster debris and waste, including hazardous materials, in compliance with environmental regulations and community health standards."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:natural:environmental-health-risks:ind:1",
+          "title": "Environmental contamination levels",
+          "description": "Measured levels of environmental contaminants in soil, water, and air across disaster-affected areas compared to regulatory standards and pre-disaster baselines.",
+          "data_collection_methodology": "Environmental monitoring program with systematic sampling of soil, surface water, groundwater, and air quality at defined monitoring sites, conducted monthly during active remediation and quarterly thereafter.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:natural:environmental-health-risks:ind:2",
+          "title": "Disaster waste removal and disposal progress",
+          "description": "Volume of disaster debris and waste collected, processed, and disposed of compared to estimated total waste generated, tracked by waste stream type.",
+          "data_collection_methodology": "Waste management records from collection and disposal operators, tracking volumes by waste category, reported weekly during active clean-up and monthly thereafter.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:natural:environmental-health-risks:ind:3",
+          "title": "Environmental health risk assessments completed",
+          "description": "Proportion of identified environmental health risk sites that have been fully assessed and either cleared or have remediation plans in place.",
+          "data_collection_methodology": "Environmental risk site register maintained by environmental protection agency, tracking assessment and remediation status for all identified risk sites.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:natural:biodiversity-ecosystems-restored",
+      "objective_type": "sustainability",
+      "title": "Biodiversity and ecosystems restored",
+      "description": "Natural ecosystems, native flora and fauna populations, and biodiversity values impacted by the disaster are recovering, with active restoration programs supporting natural regeneration and protecting threatened species and ecological communities.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:natural:biodiversity-ecosystems-restored:act:1",
+          "title": "Implement ecological recovery and revegetation programs",
+          "description": "Design and deliver habitat restoration programs including native revegetation, erosion control, seed collection and propagation, and weed management to support ecosystem recovery."
+        },
+        {
+          "activity_id": "aidr:natural:biodiversity-ecosystems-restored:act:2",
+          "title": "Protect and manage threatened species recovery",
+          "description": "Implement emergency and longer-term conservation actions for threatened species and ecological communities impacted by the disaster, including supplementary feeding, predator control, and habitat protection."
+        },
+        {
+          "activity_id": "aidr:natural:biodiversity-ecosystems-restored:act:3",
+          "title": "Engage community in environmental restoration",
+          "description": "Mobilise community volunteers and landholders in ecological restoration activities including planting days, wildlife monitoring, and land management programs that support both environmental and social recovery."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:natural:biodiversity-ecosystems-restored:ind:1",
+          "title": "Ecosystem recovery trajectory assessment",
+          "description": "Assessment of ecosystem recovery progress across key habitat types in the disaster-affected area, using vegetation condition, species diversity, and ecological function indicators.",
+          "data_collection_methodology": "Ecological monitoring at established reference sites using standardised vegetation and fauna survey methods, conducted at seasonal intervals with comparison to pre-disaster baseline data.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:natural:biodiversity-ecosystems-restored:ind:2",
+          "title": "Threatened species population status",
+          "description": "Population status and trend assessments for threatened species known to be impacted by the disaster, tracking recovery trajectories against conservation targets.",
+          "data_collection_methodology": "Species-specific monitoring programs using appropriate survey methodologies for each taxon, conducted at ecologically relevant intervals with population trend analysis.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:natural:biodiversity-ecosystems-restored:ind:3",
+          "title": "Area of habitat under active restoration",
+          "description": "Total area of disaster-affected habitat that is under active ecological restoration management, including revegetation, weed control, and erosion remediation.",
+          "data_collection_methodology": "Restoration program spatial data maintained in GIS, tracking all active restoration sites with area, treatment type, and condition assessment data updated quarterly.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:natural:cultural-heritage-landscapes",
+      "objective_type": "sustainability",
+      "title": "Cultural and heritage landscapes restored",
+      "description": "Culturally significant landscapes, including Aboriginal and Torres Strait Islander cultural sites, heritage gardens, memorial areas, and landscapes with deep community attachment have been protected and restored following disaster impacts.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:natural:cultural-heritage-landscapes:act:1",
+          "title": "Assess and protect culturally significant natural sites",
+          "description": "Work with Traditional Owners and community groups to identify, assess, and implement protection measures for culturally significant landscapes and natural heritage sites affected by the disaster."
+        },
+        {
+          "activity_id": "aidr:natural:cultural-heritage-landscapes:act:2",
+          "title": "Restore heritage gardens and memorial landscapes",
+          "description": "Implement restoration programs for heritage gardens, memorial plantings, significant trees, and culturally important natural areas damaged by the disaster, guided by community and cultural expertise."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:natural:cultural-heritage-landscapes:ind:1",
+          "title": "Cultural landscape condition assessment",
+          "description": "Condition status of identified culturally significant landscapes and heritage sites, assessed against pre-disaster condition and cultural management objectives.",
+          "data_collection_methodology": "Cultural landscape condition surveys conducted in partnership with Traditional Owners and heritage specialists at 6-monthly intervals, using culturally appropriate assessment criteria.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:natural:cultural-heritage-landscapes:ind:2",
+          "title": "Traditional Owner satisfaction with cultural site management",
+          "description": "Level of satisfaction among Traditional Owners and custodial community groups with the protection and restoration of culturally significant natural sites affected by the disaster.",
+          "data_collection_methodology": "Structured consultations with Traditional Owner groups and cultural heritage organisations conducted annually, using culturally safe engagement processes.",
+          "indicator_type": "qualitative"
+        },
+        {
+          "indicator_id": "aidr:natural:cultural-heritage-landscapes:ind:3",
+          "title": "Heritage landscape restoration progress",
+          "description": "Proportion of identified culturally significant natural sites and heritage landscapes with active restoration or protection programs in place.",
+          "data_collection_methodology": "Heritage site recovery register tracking all identified cultural landscape sites, their assessed condition, and the status of restoration or protection actions.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:natural:water-quality-catchment-health",
+      "objective_type": "sustainability",
+      "title": "Water quality and catchment health restored",
+      "description": "Water quality in rivers, lakes, reservoirs, and groundwater systems affected by the disaster has been restored to safe levels, with catchment rehabilitation programs addressing erosion, sedimentation, and contamination impacts.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:natural:water-quality-catchment-health:act:1",
+          "title": "Implement catchment rehabilitation programs",
+          "description": "Deliver targeted catchment rehabilitation works including erosion control structures, riparian revegetation, waterway stabilisation, and sediment management to restore catchment health and water quality."
+        },
+        {
+          "activity_id": "aidr:natural:water-quality-catchment-health:act:2",
+          "title": "Monitor and manage water quality risks",
+          "description": "Establish enhanced water quality monitoring programs to track recovery of water bodies, identify emerging contamination risks, and inform water treatment and management decisions."
+        },
+        {
+          "activity_id": "aidr:natural:water-quality-catchment-health:act:3",
+          "title": "Restore riparian and wetland buffer zones",
+          "description": "Rehabilitate riparian corridors and wetland systems that provide natural water filtration and flood mitigation services, enhancing both water quality outcomes and habitat connectivity."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:natural:water-quality-catchment-health:ind:1",
+          "title": "Water quality monitoring results",
+          "description": "Water quality parameters including turbidity, nutrients, heavy metals, pH, and microbial indicators across disaster-affected waterways compared to environmental standards and pre-disaster baselines.",
+          "data_collection_methodology": "Water quality sampling at established monitoring sites across affected catchments, conducted monthly with laboratory analysis against Australian water quality guidelines.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:natural:water-quality-catchment-health:ind:2",
+          "title": "Catchment condition and erosion risk assessment",
+          "description": "Assessment of catchment condition including vegetation cover, erosion severity, sediment delivery, and riparian zone integrity across disaster-affected catchments.",
+          "data_collection_methodology": "Catchment condition assessment using remote sensing (satellite and aerial imagery), ground-truthed with field surveys at representative sites, conducted biannually.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:natural:water-quality-catchment-health:ind:3",
+          "title": "Drinking water supply quality and security",
+          "description": "Quality and reliability of drinking water supply from disaster-affected catchments, including treatment effectiveness and supply security assessments.",
+          "data_collection_methodology": "Drinking water quality monitoring data from water utilities, reported against Australian Drinking Water Guidelines with monthly analysis and annual risk assessment.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:natural:community-environmental-risk-awareness",
+      "objective_type": "resilience",
+      "title": "Community awareness of environmental risks enhanced",
+      "description": "Community understanding of environmental risks, including how natural hazards interact with environmental conditions and how environmental management can reduce disaster risk, has been significantly improved.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:natural:community-environmental-risk-awareness:act:1",
+          "title": "Deliver environmental risk education programs",
+          "description": "Implement community education programs that explain the relationships between environmental health, natural hazard risk, and disaster resilience, including practical guidance on environmental stewardship."
+        },
+        {
+          "activity_id": "aidr:natural:community-environmental-risk-awareness:act:2",
+          "title": "Engage community in environmental monitoring and stewardship",
+          "description": "Establish citizen science and community environmental monitoring programs that build knowledge, ownership, and ongoing engagement in environmental management and risk awareness."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:natural:community-environmental-risk-awareness:ind:1",
+          "title": "Community environmental risk literacy levels",
+          "description": "Community members' understanding of local environmental risks, the role of environmental management in disaster risk reduction, and practical actions they can take to support environmental resilience.",
+          "data_collection_methodology": "Environmental risk literacy survey administered annually to a representative community sample, testing knowledge of environmental risks, land management, and ecosystem services.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:natural:community-environmental-risk-awareness:ind:2",
+          "title": "Participation in environmental stewardship activities",
+          "description": "Number of community members actively participating in environmental stewardship, citizen science, and community environmental monitoring programs.",
+          "data_collection_methodology": "Participation records from environmental volunteer programs, Landcare groups, and citizen science platforms, aggregated quarterly with demographic analysis.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:natural:environmental-resilience-enhanced",
+      "objective_type": "resilience",
+      "title": "Environmental resilience enhanced for future events",
+      "description": "The natural environment's resilience to future disaster events has been strengthened through improved land management, ecosystem restoration, nature-based solutions, and integration of environmental considerations into disaster risk reduction planning.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:natural:environmental-resilience-enhanced:act:1",
+          "title": "Integrate environmental resilience into land use planning",
+          "description": "Update land use planning policies and development controls to protect environmental buffers, maintain ecosystem services, and incorporate nature-based solutions for disaster risk reduction."
+        },
+        {
+          "activity_id": "aidr:natural:environmental-resilience-enhanced:act:2",
+          "title": "Invest in nature-based disaster risk reduction solutions",
+          "description": "Implement nature-based solutions such as wetland restoration for flood mitigation, strategic revegetation for fire risk management, and coastal ecosystem protection for storm surge reduction."
+        },
+        {
+          "activity_id": "aidr:natural:environmental-resilience-enhanced:act:3",
+          "title": "Develop environmental resilience monitoring programs",
+          "description": "Establish long-term environmental monitoring programs that track ecosystem health, detect early warning signs of environmental stress, and inform adaptive management decisions."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:natural:environmental-resilience-enhanced:ind:1",
+          "title": "Nature-based solutions implemented",
+          "description": "Number and scale of nature-based disaster risk reduction projects implemented, including their estimated risk reduction contribution and co-benefits.",
+          "data_collection_methodology": "Nature-based solutions project register tracking all implemented projects with spatial extent, type, estimated risk reduction value, and co-benefit assessment.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:natural:environmental-resilience-enhanced:ind:2",
+          "title": "Environmental resilience assessment score",
+          "description": "Composite assessment of environmental resilience across key dimensions including ecosystem connectivity, vegetation condition, soil health, and adaptive management capacity.",
+          "data_collection_methodology": "Environmental resilience assessment framework applied annually using remote sensing data, field surveys, and management practice audits across representative landscape units.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:natural:environmental-resilience-enhanced:ind:3",
+          "title": "Environmental considerations in planning instruments",
+          "description": "Extent to which environmental resilience principles and nature-based solutions have been incorporated into updated land use planning instruments and disaster risk management plans.",
+          "data_collection_methodology": "Planning instrument review assessing the incorporation of environmental resilience provisions, conducted following each planning amendment cycle with benchmarking against best practice criteria.",
+          "indicator_type": "qualitative"
+        }
+      ]
+    }
+  ]
+}

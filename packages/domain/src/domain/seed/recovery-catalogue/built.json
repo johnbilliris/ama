@@ -1,0 +1,281 @@
+{
+  "domain": "built",
+  "outcomes": [
+    {
+      "outcome_id": "aidr:built:essential-services-infrastructure",
+      "objective_type": "sustainability",
+      "title": "Essential services infrastructure restored",
+      "description": "Critical infrastructure that supports essential services including power, water, sewerage, telecommunications, and transport has been repaired or rebuilt to restore reliable service delivery to the affected community.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:built:essential-services-infrastructure:act:1",
+          "title": "Prioritise restoration of essential utility services",
+          "description": "Implement prioritised repair programs for essential utility infrastructure including electricity, water supply, sewerage, and gas networks based on community need and safety risk assessments."
+        },
+        {
+          "activity_id": "aidr:built:essential-services-infrastructure:act:2",
+          "title": "Restore telecommunications and digital connectivity",
+          "description": "Repair and rebuild telecommunications infrastructure including mobile towers, fixed-line networks, and broadband services to restore digital connectivity critical for community functioning and recovery coordination."
+        },
+        {
+          "activity_id": "aidr:built:essential-services-infrastructure:act:3",
+          "title": "Rebuild critical transport links and routes",
+          "description": "Repair damaged roads, bridges, rail lines, and other transport infrastructure to restore safe and reliable access for communities, emergency services, and supply chains."
+        },
+        {
+          "activity_id": "aidr:built:essential-services-infrastructure:act:4",
+          "title": "Establish temporary service arrangements during rebuilding",
+          "description": "Deploy temporary infrastructure solutions such as portable generators, water tanks, temporary bridges, and mobile telecommunications to maintain essential service levels while permanent repairs are underway."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:built:essential-services-infrastructure:ind:1",
+          "title": "Essential infrastructure operational status",
+          "description": "Percentage of essential service infrastructure restored to full operational capacity, tracked by infrastructure type and geographic area.",
+          "data_collection_methodology": "Infrastructure restoration tracking register maintained by coordinating agencies, with weekly status updates from utility providers and infrastructure owners.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:built:essential-services-infrastructure:ind:2",
+          "title": "Service reliability and quality metrics",
+          "description": "Reliability and quality of essential services delivered to the community including power outage frequency, water quality compliance, and road network accessibility.",
+          "data_collection_methodology": "Utility service performance data collected from infrastructure operators on a monthly basis, benchmarked against pre-disaster service levels and regulatory standards.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:built:essential-services-infrastructure:ind:3",
+          "title": "Community satisfaction with essential services restoration",
+          "description": "Community members' satisfaction with the restoration of essential services including perceived reliability, quality, and timeliness of repair.",
+          "data_collection_methodology": "Community satisfaction survey administered quarterly, covering all essential service categories with questions on reliability, quality, and adequacy of service delivery.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:built:essential-services-infrastructure:ind:4",
+          "title": "Remaining service disruptions and workarounds",
+          "description": "Number and nature of ongoing essential service disruptions and temporary arrangements still in place, with estimated timelines for permanent restoration.",
+          "data_collection_methodology": "Service disruption register maintained by recovery coordination centre, updated fortnightly with data from all essential service providers and local government.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:built:community-infrastructure-restored",
+      "objective_type": "sustainability",
+      "title": "Community infrastructure restored and improved",
+      "description": "Public and community infrastructure including schools, hospitals, community centres, libraries, parks, and recreational facilities has been repaired, rebuilt, or replaced, enabling communities to resume normal activities and access services.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:built:community-infrastructure-restored:act:1",
+          "title": "Develop prioritised community infrastructure rebuild program",
+          "description": "Assess damaged community infrastructure, prioritise rebuilding based on community need, safety, and utilisation, and develop a coordinated rebuild program with clear timelines and budgets."
+        },
+        {
+          "activity_id": "aidr:built:community-infrastructure-restored:act:2",
+          "title": "Incorporate community input into infrastructure design",
+          "description": "Engage communities in the design and planning of rebuilt infrastructure to ensure facilities meet current and future needs, incorporate lessons learned, and reflect community aspirations."
+        },
+        {
+          "activity_id": "aidr:built:community-infrastructure-restored:act:3",
+          "title": "Apply betterment principles in rebuilding",
+          "description": "Where possible, rebuild community infrastructure to improved standards that enhance functionality, resilience, accessibility, and environmental sustainability beyond pre-disaster condition."
+        },
+        {
+          "activity_id": "aidr:built:community-infrastructure-restored:act:4",
+          "title": "Coordinate temporary facility arrangements",
+          "description": "Provide temporary community facilities including demountable buildings, shared spaces, and pop-up services to maintain community access to services during the rebuild period."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:built:community-infrastructure-restored:ind:1",
+          "title": "Community infrastructure rebuild completion rate",
+          "description": "Percentage of damaged community infrastructure projects completed against the approved rebuild program, tracked by facility type, value, and location.",
+          "data_collection_methodology": "Infrastructure project management system tracking all community infrastructure rebuild projects from approval through to completion, reported monthly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:built:community-infrastructure-restored:ind:2",
+          "title": "Facility utilisation and community satisfaction",
+          "description": "Utilisation levels and community satisfaction with rebuilt community facilities, measuring whether new facilities are meeting community needs and expectations.",
+          "data_collection_methodology": "Facility utilisation data from facility managers combined with community satisfaction surveys conducted within 6 months of each facility reopening.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:built:community-infrastructure-restored:ind:3",
+          "title": "Betterment and improvement outcomes achieved",
+          "description": "Proportion of rebuilt community infrastructure that incorporates betterment improvements beyond pre-disaster condition, including resilience, accessibility, and functionality upgrades.",
+          "data_collection_methodology": "Post-completion assessment of rebuilt facilities against pre-disaster specifications and betterment criteria, documented in project completion reports.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:built:private-infrastructure-residential",
+      "objective_type": "sustainability",
+      "title": "Private residential infrastructure repaired and rebuilt",
+      "description": "Disaster-damaged private residential properties have been repaired, rebuilt, or replaced, enabling residents to return to safe, habitable, and appropriate housing that meets current building standards.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:built:private-infrastructure-residential:act:1",
+          "title": "Coordinate residential repair and rebuild support",
+          "description": "Establish coordinated support services for homeowners undertaking repairs and rebuilds, including builder referral services, quality assurance, and dispute resolution mechanisms."
+        },
+        {
+          "activity_id": "aidr:built:private-infrastructure-residential:act:2",
+          "title": "Streamline building approval and compliance processes",
+          "description": "Implement fast-tracked building approval processes for disaster repairs and rebuilds while maintaining appropriate safety and quality standards, including dedicated assessment teams and simplified application requirements."
+        },
+        {
+          "activity_id": "aidr:built:private-infrastructure-residential:act:3",
+          "title": "Provide financial assistance for residential rebuilding",
+          "description": "Administer grants, concessional loans, and other financial support to assist homeowners who lack sufficient insurance or resources to repair or rebuild their damaged homes."
+        },
+        {
+          "activity_id": "aidr:built:private-infrastructure-residential:act:4",
+          "title": "Manage builder and trade workforce supply",
+          "description": "Coordinate workforce supply strategies to ensure adequate builders and tradespeople are available in disaster-affected areas, including licensing support, accommodation provision, and skills recognition programs."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:built:private-infrastructure-residential:ind:1",
+          "title": "Residential property repair and rebuild completion rates",
+          "description": "Percentage of disaster-damaged residential properties that have been repaired or rebuilt to habitable standard, tracked by damage level, location, and tenure type.",
+          "data_collection_methodology": "Building permit data from local government combined with damage assessment records, analysed monthly to track repair progress against total damaged properties.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:built:private-infrastructure-residential:ind:2",
+          "title": "Building approval processing timeliness",
+          "description": "Average time taken to process building applications for disaster-related residential repairs and rebuilds compared to standard processing times and community expectations.",
+          "data_collection_methodology": "Local government building approval system data on application lodgement, assessment, and determination dates, analysed monthly with median and 90th percentile reporting.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:built:private-infrastructure-residential:ind:3",
+          "title": "Homeowner satisfaction with rebuild process and outcomes",
+          "description": "Homeowner satisfaction with the residential rebuild experience including quality of construction, timeliness, cost management, and adequacy of support received.",
+          "data_collection_methodology": "Post-completion homeowner satisfaction survey administered within 3 months of rebuild completion, covering build quality, process experience, and support adequacy.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:built:private-infrastructure-residential:ind:4",
+          "title": "Building workforce availability and capacity",
+          "description": "Assessment of the availability and capacity of builders and tradespeople working on residential repairs in the disaster-affected area relative to demand.",
+          "data_collection_methodology": "Workforce supply monitoring through builder registration data, building commencement records, and industry consultation conducted monthly during peak rebuild period.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:built:private-infrastructure-commercial-rural",
+      "objective_type": "sustainability",
+      "title": "Private commercial and rural infrastructure rebuilt",
+      "description": "Disaster-damaged commercial buildings, industrial facilities, and rural property infrastructure including fencing, sheds, water systems, and farm buildings have been repaired or replaced to restore economic productivity.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:built:private-infrastructure-commercial-rural:act:1",
+          "title": "Provide commercial and rural property rebuild assistance",
+          "description": "Deliver financial and technical assistance to commercial property owners and primary producers to support repair and rebuilding of business premises and farm infrastructure."
+        },
+        {
+          "activity_id": "aidr:built:private-infrastructure-commercial-rural:act:2",
+          "title": "Coordinate rural infrastructure restoration programs",
+          "description": "Establish coordinated programs to assist with large-scale rural infrastructure restoration including fencing, water systems, and livestock handling facilities, leveraging volunteer labour and community support."
+        },
+        {
+          "activity_id": "aidr:built:private-infrastructure-commercial-rural:act:3",
+          "title": "Support building back better for commercial and rural properties",
+          "description": "Provide technical guidance and incentives for commercial and rural property owners to rebuild to improved resilience standards, incorporating hazard-appropriate design and materials."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:built:private-infrastructure-commercial-rural:ind:1",
+          "title": "Commercial property rebuild progress",
+          "description": "Percentage of damaged commercial and industrial buildings that have been repaired or rebuilt to operational standard, by building type and severity of damage.",
+          "data_collection_methodology": "Building permit and occupancy data from local government, combined with commercial property condition assessments, tracked monthly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:built:private-infrastructure-commercial-rural:ind:2",
+          "title": "Rural infrastructure restoration progress",
+          "description": "Proportion of disaster-damaged rural infrastructure including fencing, water systems, and farm buildings that has been repaired or replaced.",
+          "data_collection_methodology": "Rural property infrastructure recovery survey administered at 6-monthly intervals to affected primary producers, covering all major infrastructure categories.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:built:private-infrastructure-commercial-rural:ind:3",
+          "title": "Improved building standards adoption in rebuilds",
+          "description": "Proportion of rebuilt commercial and rural properties that have incorporated improved resilience features, better materials, or enhanced design standards compared to pre-disaster construction.",
+          "data_collection_methodology": "Building certification data review comparing rebuilt property specifications against pre-disaster standards, conducted as properties reach completion.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:built:infrastructure-resilience-enhanced",
+      "objective_type": "resilience",
+      "title": "Infrastructure resilience enhanced for future events",
+      "description": "Infrastructure in the disaster-affected area has been rebuilt or retrofitted to enhanced resilience standards, reducing vulnerability to future hazard events and improving the community's ability to withstand and recover from future disasters.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:built:infrastructure-resilience-enhanced:act:1",
+          "title": "Implement infrastructure resilience standards in rebuilding",
+          "description": "Apply updated building codes, design standards, and hazard-appropriate construction specifications to all infrastructure rebuilding, ensuring improved performance in future disaster events."
+        },
+        {
+          "activity_id": "aidr:built:infrastructure-resilience-enhanced:act:2",
+          "title": "Undertake land use and hazard risk assessment reviews",
+          "description": "Review and update land use planning instruments, hazard mapping, and development controls to incorporate lessons learned and reduce future infrastructure exposure to natural hazards."
+        },
+        {
+          "activity_id": "aidr:built:infrastructure-resilience-enhanced:act:3",
+          "title": "Invest in protective infrastructure and mitigation works",
+          "description": "Design and construct infrastructure mitigation works such as levees, firebreaks, retaining walls, and drainage upgrades to protect rebuilt infrastructure from future hazard impacts."
+        },
+        {
+          "activity_id": "aidr:built:infrastructure-resilience-enhanced:act:4",
+          "title": "Retrofit existing infrastructure for improved resilience",
+          "description": "Identify and fund retrofitting programs for existing infrastructure that was not damaged but has been identified as vulnerable to future disaster impacts, improving overall community resilience."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:built:infrastructure-resilience-enhanced:ind:1",
+          "title": "Infrastructure rebuilt to enhanced resilience standards",
+          "description": "Proportion of rebuilt infrastructure that meets or exceeds updated resilience standards and hazard-appropriate design specifications.",
+          "data_collection_methodology": "Building compliance data from certification authorities, documenting resilience standard adoption in all rebuilt infrastructure, reviewed annually.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:built:infrastructure-resilience-enhanced:ind:2",
+          "title": "Updated planning and building controls implemented",
+          "description": "Status of land use planning amendments, building code updates, and development control changes that incorporate disaster lessons and improve future infrastructure resilience.",
+          "data_collection_methodology": "Planning instrument review tracking the progress of identified planning and building control amendments from initiation through to gazettal and implementation.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:built:infrastructure-resilience-enhanced:ind:3",
+          "title": "Mitigation infrastructure projects completed",
+          "description": "Number and value of infrastructure mitigation projects completed or underway that provide protective benefits to the disaster-affected community.",
+          "data_collection_methodology": "Mitigation project register maintained by responsible agencies, tracking project status, cost, completion dates, and estimated risk reduction benefits.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:built:infrastructure-resilience-enhanced:ind:4",
+          "title": "Modelled risk reduction from infrastructure improvements",
+          "description": "Estimated reduction in community risk exposure resulting from infrastructure resilience improvements, measured through updated hazard risk modelling and damage assessments.",
+          "data_collection_methodology": "Hazard risk modelling incorporating post-rebuild infrastructure data, conducted at 12-monthly intervals to estimate residual risk and risk reduction achieved.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    }
+  ]
+}

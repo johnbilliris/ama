@@ -233,6 +233,16 @@ def create_app(
     from fastapi import FastAPI, HTTPException
     from pydantic import BaseModel as PydanticBaseModel
 
+    from monitoring.me_framework_service import MEFrameworkService
+    from monitoring.models import (
+        CreateEvaluationRequest,
+        CreateMEFrameworkRequest,
+        CreateProgramLogicRequest,
+        SelectOutcomesRequest,
+        SetCollectionScheduleRequest,
+        SetStandardsRequest,
+    )
+
     _config = config or MonitoringConfig()
     app = FastAPI(title="Monitoring Agent", version=_config.agent_version)
 
@@ -241,6 +251,7 @@ def create_app(
     app.state.audit_writer = audit_writer
     app.state.freshness_tracker = freshness_tracker
     app.state.config = _config
+    app.state.me_framework_service = MEFrameworkService()
 
     class HealthResponse(PydanticBaseModel):
         status: str
@@ -386,6 +397,170 @@ def create_app(
                     "message": str(exc),
                 },
             )
+
+    # ------------------------------------------------------------------
+    # M&E Framework endpoints (FRs: FR-008–014)
+    # ------------------------------------------------------------------
+
+    @app.post("/me-framework", status_code=201)
+    async def create_me_framework(request: CreateMEFrameworkRequest) -> dict:
+        """Create a new M&E framework for a recovery programme."""
+        svc = app.state.me_framework_service
+        framework = svc.create_framework(
+            incident_id=request.incident_id,
+            program_name=request.program_name,
+            affected_community_definition=request.affected_community_definition,
+            created_by=request.created_by,
+        )
+        return framework
+
+    @app.get("/me-framework/{framework_id}")
+    async def get_me_framework(framework_id: str) -> dict:
+        """Retrieve an M&E framework by ID."""
+        svc = app.state.me_framework_service
+        framework = svc.get_framework(framework_id)
+        if not framework:
+            raise HTTPException(status_code=404, detail=f"Framework {framework_id} not found")
+        return framework
+
+    @app.post("/me-framework/{framework_id}/outcomes")
+    async def select_outcomes(framework_id: str, request: SelectOutcomesRequest) -> dict:
+        """Select outcomes from the catalogue for a framework."""
+        svc = app.state.me_framework_service
+        try:
+            return svc.select_outcomes(framework_id, request.outcomes)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/me-framework/{framework_id}/program-logic", status_code=201)
+    async def create_program_logic(framework_id: str, request: CreateProgramLogicRequest) -> dict:
+        """Create a program logic model for a framework."""
+        svc = app.state.me_framework_service
+        try:
+            return svc.create_program_logic(framework_id, request.model_dump())
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/me-framework/{framework_id}/standards")
+    async def set_standards(framework_id: str, request: SetStandardsRequest) -> dict:
+        """Set standards of success for framework indicators."""
+        svc = app.state.me_framework_service
+        try:
+            return svc.set_standards(framework_id, request.standards)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/me-framework/{framework_id}/collection-schedule")
+    async def set_collection_schedule(framework_id: str, request: SetCollectionScheduleRequest) -> dict:
+        """Set the data-collection schedule for framework indicators."""
+        svc = app.state.me_framework_service
+        try:
+            return svc.set_collection_schedule(framework_id, request.schedules)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.get("/me-framework/{framework_id}/monitoring-report")
+    async def get_monitoring_report(framework_id: str) -> dict:
+        """Generate a monitoring report for the framework."""
+        svc = app.state.me_framework_service
+        try:
+            return svc.generate_monitoring_report(framework_id)
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    @app.post("/me-framework/{framework_id}/evaluation", status_code=201)
+    async def create_evaluation(framework_id: str, request: CreateEvaluationRequest) -> dict:
+        """Generate an evaluation report for the framework."""
+        svc = app.state.me_framework_service
+        try:
+            return svc.generate_evaluation_report(
+                framework_id,
+                period_start=request.evaluation_period_start,
+                period_end=request.evaluation_period_end,
+                generated_by=request.generated_by,
+                created_by=request.created_by,
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    # ------------------------------------------------------------------
+    # Recovery Catalogue endpoints (FRs: FR-015–024, FR-026)
+    # ------------------------------------------------------------------
+
+    from monitoring.catalogue_service import CatalogueService
+
+    app.state.catalogue_service = CatalogueService()
+
+    class SuggestActivitiesRequest(PydanticBaseModel):
+        lagging_indicator_ids: list[str]
+
+    @app.get("/catalogue/outcomes")
+    async def list_catalogue_outcomes(domain: str | None = None, objective_type: str | None = None) -> list[dict]:
+        """List all recovery outcomes with optional domain/objective-type filter."""
+        return app.state.catalogue_service.list_outcomes(domain=domain, objective_type=objective_type)
+
+    @app.get("/catalogue/outcomes/{outcome_id}")
+    async def get_catalogue_outcome(outcome_id: str) -> dict:
+        """Retrieve a single outcome by ID."""
+        result = app.state.catalogue_service.get_outcome(outcome_id)
+        if not result:
+            raise HTTPException(status_code=404, detail=f"Outcome {outcome_id} not found")
+        return result
+
+    @app.get("/catalogue/domains/{domain}/summary")
+    async def get_catalogue_domain_summary(domain: str) -> dict:
+        """Return aggregate counts for a recovery domain."""
+        return app.state.catalogue_service.get_domain_summary(domain)
+
+    @app.get("/catalogue/evaluation-questions/{domain}")
+    async def get_catalogue_evaluation_questions(domain: str) -> dict:
+        """Retrieve evaluation questions for a domain."""
+        result = app.state.catalogue_service.get_evaluation_questions(domain)
+        if not result:
+            raise HTTPException(status_code=404, detail=f"No evaluation questions for domain '{domain}'")
+        return result
+
+    @app.post("/catalogue/suggest-activities")
+    async def suggest_catalogue_activities(request: SuggestActivitiesRequest) -> list[dict]:
+        """Suggest catalogue activities that address lagging indicators."""
+        return app.state.catalogue_service.suggest_activities(request.lagging_indicator_ids)
+
+    # ------------------------------------------------------------------
+    # AI Analysis endpoints (FRs: FR-025–028)
+    # ------------------------------------------------------------------
+
+    from monitoring.indicator_analysis import IndicatorAnalysisService
+
+    app.state.analysis_service = IndicatorAnalysisService(
+        catalogue_service=app.state.catalogue_service,
+    )
+
+    class CrossDomainRequest(PydanticBaseModel):
+        indicator_data: list[dict]
+
+    class RecommendationsRequest(PydanticBaseModel):
+        lagging_indicator_ids: list[str]
+
+    class CommunitySummaryRequest(PydanticBaseModel):
+        indicator_data: list[dict]
+        domain_filter: str | None = None
+
+    @app.post("/analysis/cross-domain")
+    async def analysis_cross_domain(request: CrossDomainRequest) -> dict:
+        """Analyse cross-domain correlations in recovery indicator data."""
+        return app.state.analysis_service.analyse_cross_domain_correlations(request.indicator_data)
+
+    @app.post("/analysis/recommendations")
+    async def analysis_recommendations(request: RecommendationsRequest) -> list[dict]:
+        """Recommend AIDR catalogue activities for lagging indicators."""
+        return app.state.analysis_service.recommend_activities(request.lagging_indicator_ids)
+
+    @app.post("/analysis/community-summary")
+    async def analysis_community_summary(request: CommunitySummaryRequest) -> dict:
+        """Generate a plain-language recovery summary for community communication."""
+        return app.state.analysis_service.generate_community_summary(
+            request.indicator_data, domain_filter=request.domain_filter,
+        )
 
     return app
 

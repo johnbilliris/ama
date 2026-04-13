@@ -1,0 +1,336 @@
+{
+  "domain": "overarching",
+  "outcomes": [
+    {
+      "outcome_id": "aidr:overarching:community-resilience",
+      "objective_type": "resilience",
+      "title": "Community resilience is strengthened through disaster experience",
+      "description": "The community has used the disaster experience as a catalyst to strengthen its overall resilience, including improved social networks, enhanced preparedness, and greater capacity to withstand future shocks.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:overarching:community-resilience:act:1",
+          "title": "Conduct community resilience assessments",
+          "description": "Undertake baseline and periodic resilience assessments across affected communities to identify strengths, gaps, and opportunities for building long-term resilience capacity."
+        },
+        {
+          "activity_id": "aidr:overarching:community-resilience:act:2",
+          "title": "Facilitate community-led resilience planning workshops",
+          "description": "Bring together diverse community members to co-design resilience plans that build on local knowledge, strengths, and social capital developed during and after the disaster."
+        },
+        {
+          "activity_id": "aidr:overarching:community-resilience:act:3",
+          "title": "Establish community resilience hubs",
+          "description": "Create physical or virtual hubs where community members can access resilience-building resources, connect with support services, and participate in preparedness activities."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:overarching:community-resilience:ind:1",
+          "title": "Community resilience index score",
+          "description": "Composite score measuring community resilience across multiple dimensions including social capital, economic diversity, infrastructure robustness, and institutional capacity.",
+          "data_collection_methodology": "Validated community resilience survey instrument administered at baseline and 6-monthly intervals to a representative sample of community members.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:overarching:community-resilience:ind:2",
+          "title": "Proportion of community members reporting increased confidence in managing future disasters",
+          "description": "Percentage of surveyed community members who report feeling more confident in their ability to prepare for, respond to, and recover from future disaster events.",
+          "data_collection_methodology": "Community survey using Likert-scale confidence questions, administered annually to a stratified random sample of disaster-affected residents.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:overarching:community-resilience:ind:3",
+          "title": "Evidence of community-driven resilience initiatives",
+          "description": "Documented examples of community-initiated projects and programs that demonstrate enhanced resilience thinking and practice beyond pre-disaster levels.",
+          "data_collection_methodology": "Qualitative case studies and community asset mapping, supplemented by key informant interviews with community leaders and recovery coordinators.",
+          "indicator_type": "qualitative"
+        },
+        {
+          "indicator_id": "aidr:overarching:community-resilience:ind:4",
+          "title": "Number of active community resilience plans",
+          "description": "Count of formally adopted community resilience plans that have been developed or updated as a result of the disaster recovery process.",
+          "data_collection_methodology": "Administrative records review of local government and community organisation planning documents, verified through stakeholder consultation.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:overarching:sustainability-of-recovery",
+      "objective_type": "sustainability",
+      "title": "Community can sustain and manage own recovery",
+      "description": "The affected community has developed sufficient capacity, resources, and governance structures to manage its ongoing recovery independently, without continued reliance on external recovery support.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:overarching:sustainability-of-recovery:act:1",
+          "title": "Develop community-owned recovery transition plans",
+          "description": "Work with communities to create structured transition plans that progressively transfer recovery management responsibility from external agencies to local organisations and community groups."
+        },
+        {
+          "activity_id": "aidr:overarching:sustainability-of-recovery:act:2",
+          "title": "Build local capacity for ongoing recovery management",
+          "description": "Provide training, mentoring, and resources to local leaders, community organisations, and council staff to ensure they can sustain recovery efforts after external support is withdrawn."
+        },
+        {
+          "activity_id": "aidr:overarching:sustainability-of-recovery:act:3",
+          "title": "Establish sustainable funding and resource mechanisms",
+          "description": "Identify and secure ongoing funding sources and resource arrangements that support continued recovery activities beyond the initial recovery program timeframe."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:overarching:sustainability-of-recovery:ind:1",
+          "title": "Proportion of recovery functions transitioned to community management",
+          "description": "Percentage of recovery program functions that have been successfully handed over to local organisations, community groups, or mainstream service providers.",
+          "data_collection_methodology": "Recovery program transition tracking register, with quarterly assessments of handover status for each recovery function and service area.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:overarching:sustainability-of-recovery:ind:2",
+          "title": "Community self-assessed recovery management capacity",
+          "description": "Community leaders and organisations self-assessed readiness to manage recovery independently, covering governance, resources, skills, and knowledge domains.",
+          "data_collection_methodology": "Structured self-assessment tool completed by community recovery committees and local government recovery teams at quarterly intervals.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:overarching:sustainability-of-recovery:ind:3",
+          "title": "Sustained recovery activity levels post external support",
+          "description": "Evidence that recovery activities, services, and community initiatives continue at appropriate levels after the withdrawal of external recovery support programs.",
+          "data_collection_methodology": "Longitudinal monitoring of recovery service delivery data and community activity levels, collected through service provider reports and community observation at 6, 12, and 24 months post-transition.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:overarching:whole-of-community-approach",
+      "objective_type": "sustainability",
+      "title": "Whole-of-community approach to recovery",
+      "description": "Recovery planning and implementation genuinely engages all sectors of the community, including government, business, non-government organisations, and community members, ensuring diverse perspectives and shared ownership.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:overarching:whole-of-community-approach:act:1",
+          "title": "Establish multi-sector recovery partnerships",
+          "description": "Create formal and informal partnerships across government agencies, businesses, NGOs, and community groups to ensure coordinated and comprehensive recovery efforts."
+        },
+        {
+          "activity_id": "aidr:overarching:whole-of-community-approach:act:2",
+          "title": "Implement inclusive community engagement processes",
+          "description": "Design and deliver community engagement activities that deliberately reach and include diverse population groups, ensuring marginalised and hard-to-reach voices are heard in recovery planning."
+        },
+        {
+          "activity_id": "aidr:overarching:whole-of-community-approach:act:3",
+          "title": "Develop shared recovery vision and priorities",
+          "description": "Facilitate community-wide processes to develop a shared vision for recovery that reflects the aspirations and priorities of all community sectors and population groups."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:overarching:whole-of-community-approach:ind:1",
+          "title": "Diversity of stakeholders engaged in recovery planning",
+          "description": "Measurement of the range and representativeness of stakeholders actively participating in recovery planning and decision-making processes.",
+          "data_collection_methodology": "Stakeholder engagement tracking database recording participation by sector, demographics, and geographic location across all recovery planning activities.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:overarching:whole-of-community-approach:ind:2",
+          "title": "Community satisfaction with engagement in recovery",
+          "description": "Level of satisfaction among community members regarding their opportunity to participate in and influence recovery decisions and activities.",
+          "data_collection_methodology": "Community satisfaction survey administered biannually, using validated engagement quality measures and open-ended feedback questions.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:overarching:whole-of-community-approach:ind:3",
+          "title": "Evidence of cross-sector collaboration in recovery activities",
+          "description": "Documented instances where government, business, NGO, and community actors have jointly planned, funded, or delivered recovery activities.",
+          "data_collection_methodology": "Review of recovery project documentation, partnership agreements, and meeting minutes to identify and catalogue cross-sector collaborative initiatives.",
+          "indicator_type": "qualitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:overarching:adaptive-capacity",
+      "objective_type": "resilience",
+      "title": "Adaptive capacity of community enhanced",
+      "description": "The community has strengthened its ability to adapt to changing circumstances, learn from experience, and adjust its recovery strategies in response to emerging challenges and opportunities.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:overarching:adaptive-capacity:act:1",
+          "title": "Implement adaptive recovery management frameworks",
+          "description": "Adopt recovery management approaches that enable regular review and adjustment of strategies based on monitoring data, community feedback, and changing conditions."
+        },
+        {
+          "activity_id": "aidr:overarching:adaptive-capacity:act:2",
+          "title": "Facilitate community learning and knowledge sharing",
+          "description": "Create opportunities for community members and organisations to share experiences, learn from each other, and develop collective knowledge about effective recovery practices."
+        },
+        {
+          "activity_id": "aidr:overarching:adaptive-capacity:act:3",
+          "title": "Support innovation and experimentation in recovery",
+          "description": "Encourage and resource innovative approaches to recovery challenges, allowing communities to trial new solutions and scale successful initiatives."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:overarching:adaptive-capacity:ind:1",
+          "title": "Frequency and quality of recovery strategy adjustments",
+          "description": "Number and significance of adjustments made to recovery plans and strategies in response to monitoring data, evaluation findings, or changed circumstances.",
+          "data_collection_methodology": "Recovery program management records review, documenting strategy adjustments with supporting rationale and evidence base at quarterly review points.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:overarching:adaptive-capacity:ind:2",
+          "title": "Community adaptive capacity self-assessment",
+          "description": "Community-assessed capacity to identify, evaluate, and respond to changing recovery needs and emerging challenges using structured assessment tools.",
+          "data_collection_methodology": "Adaptive capacity assessment tool administered to community recovery committees and key stakeholder groups at 6-monthly intervals.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:overarching:adaptive-capacity:ind:3",
+          "title": "Number of lessons learned captured and applied",
+          "description": "Count of formally documented lessons from recovery activities that have been incorporated into revised plans, policies, or practices.",
+          "data_collection_methodology": "Lessons learned register maintained by recovery program management, with verification of implementation through policy and procedure document review.",
+          "indicator_type": "quantitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:overarching:connectedness-and-cohesion",
+      "objective_type": "sustainability",
+      "title": "Connectedness and social cohesion restored or enhanced",
+      "description": "Social connections, trust, and cohesion within the community have been restored to at least pre-disaster levels or have been strengthened through shared recovery experiences and collaborative action.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:overarching:connectedness-and-cohesion:act:1",
+          "title": "Support community gathering and social connection events",
+          "description": "Fund and facilitate regular community events, gatherings, and activities that bring people together, rebuild social networks, and strengthen community bonds."
+        },
+        {
+          "activity_id": "aidr:overarching:connectedness-and-cohesion:act:2",
+          "title": "Strengthen neighbourhood and community group networks",
+          "description": "Invest in rebuilding and enhancing neighbourhood networks and community group connections that were disrupted by the disaster, including support for new groups formed during recovery."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:overarching:connectedness-and-cohesion:ind:1",
+          "title": "Community connectedness and social capital index",
+          "description": "Composite measure of social connectedness covering trust, belonging, participation in community activities, and strength of social networks.",
+          "data_collection_methodology": "Social capital survey using validated instruments administered at baseline and annually, with results benchmarked against pre-disaster and comparable community data.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:overarching:connectedness-and-cohesion:ind:2",
+          "title": "Level of community participation in collective activities",
+          "description": "Rate of community member participation in organised community events, volunteer activities, and group-based recovery initiatives.",
+          "data_collection_methodology": "Event attendance records, volunteer registration databases, and community group membership data collected and aggregated quarterly.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:overarching:connectedness-and-cohesion:ind:3",
+          "title": "Community perceptions of social cohesion",
+          "description": "Community members' subjective assessment of trust, mutual support, and sense of belonging within their neighbourhood and broader community.",
+          "data_collection_methodology": "Focus groups and community perception surveys conducted biannually with diverse cross-sections of the affected population.",
+          "indicator_type": "qualitative"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:overarching:effective-governance",
+      "objective_type": "sustainability",
+      "title": "Effective recovery governance structures in place",
+      "description": "Clear, transparent, and accountable governance arrangements are established for recovery that enable timely decision-making, appropriate resource allocation, and meaningful community participation.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:overarching:effective-governance:act:1",
+          "title": "Establish clear recovery governance framework",
+          "description": "Define and implement governance structures with clear roles, responsibilities, decision-making authority, and accountability mechanisms for all recovery stakeholders."
+        },
+        {
+          "activity_id": "aidr:overarching:effective-governance:act:2",
+          "title": "Implement transparent reporting and accountability mechanisms",
+          "description": "Establish regular public reporting on recovery progress, expenditure, and outcomes to ensure transparency and maintain community trust in recovery governance."
+        },
+        {
+          "activity_id": "aidr:overarching:effective-governance:act:3",
+          "title": "Ensure community representation in governance",
+          "description": "Include community representatives in recovery governance structures and decision-making bodies to ensure local knowledge and community priorities inform recovery direction."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:overarching:effective-governance:ind:1",
+          "title": "Governance effectiveness assessment score",
+          "description": "Assessment of recovery governance effectiveness covering clarity of roles, timeliness of decisions, stakeholder satisfaction, and accountability measures.",
+          "data_collection_methodology": "Governance effectiveness review conducted quarterly using a structured assessment framework, incorporating stakeholder surveys and governance document review.",
+          "indicator_type": "both"
+        },
+        {
+          "indicator_id": "aidr:overarching:effective-governance:ind:2",
+          "title": "Timeliness of recovery decision-making",
+          "description": "Measurement of the time taken to make and implement key recovery decisions relative to established benchmarks and community expectations.",
+          "data_collection_methodology": "Decision-making audit tracking key decisions from initiation to implementation, with timeliness benchmarked against recovery program milestones.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:overarching:effective-governance:ind:3",
+          "title": "Community trust in recovery governance",
+          "description": "Level of trust and confidence expressed by community members in the governance arrangements managing disaster recovery in their area.",
+          "data_collection_methodology": "Community trust survey administered biannually, supplemented by analysis of complaints, feedback, and public submissions related to recovery governance.",
+          "indicator_type": "both"
+        }
+      ]
+    },
+    {
+      "outcome_id": "aidr:overarching:risk-awareness",
+      "objective_type": "resilience",
+      "title": "Improved risk awareness and disaster preparedness",
+      "description": "Community members and organisations have a significantly improved understanding of natural hazard risks and have taken practical steps to enhance their preparedness for future disaster events.",
+      "has_developed_activities": true,
+      "activities": [
+        {
+          "activity_id": "aidr:overarching:risk-awareness:act:1",
+          "title": "Deliver community disaster preparedness education programs",
+          "description": "Implement targeted education and awareness campaigns that help community members understand local hazard risks and take practical preparedness actions for their households and businesses."
+        },
+        {
+          "activity_id": "aidr:overarching:risk-awareness:act:2",
+          "title": "Update community emergency and risk management plans",
+          "description": "Review and update local emergency management plans incorporating lessons learned from the disaster, revised risk assessments, and improved response and recovery arrangements."
+        },
+        {
+          "activity_id": "aidr:overarching:risk-awareness:act:3",
+          "title": "Support community-based emergency preparedness initiatives",
+          "description": "Fund and facilitate community-led preparedness programs including neighbourhood preparedness groups, community emergency response teams, and disaster ready programs."
+        }
+      ],
+      "indicators": [
+        {
+          "indicator_id": "aidr:overarching:risk-awareness:ind:1",
+          "title": "Community hazard risk awareness levels",
+          "description": "Proportion of community members who can accurately identify local hazard risks and describe appropriate preparedness and response actions.",
+          "data_collection_methodology": "Risk awareness survey administered to representative community sample at baseline and annually, testing knowledge of local hazards and appropriate actions.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:overarching:risk-awareness:ind:2",
+          "title": "Household disaster preparedness levels",
+          "description": "Percentage of households in the affected area that have completed practical disaster preparedness actions such as having emergency plans, kits, and insurance.",
+          "data_collection_methodology": "Household preparedness survey measuring completion of key preparedness actions, administered annually to a stratified random sample of affected households.",
+          "indicator_type": "quantitative"
+        },
+        {
+          "indicator_id": "aidr:overarching:risk-awareness:ind:3",
+          "title": "Updated risk management plans in place",
+          "description": "Number and quality of local emergency management and risk reduction plans that have been updated to reflect lessons learned and revised risk assessments.",
+          "data_collection_methodology": "Review of local government and community organisation emergency management plans against quality criteria, conducted at 12-month intervals post-disaster.",
+          "indicator_type": "both"
+        }
+      ]
+    }
+  ]
+}

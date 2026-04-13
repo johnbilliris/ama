@@ -135,3 +135,58 @@ def deliver_handoff_with_retry(
     handoff.failed_at = datetime.now(UTC)
     handoff.dead_letter_entry_id = on_dead_letter(handoff)
     return handoff
+
+
+def build_plan_activation_handoff(
+    *,
+    incident_id: str,
+    plan_id: str,
+    activated_by: str,
+) -> AgentHandoffEvent:
+    """Build a plan activation handoff (incident management → planning).
+
+    Used when an incident is declared and a pre-existing emergency plan
+    should be activated. Follows quickstart.md §Agent Handoff Pattern.
+    """
+    return build_handoff(
+        incident_id=incident_id,
+        source_agent="incident_management",
+        target_agent="planning",
+        scope_key=f"plan_activation:{plan_id}",
+        payload={"plan_id": plan_id, "activated_by": activated_by},
+        confidence=1.0,
+    )
+
+
+def build_evaluation_lessons_handoff(
+    *, incident_id: str, report_id: str, recommendations: list[dict],
+) -> AgentHandoffEvent:
+    """Build a handoff from evaluation report recommendations to lessons management."""
+    return build_handoff(
+        incident_id=incident_id,
+        source_agent="monitoring",
+        target_agent="lessons_management",
+        scope_key=f"evaluation_lessons:{report_id}",
+        payload={"report_id": report_id, "recommendations": recommendations},
+        confidence=0.85,
+    )
+
+
+def build_me_framework_handoff(
+    *,
+    incident_id: str,
+    plan_id: str,
+) -> AgentHandoffEvent:
+    """Build an M&E framework initialisation handoff (planning → monitoring).
+
+    Triggered when recovery arrangements are activated, signalling the
+    monitoring agent to set up M&E tracking. Follows quickstart.md §Agent Handoff Pattern.
+    """
+    return build_handoff(
+        incident_id=incident_id,
+        source_agent="planning",
+        target_agent="monitoring",
+        scope_key="me_framework_init",
+        payload={"plan_id": plan_id, "trigger": "recovery_arrangements_activated"},
+        confidence=0.9,
+    )
