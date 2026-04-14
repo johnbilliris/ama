@@ -1,6 +1,7 @@
 """Unit tests for AIIMS role mapping and coverage validation."""
 
 import pytest
+
 from apps.agents.common.aiims_mapping import (
     DEFAULT_AGENT_AIIMS_MAP,
     FULL_COVERAGE_REQUIRED_LEVEL,
@@ -9,7 +10,6 @@ from apps.agents.common.aiims_mapping import (
     validate_coverage,
 )
 from packages.domain.src.domain.models.aiims_role_assignment import ALL_AIIMS_FUNCTIONS
-
 
 # ---------------------------------------------------------------------------
 # Default mapping

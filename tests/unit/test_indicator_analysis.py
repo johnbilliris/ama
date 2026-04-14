@@ -3,9 +3,9 @@
 Tests cross-domain correlation analysis, activity recommendations,
 community summary generation, and LLM enrichment paths.
 """
-import pytest
 from unittest.mock import MagicMock
 
+import pytest
 from monitoring.indicator_analysis import IndicatorAnalysisService
 
 
@@ -79,7 +79,8 @@ class TestCrossDomainCorrelations:
     def test_two_domains_both_lagging(self, analysis_service):
         data = [
             {"domain": "social", "indicator_name": "health", "trend": "negative", "value": 0.3, "target_value": 1.0},
-            {"domain": "economic", "indicator_name": "employment", "trend": "negative", "value": 0.2, "target_value": 1.0},
+            {"domain": "economic", "indicator_name": "employment", "trend": "negative",
+             "value": 0.2, "target_value": 1.0},
         ]
         result = analysis_service.analyse_cross_domain_correlations(data)
         assert len(result["lagging_domains"]) == 2

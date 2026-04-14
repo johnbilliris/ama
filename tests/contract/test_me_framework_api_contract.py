@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-
 from monitoring.agent import create_app
 
 

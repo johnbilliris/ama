@@ -1,6 +1,7 @@
 """Unit tests for PPRR phase transition logic."""
 
 import pytest
+
 from apps.agents.common.pprr_lifecycle import (
     CONCURRENT_PHASE_PAIRS,
     VALID_PPRR_TRANSITIONS,
@@ -8,7 +9,6 @@ from apps.agents.common.pprr_lifecycle import (
     can_run_concurrently,
     validate_phase_transition,
 )
-
 
 # ---------------------------------------------------------------------------
 # Phase transitions

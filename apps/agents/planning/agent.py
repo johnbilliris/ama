@@ -11,25 +11,20 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-
+from planning import telemetry
 from planning.audit import build_section_edit_audit, build_transition_audit
 from planning.config import PlanningConfig
 from planning.models import (
     CreatePlanRequest,
     PlanActivationRequest,
-    PlanCompletenessResponse,
-    PlanHierarchyResponse,
-    PlanSummaryResponse,
     PlanTransitionRequest,
-    PlanTransitionResponse,
     UpdateSectionRequest,
     UpdateStepRequest,
 )
 from planning.pipeline import compute_completeness
 from planning.plan_lifecycle import is_editable_state, validate_plan_transition
-from planning import telemetry
 from planning.telemetry import update_section_completeness
+from pydantic import BaseModel
 
 from packages.domain.src.domain.models.emergency_plan import PLAN_SECTION_SLUGS
 from packages.domain.src.domain.models.planning_process_record import PLANNING_STEPS
@@ -186,7 +181,9 @@ class PlanningAgent:
     def get_hierarchy(self, region_id: str) -> list[dict]:
         return [p for p in self._plans.values() if p.get("region_id") == region_id]
 
-    def update_process_step(self, plan_id: str, step_number: int, is_complete: bool, notes: str, completed_by: str) -> dict:
+    def update_process_step(
+        self, plan_id: str, step_number: int, is_complete: bool, notes: str, completed_by: str
+    ) -> dict:
         plan = self._plans.get(plan_id)
         if plan is None:
             raise KeyError(f"Plan '{plan_id}' not found")
@@ -316,7 +313,9 @@ def create_app(
     @app.put("/plans/{plan_id}/process/steps/{step_number}")
     async def update_process_step(plan_id: str, step_number: int, request: UpdateStepRequest) -> dict:
         try:
-            plan = _agent.update_process_step(plan_id, step_number, request.is_complete, request.notes, request.completed_by)
+            plan = _agent.update_process_step(
+                plan_id, step_number, request.is_complete, request.notes, request.completed_by
+            )
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:

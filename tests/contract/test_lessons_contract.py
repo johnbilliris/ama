@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import pytest
+from app.main import create_app
+from app.services.state_store import INCIDENTS, reset_state
 from fastapi.testclient import TestClient
 
-from app.main import create_app
-from app.services.state_store import INCIDENTS, LESSONS, reset_state
 from packages.domain.src.domain.models.incident import Incident
 
 

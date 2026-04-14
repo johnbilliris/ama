@@ -231,8 +231,6 @@ def create_app(
 ):
     """Create the FastAPI application with health and association endpoints."""
     from fastapi import FastAPI, HTTPException
-    from pydantic import BaseModel as PydanticBaseModel
-
     from monitoring.me_framework_service import MEFrameworkService
     from monitoring.models import (
         CreateEvaluationRequest,
@@ -242,6 +240,7 @@ def create_app(
         SetCollectionScheduleRequest,
         SetStandardsRequest,
     )
+    from pydantic import BaseModel as PydanticBaseModel
 
     _config = config or MonitoringConfig()
     app = FastAPI(title="Monitoring Agent", version=_config.agent_version)

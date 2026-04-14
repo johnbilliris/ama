@@ -1,9 +1,11 @@
 """Benchmark tests for AIDR performance targets (NFR-001–008)."""
 import time
+
 import pytest
-from fastapi.testclient import TestClient
 from app.main import create_app
-from app.services.state_store import INCIDENTS, ALERTS, LESSONS, reset_state
+from app.services.state_store import ALERTS, INCIDENTS, LESSONS, reset_state
+from fastapi.testclient import TestClient
+
 from packages.domain.src.domain.models.incident import Incident
 
 

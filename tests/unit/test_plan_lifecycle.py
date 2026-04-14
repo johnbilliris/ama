@@ -6,12 +6,12 @@ terminal states, editable states, incident_controller requirement.
 import pytest
 
 from packages.domain.src.domain.models.plan_lifecycle import (
-    VALID_PLAN_TRANSITIONS,
-    TRANSITION_ROLE_REQUIREMENTS,
-    TERMINAL_STATES,
     EDITABLE_STATES,
-    is_terminal_state,
+    TERMINAL_STATES,
+    TRANSITION_ROLE_REQUIREMENTS,
+    VALID_PLAN_TRANSITIONS,
     is_editable_state,
+    is_terminal_state,
     validate_plan_transition,
 )
 

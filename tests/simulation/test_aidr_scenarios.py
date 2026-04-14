@@ -1,10 +1,10 @@
 """Simulation tests for end-to-end AIDR flows."""
 import pytest
-from fastapi.testclient import TestClient
 from app.main import create_app
-from app.services.state_store import INCIDENTS, ALERTS, reset_state
+from app.services.state_store import INCIDENTS, reset_state
+from fastapi.testclient import TestClient
+
 from packages.domain.src.domain.models.incident import Incident
-from packages.domain.src.domain.models.public_alert import PublicAlert
 
 
 @pytest.fixture

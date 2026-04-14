@@ -8,8 +8,6 @@ from __future__ import annotations
 
 import time
 
-from fastapi import APIRouter
-
 from app.services.state_store import (
     AIIMS_ASSIGNMENTS,
     EVACUATION_STAGES,
@@ -17,6 +15,7 @@ from app.services.state_store import (
     PPRR_CONTEXTS,
     RECOVERY_TRACKERS,
 )
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/health/aidr", tags=["health"])
 

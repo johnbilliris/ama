@@ -9,6 +9,12 @@ FRs: FR-031, FR-050, FR-053 | Research: R-001
 from datetime import UTC, datetime
 from uuid import uuid4
 
+from app.services.state_store import (
+    INCIDENTS,
+    PPRR_CONTEXTS,
+    TIMELINE_EVENTS,
+)
+
 from apps.agents.common.pprr_lifecycle import (
     build_phase_transition_payload,
     can_run_concurrently,
@@ -16,12 +22,6 @@ from apps.agents.common.pprr_lifecycle import (
 )
 from packages.domain.src.domain.models.pprr_phase_context import PprrPhaseContext
 from packages.domain.src.domain.models.timeline_event import TimelineEvent
-
-from app.services.state_store import (
-    INCIDENTS,
-    PPRR_CONTEXTS,
-    TIMELINE_EVENTS,
-)
 
 
 class PprrService:

@@ -6,7 +6,6 @@ Supports overlap periods where multiple PPRR phases are active simultaneously.
 FRs: FR-031, FR-053 | Research: R-001
 """
 
-from datetime import UTC, datetime
 
 # Valid PPRR phase transitions
 VALID_PPRR_TRANSITIONS: dict[str, list[str]] = {

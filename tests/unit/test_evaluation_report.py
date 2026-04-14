@@ -3,16 +3,16 @@
 Tests: report creation, period validation, AI-assisted safety requirement,
 domain findings keys, severity levels, recommendations, dissemination.
 """
+from datetime import UTC, datetime, timedelta
+
 import pytest
-from datetime import datetime, timedelta, UTC
 
 from packages.domain.src.domain.models.evaluation_report import (
+    DisseminationRecord,
+    DomainFinding,
     EvaluationReport,
     Finding,
-    DomainFinding,
     Recommendation,
-    DisseminationRecord,
-    EvaluationDomain,
 )
 
 

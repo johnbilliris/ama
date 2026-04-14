@@ -21,7 +21,10 @@ def compute_completeness(plan_doc: dict) -> dict:
     checked_principles = sum(1 for v in principles.values() if v is True)
     total_principles = len(PLANNING_PRINCIPLES)
 
-    missing_sections = [slug for slug in PLAN_SECTION_SLUGS if slug not in sections or not sections.get(slug, {}).get("is_complete", False)]
+    missing_sections = [
+        slug for slug in PLAN_SECTION_SLUGS
+        if slug not in sections or not sections.get(slug, {}).get("is_complete", False)
+    ]
     unchecked_principles = [p for p in PLANNING_PRINCIPLES if not principles.get(p, False)]
 
     return {
@@ -45,7 +48,9 @@ def validate_plan_for_endorsement(plan_doc: dict) -> tuple[bool, list[str]]:
     completeness = compute_completeness(plan_doc)
 
     if completeness["section_completeness"] < 0.5:
-        issues.append(f"Only {completeness['completed_sections']}/{completeness['total_sections']} sections complete (need ≥50%)")
+        done = completeness['completed_sections']
+        total = completeness['total_sections']
+        issues.append(f"Only {done}/{total} sections complete (need ≥50%)")
 
     if completeness["principles_completeness"] < 1.0:
         issues.append(f"Not all planning principles checked: missing {completeness['unchecked_principles']}")

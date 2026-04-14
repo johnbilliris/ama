@@ -10,6 +10,8 @@ FRs: FR-032–037 | SCs: SC-005 | Research: R-003, R-008, R-012
 from datetime import UTC, datetime
 from uuid import uuid4
 
+from app.services.state_store import INCIDENTS, RECOVERY_TRACKERS
+
 from packages.domain.src.domain.models.recovery_environment_tracker import (
     AIDR_INDICATORS,
     ALL_INDICATOR_NAMES,
@@ -17,8 +19,6 @@ from packages.domain.src.domain.models.recovery_environment_tracker import (
     RecoveryEnvironmentTracker,
     RecoveryIndicator,
 )
-
-from app.services.state_store import INCIDENTS, RECOVERY_TRACKERS
 
 
 class RecoveryService:

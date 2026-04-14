@@ -10,10 +10,10 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from packages.domain.src.domain.models.evacuation_stage import (
-    EvacStageName,
-    EvacuationStage,
     RE_ENTRY_TRANSITIONS,
     VALID_TRANSITIONS,
+    EvacStageName,
+    EvacuationStage,
 )
 
 

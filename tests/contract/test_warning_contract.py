@@ -6,10 +6,10 @@ from datetime import UTC, datetime
 from xml.etree.ElementTree import fromstring
 
 import pytest
-from fastapi.testclient import TestClient
-
 from app.main import create_app
 from app.services.state_store import ALERTS, INCIDENTS, reset_state
+from fastapi.testclient import TestClient
+
 from packages.domain.src.domain.models.incident import Incident
 from packages.domain.src.domain.models.public_alert import PublicAlert
 

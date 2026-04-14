@@ -88,7 +88,8 @@ class RecoveryIndicator(BaseModel):
             raise ValueError(msg)
         if self.catalogue_indicator_id is not None:
             import re
-            if not re.match(r"^aidr:(overarching|social|economic|built|natural):[a-z0-9-]+:ind:\d+$", self.catalogue_indicator_id):
+            _pattern = r"^aidr:(overarching|social|economic|built|natural):[a-z0-9-]+:ind:\d+$"
+            if not re.match(_pattern, self.catalogue_indicator_id):
                 raise ValueError(
                     f"catalogue_indicator_id must match 'aidr:{{domain}}:{{outcome-slug}}:ind:{{index}}' pattern, "
                     f"got '{self.catalogue_indicator_id}'"

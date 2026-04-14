@@ -5,7 +5,6 @@ location-required filter, keyword search, year range, and empty results.
 """
 
 import pytest
-
 from app.repositories.incident_map_repository import IncidentMapRepository
 
 # ── Test fixtures ──

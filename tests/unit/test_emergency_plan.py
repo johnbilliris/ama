@@ -2,12 +2,17 @@
 
 Tests: 7-state lifecycle, 27 sections, 8 planning principles, endorsement rules.
 """
+from datetime import UTC, datetime
+
 import pytest
-from datetime import datetime, UTC
 
 from packages.domain.src.domain.models.emergency_plan import (
-    EmergencyPlan, PlanSection, PlanActivationRecord, PlanAmendment,
-    PLAN_SECTION_SLUGS, PLANNING_PRINCIPLES, PlanLifecycleState,
+    PLAN_SECTION_SLUGS,
+    PLANNING_PRINCIPLES,
+    EmergencyPlan,
+    PlanActivationRecord,
+    PlanAmendment,
+    PlanSection,
 )
 from packages.domain.src.domain.models.recovery_environment_tracker import RecoveryIndicator
 
@@ -19,7 +24,10 @@ class TestEmergencyPlan:
         assert plan.version == 1
 
     def test_all_lifecycle_states_valid(self):
-        states = ["draft", "in_consultation", "under_review", "endorsed", "activated", "post_event_review", "superseded"]
+        states = [
+            "draft", "in_consultation", "under_review", "endorsed",
+            "activated", "post_event_review", "superseded",
+        ]
         assert len(states) == 7
         # endorsed+ states need endorsed_by/endorsed_at
         for state in ["endorsed", "activated", "post_event_review"]:
@@ -85,7 +93,9 @@ class TestEmergencyPlan:
         assert plan.activation_records[0].incident_id == "inc-1"
 
     def test_amendment_nesting(self):
-        amendment = PlanAmendment(amendment_number=1, description="Update", amended_by="user-1", amended_at=datetime.now(UTC))
+        amendment = PlanAmendment(
+            amendment_number=1, description="Update", amended_by="user-1", amended_at=datetime.now(UTC)
+        )
         plan = EmergencyPlan(
             plan_id="ep-1", title="Test", region_id="r-1", hazard_types=["flood"],
             amendment_register=[amendment],

@@ -3,16 +3,17 @@
 Tests: 9-step AIDR process tracking, step validation, team members,
 stakeholder engagement, endorsement approvals.
 """
+from datetime import UTC, datetime
+
 import pytest
-from datetime import datetime, UTC
 
 from packages.domain.src.domain.models.planning_process_record import (
+    PLANNING_STEPS,
+    EndorsementApproval,
+    EngagementEntry,
     PlanningProcessRecord,
     StepCompletion,
     TeamMember,
-    EngagementEntry,
-    EndorsementApproval,
-    PLANNING_STEPS,
 )
 
 

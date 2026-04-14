@@ -62,7 +62,7 @@ class RecoveryCatalogueRepository:
                 clauses.append("c.objective_type = @objective_type")
                 params.append({"name": "@objective_type", "value": objective_type})
             query = (
-                f"SELECT TOP @limit * FROM c WHERE "
+                "SELECT TOP @limit * FROM c WHERE "
                 + " AND ".join(clauses)
                 + " ORDER BY c.domain, c.outcome_id"
             )
@@ -166,9 +166,13 @@ class RecoveryCatalogueRepository:
         """Upsert a single catalogue item — used by the seed loader."""
         container = self._get_container()
         if container:
-            item_doc.setdefault("id", item_doc.get("outcome_id") or item_doc.get("activity_id") or item_doc.get("indicator_id", ""))
+            fallback_id = item_doc.get("outcome_id") or item_doc.get("activity_id") or item_doc.get("indicator_id", "")
+            item_doc.setdefault("id", fallback_id)
             container.upsert_item(item_doc)
         else:
-            key = item_doc.get("id", item_doc.get("outcome_id") or item_doc.get("activity_id") or item_doc.get("indicator_id", ""))
+            key = (
+                item_doc.get("id") or item_doc.get("outcome_id")
+                or item_doc.get("activity_id") or item_doc.get("indicator_id", "")
+            )
             self._in_memory[key] = item_doc
         return item_doc

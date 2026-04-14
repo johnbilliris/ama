@@ -4,8 +4,7 @@ The service loads from seed JSON files, so these tests use the real catalogue da
 to verify correct loading, filtering, lookup, and suggestion behaviour.
 """
 import pytest
-
-from monitoring.catalogue_service import CatalogueService, DOMAIN_FILES, SEED_ROOT
+from monitoring.catalogue_service import DOMAIN_FILES, SEED_ROOT, CatalogueService
 
 
 @pytest.fixture(scope="module")
