@@ -4,14 +4,28 @@
   "version": "0.1.0",
   "type": "module",
   "exports": {
-    "./components/*": "./src/components/*.tsx",
+    "./components/disaster-map/disaster-map": "./src/components/disaster-map/disaster-map.tsx",
+    "./components/disaster-map/filter-panel": "./src/components/disaster-map/filter-panel.tsx",
+    "./components/disaster-map/incident-sidebar": "./src/components/disaster-map/incident-sidebar.tsx",
+    "./components/disaster-map/list-view-fallback": "./src/components/disaster-map/list-view-fallback.tsx",
+    "./components/disaster-map/marker-cluster": "./src/components/disaster-map/marker-cluster.tsx",
+    "./components/disaster-map/search-bar": "./src/components/disaster-map/search-bar.tsx",
+    "./components/disaster-map/types": "./src/components/disaster-map/types.ts",
+    "./components/disaster-map/use-disaster-map-filters": "./src/components/disaster-map/use-disaster-map-filters.ts",
+    "./components/layout/app-shell": "./src/components/layout/app-shell.tsx",
     "./styles/*": "./src/styles/*"
   },
   "dependencies": {
     "azure-maps-control": "^3.5.0"
   },
   "peerDependencies": {
+    "next": ">=15.0.0",
     "react": "19.0.0",
     "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "next": "15.5.15"
   }
 }

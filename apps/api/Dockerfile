@@ -20,6 +20,7 @@ COPY packages/ ./packages/
 COPY apps/__init__.py ./apps/
 COPY apps/agents/__init__.py ./apps/agents/
 COPY apps/agents/common/ ./apps/agents/common/
+COPY apps/agents/communication/ ./apps/agents/communication/
 COPY apps/agents/evacuation/ ./apps/agents/evacuation/
 
 ENV PYTHONPATH="/app/apps/agents:${PYTHONPATH}"

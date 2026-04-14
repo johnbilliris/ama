@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "3565060829245128979"
+      "templateHash": "1306978627856827613"
     }
   },
   "parameters": {
@@ -76,6 +76,13 @@
       "metadata": {
         "description": "Principal type for RBAC assignments"
       }
+    },
+    "developerIpAddress": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Developer IP address to allow through Cosmos DB firewall (for local seed scripts, etc.)"
+      }
     }
   },
   "variables": {
@@ -95,7 +102,8 @@
     "abbrs": "[variables('$fxv#0')]",
     "tags": {
       "azd-env-name": "[parameters('environmentName')]",
-      "project": "disaster-response-hub"
+      "project": "disaster-response-hub",
+      "SecurityControl": "Ignore"
     },
     "uniqueSuffix": "[uniqueString(resourceGroup().id)]",
     "blobContainers": [
@@ -103,7 +111,9 @@
       "binary-assets",
       "audit",
       "simulation"
-    ]
+    ],
+    "monitoringMetricsPublisherRoleId": "3913510d-42f4-4e42-8a64-420c390055eb",
+    "cognitiveServicesOpenAiUserRoleId": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
   },
   "resources": {
     "containerRegistry": {
@@ -132,7 +142,8 @@
       "properties": {
         "allowBlobPublicAccess": false,
         "minimumTlsVersion": "TLS1_2",
-        "supportsHttpsTrafficOnly": true
+        "supportsHttpsTrafficOnly": true,
+        "publicNetworkAccess": "Enabled"
       }
     },
     "blobService": {
@@ -228,6 +239,7 @@
       "properties": {
         "databaseAccountOfferType": "Standard",
         "publicNetworkAccess": "Enabled",
+        "ipRules": "[concat(createArray(createObject('ipAddressOrRange', '0.0.0.0'), createObject('ipAddressOrRange', '104.42.195.92'), createObject('ipAddressOrRange', '40.76.54.131'), createObject('ipAddressOrRange', '52.176.6.30'), createObject('ipAddressOrRange', '52.169.50.45'), createObject('ipAddressOrRange', '52.187.184.26')), if(empty(parameters('developerIpAddress')), createArray(), createArray(createObject('ipAddressOrRange', parameters('developerIpAddress')))))]",
         "locations": [
           {
             "locationName": "[parameters('location')]",
@@ -308,6 +320,41 @@
               "/scenario_id"
             ],
             "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "compositeIndexes": [
+              [
+                {
+                  "path": "/document_type",
+                  "order": "ascending"
+                },
+                {
+                  "path": "/status",
+                  "order": "ascending"
+                }
+              ],
+              [
+                {
+                  "path": "/document_type",
+                  "order": "ascending"
+                },
+                {
+                  "path": "/created_at",
+                  "order": "descending"
+                }
+              ],
+              [
+                {
+                  "path": "/document_type",
+                  "order": "ascending"
+                },
+                {
+                  "path": "/expires_at",
+                  "order": "ascending"
+                }
+              ]
+            ]
           }
         },
         "options": {
@@ -397,6 +444,108 @@
         "cosmos"
       ]
     },
+    "cosmosAccountReaderAssignment": {
+      "condition": "[not(empty(parameters('principalId')))]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.DocumentDB/databaseAccounts/{0}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44))]",
+      "name": "[guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), parameters('principalId'), 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+        "principalId": "[parameters('principalId')]",
+        "principalType": "[parameters('principalType')]"
+      },
+      "dependsOn": [
+        "cosmos"
+      ]
+    },
+    "cosmosAccountReaderApi": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.DocumentDB/databaseAccounts/{0}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44))]",
+      "name": "[guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+        "principalId": "[reference('apiContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "apiContainerApp",
+        "cosmos"
+      ]
+    },
+    "cosmosAccountReaderAgents": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.DocumentDB/databaseAccounts/{0}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44))]",
+      "name": "[guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+        "principalId": "[reference('agentsContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "agentsContainerApp",
+        "cosmos"
+      ]
+    },
+    "cosmosAccountReaderIngestion": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.DocumentDB/databaseAccounts/{0}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44))]",
+      "name": "[guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}ingest-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+        "principalId": "[reference('ingestionContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "cosmos",
+        "ingestionContainerApp"
+      ]
+    },
+    "cosmosApiRoleAssignment": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), '00000000-0000-0000-0000-000000000002'))]",
+      "properties": {
+        "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002', resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)))]",
+        "principalId": "[reference('apiContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44))]"
+      },
+      "dependsOn": [
+        "apiContainerApp",
+        "cosmos"
+      ]
+    },
+    "cosmosAgentsRoleAssignment": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), '00000000-0000-0000-0000-000000000002'))]",
+      "properties": {
+        "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002', resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)))]",
+        "principalId": "[reference('agentsContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44))]"
+      },
+      "dependsOn": [
+        "agentsContainerApp",
+        "cosmos"
+      ]
+    },
+    "cosmosIngestionRoleAssignment": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}ingest-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), '00000000-0000-0000-0000-000000000002'))]",
+      "properties": {
+        "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002', resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)))]",
+        "principalId": "[reference('ingestionContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44))]"
+      },
+      "dependsOn": [
+        "cosmos",
+        "ingestionContainerApp"
+      ]
+    },
     "redis": {
       "type": "Microsoft.Cache/redis",
       "apiVersion": "2024-03-01",
@@ -426,7 +575,7 @@
       "properties": {
         "customSubDomainName": "[format('{0}-openai-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6))]",
         "publicNetworkAccess": "Enabled",
-        "disableLocalAuth": false
+        "disableLocalAuth": true
       }
     },
     "managedEnvironment": {
@@ -525,8 +674,46 @@
                   "value": "[reference('openAi').endpoint]"
                 },
                 {
+                  "name": "AZURE_OPENAI_REASONING_DEPLOYMENT",
+                  "value": "[reference('openAiDeployments').outputs.reasoningDeploymentName.value]"
+                },
+                {
+                  "name": "AZURE_OPENAI_DRAFTING_DEPLOYMENT",
+                  "value": "[reference('openAiDeployments').outputs.draftingDeploymentName.value]"
+                },
+                {
                   "name": "OTEL_SERVICE_NAME",
                   "value": "api"
+                }
+              ],
+              "probes": [
+                {
+                  "type": "Liveness",
+                  "httpGet": {
+                    "path": "/api/health",
+                    "port": 8000
+                  },
+                  "initialDelaySeconds": 15,
+                  "periodSeconds": 30
+                },
+                {
+                  "type": "Readiness",
+                  "httpGet": {
+                    "path": "/api/health",
+                    "port": 8000
+                  },
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 10
+                },
+                {
+                  "type": "Startup",
+                  "httpGet": {
+                    "path": "/api/health",
+                    "port": 8000
+                  },
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 10,
+                  "failureThreshold": 6
                 }
               ]
             }
@@ -543,6 +730,7 @@
         "managedEnvironment",
         "monitoring",
         "openAi",
+        "openAiDeployments",
         "redis",
         "storage"
       ]
@@ -612,6 +800,14 @@
                   "value": "[reference('openAi').endpoint]"
                 },
                 {
+                  "name": "AZURE_OPENAI_REASONING_DEPLOYMENT",
+                  "value": "[reference('openAiDeployments').outputs.reasoningDeploymentName.value]"
+                },
+                {
+                  "name": "AZURE_OPENAI_DRAFTING_DEPLOYMENT",
+                  "value": "[reference('openAiDeployments').outputs.draftingDeploymentName.value]"
+                },
+                {
                   "name": "API_ENDPOINT",
                   "value": "[format('https://{0}', reference('apiContainerApp').configuration.ingress.fqdn)]"
                 },
@@ -635,6 +831,7 @@
         "managedEnvironment",
         "monitoring",
         "openAi",
+        "openAiDeployments",
         "redis",
         "storage"
       ]
@@ -753,7 +950,7 @@
       "apiVersion": "2023-12-01",
       "name": "[take(format('{0}{1}-{2}', variables('abbrs').webSitesAppService, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 60)]",
       "location": "[parameters('location')]",
-      "tags": "[union(variables('tags'), createObject('azd-service-name', 'web'))]",
+      "tags": "[union(variables('tags'), createObject('azd-service-name', 'web', 'hidden-link: /app-insights-resource-id', resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255))))]",
       "kind": "app,linux",
       "identity": {
         "type": "SystemAssigned"
@@ -789,6 +986,68 @@
         "monitoring"
       ]
     },
+    "appInsightsRef": {
+      "existing": true,
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[take(format('appi-{0}', parameters('environmentName')), 255)]"
+    },
+    "appInsightsRoleApi": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.Insights/components/{0}', take(format('appi-{0}', parameters('environmentName')), 255))]",
+      "name": "[guid(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255)), resourceId('Microsoft.App/containerApps', take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), variables('monitoringMetricsPublisherRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('monitoringMetricsPublisherRoleId'))]",
+        "principalId": "[reference('apiContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "apiContainerApp"
+      ]
+    },
+    "appInsightsRoleAgents": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.Insights/components/{0}', take(format('appi-{0}', parameters('environmentName')), 255))]",
+      "name": "[guid(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255)), resourceId('Microsoft.App/containerApps', take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), variables('monitoringMetricsPublisherRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('monitoringMetricsPublisherRoleId'))]",
+        "principalId": "[reference('agentsContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "agentsContainerApp"
+      ]
+    },
+    "appInsightsRoleIngestion": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.Insights/components/{0}', take(format('appi-{0}', parameters('environmentName')), 255))]",
+      "name": "[guid(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255)), resourceId('Microsoft.App/containerApps', take(format('{0}ingest-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), variables('monitoringMetricsPublisherRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('monitoringMetricsPublisherRoleId'))]",
+        "principalId": "[reference('ingestionContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "ingestionContainerApp"
+      ]
+    },
+    "appInsightsRoleWeb": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.Insights/components/{0}', take(format('appi-{0}', parameters('environmentName')), 255))]",
+      "name": "[guid(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255)), resourceId('Microsoft.Web/sites', take(format('{0}{1}-{2}', variables('abbrs').webSitesAppService, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 60)), variables('monitoringMetricsPublisherRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('monitoringMetricsPublisherRoleId'))]",
+        "principalId": "[reference('webApp', '2023-12-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "webApp"
+      ]
+    },
     "envDiagnostic": {
       "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2021-05-01-preview",
@@ -816,6 +1075,36 @@
       "dependsOn": [
         "managedEnvironment",
         "monitoring"
+      ]
+    },
+    "openAiRoleApi": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64)), resourceId('Microsoft.App/containerApps', take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), variables('cognitiveServicesOpenAiUserRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesOpenAiUserRoleId'))]",
+        "principalId": "[reference('apiContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "apiContainerApp",
+        "openAi"
+      ]
+    },
+    "openAiRoleAgents": {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64)), resourceId('Microsoft.App/containerApps', take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), variables('cognitiveServicesOpenAiUserRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesOpenAiUserRoleId'))]",
+        "principalId": "[reference('agentsContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "agentsContainerApp",
+        "openAi"
       ]
     },
     "monitoring": {
@@ -851,7 +1140,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "4574559810649970444"
+              "templateHash": "6394953587067706102"
             }
           },
           "parameters": {
@@ -1027,6 +1316,56 @@
                 "[resourceId('Microsoft.Insights/actionGroups', take(format('ag-{0}', parameters('envPrefix')), 260))]",
                 "[resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('envPrefix')), 255))]"
               ]
+            },
+            {
+              "type": "Microsoft.Insights/scheduledQueryRules",
+              "apiVersion": "2023-03-15-preview",
+              "name": "[take(format('alert-sim-errors-{0}', parameters('envPrefix')), 260)]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "displayName": "Simulation Tenant Errors",
+                "description": "Fires when a simulation tenant exceeds error threshold; filtered by tenant_id custom dimension",
+                "severity": 2,
+                "enabled": true,
+                "evaluationFrequency": "PT5M",
+                "windowSize": "PT15M",
+                "scopes": [
+                  "[resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('envPrefix')), 255))]"
+                ],
+                "criteria": {
+                  "allOf": [
+                    {
+                      "query": "requests | extend tenant_id = tostring(customDimensions.tenant_id) | where tenant_id startswith \"sim-\" | where success == false | summarize FailedCount = count() by tenant_id | where FailedCount > 20",
+                      "timeAggregation": "Count",
+                      "operator": "GreaterThan",
+                      "threshold": 0,
+                      "dimensions": [
+                        {
+                          "name": "tenant_id",
+                          "operator": "Include",
+                          "values": [
+                            "*"
+                          ]
+                        }
+                      ],
+                      "failingPeriods": {
+                        "numberOfEvaluationPeriods": 1,
+                        "minFailingPeriodsToAlert": 1
+                      }
+                    }
+                  ]
+                },
+                "actions": {
+                  "actionGroups": [
+                    "[resourceId('Microsoft.Insights/actionGroups', take(format('ag-{0}', parameters('envPrefix')), 260))]"
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Insights/actionGroups', take(format('ag-{0}', parameters('envPrefix')), 260))]",
+                "[resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('envPrefix')), 255))]"
+              ]
             }
           ],
           "outputs": {
@@ -1053,6 +1392,526 @@
           }
         }
       }
+    },
+    "azureMaps": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "azure-maps",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "australiaeast"
+          },
+          "envPrefix": {
+            "value": "[parameters('environmentName')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "2346184579648017036"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "allowedValues": [
+                "australiaeast"
+              ],
+              "metadata": {
+                "description": "Location for the Azure Maps account — must be Australia East for data sovereignty"
+              }
+            },
+            "envPrefix": {
+              "type": "string",
+              "metadata": {
+                "description": "Environment name for resource naming"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "metadata": {
+                "description": "Tags applied to the resource"
+              }
+            },
+            "corsAllowedOrigins": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Allowed CORS origins for the web frontend"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Maps/accounts",
+              "apiVersion": "2024-07-01-preview",
+              "name": "[take(format('maps-{0}', parameters('envPrefix')), 98)]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "G2"
+              },
+              "kind": "Gen2",
+              "properties": {
+                "disableLocalAuth": true,
+                "cors": {
+                  "copy": [
+                    {
+                      "name": "corsRules",
+                      "count": "[length(parameters('corsAllowedOrigins'))]",
+                      "input": {
+                        "allowedOrigins": [
+                          "[parameters('corsAllowedOrigins')[copyIndex('corsRules')]]"
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "azureMapsName": {
+              "type": "string",
+              "value": "[take(format('maps-{0}', parameters('envPrefix')), 98)]"
+            },
+            "azureMapsId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Maps/accounts', take(format('maps-{0}', parameters('envPrefix')), 98))]"
+            }
+          }
+        }
+      }
+    },
+    "recoveryLessons": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "recovery-lessons",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "cosmosAccountName": {
+            "value": "[take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)]"
+          },
+          "cosmosDbName": {
+            "value": "disaster-hub"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "5003425488450646145"
+            }
+          },
+          "parameters": {
+            "cosmosDbName": {
+              "type": "string",
+              "metadata": {
+                "description": "Cosmos DB database resource ID (parent)"
+              }
+            },
+            "cosmosAccountName": {
+              "type": "string",
+              "metadata": {
+                "description": "Cosmos DB account name"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2023-11-15",
+              "name": "[format('{0}/{1}/{2}', split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[0], split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[1], 'recovery')]",
+              "properties": {
+                "resource": {
+                  "id": "recovery",
+                  "partitionKey": {
+                    "paths": [
+                      "/incident_id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/status",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/updated_at",
+                          "order": "descending"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "options": {
+                  "autoscaleSettings": {
+                    "maxThroughput": 1000
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2023-11-15",
+              "name": "[format('{0}/{1}/{2}', split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[0], split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[1], 'lessons')]",
+              "properties": {
+                "resource": {
+                  "id": "lessons",
+                  "partitionKey": {
+                    "paths": [
+                      "/incident_id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/status",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/created_at",
+                          "order": "descending"
+                        }
+                      ],
+                      [
+                        {
+                          "path": "/aiims_function",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/pprr_phase",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "options": {
+                  "autoscaleSettings": {
+                    "maxThroughput": 1000
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2023-11-15",
+              "name": "[format('{0}/{1}/{2}', split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[0], split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[1], 'aiims-assignments')]",
+              "properties": {
+                "resource": {
+                  "id": "aiims-assignments",
+                  "partitionKey": {
+                    "paths": [
+                      "/incident_id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/aiims_function",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/is_active",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "options": {
+                  "autoscaleSettings": {
+                    "maxThroughput": 1000
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2023-11-15",
+              "name": "[format('{0}/{1}/{2}', split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[0], split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[1], 'evacuation-stages')]",
+              "properties": {
+                "resource": {
+                  "id": "evacuation-stages",
+                  "partitionKey": {
+                    "paths": [
+                      "/incident_id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/current_stage",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/stage_started_at",
+                          "order": "descending"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "options": {
+                  "autoscaleSettings": {
+                    "maxThroughput": 1000
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2023-11-15",
+              "name": "[format('{0}/{1}/{2}', split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[0], split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[1], 'pprr-contexts')]",
+              "properties": {
+                "resource": {
+                  "id": "pprr-contexts",
+                  "partitionKey": {
+                    "paths": [
+                      "/context_reference_id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/context_type",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/pprr_phase",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "options": {
+                  "autoscaleSettings": {
+                    "maxThroughput": 1000
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "cosmos",
+        "cosmosDb"
+      ]
+    },
+    "emergencyPlanning": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "emergency-planning",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "cosmosAccountName": {
+            "value": "[take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)]"
+          },
+          "cosmosDbName": {
+            "value": "disaster-hub"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "663592852371978554"
+            }
+          },
+          "parameters": {
+            "cosmosDbName": {
+              "type": "string",
+              "metadata": {
+                "description": "Cosmos DB database resource ID (parent)"
+              }
+            },
+            "cosmosAccountName": {
+              "type": "string",
+              "metadata": {
+                "description": "Cosmos DB account name"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2023-11-15",
+              "name": "[format('{0}/{1}/{2}', split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[0], split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[1], 'emergency-plans')]",
+              "properties": {
+                "resource": {
+                  "id": "emergency-plans",
+                  "partitionKey": {
+                    "paths": [
+                      "/region_id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/lifecycle_state",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/updated_at",
+                          "order": "descending"
+                        }
+                      ],
+                      [
+                        {
+                          "path": "/hierarchy_level",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/lifecycle_state",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "options": {
+                  "autoscaleSettings": {
+                    "maxThroughput": 1000
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2023-11-15",
+              "name": "[format('{0}/{1}/{2}', split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[0], split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[1], 'recovery-programmes')]",
+              "properties": {
+                "resource": {
+                  "id": "recovery-programmes",
+                  "partitionKey": {
+                    "paths": [
+                      "/incident_id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/status",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/created_at",
+                          "order": "descending"
+                        }
+                      ],
+                      [
+                        {
+                          "path": "/incident_id",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/status",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "options": {
+                  "autoscaleSettings": {
+                    "maxThroughput": 1000
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2023-11-15",
+              "name": "[format('{0}/{1}/{2}', split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[0], split(format('{0}/{1}', parameters('cosmosAccountName'), parameters('cosmosDbName')), '/')[1], 'recovery-catalogue')]",
+              "properties": {
+                "resource": {
+                  "id": "recovery-catalogue",
+                  "partitionKey": {
+                    "paths": [
+                      "/domain"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/domain",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/objective_type",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                "options": {
+                  "autoscaleSettings": {
+                    "maxThroughput": 1000
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "cosmos",
+        "cosmosDb"
+      ]
     },
     "logAnalyticsSharedKey": {
       "type": "Microsoft.Resources/deployments",
@@ -1102,6 +1961,230 @@
       },
       "dependsOn": [
         "monitoring"
+      ]
+    },
+    "openAiDeployments": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "azure-openai-deployments",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "openAiAccountName": {
+            "value": "[take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64)]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "envPrefix": {
+            "value": "[parameters('environmentName')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "[reference('monitoring').outputs.logAnalyticsId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "7938075628272798472"
+            }
+          },
+          "parameters": {
+            "openAiAccountName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the existing Azure OpenAI resource"
+              }
+            },
+            "location": {
+              "type": "string",
+              "allowedValues": [
+                "australiaeast",
+                "australiasoutheast"
+              ],
+              "metadata": {
+                "description": "Location — restricted to Australian regions"
+              }
+            },
+            "envPrefix": {
+              "type": "string",
+              "metadata": {
+                "description": "Environment prefix for deployment naming"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "metadata": {
+                "description": "Resource tags"
+              }
+            },
+            "reasoningModelName": {
+              "type": "string",
+              "defaultValue": "gpt-4o",
+              "metadata": {
+                "description": "Reasoning-tier model name"
+              }
+            },
+            "reasoningModelVersion": {
+              "type": "string",
+              "defaultValue": "2024-08-06",
+              "metadata": {
+                "description": "Reasoning-tier model version"
+              }
+            },
+            "draftingModelName": {
+              "type": "string",
+              "defaultValue": "gpt-4o-mini",
+              "metadata": {
+                "description": "Drafting-tier model name"
+              }
+            },
+            "draftingModelVersion": {
+              "type": "string",
+              "defaultValue": "2024-07-18",
+              "metadata": {
+                "description": "Drafting-tier model version"
+              }
+            },
+            "reasoningTpmQuota": {
+              "type": "int",
+              "defaultValue": 30,
+              "minValue": 1,
+              "metadata": {
+                "description": "Reasoning-tier TPM quota (K). Dev=30, Prod=120"
+              }
+            },
+            "draftingTpmQuota": {
+              "type": "int",
+              "defaultValue": 60,
+              "minValue": 1,
+              "metadata": {
+                "description": "Drafting-tier TPM quota (K). Dev=60, Prod=240"
+              }
+            },
+            "agentPrincipalIds": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Principal IDs to grant Cognitive Services OpenAI User role"
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Log Analytics workspace ID for diagnostic settings"
+              }
+            }
+          },
+          "variables": {
+            "cognitiveServicesOpenAiUserRoleId": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2024-10-01",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-4o-{0}', parameters('envPrefix')))]",
+              "sku": {
+                "name": "Standard",
+                "capacity": "[parameters('reasoningTpmQuota')]"
+              },
+              "properties": {
+                "model": {
+                  "format": "OpenAI",
+                  "name": "[parameters('reasoningModelName')]",
+                  "version": "[parameters('reasoningModelVersion')]"
+                }
+              }
+            },
+            {
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2024-10-01",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-4o-mini-{0}', parameters('envPrefix')))]",
+              "sku": {
+                "name": "Standard",
+                "capacity": "[parameters('draftingTpmQuota')]"
+              },
+              "properties": {
+                "model": {
+                  "format": "OpenAI",
+                  "name": "[parameters('draftingModelName')]",
+                  "version": "[parameters('draftingModelVersion')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-4o-{0}', parameters('envPrefix')))]"
+              ]
+            },
+            {
+              "copy": {
+                "name": "openAiRoleAssignment",
+                "count": "[length(parameters('agentPrincipalIds'))]"
+              },
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('openAiAccountName'))]",
+              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')), parameters('agentPrincipalIds')[copyIndex()], variables('cognitiveServicesOpenAiUserRoleId'))]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesOpenAiUserRoleId'))]",
+                "principalId": "[parameters('agentPrincipalIds')[copyIndex()]]",
+                "principalType": "ServicePrincipal"
+              }
+            },
+            {
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('openAiAccountName'))]",
+              "name": "openai-diagnostics",
+              "properties": {
+                "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+                "logs": [
+                  {
+                    "category": "RequestResponse",
+                    "enabled": true
+                  },
+                  {
+                    "category": "Audit",
+                    "enabled": true
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "AllMetrics",
+                    "enabled": true
+                  }
+                ]
+              }
+            }
+          ],
+          "outputs": {
+            "reasoningDeploymentName": {
+              "type": "string",
+              "value": "[format('gpt-4o-{0}', parameters('envPrefix'))]"
+            },
+            "draftingDeploymentName": {
+              "type": "string",
+              "value": "[format('gpt-4o-mini-{0}', parameters('envPrefix'))]"
+            },
+            "openAiEndpoint": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')), '2024-10-01').endpoint]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "monitoring",
+        "openAi"
       ]
     }
   },

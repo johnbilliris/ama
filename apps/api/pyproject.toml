@@ -24,6 +24,7 @@ dependencies = [
   "Pygments>=2.20.0",
   "requests>=2.33.0",
   "jsonschema>=4.23.0",
+  "shapely>=2.0.0",
 ]
 
 [tool.hatch.build.targets.wheel]

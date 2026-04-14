@@ -658,7 +658,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 resource webApp 'Microsoft.Web/sites@2023-12-01' = {
   name: take('${abbrs.webSitesAppService}${environmentName}-${take(uniqueSuffix, 6)}', 60)
   location: location
-  tags: union(tags, { 'azd-service-name': 'web' })
+  tags: union(tags, { 'azd-service-name': 'web', 'hidden-link: /app-insights-resource-id': resourceId('Microsoft.Insights/components', take('appi-${environmentName}', 255)) })
   kind: 'app,linux'
   identity: { type: 'SystemAssigned' }
   properties: {
@@ -750,11 +750,30 @@ module openAiDeployments './modules/azure-openai.bicep' = {
     location: location
     envPrefix: environmentName
     tags: tags
-    agentPrincipalIds: [
-      apiContainerApp.identity.principalId
-      agentsContainerApp.identity.principalId
-    ]
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsId
+  }
+}
+
+// Cognitive Services OpenAI User — Container Apps (separated to break cycle with openAiDeployments)
+var cognitiveServicesOpenAiUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+
+resource openAiRoleApi 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(openAi.id, apiContainerApp.id, cognitiveServicesOpenAiUserRoleId)
+  scope: openAi
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesOpenAiUserRoleId)
+    principalId: apiContainerApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource openAiRoleAgents 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(openAi.id, agentsContainerApp.id, cognitiveServicesOpenAiUserRoleId)
+  scope: openAi
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesOpenAiUserRoleId)
+    principalId: agentsContainerApp.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
