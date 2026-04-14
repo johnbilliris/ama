@@ -8,8 +8,8 @@ within the 60 s benchmark wall-clock budget.
 from __future__ import annotations
 
 import pytest
+from benchmark_helpers import set_benchmark_metadata
 from common.circuit_breaker import CircuitBreaker, CircuitState
-from conftest import set_benchmark_metadata
 
 RECOVERY_TIMEOUT: float = 0.1  # 100 ms — fast benchmarking
 

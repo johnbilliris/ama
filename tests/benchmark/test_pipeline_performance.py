@@ -11,8 +11,8 @@ import asyncio
 from unittest.mock import MagicMock
 
 import pytest
+from benchmark_helpers import set_benchmark_metadata
 from common.handoffs import AgentHandoffEvent
-from conftest import set_benchmark_metadata
 
 # ── Sample data factories ────────────────────────────────────────────────────
 
