@@ -7,7 +7,6 @@ hook that triggers regression comparison after all benchmarks complete.
 
 from __future__ import annotations
 
-import asyncio
 import os
 import sys
 from pathlib import Path
@@ -63,23 +62,6 @@ def communication_client() -> TestClient:
     from communication.agent import create_app as create_communication_app
 
     return TestClient(create_communication_app())
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-
-def run_async(coro_fn, *args, **kwargs):
-    """Execute an async function synchronously for pytest-benchmark compatibility."""
-    return asyncio.run(coro_fn(*args, **kwargs))
-
-
-def set_benchmark_metadata(
-    benchmark, *, agent: str, metric_type: str, slo_target_s: float
-) -> None:
-    """Add SLO metadata to benchmark ``extra_info``."""
-    benchmark.extra_info["agent"] = agent
-    benchmark.extra_info["metric_type"] = metric_type
-    benchmark.extra_info["slo_target_s"] = slo_target_s
 
 
 # ── Session finish hook — regression comparison ──────────────────────────────

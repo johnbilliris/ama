@@ -10,9 +10,9 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
+from benchmark_helpers import set_benchmark_metadata
 from common.llm_client import LLMClient
 from common.llm_config import LLMClientConfig
-from conftest import set_benchmark_metadata
 
 # ── Fixture ───────────────────────────────────────────────────────────────────
 

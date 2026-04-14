@@ -8,7 +8,7 @@ Safety-critical agents (risk, evacuation) have a tighter SLO (< 75 ms).
 from __future__ import annotations
 
 import pytest
-from conftest import set_benchmark_metadata
+from benchmark_helpers import set_benchmark_metadata
 
 # ── Monitoring (general) ─────────────────────────────────────────────────────
 
