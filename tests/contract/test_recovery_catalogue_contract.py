@@ -55,8 +55,10 @@ class TestAnalysisEndpoints:
     def test_cross_domain_analysis(self, client):
         resp = client.post("/analysis/cross-domain", json={
             "indicator_data": [
-                {"domain": "social", "indicator_name": "health", "trend": "negative", "value": 0.3, "target_value": 1.0},
-                {"domain": "economic", "indicator_name": "employment", "trend": "positive", "value": 0.8, "target_value": 1.0},
+                {"domain": "social", "indicator_name": "health", "trend": "negative",
+                 "value": 0.3, "target_value": 1.0},
+                {"domain": "economic", "indicator_name": "employment", "trend": "positive",
+                 "value": 0.8, "target_value": 1.0},
             ],
         })
         assert resp.status_code == 200

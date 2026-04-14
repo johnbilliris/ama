@@ -5,10 +5,9 @@ recommendations, and community summary generation.
 
 FRs: FR-025–028
 """
-from fastapi import APIRouter, Query
-from pydantic import BaseModel
-
 from app.services.ai_analysis_service import AIAnalysisService
+from fastapi import APIRouter
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/analysis", tags=["ai-analysis"])
 _service = AIAnalysisService()

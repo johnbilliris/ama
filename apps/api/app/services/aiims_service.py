@@ -10,19 +10,19 @@ FRs: FR-013, FR-014, FR-049 | Research: R-005
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from apps.agents.common.pprr_lifecycle import build_incident_level_change_payload
-from packages.domain.src.domain.models.aiims_role_assignment import (
-    AiimsFunction,
-    AiimsRoleAssignment,
-    ALL_AIIMS_FUNCTIONS,
-)
-from packages.domain.src.domain.models.timeline_event import TimelineEvent
-
 from app.services.state_store import (
     AIIMS_ASSIGNMENTS,
     INCIDENTS,
     TIMELINE_EVENTS,
 )
+
+from apps.agents.common.pprr_lifecycle import build_incident_level_change_payload
+from packages.domain.src.domain.models.aiims_role_assignment import (
+    ALL_AIIMS_FUNCTIONS,
+    AiimsFunction,
+    AiimsRoleAssignment,
+)
+from packages.domain.src.domain.models.timeline_event import TimelineEvent
 
 
 class AiimsService:

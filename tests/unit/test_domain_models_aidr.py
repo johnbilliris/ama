@@ -3,6 +3,7 @@
 from datetime import UTC, datetime
 
 import pytest
+
 from packages.domain.src.domain.models.aiims_role_assignment import (
     ALL_AIIMS_FUNCTIONS,
     AiimsRoleAssignment,
@@ -26,7 +27,6 @@ from packages.domain.src.domain.models.recovery_environment_tracker import (
     RecoveryEnvironmentTracker,
     RecoveryIndicator,
 )
-
 
 # ---------------------------------------------------------------------------
 # Incident

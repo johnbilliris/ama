@@ -4,7 +4,6 @@ import os
 
 if __name__ == "__main__":
     import uvicorn
-
     from planning.agent import create_app
     from planning.config import PlanningConfig
 

@@ -7,7 +7,6 @@ import pytest
 from app.repositories.emergency_plan_repository import EmergencyPlanRepository
 from app.services.emergency_plan_service import EmergencyPlanService
 
-
 # ---------------------------------------------------------------------------
 # Mock Cosmos container
 # ---------------------------------------------------------------------------

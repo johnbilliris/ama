@@ -4,10 +4,10 @@ Tests the complete workflow from plan creation through recovery evaluation.
 """
 import pytest
 from fastapi.testclient import TestClient
-from planning.agent import create_app as create_planning_app
-from planning.config import PlanningConfig
 from monitoring.agent import create_app as create_monitoring_app
 from monitoring.config import MonitoringConfig
+from planning.agent import create_app as create_planning_app
+from planning.config import PlanningConfig
 
 
 @pytest.fixture
@@ -75,7 +75,11 @@ class TestEmergencyPlanningToRecoveryScenario:
         # Step 2: Select outcomes
         resp = monitoring_client.post(f"/me-framework/{fw_id}/outcomes", json={
             "outcomes": [
-                {"catalogue_outcome_id": "aidr:social:community-health-levels", "domain": "social", "objective_type": "sustainability"},
+                {
+                    "catalogue_outcome_id": "aidr:social:community-health-levels",
+                    "domain": "social",
+                    "objective_type": "sustainability",
+                },
             ],
         })
         assert resp.status_code == 200
@@ -93,8 +97,10 @@ class TestEmergencyPlanningToRecoveryScenario:
     def test_ai_analysis(self, monitoring_client):
         resp = monitoring_client.post("/analysis/cross-domain", json={
             "indicator_data": [
-                {"domain": "social", "indicator_name": "health", "value": 60, "target_value": 100, "trend": "negative"},
-                {"domain": "economic", "indicator_name": "employment", "value": 55, "target_value": 100, "trend": "negative"},
+                {"domain": "social", "indicator_name": "health",
+                 "value": 60, "target_value": 100, "trend": "negative"},
+                {"domain": "economic", "indicator_name": "employment",
+                 "value": 55, "target_value": 100, "trend": "negative"},
             ],
         })
         assert resp.status_code == 200

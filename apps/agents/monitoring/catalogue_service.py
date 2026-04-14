@@ -11,7 +11,10 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-SEED_ROOT = Path(__file__).resolve().parent.parent.parent.parent / "packages" / "domain" / "src" / "domain" / "seed" / "recovery-catalogue"
+SEED_ROOT = (
+    Path(__file__).resolve().parent.parent.parent.parent
+    / "packages" / "domain" / "src" / "domain" / "seed" / "recovery-catalogue"
+)
 
 DOMAIN_FILES = ["overarching", "social", "economic", "built", "natural"]
 
@@ -107,7 +110,10 @@ class CatalogueService:
                     "activity": act,
                     "for_indicator": ind_id,
                     "outcome": outcome["title"],
-                    "rationale": f"Activity addresses lagging indicator '{indicator.get('title', ind_id)}' under outcome '{outcome['title']}'",
+                    "rationale": (
+                        f"Activity addresses lagging indicator '{indicator.get('title', ind_id)}'"
+                        f" under outcome '{outcome['title']}'"
+                    ),
                 })
         return suggestions
 

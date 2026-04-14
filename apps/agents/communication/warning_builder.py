@@ -9,12 +9,9 @@ FRs: FR-001–005, FR-048 | SCs: SC-001–005
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from uuid import uuid4
 
-from apps.agents.common.warning_compliance import validate_warning_compliance
 from packages.domain.src.domain.models.public_alert import (
-    TIER_COLOUR_MAP,
     WARNING_PRINCIPLE_KEYS,
     HazardIcon,
     PublicAlert,

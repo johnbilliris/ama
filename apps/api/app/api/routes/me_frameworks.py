@@ -6,10 +6,9 @@ standards, collection schedules, monitoring reports, and evaluations.
 FRs: FR-008–014
 """
 
+from app.services.me_framework_service import MEFrameworkPlatformService
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-
-from app.services.me_framework_service import MEFrameworkPlatformService
 
 router = APIRouter(prefix="/me-frameworks", tags=["me-frameworks"])
 _service = MEFrameworkPlatformService()

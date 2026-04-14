@@ -10,17 +10,16 @@ import time
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query
-
 from app.models.geojson import (
+    SEVERITY_TO_AWS_TIER,
     GeoJSONPoint,
     IncidentFeature,
     IncidentFeatureCollection,
     IncidentFeatureProperties,
     IncidentMapMetadata,
-    SEVERITY_TO_AWS_TIER,
 )
 from app.repositories.incident_map_repository import IncidentMapRepository
+from fastapi import APIRouter, HTTPException, Query
 
 logger = logging.getLogger(__name__)
 

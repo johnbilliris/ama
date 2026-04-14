@@ -7,12 +7,11 @@ from evacuation.stages import (
     transition_stage,
     validate_transition,
 )
+
 from packages.domain.src.domain.models.evacuation_stage import (
     RE_ENTRY_TRANSITIONS,
-    VALID_TRANSITIONS,
     EvacuationStage,
 )
-
 
 # ---------------------------------------------------------------------------
 # validate_transition

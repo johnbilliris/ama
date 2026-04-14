@@ -6,7 +6,6 @@ Three-tier hierarchy per R-005:
 Provides default mapping for automated role assignment when incidents are created.
 """
 
-from typing import Literal
 
 from packages.domain.src.domain.models.aiims_role_assignment import (
     ALL_AIIMS_FUNCTIONS,

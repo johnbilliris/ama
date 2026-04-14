@@ -11,6 +11,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from app.repositories.emergency_plan_repository import EmergencyPlanRepository
+
 from packages.domain.src.domain.models.emergency_plan import PLAN_SECTION_SLUGS, PLANNING_PRINCIPLES
 from packages.domain.src.domain.models.planning_process_record import PLANNING_STEPS
 
@@ -165,7 +166,10 @@ class EmergencyPlanService:
         checked_principles = sum(1 for v in principles.values() if v is True)
         total_principles = len(PLANNING_PRINCIPLES)
 
-        missing_sections = [slug for slug in PLAN_SECTION_SLUGS if slug not in sections or not sections.get(slug, {}).get("is_complete", False)]
+        missing_sections = [
+            slug for slug in PLAN_SECTION_SLUGS
+            if slug not in sections or not sections.get(slug, {}).get("is_complete", False)
+        ]
         unchecked_principles = [p for p in PLANNING_PRINCIPLES if not principles.get(p, False)]
 
         return {

@@ -6,20 +6,22 @@ through the state machine, and updating stage-specific progress fields.
 FRs: FR-018–FR-025
 """
 
-from apps.agents.evacuation.stages import (
-    build_stage_transition_payload,
-    create_initial_stage,
-    transition_stage,
-)
+from uuid import uuid4
+
 from app.services.state_store import (
     EVACUATION_STAGES,
     INCIDENTS,
     TIMELINE_EVENTS,
 )
-from packages.domain.src.domain.models.timeline_event import TimelineEvent
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from uuid import uuid4
+
+from apps.agents.evacuation.stages import (
+    build_stage_transition_payload,
+    create_initial_stage,
+    transition_stage,
+)
+from packages.domain.src.domain.models.timeline_event import TimelineEvent
 
 router = APIRouter(
     prefix="/incidents/{incident_id}/evacuation", tags=["evacuation"],

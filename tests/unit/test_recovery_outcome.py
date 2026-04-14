@@ -6,14 +6,12 @@ CatalogueIndicator, RecoveryDomain, ObjectiveType.
 import pytest
 
 from packages.domain.src.domain.models.recovery_outcome import (
-    RecoveryOutcome,
-    CatalogueActivity,
-    CatalogueIndicator,
-    RecoveryDomain,
-    ObjectiveType,
-    CATALOGUE_OUTCOME_ID_PATTERN,
     CATALOGUE_ACTIVITY_ID_PATTERN,
     CATALOGUE_INDICATOR_ID_PATTERN,
+    CATALOGUE_OUTCOME_ID_PATTERN,
+    CatalogueActivity,
+    CatalogueIndicator,
+    RecoveryOutcome,
 )
 
 

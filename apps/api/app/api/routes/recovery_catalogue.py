@@ -5,10 +5,9 @@ activity suggestions, and evaluation question retrieval.
 
 FRs: FR-015–024
 """
+from app.services.recovery_catalogue_service import RecoveryCatalogueService
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-
-from app.services.recovery_catalogue_service import RecoveryCatalogueService
 
 router = APIRouter(prefix="/recovery-catalogue", tags=["recovery-catalogue"])
 _service = RecoveryCatalogueService()

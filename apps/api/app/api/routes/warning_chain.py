@@ -10,16 +10,15 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from apps.agents.common.warning_compliance import validate_warning_compliance
-from apps.agents.communication.edxl_serialiser import serialize_to_edxl
-from apps.agents.communication.warning_builder import (
-    get_chain_position,
-    traverse_chain,
-)
 from app.services.state_store import ALERTS
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
-from packages.domain.src.domain.models.public_alert import PublicAlert
+
+from apps.agents.common.warning_compliance import validate_warning_compliance
+from apps.agents.communication.edxl_serialiser import serialize_to_edxl
+from apps.agents.communication.warning_builder import (
+    traverse_chain,
+)
 
 router = APIRouter(prefix="/alerts", tags=["warning-chain"])
 

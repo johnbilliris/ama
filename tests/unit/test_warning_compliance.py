@@ -1,6 +1,7 @@
 """Unit tests for AWS warning compliance validator and 10-principle checker."""
 
 import pytest
+
 from apps.agents.common.warning_compliance import (
     WarningComplianceResult,
     validate_tier_colour_consistency,

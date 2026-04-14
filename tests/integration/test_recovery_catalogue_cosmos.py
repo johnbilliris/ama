@@ -4,10 +4,10 @@ Validates that the seed data can be loaded into the RecoveryCatalogueRepository
 (in-memory mode) and queried correctly, simulating Cosmos DB interactions.
 """
 import json
-import pytest
-import pytest_asyncio
 from pathlib import Path
 
+import pytest
+import pytest_asyncio
 from app.repositories.recovery_catalogue_repository import RecoveryCatalogueRepository
 
 SEED_ROOT = (
