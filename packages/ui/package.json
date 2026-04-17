@@ -14,7 +14,9 @@
     "./components/disaster-map/use-disaster-map-filters": "./src/components/disaster-map/use-disaster-map-filters.ts",
     "./components/layout/app-shell": "./src/components/layout/app-shell.tsx",
     "./styles/*": "./src/styles/*",
-    "./components/disaster-map/incident-type-icon": "./src/components/disaster-map/incident-type-icon.tsx"
+    "./components/disaster-map/incident-type-icon": "./src/components/disaster-map/incident-type-icon.tsx",
+    "./components/governance/health-score-gauge": "./src/components/governance/HealthScoreGauge.tsx",
+    "./components/governance/traffic-light-indicator": "./src/components/governance/TrafficLightIndicator.tsx"
   },
   "dependencies": {
     "azure-maps-control": "^3.5.0"

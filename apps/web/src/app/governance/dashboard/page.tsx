@@ -6,7 +6,7 @@ import { DataFreshnessIndicator } from "@/components/governance/dashboard/DataFr
 import { DegradedModeBanner } from "@/components/governance/dashboard/DegradedModeBanner";
 import { RefreshControls } from "@/components/governance/dashboard/RefreshControls";
 import { WidgetErrorBoundary } from "@/components/governance/dashboard/WidgetErrorBoundary";
-import { HealthScoreGauge } from "@ama/ui/components/governance";
+import { HealthScoreGauge } from "@ama/ui/components/governance/health-score-gauge";
 import {
   getExecutiveSummary,
   type ExecutiveSummaryResponse,
