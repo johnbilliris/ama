@@ -56,6 +56,11 @@ class DataSource(BaseModel):
     deactivated_at: datetime | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    # Dashboard fields (021-governance-dashboard)
+    next_assessment_due_date: datetime | None = None
+    governance_gap_count: int = 0
+    grace_period_expiry: datetime | None = None
+    grace_period_reason: str | None = None
 
     @model_validator(mode="after")
     def sync_authority_rank(self) -> "DataSource":

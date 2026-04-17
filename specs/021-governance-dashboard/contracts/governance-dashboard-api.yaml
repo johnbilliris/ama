@@ -1,0 +1,1164 @@
+# Governance Dashboard API Contract
+# OpenAPI 3.1.0 — New endpoints for the governance dashboard feature
+# Extends existing router at /api/v1/governance/
+
+openapi: "3.1.0"
+info:
+  title: Governance Dashboard API
+  version: "1.0.0"
+  description: |
+    API contract for the Governance Dashboard feature (spec 021).
+    All endpoints are read-only except the audit export endpoint (which creates an export job).
+    All endpoints require authentication and include tenant_id from Entra ID claims.
+    All endpoints return JSON with consistent error shapes.
+
+servers:
+  - url: /api/v1
+    description: FastAPI backend (proxied via Next.js rewrites)
+
+security:
+  - entraIdBearer: []
+
+tags:
+  - name: Dashboard Config
+    description: Dashboard configuration and role-based personalisation
+  - name: Executive Summary
+    description: High-level governance health overview
+  - name: Compliance
+    description: Compliance matrix and assessment tracking
+  - name: Audit Trail
+    description: Searchable audit log and decision chains
+  - name: Operational Readiness
+    description: PPRR, emergency plans, exercises, role coverage
+  - name: Recovery
+    description: Recovery domain progress tracking
+  - name: Risk & Warning
+    description: Risk register and AWS warning compliance
+
+paths:
+  /governance/dashboard/config:
+    get:
+      tags: [Dashboard Config]
+      operationId: getDashboardConfig
+      summary: Get dashboard configuration for the current user
+      description: |
+        Returns the user's AIIMS roles, default widget layout, polling interval,
+        tenant context, and active incident status. Called once on dashboard load
+        and on role change detection.
+      responses:
+        "200":
+          description: Dashboard configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardConfigResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: User has no AIIMS role assignment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestrictedAccessResponse"
+
+  /governance/dashboard/summary:
+    get:
+      tags: [Executive Summary]
+      operationId: getExecutiveSummary
+      summary: Get executive governance summary with health score
+      description: |
+        Returns the composite governance health score, constitutional gate statuses,
+        active incident count, resource utilisation, and risk summary.
+        Cached with 5-minute TTL; respects Cache-Control: no-cache for manual refresh.
+      parameters:
+        - $ref: "#/components/parameters/CacheControl"
+      responses:
+        "200":
+          description: Executive summary data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecutiveSummaryResponse"
+          headers:
+            X-Data-Freshness:
+              description: ISO 8601 timestamp of the oldest data source contributing to the response
+              schema:
+                type: string
+                format: date-time
+            X-Cache-Status:
+              description: Whether this response was served from cache
+              schema:
+                type: string
+                enum: [HIT, MISS, BYPASS]
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "503":
+          $ref: "#/components/responses/DegradedMode"
+
+  /governance/dashboard/compliance:
+    get:
+      tags: [Compliance]
+      operationId: getComplianceMatrix
+      summary: Get compliance matrix with data source governance status
+      parameters:
+        - name: compliance_status
+          in: query
+          schema:
+            type: string
+            enum: [compliant, non_compliant, pending, grace_period]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [last_assessment_date, next_due_date, gap_count, name]
+            default: name
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/ContinuationToken"
+      responses:
+        "200":
+          description: Paginated compliance matrix
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComplianceMatrixResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /governance/dashboard/compliance/{dataSourceId}:
+    get:
+      tags: [Compliance]
+      operationId: getComplianceDetail
+      summary: Get detailed compliance info for a specific data source
+      parameters:
+        - name: dataSourceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Data source compliance detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComplianceDetailResponse"
+        "404":
+          description: Data source not found
+
+  /governance/dashboard/audit:
+    get:
+      tags: [Audit Trail]
+      operationId: searchAuditTrail
+      summary: Search and filter governance audit events
+      description: |
+        Returns paginated audit events matching the given filters.
+        Performance target: results within 2 seconds with server-side pagination.
+      parameters:
+        - name: date_from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: date_to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: actor
+          in: query
+          schema:
+            type: string
+        - name: action_type
+          in: query
+          schema:
+            type: string
+        - name: affected_entity
+          in: query
+          schema:
+            type: string
+        - name: keyword
+          in: query
+          description: Free-text search across event descriptions
+          schema:
+            type: string
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/ContinuationToken"
+      responses:
+        "200":
+          description: Paginated audit events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditTrailResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /governance/dashboard/audit/{eventId}/chain:
+    get:
+      tags: [Audit Trail]
+      operationId: getDecisionChain
+      summary: Get the full decision chain for an audit event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Decision chain steps
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditDecisionChainResponse"
+        "404":
+          description: Audit event not found
+
+  /governance/dashboard/audit/export:
+    post:
+      tags: [Audit Trail]
+      operationId: createAuditExport
+      summary: Create an async export job for selected audit records
+      description: |
+        Initiates an asynchronous export. Returns a job ID for polling.
+        The export file is stored in Azure Blob Storage with a 24-hour download window.
+        Export actions are logged in the audit trail (FR-027).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditExportRequest"
+      responses:
+        "202":
+          description: Export job created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditExportJobResponse"
+        "429":
+          description: Too many concurrent exports (max 3 per user)
+
+  /governance/dashboard/audit/export/{jobId}:
+    get:
+      tags: [Audit Trail]
+      operationId: getExportJobStatus
+      summary: Check the status of an audit export job
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Export job status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditExportJobResponse"
+        "404":
+          description: Export job not found
+
+  /governance/dashboard/readiness:
+    get:
+      tags: [Operational Readiness]
+      operationId: getOperationalReadiness
+      summary: Get operational readiness assessment data
+      responses:
+        "200":
+          description: Operational readiness data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OperationalReadinessResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /governance/dashboard/recovery:
+    get:
+      tags: [Recovery]
+      operationId: getRecoveryProgress
+      summary: Get recovery domain progress data
+      parameters:
+        - name: incident_id
+          in: query
+          description: Filter by specific incident. Defaults to most recent active recovery.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recovery progress data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecoveryProgressResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /governance/dashboard/recovery/{domain}:
+    get:
+      tags: [Recovery]
+      operationId: getRecoveryDomainDetail
+      summary: Get detail panel data for a specific recovery domain
+      parameters:
+        - name: domain
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [overarching, social, economic, built, natural]
+        - name: incident_id
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recovery domain detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecoveryDomainDetailResponse"
+        "404":
+          description: Recovery domain not found or no active recovery
+
+  /governance/dashboard/risk:
+    get:
+      tags: [Risk & Warning]
+      operationId: getRiskAndWarning
+      summary: Get risk register and warning compliance data
+      responses:
+        "200":
+          description: Risk and warning data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskWarningResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /governance/dashboard/risk/{riskId}:
+    get:
+      tags: [Risk & Warning]
+      operationId: getRiskDetail
+      summary: Get detail panel for a specific risk entry
+      parameters:
+        - name: riskId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Risk detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskDetailResponse"
+        "404":
+          description: Risk entry not found
+
+components:
+  securitySchemes:
+    entraIdBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Microsoft Entra ID JWT token with tenant_id claim
+
+  parameters:
+    PageSize:
+      name: page_size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+    ContinuationToken:
+      name: continuation_token
+      in: query
+      description: Cosmos DB continuation token for pagination
+      schema:
+        type: string
+    CacheControl:
+      name: Cache-Control
+      in: header
+      description: Send "no-cache" to bypass dashboard cache (manual refresh)
+      schema:
+        type: string
+
+  responses:
+    Unauthorized:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Authentication required"
+    DegradedMode:
+      description: One or more backend data sources unavailable
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+              degraded_sources:
+                type: array
+                items:
+                  type: string
+              last_known_good_at:
+                type: string
+                format: date-time
+
+  schemas:
+    DashboardConfigResponse:
+      type: object
+      required: [user_roles, widget_layout, default_view, poll_interval_ms, tenant_id, is_simulation]
+      properties:
+        user_roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/AIIMSRole"
+        primary_role:
+          $ref: "#/components/schemas/AIIMSRole"
+        widget_layout:
+          type: array
+          items:
+            $ref: "#/components/schemas/WidgetDefinition"
+        default_view:
+          type: string
+          enum: [executive_summary, compliance, audit_trail, operational_readiness, recovery, risk_warning]
+        poll_interval_ms:
+          type: integer
+          description: Polling interval in milliseconds (30000 or 300000)
+        has_active_incident:
+          type: boolean
+        cache_ttl_s:
+          type: integer
+          default: 300
+        tenant_id:
+          type: string
+        tenant_display_name:
+          type: string
+        is_simulation:
+          type: boolean
+
+    AIIMSRole:
+      type: string
+      enum:
+        - incident_controller
+        - operations_officer
+        - planning_officer
+        - intelligence_officer
+        - logistics_officer
+        - public_information_officer
+        - executive_leader
+        - observer_auditor
+        - risk_manager
+        - resilience_planner
+
+    WidgetDefinition:
+      type: object
+      required: [widget_id, widget_type, display_name, priority, data_endpoint, refresh_group]
+      properties:
+        widget_id:
+          type: string
+        widget_type:
+          type: string
+          enum: [gauge, grid, table, chart, indicator, search, timeline, progress_bar, counter]
+        display_name:
+          type: string
+        priority:
+          type: integer
+          minimum: 1
+        data_endpoint:
+          type: string
+        refresh_group:
+          type: string
+          enum: [active_incident, steady_state, manual_only]
+
+    ExecutiveSummaryResponse:
+      type: object
+      required: [health_score, constitutional_gates, active_incident_count, resource_utilisation_pct, risk_summary, tenant_id]
+      properties:
+        health_score:
+          $ref: "#/components/schemas/GovernanceHealthScore"
+        constitutional_gates:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConstitutionalGateStatus"
+          minItems: 10
+          maxItems: 10
+        active_incident_count:
+          type: integer
+          minimum: 0
+        resource_utilisation_pct:
+          type: number
+          minimum: 0
+          maximum: 100
+        risk_summary:
+          type: object
+          properties:
+            extreme:
+              type: integer
+            high:
+              type: integer
+            medium:
+              type: integer
+            low:
+              type: integer
+        data_freshness:
+          type: string
+          format: date-time
+        tenant_id:
+          type: string
+
+    GovernanceHealthScore:
+      type: object
+      required: [score, status, dimensions, calculated_at]
+      properties:
+        score:
+          type: number
+          minimum: 0
+          maximum: 100
+        status:
+          type: string
+          enum: [green, amber, red]
+        dimensions:
+          type: array
+          items:
+            type: object
+            properties:
+              dimension:
+                type: string
+              score:
+                type: number
+              weight:
+                type: number
+              weighted_score:
+                type: number
+              input_count:
+                type: integer
+              stale:
+                type: boolean
+          minItems: 4
+          maxItems: 4
+        calculated_at:
+          type: string
+          format: date-time
+        has_active_incident:
+          type: boolean
+
+    ConstitutionalGateStatus:
+      type: object
+      required: [gate_number, gate_name, status, detail_url]
+      properties:
+        gate_number:
+          type: integer
+          minimum: 1
+          maximum: 10
+        gate_name:
+          type: string
+        status:
+          type: string
+          enum: [compliant, non_compliant, partially_compliant, assessment_pending]
+        severity:
+          type: string
+          enum: [info, warning, critical]
+          nullable: true
+        last_assessment_date:
+          type: string
+          format: date-time
+          nullable: true
+        evidence_count:
+          type: integer
+          minimum: 0
+        detail_url:
+          type: string
+
+    ComplianceMatrixResponse:
+      type: object
+      required: [entries, total_count, page_size]
+      properties:
+        entries:
+          type: array
+          items:
+            type: object
+            required: [data_source_id, data_source_name, compliance_status]
+            properties:
+              data_source_id:
+                type: string
+              data_source_name:
+                type: string
+              compliance_status:
+                type: string
+                enum: [compliant, non_compliant, pending, grace_period]
+              last_assessment_date:
+                type: string
+                format: date-time
+                nullable: true
+              next_assessment_due_date:
+                type: string
+                format: date-time
+                nullable: true
+              governance_gap_count:
+                type: integer
+                minimum: 0
+              grace_period_expiry:
+                type: string
+                format: date-time
+                nullable: true
+              grace_period_reason:
+                type: string
+                nullable: true
+              grace_period_countdown_days:
+                type: integer
+                nullable: true
+              category:
+                type: string
+                nullable: true
+        total_count:
+          type: integer
+        filters_applied:
+          type: object
+        continuation_token:
+          type: string
+          nullable: true
+        page_size:
+          type: integer
+          default: 50
+
+    ComplianceDetailResponse:
+      type: object
+      required: [data_source_id, assessment_history, remediation_actions]
+      properties:
+        data_source_id:
+          type: string
+        data_source_name:
+          type: string
+        current_status:
+          type: string
+        assessment_history:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date-time
+              assessor:
+                type: string
+              result:
+                type: string
+              notes:
+                type: string
+        remediation_actions:
+          type: array
+          items:
+            type: object
+            properties:
+              action:
+                type: string
+              status:
+                type: string
+              due_date:
+                type: string
+                format: date-time
+        related_audit_urls:
+          type: array
+          items:
+            type: string
+
+    AuditTrailResponse:
+      type: object
+      required: [events, total_count, page_size]
+      properties:
+        events:
+          type: array
+          items:
+            type: object
+            required: [id, timestamp, actor, action_type, affected_entity, outcome]
+            properties:
+              id:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              actor:
+                type: string
+              action_type:
+                type: string
+              affected_entity:
+                type: string
+              outcome:
+                type: string
+              provenance_reference:
+                type: string
+                nullable: true
+              has_decision_chain:
+                type: boolean
+        total_count:
+          type: integer
+        filters_applied:
+          type: object
+        continuation_token:
+          type: string
+          nullable: true
+        page_size:
+          type: integer
+          default: 50
+
+    AuditDecisionChainResponse:
+      type: object
+      required: [event_id, chain, chain_complete]
+      properties:
+        event_id:
+          type: string
+        chain:
+          type: array
+          items:
+            type: object
+            required: [step_order, event_type, actor, timestamp, description]
+            properties:
+              step_order:
+                type: integer
+              event_type:
+                type: string
+                enum: [trigger, approval, action, notification]
+              actor:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              description:
+                type: string
+              rationale:
+                type: string
+                nullable: true
+              evidence_integrity:
+                type: string
+                enum: [verified, unverified, pending]
+        chain_complete:
+          type: boolean
+
+    AuditExportRequest:
+      type: object
+      required: [format]
+      properties:
+        format:
+          type: string
+          enum: [pdf, csv, json]
+        event_ids:
+          type: array
+          items:
+            type: string
+          description: Specific event IDs to export. If empty, uses filter_params.
+        filter_params:
+          type: object
+          description: Same filter parameters as the search endpoint
+          properties:
+            date_from:
+              type: string
+              format: date-time
+            date_to:
+              type: string
+              format: date-time
+            actor:
+              type: string
+            action_type:
+              type: string
+            affected_entity:
+              type: string
+
+    AuditExportJobResponse:
+      type: object
+      required: [id, status, format, requested_at]
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [queued, processing, complete, failed]
+        format:
+          type: string
+          enum: [pdf, csv, json]
+        requested_at:
+          type: string
+          format: date-time
+        record_count:
+          type: integer
+          minimum: 0
+        download_url:
+          type: string
+          nullable: true
+        download_expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        error_message:
+          type: string
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    OperationalReadinessResponse:
+      type: object
+      required: [pprr_phases, emergency_plans, exercise_completion_rate_pct, aiims_role_coverage]
+      properties:
+        pprr_phases:
+          type: array
+          items:
+            type: object
+            required: [phase, is_active, indicator_status]
+            properties:
+              phase:
+                type: string
+                enum: [prevention, preparedness, response, recovery]
+              is_active:
+                type: boolean
+              indicator_status:
+                type: string
+                enum: [active, inactive, elevated]
+          minItems: 4
+          maxItems: 4
+        emergency_plans:
+          type: array
+          items:
+            type: object
+            properties:
+              lifecycle_state:
+                type: string
+                enum: [Draft, InConsultation, UnderReview, Endorsed, Activated, PostEventReview, Superseded]
+              count:
+                type: integer
+              overdue_count:
+                type: integer
+        total_plans:
+          type: integer
+        overdue_plans_total:
+          type: integer
+        exercise_completion_rate_pct:
+          type: number
+          minimum: 0
+          maximum: 100
+        exercise_breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              rate:
+                type: number
+              last_date:
+                type: string
+                format: date-time
+        overall_readiness_score:
+          type: number
+          minimum: 0
+          maximum: 100
+        aiims_role_coverage:
+          type: array
+          items:
+            type: object
+            required: [role, assigned_count, required_count, is_staffed, coverage_pct]
+            properties:
+              role:
+                $ref: "#/components/schemas/AIIMSRole"
+              assigned_count:
+                type: integer
+              required_count:
+                type: integer
+              is_staffed:
+                type: boolean
+              coverage_pct:
+                type: number
+        overall_role_coverage_pct:
+          type: number
+          minimum: 0
+          maximum: 100
+        capability_gap_count:
+          type: integer
+          minimum: 0
+
+    RecoveryProgressResponse:
+      type: object
+      required: [domains, has_active_recovery]
+      properties:
+        domains:
+          type: array
+          items:
+            type: object
+            required: [domain, display_name, completion_pct, trend, is_below_target]
+            properties:
+              domain:
+                type: string
+                enum: [overarching, social, economic, built, natural]
+              display_name:
+                type: string
+              completion_pct:
+                type: number
+                minimum: 0
+                maximum: 100
+              trend:
+                type: string
+                enum: [improving, stable, declining]
+              target_pct:
+                type: number
+              variance_from_target:
+                type: number
+              is_below_target:
+                type: boolean
+              is_cross_cutting:
+                type: boolean
+              incident_id:
+                type: string
+          minItems: 5
+          maxItems: 5
+        active_incident_id:
+          type: string
+          nullable: true
+        available_incidents:
+          type: array
+          items:
+            type: object
+            properties:
+              incident_id:
+                type: string
+              name:
+                type: string
+              start_date:
+                type: string
+                format: date-time
+        has_active_recovery:
+          type: boolean
+
+    RecoveryDomainDetailResponse:
+      type: object
+      required: [domain, outcome_targets, activity_completion_rates]
+      properties:
+        domain:
+          type: string
+        outcome_targets:
+          type: array
+          items:
+            type: object
+            properties:
+              target_name:
+                type: string
+              target_value:
+                type: number
+              current_value:
+                type: number
+        activity_completion_rates:
+          type: array
+          items:
+            type: object
+            properties:
+              activity:
+                type: string
+              rate_pct:
+                type: number
+        community_indicators:
+          type: array
+          items:
+            type: object
+            properties:
+              indicator:
+                type: string
+              value:
+                type: string
+              type:
+                type: string
+                enum: [quantitative, qualitative]
+        me_evaluation_results:
+          type: array
+          items:
+            type: object
+            properties:
+              outcome:
+                type: string
+              rating:
+                type: string
+              evidence_count:
+                type: integer
+
+    RiskWarningResponse:
+      type: object
+      required: [risk_severity, treatment_closure_rate_pct, alert_compliance]
+      properties:
+        risk_severity:
+          type: object
+          required: [extreme, high, medium, low, total]
+          properties:
+            extreme:
+              type: integer
+            high:
+              type: integer
+            medium:
+              type: integer
+            low:
+              type: integer
+            total:
+              type: integer
+        treatment_closure_rate_pct:
+          type: number
+          minimum: 0
+          maximum: 100
+        alert_compliance:
+          type: object
+          required: [avg_approval_latency_s, acceptable_threshold_s, principle_compliance, overall_principle_compliance_pct]
+          properties:
+            avg_approval_latency_s:
+              type: number
+            acceptable_threshold_s:
+              type: number
+            exceeds_threshold:
+              type: boolean
+            alerts_exceeding_threshold:
+              type: array
+              items:
+                type: object
+                properties:
+                  alert_id:
+                    type: string
+                  actual_latency_s:
+                    type: number
+                  approved_at:
+                    type: string
+                    format: date-time
+            aws_tier_usage:
+              type: object
+              properties:
+                advice:
+                  type: integer
+                watch_and_act:
+                  type: integer
+                emergency_warning:
+                  type: integer
+            broadcast_reach_pct:
+              type: number
+            principle_compliance:
+              type: array
+              items:
+                type: object
+                required: [principle, compliance_rate_pct]
+                properties:
+                  principle:
+                    type: string
+                    enum:
+                      - life_saving
+                      - empowering
+                      - trusted
+                      - risk_scaled
+                      - timely_targeted
+                      - impact_conveying
+                      - action_calling
+                      - clearly_communicated
+                      - accessible
+                      - bigger_picture
+                  display_name:
+                    type: string
+                  compliant_count:
+                    type: integer
+                  total_count:
+                    type: integer
+                  compliance_rate_pct:
+                    type: number
+                  non_compliant_warning_ids:
+                    type: array
+                    items:
+                      type: string
+              minItems: 10
+              maxItems: 10
+            overall_principle_compliance_pct:
+              type: number
+        top_risks:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              description:
+                type: string
+              severity:
+                type: string
+                enum: [extreme, high, medium, low]
+              treatment_due:
+                type: string
+                format: date-time
+              responsible:
+                type: string
+
+    RiskDetailResponse:
+      type: object
+      required: [id, description, severity, likelihood, consequence]
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [extreme, high, medium, low]
+        likelihood:
+          type: string
+        consequence:
+          type: string
+        current_treatments:
+          type: array
+          items:
+            type: object
+            properties:
+              treatment:
+                type: string
+              status:
+                type: string
+              due_date:
+                type: string
+                format: date-time
+        treatment_history:
+          type: array
+          items:
+            type: object
+            properties:
+              treatment:
+                type: string
+              completed_at:
+                type: string
+                format: date-time
+              outcome:
+                type: string
+        related_audit_urls:
+          type: array
+          items:
+            type: string
+
+    RestrictedAccessResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: "No AIIMS role assignment found. Contact your administrator to request access."
+        request_access_url:
+          type: string

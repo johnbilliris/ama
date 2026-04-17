@@ -10,6 +10,7 @@ from app.api.routes.alerts import router as alerts_router
 from app.api.routes.emergency_plans import router as emergency_plans_router
 from app.api.routes.evacuation import router as evacuation_router
 from app.api.routes.frameworks import router as frameworks_router
+from app.api.routes.governance_dashboard import router as governance_dashboard_router
 from app.api.routes.health import router as aidr_health_router
 from app.api.routes.incidents import router as incidents_router
 from app.api.routes.incidents_map import router as incidents_map_router
@@ -59,3 +60,4 @@ api_router.include_router(me_frameworks_router)
 api_router.include_router(recovery_catalogue_router)
 api_router.include_router(ai_analysis_router)
 api_router.include_router(aidr_health_router)
+api_router.include_router(governance_dashboard_router)

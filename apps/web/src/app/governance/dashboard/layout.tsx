@@ -1,0 +1,73 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { type ReactNode } from "react";
+
+const NAV_ITEMS = [
+  { href: "/governance/dashboard", label: "Executive Summary" },
+  { href: "/governance/dashboard/compliance", label: "Compliance" },
+  { href: "/governance/dashboard/audit", label: "Audit Trail" },
+  { href: "/governance/dashboard/readiness", label: "Readiness" },
+  { href: "/governance/dashboard/recovery", label: "Recovery" },
+  { href: "/governance/dashboard/risk", label: "Risk & Warning" },
+];
+
+interface DashboardLayoutProps {
+  children: ReactNode;
+}
+
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const pathname = usePathname();
+
+  return (
+    <div className="mx-auto max-w-7xl">
+      {/* Breadcrumbs */}
+      <nav aria-label="Breadcrumb" className="px-6 pt-4 text-sm text-gray-500">
+        <ol className="flex items-center space-x-2">
+          <li>
+            <Link href="/governance" className="hover:text-blue-600">
+              Governance
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li className="font-medium text-gray-900">Dashboard</li>
+        </ol>
+      </nav>
+
+      {/* Sub-navigation */}
+      <nav
+        aria-label="Dashboard views"
+        className="border-b border-gray-200 px-6"
+      >
+        <ul className="flex space-x-1 overflow-x-auto" role="tablist">
+          {NAV_ITEMS.map(({ href, label }) => {
+            const isActive =
+              pathname === href ||
+              (href !== "/governance/dashboard" &&
+                pathname?.startsWith(href));
+            return (
+              <li key={href} role="presentation">
+                <Link
+                  href={href}
+                  role="tab"
+                  aria-selected={isActive}
+                  className={`inline-block whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "border-blue-600 text-blue-600"
+                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  }`}
+                >
+                  {label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* Dashboard content */}
+      <main className="p-6">{children}</main>
+    </div>
+  );
+}
