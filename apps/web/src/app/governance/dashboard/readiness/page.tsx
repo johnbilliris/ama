@@ -84,6 +84,39 @@ export default function ReadinessPage() {
                 ? "No capability gaps identified"
                 : `${data.capability_gap_count} gap${data.capability_gap_count !== 1 ? "s" : ""} require attention`}
             </p>
+            {data.capability_gaps && data.capability_gaps.length > 0 && (
+              <table className="mt-3 min-w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="px-2 py-1.5 text-left font-medium text-gray-700">Type</th>
+                    <th className="px-2 py-1.5 text-left font-medium text-gray-700">Description</th>
+                    <th className="px-2 py-1.5 text-left font-medium text-gray-700">Severity</th>
+                    <th className="px-2 py-1.5 text-left font-medium text-gray-700">Affected Roles</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.capability_gaps.map((gap: { gap_type: string; description: string; severity: string; affected_roles: string[] }, i: number) => (
+                    <tr key={i} className="border-b">
+                      <td className="px-2 py-1.5 capitalize">{gap.gap_type}</td>
+                      <td className="px-2 py-1.5">{gap.description}</td>
+                      <td className="px-2 py-1.5">
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
+                          gap.severity === "critical" ? "bg-red-100 text-red-800"
+                            : gap.severity === "high" ? "bg-orange-100 text-orange-800"
+                              : gap.severity === "medium" ? "bg-yellow-100 text-yellow-800"
+                                : "bg-green-100 text-green-800"
+                        }`}>
+                          {gap.severity}
+                        </span>
+                      </td>
+                      <td className="px-2 py-1.5 text-gray-600">
+                        {gap.affected_roles.map((r: string) => r.replace(/_/g, " ")).join(", ")}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </WidgetErrorBoundary>
       </div>
@@ -133,6 +166,49 @@ export default function ReadinessPage() {
           </table>
         </div>
       </WidgetErrorBoundary>
+
+      {/* Volunteer Workforce Readiness */}
+      {data.volunteer_readiness && (
+        <WidgetErrorBoundary widgetName="Volunteer Readiness">
+          <div className="rounded-lg border border-gray-200 bg-white p-4">
+            <h3 className="mb-3 text-sm font-semibold text-gray-900">
+              Volunteer Workforce Readiness
+            </h3>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+              <div className="rounded-lg bg-blue-50 p-3 text-center">
+                <p className="text-2xl font-bold text-blue-700">
+                  {data.volunteer_readiness.total_registered}
+                </p>
+                <p className="text-xs text-gray-600">Registered</p>
+              </div>
+              <div className="rounded-lg bg-green-50 p-3 text-center">
+                <p className="text-2xl font-bold text-green-700">
+                  {data.volunteer_readiness.currently_available}
+                </p>
+                <p className="text-xs text-gray-600">Available</p>
+              </div>
+              <div className="rounded-lg bg-orange-50 p-3 text-center">
+                <p className="text-2xl font-bold text-orange-700">
+                  {data.volunteer_readiness.active_deployed}
+                </p>
+                <p className="text-xs text-gray-600">Deployed</p>
+              </div>
+              <div className="rounded-lg bg-purple-50 p-3 text-center">
+                <p className="text-2xl font-bold text-purple-700">
+                  {data.volunteer_readiness.availability_rate_pct.toFixed(1)}%
+                </p>
+                <p className="text-xs text-gray-600">Availability Rate</p>
+              </div>
+              <div className="rounded-lg bg-gray-50 p-3 text-center">
+                <p className="text-2xl font-bold text-gray-700">
+                  {data.volunteer_readiness.welfare_check_compliance_pct.toFixed(1)}%
+                </p>
+                <p className="text-xs text-gray-600">Welfare Compliance</p>
+              </div>
+            </div>
+          </div>
+        </WidgetErrorBoundary>
+      )}
     </div>
   );
 }

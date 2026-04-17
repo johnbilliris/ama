@@ -1,6 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import type { AWSPrincipleCompliance, AlertComplianceMetrics } from "@/lib/api/governance";
+
+const ISSUING_AUTHORITIES = [
+  "All Authorities",
+  "Bureau of Meteorology",
+  "Geoscience Australia",
+  "State/Territory Lead Agency",
+] as const;
 
 interface WarningCompliancePanelProps {
   alertCompliance: AlertComplianceMetrics;
@@ -13,6 +21,8 @@ interface WarningCompliancePanelProps {
 export function WarningCompliancePanel({
   alertCompliance,
 }: WarningCompliancePanelProps) {
+  const [issuingAuthority, setIssuingAuthority] = useState<string>("All Authorities");
+
   const {
     avg_approval_latency_s,
     acceptable_threshold_s,
@@ -28,6 +38,25 @@ export function WarningCompliancePanel({
       <h3 className="mb-3 text-sm font-semibold text-gray-900">
         Warning Compliance
       </h3>
+
+      {/* Issuing Authority filter */}
+      <div className="mb-4">
+        <label htmlFor="issuing-authority-filter" className="block text-xs font-medium text-gray-700 mb-1">
+          Issuing Authority
+        </label>
+        <select
+          id="issuing-authority-filter"
+          value={issuingAuthority}
+          onChange={(e) => setIssuingAuthority(e.target.value)}
+          className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          {ISSUING_AUTHORITIES.map((authority) => (
+            <option key={authority} value={authority}>
+              {authority}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {/* Key metrics row */}
       <div className="mb-4 grid grid-cols-3 gap-3">
@@ -127,6 +156,42 @@ export function WarningCompliancePanel({
             </p>
           </div>
         ))}
+      </div>
+
+      {/* Multilingual Coverage */}
+      <div className="mt-4">
+        <h4 className="mb-2 text-xs font-semibold text-gray-700">
+          Multilingual Coverage
+        </h4>
+        <div
+          className="rounded-lg p-3"
+          style={{
+            backgroundColor: "var(--ama-aws-advice, #fef3c7)",
+            color: "var(--ama-aws-advice-text, #92400e)",
+          }}
+        >
+          <p className="text-xs text-gray-600">Warnings with multilingual versions</p>
+          <p className="text-2xl font-bold">0%</p>
+          <p className="text-[10px] text-gray-500">0 of 0 warnings have multilingual translations</p>
+        </div>
+      </div>
+
+      {/* Accessibility Compliance */}
+      <div className="mt-4">
+        <h4 className="mb-2 text-xs font-semibold text-gray-700">
+          Accessibility Compliance
+        </h4>
+        <div
+          className="rounded-lg p-3"
+          style={{
+            backgroundColor: "var(--ama-aws-watch, #fed7aa)",
+            color: "var(--ama-aws-watch-text, #9a3412)",
+          }}
+        >
+          <p className="text-xs text-gray-600">WCAG compliance rate for public communications</p>
+          <p className="text-2xl font-bold">0%</p>
+          <p className="text-[10px] text-gray-500">0 of 0 communications meet WCAG 2.1 AA standards</p>
+        </div>
       </div>
     </div>
   );

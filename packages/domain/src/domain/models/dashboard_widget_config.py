@@ -18,6 +18,7 @@ AIIMSRole = Literal[
     "observer_auditor",
     "risk_manager",
     "resilience_planner",
+    "field_coordinator",
 ]
 
 AIIMS_AUTHORITY_RANKS: dict[str, int] = {
@@ -31,6 +32,7 @@ AIIMS_AUTHORITY_RANKS: dict[str, int] = {
     "observer_auditor": 10,
     "risk_manager": 8,
     "resilience_planner": 9,
+    "field_coordinator": 11,
 }
 
 
@@ -58,6 +60,6 @@ class RoleWidgetMapping(BaseModel):
     ]
     widgets: list[WidgetDefinition] = Field(min_length=1)
     authority_rank: int = Field(
-        ge=1, le=10,
+        ge=1, le=11,
         description="Rank for multi-role ordering: 1=highest authority",
     )

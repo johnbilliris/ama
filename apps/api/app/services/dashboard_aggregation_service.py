@@ -14,6 +14,7 @@ from app.models.governance_health import (
     AuditEventSummary,
     AuditTrailResponse,
     AWSPrincipleCompliance,
+    CapabilityGap,
     ComplianceDetailResponse,
     ComplianceMatrixEntry,
     ComplianceMatrixResponse,
@@ -28,6 +29,7 @@ from app.models.governance_health import (
     RiskDetailResponse,
     RiskSeverityBreakdown,
     RiskWarningResponse,
+    VolunteerReadiness,
 )
 from app.services.health_score_service import HealthScoreService
 
@@ -79,6 +81,7 @@ class DashboardAggregationService:
 
     def get_executive_summary(
         self, *, tenant_id: str = "live", has_active_incident: bool = False,
+        jurisdiction_id: str | None = None,
     ) -> ExecutiveSummaryResponse:
         """Build executive summary from all governance data sources."""
         # Gather gate statuses
@@ -135,6 +138,7 @@ class DashboardAggregationService:
         sort_dir: str = "asc",
         page_size: int = 50,
         continuation_token: str | None = None,
+        jurisdiction_id: str | None = None,
     ) -> ComplianceMatrixResponse:
         """Build compliance matrix with filtering, sorting, pagination."""
         entries = self._build_compliance_entries(tenant_id)
@@ -179,6 +183,7 @@ class DashboardAggregationService:
 
     def get_compliance_detail(
         self, data_source_id: str, *, tenant_id: str = "live",
+        jurisdiction_id: str | None = None,
     ) -> ComplianceDetailResponse | None:
         """Get detailed compliance information for a single data source."""
         # In production, fetch from repository
@@ -205,6 +210,7 @@ class DashboardAggregationService:
         keyword: str | None = None,
         page_size: int = 50,
         continuation_token: str | None = None,
+        jurisdiction_id: str | None = None,
     ) -> AuditTrailResponse:
         """Search audit events with filters and pagination."""
         filters = {
@@ -229,6 +235,7 @@ class DashboardAggregationService:
 
     def get_decision_chain(
         self, event_id: str, *, tenant_id: str = "live",
+        jurisdiction_id: str | None = None,
     ) -> AuditDecisionChainResponse | None:
         """Get the decision chain for an audit event."""
         # Return a minimal chain — repository integration provides real data
@@ -242,6 +249,8 @@ class DashboardAggregationService:
 
     def get_operational_readiness(
         self, *, tenant_id: str = "live",
+        jurisdiction_id: str | None = None,
+        hazard_type: str | None = None,
     ) -> OperationalReadinessResponse:
         """Aggregate operational readiness data."""
         pprr = [
@@ -276,12 +285,40 @@ class DashboardAggregationService:
             aiims_role_coverage=role_coverage,
             overall_role_coverage_pct=round(overall_coverage, 1),
             capability_gap_count=3,
+            capability_gaps=[
+                CapabilityGap(
+                    gap_type="staffing",
+                    description="Insufficient logistics officers for concurrent incidents",
+                    severity="high",
+                    affected_roles=["logistics_officer"],
+                ),
+                CapabilityGap(
+                    gap_type="training",
+                    description="Observer/auditor role has no qualified personnel assigned",
+                    severity="critical",
+                    affected_roles=["observer_auditor"],
+                ),
+                CapabilityGap(
+                    gap_type="equipment",
+                    description="Mobile communication units below minimum fleet requirement",
+                    severity="medium",
+                    affected_roles=["operations_officer", "field_coordinator"],
+                ),
+            ],
+            volunteer_readiness=VolunteerReadiness(
+                total_registered=0,
+                currently_available=0,
+                active_deployed=0,
+                availability_rate_pct=0.0,
+                welfare_check_compliance_pct=0.0,
+            ),
         )
 
     # --- Recovery Progress (US5) ---
 
     def get_recovery_progress(
         self, *, tenant_id: str = "live", incident_id: str | None = None,
+        jurisdiction_id: str | None = None,
     ) -> RecoveryProgressResponse:
         """Aggregate recovery domain progress."""
         # Check if there's active recovery
@@ -331,6 +368,7 @@ class DashboardAggregationService:
 
     def get_recovery_domain_detail(
         self, domain: str, *, tenant_id: str = "live", incident_id: str | None = None,
+        jurisdiction_id: str | None = None,
     ) -> RecoveryDomainDetail | None:
         """Get detailed recovery information for a single domain."""
         valid_domains = {"overarching", "social", "economic", "built", "natural"}
@@ -357,6 +395,9 @@ class DashboardAggregationService:
 
     def get_risk_and_warning(
         self, *, tenant_id: str = "live",
+        jurisdiction_id: str | None = None,
+        issuing_authority: str | None = None,
+        hazard_type: str | None = None,
     ) -> RiskWarningResponse:
         """Aggregate risk register and warning compliance data."""
         severity = self._get_risk_severity_breakdown(tenant_id)
@@ -413,6 +454,7 @@ class DashboardAggregationService:
 
     def get_risk_detail(
         self, risk_id: str, *, tenant_id: str = "live",
+        jurisdiction_id: str | None = None,
     ) -> RiskDetailResponse | None:
         """Get detailed risk information."""
         return RiskDetailResponse(

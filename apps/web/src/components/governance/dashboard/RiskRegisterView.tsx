@@ -1,6 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import type { RiskSeverityBreakdown } from "@/lib/api/governance";
+
+const HAZARD_TYPES = [
+  "All Hazards",
+  "Bushfire",
+  "Flood",
+  "Storm",
+  "Cyclone",
+  "Earthquake",
+  "Tsunami",
+  "Heatwave",
+  "Pandemic",
+] as const;
 
 interface RiskRegisterViewProps {
   severity: RiskSeverityBreakdown;
@@ -31,11 +44,32 @@ export function RiskRegisterView({
   topRisks,
   onRiskClick,
 }: RiskRegisterViewProps) {
+  const [hazardType, setHazardType] = useState<string>("All Hazards");
+
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4">
       <h3 className="mb-3 text-sm font-semibold text-gray-900">
         Risk Register ({severity.total} active risks)
       </h3>
+
+      {/* Hazard type filter */}
+      <div className="mb-4">
+        <label htmlFor="hazard-type-filter" className="block text-xs font-medium text-gray-700 mb-1">
+          Hazard Type
+        </label>
+        <select
+          id="hazard-type-filter"
+          value={hazardType}
+          onChange={(e) => setHazardType(e.target.value)}
+          className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          {HAZARD_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {/* Severity breakdown cards */}
       <div className="mb-4 grid grid-cols-4 gap-2">

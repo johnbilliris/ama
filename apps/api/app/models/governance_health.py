@@ -147,6 +147,25 @@ class AIIMSRoleCoverage(BaseModel):
     coverage_pct: float = Field(ge=0.0, le=100.0)
 
 
+class VolunteerReadiness(BaseModel):
+    """Volunteer workforce readiness metrics."""
+
+    total_registered: int = Field(ge=0)
+    currently_available: int = Field(ge=0)
+    active_deployed: int = Field(ge=0)
+    availability_rate_pct: float = Field(ge=0.0, le=100.0)
+    welfare_check_compliance_pct: float = Field(ge=0.0, le=100.0)
+
+
+class CapabilityGap(BaseModel):
+    """A single identified capability gap."""
+
+    gap_type: str
+    description: str
+    severity: Literal["critical", "high", "medium", "low"]
+    affected_roles: list[str] = Field(default_factory=list)
+
+
 class OperationalReadinessResponse(BaseModel):
     """Response for GET /governance/dashboard/readiness."""
 
@@ -160,6 +179,8 @@ class OperationalReadinessResponse(BaseModel):
     aiims_role_coverage: list[AIIMSRoleCoverage]
     overall_role_coverage_pct: float = Field(ge=0.0, le=100.0)
     capability_gap_count: int = Field(ge=0)
+    capability_gaps: list[CapabilityGap] = Field(default_factory=list)
+    volunteer_readiness: VolunteerReadiness | None = None
 
 
 # --- Recovery Progress ---

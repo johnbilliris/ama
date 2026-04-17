@@ -72,6 +72,7 @@ ROLE_WIDGET_CONFIGS: dict[str, dict] = {
             {"widget_id": "resource_utilisation", "widget_type": "gauge", "display_name": "Resource Utilisation", "priority": 4, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
             {"widget_id": "risk_summary", "widget_type": "chart", "display_name": "Strategic Risk Summary", "priority": 5, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "steady_state"},
             {"widget_id": "pprr_indicator", "widget_type": "indicator", "display_name": "PPRR Phase", "priority": 6, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "steady_state"},
+            {"widget_id": "warning_compliance", "widget_type": "grid", "display_name": "Alert Approval Status", "priority": 7, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
         ],
     },
     "operations_officer": {
@@ -80,6 +81,8 @@ ROLE_WIDGET_CONFIGS: dict[str, dict] = {
             {"widget_id": "active_incidents", "widget_type": "counter", "display_name": "Active Incidents", "priority": 1, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
             {"widget_id": "resource_utilisation", "widget_type": "gauge", "display_name": "Resource Utilisation", "priority": 2, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
             {"widget_id": "pprr_indicator", "widget_type": "indicator", "display_name": "PPRR Phase (Response)", "priority": 3, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "active_incident"},
+            {"widget_id": "deployment_status", "widget_type": "counter", "display_name": "Deployment Status", "priority": 4, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "active_incident"},
+            {"widget_id": "field_safety", "widget_type": "indicator", "display_name": "Field Safety Status", "priority": 5, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "active_incident"},
         ],
     },
     "planning_officer": {
@@ -109,6 +112,8 @@ ROLE_WIDGET_CONFIGS: dict[str, dict] = {
         "widgets": [
             {"widget_id": "warning_compliance", "widget_type": "grid", "display_name": "AWS Warning Compliance", "priority": 1, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
             {"widget_id": "broadcast_reach", "widget_type": "gauge", "display_name": "Broadcast Reach", "priority": 2, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
+            {"widget_id": "multilingual_coverage", "widget_type": "gauge", "display_name": "Multilingual Coverage %", "priority": 3, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
+            {"widget_id": "a11y_compliance", "widget_type": "indicator", "display_name": "Accessibility Compliance", "priority": 4, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "steady_state"},
         ],
     },
     "executive_leader": {
@@ -133,6 +138,8 @@ ROLE_WIDGET_CONFIGS: dict[str, dict] = {
         "widgets": [
             {"widget_id": "risk_register", "widget_type": "table", "display_name": "Risk Register", "priority": 1, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
             {"widget_id": "warning_compliance", "widget_type": "grid", "display_name": "AWS Compliance", "priority": 2, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
+            {"widget_id": "recovery_domains", "widget_type": "progress_bar", "display_name": "Recovery Domain Progress", "priority": 3, "data_endpoint": "/governance/dashboard/recovery", "refresh_group": "steady_state"},
+            {"widget_id": "health_score_gauge", "widget_type": "gauge", "display_name": "Governance Health Score", "priority": 4, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "steady_state"},
         ],
     },
     "resilience_planner": {
@@ -141,6 +148,14 @@ ROLE_WIDGET_CONFIGS: dict[str, dict] = {
             {"widget_id": "pprr_indicator", "widget_type": "indicator", "display_name": "PPRR Phase Indicators", "priority": 1, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "steady_state"},
             {"widget_id": "emergency_plans", "widget_type": "table", "display_name": "Emergency Plan Lifecycle", "priority": 2, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "steady_state"},
             {"widget_id": "recovery_domains", "widget_type": "progress_bar", "display_name": "Recovery Domain Progress", "priority": 3, "data_endpoint": "/governance/dashboard/recovery", "refresh_group": "steady_state"},
+        ],
+    },
+    "field_coordinator": {
+        "default_view": "executive_summary",
+        "widgets": [
+            {"widget_id": "active_incidents", "widget_type": "counter", "display_name": "Active Incidents", "priority": 1, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
+            {"widget_id": "pprr_indicator", "widget_type": "indicator", "display_name": "PPRR Phase", "priority": 2, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "active_incident"},
+            {"widget_id": "resource_utilisation", "widget_type": "gauge", "display_name": "Resource Utilisation", "priority": 3, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
         ],
     },
 }
@@ -245,14 +260,19 @@ async def get_dashboard_config(request: Request) -> DashboardConfigResponse:
 # --- Endpoint 2: Executive Summary ---
 
 @router.get("/summary", response_model=ExecutiveSummaryResponse)
-async def get_executive_summary(request: Request) -> JSONResponse:
+async def get_executive_summary(
+    request: Request,
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
+) -> JSONResponse:
     """GET /governance/dashboard/summary — health score, gates, incidents, risks."""
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
     bypass_cache = request.headers.get("Cache-Control") == "no-cache"
 
     try:
-        summary = _aggregation.get_executive_summary(tenant_id=tenant_id)
+        summary = _aggregation.get_executive_summary(
+            tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
+        )
         data = summary.model_dump(mode="json")
 
         headers = {
@@ -283,6 +303,7 @@ async def get_compliance_matrix(
     sort_dir: str = Query("asc"),
     page_size: int = Query(50, ge=1, le=100),
     continuation_token: str | None = Query(None),
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
 ) -> ComplianceMatrixResponse:
     """GET /governance/dashboard/compliance — data source compliance matrix."""
     start = time.monotonic()
@@ -295,6 +316,7 @@ async def get_compliance_matrix(
         sort_dir=sort_dir,
         page_size=page_size,
         continuation_token=continuation_token,
+        jurisdiction_id=jurisdiction_id,
     )
     _log_perf("compliance_matrix", start, tenant_id)
     return result
@@ -303,10 +325,16 @@ async def get_compliance_matrix(
 # --- Endpoint 4: Compliance Detail ---
 
 @router.get("/compliance/{data_source_id}", response_model=ComplianceDetailResponse)
-async def get_compliance_detail(data_source_id: str, request: Request) -> ComplianceDetailResponse:
+async def get_compliance_detail(
+    data_source_id: str,
+    request: Request,
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
+) -> ComplianceDetailResponse:
     """GET /governance/dashboard/compliance/{dataSourceId} — detail view."""
     tenant_id = _get_tenant_id(request)
-    detail = _aggregation.get_compliance_detail(data_source_id, tenant_id=tenant_id)
+    detail = _aggregation.get_compliance_detail(
+        data_source_id, tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
+    )
     if not detail:
         raise HTTPException(status_code=404, detail=f"Data source '{data_source_id}' not found.")
     return detail
@@ -325,6 +353,7 @@ async def get_audit_trail(
     keyword: str | None = Query(None),
     page_size: int = Query(50, ge=1, le=100),
     continuation_token: str | None = Query(None),
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
 ) -> AuditTrailResponse:
     """GET /governance/dashboard/audit — searchable audit trail."""
     start = time.monotonic()
@@ -343,6 +372,7 @@ async def get_audit_trail(
         keyword=keyword,
         page_size=page_size,
         continuation_token=continuation_token,
+        jurisdiction_id=jurisdiction_id,
     )
     _log_perf("audit_trail_search", start, tenant_id)
     return result
@@ -351,10 +381,16 @@ async def get_audit_trail(
 # --- Endpoint 6: Decision Chain ---
 
 @router.get("/audit/{event_id}/chain", response_model=AuditDecisionChainResponse)
-async def get_decision_chain(event_id: str, request: Request) -> AuditDecisionChainResponse:
+async def get_decision_chain(
+    event_id: str,
+    request: Request,
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
+) -> AuditDecisionChainResponse:
     """GET /governance/dashboard/audit/{eventId}/chain — decision chain."""
     tenant_id = _get_tenant_id(request)
-    chain = _aggregation.get_decision_chain(event_id, tenant_id=tenant_id)
+    chain = _aggregation.get_decision_chain(
+        event_id, tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
+    )
     if not chain:
         raise HTTPException(status_code=404, detail=f"Event '{event_id}' not found.")
     return chain
@@ -363,7 +399,11 @@ async def get_decision_chain(event_id: str, request: Request) -> AuditDecisionCh
 # --- Endpoint 7: Audit Export (create) ---
 
 @router.post("/audit/export", status_code=202, response_model=AuditExportJobResponse)
-async def create_audit_export(body: AuditExportRequest, request: Request) -> AuditExportJobResponse:
+async def create_audit_export(
+    body: AuditExportRequest,
+    request: Request,
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
+) -> AuditExportJobResponse:
     """POST /governance/dashboard/audit/export — start async export."""
     tenant_id = _get_tenant_id(request)
     user_id = request.headers.get("X-User-Id", "anonymous")
@@ -411,11 +451,17 @@ async def get_export_status(job_id: str) -> AuditExportJobResponse:
 # --- Endpoint 9: Operational Readiness ---
 
 @router.get("/readiness", response_model=OperationalReadinessResponse)
-async def get_operational_readiness(request: Request) -> OperationalReadinessResponse:
+async def get_operational_readiness(
+    request: Request,
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
+    hazard_type: str | None = Query(None, description="Filter by hazard type (bushfire, flood, storm, cyclone, earthquake, tsunami, etc.)"),
+) -> OperationalReadinessResponse:
     """GET /governance/dashboard/readiness — PPRR, plans, exercises, roles."""
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
-    result = _aggregation.get_operational_readiness(tenant_id=tenant_id)
+    result = _aggregation.get_operational_readiness(
+        tenant_id=tenant_id, jurisdiction_id=jurisdiction_id, hazard_type=hazard_type,
+    )
     _log_perf("operational_readiness", start, tenant_id)
     return result
 
@@ -426,12 +472,13 @@ async def get_operational_readiness(request: Request) -> OperationalReadinessRes
 async def get_recovery_progress(
     request: Request,
     incident_id: str | None = Query(None),
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
 ) -> RecoveryProgressResponse:
     """GET /governance/dashboard/recovery — 5-domain recovery progress."""
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
     result = _aggregation.get_recovery_progress(
-        tenant_id=tenant_id, incident_id=incident_id,
+        tenant_id=tenant_id, incident_id=incident_id, jurisdiction_id=jurisdiction_id,
     )
     _log_perf("recovery_progress", start, tenant_id)
     return result
@@ -443,6 +490,7 @@ async def get_recovery_progress(
 async def get_recovery_domain_detail(
     domain: str, request: Request,
     incident_id: str | None = Query(None),
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
 ) -> RecoveryDomainDetail:
     """GET /governance/dashboard/recovery/{domain} — domain detail."""
     tenant_id = _get_tenant_id(request)
@@ -455,7 +503,7 @@ async def get_recovery_domain_detail(
         )
 
     detail = _aggregation.get_recovery_domain_detail(
-        domain, tenant_id=tenant_id, incident_id=incident_id,
+        domain, tenant_id=tenant_id, incident_id=incident_id, jurisdiction_id=jurisdiction_id,
     )
     if not detail:
         raise HTTPException(status_code=404, detail=f"No recovery data for domain '{domain}'.")
@@ -465,11 +513,19 @@ async def get_recovery_domain_detail(
 # --- Endpoint 12: Risk & Warning ---
 
 @router.get("/risk", response_model=RiskWarningResponse)
-async def get_risk_and_warning(request: Request) -> RiskWarningResponse:
+async def get_risk_and_warning(
+    request: Request,
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
+    issuing_authority: str | None = Query(None, description="Filter warnings by statutory issuing authority"),
+    hazard_type: str | None = Query(None, description="Filter by hazard type (bushfire, flood, storm, cyclone, earthquake, tsunami, etc.)"),
+) -> RiskWarningResponse:
     """GET /governance/dashboard/risk — risk register + warning compliance."""
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
-    result = _aggregation.get_risk_and_warning(tenant_id=tenant_id)
+    result = _aggregation.get_risk_and_warning(
+        tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
+        issuing_authority=issuing_authority, hazard_type=hazard_type,
+    )
     _log_perf("risk_warning", start, tenant_id)
     return result
 
@@ -477,10 +533,16 @@ async def get_risk_and_warning(request: Request) -> RiskWarningResponse:
 # --- Endpoint 13: Risk Detail ---
 
 @router.get("/risk/{risk_id}")
-async def get_risk_detail(risk_id: str, request: Request) -> RiskDetailResponse:
+async def get_risk_detail(
+    risk_id: str,
+    request: Request,
+    jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
+) -> RiskDetailResponse:
     """GET /governance/dashboard/risk/{riskId} — risk detail."""
     tenant_id = _get_tenant_id(request)
-    detail = _aggregation.get_risk_detail(risk_id, tenant_id=tenant_id)
+    detail = _aggregation.get_risk_detail(
+        risk_id, tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
+    )
     if not detail:
         raise HTTPException(status_code=404, detail=f"Risk '{risk_id}' not found.")
     return detail
