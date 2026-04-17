@@ -37,6 +37,17 @@ param principalType string = 'User'
 @description('Developer IP address to allow through Cosmos DB firewall (for local seed scripts, etc.)')
 param developerIpAddress string = ''
 
+@description('Azure OpenAI model deployment SKU. Use GlobalStandard for dev/staging (draws from global capacity pool) and Standard for production (regional capacity).')
+@allowed(['Standard', 'GlobalStandard'])
+param openAiDeploymentSku string = 'GlobalStandard'
+
+@description('When true, restricts Cosmos DB network access to Azure Portal and Azure-services IPs only. Set to true for production; leave false for dev/staging to allow fully open public access.')
+param restrictNetworkAccess bool = false
+
+@description('Deployment environment tier — controls auth policies (e.g. Azure Maps local auth)')
+@allowed(['dev', 'staging', 'prod'])
+param environmentTier string = 'dev'
+
 // ────────────────────────────────────────────────────────────────────────────────
 // Variables
 // ────────────────────────────────────────────────────────────────────────────────
@@ -48,6 +59,22 @@ var tags = {
   SecurityControl: 'Ignore'
 }
 var uniqueSuffix = uniqueString(resourceGroup().id)
+
+// Azure Portal and Azure-services IPs used to restrict Cosmos DB in production
+var portalAndServiceIpRules = [
+  { ipAddressOrRange: '0.0.0.0' }           // allow Azure services (Container Apps, etc.)
+  { ipAddressOrRange: '104.42.195.92' }     // Azure Portal
+  { ipAddressOrRange: '40.76.54.131' }      // Azure Portal
+  { ipAddressOrRange: '52.176.6.30' }       // Azure Portal
+  { ipAddressOrRange: '52.169.50.45' }      // Azure Portal
+  { ipAddressOrRange: '52.187.184.26' }     // Azure Portal
+]
+var developerIpRules = empty(developerIpAddress) ? [] : [{ ipAddressOrRange: developerIpAddress }]
+// Production: Portal + Azure-services IPs + optional developer IP.
+// Dev/staging: only developer IP if set, otherwise fully open (no IP filtering).
+var cosmosIpRules = restrictNetworkAccess
+  ? concat(portalAndServiceIpRules, developerIpRules)
+  : developerIpRules
 
 // ────────────────────────────────────────────────────────────────────────────────
 // Monitoring (Log Analytics + App Insights + Alerts)
@@ -71,8 +98,9 @@ module monitoring './modules/monitoring.bicep' = {
 module azureMaps './modules/azure-maps.bicep' = {
   name: 'azure-maps'
   params: {
-    location: 'australiaeast'
+    location: 'global'
     envPrefix: environmentName
+    environment: environmentTier
     tags: tags
   }
 }
@@ -177,14 +205,7 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2023-11-15' = {
   properties: {
     databaseAccountOfferType: 'Standard'
     publicNetworkAccess: 'Enabled'
-    ipRules: concat([
-      { ipAddressOrRange: '0.0.0.0' }           // allow Azure services (Container Apps, Functions, etc.)
-      { ipAddressOrRange: '104.42.195.92' }     // Azure Portal
-      { ipAddressOrRange: '40.76.54.131' }      // Azure Portal
-      { ipAddressOrRange: '52.176.6.30' }       // Azure Portal
-      { ipAddressOrRange: '52.169.50.45' }      // Azure Portal
-      { ipAddressOrRange: '52.187.184.26' }     // Azure Portal
-    ], empty(developerIpAddress) ? [] : [{ ipAddressOrRange: developerIpAddress }])
+    ipRules: cosmosIpRules
     locations: [{ locationName: location, failoverPriority: 0 }]
     disableKeyBasedMetadataWriteAccess: true
   }
@@ -751,6 +772,7 @@ module openAiDeployments './modules/azure-openai.bicep' = {
     envPrefix: environmentName
     tags: tags
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsId
+    modelDeploymentSku: openAiDeploymentSku
   }
 }
 

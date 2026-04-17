@@ -18,15 +18,25 @@ export type { MapFilterParams };
 /* ── Constants ── */
 
 export const INCIDENT_TYPES = [
+  "biosecurity",
   "bushfire",
-  "flood",
+  "criminal",
   "cyclone",
-  "storm",
   "earthquake",
-  "tsunami",
+  "environment",
   "extreme_heat",
-  "pandemic",
+  "flood",
+  "health",
+  "industrial",
+  "landslide",
+  "maritime_coastal",
   "other",
+  "pandemic",
+  "storm",
+  "tornado",
+  "transport",
+  "tsunami",
+  "urban_fire",
 ] as const;
 
 export const SEVERITY_TIERS = [

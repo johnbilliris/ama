@@ -17,16 +17,16 @@ param tags object
 
 // Model configuration
 @description('Reasoning-tier model name')
-param reasoningModelName string = 'gpt-4o'
+param reasoningModelName string = 'gpt-5.4'
 
 @description('Reasoning-tier model version')
-param reasoningModelVersion string = '2024-08-06'
+param reasoningModelVersion string = '2026-03-05'
 
 @description('Drafting-tier model name')
-param draftingModelName string = 'gpt-4o-mini'
+param draftingModelName string = 'gpt-5.4'
 
 @description('Drafting-tier model version')
-param draftingModelVersion string = '2024-07-18'
+param draftingModelVersion string = '2026-03-05'
 
 // TPM quotas (in thousands)
 @description('Reasoning-tier TPM quota (K). Dev=30, Prod=120')
@@ -36,6 +36,10 @@ param reasoningTpmQuota int = 30
 @description('Drafting-tier TPM quota (K). Dev=60, Prod=240')
 @minValue(1)
 param draftingTpmQuota int = 60
+
+@description('Model deployment SKU — GlobalStandard for dev/staging (draws from global capacity pool), Standard for production (regional capacity)')
+@allowed(['Standard', 'GlobalStandard'])
+param modelDeploymentSku string = 'GlobalStandard'
 
 // RBAC
 @description('Principal IDs to grant Cognitive Services OpenAI User role')
@@ -59,9 +63,9 @@ resource openAiAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' existin
 
 resource reasoningDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: openAiAccount
-  name: 'gpt-4o-${envPrefix}'
+  name: 'gpt-5.4-${envPrefix}'
   sku: {
-    name: 'Standard'
+    name: modelDeploymentSku
     capacity: reasoningTpmQuota
   }
   properties: {
@@ -75,9 +79,9 @@ resource reasoningDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
 
 resource draftingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: openAiAccount
-  name: 'gpt-4o-mini-${envPrefix}'
+  name: 'gpt-5.4-mini-${envPrefix}'
   sku: {
-    name: 'Standard'
+    name: modelDeploymentSku
     capacity: draftingTpmQuota
   }
   properties: {

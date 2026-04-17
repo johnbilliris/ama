@@ -2,6 +2,7 @@ import logging
 import os
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 from app.core.settings import get_settings
@@ -31,6 +32,16 @@ def create_app() -> FastAPI:
     )
     add_error_handler_middleware(app)
     add_resilience_middleware(app)
+
+    # CORS — must be added before auth/tenant middleware so preflight OPTIONS
+    # requests are answered before they reach authentication checks.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_allowed_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allow_headers=["*"],
+    )
 
     from app.middleware.auth_middleware import add_auth_middleware
     from app.middleware.tenant_middleware import add_tenant_middleware

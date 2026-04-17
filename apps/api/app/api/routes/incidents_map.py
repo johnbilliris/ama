@@ -34,8 +34,10 @@ _error_count = 0
 # ── Allowed enum values ──────────────────────────────────────────────────
 
 VALID_TYPES = {
-    "bushfire", "flood", "cyclone", "storm", "earthquake",
-    "tsunami", "extreme_heat", "pandemic", "other",
+    "biosecurity", "bushfire", "criminal", "cyclone", "earthquake",
+    "environment", "extreme_heat", "flood", "health", "industrial",
+    "landslide", "maritime_coastal", "other", "pandemic", "storm",
+    "tornado", "transport", "tsunami", "urban_fire",
 }
 VALID_SEVERITIES = {"advisory", "watch", "warning", "emergency"}
 VALID_STATUSES = {"monitoring", "active", "stabilising", "recovery", "closed"}

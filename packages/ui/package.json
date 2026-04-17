@@ -13,7 +13,9 @@
     "./components/disaster-map/types": "./src/components/disaster-map/types.ts",
     "./components/disaster-map/use-disaster-map-filters": "./src/components/disaster-map/use-disaster-map-filters.ts",
     "./components/layout/app-shell": "./src/components/layout/app-shell.tsx",
-    "./styles/*": "./src/styles/*"
+    "./styles/*": "./src/styles/*",
+    "./components/disaster-map/incident-type-icon": "./src/components/disaster-map/incident-type-icon.tsx",
+    "./components/disaster-map/incident-hover-card": "./src/components/disaster-map/incident-hover-card.tsx"
   },
   "dependencies": {
     "azure-maps-control": "^3.5.0"

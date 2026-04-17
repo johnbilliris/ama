@@ -7,6 +7,22 @@ export interface DashboardPayload {
     incidentType: string;
     status: string;
     severity: string;
+    region?: string;
+    startedAt?: string;
+    introduction?: string;
+    sourceUrl?: string;
+    location?: {
+      longitude: number | null;
+      latitude: number | null;
+    };
+    impact?: {
+      deaths?: number | null;
+      injuries?: number | null;
+      homesDestroyed?: number | null;
+      businessesDestroyed?: number | null;
+      insuranceCostAud?: number | null;
+      insuranceCostFormatted?: string | null;
+    };
   };
   participatingOrganisations: Array<{
     organisationId: string;

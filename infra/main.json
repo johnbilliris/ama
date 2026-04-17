@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "1306978627856827613"
+      "templateHash": "2487577355730898249"
     }
   },
   "parameters": {
@@ -83,6 +83,36 @@
       "metadata": {
         "description": "Developer IP address to allow through Cosmos DB firewall (for local seed scripts, etc.)"
       }
+    },
+    "openAiDeploymentSku": {
+      "type": "string",
+      "defaultValue": "GlobalStandard",
+      "allowedValues": [
+        "Standard",
+        "GlobalStandard"
+      ],
+      "metadata": {
+        "description": "Azure OpenAI model deployment SKU. Use GlobalStandard for dev/staging (draws from global capacity pool) and Standard for production (regional capacity)."
+      }
+    },
+    "restrictNetworkAccess": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "When true, restricts Cosmos DB network access to Azure Portal and Azure-services IPs only. Set to true for production; leave false for dev/staging to allow fully open public access."
+      }
+    },
+    "environmentTier": {
+      "type": "string",
+      "defaultValue": "dev",
+      "allowedValues": [
+        "dev",
+        "staging",
+        "prod"
+      ],
+      "metadata": {
+        "description": "Deployment environment tier — controls auth policies (e.g. Azure Maps local auth)"
+      }
     }
   },
   "variables": {
@@ -106,6 +136,28 @@
       "SecurityControl": "Ignore"
     },
     "uniqueSuffix": "[uniqueString(resourceGroup().id)]",
+    "portalAndServiceIpRules": [
+      {
+        "ipAddressOrRange": "0.0.0.0"
+      },
+      {
+        "ipAddressOrRange": "104.42.195.92"
+      },
+      {
+        "ipAddressOrRange": "40.76.54.131"
+      },
+      {
+        "ipAddressOrRange": "52.176.6.30"
+      },
+      {
+        "ipAddressOrRange": "52.169.50.45"
+      },
+      {
+        "ipAddressOrRange": "52.187.184.26"
+      }
+    ],
+    "developerIpRules": "[if(empty(parameters('developerIpAddress')), createArray(), createArray(createObject('ipAddressOrRange', parameters('developerIpAddress'))))]",
+    "cosmosIpRules": "[if(parameters('restrictNetworkAccess'), concat(variables('portalAndServiceIpRules'), variables('developerIpRules')), variables('developerIpRules'))]",
     "blobContainers": [
       "raw-payloads",
       "binary-assets",
@@ -239,7 +291,7 @@
       "properties": {
         "databaseAccountOfferType": "Standard",
         "publicNetworkAccess": "Enabled",
-        "ipRules": "[concat(createArray(createObject('ipAddressOrRange', '0.0.0.0'), createObject('ipAddressOrRange', '104.42.195.92'), createObject('ipAddressOrRange', '40.76.54.131'), createObject('ipAddressOrRange', '52.176.6.30'), createObject('ipAddressOrRange', '52.169.50.45'), createObject('ipAddressOrRange', '52.187.184.26')), if(empty(parameters('developerIpAddress')), createArray(), createArray(createObject('ipAddressOrRange', parameters('developerIpAddress')))))]",
+        "ipRules": "[variables('cosmosIpRules')]",
         "locations": [
           {
             "locationName": "[parameters('location')]",
@@ -1404,10 +1456,13 @@
         "mode": "Incremental",
         "parameters": {
           "location": {
-            "value": "australiaeast"
+            "value": "global"
           },
           "envPrefix": {
             "value": "[parameters('environmentName')]"
+          },
+          "environment": {
+            "value": "[parameters('environmentTier')]"
           },
           "tags": {
             "value": "[variables('tags')]"
@@ -1420,14 +1475,15 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "2346184579648017036"
+              "templateHash": "17569212409784300667"
             }
           },
           "parameters": {
             "location": {
               "type": "string",
               "allowedValues": [
-                "australiaeast"
+                "australiaeast",
+                "global"
               ],
               "metadata": {
                 "description": "Location for the Azure Maps account — must be Australia East for data sovereignty"
@@ -1437,6 +1493,18 @@
               "type": "string",
               "metadata": {
                 "description": "Environment name for resource naming"
+              }
+            },
+            "environment": {
+              "type": "string",
+              "defaultValue": "prod",
+              "allowedValues": [
+                "dev",
+                "staging",
+                "prod"
+              ],
+              "metadata": {
+                "description": "Deployment environment — controls authentication policy"
               }
             },
             "tags": {
@@ -1465,7 +1533,7 @@
               },
               "kind": "Gen2",
               "properties": {
-                "disableLocalAuth": true,
+                "disableLocalAuth": "[not(equals(parameters('environment'), 'dev'))]",
                 "cors": {
                   "copy": [
                     {
@@ -1987,6 +2055,9 @@
           },
           "logAnalyticsWorkspaceId": {
             "value": "[reference('monitoring').outputs.logAnalyticsId.value]"
+          },
+          "modelDeploymentSku": {
+            "value": "[parameters('openAiDeploymentSku')]"
           }
         },
         "template": {
@@ -1996,7 +2067,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "7938075628272798472"
+              "templateHash": "8366731857527918259"
             }
           },
           "parameters": {
@@ -2030,28 +2101,28 @@
             },
             "reasoningModelName": {
               "type": "string",
-              "defaultValue": "gpt-4o",
+              "defaultValue": "gpt-5.4",
               "metadata": {
                 "description": "Reasoning-tier model name"
               }
             },
             "reasoningModelVersion": {
               "type": "string",
-              "defaultValue": "2024-08-06",
+              "defaultValue": "2026-03-05",
               "metadata": {
                 "description": "Reasoning-tier model version"
               }
             },
             "draftingModelName": {
               "type": "string",
-              "defaultValue": "gpt-4o-mini",
+              "defaultValue": "gpt-5.4",
               "metadata": {
                 "description": "Drafting-tier model name"
               }
             },
             "draftingModelVersion": {
               "type": "string",
-              "defaultValue": "2024-07-18",
+              "defaultValue": "2026-03-05",
               "metadata": {
                 "description": "Drafting-tier model version"
               }
@@ -2070,6 +2141,17 @@
               "minValue": 1,
               "metadata": {
                 "description": "Drafting-tier TPM quota (K). Dev=60, Prod=240"
+              }
+            },
+            "modelDeploymentSku": {
+              "type": "string",
+              "defaultValue": "GlobalStandard",
+              "allowedValues": [
+                "Standard",
+                "GlobalStandard"
+              ],
+              "metadata": {
+                "description": "Model deployment SKU — GlobalStandard for dev/staging (draws from global capacity pool), Standard for production (regional capacity)"
               }
             },
             "agentPrincipalIds": {
@@ -2093,9 +2175,9 @@
             {
               "type": "Microsoft.CognitiveServices/accounts/deployments",
               "apiVersion": "2024-10-01",
-              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-4o-{0}', parameters('envPrefix')))]",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-{0}', parameters('envPrefix')))]",
               "sku": {
-                "name": "Standard",
+                "name": "[parameters('modelDeploymentSku')]",
                 "capacity": "[parameters('reasoningTpmQuota')]"
               },
               "properties": {
@@ -2109,9 +2191,9 @@
             {
               "type": "Microsoft.CognitiveServices/accounts/deployments",
               "apiVersion": "2024-10-01",
-              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-4o-mini-{0}', parameters('envPrefix')))]",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-mini-{0}', parameters('envPrefix')))]",
               "sku": {
-                "name": "Standard",
+                "name": "[parameters('modelDeploymentSku')]",
                 "capacity": "[parameters('draftingTpmQuota')]"
               },
               "properties": {
@@ -2122,7 +2204,7 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-4o-{0}', parameters('envPrefix')))]"
+                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-{0}', parameters('envPrefix')))]"
               ]
             },
             {
@@ -2169,11 +2251,11 @@
           "outputs": {
             "reasoningDeploymentName": {
               "type": "string",
-              "value": "[format('gpt-4o-{0}', parameters('envPrefix'))]"
+              "value": "[format('gpt-5.4-{0}', parameters('envPrefix'))]"
             },
             "draftingDeploymentName": {
               "type": "string",
-              "value": "[format('gpt-4o-mini-{0}', parameters('envPrefix'))]"
+              "value": "[format('gpt-5.4-mini-{0}', parameters('envPrefix'))]"
             },
             "openAiEndpoint": {
               "type": "string",

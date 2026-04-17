@@ -1,15 +1,19 @@
 // Azure Maps account for the Disaster Mapper UI
-// Deploys a Gen2 Azure Maps account locked to Australia East
-// with local auth disabled (Entra-only access)
+// Deploys a Gen2 Azure Maps account locked to Australia East.
+// Local (subscription-key) auth is allowed in dev; staging/prod require Entra ID only.
 
 @description('Location for the Azure Maps account — must be Australia East for data sovereignty')
 @allowed([
-  'australiaeast'
+  'australiaeast', 'global'
 ])
 param location string
 
 @description('Environment name for resource naming')
 param envPrefix string
+
+@description('Deployment environment — controls authentication policy')
+@allowed(['dev', 'staging', 'prod'])
+param environment string = 'prod'
 
 @description('Tags applied to the resource')
 param tags object
@@ -28,7 +32,7 @@ resource azureMaps 'Microsoft.Maps/accounts@2024-07-01-preview' = {
   }
   kind: 'Gen2'
   properties: {
-    disableLocalAuth: true
+    disableLocalAuth: environment != 'dev'
     cors: {
       corsRules: [for origin in corsAllowedOrigins: {
         allowedOrigins: [origin]
