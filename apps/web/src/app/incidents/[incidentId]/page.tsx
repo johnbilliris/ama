@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AppShell } from "@ama/ui/components/layout/app-shell";
 import { IncidentTypeIcon } from "@ama/ui/components/disaster-map/incident-type-icon";
 import { getIncidentDashboard, type DashboardPayload } from "../../../lib/api/dashboard";
 import { useParams } from "next/navigation";
@@ -51,25 +50,21 @@ export default function IncidentPage() {
 
   if (error) {
     return (
-      <AppShell>
-        <div className="incident-detail-page">
-          <div className="incident-error">
-            <h1>Incident not found</h1>
-            <p>The requested incident could not be loaded.</p>
-            <Link href="/" className="incident-back-link">← Back to map</Link>
-          </div>
+      <div className="incident-detail-page">
+        <div className="incident-error">
+          <h1>Incident not found</h1>
+          <p>The requested incident could not be loaded.</p>
+          <Link href="/" className="incident-back-link">← Back to map</Link>
         </div>
-      </AppShell>
+      </div>
     );
   }
 
   if (!dashboard) {
     return (
-      <AppShell>
-        <div className="incident-detail-page">
-          <div className="incident-loading">Loading incident details…</div>
-        </div>
-      </AppShell>
+      <div className="incident-detail-page">
+        <div className="incident-loading">Loading incident details…</div>
+      </div>
     );
   }
 
@@ -90,8 +85,7 @@ export default function IncidentPage() {
       : null;
 
   return (
-    <AppShell>
-      <div className="incident-detail-page">
+    <div className="incident-detail-page">
         {/* ── Hero section with map background ── */}
         <section
           className="incident-hero"
@@ -215,7 +209,6 @@ export default function IncidentPage() {
             )}
           </section>
         )}
-      </div>
-    </AppShell>
+    </div>
   );
 }

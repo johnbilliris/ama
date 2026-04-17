@@ -10,7 +10,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { AppShell } from "@ama/ui/components/layout/app-shell";
+
 import type {
   IncidentFeature,
   IncidentMapMetadata,
@@ -147,13 +147,10 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
   }, [features.length]);
 
   return (
-    <AppShell>
-      <div className="disaster-mapper-page">
+    <div className="disaster-mapper-page">
         {/* Top: header + error banner — always one grid row */}
         <div className="disaster-mapper-top">
           <header className="disaster-mapper-header">
-            <p className="disaster-mapper-kicker">Situational Awareness</p>
-            <h1 className="disaster-mapper-title">Disaster Mapper</h1>
             <div className="disaster-mapper-header-controls">
               {/* Search bar */}
               <div className="disaster-mapper-search-wrapper">
@@ -206,7 +203,7 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
         </div>
 
         {/* Main content: filter panel + map + sidebar — always fills 1fr */}
-        <div className="disaster-mapper-body">
+        <div className={`disaster-mapper-body ${filterPanelOpen ? "" : "disaster-mapper-body--filters-hidden"}`}>
           {/* Filter panel */}
           <FilterPanel
             filters={filters}
@@ -282,8 +279,7 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
             </p>
           </footer>
         )}
-      </div>
-    </AppShell>
+    </div>
   );
 }
 

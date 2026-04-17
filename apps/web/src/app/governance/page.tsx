@@ -29,7 +29,7 @@ export default function GovernanceDashboardPage() {
       .catch(() => {});
   }, []);
 
-  if (!dashboard) return <div className="p-6">Loading governance dashboard...</div>;
+  if (!dashboard?.summary) return <div className="p-6">Loading governance dashboard...</div>;
 
   const hasGaps = dashboard.summary.unassessed > 0 || dashboard.summary.unassigned > 0;
 

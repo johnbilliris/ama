@@ -33,7 +33,7 @@ The Disaster Response Coordination Hub is built as a cloud-native monorepo deliv
   - `/` — Hub entry point
   - `/incidents/[incidentId]` — Incident commander shared operating picture
   - `/workspaces/[personaId]` — Role-specific operational workspace
-  - `/preparedness` — Agency operating model analyzer and scenario replay
+  - `/preparedness` — Agency operating model analyser and scenario replay
 - **Accessibility**: Language switcher (6 languages, RTL support), connectivity banner, multilingual alert preview
 
 ### API Service (`apps/api`)

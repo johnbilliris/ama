@@ -38,7 +38,7 @@ export function OperatingModelAnalyzer({ organisations, frameworks }: OperatingM
     <section className="preparedness-shell">
       <header className="preparedness-header">
         <p className="preparedness-kicker">Preparedness analysis</p>
-        <h1 className="preparedness-title">Agency operating model analyzer</h1>
+        <h1 className="preparedness-title">Agency operating model analyser</h1>
         <p className="preparedness-copy">
           Review jurisdiction coverage, assigned operating frameworks, and likely coordination gaps before a live event.
         </p>
