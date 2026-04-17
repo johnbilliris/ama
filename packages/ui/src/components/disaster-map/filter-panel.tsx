@@ -18,6 +18,7 @@ import {
   csvHasValue,
   type MapFilterParams,
 } from "./use-disaster-map-filters";
+import { IncidentTypeIcon } from "./incident-type-icon";
 
 export interface FilterPanelProps {
   filters: MapFilterParams;
@@ -213,6 +214,7 @@ export function FilterPanel({
                 checked={csvHasValue(filters.type, t)}
                 onChange={() => toggleType(t)}
               />
+              <IncidentTypeIcon type={t} size={20} />
               {formatLabel(t)}
             </label>
           ))}

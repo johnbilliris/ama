@@ -21,6 +21,7 @@ SEED_FILES = {
     "frameworks":    "frameworks_australia.json",
     "organisations": "organisations_australia.json",
     "data_sources":  "data_sources_australia.json",
+    "disasters":     "disasters_australia.json",
 }
 
 CONTAINER_MAP = {
@@ -28,6 +29,7 @@ CONTAINER_MAP = {
     "frameworks":    "seed",
     "organisations": "seed",
     "data_sources":  "seed",
+    "disasters":     "seed",
 }
 
 PARTITION_KEY_MAP = {
@@ -35,6 +37,7 @@ PARTITION_KEY_MAP = {
     "frameworks":    "framework",
     "organisations": "organisation",
     "data_sources":  "data_source",
+    "disasters":     "disaster",
 }
 
 CATALOGUE_ROOT = SEED_ROOT / "recovery-catalogue"

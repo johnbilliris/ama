@@ -14,6 +14,13 @@ class Settings(BaseSettings):
         default_factory=lambda: ["Australia East", "Australia Southeast"],
         alias="ALLOWED_AZURE_REGIONS",
     )
+    cors_allowed_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ],
+        alias="CORS_ALLOWED_ORIGINS",
+    )
 
     max_concurrent_simulations: int = Field(default=3, alias="MAX_CONCURRENT_SIMULATIONS")
     simulation_ttl_hours: int = Field(default=72, alias="SIMULATION_TTL_HOURS")

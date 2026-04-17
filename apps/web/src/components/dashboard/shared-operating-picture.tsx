@@ -9,6 +9,7 @@ interface SharedOperatingPictureProps {
 }
 
 export function SharedOperatingPicture({ dashboard, signals }: SharedOperatingPictureProps) {
+  const safeSignals = Array.isArray(signals) ? signals : [];
   return (
     <section className="sop-layout">
       <header className="sop-header">
@@ -28,7 +29,7 @@ export function SharedOperatingPicture({ dashboard, signals }: SharedOperatingPi
         <article className="sop-panel">
           <h2 className="sop-panel-title">Live signals</h2>
           <ul className="sop-list">
-            {signals.map((signal) => (
+            {safeSignals.map((signal) => (
               <li key={signal.signal_id} className="sop-list-item">
                 <strong>{signal.category}</strong>
                 <div className="signal-meta">

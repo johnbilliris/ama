@@ -4,28 +4,51 @@ Builds dynamic queries that always exclude rehearsal-status incidents and
 require a valid GeoJSON Point location.  Supports multi-value filters for
 incident_type, severity, status, and pprr_phase (OR within category, AND
 across categories).
+
+When ``COSMOS_ENDPOINT`` is set the repository talks to Cosmos DB.
+Otherwise it falls back to in-memory storage for dev/test.
+Incidents live in the ``seed`` container with ``kind = 'disaster'``.
 """
 
 import logging
+import os
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
+def _build_container() -> Any:
+    """Create a Cosmos DB container client from environment variables."""
+    from azure.cosmos import CosmosClient
+    from azure.identity import DefaultAzureCredential
+
+    endpoint = os.environ["COSMOS_ENDPOINT"]
+    database = os.environ.get("COSMOS_DATABASE", "disaster-hub")
+    credential = DefaultAzureCredential()
+    client = CosmosClient(endpoint, credential=credential)
+    db = client.get_database_client(database)
+    return db.get_container_client("seed")
+
+
 class IncidentMapRepository:
-    """Tenant-scoped read-only queries against the `incidents` Cosmos DB container."""
+    """Read-only queries against the ``seed`` Cosmos DB container (kind='disaster')."""
 
     def __init__(self, cosmos_client: Any = None, database_name: str = "disaster-hub"):
-        self._client = cosmos_client
-        self._db_name = database_name
-        self._container_name = "incidents"
+        self._container: Any = None
         self._in_memory: list[dict[str, Any]] = []
 
+        if cosmos_client is not None:
+            db = cosmos_client.get_database_client(database_name)
+            self._container = db.get_container_client("seed")
+        elif os.environ.get("COSMOS_ENDPOINT"):
+            try:
+                self._container = _build_container()
+                logger.info("IncidentMapRepository connected to Cosmos DB")
+            except Exception:
+                logger.warning("Failed to connect to Cosmos DB, using in-memory fallback", exc_info=True)
+
     def _get_container(self) -> Any:
-        if self._client is None:
-            return None
-        db = self._client.get_database_client(self._db_name)
-        return db.get_container_client(self._container_name)
+        return self._container
 
     # ── Query builder ──────────────────────────────────────────────────────
 
@@ -54,12 +77,15 @@ class IncidentMapRepository:
         clauses: list[str] = []
         params: list[dict[str, Any]] = []
 
+        # Scope to disaster documents in the shared seed container
+        clauses.append("c.kind = 'disaster'")
+
         # Always exclude rehearsal
         clauses.append("c.status != 'rehearsal'")
 
         # Location filter
         if unmapped_only:
-            clauses.append("(NOT IS_DEFINED(c.location) OR c.location IS NULL)")
+            clauses.append("(NOT IS_DEFINED(c.location) OR IS_NULL(c.location))")
         else:
             clauses.append("IS_DEFINED(c.location)")
             clauses.append("c.location.type = 'Point'")
@@ -238,6 +264,8 @@ class IncidentMapRepository:
         year_start: int | None,
         year_end: int | None,
     ) -> bool:
+        if doc.get("kind") != "disaster":
+            return False
         if doc.get("status") == "rehearsal":
             return False
         if incident_types and doc.get("incident_type") not in incident_types:

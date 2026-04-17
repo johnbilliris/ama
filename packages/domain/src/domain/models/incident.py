@@ -4,8 +4,10 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 IncidentType = Literal[
-    "bushfire", "flood", "cyclone", "storm", "earthquake",
-    "tsunami", "extreme_heat", "pandemic", "other",
+    "biosecurity", "bushfire", "criminal", "cyclone", "earthquake",
+    "environment", "flood", "health", "industrial", "landslide",
+    "maritime_coastal", "storm", "tornado", "transport", "tsunami",
+    "urban_fire", "extreme_heat", "pandemic", "other",
 ]
 
 PprrPhase = Literal["prevention", "preparedness", "response", "recovery"]
