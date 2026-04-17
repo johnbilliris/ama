@@ -12,6 +12,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import type { IncidentFeature } from "./types";
 import { setupMarkerCluster, featuresToGeoJSON } from "./marker-cluster";
+import { useMapViewport } from "./use-map-viewport";
 
 export interface DisasterMapProps {
   /** GeoJSON IncidentFeature array to render as markers */
@@ -37,6 +38,7 @@ export function DisasterMap({
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
+  const { getSavedViewport, saveViewport } = useMapViewport();
 
   // Stable callback ref
   const onMarkerClickRef = useRef(onMarkerClick);
@@ -63,10 +65,14 @@ export function DisasterMap({
         const subscriptionKey =
           process.env.NEXT_PUBLIC_AZURE_MAPS_KEY ?? "";
 
+        // Restore saved viewport or default to Australia bounds
+        const savedViewport = getSavedViewport();
+        const viewOptions: Record<string, unknown> = savedViewport
+          ? { center: savedViewport.center, zoom: savedViewport.zoom }
+          : { bounds: [112.0, -45.0, 155.0, -9.0] as unknown as import("azure-maps-control").data.BoundingBox, padding: 20 };
+
         const map = new atlas.Map(containerRef.current, {
-          // Fit all of Australia (incl. Tasmania) regardless of viewport size
-          bounds: [112.0, -45.0, 155.0, -9.0] as unknown as import("azure-maps-control").data.BoundingBox,
-          padding: 20,
+          ...viewOptions,
           language: "en-AU",
           authOptions: subscriptionKey
             ? {
@@ -97,6 +103,17 @@ export function DisasterMap({
 
           dataSourceRef.current = ds;
           setMapReady(true);
+
+          // Persist viewport on pan/zoom for restoration after navigation
+          map.events.add("moveend", () => {
+            const cam = map.getCamera();
+            if (cam.center && cam.zoom != null) {
+              saveViewport({
+                zoom: cam.zoom,
+                center: [cam.center[0], cam.center[1]],
+              });
+            }
+          });
         });
 
         // 15-second timeout — Azure Maps cold-starts can be slow on first load

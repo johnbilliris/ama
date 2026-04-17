@@ -12,6 +12,7 @@
     "./components/disaster-map/search-bar": "./src/components/disaster-map/search-bar.tsx",
     "./components/disaster-map/types": "./src/components/disaster-map/types.ts",
     "./components/disaster-map/use-disaster-map-filters": "./src/components/disaster-map/use-disaster-map-filters.ts",
+    "./components/disaster-map/use-map-viewport": "./src/components/disaster-map/use-map-viewport.ts",
     "./components/layout/app-shell": "./src/components/layout/app-shell.tsx",
     "./styles/*": "./src/styles/*",
     "./components/disaster-map/incident-type-icon": "./src/components/disaster-map/incident-type-icon.tsx",

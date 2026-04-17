@@ -10,6 +10,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import type {
   IncidentFeature,
@@ -75,6 +76,7 @@ interface DisastersPageContentProps {
 }
 
 function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setKeywordInput }: DisastersPageContentProps) {
+  const searchParams = useSearchParams();
   const [features, setFeatures] = useState<IncidentFeature[]>([]);
   const [metadata, setMetadata] = useState<IncidentMapMetadata | null>(null);
   const [loading, setLoading] = useState(true);
@@ -129,6 +131,9 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
   const handleMarkerClick = useCallback((feature: IncidentFeature) => {
     setSelectedIncident(feature);
   }, []);
+
+  // Build return path preserving current filter params
+  const returnPath = `/${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
   // ── Telemetry (T031) ──
   const pageLoadStartRef = useRef(typeof performance !== "undefined" ? performance.now() : 0);
@@ -259,6 +264,7 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
               <IncidentSidebar
                 incident={selectedIncident.properties}
                 onClose={() => setSelectedIncident(null)}
+                returnPath={returnPath}
               />
             )}
           </div>
