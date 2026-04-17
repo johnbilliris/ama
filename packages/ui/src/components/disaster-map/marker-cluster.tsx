@@ -270,6 +270,14 @@ export async function setupMarkerCluster(
     });
   }
 
+  // Force default cursor on marker hover (Azure Maps defaults to pointer)
+  map.events.add("mouseover", markerLayer, () => {
+    map.getCanvasContainer().style.cursor = "default";
+  });
+  map.events.add("mouseout", markerLayer, () => {
+    map.getCanvasContainer().style.cursor = "";
+  });
+
   return dataSource;
 }
 

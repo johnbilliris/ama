@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
     };
   },
 
-  webpack(config) {
+  webpack(config, { isServer }) {
     // azure-maps-control's default ESM entry (atlas-esm.min.js) contains a
     // variable redeclaration that webpack's strict parser rejects. Alias to
     // the non-minified build so webpack can parse it cleanly.
@@ -41,6 +41,25 @@ const nextConfig: NextConfig = {
         "../../packages/ui/node_modules/azure-maps-control/dist/atlas-esm.js",
       ),
     };
+
+    // Suppress "Critical dependency" warnings from OpenTelemetry packages
+    // which use dynamic require() internally — harmless at runtime.
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings ?? []),
+      {
+        module: /opentelemetry/,
+        message: /Critical dependency/,
+      },
+      {
+        module: /azure.*opentelemetry/,
+        message: /Critical dependency/,
+      },
+      {
+        module: /monitor-opentelemetry/,
+        message: /Critical dependency/,
+      },
+    ];
+
     return config;
   },
 };
