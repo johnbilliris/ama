@@ -18,8 +18,6 @@ export interface DisasterMapProps {
   features: IncidentFeature[];
   /** Called when a marker (individual, not cluster) is clicked */
   onMarkerClick?: (feature: IncidentFeature) => void;
-  /** Called when hovering over a marker (null on mouse-out) */
-  onMarkerHover?: (feature: IncidentFeature | null) => void;
   /** Called when the map finishes rendering / re-rendering markers */
   onRenderComplete?: () => void;
   /** Additional CSS class for the map container */
@@ -29,7 +27,6 @@ export interface DisasterMapProps {
 export function DisasterMap({
   features,
   onMarkerClick,
-  onMarkerHover,
   onRenderComplete,
   className,
 }: DisasterMapProps) {
@@ -44,8 +41,6 @@ export function DisasterMap({
   // Stable callback ref
   const onMarkerClickRef = useRef(onMarkerClick);
   onMarkerClickRef.current = onMarkerClick;
-  const onMarkerHoverRef = useRef(onMarkerHover);
-  onMarkerHoverRef.current = onMarkerHover;
   const onRenderCompleteRef = useRef(onRenderComplete);
   onRenderCompleteRef.current = onRenderComplete;
 
@@ -98,7 +93,6 @@ export function DisasterMap({
             atlas,
             map,
             (f: IncidentFeature) => onMarkerClickRef.current?.(f),
-            (f: IncidentFeature | null) => onMarkerHoverRef.current?.(f),
           );
 
           dataSourceRef.current = ds;

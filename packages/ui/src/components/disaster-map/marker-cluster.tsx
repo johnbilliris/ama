@@ -128,13 +128,11 @@ export type { IncidentFeature };
  * @param atlas  The `atlas` module (imported dynamically to avoid SSR)
  * @param map    The atlas.Map instance
  * @param onMarkerClick  Callback when an individual marker is clicked
- * @param onMarkerHover  Callback when hovering over / leaving a marker
  */
 export async function setupMarkerCluster(
   atlas: typeof import("azure-maps-control"),
   map: InstanceType<typeof import("azure-maps-control").Map>,
   onMarkerClick?: (feature: IncidentFeature) => void,
-  onMarkerHover?: (feature: IncidentFeature | null) => void,
 ) {
   // Register teardrop pin icons for each incident type
   const allTypes = Object.keys(PIN_DEFS);
@@ -269,42 +267,6 @@ export async function setupMarkerCluster(
           incident_level: (props.incidentLevel as number) ?? 1,
         },
       });
-    });
-  }
-
-  // ── Individual marker hover (preview card) ──
-  if (onMarkerHover) {
-    map.events.add("mouseover", markerLayer, (e: { shapes?: unknown[] }) => {
-      if (!e.shapes || e.shapes.length === 0) return;
-      const shape = e.shapes[0] as { getProperties?: () => Record<string, unknown>; getCoordinates?: () => unknown };
-      if (!shape.getProperties) return;
-      const props = shape.getProperties();
-      map.getCanvasContainer().style.cursor = "pointer";
-      onMarkerHover({
-        type: "Feature",
-        id: props.incidentId as string,
-        geometry: {
-          type: "Point",
-          coordinates: (shape.getCoordinates?.() as [number, number]) ?? [0, 0],
-        },
-        properties: {
-          incident_id: props.incidentId as string,
-          title: props.title as string,
-          incident_type: props.incidentType as string,
-          status: props.status as string,
-          severity: props.severity as string,
-          severity_tier: props.severityTier as "advice" | "watch" | "emergency",
-          affected_jurisdiction_ids: (props.affectedJurisdictionIds as string[]) ?? [],
-          participating_organisation_ids: (props.participatingOrganisationIds as string[]) ?? [],
-          started_at: props.startedAt as string,
-          pprr_phase: (props.pprrPhase as string) ?? null,
-          incident_level: (props.incidentLevel as number) ?? 1,
-        },
-      });
-    });
-    map.events.add("mouseout", markerLayer, () => {
-      map.getCanvasContainer().style.cursor = "";
-      onMarkerHover(null);
     });
   }
 

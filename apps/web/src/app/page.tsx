@@ -45,14 +45,6 @@ const IncidentSidebar = dynamic(
   { ssr: false },
 );
 
-const IncidentHoverCard = dynamic(
-  () =>
-    import("@ama/ui/components/disaster-map/incident-hover-card").then(
-      (mod) => mod.IncidentHoverCard,
-    ),
-  { ssr: false },
-);
-
 /* Inner component that uses useSearchParams (must be inside Suspense) */
 function DisastersPageInner() {
   // Import the hook dynamically to avoid SSR issues with useSearchParams
@@ -136,13 +128,6 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
 
   const handleMarkerClick = useCallback((feature: IncidentFeature) => {
     setSelectedIncident(feature);
-  }, []);
-
-  const [hoveredIncident, setHoveredIncident] =
-    useState<IncidentFeature | null>(null);
-
-  const handleMarkerHover = useCallback((feature: IncidentFeature | null) => {
-    setHoveredIncident(feature);
   }, []);
 
   // ── Telemetry (T031) ──
@@ -256,13 +241,8 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
               <DisasterMap
                 features={features}
                 onMarkerClick={handleMarkerClick}
-                onMarkerHover={handleMarkerHover}
                 onRenderComplete={handleMapRenderComplete}
               />
-              {/* Hover preview card */}
-              {hoveredIncident && !selectedIncident && (
-                <IncidentHoverCard incident={hoveredIncident.properties} />
-              )}
               {/* No-results overlay — floats above the map so the map stays visible */}
               {!loading && features.length === 0 && !error && (
                 <div className="disaster-mapper-no-results" role="status">
