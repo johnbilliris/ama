@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useDeferredValue, useState } from "react";
+import { useEffect, useDeferredValue, useMemo, useState } from "react";
 
 import type { PreparednessFramework } from "../../lib/api/frameworks";
 import type { PreparednessOrganisation } from "../../lib/api/organisations";
@@ -54,6 +54,11 @@ export function OperatingModelAnalyzer({
 
   const noJurisdictions = selectedJurisdictionIds.length === 0;
 
+  const orgLookup = useMemo(
+    () => new Map(organisations.map((o) => [o.organisation_id, o])),
+    [organisations],
+  );
+
   function handleReplay() {
     setReplayError(null);
     setReplaying(true);
@@ -105,6 +110,13 @@ export function OperatingModelAnalyzer({
                     <div className="preparedness-meta">
                       {formatLabel(org.category)} · {formatLabel(org.operating_role)} · {formatLabel(org.authority_level)}
                     </div>
+                    {org.aiims_functions.length > 0 && (
+                      <div className="preparedness-tag-row">
+                        {org.aiims_functions.map((fn) => (
+                          <span key={fn} className="preparedness-tag preparedness-tag--aiims">{formatLabel(fn)}</span>
+                        ))}
+                      </div>
+                    )}
                     {org.hazard_types.length > 0 && (
                       <div className="preparedness-tag-row">
                         {org.hazard_types.map((h) => (
@@ -125,6 +137,14 @@ export function OperatingModelAnalyzer({
                     {org.lead_agency_for.length > 0 && (
                       <div className="preparedness-org-lead">
                         Lead agency for: {org.lead_agency_for.map(formatLabel).join(", ")}
+                      </div>
+                    )}
+                    {org.mutual_aid_partner_ids.length > 0 && (
+                      <div className="preparedness-org-partners">
+                        Mutual aid: {org.mutual_aid_partner_ids.map((pid) => {
+                          const partner = orgLookup.get(pid);
+                          return partner ? (partner.abbreviation ?? partner.name) : pid;
+                        }).join(", ")}
                       </div>
                     )}
                     {org.legislative_basis && (

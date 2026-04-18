@@ -1863,6 +1863,12 @@ body {
   border: 1px solid rgba(15, 76, 92, 0.12);
 }
 
+.preparedness-tag--aiims {
+  background: rgba(75, 0, 130, 0.06);
+  color: #4b0082;
+  border: 1px solid rgba(75, 0, 130, 0.12);
+}
+
 .preparedness-tag--more {
   background: var(--ama-surface-elevated);
   color: var(--ama-color-ink-soft);
@@ -1873,6 +1879,11 @@ body {
   font-size: 0.78rem;
   font-weight: 600;
   color: #991b2c;
+}
+
+.preparedness-org-partners {
+  font-size: 0.75rem;
+  color: var(--ama-color-ocean-deep);
 }
 
 .preparedness-org-legislation {
