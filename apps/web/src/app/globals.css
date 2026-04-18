@@ -35,6 +35,12 @@ nav ul,
   padding: 0;
 }
 
+/* Remove underlines from tab and navigation links */
+[role="tablist"] a,
+nav[aria-label] a {
+  text-decoration: none;
+}
+
 /* ═══════════════════════════════════════════════════════
    APP SHELL — Navigation, Main, Footer
    ═══════════════════════════════════════════════════════ */

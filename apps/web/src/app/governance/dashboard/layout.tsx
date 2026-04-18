@@ -22,23 +22,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="mx-auto max-w-7xl">
-      {/* Breadcrumbs */}
-      <nav aria-label="Breadcrumb" className="px-6 pt-4 text-sm text-gray-500">
-        <ol className="flex items-center space-x-2">
-          <li>
-            <Link href="/governance" className="hover:text-blue-600">
-              Governance
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="font-medium text-gray-900">Dashboard</li>
-        </ol>
-      </nav>
+      {/* Page header — matches preparedness style */}
+      <header className="preparedness-header" style={{ margin: "1.25rem 1.5rem 0" }}>
+        <p className="preparedness-kicker">Governance</p>
+        <h1 className="preparedness-title">Governance Dashboard</h1>
+        <p className="preparedness-copy">
+          Monitor constitutional compliance, operational readiness, recovery
+          progress, and risk posture across all jurisdictions.
+        </p>
+      </header>
 
-      {/* Sub-navigation */}
+      {/* Tab navigation */}
       <nav
         aria-label="Dashboard views"
-        className="border-b border-gray-200 px-6"
+        className="border-b border-gray-200"
+        style={{ margin: "0 1.5rem" }}
       >
         <ul className="flex space-x-1 overflow-x-auto" role="tablist">
           {NAV_ITEMS.map(({ href, label }) => {
