@@ -10,11 +10,10 @@ from packages.domain.src.domain.models.organisation import Organisation
 
 class PreparednessAnalysisService:
     def __init__(self, seed_root: Path | None = None) -> None:
-        self.seed_root = (
-            seed_root
-            or Path(__file__).resolve().parents[4]
-            / "packages" / "domain" / "src" / "domain" / "seed"
-        )
+        if seed_root is None:
+            from packages.domain.src.domain.seed import bootstrap as _seed_mod
+            seed_root = Path(_seed_mod.__file__).resolve().parent
+        self.seed_root = seed_root
 
     def get_context(self) -> dict[str, list[object]]:
         seeds = SeedService().load(self.seed_root)
