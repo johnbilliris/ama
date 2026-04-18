@@ -6,6 +6,12 @@ import type { PreparednessFramework } from "../../lib/api/frameworks";
 import type { PreparednessOrganisation } from "../../lib/api/organisations";
 import { replayPreparednessScenario, type ScenarioRunPayload } from "../../lib/api/scenarios";
 
+function formatLabel(value: string): string {
+  return value
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 interface OperatingModelAnalyzerProps {
   organisations: PreparednessOrganisation[];
   frameworks: PreparednessFramework[];
@@ -86,12 +92,54 @@ export function OperatingModelAnalyzer({
               <p className="preparedness-meta">No organisations found for the selected jurisdictions.</p>
             ) : (
               <ul className="preparedness-list">
-                {organisations.map((organisation) => (
-                  <li key={organisation.organisation_id} className="preparedness-list-item">
-                    <strong>{organisation.name}</strong>
-                    <div className="preparedness-meta">
-                      {organisation.category} · {organisation.operating_role} · {organisation.authority_level}
+                {organisations.map((org) => (
+                  <li key={org.organisation_id} className="preparedness-list-item preparedness-org-card">
+                    <div className="preparedness-org-header">
+                      <strong>{org.abbreviation ? `${org.name} (${org.abbreviation})` : org.name}</strong>
+                      {org.workforce_type && (
+                        <span className={`preparedness-badge preparedness-badge--${org.workforce_type}`}>
+                          {org.workforce_type}
+                        </span>
+                      )}
                     </div>
+                    <div className="preparedness-meta">
+                      {formatLabel(org.category)} · {formatLabel(org.operating_role)} · {formatLabel(org.authority_level)}
+                    </div>
+                    {org.hazard_types.length > 0 && (
+                      <div className="preparedness-tag-row">
+                        {org.hazard_types.map((h) => (
+                          <span key={h} className="preparedness-tag preparedness-tag--hazard">{formatLabel(h)}</span>
+                        ))}
+                      </div>
+                    )}
+                    {org.primary_capabilities.length > 0 && (
+                      <div className="preparedness-tag-row">
+                        {org.primary_capabilities.slice(0, 4).map((c) => (
+                          <span key={c} className="preparedness-tag preparedness-tag--capability">{formatLabel(c)}</span>
+                        ))}
+                        {org.primary_capabilities.length > 4 && (
+                          <span className="preparedness-tag preparedness-tag--more">+{org.primary_capabilities.length - 4}</span>
+                        )}
+                      </div>
+                    )}
+                    {org.lead_agency_for.length > 0 && (
+                      <div className="preparedness-org-lead">
+                        Lead agency for: {org.lead_agency_for.map(formatLabel).join(", ")}
+                      </div>
+                    )}
+                    {org.legislative_basis && (
+                      <div className="preparedness-org-legislation">{org.legislative_basis}</div>
+                    )}
+                    {org.activation_triggers.length > 0 && (
+                      <details className="preparedness-org-details">
+                        <summary>Activation triggers ({org.activation_triggers.length})</summary>
+                        <ul className="preparedness-org-triggers">
+                          {org.activation_triggers.map((t) => (
+                            <li key={t}>{t}</li>
+                          ))}
+                        </ul>
+                      </details>
+                    )}
                   </li>
                 ))}
               </ul>

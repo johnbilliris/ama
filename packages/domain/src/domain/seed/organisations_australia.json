@@ -17,7 +17,39 @@
     "participation_conditions": [
       "National coordination for all major disasters"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "NEMA",
+    "aiims_functions": [
+      "control",
+      "intelligence"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "national_coordination",
+      "crisis_centre_operations",
+      "commonwealth_assistance"
+    ],
+    "hazard_types": [
+      "bushfire",
+      "flood",
+      "cyclone",
+      "earthquake",
+      "tsunami",
+      "pandemic"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "National Emergency Declaration Act 2020",
+    "mutual_aid_partner_ids": [
+      "adf",
+      "bom-national",
+      "ga-national",
+      "afp"
+    ],
+    "activation_triggers": [
+      "COMDISPLAN activation",
+      "National Emergency Declaration",
+      "State/territory request for Commonwealth assistance"
+    ]
   },
   {
     "organisation_id": "bom-national",
@@ -37,7 +69,36 @@
     "participation_conditions": [
       "National severe weather support"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "BoM",
+    "aiims_functions": [
+      "intelligence"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "weather_forecasting",
+      "severe_weather_warnings",
+      "flood_prediction",
+      "tsunami_warning"
+    ],
+    "hazard_types": [
+      "cyclone",
+      "flood",
+      "storm",
+      "tsunami",
+      "extreme_heat"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Meteorology Act 1955",
+    "mutual_aid_partner_ids": [
+      "nema",
+      "ga-national"
+    ],
+    "activation_triggers": [
+      "Severe weather event",
+      "Tropical cyclone formation",
+      "Flood watch issued"
+    ]
   },
   {
     "organisation_id": "ga-national",
@@ -57,7 +118,36 @@
     "participation_conditions": [
       "Earthquake, tsunami, and geohazard monitoring"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "GA",
+    "aiims_functions": [
+      "intelligence"
+    ],
+    "lead_agency_for": [
+      "earthquake",
+      "tsunami"
+    ],
+    "primary_capabilities": [
+      "seismic_monitoring",
+      "tsunami_warning",
+      "geospatial_intelligence",
+      "satellite_imagery"
+    ],
+    "hazard_types": [
+      "earthquake",
+      "tsunami",
+      "landslide"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "National Measurement Act 1960",
+    "mutual_aid_partner_ids": [
+      "bom-national",
+      "nema"
+    ],
+    "activation_triggers": [
+      "Earthquake magnitude >= 3.0 detected",
+      "Tsunami warning issued"
+    ]
   },
   {
     "organisation_id": "afp",
@@ -79,7 +169,36 @@
       "Federal jurisdiction",
       "ACT policing contract"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "AFP",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "criminal"
+    ],
+    "primary_capabilities": [
+      "counter_terrorism",
+      "federal_law_enforcement",
+      "protective_security",
+      "disaster_victim_identification"
+    ],
+    "hazard_types": [
+      "criminal",
+      "biosecurity"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Australian Federal Police Act 1979",
+    "mutual_aid_partner_ids": [
+      "act-policing",
+      "nema",
+      "abf"
+    ],
+    "activation_triggers": [
+      "Federal jurisdiction event",
+      "Terrorism threat level elevated",
+      "Disaster victim identification requested"
+    ]
   },
   {
     "organisation_id": "adf",
@@ -99,7 +218,35 @@
     "participation_conditions": [
       "Defence Assistance to the Civil Community (DACC) activation"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "ADF",
+    "aiims_functions": [
+      "operations",
+      "logistics"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "defence_aid_civil_community",
+      "heavy_lift",
+      "engineering",
+      "medical_support",
+      "aerial_support"
+    ],
+    "hazard_types": [
+      "bushfire",
+      "flood",
+      "cyclone",
+      "earthquake"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Defence Act 1903",
+    "mutual_aid_partner_ids": [
+      "nema"
+    ],
+    "activation_triggers": [
+      "DACC Category 1-6 request",
+      "State/territory formal request to NEMA"
+    ]
   },
   {
     "organisation_id": "abf",
@@ -119,7 +266,31 @@
     "participation_conditions": [
       "Maritime and border emergencies"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "ABF",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "border_protection",
+      "maritime_surveillance",
+      "customs_enforcement"
+    ],
+    "hazard_types": [
+      "maritime_coastal",
+      "biosecurity"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Australian Border Force Act 2015",
+    "mutual_aid_partner_ids": [
+      "afp",
+      "nema"
+    ],
+    "activation_triggers": [
+      "Maritime emergency",
+      "Biosecurity threat at border"
+    ]
   },
   {
     "organisation_id": "asa",
@@ -139,7 +310,28 @@
     "participation_conditions": [
       "Aviation fire and rescue services at major airports"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "ASA",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "aviation_fire_rescue",
+      "air_traffic_control",
+      "airspace_management"
+    ],
+    "hazard_types": [
+      "urban_fire",
+      "transport"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Air Services Act 1995",
+    "mutual_aid_partner_ids": [],
+    "activation_triggers": [
+      "Aviation emergency declared",
+      "Airport fire/rescue activation"
+    ]
   },
   {
     "organisation_id": "rfds",
@@ -159,7 +351,34 @@
     "participation_conditions": [
       "Remote and rural medical retrieval"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "RFDS",
+    "aiims_functions": [
+      "operations",
+      "logistics"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "aeromedical_retrieval",
+      "remote_area_medical",
+      "patient_transfer",
+      "primary_healthcare"
+    ],
+    "hazard_types": [
+      "health",
+      "bushfire",
+      "flood"
+    ],
+    "workforce_type": "mixed",
+    "legislative_basis": null,
+    "mutual_aid_partner_ids": [
+      "nema",
+      "arc"
+    ],
+    "activation_triggers": [
+      "Aeromedical retrieval request",
+      "Mass casualty event in remote area"
+    ]
   },
   {
     "organisation_id": "frnsw",
@@ -180,7 +399,38 @@
       "AIIMS activation",
       "Urban fire and hazmat response"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "FRNSW",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "urban_fire"
+    ],
+    "primary_capabilities": [
+      "urban_fire_suppression",
+      "hazmat_response",
+      "technical_rescue",
+      "road_crash_rescue"
+    ],
+    "hazard_types": [
+      "urban_fire",
+      "industrial",
+      "transport"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Fire and Rescue NSW Act 1989",
+    "mutual_aid_partner_ids": [
+      "nsw-rfs",
+      "ses-nsw",
+      "nswpf",
+      "nsw-ambulance"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "AIIMS activation",
+      "Hazmat incident reported"
+    ]
   },
   {
     "organisation_id": "nsw-rfs",
@@ -201,7 +451,35 @@
       "AIIMS activation",
       "Rural fire districts"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "NSW RFS",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "bushfire"
+    ],
+    "primary_capabilities": [
+      "bushfire_suppression",
+      "hazard_reduction_burns",
+      "community_education",
+      "aerial_firefighting"
+    ],
+    "hazard_types": [
+      "bushfire"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Rural Fires Act 1997 (NSW)",
+    "mutual_aid_partner_ids": [
+      "frnsw",
+      "ses-nsw",
+      "nswpf"
+    ],
+    "activation_triggers": [
+      "Bush Fire Danger Rating Very High+",
+      "Section 44 declaration",
+      "Total Fire Ban declared"
+    ]
   },
   {
     "organisation_id": "ses-nsw",
@@ -222,7 +500,39 @@
       "AIIMS activation",
       "State flood plan active"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "NSW SES",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "flood",
+      "storm"
+    ],
+    "primary_capabilities": [
+      "flood_rescue",
+      "storm_damage_response",
+      "road_crash_rescue",
+      "community_resilience"
+    ],
+    "hazard_types": [
+      "flood",
+      "storm",
+      "tsunami"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "State Emergency Service Act 1989 (NSW)",
+    "mutual_aid_partner_ids": [
+      "frnsw",
+      "nsw-rfs",
+      "nswpf",
+      "mrnsw"
+    ],
+    "activation_triggers": [
+      "Flood watch/warning issued",
+      "Severe storm warning",
+      "Tsunami warning"
+    ]
   },
   {
     "organisation_id": "nswpf",
@@ -243,7 +553,41 @@
       "State emergency coordination",
       "Law enforcement"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "NSWPF",
+    "aiims_functions": [
+      "control",
+      "operations"
+    ],
+    "lead_agency_for": [
+      "criminal"
+    ],
+    "primary_capabilities": [
+      "emergency_coordination",
+      "evacuation_management",
+      "traffic_control",
+      "search_rescue",
+      "disaster_victim_identification"
+    ],
+    "hazard_types": [
+      "criminal",
+      "bushfire",
+      "flood",
+      "storm"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "State Emergency and Rescue Management Act 1989 (NSW)",
+    "mutual_aid_partner_ids": [
+      "frnsw",
+      "nsw-rfs",
+      "ses-nsw",
+      "nsw-ambulance"
+    ],
+    "activation_triggers": [
+      "State emergency declared",
+      "Evacuation order issued",
+      "Major crime scene"
+    ]
   },
   {
     "organisation_id": "nsw-ambulance",
@@ -263,7 +607,35 @@
     "participation_conditions": [
       "Pre-hospital emergency medical care"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "NSWA",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "emergency_medical_services",
+      "patient_triage",
+      "mass_casualty_management",
+      "aeromedical_retrieval"
+    ],
+    "hazard_types": [
+      "health",
+      "bushfire",
+      "flood",
+      "industrial"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Health Services Act 1997 (NSW)",
+    "mutual_aid_partner_ids": [
+      "frnsw",
+      "nswpf",
+      "rfds"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "Mass casualty incident declared"
+    ]
   },
   {
     "organisation_id": "mrnsw",
@@ -283,7 +655,33 @@
     "participation_conditions": [
       "Marine search and rescue operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "MRNSW",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "maritime_coastal"
+    ],
+    "primary_capabilities": [
+      "marine_search_rescue",
+      "flood_boat_rescue",
+      "coastal_patrol"
+    ],
+    "hazard_types": [
+      "maritime_coastal",
+      "flood"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Marine Rescue NSW Act 2022",
+    "mutual_aid_partner_ids": [
+      "ses-nsw",
+      "nswpf"
+    ],
+    "activation_triggers": [
+      "Marine distress call",
+      "Flood boat rescue requested"
+    ]
   },
   {
     "organisation_id": "frv",
@@ -304,7 +702,37 @@
       "AIIMS activation",
       "Metropolitan fire district"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "FRV",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "urban_fire"
+    ],
+    "primary_capabilities": [
+      "urban_fire_suppression",
+      "hazmat_response",
+      "technical_rescue",
+      "road_crash_rescue"
+    ],
+    "hazard_types": [
+      "urban_fire",
+      "industrial",
+      "transport"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Fire Rescue Victoria Act 1958",
+    "mutual_aid_partner_ids": [
+      "cfa-vic",
+      "ses-vic",
+      "vicpol",
+      "av"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "AIIMS activation"
+    ]
   },
   {
     "organisation_id": "cfa-vic",
@@ -325,7 +753,35 @@
       "State bushfire readiness",
       "Rural fire districts"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "CFA",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "bushfire"
+    ],
+    "primary_capabilities": [
+      "bushfire_suppression",
+      "hazard_reduction_burns",
+      "community_preparedness",
+      "aerial_firefighting"
+    ],
+    "hazard_types": [
+      "bushfire"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Country Fire Authority Act 1958 (Vic)",
+    "mutual_aid_partner_ids": [
+      "frv",
+      "ses-vic",
+      "vicpol"
+    ],
+    "activation_triggers": [
+      "Fire Danger Rating Very High+",
+      "Total Fire Ban declared",
+      "State bushfire readiness"
+    ]
   },
   {
     "organisation_id": "ses-vic",
@@ -346,7 +802,40 @@
       "AIIMS activation",
       "Storm and flood operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "VICSES",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "flood",
+      "storm",
+      "earthquake"
+    ],
+    "primary_capabilities": [
+      "flood_rescue",
+      "storm_damage_response",
+      "earthquake_response",
+      "road_crash_rescue"
+    ],
+    "hazard_types": [
+      "flood",
+      "storm",
+      "earthquake"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Victoria State Emergency Service Act 2005",
+    "mutual_aid_partner_ids": [
+      "frv",
+      "cfa-vic",
+      "vicpol",
+      "av"
+    ],
+    "activation_triggers": [
+      "Flood watch/warning issued",
+      "Severe storm warning",
+      "Earthquake felt report"
+    ]
   },
   {
     "organisation_id": "vicpol",
@@ -367,7 +856,38 @@
       "State emergency coordination",
       "Law enforcement"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "VicPol",
+    "aiims_functions": [
+      "control",
+      "operations"
+    ],
+    "lead_agency_for": [
+      "criminal"
+    ],
+    "primary_capabilities": [
+      "emergency_coordination",
+      "evacuation_management",
+      "traffic_control",
+      "search_rescue"
+    ],
+    "hazard_types": [
+      "criminal",
+      "bushfire",
+      "flood"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Emergency Management Act 2013 (Vic)",
+    "mutual_aid_partner_ids": [
+      "frv",
+      "cfa-vic",
+      "ses-vic",
+      "av"
+    ],
+    "activation_triggers": [
+      "State emergency declared",
+      "Evacuation order issued"
+    ]
   },
   {
     "organisation_id": "av",
@@ -387,7 +907,33 @@
     "participation_conditions": [
       "Pre-hospital emergency medical care"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "AV",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "emergency_medical_services",
+      "patient_triage",
+      "mass_casualty_management"
+    ],
+    "hazard_types": [
+      "health",
+      "bushfire",
+      "flood"
+    ],
+    "workforce_type": "mixed",
+    "legislative_basis": "Ambulance Services Act 1986 (Vic)",
+    "mutual_aid_partner_ids": [
+      "frv",
+      "vicpol",
+      "rfds"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "Mass casualty incident declared"
+    ]
   },
   {
     "organisation_id": "qfd",
@@ -408,7 +954,40 @@
       "AIIMS activation",
       "Fire rescue and SES operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "QFD",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "urban_fire",
+      "bushfire"
+    ],
+    "primary_capabilities": [
+      "fire_suppression",
+      "bushfire_response",
+      "hazmat_response",
+      "technical_rescue",
+      "swift_water_rescue"
+    ],
+    "hazard_types": [
+      "urban_fire",
+      "bushfire",
+      "industrial",
+      "flood"
+    ],
+    "workforce_type": "mixed",
+    "legislative_basis": "Fire and Emergency Services Act 1990 (Qld)",
+    "mutual_aid_partner_ids": [
+      "ses-qld",
+      "qps",
+      "qas"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "AIIMS activation",
+      "Disaster declaration"
+    ]
   },
   {
     "organisation_id": "ses-qld",
@@ -429,7 +1008,38 @@
       "AIIMS activation",
       "Cyclone and flood operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "QLD SES",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "flood",
+      "storm",
+      "cyclone"
+    ],
+    "primary_capabilities": [
+      "flood_rescue",
+      "storm_damage_response",
+      "cyclone_preparation",
+      "community_resilience"
+    ],
+    "hazard_types": [
+      "flood",
+      "storm",
+      "cyclone"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Fire and Emergency Services Act 1990 (Qld)",
+    "mutual_aid_partner_ids": [
+      "qfd",
+      "qps"
+    ],
+    "activation_triggers": [
+      "Cyclone warning issued",
+      "Flood warning issued",
+      "Severe storm warning"
+    ]
   },
   {
     "organisation_id": "qps",
@@ -450,7 +1060,38 @@
       "State disaster coordination",
       "Law enforcement"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "QPS",
+    "aiims_functions": [
+      "control",
+      "operations"
+    ],
+    "lead_agency_for": [
+      "criminal"
+    ],
+    "primary_capabilities": [
+      "disaster_coordination",
+      "evacuation_management",
+      "traffic_control",
+      "search_rescue"
+    ],
+    "hazard_types": [
+      "criminal",
+      "cyclone",
+      "flood"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Disaster Management Act 2003 (Qld)",
+    "mutual_aid_partner_ids": [
+      "qfd",
+      "ses-qld",
+      "qas"
+    ],
+    "activation_triggers": [
+      "Disaster declaration",
+      "Evacuation order",
+      "State emergency"
+    ]
   },
   {
     "organisation_id": "qas",
@@ -470,7 +1111,33 @@
     "participation_conditions": [
       "Pre-hospital emergency medical care"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "QAS",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "emergency_medical_services",
+      "patient_triage",
+      "mass_casualty_management"
+    ],
+    "hazard_types": [
+      "health",
+      "cyclone",
+      "flood"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Ambulance Service Act 1991 (Qld)",
+    "mutual_aid_partner_ids": [
+      "qfd",
+      "qps",
+      "rfds"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "Mass casualty incident declared"
+    ]
   },
   {
     "organisation_id": "samfs",
@@ -491,7 +1158,35 @@
       "AIIMS activation",
       "Metropolitan fire district"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "SAMFS",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "urban_fire"
+    ],
+    "primary_capabilities": [
+      "urban_fire_suppression",
+      "hazmat_response",
+      "technical_rescue"
+    ],
+    "hazard_types": [
+      "urban_fire",
+      "industrial"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Fire and Emergency Services Act 2005 (SA)",
+    "mutual_aid_partner_ids": [
+      "sacfs",
+      "ses-sa",
+      "sapol",
+      "saas"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "AIIMS activation"
+    ]
   },
   {
     "organisation_id": "sacfs",
@@ -512,7 +1207,33 @@
       "AIIMS activation",
       "Rural fire districts"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "SACFS",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "bushfire"
+    ],
+    "primary_capabilities": [
+      "bushfire_suppression",
+      "hazard_reduction_burns",
+      "community_preparedness"
+    ],
+    "hazard_types": [
+      "bushfire"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Fire and Emergency Services Act 2005 (SA)",
+    "mutual_aid_partner_ids": [
+      "samfs",
+      "ses-sa",
+      "sapol"
+    ],
+    "activation_triggers": [
+      "Fire Danger Rating Very High+",
+      "Total Fire Ban declared"
+    ]
   },
   {
     "organisation_id": "ses-sa",
@@ -533,7 +1254,35 @@
       "AIIMS activation",
       "Storm and flood operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "SASES",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "flood",
+      "storm"
+    ],
+    "primary_capabilities": [
+      "flood_rescue",
+      "storm_damage_response",
+      "road_crash_rescue"
+    ],
+    "hazard_types": [
+      "flood",
+      "storm"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Fire and Emergency Services Act 2005 (SA)",
+    "mutual_aid_partner_ids": [
+      "samfs",
+      "sacfs",
+      "sapol"
+    ],
+    "activation_triggers": [
+      "Flood watch/warning issued",
+      "Severe storm warning"
+    ]
   },
   {
     "organisation_id": "sapol",
@@ -554,7 +1303,38 @@
       "State emergency coordination",
       "Law enforcement"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "SAPOL",
+    "aiims_functions": [
+      "control",
+      "operations"
+    ],
+    "lead_agency_for": [
+      "criminal"
+    ],
+    "primary_capabilities": [
+      "emergency_coordination",
+      "evacuation_management",
+      "traffic_control",
+      "search_rescue"
+    ],
+    "hazard_types": [
+      "criminal",
+      "bushfire",
+      "flood"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Emergency Management Act 2004 (SA)",
+    "mutual_aid_partner_ids": [
+      "samfs",
+      "sacfs",
+      "ses-sa",
+      "saas"
+    ],
+    "activation_triggers": [
+      "State emergency declared",
+      "Evacuation order issued"
+    ]
   },
   {
     "organisation_id": "saas",
@@ -574,7 +1354,32 @@
     "participation_conditions": [
       "Pre-hospital emergency medical care"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "SAAS",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "emergency_medical_services",
+      "patient_triage",
+      "mass_casualty_management"
+    ],
+    "hazard_types": [
+      "health",
+      "bushfire",
+      "flood"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "SA Ambulance Service Act 1992",
+    "mutual_aid_partner_ids": [
+      "sapol",
+      "rfds"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "Mass casualty incident declared"
+    ]
   },
   {
     "organisation_id": "dfes-wa",
@@ -595,7 +1400,44 @@
       "AIIMS activation",
       "Fire rescue and SES operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "DFES",
+    "aiims_functions": [
+      "control",
+      "operations"
+    ],
+    "lead_agency_for": [
+      "bushfire",
+      "urban_fire",
+      "flood",
+      "storm",
+      "cyclone"
+    ],
+    "primary_capabilities": [
+      "fire_suppression",
+      "bushfire_response",
+      "flood_rescue",
+      "hazmat_response",
+      "cyclone_preparation"
+    ],
+    "hazard_types": [
+      "bushfire",
+      "urban_fire",
+      "flood",
+      "storm",
+      "cyclone"
+    ],
+    "workforce_type": "mixed",
+    "legislative_basis": "Fire and Emergency Services Act 1998 (WA)",
+    "mutual_aid_partner_ids": [
+      "wapol",
+      "sja-wa"
+    ],
+    "activation_triggers": [
+      "Emergency situation declared",
+      "AIIMS activation",
+      "Cyclone warning"
+    ]
   },
   {
     "organisation_id": "wapol",
@@ -616,7 +1458,36 @@
       "State emergency coordination",
       "Law enforcement"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "WAPol",
+    "aiims_functions": [
+      "control",
+      "operations"
+    ],
+    "lead_agency_for": [
+      "criminal"
+    ],
+    "primary_capabilities": [
+      "emergency_coordination",
+      "evacuation_management",
+      "traffic_control",
+      "search_rescue"
+    ],
+    "hazard_types": [
+      "criminal",
+      "cyclone",
+      "bushfire"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Emergency Management Act 2005 (WA)",
+    "mutual_aid_partner_ids": [
+      "dfes-wa",
+      "sja-wa"
+    ],
+    "activation_triggers": [
+      "State emergency declared",
+      "Evacuation order issued"
+    ]
   },
   {
     "organisation_id": "sja-wa",
@@ -636,7 +1507,33 @@
     "participation_conditions": [
       "Government-contracted ambulance service"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "SJA WA",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "emergency_medical_services",
+      "patient_triage",
+      "first_aid_event_support"
+    ],
+    "hazard_types": [
+      "health",
+      "bushfire",
+      "cyclone"
+    ],
+    "workforce_type": "mixed",
+    "legislative_basis": null,
+    "mutual_aid_partner_ids": [
+      "dfes-wa",
+      "wapol",
+      "rfds"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "Mass casualty incident declared"
+    ]
   },
   {
     "organisation_id": "tfs",
@@ -657,7 +1554,37 @@
       "AIIMS activation",
       "Fire and rescue operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "TFS",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "bushfire",
+      "urban_fire"
+    ],
+    "primary_capabilities": [
+      "fire_suppression",
+      "bushfire_response",
+      "hazmat_response",
+      "road_crash_rescue"
+    ],
+    "hazard_types": [
+      "bushfire",
+      "urban_fire",
+      "industrial"
+    ],
+    "workforce_type": "mixed",
+    "legislative_basis": "Fire Service Act 1979 (Tas)",
+    "mutual_aid_partner_ids": [
+      "ses-tas",
+      "taspol",
+      "at"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "AIIMS activation"
+    ]
   },
   {
     "organisation_id": "ses-tas",
@@ -678,7 +1605,34 @@
       "AIIMS activation",
       "Storm and flood operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "TasSES",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "flood",
+      "storm"
+    ],
+    "primary_capabilities": [
+      "flood_rescue",
+      "storm_damage_response",
+      "community_resilience"
+    ],
+    "hazard_types": [
+      "flood",
+      "storm"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Emergency Management Act 2006 (Tas)",
+    "mutual_aid_partner_ids": [
+      "tfs",
+      "taspol"
+    ],
+    "activation_triggers": [
+      "Flood watch/warning issued",
+      "Severe storm warning"
+    ]
   },
   {
     "organisation_id": "taspol",
@@ -699,7 +1653,37 @@
       "State emergency coordination",
       "Law enforcement"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "TasPol",
+    "aiims_functions": [
+      "control",
+      "operations"
+    ],
+    "lead_agency_for": [
+      "criminal"
+    ],
+    "primary_capabilities": [
+      "emergency_coordination",
+      "evacuation_management",
+      "traffic_control",
+      "search_rescue"
+    ],
+    "hazard_types": [
+      "criminal",
+      "bushfire",
+      "flood"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Emergency Management Act 2006 (Tas)",
+    "mutual_aid_partner_ids": [
+      "tfs",
+      "ses-tas",
+      "at"
+    ],
+    "activation_triggers": [
+      "State emergency declared",
+      "Evacuation order issued"
+    ]
   },
   {
     "organisation_id": "at",
@@ -719,7 +1703,31 @@
     "participation_conditions": [
       "Pre-hospital emergency medical care"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "AT",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "emergency_medical_services",
+      "patient_triage"
+    ],
+    "hazard_types": [
+      "health",
+      "bushfire",
+      "flood"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Ambulance Service Act 1982 (Tas)",
+    "mutual_aid_partner_ids": [
+      "tfs",
+      "taspol"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "Mass casualty incident declared"
+    ]
   },
   {
     "organisation_id": "act-esa",
@@ -739,7 +1747,36 @@
     "participation_conditions": [
       "ACT emergency coordination umbrella"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "ACT ESA",
+    "aiims_functions": [
+      "control",
+      "planning"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "emergency_services_coordination",
+      "strategic_planning",
+      "public_warning"
+    ],
+    "hazard_types": [
+      "bushfire",
+      "flood",
+      "storm"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Emergencies Act 2004 (ACT)",
+    "mutual_aid_partner_ids": [
+      "act-fr",
+      "act-rfs",
+      "ses-act",
+      "act-policing",
+      "act-ambulance"
+    ],
+    "activation_triggers": [
+      "Emergency declared by ACT Government",
+      "AIIMS activation"
+    ]
   },
   {
     "organisation_id": "act-fr",
@@ -760,7 +1797,34 @@
       "AIIMS activation",
       "Urban fire and rescue"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "ACT F&R",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "urban_fire"
+    ],
+    "primary_capabilities": [
+      "urban_fire_suppression",
+      "hazmat_response",
+      "technical_rescue"
+    ],
+    "hazard_types": [
+      "urban_fire",
+      "industrial"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Emergencies Act 2004 (ACT)",
+    "mutual_aid_partner_ids": [
+      "act-esa",
+      "act-rfs",
+      "ses-act"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "AIIMS activation"
+    ]
   },
   {
     "organisation_id": "act-rfs",
@@ -781,7 +1845,32 @@
       "AIIMS activation",
       "Rural fire districts"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "ACT RFS",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "bushfire"
+    ],
+    "primary_capabilities": [
+      "bushfire_suppression",
+      "hazard_reduction_burns",
+      "community_education"
+    ],
+    "hazard_types": [
+      "bushfire"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Emergencies Act 2004 (ACT)",
+    "mutual_aid_partner_ids": [
+      "act-esa",
+      "act-fr"
+    ],
+    "activation_triggers": [
+      "Fire Danger Rating Very High+",
+      "Total Fire Ban declared"
+    ]
   },
   {
     "organisation_id": "ses-act",
@@ -802,7 +1891,33 @@
       "AIIMS activation",
       "Storm and flood operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "ACT SES",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "flood",
+      "storm"
+    ],
+    "primary_capabilities": [
+      "flood_rescue",
+      "storm_damage_response"
+    ],
+    "hazard_types": [
+      "flood",
+      "storm"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Emergencies Act 2004 (ACT)",
+    "mutual_aid_partner_ids": [
+      "act-esa",
+      "act-fr"
+    ],
+    "activation_triggers": [
+      "Flood watch/warning issued",
+      "Severe storm warning"
+    ]
   },
   {
     "organisation_id": "act-policing",
@@ -822,7 +1937,35 @@
     "participation_conditions": [
       "AFP-contracted policing for ACT"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "ACT Policing",
+    "aiims_functions": [
+      "control",
+      "operations"
+    ],
+    "lead_agency_for": [
+      "criminal"
+    ],
+    "primary_capabilities": [
+      "emergency_coordination",
+      "evacuation_management",
+      "traffic_control"
+    ],
+    "hazard_types": [
+      "criminal",
+      "bushfire",
+      "flood"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Australian Federal Police Act 1979",
+    "mutual_aid_partner_ids": [
+      "act-esa",
+      "afp"
+    ],
+    "activation_triggers": [
+      "Emergency declared",
+      "Evacuation order issued"
+    ]
   },
   {
     "organisation_id": "act-ambulance",
@@ -842,7 +1985,30 @@
     "participation_conditions": [
       "Pre-hospital emergency medical care"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "ACTAS",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "emergency_medical_services",
+      "patient_triage"
+    ],
+    "hazard_types": [
+      "health",
+      "bushfire"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Emergencies Act 2004 (ACT)",
+    "mutual_aid_partner_ids": [
+      "act-esa",
+      "rfds"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "Mass casualty incident declared"
+    ]
   },
   {
     "organisation_id": "ntfrs",
@@ -863,7 +2029,34 @@
       "AIIMS activation",
       "Fire and rescue operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "NTFRS",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "urban_fire"
+    ],
+    "primary_capabilities": [
+      "urban_fire_suppression",
+      "hazmat_response",
+      "technical_rescue"
+    ],
+    "hazard_types": [
+      "urban_fire",
+      "industrial"
+    ],
+    "workforce_type": "mixed",
+    "legislative_basis": "Fire and Emergency Act 1996 (NT)",
+    "mutual_aid_partner_ids": [
+      "bushfires-nt",
+      "ntes",
+      "ntpf"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "AIIMS activation"
+    ]
   },
   {
     "organisation_id": "bushfires-nt",
@@ -884,7 +2077,31 @@
       "AIIMS activation",
       "Bushfire management"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "Bushfires NT",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "bushfire"
+    ],
+    "primary_capabilities": [
+      "bushfire_suppression",
+      "hazard_reduction_burns"
+    ],
+    "hazard_types": [
+      "bushfire"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Bushfires Management Act 2016 (NT)",
+    "mutual_aid_partner_ids": [
+      "ntfrs",
+      "ntes"
+    ],
+    "activation_triggers": [
+      "Fire Danger Rating Very High+",
+      "Bushfire declaration"
+    ]
   },
   {
     "organisation_id": "ntes",
@@ -905,7 +2122,37 @@
       "AIIMS activation",
       "Cyclone and flood operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "NTES",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [
+      "cyclone",
+      "flood"
+    ],
+    "primary_capabilities": [
+      "cyclone_preparation",
+      "flood_rescue",
+      "storm_damage_response",
+      "community_resilience"
+    ],
+    "hazard_types": [
+      "cyclone",
+      "flood",
+      "storm"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": "Emergency Management Act 2013 (NT)",
+    "mutual_aid_partner_ids": [
+      "ntfrs",
+      "bushfires-nt",
+      "ntpf"
+    ],
+    "activation_triggers": [
+      "Cyclone watch/warning issued",
+      "Flood warning issued"
+    ]
   },
   {
     "organisation_id": "ntpf",
@@ -926,7 +2173,37 @@
       "Territory emergency coordination",
       "Law enforcement"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "NTPF",
+    "aiims_functions": [
+      "control",
+      "operations"
+    ],
+    "lead_agency_for": [
+      "criminal"
+    ],
+    "primary_capabilities": [
+      "emergency_coordination",
+      "evacuation_management",
+      "traffic_control",
+      "search_rescue"
+    ],
+    "hazard_types": [
+      "criminal",
+      "cyclone",
+      "flood"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Police Administration Act 1978 (NT)",
+    "mutual_aid_partner_ids": [
+      "ntfrs",
+      "ntes",
+      "sja-nt"
+    ],
+    "activation_triggers": [
+      "Territory emergency declared",
+      "Evacuation order issued"
+    ]
   },
   {
     "organisation_id": "sja-nt",
@@ -946,7 +2223,31 @@
     "participation_conditions": [
       "Government-contracted ambulance service"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "SJA NT",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "emergency_medical_services",
+      "patient_triage",
+      "first_aid_event_support"
+    ],
+    "hazard_types": [
+      "health",
+      "cyclone"
+    ],
+    "workforce_type": "mixed",
+    "legislative_basis": null,
+    "mutual_aid_partner_ids": [
+      "ntpf",
+      "rfds"
+    ],
+    "activation_triggers": [
+      "Triple Zero (000) dispatch",
+      "Mass casualty incident declared"
+    ]
   },
   {
     "organisation_id": "arc",
@@ -967,7 +2268,34 @@
       "Disaster relief coordination",
       "Evacuation centre support"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "ARC",
+    "aiims_functions": [
+      "logistics"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "evacuation_centre_support",
+      "psychological_first_aid",
+      "registration_inquiry",
+      "humanitarian_relief"
+    ],
+    "hazard_types": [
+      "bushfire",
+      "flood",
+      "cyclone",
+      "earthquake"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": null,
+    "mutual_aid_partner_ids": [
+      "nema",
+      "sja-national"
+    ],
+    "activation_triggers": [
+      "Evacuation centre activated",
+      "State request for humanitarian support"
+    ]
   },
   {
     "organisation_id": "sja-national",
@@ -987,7 +2315,30 @@
     "participation_conditions": [
       "First aid and event medical support"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "SJA",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "first_aid_event_support",
+      "community_health",
+      "volunteer_training"
+    ],
+    "hazard_types": [
+      "health"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": null,
+    "mutual_aid_partner_ids": [
+      "arc",
+      "rfds"
+    ],
+    "activation_triggers": [
+      "Major event medical coverage requested",
+      "Mass gathering"
+    ]
   },
   {
     "organisation_id": "surf-lifesaving",
@@ -1007,6 +2358,31 @@
     "participation_conditions": [
       "Coastal and marine rescue operations"
     ],
-    "status": "active"
+    "status": "active",
+    "abbreviation": "SLSA",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "coastal_rescue",
+      "surf_patrol",
+      "flood_boat_rescue",
+      "community_education"
+    ],
+    "hazard_types": [
+      "maritime_coastal",
+      "flood"
+    ],
+    "workforce_type": "volunteer",
+    "legislative_basis": null,
+    "mutual_aid_partner_ids": [
+      "mrnsw"
+    ],
+    "activation_triggers": [
+      "Coastal emergency",
+      "Flood rescue support requested",
+      "Beach hazard declared"
+    ]
   }
 ]

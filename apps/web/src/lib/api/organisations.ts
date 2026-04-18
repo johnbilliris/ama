@@ -3,11 +3,20 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8
 export interface PreparednessOrganisation {
   organisation_id: string;
   name: string;
+  abbreviation: string | null;
   category: string;
   jurisdiction_ids: string[];
   operating_role: string;
   authority_level: string;
   status: string;
+  aiims_functions: string[];
+  lead_agency_for: string[];
+  primary_capabilities: string[];
+  hazard_types: string[];
+  workforce_type: string | null;
+  legislative_basis: string | null;
+  mutual_aid_partner_ids: string[];
+  activation_triggers: string[];
 }
 
 export async function listPreparednessOrganisations(

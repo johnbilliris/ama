@@ -1798,6 +1798,113 @@ body {
   color: #f6fbfc;
 }
 
+/* ── Organisation card enrichment ── */
+
+.preparedness-org-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.preparedness-org-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.preparedness-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--ama-radius-pill);
+  white-space: nowrap;
+}
+
+.preparedness-badge--paid {
+  background: rgba(15, 76, 92, 0.1);
+  color: var(--ama-color-ocean-deep);
+}
+
+.preparedness-badge--volunteer {
+  background: rgba(34, 139, 34, 0.1);
+  color: #166534;
+}
+
+.preparedness-badge--mixed {
+  background: rgba(161, 98, 7, 0.1);
+  color: #92400e;
+}
+
+.preparedness-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.preparedness-tag {
+  font-size: 0.68rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--ama-radius-xs);
+  white-space: nowrap;
+}
+
+.preparedness-tag--hazard {
+  background: rgba(191, 47, 74, 0.08);
+  color: #991b2c;
+  border: 1px solid rgba(191, 47, 74, 0.15);
+}
+
+.preparedness-tag--capability {
+  background: rgba(15, 76, 92, 0.06);
+  color: var(--ama-color-ocean);
+  border: 1px solid rgba(15, 76, 92, 0.12);
+}
+
+.preparedness-tag--more {
+  background: var(--ama-surface-elevated);
+  color: var(--ama-color-ink-soft);
+  border: 1px solid var(--ama-border-subtle);
+}
+
+.preparedness-org-lead {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #991b2c;
+}
+
+.preparedness-org-legislation {
+  font-size: 0.72rem;
+  color: var(--ama-color-ink-soft);
+  font-style: italic;
+}
+
+.preparedness-org-details {
+  font-size: 0.75rem;
+}
+
+.preparedness-org-details summary {
+  cursor: pointer;
+  color: var(--ama-color-ocean);
+  font-weight: 500;
+}
+
+.preparedness-org-details summary:hover {
+  color: var(--ama-color-ocean-deep);
+}
+
+.preparedness-org-triggers {
+  margin: 0.3rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--ama-color-ink-soft);
+}
+
+.preparedness-org-triggers li {
+  padding: 0.1rem 0;
+}
+
 .preparedness-dark-item {
   border-top-color: rgba(246, 251, 252, 0.1);
 }
