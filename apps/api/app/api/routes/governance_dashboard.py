@@ -24,6 +24,8 @@ from app.models.governance_health import (
 )
 from app.services.audit_export_service import AuditExportService
 from app.services.dashboard_aggregation_service import DashboardAggregationService
+from app.services.governance_data_service import GovernanceDataService
+from app.services.seed_service import SeedService
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
@@ -57,8 +59,22 @@ def _log_perf(endpoint: str, start: float, tenant_id: str = "live") -> None:
             endpoint, elapsed_ms,
         )
 
-_aggregation = DashboardAggregationService()
+_data_service: GovernanceDataService | None = None
+_aggregation: DashboardAggregationService | None = None
 _export_service = AuditExportService()
+
+
+def _get_aggregation() -> DashboardAggregationService:
+    """Lazy-initialise DashboardAggregationService with seed data."""
+    global _data_service, _aggregation
+    if _aggregation is None:
+        from pathlib import Path
+        from packages.domain.src.domain.seed import bootstrap as _seed_mod
+        _seed_root = Path(_seed_mod.__file__).resolve().parent
+        _seed_data = SeedService().load(_seed_root)
+        _data_service = GovernanceDataService(seed_data=_seed_data)
+        _aggregation = DashboardAggregationService(data_service=_data_service)
+    return _aggregation
 
 # --- Role-to-widget mapping configuration (US7) ---
 
@@ -236,7 +252,7 @@ async def get_dashboard_config(request: Request) -> DashboardConfigResponse:
 
     # Check for active incident to set polling interval
     try:
-        summary = _aggregation.get_executive_summary(tenant_id=tenant_id)
+        summary = _get_aggregation().get_executive_summary(tenant_id=tenant_id)
         has_incident = summary.active_incident_count > 0
     except Exception:
         has_incident = False
@@ -270,7 +286,7 @@ async def get_executive_summary(
     bypass_cache = request.headers.get("Cache-Control") == "no-cache"
 
     try:
-        summary = _aggregation.get_executive_summary(
+        summary = _get_aggregation().get_executive_summary(
             tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
         )
         data = summary.model_dump(mode="json")
@@ -308,7 +324,7 @@ async def get_compliance_matrix(
     """GET /governance/dashboard/compliance — data source compliance matrix."""
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
-    result = _aggregation.get_compliance_matrix(
+    result = _get_aggregation().get_compliance_matrix(
         tenant_id=tenant_id,
         compliance_status=compliance_status,
         category=category,
@@ -332,7 +348,7 @@ async def get_compliance_detail(
 ) -> ComplianceDetailResponse:
     """GET /governance/dashboard/compliance/{dataSourceId} — detail view."""
     tenant_id = _get_tenant_id(request)
-    detail = _aggregation.get_compliance_detail(
+    detail = _get_aggregation().get_compliance_detail(
         data_source_id, tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
     )
     if not detail:
@@ -362,7 +378,7 @@ async def get_audit_trail(
     from_dt = datetime.fromisoformat(date_from) if date_from else None
     to_dt = datetime.fromisoformat(date_to) if date_to else None
 
-    result = _aggregation.search_audit_events(
+    result = _get_aggregation().search_audit_events(
         tenant_id=tenant_id,
         date_from=from_dt,
         date_to=to_dt,
@@ -388,7 +404,7 @@ async def get_decision_chain(
 ) -> AuditDecisionChainResponse:
     """GET /governance/dashboard/audit/{eventId}/chain — decision chain."""
     tenant_id = _get_tenant_id(request)
-    chain = _aggregation.get_decision_chain(
+    chain = _get_aggregation().get_decision_chain(
         event_id, tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
     )
     if not chain:
@@ -459,7 +475,7 @@ async def get_operational_readiness(
     """GET /governance/dashboard/readiness — PPRR, plans, exercises, roles."""
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
-    result = _aggregation.get_operational_readiness(
+    result = _get_aggregation().get_operational_readiness(
         tenant_id=tenant_id, jurisdiction_id=jurisdiction_id, hazard_type=hazard_type,
     )
     _log_perf("operational_readiness", start, tenant_id)
@@ -477,7 +493,7 @@ async def get_recovery_progress(
     """GET /governance/dashboard/recovery — 5-domain recovery progress."""
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
-    result = _aggregation.get_recovery_progress(
+    result = _get_aggregation().get_recovery_progress(
         tenant_id=tenant_id, incident_id=incident_id, jurisdiction_id=jurisdiction_id,
     )
     _log_perf("recovery_progress", start, tenant_id)
@@ -502,7 +518,7 @@ async def get_recovery_domain_detail(
             detail=f"Invalid domain '{domain}'. Valid: {sorted(valid_domains)}",
         )
 
-    detail = _aggregation.get_recovery_domain_detail(
+    detail = _get_aggregation().get_recovery_domain_detail(
         domain, tenant_id=tenant_id, incident_id=incident_id, jurisdiction_id=jurisdiction_id,
     )
     if not detail:
@@ -522,7 +538,7 @@ async def get_risk_and_warning(
     """GET /governance/dashboard/risk — risk register + warning compliance."""
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
-    result = _aggregation.get_risk_and_warning(
+    result = _get_aggregation().get_risk_and_warning(
         tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
         issuing_authority=issuing_authority, hazard_type=hazard_type,
     )
@@ -540,7 +556,7 @@ async def get_risk_detail(
 ) -> RiskDetailResponse:
     """GET /governance/dashboard/risk/{riskId} — risk detail."""
     tenant_id = _get_tenant_id(request)
-    detail = _aggregation.get_risk_detail(
+    detail = _get_aggregation().get_risk_detail(
         risk_id, tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
     )
     if not detail:
