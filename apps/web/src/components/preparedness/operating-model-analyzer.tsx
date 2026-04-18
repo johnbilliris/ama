@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useDeferredValue, useState } from "react";
+import { useDeferredValue, useState } from "react";
 
 import type { PreparednessFramework } from "../../lib/api/frameworks";
 import type { PreparednessOrganisation } from "../../lib/api/organisations";
@@ -25,13 +25,17 @@ const DEFAULT_SCENARIO: ScenarioRunPayload = {
 export function OperatingModelAnalyzer({ organisations, frameworks }: OperatingModelAnalyzerProps) {
   const [scenarioType, setScenarioType] = useState("flood");
   const [scenarioRun, setScenarioRun] = useState<ScenarioRunPayload>(DEFAULT_SCENARIO);
+  const [replayError, setReplayError] = useState<string | null>(null);
+  const [replaying, setReplaying] = useState(false);
   const deferredScenarioRun = useDeferredValue(scenarioRun);
 
   function handleReplay() {
-    startTransition(async () => {
-      const result = await replayPreparednessScenario("Preparedness rehearsal", scenarioType, ["nsw"]);
-      setScenarioRun(result);
-    });
+    setReplayError(null);
+    setReplaying(true);
+    replayPreparednessScenario("Preparedness rehearsal", scenarioType, ["nsw"])
+      .then((result) => setScenarioRun(result))
+      .catch((err: Error) => setReplayError(err.message || "Rehearsal replay failed. The API may be temporarily unavailable."))
+      .finally(() => setReplaying(false));
   }
 
   return (
@@ -88,10 +92,19 @@ export function OperatingModelAnalyzer({ organisations, frameworks }: OperatingM
               <option value="cyclone">Cyclone</option>
             </select>
           </label>
-          <button type="button" className="preparedness-button" onClick={handleReplay}>
-            Run rehearsal replay
+          <button type="button" className="preparedness-button" onClick={handleReplay} disabled={replaying}>
+            {replaying ? "Running…" : "Run rehearsal replay"}
           </button>
         </div>
+
+        {replayError && (
+          <div className="preparedness-error" role="alert">
+            <p><strong>Rehearsal replay failed:</strong> {replayError}</p>
+            <button type="button" className="preparedness-button" onClick={handleReplay} disabled={replaying}>
+              Retry
+            </button>
+          </div>
+        )}
 
         <div className="preparedness-columns">
           <article className="preparedness-panel preparedness-dark-panel">
