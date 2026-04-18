@@ -167,6 +167,7 @@ export function PreparednessClient({ initialJurisdictionParam }: PreparednessCli
         )}
 
         <OperatingModelAnalyzer
+          jurisdictions={jurisdictions}
           organisations={organisations}
           frameworks={frameworks}
           selectedJurisdictionIds={selectedIds}

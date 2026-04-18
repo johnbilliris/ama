@@ -1968,6 +1968,18 @@ body {
   margin: 0.2rem 0;
 }
 
+/* ── Replay detail grid ── */
+
+.preparedness-replay-detail {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 900px) {
+  .preparedness-replay-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
 .preparedness-dark-item {
   border-top-color: rgba(246, 251, 252, 0.1);
 }

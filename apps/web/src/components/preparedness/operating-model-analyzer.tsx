@@ -2,6 +2,7 @@
 
 import { useEffect, useDeferredValue, useMemo, useState } from "react";
 
+import type { JurisdictionSummary } from "../../lib/api/jurisdictions";
 import type { PreparednessFramework } from "../../lib/api/frameworks";
 import type { PreparednessOrganisation } from "../../lib/api/organisations";
 import { replayPreparednessScenario, type ScenarioRunPayload } from "../../lib/api/scenarios";
@@ -13,6 +14,7 @@ function formatLabel(value: string): string {
 }
 
 interface OperatingModelAnalyzerProps {
+  jurisdictions: JurisdictionSummary[];
   organisations: PreparednessOrganisation[];
   frameworks: PreparednessFramework[];
   selectedJurisdictionIds: string[];
@@ -33,6 +35,7 @@ const DEFAULT_SCENARIO: ScenarioRunPayload = {
 };
 
 export function OperatingModelAnalyzer({
+  jurisdictions,
   organisations,
   frameworks,
   selectedJurisdictionIds,
@@ -57,6 +60,16 @@ export function OperatingModelAnalyzer({
   const orgLookup = useMemo(
     () => new Map(organisations.map((o) => [o.organisation_id, o])),
     [organisations],
+  );
+
+  const fwLookup = useMemo(
+    () => new Map(frameworks.map((f) => [f.framework_id, f])),
+    [frameworks],
+  );
+
+  const jurLookup = useMemo(
+    () => new Map(jurisdictions.map((j) => [j.jurisdiction_id, j])),
+    [jurisdictions],
   );
 
   function handleReplay() {
@@ -319,6 +332,83 @@ export function OperatingModelAnalyzer({
                 ))
               )}
             </ul>
+          </article>
+        </div>
+
+        <div className="preparedness-columns preparedness-replay-detail">
+          <article className="preparedness-panel">
+            <h2 className="preparedness-panel-title">
+              Jurisdictions ({deferredScenarioRun.jurisdiction_ids.length})
+            </h2>
+            <ul className="preparedness-list">
+              {deferredScenarioRun.jurisdiction_ids.map((jid) => {
+                const jur = jurLookup.get(jid);
+                return (
+                  <li key={jid} className="preparedness-list-item">
+                    <strong>{jur ? jur.name : jid}</strong>
+                    {jur && <span className="preparedness-meta"> · {formatLabel(jur.level)}</span>}
+                  </li>
+                );
+              })}
+            </ul>
+          </article>
+
+          <article className="preparedness-panel">
+            <h2 className="preparedness-panel-title">
+              Organisations ({deferredScenarioRun.organisation_ids.length})
+            </h2>
+            {deferredScenarioRun.organisation_ids.length === 0 ? (
+              <p className="preparedness-meta">No organisations matched.</p>
+            ) : (
+              <ul className="preparedness-list">
+                {deferredScenarioRun.organisation_ids.map((oid) => {
+                  const org = orgLookup.get(oid);
+                  return (
+                    <li key={oid} className="preparedness-list-item">
+                      <strong>{org ? (org.abbreviation ? `${org.abbreviation} — ${org.name}` : org.name) : oid}</strong>
+                      {org && (
+                        <div className="preparedness-meta">
+                          {formatLabel(org.category)} · {formatLabel(org.operating_role)}
+                          {org.workforce_type && ` · ${formatLabel(org.workforce_type)}`}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </article>
+
+          <article className="preparedness-panel">
+            <h2 className="preparedness-panel-title">
+              Frameworks ({deferredScenarioRun.framework_ids.length})
+            </h2>
+            {deferredScenarioRun.framework_ids.length === 0 ? (
+              <p className="preparedness-meta">No frameworks matched.</p>
+            ) : (
+              <ul className="preparedness-list">
+                {deferredScenarioRun.framework_ids.map((fid) => {
+                  const fw = fwLookup.get(fid);
+                  return (
+                    <li key={fid} className="preparedness-list-item">
+                      <strong>{fw ? (fw.abbreviation ? `${fw.abbreviation} — ${fw.name}` : fw.name) : fid}</strong>
+                      {fw && (
+                        <>
+                          <div className="preparedness-meta">{formatLabel(fw.framework_type)}</div>
+                          {fw.pprr_phases.length > 0 && (
+                            <div className="preparedness-tag-row">
+                              {fw.pprr_phases.map((p) => (
+                                <span key={p} className="preparedness-tag preparedness-tag--pprr">{formatLabel(p)}</span>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </article>
         </div>
       </section>
