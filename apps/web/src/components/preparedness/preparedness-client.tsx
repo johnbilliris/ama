@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import type { JurisdictionSummary } from "../../lib/api/jurisdictions";
+import { listJurisdictions, type JurisdictionSummary } from "../../lib/api/jurisdictions";
 import type { PreparednessFramework } from "../../lib/api/frameworks";
 import type { PreparednessOrganisation } from "../../lib/api/organisations";
 import { listPreparednessOrganisations } from "../../lib/api/organisations";
@@ -12,15 +12,16 @@ import { JurisdictionSelector } from "./jurisdiction-selector";
 import { OperatingModelAnalyzer } from "./operating-model-analyzer";
 
 interface PreparednessClientProps {
-  jurisdictions: JurisdictionSummary[];
-  initialSelectedIds: string[];
+  initialJurisdictionParam: string;
 }
 
-export function PreparednessClient({ jurisdictions, initialSelectedIds }: PreparednessClientProps) {
+export function PreparednessClient({ initialJurisdictionParam }: PreparednessClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
+  const [jurisdictions, setJurisdictions] = useState<JurisdictionSummary[]>([]);
+  const [jurisdictionsLoading, setJurisdictionsLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [organisations, setOrganisations] = useState<PreparednessOrganisation[]>([]);
   const [frameworks, setFrameworks] = useState<PreparednessFramework[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,6 +33,25 @@ export function PreparednessClient({ jurisdictions, initialSelectedIds }: Prepar
   const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestIdRef = useRef(0);
+  const initializedRef = useRef(false);
+
+  // Fetch jurisdictions on mount and resolve initial selection from URL param
+  useEffect(() => {
+    listJurisdictions()
+      .then((data) => {
+        setJurisdictions(data);
+        if (!initializedRef.current) {
+          initializedRef.current = true;
+          const validIds = new Set(data.map((j) => j.jurisdiction_id));
+          const initial = initialJurisdictionParam
+            ? initialJurisdictionParam.split(",").filter((id) => validIds.has(id))
+            : [];
+          setSelectedIds(initial);
+        }
+      })
+      .catch(() => setError("Failed to load jurisdictions. Please refresh the page."))
+      .finally(() => setJurisdictionsLoading(false));
+  }, [initialJurisdictionParam]);
 
   const validIds = jurisdictions.map((j) => j.jurisdiction_id);
 
@@ -79,6 +99,7 @@ export function PreparednessClient({ jurisdictions, initialSelectedIds }: Prepar
   );
 
   useEffect(() => {
+    if (jurisdictionsLoading) return;
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
@@ -89,7 +110,7 @@ export function PreparednessClient({ jurisdictions, initialSelectedIds }: Prepar
       if (debounceRef.current) clearTimeout(debounceRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
-  }, [selectedIds, fetchData]);
+  }, [selectedIds, fetchData, jurisdictionsLoading]);
 
   useEffect(() => {
     if (replayJurisdictions !== null) {
@@ -119,6 +140,10 @@ export function PreparednessClient({ jurisdictions, initialSelectedIds }: Prepar
 
   function handleRetry() {
     fetchData(selectedIds);
+  }
+
+  if (jurisdictionsLoading) {
+    return <div className="preparedness-loading">Loading jurisdictions…</div>;
   }
 
   return (
