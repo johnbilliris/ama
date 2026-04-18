@@ -2,23 +2,1330 @@
   {
     "framework_id": "aiims-national",
     "name": "Australasian Inter-service Incident Management System",
+    "abbreviation": "AIIMS",
+    "description": "Australia-wide incident management system providing a consistent command and control framework for multi-agency emergency response. Defines functional sections (Control, Planning, Intelligence, Operations, Logistics, Public Information) and span of control principles.",
     "framework_type": "aiims",
-    "principles": ["management by objectives", "unity of command", "span of control"],
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": null,
+    "pprr_phases": [
+      "preparedness",
+      "response"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "management by objectives",
+      "unity of command",
+      "span of control",
+      "flexible and modular",
+      "functional management"
+    ],
     "control_model": "incident_management_team",
-    "approval_rules": [{"action": "public_alert", "requires": "incident_commander"}],
-    "escalation_rules": [{"condition": "cross-border impact", "escalateTo": "state_controller"}],
-    "span_of_control_guidance": "1 supervisor to 5 resources",
+    "approval_rules": [
+      {
+        "action": "public_alert",
+        "requires": "incident_commander"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "cross-border impact",
+        "escalateTo": "state_controller"
+      }
+    ],
+    "span_of_control_guidance": "1 supervisor to 3-7 resources (optimal 5)",
+    "activation_triggers": [
+      "Any multi-agency emergency incident",
+      "Declaration of emergency or disaster"
+    ],
+    "legislative_basis": null,
+    "version": "5th Edition",
+    "source_uri": "https://www.afac.com.au/auxiliary/publication/2361",
+    "related_framework_ids": [],
+    "status": "active"
+  },
+  {
+    "framework_id": "comdisplan",
+    "name": "Commonwealth Government Disaster Response Plan",
+    "abbreviation": "COMDISPLAN",
+    "description": "Describes Australian Government assistance to states and territories in response to a disaster or emergency. Covers physical assistance, financial aid, and coordination of Australian Government resources.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": "nema",
+    "pprr_phases": [
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "all hazards approach",
+      "scalable response",
+      "complementary to state arrangements"
+    ],
+    "control_model": "australian_government_crisis_committee",
+    "approval_rules": [
+      {
+        "action": "activate_assistance",
+        "requires": "minister_for_emergency_management"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "state request for assistance",
+        "escalateTo": "nema_coordinator_general"
+      }
+    ],
+    "span_of_control_guidance": "Managed through NEMA Coordination Centre",
+    "activation_triggers": [
+      "Formal request for assistance from a state or territory",
+      "National emergency declaration"
+    ],
+    "legislative_basis": "Crisis Management Framework (2023)",
+    "version": "2023",
+    "source_uri": "https://www.homeaffairs.gov.au/emergency/files/plan-disaster-response.pdf",
+    "related_framework_ids": [
+      "natcatdisplan",
+      "ag-crisis-mgmt"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "natcatdisplan",
+    "name": "National Catastrophic Natural Disaster Plan",
+    "abbreviation": "NATCATDISPLAN",
+    "description": "Provides a national framework for managing catastrophic natural disasters that overwhelm the capacity of any single state or territory. Coordinates national resources and defence force assistance.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": "nema",
+    "pprr_phases": [
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [
+      "bushfire",
+      "flood",
+      "cyclone",
+      "earthquake",
+      "tsunami"
+    ],
+    "principles": [
+      "national scalability",
+      "defence force integration",
+      "cross-jurisdiction coordination"
+    ],
+    "control_model": "national_coordination_mechanism",
+    "approval_rules": [
+      {
+        "action": "national_declaration",
+        "requires": "prime_minister"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "catastrophic threshold met",
+        "escalateTo": "national_crisis_committee"
+      }
+    ],
+    "span_of_control_guidance": "National coordination through NEMA with ADF support",
+    "activation_triggers": [
+      "Catastrophic disaster exceeding state capacity",
+      "Multiple simultaneous major emergencies"
+    ],
+    "legislative_basis": "Defence Act 1903 Part IIIAAA",
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "comdisplan"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "ag-crisis-mgmt",
+    "name": "Australian Government Crisis Management Framework",
+    "abbreviation": "AGCMF",
+    "description": "Overarching framework for managing crises that affect Australian interests. Integrates domestic and international crisis response at the national level.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "commonwealth"
+    ],
+    "custodian_organisation_id": "nema",
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "whole-of-government approach",
+      "subsidiarity",
+      "shared responsibility"
+    ],
+    "control_model": "national_security_committee",
+    "approval_rules": [],
+    "escalation_rules": [
+      {
+        "condition": "national security implications",
+        "escalateTo": "national_security_committee"
+      }
+    ],
+    "span_of_control_guidance": "Coordinated through Department of the Prime Minister and Cabinet",
+    "activation_triggers": [
+      "Crisis affecting national interests",
+      "Multiple jurisdiction impact"
+    ],
+    "legislative_basis": null,
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "comdisplan",
+      "natcatdisplan"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "aidr-emergency-planning",
+    "name": "AIDR Emergency Planning Handbook",
+    "abbreviation": null,
+    "description": "National guide to emergency planning processes at all levels of government. Covers planning principles, community engagement, capability assessment, and plan review cycles.",
+    "framework_type": "other",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": "nema",
+    "pprr_phases": [
+      "prevention",
+      "preparedness"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "risk-based planning",
+      "community engagement",
+      "continuous improvement"
+    ],
+    "control_model": "planning_committee",
+    "approval_rules": [],
+    "escalation_rules": [],
+    "span_of_control_guidance": "Scalable to local, regional, and state levels",
+    "activation_triggers": [],
+    "legislative_basis": null,
+    "version": "2nd Edition 2020",
+    "source_uri": "https://knowledge.aidr.org.au/resources/handbook-emergency-planning/",
+    "related_framework_ids": [],
+    "status": "active"
+  },
+  {
+    "framework_id": "aidr-public-info-warnings",
+    "name": "AIDR Public Information and Warnings Handbook",
+    "abbreviation": null,
+    "description": "National guidance on developing and disseminating public information and warnings during emergencies. Covers warning systems, message construction, dissemination channels, and community engagement.",
+    "framework_type": "communications",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": "nema",
+    "pprr_phases": [
+      "preparedness",
+      "response"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "plain language",
+      "timely and accurate",
+      "accessible to all",
+      "consistent messaging"
+    ],
+    "control_model": "public_information_cell",
+    "approval_rules": [
+      {
+        "action": "emergency_warning",
+        "requires": "authorised_officer"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "warning level upgrade",
+        "escalateTo": "incident_controller"
+      }
+    ],
+    "span_of_control_guidance": "Coordinated through Public Information Section under AIIMS",
+    "activation_triggers": [
+      "Threat to life or property requiring public warning",
+      "Community information need during emergency"
+    ],
+    "legislative_basis": null,
+    "version": "2nd Edition 2021",
+    "source_uri": "https://knowledge.aidr.org.au/resources/handbook-public-information-and-warnings/",
+    "related_framework_ids": [
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "aidr-community-recovery",
+    "name": "AIDR Community Recovery Handbook",
+    "abbreviation": null,
+    "description": "National guidance on community-led recovery from disasters. Covers psychosocial support, economic recovery, built environment restoration, and natural environment rehabilitation.",
+    "framework_type": "other",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": "nema",
+    "pprr_phases": [
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "community-led recovery",
+      "resilience building",
+      "equity and inclusion",
+      "adaptive management"
+    ],
+    "control_model": "recovery_committee",
+    "approval_rules": [],
+    "escalation_rules": [],
+    "span_of_control_guidance": "Local recovery committee with state coordination as needed",
+    "activation_triggers": [
+      "Declaration of disaster or emergency recovery phase",
+      "Significant community impact from emergency event"
+    ],
+    "legislative_basis": null,
+    "version": "2nd Edition 2018",
+    "source_uri": "https://knowledge.aidr.org.au/resources/handbook-community-recovery/",
+    "related_framework_ids": [
+      "aidr-me-framework"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "aidr-me-framework",
+    "name": "AIDR Monitoring and Evaluation Framework for Disaster Recovery Programs",
+    "abbreviation": "AIDR M&E",
+    "description": "Guides the design and implementation of monitoring and evaluation for disaster recovery programs. Provides outcome catalogues, program logic templates, and evaluation domain frameworks.",
+    "framework_type": "other",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": "nema",
+    "pprr_phases": [
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "outcomes-based evaluation",
+      "stakeholder engagement",
+      "adaptive learning"
+    ],
+    "control_model": "evaluation_steering_committee",
+    "approval_rules": [],
+    "escalation_rules": [],
+    "span_of_control_guidance": "Program-level M&E with community input",
+    "activation_triggers": [
+      "Establishment of disaster recovery program"
+    ],
+    "legislative_basis": null,
+    "version": "Version 2 2020",
+    "source_uri": "https://knowledge.aidr.org.au/resources/monitoring-and-evaluation/",
+    "related_framework_ids": [
+      "aidr-community-recovery"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "nsw-emplan",
+    "name": "NSW State Emergency Management Plan",
+    "abbreviation": "NSW EMPLAN",
+    "description": "Overarching emergency management plan for New South Wales. Defines roles of combat agencies, functional areas, and coordination arrangements for prevention, preparedness, response and recovery.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "nsw"
+    ],
+    "custodian_organisation_id": null,
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "comprehensive approach",
+      "all agencies",
+      "all hazards"
+    ],
+    "control_model": "state_emergency_operations_centre",
+    "approval_rules": [
+      {
+        "action": "state_emergency_declaration",
+        "requires": "minister_or_premier"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "regional capacity exceeded",
+        "escalateTo": "state_emergency_operations_controller"
+      }
+    ],
+    "span_of_control_guidance": "Local > Regional > State escalation tiers",
+    "activation_triggers": [
+      "Emergency event requiring multi-agency coordination",
+      "Declaration under State Emergency and Rescue Management Act 1989"
+    ],
+    "legislative_basis": "State Emergency and Rescue Management Act 1989",
+    "version": "2023",
+    "source_uri": "https://www.nsw.gov.au/emergency/emergency-management/plans",
+    "related_framework_ids": [
+      "aiims-national",
+      "nsw-flood-communications"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "vic-emmv",
+    "name": "Emergency Management Manual Victoria",
+    "abbreviation": "EMMV",
+    "description": "Victoria's primary emergency management policy and planning document. Establishes roles, responsibilities, and coordination arrangements for all agencies involved in emergency management.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "vic"
+    ],
+    "custodian_organisation_id": null,
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "shared responsibility",
+      "community resilience",
+      "integrated management"
+    ],
+    "control_model": "state_control_centre",
+    "approval_rules": [
+      {
+        "action": "state_of_disaster",
+        "requires": "premier"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "regional escalation",
+        "escalateTo": "emergency_management_commissioner"
+      }
+    ],
+    "span_of_control_guidance": "Municipal > Regional > State tiered coordination",
+    "activation_triggers": [
+      "Major emergency or disaster in Victoria",
+      "Declaration under Emergency Management Act 2013"
+    ],
+    "legislative_basis": "Emergency Management Act 2013",
+    "version": "2024",
+    "source_uri": "https://www.emv.vic.gov.au/policies/emmv",
+    "related_framework_ids": [
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "qld-sdmp",
+    "name": "Queensland State Disaster Management Plan",
+    "abbreviation": "QLD SDMP",
+    "description": "Queensland's overarching disaster management plan describing the state's disaster management arrangements at local, district and state levels.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "qld"
+    ],
+    "custodian_organisation_id": "qfd",
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "local disaster management groups",
+      "district coordination",
+      "state-level support"
+    ],
+    "control_model": "state_disaster_coordination_centre",
+    "approval_rules": [
+      {
+        "action": "disaster_declaration",
+        "requires": "district_disaster_coordinator"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "district capacity exceeded",
+        "escalateTo": "state_disaster_coordinator"
+      }
+    ],
+    "span_of_control_guidance": "Local > District > State disaster management groups",
+    "activation_triggers": [
+      "Disaster event or imminent threat",
+      "Activation under Disaster Management Act 2003"
+    ],
+    "legislative_basis": "Disaster Management Act 2003",
+    "version": "2023",
+    "source_uri": "https://www.disaster.qld.gov.au/disaster-management-plan",
+    "related_framework_ids": [
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "wa-semp",
+    "name": "WA State Emergency Management Plan",
+    "abbreviation": "WA WESTPLAN",
+    "description": "Western Australia's state emergency management plan covering hazard management agency responsibilities and coordination arrangements through the State Emergency Coordination Group.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "wa"
+    ],
+    "custodian_organisation_id": "dfes-wa",
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "hazard management agency responsibility",
+      "support agency coordination",
+      "community safety"
+    ],
+    "control_model": "state_emergency_coordination_group",
+    "approval_rules": [
+      {
+        "action": "state_of_emergency",
+        "requires": "minister_for_emergency_services"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "local capacity exceeded",
+        "escalateTo": "state_emergency_coordinator"
+      }
+    ],
+    "span_of_control_guidance": "Local > District > State coordination tiers",
+    "activation_triggers": [
+      "Emergency event requiring multi-agency response",
+      "Declaration under Emergency Management Act 2005"
+    ],
+    "legislative_basis": "Emergency Management Act 2005",
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "sa-semp",
+    "name": "SA State Emergency Management Plan",
+    "abbreviation": "SA SEMP",
+    "description": "South Australia's state emergency management plan establishing control agency responsibilities and zone emergency management committee coordination.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "sa"
+    ],
+    "custodian_organisation_id": "ses-sa",
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "control agency responsibility",
+      "zone coordination",
+      "community resilience"
+    ],
+    "control_model": "state_emergency_centre",
+    "approval_rules": [
+      {
+        "action": "major_emergency_declaration",
+        "requires": "state_coordinator"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "zone capacity exceeded",
+        "escalateTo": "state_emergency_coordinator"
+      }
+    ],
+    "span_of_control_guidance": "Zone > State coordination tiers",
+    "activation_triggers": [
+      "Emergency requiring multi-agency response",
+      "Declaration under Emergency Management Act 2004"
+    ],
+    "legislative_basis": "Emergency Management Act 2004",
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "tas-temp",
+    "name": "Tasmanian Emergency Management Plan",
+    "abbreviation": "TEMP",
+    "description": "Tasmania's state emergency management plan covering the emergency management framework, agency responsibilities, and coordination arrangements.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "tas"
+    ],
+    "custodian_organisation_id": "ses-tas",
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "risk management",
+      "shared responsibility",
+      "resilience"
+    ],
+    "control_model": "state_emergency_management_controller",
+    "approval_rules": [
+      {
+        "action": "state_of_emergency",
+        "requires": "premier"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "regional escalation",
+        "escalateTo": "state_controller"
+      }
+    ],
+    "span_of_control_guidance": "Municipal > Regional > State coordination",
+    "activation_triggers": [
+      "Emergency event in Tasmania",
+      "Declaration under Emergency Management Act 2006"
+    ],
+    "legislative_basis": "Emergency Management Act 2006",
+    "version": "2022",
+    "source_uri": null,
+    "related_framework_ids": [
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "act-emp",
+    "name": "ACT Emergency Plan",
+    "abbreviation": "ACT EMP",
+    "description": "Australian Capital Territory emergency management plan defining ESA coordination arrangements and agency responsibilities for the territory.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "act"
+    ],
+    "custodian_organisation_id": "act-esa",
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "whole-of-territory approach",
+      "community safety",
+      "coordinated response"
+    ],
+    "control_model": "esa_coordination_centre",
+    "approval_rules": [
+      {
+        "action": "state_of_emergency",
+        "requires": "chief_minister"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "territory capacity exceeded",
+        "escalateTo": "esa_commissioner"
+      }
+    ],
+    "span_of_control_guidance": "Territory-wide coordination through ESA",
+    "activation_triggers": [
+      "Emergency event in the ACT",
+      "Declaration under Emergencies Act 2004"
+    ],
+    "legislative_basis": "Emergencies Act 2004",
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "nt-emp",
+    "name": "Northern Territory Emergency Plan",
+    "abbreviation": "NT EMP",
+    "description": "Northern Territory's all-hazards emergency management plan covering counter-disaster arrangements and coordination through Territory Emergency Operations Centre.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "nt"
+    ],
+    "custodian_organisation_id": "ntes",
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "all hazards approach",
+      "community resilience",
+      "scalable response"
+    ],
+    "control_model": "territory_emergency_operations_centre",
+    "approval_rules": [
+      {
+        "action": "emergency_declaration",
+        "requires": "administrator_or_minister"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "regional capacity exceeded",
+        "escalateTo": "territory_controller"
+      }
+    ],
+    "span_of_control_guidance": "Local > Regional > Territory coordination",
+    "activation_triggers": [
+      "Cyclone, flood, or bushfire emergency",
+      "Declaration under Emergency Management Act 2013 (NT)"
+    ],
+    "legislative_basis": "Emergency Management Act 2013 (NT)",
+    "version": "2022",
+    "source_uri": null,
+    "related_framework_ids": [
+      "aiims-national"
+    ],
     "status": "active"
   },
   {
     "framework_id": "nsw-flood-communications",
     "name": "NSW Flood Communications Protocol",
+    "abbreviation": null,
+    "description": "Communications protocol for flood events in New South Wales. Establishes message approval workflows, multilingual support requirements, and public information dissemination channels for flood warnings.",
     "framework_type": "communications",
-    "principles": ["plain language", "multilingual support"],
+    "applicable_jurisdiction_ids": [
+      "nsw"
+    ],
+    "custodian_organisation_id": "ses-nsw",
+    "pprr_phases": [
+      "preparedness",
+      "response"
+    ],
+    "hazard_types": [
+      "flood"
+    ],
+    "principles": [
+      "plain language",
+      "multilingual support",
+      "timely dissemination"
+    ],
     "control_model": "public_information_cell",
-    "approval_rules": [{"action": "evacuation_alert", "requires": "public_information_officer"}],
-    "escalation_rules": [{"condition": "warning upgraded", "escalateTo": "incident_commander"}],
+    "approval_rules": [
+      {
+        "action": "evacuation_alert",
+        "requires": "public_information_officer"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "warning upgraded",
+        "escalateTo": "incident_commander"
+      }
+    ],
     "span_of_control_guidance": "Dedicated approval queue for public messaging",
+    "activation_triggers": [
+      "Flood watch or warning issued by BoM",
+      "SES flood operations activation"
+    ],
+    "legislative_basis": "State Emergency and Rescue Management Act 1989",
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "nsw-emplan",
+      "aidr-public-info-warnings"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "nsw-bushfire-plan",
+    "name": "NSW State Bush Fire Plan",
+    "abbreviation": null,
+    "description": "Bush fire management plan for New South Wales establishing RFS as combat agency, coordinated firefighting arrangements, and bush fire danger period management.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "nsw"
+    ],
+    "custodian_organisation_id": "nsw-rfs",
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response"
+    ],
+    "hazard_types": [
+      "bushfire"
+    ],
+    "principles": [
+      "risk-based response",
+      "property and life safety",
+      "coordinated firefighting"
+    ],
+    "control_model": "incident_management_team",
+    "approval_rules": [
+      {
+        "action": "section_44_declaration",
+        "requires": "rfs_commissioner"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "catastrophic fire danger",
+        "escalateTo": "state_operations_controller"
+      }
+    ],
+    "span_of_control_guidance": "Brigade > District > Region > State Operations Centre",
+    "activation_triggers": [
+      "Bush fire danger period",
+      "Total fire ban declaration",
+      "Active bushfire requiring multi-agency response"
+    ],
+    "legislative_basis": "Rural Fires Act 1997",
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "nsw-emplan",
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "vic-bushfire-plan",
+    "name": "Victorian State Bushfire Plan",
+    "abbreviation": null,
+    "description": "Victoria's bushfire management arrangements establishing CFA and FRV coordination, community warning systems, and evacuation planning for bushfire emergencies.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "vic"
+    ],
+    "custodian_organisation_id": "cfa-vic",
+    "pprr_phases": [
+      "prevention",
+      "preparedness",
+      "response"
+    ],
+    "hazard_types": [
+      "bushfire"
+    ],
+    "principles": [
+      "shared responsibility",
+      "community-based planning",
+      "leave early or stay and defend"
+    ],
+    "control_model": "incident_management_team",
+    "approval_rules": [],
+    "escalation_rules": [
+      {
+        "condition": "code red fire danger",
+        "escalateTo": "emergency_management_commissioner"
+      }
+    ],
+    "span_of_control_guidance": "District > Regional > State tier 3 response",
+    "activation_triggers": [
+      "Fire danger rating severe or above",
+      "Active bushfire threatening community"
+    ],
+    "legislative_basis": "Country Fire Authority Act 1958; Fire Rescue Victoria Act 1958",
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "vic-emmv",
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "qld-cyclone-plan",
+    "name": "Queensland Tropical Cyclone Plan",
+    "abbreviation": null,
+    "description": "Queensland's arrangements for tropical cyclone preparedness and response, covering pre-season preparations, BoM coordination, evacuation planning, and post-impact assessment.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "qld"
+    ],
+    "custodian_organisation_id": "qfd",
+    "pprr_phases": [
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [
+      "cyclone",
+      "storm",
+      "flood"
+    ],
+    "principles": [
+      "pre-season readiness",
+      "community awareness",
+      "rapid damage assessment"
+    ],
+    "control_model": "state_disaster_coordination_centre",
+    "approval_rules": [
+      {
+        "action": "evacuation_order",
+        "requires": "district_disaster_coordinator"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "category 3+ cyclone",
+        "escalateTo": "state_disaster_coordinator"
+      }
+    ],
+    "span_of_control_guidance": "Local disaster management group > District > State",
+    "activation_triggers": [
+      "Tropical cyclone watch or warning",
+      "Pre-season activation (November)"
+    ],
+    "legislative_basis": "Disaster Management Act 2003",
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "qld-sdmp",
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "wa-cyclone-plan",
+    "name": "WA State Hazard Plan - Tropical Cyclone",
+    "abbreviation": null,
+    "description": "Western Australia's hazard-specific plan for tropical cyclone events covering blue, yellow, and red alert stages and DFES coordination.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "wa"
+    ],
+    "custodian_organisation_id": "dfes-wa",
+    "pprr_phases": [
+      "preparedness",
+      "response"
+    ],
+    "hazard_types": [
+      "cyclone",
+      "storm"
+    ],
+    "principles": [
+      "staged alert system",
+      "community self-reliance",
+      "pre-positioning resources"
+    ],
+    "control_model": "state_emergency_coordination_group",
+    "approval_rules": [],
+    "escalation_rules": [
+      {
+        "condition": "red alert issued",
+        "escalateTo": "state_emergency_coordinator"
+      }
+    ],
+    "span_of_control_guidance": "Local > District > State tiered alerts",
+    "activation_triggers": [
+      "Cyclone watch issued by BoM for WA coast",
+      "Blue alert activation"
+    ],
+    "legislative_basis": "Emergency Management Act 2005",
+    "version": "2022",
+    "source_uri": null,
+    "related_framework_ids": [
+      "wa-semp",
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "nt-cyclone-plan",
+    "name": "NT Counter Disaster Plan - Cyclone",
+    "abbreviation": null,
+    "description": "Northern Territory cyclone-specific counter disaster plan covering Darwin, Katherine, and remote community preparations and response coordination.",
+    "framework_type": "jurisdictional_policy",
+    "applicable_jurisdiction_ids": [
+      "nt"
+    ],
+    "custodian_organisation_id": "ntes",
+    "pprr_phases": [
+      "preparedness",
+      "response"
+    ],
+    "hazard_types": [
+      "cyclone",
+      "storm",
+      "flood"
+    ],
+    "principles": [
+      "remote community readiness",
+      "early warning",
+      "staged evacuation"
+    ],
+    "control_model": "territory_emergency_operations_centre",
+    "approval_rules": [],
+    "escalation_rules": [
+      {
+        "condition": "cyclone threatening populated area",
+        "escalateTo": "territory_controller"
+      }
+    ],
+    "span_of_control_guidance": "Local counter-disaster committee > Regional > Territory",
+    "activation_triggers": [
+      "Cyclone watch for NT coast",
+      "Pre-wet season activation"
+    ],
+    "legislative_basis": "Emergency Management Act 2013 (NT)",
+    "version": "2022",
+    "source_uri": null,
+    "related_framework_ids": [
+      "nt-emp",
+      "aiims-national"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "national-heatwave",
+    "name": "National Heatwave Assessment Framework",
+    "abbreviation": null,
+    "description": "National framework for assessing and responding to heatwave events. Defines three-tier heatwave severity levels (low-intensity, severe, extreme) and health system activation triggers.",
+    "framework_type": "agency_specific",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": "bom-national",
+    "pprr_phases": [
+      "preparedness",
+      "response"
+    ],
+    "hazard_types": [
+      "extreme_heat"
+    ],
+    "principles": [
+      "three-tier severity assessment",
+      "vulnerable population focus",
+      "health system readiness"
+    ],
+    "control_model": "health_coordination_centre",
+    "approval_rules": [],
+    "escalation_rules": [
+      {
+        "condition": "extreme heatwave",
+        "escalateTo": "state_health_controller"
+      }
+    ],
+    "span_of_control_guidance": "BoM assessment > State health coordination",
+    "activation_triggers": [
+      "BoM heatwave warning",
+      "Forecast temperature thresholds exceeded"
+    ],
+    "legislative_basis": null,
+    "version": "2014",
+    "source_uri": null,
+    "related_framework_ids": [],
+    "status": "active"
+  },
+  {
+    "framework_id": "national-pandemic",
+    "name": "Australian Health Management Plan for Pandemic Influenza",
+    "abbreviation": "AHMPPI",
+    "description": "National plan for health sector response to pandemic influenza and analogous communicable disease emergencies. Covers containment, mitigation, and population-level health measures.",
+    "framework_type": "agency_specific",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": null,
+    "pprr_phases": [
+      "preparedness",
+      "response",
+      "recovery"
+    ],
+    "hazard_types": [
+      "pandemic",
+      "health"
+    ],
+    "principles": [
+      "proportionate response",
+      "health system surge",
+      "social measures"
+    ],
+    "control_model": "national_health_emergency_committee",
+    "approval_rules": [
+      {
+        "action": "pandemic_declaration",
+        "requires": "chief_medical_officer"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "sustained community transmission",
+        "escalateTo": "national_cabinet"
+      }
+    ],
+    "span_of_control_guidance": "National coordination through AHPPC with state health departments",
+    "activation_triggers": [
+      "WHO pandemic declaration",
+      "Novel pathogen with sustained community transmission"
+    ],
+    "legislative_basis": "Biosecurity Act 2015; National Health Security Act 2007",
+    "version": "2019",
+    "source_uri": null,
+    "related_framework_ids": [
+      "ag-crisis-mgmt"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "national-earthquake",
+    "name": "National Earthquake Alert and Response Plan",
+    "abbreviation": null,
+    "description": "National framework for earthquake alerting through Geoscience Australia seismic monitoring and coordination of urban search and rescue response.",
+    "framework_type": "agency_specific",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": "ga-national",
+    "pprr_phases": [
+      "preparedness",
+      "response"
+    ],
+    "hazard_types": [
+      "earthquake"
+    ],
+    "principles": [
+      "rapid seismic assessment",
+      "USAR deployment",
+      "aftershock monitoring"
+    ],
+    "control_model": "joint_operations_centre",
+    "approval_rules": [],
+    "escalation_rules": [
+      {
+        "condition": "magnitude 6.0+ earthquake",
+        "escalateTo": "state_emergency_controller"
+      }
+    ],
+    "span_of_control_guidance": "GA assessment > State agency coordination > USAR deployment",
+    "activation_triggers": [
+      "Earthquake detected by GA seismic network",
+      "Tsunami warning from JATWC"
+    ],
+    "legislative_basis": null,
+    "version": "2021",
+    "source_uri": null,
+    "related_framework_ids": [
+      "comdisplan"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "national-tsunami",
+    "name": "Australian Tsunami Warning System Plan",
+    "abbreviation": "ATWS",
+    "description": "National arrangements for detecting, assessing, and warning of tsunami threats through the Joint Australian Tsunami Warning Centre operated by BoM and Geoscience Australia.",
+    "framework_type": "communications",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": "bom-national",
+    "pprr_phases": [
+      "preparedness",
+      "response"
+    ],
+    "hazard_types": [
+      "tsunami",
+      "earthquake"
+    ],
+    "principles": [
+      "rapid detection",
+      "tiered warning levels",
+      "coastal community awareness"
+    ],
+    "control_model": "joint_australian_tsunami_warning_centre",
+    "approval_rules": [
+      {
+        "action": "tsunami_warning",
+        "requires": "jatwc_duty_officer"
+      }
+    ],
+    "escalation_rules": [
+      {
+        "condition": "marine or land threat",
+        "escalateTo": "state_emergency_services"
+      }
+    ],
+    "span_of_control_guidance": "JATWC > BoM > State emergency services > Coastal communities",
+    "activation_triggers": [
+      "Earthquake in tsunami-generating zone detected by seismic network",
+      "Sea level anomaly detected by tide gauges"
+    ],
+    "legislative_basis": "Meteorology Act 1955",
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "national-earthquake"
+    ],
+    "status": "active"
+  },
+  {
+    "framework_id": "national-emergency-alert",
+    "name": "National Emergency Alert System",
+    "abbreviation": "EA",
+    "description": "National telephone-based warning system allowing authorised emergency services to send voice and SMS warnings to landlines and mobile phones based on location during emergencies.",
+    "framework_type": "communications",
+    "applicable_jurisdiction_ids": [
+      "commonwealth",
+      "nsw",
+      "vic",
+      "qld",
+      "sa",
+      "wa",
+      "tas",
+      "act",
+      "nt"
+    ],
+    "custodian_organisation_id": "nema",
+    "pprr_phases": [
+      "response"
+    ],
+    "hazard_types": [],
+    "principles": [
+      "location-based targeting",
+      "authorised use only",
+      "multi-channel delivery"
+    ],
+    "control_model": "authorised_agency_activation",
+    "approval_rules": [
+      {
+        "action": "emergency_alert_broadcast",
+        "requires": "authorised_emergency_officer"
+      }
+    ],
+    "escalation_rules": [],
+    "span_of_control_guidance": "State/territory emergency services activate within their jurisdiction",
+    "activation_triggers": [
+      "Imminent threat to life or property",
+      "Authorised emergency officer decision to warn"
+    ],
+    "legislative_basis": "Telecommunications Act 1997",
+    "version": "2023",
+    "source_uri": null,
+    "related_framework_ids": [
+      "aidr-public-info-warnings"
+    ],
     "status": "active"
   }
 ]

@@ -1916,6 +1916,58 @@ body {
   padding: 0.1rem 0;
 }
 
+/* ── Framework card enrichment ── */
+
+.preparedness-fw-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.preparedness-badge--fw-aiims {
+  background: rgba(75, 0, 130, 0.1);
+  color: #4b0082;
+}
+
+.preparedness-badge--fw-jurisdictional_policy {
+  background: rgba(15, 76, 92, 0.1);
+  color: var(--ama-color-ocean-deep);
+}
+
+.preparedness-badge--fw-communications {
+  background: rgba(34, 139, 34, 0.1);
+  color: #166534;
+}
+
+.preparedness-badge--fw-agency_specific {
+  background: rgba(161, 98, 7, 0.1);
+  color: #92400e;
+}
+
+.preparedness-badge--fw-other {
+  background: var(--ama-surface-elevated);
+  color: var(--ama-color-ink-soft);
+}
+
+.preparedness-fw-description {
+  font-size: 0.78rem;
+  color: var(--ama-color-ink-soft);
+  line-height: 1.4;
+}
+
+.preparedness-tag--pprr {
+  background: rgba(30, 64, 175, 0.08);
+  color: #1e40af;
+  border: 1px solid rgba(30, 64, 175, 0.15);
+  font-weight: 600;
+}
+
+.preparedness-fw-principles {
+  font-size: 0.75rem;
+  color: var(--ama-color-ink-soft);
+  margin: 0.2rem 0;
+}
+
 .preparedness-dark-item {
   border-top-color: rgba(246, 251, 252, 0.1);
 }
