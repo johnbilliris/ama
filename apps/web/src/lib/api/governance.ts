@@ -180,6 +180,14 @@ export interface OperationalReadinessResponse {
   aiims_role_coverage: AIIMSRoleCoverage[];
   overall_role_coverage_pct: number;
   capability_gap_count: number;
+  capability_gaps?: { gap_type: string; description: string; severity: string; affected_roles: string[] }[];
+  volunteer_readiness?: {
+    total_registered: number;
+    currently_available: number;
+    active_deployed: number;
+    availability_rate_pct: number;
+    welfare_check_compliance_pct: number;
+  };
 }
 
 export interface RecoveryDomainProgress {
