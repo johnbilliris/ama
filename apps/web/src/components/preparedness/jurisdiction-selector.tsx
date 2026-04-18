@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+/**
+ * JurisdictionSelector — Fieldset-based multi-select filter panel for jurisdictions.
+ *
+ * Matches the disaster map FilterPanel layout: fieldset groups with native checkboxes,
+ * All/Clear action links in the legend, grouped by level (Commonwealth / States / Territories).
+ */
+
+import { useCallback } from "react";
 
 import type { JurisdictionSummary } from "../../lib/api/jurisdictions";
 
@@ -17,181 +24,94 @@ const LEVEL_LABELS: Record<string, string> = {
 };
 
 export function JurisdictionSelector({ jurisdictions, selectedIds, onChange }: JurisdictionSelectorProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [focusIndex, setFocusIndex] = useState(-1);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
-  const actionsRef = useRef<HTMLDivElement>(null);
-
   const grouped = groupByLevel(jurisdictions);
-  const flatItems = jurisdictions;
+
+  const toggleItem = useCallback(
+    (id: string) => {
+      const next = selectedIds.includes(id)
+        ? selectedIds.filter((sid) => sid !== id)
+        : [...selectedIds, id];
+      onChange(next);
+    },
+    [selectedIds, onChange],
+  );
+
+  const selectAll = useCallback(() => {
+    onChange(jurisdictions.map((j) => j.jurisdiction_id));
+  }, [jurisdictions, onChange]);
+
+  const clearAll = useCallback(() => {
+    onChange([]);
+  }, [onChange]);
 
   const selectedCount = selectedIds.length;
-  const buttonLabel =
-    selectedCount === 0
-      ? "Select jurisdictions…"
-      : selectedCount === jurisdictions.length
-        ? "All jurisdictions selected"
-        : `${selectedCount} jurisdiction${selectedCount > 1 ? "s" : ""} selected`;
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    if (isOpen && focusIndex >= 0 && listRef.current) {
-      const items = listRef.current.querySelectorAll('[role="option"]');
-      (items[focusIndex] as HTMLElement)?.focus();
-    }
-  }, [focusIndex, isOpen]);
-
-  function toggleItem(id: string) {
-    const next = selectedIds.includes(id)
-      ? selectedIds.filter((sid) => sid !== id)
-      : [...selectedIds, id];
-    onChange(next);
-  }
-
-  function selectAll() {
-    onChange(jurisdictions.map((j) => j.jurisdiction_id));
-  }
-
-  function clearAll() {
-    onChange([]);
-  }
-
-  function handleKeyDown(event: React.KeyboardEvent) {
-    switch (event.key) {
-      case "ArrowDown":
-        event.preventDefault();
-        setFocusIndex((prev) => Math.min(prev + 1, flatItems.length - 1));
-        break;
-      case "ArrowUp":
-        event.preventDefault();
-        setFocusIndex((prev) => Math.max(prev - 1, 0));
-        break;
-      case " ":
-      case "Enter":
-        event.preventDefault();
-        if (!isOpen) {
-          setIsOpen(true);
-          setFocusIndex(0);
-        } else if (focusIndex >= 0 && focusIndex < flatItems.length) {
-          toggleItem(flatItems[focusIndex].jurisdiction_id);
-        }
-        break;
-      case "Escape":
-        event.preventDefault();
-        setIsOpen(false);
-        break;
-      case "Home":
-        event.preventDefault();
-        if (isOpen) selectAll();
-        break;
-      case "End":
-        if (event.ctrlKey || event.metaKey) {
-          event.preventDefault();
-          if (isOpen) clearAll();
-        }
-        break;
-      case "a":
-        if (event.ctrlKey || event.metaKey) {
-          event.preventDefault();
-          if (isOpen) selectAll();
-        }
-        break;
-    }
-  }
 
   return (
-    <div className="preparedness-jurisdiction-selector" ref={containerRef}>
-      <button
-        type="button"
-        className="preparedness-select preparedness-jurisdiction-trigger"
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) setFocusIndex(0);
-        }}
-        onKeyDown={handleKeyDown}
-      >
-        {buttonLabel}
-      </button>
+    <div
+      className="preparedness-filter-panel"
+      role="search"
+      aria-label="Filter by jurisdiction"
+    >
+      <div className="preparedness-filter-content">
+        {/* Summary status */}
+        <p className="preparedness-filter-status" aria-live="polite">
+          {selectedCount === 0
+            ? "No jurisdictions selected"
+            : selectedCount === jurisdictions.length
+              ? "All jurisdictions selected"
+              : `${selectedCount} of ${jurisdictions.length} selected`}
+        </p>
 
-      {isOpen && (
-        <div className="preparedness-jurisdiction-dropdown">
-          <div className="preparedness-jurisdiction-actions" ref={actionsRef}>
-            <button
-              type="button"
-              className="preparedness-button"
-              onClick={selectAll}
-              tabIndex={0}
-              aria-keyshortcuts="Control+A"
-            >
-              Select all
-            </button>
-            <button
-              type="button"
-              className="preparedness-button"
-              onClick={clearAll}
-              tabIndex={0}
-            >
-              Clear all
-            </button>
-          </div>
+        {/* One fieldset per level group */}
+        {grouped.map(({ level, items }) => {
+          const levelIds = items.map((j) => j.jurisdiction_id);
+          const allSelected = levelIds.every((id) => selectedIds.includes(id));
 
-          <ul
-            ref={listRef}
-            role="listbox"
-            aria-multiselectable="true"
-            aria-label="Jurisdictions"
-            className="preparedness-jurisdiction-list"
-            onKeyDown={handleKeyDown}
-          >
-            {grouped.map(({ level, items }) => (
-              <li key={level} role="presentation">
-                <span className="preparedness-jurisdiction-group-label">
-                  {LEVEL_LABELS[level] ?? level}
+          const selectGroup = () => {
+            const merged = new Set([...selectedIds, ...levelIds]);
+            onChange(Array.from(merged));
+          };
+          const clearGroup = () => {
+            onChange(selectedIds.filter((id) => !levelIds.includes(id)));
+          };
+
+          return (
+            <fieldset key={level} className="preparedness-filter-group">
+              <legend>
+                {LEVEL_LABELS[level] ?? level}
+                <span className="preparedness-filter-actions">
+                  <button type="button" onClick={allSelected ? clearGroup : selectGroup}>
+                    {allSelected ? "Clear" : "All"}
+                  </button>
                 </span>
-                <ul role="group" aria-label={LEVEL_LABELS[level] ?? level}>
-                  {items.map((jurisdiction) => {
-                    const globalIndex = flatItems.findIndex(
-                      (j) => j.jurisdiction_id === jurisdiction.jurisdiction_id,
-                    );
-                    const isSelected = selectedIds.includes(jurisdiction.jurisdiction_id);
-                    return (
-                      <li
-                        key={jurisdiction.jurisdiction_id}
-                        role="option"
-                        aria-selected={isSelected}
-                        tabIndex={focusIndex === globalIndex ? 0 : -1}
-                        className={`preparedness-jurisdiction-option ${isSelected ? "preparedness-jurisdiction-option--selected" : ""}`}
-                        onClick={() => toggleItem(jurisdiction.jurisdiction_id)}
-                        onKeyDown={handleKeyDown}
-                      >
-                        <span
-                          className="preparedness-jurisdiction-checkbox"
-                          aria-hidden="true"
-                        >
-                          {isSelected ? "☑" : "☐"}
-                        </span>
-                        {jurisdiction.name}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
-            ))}
-          </ul>
+              </legend>
+              {items.map((jurisdiction) => {
+                const isSelected = selectedIds.includes(jurisdiction.jurisdiction_id);
+                return (
+                  <label key={jurisdiction.jurisdiction_id} className="preparedness-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleItem(jurisdiction.jurisdiction_id)}
+                    />
+                    {jurisdiction.name}
+                  </label>
+                );
+              })}
+            </fieldset>
+          );
+        })}
+
+        {/* Global actions */}
+        <div className="preparedness-filter-global-actions">
+          <button type="button" onClick={selectAll} className="preparedness-filter-action-btn">
+            Select All
+          </button>
+          <button type="button" onClick={clearAll} className="preparedness-filter-action-btn preparedness-filter-action-btn--clear">
+            Clear All
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }

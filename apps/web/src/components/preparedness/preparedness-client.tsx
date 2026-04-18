@@ -147,35 +147,34 @@ export function PreparednessClient({ initialJurisdictionParam }: PreparednessCli
   }
 
   return (
-    <>
-      <div className="preparedness-jurisdiction-bar">
-        <label className="preparedness-field">
-          <span>Jurisdictions</span>
-          <JurisdictionSelector
-            jurisdictions={jurisdictions}
-            selectedIds={selectedIds}
-            onChange={handleSelectionChange}
-          />
-        </label>
-      </div>
-
-      {error && (
-        <div className="preparedness-error" role="alert">
-          <p>{error}</p>
-          <button type="button" className="preparedness-button" onClick={handleRetry}>
-            Retry
-          </button>
-        </div>
-      )}
-
-      <OperatingModelAnalyzer
-        organisations={organisations}
-        frameworks={frameworks}
-        selectedJurisdictionIds={selectedIds}
-        isLoading={isLoading}
-        replayStale={replayStale}
-        onReplayComplete={handleReplayComplete}
+    <div className="preparedness-layout">
+      {/* Left: filter panel matching disaster map pattern */}
+      <JurisdictionSelector
+        jurisdictions={jurisdictions}
+        selectedIds={selectedIds}
+        onChange={handleSelectionChange}
       />
-    </>
+
+      {/* Right: main content */}
+      <div className="preparedness-main">
+        {error && (
+          <div className="preparedness-error" role="alert">
+            <p>{error}</p>
+            <button type="button" className="preparedness-button" onClick={handleRetry}>
+              Retry
+            </button>
+          </div>
+        )}
+
+        <OperatingModelAnalyzer
+          organisations={organisations}
+          frameworks={frameworks}
+          selectedJurisdictionIds={selectedIds}
+          isLoading={isLoading}
+          replayStale={replayStale}
+          onReplayComplete={handleReplayComplete}
+        />
+      </div>
+    </div>
   );
 }
