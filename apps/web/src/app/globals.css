@@ -26,6 +26,15 @@ body {
   line-height: 1.6;
 }
 
+/* Reset list markers in navigation/tab contexts */
+nav ol,
+nav ul,
+[role="tablist"] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 /* ═══════════════════════════════════════════════════════
    APP SHELL — Navigation, Main, Footer
    ═══════════════════════════════════════════════════════ */
@@ -2457,7 +2466,7 @@ body {
 .border { border: 1px solid var(--ama-border-medium); }
 .border-2 { border: 2px solid var(--ama-border-medium); }
 .border-b { border-bottom: 1px solid var(--ama-border-subtle); }
-.border-b-2 { border-bottom: 2px solid var(--ama-border-medium); }
+.border-b-2 { border-bottom-width: 2px; border-bottom-style: solid; }
 .border-l-2 { border-left: 2px solid var(--ama-border-medium); }
 .border-transparent { border-color: transparent; }
 .border-t-transparent { border-top-color: transparent; }
