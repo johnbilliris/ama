@@ -12,13 +12,17 @@ class OrganisationIntelligenceService:
             seed_root = Path(_seed_mod.__file__).resolve().parent
         self.seed_root = seed_root
 
-    def list_organisations(self, jurisdiction_id: str | None = None) -> list[Organisation]:
+    def list_organisations(self, jurisdiction_ids: list[str] | None = None) -> list[Organisation]:
         seeds = SeedService().load(self.seed_root)
         organisations = [Organisation(**item) for item in seeds["organisations"]]
-        if jurisdiction_id is None:
-            return organisations
-        return [
-            organisation
-            for organisation in organisations
-            if jurisdiction_id in organisation.jurisdiction_ids
-        ]
+        if not jurisdiction_ids:
+            return []
+        seen_ids: set[str] = set()
+        result: list[Organisation] = []
+        for organisation in organisations:
+            if organisation.organisation_id in seen_ids:
+                continue
+            if any(jid in organisation.jurisdiction_ids for jid in jurisdiction_ids):
+                seen_ids.add(organisation.organisation_id)
+                result.append(organisation)
+        return result

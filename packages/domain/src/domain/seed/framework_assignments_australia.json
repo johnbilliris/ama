@@ -1,0 +1,72 @@
+[
+  {
+    "assignment_id": "assign-aiims-national-commonwealth",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-nsw",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-vic",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-qld",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-sa",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-wa",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-tas",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-act",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-nt",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-nsw-flood-communications-nsw",
+    "framework_id": "nsw-flood-communications",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  }
+]

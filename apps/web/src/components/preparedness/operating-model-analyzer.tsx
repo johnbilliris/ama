@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useState } from "react";
+import { useEffect, useDeferredValue, useState } from "react";
 
 import type { PreparednessFramework } from "../../lib/api/frameworks";
 import type { PreparednessOrganisation } from "../../lib/api/organisations";
@@ -9,31 +9,53 @@ import { replayPreparednessScenario, type ScenarioRunPayload } from "../../lib/a
 interface OperatingModelAnalyzerProps {
   organisations: PreparednessOrganisation[];
   frameworks: PreparednessFramework[];
+  selectedJurisdictionIds: string[];
+  isLoading: boolean;
+  replayStale: boolean;
+  onReplayComplete: () => void;
 }
 
 const DEFAULT_SCENARIO: ScenarioRunPayload = {
   scenario_run_id: "scenario-pending",
   scenario_name: "Preparedness rehearsal pending",
   scenario_type: "flood",
-  jurisdiction_ids: ["nsw"],
+  jurisdiction_ids: [],
   organisation_ids: [],
   framework_ids: [],
   coordination_gap_summary: [],
   generated_findings: ["Run a rehearsal to generate coordination findings."],
 };
 
-export function OperatingModelAnalyzer({ organisations, frameworks }: OperatingModelAnalyzerProps) {
+export function OperatingModelAnalyzer({
+  organisations,
+  frameworks,
+  selectedJurisdictionIds,
+  isLoading,
+  replayStale,
+  onReplayComplete,
+}: OperatingModelAnalyzerProps) {
   const [scenarioType, setScenarioType] = useState("flood");
   const [scenarioRun, setScenarioRun] = useState<ScenarioRunPayload>(DEFAULT_SCENARIO);
   const [replayError, setReplayError] = useState<string | null>(null);
   const [replaying, setReplaying] = useState(false);
   const deferredScenarioRun = useDeferredValue(scenarioRun);
 
+  useEffect(() => {
+    if (replayStale) {
+      setScenarioRun(DEFAULT_SCENARIO);
+    }
+  }, [replayStale]);
+
+  const noJurisdictions = selectedJurisdictionIds.length === 0;
+
   function handleReplay() {
     setReplayError(null);
     setReplaying(true);
-    replayPreparednessScenario("Preparedness rehearsal", scenarioType, ["nsw"])
-      .then((result) => setScenarioRun(result))
+    replayPreparednessScenario("Preparedness rehearsal", scenarioType, selectedJurisdictionIds)
+      .then((result) => {
+        setScenarioRun(result);
+        onReplayComplete();
+      })
       .catch((err: Error) => setReplayError(err.message || "Rehearsal replay failed. The API may be temporarily unavailable."))
       .finally(() => setReplaying(false));
   }
@@ -48,35 +70,55 @@ export function OperatingModelAnalyzer({ organisations, frameworks }: OperatingM
         </p>
       </header>
 
-      <div className="preparedness-columns">
-        <article className="preparedness-panel">
-          <h2 className="preparedness-panel-title">Organisation catalog</h2>
-          <ul className="preparedness-list">
-            {organisations.map((organisation) => (
-              <li key={organisation.organisation_id} className="preparedness-list-item">
-                <strong>{organisation.name}</strong>
-                <div className="preparedness-meta">
-                  {organisation.category} · {organisation.operating_role} · {organisation.authority_level}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </article>
+      {noJurisdictions && (
+        <div className="preparedness-empty-state" role="status">
+          <p>Select one or more jurisdictions above to view the organisation and framework catalogs.</p>
+        </div>
+      )}
 
-        <article className="preparedness-panel">
-          <h2 className="preparedness-panel-title">Framework catalog</h2>
-          <ul className="preparedness-list">
-            {frameworks.map((framework) => (
-              <li key={framework.framework_id} className="preparedness-list-item">
-                <strong>{framework.name}</strong>
-                <div className="preparedness-meta">
-                  {framework.framework_type} · {framework.span_of_control_guidance}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </article>
-      </div>
+      {!noJurisdictions && (
+        <div className="preparedness-columns">
+          <article className="preparedness-panel">
+            <h2 className="preparedness-panel-title">Organisation catalog</h2>
+            {isLoading ? (
+              <p className="preparedness-loading">Loading organisations…</p>
+            ) : organisations.length === 0 ? (
+              <p className="preparedness-meta">No organisations found for the selected jurisdictions.</p>
+            ) : (
+              <ul className="preparedness-list">
+                {organisations.map((organisation) => (
+                  <li key={organisation.organisation_id} className="preparedness-list-item">
+                    <strong>{organisation.name}</strong>
+                    <div className="preparedness-meta">
+                      {organisation.category} · {organisation.operating_role} · {organisation.authority_level}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+
+          <article className="preparedness-panel">
+            <h2 className="preparedness-panel-title">Framework catalog</h2>
+            {isLoading ? (
+              <p className="preparedness-loading">Loading frameworks…</p>
+            ) : frameworks.length === 0 ? (
+              <p className="preparedness-meta">No frameworks found for the selected jurisdictions.</p>
+            ) : (
+              <ul className="preparedness-list">
+                {frameworks.map((framework) => (
+                  <li key={framework.framework_id} className="preparedness-list-item">
+                    <strong>{framework.name}</strong>
+                    <div className="preparedness-meta">
+                      {framework.framework_type} · {framework.span_of_control_guidance}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+        </div>
+      )}
 
       <section className="preparedness-replay-panel">
         <div className="preparedness-replay-controls">
@@ -92,15 +134,30 @@ export function OperatingModelAnalyzer({ organisations, frameworks }: OperatingM
               <option value="cyclone">Cyclone</option>
             </select>
           </label>
-          <button type="button" className="preparedness-button" onClick={handleReplay} disabled={replaying}>
+          <button
+            type="button"
+            className="preparedness-button"
+            onClick={handleReplay}
+            disabled={replaying || noJurisdictions}
+            title={noJurisdictions ? "Select at least one jurisdiction to run a rehearsal replay" : undefined}
+          >
             {replaying ? "Running…" : "Run rehearsal replay"}
           </button>
+          {noJurisdictions && (
+            <span className="preparedness-meta">Select at least one jurisdiction to run a rehearsal replay.</span>
+          )}
         </div>
+
+        {replayStale && (
+          <div className="preparedness-stale-notice" role="status">
+            <p>Replay results were generated for different jurisdictions. Run a new replay for updated results.</p>
+          </div>
+        )}
 
         {replayError && (
           <div className="preparedness-error" role="alert">
             <p><strong>Rehearsal replay failed:</strong> {replayError}</p>
-            <button type="button" className="preparedness-button" onClick={handleReplay} disabled={replaying}>
+            <button type="button" className="preparedness-button" onClick={handleReplay} disabled={replaying || noJurisdictions}>
               Retry
             </button>
           </div>

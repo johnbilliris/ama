@@ -44,6 +44,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-09
 - Azure Cosmos DB (`disaster-hub` database, `incidents` container) (020-disaster-mapper-ui)
 - TypeScript 5.8 (frontend), Python 3.11+ (backend) + Next.js 16.2, React 19, FastAPI 0.115, Pydantic 2.10, Uvicorn (021-governance-dashboard)
 - Azure Cosmos DB (autoscale, partition-per-entity pattern), Azure Storage (audit blob export) (021-governance-dashboard)
+- TypeScript 5.8 (frontend), Python 3.12+ (backend) + Next.js 16.2, React 19, FastAPI 0.115, Pydantic 2.10, Uvicorn (022-multi-jurisdiction-filter)
+- Seed JSON files (jurisdictions_australia.json, organisations_australia.json, frameworks_australia.json) loaded via SeedService → bootstrap_seed_data (022-multi-jurisdiction-filter)
 
 - Python 3.12 for API and agents; TypeScript 5.6 for web UI + Microsoft Agent Framework (Python SDK), FastAPI, Pydantic, Azure SDKs, Next.js 15, React 19, Tailwind CSS, Azure Cosmos DB client, Azure Service Bus/Event Hubs clients (001-disaster-response-hub)
 
@@ -64,9 +66,9 @@ cd src; pytest; ruff check .
 Python 3.12 for API and agents; TypeScript 5.6 for web UI: Follow standard conventions
 
 ## Recent Changes
+- 022-multi-jurisdiction-filter: Added TypeScript 5.8 (frontend), Python 3.12+ (backend) + Next.js 16.2, React 19, FastAPI 0.115, Pydantic 2.10, Uvicorn
 - 021-governance-dashboard: Added TypeScript 5.8 (frontend), Python 3.11+ (backend) + Next.js 16.2, React 19, FastAPI 0.115, Pydantic 2.10, Uvicorn
 - 020-disaster-mapper-ui: Added TypeScript 5.8 (frontend), Python 3.11+ (backend) + Next.js 15.5, React 19, `azure-maps-control` 3.x (frontend); FastAPI, Pydantic v2, `azure-cosmos` (backend)
-- 019-aidr-additional-guidances: Added Python 3.10+ (confirmed from `pyproject.toml` and existing agents) + FastAPI (ASGI agents + API), Pydantic (domain models with `Literal[]` unions, no Enums), Azure OpenAI SDK via `LLMClient`/`LLMCallMixin` (AI analysis), azure-servicebus (agent handoffs), azure-cosmos (state store), tenacity (retry logic)
 
 
 <!-- MANUAL ADDITIONS START -->

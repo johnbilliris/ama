@@ -10,9 +10,18 @@ export interface PreparednessOrganisation {
   status: string;
 }
 
-export async function listPreparednessOrganisations(jurisdictionId: string): Promise<PreparednessOrganisation[]> {
-  const response = await fetch(`${API_BASE_URL}/organisations?jurisdictionId=${jurisdictionId}`, {
+export async function listPreparednessOrganisations(
+  jurisdictionIds: string[],
+  signal?: AbortSignal,
+): Promise<PreparednessOrganisation[]> {
+  const params = new URLSearchParams();
+  for (const id of jurisdictionIds) {
+    params.append("jurisdictionId", id);
+  }
+
+  const response = await fetch(`${API_BASE_URL}/organisations?${params.toString()}`, {
     cache: "no-store",
+    signal,
   });
 
   if (!response.ok) {

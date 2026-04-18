@@ -14,6 +14,7 @@ from app.api.routes.governance_dashboard import router as governance_dashboard_r
 from app.api.routes.health import router as aidr_health_router
 from app.api.routes.incidents import router as incidents_router
 from app.api.routes.incidents_map import router as incidents_map_router
+from app.api.routes.jurisdictions import router as jurisdictions_router
 from app.api.routes.lessons import router as lessons_router
 from app.api.routes.me_frameworks import router as me_frameworks_router
 from app.api.routes.organisations import router as organisations_router
@@ -40,6 +41,7 @@ api_router.include_router(personas_router)
 api_router.include_router(tasks_router)
 api_router.include_router(organisations_router)
 api_router.include_router(frameworks_router)
+api_router.include_router(jurisdictions_router)
 api_router.include_router(scenarios_router)
 api_router.include_router(simulations_router)
 api_router.include_router(handoffs_router)

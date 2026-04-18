@@ -8,9 +8,18 @@ export interface PreparednessFramework {
   status: string;
 }
 
-export async function listPreparednessFrameworks(jurisdictionId: string): Promise<PreparednessFramework[]> {
-  const response = await fetch(`${API_BASE_URL}/frameworks?jurisdictionId=${jurisdictionId}`, {
+export async function listPreparednessFrameworks(
+  jurisdictionIds: string[],
+  signal?: AbortSignal,
+): Promise<PreparednessFramework[]> {
+  const params = new URLSearchParams();
+  for (const id of jurisdictionIds) {
+    params.append("jurisdictionId", id);
+  }
+
+  const response = await fetch(`${API_BASE_URL}/frameworks?${params.toString()}`, {
     cache: "no-store",
+    signal,
   });
 
   if (!response.ok) {
