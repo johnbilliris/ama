@@ -9,10 +9,10 @@ class RehearsalOrchestrator:
     def run(
         self, scenario_name: str, scenario_type: str, jurisdiction_ids: list[str]
     ) -> ScenarioRun:
-        from apps.agents.evacuation.agent import EvacuationAgent
-
         analysis = PreparednessAnalysisService().analyse(scenario_type, jurisdiction_ids)
-        evacuation_review = EvacuationAgent().review(scenario_type, jurisdiction_ids)
+
+        evacuation_review = self._get_evacuation_review(scenario_type, jurisdiction_ids)
+
         organisation_ids = [
             organisation["organisation_id"] for organisation in analysis["organisations"]
         ]
@@ -30,3 +30,22 @@ class RehearsalOrchestrator:
             coordination_gap_summary=list(analysis["coordinationGaps"]),
             generated_findings=findings,
         )
+
+    @staticmethod
+    def _get_evacuation_review(
+        scenario_type: str, jurisdiction_ids: list[str]
+    ) -> dict[str, object]:
+        """Get evacuation review, falling back to inline logic if agent is unavailable."""
+        try:
+            from apps.agents.evacuation.agent import EvacuationAgent
+            return EvacuationAgent().review(scenario_type, jurisdiction_ids)
+        except ImportError:
+            route_pressure = "high" if scenario_type in {"flood", "bushfire"} else "moderate"
+            return {
+                "scenarioType": scenario_type,
+                "jurisdictions": jurisdiction_ids,
+                "routePressure": route_pressure,
+                "recommendation": (
+                    "Validate assembly areas and transport corridors before public release."
+                ),
+            }
