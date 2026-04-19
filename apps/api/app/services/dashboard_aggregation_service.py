@@ -68,7 +68,19 @@ class DashboardAggregationService:
             active_count = self._data.get_active_incident_count(tenant_id)
             utilisation = self._data.get_resource_utilisation(tenant_id)
         else:
-            gates = []
+            gates = [
+                ConstitutionalGateStatus(
+                    gate_number=num, gate_name=name,
+                    status="assessment_pending", detail_url=f"/governance/dashboard/compliance?gate={num}",
+                )
+                for num, name in [
+                    (1, "Primacy of Life"), (2, "National EM Principles"),
+                    (3, "Multi-Hazard Design"), (4, "Transparency & Auditability"),
+                    (5, "Warning & Public Information"), (6, "Evacuation Framework"),
+                    (7, "Recovery Support"), (8, "Cloud Platform & Infrastructure"),
+                    (9, "PPRR Lifecycle"), (10, "Governance & Quality Gates"),
+                ]
+            ]
             ds_stats = {"total": 0, "compliant": 0, "partially_compliant": 0}
             readiness = {"exercise_completion_rate": 0.0, "role_coverage_pct": 0.0, "plan_currency_pct": 0.0}
             recovery = {"has_active_recovery": False}
@@ -351,10 +363,28 @@ class DashboardAggregationService:
                 PPRRPhaseStatus(phase=p, is_active=False, indicator_status="inactive")
                 for p in ("prevention", "preparedness", "response", "recovery")
             ]
-            plans = []
+            plans = [
+                EmergencyPlanSummary(lifecycle_state=s, count=0, overdue_count=0)
+                for s in (
+                    "Draft", "InConsultation", "UnderReview", "Endorsed",
+                    "Activated", "PostEventReview", "Superseded",
+                )
+            ]
             total_plans = 0
             overdue = 0
-            role_coverage = []
+            _default_roles = [
+                "incident_controller", "operations_officer", "planning_officer",
+                "logistics_officer", "public_information_officer", "safety_officer",
+                "liaison_officer", "intelligence_officer", "finance_officer",
+                "medical_officer",
+            ]
+            role_coverage = [
+                AIIMSRoleCoverage(
+                    role=r, assigned_count=0, required_count=1,
+                    is_staffed=False, coverage_pct=0.0,
+                )
+                for r in _default_roles
+            ]
             overall_coverage = 0.0
             capability_gaps = []
             volunteer = VolunteerReadiness(
@@ -425,23 +455,20 @@ class DashboardAggregationService:
         if concrete_domains:
             avg_completion = sum(d.completion_pct for d in concrete_domains) / len(concrete_domains)
             avg_target = sum(d.target_pct for d in concrete_domains) / len(concrete_domains)
+            overarching = RecoveryDomainProgress(
+                domain="overarching",
+                display_name="Overarching Recovery",
+                completion_pct=round(avg_completion, 1),
+                trend="stable",
+                target_pct=round(avg_target, 1),
+                variance_from_target=round(avg_completion - avg_target, 1),
+                is_below_target=avg_completion < avg_target,
+                is_cross_cutting=True,
+                incident_id=target_incident,
+            )
+            all_domains = [overarching, *concrete_domains]
         else:
-            avg_completion = 0.0
-            avg_target = 0.0
-
-        overarching = RecoveryDomainProgress(
-            domain="overarching",
-            display_name="Overarching Recovery",
-            completion_pct=round(avg_completion, 1),
-            trend="stable",
-            target_pct=round(avg_target, 1),
-            variance_from_target=round(avg_completion - avg_target, 1),
-            is_below_target=avg_completion < avg_target,
-            is_cross_cutting=True,
-            incident_id=target_incident,
-        )
-
-        all_domains = [overarching, *concrete_domains]
+            all_domains = []
 
         return RecoveryProgressResponse(
             domains=all_domains,
@@ -515,7 +542,26 @@ class DashboardAggregationService:
         else:
             severity = RiskSeverityBreakdown(extreme=0, high=0, medium=0, low=0, total=0)
             top_risks = []
-            principles = []
+            _default_principle_names = [
+                ("life_saving", "Life Saving"),
+                ("empowering", "Empowering"),
+                ("trusted", "Trusted"),
+                ("risk_scaled", "Risk Scaled"),
+                ("timely_targeted", "Timely & Targeted"),
+                ("impact_conveying", "Impact Conveying"),
+                ("action_calling", "Action Calling"),
+                ("clearly_communicated", "Clearly Communicated"),
+                ("accessible", "Accessible"),
+                ("bigger_picture", "Bigger Picture"),
+            ]
+            principles = [
+                AWSPrincipleCompliance(
+                    principle=pid, display_name=name,
+                    compliant_count=0, total_count=0,
+                    compliance_rate_pct=0.0, non_compliant_warning_ids=[],
+                )
+                for pid, name in _default_principle_names
+            ]
 
         overall_compliance = (
             sum(p.compliance_rate_pct for p in principles) / len(principles)

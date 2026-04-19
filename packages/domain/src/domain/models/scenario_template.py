@@ -4,9 +4,9 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class BenchmarkTargets(BaseModel):
-    time_to_first_recommendation_s: int = 300
-    time_to_alert_s: int = 600
-    coordination_coverage_pct: float = 80.0
+    time_to_first_recommendation_s: int = Field(default=300, gt=0)
+    time_to_alert_s: int = Field(default=600, gt=0)
+    coordination_coverage_pct: float = Field(default=80.0, gt=0)
 
 
 class SignalTimelineEntry(BaseModel):

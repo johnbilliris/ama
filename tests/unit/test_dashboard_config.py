@@ -11,11 +11,12 @@ from packages.domain.src.domain.models.dashboard_widget_config import AIIMS_AUTH
 
 class TestRoleWidgetConfig:
     def test_all_10_roles_configured(self):
-        """All 10 AIIMS roles have widget configurations."""
+        """All 10 AIIMS roles plus field_coordinator have widget configurations."""
         expected_roles = {
             "incident_controller", "operations_officer", "planning_officer",
             "intelligence_officer", "logistics_officer", "public_information_officer",
             "executive_leader", "observer_auditor", "risk_manager", "resilience_planner",
+            "field_coordinator",
         }
         assert set(ROLE_WIDGET_CONFIGS.keys()) == expected_roles
 

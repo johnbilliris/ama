@@ -220,7 +220,7 @@ def _resolve_widget_layout(roles: list[str]) -> tuple[list[WidgetDefinition], st
         for w in config.get("widgets", []):
             if w["widget_id"] not in seen_ids:
                 seen_ids.add(w["widget_id"])
-                merged.append(WidgetDefinition(**w, priority=len(merged) + 1))
+                merged.append(WidgetDefinition(**{**w, "priority": len(merged) + 1}))
 
     return merged, default_view
 

@@ -26,6 +26,7 @@ def _make_incident(
 ) -> dict:
     return {
         "incident_id": incident_id,
+        "kind": "disaster",
         "title": title,
         "incident_type": incident_type,
         "status": status,
