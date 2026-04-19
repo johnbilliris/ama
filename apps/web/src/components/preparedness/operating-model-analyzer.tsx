@@ -43,6 +43,8 @@ export function OperatingModelAnalyzer({
   replayStale,
   onReplayComplete,
 }: OperatingModelAnalyzerProps) {
+  const [orgCatalogueOpen, setOrgCatalogueOpen] = useState(true);
+  const [fwCatalogueOpen, setFwCatalogueOpen] = useState(true);
   const [scenarioType, setScenarioType] = useState("flood");
   const [scenarioRun, setScenarioRun] = useState<ScenarioRunPayload>(DEFAULT_SCENARIO);
   const [replayError, setReplayError] = useState<string | null>(null);
@@ -96,169 +98,193 @@ export function OperatingModelAnalyzer({
 
       {noJurisdictions && (
         <div className="preparedness-empty-state" role="status">
-          <p>Select one or more jurisdictions above to view the organisation and framework catalogs.</p>
+          <p>Select one or more jurisdictions above to view the organisation and framework catalogues.</p>
         </div>
       )}
 
       {!noJurisdictions && (
         <div className="preparedness-columns">
           <article className="preparedness-panel">
-            <h2 className="preparedness-panel-title">Organisation catalog</h2>
-            {isLoading ? (
-              <p className="preparedness-loading">Loading organisations…</p>
-            ) : organisations.length === 0 ? (
-              <p className="preparedness-meta">No organisations found for the selected jurisdictions.</p>
-            ) : (
-              <ul className="preparedness-list">
-                {organisations.map((org) => (
-                  <li key={org.organisation_id} className="preparedness-list-item preparedness-org-card">
-                    <div className="preparedness-org-header">
-                      <strong>{org.abbreviation ? `${org.name} (${org.abbreviation})` : org.name}</strong>
-                      {org.workforce_type && (
-                        <span className={`preparedness-badge preparedness-badge--${org.workforce_type}`}>
-                          {org.workforce_type}
-                        </span>
-                      )}
-                    </div>
-                    <div className="preparedness-meta">
-                      {formatLabel(org.category)} · {formatLabel(org.operating_role)} · {formatLabel(org.authority_level)}
-                    </div>
-                    {org.aiims_functions.length > 0 && (
-                      <div className="preparedness-tag-row">
-                        {org.aiims_functions.map((fn) => (
-                          <span key={fn} className="preparedness-tag preparedness-tag--aiims">{formatLabel(fn)}</span>
-                        ))}
-                      </div>
-                    )}
-                    {org.hazard_types.length > 0 && (
-                      <div className="preparedness-tag-row">
-                        {org.hazard_types.map((h) => (
-                          <span key={h} className="preparedness-tag preparedness-tag--hazard">{formatLabel(h)}</span>
-                        ))}
-                      </div>
-                    )}
-                    {org.primary_capabilities.length > 0 && (
-                      <div className="preparedness-tag-row">
-                        {org.primary_capabilities.slice(0, 4).map((c) => (
-                          <span key={c} className="preparedness-tag preparedness-tag--capability">{formatLabel(c)}</span>
-                        ))}
-                        {org.primary_capabilities.length > 4 && (
-                          <span className="preparedness-tag preparedness-tag--more">+{org.primary_capabilities.length - 4}</span>
+            <button
+              type="button"
+              className="preparedness-panel-toggle"
+              onClick={() => setOrgCatalogueOpen((v) => !v)}
+              aria-expanded={orgCatalogueOpen}
+            >
+              <span className={`preparedness-panel-chevron ${orgCatalogueOpen ? "preparedness-panel-chevron--open" : ""}`} aria-hidden="true">▶</span>
+              <h2 className="preparedness-panel-title">Organisation catalogue</h2>
+            </button>
+            {orgCatalogueOpen && (
+              <>
+                {isLoading ? (
+                  <p className="preparedness-loading">Loading organisations…</p>
+                ) : organisations.length === 0 ? (
+                  <p className="preparedness-meta">No organisations found for the selected jurisdictions.</p>
+                ) : (
+                  <ul className="preparedness-list">
+                    {organisations.map((org) => (
+                      <li key={org.organisation_id} className="preparedness-list-item preparedness-org-card">
+                        <div className="preparedness-org-header">
+                          <strong>{org.abbreviation ? `${org.name} (${org.abbreviation})` : org.name}</strong>
+                          {org.workforce_type && (
+                            <span className={`preparedness-badge preparedness-badge--${org.workforce_type}`}>
+                              {org.workforce_type}
+                            </span>
+                          )}
+                        </div>
+                        <div className="preparedness-meta">
+                          {formatLabel(org.category)} · {formatLabel(org.operating_role)} · {formatLabel(org.authority_level)}
+                        </div>
+                        {org.aiims_functions.length > 0 && (
+                          <div className="preparedness-tag-row">
+                            {org.aiims_functions.map((fn) => (
+                              <span key={fn} className="preparedness-tag preparedness-tag--aiims">{formatLabel(fn)}</span>
+                            ))}
+                          </div>
                         )}
-                      </div>
-                    )}
-                    {org.lead_agency_for.length > 0 && (
-                      <div className="preparedness-org-lead">
-                        Lead agency for: {org.lead_agency_for.map(formatLabel).join(", ")}
-                      </div>
-                    )}
-                    {org.mutual_aid_partner_ids.length > 0 && (
-                      <div className="preparedness-org-partners">
-                        Mutual aid: {org.mutual_aid_partner_ids.map((pid) => {
-                          const partner = orgLookup.get(pid);
-                          return partner ? (partner.abbreviation ?? partner.name) : pid;
-                        }).join(", ")}
-                      </div>
-                    )}
-                    {org.legislative_basis && (
-                      <div className="preparedness-org-legislation">{org.legislative_basis}</div>
-                    )}
-                    {org.activation_triggers.length > 0 && (
-                      <details className="preparedness-org-details">
-                        <summary>Activation triggers ({org.activation_triggers.length})</summary>
-                        <ul className="preparedness-org-triggers">
-                          {org.activation_triggers.map((t) => (
-                            <li key={t}>{t}</li>
-                          ))}
-                        </ul>
-                      </details>
-                    )}
-                  </li>
-                ))}
-              </ul>
+                        {org.hazard_types.length > 0 && (
+                          <div className="preparedness-tag-row">
+                            {org.hazard_types.map((h) => (
+                              <span key={h} className="preparedness-tag preparedness-tag--hazard">{formatLabel(h)}</span>
+                            ))}
+                          </div>
+                        )}
+                        {org.primary_capabilities.length > 0 && (
+                          <div className="preparedness-tag-row">
+                            {org.primary_capabilities.slice(0, 4).map((c) => (
+                              <span key={c} className="preparedness-tag preparedness-tag--capability">{formatLabel(c)}</span>
+                            ))}
+                            {org.primary_capabilities.length > 4 && (
+                              <span className="preparedness-tag preparedness-tag--more">+{org.primary_capabilities.length - 4}</span>
+                            )}
+                          </div>
+                        )}
+                        {org.lead_agency_for.length > 0 && (
+                          <div className="preparedness-org-lead">
+                            Lead agency for: {org.lead_agency_for.map(formatLabel).join(", ")}
+                          </div>
+                        )}
+                        {org.mutual_aid_partner_ids.length > 0 && (
+                          <div className="preparedness-org-partners">
+                            Mutual aid: {org.mutual_aid_partner_ids.map((pid) => {
+                              const partner = orgLookup.get(pid);
+                              return partner ? (partner.abbreviation ?? partner.name) : pid;
+                            }).join(", ")}
+                          </div>
+                        )}
+                        {org.legislative_basis && (
+                          <div className="preparedness-org-legislation">{org.legislative_basis}</div>
+                        )}
+                        {org.activation_triggers.length > 0 && (
+                          <details className="preparedness-org-details">
+                            <summary>Activation triggers ({org.activation_triggers.length})</summary>
+                            <ul className="preparedness-org-triggers">
+                              {org.activation_triggers.map((t) => (
+                                <li key={t}>{t}</li>
+                              ))}
+                            </ul>
+                          </details>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
             )}
           </article>
 
           <article className="preparedness-panel">
-            <h2 className="preparedness-panel-title">Framework catalog</h2>
-            {isLoading ? (
-              <p className="preparedness-loading">Loading frameworks…</p>
-            ) : frameworks.length === 0 ? (
-              <p className="preparedness-meta">No frameworks found for the selected jurisdictions.</p>
-            ) : (
-              <ul className="preparedness-list">
-                {frameworks.map((fw) => (
-                  <li key={fw.framework_id} className="preparedness-list-item preparedness-fw-card">
-                    <div className="preparedness-org-header">
-                      <strong>{fw.abbreviation ? `${fw.name} (${fw.abbreviation})` : fw.name}</strong>
-                      <span className={`preparedness-badge preparedness-badge--fw-${fw.framework_type}`}>
-                        {formatLabel(fw.framework_type)}
-                      </span>
-                    </div>
-                    {fw.description && (
-                      <div className="preparedness-fw-description">{fw.description}</div>
-                    )}
-                    {fw.pprr_phases.length > 0 && (
-                      <div className="preparedness-tag-row">
-                        {fw.pprr_phases.map((p) => (
-                          <span key={p} className="preparedness-tag preparedness-tag--pprr">{formatLabel(p)}</span>
-                        ))}
-                      </div>
-                    )}
-                    {fw.hazard_types.length > 0 ? (
-                      <div className="preparedness-tag-row">
-                        {fw.hazard_types.map((h) => (
-                          <span key={h} className="preparedness-tag preparedness-tag--hazard">{formatLabel(h)}</span>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="preparedness-meta">All hazards</div>
-                    )}
-                    {fw.custodian_organisation_id && (
-                      <div className="preparedness-meta">
-                        Custodian: {(() => {
-                          const custodian = orgLookup.get(fw.custodian_organisation_id!);
-                          return custodian ? (custodian.abbreviation ?? custodian.name) : fw.custodian_organisation_id;
-                        })()}
-                      </div>
-                    )}
-                    {fw.legislative_basis && (
-                      <div className="preparedness-org-legislation">{fw.legislative_basis}</div>
-                    )}
-                    {(fw.activation_triggers.length > 0 || fw.principles.length > 0 || fw.version) && (
-                      <details className="preparedness-org-details">
-                        <summary>Details</summary>
-                        {fw.version && <div className="preparedness-meta">Version: {fw.version}</div>}
-                        {fw.principles.length > 0 && (
-                          <div className="preparedness-fw-principles">
-                            <strong>Principles:</strong> {fw.principles.join(", ")}
+            <button
+              type="button"
+              className="preparedness-panel-toggle"
+              onClick={() => setFwCatalogueOpen((v) => !v)}
+              aria-expanded={fwCatalogueOpen}
+            >
+              <span className={`preparedness-panel-chevron ${fwCatalogueOpen ? "preparedness-panel-chevron--open" : ""}`} aria-hidden="true">▶</span>
+              <h2 className="preparedness-panel-title">Framework catalogue</h2>
+            </button>
+            {fwCatalogueOpen && (
+              <>
+                {isLoading ? (
+                  <p className="preparedness-loading">Loading frameworks…</p>
+                ) : frameworks.length === 0 ? (
+                  <p className="preparedness-meta">No frameworks found for the selected jurisdictions.</p>
+                ) : (
+                  <ul className="preparedness-list">
+                    {frameworks.map((fw) => (
+                      <li key={fw.framework_id} className="preparedness-list-item preparedness-fw-card">
+                        <div className="preparedness-org-header">
+                          <strong>{fw.abbreviation ? `${fw.name} (${fw.abbreviation})` : fw.name}</strong>
+                          <span className={`preparedness-badge preparedness-badge--fw-${fw.framework_type}`}>
+                            {formatLabel(fw.framework_type)}
+                          </span>
+                        </div>
+                        {fw.description && (
+                          <div className="preparedness-fw-description">{fw.description}</div>
+                        )}
+                        {fw.pprr_phases.length > 0 && (
+                          <div className="preparedness-tag-row">
+                            {fw.pprr_phases.map((p) => (
+                              <span key={p} className="preparedness-tag preparedness-tag--pprr">{formatLabel(p)}</span>
+                            ))}
                           </div>
                         )}
-                        {fw.span_of_control_guidance && (
-                          <div className="preparedness-fw-principles">
-                            <strong>Span of control:</strong> {fw.span_of_control_guidance}
+                        {fw.hazard_types.length > 0 ? (
+                          <div className="preparedness-tag-row">
+                            {fw.hazard_types.map((h) => (
+                              <span key={h} className="preparedness-tag preparedness-tag--hazard">{formatLabel(h)}</span>
+                            ))}
                           </div>
+                        ) : (
+                          <div className="preparedness-meta">All hazards</div>
                         )}
-                        {fw.activation_triggers.length > 0 && (
-                          <>
-                            <strong>Activation triggers:</strong>
-                            <ul className="preparedness-org-triggers">
-                              {fw.activation_triggers.map((t) => (
-                                <li key={t}>{t}</li>
-                              ))}
-                            </ul>
-                          </>
-                        )}
-                        {fw.source_uri && (
+                        {fw.custodian_organisation_id && (
                           <div className="preparedness-meta">
-                            <a href={fw.source_uri} target="_blank" rel="noopener noreferrer">Source document ↗</a>
+                            Custodian: {(() => {
+                              const custodian = orgLookup.get(fw.custodian_organisation_id!);
+                              return custodian ? (custodian.abbreviation ?? custodian.name) : fw.custodian_organisation_id;
+                            })()}
                           </div>
                         )}
-                      </details>
-                    )}
-                  </li>
-                ))}
-              </ul>
+                        {fw.legislative_basis && (
+                          <div className="preparedness-org-legislation">{fw.legislative_basis}</div>
+                        )}
+                        {(fw.activation_triggers.length > 0 || fw.principles.length > 0 || fw.version) && (
+                          <details className="preparedness-org-details">
+                            <summary>Details</summary>
+                            {fw.version && <div className="preparedness-meta">Version: {fw.version}</div>}
+                            {fw.principles.length > 0 && (
+                              <div className="preparedness-fw-principles">
+                                <strong>Principles:</strong> {fw.principles.join(", ")}
+                              </div>
+                            )}
+                            {fw.span_of_control_guidance && (
+                              <div className="preparedness-fw-principles">
+                                <strong>Span of control:</strong> {fw.span_of_control_guidance}
+                              </div>
+                            )}
+                            {fw.activation_triggers.length > 0 && (
+                              <>
+                                <strong>Activation triggers:</strong>
+                                <ul className="preparedness-org-triggers">
+                                  {fw.activation_triggers.map((t) => (
+                                    <li key={t}>{t}</li>
+                                  ))}
+                                </ul>
+                              </>
+                            )}
+                            {fw.source_uri && (
+                              <div className="preparedness-meta">
+                                <a href={fw.source_uri} target="_blank" rel="noopener noreferrer">Source document ↗</a>
+                              </div>
+                            )}
+                          </details>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
             )}
           </article>
         </div>

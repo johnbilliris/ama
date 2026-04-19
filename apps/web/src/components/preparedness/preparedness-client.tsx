@@ -90,7 +90,7 @@ export function PreparednessClient({ initialJurisdictionParam }: PreparednessCli
           return;
         }
         if (requestId === requestIdRef.current && !controller.signal.aborted) {
-          setError("Failed to load catalog data. Please try again.");
+          setError("Failed to load catalogue data. Please try again.");
           setIsLoading(false);
         }
       }

@@ -34,7 +34,7 @@ export async function listPreparednessOrganisations(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to load organisation catalog");
+    throw new Error("Failed to load organisation catalogue");
   }
 
   return (await response.json()) as PreparednessOrganisation[];

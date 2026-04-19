@@ -71,9 +71,7 @@ nav[aria-label] a {
 .ama-nav-inner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  max-width: 1440px;
-  margin: 0 auto;
+  width: 100%;
   padding: 0 1.5rem;
   height: 60px;
 }
@@ -85,6 +83,7 @@ nav[aria-label] a {
   text-decoration: none;
   color: #fff;
   flex-shrink: 0;
+  margin-left: 20px;
 }
 
 .ama-nav-logo {
@@ -116,6 +115,7 @@ nav[aria-label] a {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  margin-left: auto;
 }
 
 .ama-nav-link {
@@ -1382,7 +1382,7 @@ nav[aria-label] a {
   display: grid;
   gap: 1.25rem;
   padding: 1.5rem;
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
@@ -1733,13 +1733,45 @@ nav[aria-label] a {
 .preparedness-title,
 .preparedness-panel-title {
   margin-top: 0;
+  margin-bottom: 0;
   font-weight: 700;
+}
+
+.preparedness-panel-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+}
+
+.preparedness-panel-toggle:hover {
+  opacity: 0.85;
+}
+
+.preparedness-panel-chevron {
+  display: inline-flex;
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+  color: var(--ama-color-ink-soft);
+  flex-shrink: 0;
+}
+
+.preparedness-panel-chevron--open {
+  transform: rotate(90deg);
 }
 
 .preparedness-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  align-items: start;
 }
 
 .preparedness-list {
@@ -2004,16 +2036,20 @@ nav[aria-label] a {
 .preparedness-layout {
   display: grid;
   grid-template-columns: 260px 1fr;
-  gap: 0;
+  gap: 1.5rem;
+  margin-top: -0.25rem;
   min-height: calc(100vh - 120px);
+  align-items: start;
 }
 
 .preparedness-filter-panel {
   background: var(--ama-surface-elevated);
-  border-right: 1px solid var(--ama-border-subtle);
+  border: 1px solid var(--ama-border-subtle);
+  border-radius: var(--ama-radius-panel);
   padding: 0.85rem;
   overflow-y: auto;
   font-size: 0.82rem;
+  box-shadow: var(--ama-shadow-xs);
 }
 
 .preparedness-filter-content {
@@ -2123,7 +2159,6 @@ nav[aria-label] a {
 }
 
 .preparedness-main {
-  padding: 1rem;
   overflow-y: auto;
 }
 

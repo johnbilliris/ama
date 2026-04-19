@@ -38,7 +38,7 @@ export async function listPreparednessFrameworks(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to load framework catalog");
+    throw new Error("Failed to load framework catalogue");
   }
 
   return (await response.json()) as PreparednessFramework[];
