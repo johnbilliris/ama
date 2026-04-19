@@ -26,6 +26,7 @@ from app.api.routes.recovery import router as recovery_router
 from app.api.routes.recovery_catalogue import router as recovery_catalogue_router
 from app.api.routes.scenarios import router as scenarios_router
 from app.api.routes.signals import router as signals_router
+from app.api.routes.simulation_chat import router as simulation_chat_router
 from app.api.routes.simulations import router as simulations_router
 from app.api.routes.tasks import router as tasks_router
 from app.api.routes.warning_chain import router as warning_chain_router
@@ -44,6 +45,7 @@ api_router.include_router(frameworks_router)
 api_router.include_router(jurisdictions_router)
 api_router.include_router(scenarios_router)
 api_router.include_router(simulations_router)
+api_router.include_router(simulation_chat_router)
 api_router.include_router(handoffs_router)
 api_router.include_router(dead_letters_router)
 api_router.include_router(health_router)

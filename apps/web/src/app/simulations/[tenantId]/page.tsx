@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getSimulation, type SimulationDetail } from "@/lib/api/simulations";
+import {
+  getSimulation,
+  pauseSimulation,
+  resumeSimulation,
+  archiveSimulation,
+  type SimulationDetail,
+} from "@/lib/api/simulations";
 import { SimulationBanner } from "@/components/simulation-banner";
+import { SimulationChatPane } from "@/components/simulation-chat-pane";
 
 export default function SimulationDashboardPage() {
   const { tenantId } = useParams<{ tenantId: string }>();
@@ -79,6 +86,48 @@ export default function SimulationDashboardPage() {
               <li key={p}>{p}</li>
             ))}
           </ul>
+        </div>
+
+        <div className="mt-6 flex gap-2">
+          <button
+            type="button"
+            className="rounded bg-amber-500 px-3 py-1 text-sm font-medium text-white disabled:opacity-40"
+            disabled={tenant.status !== "active"}
+            onClick={async () => {
+              await pauseSimulation(tenant.tenant_id);
+              setTenant({ ...tenant, status: "paused" });
+            }}
+          >
+            Pause
+          </button>
+          <button
+            type="button"
+            className="rounded bg-emerald-600 px-3 py-1 text-sm font-medium text-white disabled:opacity-40"
+            disabled={tenant.status !== "paused"}
+            onClick={async () => {
+              await resumeSimulation(tenant.tenant_id);
+              setTenant({ ...tenant, status: "active" });
+            }}
+          >
+            Resume
+          </button>
+          <button
+            type="button"
+            className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white disabled:opacity-40"
+            disabled={!["active", "paused"].includes(tenant.status)}
+            onClick={async () => {
+              if (!window.confirm("Stop this simulation? This is terminal.")) return;
+              await archiveSimulation(tenant.tenant_id);
+              setTenant({ ...tenant, status: "archiving" });
+            }}
+          >
+            Stop
+          </button>
+        </div>
+
+        <div className="mt-6">
+          <h2 className="mb-2 text-lg font-semibold">Simulation Controller</h2>
+          <SimulationChatPane tenantId={tenant.tenant_id} />
         </div>
       </div>
     </>
