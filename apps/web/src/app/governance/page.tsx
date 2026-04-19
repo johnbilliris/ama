@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { GovernanceSummary } from "@/components/governance/GovernanceSummary";
 import { DataSourceTable } from "@/components/governance/DataSourceTable";
 
@@ -20,7 +21,13 @@ interface DashboardData {
 }
 
 export default function GovernanceDashboardPage() {
+  const router = useRouter();
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+
+  useEffect(() => {
+    // Redirect to new governance dashboard as default entry point
+    router.replace("/governance/dashboard");
+  }, [router]);
 
   useEffect(() => {
     fetch("/api/v1/governance/dashboard")

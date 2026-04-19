@@ -23,6 +23,13 @@ GovernanceAction = Literal[
     "grace_period_expired",
     "auto_blocked",
     "precedence_set",
+    # Dashboard action types (021-governance-dashboard)
+    "dashboard_view",
+    "dashboard_filter",
+    "dashboard_search",
+    "dashboard_export",
+    "dashboard_drill_down",
+    "dashboard_navigate_to_crud",
 ]
 
 
@@ -34,3 +41,7 @@ class GovernanceAuditEntry(BaseModel):
     timestamp: datetime
     details: dict[str, Any] = {}
     related_entity_id: str | None = None
+    # Dashboard fields (021-governance-dashboard)
+    tenant_id: str = "live"
+    view_context: str | None = None
+    session_id: str | None = None

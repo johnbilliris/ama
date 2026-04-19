@@ -1,0 +1,863 @@
+[
+  {
+    "assignment_id": "assign-aiims-national-commonwealth",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-nsw",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-vic",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-qld",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-sa",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-wa",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-tas",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-act",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aiims-national-nt",
+    "framework_id": "aiims-national",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-comdisplan-commonwealth",
+    "framework_id": "comdisplan",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-comdisplan-nsw",
+    "framework_id": "comdisplan",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-comdisplan-vic",
+    "framework_id": "comdisplan",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-comdisplan-qld",
+    "framework_id": "comdisplan",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-comdisplan-sa",
+    "framework_id": "comdisplan",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-comdisplan-wa",
+    "framework_id": "comdisplan",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-comdisplan-tas",
+    "framework_id": "comdisplan",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-comdisplan-act",
+    "framework_id": "comdisplan",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-comdisplan-nt",
+    "framework_id": "comdisplan",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-natcatdisplan-commonwealth",
+    "framework_id": "natcatdisplan",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-natcatdisplan-nsw",
+    "framework_id": "natcatdisplan",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-natcatdisplan-vic",
+    "framework_id": "natcatdisplan",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-natcatdisplan-qld",
+    "framework_id": "natcatdisplan",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-natcatdisplan-sa",
+    "framework_id": "natcatdisplan",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-natcatdisplan-wa",
+    "framework_id": "natcatdisplan",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-natcatdisplan-tas",
+    "framework_id": "natcatdisplan",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-natcatdisplan-act",
+    "framework_id": "natcatdisplan",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-natcatdisplan-nt",
+    "framework_id": "natcatdisplan",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-ag-crisis-mgmt-commonwealth",
+    "framework_id": "ag-crisis-mgmt",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-emergency-planning-commonwealth",
+    "framework_id": "aidr-emergency-planning",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-emergency-planning-nsw",
+    "framework_id": "aidr-emergency-planning",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-emergency-planning-vic",
+    "framework_id": "aidr-emergency-planning",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-emergency-planning-qld",
+    "framework_id": "aidr-emergency-planning",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-emergency-planning-sa",
+    "framework_id": "aidr-emergency-planning",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-emergency-planning-wa",
+    "framework_id": "aidr-emergency-planning",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-emergency-planning-tas",
+    "framework_id": "aidr-emergency-planning",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-emergency-planning-act",
+    "framework_id": "aidr-emergency-planning",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-emergency-planning-nt",
+    "framework_id": "aidr-emergency-planning",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-public-info-warnings-commonwealth",
+    "framework_id": "aidr-public-info-warnings",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-public-info-warnings-nsw",
+    "framework_id": "aidr-public-info-warnings",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-public-info-warnings-vic",
+    "framework_id": "aidr-public-info-warnings",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-public-info-warnings-qld",
+    "framework_id": "aidr-public-info-warnings",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-public-info-warnings-sa",
+    "framework_id": "aidr-public-info-warnings",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-public-info-warnings-wa",
+    "framework_id": "aidr-public-info-warnings",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-public-info-warnings-tas",
+    "framework_id": "aidr-public-info-warnings",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-public-info-warnings-act",
+    "framework_id": "aidr-public-info-warnings",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-public-info-warnings-nt",
+    "framework_id": "aidr-public-info-warnings",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-community-recovery-commonwealth",
+    "framework_id": "aidr-community-recovery",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-community-recovery-nsw",
+    "framework_id": "aidr-community-recovery",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-community-recovery-vic",
+    "framework_id": "aidr-community-recovery",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-community-recovery-qld",
+    "framework_id": "aidr-community-recovery",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-community-recovery-sa",
+    "framework_id": "aidr-community-recovery",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-community-recovery-wa",
+    "framework_id": "aidr-community-recovery",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-community-recovery-tas",
+    "framework_id": "aidr-community-recovery",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-community-recovery-act",
+    "framework_id": "aidr-community-recovery",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-community-recovery-nt",
+    "framework_id": "aidr-community-recovery",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-me-framework-commonwealth",
+    "framework_id": "aidr-me-framework",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-me-framework-nsw",
+    "framework_id": "aidr-me-framework",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-me-framework-vic",
+    "framework_id": "aidr-me-framework",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-me-framework-qld",
+    "framework_id": "aidr-me-framework",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-me-framework-sa",
+    "framework_id": "aidr-me-framework",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-me-framework-wa",
+    "framework_id": "aidr-me-framework",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-me-framework-tas",
+    "framework_id": "aidr-me-framework",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-me-framework-act",
+    "framework_id": "aidr-me-framework",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-aidr-me-framework-nt",
+    "framework_id": "aidr-me-framework",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-nsw-emplan-nsw",
+    "framework_id": "nsw-emplan",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-vic-emmv-vic",
+    "framework_id": "vic-emmv",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-qld-sdmp-qld",
+    "framework_id": "qld-sdmp",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-wa-semp-wa",
+    "framework_id": "wa-semp",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-sa-semp-sa",
+    "framework_id": "sa-semp",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-tas-temp-tas",
+    "framework_id": "tas-temp",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-act-emp-act",
+    "framework_id": "act-emp",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-nt-emp-nt",
+    "framework_id": "nt-emp",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-nsw-flood-communications-nsw",
+    "framework_id": "nsw-flood-communications",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-nsw-bushfire-plan-nsw",
+    "framework_id": "nsw-bushfire-plan",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-vic-bushfire-plan-vic",
+    "framework_id": "vic-bushfire-plan",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-qld-cyclone-plan-qld",
+    "framework_id": "qld-cyclone-plan",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-wa-cyclone-plan-wa",
+    "framework_id": "wa-cyclone-plan",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-nt-cyclone-plan-nt",
+    "framework_id": "nt-cyclone-plan",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-heatwave-commonwealth",
+    "framework_id": "national-heatwave",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-heatwave-nsw",
+    "framework_id": "national-heatwave",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-heatwave-vic",
+    "framework_id": "national-heatwave",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-heatwave-qld",
+    "framework_id": "national-heatwave",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-heatwave-sa",
+    "framework_id": "national-heatwave",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-heatwave-wa",
+    "framework_id": "national-heatwave",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-heatwave-tas",
+    "framework_id": "national-heatwave",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-heatwave-act",
+    "framework_id": "national-heatwave",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-heatwave-nt",
+    "framework_id": "national-heatwave",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-pandemic-commonwealth",
+    "framework_id": "national-pandemic",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-pandemic-nsw",
+    "framework_id": "national-pandemic",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-pandemic-vic",
+    "framework_id": "national-pandemic",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-pandemic-qld",
+    "framework_id": "national-pandemic",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-pandemic-sa",
+    "framework_id": "national-pandemic",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-pandemic-wa",
+    "framework_id": "national-pandemic",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-pandemic-tas",
+    "framework_id": "national-pandemic",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-pandemic-act",
+    "framework_id": "national-pandemic",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-pandemic-nt",
+    "framework_id": "national-pandemic",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-earthquake-commonwealth",
+    "framework_id": "national-earthquake",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-earthquake-nsw",
+    "framework_id": "national-earthquake",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-earthquake-vic",
+    "framework_id": "national-earthquake",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-earthquake-qld",
+    "framework_id": "national-earthquake",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-earthquake-sa",
+    "framework_id": "national-earthquake",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-earthquake-wa",
+    "framework_id": "national-earthquake",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-earthquake-tas",
+    "framework_id": "national-earthquake",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-earthquake-act",
+    "framework_id": "national-earthquake",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-earthquake-nt",
+    "framework_id": "national-earthquake",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-tsunami-commonwealth",
+    "framework_id": "national-tsunami",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-tsunami-nsw",
+    "framework_id": "national-tsunami",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-tsunami-vic",
+    "framework_id": "national-tsunami",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-tsunami-qld",
+    "framework_id": "national-tsunami",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-tsunami-sa",
+    "framework_id": "national-tsunami",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-tsunami-wa",
+    "framework_id": "national-tsunami",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-tsunami-tas",
+    "framework_id": "national-tsunami",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-tsunami-act",
+    "framework_id": "national-tsunami",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-tsunami-nt",
+    "framework_id": "national-tsunami",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-emergency-alert-commonwealth",
+    "framework_id": "national-emergency-alert",
+    "jurisdiction_id": "commonwealth",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-emergency-alert-nsw",
+    "framework_id": "national-emergency-alert",
+    "jurisdiction_id": "nsw",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-emergency-alert-vic",
+    "framework_id": "national-emergency-alert",
+    "jurisdiction_id": "vic",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-emergency-alert-qld",
+    "framework_id": "national-emergency-alert",
+    "jurisdiction_id": "qld",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-emergency-alert-sa",
+    "framework_id": "national-emergency-alert",
+    "jurisdiction_id": "sa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-emergency-alert-wa",
+    "framework_id": "national-emergency-alert",
+    "jurisdiction_id": "wa",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-emergency-alert-tas",
+    "framework_id": "national-emergency-alert",
+    "jurisdiction_id": "tas",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-emergency-alert-act",
+    "framework_id": "national-emergency-alert",
+    "jurisdiction_id": "act",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  },
+  {
+    "assignment_id": "assign-national-emergency-alert-nt",
+    "framework_id": "national-emergency-alert",
+    "jurisdiction_id": "nt",
+    "effective_from": "2024-01-01",
+    "effective_to": null
+  }
+]

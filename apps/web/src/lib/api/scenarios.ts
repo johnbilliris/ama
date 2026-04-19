@@ -21,7 +21,8 @@ export async function replayPreparednessScenario(scenarioName: string, scenarioT
   });
 
   if (!response.ok) {
-    throw new Error("Failed to replay preparedness scenario");
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Replay failed: ${response.status}`);
   }
 
   return (await response.json()) as ScenarioRunPayload;

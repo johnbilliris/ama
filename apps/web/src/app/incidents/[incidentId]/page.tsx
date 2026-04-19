@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { IncidentTypeIcon } from "@ama/ui/components/disaster-map/incident-type-icon";
 import { getIncidentDashboard, type DashboardPayload } from "../../../lib/api/dashboard";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 /* ── Stat card helper ── */
@@ -38,7 +38,9 @@ function formatCost(aud?: number | null, formatted?: string | null): string | nu
 
 export default function IncidentPage() {
   const params = useParams<{ incidentId: string }>();
+  const searchParams = useSearchParams();
   const incidentId = params.incidentId;
+  const returnUrl = searchParams.get("returnUrl") || "/";
   const [dashboard, setDashboard] = useState<DashboardPayload | null>(null);
   const [error, setError] = useState(false);
 
@@ -54,7 +56,7 @@ export default function IncidentPage() {
         <div className="incident-error">
           <h1>Incident not found</h1>
           <p>The requested incident could not be loaded.</p>
-          <Link href="/" className="incident-back-link">← Back to map</Link>
+          <Link href={returnUrl} className="incident-back-link">← Back to map</Link>
         </div>
       </div>
     );
@@ -97,7 +99,7 @@ export default function IncidentPage() {
         >
           <div className="incident-hero-overlay" />
           <div className="incident-hero-content">
-            <Link href="/" className="incident-back-link">← Back to map</Link>
+            <Link href={returnUrl} className="incident-back-link">← Back to map</Link>
             <div className="incident-hero-meta">
               <IncidentTypeIcon type={inc.incidentType} size={36} />
               <span className="incident-hero-type">

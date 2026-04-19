@@ -1,0 +1,371 @@
+openapi: 3.1.0
+info:
+  title: Multi-Jurisdiction Filter API Contract
+  description: >
+    API contract for the multi-jurisdiction filter feature (spec 022).
+    Covers the new jurisdictions endpoint and modified organisations/frameworks endpoints.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000/api
+    description: Local development
+  - url: https://{container-app-url}/api
+    description: Azure Container Apps deployment
+
+paths:
+  /jurisdictions:
+    get:
+      operationId: listJurisdictions
+      summary: List all available jurisdictions
+      description: >
+        Returns the list of active Australian jurisdictions for the jurisdiction selector.
+        Jurisdictions are sourced from seed data and ordered by level (commonwealth first,
+        then states alphabetically, then territories alphabetically).
+        This endpoint is called once on page load (server-side in Next.js).
+      tags:
+        - jurisdictions
+      responses:
+        "200":
+          description: List of active jurisdictions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JurisdictionSummary"
+              example:
+                - jurisdiction_id: commonwealth
+                  name: Commonwealth of Australia
+                  level: commonwealth
+                - jurisdiction_id: nsw
+                  name: New South Wales
+                  level: state
+                - jurisdiction_id: vic
+                  name: Victoria
+                  level: state
+                - jurisdiction_id: qld
+                  name: Queensland
+                  level: state
+                - jurisdiction_id: sa
+                  name: South Australia
+                  level: state
+                - jurisdiction_id: wa
+                  name: Western Australia
+                  level: state
+                - jurisdiction_id: tas
+                  name: Tasmania
+                  level: state
+                - jurisdiction_id: act
+                  name: Australian Capital Territory
+                  level: territory
+                - jurisdiction_id: nt
+                  name: Northern Territory
+                  level: territory
+
+  /organisations:
+    get:
+      operationId: listOrganisations
+      summary: List organisations filtered by jurisdiction(s)
+      description: >
+        Returns organisations matching any of the specified jurisdictions.
+        Uses OR logic: an organisation appears if any of its jurisdiction_ids
+        matches any of the requested jurisdictionId values.
+        Results are automatically deduplicated (each organisation appears once).
+        When no jurisdictionId is provided, returns an empty array (FR-006).
+      tags:
+        - organisations
+      parameters:
+        - name: jurisdictionId
+          in: query
+          required: false
+          description: >
+            One or more jurisdiction identifiers to filter by.
+            Use repeated query parameters for multiple values:
+            ?jurisdictionId=nsw&jurisdictionId=vic
+            Single value is backward compatible: ?jurisdictionId=nsw
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - commonwealth
+                - nsw
+                - vic
+                - qld
+                - sa
+                - wa
+                - tas
+                - act
+                - nt
+          style: form
+          explode: true
+          examples:
+            single:
+              summary: Single jurisdiction (backward compatible)
+              value: [nsw]
+            multiple:
+              summary: Multiple jurisdictions
+              value: [nsw, vic, qld]
+            empty:
+              summary: No jurisdictions (returns empty array)
+              value: []
+      responses:
+        "200":
+          description: Filtered list of organisations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Organisation"
+
+  /frameworks:
+    get:
+      operationId: listFrameworks
+      summary: List frameworks filtered by jurisdiction(s)
+      description: >
+        Returns operating frameworks applicable to any of the specified jurisdictions.
+        Framework-to-jurisdiction mapping uses FrameworkAssignment junction records
+        (per spec 018 data model). A framework appears if any FrameworkAssignment
+        links it to any of the requested jurisdictionId values.
+        Results are automatically deduplicated.
+        When no jurisdictionId is provided, returns an empty array (FR-006).
+      tags:
+        - frameworks
+      parameters:
+        - name: jurisdictionId
+          in: query
+          required: false
+          description: >
+            One or more jurisdiction identifiers to filter by.
+            Use repeated query parameters for multiple values.
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - commonwealth
+                - nsw
+                - vic
+                - qld
+                - sa
+                - wa
+                - tas
+                - act
+                - nt
+          style: form
+          explode: true
+      responses:
+        "200":
+          description: Filtered list of frameworks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OperatingFramework"
+
+  /scenarios/replay:
+    post:
+      operationId: replayScenario
+      summary: Run a rehearsal replay for selected jurisdictions
+      description: >
+        Existing endpoint — no changes to the contract.
+        The jurisdictionIds field in the request body already accepts a list.
+        The frontend now passes the user's selected jurisdictions instead of hardcoded ["nsw"].
+      tags:
+        - scenarios
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScenarioReplayRequest"
+      responses:
+        "200":
+          description: Replay results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScenarioRunPayload"
+
+components:
+  schemas:
+    JurisdictionSummary:
+      type: object
+      required:
+        - jurisdiction_id
+        - name
+        - level
+      properties:
+        jurisdiction_id:
+          type: string
+          description: Unique jurisdiction identifier
+          example: nsw
+        name:
+          type: string
+          description: Human-readable display name
+          example: New South Wales
+        level:
+          type: string
+          enum: [commonwealth, state, territory]
+          description: Administrative level
+          example: state
+
+    Organisation:
+      type: object
+      required:
+        - organisation_id
+        - name
+        - category
+        - jurisdiction_ids
+        - operating_role
+        - authority_level
+        - status
+      properties:
+        organisation_id:
+          type: string
+          example: ses-nsw
+        name:
+          type: string
+          example: NSW State Emergency Service
+        category:
+          type: string
+          enum:
+            - commonwealth
+            - state
+            - territory
+            - local_government
+            - emergency_service
+            - health
+            - utility
+            - transport
+            - community
+            - volunteer
+            - other
+        jurisdiction_ids:
+          type: array
+          items:
+            type: string
+          example: [nsw]
+        operating_role:
+          type: string
+          example: flood_response_lead
+        authority_level:
+          type: string
+          example: state_combat
+        contact_channels:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              value:
+                type: string
+        participation_conditions:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, inactive, planned]
+
+    OperatingFramework:
+      type: object
+      required:
+        - framework_id
+        - name
+        - framework_type
+        - span_of_control_guidance
+        - status
+      properties:
+        framework_id:
+          type: string
+          example: aiims-national
+        name:
+          type: string
+          example: Australasian Inter-service Incident Management System
+        framework_type:
+          type: string
+          enum: [aiims, agency_specific, jurisdictional_policy, communications, other]
+        principles:
+          type: array
+          items:
+            type: string
+        control_model:
+          type: string
+        approval_rules:
+          type: array
+          items:
+            type: object
+        escalation_rules:
+          type: array
+          items:
+            type: object
+        span_of_control_guidance:
+          type: string
+          example: "1 supervisor to 5 resources"
+        status:
+          type: string
+          enum: [active, retired, draft]
+
+    ScenarioReplayRequest:
+      type: object
+      required:
+        - scenarioName
+        - scenarioType
+        - jurisdictionIds
+      properties:
+        scenarioName:
+          type: string
+          example: "Multi-jurisdiction flood rehearsal"
+        scenarioType:
+          type: string
+          enum: [flood, bushfire, cyclone]
+          example: flood
+        jurisdictionIds:
+          type: array
+          items:
+            type: string
+          description: Selected jurisdiction identifiers
+          example: [nsw, vic]
+
+    ScenarioRunPayload:
+      type: object
+      required:
+        - scenario_run_id
+        - scenario_name
+        - scenario_type
+        - jurisdiction_ids
+        - organisation_ids
+        - framework_ids
+        - coordination_gap_summary
+        - generated_findings
+      properties:
+        scenario_run_id:
+          type: string
+        scenario_name:
+          type: string
+        scenario_type:
+          type: string
+        jurisdiction_ids:
+          type: array
+          items:
+            type: string
+        organisation_ids:
+          type: array
+          items:
+            type: string
+        framework_ids:
+          type: array
+          items:
+            type: string
+        coordination_gap_summary:
+          type: array
+          items:
+            type: string
+        generated_findings:
+          type: array
+          items:
+            type: string

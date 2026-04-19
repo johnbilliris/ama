@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: "/governance", label: "Governance", icon: "🛡️" },
   { href: "/simulations", label: "Simulations", icon: "🔬" },
   { href: "/preparedness", label: "Preparedness", icon: "📋" },
+  { href: "/help", label: "Help", icon: "❓" },
 ];
 
 export function AppShell({ children }: PropsWithChildren) {

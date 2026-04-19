@@ -1,16 +1,20 @@
-import { OperatingModelAnalyzer } from "../../components/preparedness/operating-model-analyzer";
-import { listPreparednessFrameworks } from "../../lib/api/frameworks";
-import { listPreparednessOrganisations } from "../../lib/api/organisations";
+import { Suspense } from "react";
 
-export default async function PreparednessPage() {
-  const [organisations, frameworks] = await Promise.all([
-    listPreparednessOrganisations("nsw").catch(() => []),
-    listPreparednessFrameworks("nsw").catch(() => []),
-  ]);
+import { PreparednessClient } from "../../components/preparedness/preparedness-client";
+
+interface PreparednessPageProps {
+  searchParams: Promise<{ jurisdictions?: string }>;
+}
+
+export default async function PreparednessPage({ searchParams }: PreparednessPageProps) {
+  const params = await searchParams;
+  const initialJurisdictionParam = params.jurisdictions ?? "";
 
   return (
     <div className="incident-page">
-      <OperatingModelAnalyzer organisations={organisations} frameworks={frameworks} />
+      <Suspense fallback={<div className="preparedness-loading">Loading preparedness page…</div>}>
+        <PreparednessClient initialJurisdictionParam={initialJurisdictionParam} />
+      </Suspense>
     </div>
   );
 }

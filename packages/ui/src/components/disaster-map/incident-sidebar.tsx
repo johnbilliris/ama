@@ -8,12 +8,15 @@
  */
 
 import type { IncidentFeatureProperties } from "./types";
+import Link from "next/link";
 
 export interface IncidentSidebarProps {
   /** The selected incident's properties */
   incident: IncidentFeatureProperties;
   /** Called when the user closes the sidebar */
   onClose: () => void;
+  /** Return path with filter params for back-navigation */
+  returnPath?: string;
   /** Additional CSS class */
   className?: string;
 }
@@ -59,6 +62,7 @@ function formatDate(iso: string): string {
 export function IncidentSidebar({
   incident,
   onClose,
+  returnPath,
   className,
 }: IncidentSidebarProps) {
   const severityInfo = SEVERITY_DISPLAY[incident.severity_tier] ?? {
@@ -134,12 +138,12 @@ export function IncidentSidebar({
         )}
       </dl>
 
-      <a
-        href={`/incidents/${incident.incident_id}`}
+      <Link
+        href={`/incidents/${incident.incident_id}${returnPath ? `?returnUrl=${encodeURIComponent(returnPath)}` : ""}`}
         className="disaster-mapper-workspace-link"
       >
         Open Workspace →
-      </a>
+      </Link>
     </aside>
   );
 }
