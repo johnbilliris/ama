@@ -51,13 +51,17 @@ def _log_perf(endpoint: str, start: float, tenant_id: str = "live") -> None:
     elapsed_ms = round((time.monotonic() - start) * 1000, 1)
     perf_logger.info(
         "dashboard.perf endpoint=%s tenant=%s elapsed_ms=%.1f",
-        endpoint, tenant_id, elapsed_ms,
+        endpoint,
+        tenant_id,
+        elapsed_ms,
     )
     if elapsed_ms > 2000:
         perf_logger.warning(
             "dashboard.perf.slow endpoint=%s elapsed_ms=%.1f exceeds_target=2000ms",
-            endpoint, elapsed_ms,
+            endpoint,
+            elapsed_ms,
         )
+
 
 _data_service: GovernanceDataService | None = None
 _aggregation: DashboardAggregationService | None = None
@@ -69,12 +73,15 @@ def _get_aggregation() -> DashboardAggregationService:
     global _data_service, _aggregation
     if _aggregation is None:
         from pathlib import Path
+
         from packages.domain.src.domain.seed import bootstrap as _seed_mod
+
         _seed_root = Path(_seed_mod.__file__).resolve().parent
         _seed_data = SeedService().load(_seed_root)
         _data_service = GovernanceDataService(seed_data=_seed_data)
         _aggregation = DashboardAggregationService(data_service=_data_service)
     return _aggregation
+
 
 # --- Role-to-widget mapping configuration (US7) ---
 
@@ -82,96 +89,376 @@ ROLE_WIDGET_CONFIGS: dict[str, dict] = {
     "incident_controller": {
         "default_view": "executive_summary",
         "widgets": [
-            {"widget_id": "health_score_gauge", "widget_type": "gauge", "display_name": "Health Score", "priority": 1, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
-            {"widget_id": "constitutional_gates", "widget_type": "grid", "display_name": "Constitutional Gates", "priority": 2, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
-            {"widget_id": "active_incidents", "widget_type": "counter", "display_name": "Active Incidents", "priority": 3, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
-            {"widget_id": "resource_utilisation", "widget_type": "gauge", "display_name": "Resource Utilisation", "priority": 4, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
-            {"widget_id": "risk_summary", "widget_type": "chart", "display_name": "Strategic Risk Summary", "priority": 5, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "steady_state"},
-            {"widget_id": "pprr_indicator", "widget_type": "indicator", "display_name": "PPRR Phase", "priority": 6, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "steady_state"},
-            {"widget_id": "warning_compliance", "widget_type": "grid", "display_name": "Alert Approval Status", "priority": 7, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
+            {
+                "widget_id": "health_score_gauge",
+                "widget_type": "gauge",
+                "display_name": "Health Score",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "constitutional_gates",
+                "widget_type": "grid",
+                "display_name": "Constitutional Gates",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "active_incidents",
+                "widget_type": "counter",
+                "display_name": "Active Incidents",
+                "priority": 3,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "resource_utilisation",
+                "widget_type": "gauge",
+                "display_name": "Resource Utilisation",
+                "priority": 4,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "risk_summary",
+                "widget_type": "chart",
+                "display_name": "Strategic Risk Summary",
+                "priority": 5,
+                "data_endpoint": "/governance/dashboard/risk",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "pprr_indicator",
+                "widget_type": "indicator",
+                "display_name": "PPRR Phase",
+                "priority": 6,
+                "data_endpoint": "/governance/dashboard/readiness",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "warning_compliance",
+                "widget_type": "grid",
+                "display_name": "Alert Approval Status",
+                "priority": 7,
+                "data_endpoint": "/governance/dashboard/risk",
+                "refresh_group": "active_incident",
+            },
         ],
     },
     "operations_officer": {
         "default_view": "executive_summary",
         "widgets": [
-            {"widget_id": "active_incidents", "widget_type": "counter", "display_name": "Active Incidents", "priority": 1, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
-            {"widget_id": "resource_utilisation", "widget_type": "gauge", "display_name": "Resource Utilisation", "priority": 2, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
-            {"widget_id": "pprr_indicator", "widget_type": "indicator", "display_name": "PPRR Phase (Response)", "priority": 3, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "active_incident"},
-            {"widget_id": "deployment_status", "widget_type": "counter", "display_name": "Deployment Status", "priority": 4, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "active_incident"},
-            {"widget_id": "field_safety", "widget_type": "indicator", "display_name": "Field Safety Status", "priority": 5, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "active_incident"},
+            {
+                "widget_id": "active_incidents",
+                "widget_type": "counter",
+                "display_name": "Active Incidents",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "resource_utilisation",
+                "widget_type": "gauge",
+                "display_name": "Resource Utilisation",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "pprr_indicator",
+                "widget_type": "indicator",
+                "display_name": "PPRR Phase (Response)",
+                "priority": 3,
+                "data_endpoint": "/governance/dashboard/readiness",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "deployment_status",
+                "widget_type": "counter",
+                "display_name": "Deployment Status",
+                "priority": 4,
+                "data_endpoint": "/governance/dashboard/readiness",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "field_safety",
+                "widget_type": "indicator",
+                "display_name": "Field Safety Status",
+                "priority": 5,
+                "data_endpoint": "/governance/dashboard/readiness",
+                "refresh_group": "active_incident",
+            },
         ],
     },
     "planning_officer": {
         "default_view": "operational_readiness",
         "widgets": [
-            {"widget_id": "emergency_plans", "widget_type": "table", "display_name": "Emergency Plan Status", "priority": 1, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "steady_state"},
-            {"widget_id": "pprr_indicator", "widget_type": "indicator", "display_name": "PPRR Phase Indicators", "priority": 2, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "steady_state"},
-            {"widget_id": "recovery_trajectory", "widget_type": "chart", "display_name": "Recovery Trajectory", "priority": 3, "data_endpoint": "/governance/dashboard/recovery", "refresh_group": "steady_state"},
+            {
+                "widget_id": "emergency_plans",
+                "widget_type": "table",
+                "display_name": "Emergency Plan Status",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/readiness",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "pprr_indicator",
+                "widget_type": "indicator",
+                "display_name": "PPRR Phase Indicators",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/readiness",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "recovery_trajectory",
+                "widget_type": "chart",
+                "display_name": "Recovery Trajectory",
+                "priority": 3,
+                "data_endpoint": "/governance/dashboard/recovery",
+                "refresh_group": "steady_state",
+            },
         ],
     },
     "intelligence_officer": {
         "default_view": "compliance",
         "widgets": [
-            {"widget_id": "compliance_matrix", "widget_type": "table", "display_name": "Data Source Compliance", "priority": 1, "data_endpoint": "/governance/dashboard/compliance", "refresh_group": "steady_state"},
-            {"widget_id": "health_score_gauge", "widget_type": "gauge", "display_name": "Health Score Trend", "priority": 2, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "steady_state"},
+            {
+                "widget_id": "compliance_matrix",
+                "widget_type": "table",
+                "display_name": "Data Source Compliance",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/compliance",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "health_score_gauge",
+                "widget_type": "gauge",
+                "display_name": "Health Score Trend",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "steady_state",
+            },
         ],
     },
     "logistics_officer": {
         "default_view": "operational_readiness",
         "widgets": [
-            {"widget_id": "resource_utilisation", "widget_type": "gauge", "display_name": "Resource Utilisation", "priority": 1, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
-            {"widget_id": "emergency_plans", "widget_type": "table", "display_name": "Emergency Plan Logistics", "priority": 2, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "steady_state"},
+            {
+                "widget_id": "resource_utilisation",
+                "widget_type": "gauge",
+                "display_name": "Resource Utilisation",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "emergency_plans",
+                "widget_type": "table",
+                "display_name": "Emergency Plan Logistics",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/readiness",
+                "refresh_group": "steady_state",
+            },
         ],
     },
     "public_information_officer": {
         "default_view": "risk_warning",
         "widgets": [
-            {"widget_id": "warning_compliance", "widget_type": "grid", "display_name": "AWS Warning Compliance", "priority": 1, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
-            {"widget_id": "broadcast_reach", "widget_type": "gauge", "display_name": "Broadcast Reach", "priority": 2, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
-            {"widget_id": "multilingual_coverage", "widget_type": "gauge", "display_name": "Multilingual Coverage %", "priority": 3, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
-            {"widget_id": "a11y_compliance", "widget_type": "indicator", "display_name": "Accessibility Compliance", "priority": 4, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "steady_state"},
+            {
+                "widget_id": "warning_compliance",
+                "widget_type": "grid",
+                "display_name": "AWS Warning Compliance",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/risk",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "broadcast_reach",
+                "widget_type": "gauge",
+                "display_name": "Broadcast Reach",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/risk",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "multilingual_coverage",
+                "widget_type": "gauge",
+                "display_name": "Multilingual Coverage %",
+                "priority": 3,
+                "data_endpoint": "/governance/dashboard/risk",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "a11y_compliance",
+                "widget_type": "indicator",
+                "display_name": "Accessibility Compliance",
+                "priority": 4,
+                "data_endpoint": "/governance/dashboard/risk",
+                "refresh_group": "steady_state",
+            },
         ],
     },
     "executive_leader": {
         "default_view": "executive_summary",
         "widgets": [
-            {"widget_id": "health_score_gauge", "widget_type": "gauge", "display_name": "Health Score", "priority": 1, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
-            {"widget_id": "constitutional_gates", "widget_type": "grid", "display_name": "Constitutional Gates", "priority": 2, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "steady_state"},
-            {"widget_id": "risk_summary", "widget_type": "chart", "display_name": "Strategic Risk Summary", "priority": 3, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "steady_state"},
-            {"widget_id": "recovery_domains", "widget_type": "progress_bar", "display_name": "Recovery Domain Progress", "priority": 4, "data_endpoint": "/governance/dashboard/recovery", "refresh_group": "steady_state"},
+            {
+                "widget_id": "health_score_gauge",
+                "widget_type": "gauge",
+                "display_name": "Health Score",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "constitutional_gates",
+                "widget_type": "grid",
+                "display_name": "Constitutional Gates",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "risk_summary",
+                "widget_type": "chart",
+                "display_name": "Strategic Risk Summary",
+                "priority": 3,
+                "data_endpoint": "/governance/dashboard/risk",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "recovery_domains",
+                "widget_type": "progress_bar",
+                "display_name": "Recovery Domain Progress",
+                "priority": 4,
+                "data_endpoint": "/governance/dashboard/recovery",
+                "refresh_group": "steady_state",
+            },
         ],
     },
     "observer_auditor": {
         "default_view": "audit_trail",
         "widgets": [
-            {"widget_id": "audit_search", "widget_type": "search", "display_name": "Audit Trail Search", "priority": 1, "data_endpoint": "/governance/dashboard/audit", "refresh_group": "manual_only"},
-            {"widget_id": "compliance_matrix", "widget_type": "table", "display_name": "Compliance Matrix", "priority": 2, "data_endpoint": "/governance/dashboard/compliance", "refresh_group": "steady_state"},
-            {"widget_id": "constitutional_gates", "widget_type": "grid", "display_name": "Constitutional Gate Details", "priority": 3, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "steady_state"},
+            {
+                "widget_id": "audit_search",
+                "widget_type": "search",
+                "display_name": "Audit Trail Search",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/audit",
+                "refresh_group": "manual_only",
+            },
+            {
+                "widget_id": "compliance_matrix",
+                "widget_type": "table",
+                "display_name": "Compliance Matrix",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/compliance",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "constitutional_gates",
+                "widget_type": "grid",
+                "display_name": "Constitutional Gate Details",
+                "priority": 3,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "steady_state",
+            },
         ],
     },
     "risk_manager": {
         "default_view": "risk_warning",
         "widgets": [
-            {"widget_id": "risk_register", "widget_type": "table", "display_name": "Risk Register", "priority": 1, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
-            {"widget_id": "warning_compliance", "widget_type": "grid", "display_name": "AWS Compliance", "priority": 2, "data_endpoint": "/governance/dashboard/risk", "refresh_group": "active_incident"},
-            {"widget_id": "recovery_domains", "widget_type": "progress_bar", "display_name": "Recovery Domain Progress", "priority": 3, "data_endpoint": "/governance/dashboard/recovery", "refresh_group": "steady_state"},
-            {"widget_id": "health_score_gauge", "widget_type": "gauge", "display_name": "Governance Health Score", "priority": 4, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "steady_state"},
+            {
+                "widget_id": "risk_register",
+                "widget_type": "table",
+                "display_name": "Risk Register",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/risk",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "warning_compliance",
+                "widget_type": "grid",
+                "display_name": "AWS Compliance",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/risk",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "recovery_domains",
+                "widget_type": "progress_bar",
+                "display_name": "Recovery Domain Progress",
+                "priority": 3,
+                "data_endpoint": "/governance/dashboard/recovery",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "health_score_gauge",
+                "widget_type": "gauge",
+                "display_name": "Governance Health Score",
+                "priority": 4,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "steady_state",
+            },
         ],
     },
     "resilience_planner": {
         "default_view": "operational_readiness",
         "widgets": [
-            {"widget_id": "pprr_indicator", "widget_type": "indicator", "display_name": "PPRR Phase Indicators", "priority": 1, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "steady_state"},
-            {"widget_id": "emergency_plans", "widget_type": "table", "display_name": "Emergency Plan Lifecycle", "priority": 2, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "steady_state"},
-            {"widget_id": "recovery_domains", "widget_type": "progress_bar", "display_name": "Recovery Domain Progress", "priority": 3, "data_endpoint": "/governance/dashboard/recovery", "refresh_group": "steady_state"},
+            {
+                "widget_id": "pprr_indicator",
+                "widget_type": "indicator",
+                "display_name": "PPRR Phase Indicators",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/readiness",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "emergency_plans",
+                "widget_type": "table",
+                "display_name": "Emergency Plan Lifecycle",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/readiness",
+                "refresh_group": "steady_state",
+            },
+            {
+                "widget_id": "recovery_domains",
+                "widget_type": "progress_bar",
+                "display_name": "Recovery Domain Progress",
+                "priority": 3,
+                "data_endpoint": "/governance/dashboard/recovery",
+                "refresh_group": "steady_state",
+            },
         ],
     },
     "field_coordinator": {
         "default_view": "executive_summary",
         "widgets": [
-            {"widget_id": "active_incidents", "widget_type": "counter", "display_name": "Active Incidents", "priority": 1, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
-            {"widget_id": "pprr_indicator", "widget_type": "indicator", "display_name": "PPRR Phase", "priority": 2, "data_endpoint": "/governance/dashboard/readiness", "refresh_group": "active_incident"},
-            {"widget_id": "resource_utilisation", "widget_type": "gauge", "display_name": "Resource Utilisation", "priority": 3, "data_endpoint": "/governance/dashboard/summary", "refresh_group": "active_incident"},
+            {
+                "widget_id": "active_incidents",
+                "widget_type": "counter",
+                "display_name": "Active Incidents",
+                "priority": 1,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "pprr_indicator",
+                "widget_type": "indicator",
+                "display_name": "PPRR Phase",
+                "priority": 2,
+                "data_endpoint": "/governance/dashboard/readiness",
+                "refresh_group": "active_incident",
+            },
+            {
+                "widget_id": "resource_utilisation",
+                "widget_type": "gauge",
+                "display_name": "Resource Utilisation",
+                "priority": 3,
+                "data_endpoint": "/governance/dashboard/summary",
+                "refresh_group": "active_incident",
+            },
         ],
     },
 }
@@ -227,6 +514,7 @@ def _resolve_widget_layout(roles: list[str]) -> tuple[list[WidgetDefinition], st
 
 # --- Endpoint 1: Dashboard Config ---
 
+
 @router.get("/config", response_model=DashboardConfigResponse)
 async def get_dashboard_config(request: Request) -> DashboardConfigResponse:
     """GET /governance/dashboard/config — user role config and polling settings."""
@@ -275,6 +563,7 @@ async def get_dashboard_config(request: Request) -> DashboardConfigResponse:
 
 # --- Endpoint 2: Executive Summary ---
 
+
 @router.get("/summary", response_model=ExecutiveSummaryResponse)
 async def get_executive_summary(
     request: Request,
@@ -287,7 +576,8 @@ async def get_executive_summary(
 
     try:
         summary = _get_aggregation().get_executive_summary(
-            tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
+            tenant_id=tenant_id,
+            jurisdiction_id=jurisdiction_id,
         )
         data = summary.model_dump(mode="json")
 
@@ -309,6 +599,7 @@ async def get_executive_summary(
 
 
 # --- Endpoint 3: Compliance Matrix ---
+
 
 @router.get("/compliance", response_model=ComplianceMatrixResponse)
 async def get_compliance_matrix(
@@ -340,6 +631,7 @@ async def get_compliance_matrix(
 
 # --- Endpoint 4: Compliance Detail ---
 
+
 @router.get("/compliance/{data_source_id}", response_model=ComplianceDetailResponse)
 async def get_compliance_detail(
     data_source_id: str,
@@ -349,7 +641,9 @@ async def get_compliance_detail(
     """GET /governance/dashboard/compliance/{dataSourceId} — detail view."""
     tenant_id = _get_tenant_id(request)
     detail = _get_aggregation().get_compliance_detail(
-        data_source_id, tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
+        data_source_id,
+        tenant_id=tenant_id,
+        jurisdiction_id=jurisdiction_id,
     )
     if not detail:
         raise HTTPException(status_code=404, detail=f"Data source '{data_source_id}' not found.")
@@ -357,6 +651,7 @@ async def get_compliance_detail(
 
 
 # --- Endpoint 5: Audit Trail ---
+
 
 @router.get("/audit", response_model=AuditTrailResponse)
 async def get_audit_trail(
@@ -396,6 +691,7 @@ async def get_audit_trail(
 
 # --- Endpoint 6: Decision Chain ---
 
+
 @router.get("/audit/{event_id}/chain", response_model=AuditDecisionChainResponse)
 async def get_decision_chain(
     event_id: str,
@@ -405,7 +701,9 @@ async def get_decision_chain(
     """GET /governance/dashboard/audit/{eventId}/chain — decision chain."""
     tenant_id = _get_tenant_id(request)
     chain = _get_aggregation().get_decision_chain(
-        event_id, tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
+        event_id,
+        tenant_id=tenant_id,
+        jurisdiction_id=jurisdiction_id,
     )
     if not chain:
         raise HTTPException(status_code=404, detail=f"Event '{event_id}' not found.")
@@ -413,6 +711,7 @@ async def get_decision_chain(
 
 
 # --- Endpoint 7: Audit Export (create) ---
+
 
 @router.post("/audit/export", status_code=202, response_model=AuditExportJobResponse)
 async def create_audit_export(
@@ -448,6 +747,7 @@ async def create_audit_export(
 
 # --- Endpoint 8: Audit Export Status ---
 
+
 @router.get("/audit/export/{job_id}", response_model=AuditExportJobResponse)
 async def get_export_status(job_id: str) -> AuditExportJobResponse:
     """GET /governance/dashboard/audit/export/{jobId} — export job status."""
@@ -466,23 +766,29 @@ async def get_export_status(job_id: str) -> AuditExportJobResponse:
 
 # --- Endpoint 9: Operational Readiness ---
 
+
 @router.get("/readiness", response_model=OperationalReadinessResponse)
 async def get_operational_readiness(
     request: Request,
     jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
-    hazard_type: str | None = Query(None, description="Filter by hazard type (bushfire, flood, storm, cyclone, earthquake, tsunami, etc.)"),
+    hazard_type: str | None = Query(
+        None, description="Filter by hazard type (bushfire, flood, storm, cyclone, earthquake, tsunami, etc.)"
+    ),
 ) -> OperationalReadinessResponse:
     """GET /governance/dashboard/readiness — PPRR, plans, exercises, roles."""
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
     result = _get_aggregation().get_operational_readiness(
-        tenant_id=tenant_id, jurisdiction_id=jurisdiction_id, hazard_type=hazard_type,
+        tenant_id=tenant_id,
+        jurisdiction_id=jurisdiction_id,
+        hazard_type=hazard_type,
     )
     _log_perf("operational_readiness", start, tenant_id)
     return result
 
 
 # --- Endpoint 10: Recovery Progress ---
+
 
 @router.get("/recovery", response_model=RecoveryProgressResponse)
 async def get_recovery_progress(
@@ -494,7 +800,9 @@ async def get_recovery_progress(
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
     result = _get_aggregation().get_recovery_progress(
-        tenant_id=tenant_id, incident_id=incident_id, jurisdiction_id=jurisdiction_id,
+        tenant_id=tenant_id,
+        incident_id=incident_id,
+        jurisdiction_id=jurisdiction_id,
     )
     _log_perf("recovery_progress", start, tenant_id)
     return result
@@ -502,9 +810,11 @@ async def get_recovery_progress(
 
 # --- Endpoint 11: Recovery Domain Detail ---
 
+
 @router.get("/recovery/{domain}")
 async def get_recovery_domain_detail(
-    domain: str, request: Request,
+    domain: str,
+    request: Request,
     incident_id: str | None = Query(None),
     jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
 ) -> RecoveryDomainDetail:
@@ -519,7 +829,10 @@ async def get_recovery_domain_detail(
         )
 
     detail = _get_aggregation().get_recovery_domain_detail(
-        domain, tenant_id=tenant_id, incident_id=incident_id, jurisdiction_id=jurisdiction_id,
+        domain,
+        tenant_id=tenant_id,
+        incident_id=incident_id,
+        jurisdiction_id=jurisdiction_id,
     )
     if not detail:
         raise HTTPException(status_code=404, detail=f"No recovery data for domain '{domain}'.")
@@ -528,25 +841,31 @@ async def get_recovery_domain_detail(
 
 # --- Endpoint 12: Risk & Warning ---
 
+
 @router.get("/risk", response_model=RiskWarningResponse)
 async def get_risk_and_warning(
     request: Request,
     jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
     issuing_authority: str | None = Query(None, description="Filter warnings by statutory issuing authority"),
-    hazard_type: str | None = Query(None, description="Filter by hazard type (bushfire, flood, storm, cyclone, earthquake, tsunami, etc.)"),
+    hazard_type: str | None = Query(
+        None, description="Filter by hazard type (bushfire, flood, storm, cyclone, earthquake, tsunami, etc.)"
+    ),
 ) -> RiskWarningResponse:
     """GET /governance/dashboard/risk — risk register + warning compliance."""
     start = time.monotonic()
     tenant_id = _get_tenant_id(request)
     result = _get_aggregation().get_risk_and_warning(
-        tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
-        issuing_authority=issuing_authority, hazard_type=hazard_type,
+        tenant_id=tenant_id,
+        jurisdiction_id=jurisdiction_id,
+        issuing_authority=issuing_authority,
+        hazard_type=hazard_type,
     )
     _log_perf("risk_warning", start, tenant_id)
     return result
 
 
 # --- Endpoint 13: Risk Detail ---
+
 
 @router.get("/risk/{risk_id}")
 async def get_risk_detail(
@@ -557,7 +876,9 @@ async def get_risk_detail(
     """GET /governance/dashboard/risk/{riskId} — risk detail."""
     tenant_id = _get_tenant_id(request)
     detail = _get_aggregation().get_risk_detail(
-        risk_id, tenant_id=tenant_id, jurisdiction_id=jurisdiction_id,
+        risk_id,
+        tenant_id=tenant_id,
+        jurisdiction_id=jurisdiction_id,
     )
     if not detail:
         raise HTTPException(status_code=404, detail=f"Risk '{risk_id}' not found.")

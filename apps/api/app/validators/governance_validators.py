@@ -1,6 +1,5 @@
 from fastapi import HTTPException
 
-from packages.domain.src.domain.models.audit_export import ExportFormat
 from packages.domain.src.domain.models.handoff_chain import HandoffChainDefinition
 
 RECOGNIZED_AGENTS = frozenset({

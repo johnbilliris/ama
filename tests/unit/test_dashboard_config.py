@@ -1,6 +1,5 @@
 """Unit tests for dashboard role-to-widget config resolution (T080)."""
 
-import pytest
 
 from apps.api.app.api.routes.governance_dashboard import (
     ROLE_WIDGET_CONFIGS,

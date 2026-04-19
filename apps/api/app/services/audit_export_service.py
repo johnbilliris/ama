@@ -72,11 +72,11 @@ class AuditExportService:
 
         try:
             if job.format == "csv":
-                content = self._generate_csv(records)
+                self._generate_csv(records)
             elif job.format == "json":
-                content = self._generate_json(records)
+                self._generate_json(records)
             elif job.format == "pdf":
-                content = self._generate_pdf_placeholder(records)
+                self._generate_pdf_placeholder(records)
             else:
                 msg = f"Unsupported format: {job.format}"
                 raise ValueError(msg)

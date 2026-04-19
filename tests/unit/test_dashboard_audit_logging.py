@@ -1,9 +1,8 @@
 """Unit tests for dashboard audit logging (T086)."""
 
-import pytest
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
-from packages.domain.src.domain.models.governance_audit import GovernanceAction, GovernanceAuditEntry
+from packages.domain.src.domain.models.governance_audit import GovernanceAuditEntry
 
 
 class TestDashboardAuditActions:

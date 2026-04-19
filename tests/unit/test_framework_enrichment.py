@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-from packages.domain.src.domain.models.operating_framework import OperatingFramework
 from packages.domain.src.domain.models.incident import IncidentType, PprrPhase
+from packages.domain.src.domain.models.operating_framework import OperatingFramework
 
 SEED_ROOT = Path("packages/domain/src/domain/seed")
 

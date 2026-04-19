@@ -1,6 +1,7 @@
+import logging
+
 from app.services.preparedness_analysis_service import PreparednessAnalysisService
 from fastapi import APIRouter, Query, Request
-import logging
 
 router = APIRouter(prefix="/frameworks", tags=["frameworks"])
 logger = logging.getLogger(__name__)

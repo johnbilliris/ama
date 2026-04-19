@@ -12,9 +12,9 @@ from pathlib import Path
 
 import pytest
 
-from packages.domain.src.domain.models.organisation import Organisation
 from packages.domain.src.domain.models.aiims_role_assignment import AiimsFunction
 from packages.domain.src.domain.models.incident import IncidentType
+from packages.domain.src.domain.models.organisation import Organisation
 
 SEED_PATH = Path("packages/domain/src/domain/seed/organisations_australia.json")
 

@@ -8,12 +8,11 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from packages.domain.src.domain.models.dashboard_widget_config import AIIMSRole, WidgetDefinition
+from packages.domain.src.domain.models.dashboard_widget_config import WidgetDefinition
 from packages.domain.src.domain.models.governance_health_score import (
     ConstitutionalGateStatus,
     GovernanceHealthScore,
 )
-
 
 # --- Executive Summary ---
 

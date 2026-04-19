@@ -1,12 +1,13 @@
 """Unit tests for GovernanceHealthScore domain model validation (T029)."""
 
+from datetime import UTC, datetime
+
 import pytest
-from datetime import datetime, UTC
 
 from packages.domain.src.domain.models.governance_health_score import (
+    ConstitutionalGateStatus,
     DimensionScore,
     GovernanceHealthScore,
-    ConstitutionalGateStatus,
 )
 
 
@@ -25,14 +26,20 @@ class TestDimensionScore:
     def test_score_range_min(self):
         d = DimensionScore(
             dimension="operational_readiness",
-            score=0.0, weight=0.25, weighted_score=0.0, input_count=0,
+            score=0.0,
+            weight=0.25,
+            weighted_score=0.0,
+            input_count=0,
         )
         assert d.score == 0.0
 
     def test_score_range_max(self):
         d = DimensionScore(
             dimension="data_source_governance",
-            score=100.0, weight=0.20, weighted_score=20.0, input_count=5,
+            score=100.0,
+            weight=0.20,
+            weighted_score=20.0,
+            input_count=5,
         )
         assert d.score == 100.0
 
@@ -40,7 +47,10 @@ class TestDimensionScore:
         with pytest.raises(Exception):
             DimensionScore(
                 dimension="recovery_progress",
-                score=101.0, weight=0.15, weighted_score=15.15, input_count=1,
+                score=101.0,
+                weight=0.15,
+                weighted_score=15.15,
+                input_count=1,
             )
 
 
@@ -87,16 +97,23 @@ class TestGovernanceHealthScore:
 
     def test_dimension_weights_must_sum_to_one(self):
         bad_dims = [
-            DimensionScore(dimension="constitutional_compliance", score=80, weight=0.50, weighted_score=40, input_count=1),
-            DimensionScore(dimension="operational_readiness", score=70, weight=0.25, weighted_score=17.5, input_count=1),
+            DimensionScore(
+                dimension="constitutional_compliance", score=80, weight=0.50, weighted_score=40, input_count=1
+            ),
+            DimensionScore(
+                dimension="operational_readiness", score=70, weight=0.25, weighted_score=17.5, input_count=1
+            ),
             DimensionScore(dimension="data_source_governance", score=60, weight=0.20, weighted_score=12, input_count=1),
             DimensionScore(dimension="recovery_progress", score=50, weight=0.15, weighted_score=7.5, input_count=1),
         ]
         # Weights sum to 1.10 — should fail
         with pytest.raises(Exception):
             GovernanceHealthScore(
-                id="test", tenant_id="live", score=77,
-                status="amber", dimensions=bad_dims,
+                id="test",
+                tenant_id="live",
+                score=77,
+                status="amber",
+                dimensions=bad_dims,
                 calculated_at=datetime.now(UTC),
             )
 
@@ -104,8 +121,11 @@ class TestGovernanceHealthScore:
         dims = self._make_dimensions()
         with pytest.raises(Exception):
             GovernanceHealthScore(
-                id="test", tenant_id="live", score=99.0,  # wrong
-                status="green", dimensions=dims,
+                id="test",
+                tenant_id="live",
+                score=99.0,  # wrong
+                status="green",
+                dimensions=dims,
                 calculated_at=datetime.now(UTC),
             )
 
@@ -125,19 +145,25 @@ class TestConstitutionalGateStatus:
     def test_gate_number_range(self):
         for num in range(1, 11):
             g = ConstitutionalGateStatus(
-                gate_number=num, gate_name=f"Gate {num}",
-                status="compliant", detail_url="/test",
+                gate_number=num,
+                gate_name=f"Gate {num}",
+                status="compliant",
+                detail_url="/test",
             )
             assert g.gate_number == num
 
     def test_gate_number_out_of_range(self):
         with pytest.raises(Exception):
             ConstitutionalGateStatus(
-                gate_number=0, gate_name="Invalid",
-                status="compliant", detail_url="/test",
+                gate_number=0,
+                gate_name="Invalid",
+                status="compliant",
+                detail_url="/test",
             )
         with pytest.raises(Exception):
             ConstitutionalGateStatus(
-                gate_number=11, gate_name="Invalid",
-                status="compliant", detail_url="/test",
+                gate_number=11,
+                gate_name="Invalid",
+                status="compliant",
+                detail_url="/test",
             )

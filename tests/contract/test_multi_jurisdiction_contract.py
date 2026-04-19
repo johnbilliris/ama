@@ -6,9 +6,9 @@ Validates:
 - GET /api/frameworks?jurisdictionId=... supports multi-value
 - Backward compatibility: single jurisdictionId still works
 """
+import pytest
 from app.main import create_app
 from fastapi.testclient import TestClient
-import pytest
 
 
 @pytest.fixture(scope="module")

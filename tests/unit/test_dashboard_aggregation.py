@@ -1,7 +1,5 @@
 """Unit tests for DashboardAggregationService (T033, T042, T060, T067, T073)."""
 
-import pytest
-from datetime import datetime, UTC
 
 from apps.api.app.services.dashboard_aggregation_service import DashboardAggregationService
 

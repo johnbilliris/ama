@@ -166,9 +166,10 @@ class TestSeedServiceCaching:
     """SeedService caches loaded data in memory."""
 
     def test_repeated_loads_return_same_object(self):
-        from apps.api.app.services.seed_service import SeedService, _cached_load
-        from packages.domain.src.domain.seed import bootstrap as _seed_mod
         from pathlib import Path
+
+        from apps.api.app.services.seed_service import SeedService
+        from packages.domain.src.domain.seed import bootstrap as _seed_mod
         seed_root = Path(_seed_mod.__file__).resolve().parent
         svc = SeedService()
         result1 = svc.load(seed_root)

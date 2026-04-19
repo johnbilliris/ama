@@ -40,8 +40,12 @@ AWS_PRINCIPLES = [
 ]
 
 AIIMS_FUNCTIONS = [
-    "control", "planning", "intelligence",
-    "public_information", "operations", "logistics",
+    "control",
+    "planning",
+    "intelligence",
+    "public_information",
+    "operations",
+    "logistics",
 ]
 
 
@@ -98,15 +102,17 @@ class GovernanceDataService:
             evaluator = gate_evaluators.get(num)
             status, evidence_count = evaluator() if evaluator else ("assessment_pending", 0)
 
-            gates.append(ConstitutionalGateStatus(
-                gate_number=num,
-                gate_name=name,
-                status=status,
-                severity=None if status == "compliant" else "warning",
-                last_assessment_date=now - timedelta(days=1),
-                evidence_count=evidence_count,
-                detail_url=f"/governance/dashboard/compliance?gate={num}",
-            ))
+            gates.append(
+                ConstitutionalGateStatus(
+                    gate_number=num,
+                    gate_name=name,
+                    status=status,
+                    severity=None if status == "compliant" else "warning",
+                    last_assessment_date=now - timedelta(days=1),
+                    evidence_count=evidence_count,
+                    detail_url=f"/governance/dashboard/compliance?gate={num}",
+                )
+            )
 
         return gates
 
@@ -143,7 +149,6 @@ class GovernanceDataService:
         """Gate 4: Audit trail and governance registry configured."""
         has_audit = bool(self._repo)
         has_sources = len(self._data_sources) > 0
-        evidence = (1 if has_audit else 0) + (1 if has_sources else 0)
         if has_audit and has_sources:
             return "compliant", len(self._data_sources)
         if has_sources:
@@ -153,7 +158,8 @@ class GovernanceDataService:
     def _eval_warning_public_info(self) -> tuple[str, int]:
         """Gate 5: Warning-related data sources registered."""
         warning_sources = [
-            s for s in self._data_sources
+            s
+            for s in self._data_sources
             if s.get("sub_category") in ("weather_climate", "seismic_geological", "fire_bushfire")
             or "warning" in s.get("name", "").lower()
         ]
@@ -166,9 +172,9 @@ class GovernanceDataService:
     def _eval_evacuation_framework(self) -> tuple[str, int]:
         """Gate 6: Evacuation-related frameworks exist."""
         evac_fws = [
-            f for f in self._frameworks
-            if "evacuation" in f.get("name", "").lower()
-            or "evacuation" in f.get("framework_id", "").lower()
+            f
+            for f in self._frameworks
+            if "evacuation" in f.get("name", "").lower() or "evacuation" in f.get("framework_id", "").lower()
         ]
         if evac_fws:
             return "compliant", len(evac_fws)
@@ -212,10 +218,7 @@ class GovernanceDataService:
 
     def _eval_governance_quality(self) -> tuple[str, int]:
         """Gate 10: Quality gates — frameworks with review cycles."""
-        fws_with_review = [
-            f for f in self._frameworks
-            if f.get("review_cycle_years") or f.get("version")
-        ]
+        fws_with_review = [f for f in self._frameworks if f.get("review_cycle_years") or f.get("version")]
         if len(fws_with_review) >= len(self._frameworks) * 0.5:
             return "compliant", len(fws_with_review)
         if fws_with_review:
@@ -231,10 +234,7 @@ class GovernanceDataService:
                 sources = self._repo.list_sources()
                 total = len(sources)
                 compliant = sum(1 for s in sources if getattr(s, "compliance_status", "") == "compliant")
-                partial = sum(
-                    1 for s in sources
-                    if getattr(s, "compliance_status", "") == "partially_compliant"
-                )
+                partial = sum(1 for s in sources if getattr(s, "compliance_status", "") == "partially_compliant")
                 return {"total": total, "compliant": compliant, "partially_compliant": partial}
             except Exception:
                 logger.warning("Failed to get data source stats from repo, falling back to seed")
@@ -253,10 +253,7 @@ class GovernanceDataService:
     def get_readiness_inputs(self, tenant_id: str) -> dict:
         """Compute operational readiness from seed data."""
         role_coverage = self.get_role_coverage(tenant_id)
-        overall_coverage = (
-            sum(r["coverage_pct"] for r in role_coverage) / len(role_coverage)
-            if role_coverage else 0.0
-        )
+        overall_coverage = sum(r["coverage_pct"] for r in role_coverage) / len(role_coverage) if role_coverage else 0.0
 
         plan_summaries = self.get_emergency_plan_summaries(tenant_id)
         total_plans = sum(s["count"] for s in plan_summaries)
@@ -288,11 +285,13 @@ class GovernanceDataService:
             outcomes = domain_data.get("outcomes", []) if isinstance(domain_data, dict) else []
             total_indicators = sum(len(o.get("indicators", [])) for o in outcomes)
             # Baseline: catalogue loaded = structure exists, no active tracking = 0% progress
-            domain_stats.append({
-                "domain": domain_name,
-                "completion_pct": 0.0,
-                "indicator_count": total_indicators,
-            })
+            domain_stats.append(
+                {
+                    "domain": domain_name,
+                    "completion_pct": 0.0,
+                    "indicator_count": total_indicators,
+                }
+            )
 
         return {
             "has_active_recovery": False,
@@ -350,13 +349,15 @@ class GovernanceDataService:
         for func in AIIMS_FUNCTIONS:
             assigned = function_counts.get(func, 0)
             required = max(1, len(self._jurisdictions))
-            coverage.append({
-                "role": func,
-                "assigned_count": assigned,
-                "required_count": required,
-                "is_staffed": assigned >= required,
-                "coverage_pct": min(100.0, round((assigned / required) * 100, 1)) if required > 0 else 0.0,
-            })
+            coverage.append(
+                {
+                    "role": func,
+                    "assigned_count": assigned,
+                    "required_count": required,
+                    "is_staffed": assigned >= required,
+                    "coverage_pct": min(100.0, round((assigned / required) * 100, 1)) if required > 0 else 0.0,
+                }
+            )
 
         return coverage
 
@@ -365,26 +366,26 @@ class GovernanceDataService:
     def get_emergency_plan_summaries(self, tenant_id: str) -> list[dict]:
         """Derive emergency plan expectations from frameworks and assignments."""
         states = [
-            "Draft", "InConsultation", "UnderReview", "Endorsed",
-            "Activated", "PostEventReview", "Superseded",
+            "Draft",
+            "InConsultation",
+            "UnderReview",
+            "Endorsed",
+            "Activated",
+            "PostEventReview",
+            "Superseded",
         ]
 
         # Count frameworks that serve as emergency plans
         plan_frameworks = [
-            f for f in self._frameworks
+            f
+            for f in self._frameworks
             if f.get("type") in ("state_territory_plan", "hazard_specific", "national", "national_strategy")
         ]
         total_plan_fws = len(plan_frameworks)
 
         # Distribute across lifecycle states based on seed metadata
-        endorsed_count = sum(
-            1 for f in plan_frameworks
-            if f.get("version") and f.get("source_uri")
-        )
-        draft_count = sum(
-            1 for f in plan_frameworks
-            if not f.get("version") and not f.get("source_uri")
-        )
+        endorsed_count = sum(1 for f in plan_frameworks if f.get("version") and f.get("source_uri"))
+        draft_count = sum(1 for f in plan_frameworks if not f.get("version") and not f.get("source_uri"))
         remaining = total_plan_fws - endorsed_count - draft_count
 
         state_distribution = {
@@ -422,12 +423,18 @@ class GovernanceDataService:
         role_cov = self.get_role_coverage(tenant_id)
         for role_data in role_cov:
             if not role_data["is_staffed"]:
-                gaps.append({
-                    "gap_type": "staffing",
-                    "description": f"{role_data['role'].replace('_', ' ').title()} has {role_data['assigned_count']} assigned vs {role_data['required_count']} required",
-                    "severity": "critical" if role_data["assigned_count"] == 0 else "high",
-                    "affected_roles": [role_data["role"]],
-                })
+                gaps.append(
+                    {
+                        "gap_type": "staffing",
+                        "description": (
+                            f"{role_data['role'].replace('_', ' ').title()} has "
+                            f"{role_data['assigned_count']} assigned vs "
+                            f"{role_data['required_count']} required"
+                        ),
+                        "severity": "critical" if role_data["assigned_count"] == 0 else "high",
+                        "affected_roles": [role_data["role"]],
+                    }
+                )
 
         # Check hazard coverage gaps
         framework_hazards: set[str] = set()
@@ -440,12 +447,17 @@ class GovernanceDataService:
 
         uncovered = framework_hazards - org_hazards
         if uncovered:
-            gaps.append({
-                "gap_type": "capability",
-                "description": f"Hazard types defined in frameworks but not covered by any organisation: {', '.join(sorted(uncovered))}",
-                "severity": "medium",
-                "affected_roles": [],
-            })
+            gaps.append(
+                {
+                    "gap_type": "capability",
+                    "description": (
+                        "Hazard types defined in frameworks but not covered by any organisation: "
+                        f"{', '.join(sorted(uncovered))}"
+                    ),
+                    "severity": "medium",
+                    "affected_roles": [],
+                }
+            )
 
         return gaps
 
@@ -453,10 +465,7 @@ class GovernanceDataService:
 
     def get_volunteer_readiness(self, tenant_id: str) -> dict:
         """Compute volunteer readiness from organisation workforce types."""
-        vol_orgs = [
-            o for o in self._orgs
-            if o.get("workforce_type") in ("volunteer", "mixed")
-        ]
+        vol_orgs = [o for o in self._orgs if o.get("workforce_type") in ("volunteer", "mixed")]
         total = len(vol_orgs)
 
         jurisdictions_covered: set[str] = set()
@@ -491,20 +500,22 @@ class GovernanceDataService:
             total_indicators = sum(len(o.get("indicators", [])) for o in outcomes)
 
             # No active tracker = 0% completion (honest baseline)
-            results.append({
-                "domain": domain_name,
-                "display_name": f"{domain_name.title()} Recovery",
-                "completion_pct": 0.0,
-                "trend": "stable",
-                "target_pct": 100.0,
-                "variance_from_target": -100.0,
-                "is_below_target": True,
-                "is_cross_cutting": False,
-                "incident_id": incident_id,
-                "outcome_count": len(outcomes),
-                "activity_count": total_activities,
-                "indicator_count": total_indicators,
-            })
+            results.append(
+                {
+                    "domain": domain_name,
+                    "display_name": f"{domain_name.title()} Recovery",
+                    "completion_pct": 0.0,
+                    "trend": "stable",
+                    "target_pct": 100.0,
+                    "variance_from_target": -100.0,
+                    "is_below_target": True,
+                    "is_cross_cutting": False,
+                    "incident_id": incident_id,
+                    "outcome_count": len(outcomes),
+                    "activity_count": total_activities,
+                    "indicator_count": total_indicators,
+                }
+            )
 
         return results
 
@@ -523,32 +534,40 @@ class GovernanceDataService:
         me_results = []
 
         for outcome in outcomes:
-            outcome_targets.append({
-                "target_name": outcome.get("title", "Unknown"),
-                "target_value": len(outcome.get("indicators", [])),
-                "current_value": 0,
-            })
+            outcome_targets.append(
+                {
+                    "target_name": outcome.get("title", "Unknown"),
+                    "target_value": len(outcome.get("indicators", [])),
+                    "current_value": 0,
+                }
+            )
             for activity in outcome.get("activities", []):
-                activity_rates.append({
-                    "activity": activity.get("title", "Unknown"),
-                    "rate_pct": 0.0,
-                })
+                activity_rates.append(
+                    {
+                        "activity": activity.get("title", "Unknown"),
+                        "rate_pct": 0.0,
+                    }
+                )
             for indicator in outcome.get("indicators", []):
-                community_indicators.append({
-                    "indicator": indicator.get("title", "Unknown"),
-                    "value": "not_assessed",
-                    "type": "qualitative",
-                })
+                community_indicators.append(
+                    {
+                        "indicator": indicator.get("title", "Unknown"),
+                        "value": "not_assessed",
+                        "type": "qualitative",
+                    }
+                )
 
         eval_questions = self._recovery_catalogue.get("evaluation_questions", [])
         for eq_domain in eval_questions:
             if isinstance(eq_domain, dict) and eq_domain.get("domain") == domain:
                 for q in eq_domain.get("questions", []):
-                    me_results.append({
-                        "outcome": q if isinstance(q, str) else str(q),
-                        "rating": "not_evaluated",
-                        "evidence_count": 0,
-                    })
+                    me_results.append(
+                        {
+                            "outcome": q if isinstance(q, str) else str(q),
+                            "rating": "not_evaluated",
+                            "evidence_count": 0,
+                        }
+                    )
 
         return {
             "domain": domain,
@@ -571,7 +590,8 @@ class GovernanceDataService:
     def get_aws_principle_compliance(self, tenant_id: str) -> list[dict]:
         """Compute AWS principle compliance from data source trust tiers."""
         warning_sources = [
-            s for s in self._data_sources
+            s
+            for s in self._data_sources
             if s.get("sub_category") in ("weather_climate", "seismic_geological", "fire_bushfire")
             or "warning" in s.get("name", "").lower()
             or "alert" in s.get("name", "").lower()
@@ -579,23 +599,22 @@ class GovernanceDataService:
         total = len(warning_sources) if warning_sources else 1
 
         # Sources with tier_1 trust are fully aligned with AWS principles
-        tier1_count = sum(
-            1 for s in warning_sources
-            if s.get("trust_tier", "").startswith("tier_1")
-        )
+        tier1_count = sum(1 for s in warning_sources if s.get("trust_tier", "").startswith("tier_1"))
 
         results = []
         for code, name in AWS_PRINCIPLES:
             compliant = tier1_count
             rate = round((compliant / total) * 100, 1) if total > 0 else 0.0
-            results.append({
-                "principle": code,
-                "display_name": name,
-                "compliant_count": compliant,
-                "total_count": total,
-                "compliance_rate_pct": rate,
-                "non_compliant_warning_ids": [],
-            })
+            results.append(
+                {
+                    "principle": code,
+                    "display_name": name,
+                    "compliant_count": compliant,
+                    "total_count": total,
+                    "compliance_rate_pct": rate,
+                    "non_compliant_warning_ids": [],
+                }
+            )
 
         return results
 
@@ -618,26 +637,29 @@ class GovernanceDataService:
                             "compliance_lapsed": "grace_period",
                         }
                         matrix_status = status_map.get(
-                            getattr(s, "compliance_status", "unassessed"), "pending",
+                            getattr(s, "compliance_status", "unassessed"),
+                            "pending",
                         )
                         countdown = None
                         if getattr(s, "grace_period_end", None):
                             delta = s.grace_period_end - now
                             countdown = max(0, delta.days)
 
-                        entries.append({
-                            "data_source_id": s.data_source_id,
-                            "data_source_name": s.name,
-                            "compliance_status": matrix_status,
-                            "last_assessment_date": getattr(s, "updated_at", now),
-                            "next_assessment_due_date": getattr(s, "next_assessment_due_date", None),
-                            "governance_gap_count": getattr(s, "governance_gap_count", 0),
-                            "grace_period_expiry": getattr(s, "grace_period_end", None),
-                            "grace_period_reason": getattr(s, "grace_period_reason", None),
-                            "grace_period_countdown_days": countdown,
-                            "category": getattr(s, "kind", "unknown"),
-                            "data_source_type": "stored",
-                        })
+                        entries.append(
+                            {
+                                "data_source_id": s.data_source_id,
+                                "data_source_name": s.name,
+                                "compliance_status": matrix_status,
+                                "last_assessment_date": getattr(s, "updated_at", now),
+                                "next_assessment_due_date": getattr(s, "next_assessment_due_date", None),
+                                "governance_gap_count": getattr(s, "governance_gap_count", 0),
+                                "grace_period_expiry": getattr(s, "grace_period_end", None),
+                                "grace_period_reason": getattr(s, "grace_period_reason", None),
+                                "grace_period_countdown_days": countdown,
+                                "category": getattr(s, "kind", "unknown"),
+                                "data_source_type": "stored",
+                            }
+                        )
                     return entries
             except Exception:
                 logger.warning("Failed to build compliance from repo, falling back to seed")
@@ -646,19 +668,21 @@ class GovernanceDataService:
         now = datetime.now(UTC)
         entries = []
         for s in self._data_sources:
-            entries.append({
-                "data_source_id": s.get("data_source_id", ""),
-                "data_source_name": s.get("name", ""),
-                "compliance_status": "pending",
-                "last_assessment_date": now,
-                "next_assessment_due_date": None,
-                "governance_gap_count": 0,
-                "grace_period_expiry": None,
-                "grace_period_reason": None,
-                "grace_period_countdown_days": None,
-                "category": s.get("kind", "unknown"),
-                "data_source_type": "seed_fallback",
-            })
+            entries.append(
+                {
+                    "data_source_id": s.get("data_source_id", ""),
+                    "data_source_name": s.get("name", ""),
+                    "compliance_status": "pending",
+                    "last_assessment_date": now,
+                    "next_assessment_due_date": None,
+                    "governance_gap_count": 0,
+                    "grace_period_expiry": None,
+                    "grace_period_reason": None,
+                    "grace_period_countdown_days": None,
+                    "category": s.get("kind", "unknown"),
+                    "data_source_type": "seed_fallback",
+                }
+            )
 
         return entries
 

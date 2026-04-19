@@ -1,7 +1,8 @@
+import logging
+from pathlib import Path
+
 from app.services.seed_service import SeedService
 from fastapi import APIRouter, Request
-from pathlib import Path
-import logging
 
 from packages.domain.src.domain.models.jurisdiction import Jurisdiction
 

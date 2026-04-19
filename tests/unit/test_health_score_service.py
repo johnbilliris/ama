@@ -2,7 +2,7 @@
 
 import pytest
 
-from apps.api.app.services.health_score_service import HealthScoreService, DIMENSION_WEIGHTS
+from apps.api.app.services.health_score_service import DIMENSION_WEIGHTS, HealthScoreService
 
 
 class TestHealthScoreService:
@@ -39,7 +39,8 @@ class TestHealthScoreService:
 
     def test_traffic_light_amber(self):
         result = self.service.calculate(
-            constitutional_gates=[{"status": "compliant"} for _ in range(5)] + [{"status": "non_compliant"} for _ in range(5)],
+            constitutional_gates=[{"status": "compliant"} for _ in range(5)]
+            + [{"status": "non_compliant"} for _ in range(5)],
             readiness_data={"exercise_completion_rate": 60, "role_coverage_pct": 60, "plan_currency_pct": 60},
             data_source_stats={"total": 10, "compliant": 5, "partially_compliant": 2},
             recovery_data={"has_active_recovery": False},

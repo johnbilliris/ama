@@ -1,6 +1,7 @@
+import logging
+
 from app.services.organisation_intelligence_service import OrganisationIntelligenceService
 from fastapi import APIRouter, Query, Request
-import logging
 
 router = APIRouter(prefix="/organisations", tags=["organisations"])
 logger = logging.getLogger(__name__)
@@ -14,7 +15,9 @@ def _get_tenant_id(request: Request) -> str:
 
 
 @router.get("")
-async def list_organisations(request: Request, jurisdictionId: list[str] = Query(default=[])) -> list[dict[str, object]]:
+async def list_organisations(
+    request: Request, jurisdictionId: list[str] = Query(default=[])
+) -> list[dict[str, object]]:
     tenant_id = _get_tenant_id(request)
     logger.info("list_organisations tenant_id=%s jurisdictions=%s", tenant_id, jurisdictionId)
     organisations = OrganisationIntelligenceService().list_organisations(jurisdictionId if jurisdictionId else None)

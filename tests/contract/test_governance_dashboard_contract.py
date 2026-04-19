@@ -3,16 +3,16 @@
 import pytest
 from pydantic import ValidationError
 
+from apps.api.app.models.audit_export import AuditExportJobResponse
 from apps.api.app.models.governance_health import (
-    ExecutiveSummaryResponse,
-    ComplianceMatrixResponse,
     AuditTrailResponse,
+    ComplianceMatrixResponse,
+    DashboardConfigResponse,
+    ExecutiveSummaryResponse,
     OperationalReadinessResponse,
     RecoveryProgressResponse,
     RiskWarningResponse,
-    DashboardConfigResponse,
 )
-from apps.api.app.models.audit_export import AuditExportJobResponse
 
 
 class TestExecutiveSummaryContract:
@@ -24,9 +24,27 @@ class TestExecutiveSummaryContract:
 
     def test_valid_response(self):
         dims = [
-            {"dimension": "constitutional_compliance", "score": 90.0, "weight": 0.40, "weighted_score": 36.0, "input_count": 10},
-            {"dimension": "operational_readiness", "score": 80.0, "weight": 0.25, "weighted_score": 20.0, "input_count": 4},
-            {"dimension": "data_source_governance", "score": 70.0, "weight": 0.20, "weighted_score": 14.0, "input_count": 5},
+            {
+                "dimension": "constitutional_compliance",
+                "score": 90.0,
+                "weight": 0.40,
+                "weighted_score": 36.0,
+                "input_count": 10,
+            },
+            {
+                "dimension": "operational_readiness",
+                "score": 80.0,
+                "weight": 0.25,
+                "weighted_score": 20.0,
+                "input_count": 4,
+            },
+            {
+                "dimension": "data_source_governance",
+                "score": 70.0,
+                "weight": 0.20,
+                "weighted_score": 14.0,
+                "input_count": 5,
+            },
             {"dimension": "recovery_progress", "score": 50.0, "weight": 0.15, "weighted_score": 7.5, "input_count": 5},
         ]
         gates = [
@@ -56,7 +74,14 @@ class TestExecutiveSummaryContract:
         """data_freshness must be present."""
         with pytest.raises(ValidationError):
             ExecutiveSummaryResponse(
-                health_score={"id": "hs-1", "tenant_id": "live", "score": 85.0, "status": "green", "dimensions": [], "calculated_at": "2025-01-01T00:00:00Z"},
+                health_score={
+                    "id": "hs-1",
+                    "tenant_id": "live",
+                    "score": 85.0,
+                    "status": "green",
+                    "dimensions": [],
+                    "calculated_at": "2025-01-01T00:00:00Z",
+                },
                 constitutional_gates=[],
                 active_incident_count=0,
                 resource_utilisation_pct=55.0,

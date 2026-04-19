@@ -18,7 +18,6 @@ from app.models.governance_health import (
     ComplianceDetailResponse,
     ComplianceMatrixEntry,
     ComplianceMatrixResponse,
-    DecisionChainStep,
     EmergencyPlanSummary,
     ExecutiveSummaryResponse,
     OperationalReadinessResponse,
@@ -55,7 +54,10 @@ class DashboardAggregationService:
     # --- Executive Summary (US1) ---
 
     def get_executive_summary(
-        self, *, tenant_id: str = "live", has_active_incident: bool = False,
+        self,
+        *,
+        tenant_id: str = "live",
+        has_active_incident: bool = False,
         jurisdiction_id: str | None = None,
     ) -> ExecutiveSummaryResponse:
         """Build executive summary from real governance data sources."""
@@ -70,15 +72,22 @@ class DashboardAggregationService:
         else:
             gates = [
                 ConstitutionalGateStatus(
-                    gate_number=num, gate_name=name,
-                    status="assessment_pending", detail_url=f"/governance/dashboard/compliance?gate={num}",
+                    gate_number=num,
+                    gate_name=name,
+                    status="assessment_pending",
+                    detail_url=f"/governance/dashboard/compliance?gate={num}",
                 )
                 for num, name in [
-                    (1, "Primacy of Life"), (2, "National EM Principles"),
-                    (3, "Multi-Hazard Design"), (4, "Transparency & Auditability"),
-                    (5, "Warning & Public Information"), (6, "Evacuation Framework"),
-                    (7, "Recovery Support"), (8, "Cloud Platform & Infrastructure"),
-                    (9, "PPRR Lifecycle"), (10, "Governance & Quality Gates"),
+                    (1, "Primacy of Life"),
+                    (2, "National EM Principles"),
+                    (3, "Multi-Hazard Design"),
+                    (4, "Transparency & Auditability"),
+                    (5, "Warning & Public Information"),
+                    (6, "Evacuation Framework"),
+                    (7, "Recovery Support"),
+                    (8, "Cloud Platform & Infrastructure"),
+                    (9, "PPRR Lifecycle"),
+                    (10, "Governance & Quality Gates"),
                 ]
             ]
             ds_stats = {"total": 0, "compliant": 0, "partially_compliant": 0}
@@ -151,10 +160,12 @@ class DashboardAggregationService:
 
         total = len(entries)
         filters = {
-            k: v for k, v in {
+            k: v
+            for k, v in {
                 "compliance_status": compliance_status,
                 "category": category,
-            }.items() if v is not None
+            }.items()
+            if v is not None
         }
 
         if sort_by:
@@ -168,7 +179,7 @@ class DashboardAggregationService:
             except ValueError:
                 start = 0
 
-        page = entries[start:start + page_size]
+        page = entries[start : start + page_size]
         next_token = str(start + page_size) if start + page_size < total else None
 
         return ComplianceMatrixResponse(
@@ -180,7 +191,10 @@ class DashboardAggregationService:
         )
 
     def get_compliance_detail(
-        self, data_source_id: str, *, tenant_id: str = "live",
+        self,
+        data_source_id: str,
+        *,
+        tenant_id: str = "live",
         jurisdiction_id: str | None = None,
     ) -> ComplianceDetailResponse | None:
         """Get detailed compliance information for a single data source."""
@@ -224,14 +238,16 @@ class DashboardAggregationService:
     ) -> AuditTrailResponse:
         """Search audit events from real governance audit entries."""
         filters = {
-            k: str(v) for k, v in {
+            k: str(v)
+            for k, v in {
                 "date_from": date_from,
                 "date_to": date_to,
                 "actor": actor,
                 "action_type": action_type,
                 "affected_entity": affected_entity,
                 "keyword": keyword,
-            }.items() if v is not None
+            }.items()
+            if v is not None
         }
 
         events: list[AuditEventSummary] = []
@@ -266,7 +282,7 @@ class DashboardAggregationService:
             except ValueError:
                 start = 0
 
-        page = events[start:start + page_size]
+        page = events[start : start + page_size]
         next_token = str(start + page_size) if start + page_size < total else None
 
         return AuditTrailResponse(
@@ -278,7 +294,10 @@ class DashboardAggregationService:
         )
 
     def get_decision_chain(
-        self, event_id: str, *, tenant_id: str = "live",
+        self,
+        event_id: str,
+        *,
+        tenant_id: str = "live",
         jurisdiction_id: str | None = None,
     ) -> AuditDecisionChainResponse | None:
         """Get the decision chain for an audit event."""
@@ -291,7 +310,9 @@ class DashboardAggregationService:
     # --- Operational Readiness (US4) ---
 
     def get_operational_readiness(
-        self, *, tenant_id: str = "live",
+        self,
+        *,
+        tenant_id: str = "live",
         jurisdiction_id: str | None = None,
         hazard_type: str | None = None,
     ) -> OperationalReadinessResponse:
@@ -330,10 +351,7 @@ class DashboardAggregationService:
                 )
                 for r in raw_coverage
             ]
-            overall_coverage = (
-                sum(r.coverage_pct for r in role_coverage) / len(role_coverage)
-                if role_coverage else 0.0
-            )
+            overall_coverage = sum(r.coverage_pct for r in role_coverage) / len(role_coverage) if role_coverage else 0.0
 
             raw_gaps = self._data.get_capability_gaps(tenant_id)
             capability_gaps = [
@@ -366,30 +384,47 @@ class DashboardAggregationService:
             plans = [
                 EmergencyPlanSummary(lifecycle_state=s, count=0, overdue_count=0)
                 for s in (
-                    "Draft", "InConsultation", "UnderReview", "Endorsed",
-                    "Activated", "PostEventReview", "Superseded",
+                    "Draft",
+                    "InConsultation",
+                    "UnderReview",
+                    "Endorsed",
+                    "Activated",
+                    "PostEventReview",
+                    "Superseded",
                 )
             ]
             total_plans = 0
             overdue = 0
             _default_roles = [
-                "incident_controller", "operations_officer", "planning_officer",
-                "logistics_officer", "public_information_officer", "safety_officer",
-                "liaison_officer", "intelligence_officer", "finance_officer",
+                "incident_controller",
+                "operations_officer",
+                "planning_officer",
+                "logistics_officer",
+                "public_information_officer",
+                "safety_officer",
+                "liaison_officer",
+                "intelligence_officer",
+                "finance_officer",
                 "medical_officer",
             ]
             role_coverage = [
                 AIIMSRoleCoverage(
-                    role=r, assigned_count=0, required_count=1,
-                    is_staffed=False, coverage_pct=0.0,
+                    role=r,
+                    assigned_count=0,
+                    required_count=1,
+                    is_staffed=False,
+                    coverage_pct=0.0,
                 )
                 for r in _default_roles
             ]
             overall_coverage = 0.0
             capability_gaps = []
             volunteer = VolunteerReadiness(
-                total_registered=0, currently_available=0, active_deployed=0,
-                availability_rate_pct=0.0, welfare_check_compliance_pct=0.0,
+                total_registered=0,
+                currently_available=0,
+                active_deployed=0,
+                availability_rate_pct=0.0,
+                welfare_check_compliance_pct=0.0,
             )
             exercise_rate = 0.0
             overall_score = 0.0
@@ -398,7 +433,11 @@ class DashboardAggregationService:
         exercise_breakdown = []
         if self._data:
             pprr_dist = self._data.get_pprr_distribution(tenant_id)
-            for ex_type, phase_key in [("tabletop", "preparedness"), ("functional", "response"), ("full_scale", "recovery")]:
+            for ex_type, phase_key in [
+                ("tabletop", "preparedness"),
+                ("functional", "response"),
+                ("full_scale", "recovery"),
+            ]:
                 count = pprr_dist.get(phase_key, 0)
                 rate = min(100.0, round((count / max(1, len(self._data._assignments))) * 100, 1))
                 exercise_breakdown.append({"type": ex_type, "rate": rate, "last_date": None})
@@ -421,7 +460,10 @@ class DashboardAggregationService:
     # --- Recovery Progress (US5) ---
 
     def get_recovery_progress(
-        self, *, tenant_id: str = "live", incident_id: str | None = None,
+        self,
+        *,
+        tenant_id: str = "live",
+        incident_id: str | None = None,
         jurisdiction_id: str | None = None,
     ) -> RecoveryProgressResponse:
         """Aggregate recovery domain progress from catalogue data."""
@@ -475,13 +517,18 @@ class DashboardAggregationService:
             active_incident_id=target_incident if has_recovery else None,
             available_incidents=(
                 [{"incident_id": target_incident, "name": "Current Recovery", "start_date": "2025-01-15"}]
-                if has_recovery else []
+                if has_recovery
+                else []
             ),
             has_active_recovery=has_recovery or len(concrete_domains) > 0,
         )
 
     def get_recovery_domain_detail(
-        self, domain: str, *, tenant_id: str = "live", incident_id: str | None = None,
+        self,
+        domain: str,
+        *,
+        tenant_id: str = "live",
+        incident_id: str | None = None,
         jurisdiction_id: str | None = None,
     ) -> RecoveryDomainDetail | None:
         """Get detailed recovery information for a single domain."""
@@ -511,7 +558,9 @@ class DashboardAggregationService:
     # --- Risk & Warning (US6) ---
 
     def get_risk_and_warning(
-        self, *, tenant_id: str = "live",
+        self,
+        *,
+        tenant_id: str = "live",
         jurisdiction_id: str | None = None,
         issuing_authority: str | None = None,
         hazard_type: str | None = None,
@@ -556,17 +605,17 @@ class DashboardAggregationService:
             ]
             principles = [
                 AWSPrincipleCompliance(
-                    principle=pid, display_name=name,
-                    compliant_count=0, total_count=0,
-                    compliance_rate_pct=0.0, non_compliant_warning_ids=[],
+                    principle=pid,
+                    display_name=name,
+                    compliant_count=0,
+                    total_count=0,
+                    compliance_rate_pct=0.0,
+                    non_compliant_warning_ids=[],
                 )
                 for pid, name in _default_principle_names
             ]
 
-        overall_compliance = (
-            sum(p.compliance_rate_pct for p in principles) / len(principles)
-            if principles else 0.0
-        )
+        overall_compliance = sum(p.compliance_rate_pct for p in principles) / len(principles) if principles else 0.0
 
         alert_compliance = AlertComplianceMetrics(
             avg_approval_latency_s=0.0,
@@ -590,7 +639,10 @@ class DashboardAggregationService:
         )
 
     def get_risk_detail(
-        self, risk_id: str, *, tenant_id: str = "live",
+        self,
+        risk_id: str,
+        *,
+        tenant_id: str = "live",
         jurisdiction_id: str | None = None,
     ) -> RiskDetailResponse | None:
         """Get detailed risk information."""
