@@ -1,14 +1,15 @@
-"""Assessment Processing Pipeline — 8-stage orchestrator per contracts/assessment-pipeline.md.
+"""Assessment Processing Pipeline — 9-stage orchestrator per contracts/assessment-pipeline.md.
 
 Stages:
 1. Handoff Intake and Validation
 2. Signal Retrieval
 3. Multi-Source Correlation
 4. Contradiction Detection
-5. Assessment Generation (version, severity, summary, persistence)
-6. Recommendation Generation
-7. Downstream Escalation (Communication, Evacuation, Resource Allocation)
-8. Audit Finalisation
+5. Trend Extrapolation (predictive lead time estimation)
+6. Assessment Generation (version, severity, summary, persistence)
+7. Recommendation Generation
+8. Downstream Escalation (Communication, Evacuation, Resource Allocation)
+9. Audit Finalisation
 
 Each stage produces audit records (RiskAssessmentDecisionRecord) and emits metrics.
 """
@@ -24,6 +25,7 @@ from risk_assessment.audit import AuditWriter
 from risk_assessment.config import RiskAssessmentConfig
 from risk_assessment.correlation import ContradictionDetector, ContradictionResult, CorrelationResult, SignalCorrelator
 from risk_assessment.dedup import HandoffDeduplicator
+from risk_assessment.extrapolation import ExtrapolationResult, extrapolate_hazard_trend
 from risk_assessment.models import DecisionType, RiskAssessmentDecisionRecord
 from risk_assessment.severity import SeverityComputer
 from risk_assessment.telemetry import CustomEventEmitter, metrics, pipeline_span
@@ -301,7 +303,62 @@ class AssessmentProcessingPipeline:
         return result
 
     # ------------------------------------------------------------------
-    # Stage 5: Assessment Generation
+    # Stage 5: Trend Extrapolation
+    # ------------------------------------------------------------------
+
+    def _extrapolate_trend(
+        self,
+        signals: list[dict],
+        handoff_id: str,
+        tenant_id: str,
+        incident_id: str,
+    ) -> ExtrapolationResult:
+        """Stage 5: Extrapolate hazard trend to estimate predictive lead time."""
+        if not self._config.extrapolation_enabled:
+            return ExtrapolationResult()
+
+        category = signals[0].get("category", "fire") if signals else "fire"
+        result = extrapolate_hazard_trend(
+            signals=signals,
+            category=category,
+            min_points=self._config.extrapolation_min_points,
+        )
+
+        if result.trend_detected:
+            scope_key = _build_scope_key(tenant_id, incident_id)
+            lead_time_msg = (
+                f"Trend extrapolation: {result.trend_direction} at "
+                f"{result.slope_per_hour:.4f}/hr. "
+            )
+            if result.hours_to_warning_threshold is not None:
+                lead_time_msg += (
+                    f"Warning threshold breach in ~{result.hours_to_warning_threshold:.1f}h. "
+                )
+            if result.hours_to_emergency_threshold is not None:
+                lead_time_msg += (
+                    f"Emergency threshold breach in ~{result.hours_to_emergency_threshold:.1f}h. "
+                )
+            lead_time_msg += f"Predictive lead time: {result.predictive_lead_time_hours:.1f}h."
+
+            logger.info(lead_time_msg)
+            self._write_audit(RiskAssessmentDecisionRecord(
+                handoff_id=handoff_id,
+                input_signal_ids=[s.get("signal_id", "") for s in signals],
+                decision_type=DecisionType.assessment_generated,
+                confidence_raw=result.current_value,
+                confidence_adjusted=result.extrapolation_confidence,
+                decision_rationale=lead_time_msg,
+                generation_method="extrapolation",
+                agent_version=self._config.agent_version,
+                configuration_version=self._config.compute_config_hash(),
+                incident_scope_key=scope_key,
+                tenant_id=tenant_id,
+            ))
+
+        return result
+
+    # ------------------------------------------------------------------
+    # Stage 6: Assessment Generation
     # ------------------------------------------------------------------
 
     def _generate_assessment(
@@ -311,6 +368,7 @@ class AssessmentProcessingPipeline:
         correlation: CorrelationResult,
         contradiction: ContradictionResult,
         tenant_id: str,
+        extrapolation: ExtrapolationResult | None = None,
     ) -> HazardAssessment:
         """Stage 5: Generate versioned hazard assessment."""
         scope_key = _build_scope_key(tenant_id, handoff.incident_id)
@@ -335,6 +393,7 @@ class AssessmentProcessingPipeline:
             version=version,
             config_hash=config_hash,
             tenant_id=tenant_id,
+            extrapolation=extrapolation,
         )
 
         # Persist assessment
@@ -379,7 +438,7 @@ class AssessmentProcessingPipeline:
         return assessment
 
     # ------------------------------------------------------------------
-    # Stage 6: Recommendation Generation
+    # Stage 7: Recommendation Generation
     # ------------------------------------------------------------------
 
     def _generate_recommendations(
@@ -389,7 +448,7 @@ class AssessmentProcessingPipeline:
         signals: list[dict],
         tenant_id: str,
     ) -> list[Recommendation]:
-        """Stage 6: Generate recommendations from assessment."""
+        """Stage 7: Generate recommendations from assessment."""
         scope_key = _build_scope_key(tenant_id, handoff.incident_id)
         recommendations = self._agent.generate_recommendations(assessment, signals)
 
@@ -428,7 +487,7 @@ class AssessmentProcessingPipeline:
         return recommendations
 
     # ------------------------------------------------------------------
-    # Stage 7: Downstream Escalation
+    # Stage 8: Downstream Escalation
     # ------------------------------------------------------------------
 
     def _evaluate_escalation(
@@ -438,7 +497,7 @@ class AssessmentProcessingPipeline:
         recommendations: list[Recommendation],
         tenant_id: str,
     ) -> list[AgentHandoffEvent]:
-        """Stage 7: Evaluate and deliver downstream escalation handoffs.
+        """Stage 8: Evaluate and deliver downstream escalation handoffs.
 
         Simulation tenants do NOT trigger live downstream handoffs.
         """
@@ -567,7 +626,7 @@ class AssessmentProcessingPipeline:
         handoff: AgentHandoffEvent,
         tenant_id: str | None = None,
     ) -> dict:
-        """Process a handoff through all 8 pipeline stages.
+        """Process a handoff through all 9 pipeline stages.
 
         Returns a result dict with assessment, recommendations, and handoffs.
         Instrumented with OpenTelemetry spans, metrics, and custom events.
@@ -634,10 +693,25 @@ class AssessmentProcessingPipeline:
                         confidence_reduction=1 - self._config.contradiction_reduction_factor,
                     )
 
-            # Stage 5: Assessment Generation
+            # Stage 5: Trend Extrapolation
+            with pipeline_span("risk_assessment.extrapolate_trend", handoff.handoff_id):
+                extrapolation = self._extrapolate_trend(
+                    signals, handoff.handoff_id, effective_tenant, handoff.incident_id,
+                )
+                result["extrapolation"] = extrapolation
+                if extrapolation.trend_detected:
+                    CustomEventEmitter.assessment_generated(
+                        assessment_id=f"extrap-{handoff.handoff_id}",
+                        confidence=extrapolation.extrapolation_confidence,
+                        severity="n/a",
+                        generation_method="extrapolation",
+                    )
+
+            # Stage 6: Assessment Generation
             with pipeline_span("risk_assessment.generate_assessment", handoff.handoff_id):
                 assessment = self._generate_assessment(
                     handoff, signals, correlation, contradiction, effective_tenant,
+                    extrapolation=extrapolation,
                 )
                 result["assessment"] = assessment
                 metrics.inc_assessment_count()
@@ -653,21 +727,21 @@ class AssessmentProcessingPipeline:
                     metrics.inc_fallback()
                     CustomEventEmitter.degradation_event("llm", 1)
 
-            # Stage 6: Recommendation Generation
+            # Stage 7: Recommendation Generation
             with pipeline_span("risk_assessment.generate_recommendations", handoff.handoff_id):
                 recommendations = self._generate_recommendations(
                     handoff, assessment, signals, effective_tenant,
                 )
                 result["recommendations"] = recommendations
 
-            # Stage 7: Downstream Escalation
+            # Stage 8: Downstream Escalation
             with pipeline_span("risk_assessment.evaluate_escalation", handoff.handoff_id):
                 downstream_handoffs = self._evaluate_escalation(
                     handoff, assessment, recommendations, effective_tenant,
                 )
                 result["handoffs"] = downstream_handoffs
 
-            # Stage 8: Audit Finalisation
+            # Stage 9: Audit Finalisation
             with pipeline_span("risk_assessment.write_audit", handoff.handoff_id):
                 elapsed_ms = round((time.perf_counter() - start) * 1000, 2)
                 metrics.record_assessment_latency(elapsed_ms)

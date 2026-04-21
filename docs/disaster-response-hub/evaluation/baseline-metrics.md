@@ -75,3 +75,16 @@ Each evaluation exercise pack contains:
 3. **Baseline recording sheet** — timestamps and metrics per the procedures above
 4. **Hub-enabled recording sheet** — same metrics captured through the hub audit trail
 5. **Comparison report template** — side-by-side baseline vs. hub results per SC
+
+## Outcome Metrics: Post-Deployment Roadmap
+
+This evaluation framework covers SC-004 through SC-007 — the metrics that can be measured during prototype exercises. Two capstone success criteria are **outcome-level metrics** that require production deployment and multi-year observation:
+
+| Capstone Criterion | Why Not Measurable in Prototype | Post-Deployment Approach |
+|---|---|---|
+| Save 1,000+ lives annually | Requires real incidents with population exposure across multiple disaster seasons to generate statistically valid comparison | Comparative fatality-rate analysis against historical baselines, normalised for hazard severity and population density, using national disaster mortality databases |
+| Reduce economic losses by 30% | Requires actuarial loss data from real events and insurance industry catastrophe model comparisons | Insured/uninsured loss comparison normalised for hazard intensity via ICNEC, Munich Re NatCatSERVICE, and national disaster loss databases |
+
+The proxy metrics in this document (response time, evacuation timing, resource efficiency) are the recognised **leading indicators** for these outcome metrics per UNDRR Sendai Framework monitoring guidance and AIDR Handbook 10. Improvement in leading indicators is the industry-standard pre-deployment evidence that outcome improvements will follow.
+
+See the [architecture document's Success Criteria Alignment section](../architecture.md#success-criteria-alignment) for the full criteria coverage matrix and post-deployment measurement plan.
