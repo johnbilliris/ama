@@ -10,19 +10,49 @@ FRs: FR-029 | Research: R-008
 """
 
 import logging
+import os
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
+def _build_cosmos_client() -> Any:
+    """Build a CosmosClient from the ``COSMOS_ENDPOINT`` env var."""
+    from azure.cosmos import CosmosClient
+    from azure.identity import DefaultAzureCredential
+
+    endpoint = os.environ["COSMOS_ENDPOINT"]
+    credential = DefaultAzureCredential()
+    return CosmosClient(endpoint, credential=credential)
+
+
 class RecoveryCatalogueRepository:
-    """Read/write operations against the ``recovery-catalogue`` Cosmos DB container."""
+    """Read/write operations against the ``recovery-catalogue`` Cosmos DB container.
+
+    When ``COSMOS_ENDPOINT`` is set the repository talks to Cosmos DB.
+    Otherwise it falls back to an in-memory dict so that unit / contract
+    tests keep working without infrastructure.
+    """
 
     def __init__(self, cosmos_client: Any = None, database_name: str = "disaster-hub"):
-        self._client = cosmos_client
         self._db_name = database_name
         self._container_name = "recovery-catalogue"
         self._in_memory: dict[str, dict[str, Any]] = {}
+
+        if cosmos_client is not None:
+            self._client = cosmos_client
+        elif os.environ.get("COSMOS_ENDPOINT"):
+            try:
+                self._client = _build_cosmos_client()
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(
+                    "RecoveryCatalogueRepository: Cosmos init failed (%s); "
+                    "falling back to in-memory store",
+                    exc,
+                )
+                self._client = None
+        else:
+            self._client = None
 
     def _get_container(self) -> Any:
         if self._client is None:
