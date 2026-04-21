@@ -105,6 +105,17 @@ class RiskAssessmentConfig:
         default_factory=lambda: float(os.getenv("LLM_MONTHLY_BUDGET_USD", "50.0"))
     )
 
+    # --- Extrapolation Configuration ---
+    extrapolation_enabled: bool = field(
+        default_factory=lambda: os.getenv("EXTRAPOLATION_ENABLED", "true").lower() == "true"
+    )
+    extrapolation_min_points: int = field(
+        default_factory=lambda: int(os.getenv("EXTRAPOLATION_MIN_POINTS", "2"))
+    )
+    extrapolation_confidence_boost: float = field(
+        default_factory=lambda: float(os.getenv("EXTRAPOLATION_CONFIDENCE_BOOST", "0.05"))
+    )
+
     def __post_init__(self) -> None:
         """Validate LLM configuration values immediately after construction."""
         if self.llm_model_tier not in ("reasoning", "drafting"):
@@ -167,5 +178,8 @@ class RiskAssessmentConfig:
             f"llm_confidence_threshold={self.llm_confidence_threshold};"
             f"llm_fallback_reduction_factor={self.llm_fallback_reduction_factor};"
             f"llm_monthly_budget_usd={self.llm_monthly_budget_usd};"
+            f"extrapolation_enabled={self.extrapolation_enabled};"
+            f"extrapolation_min_points={self.extrapolation_min_points};"
+            f"extrapolation_confidence_boost={self.extrapolation_confidence_boost};"
         )
         return hashlib.sha256(config_str.encode()).hexdigest()

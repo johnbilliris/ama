@@ -18,6 +18,7 @@ from common.handoffs import AgentHandoffEvent, build_handoff
 from common.llm_mixin import LLMCallMixin
 from risk_assessment.config import RiskAssessmentConfig
 from risk_assessment.correlation import ContradictionResult, CorrelationResult
+from risk_assessment.extrapolation import ExtrapolationResult
 from risk_assessment.models import (
     DecisionType,
     RiskAssessmentDecisionRecord,
@@ -82,6 +83,7 @@ class RiskAssessmentAgent(LLMCallMixin):
         version: int,
         config_hash: str,
         tenant_id: str = "live",
+        extrapolation: ExtrapolationResult | None = None,
     ) -> HazardAssessment:
         """Generate a full HazardAssessment with LLM or template fallback.
 
@@ -169,6 +171,38 @@ class RiskAssessmentAgent(LLMCallMixin):
 
         confidence_level = confidence_to_level(confidence)
 
+        # Enrich with predictive extrapolation if available
+        if extrapolation and extrapolation.trend_detected:
+            trend_parts = [f"PREDICTIVE OUTLOOK: Trend is {extrapolation.trend_direction}"]
+            trend_parts.append(
+                f"(slope {extrapolation.slope_per_hour:+.4f}/hr, "
+                f"R²={extrapolation.details.get('r_squared', 0):.2f})."
+            )
+            if extrapolation.hours_to_warning_threshold is not None:
+                trend_parts.append(
+                    f"Warning threshold breach projected in "
+                    f"~{extrapolation.hours_to_warning_threshold:.1f} hours."
+                )
+            if extrapolation.hours_to_emergency_threshold is not None:
+                trend_parts.append(
+                    f"Emergency threshold breach projected in "
+                    f"~{extrapolation.hours_to_emergency_threshold:.1f} hours."
+                )
+            trend_parts.append(
+                f"24h projection: {extrapolation.projected_value_24h:.2f}; "
+                f"48h projection: {extrapolation.projected_value_48h:.2f}."
+            )
+            if extrapolation.predictive_lead_time_hours > 0:
+                trend_parts.append(
+                    f"Predictive lead time: {extrapolation.predictive_lead_time_hours:.1f}h."
+                )
+                # Boost confidence slightly when predictive data supports the assessment
+                confidence += self._config.extrapolation_confidence_boost
+                confidence = min(1.0, confidence)
+                confidence_level = confidence_to_level(confidence)
+
+            summary += " " + " ".join(trend_parts)
+
         # Build input snapshot for reproducibility
         input_snapshot = {
             "signals": [
@@ -185,6 +219,24 @@ class RiskAssessmentAgent(LLMCallMixin):
             "model_deployment_id": response.get("model_deployment_id"),
             "prompt_template_version": "1.0",
             "configuration_hash": config_hash,
+            "extrapolation": {
+                "trend_detected": extrapolation.trend_detected,
+                "trend_direction": extrapolation.trend_direction,
+                "slope_per_hour": extrapolation.slope_per_hour,
+                "predictive_lead_time_hours": extrapolation.predictive_lead_time_hours,
+                "projected_value_24h": extrapolation.projected_value_24h,
+                "projected_value_48h": extrapolation.projected_value_48h,
+                "extrapolation_confidence": extrapolation.extrapolation_confidence,
+            } if extrapolation else None,
+            "extrapolation": {
+                "trend_detected": extrapolation.trend_detected,
+                "trend_direction": extrapolation.trend_direction,
+                "slope_per_hour": extrapolation.slope_per_hour,
+                "predictive_lead_time_hours": extrapolation.predictive_lead_time_hours,
+                "projected_value_24h": extrapolation.projected_value_24h,
+                "projected_value_48h": extrapolation.projected_value_48h,
+                "extrapolation_confidence": extrapolation.extrapolation_confidence,
+            } if extrapolation else None,
         }
 
         assessment_id = f"ha-{incident_id}-{assessment_type}-v{version}"
