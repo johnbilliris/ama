@@ -17,27 +17,30 @@ from pathlib import Path
 SEED_ROOT = Path(__file__).resolve().parent.parent / "packages" / "domain" / "src" / "domain" / "seed"
 
 SEED_FILES = {
-    "jurisdictions": "jurisdictions_australia.json",
-    "frameworks":    "frameworks_australia.json",
-    "organisations": "organisations_australia.json",
-    "data_sources":  "data_sources_australia.json",
-    "disasters":     "disasters_australia.json",
+    "jurisdictions":          "jurisdictions_australia.json",
+    "frameworks":             "frameworks_australia.json",
+    "organisations":          "organisations_australia.json",
+    "data_sources":           "data_sources_australia.json",
+    "disasters":              "disasters_australia.json",
+    "framework_assignments":  "framework_assignments_australia.json",
 }
 
 CONTAINER_MAP = {
-    "jurisdictions": "seed",
-    "frameworks":    "seed",
-    "organisations": "seed",
-    "data_sources":  "seed",
-    "disasters":     "seed",
+    "jurisdictions":          "seed",
+    "frameworks":             "seed",
+    "organisations":          "seed",
+    "data_sources":           "seed",
+    "disasters":              "seed",
+    "framework_assignments":  "seed",
 }
 
 PARTITION_KEY_MAP = {
-    "jurisdictions": "jurisdiction",
-    "frameworks":    "framework",
-    "organisations": "organisation",
-    "data_sources":  "data_source",
-    "disasters":     "disaster",
+    "jurisdictions":          "jurisdiction",
+    "frameworks":             "framework",
+    "organisations":          "organisation",
+    "data_sources":           "data_source",
+    "disasters":              "disaster",
+    "framework_assignments":  "framework_assignment",
 }
 
 CATALOGUE_ROOT = SEED_ROOT / "recovery-catalogue"
