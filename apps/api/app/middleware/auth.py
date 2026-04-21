@@ -56,10 +56,18 @@ def _log_auth_forbidden(
 
 
 def _validate_jwt(token: str) -> dict:
-    """Decode and validate Azure AD JWT."""
+    """Decode and validate Azure AD JWT.
+
+    SECURITY: verify_signature=False is acceptable ONLY during local dev/staging.
+    Production MUST use JWKS from Azure AD to verify token signatures.
+    See: https://login.microsoftonline.com/{tenant}/.well-known/openid-configuration
+    """
     _, _, tenant_id, audience = _get_env()
     try:
         issuer = f"https://sts.windows.net/{tenant_id}/"
+        # TODO(security): Implement JWKS-based signature verification for production.
+        # Fetch keys from https://login.microsoftonline.com/{tenant_id}/discovery/v2.0/keys
+        # and pass the matching public key to jwt.decode() with verify_signature=True.
         payload = jwt.decode(
             token,
             options={"verify_signature": False},
