@@ -43,7 +43,7 @@ export default function ExerciseReportPage() {
   return (
     <>
       <SimulationBanner />
-      <div className="mx-auto max-w-5xl p-6" style={{ marginTop: "40px" }}>
+      <div className="mx-auto max-w-5xl p-6">
         <h1 className="mb-2 text-2xl font-bold">Exercise Report</h1>
         <p className="mb-6 text-sm text-gray-500">
           Report: {report.report_id} | Scenario: {report.scenario_type} | Generated:{" "}

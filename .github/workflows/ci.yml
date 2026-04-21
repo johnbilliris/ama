@@ -13,16 +13,16 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
         with:
           version: 10.6.3
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
       - name: Validate workspace structure
         run: |
           test -f pyproject.toml
@@ -56,7 +56,7 @@ jobs:
         run: pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q
 
       - name: upload-benchmark-results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: benchmark-results

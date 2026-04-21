@@ -2,29 +2,16 @@
 
 export function SimulationBanner() {
   return (
-    <div
-      className="simulation-banner"
-      role="alert"
-      aria-live="assertive"
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9999,
-        backgroundColor: "#dc2626",
-        color: "#ffffff",
-        textAlign: "center",
-        padding: "8px 16px",
-        fontWeight: 700,
-        fontSize: "14px",
-        letterSpacing: "0.1em",
-        textTransform: "uppercase",
-        pointerEvents: "none",
-        userSelect: "none",
-      }}
-    >
-      ⚠ SIMULATION — This is not live data ⚠
+    <div className="sim-banner-wrap" role="alert" aria-live="assertive">
+      <div className="sim-banner-card">
+        <p className="sim-banner-kicker">⚠ Exercise mode</p>
+        <h2 className="sim-banner-title">Simulation — this is not live data</h2>
+        <p className="sim-banner-copy">
+          All communications, decisions and telemetry on this page are scoped to
+          the exercise tenant. No real-world dispatch or public notifications
+          will be issued.
+        </p>
+      </div>
     </div>
   );
 }

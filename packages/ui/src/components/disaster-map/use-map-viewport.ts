@@ -9,19 +9,19 @@
 
 import { useCallback, useRef } from "react";
 
-const STORAGE_KEY = "disaster-map-viewport";
+const DEFAULT_STORAGE_KEY = "disaster-map-viewport";
 
 export interface MapViewport {
   zoom: number;
   center: [number, number];
 }
 
-export function useMapViewport() {
+export function useMapViewport(storageKey: string = DEFAULT_STORAGE_KEY) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const getSavedViewport = useCallback((): MapViewport | null => {
     try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
+      const raw = sessionStorage.getItem(storageKey);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
       if (
@@ -37,18 +37,18 @@ export function useMapViewport() {
     } catch {
       return null;
     }
-  }, []);
+  }, [storageKey]);
 
   const saveViewport = useCallback((viewport: MapViewport) => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(viewport));
+        sessionStorage.setItem(storageKey, JSON.stringify(viewport));
       } catch {
         // Graceful degradation — sessionStorage may be unavailable
       }
     }, 500);
-  }, []);
+  }, [storageKey]);
 
   return { getSavedViewport, saveViewport };
 }

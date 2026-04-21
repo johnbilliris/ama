@@ -75,8 +75,8 @@ class ResourceGovernor:
     async def declare_incident(self) -> int:
         """Set all active simulations to incident-throttled mode. Returns count affected."""
         self._incident_active = True
-        active_tenants, _ = await self._repo.list_by_status(status="active", limit=100)
-        paused_tenants, _ = await self._repo.list_by_status(status="paused", limit=100)
+        active_tenants, _ = await self._repo.list_by_status(status="Active", limit=100)
+        paused_tenants, _ = await self._repo.list_by_status(status="Paused", limit=100)
         all_tenants = active_tenants + paused_tenants
 
         affected = 0
@@ -94,8 +94,8 @@ class ResourceGovernor:
     async def resolve_incident(self) -> int:
         """Restore all simulations to normal throttle mode. Returns count restored."""
         self._incident_active = False
-        active_tenants, _ = await self._repo.list_by_status(status="active", limit=100)
-        paused_tenants, _ = await self._repo.list_by_status(status="paused", limit=100)
+        active_tenants, _ = await self._repo.list_by_status(status="Active", limit=100)
+        paused_tenants, _ = await self._repo.list_by_status(status="Paused", limit=100)
         all_tenants = active_tenants + paused_tenants
 
         restored = 0

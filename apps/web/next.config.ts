@@ -14,17 +14,19 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@ama/ui"],
 
   // Proxy /api/* → upstream API server so browser requests stay same-origin
-  // and CORS headers are never needed.  beforeFiles runs before the App Router
-  // filesystem check so Next.js never reaches its not-found handler for these paths.
+  // and CORS headers are never needed.  Registered as `afterFiles` so any
+  // App Router Route Handlers under /src/app/api/** take precedence — this
+  // matters for streaming endpoints (e.g. simulation chat SSE) which the
+  // built-in rewrite proxy buffers.
   async rewrites() {
     return {
-      beforeFiles: [
+      beforeFiles: [],
+      afterFiles: [
         {
           source: "/api/:path*",
           destination: `${API_PROXY_UPSTREAM}/:path*`,
         },
       ],
-      afterFiles: [],
       fallback: [],
     };
   },

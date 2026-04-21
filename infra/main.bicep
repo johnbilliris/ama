@@ -42,7 +42,7 @@ param developerIpAddress string = ''
 param openAiDeploymentSku string = 'GlobalStandard'
 
 @description('When true, restricts Cosmos DB network access to Azure Portal and Azure-services IPs only. Set to true for production; leave false for dev/staging to allow fully open public access.')
-param restrictNetworkAccess bool = false
+param restrictNetworkAccess bool = true
 
 @description('Deployment environment tier — controls auth policies (e.g. Azure Maps local auth)')
 @allowed(['dev', 'staging', 'prod'])
@@ -279,6 +279,31 @@ resource seedContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/conta
     resource: {
       id: 'seed'
       partitionKey: { paths: ['/kind'], kind: 'Hash' }
+    }
+    options: { autoscaleSettings: { maxThroughput: 1000 } }
+  }
+}
+
+// Simulation controller chat history — one document per turn, partitioned
+// by tenant_id so all turns of a single exercise co-locate. Composite index
+// on (document_type, sequence) makes ordered replay of a conversation a
+// single-partition query.
+resource simChatContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+  name: 'sim-chat'
+  parent: cosmosDb
+  properties: {
+    resource: {
+      id: 'sim-chat'
+      partitionKey: { paths: ['/tenant_id'], kind: 'Hash' }
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        compositeIndexes: [
+          [
+            { path: '/document_type', order: 'ascending' }
+            { path: '/sequence', order: 'ascending' }
+          ]
+        ]
+      }
     }
     options: { autoscaleSettings: { maxThroughput: 1000 } }
   }
@@ -521,6 +546,8 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'AZURE_OPENAI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
             { name: 'AZURE_OPENAI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
+            { name: 'AZURE_OPENAI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
+            { name: 'AZURE_OPENAI_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
             { name: 'OTEL_SERVICE_NAME', value: 'api' }
           ]
           probes: [
@@ -593,6 +620,7 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'AZURE_OPENAI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
             { name: 'AZURE_OPENAI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
+            { name: 'AZURE_OPENAI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
             { name: 'API_ENDPOINT', value: 'https://${apiContainerApp.properties.configuration.ingress.fqdn}' }
             { name: 'OTEL_SERVICE_NAME', value: 'agents' }
           ]
@@ -615,7 +643,16 @@ resource ingestionContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
   properties: {
     managedEnvironmentId: managedEnvironment.id
     configuration: {
-      ingress: { external: false, targetPort: 8081 }
+      // NOTE: No `ingress` block is declared here on purpose. The ingestion
+      // worker is a headless background service (scales on CPU, pulls work
+      // from queues, runs pipeline tasks) and never serves inbound HTTP
+      // traffic. Declaring ingress would force Container Apps to probe a
+      // `targetPort` — and any mismatch between the declared port and the
+      // port the worker happens to bind (or the placeholder helloworld
+      // image listening on :80 during initial provisioning) blocks the
+      // replica from becoming Ready, which in turn blocks every future
+      // `azd deploy` rollout with a "Deployment Progress Deadline Exceeded"
+      // error. Keeping ingress absent eliminates that class of failure.
       registries: [
         {
           server: containerRegistry.properties.loginServer

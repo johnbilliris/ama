@@ -24,13 +24,13 @@ class TestQuickstartE2EFlow:
             tenant_id=tenant_id,
             scenario_id="sc-quickstart",
             scenario_run_id=f"run-{uuid.uuid4()}",
-            scenario_type="cyclone",
+            scenario_type="Cyclone",
             created_by="user-qs",
             participants=["user-qs"],
             jurisdictions=["qld-fnq", "qld-nq"],
             resource_limits=ResourceLimits(max_signals=10000, max_recommendations=500, max_duration_hours=48),
         )
-        assert tenant.status == "provisioning"
+        assert tenant.status == "Provisioning"
         assert tenant.tenant_id.startswith("sim-")
         assert tenant.resource_limits.max_signals == 10000
 
@@ -41,7 +41,7 @@ class TestQuickstartE2EFlow:
             tenant_id=self._make_tenant_id(),
             scenario_id="sc-001",
             scenario_run_id="run-001",
-            scenario_type="cyclone",
+            scenario_type="Cyclone",
             created_by="user-001",
             participants=["user-001"],
         )
@@ -94,40 +94,40 @@ class TestQuickstartE2EFlow:
             tenant_id=self._make_tenant_id(),
             scenario_id="sc-001",
             scenario_run_id="run-001",
-            scenario_type="flood",
+            scenario_type="Flood",
             created_by="user-001",
             participants=["user-001"],
-            status="provisioning",
+            status="Provisioning",
         )
-        assert tenant.can_transition_to("active")
-        tenant.status = "active"
+        assert tenant.can_transition_to("Active")
+        tenant.status = "Active"
 
-        assert tenant.can_transition_to("paused")
-        tenant.status = "paused"
+        assert tenant.can_transition_to("Paused")
+        tenant.status = "Paused"
 
-        assert tenant.can_transition_to("active")
-        tenant.status = "active"
+        assert tenant.can_transition_to("Active")
+        tenant.status = "Active"
 
-        assert tenant.can_transition_to("archiving")
-        tenant.status = "archiving"
+        assert tenant.can_transition_to("Archiving")
+        tenant.status = "Archiving"
 
-        assert tenant.can_transition_to("archived")
-        tenant.status = "archived"
+        assert tenant.can_transition_to("Archived")
+        tenant.status = "Archived"
 
-        assert tenant.can_transition_to("deleted")
+        assert tenant.can_transition_to("Deleted")
 
     def test_invalid_lifecycle_transition_blocked(self):
         tenant = SimulationTenant(
             tenant_id=self._make_tenant_id(),
             scenario_id="sc-001",
             scenario_run_id="run-001",
-            scenario_type="flood",
+            scenario_type="Flood",
             created_by="user-001",
             participants=["user-001"],
-            status="archived",
+            status="Archived",
         )
-        assert not tenant.can_transition_to("active")
-        assert not tenant.can_transition_to("paused")
+        assert not tenant.can_transition_to("Active")
+        assert not tenant.can_transition_to("Paused")
 
     # --- Resource limits contract ---
 

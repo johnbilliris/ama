@@ -50,7 +50,7 @@ class SimulationRepository:
             query = (
                 "SELECT * FROM c WHERE ARRAY_CONTAINS(c.participants, @oid) "
                 "AND c.document_type = 'simulation_tenant' "
-                "AND c.status IN ('active', 'paused')"
+                "AND c.status IN ('Active', 'Paused')"
             )
             items = list(
                 container.query_items(query, parameters=[{"name": "@oid", "value": user_oid}])
@@ -59,7 +59,7 @@ class SimulationRepository:
         return [
             t
             for t in self._in_memory.values()
-            if user_oid in t.participants and t.status in ("active", "paused")
+            if user_oid in t.participants and t.status in ("Active", "Paused")
         ]
 
     async def list_by_status(
@@ -94,13 +94,13 @@ class SimulationRepository:
             query = (
                 "SELECT VALUE COUNT(1) FROM c "
                 "WHERE c.document_type = 'simulation_tenant' "
-                "AND c.status IN ('provisioning', 'active', 'paused')"
+                "AND c.status IN ('Provisioning', 'Active', 'Paused')"
             )
             return list(container.query_items(query))[0]
         return sum(
             1
             for t in self._in_memory.values()
-            if t.status in ("provisioning", "active", "paused")
+            if t.status in ("Provisioning", "Active", "Paused")
         )
 
     async def update(self, tenant: SimulationTenant) -> SimulationTenant:
@@ -127,7 +127,7 @@ class SimulationRepository:
             now = datetime.now(UTC).isoformat()
             query = (
                 "SELECT * FROM c WHERE c.document_type = 'simulation_tenant' "
-                "AND c.status IN ('active', 'paused') "
+                "AND c.status IN ('Active', 'Paused') "
                 "AND c.expires_at <= @now"
             )
             items = list(
@@ -140,5 +140,5 @@ class SimulationRepository:
         return [
             t
             for t in self._in_memory.values()
-            if t.status in ("active", "paused") and t.expires_at and t.expires_at <= now
+            if t.status in ("Active", "Paused") and t.expires_at and t.expires_at <= now
         ]

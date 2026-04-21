@@ -28,6 +28,12 @@ param draftingModelName string = 'gpt-5.4'
 @description('Drafting-tier model version')
 param draftingModelVersion string = '2026-03-05'
 
+@description('Simulation Controller model name (used by the Simulation chat endpoint).')
+param simulationModelName string = 'gpt-5.4'
+
+@description('Simulation Controller model version.')
+param simulationModelVersion string = '2026-03-05'
+
 // TPM quotas (in thousands)
 @description('Reasoning-tier TPM quota (K). Dev=30, Prod=120')
 @minValue(1)
@@ -36,6 +42,10 @@ param reasoningTpmQuota int = 30
 @description('Drafting-tier TPM quota (K). Dev=60, Prod=240')
 @minValue(1)
 param draftingTpmQuota int = 60
+
+@description('Simulation Controller TPM quota (K). Dev=20, Prod=80. Isolated quota so an exercise cannot starve live agents.')
+@minValue(1)
+param simulationTpmQuota int = 20
 
 @description('Model deployment SKU — GlobalStandard for dev/staging (draws from global capacity pool), Standard for production (regional capacity)')
 @allowed(['Standard', 'GlobalStandard'])
@@ -94,6 +104,26 @@ resource draftingDeployment 'Microsoft.CognitiveServices/accounts/deployments@20
   dependsOn: [reasoningDeployment]
 }
 
+// Dedicated deployment for the Simulation Controller (spec 024).
+// GlobalStandard SKU isolates exercise traffic from live-incident reasoning/drafting
+// quota so a runaway simulation cannot starve real-incident agents.
+resource simulationDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: openAiAccount
+  name: 'gpt-5.4-sim-${envPrefix}'
+  sku: {
+    name: modelDeploymentSku
+    capacity: simulationTpmQuota
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: simulationModelName
+      version: simulationModelVersion
+    }
+  }
+  dependsOn: [draftingDeployment]
+}
+
 // ────────────────────────────────────────────────────────────────────────────────
 // RBAC: Cognitive Services OpenAI User
 // ────────────────────────────────────────────────────────────────────────────────
@@ -140,4 +170,5 @@ resource openAiDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
 
 output reasoningDeploymentName string = reasoningDeployment.name
 output draftingDeploymentName string = draftingDeployment.name
+output simulationDeploymentName string = simulationDeployment.name
 output openAiEndpoint string = openAiAccount.properties.endpoint

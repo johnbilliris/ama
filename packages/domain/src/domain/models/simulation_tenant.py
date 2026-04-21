@@ -7,11 +7,11 @@ from pydantic import BaseModel, Field, field_validator
 TENANT_ID_PATTERN = re.compile(r"^sim-[a-z0-9-]{36}$")
 
 VALID_STATUS_TRANSITIONS: dict[str, set[str]] = {
-    "provisioning": {"active"},
-    "active": {"paused", "archiving"},
-    "paused": {"active", "archiving"},
-    "archiving": {"archived"},
-    "archived": {"deleted"},
+    "Provisioning": {"Active"},
+    "Active": {"Paused", "Archiving"},
+    "Paused": {"Active", "Archiving"},
+    "Archiving": {"Archived"},
+    "Archived": {"Deleted"},
 }
 
 
@@ -33,11 +33,22 @@ class SimulationTenant(BaseModel):
     tenant_id: str
     scenario_id: str
     scenario_run_id: str
-    scenario_type: Literal["bushfire", "flood", "cyclone", "cross-jurisdiction"]
+    scenario_type: Literal[
+        "Bushfire",
+        "Flood",
+        "Cyclone",
+        "Severe Storm",
+        "Heatwave",
+        "Earthquake",
+        "Tsunami",
+        "Pandemic",
+        "Other",
+        "Cross-jurisdiction",
+    ]
     scenario_template_id: str | None = None
     status: Literal[
-        "provisioning", "active", "paused", "archiving", "archived", "deleted"
-    ] = "provisioning"
+        "Provisioning", "Active", "Paused", "Archiving", "Archived", "Deleted"
+    ] = "Provisioning"
     created_by: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     ttl_hours: int = 72
@@ -73,6 +84,11 @@ class SimulationTenant(BaseModel):
         if not v:
             raise ValueError("participants must contain at least one entry (the creator)")
         return v
+
+    @field_validator("jurisdictions")
+    @classmethod
+    def uppercase_jurisdictions(cls, v: list[str]) -> list[str]:
+        return [j.upper() for j in v]
 
     def can_transition_to(self, new_status: str) -> bool:
         allowed = VALID_STATUS_TRANSITIONS.get(self.status, set())

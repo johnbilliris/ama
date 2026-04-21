@@ -45,9 +45,9 @@ export default function SimulationListPage() {
           aria-label="Filter by status"
         >
           <option value="">All statuses</option>
-          <option value="active">Active</option>
-          <option value="paused">Paused</option>
-          <option value="archived">Archived</option>
+          <option value="Active">Active</option>
+          <option value="Paused">Paused</option>
+          <option value="Archived">Archived</option>
         </select>
         <span className="ml-2 text-sm text-gray-500">{total} total</span>
       </div>
@@ -79,8 +79,8 @@ export default function SimulationListPage() {
                 <td className="p-2">{sim.scenario_type}</td>
                 <td className="p-2">
                   <span className={`rounded px-2 py-0.5 text-xs font-medium ${
-                    sim.status === "active" ? "bg-green-100 text-green-800" :
-                    sim.status === "paused" ? "bg-yellow-100 text-yellow-800" :
+                    sim.status === "Active" ? "bg-green-100 text-green-800" :
+                    sim.status === "Paused" ? "bg-yellow-100 text-yellow-800" :
                     "bg-gray-100 text-gray-800"
                   }`}>
                     {sim.status}
@@ -91,16 +91,16 @@ export default function SimulationListPage() {
                 <td className="p-2">{sim.signal_count}</td>
                 <td className="p-2">{(sim.storage_bytes / 1024).toFixed(1)} KB</td>
                 <td className="p-2 space-x-1">
-                  {sim.status === "active" && (
+                  {sim.status === "Active" && (
                     <button onClick={() => pauseSimulation(sim.tenant_id).then(reload)} className="rounded bg-yellow-500 px-2 py-0.5 text-xs text-white">Pause</button>
                   )}
-                  {sim.status === "paused" && (
+                  {sim.status === "Paused" && (
                     <button onClick={() => resumeSimulation(sim.tenant_id).then(reload)} className="rounded bg-green-500 px-2 py-0.5 text-xs text-white">Resume</button>
                   )}
-                  {(sim.status === "active" || sim.status === "paused") && (
+                  {(sim.status === "Active" || sim.status === "Paused") && (
                     <button onClick={() => archiveSimulation(sim.tenant_id).then(reload)} className="rounded bg-orange-500 px-2 py-0.5 text-xs text-white">Archive</button>
                   )}
-                  {sim.status === "archived" && (
+                  {sim.status === "Archived" && (
                     <button onClick={() => { if (confirm("Delete this simulation?")) deleteSimulation(sim.tenant_id).then(reload); }} className="rounded bg-red-500 px-2 py-0.5 text-xs text-white">Delete</button>
                   )}
                 </td>
