@@ -23,6 +23,7 @@ SEED_FILES = {
     "data_sources":           "data_sources_australia.json",
     "disasters":              "disasters_australia.json",
     "framework_assignments":  "framework_assignments_australia.json",
+    "scenario_templates":     "scenario_templates_australia.json",
 }
 
 CONTAINER_MAP = {
@@ -32,6 +33,7 @@ CONTAINER_MAP = {
     "data_sources":           "seed",
     "disasters":              "seed",
     "framework_assignments":  "seed",
+    "scenario_templates":     "seed",
 }
 
 PARTITION_KEY_MAP = {
@@ -41,6 +43,7 @@ PARTITION_KEY_MAP = {
     "data_sources":           "data_source",
     "disasters":              "disaster",
     "framework_assignments":  "framework_assignment",
+    "scenario_templates":     "scenario_template",
 }
 
 CATALOGUE_ROOT = SEED_ROOT / "recovery-catalogue"

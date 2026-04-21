@@ -1,0 +1,1302 @@
+[
+  {
+    "id": "nsw-bushfire-multi-agency",
+    "template_id": "nsw-bushfire-multi-agency",
+    "kind": "scenario_template",
+    "document_type": "scenario_template",
+    "scenario_type": "Bushfire",
+    "name": "NSW Blue Mountains Bushfire — Multi-Agency",
+    "description": "A rapidly escalating bushfire in the Blue Mountains region west of Sydney requiring multi-agency coordination across fire, police, ambulance and SES. Exercises AIIMS activation, public warnings, evacuation planning and resource staging over an 8-hour period.",
+    "seed_organisations": [
+      { "org_id": "nsw-rfs", "name": "New South Wales Rural Fire Service", "type": "emergency_service", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "frnsw", "name": "Fire and Rescue New South Wales", "type": "emergency_service", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "ses-nsw", "name": "New South Wales State Emergency Service", "type": "emergency_service", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "nswpf", "name": "New South Wales Police Force", "type": "emergency_service", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "nsw-ambulance", "name": "NSW Ambulance", "type": "health", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "bom-national", "name": "Bureau of Meteorology", "type": "commonwealth", "jurisdiction_ids": ["commonwealth"] },
+      { "org_id": "nema", "name": "National Emergency Management Agency", "type": "commonwealth", "jurisdiction_ids": ["commonwealth"] }
+    ],
+    "seed_jurisdictions": ["nsw", "commonwealth"],
+    "seed_framework_ids": ["aiims-national", "nsw-emplan", "nsw-bushfire-plan", "aidr-emergency-planning", "aidr-public-info-warnings"],
+    "signal_timeline": [
+      {
+        "offset_seconds": 0,
+        "signal_envelope": {
+          "data_source_id": "bom-warnings",
+          "category": "weather",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.31, -33.72] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 2, "summary": "Severe fire weather warning: Catastrophic fire danger rating for Greater Sydney and Blue Mountains. Temperatures above 40°C, winds gusting 80 km/h, humidity below 10%.", "temperature_c": 42, "wind_speed_kmh": 80, "humidity_pct": 8 },
+          "provenance": { "source": "bom-warnings", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 900,
+        "signal_envelope": {
+          "data_source_id": "ga-sentinel-hotspots",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.28, -33.70] },
+          "confidence_score": 0.85,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 2, "summary": "Sentinel satellite hotspot detected near Wentworth Falls. Estimated fire area 2 ha.", "detection_method": "MODIS", "fire_area_ha": 2 },
+          "provenance": { "source": "ga-sentinel-hotspots", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 1800,
+        "signal_envelope": {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.29, -33.71] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Bush/grass fire reported. Wentworth Falls area. Fire not yet under control. ALERT level.", "alert_level": "ALERT", "fire_area_ha": 15 },
+          "provenance": { "source": "nsw-rfs-fires-near-me", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 2700,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.30, -33.71] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Field report: fire spreading rapidly NE under strong westerly winds. Spot fires reported ahead of main front. Estimated rate of spread 2 km/h.", "rate_of_spread_kmh": 2.0 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 3600,
+        "signal_envelope": {
+          "data_source_id": "bom-observations",
+          "category": "weather",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.31, -33.72] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Updated observations: Temperature 44°C, wind gusts to 95 km/h NW. Fire weather conditions deteriorating.", "temperature_c": 44, "wind_speed_kmh": 95, "humidity_pct": 6 },
+          "provenance": { "source": "bom-observations", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 4500,
+        "signal_envelope": {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.33, -33.69] },
+          "confidence_score": 0.93,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "Fire upgraded to WATCH AND ACT. Fire area now 120 ha. Threatening Leura and Katoomba. Residents should enact bush fire survival plans.", "alert_level": "WATCH_AND_ACT", "fire_area_ha": 120 },
+          "provenance": { "source": "nsw-rfs-fires-near-me", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 5400,
+        "signal_envelope": {
+          "data_source_id": "twitter-disaster",
+          "category": "social_report",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.33, -33.71] },
+          "confidence_score": 0.60,
+          "freshness_score": 0.9,
+          "validation_status": "pending",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Multiple social media reports of heavy smoke and ember attack in Leura. Residents posting evacuation photos.", "platform": "twitter", "post_count": 47 },
+          "provenance": { "source": "twitter-disaster", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 6300,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.35, -33.68] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "AIIMS Level 2 declared. Multiple spot fires established NE of main front. Structure defence operations commencing in Leura.", "aiims_level": 2 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 7200,
+        "signal_envelope": {
+          "data_source_id": "tfnsw",
+          "category": "infrastructure",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.32, -33.72] },
+          "confidence_score": 0.98,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Great Western Highway closed between Springwood and Lithgow due to fire activity. Blue Mountains Line rail services suspended.", "road_closure": true, "rail_suspended": true },
+          "provenance": { "source": "tfnsw", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 9000,
+        "signal_envelope": {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.36, -33.67] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 5, "summary": "EMERGENCY WARNING issued for Leura, Katoomba, Wentworth Falls. Fire area 450 ha. Too late to leave. Shelter in a solid structure.", "alert_level": "EMERGENCY_WARNING", "fire_area_ha": 450 },
+          "provenance": { "source": "nsw-rfs-fires-near-me", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 10800,
+        "signal_envelope": {
+          "data_source_id": "energy-networks-nsw",
+          "category": "infrastructure",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.34, -33.70] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "Power outages affecting 12,000 customers in Blue Mountains LGA. Ausgrid crews unable to access affected substations.", "customers_affected": 12000 },
+          "provenance": { "source": "energy-networks-nsw", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 12600,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.37, -33.66] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 5, "summary": "AIIMS Level 3 declared. Fire area 800 ha. 15 structures confirmed lost. Request for interstate assistance lodged.", "aiims_level": 3, "structures_lost": 15, "fire_area_ha": 800 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 14400,
+        "signal_envelope": {
+          "data_source_id": "ga-sentinel-hotspots",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Polygon", "coordinates": [[[150.25, -33.75], [150.40, -33.75], [150.40, -33.63], [150.25, -33.63], [150.25, -33.75]]] },
+          "confidence_score": 0.90,
+          "freshness_score": 0.95,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 5, "summary": "Satellite pass confirms fire perimeter spanning 1,200 ha. Active fire fronts on north and east flanks.", "fire_area_ha": 1200 },
+          "provenance": { "source": "ga-sentinel-hotspots", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 16200,
+        "signal_envelope": {
+          "data_source_id": "nsw-health",
+          "category": "community_report",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.31, -33.72] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Blue Mountains Hospital reporting surge in smoke inhalation and heat-related presentations. 45 patients treated, 8 admissions.", "patients_treated": 45, "admissions": 8 },
+          "provenance": { "source": "nsw-health", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 18000,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.35, -33.68] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "Wind change to southerly. Fire behaviour moderating on southern flank. Northern flank still active. Containment operations commencing.", "wind_direction": "S", "containment_pct": 15 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 19800,
+        "signal_envelope": {
+          "data_source_id": "snap-send-solve",
+          "category": "community_report",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.33, -33.70] },
+          "confidence_score": 0.65,
+          "freshness_score": 0.9,
+          "validation_status": "pending",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Community reports of fallen trees blocking evacuation routes on Cliff Drive, Leura. Multiple abandoned vehicles.", "report_count": 12 },
+          "provenance": { "source": "snap-send-solve", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 21600,
+        "signal_envelope": {
+          "data_source_id": "bom-observations",
+          "category": "weather",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.31, -33.72] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Southerly wind change fully established. Temperature dropping to 28°C. Relative humidity rising to 35%. Fire danger rating reducing.", "temperature_c": 28, "wind_speed_kmh": 45, "humidity_pct": 35 },
+          "provenance": { "source": "bom-observations", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 23400,
+        "signal_envelope": {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.33, -33.68] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "Fire downgraded to WATCH AND ACT. Containment at 40%. Fire area 1,400 ha. 23 structures confirmed lost. Damage assessment teams deploying.", "alert_level": "WATCH_AND_ACT", "fire_area_ha": 1400, "containment_pct": 40, "structures_lost": 23 },
+          "provenance": { "source": "nsw-rfs-fires-near-me", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 25200,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.33, -33.69] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Containment operations progressing well. Back-burning successful on eastern flank. Containment at 55%.", "containment_pct": 55 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 27000,
+        "signal_envelope": {
+          "data_source_id": "water-authorities-nsw",
+          "category": "infrastructure",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.32, -33.71] },
+          "confidence_score": 0.88,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Water supply pressure reduced in Katoomba and Leura due to firefighting demand. Water restrictions in effect for non-emergency use.", "pressure_reduced": true },
+          "provenance": { "source": "water-authorities-nsw", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 28800,
+        "signal_envelope": {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.33, -33.69] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Fire downgraded to ADVICE. Containment at 70%. Fire area 1,500 ha. AIIMS Level 3 maintained. Recovery coordination planning initiated.", "alert_level": "ADVICE", "fire_area_ha": 1500, "containment_pct": 70, "structures_lost": 23 },
+          "provenance": { "source": "nsw-rfs-fires-near-me", "source_context": "simulation" }
+        }
+      }
+    ],
+    "benchmark_targets": {
+      "time_to_first_recommendation_s": 300,
+      "time_to_alert_s": 600,
+      "coordination_coverage_pct": 85.0
+    }
+  },
+  {
+    "id": "qld-cyclone-multi-agency",
+    "template_id": "qld-cyclone-multi-agency",
+    "kind": "scenario_template",
+    "document_type": "scenario_template",
+    "scenario_type": "Cyclone",
+    "name": "QLD Cyclone — Multi-Agency",
+    "description": "A category 3 tropical cyclone making landfall near Cairns in Far North Queensland. Exercises cyclone tracking, progressive public warnings, evacuation of coastal communities, multi-agency coordination and post-landfall damage assessment over a 24-hour period.",
+    "seed_organisations": [
+      { "org_id": "qps", "name": "Queensland Police Service", "type": "emergency_service", "jurisdiction_ids": ["qld"] },
+      { "org_id": "qfd", "name": "Queensland Fire Department", "type": "emergency_service", "jurisdiction_ids": ["qld"] },
+      { "org_id": "qas", "name": "Queensland Ambulance Service", "type": "health", "jurisdiction_ids": ["qld"] },
+      { "org_id": "ses-qld", "name": "Queensland State Emergency Service", "type": "emergency_service", "jurisdiction_ids": ["qld"] },
+      { "org_id": "bom-national", "name": "Bureau of Meteorology", "type": "commonwealth", "jurisdiction_ids": ["commonwealth"] },
+      { "org_id": "nema", "name": "National Emergency Management Agency", "type": "commonwealth", "jurisdiction_ids": ["commonwealth"] }
+    ],
+    "seed_jurisdictions": ["qld", "commonwealth"],
+    "seed_framework_ids": ["aiims-national", "qld-sdmp", "qld-cyclone-plan", "aidr-public-info-warnings", "aidr-emergency-planning"],
+    "signal_timeline": [
+      {
+        "offset_seconds": 0,
+        "signal_envelope": {
+          "data_source_id": "bom-warnings",
+          "category": "weather",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [147.50, -15.50] },
+          "confidence_score": 0.85,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 3, "summary": "Tropical Cyclone Watch issued for coastal areas between Cooktown and Innisfail. TC forming in Coral Sea, currently Category 1. Expected to intensify.", "cyclone_category": 1, "wind_speed_kmh": 90, "central_pressure_hpa": 985 },
+          "provenance": { "source": "bom-warnings", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 3600,
+        "signal_envelope": {
+          "data_source_id": "bom-forecasts",
+          "category": "weather",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [147.20, -15.80] },
+          "confidence_score": 0.85,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 3, "summary": "TC track forecast update: System intensifying, now Cat 2. Predicted landfall near Cairns in 18-22 hours. Peak gusts to 170 km/h expected.", "cyclone_category": 2, "wind_speed_kmh": 130, "central_pressure_hpa": 975, "predicted_landfall_hours": 20 },
+          "provenance": { "source": "bom-forecasts", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 7200,
+        "signal_envelope": {
+          "data_source_id": "bom-warnings",
+          "category": "weather",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [146.80, -16.20] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 4, "summary": "Cyclone Warning UPGRADED. TC now Category 3. Destructive winds expected in coastal areas from Cooktown to Innisfail. Prepare to shelter.", "cyclone_category": 3, "wind_speed_kmh": 170, "central_pressure_hpa": 960 },
+          "provenance": { "source": "bom-warnings", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 10800,
+        "signal_envelope": {
+          "data_source_id": "bom-radar",
+          "category": "weather",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [146.50, -16.50] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 4, "summary": "Doppler radar tracking: eye wall visible. System maintaining Cat 3 intensity. Heavy rainfall bands extending 200 km from centre. Cairns radar reporting 100 mm/hr rainfall rates.", "rainfall_rate_mmh": 100, "cyclone_category": 3 },
+          "provenance": { "source": "bom-radar", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 14400,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "weather",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.80, -16.80] },
+          "confidence_score": 0.88,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 4, "summary": "Pre-landfall: gale force winds now affecting Cairns CBD. Debris reported on streets. Power outages beginning in northern suburbs. All bridges closed.", "wind_speed_kmh": 110 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 18000,
+        "signal_envelope": {
+          "data_source_id": "qld-qfes",
+          "category": "weather",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 5, "summary": "QFES emergency situation declared for Cairns Regional Council area. All emergency services in shelter mode. No vehicle movements until wind gusts below 80 km/h.", "wind_speed_kmh": 165, "cyclone_category": 3 },
+          "provenance": { "source": "qld-qfes", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 21600,
+        "signal_envelope": {
+          "data_source_id": "bom-warnings",
+          "category": "weather",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 5, "summary": "TC has made landfall 20 km north of Cairns. Peak wind gusts 185 km/h recorded. Storm surge of 2.5 m above normal tide levels. Extreme rainfall continuing.", "cyclone_category": 3, "wind_speed_kmh": 185, "storm_surge_m": 2.5, "central_pressure_hpa": 955 },
+          "provenance": { "source": "bom-warnings", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 25200,
+        "signal_envelope": {
+          "data_source_id": "bom-flood-warnings",
+          "category": "hydrology",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.75, -16.90] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 4, "summary": "Major flood warning for Barron River at Cairns. River level 10.2 m (major flood level 9.4 m). Peak expected in 6 hours.", "river_level_m": 10.2, "major_flood_level_m": 9.4 },
+          "provenance": { "source": "bom-flood-warnings", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 28800,
+        "signal_envelope": {
+          "data_source_id": "twitter-disaster",
+          "category": "social_report",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.55,
+          "freshness_score": 0.85,
+          "validation_status": "pending",
+          "payload": { "hazard_type": "cyclone", "severity": 4, "summary": "Social media surge: reports of roof damage in Cairns North, flooding in Smithfield. Unverified reports of building collapse on Sheridan St.", "platform": "twitter", "post_count": 230 },
+          "provenance": { "source": "twitter-disaster", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 32400,
+        "signal_envelope": {
+          "data_source_id": "bom-warnings",
+          "category": "weather",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.50, -17.20] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 4, "summary": "TC moving inland, weakening to Category 2. Destructive winds easing in coastal areas. Heavy rainfall continuing. Flash flooding risk remains very high.", "cyclone_category": 2, "wind_speed_kmh": 120, "central_pressure_hpa": 970 },
+          "provenance": { "source": "bom-warnings", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 36000,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "community_report",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 4, "summary": "Initial damage assessment: significant structural damage in Cairns North and Machans Beach. Multiple roads blocked by debris and fallen trees. Three evacuation centres active with 2,400 displaced residents.", "evacuees": 2400, "evacuation_centres": 3 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 39600,
+        "signal_envelope": {
+          "data_source_id": "tmr-qld",
+          "category": "infrastructure",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 4, "summary": "Major infrastructure damage: Captain Cook Highway impassable. Bruce Highway blocked at Gordonvale. Cairns Airport closed. Rail services suspended north of Townsville.", "roads_closed": 12, "airport_closed": true },
+          "provenance": { "source": "tmr-qld", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 43200,
+        "signal_envelope": {
+          "data_source_id": "qld-health",
+          "category": "community_report",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 3, "summary": "Cairns Hospital operational on emergency generators. 87 storm-related presentations, 12 admissions, 3 critical. Pharmacy supplies for 72 hours.", "patients_treated": 87, "admissions": 12, "critical": 3 },
+          "provenance": { "source": "qld-health", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 46800,
+        "signal_envelope": {
+          "data_source_id": "bom-river-gauges",
+          "category": "hydrology",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.70, -16.88] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 4, "summary": "Barron River peaked at 11.8 m (record flood). Slowly receding. Mulgrave River at 8.9 m (major flood). Flooding widespread across Cairns coastal plain.", "river_level_m": 11.8, "record_flood": true },
+          "provenance": { "source": "bom-river-gauges", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 50400,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "community_report",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 3, "summary": "Comprehensive damage assessment: 450 buildings damaged (85 severely), 12 km of power lines down, 8 major road closures remaining. Estimated 15,000 without power.", "buildings_damaged": 450, "buildings_severely_damaged": 85, "without_power": 15000 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 54000,
+        "signal_envelope": {
+          "data_source_id": "epa-air-quality",
+          "category": "community_report",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.88,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 2, "summary": "Air quality monitoring: asbestos risk identified in heavily damaged structures in Machans Beach. Exclusion zone recommended. EPA assessors mobilising.", "asbestos_risk": true },
+          "provenance": { "source": "epa-air-quality", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 57600,
+        "signal_envelope": {
+          "data_source_id": "bom-warnings",
+          "category": "weather",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.30, -17.50] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 2, "summary": "TC weakened to tropical low. Gale warnings cancelled for coastal areas. Heavy rainfall warning continues for ranges. Flash flood risk remains.", "cyclone_category": 0, "wind_speed_kmh": 55 },
+          "provenance": { "source": "bom-warnings", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 61200,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 3, "summary": "AIIMS Level 2 maintained. Recovery coordination initiated. 5 evacuation centres operational (3,100 displaced). ADF asset request submitted. NEMA liaison en route.", "evacuees": 3100, "evacuation_centres": 5, "adf_requested": true },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 64800,
+        "signal_envelope": {
+          "data_source_id": "facebook-community",
+          "category": "social_report",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.50,
+          "freshness_score": 0.80,
+          "validation_status": "pending",
+          "payload": { "hazard_type": "cyclone", "severity": 2, "summary": "Community Facebook groups: misinformation spreading about dam failure upstream. No dam failure confirmed. Cairns Regional Council issuing corrections.", "misinformation": true, "topic": "dam_failure_rumour" },
+          "provenance": { "source": "facebook-community", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 68400,
+        "signal_envelope": {
+          "data_source_id": "qld-ses-flood",
+          "category": "hydrology",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.75, -16.90] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 3, "summary": "Flood waters receding in Cairns coastal areas. SES conducting swift water rescue stand-down. 42 rescues completed during event. Road reopening assessments commencing.", "rescues_completed": 42 },
+          "provenance": { "source": "qld-ses-flood", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 72000,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 3, "summary": "ADF assets arrived: HMAS Choules en route, C-17 delivering emergency supplies to Cairns Airport (now operational for military flights). 200 ADF personnel deployed for debris clearance.", "adf_personnel": 200 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 79200,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 2, "summary": "Recovery phase commencing. Power restored to 60% of affected areas. Bruce Highway reopened single-lane. Transition from response to recovery coordination underway.", "power_restored_pct": 60, "phase": "recovery_transition" },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 86400,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "qld",
+          "location": { "type": "Point", "coordinates": [145.77, -16.92] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "cyclone", "severity": 2, "summary": "24-hour situation report: TC dissipated. AIIMS Level 2 continuing. 3,100 displaced, 450 buildings damaged. Recovery plan being developed with all agencies. Community recovery hubs established at 3 locations.", "phase": "recovery", "community_recovery_hubs": 3 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      }
+    ],
+    "benchmark_targets": {
+      "time_to_first_recommendation_s": 600,
+      "time_to_alert_s": 1200,
+      "coordination_coverage_pct": 80.0
+    }
+  },
+  {
+    "id": "nsw-flood-riverine",
+    "template_id": "nsw-flood-riverine",
+    "kind": "scenario_template",
+    "document_type": "scenario_template",
+    "scenario_type": "Flood",
+    "name": "NSW Hawkesbury-Nepean Riverine Flood",
+    "description": "A major riverine flooding event in the Hawkesbury-Nepean valley west of Sydney, triggered by prolonged heavy rainfall. Exercises flood warning interpretation, progressive evacuation of low-lying communities, road closure management and inter-agency coordination over a 12-hour period.",
+    "seed_organisations": [
+      { "org_id": "ses-nsw", "name": "New South Wales State Emergency Service", "type": "emergency_service", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "frnsw", "name": "Fire and Rescue New South Wales", "type": "emergency_service", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "nswpf", "name": "New South Wales Police Force", "type": "emergency_service", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "nsw-ambulance", "name": "NSW Ambulance", "type": "health", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "bom-national", "name": "Bureau of Meteorology", "type": "commonwealth", "jurisdiction_ids": ["commonwealth"] },
+      { "org_id": "mrnsw", "name": "Marine Rescue New South Wales", "type": "volunteer", "jurisdiction_ids": ["nsw"] }
+    ],
+    "seed_jurisdictions": ["nsw", "commonwealth"],
+    "seed_framework_ids": ["aiims-national", "nsw-emplan", "nsw-flood-communications", "aidr-public-info-warnings"],
+    "signal_timeline": [
+      {
+        "offset_seconds": 0,
+        "signal_envelope": {
+          "data_source_id": "bom-flood-warnings",
+          "category": "hydrology",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.75, -33.60] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 3, "summary": "Flood Watch for Hawkesbury-Nepean River system. Heavy rainfall forecast for catchment over next 24 hours. Minor flooding expected at Windsor and North Richmond.", "warning_level": "flood_watch", "forecast_rainfall_mm": 150 },
+          "provenance": { "source": "bom-flood-warnings", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 3600,
+        "signal_envelope": {
+          "data_source_id": "bom-observations",
+          "category": "weather",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.60, -33.55] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 3, "summary": "Warragamba Dam spillway active. Inflows exceeding 100 GL/day. Rainfall intensity increasing in upper catchment. 80 mm recorded in last 6 hours.", "dam_spilling": true, "rainfall_6h_mm": 80 },
+          "provenance": { "source": "bom-observations", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 5400,
+        "signal_envelope": {
+          "data_source_id": "bom-river-gauges",
+          "category": "hydrology",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.80, -33.61] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 3, "summary": "Nepean River at Penrith: 8.2 m and rising (minor flood level 7.5 m). Rate of rise 0.4 m/hr. Peak forecast 12.5 m (major flood) in 8 hours.", "river_level_m": 8.2, "rate_of_rise_mh": 0.4, "forecast_peak_m": 12.5 },
+          "provenance": { "source": "bom-river-gauges", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 7200,
+        "signal_envelope": {
+          "data_source_id": "bom-flood-warnings",
+          "category": "hydrology",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.80, -33.61] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 4, "summary": "Flood Warning UPGRADED to MAJOR for Hawkesbury River at Windsor. Expected to reach 13.0 m. Moderate flooding at North Richmond. Low-lying areas prepare to evacuate.", "warning_level": "major_flood_warning", "forecast_peak_m": 13.0 },
+          "provenance": { "source": "bom-flood-warnings", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 9000,
+        "signal_envelope": {
+          "data_source_id": "nsw-ses-flood",
+          "category": "hydrology",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.61] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 4, "summary": "SES Evacuation ORDER issued for McGraths Hill, Cornwallis and Pitt Town Bottoms. 4,500 residents must evacuate immediately. Evacuation centres open at Richmond and Castle Hill.", "evacuation_order": true, "residents_affected": 4500 },
+          "provenance": { "source": "nsw-ses-flood", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 10800,
+        "signal_envelope": {
+          "data_source_id": "tfnsw",
+          "category": "infrastructure",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.62] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 4, "summary": "Windsor Bridge closed. Hawkesbury River road crossings closed at Sackville, Wisemans Ferry. Richmond-Windsor road impassable. Only route via M7/M2 corridor.", "bridges_closed": 3, "roads_closed": 8 },
+          "provenance": { "source": "tfnsw", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 12600,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "community_report",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.82, -33.60] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 4, "summary": "Evacuation compliance estimated at 70%. SES door-knocking remaining residents in McGraths Hill. 15 requests for flood rescue assistance received. Marine Rescue boats deployed.", "evacuation_compliance_pct": 70, "rescue_requests": 15 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 14400,
+        "signal_envelope": {
+          "data_source_id": "bom-river-gauges",
+          "category": "hydrology",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.61] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 5, "summary": "Hawkesbury at Windsor: 12.8 m and still rising. Rate of rise 0.5 m/hr. Revised peak forecast 14.5 m — exceeding 1 in 100 year level. Historic 1867 flood level 19.7 m.", "river_level_m": 12.8, "rate_of_rise_mh": 0.5, "forecast_peak_m": 14.5 },
+          "provenance": { "source": "bom-river-gauges", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 16200,
+        "signal_envelope": {
+          "data_source_id": "nsw-ses-flood",
+          "category": "hydrology",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.61] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 5, "summary": "EMERGENCY WARNING: Additional evacuation orders for Windsor CBD, South Windsor, Bligh Park. Total 18,000 residents under evacuation orders. This is a life-threatening emergency.", "evacuation_order": true, "residents_affected": 18000, "warning_level": "emergency_warning" },
+          "provenance": { "source": "nsw-ses-flood", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 18000,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "community_report",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.61] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 5, "summary": "AIIMS Level 2 declared. Flood waters entering ground floors in South Windsor. 8 swift-water rescues completed. 2 people unaccounted for. Evacuation centres at capacity — opening additional centre at Rouse Hill.", "aiims_level": 2, "rescues_completed": 8, "unaccounted": 2 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 21600,
+        "signal_envelope": {
+          "data_source_id": "energy-networks-nsw",
+          "category": "infrastructure",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.61] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 4, "summary": "Precautionary power shutdown in flood-affected areas. 22,000 customers without power across Hawkesbury LGA. Restoration dependent on flood recession.", "customers_affected": 22000, "precautionary_shutdown": true },
+          "provenance": { "source": "energy-networks-nsw", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 25200,
+        "signal_envelope": {
+          "data_source_id": "bom-river-gauges",
+          "category": "hydrology",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.61] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 5, "summary": "Hawkesbury at Windsor peaked at 14.2 m. Now 14.0 m and slowly falling. Rate of fall 0.1 m/hr. Flood waters expected to remain above major flood level for 48+ hours.", "river_level_m": 14.0, "peak_m": 14.2, "rate_of_fall_mh": 0.1 },
+          "provenance": { "source": "bom-river-gauges", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 28800,
+        "signal_envelope": {
+          "data_source_id": "nsw-health",
+          "category": "community_report",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.61] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 3, "summary": "Hawkesbury District Health Service: 23 flood-related presentations. 5 hypothermia cases. 2 people recovered from floodwaters — admitted ICU. Both unaccounted persons now located safe.", "patients_treated": 23, "unaccounted_resolved": true },
+          "provenance": { "source": "nsw-health", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 32400,
+        "signal_envelope": {
+          "data_source_id": "bom-observations",
+          "category": "weather",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.75, -33.60] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 3, "summary": "Rainfall easing across catchment. 6 mm recorded in last 3 hours (down from 30 mm/hr at peak). Clearing trend expected overnight. Catchment saturation remains extreme.", "rainfall_3h_mm": 6 },
+          "provenance": { "source": "bom-observations", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 36000,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.61] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 3, "summary": "Situation stabilising. AIIMS Level 2 maintained. 14,200 evacuated (79% compliance). 4 evacuation centres active. Clean-up planning commenced. Road damage assessment scheduled for when waters recede.", "evacuees": 14200, "evacuation_compliance_pct": 79, "phase": "stabilisation" },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 39600,
+        "signal_envelope": {
+          "data_source_id": "water-authorities-nsw",
+          "category": "infrastructure",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.61] },
+          "confidence_score": 0.88,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 3, "summary": "North Richmond Water Filtration Plant offline due to extreme turbidity. Bottled water distribution organised for evacuation centres. Estimated 72 hours to restore treatment.", "water_treatment_offline": true, "restoration_hours": 72 },
+          "provenance": { "source": "water-authorities-nsw", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 43200,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [150.81, -33.61] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "flood", "severity": 3, "summary": "12-hour situation report: River at 13.5 m, falling slowly. All evacuated persons accounted for. No fatalities. Preliminary damage estimate 200+ properties inundated. Recovery coordinator appointed.", "river_level_m": 13.5, "properties_inundated": 200, "phase": "recovery_transition" },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      }
+    ],
+    "benchmark_targets": {
+      "time_to_first_recommendation_s": 300,
+      "time_to_alert_s": 900,
+      "coordination_coverage_pct": 80.0
+    }
+  },
+  {
+    "id": "cross-jurisdiction-bushfire",
+    "template_id": "cross-jurisdiction-bushfire",
+    "kind": "scenario_template",
+    "document_type": "scenario_template",
+    "scenario_type": "Cross-jurisdiction",
+    "name": "VIC/NSW Border Bushfire — Cross-jurisdiction",
+    "description": "A large bushfire originating in north-east Victoria that crosses into southern NSW, triggering multi-state coordination, Commonwealth activation (COMDISPLAN) and ADF assistance. Exercises cross-jurisdictional AIIMS integration, resource sharing agreements, unified public messaging, and national-level escalation over a 48-hour period.",
+    "seed_organisations": [
+      { "org_id": "cfa-vic", "name": "Country Fire Authority", "type": "emergency_service", "jurisdiction_ids": ["vic"] },
+      { "org_id": "frv", "name": "Fire Rescue Victoria", "type": "emergency_service", "jurisdiction_ids": ["vic"] },
+      { "org_id": "ses-vic", "name": "Victoria State Emergency Service", "type": "emergency_service", "jurisdiction_ids": ["vic"] },
+      { "org_id": "vicpol", "name": "Victoria Police", "type": "emergency_service", "jurisdiction_ids": ["vic"] },
+      { "org_id": "nsw-rfs", "name": "New South Wales Rural Fire Service", "type": "emergency_service", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "ses-nsw", "name": "New South Wales State Emergency Service", "type": "emergency_service", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "nswpf", "name": "New South Wales Police Force", "type": "emergency_service", "jurisdiction_ids": ["nsw"] },
+      { "org_id": "nema", "name": "National Emergency Management Agency", "type": "commonwealth", "jurisdiction_ids": ["commonwealth"] },
+      { "org_id": "bom-national", "name": "Bureau of Meteorology", "type": "commonwealth", "jurisdiction_ids": ["commonwealth"] },
+      { "org_id": "adf", "name": "Australian Defence Force", "type": "commonwealth", "jurisdiction_ids": ["commonwealth"] },
+      { "org_id": "arc", "name": "Australian Red Cross", "type": "community", "jurisdiction_ids": ["commonwealth"] }
+    ],
+    "seed_jurisdictions": ["vic", "nsw", "commonwealth"],
+    "seed_framework_ids": ["aiims-national", "nsw-emplan", "vic-emmv", "nsw-bushfire-plan", "vic-bushfire-plan", "comdisplan", "natcatdisplan", "aidr-emergency-planning", "aidr-public-info-warnings"],
+    "signal_timeline": [
+      {
+        "offset_seconds": 0,
+        "signal_envelope": {
+          "data_source_id": "bom-warnings",
+          "category": "weather",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.15, -36.75] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Extreme fire danger rating for North East Victoria and Southern Ranges NSW. Total fire ban declared both states. Temperatures 42°C+, winds NW 70 km/h.", "temperature_c": 43, "wind_speed_kmh": 70, "humidity_pct": 7, "fire_danger_rating": "extreme" },
+          "provenance": { "source": "bom-warnings", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 3600,
+        "signal_envelope": {
+          "data_source_id": "vic-cfa",
+          "category": "fire",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.10, -36.70] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Grass and scrub fire reported near Corryong, NE Victoria. CFA crews responding. Fire area approximately 10 ha. ALERT level.", "alert_level": "ALERT", "fire_area_ha": 10 },
+          "provenance": { "source": "vic-cfa", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 7200,
+        "signal_envelope": {
+          "data_source_id": "ga-sentinel-hotspots",
+          "category": "fire",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.12, -36.68] },
+          "confidence_score": 0.88,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Multiple satellite hotspots detected. Fire area estimated 80 ha. Rapid spread NE under strong winds. Spot fires detected 2 km ahead of main front.", "fire_area_ha": 80, "spot_fires": true },
+          "provenance": { "source": "ga-sentinel-hotspots", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 10800,
+        "signal_envelope": {
+          "data_source_id": "vic-cfa",
+          "category": "fire",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.18, -36.65] },
+          "confidence_score": 0.93,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "WATCH AND ACT for Corryong and Cudgewa. Fire area 350 ha. Moving towards NSW border. AIIMS Level 2 declared VIC. Request for NSW RFS assistance submitted.", "alert_level": "WATCH_AND_ACT", "fire_area_ha": 350, "aiims_level": 2 },
+          "provenance": { "source": "vic-cfa", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 14400,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "fire",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.25, -36.60] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "Fire has crossed Murray River into NSW near Bringenbrong. NSW RFS notified and responding. Dual-state AIIMS coordination being established. Fire area 800 ha total.", "fire_area_ha": 800, "cross_border": true, "border_crossed": "vic_to_nsw" },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 18000,
+        "signal_envelope": {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [147.30, -36.05] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "NSW RFS: WATCH AND ACT for Khancoban and Tooma areas. Fire established in Kosciuszko NP on NSW side. Separate AIIMS structure established NSW. Joint operations centre proposed.", "alert_level": "WATCH_AND_ACT", "fire_area_ha": 200 },
+          "provenance": { "source": "nsw-rfs-fires-near-me", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 21600,
+        "signal_envelope": {
+          "data_source_id": "vic-cfa",
+          "category": "fire",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.60] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 5, "summary": "EMERGENCY WARNING VIC: Corryong township under direct threat. Residents shelter immediately. Fire area 2,000 ha. 12 structures confirmed lost. AIIMS Level 3 declared.", "alert_level": "EMERGENCY_WARNING", "fire_area_ha": 2000, "structures_lost": 12, "aiims_level": 3 },
+          "provenance": { "source": "vic-cfa", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 28800,
+        "signal_envelope": {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [147.35, -36.00] },
+          "confidence_score": 0.93,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 5, "summary": "EMERGENCY WARNING NSW: Khancoban and surrounding areas. Fire area on NSW side now 600 ha. Running through alpine country. Containment extremely difficult in terrain.", "alert_level": "EMERGENCY_WARNING", "fire_area_ha": 600 },
+          "provenance": { "source": "nsw-rfs-fires-near-me", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 36000,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "fire",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.55] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "Joint State Operations Centre established in Wodonga. Unified command VIC/NSW agreed. Combined fire area 3,500 ha. 250 firefighters deployed (180 VIC, 70 NSW). Interstate resource sharing under mutual aid.", "fire_area_ha": 3500, "firefighters_deployed": 250 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 43200,
+        "signal_envelope": {
+          "data_source_id": "bom-observations",
+          "category": "weather",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.15, -36.60] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "Overnight conditions: temperature dropped to 18°C, winds easing to 20 km/h. Humidity rising to 55%. Fire behaviour moderated significantly. Window for containment operations.", "temperature_c": 18, "wind_speed_kmh": 20, "humidity_pct": 55 },
+          "provenance": { "source": "bom-observations", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 50400,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "fire",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.55] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "Overnight containment operations successful on southern and western flanks. 35% contained. Fire area 4,200 ha. Second hot day forecast — conditions expected to deteriorate by 1400.", "fire_area_ha": 4200, "containment_pct": 35 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 57600,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.55] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "NEMA activated COMDISPLAN. ADF assets requested: Black Hawk helicopters for water bombing, Army personnel for fire line construction. NEMA deploying liaison officers to Joint Operations Centre.", "comdisplan_activated": true, "adf_assets_requested": true },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 64800,
+        "signal_envelope": {
+          "data_source_id": "himawari-satellite",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Polygon", "coordinates": [[[147.00, -36.80], [147.50, -36.80], [147.50, -35.90], [147.00, -35.90], [147.00, -36.80]]] },
+          "confidence_score": 0.88,
+          "freshness_score": 0.95,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 5, "summary": "Himawari-9 satellite imagery shows massive smoke plume extending 300 km. Combined fire area estimated 6,500 ha across both states. New fire front developing in Kosciuszko NP.", "fire_area_ha": 6500, "smoke_plume_km": 300 },
+          "provenance": { "source": "himawari-satellite", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 72000,
+        "signal_envelope": {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "category": "fire",
+          "jurisdiction_id": "nsw",
+          "location": { "type": "Point", "coordinates": [147.40, -35.95] },
+          "confidence_score": 0.93,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 5, "summary": "AIIMS Level 3 declared NSW. Fire area NSW side 2,800 ha. Tumbarumba shire under EMERGENCY WARNING. National parks closed across Snowy Mountains region.", "alert_level": "EMERGENCY_WARNING", "fire_area_ha": 2800, "aiims_level": 3 },
+          "provenance": { "source": "nsw-rfs-fires-near-me", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 79200,
+        "signal_envelope": {
+          "data_source_id": "vicroads",
+          "category": "infrastructure",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.15, -36.55] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "Major road closures: Murray Valley Highway closed Tallangatta to Corryong. Omeo Highway closed. Alpine Road closed. Hume Freeway traffic management in place at Wodonga. Cross-border movement restricted.", "roads_closed": 6, "cross_border_restricted": true },
+          "provenance": { "source": "vicroads", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 86400,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.55] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 4, "summary": "24-hour SITREP: Combined fire area 8,200 ha. 45% contained. 28 structures lost (VIC 18, NSW 10). 580 firefighters deployed including 120 ADF. 2 Black Hawk helicopters operational. Red Cross operating 4 relief centres.", "fire_area_ha": 8200, "containment_pct": 45, "structures_lost": 28, "firefighters": 580 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 93600,
+        "signal_envelope": {
+          "data_source_id": "facebook-community",
+          "category": "social_report",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.60] },
+          "confidence_score": 0.50,
+          "freshness_score": 0.80,
+          "validation_status": "pending",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Misinformation circulating on social media: false claims fire was deliberately lit. VicPol statement: cause under investigation, no evidence of arson. Corrective messaging issued.", "misinformation": true, "topic": "false_arson_claims" },
+          "provenance": { "source": "facebook-community", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 100800,
+        "signal_envelope": {
+          "data_source_id": "bom-observations",
+          "category": "weather",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.15, -36.60] },
+          "confidence_score": 0.95,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Cool change moving through. SW winds 25 km/h, temperature 22°C, humidity 60%. Conditions favourable for containment over next 48 hours. No further hot days in 7-day outlook.", "temperature_c": 22, "wind_speed_kmh": 25, "humidity_pct": 60 },
+          "provenance": { "source": "bom-observations", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 108000,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "fire",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.55] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Containment progressing well. 65% contained. Cool conditions allowing aggressive back-burning. Fire area stable at 8,500 ha. Downgrading alerts for Corryong township.", "fire_area_ha": 8500, "containment_pct": 65 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 122400,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.55] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 3, "summary": "Recovery transition planning commenced. Red Cross leading needs assessments. VIC: 18 structures lost, 350 livestock. NSW: 10 structures, 8,000 ha parkland. Recovery coordinators appointed both states.", "phase": "recovery_transition", "vic_structures_lost": 18, "nsw_structures_lost": 10 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 136800,
+        "signal_envelope": {
+          "data_source_id": "epa-air-quality",
+          "category": "community_report",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.60] },
+          "confidence_score": 0.88,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 2, "summary": "Air quality: smoke haze reducing across NE VIC. PM2.5 levels returning to moderate (25-50 µg/m³). Health advisory for sensitive groups maintained.", "pm25_ugm3": 35 },
+          "provenance": { "source": "epa-air-quality", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 151200,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "fire",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.55] },
+          "confidence_score": 0.92,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 2, "summary": "Fire at 80% containment. Patrol and blacking-out operations continuing. AIIMS downgraded to Level 2 in both states. ADF draw-down commenced. Joint Operations Centre transitioning to recovery focus.", "fire_area_ha": 8600, "containment_pct": 80, "aiims_level": 2 },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 165600,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.55] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 2, "summary": "46-hour SITREP: 85% contained. Recovery operations ramping up. COMDISPLAN assistance continuing. National bushfire recovery agency briefed. Insurance assessors deployed. Community recovery meetings scheduled both sides of border.", "containment_pct": 85, "phase": "recovery" },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      },
+      {
+        "offset_seconds": 172800,
+        "signal_envelope": {
+          "data_source_id": "field-officer-reports",
+          "category": "resource_status",
+          "jurisdiction_id": "vic",
+          "location": { "type": "Point", "coordinates": [147.20, -36.55] },
+          "confidence_score": 0.90,
+          "freshness_score": 1.0,
+          "validation_status": "validated",
+          "payload": { "hazard_type": "bushfire", "severity": 2, "summary": "48-hour final SITREP: Fire 90% contained, 8,600 ha. 28 structures lost, no fatalities. Full recovery coordination established. AIIMS to be stood down within 24 hours. Lessons learned capture process initiated.", "fire_area_ha": 8600, "containment_pct": 90, "structures_lost": 28, "fatalities": 0, "phase": "recovery" },
+          "provenance": { "source": "field-officer-reports", "source_context": "simulation" }
+        }
+      }
+    ],
+    "benchmark_targets": {
+      "time_to_first_recommendation_s": 600,
+      "time_to_alert_s": 1200,
+      "coordination_coverage_pct": 75.0
+    }
+  }
+]
