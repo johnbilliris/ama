@@ -15,10 +15,11 @@ import logging
 import os
 import re
 import uuid
-from dataclasses import dataclass, field
+from collections.abc import AsyncIterator
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, AsyncIterator
+from typing import Any
 
 from app.repositories.sim_chat_history_repository import (
     SimChatHistoryRepository,
@@ -27,6 +28,7 @@ from app.repositories.sim_chat_history_repository import (
 from app.services.simulation.controller_tools import ALLOW_LIST, TOOL_SCHEMAS
 from app.services.simulation.rate_limiter import RateLimiter, get_rate_limiter
 from app.services.simulation.sub_agent_invoker import SubAgentInvoker, default_invoker
+
 from packages.domain.src.domain.models.sim_chat_turn import SimChatTurn
 
 logger = logging.getLogger(__name__)
@@ -336,7 +338,11 @@ class SimulationControllerService:
         api_key = os.environ.get("AZURE_OPENAI_API_KEY")
         if not (endpoint and deployment):
             missing = (
-                "AZURE_OPENAI_ENDPOINT" if not endpoint else "AZURE_OPENAI_DEPLOYMENT (or AZURE_OPENAI_SIMULATION_DEPLOYMENT / AZURE_OPENAI_REASONING_DEPLOYMENT)"
+                "AZURE_OPENAI_ENDPOINT"
+                if not endpoint
+                else "AZURE_OPENAI_DEPLOYMENT"
+                " (or AZURE_OPENAI_SIMULATION_DEPLOYMENT"
+                " / AZURE_OPENAI_REASONING_DEPLOYMENT)"
             )
             yield ChatEvent(
                 "error",

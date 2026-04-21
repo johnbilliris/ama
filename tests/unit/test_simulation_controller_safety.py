@@ -3,7 +3,6 @@
 import asyncio
 
 import pytest
-
 from app.clients.outbound_http import SimAwareHttpClient, SimEgressBlocked
 from app.core.tenant_context import TenantContext, set_current_tenant
 from app.services.simulation.controller_service import SimulationControllerService

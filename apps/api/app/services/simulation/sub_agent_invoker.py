@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Awaitable, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class SubAgentInvoker:
             )
         try:
             return await asyncio.wait_for(fn(tenant_id, question), timeout=timeout_s)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning("sub_agent.timeout sub_agent=%s tenant=%s", sub_agent, tenant_id)
             return SubAgentReply(
                 sub_agent=sub_agent,
