@@ -1,0 +1,206 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "12751093467716470887"
+    }
+  },
+  "parameters": {
+    "iotHubName": {
+      "type": "string",
+      "metadata": {
+        "description": "IoT Hub name"
+      }
+    },
+    "location": {
+      "type": "string",
+      "allowedValues": [
+        "australiaeast",
+        "australiasoutheast"
+      ],
+      "metadata": {
+        "description": "Location — restricted to Australian regions"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "metadata": {
+        "description": "Resource tags"
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "S1",
+      "allowedValues": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "metadata": {
+        "description": "IoT Hub SKU"
+      }
+    },
+    "skuCapacity": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "metadata": {
+        "description": "IoT Hub SKU capacity (units)"
+      }
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Log Analytics workspace ID for diagnostics"
+      }
+    },
+    "eventGridWebhookEndpoint": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Event Grid webhook endpoint for telemetry events"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Devices/IotHubs",
+      "apiVersion": "2023-06-30",
+      "name": "[parameters('iotHubName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "sku": {
+        "name": "[parameters('skuName')]",
+        "capacity": "[parameters('skuCapacity')]"
+      },
+      "properties": {
+        "minTlsVersion": "1.2",
+        "publicNetworkAccess": "Disabled",
+        "disableLocalAuth": true,
+        "features": "None",
+        "routing": {
+          "routes": [
+            {
+              "name": "telemetry-to-events",
+              "source": "DeviceMessages",
+              "condition": "true",
+              "endpointNames": [
+                "events"
+              ],
+              "isEnabled": true
+            }
+          ]
+        }
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      }
+    },
+    {
+      "type": "Microsoft.EventGrid/systemTopics",
+      "apiVersion": "2024-06-01-preview",
+      "name": "[format('{0}-events', parameters('iotHubName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "source": "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]",
+        "topicType": "Microsoft.Devices.IoTHubs"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]"
+      ]
+    },
+    {
+      "condition": "[not(empty(parameters('eventGridWebhookEndpoint')))]",
+      "type": "Microsoft.EventGrid/systemTopics/eventSubscriptions",
+      "apiVersion": "2024-06-01-preview",
+      "name": "[format('{0}/{1}', format('{0}-events', parameters('iotHubName')), 'telemetry-to-monitoring')]",
+      "properties": {
+        "destination": {
+          "endpointType": "WebHook",
+          "properties": {
+            "endpointUrl": "[parameters('eventGridWebhookEndpoint')]"
+          }
+        },
+        "filter": {
+          "includedEventTypes": [
+            "Microsoft.Devices.DeviceTelemetry"
+          ]
+        },
+        "retryPolicy": {
+          "maxDeliveryAttempts": 10,
+          "eventTimeToLiveInMinutes": 1440
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.EventGrid/systemTopics', format('{0}-events', parameters('iotHubName')))]"
+      ]
+    },
+    {
+      "condition": "[not(empty(parameters('logAnalyticsWorkspaceId')))]",
+      "type": "Microsoft.Insights/diagnosticSettings",
+      "apiVersion": "2021-05-01-preview",
+      "scope": "[format('Microsoft.Devices/IotHubs/{0}', parameters('iotHubName'))]",
+      "name": "[format('{0}-diag', parameters('iotHubName'))]",
+      "properties": {
+        "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+        "logs": [
+          {
+            "categoryGroup": "allLogs",
+            "enabled": true
+          }
+        ],
+        "metrics": [
+          {
+            "category": "AllMetrics",
+            "enabled": true
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "resourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "IoT Hub resource ID"
+      },
+      "value": "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]"
+    },
+    "resourceName": {
+      "type": "string",
+      "metadata": {
+        "description": "IoT Hub resource name"
+      },
+      "value": "[parameters('iotHubName')]"
+    },
+    "hostname": {
+      "type": "string",
+      "metadata": {
+        "description": "IoT Hub hostname"
+      },
+      "value": "[reference(resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName')), '2023-06-30').hostName]"
+    },
+    "principalId": {
+      "type": "string",
+      "metadata": {
+        "description": "IoT Hub system-assigned principal ID"
+      },
+      "value": "[reference(resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName')), '2023-06-30', 'full').identity.principalId]"
+    },
+    "eventGridTopicId": {
+      "type": "string",
+      "metadata": {
+        "description": "Event Grid system topic ID"
+      },
+      "value": "[resourceId('Microsoft.EventGrid/systemTopics', format('{0}-events', parameters('iotHubName')))]"
+    }
+  }
+}

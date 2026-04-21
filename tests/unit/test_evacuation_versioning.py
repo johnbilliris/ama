@@ -9,14 +9,16 @@ from evacuation.versioning import VersionConflictError, VersionCounter
 
 
 class TestVersionAssignmentNoCosmos:
-    def test_returns_one_without_cosmos(self):
+    @pytest.mark.asyncio
+    async def test_returns_one_without_cosmos(self):
         vc = VersionCounter(cosmos_container=None)
-        assert vc.assign_version("inc-001") == 1
+        assert await vc.assign_version("inc-001") == 1
 
-    def test_returns_one_repeatedly(self):
+    @pytest.mark.asyncio
+    async def test_returns_one_repeatedly(self):
         vc = VersionCounter(cosmos_container=None)
         for _ in range(5):
-            assert vc.assign_version("inc-001") == 1
+            assert await vc.assign_version("inc-001") == 1
 
 
 # ---------------------------------------------------------------------------
@@ -63,7 +65,8 @@ class TestVersionConflictError:
 
 
 class TestVersionAssignmentWithCosmos:
-    def test_increment_existing_counter(self):
+    @pytest.mark.asyncio
+    async def test_increment_existing_counter(self):
         """Mock Cosmos returns existing counter doc → version is incremented."""
 
         class FakeCosmos:
@@ -74,9 +77,10 @@ class TestVersionAssignmentWithCosmos:
                 pass
 
         vc = VersionCounter(cosmos_container=FakeCosmos())
-        assert vc.assign_version("inc-001", "live:inc-001") == 6
+        assert await vc.assign_version("inc-001", "live:inc-001") == 6
 
-    def test_create_counter_on_404(self):
+    @pytest.mark.asyncio
+    async def test_create_counter_on_404(self):
         """Counter does not exist (404) → creates at version 1."""
 
         class FakeCosmos:
@@ -87,9 +91,10 @@ class TestVersionAssignmentWithCosmos:
                 pass
 
         vc = VersionCounter(cosmos_container=FakeCosmos())
-        assert vc.assign_version("inc-002", "live:inc-002") == 1
+        assert await vc.assign_version("inc-002", "live:inc-002") == 1
 
-    def test_occ_conflict_retries(self):
+    @pytest.mark.asyncio
+    async def test_occ_conflict_retries(self):
         """412 on first attempt → retry succeeds."""
         attempt = {"count": 0}
 
@@ -104,10 +109,11 @@ class TestVersionAssignmentWithCosmos:
                 pass
 
         vc = VersionCounter(cosmos_container=FakeCosmos())
-        result = vc.assign_version("inc-003", "live:inc-003")
+        result = await vc.assign_version("inc-003", "live:inc-003")
         assert result == 4  # 3 + 1
 
-    def test_occ_exhausted_retries_uses_fallback(self):
+    @pytest.mark.asyncio
+    async def test_occ_exhausted_retries_uses_fallback(self):
         """All OCC retries fail → fallback reads current_version + 1."""
 
         class FakeCosmos:
@@ -119,5 +125,5 @@ class TestVersionAssignmentWithCosmos:
 
         vc = VersionCounter(cosmos_container=FakeCosmos())
         # The fallback also calls read_item which raises 412, so falls back to 1
-        result = vc.assign_version("inc-004", "live:inc-004")
+        result = await vc.assign_version("inc-004", "live:inc-004")
         assert result == 1

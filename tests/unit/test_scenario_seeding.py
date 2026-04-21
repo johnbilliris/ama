@@ -11,7 +11,7 @@ class TestScenarioTemplate:
     def test_timeline_sorted_ascending(self):
         template = ScenarioTemplate(
             template_id="test-template",
-            scenario_type="bushfire",
+            scenario_type="Bushfire",
             name="Test",
             signal_timeline=[
                 SignalTimelineEntry(offset_seconds=0, signal_envelope={"type": "smoke"}),
@@ -24,7 +24,7 @@ class TestScenarioTemplate:
         with pytest.raises(ValueError, match="sorted ascending"):
             ScenarioTemplate(
                 template_id="bad-template",
-                scenario_type="bushfire",
+                scenario_type="Bushfire",
                 name="Bad",
                 signal_timeline=[
                     SignalTimelineEntry(offset_seconds=60, signal_envelope={"type": "fire"}),

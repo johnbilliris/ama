@@ -8,9 +8,9 @@ Simulation tenant alerts MUST NOT trigger real public delivery per FR-040.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import math
-import time
 from datetime import UTC, datetime
 from uuid import uuid4
 
@@ -53,7 +53,7 @@ class MultiChannelDeliveryService:
             "emergency_broadcast": True,
         }
 
-    def deliver_alert(
+    async def deliver_alert(
         self,
         alert: PublicAlert,
         segments: list[AudienceSegment],
@@ -113,7 +113,7 @@ class MultiChannelDeliveryService:
                     record.delivery_status = DeliveryStatus.delivered
                     record.completed_at = datetime.now(UTC)
                 else:
-                    record = self._deliver_with_retry(record, ChannelType(channel_str))
+                    record = await self._deliver_with_retry(record, ChannelType(channel_str))
 
                 records.append(record)
 
@@ -164,7 +164,7 @@ class MultiChannelDeliveryService:
             ),
         )
 
-    def _deliver_with_retry(
+    async def _deliver_with_retry(
         self, record: DeliveryRecord, channel: ChannelType
     ) -> DeliveryRecord:
         """Implement per-channel independent retry with exponential backoff."""
@@ -200,7 +200,7 @@ class MultiChannelDeliveryService:
 
                 if attempt < max_retries and attempt < len(backoff):
                     record.delivery_status = DeliveryStatus.retrying
-                    time.sleep(backoff[attempt])
+                    await asyncio.sleep(backoff[attempt])
 
         # All retries exhausted
         record.delivery_status = DeliveryStatus.failed

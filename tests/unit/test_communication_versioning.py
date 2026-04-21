@@ -1,5 +1,6 @@
 """Tests for communication.versioning — VersionCounter."""
 
+import pytest
 
 from communication.versioning import VersionCounter
 
@@ -9,25 +10,28 @@ from communication.versioning import VersionCounter
 
 
 class TestLocalVersionCounter:
-    def test_first_version_is_one(self):
+    @pytest.mark.asyncio
+    async def test_first_version_is_one(self):
         vc = VersionCounter()
-        v = vc.assign_version("inc-1")
+        v = await vc.assign_version("inc-1")
         assert v == 1
 
-    def test_monotonic_increment(self):
+    @pytest.mark.asyncio
+    async def test_monotonic_increment(self):
         vc = VersionCounter()
-        v1 = vc.assign_version("inc-1")
-        v2 = vc.assign_version("inc-1")
-        v3 = vc.assign_version("inc-1")
+        v1 = await vc.assign_version("inc-1")
+        v2 = await vc.assign_version("inc-1")
+        v3 = await vc.assign_version("inc-1")
         assert v1 == 1
         assert v2 == 2
         assert v3 == 3
 
-    def test_different_incidents_independent(self):
+    @pytest.mark.asyncio
+    async def test_different_incidents_independent(self):
         vc = VersionCounter()
-        assert vc.assign_version("inc-1") == 1
-        assert vc.assign_version("inc-2") == 1
-        assert vc.assign_version("inc-1") == 2
+        assert await vc.assign_version("inc-1") == 1
+        assert await vc.assign_version("inc-2") == 1
+        assert await vc.assign_version("inc-1") == 2
 
 
 # ---------------------------------------------------------------------------
@@ -53,22 +57,25 @@ class TestAlertIdFormat:
 
 
 class TestVersionCreationHelpers:
-    def test_create_update_version(self):
+    @pytest.mark.asyncio
+    async def test_create_update_version(self):
         vc = VersionCounter()
         version, alert_id = vc.create_update_version("inc-1", "Updated info")
         assert version == 1
         assert alert_id == "ca-inc-1-v1"
 
-    def test_create_correction_version(self):
+    @pytest.mark.asyncio
+    async def test_create_correction_version(self):
         vc = VersionCounter()
-        vc.assign_version("inc-1")  # v1
+        await vc.assign_version("inc-1")  # v1
         version, alert_id = vc.create_correction_version("inc-1", "ca-inc-1-v1")
         assert version == 2
         assert alert_id == "ca-inc-1-v2"
 
-    def test_create_all_clear_version(self):
+    @pytest.mark.asyncio
+    async def test_create_all_clear_version(self):
         vc = VersionCounter()
-        vc.assign_version("inc-1")  # v1
+        await vc.assign_version("inc-1")  # v1
         version, alert_id = vc.create_all_clear_version("inc-1", "ca-inc-1-v1")
         assert version == 2
         assert alert_id == "ca-inc-1-v2"

@@ -16,7 +16,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "apps", "agents"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from risk_assessment.audit import AuditWriter
@@ -84,7 +84,8 @@ class TestAssessmentWriteUsesCreateItem:
 
 
 class TestAssessmentReadByPartitionKey:
-    def test_assessment_read_by_partition_key(self) -> None:
+    @pytest.mark.asyncio
+    async def test_assessment_read_by_partition_key(self) -> None:
         """Verify reads use incident_scope_key as partition key."""
         mock_container = MagicMock()
         mock_container.read_item.return_value = {
@@ -96,7 +97,7 @@ class TestAssessmentReadByPartitionKey:
         mock_container.replace_item.return_value = None
 
         counter = VersionCounter(cosmos_container=mock_container)
-        version = counter.assign_version(
+        version = await counter.assign_version(
             incident_id="inc-001",
             assessment_type="spread_prediction",
             incident_scope_key="live:inc-001",
@@ -156,7 +157,8 @@ class TestAuditRecordAppendOnly:
 
 
 class TestVersionCounterOCCRetry:
-    def test_version_counter_occ_retry(self) -> None:
+    @pytest.mark.asyncio
+    async def test_version_counter_occ_retry(self) -> None:
         """Verify version counter retries on 412 errors then succeeds."""
         mock_container = MagicMock()
 
@@ -180,8 +182,8 @@ class TestVersionCounterOCCRetry:
 
         counter = VersionCounter(cosmos_container=mock_container)
 
-        with patch("risk_assessment.versioning.time.sleep"):
-            version = counter.assign_version(
+        with patch("risk_assessment.versioning.asyncio.sleep", new=AsyncMock()):
+            version = await counter.assign_version(
                 incident_id="inc-001",
                 assessment_type="spread_prediction",
                 incident_scope_key="live:inc-001",

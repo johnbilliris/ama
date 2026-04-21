@@ -22,6 +22,7 @@ import logging
 import time
 from datetime import UTC, datetime, timedelta
 
+from common.async_bridge import run_async
 from common.content_safety import ContentSafetyValidator
 from common.handoffs import AgentHandoffEvent
 from communication.audit import AuditWriter
@@ -470,7 +471,7 @@ class CommunicationProcessingPipeline:
         """Stage 8: Alert Versioning & Persistence."""
         with pipeline_span("communication.stage.version_persist"):
             # Assign version
-            version = self._version_counter.assign_version(event.incident_id)
+            version = run_async(self._version_counter.assign_version(event.incident_id))
             alert_id = self._version_counter.format_alert_id(event.incident_id, version)
 
             # Compute confidence with compound penalties per CHK031
@@ -609,7 +610,7 @@ class CommunicationProcessingPipeline:
             alert.status = AlertStatus.delivering
             alert.updated_at = datetime.now(UTC)
 
-            records = self._delivery_service.deliver_alert(alert, segments)
+            records = run_async(self._delivery_service.deliver_alert(alert, segments))
 
             # Determine overall status
             statuses = [r.delivery_status for r in records if not r.is_deduplicated]

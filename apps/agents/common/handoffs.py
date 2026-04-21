@@ -1,9 +1,13 @@
+import asyncio
+import logging
 import time
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 
 class AgentHandoffEvent(BaseModel):
@@ -104,36 +108,66 @@ def build_lessons_capture_handoff(
     )
 
 
-def deliver_handoff_with_retry(
+async def deliver_handoff_with_retry(
     *,
     handoff: AgentHandoffEvent,
-    deliver: Callable[[AgentHandoffEvent], None],
-    on_dead_letter: Callable[[AgentHandoffEvent], str],
+    deliver: Callable[[AgentHandoffEvent], Awaitable[None]],
+    on_dead_letter: Callable[[AgentHandoffEvent], str] | None = None,
     max_retries: int = 3,
     retry_window_seconds: int = 300,
 ) -> AgentHandoffEvent:
+    """Deliver a handoff with async non-blocking retries and 2-second cap per attempt."""
     handoff.max_retries = max_retries
     handoff.retry_window_seconds = retry_window_seconds
     retry_sleep = max(1, retry_window_seconds // max(1, max_retries))
+    start_time = time.monotonic()
 
     for attempt in range(1, max_retries + 1):
         try:
-            deliver(handoff)
+            # FR-002: 2-second maximum blocking cap per delivery attempt
+            await asyncio.wait_for(deliver(handoff), timeout=2.0)
             handoff.status = "delivered"
             handoff.retry_count = attempt - 1
             handoff.delivered_at = datetime.now(UTC)
+            duration_ms = (time.monotonic() - start_time) * 1000
+            logger.info(
+                "handoff_delivered",
+                extra={
+                    "handoff_id": handoff.handoff_id,
+                    "retry_count": attempt - 1,
+                    "duration_ms": duration_ms,
+                },
+            )
             return handoff
         except Exception as error:
             handoff.status = "retrying" if attempt < max_retries else "failed"
             handoff.retry_count = attempt
             handoff.failure_reason = str(error)
             handoff.next_retry_at = datetime.now(UTC)
+            logger.warning(
+                "handoff_retry",
+                extra={
+                    "handoff_id": handoff.handoff_id,
+                    "attempt": attempt,
+                    "target_agent": handoff.target_agent,
+                    "error_reason": str(error),
+                },
+            )
             if attempt < max_retries:
-                time.sleep(retry_sleep)
+                await asyncio.sleep(retry_sleep)
 
     handoff.status = "dead_lettered"
     handoff.failed_at = datetime.now(UTC)
-    handoff.dead_letter_entry_id = on_dead_letter(handoff)
+    if on_dead_letter is not None:
+        handoff.dead_letter_entry_id = on_dead_letter(handoff)
+    logger.error(
+        "handoff_dead_lettered",
+        extra={
+            "handoff_id": handoff.handoff_id,
+            "retry_count": max_retries,
+            "dead_letter_entry_id": handoff.dead_letter_entry_id,
+        },
+    )
     return handoff
 
 

@@ -6,9 +6,9 @@ increasing version numbers per incident combination.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import random
-import time
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class VersionCounter:
     def __init__(self, cosmos_container: object | None = None) -> None:
         self._container = cosmos_container
 
-    def assign_version(
+    async def assign_version(
         self,
         incident_id: str,
         incident_scope_key: str = "",
@@ -61,9 +61,9 @@ class VersionCounter:
                     attempt, _MAX_RETRIES, counter_id,
                 )
                 if attempt < _MAX_RETRIES:
-                    # Jittered backoff
+                    # Jittered backoff (non-blocking)
                     jitter = random.uniform(0.05, 0.2) * attempt
-                    time.sleep(jitter)
+                    await asyncio.sleep(jitter)
 
         # Exhausted retries — fallback to UUID-suffixed version
         logger.error(

@@ -3,7 +3,6 @@
 from datetime import UTC, datetime, timedelta
 
 from risk_assessment.extrapolation import (
-    ExtrapolationResult,
     _hours_to_threshold,
     _linear_regression,
     _r_squared,

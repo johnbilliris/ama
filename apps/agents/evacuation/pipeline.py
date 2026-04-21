@@ -20,6 +20,7 @@ import time
 from datetime import UTC, datetime
 from typing import Any
 
+from common.async_bridge import run_async
 from common.handoffs import AgentHandoffEvent
 from evacuation import telemetry as tel
 from evacuation.audit import AuditWriter
@@ -954,10 +955,10 @@ class EvacuationProcessingPipeline:
         hazard_type = assessment_data.get("hazard_type", "bushfire")
 
         # Assign version via OCC
-        version = self._version_counter.assign_version(
+        version = run_async(self._version_counter.assign_version(
             incident_id=incident_id,
             incident_scope_key=incident_scope_key,
-        )
+        ))
         plan_id = self._version_counter.format_plan_id(incident_id, version)
 
         # Build assembly areas from road network
