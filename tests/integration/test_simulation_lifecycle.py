@@ -20,42 +20,42 @@ class TestSimulationLifecycle:
     @pytest.mark.asyncio
     async def test_full_lifecycle(self, service, repo):
         tenant = await service.create_tenant(
-            scenario_type="bushfire",
+            scenario_type="Bushfire",
             jurisdictions=["nsw-sw"],
             participants=["user-001"],
             creator_oid="user-001",
         )
-        assert tenant.status == "active"
+        assert tenant.status == "Active"
 
-        tenant = tenant.transition_to("paused")
+        tenant = tenant.transition_to("Paused")
         tenant = await repo.update(tenant)
-        assert tenant.status == "paused"
+        assert tenant.status == "Paused"
 
-        tenant = tenant.transition_to("active")
+        tenant = tenant.transition_to("Active")
         tenant = await repo.update(tenant)
-        assert tenant.status == "active"
+        assert tenant.status == "Active"
 
-        tenant = tenant.transition_to("archiving")
+        tenant = tenant.transition_to("Archiving")
         tenant = await repo.update(tenant)
-        assert tenant.status == "archiving"
+        assert tenant.status == "Archiving"
 
-        tenant = tenant.transition_to("archived")
+        tenant = tenant.transition_to("Archived")
         tenant = await repo.update(tenant)
-        assert tenant.status == "archived"
+        assert tenant.status == "Archived"
 
-        tenant = tenant.transition_to("deleted")
+        tenant = tenant.transition_to("Deleted")
         tenant = await repo.update(tenant)
-        assert tenant.status == "deleted"
+        assert tenant.status == "Deleted"
 
     @pytest.mark.asyncio
     async def test_invalid_transition_raises(self, service, repo):
         tenant = await service.create_tenant(
-            scenario_type="flood",
+            scenario_type="Flood",
             jurisdictions=[],
             participants=["user-001"],
             creator_oid="user-001",
         )
-        assert tenant.status == "active"
+        assert tenant.status == "Active"
 
         with pytest.raises(ValueError, match="Cannot transition"):
-            tenant.transition_to("deleted")
+            tenant.transition_to("Deleted")

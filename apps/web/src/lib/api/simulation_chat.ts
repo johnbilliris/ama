@@ -74,3 +74,33 @@ function parseEvent(raw: string): ChatEvent | null {
     return null;
   }
 }
+
+export interface SimChatTurn {
+  id: string;
+  tenant_id: string;
+  simulation_id: string;
+  sequence: number;
+  role: "user" | "assistant" | "tool" | "system";
+  content: string;
+  tool_call_id?: string | null;
+  model?: string | null;
+  created_at: string;
+}
+
+export async function getChatHistory(
+  tenantId: string,
+  limit = 100,
+): Promise<SimChatTurn[]> {
+  const res = await fetch(
+    `${API_BASE_URL}/simulations/${encodeURIComponent(tenantId)}/chat/history?limit=${limit}`,
+    { cache: "no-store" },
+  );
+  if (!res.ok) {
+    // History hydration is best-effort — the pane should still be usable if
+    // Cosmos is degraded. Surface the failure in the console and return empty.
+    console.warn(`chat history ${res.status}: ${await res.text()}`);
+    return [];
+  }
+  const body = (await res.json()) as { turns?: SimChatTurn[] };
+  return body.turns ?? [];
+}

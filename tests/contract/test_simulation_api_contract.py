@@ -18,7 +18,7 @@ class TestSimulationTenantContract:
             tenant_id="sim-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             scenario_id="sc-001",
             scenario_run_id="run-001",
-            scenario_type="cyclone",
+            scenario_type="Cyclone",
             created_by="user-001",
             participants=["user-001"],
         )
@@ -40,8 +40,8 @@ class TestSimulationTenantContract:
             "simulations": [
                 {
                     "tenant_id": "sim-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-                    "scenario_type": "cyclone",
-                    "status": "active",
+                    "scenario_type": "Cyclone",
+                    "status": "Active",
                     "created_at": "2026-04-09T10:00:00+00:00",
                     "participant_count": 5,
                     "signal_count": 342,
@@ -69,7 +69,7 @@ class TestSimulationTenantContract:
             tenant_id="sim-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             scenario_id="sc-001",
             scenario_run_id="run-001",
-            scenario_type="flood",
+            scenario_type="Flood",
             created_by="user-001",
             participants=["user-001"],
             jurisdictions=["nsw"],
@@ -101,13 +101,13 @@ class TestSimulationTenantContract:
             tenant_id="sim-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             scenario_id="sc-001",
             scenario_run_id="run-001",
-            scenario_type="bushfire",
+            scenario_type="Bushfire",
             created_by="user-001",
             participants=["user-001"],
-            status="provisioning",
+            status="Provisioning",
         )
-        assert tenant.can_transition_to("active")
-        assert not tenant.can_transition_to("archived")
+        assert tenant.can_transition_to("Active")
+        assert not tenant.can_transition_to("Archived")
 
     def test_pause_resume_error_codes(self):
         """Pause on non-active → 409, Resume on non-paused → 409."""
@@ -115,20 +115,20 @@ class TestSimulationTenantContract:
             tenant_id="sim-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             scenario_id="sc-001",
             scenario_run_id="run-001",
-            scenario_type="bushfire",
+            scenario_type="Bushfire",
             created_by="user-001",
             participants=["user-001"],
-            status="archived",
+            status="Archived",
         )
-        assert not tenant.can_transition_to("paused")
-        assert not tenant.can_transition_to("active")
+        assert not tenant.can_transition_to("Paused")
+        assert not tenant.can_transition_to("Active")
 
 
 class TestScenarioTemplateContract:
     def test_template_required_fields(self):
         template = ScenarioTemplate(
             template_id="qld-cyclone-multi-agency",
-            scenario_type="cyclone",
+            scenario_type="Cyclone",
             name="QLD Cyclone Multi-Agency",
         )
         doc = template.model_dump(mode="json")
@@ -142,7 +142,7 @@ class TestExerciseReportContract:
             report_id="rpt-001",
             tenant_id="sim-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             scenario_run_id="run-001",
-            scenario_type="bushfire",
+            scenario_type="Bushfire",
         )
         doc = report.model_dump(mode="json")
         for field in (

@@ -35,10 +35,14 @@ async def create_simulation(body: CreateSimulationRequest, request: Request) -> 
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
 
+    participants = list(body.participants)
+    if principal.subject not in participants:
+        participants.insert(0, principal.subject)
+
     tenant = await _service.create_tenant(
         scenario_type=body.scenario_type,
         jurisdictions=body.jurisdictions,
-        participants=body.participants,
+        participants=participants,
         creator_oid=principal.subject,
         scenario_template_id=body.scenario_template_id,
         resource_limits=body.resource_limits,
@@ -117,7 +121,7 @@ async def seed_simulation(tenant_id: str, body: SeedTemplateRequest, request: Re
     tenant = await _service.get_tenant(tenant_id)
     if tenant is None:
         raise HTTPException(status_code=404, detail="Simulation tenant not found")
-    if tenant.status != "active":
+    if tenant.status != "Active":
         raise HTTPException(status_code=409, detail="Simulation must be active to seed")
 
     result = await _seeding.seed_from_template(tenant_id, body.template_id)
@@ -133,7 +137,7 @@ async def seed_replay(tenant_id: str, body: SeedReplayRequest, request: Request)
     tenant = await _service.get_tenant(tenant_id)
     if tenant is None:
         raise HTTPException(status_code=404, detail="Simulation tenant not found")
-    if tenant.status != "active":
+    if tenant.status != "Active":
         raise HTTPException(status_code=409, detail="Simulation must be active to seed")
 
     result = await _seeding.seed_from_replay(
@@ -175,7 +179,7 @@ async def get_report(tenant_id: str, request: Request) -> dict:
     tenant = await _service.get_tenant(tenant_id)
     if tenant is None:
         raise HTTPException(status_code=404, detail="Simulation tenant not found")
-    if tenant.status == "active":
+    if tenant.status == "Active":
         raise HTTPException(status_code=409, detail="Cannot generate report while simulation is active")
 
     report = await _report_service.get_report(tenant_id)
@@ -194,10 +198,10 @@ async def pause_simulation(tenant_id: str, request: Request) -> dict:
     tenant = await _service.get_tenant(tenant_id)
     if tenant is None:
         raise HTTPException(status_code=404, detail="Simulation tenant not found")
-    if not tenant.can_transition_to("paused"):
+    if not tenant.can_transition_to("Paused"):
         raise HTTPException(status_code=409, detail=f"Cannot pause simulation in '{tenant.status}' status")
 
-    tenant = tenant.transition_to("paused")
+    tenant = tenant.transition_to("Paused")
     tenant = await _repo.update(tenant)
     return {"tenant_id": tenant.tenant_id, "status": tenant.status}
 
@@ -211,10 +215,10 @@ async def resume_simulation(tenant_id: str, request: Request) -> dict:
     tenant = await _service.get_tenant(tenant_id)
     if tenant is None:
         raise HTTPException(status_code=404, detail="Simulation tenant not found")
-    if not tenant.can_transition_to("active"):
+    if not tenant.can_transition_to("Active"):
         raise HTTPException(status_code=409, detail=f"Cannot resume simulation in '{tenant.status}' status")
 
-    tenant = tenant.transition_to("active")
+    tenant = tenant.transition_to("Active")
     tenant = await _repo.update(tenant)
     return {"tenant_id": tenant.tenant_id, "status": tenant.status}
 
@@ -228,10 +232,10 @@ async def archive_simulation(tenant_id: str, request: Request) -> dict:
     tenant = await _service.get_tenant(tenant_id)
     if tenant is None:
         raise HTTPException(status_code=404, detail="Simulation tenant not found")
-    if not tenant.can_transition_to("archiving"):
+    if not tenant.can_transition_to("Archiving"):
         raise HTTPException(status_code=409, detail=f"Cannot archive simulation in '{tenant.status}' status")
 
-    tenant = tenant.transition_to("archiving")
+    tenant = tenant.transition_to("Archiving")
     tenant = await _repo.update(tenant)
     return {"tenant_id": tenant.tenant_id, "status": tenant.status}
 
@@ -244,8 +248,8 @@ async def delete_simulation(tenant_id: str, request: Request) -> None:
     tenant = await _service.get_tenant(tenant_id)
     if tenant is None:
         raise HTTPException(status_code=404, detail="Simulation tenant not found")
-    if tenant.status != "archived":
+    if tenant.status != "Archived":
         raise HTTPException(status_code=409, detail="Simulation must be archived before deletion")
 
-    tenant = tenant.transition_to("deleted")
+    tenant = tenant.transition_to("Deleted")
     await _repo.update(tenant)

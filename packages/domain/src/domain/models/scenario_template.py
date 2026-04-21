@@ -32,7 +32,10 @@ class ScenarioTemplate(BaseModel):
     id: str = ""
     template_id: str
     kind: str = "scenario_template"
-    scenario_type: Literal["bushfire", "flood", "cyclone", "cross-jurisdiction"]
+    scenario_type: Literal[
+        "Bushfire", "Flood", "Cyclone", "Severe Storm", "Heatwave",
+        "Earthquake", "Tsunami", "Pandemic", "Other", "Cross-jurisdiction",
+    ]
     name: str
     description: str = ""
     seed_organisations: list[SeedOrganisation] = Field(default_factory=list)

@@ -15,8 +15,10 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "function": {
             "name": "seed_scenario",
             "description": (
-                "Propose a simulation scenario card for the coordinator to confirm. "
-                "Does NOT start the simulation by itself; the coordinator must confirm."
+                "Immediately seed the simulation with a scenario card built from the "
+                "coordinator's description. The simulation tenant is already created; "
+                "this call populates it with hazard, location, and starting conditions. "
+                "Call this directly — do NOT ask the coordinator to confirm first."
             ),
             "parameters": {
                 "type": "object",

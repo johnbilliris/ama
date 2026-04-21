@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "2487577355730898249"
+      "templateHash": "1510554714163411183"
     }
   },
   "parameters": {
@@ -443,6 +443,45 @@
         "cosmosDb"
       ]
     },
+    "simChatContainer": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'sim-chat')]",
+      "properties": {
+        "resource": {
+          "id": "sim-chat",
+          "partitionKey": {
+            "paths": [
+              "/tenant_id"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "compositeIndexes": [
+              [
+                {
+                  "path": "/document_type",
+                  "order": "ascending"
+                },
+                {
+                  "path": "/sequence",
+                  "order": "ascending"
+                }
+              ]
+            ]
+          }
+        },
+        "options": {
+          "autoscaleSettings": {
+            "maxThroughput": 1000
+          }
+        }
+      },
+      "dependsOn": [
+        "cosmosDb"
+      ]
+    },
     "governanceContainer": {
       "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
       "apiVersion": "2023-11-15",
@@ -734,6 +773,14 @@
                   "value": "[reference('openAiDeployments').outputs.draftingDeploymentName.value]"
                 },
                 {
+                  "name": "AZURE_OPENAI_SIMULATION_DEPLOYMENT",
+                  "value": "[reference('openAiDeployments').outputs.simulationDeploymentName.value]"
+                },
+                {
+                  "name": "AZURE_OPENAI_DEPLOYMENT",
+                  "value": "[reference('openAiDeployments').outputs.simulationDeploymentName.value]"
+                },
+                {
                   "name": "OTEL_SERVICE_NAME",
                   "value": "api"
                 }
@@ -858,6 +905,10 @@
                 {
                   "name": "AZURE_OPENAI_DRAFTING_DEPLOYMENT",
                   "value": "[reference('openAiDeployments').outputs.draftingDeploymentName.value]"
+                },
+                {
+                  "name": "AZURE_OPENAI_SIMULATION_DEPLOYMENT",
+                  "value": "[reference('openAiDeployments').outputs.simulationDeploymentName.value]"
                 },
                 {
                   "name": "API_ENDPOINT",
@@ -2067,7 +2118,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "8366731857527918259"
+              "templateHash": "3726348244177825907"
             }
           },
           "parameters": {
@@ -2127,6 +2178,20 @@
                 "description": "Drafting-tier model version"
               }
             },
+            "simulationModelName": {
+              "type": "string",
+              "defaultValue": "gpt-5.4",
+              "metadata": {
+                "description": "Simulation Controller model name (used by the Simulation chat endpoint)."
+              }
+            },
+            "simulationModelVersion": {
+              "type": "string",
+              "defaultValue": "2026-03-05",
+              "metadata": {
+                "description": "Simulation Controller model version."
+              }
+            },
             "reasoningTpmQuota": {
               "type": "int",
               "defaultValue": 30,
@@ -2141,6 +2206,14 @@
               "minValue": 1,
               "metadata": {
                 "description": "Drafting-tier TPM quota (K). Dev=60, Prod=240"
+              }
+            },
+            "simulationTpmQuota": {
+              "type": "int",
+              "defaultValue": 20,
+              "minValue": 1,
+              "metadata": {
+                "description": "Simulation Controller TPM quota (K). Dev=20, Prod=80. Isolated quota so an exercise cannot starve live agents."
               }
             },
             "modelDeploymentSku": {
@@ -2208,6 +2281,25 @@
               ]
             },
             {
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2024-10-01",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-sim-{0}', parameters('envPrefix')))]",
+              "sku": {
+                "name": "[parameters('modelDeploymentSku')]",
+                "capacity": "[parameters('simulationTpmQuota')]"
+              },
+              "properties": {
+                "model": {
+                  "format": "OpenAI",
+                  "name": "[parameters('simulationModelName')]",
+                  "version": "[parameters('simulationModelVersion')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-mini-{0}', parameters('envPrefix')))]"
+              ]
+            },
+            {
               "copy": {
                 "name": "openAiRoleAssignment",
                 "count": "[length(parameters('agentPrincipalIds'))]"
@@ -2256,6 +2348,10 @@
             "draftingDeploymentName": {
               "type": "string",
               "value": "[format('gpt-5.4-mini-{0}', parameters('envPrefix'))]"
+            },
+            "simulationDeploymentName": {
+              "type": "string",
+              "value": "[format('gpt-5.4-sim-{0}', parameters('envPrefix'))]"
             },
             "openAiEndpoint": {
               "type": "string",

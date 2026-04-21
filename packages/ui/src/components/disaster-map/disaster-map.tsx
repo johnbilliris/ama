@@ -23,6 +23,10 @@ export interface DisasterMapProps {
   onRenderComplete?: () => void;
   /** Additional CSS class for the map container */
   className?: string;
+  /** Optional viewport to pan/zoom to when it changes (e.g. scenario card). */
+  focus?: { center: [number, number]; zoom?: number } | null;
+  /** Unique key for persisting zoom/center independently per map instance. */
+  viewportKey?: string;
 }
 
 export function DisasterMap({
@@ -30,6 +34,8 @@ export function DisasterMap({
   onMarkerClick,
   onRenderComplete,
   className,
+  focus,
+  viewportKey,
 }: DisasterMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<unknown>(null);
@@ -38,7 +44,7 @@ export function DisasterMap({
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
-  const { getSavedViewport, saveViewport } = useMapViewport();
+  const { getSavedViewport, saveViewport } = useMapViewport(viewportKey);
 
   // Stable callback ref
   const onMarkerClickRef = useRef(onMarkerClick);
@@ -160,6 +166,27 @@ export function DisasterMap({
   useEffect(() => {
     updateMarkers();
   }, [updateMarkers]);
+
+  // Pan/zoom to an external focus viewport (e.g. when the simulation
+  // controller seeds a scenario at a known location). Only fires when `focus`
+  // changes to a truthy value so regular user panning isn't overridden.
+  useEffect(() => {
+    if (!focus || !mapReady) return;
+    const map = mapRef.current as
+      | { setCamera: (opts: Record<string, unknown>) => void }
+      | null;
+    if (!map?.setCamera) return;
+    try {
+      map.setCamera({
+        center: focus.center,
+        zoom: focus.zoom ?? 10,
+        type: "ease",
+        duration: 800,
+      });
+    } catch {
+      // ignore — camera update is a best-effort UX helper.
+    }
+  }, [focus, mapReady]);
 
   // Always render the container div so the map area never collapses.
   // When mapError is true, overlay an inline message instead of returning null —

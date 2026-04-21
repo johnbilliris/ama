@@ -17,13 +17,13 @@ class TestSimulationService:
     @pytest.mark.asyncio
     async def test_create_tenant_success(self, service, repo):
         tenant = await service.create_tenant(
-            scenario_type="bushfire",
+            scenario_type="Bushfire",
             jurisdictions=["nsw-sw"],
             participants=["user-001"],
             creator_oid="user-001",
         )
         assert tenant.tenant_id.startswith("sim-")
-        assert tenant.status == "active"
+        assert tenant.status == "Active"
         assert "user-001" in tenant.participants
 
     @pytest.mark.asyncio
@@ -45,7 +45,7 @@ class TestSimulationService:
 
         with pytest.raises(HTTPException):
             await service.create_tenant(
-                scenario_type="flood",
+                scenario_type="Flood",
                 jurisdictions=[],
                 participants=[],
                 creator_oid="user-001",
@@ -57,7 +57,7 @@ class TestSimulationService:
 
         for i in range(3):
             await service.create_tenant(
-                scenario_type="flood",
+                scenario_type="Flood",
                 jurisdictions=[],
                 participants=[f"user-{i}"],
                 creator_oid=f"user-{i}",
@@ -65,7 +65,7 @@ class TestSimulationService:
 
         with pytest.raises(HTTPException) as exc_info:
             await service.create_tenant(
-                scenario_type="flood",
+                scenario_type="Flood",
                 jurisdictions=[],
                 participants=["user-x"],
                 creator_oid="user-x",
@@ -75,7 +75,7 @@ class TestSimulationService:
     @pytest.mark.asyncio
     async def test_get_tenant(self, service):
         tenant = await service.create_tenant(
-            scenario_type="cyclone",
+            scenario_type="Cyclone",
             jurisdictions=["qld-fnq"],
             participants=["user-001"],
             creator_oid="user-001",
@@ -87,7 +87,7 @@ class TestSimulationService:
     @pytest.mark.asyncio
     async def test_list_tenants(self, service):
         await service.create_tenant(
-            scenario_type="bushfire",
+            scenario_type="Bushfire",
             jurisdictions=[],
             participants=["user-001"],
             creator_oid="user-001",
@@ -99,17 +99,17 @@ class TestSimulationService:
     @pytest.mark.asyncio
     async def test_lifecycle_transitions(self, service, repo):
         tenant = await service.create_tenant(
-            scenario_type="bushfire",
+            scenario_type="Bushfire",
             jurisdictions=[],
             participants=["user-001"],
             creator_oid="user-001",
         )
-        assert tenant.status == "active"
+        assert tenant.status == "Active"
 
-        tenant = tenant.transition_to("paused")
+        tenant = tenant.transition_to("Paused")
         tenant = await repo.update(tenant)
-        assert tenant.status == "paused"
+        assert tenant.status == "Paused"
 
-        tenant = tenant.transition_to("active")
+        tenant = tenant.transition_to("Active")
         tenant = await repo.update(tenant)
-        assert tenant.status == "active"
+        assert tenant.status == "Active"

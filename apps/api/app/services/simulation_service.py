@@ -65,14 +65,14 @@ class SimulationService:
             participants=participants,
             jurisdictions=jurisdictions,
             resource_limits=limits,
-            status="provisioning",
+            status="Provisioning",
         )
 
         tenant = await self._repo.create(tenant)
 
         await self._provision_namespace(tenant_id)
 
-        tenant = tenant.transition_to("active")
+        tenant = tenant.transition_to("Active")
         tenant = await self._repo.update(tenant)
 
         if self._audit:
@@ -101,10 +101,10 @@ class SimulationService:
         if tenant is None:
             raise ValueError(f"Simulation tenant '{tenant_id}' not found")
 
-        if not tenant.can_transition_to("archiving"):
+        if not tenant.can_transition_to("Archiving"):
             raise ValueError(f"Cannot archive simulation in '{tenant.status}' status")
 
-        tenant = tenant.transition_to("archiving")
+        tenant = tenant.transition_to("Archiving")
         tenant = await self._repo.update(tenant)
 
         archive_uri = f"simulation/{tenant_id}/archive/"
@@ -112,7 +112,7 @@ class SimulationService:
 
         await self._cleanup_redis_namespace(tenant_id)
 
-        tenant = tenant.transition_to("archived")
+        tenant = tenant.transition_to("Archived")
         tenant = await self._repo.update(tenant)
 
         logger.info("simulation_archived tenant_id=%s", tenant_id)

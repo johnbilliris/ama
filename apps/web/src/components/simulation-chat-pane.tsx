@@ -1,7 +1,10 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
+  getChatHistory,
   streamChat,
   type ChatEvent,
 } from "@/lib/api/simulation_chat";
@@ -17,12 +20,55 @@ interface ChatMessage {
   refused?: boolean;
 }
 
-export function SimulationChatPane({ tenantId }: { tenantId: string }) {
+export function SimulationChatPane({
+  tenantId,
+  onScenarioCard,
+  onEvent,
+}: {
+  tenantId: string;
+  onScenarioCard?: (card: Record<string, unknown>) => void;
+  onEvent?: (text: string) => void;
+}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isHydrating, setHydrating] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto-scroll to the newest message whenever the list or streamed content
+  // grows. Keeps the active reply + input visible without the user chasing it.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [messages, isStreaming]);
+
+  useEffect(() => {
+    // Hydrate the pane with prior turns so controllers returning to an
+    // ongoing exercise see the full conversation, not an empty canvas.
+    let cancelled = false;
+    (async () => {
+      try {
+        const turns = await getChatHistory(tenantId);
+        if (cancelled) return;
+        const seeded: ChatMessage[] = turns
+          .filter((t) => t.role === "user" || t.role === "assistant")
+          .map((t) => ({
+            id: t.id,
+            role: t.role as Role,
+            content: t.content,
+          }));
+        setMessages(seeded);
+      } finally {
+        if (!cancelled) setHydrating(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [tenantId]);
 
   const send = useCallback(async () => {
     if (!input.trim() || isStreaming) return;
@@ -47,6 +93,9 @@ export function SimulationChatPane({ tenantId }: { tenantId: string }) {
     try {
       for await (const ev of streamChat(tenantId, userMsg.content, ctrl.signal)) {
         applyEvent(assistantId, ev, setMessages);
+        if (ev.event === "card.scenario" && onScenarioCard) {
+          onScenarioCard(ev.data as Record<string, unknown>);
+        }
       }
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
@@ -56,19 +105,67 @@ export function SimulationChatPane({ tenantId }: { tenantId: string }) {
       setStreaming(false);
       abortRef.current = null;
     }
-  }, [input, isStreaming, tenantId]);
+  }, [input, isStreaming, tenantId, onScenarioCard]);
 
   const cancel = useCallback(() => {
     abortRef.current?.abort();
   }, []);
 
+  const exportTranscript = useCallback(() => {
+    const lines = messages.map((m) => {
+      const role = m.role === "user" ? "OPERATOR" : "CONTROLLER";
+      return `[${role}]\n${m.content}\n`;
+    });
+    const blob = new Blob(
+      [`# Simulation Exercise Transcript\n# Tenant: ${tenantId}\n# Exported: ${new Date().toISOString()}\n\n${lines.join("\n")}`],
+      { type: "text/markdown" },
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sim-transcript-${tenantId.slice(0, 12)}-${Date.now()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [messages, tenantId]);
+
+  const QUICK_ACTIONS = [
+    { label: "📋 SITREP", prompt: "Provide a situation report for the current simulation state." },
+    { label: "🚒 Deploy", prompt: "Deploy available resources to the staging area nearest the incident." },
+    { label: "📢 Alert", prompt: "Draft a public alert message for the affected area." },
+    { label: "⬆ Escalate", prompt: "Escalate the current situation to executive leadership with a risk summary." },
+    { label: "⚠ Risk", prompt: "Provide a risk assessment for the current scenario including hazard severity and consequences." },
+  ];
+
+  const injectQuickAction = useCallback((prompt: string) => {
+    setInput(prompt);
+  }, []);
+
   return (
-    <div className="flex h-[520px] flex-col rounded border">
-      <header className="border-b bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900">
-        SIMULATION CONTROLLER · Exercise scope only · No real-world dispatch
+    <div
+      className="grid h-full min-h-0 overflow-hidden rounded border"
+      style={{ gridTemplateRows: "auto minmax(0, 1fr) auto auto" }}
+    >
+      <header className="sim-chat-header border-b bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900">
+        <span>SIMULATION CONTROLLER · Exercise scope only</span>
+        {messages.length > 0 && (
+          <button
+            type="button"
+            onClick={exportTranscript}
+            className="sim-export-btn"
+            title="Export chat transcript for post-exercise review"
+          >
+            ⬇ Export
+          </button>
+        )}
       </header>
-      <div className="flex-1 space-y-3 overflow-y-auto p-3 text-sm">
-        {messages.length === 0 && (
+      <div
+        ref={scrollRef}
+        className="min-h-0 space-y-3 overflow-y-auto p-3 text-sm"
+      >
+        {isHydrating && (
+          <p className="text-xs text-gray-400">Loading prior conversation…</p>
+        )}
+        {!isHydrating && messages.length === 0 && (
           <p className="text-gray-500">
             Describe a scenario to begin. Example: <em>&ldquo;Bushfire near Katoomba, 39&nbsp;°C,
             NW winds 55&nbsp;km/h, start 14:00 AEST&rdquo;</em>
@@ -83,7 +180,22 @@ export function SimulationChatPane({ tenantId }: { tenantId: string }) {
           </p>
         )}
       </div>
-      <footer className="flex gap-2 border-t p-2">
+      {/* Quick-action buttons for common operational commands */}
+      <div className="sim-quick-actions border-t">
+        {QUICK_ACTIONS.map((qa) => (
+          <button
+            key={qa.label}
+            type="button"
+            className="sim-quick-btn"
+            onClick={() => injectQuickAction(qa.prompt)}
+            disabled={isStreaming}
+            title={qa.prompt}
+          >
+            {qa.label}
+          </button>
+        ))}
+      </div>
+      <footer className="flex gap-2 border-t bg-white p-2">
         <textarea
           aria-label="Simulation chat input"
           className="flex-1 resize-none rounded border px-2 py-1 text-sm"
@@ -124,19 +236,39 @@ export function SimulationChatPane({ tenantId }: { tenantId: string }) {
 
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
+  // iMessage-style alignment: the operator's own messages hug the RIGHT
+  // edge (outgoing blue bubbles), assistant replies hug the LEFT edge
+  // (incoming grey bubbles). We set text-align both via utility class AND
+  // inline style because this project ships a hand-authored utility set
+  // and the inline style guarantees correct alignment regardless.
+  const alignClass = isUser ? "text-right" : "text-left";
+  const alignStyle: React.CSSProperties = {
+    textAlign: isUser ? "right" : "left",
+  };
+  // Derive a concise human-readable card summary (hazard · location · level)
+  // from the scenario payload so we never expose raw IDs / JSON to operators.
+  const cardSummary = message.card ? summariseScenarioCard(message.card) : null;
+  const bubbleClass =
+    "inline-block max-w-[85%] rounded-lg px-3 py-2 text-left " +
+    (isUser
+      ? "whitespace-pre-wrap bg-blue-600 text-white"
+      : message.refused
+        ? "whitespace-pre-wrap bg-amber-100 text-amber-900"
+        : "sim-chat-markdown bg-gray-100 text-gray-900");
   return (
-    <div className={isUser ? "text-right" : "text-left"}>
-      <div
-        className={
-          "inline-block max-w-[85%] whitespace-pre-wrap rounded-lg px-3 py-2 " +
-          (isUser
-            ? "bg-blue-600 text-white"
-            : message.refused
-              ? "bg-amber-100 text-amber-900"
-              : "bg-gray-100 text-gray-900")
-        }
-      >
-        {message.content || <span className="text-gray-400">…</span>}
+    <div className={alignClass} style={alignStyle}>
+      <div className={bubbleClass} style={{ textAlign: "left" }}>
+        {message.content ? (
+          isUser ? (
+            message.content
+          ) : (
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {message.content}
+            </ReactMarkdown>
+          )
+        ) : (
+          <span className="text-gray-400">…</span>
+        )}
       </div>
       {message.toolCalls?.map((t, i) => (
         <div key={i} className="mt-1 text-xs text-gray-500">
@@ -144,16 +276,31 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           {t.arguments.sub_agent ? ` (${String(t.arguments.sub_agent)})` : ""}
         </div>
       ))}
-      {message.card && (
-        <div className="mt-2 rounded border bg-white p-3 text-left text-xs shadow-sm">
-          <p className="mb-1 font-semibold">Scenario card (review &amp; confirm)</p>
-          <pre className="overflow-x-auto whitespace-pre-wrap text-[11px]">
-            {JSON.stringify(message.card, null, 2)}
-          </pre>
+      {cardSummary && (
+        <div
+          className="mt-2 inline-flex max-w-[85%] items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-left text-[11px] text-emerald-900"
+          style={{ textAlign: "left" }}
+        >
+          <span aria-hidden="true">📍</span>
+          <span>
+            <strong className="font-semibold">Scenario seeded</strong> — {cardSummary}
+          </span>
         </div>
       )}
     </div>
   );
+}
+
+function summariseScenarioCard(card: Record<string, unknown>): string {
+  const hazard =
+    typeof card.hazard === "string" && card.hazard ? card.hazard : "scenario";
+  const locObj = (card.location as Record<string, unknown>) || {};
+  const locName =
+    typeof locObj.name === "string" && locObj.name ? locObj.name : "unspecified";
+  const levelRaw =
+    typeof card.aws_default_level === "string" ? card.aws_default_level : "";
+  const level = levelRaw ? levelRaw.replace(/_/g, " ") : "";
+  return level ? `${hazard} near ${locName} · ${level}` : `${hazard} near ${locName}`;
 }
 
 function applyEvent(

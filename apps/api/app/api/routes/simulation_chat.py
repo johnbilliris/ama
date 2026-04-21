@@ -65,3 +65,34 @@ async def chat_health(tenant_id: str) -> dict:
         "prompt_hash": _controller.prompt_hash,
         "backend": "azure-or-offline",
     }
+
+
+@router.get("/{tenant_id}/chat/history")
+async def get_chat_history(
+    tenant_id: str,
+    request: Request,
+    limit: int = 100,
+) -> dict:
+    """Return prior chat turns for the simulation in ascending sequence.
+
+    Used by the UI to hydrate the chat pane when a controller opens an
+    existing simulation, and by the controller service internally to
+    replay conversation context to the model.
+    """
+    principal = extract_principal_from_claims(request.state.claims)
+    require_simulation_role(principal)
+
+    if not tenant_id.startswith("sim-"):
+        raise HTTPException(status_code=400, detail="chat endpoint is simulation-scoped only")
+
+    # Clamp to a sensible window — the UI only needs recent context.
+    if limit < 1:
+        limit = 1
+    elif limit > 500:
+        limit = 500
+
+    turns = _controller.history.list_turns(tenant_id, limit=limit)
+    return {
+        "tenant_id": tenant_id,
+        "turns": [t.model_dump(mode="json") for t in turns],
+    }

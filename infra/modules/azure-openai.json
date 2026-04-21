@@ -1,0 +1,248 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "3726348244177825907"
+    }
+  },
+  "parameters": {
+    "openAiAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the existing Azure OpenAI resource"
+      }
+    },
+    "location": {
+      "type": "string",
+      "allowedValues": [
+        "australiaeast",
+        "australiasoutheast"
+      ],
+      "metadata": {
+        "description": "Location — restricted to Australian regions"
+      }
+    },
+    "envPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Environment prefix for deployment naming"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "metadata": {
+        "description": "Resource tags"
+      }
+    },
+    "reasoningModelName": {
+      "type": "string",
+      "defaultValue": "gpt-5.4",
+      "metadata": {
+        "description": "Reasoning-tier model name"
+      }
+    },
+    "reasoningModelVersion": {
+      "type": "string",
+      "defaultValue": "2026-03-05",
+      "metadata": {
+        "description": "Reasoning-tier model version"
+      }
+    },
+    "draftingModelName": {
+      "type": "string",
+      "defaultValue": "gpt-5.4",
+      "metadata": {
+        "description": "Drafting-tier model name"
+      }
+    },
+    "draftingModelVersion": {
+      "type": "string",
+      "defaultValue": "2026-03-05",
+      "metadata": {
+        "description": "Drafting-tier model version"
+      }
+    },
+    "simulationModelName": {
+      "type": "string",
+      "defaultValue": "gpt-5.4",
+      "metadata": {
+        "description": "Simulation Controller model name (used by the Simulation chat endpoint)."
+      }
+    },
+    "simulationModelVersion": {
+      "type": "string",
+      "defaultValue": "2026-03-05",
+      "metadata": {
+        "description": "Simulation Controller model version."
+      }
+    },
+    "reasoningTpmQuota": {
+      "type": "int",
+      "defaultValue": 30,
+      "minValue": 1,
+      "metadata": {
+        "description": "Reasoning-tier TPM quota (K). Dev=30, Prod=120"
+      }
+    },
+    "draftingTpmQuota": {
+      "type": "int",
+      "defaultValue": 60,
+      "minValue": 1,
+      "metadata": {
+        "description": "Drafting-tier TPM quota (K). Dev=60, Prod=240"
+      }
+    },
+    "simulationTpmQuota": {
+      "type": "int",
+      "defaultValue": 20,
+      "minValue": 1,
+      "metadata": {
+        "description": "Simulation Controller TPM quota (K). Dev=20, Prod=80. Isolated quota so an exercise cannot starve live agents."
+      }
+    },
+    "modelDeploymentSku": {
+      "type": "string",
+      "defaultValue": "GlobalStandard",
+      "allowedValues": [
+        "Standard",
+        "GlobalStandard"
+      ],
+      "metadata": {
+        "description": "Model deployment SKU — GlobalStandard for dev/staging (draws from global capacity pool), Standard for production (regional capacity)"
+      }
+    },
+    "agentPrincipalIds": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Principal IDs to grant Cognitive Services OpenAI User role"
+      }
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Log Analytics workspace ID for diagnostic settings"
+      }
+    }
+  },
+  "variables": {
+    "cognitiveServicesOpenAiUserRoleId": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2024-10-01",
+      "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-{0}', parameters('envPrefix')))]",
+      "sku": {
+        "name": "[parameters('modelDeploymentSku')]",
+        "capacity": "[parameters('reasoningTpmQuota')]"
+      },
+      "properties": {
+        "model": {
+          "format": "OpenAI",
+          "name": "[parameters('reasoningModelName')]",
+          "version": "[parameters('reasoningModelVersion')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2024-10-01",
+      "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-mini-{0}', parameters('envPrefix')))]",
+      "sku": {
+        "name": "[parameters('modelDeploymentSku')]",
+        "capacity": "[parameters('draftingTpmQuota')]"
+      },
+      "properties": {
+        "model": {
+          "format": "OpenAI",
+          "name": "[parameters('draftingModelName')]",
+          "version": "[parameters('draftingModelVersion')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-{0}', parameters('envPrefix')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2024-10-01",
+      "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-sim-{0}', parameters('envPrefix')))]",
+      "sku": {
+        "name": "[parameters('modelDeploymentSku')]",
+        "capacity": "[parameters('simulationTpmQuota')]"
+      },
+      "properties": {
+        "model": {
+          "format": "OpenAI",
+          "name": "[parameters('simulationModelName')]",
+          "version": "[parameters('simulationModelVersion')]"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-mini-{0}', parameters('envPrefix')))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "openAiRoleAssignment",
+        "count": "[length(parameters('agentPrincipalIds'))]"
+      },
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('openAiAccountName'))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')), parameters('agentPrincipalIds')[copyIndex()], variables('cognitiveServicesOpenAiUserRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesOpenAiUserRoleId'))]",
+        "principalId": "[parameters('agentPrincipalIds')[copyIndex()]]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Insights/diagnosticSettings",
+      "apiVersion": "2021-05-01-preview",
+      "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('openAiAccountName'))]",
+      "name": "openai-diagnostics",
+      "properties": {
+        "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+        "logs": [
+          {
+            "category": "RequestResponse",
+            "enabled": true
+          },
+          {
+            "category": "Audit",
+            "enabled": true
+          }
+        ],
+        "metrics": [
+          {
+            "category": "AllMetrics",
+            "enabled": true
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "reasoningDeploymentName": {
+      "type": "string",
+      "value": "[format('gpt-5.4-{0}', parameters('envPrefix'))]"
+    },
+    "draftingDeploymentName": {
+      "type": "string",
+      "value": "[format('gpt-5.4-mini-{0}', parameters('envPrefix'))]"
+    },
+    "simulationDeploymentName": {
+      "type": "string",
+      "value": "[format('gpt-5.4-sim-{0}', parameters('envPrefix'))]"
+    },
+    "openAiEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')), '2024-10-01').endpoint]"
+    }
+  }
+}
