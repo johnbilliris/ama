@@ -34,9 +34,6 @@ export interface SimulationDetail {
   throttle_mode: string;
   throttle_quota_pct: number;
   elapsed_seconds: number;
-  last_resumed_at: string | null;
-  paused_at: string | null;
-  current_elapsed_seconds: number;
 }
 
 export interface CreateSimulationPayload {
@@ -62,8 +59,6 @@ export interface SimulationTimerResponse {
   tenant_id: string;
   status: string;
   elapsed_seconds: number;
-  last_resumed_at: string | null;
-  paused_at: string | null;
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -102,16 +97,25 @@ export async function getSimulation(tenantId: string): Promise<SimulationDetail>
   return apiFetch<SimulationDetail>(`/simulations/${encodeURIComponent(tenantId)}`);
 }
 
-export async function pauseSimulation(tenantId: string): Promise<SimulationTimerResponse> {
-  return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/pause`, { method: "POST" });
+export async function pauseSimulation(tenantId: string, elapsedSeconds: number): Promise<SimulationTimerResponse> {
+  return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/pause`, {
+    method: "POST",
+    body: JSON.stringify({ elapsed_seconds: elapsedSeconds }),
+  });
 }
 
-export async function resumeSimulation(tenantId: string): Promise<SimulationTimerResponse> {
-  return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/resume`, { method: "POST" });
+export async function resumeSimulation(tenantId: string, elapsedSeconds: number): Promise<SimulationTimerResponse> {
+  return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/resume`, {
+    method: "POST",
+    body: JSON.stringify({ elapsed_seconds: elapsedSeconds }),
+  });
 }
 
-export async function archiveSimulation(tenantId: string): Promise<{ tenant_id: string; status: string }> {
-  return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/archive`, { method: "POST" });
+export async function archiveSimulation(tenantId: string, elapsedSeconds?: number): Promise<{ tenant_id: string; status: string; elapsed_seconds: number }> {
+  return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/archive`, {
+    method: "POST",
+    body: JSON.stringify({ elapsed_seconds: elapsedSeconds ?? 0 }),
+  });
 }
 
 export async function deleteSimulation(tenantId: string): Promise<void> {

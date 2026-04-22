@@ -78,11 +78,13 @@ class TestSimulationTenantContract:
         required_fields = [
             "tenant_id", "scenario_id", "scenario_run_id", "scenario_type",
             "status", "created_by", "created_at", "participants", "jurisdictions",
-            "resource_limits", "resource_consumption",
-            "elapsed_seconds", "last_resumed_at", "paused_at", "current_elapsed_seconds",
+            "resource_limits", "resource_consumption", "elapsed_seconds",
         ]
         for field in required_fields:
             assert field in doc, f"Missing field: {field}"
+        # Verify removed fields are NOT present
+        for removed in ("last_resumed_at", "paused_at", "current_elapsed_seconds"):
+            assert removed not in doc, f"Obsolete field still present: {removed}"
 
     def test_tenant_id_pattern(self):
         """tenant_id must match ^sim-[a-z0-9-]{36}$."""
@@ -125,7 +127,7 @@ class TestSimulationTenantContract:
         assert not tenant.can_transition_to("Active")
 
     def test_elapsed_time_fields_present_on_new_tenant(self):
-        """New tenants have elapsed-time fields with correct defaults."""
+        """New tenants have elapsed_seconds with correct default."""
         tenant = SimulationTenant(
             tenant_id="sim-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             scenario_id="sc-001",
@@ -135,15 +137,11 @@ class TestSimulationTenantContract:
             participants=["user-001"],
         )
         assert tenant.elapsed_seconds == 0.0
-        assert tenant.last_resumed_at is None
-        assert tenant.paused_at is None
         doc = tenant.model_dump(mode="json")
-        assert "current_elapsed_seconds" in doc
+        assert "elapsed_seconds" in doc
 
     def test_pause_response_schema(self):
-        """POST /api/simulations/{tenantId}/pause → response includes timer fields."""
-        from datetime import UTC, datetime
-
+        """POST /api/simulations/{tenantId}/pause → response includes elapsed_seconds."""
         tenant = SimulationTenant(
             tenant_id="sim-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             scenario_id="sc-001",
@@ -152,21 +150,31 @@ class TestSimulationTenantContract:
             created_by="user-001",
             participants=["user-001"],
             status="Active",
-            last_resumed_at=datetime.now(UTC),
         )
-        paused = tenant.transition_to("Paused")
+        paused = tenant.transition_to("Paused", elapsed_seconds=75.5)
         response = {
             "tenant_id": paused.tenant_id,
             "status": paused.status,
             "elapsed_seconds": paused.elapsed_seconds,
-            "paused_at": paused.paused_at.isoformat() if paused.paused_at else None,
-            "last_resumed_at": None,
         }
         assert response["status"] == "Paused"
         assert isinstance(response["elapsed_seconds"], float)
-        assert response["elapsed_seconds"] >= 0.0
-        assert response["paused_at"] is not None
-        assert response["last_resumed_at"] is None
+        assert response["elapsed_seconds"] == 75.5
+
+    def test_transition_preserves_elapsed_when_not_provided(self):
+        """Transitions without explicit elapsed_seconds keep existing value."""
+        tenant = SimulationTenant(
+            tenant_id="sim-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            scenario_id="sc-001",
+            scenario_run_id="run-001",
+            scenario_type="Bushfire",
+            created_by="user-001",
+            participants=["user-001"],
+            status="Active",
+            elapsed_seconds=42.0,
+        )
+        paused = tenant.transition_to("Paused")
+        assert paused.elapsed_seconds == 42.0
 
 
 class TestScenarioTemplateContract:

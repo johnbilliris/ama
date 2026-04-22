@@ -2,7 +2,7 @@ import re
 from datetime import UTC, datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, computed_field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 
 TENANT_ID_PATTERN = re.compile(r"^sim-[a-z0-9-]{36}$")
 
@@ -63,19 +63,8 @@ class SimulationTenant(BaseModel):
     archive_uri: str | None = None
     document_type: str = "simulation_tenant"
 
-    # Elapsed time tracking
+    # Elapsed active time in seconds, managed by the UI
     elapsed_seconds: float = 0.0
-    last_resumed_at: datetime | None = None
-    paused_at: datetime | None = None
-
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def current_elapsed_seconds(self) -> float:
-        """Total elapsed seconds including the current running segment."""
-        if self.status == "Active" and self.last_resumed_at is not None:
-            running_segment = (datetime.now(UTC) - self.last_resumed_at).total_seconds()
-            return self.elapsed_seconds + max(0.0, running_segment)
-        return self.elapsed_seconds
 
     def model_post_init(self, __context: object) -> None:
         if not self.id:
@@ -104,53 +93,19 @@ class SimulationTenant(BaseModel):
     def uppercase_jurisdictions(cls, v: list[str]) -> list[str]:
         return [j.upper() for j in v]
 
-    @model_validator(mode="after")
-    def validate_elapsed_time_invariants(self) -> "SimulationTenant":
-        """Enforce consistency between status and elapsed-time timestamps."""
-        if self.status == "Active" and self.paused_at is not None:
-            raise ValueError("paused_at must be None when status is 'Active'")
-        if self.status == "Paused" and self.last_resumed_at is not None:
-            raise ValueError("last_resumed_at must be None when status is 'Paused'")
-        return self
-
     def can_transition_to(self, new_status: str) -> bool:
         allowed = VALID_STATUS_TRANSITIONS.get(self.status, set())
         return new_status in allowed
 
     def transition_to(
-        self, new_status: str, *, now: datetime | None = None
+        self, new_status: str, *, elapsed_seconds: float | None = None
     ) -> "SimulationTenant":
         if not self.can_transition_to(new_status):
             raise ValueError(
                 f"Cannot transition from '{self.status}' to '{new_status}'. "
                 f"Allowed: {VALID_STATUS_TRANSITIONS.get(self.status, set())}"
             )
-        now = now or datetime.now(UTC)
         updates: dict = {"status": new_status}
-
-        if self.status == "Provisioning" and new_status == "Active":
-            updates["last_resumed_at"] = now
-
-        elif self.status == "Active" and new_status == "Paused":
-            accrued = 0.0
-            if self.last_resumed_at is not None:
-                accrued = max(0.0, (now - self.last_resumed_at).total_seconds())
-            updates["elapsed_seconds"] = self.elapsed_seconds + accrued
-            updates["last_resumed_at"] = None
-            updates["paused_at"] = now
-
-        elif self.status == "Paused" and new_status == "Active":
-            updates["last_resumed_at"] = now
-            updates["paused_at"] = None
-
-        elif self.status == "Active" and new_status == "Archiving":
-            accrued = 0.0
-            if self.last_resumed_at is not None:
-                accrued = max(0.0, (now - self.last_resumed_at).total_seconds())
-            updates["elapsed_seconds"] = self.elapsed_seconds + accrued
-            updates["last_resumed_at"] = None
-
-        elif self.status == "Paused" and new_status == "Archiving":
-            updates["paused_at"] = None
-
+        if elapsed_seconds is not None:
+            updates["elapsed_seconds"] = elapsed_seconds
         return self.model_copy(update=updates)

@@ -105,17 +105,14 @@ class TestSimulationService:
             creator_oid="user-001",
         )
         assert tenant.status == "Active"
-        assert tenant.last_resumed_at is not None
         assert tenant.elapsed_seconds == 0.0
 
-        tenant = tenant.transition_to("Paused")
+        tenant = tenant.transition_to("Paused", elapsed_seconds=45.0)
         tenant = await repo.update(tenant)
         assert tenant.status == "Paused"
-        assert tenant.last_resumed_at is None
-        assert tenant.paused_at is not None
+        assert tenant.elapsed_seconds == 45.0
 
-        tenant = tenant.transition_to("Active")
+        tenant = tenant.transition_to("Active", elapsed_seconds=45.0)
         tenant = await repo.update(tenant)
         assert tenant.status == "Active"
-        assert tenant.last_resumed_at is not None
-        assert tenant.paused_at is None
+        assert tenant.elapsed_seconds == 45.0
