@@ -97,14 +97,14 @@ export async function getSimulation(tenantId: string): Promise<SimulationDetail>
   return apiFetch<SimulationDetail>(`/simulations/${encodeURIComponent(tenantId)}`);
 }
 
-export async function pauseSimulation(tenantId: string, elapsedSeconds: number): Promise<SimulationTimerResponse> {
+export async function pauseSimulation(tenantId: string, elapsedSeconds = 0): Promise<SimulationTimerResponse> {
   return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/pause`, {
     method: "POST",
     body: JSON.stringify({ elapsed_seconds: elapsedSeconds }),
   });
 }
 
-export async function resumeSimulation(tenantId: string, elapsedSeconds: number): Promise<SimulationTimerResponse> {
+export async function resumeSimulation(tenantId: string, elapsedSeconds = 0): Promise<SimulationTimerResponse> {
   return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/resume`, {
     method: "POST",
     body: JSON.stringify({ elapsed_seconds: elapsedSeconds }),
