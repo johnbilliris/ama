@@ -11,16 +11,12 @@ Exposes read-only endpoints for after-action review:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
-
 from app.api.routes.simulations import _event_repo, _repo
 from app.core.auth import extract_principal_from_claims
 from app.services.annotation_service import AnnotationService
 from app.services.playback_service import PlaybackService
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, Field
-
-from packages.domain.src.domain.models.simulation_event import SimulationEvent
 
 router = APIRouter(
     prefix="/simulations/{tenant_id}/playback",
