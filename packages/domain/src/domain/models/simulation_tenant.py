@@ -4,6 +4,12 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+from packages.domain.src.domain.models.warp_constants import (
+    DEFAULT_WARP_SPEED,
+    validate_warp_speed,
+)
+from packages.domain.src.domain.models.warp_speed_change import WarpSpeedChange
+
 TENANT_ID_PATTERN = re.compile(r"^sim-[a-z0-9-]{36}$")
 
 VALID_STATUS_TRANSITIONS: dict[str, set[str]] = {
@@ -63,8 +69,31 @@ class SimulationTenant(BaseModel):
     archive_uri: str | None = None
     document_type: str = "simulation_tenant"
 
-    # Elapsed active time in seconds, managed by the UI
+    # Deprecated: legacy client-managed elapsed time. Retained for
+    # backward compatibility with pre-feature-026 clients. The API now
+    # mirrors ``accumulated_sim_seconds`` into this field on responses.
     elapsed_seconds: float = 0.0
+
+    # Feature 026: server-owned canonical simulation clock.
+    current_warp_speed: float = Field(default=DEFAULT_WARP_SPEED)
+    accumulated_sim_seconds: float = 0.0
+    last_resumed_at: datetime | None = None
+    clock_paused: bool = True
+    playback_status: Literal["full", "partial", "none"] = "none"
+    warp_speed_history: list[WarpSpeedChange] = Field(default_factory=list)
+
+    @field_validator("current_warp_speed")
+    @classmethod
+    def _validate_warp_speed(cls, v: float) -> float:
+        return validate_warp_speed(v)
+
+    @property
+    def current_sim_seconds(self) -> float:
+        """Live simulated time. When running, extrapolates from ``last_resumed_at``."""
+        if self.clock_paused or self.last_resumed_at is None:
+            return self.accumulated_sim_seconds
+        delta = (datetime.now(UTC) - self.last_resumed_at).total_seconds()
+        return self.accumulated_sim_seconds + max(delta, 0.0) * self.current_warp_speed
 
     def model_post_init(self, __context: object) -> None:
         if not self.id:

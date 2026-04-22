@@ -18,17 +18,24 @@ class ScenarioSeedingService:
         signal_repository: SignalRepository,
         audit_writer: SimulationAuditWriter | None = None,
         cosmos_client: Any = None,
+        warp_scheduler: Any = None,
+        event_recorder: Any = None,
     ):
         self._signals = signal_repository
         self._audit = audit_writer
         self._cosmos = cosmos_client
+        self._scheduler = warp_scheduler
+        self._recorder = event_recorder
 
-    async def seed_from_template(self, tenant_id: str, template_id: str) -> dict:
+    async def seed_from_template(
+        self, tenant_id: str, template_id: str, warp_speed: float = 1.0
+    ) -> dict:
         template = await self._load_template(template_id)
         if template is None:
             raise ValueError(f"Template '{template_id}' not found")
 
         injected = 0
+        timeline: list[dict[str, Any]] = []
         for entry in template.signal_timeline:
             envelope = dict(entry.signal_envelope)
             envelope["signal_id"] = f"sig-{uuid4().hex[:12]}"
@@ -36,7 +43,16 @@ class ScenarioSeedingService:
             envelope["source_context"] = "simulation"
             envelope["offset_seconds"] = entry.offset_seconds
             await self._signals.create_signal(tenant_id, envelope)
+            timeline.append(
+                {
+                    "offset_seconds": entry.offset_seconds,
+                    "signal_envelope": envelope,
+                }
+            )
             injected += 1
+
+        if self._scheduler is not None:
+            self._scheduler.initialize(tenant_id, timeline, warp_speed=warp_speed)
 
         if self._audit:
             await self._audit.write_event(
@@ -44,10 +60,20 @@ class ScenarioSeedingService:
                 action="signal_write",
                 actor_id="system",
                 resource_id=template_id,
-                details={"action": "seed_from_template", "signals_injected": injected},
+                details={
+                    "action": "seed_from_template",
+                    "signals_injected": injected,
+                    "warp_speed": warp_speed,
+                },
             )
 
-        logger.info("seeded_from_template tenant_id=%s template=%s signals=%d", tenant_id, template_id, injected)
+        logger.info(
+            "seeded_from_template tenant_id=%s template=%s signals=%d warp=%s",
+            tenant_id,
+            template_id,
+            injected,
+            warp_speed,
+        )
         return {"template_id": template_id, "signals_injected": injected}
 
     async def seed_from_replay(

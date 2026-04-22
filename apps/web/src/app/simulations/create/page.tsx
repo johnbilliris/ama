@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createSimulation } from "@/lib/api/simulations";
+import { createSimulation, ALLOWED_WARP_SPEEDS } from "@/lib/api/simulations";
 
 const SCENARIO_TYPES = [
   { value: "Bushfire", label: "Bushfire" },
@@ -26,6 +26,7 @@ export default function CreateSimulationPage() {
   const [maxSignals, setMaxSignals] = useState(1000);
   const [maxRecommendations, setMaxRecommendations] = useState(500);
   const [maxDurationHours, setMaxDurationHours] = useState(72);
+  const [warpSpeed, setWarpSpeed] = useState<number>(1);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +44,7 @@ export default function CreateSimulationPage() {
         scenario_type: scenarioType,
         jurisdictions,
         participants: [],
+        warp_speed: warpSpeed,
         resource_limits: {
           max_signals: maxSignals,
           max_recommendations: maxRecommendations,
@@ -139,6 +141,40 @@ export default function CreateSimulationPage() {
             onChange={setMaxDurationHours}
           />
         </div>
+
+        <fieldset>
+          <legend className="mb-1 block text-sm font-medium">
+            Time warp speed
+            <span className="ml-2 text-xs font-normal text-gray-500">
+              (scheduler delivers signals {warpSpeed}× faster than wall clock)
+            </span>
+          </legend>
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Warp speed">
+            {ALLOWED_WARP_SPEEDS.map((s) => {
+              const active = s === warpSpeed;
+              return (
+                <label
+                  key={s}
+                  className={`cursor-pointer rounded border px-3 py-1 text-sm ${
+                    active ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="warp_speed"
+                    className="sr-only"
+                    checked={active}
+                    onChange={() => setWarpSpeed(s)}
+                  />
+                  {s}×
+                </label>
+              );
+            })}
+          </div>
+          <p className="mt-1 text-xs text-gray-500">
+            Allowed: 1×, 2×, 5×, 10×, 24×, 60×. Speed can be changed during the run.
+          </p>
+        </fieldset>
 
         {error && (
           <p role="alert" className="rounded bg-red-50 px-3 py-2 text-sm text-red-700">
