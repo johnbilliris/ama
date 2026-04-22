@@ -18,11 +18,11 @@ Workflow:
 4. Diagrams are saved and markdown is updated with image links
 """
 
+import argparse
 import re
 import sys
-import argparse
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Optional
 
 

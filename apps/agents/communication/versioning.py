@@ -8,11 +8,12 @@ Supports alert lifecycle: supersede, expire, and version history queries.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import random
-import time
 from datetime import UTC, datetime
 
+from common.async_bridge import run_async
 from communication.config import CommunicationConfig
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class VersionCounter:
         self._container = cosmos_container
         self._local_counters: dict[str, int] = {}
 
-    def assign_version(self, incident_id: str) -> int:
+    async def assign_version(self, incident_id: str) -> int:
         """Assign the next version number for an incident.
 
         Returns the assigned version number (≥ 1).
@@ -64,7 +65,7 @@ class VersionCounter:
                 )
                 if attempt < max_retries:
                     jitter = random.uniform(0.05, 0.2) * attempt
-                    time.sleep(jitter)
+                    await asyncio.sleep(jitter)
 
         # Exhausted retries — fallback
         logger.error(
@@ -177,7 +178,7 @@ class VersionCounter:
         change_summary: str,
     ) -> tuple[int, str]:
         """Create a new update version. Returns (version, alert_id)."""
-        version = self.assign_version(incident_id)
+        version = run_async(self.assign_version(incident_id))
         alert_id = self.format_alert_id(incident_id, version)
         return version, alert_id
 
@@ -187,7 +188,7 @@ class VersionCounter:
         original_alert_id: str,
     ) -> tuple[int, str]:
         """Create a new correction version. Returns (version, alert_id)."""
-        version = self.assign_version(incident_id)
+        version = run_async(self.assign_version(incident_id))
         alert_id = self.format_alert_id(incident_id, version)
         return version, alert_id
 
@@ -197,7 +198,7 @@ class VersionCounter:
         original_alert_id: str,
     ) -> tuple[int, str]:
         """Create a new all-clear version. Returns (version, alert_id)."""
-        version = self.assign_version(incident_id)
+        version = run_async(self.assign_version(incident_id))
         alert_id = self.format_alert_id(incident_id, version)
         return version, alert_id
 

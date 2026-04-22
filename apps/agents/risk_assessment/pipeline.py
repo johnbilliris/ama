@@ -19,6 +19,7 @@ from __future__ import annotations
 import logging
 import time
 
+from common.async_bridge import run_async
 from common.handoffs import AgentHandoffEvent, deliver_handoff_with_retry
 from risk_assessment.agent import RiskAssessmentAgent
 from risk_assessment.audit import AuditWriter
@@ -376,11 +377,11 @@ class AssessmentProcessingPipeline:
         assessment_type = self._severity_computer.derive_assessment_type(signal_category)
 
         # Assign version via optimistic concurrency
-        version = self._version_counter.assign_version(
+        version = run_async(self._version_counter.assign_version(
             incident_id=handoff.incident_id,
             assessment_type=assessment_type,
             incident_scope_key=scope_key,
-        )
+        ))
 
         config_hash = self._config.compute_config_hash()
 
@@ -551,11 +552,11 @@ class AssessmentProcessingPipeline:
 
                 # Deliver handoff
                 if self._deliver_fn is not None:
-                    delivered = deliver_handoff_with_retry(
+                    delivered = run_async(deliver_handoff_with_retry(
                         handoff=downstream,
                         deliver=self._deliver_fn,
                         on_dead_letter=self._on_dead_letter_fn,
-                    )
+                    ))
 
                     if delivered.status == "delivered":
                         self._escalation_count += 1

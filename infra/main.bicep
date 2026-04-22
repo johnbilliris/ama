@@ -106,6 +106,32 @@ module azureMaps './modules/azure-maps.bicep' = {
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
+// Azure AI Content Safety (FR-007 — 3-layer content validation)
+// ────────────────────────────────────────────────────────────────────────────────
+
+module contentSafety './modules/content-safety.bicep' = {
+  name: 'content-safety'
+  params: {
+    contentSafetyName: 'cs-${environmentName}-${take(uniqueSuffix, 6)}'
+    location: location
+    tags: tags
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+// Azure IoT Hub (FR-016/017/018 — IoT signal ingestion)
+// ────────────────────────────────────────────────────────────────────────────────
+
+module iotHub './modules/iot-hub.bicep' = {
+  name: 'iot-hub'
+  params: {
+    iotHubName: 'iot-${environmentName}-${take(uniqueSuffix, 6)}'
+    location: location
+    tags: tags
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
 // Container Registry (for Container Apps images)
 // ────────────────────────────────────────────────────────────────────────────────
 

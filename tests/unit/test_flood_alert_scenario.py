@@ -2,6 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
+import pytest
 from common.handoffs import AgentHandoffEvent
 from communication.config import CommunicationConfig
 from communication.delivery import MultiChannelDeliveryService
@@ -79,7 +80,8 @@ class TestFloodAlertScenario:
         assert zone3_segments[0].urgency_level == UrgencyLevel.advisory
         assert zone3_segments[0].priority == SegmentPriority.moderate
 
-    def test_flood_multiple_channels_sms_and_push(self):
+    @pytest.mark.asyncio
+    async def test_flood_multiple_channels_sms_and_push(self):
         """Delivery service creates records for both SMS and push channels."""
         config = CommunicationConfig()
         sms_mock = MagicMock()
@@ -115,13 +117,14 @@ class TestFloodAlertScenario:
             ),
         ]
 
-        records = service.deliver_alert(alert, segments)
+        records = await service.deliver_alert(alert, segments)
 
         channels_used = {r.channel for r in records}
         assert ChannelType.sms in channels_used
         assert ChannelType.push in channels_used
 
-    def test_flood_delivery_records_status(self):
+    @pytest.mark.asyncio
+    async def test_flood_delivery_records_status(self):
         """Delivery records have a valid delivery status after delivery."""
         config = CommunicationConfig()
         sms_mock = MagicMock()
@@ -157,7 +160,7 @@ class TestFloodAlertScenario:
             ),
         ]
 
-        records = service.deliver_alert(alert, segments)
+        records = await service.deliver_alert(alert, segments)
         assert len(records) >= 1
         assert records[0].delivery_status in (
             DeliveryStatus.delivered,

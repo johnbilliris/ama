@@ -1,0 +1,159 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "6600022498152172701"
+    }
+  },
+  "parameters": {
+    "contentSafetyName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Content Safety resource"
+      }
+    },
+    "location": {
+      "type": "string",
+      "allowedValues": [
+        "australiaeast",
+        "australiasoutheast"
+      ],
+      "metadata": {
+        "description": "Location — restricted to Australian regions"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "metadata": {
+        "description": "Resource tags"
+      }
+    },
+    "skuName": {
+      "type": "string",
+      "defaultValue": "S0",
+      "allowedValues": [
+        "S0"
+      ],
+      "metadata": {
+        "description": "SKU for Content Safety"
+      }
+    },
+    "cognitiveServicesUserPrincipalIds": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "Principal IDs to grant Cognitive Services User role"
+      }
+    },
+    "logAnalyticsWorkspaceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Log Analytics workspace ID for diagnostics"
+      }
+    }
+  },
+  "variables": {
+    "cognitiveServicesUserRoleId": "a97b65f3-24c7-4388-baec-2e87135dc908"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2024-10-01",
+      "name": "[parameters('contentSafetyName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "kind": "ContentSafety",
+      "sku": {
+        "name": "[parameters('skuName')]"
+      },
+      "properties": {
+        "customSubDomainName": "[parameters('contentSafetyName')]",
+        "publicNetworkAccess": "Disabled",
+        "networkAcls": {
+          "defaultAction": "Deny"
+        },
+        "disableLocalAuth": true
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      }
+    },
+    {
+      "copy": {
+        "name": "roleAssignment",
+        "count": "[length(parameters('cognitiveServicesUserPrincipalIds'))]"
+      },
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('contentSafetyName'))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName')), parameters('cognitiveServicesUserPrincipalIds')[copyIndex()], variables('cognitiveServicesUserRoleId'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesUserRoleId'))]",
+        "principalId": "[parameters('cognitiveServicesUserPrincipalIds')[copyIndex()]]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName'))]"
+      ]
+    },
+    {
+      "condition": "[not(empty(parameters('logAnalyticsWorkspaceId')))]",
+      "type": "Microsoft.Insights/diagnosticSettings",
+      "apiVersion": "2021-05-01-preview",
+      "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('contentSafetyName'))]",
+      "name": "[format('{0}-diag', parameters('contentSafetyName'))]",
+      "properties": {
+        "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+        "logs": [
+          {
+            "categoryGroup": "allLogs",
+            "enabled": true
+          }
+        ],
+        "metrics": [
+          {
+            "category": "AllMetrics",
+            "enabled": true
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "resourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Content Safety resource ID"
+      },
+      "value": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName'))]"
+    },
+    "resourceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Content Safety resource name"
+      },
+      "value": "[parameters('contentSafetyName')]"
+    },
+    "endpoint": {
+      "type": "string",
+      "metadata": {
+        "description": "Content Safety endpoint URL"
+      },
+      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName')), '2024-10-01').endpoint]"
+    },
+    "principalId": {
+      "type": "string",
+      "metadata": {
+        "description": "Content Safety system-assigned principal ID"
+      },
+      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName')), '2024-10-01', 'full').identity.principalId]"
+    }
+  }
+}

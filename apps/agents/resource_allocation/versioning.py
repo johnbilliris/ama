@@ -8,9 +8,9 @@ Counter document pattern: ``{incident_id}_plan_counter``
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import random
-import time
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class VersionCounter:
         # In-memory fallback counters for when Cosmos is unavailable
         self._local_counters: dict[str, int] = {}
 
-    def assign_version(
+    async def assign_version(
         self,
         incident_id: str,
         incident_scope_key: str = "",
@@ -73,9 +73,9 @@ class VersionCounter:
                     attempt, self._max_retries, counter_id,
                 )
                 if attempt < self._max_retries:
-                    # Jittered backoff
+                    # Jittered backoff (non-blocking)
                     jitter = random.uniform(0.05, 0.2) * attempt
-                    time.sleep(jitter)
+                    await asyncio.sleep(jitter)
 
         # Exhausted retries — fallback to reading current + 1
         logger.error(

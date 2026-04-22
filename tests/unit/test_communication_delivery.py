@@ -2,6 +2,7 @@
 
 import math
 
+import pytest
 from communication.delivery import MultiChannelDeliveryService
 from communication.models import (
     AudienceSegment,
@@ -50,18 +51,20 @@ def _make_segment(**overrides):
 
 
 class TestSMSSegmentCount:
-    def test_segment_count_short_message(self):
+    @pytest.mark.asyncio
+    async def test_segment_count_short_message(self):
         service = MultiChannelDeliveryService()
         alert = _make_alert()
         segment = _make_segment()
-        records = service.deliver_alert(alert, [segment])
+        records = await service.deliver_alert(alert, [segment])
         sms_records = [r for r in records if r.channel == ChannelType.sms]
         assert len(sms_records) >= 1
         content_len = len(sms_records[0].content_payload)
         expected = math.ceil(min(content_len, 612) / 153) if content_len > 0 else 1
         assert sms_records[0].segment_count == expected
 
-    def test_sms_max_length_enforced(self):
+    @pytest.mark.asyncio
+    async def test_sms_max_length_enforced(self):
         long_body = "x" * 1200
         en_block = ContentBlock(
             language_code="en-AU",
@@ -72,7 +75,7 @@ class TestSMSSegmentCount:
         alert = _make_alert(content_blocks={"en-AU": en_block})
         segment = _make_segment()
         service = MultiChannelDeliveryService()
-        records = service.deliver_alert(alert, [segment])
+        records = await service.deliver_alert(alert, [segment])
         sms_records = [r for r in records if r.channel == ChannelType.sms]
         assert len(sms_records[0].content_payload) <= 612
 
@@ -83,7 +86,8 @@ class TestSMSSegmentCount:
 
 
 class TestEmergencyBroadcast:
-    def test_broadcast_en_au_only(self):
+    @pytest.mark.asyncio
+    async def test_broadcast_en_au_only(self):
         service = MultiChannelDeliveryService()
         alert = _make_alert()
         segment = _make_segment(
@@ -91,7 +95,7 @@ class TestEmergencyBroadcast:
             delivery_channels=[ChannelType.emergency_broadcast],
         )
         # The broadcast delivery checks language but still creates a record
-        records = service.deliver_alert(alert, [segment])
+        records = await service.deliver_alert(alert, [segment])
         assert len(records) >= 1
 
 
@@ -101,7 +105,8 @@ class TestEmergencyBroadcast:
 
 
 class TestPriorityOrdering:
-    def test_critical_delivered_before_moderate(self):
+    @pytest.mark.asyncio
+    async def test_critical_delivered_before_moderate(self):
         service = MultiChannelDeliveryService()
         alert = _make_alert()
 
@@ -119,7 +124,7 @@ class TestPriorityOrdering:
             vulnerability_categories=["hospital"],
         )
 
-        records = service.deliver_alert(alert, [seg_moderate, seg_critical])
+        records = await service.deliver_alert(alert, [seg_moderate, seg_critical])
         seg_ids = [r.audience_segment_id for r in records]
         # Critical should appear before moderate
         crit_idx = seg_ids.index("seg-crit")
@@ -133,7 +138,8 @@ class TestPriorityOrdering:
 
 
 class TestDeliveryDedup:
-    def test_same_zone_lower_priority_deduped(self):
+    @pytest.mark.asyncio
+    async def test_same_zone_lower_priority_deduped(self):
         service = MultiChannelDeliveryService()
         alert = _make_alert()
 
@@ -148,7 +154,7 @@ class TestDeliveryDedup:
             priority=SegmentPriority.moderate,
         )
 
-        records = service.deliver_alert(alert, [seg_high, seg_moderate])
+        records = await service.deliver_alert(alert, [seg_high, seg_moderate])
         deduped = [r for r in records if r.is_deduplicated]
         # The moderate segment should be deduped in favour of high
         assert any(r.audience_segment_id == "seg-mod" for r in deduped)
@@ -160,19 +166,21 @@ class TestDeliveryDedup:
 
 
 class TestSimulationDelivery:
-    def test_simulation_tenant_skips_real_delivery(self):
+    @pytest.mark.asyncio
+    async def test_simulation_tenant_skips_real_delivery(self):
         service = MultiChannelDeliveryService()
         alert = _make_alert(tenant_id="simulation-test")
         segment = _make_segment()
-        records = service.deliver_alert(alert, [segment])
+        records = await service.deliver_alert(alert, [segment])
         assert all(r.delivery_status == DeliveryStatus.delivered for r in records)
         assert all(r.content_payload == "[SIMULATION]" for r in records)
 
-    def test_live_tenant_attempts_real_delivery(self):
+    @pytest.mark.asyncio
+    async def test_live_tenant_attempts_real_delivery(self):
         service = MultiChannelDeliveryService()
         alert = _make_alert(tenant_id="live")
         segment = _make_segment()
-        records = service.deliver_alert(alert, [segment])
+        records = await service.deliver_alert(alert, [segment])
         assert all(r.content_payload != "[SIMULATION]" for r in records)
 
 

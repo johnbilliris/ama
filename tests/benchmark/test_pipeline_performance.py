@@ -14,6 +14,10 @@ import pytest
 from benchmark_helpers import set_benchmark_metadata
 from common.handoffs import AgentHandoffEvent
 
+
+async def _async_noop(h):
+    pass
+
 # ── Sample data factories ────────────────────────────────────────────────────
 
 
@@ -97,7 +101,7 @@ def monitoring_pipeline():
     return SignalProcessingPipeline(
         config=config,
         audit_writer=AuditWriter(config=config, cosmos_client=None),
-        deliver_fn=lambda h: None,
+        deliver_fn=_async_noop,
     )
 
 
@@ -112,7 +116,7 @@ def risk_pipeline():
     return AssessmentProcessingPipeline(
         config=config,
         audit_writer=AuditWriter(config=config, cosmos_client=None),
-        deliver_fn=lambda h: None,
+        deliver_fn=_async_noop,
     )
 
 

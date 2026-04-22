@@ -20,6 +20,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
+from common.async_bridge import run_async
 from common.handoffs import AgentHandoffEvent
 from resource_allocation.audit import AuditWriter
 from resource_allocation.config import ResourceAllocationConfig
@@ -648,10 +649,10 @@ class AllocationProcessingPipeline:
     ) -> ResourceDeploymentPlan:
         """Generate versioned deployment plan with LLM or template summary."""
         # Assign version
-        version = self._version_counter.assign_version(
+        version = run_async(self._version_counter.assign_version(
             incident_id=handoff.incident_id,
             incident_scope_key=incident_scope_key,
-        )
+        ))
 
         plan_id = f"rdp-{handoff.incident_id}-v{version}"
 

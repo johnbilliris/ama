@@ -189,8 +189,12 @@ async def get_report(tenant_id: str, request: Request) -> dict:
     return report.model_dump(mode="json")
 
 
+class PauseResumeRequest(BaseModel):
+    elapsed_seconds: float = Field(ge=0.0)
+
+
 @router.post("/{tenant_id}/pause")
-async def pause_simulation(tenant_id: str, request: Request) -> dict:
+async def pause_simulation(tenant_id: str, body: PauseResumeRequest, request: Request) -> dict:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -201,13 +205,17 @@ async def pause_simulation(tenant_id: str, request: Request) -> dict:
     if not tenant.can_transition_to("Paused"):
         raise HTTPException(status_code=409, detail=f"Cannot pause simulation in '{tenant.status}' status")
 
-    tenant = tenant.transition_to("Paused")
+    tenant = tenant.transition_to("Paused", elapsed_seconds=body.elapsed_seconds)
     tenant = await _repo.update(tenant)
-    return {"tenant_id": tenant.tenant_id, "status": tenant.status}
+    return {
+        "tenant_id": tenant.tenant_id,
+        "status": tenant.status,
+        "elapsed_seconds": tenant.elapsed_seconds,
+    }
 
 
 @router.post("/{tenant_id}/resume")
-async def resume_simulation(tenant_id: str, request: Request) -> dict:
+async def resume_simulation(tenant_id: str, body: PauseResumeRequest, request: Request) -> dict:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -218,13 +226,21 @@ async def resume_simulation(tenant_id: str, request: Request) -> dict:
     if not tenant.can_transition_to("Active"):
         raise HTTPException(status_code=409, detail=f"Cannot resume simulation in '{tenant.status}' status")
 
-    tenant = tenant.transition_to("Active")
+    tenant = tenant.transition_to("Active", elapsed_seconds=body.elapsed_seconds)
     tenant = await _repo.update(tenant)
-    return {"tenant_id": tenant.tenant_id, "status": tenant.status}
+    return {
+        "tenant_id": tenant.tenant_id,
+        "status": tenant.status,
+        "elapsed_seconds": tenant.elapsed_seconds,
+    }
+
+
+class ArchiveRequest(BaseModel):
+    elapsed_seconds: float = Field(default=0.0, ge=0.0)
 
 
 @router.post("/{tenant_id}/archive", status_code=202)
-async def archive_simulation(tenant_id: str, request: Request) -> dict:
+async def archive_simulation(tenant_id: str, request: Request, body: ArchiveRequest | None = None) -> dict:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -235,9 +251,10 @@ async def archive_simulation(tenant_id: str, request: Request) -> dict:
     if not tenant.can_transition_to("Archiving"):
         raise HTTPException(status_code=409, detail=f"Cannot archive simulation in '{tenant.status}' status")
 
-    tenant = tenant.transition_to("Archiving")
+    elapsed = body.elapsed_seconds if body else None
+    tenant = tenant.transition_to("Archiving", elapsed_seconds=elapsed)
     tenant = await _repo.update(tenant)
-    return {"tenant_id": tenant.tenant_id, "status": tenant.status}
+    return {"tenant_id": tenant.tenant_id, "status": tenant.status, "elapsed_seconds": tenant.elapsed_seconds}
 
 
 @router.delete("/{tenant_id}", status_code=204)

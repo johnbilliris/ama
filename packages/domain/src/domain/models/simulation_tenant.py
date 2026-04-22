@@ -63,6 +63,9 @@ class SimulationTenant(BaseModel):
     archive_uri: str | None = None
     document_type: str = "simulation_tenant"
 
+    # Elapsed active time in seconds, managed by the UI
+    elapsed_seconds: float = 0.0
+
     def model_post_init(self, __context: object) -> None:
         if not self.id:
             self.id = self.tenant_id
@@ -94,10 +97,15 @@ class SimulationTenant(BaseModel):
         allowed = VALID_STATUS_TRANSITIONS.get(self.status, set())
         return new_status in allowed
 
-    def transition_to(self, new_status: str) -> "SimulationTenant":
+    def transition_to(
+        self, new_status: str, *, elapsed_seconds: float | None = None
+    ) -> "SimulationTenant":
         if not self.can_transition_to(new_status):
             raise ValueError(
                 f"Cannot transition from '{self.status}' to '{new_status}'. "
                 f"Allowed: {VALID_STATUS_TRANSITIONS.get(self.status, set())}"
             )
-        return self.model_copy(update={"status": new_status})
+        updates: dict = {"status": new_status}
+        if elapsed_seconds is not None:
+            updates["elapsed_seconds"] = elapsed_seconds
+        return self.model_copy(update=updates)

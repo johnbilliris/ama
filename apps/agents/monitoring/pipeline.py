@@ -18,6 +18,7 @@ import logging
 import time
 
 from app.validators.signal_envelope import SignalEnvelope
+from common.async_bridge import run_async  # noqa: F401 — kept for downstream pipeline compatibility
 from common.content_safety import ContentSafetyValidator
 from common.handoffs import AgentHandoffEvent, deliver_handoff_with_retry
 from monitoring.agent import MonitoringAgent
@@ -288,7 +289,7 @@ class SignalProcessingPipeline:
     # Stage 6: Confidence-Based Triage
     # ------------------------------------------------------------------
 
-    def _triage(
+    async def _triage(
         self,
         signal_id: str,
         envelope: SignalEnvelope,
@@ -335,7 +336,7 @@ class SignalProcessingPipeline:
 
         # Deliver handoff
         if self._deliver_fn is not None:
-            delivered = deliver_handoff_with_retry(
+            delivered = await deliver_handoff_with_retry(
                 handoff=handoff,
                 deliver=self._deliver_fn,
                 on_dead_letter=self._on_dead_letter_fn,
@@ -404,7 +405,7 @@ class SignalProcessingPipeline:
         self._summarise(signal_id, envelope, tenant_id)
 
         # Stage 6: Confidence-Based Triage
-        handoff = self._triage(signal_id, envelope, suspicious_penalty, tenant_id)
+        handoff = await self._triage(signal_id, envelope, suspicious_penalty, tenant_id)
 
         elapsed_ms = round((time.perf_counter() - start) * 1000, 2)
         logger.info(

@@ -1,4 +1,4 @@
----
+﻿---
 description: "AMA development guidelines and project conventions shared with all agents."
 ---
 
@@ -37,6 +37,10 @@ docs/           # Project documentation
 ```
 
 ## Active Technologies
+- Python 3.11+ (agents, API), TypeScript/Next.js 14 (web dashboard) + FastAPI, Pydantic, Azure OpenAI SDK, Azure AI Content Safety SDK, Azure Service Bus SDK, numpy, shapely (025-agent-spec-compliance)
+- Azure Cosmos DB (assessments, plans, dead-letters), Azure Blob Storage (audit) (025-agent-spec-compliance)
+- Python 3.11+ (agents, API), TypeScript 5.x (Next.js dashboard) + FastAPI, Pydantic, Shapely, azure-ai-contentsafety, azure-iot-device, azure-cosmos, httpx, numpy, Next.js 14 (025-agent-spec-compliance)
+- Azure Cosmos DB (dead-letters, radius lookup table, assessments), Azure Blob Storage (signal archives), Azure IoT Hub (device telemetry) (025-agent-spec-compliance)
 
 **Backend**: Python 3.12, FastAPI, Pydantic v2, Azure Cosmos DB SDK, Azure Blob Storage SDK, Azure Identity, Azure OpenAI SDK, tenacity
 **Frontend**: TypeScript 5.8, Next.js 16.2, React 19, Tailwind CSS, @ama/ui component library

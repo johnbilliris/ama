@@ -1,7 +1,10 @@
+import pytest
+
 from apps.agents.common.handoffs import build_handoff, deliver_handoff_with_retry
 
 
-def test_handoff_retry_then_delivery() -> None:
+@pytest.mark.asyncio
+async def test_handoff_retry_then_delivery() -> None:
     handoff = build_handoff(
         incident_id="incident-retry-1",
         source_agent="monitoring",
@@ -13,7 +16,7 @@ def test_handoff_retry_then_delivery() -> None:
 
     attempts = {"count": 0}
 
-    def flaky_deliver(_):
+    async def flaky_deliver(_):
         attempts["count"] += 1
         if attempts["count"] < 2:
             raise RuntimeError("temporary unavailable")
@@ -21,7 +24,7 @@ def test_handoff_retry_then_delivery() -> None:
     def dead_letter(_):
         return "dlq-not-used"
 
-    result = deliver_handoff_with_retry(
+    result = await deliver_handoff_with_retry(
         handoff=handoff,
         deliver=flaky_deliver,
         on_dead_letter=dead_letter,
@@ -33,7 +36,8 @@ def test_handoff_retry_then_delivery() -> None:
     assert result.retry_count == 1
 
 
-def test_handoff_dead_letter_after_exhaustion() -> None:
+@pytest.mark.asyncio
+async def test_handoff_dead_letter_after_exhaustion() -> None:
     handoff = build_handoff(
         incident_id="incident-retry-2",
         source_agent="monitoring",
@@ -43,13 +47,13 @@ def test_handoff_dead_letter_after_exhaustion() -> None:
         confidence=0.9,
     )
 
-    def fail_deliver(_):
+    async def fail_deliver(_):
         raise RuntimeError("permanent failure")
 
     def dead_letter(_):
         return "dlq-123"
 
-    result = deliver_handoff_with_retry(
+    result = await deliver_handoff_with_retry(
         handoff=handoff,
         deliver=fail_deliver,
         on_dead_letter=dead_letter,

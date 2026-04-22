@@ -6,6 +6,18 @@ import pytest
 from monitoring.config import MonitoringConfig
 
 
+def _async_deliver(target: list):
+    """Return an async deliver function that appends to *target*."""
+    async def _deliver(h):
+        target.append(h)
+    return _deliver
+
+
+async def _async_noop(h):
+    """Async no-op deliver function."""
+    pass
+
+
 def _make_valid_signal(
     signal_id: str = "sig-001",
     category: str = "fire",
@@ -53,7 +65,7 @@ class TestPipelineEndToEnd:
     async def test_high_risk_fire_signal_produces_handoff(self) -> None:
         delivered = []
         pipeline = _make_pipeline(
-            deliver_fn=lambda h: delivered.append(h),
+            deliver_fn=_async_deliver(delivered),
         )
         raw = _make_valid_signal(category="fire", confidence=0.85, freshness=1.0)
         await pipeline.process_signal(raw, "sig-fire-001")
@@ -65,7 +77,7 @@ class TestPipelineEndToEnd:
     async def test_low_confidence_signal_not_escalated(self) -> None:
         delivered = []
         pipeline = _make_pipeline(
-            deliver_fn=lambda h: delivered.append(h),
+            deliver_fn=_async_deliver(delivered),
         )
         raw = _make_valid_signal(category="fire", confidence=0.3, freshness=0.5)
         await pipeline.process_signal(raw, "sig-low-001")
@@ -75,7 +87,7 @@ class TestPipelineEndToEnd:
     async def test_missing_incident_id_not_escalated(self) -> None:
         delivered = []
         pipeline = _make_pipeline(
-            deliver_fn=lambda h: delivered.append(h),
+            deliver_fn=_async_deliver(delivered),
         )
         raw = _make_valid_signal(incident_id=None)
         await pipeline.process_signal(raw, "sig-noinc-001")
@@ -85,7 +97,7 @@ class TestPipelineEndToEnd:
     async def test_non_escalation_category_not_escalated(self) -> None:
         delivered = []
         pipeline = _make_pipeline(
-            deliver_fn=lambda h: delivered.append(h),
+            deliver_fn=_async_deliver(delivered),
         )
         raw = _make_valid_signal(category="infrastructure")
         await pipeline.process_signal(raw, "sig-infra-001")
@@ -95,7 +107,7 @@ class TestPipelineEndToEnd:
     async def test_earthquake_category_escalated(self) -> None:
         delivered = []
         pipeline = _make_pipeline(
-            deliver_fn=lambda h: delivered.append(h),
+            deliver_fn=_async_deliver(delivered),
         )
         raw = _make_valid_signal(category="earthquake", confidence=0.9, freshness=0.95)
         await pipeline.process_signal(raw, "sig-eq-001")
@@ -105,7 +117,7 @@ class TestPipelineEndToEnd:
     async def test_tsunami_category_escalated(self) -> None:
         delivered = []
         pipeline = _make_pipeline(
-            deliver_fn=lambda h: delivered.append(h),
+            deliver_fn=_async_deliver(delivered),
         )
         raw = _make_valid_signal(category="tsunami", confidence=0.95, freshness=1.0)
         await pipeline.process_signal(raw, "sig-ts-001")
@@ -209,7 +221,7 @@ class TestPipelineAuditCompleteness:
 
     @pytest.mark.asyncio
     async def test_full_pipeline_produces_multiple_audits(self) -> None:
-        pipeline = _make_pipeline(deliver_fn=lambda h: None)
+        pipeline = _make_pipeline(deliver_fn=_async_noop)
         raw = _make_valid_signal()
         await pipeline.process_signal(raw, "sig-audit-full")
         # Should have at least: summarised + escalated + handed_off
@@ -247,7 +259,7 @@ class TestPipelineEffectiveConfidence:
     @pytest.mark.asyncio
     async def test_effective_confidence_incorporates_freshness(self) -> None:
         delivered = []
-        pipeline = _make_pipeline(deliver_fn=lambda h: delivered.append(h))
+        pipeline = _make_pipeline(deliver_fn=_async_deliver(delivered))
 
         # confidence=0.85, freshness=0.9 → effective=0.765 < 0.8 threshold
         raw = _make_valid_signal(category="fire", confidence=0.85, freshness=0.9)
@@ -257,7 +269,7 @@ class TestPipelineEffectiveConfidence:
     @pytest.mark.asyncio
     async def test_high_freshness_allows_escalation(self) -> None:
         delivered = []
-        pipeline = _make_pipeline(deliver_fn=lambda h: delivered.append(h))
+        pipeline = _make_pipeline(deliver_fn=_async_deliver(delivered))
 
         # confidence=0.85, freshness=1.0 → effective=0.85 >= 0.8 threshold
         raw = _make_valid_signal(category="fire", confidence=0.85, freshness=1.0)
@@ -268,7 +280,7 @@ class TestPipelineEffectiveConfidence:
     async def test_all_five_escalation_categories(self) -> None:
         for cat in ["fire", "weather", "hydrology", "earthquake", "tsunami"]:
             delivered = []
-            pipeline = _make_pipeline(deliver_fn=lambda h: delivered.append(h))
+            pipeline = _make_pipeline(deliver_fn=_async_deliver(delivered))
             raw = _make_valid_signal(category=cat, confidence=0.9, freshness=1.0)
             await pipeline.process_signal(raw, f"sig-cat-{cat}")
             assert len(delivered) == 1, f"Category '{cat}' should have been escalated"
@@ -280,7 +292,7 @@ class TestPipelineProvenanceRetention:
     @pytest.mark.asyncio
     async def test_provenance_preserved_in_audit(self) -> None:
         delivered = []
-        pipeline = _make_pipeline(deliver_fn=lambda h: delivered.append(h))
+        pipeline = _make_pipeline(deliver_fn=_async_deliver(delivered))
         provenance = {
             "collectionMethod": "api_pull",
             "sourceUri": "https://bom.gov.au/api/fire",

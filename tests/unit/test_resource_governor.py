@@ -39,10 +39,10 @@ class TestResourceGovernor:
             tenant_id=tenant_id,
             scenario_id=str(uuid4()),
             scenario_run_id=str(uuid4()),
-            scenario_type="flood",
+            scenario_type="Flood",
             created_by="user-001",
             participants=["user-001"],
-            status="active",
+            status="Active",
         )
         await repo.create(tenant)
 
@@ -63,10 +63,10 @@ class TestResourceGovernor:
             tenant_id=tenant_id,
             scenario_id=str(uuid4()),
             scenario_run_id=str(uuid4()),
-            scenario_type="bushfire",
+            scenario_type="Bushfire",
             created_by="user-001",
             participants=["user-001"],
-            status="active",
+            status="Active",
             throttle_mode="incident-throttled",
             throttle_quota_pct=20,
         )

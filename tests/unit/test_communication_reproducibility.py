@@ -1,6 +1,6 @@
 """Reproducibility tests — deterministic outputs for identical inputs."""
 
-
+import pytest
 from communication.config import CommunicationConfig
 from communication.models import CommunicationDecisionRecord, CommunicationDecisionType
 from communication.versioning import VersionCounter
@@ -9,14 +9,15 @@ from communication.versioning import VersionCounter
 class TestReproducibility:
     """Verify same inputs produce deterministic outputs (T057)."""
 
-    def test_same_inputs_produce_same_alert_id(self):
+    @pytest.mark.asyncio
+    async def test_same_inputs_produce_same_alert_id(self):
         """Two calls with the same incident_id produce sequential but predictable IDs."""
         counter = VersionCounter()
-        v1 = counter.assign_version("INC-001")
+        v1 = await counter.assign_version("INC-001")
         id1 = counter.format_alert_id("INC-001", v1)
 
         counter2 = VersionCounter()
-        v2 = counter2.assign_version("INC-001")
+        v2 = await counter2.assign_version("INC-001")
         id2 = counter2.format_alert_id("INC-001", v2)
 
         assert id1 == "ca-INC-001-v1"

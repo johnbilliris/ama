@@ -30,51 +30,36 @@ const PPRR_COLOURS: Record<string, string> = {
 };
 
 // ── Elapsed timer hook ──
-function useElapsed(createdAt: string | undefined, ticking: boolean) {
-  // frozenSecs: elapsed seconds accumulated before the current pause.
-  // resumeTs:   wall-clock ms when the timer last started/resumed.
-  const frozenSecs = useRef(0);
+// The UI owns elapsed time. It seeds from the server's elapsed_seconds on load,
+// ticks locally while running, and reports the value back on pause/resume/stop.
+function useElapsed(initialSeconds: number | undefined, ticking: boolean) {
+  const baseSeconds = useRef(0);
   const resumeTs = useRef(0);
   const [display, setDisplay] = useState("—");
 
-  // When ticking transitions: capture freeze / set resume anchor.
+  // Seed from server on first load.
   useEffect(() => {
-    if (!createdAt) return;
+    if (initialSeconds === undefined) return;
+    baseSeconds.current = initialSeconds;
     if (ticking) {
-      // Resuming — anchor to now; frozenSecs already holds prior elapsed.
       resumeTs.current = Date.now();
-    } else {
-      // Pausing — accumulate the seconds elapsed since last resume.
-      if (resumeTs.current > 0) {
-        frozenSecs.current += Math.floor(
-          (Date.now() - resumeTs.current) / 1000,
-        );
-      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSeconds]);
+
+  // Track ticking transitions (pause / resume triggered by the page).
+  useEffect(() => {
+    if (initialSeconds === undefined) return;
+    if (ticking) {
+      resumeTs.current = Date.now();
+    } else if (resumeTs.current > 0) {
+      baseSeconds.current += (Date.now() - resumeTs.current) / 1000;
       resumeTs.current = 0;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticking]);
 
-  // On first mount, seed frozenSecs from createdAt → now (if active).
-  useEffect(() => {
-    if (!createdAt) return;
-    const start = new Date(createdAt).getTime();
-    if (ticking) {
-      // Loaded while active — treat entire span as elapsed.
-      frozenSecs.current = 0;
-      resumeTs.current = start;
-    } else {
-      // Loaded while paused — best estimate of elapsed before pause.
-      frozenSecs.current = Math.max(
-        0,
-        Math.floor((Date.now() - start) / 1000),
-      );
-      resumeTs.current = 0;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [createdAt]);
-
-  // Tick loop — runs only while ticking; freezes when paused.
+  // Tick loop — display updates every second while running; freezes when paused.
   useEffect(() => {
     const fmt = (totalSecs: number) => {
       const h = String(Math.floor(totalSecs / 3600)).padStart(2, "0");
@@ -83,24 +68,34 @@ function useElapsed(createdAt: string | undefined, ticking: boolean) {
       return `${h}:${m}:${s}`;
     };
 
-    if (!createdAt) {
+    if (initialSeconds === undefined) {
       setDisplay("—");
       return;
     }
 
     const calc = () =>
-      frozenSecs.current +
-      (resumeTs.current > 0
-        ? Math.floor((Date.now() - resumeTs.current) / 1000)
-        : 0);
+      Math.floor(
+        baseSeconds.current +
+        (resumeTs.current > 0
+          ? (Date.now() - resumeTs.current) / 1000
+          : 0),
+      );
 
     setDisplay(fmt(Math.max(0, calc())));
     if (!ticking) return;
     const id = setInterval(() => setDisplay(fmt(Math.max(0, calc()))), 1000);
     return () => clearInterval(id);
-  }, [createdAt, ticking]);
+  }, [initialSeconds, ticking]);
 
-  return display;
+  /** Snapshot the current elapsed seconds (for sending to the server). */
+  const getElapsedSeconds = useCallback((): number => {
+    const running = resumeTs.current > 0
+      ? (Date.now() - resumeTs.current) / 1000
+      : 0;
+    return baseSeconds.current + running;
+  }, []);
+
+  return { display, getElapsedSeconds };
 }
 
 // ── Exercise objectives ──
@@ -136,7 +131,7 @@ export default function SimulationDashboardPage() {
   }, [tenantId, logEvent]);
 
   const isRunning = tenant !== null && tenant.status === "Active";
-  const elapsed = useElapsed(tenant?.created_at, isRunning);
+  const { display: elapsed, getElapsedSeconds } = useElapsed(tenant?.elapsed_seconds, isRunning);
   const pprr = derivePPRRPhase(tenant?.status ?? "", !!scenarioCard);
 
   if (error) {
@@ -169,19 +164,22 @@ export default function SimulationDashboardPage() {
     : 0;
 
   const handlePause = async () => {
-    await pauseSimulation(tenant.tenant_id);
-    setTenant({ ...tenant, status: "Paused" });
+    const secs = getElapsedSeconds();
+    const result = await pauseSimulation(tenant.tenant_id, secs);
+    setTenant({ ...tenant, status: "Paused", elapsed_seconds: result.elapsed_seconds });
     logEvent("Simulation paused");
   };
   const handleResume = async () => {
-    await resumeSimulation(tenant.tenant_id);
-    setTenant({ ...tenant, status: "Active" });
+    const secs = getElapsedSeconds();
+    const result = await resumeSimulation(tenant.tenant_id, secs);
+    setTenant({ ...tenant, status: "Active", elapsed_seconds: result.elapsed_seconds });
     logEvent("Simulation resumed");
   };
   const handleStop = async () => {
     if (!window.confirm("Stop this simulation? This is terminal.")) return;
-    await archiveSimulation(tenant.tenant_id);
-    setTenant({ ...tenant, status: "Archiving" });
+    const secs = getElapsedSeconds();
+    await archiveSimulation(tenant.tenant_id, secs);
+    setTenant({ ...tenant, status: "Archiving", elapsed_seconds: secs });
     logEvent("Simulation stopped (archiving)");
   };
 
