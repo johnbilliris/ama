@@ -33,6 +33,10 @@ export interface SimulationDetail {
   resource_consumption: { signal_count: number; recommendation_count: number; storage_bytes: number; cache_keys: number };
   throttle_mode: string;
   throttle_quota_pct: number;
+  elapsed_seconds: number;
+  last_resumed_at: string | null;
+  paused_at: string | null;
+  current_elapsed_seconds: number;
 }
 
 export interface CreateSimulationPayload {
@@ -52,6 +56,14 @@ export interface CreateSimulationResponse {
   scenario_run_id: string;
   status: string;
   created_at: string;
+}
+
+export interface SimulationTimerResponse {
+  tenant_id: string;
+  status: string;
+  elapsed_seconds: number;
+  last_resumed_at: string | null;
+  paused_at: string | null;
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -90,11 +102,11 @@ export async function getSimulation(tenantId: string): Promise<SimulationDetail>
   return apiFetch<SimulationDetail>(`/simulations/${encodeURIComponent(tenantId)}`);
 }
 
-export async function pauseSimulation(tenantId: string): Promise<{ tenant_id: string; status: string }> {
+export async function pauseSimulation(tenantId: string): Promise<SimulationTimerResponse> {
   return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/pause`, { method: "POST" });
 }
 
-export async function resumeSimulation(tenantId: string): Promise<{ tenant_id: string; status: string }> {
+export async function resumeSimulation(tenantId: string): Promise<SimulationTimerResponse> {
   return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/resume`, { method: "POST" });
 }
 

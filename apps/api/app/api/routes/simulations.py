@@ -203,7 +203,13 @@ async def pause_simulation(tenant_id: str, request: Request) -> dict:
 
     tenant = tenant.transition_to("Paused")
     tenant = await _repo.update(tenant)
-    return {"tenant_id": tenant.tenant_id, "status": tenant.status}
+    return {
+        "tenant_id": tenant.tenant_id,
+        "status": tenant.status,
+        "elapsed_seconds": tenant.elapsed_seconds,
+        "paused_at": tenant.paused_at.isoformat() if tenant.paused_at else None,
+        "last_resumed_at": None,
+    }
 
 
 @router.post("/{tenant_id}/resume")
@@ -220,7 +226,13 @@ async def resume_simulation(tenant_id: str, request: Request) -> dict:
 
     tenant = tenant.transition_to("Active")
     tenant = await _repo.update(tenant)
-    return {"tenant_id": tenant.tenant_id, "status": tenant.status}
+    return {
+        "tenant_id": tenant.tenant_id,
+        "status": tenant.status,
+        "elapsed_seconds": tenant.elapsed_seconds,
+        "last_resumed_at": tenant.last_resumed_at.isoformat() if tenant.last_resumed_at else None,
+        "paused_at": None,
+    }
 
 
 @router.post("/{tenant_id}/archive", status_code=202)
