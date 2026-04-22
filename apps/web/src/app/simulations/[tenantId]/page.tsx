@@ -66,10 +66,12 @@ function useElapsed(
     }
 
     const calc = () =>
-      serverBase.current +
-      (resumeTs.current > 0
-        ? Math.floor((Date.now() - resumeTs.current) / 1000)
-        : 0);
+      Math.floor(
+        serverBase.current +
+        (resumeTs.current > 0
+          ? (Date.now() - resumeTs.current) / 1000
+          : 0),
+      );
 
     setDisplay(fmt(Math.max(0, calc())));
     if (!ticking) return;
