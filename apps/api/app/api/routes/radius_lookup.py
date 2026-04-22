@@ -8,10 +8,9 @@ from __future__ import annotations
 import logging
 from datetime import UTC, datetime
 
+from app.middleware.auth import authorize_admin, authorize_management
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-
-from app.middleware.auth import authorize_admin, authorize_management
 
 logger = logging.getLogger(__name__)
 

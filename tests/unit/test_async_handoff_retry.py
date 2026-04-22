@@ -14,7 +14,6 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-
 from common.handoffs import (
     AgentHandoffEvent,
     deliver_handoff_with_retry,

@@ -8,12 +8,11 @@ pipeline conversion.
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Coroutine, TypeVar
+from collections.abc import Coroutine
+from typing import Any
 
-T = TypeVar("T")
 
-
-def run_async(coro: Coroutine[Any, Any, T]) -> T:
+def run_async[T](coro: Coroutine[Any, Any, T]) -> T:
     """Run an async coroutine from synchronous code.
 
     - If no event loop is running: uses ``asyncio.run()``

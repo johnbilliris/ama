@@ -9,7 +9,6 @@ Covers:
 
 from __future__ import annotations
 
-
 import pytest
 from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
@@ -27,6 +26,7 @@ def app(_local_env):
     """Create a minimal FastAPI app with auth middleware."""
     # Re-import after env is set so module-level vars pick up test values
     import importlib
+
     import app.middleware.auth as auth_mod
     importlib.reload(auth_mod)
 

@@ -1,7 +1,6 @@
 """Reproducibility tests — deterministic outputs for identical inputs."""
 
 import pytest
-
 from communication.config import CommunicationConfig
 from communication.models import CommunicationDecisionRecord, CommunicationDecisionType
 from communication.versioning import VersionCounter

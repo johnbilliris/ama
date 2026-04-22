@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from risk_assessment.named_locations import (
     LocationResolutionError,
     NamedLocation,

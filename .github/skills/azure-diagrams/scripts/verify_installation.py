@@ -8,9 +8,10 @@ Usage:
     python verify_installation.py
 """
 
-import sys
-import subprocess
 import shutil
+import subprocess
+import sys
+
 
 def check_python_version():
     """Check Python version is 3.9+"""
@@ -54,11 +55,11 @@ def check_azure_providers():
     """Check Azure providers are available"""
     print("Checking Azure diagram providers...", end=" ")
     try:
-        from diagrams.azure.integration import LogicApps, ServiceBus, APIManagement
         from diagrams.azure.compute import FunctionApps
         from diagrams.azure.database import CosmosDb
-        from diagrams.azure.storage import BlobStorage
+        from diagrams.azure.integration import APIManagement, LogicApps, ServiceBus
         from diagrams.azure.security import KeyVaults
+        from diagrams.azure.storage import BlobStorage
         print("✅ All core providers available")
         return True
     except ImportError as e:
@@ -69,11 +70,11 @@ def test_diagram_generation():
     """Test generating a simple diagram"""
     print("Testing diagram generation...", end=" ")
     try:
+        import os
+        import tempfile
+
         from diagrams import Diagram
         from diagrams.azure.integration import LogicApps
-        
-        import tempfile
-        import os
         
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = os.path.join(tmpdir, "test")

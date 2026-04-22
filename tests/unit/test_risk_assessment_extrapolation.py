@@ -3,13 +3,12 @@
 from datetime import UTC, datetime, timedelta
 
 from risk_assessment.extrapolation import (
+    TrendPoint,
     _hours_to_threshold,
     _linear_regression,
     _r_squared,
-    TrendPoint,
     extrapolate_hazard_trend,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -291,8 +291,8 @@ def create_gantt_chart(title: str, filename: str, tasks: list = None):
         - duration: length
         - category: for color coding
     """
-    import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
+    import matplotlib.pyplot as plt
     
     # Default example
     if not tasks:

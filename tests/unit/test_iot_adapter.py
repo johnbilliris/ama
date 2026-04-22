@@ -10,9 +10,7 @@ Covers:
 
 from __future__ import annotations
 
-
 import pytest
-
 from monitoring.iot_adapter import IoTSignalAdapter, IoTSignalDeduplicator
 
 

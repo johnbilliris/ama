@@ -11,9 +11,7 @@ Covers:
 
 from __future__ import annotations
 
-
 import pytest
-
 from common.content_safety import ContentSafetyValidator
 from common.content_safety_circuit_breaker import ContentSafetyCircuitBreaker
 

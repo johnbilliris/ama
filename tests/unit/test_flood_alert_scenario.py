@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from common.handoffs import AgentHandoffEvent
 from communication.config import CommunicationConfig
 from communication.delivery import MultiChannelDeliveryService

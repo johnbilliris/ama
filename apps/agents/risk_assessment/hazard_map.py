@@ -10,10 +10,9 @@ import logging
 from datetime import UTC, datetime
 from typing import Any
 
+from risk_assessment.hazard_radius import HazardRadiusRepository
 from shapely.geometry import Point, mapping
 from shapely.ops import unary_union
-
-from risk_assessment.hazard_radius import HazardRadiusRepository
 
 logger = logging.getLogger(__name__)
 

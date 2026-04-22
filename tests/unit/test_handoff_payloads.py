@@ -10,8 +10,6 @@ Covers:
 
 from __future__ import annotations
 
-
-
 from common.handoff_payloads import (
     DispatchHandoffPayload,
     RoadClosureSignalPayload,

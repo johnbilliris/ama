@@ -6,7 +6,6 @@ import asyncio
 import time
 
 import pytest
-
 from common.handoffs import AgentHandoffEvent, deliver_handoff_with_retry
 
 

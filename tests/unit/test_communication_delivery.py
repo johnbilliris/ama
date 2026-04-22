@@ -3,7 +3,6 @@
 import math
 
 import pytest
-
 from communication.delivery import MultiChannelDeliveryService
 from communication.models import (
     AudienceSegment,

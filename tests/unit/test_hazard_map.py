@@ -11,7 +11,6 @@ Covers:
 from __future__ import annotations
 
 import pytest
-
 from risk_assessment.hazard_map import HazardMapGenerator
 from risk_assessment.hazard_radius import HazardRadiusRepository
 

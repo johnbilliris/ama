@@ -228,15 +228,6 @@ class RiskAssessmentAgent(LLMCallMixin):
                 "projected_value_48h": extrapolation.projected_value_48h,
                 "extrapolation_confidence": extrapolation.extrapolation_confidence,
             } if extrapolation else None,
-            "extrapolation": {
-                "trend_detected": extrapolation.trend_detected,
-                "trend_direction": extrapolation.trend_direction,
-                "slope_per_hour": extrapolation.slope_per_hour,
-                "predictive_lead_time_hours": extrapolation.predictive_lead_time_hours,
-                "projected_value_24h": extrapolation.projected_value_24h,
-                "projected_value_48h": extrapolation.projected_value_48h,
-                "extrapolation_confidence": extrapolation.extrapolation_confidence,
-            } if extrapolation else None,
         }
 
         assessment_id = f"ha-{incident_id}-{assessment_type}-v{version}"
