@@ -222,13 +222,13 @@ class SimulationEventRepository:
         container = self._get_container()
         if container is None:
             for ev in self._events.get(tenant_id, []):
-                if ev.event_type == "annotation" and ev.payload.get("annotation_id") == annotation_id:
+                if ev.event_type == "annotation" and ev.id == annotation_id:
                     return ev
             return None
         query = (
             "SELECT * FROM c WHERE c.document_type = 'simulation_event' "
             "AND c.tenant_id = @tid AND c.event_type = 'annotation' "
-            "AND c.payload.annotation_id = @aid"
+            "AND c.id = @aid"
         )
         try:
             items = list(

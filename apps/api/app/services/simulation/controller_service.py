@@ -72,12 +72,54 @@ class SimulationControllerService:
         sub_agents: SubAgentInvoker | None = None,
         rate_limiter: RateLimiter | None = None,
         history_repo: SimChatHistoryRepository | None = None,
+        event_recorder: Any = None,
+        clock_service: Any = None,
+        simulation_repository: Any = None,
     ) -> None:
         self._sub_agents = sub_agents or default_invoker()
         self._rl = rate_limiter or get_rate_limiter()
         self._history = history_repo or default_history_repo()
+        self._event_recorder = event_recorder
+        self._clock = clock_service
+        self._sim_repo = simulation_repository
         self._prompt_text = _PROMPT_PATH.read_text(encoding="utf-8")
         self._prompt_hash = hashlib.sha256(self._prompt_text.encode("utf-8")).hexdigest()
+
+    async def _current_sim_seconds(self, tenant_id: str) -> float:
+        """Best-effort lookup of current simulated time for the tenant."""
+        if self._clock is None or self._sim_repo is None:
+            return 0.0
+        try:
+            tenant = await self._sim_repo.get_by_tenant_id(tenant_id)
+            if tenant is None:
+                return 0.0
+            return self._clock.get_current_sim_seconds(tenant)
+        except Exception:  # pragma: no cover — defensive
+            return 0.0
+
+    def _maybe_record_chat_turn(
+        self,
+        *,
+        tenant_id: str,
+        sim_seconds: float,
+        turn: SimChatTurn,
+        tool_calls: list[str] | None = None,
+    ) -> None:
+        """Best-effort — record the chat turn as a SimulationEvent for playback."""
+        if self._event_recorder is None:
+            return
+        try:
+            preview = turn.content[:200] if turn.content else ""
+            self._event_recorder.record_chat_turn(
+                tenant_id=tenant_id,
+                sim_time=sim_seconds,
+                turn_sequence=turn.sequence,
+                role=turn.role,
+                message_preview=preview,
+                tool_calls=tool_calls,
+            )
+        except Exception as exc:  # pragma: no cover
+            logger.warning("sim_event_record_chat_turn_failed: %s", exc)
 
     @property
     def prompt_hash(self) -> str:
@@ -111,9 +153,13 @@ class SimulationControllerService:
         actor_oid: str | None = None,
         tool_call_id: str | None = None,
         model: str | None = None,
+        sim_seconds: float = 0.0,
+        tool_calls: list[str] | None = None,
     ) -> SimChatTurn | None:
         """Append one turn to the tenant's chat history. Best-effort: persistence
-        failures must never crash the SSE stream."""
+        failures must never crash the SSE stream. Also records the turn as a
+        simulation event (for after-action playback) when a recorder is wired up.
+        """
         if not content:
             return None
         try:
@@ -131,7 +177,14 @@ class SimulationControllerService:
                 prompt_hash=self._prompt_hash,
                 content_hash=_sha256(content),
             )
-            return self._history.append_turn(turn)
+            persisted = self._history.append_turn(turn)
+            self._maybe_record_chat_turn(
+                tenant_id=tenant_id,
+                sim_seconds=sim_seconds,
+                turn=persisted,
+                tool_calls=tool_calls,
+            )
+            return persisted
         except Exception as exc:  # pragma: no cover — defensive
             logger.warning("sim_chat_history_persist_failed: %s", exc)
             return None

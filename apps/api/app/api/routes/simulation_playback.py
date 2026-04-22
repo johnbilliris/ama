@@ -1,0 +1,158 @@
+"""Playback API routes (feature 026 — US3 / US5).
+
+Exposes read-only endpoints for after-action review:
+
+* ``GET  /simulations/{tenant_id}/playback/events``
+* ``GET  /simulations/{tenant_id}/playback/snapshots``
+* ``POST /simulations/{tenant_id}/playback/annotations``  (US5)
+* ``PUT  /simulations/{tenant_id}/playback/annotations/{annotation_id}``  (US5)
+* ``DELETE /simulations/{tenant_id}/playback/annotations/{annotation_id}``  (US5)
+"""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+
+from app.api.routes.simulations import _event_repo, _repo
+from app.core.auth import extract_principal_from_claims
+from app.services.annotation_service import AnnotationService
+from app.services.playback_service import PlaybackService
+from fastapi import APIRouter, HTTPException, Request, Response
+from pydantic import BaseModel, Field
+
+from packages.domain.src.domain.models.simulation_event import SimulationEvent
+
+router = APIRouter(
+    prefix="/simulations/{tenant_id}/playback",
+    tags=["simulation-playback"],
+)
+
+_playback = PlaybackService(event_repository=_event_repo, simulation_repository=_repo)
+_annotations = AnnotationService(
+    event_repository=_event_repo, simulation_repository=_repo
+)
+
+
+def _principal(request: Request) -> str:
+    principal = extract_principal_from_claims(request.state.claims)
+    if principal is None or not principal.subject or principal.subject == "anonymous":
+        raise HTTPException(status_code=401, detail="unauthenticated")
+    if "SimulationUser" not in principal.roles:
+        raise HTTPException(status_code=403, detail="simulation_role_required")
+    return principal.subject
+
+
+def _access_error_to_http(exc: Exception) -> HTTPException:
+    if isinstance(exc, LookupError):
+        return HTTPException(status_code=404, detail="simulation_not_found")
+    if isinstance(exc, PermissionError):
+        return HTTPException(status_code=403, detail=str(exc))
+    return HTTPException(status_code=500, detail="internal_error")
+
+
+# ── events ────────────────────────────────────────────────────────────
+
+@router.get("/events")
+async def list_playback_events(
+    tenant_id: str,
+    request: Request,
+    after_seq: int = 0,
+    limit: int = 200,
+    include_annotations: bool = True,
+) -> dict:
+    user_oid = _principal(request)
+    try:
+        return await _playback.get_events(
+            tenant_id,
+            requesting_user_oid=user_oid,
+            after_seq=after_seq,
+            limit=min(limit, 1000),
+            include_annotations=include_annotations,
+        )
+    except (LookupError, PermissionError) as exc:
+        raise _access_error_to_http(exc) from exc
+
+
+@router.get("/snapshots")
+async def list_playback_snapshots(
+    tenant_id: str,
+    request: Request,
+    before_sim_time: float | None = None,
+) -> dict:
+    user_oid = _principal(request)
+    try:
+        return await _playback.get_snapshots(
+            tenant_id,
+            requesting_user_oid=user_oid,
+            before_sim_time=before_sim_time,
+        )
+    except (LookupError, PermissionError) as exc:
+        raise _access_error_to_http(exc) from exc
+
+
+# ── annotations (US5) ─────────────────────────────────────────────────
+
+class CreateAnnotationRequest(BaseModel):
+    sim_time_offset: float = Field(..., ge=0)
+    text: str = Field(..., min_length=1, max_length=2000)
+
+
+class UpdateAnnotationRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=2000)
+
+
+@router.post("/annotations", status_code=201)
+async def create_annotation(
+    tenant_id: str,
+    body: CreateAnnotationRequest,
+    request: Request,
+) -> dict:
+    user_oid = _principal(request)
+    try:
+        ann = await _annotations.create(
+            tenant_id,
+            author_oid=user_oid,
+            sim_time_offset=body.sim_time_offset,
+            text=body.text,
+        )
+        return ann.model_dump(mode="json")
+    except (LookupError, PermissionError) as exc:
+        raise _access_error_to_http(exc) from exc
+
+
+@router.put("/annotations/{annotation_id}")
+async def update_annotation(
+    tenant_id: str,
+    annotation_id: str,
+    body: UpdateAnnotationRequest,
+    request: Request,
+) -> dict:
+    user_oid = _principal(request)
+    try:
+        ann = await _annotations.update(
+            tenant_id,
+            annotation_id=annotation_id,
+            requesting_user_oid=user_oid,
+            text=body.text,
+        )
+        return ann.model_dump(mode="json")
+    except (LookupError, PermissionError) as exc:
+        raise _access_error_to_http(exc) from exc
+
+
+@router.delete("/annotations/{annotation_id}", status_code=204)
+async def delete_annotation(
+    tenant_id: str,
+    annotation_id: str,
+    request: Request,
+) -> Response:
+    user_oid = _principal(request)
+    try:
+        await _annotations.delete(
+            tenant_id,
+            annotation_id=annotation_id,
+            requesting_user_oid=user_oid,
+        )
+    except (LookupError, PermissionError) as exc:
+        raise _access_error_to_http(exc) from exc
+    return Response(status_code=204)

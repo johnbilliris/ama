@@ -313,9 +313,17 @@ export default function SimulationDashboardPage() {
                   Stop
                 </button>
               </div>
-              <Link href="/simulations" className="sim-panel-backlink">
-                ← Back to simulations
-              </Link>
+                <Link href="/simulations" className="sim-panel-backlink">
+                  ← Back to simulations
+                </Link>
+                {["Archived", "Completed"].includes(tenant.status) && (
+                  <Link
+                    href={`/simulations/${tenant.tenant_id}/playback`}
+                    className="sim-panel-backlink"
+                  >
+                    ▶ Review Playback
+                  </Link>
+                )}
             </section>
 
             {/* ── Event Log ── */}
