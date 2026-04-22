@@ -67,7 +67,11 @@ class SimulationRepository:
                 "SELECT * FROM c WHERE c.tenant_id = @tid AND c.document_type = 'simulation_tenant'"
             )
             items = list(
-                container.query_items(query, parameters=[{"name": "@tid", "value": tenant_id}])
+                container.query_items(
+                    query,
+                    parameters=[{"name": "@tid", "value": tenant_id}],
+                    enable_cross_partition_query=True,
+                )
             )
             if items:
                 return SimulationTenant.model_validate(items[0])
@@ -83,7 +87,11 @@ class SimulationRepository:
                 "AND c.status IN ('Active', 'Paused')"
             )
             items = list(
-                container.query_items(query, parameters=[{"name": "@oid", "value": user_oid}])
+                container.query_items(
+                    query,
+                    parameters=[{"name": "@oid", "value": user_oid}],
+                    enable_cross_partition_query=True,
+                )
             )
             return [SimulationTenant.model_validate(item) for item in items]
         return [
@@ -103,13 +111,19 @@ class SimulationRepository:
                 where += " AND c.status = @status"
                 params.append({"name": "@status", "value": status})
             count_query = f"SELECT VALUE COUNT(1) FROM c {where}"
-            total = list(container.query_items(count_query, parameters=params))[0]
+            total = list(
+                container.query_items(
+                    count_query, parameters=params, enable_cross_partition_query=True,
+                )
+            )[0]
             query = f"SELECT * FROM c {where} ORDER BY c.created_at DESC OFFSET @offset LIMIT @limit"
             params.extend([
                 {"name": "@offset", "value": offset},
                 {"name": "@limit", "value": limit},
             ])
-            items = list(container.query_items(query, parameters=params))
+            items = list(
+                container.query_items(query, parameters=params, enable_cross_partition_query=True)
+            )
             return [SimulationTenant.model_validate(i) for i in items], total
         tenants = list(self._in_memory.values())
         if status:
@@ -126,7 +140,9 @@ class SimulationRepository:
                 "WHERE c.document_type = 'simulation_tenant' "
                 "AND c.status IN ('Provisioning', 'Active', 'Paused')"
             )
-            return list(container.query_items(query))[0]
+            return list(
+                container.query_items(query, enable_cross_partition_query=True)
+            )[0]
         return sum(
             1
             for t in self._in_memory.values()
@@ -161,7 +177,11 @@ class SimulationRepository:
                 "AND c.expires_at <= @now"
             )
             items = list(
-                container.query_items(query, parameters=[{"name": "@now", "value": now}])
+                container.query_items(
+                    query,
+                    parameters=[{"name": "@now", "value": now}],
+                    enable_cross_partition_query=True,
+                )
             )
             return [SimulationTenant.model_validate(i) for i in items]
         from datetime import UTC, datetime
