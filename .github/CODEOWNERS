@@ -1,0 +1,25 @@
+# ---------------------------------------------------------------------------
+# CODEOWNERS — AMA monorepo
+# ---------------------------------------------------------------------------
+# Capstone specification — dual-control spec maintenance per FR-034
+# (specs/001-disaster-response-hub/spec.md § Status-transition authority).
+# Every PR touching the governed directories requires review from the
+# spec-maintainers team. A team handle is mandatory (Clarification 6).
+#
+# T005 Open Delta: if team `@johnbilliris/ama-spec-maintainers` does not yet
+# exist (verify with `gh api /orgs/johnbilliris/teams/ama-spec-maintainers`),
+# the interim individual owner below applies until the team is created. An
+# Open Delta row is carried in specs/001-disaster-response-hub/spec.md
+# § Open Deltas with target_feature=028-holistic-spec-hardening.
+# ---------------------------------------------------------------------------
+
+# Primary owner — capstone spec and its shared artefacts.
+specs/001-disaster-response-hub/  @johnbilliris/ama-spec-maintainers
+specs/027-spec-hardening/         @johnbilliris/ama-spec-maintainers
+specs/028-holistic-spec-hardening/ @johnbilliris/ama-spec-maintainers
+specs/shared/                     @johnbilliris/ama-spec-maintainers
+
+# Interim fallback (until the spec-maintainers team is provisioned; see T005).
+# Removing the line above and relying solely on the line below is a governance
+# regression — keep both until the team exists with ≥ 2 members.
+# specs/001-disaster-response-hub/  @johnbilliris

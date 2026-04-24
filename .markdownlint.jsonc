@@ -1,0 +1,28 @@
+// markdownlint-cli2 configuration for the AMA monorepo.
+// Scope: governs lint on `specs/`, top-level markdown, and `.github/` documentation.
+// Deliberately narrow: no global rule disables — any exception is per-path.
+{
+  "default": true,
+
+  // Allow long lines in spec tables and narrative — we intentionally write
+  // normative requirements on a single line for greppability.
+  "line-length": false,
+
+  // Spec files use deep header nesting for per-FR subsections.
+  "MD024": { "siblings_only": true },
+
+  // Allow inline HTML for <!-- pointer comments --> used by FR-020 evidence stubs.
+  "MD033": false,
+
+  // Trailing-punctuation: allow colons in table headers.
+  "MD026": { "punctuation": ".,;:!。,;:!" },
+
+  "ignores": [
+    "node_modules",
+    "pnpm-lock.yaml",
+    ".github/CODEOWNERS",
+    "specs/**/research.md",
+    "specs/*/contracts/**",
+    "AMA_Rubric_Asia.md"
+  ]
+}
