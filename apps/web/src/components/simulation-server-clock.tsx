@@ -72,29 +72,43 @@ export function SimulationServerClock({
   const lagging = lag >= 10;
 
   return (
-    <div className="sim-server-clock" aria-label="Simulation server clock">
-      <span className="sim-server-clock-icon">⏱</span>
-      <span className="sim-server-clock-value">{fmt(clock.current_sim_seconds)}</span>
+    <div
+      className="sim-server-clock"
+      aria-label="Simulation server clock"
+      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", width: "100%" }}
+    >
       <span
-        className="sim-server-clock-warp"
-        title={`Current warp: ${clock.current_warp_speed}×`}
+        className="sim-server-clock-left"
+        style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
       >
-        {clock.current_warp_speed}×
+        <span className="sim-server-clock-icon">⏱</span>
+        <span className="sim-server-clock-value">{fmt(clock.current_sim_seconds)}</span>
       </span>
-      {clock.clock_paused && (
-        <span className="sim-server-clock-paused" aria-label="Paused">
-          ⏸ Paused
-        </span>
-      )}
-      {lagging && (
+      <span
+        className="sim-server-clock-right"
+        style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginLeft: "auto" }}
+      >
         <span
-          className="sim-server-clock-lag-warning"
-          role="alert"
-          title="Scheduler is behind schedule"
+          className="sim-server-clock-warp"
+          title={`Current warp: ${clock.current_warp_speed}×`}
         >
-          ⚠ Delivery lag {lag.toFixed(1)}s
+          {clock.current_warp_speed}×
         </span>
-      )}
+        {clock.clock_paused && (
+          <span className="sim-server-clock-paused" aria-label="Paused">
+            ⏸ Paused
+          </span>
+        )}
+        {lagging && (
+          <span
+            className="sim-server-clock-lag-warning"
+            role="alert"
+            title="Scheduler is behind schedule"
+          >
+            ⚠ Delivery lag {lag.toFixed(1)}s
+          </span>
+        )}
+      </span>
     </div>
   );
 }

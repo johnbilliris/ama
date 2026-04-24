@@ -473,8 +473,25 @@ class SimulationControllerService:
                     stream=True,
                 )
             except Exception as exc:
+                # Distinguish Azure content-filter blocks (ResponsibleAIPolicyViolation)
+                # from generic availability failures. The UI shows different friendly
+                # copy per code; the full technical detail is logged server-side and
+                # only surfaced to the client in local/development environments.
+                exc_str = str(exc)
+                if (
+                    "content_filter" in exc_str
+                    or "ResponsibleAIPolicyViolation" in exc_str
+                ):
+                    code = "content_filter"
+                else:
+                    code = "openai_unavailable"
+                logger.exception(
+                    "sim_controller_openai_error code=%s deployment=%s",
+                    code,
+                    deployment,
+                )
                 yield ChatEvent(
-                    "error", {"code": "openai_unavailable", "message": str(exc)}
+                    "error", {"code": code, "message": exc_str}
                 )
                 return
 

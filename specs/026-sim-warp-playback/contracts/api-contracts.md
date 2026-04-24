@@ -92,7 +92,9 @@
 
 ### POST /api/simulations/{tenant_id}/warp-speed
 
-**Purpose**: Change the warp speed of a running simulation.
+**Purpose**: Change the warp speed of a running or paused simulation. When the
+simulation is paused, the new speed is recorded and takes effect on resume
+(the simulated clock is not advanced while paused).
 
 **Authorization**: Controller only (must be `created_by` of the tenant).
 
@@ -115,9 +117,9 @@
   "detail": "Invalid warp speed. Allowed values: 1, 2, 5, 10, 24, 60"
 }
 
-// Response 409 (not running)
+// Response 409 (terminal status — Archiving/Archived/Completed)
 {
-  "detail": "Simulation is not in Active status"
+  "detail": "Simulation must be Active or Paused to change warp speed (got 'Archived')"
 }
 ```
 

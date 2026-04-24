@@ -7,6 +7,7 @@ import {
   getChatHistory,
   streamChat,
   type ChatEvent,
+  type SimChatTurn,
 } from "@/lib/api/simulation_chat";
 
 type Role = "user" | "assistant";
@@ -36,6 +37,10 @@ export function SimulationChatPane({
   const [isHydrating, setHydrating] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  // Stable ref so the hydrate effect doesn't refire when the parent's inline
+  // onScenarioCard callback identity changes on every render.
+  const onScenarioCardRef = useRef(onScenarioCard);
+  onScenarioCardRef.current = onScenarioCard;
 
   // Auto-scroll to the newest message whenever the list or streamed content
   // grows. Keeps the active reply + input visible without the user chasing it.
@@ -61,6 +66,14 @@ export function SimulationChatPane({
             content: t.content,
           }));
         setMessages(seeded);
+
+        // Replay the most recent persisted scenario card (stored as role="tool"
+        // content) so the map pin + chip reappear when a controller returns to
+        // an already-seeded exercise. Without this, scenarioCard is only ever
+        // set live during streaming, so a page refresh loses the Katoomba pin
+        // and the map falls back to generic jurisdiction centroids.
+        const latestCard = extractLatestScenarioCard(turns);
+        if (latestCard) onScenarioCardRef.current?.(latestCard);
       } finally {
         if (!cancelled) setHydrating(false);
       }
@@ -303,6 +316,35 @@ function summariseScenarioCard(card: Record<string, unknown>): string {
   return level ? `${hazard} near ${locName} · ${level}` : `${hazard} near ${locName}`;
 }
 
+// Walk tool turns newest-first and return the first payload that looks like a
+// scenario card (produced by `seed_scenario` on the backend). Tool turns store
+// the card as a JSON string in `content`; anything that fails to parse or lacks
+// the hazard+location shape is ignored so other tool results can't masquerade
+// as a card.
+function extractLatestScenarioCard(
+  turns: SimChatTurn[],
+): Record<string, unknown> | null {
+  for (let i = turns.length - 1; i >= 0; i--) {
+    const t = turns[i];
+    if (t.role !== "tool" || !t.content) continue;
+    try {
+      const parsed = JSON.parse(t.content) as Record<string, unknown>;
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        typeof parsed.hazard === "string" &&
+        parsed.location &&
+        typeof parsed.location === "object"
+      ) {
+        return parsed;
+      }
+    } catch {
+      // Non-JSON tool result (e.g. summarise_state) — skip.
+    }
+  }
+  return null;
+}
+
 function applyEvent(
   assistantId: string,
   ev: ChatEvent,
@@ -337,11 +379,45 @@ function applyEvent(
     }
   } else if (ev.event === "error") {
     const code = String(ev.data.code ?? "error");
-    const msg = String(ev.data.message ?? "chat error");
+    const technicalMessage = String(ev.data.message ?? "chat error");
+    const displayMessage = formatChatErrorForDisplay(code, technicalMessage);
     setMessages((prev) =>
       prev.map((m) =>
-        m.id === assistantId ? { ...m, content: `(${code}) ${msg}`, refused: true } : m,
+        m.id === assistantId
+          ? { ...m, content: displayMessage, refused: true }
+          : m,
       ),
     );
   }
+}
+
+// Friendly copy shown to coordinators in staging/production. The raw technical
+// payload (Azure OpenAI JSON, stack traces) is only useful while developing and
+// leaks implementation detail — including internal error codes and filter
+// categories — that non-technical users don't need.
+const FRIENDLY_CHAT_ERROR: Record<string, string> = {
+  content_filter:
+    "Your message included wording that the AI safety filter blocked. " +
+    "Please rephrase — for example, describe the operational action directly " +
+    "(\u201cupgrade the Blackheath warning to Watch and Act; fire behaviour is worsening\u201d) " +
+    "rather than framing it as escalation or intensification.",
+  openai_unavailable:
+    "The AI assistant is temporarily unavailable. Please try again in a moment. " +
+    "If the issue persists, contact your administrator.",
+};
+
+const FRIENDLY_CHAT_ERROR_FALLBACK =
+  "Something went wrong while processing your message. Please try again.";
+
+function formatChatErrorForDisplay(code: string, technicalMessage: string): string {
+  // Raw technical payloads are useful while developing but must never reach
+  // coordinators in staging/production. NEXT_PUBLIC_ENVIRONMENT is baked in at
+  // build time and defaults to a safe (friendly-only) surface when unset.
+  const env = (process.env.NEXT_PUBLIC_ENVIRONMENT ?? "").toLowerCase();
+  const isDev = env === "local" || env === "development";
+  const friendly = FRIENDLY_CHAT_ERROR[code] ?? FRIENDLY_CHAT_ERROR_FALLBACK;
+  if (isDev) {
+    return `${friendly}\n\n[dev ${code}] ${technicalMessage}`;
+  }
+  return friendly;
 }

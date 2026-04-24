@@ -52,6 +52,44 @@ const SCENARIO_ICON: Record<string, string> = {
   tsunami: "🌊",
 };
 
+/**
+ * Normalise a scenario/hazard label (e.g. "Bushfire", "Severe Storm", "Heatwave",
+ * "heat") to a pin-icon key recognised by the DisasterMap marker layer.
+ * Keep in sync with PIN_DEFS in packages/ui/.../marker-cluster.tsx.
+ */
+function normaliseHazardKey(value: string | null | undefined): string {
+  if (!value) return "other";
+  const v = value.trim().toLowerCase();
+  const direct: Record<string, string> = {
+    bushfire: "bushfire",
+    fire: "bushfire",
+    "urban fire": "urban_fire",
+    urban_fire: "urban_fire",
+    flood: "flood",
+    cyclone: "cyclone",
+    storm: "storm",
+    "severe storm": "storm",
+    tornado: "tornado",
+    earthquake: "earthquake",
+    tsunami: "tsunami",
+    heatwave: "extreme_heat",
+    "extreme heat": "extreme_heat",
+    heat: "extreme_heat",
+    extreme_heat: "extreme_heat",
+    pandemic: "pandemic",
+    health: "health",
+    biosecurity: "biosecurity",
+    landslide: "landslide",
+    industrial: "industrial",
+    transport: "transport",
+    criminal: "criminal",
+    environment: "environment",
+    "maritime coastal": "maritime_coastal",
+    maritime: "maritime_coastal",
+  };
+  return direct[v] ?? "other";
+}
+
 export interface ScenarioCard {
   id?: string;
   tenant_id?: string;
@@ -105,7 +143,7 @@ export function SimulationMap({
         properties: {
           incident_id: `sim-${tenantId}-scenario`,
           title: `[SIM] ${hazard} – ${locName}`,
-          incident_type: hazard,
+          incident_type: normaliseHazardKey(hazard),
           status: status === "Archived" ? "closed" : "active",
           severity: "critical",
           severity_tier: "emergency",
@@ -130,7 +168,7 @@ export function SimulationMap({
           properties: {
             incident_id: `sim-${tenantId}-${j}`,
             title: `[SIM] ${scenarioType} – ${pt.name}`,
-            incident_type: scenarioType || "simulation",
+            incident_type: normaliseHazardKey(scenarioType || "simulation"),
             status: status === "Archived" ? "closed" : "active",
             severity: "critical",
             severity_tier: "emergency",

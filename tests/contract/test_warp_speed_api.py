@@ -189,3 +189,32 @@ def test_change_warp_speed_controller_only(client):
     assert data["previous_speed"] == 5.0
     assert data["current_warp_speed"] == 24.0
     assert "accumulated_sim_seconds" in data
+
+
+def test_change_warp_speed_while_paused_succeeds(client):
+    created = _create_sim(client, warp_speed=5, user_oid="controller-1").json()
+    tenant_id = created["tenant_id"]
+
+    pause = client.post(
+        f"/api/simulations/{tenant_id}/pause",
+        json={},
+        headers=_auth_headers("controller-1"),
+    )
+    assert pause.status_code == 200, pause.text
+    assert pause.json()["status"] == "Paused"
+
+    changed = client.post(
+        f"/api/simulations/{tenant_id}/warp-speed",
+        json={"warp_speed": 10},
+        headers=_auth_headers("controller-1"),
+    )
+    assert changed.status_code == 200, changed.text
+    assert changed.json()["current_warp_speed"] == 10.0
+    assert changed.json()["previous_speed"] == 5.0
+
+    # Simulation should remain Paused after the warp change.
+    detail = client.get(
+        f"/api/simulations/{tenant_id}", headers=_auth_headers("controller-1")
+    ).json()
+    assert detail["status"] == "Paused"
+    assert detail["current_warp_speed"] == 10.0
