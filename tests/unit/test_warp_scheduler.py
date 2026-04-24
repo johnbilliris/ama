@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 
 import pytest
-
 from app.repositories.signal_repository import SignalRepository
 from app.repositories.simulation_event_repository import SimulationEventRepository
 from app.repositories.simulation_repository import SimulationRepository

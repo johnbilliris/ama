@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from app.repositories.simulation_event_repository import SimulationEventRepository
 from app.services.simulation_event_recorder import SimulationEventRecorder
 

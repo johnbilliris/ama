@@ -207,7 +207,6 @@ def test_get_events_include_annotations_filter(client):
 # ── snapshots ─────────────────────────────────────────────────────────
 
 def test_get_snapshots_returns_list(client):
-    from datetime import UTC, datetime
 
     from app.api.routes import simulation_playback as pb_routes
 

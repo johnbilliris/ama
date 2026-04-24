@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 
 import pytest
-
 from app.services.simulation_clock_service import SimulationClockService
 
 from packages.domain.src.domain.models.simulation_tenant import SimulationTenant
