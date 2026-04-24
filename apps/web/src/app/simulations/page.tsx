@@ -60,6 +60,7 @@ export default function SimulationListPage() {
             <tr className="border-b text-left">
               <th className="p-2">Tenant ID</th>
               <th className="p-2">Scenario</th>
+              <th className="p-2">Warp</th>
               <th className="p-2">Status</th>
               <th className="p-2">Created</th>
               <th className="p-2">Participants</th>
@@ -77,6 +78,11 @@ export default function SimulationListPage() {
                   </Link>
                 </td>
                 <td className="p-2">{sim.scenario_type}</td>
+                <td className="p-2">
+                  <span className="rounded bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-800">
+                    {sim.current_warp_speed ?? 1}×
+                  </span>
+                </td>
                 <td className="p-2">
                   <span className={`rounded px-2 py-0.5 text-xs font-medium ${
                     sim.status === "Active" ? "bg-green-100 text-green-800" :

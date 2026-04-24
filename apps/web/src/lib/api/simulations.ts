@@ -1,5 +1,8 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 
+export const ALLOWED_WARP_SPEEDS = [1, 2, 5, 10, 24, 60] as const;
+export type WarpSpeed = typeof ALLOWED_WARP_SPEEDS[number];
+
 export interface SimulationSummary {
   tenant_id: string;
   scenario_type: string;
@@ -8,6 +11,9 @@ export interface SimulationSummary {
   participant_count: number;
   signal_count: number;
   storage_bytes: number;
+  current_warp_speed?: number;
+  playback_status?: string;
+  clock_paused?: boolean;
 }
 
 export interface SimulationListResponse {
@@ -34,6 +40,14 @@ export interface SimulationDetail {
   throttle_mode: string;
   throttle_quota_pct: number;
   elapsed_seconds: number;
+  // Feature 026 — server-owned clock
+  warp_speed?: number;
+  current_warp_speed?: number;
+  accumulated_sim_seconds?: number;
+  current_sim_seconds?: number;
+  clock_paused?: boolean;
+  playback_status?: string;
+  last_resumed_at?: string | null;
 }
 
 export interface CreateSimulationPayload {
@@ -41,6 +55,7 @@ export interface CreateSimulationPayload {
   jurisdictions: string[];
   participants: string[];
   scenario_template_id?: string;
+  warp_speed?: number;
   resource_limits?: {
     max_signals?: number;
     max_recommendations?: number;
@@ -53,12 +68,41 @@ export interface CreateSimulationResponse {
   scenario_run_id: string;
   status: string;
   created_at: string;
+  current_warp_speed?: number;
 }
 
 export interface SimulationTimerResponse {
   tenant_id: string;
   status: string;
   elapsed_seconds: number;
+  accumulated_sim_seconds?: number;
+  current_sim_seconds?: number;
+  current_warp_speed?: number;
+  clock_paused?: boolean;
+  playback_status?: string;
+}
+
+export interface SimulationClockResponse {
+  tenant_id: string;
+  current_warp_speed: number;
+  accumulated_sim_seconds: number;
+  current_sim_seconds: number;
+  clock_paused: boolean;
+  playback_status: string;
+  last_resumed_at: string | null;
+  server_timestamp: string;
+  delivery_lag_seconds?: number;
+  warp_speed_history?: {
+    previous_speed: number;
+    new_speed: number;
+    sim_time_offset: number;
+    wall_timestamp: string;
+    changed_by: string;
+  }[];
+}
+
+export interface ChangeWarpSpeedResponse extends SimulationClockResponse {
+  previous_warp_speed: number;
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -97,25 +141,52 @@ export async function getSimulation(tenantId: string): Promise<SimulationDetail>
   return apiFetch<SimulationDetail>(`/simulations/${encodeURIComponent(tenantId)}`);
 }
 
-export async function pauseSimulation(tenantId: string, elapsedSeconds = 0): Promise<SimulationTimerResponse> {
+export async function pauseSimulation(tenantId: string): Promise<SimulationTimerResponse> {
   return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/pause`, {
     method: "POST",
-    body: JSON.stringify({ elapsed_seconds: elapsedSeconds }),
+    body: JSON.stringify({}),
   });
 }
 
-export async function resumeSimulation(tenantId: string, elapsedSeconds = 0): Promise<SimulationTimerResponse> {
+export async function resumeSimulation(tenantId: string): Promise<SimulationTimerResponse> {
   return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/resume`, {
     method: "POST",
-    body: JSON.stringify({ elapsed_seconds: elapsedSeconds }),
+    body: JSON.stringify({}),
   });
 }
 
-export async function archiveSimulation(tenantId: string, elapsedSeconds?: number): Promise<{ tenant_id: string; status: string; elapsed_seconds: number }> {
+export async function archiveSimulation(tenantId: string): Promise<SimulationTimerResponse> {
   return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/archive`, {
     method: "POST",
-    body: JSON.stringify({ elapsed_seconds: elapsedSeconds ?? 0 }),
+    body: JSON.stringify({}),
   });
+}
+
+export async function getSimulationClock(tenantId: string): Promise<SimulationClockResponse> {
+  return apiFetch<SimulationClockResponse>(
+    `/simulations/${encodeURIComponent(tenantId)}/clock`,
+  );
+}
+
+export async function changeWarpSpeed(
+  tenantId: string,
+  warpSpeed: number,
+): Promise<ChangeWarpSpeedResponse> {
+  return apiFetch<ChangeWarpSpeedResponse>(
+    `/simulations/${encodeURIComponent(tenantId)}/warp-speed`,
+    {
+      method: "POST",
+      body: JSON.stringify({ warp_speed: warpSpeed }),
+    },
+  );
+}
+
+export async function getAllowedWarpSpeeds(): Promise<{
+  warp_speeds: number[];
+  playback_speeds: number[];
+  default_warp_speed: number;
+}> {
+  return apiFetch(`/simulations/meta/warp-speeds`);
 }
 
 export async function deleteSimulation(tenantId: string): Promise<void> {

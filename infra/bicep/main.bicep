@@ -149,6 +149,47 @@ resource simulationContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases
   }
 }
 
+// Feature 026-sim-warp-playback: recorded simulation events, playback
+// snapshots, and scheduler cursor state — partitioned by tenant_id.
+resource simEventsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+  name: 'sim-events'
+  parent: cosmosDb
+  properties: {
+    resource: {
+      id: 'sim-events'
+      partitionKey: {
+        paths: ['/tenant_id']
+        kind: 'Hash'
+      }
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          { path: '/*' }
+        ]
+        excludedPaths: [
+          { path: '/"_etag"/?' }
+        ]
+        compositeIndexes: [
+          [
+            { path: '/tenant_id', order: 'ascending' }
+            { path: '/event_seq', order: 'ascending' }
+          ]
+          [
+            { path: '/tenant_id', order: 'ascending' }
+            { path: '/sim_time_offset', order: 'ascending' }
+          ]
+        ]
+      }
+    }
+    options: {
+      autoscaleSettings: {
+        maxThroughput: 1000
+      }
+    }
+  }
+}
+
 resource rawPayloadsBlob 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
   name: '${storage.name}/default/raw-payloads'
   properties: {

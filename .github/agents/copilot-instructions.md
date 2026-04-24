@@ -1,4 +1,4 @@
-﻿---
+---
 description: "AMA development guidelines and project conventions shared with all agents."
 ---
 
@@ -41,6 +41,10 @@ docs/           # Project documentation
 - Azure Cosmos DB (assessments, plans, dead-letters), Azure Blob Storage (audit) (025-agent-spec-compliance)
 - Python 3.11+ (agents, API), TypeScript 5.x (Next.js dashboard) + FastAPI, Pydantic, Shapely, azure-ai-contentsafety, azure-iot-device, azure-cosmos, httpx, numpy, Next.js 14 (025-agent-spec-compliance)
 - Azure Cosmos DB (dead-letters, radius lookup table, assessments), Azure Blob Storage (signal archives), Azure IoT Hub (device telemetry) (025-agent-spec-compliance)
+- Python 3.11 (backend), TypeScript/Next.js 16 (frontend) + FastAPI, Pydantic v2, azure-cosmos, Next.js App Router (026-sim-warp-playback)
+- Azure Cosmos DB (containers: `simulation`, `sim-events` [new], `sim-chat`) (026-sim-warp-playback)
+- Python 3.12 (backend + agents), TypeScript/React 19 (frontend) + FastAPI, Pydantic, azure-cosmos, azure-identity (API); Next.js 16.2, React 19 (web); asyncio, azure-cosmos (agents) (026-sim-warp-playback)
+- Azure Cosmos DB — containers: `simulation` (tenants, scheduler state), `sim-events` (events, snapshots, annotations), `sim-chat` (chat history) (026-sim-warp-playback)
 
 **Backend**: Python 3.12, FastAPI, Pydantic v2, Azure Cosmos DB SDK, Azure Blob Storage SDK, Azure Identity, Azure OpenAI SDK, tenacity
 **Frontend**: TypeScript 5.8, Next.js 16.2, React 19, Tailwind CSS, @ama/ui component library

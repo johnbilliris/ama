@@ -83,7 +83,9 @@ class TestSimulationTenantContract:
         for field in required_fields:
             assert field in doc, f"Missing field: {field}"
         # Verify removed fields are NOT present
-        for removed in ("last_resumed_at", "paused_at", "current_elapsed_seconds"):
+        # Note: feature 026 reintroduces `last_resumed_at` as part of the server-owned
+        # simulation clock (used to compute accumulated_sim_seconds on pause/resume).
+        for removed in ("paused_at", "current_elapsed_seconds"):
             assert removed not in doc, f"Obsolete field still present: {removed}"
 
     def test_tenant_id_pattern(self):

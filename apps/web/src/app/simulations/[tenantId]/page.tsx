@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -9,10 +9,13 @@ import {
   resumeSimulation,
   archiveSimulation,
   type SimulationDetail,
+  type SimulationClockResponse,
 } from "@/lib/api/simulations";
 import { SimulationBanner } from "@/components/simulation-banner";
 import { SimulationChatPane } from "@/components/simulation-chat-pane";
 import { SimulationMap, type ScenarioCard } from "@/components/simulation-map";
+import { SimulationServerClock } from "@/components/simulation-server-clock";
+import { SimulationWarpControls } from "@/components/simulation-warp-controls";
 
 // ── PPRR phase derivation ──
 function derivePPRRPhase(status: string, scenarioSeeded: boolean): string {
@@ -28,75 +31,6 @@ const PPRR_COLOURS: Record<string, string> = {
   Response: "#dc2626",
   Recovery: "#22c55e",
 };
-
-// ── Elapsed timer hook ──
-// The UI owns elapsed time. It seeds from the server's elapsed_seconds on load,
-// ticks locally while running, and reports the value back on pause/resume/stop.
-function useElapsed(initialSeconds: number | undefined, ticking: boolean) {
-  const baseSeconds = useRef(0);
-  const resumeTs = useRef(0);
-  const [display, setDisplay] = useState("—");
-
-  // Seed from server on first load.
-  useEffect(() => {
-    if (initialSeconds === undefined) return;
-    baseSeconds.current = initialSeconds;
-    if (ticking) {
-      resumeTs.current = Date.now();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialSeconds]);
-
-  // Track ticking transitions (pause / resume triggered by the page).
-  useEffect(() => {
-    if (initialSeconds === undefined) return;
-    if (ticking) {
-      resumeTs.current = Date.now();
-    } else if (resumeTs.current > 0) {
-      baseSeconds.current += (Date.now() - resumeTs.current) / 1000;
-      resumeTs.current = 0;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ticking]);
-
-  // Tick loop — display updates every second while running; freezes when paused.
-  useEffect(() => {
-    const fmt = (totalSecs: number) => {
-      const h = String(Math.floor(totalSecs / 3600)).padStart(2, "0");
-      const m = String(Math.floor((totalSecs % 3600) / 60)).padStart(2, "0");
-      const s = String(totalSecs % 60).padStart(2, "0");
-      return `${h}:${m}:${s}`;
-    };
-
-    if (initialSeconds === undefined) {
-      setDisplay("—");
-      return;
-    }
-
-    const calc = () =>
-      Math.floor(
-        baseSeconds.current +
-        (resumeTs.current > 0
-          ? (Date.now() - resumeTs.current) / 1000
-          : 0),
-      );
-
-    setDisplay(fmt(Math.max(0, calc())));
-    if (!ticking) return;
-    const id = setInterval(() => setDisplay(fmt(Math.max(0, calc()))), 1000);
-    return () => clearInterval(id);
-  }, [initialSeconds, ticking]);
-
-  /** Snapshot the current elapsed seconds (for sending to the server). */
-  const getElapsedSeconds = useCallback((): number => {
-    const running = resumeTs.current > 0
-      ? (Date.now() - resumeTs.current) / 1000
-      : 0;
-    return baseSeconds.current + running;
-  }, []);
-
-  return { display, getElapsedSeconds };
-}
 
 // ── Exercise objectives ──
 interface ExerciseObjective {
@@ -115,6 +49,7 @@ export default function SimulationDashboardPage() {
   const [newObj, setNewObj] = useState("");
   const [eventLogOpen, setEventLogOpen] = useState(true);
   const [objectivesOpen, setObjectivesOpen] = useState(true);
+  const [currentWarpSpeed, setCurrentWarpSpeed] = useState<number>(1);
 
   const logEvent = useCallback((text: string) => {
     setEventLog((prev) => [...prev, { ts: new Date().toISOString(), text }]);
@@ -125,13 +60,24 @@ export default function SimulationDashboardPage() {
     getSimulation(tenantId)
       .then((data) => {
         setTenant(data);
+        setCurrentWarpSpeed(data.current_warp_speed ?? data.warp_speed ?? 1);
         logEvent("Simulation dashboard loaded");
       })
       .catch((err) => setError(err.message));
   }, [tenantId, logEvent]);
 
-  const isRunning = tenant !== null && tenant.status === "Active";
-  const { display: elapsed, getElapsedSeconds } = useElapsed(tenant?.elapsed_seconds, isRunning);
+  const onClockTick = useCallback(
+    (c: SimulationClockResponse) => {
+      setCurrentWarpSpeed(c.current_warp_speed);
+      if (tenant && c.playback_status && c.playback_status !== tenant.playback_status) {
+        setTenant((prev) =>
+          prev ? { ...prev, playback_status: c.playback_status } : prev,
+        );
+      }
+    },
+    [tenant],
+  );
+
   const pprr = derivePPRRPhase(tenant?.status ?? "", !!scenarioCard);
 
   if (error) {
@@ -164,22 +110,35 @@ export default function SimulationDashboardPage() {
     : 0;
 
   const handlePause = async () => {
-    const secs = getElapsedSeconds();
-    const result = await pauseSimulation(tenant.tenant_id, secs);
-    setTenant({ ...tenant, status: "Paused", elapsed_seconds: result.elapsed_seconds });
+    const result = await pauseSimulation(tenant.tenant_id);
+    setTenant({
+      ...tenant,
+      status: "Paused",
+      elapsed_seconds: result.elapsed_seconds,
+      accumulated_sim_seconds: result.accumulated_sim_seconds,
+      clock_paused: true,
+    });
     logEvent("Simulation paused");
   };
   const handleResume = async () => {
-    const secs = getElapsedSeconds();
-    const result = await resumeSimulation(tenant.tenant_id, secs);
-    setTenant({ ...tenant, status: "Active", elapsed_seconds: result.elapsed_seconds });
+    const result = await resumeSimulation(tenant.tenant_id);
+    setTenant({
+      ...tenant,
+      status: "Active",
+      elapsed_seconds: result.elapsed_seconds,
+      accumulated_sim_seconds: result.accumulated_sim_seconds,
+      clock_paused: false,
+    });
     logEvent("Simulation resumed");
   };
   const handleStop = async () => {
     if (!window.confirm("Stop this simulation? This is terminal.")) return;
-    const secs = getElapsedSeconds();
-    await archiveSimulation(tenant.tenant_id, secs);
-    setTenant({ ...tenant, status: "Archiving", elapsed_seconds: secs });
+    const result = await archiveSimulation(tenant.tenant_id);
+    setTenant({
+      ...tenant,
+      status: "Archiving",
+      elapsed_seconds: result.elapsed_seconds,
+    });
     logEvent("Simulation stopped (archiving)");
   };
 
@@ -222,11 +181,22 @@ export default function SimulationDashboardPage() {
                 </div>
               </header>
 
-              {/* Elapsed timer */}
-              <div className="sim-elapsed-timer" aria-label="Elapsed time">
-                <span className="sim-elapsed-icon">⏱</span>
-                <span className="sim-elapsed-value">{elapsed}</span>
-              </div>
+              {/* Server-owned simulation clock (polls /clock) */}
+              <SimulationServerClock
+                tenantId={tenant.tenant_id}
+                onClock={onClockTick}
+              />
+
+              {/* Warp speed controls (US2 — live speed change) */}
+              <SimulationWarpControls
+                tenantId={tenant.tenant_id}
+                currentWarpSpeed={currentWarpSpeed}
+                disabled={!["Active", "Paused"].includes(tenant.status)}
+                onChanged={(speed) => {
+                  setCurrentWarpSpeed(speed);
+                  logEvent(`Warp speed changed to ${speed}×`);
+                }}
+              />
 
               <dl className="sim-panel-meta">
                 <div>
@@ -343,9 +313,17 @@ export default function SimulationDashboardPage() {
                   Stop
                 </button>
               </div>
-              <Link href="/simulations" className="sim-panel-backlink">
-                ← Back to simulations
-              </Link>
+                <Link href="/simulations" className="sim-panel-backlink">
+                  ← Back to simulations
+                </Link>
+                {["Archived", "Completed"].includes(tenant.status) && (
+                  <Link
+                    href={`/simulations/${tenant.tenant_id}/playback`}
+                    className="sim-panel-backlink"
+                  >
+                    ▶ Review Playback
+                  </Link>
+                )}
             </section>
 
             {/* ── Event Log ── */}
