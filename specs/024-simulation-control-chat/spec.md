@@ -408,6 +408,8 @@ the sim audit trail with payload + intended channel.
 
 ## Out of Scope
 
+- This spec is delivery-hygiene / enabling infrastructure; capstone-outcome-critical-path ownership lives in specs 001, 020, 021, 023.
+
 - **Accelerated / time-warped simulation playback** (may be a future feature).
 - **Multi-lingual chat input beyond English** (follow-up).
 - **Role-play for external participants without Entra ID accounts** (covered by spec 007
@@ -426,3 +428,26 @@ the sim audit trail with payload + intended channel.
 - Spec 012 — risk-assessment-agent (sub-agent).
 - Spec 014 — azure-openai-integration (model deployment, content safety).
 - Spec 020 — disaster-mapper-ui (map layer host).
+
+## Assumptions
+
+Scoped to this spec's domain (conversational simulation control). Tagging follows `specs/027-spec-hardening` taxonomy: `[RISK]` (open externally-driven risk), `[DECISION]` (deliberate scoping decision), bare bullet (operating assumption).
+
+- **ASM-071**: The AU-v1 deployment context defined in `specs/001-disaster-response-hub/spec.md` is the operational baseline for this spec; capstone-country variants (PH / JP / BD) are deferred. `linked_gaps:` `specs/shared/gap-id-register.md` A-GAP-001..003. `status:` Open.
+- **ASM-072** [DECISION]: This spec's deliverables (conversational simulation control) integrate with the actor catalogue (`specs/004-actor-github-agents/spec.md`); responsible technical agents - ux-designer, product-owner-ba - are consulted via the `agent` tool during authoring and review.
+- **ASM-073**: Speckit conventions (FR/SC numbering, ASM/HYP/PER/SCP families) and the persona-profile YAML schema (`specs/027-spec-hardening/contracts/persona-profile.md`) are authoritative; this spec defers to those rather than redefining them.
+
+## Personas
+
+Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
+
+- **PER-064**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
+- **PER-065**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
+- **PER-066** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
+
+## Hypotheses
+
+Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
+
+- **HYP-022**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-022.md` (created in feature 028 polish).
+

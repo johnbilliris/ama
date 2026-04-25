@@ -320,3 +320,54 @@ After a prolonged disaster response involving multiple incidents across several 
 - **SC-008**: Every processing step has a corresponding audit record — audit completeness is 100% verifiable via reconciliation of handoff IDs processed vs. audit records created.
 - **SC-009**: When the AI service or resource inventory is unavailable, the agent continues producing degraded plans with no processing interruption — measured as 0% handoff drop rate during dependency outage periods.
 - **SC-010**: At least 90% of incident commanders in scenario-based exercises rate the deployment plans as clear, actionable, and appropriately prioritised, using a structured post-exercise survey with a 5-point rubric across clarity, priority justification, and decision confidence.
+
+## Assumptions
+
+Scoped to this spec's domain (resource allocation + recovery logistics). Tagging follows `specs/027-spec-hardening` taxonomy: `[RISK]` (open externally-driven risk), `[DECISION]` (deliberate scoping decision), bare bullet (operating assumption).
+
+- **ASM-030**: The AU-v1 deployment context defined in `specs/001-disaster-response-hub/spec.md` is the operational baseline for this spec; capstone-country variants (PH / JP / BD) are deferred. `linked_gaps:` `specs/shared/gap-id-register.md` A-GAP-001..003. `status:` Open.
+- **ASM-031** [DECISION]: This spec's deliverables (resource allocation + recovery logistics) integrate with the actor catalogue (`specs/004-actor-github-agents/spec.md`); responsible technical agents - logistics-officer, operations-officer, resilience-planner - are consulted via the `agent` tool during authoring and review.
+- **ASM-032**: Speckit conventions (FR/SC numbering, ASM/HYP/PER/SCP families) and the persona-profile YAML schema (`specs/027-spec-hardening/contracts/persona-profile.md`) are authoritative; this spec defers to those rather than redefining them.
+
+## Personas
+
+Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
+
+- **PER-025**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
+- **PER-026**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
+- **PER-027** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
+
+## Hypotheses
+
+Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
+
+- **HYP-009**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-009.md` (created in feature 028 polish).
+
+## Out of Scope
+
+Items explicitly deferred from this spec; promotion to in-scope requires the named preconditions to clear. Cross-references to other specs use the canonical overlap phrasing (`authoritative for: <capability>` / `defers-to: <NNN> (<capability>)`).
+
+- **SCP-028** [DEFERRED]: Capstone-country variants (PH typhoon, JP earthquake, BD flood) of this spec's capabilities are out of scope until: (i) capstone-reinterpretation decision per D-009; (ii) per-country regulatory + data-sharing preconditions documented in `specs/005-data-source-governance/spec.md` clear; (iii) responsible technical agents (logistics-officer, operations-officer, resilience-planner) sign off on country-specific calibration.
+- **SCP-029**: Constitutional-level changes (NON-NEGOTIABLE #1..#5) are not modified by this spec; any tension is documented as `[RISK]` in Assumptions, never resolved here.
+- **SCP-030**: Cross-spec authority disputes are arbitrated via `product-owner-ba` and the speckit governance flow; this spec does not unilaterally claim ownership of capabilities owned elsewhere. `defers-to:` 018 (recovery-phase indicators, triggers, phase-exit criteria); 008 (warning-tier authoring, multilingual delivery, misinformation defence) where applicable.
+
+
+## Capstone-Aligned Cross-References (Feature 028 / FR-018)
+
+- **Recovery-phase scope**: `defers-to:` 018 (recovery-phase indicators, triggers, and phase-exit criteria; spec 018 is authoritative across the portfolio per D-005).
+
+
+## Capstone-Country Hypotheses (Feature 028 / US2)
+
+> Three deferred capstone-country hypotheses for resource allocation + logistics efficiency. Each cites an evidence stub at `specs/011-resource-allocation-agent/evidence/HYP-<id>.md` conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. `Status = Not tested` until D-009 capstone-reinterpretation clears and per-cohort preconditions are met.
+
+- **HYP-036** [PH deferred]: We believe archipelagic logistics planning with sea-lift / air-lift / road segment awareness will produce >= 30% logistics efficiency uplift (time-to-assignment, utilisation, unfilled-priority count) vs unaided reference during PH typhoon-season exercises for the Philippines operator persona; we will know we are wrong if efficiency uplift < 15% during PH typhoon season Jun-Nov is observed in the measurement window (PH typhoon season Jun-Nov).
+  - **Falsification**: efficiency uplift < 15% during PH typhoon season Jun-Nov.
+  - **Evidence stub**: `specs/011-resource-allocation-agent/evidence/HYP-036.md` (created by feature 028 / US2 / T034..T038).
+- **HYP-037** [JP deferred]: We believe urban-dense logistics planning with rail + road segment awareness and earthquake-degraded-network re-planning will produce >= 30% logistics efficiency uplift vs unaided reference during JP earthquake / tsunami quarterly exercises for the Japan operator persona; we will know we are wrong if efficiency uplift < 15% during quarterly JP earthquake exercises is observed in the measurement window (JP continuous; quarterly review).
+  - **Falsification**: efficiency uplift < 15% during quarterly JP earthquake exercises.
+  - **Evidence stub**: `specs/011-resource-allocation-agent/evidence/HYP-037.md` (created by feature 028 / US2 / T034..T038).
+- **HYP-038** [BD deferred]: We believe deltaic logistics planning with riverine + road segment awareness during flood-degraded routes will produce >= 30% logistics efficiency uplift vs unaided reference during BD monsoon-season exercises for the Bangladesh operator persona; we will know we are wrong if efficiency uplift < 15% during BD monsoon Apr-Sep is observed in the measurement window (BD monsoon Apr-Sep).
+  - **Falsification**: efficiency uplift < 15% during BD monsoon Apr-Sep.
+  - **Evidence stub**: `specs/011-resource-allocation-agent/evidence/HYP-038.md` (created by feature 028 / US2 / T034..T038).
+

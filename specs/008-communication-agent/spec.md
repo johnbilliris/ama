@@ -333,3 +333,51 @@ During a major disaster, the LLM service used for generating alert content becom
 - **spec 006 (Data Ingestion & Storage)**: Defines the data store from which the Communication Agent retrieves recommendation, assessment, and demographic data.
 - **spec 007 (Simulation & Tenant Isolation)**: Defines the tenant isolation model that the Communication Agent must respect for simulation vs. live processing and delivery.
 - **spec 012 (Risk Assessment Agent)**: Defines the upstream agent that produces handoffs consumed by the Communication Agent. The handoff payload format (`recommendationId`, `summary`, `explanation`, `assessmentId`) and escalation criteria (confidence ≥ 0.7 for public alerts) are defined in spec 012.
+
+
+## Personas
+
+Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
+
+- **PER-016**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
+- **PER-017**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
+- **PER-018** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
+
+## Hypotheses
+
+Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
+
+- **HYP-006**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-006.md` (created in feature 028 polish).
+
+## Out of Scope
+
+Items explicitly deferred from this spec; promotion to in-scope requires the named preconditions to clear. Cross-references to other specs use the canonical overlap phrasing (`authoritative for: <capability>` / `defers-to: <NNN> (<capability>)`).
+
+- **SCP-019** [DEFERRED]: Capstone-country variants (PH typhoon, JP earthquake, BD flood) of this spec's capabilities are out of scope until: (i) capstone-reinterpretation decision per D-009; (ii) per-country regulatory + data-sharing preconditions documented in `specs/005-data-source-governance/spec.md` clear; (iii) responsible technical agents (public-information-officer, accessibility-tester, ai-ml-engineer) sign off on country-specific calibration.
+- **SCP-020**: Constitutional-level changes (NON-NEGOTIABLE #1..#5) are not modified by this spec; any tension is documented as `[RISK]` in Assumptions, never resolved here.
+- **SCP-021**: Cross-spec authority disputes are arbitrated via `product-owner-ba` and the speckit governance flow; this spec does not unilaterally claim ownership of capabilities owned elsewhere. `defers-to:` 018 (recovery-phase indicators, triggers, phase-exit criteria); 008 (warning-tier authoring, multilingual delivery, misinformation defence) where applicable.
+
+
+## Capstone-Aligned Requirements (Feature 028 / FR-006)
+
+- **FR-CAP-008-001** [DEFERRED]: Multilingual language-pack plugin support with at least one non-English language pack per capstone country: **Philippines** (Filipino + regional languages), **Japan** (Japanese), **Bangladesh** (Bangla). Each language pack has the following preconditions: (i) content-safety classifier in target language; (ii) human back-translation audit on >=1 % of public-facing alerts; (iii) accessibility QA per `specs/020-disaster-mapper-ui` and the accessibility-tester actor.
+  - **BCP-47 identifier selection is deferred to research.md** per clarification Q2 / D-004; no concrete identifier (`fil-PH` / `ja-JP` / `bn-BD`) is hard-coded in this spec.
+- **FR-CAP-008-002** [DEFERRED]: Multilingual misinformation-detection inherits the spec-010 fallback rule (when language-specific classifier confidence is below threshold, fall back to the conservative English-baseline classifier and flag for human review).
+- **FR-CAP-008-003**: `defers-to:` 018 (warning-tier approval timeout escalation; spec 018 is authoritative for portfolio-wide escalation timeout per FR-017 / T045).
+- **FR-CAP-008-004**: `supersedes:` `specs/006-data-ingestion-storage/spec.md` FR-024 (warning-tier multilingual authoring + delivery - formally relocated here per FR-016 / T044).
+
+
+## Capstone-Country Hypotheses (Feature 028 / US2)
+
+> Three deferred capstone-country hypotheses for multilingual public alerting + misinformation detection. Each cites an evidence stub at `specs/008-communication-agent/evidence/HYP-<id>.md` conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. `Status = Not tested` until D-009 capstone-reinterpretation clears and per-cohort preconditions are met.
+
+- **HYP-027** [PH deferred]: We believe a Filipino + regional-language pack with content-safety classifier and human back-translation audit will produce true-positive misinformation detection >= 85% on known PH samples and alert delivery confirmation latency p95 <= 60s for the Philippines operator persona; we will know we are wrong if true-positive rate < 70% on the labelled fil-PH validation corpus during PH typhoon season Jun-Nov is observed in the measurement window (PH typhoon season Jun-Nov).
+  - **Falsification**: true-positive rate < 70% on the labelled fil-PH validation corpus during PH typhoon season Jun-Nov.
+  - **Evidence stub**: `specs/008-communication-agent/evidence/HYP-027.md` (created by feature 028 / US2 / T034..T038).
+- **HYP-028** [JP deferred]: We believe a Japanese language pack with JMA-aligned warning-tier templates and content-safety classifier will produce true-positive misinformation detection >= 85% on known JP samples and earthquake-alert delivery latency p95 <= 5s for the Japan operator persona; we will know we are wrong if true-positive rate < 70% on the labelled ja-JP validation corpus or earthquake-alert latency p95 > 10s during quarterly review is observed in the measurement window (JP continuous; quarterly review).
+  - **Falsification**: true-positive rate < 70% on the labelled ja-JP validation corpus or earthquake-alert latency p95 > 10s during quarterly review.
+  - **Evidence stub**: `specs/008-communication-agent/evidence/HYP-028.md` (created by feature 028 / US2 / T034..T038).
+- **HYP-029** [BD deferred]: We believe a Bangla language pack with BMD / FFWC-aligned templates and content-safety classifier will produce true-positive misinformation detection >= 80% on known BD samples and flood-alert delivery latency p95 <= 60s for the Bangladesh operator persona; we will know we are wrong if true-positive rate < 65% on the labelled bn-BD validation corpus during BD monsoon Apr-Sep is observed in the measurement window (BD monsoon Apr-Sep).
+  - **Falsification**: true-positive rate < 65% on the labelled bn-BD validation corpus during BD monsoon Apr-Sep.
+  - **Evidence stub**: `specs/008-communication-agent/evidence/HYP-029.md` (created by feature 028 / US2 / T034..T038).
+

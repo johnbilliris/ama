@@ -150,3 +150,40 @@ As a system, the data retrieval layer must accept multiple jurisdiction identifi
 - **SC-004**: No duplicate organisations or frameworks appear when multiple jurisdictions are selected that share common agencies.
 - **SC-005**: Users who need to plan across multiple jurisdictions can complete their preparedness review without manually switching between single-jurisdiction views, reducing the number of interactions required by at least 50% compared to the current single-jurisdiction workflow.
 - **SC-006**: The empty state when no jurisdictions are selected clearly communicates the required action, with 90% of first-time users successfully selecting jurisdictions without external guidance.
+
+
+## Personas
+
+Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
+
+- **PER-058**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
+- **PER-059**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
+- **PER-060** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
+
+## Hypotheses
+
+Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
+
+- **HYP-020**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-020.md` (created in feature 028 polish).
+
+## Out of Scope
+
+Items explicitly deferred from this spec; promotion to in-scope requires the named preconditions to clear. Cross-references to other specs use the canonical overlap phrasing (`authoritative for: <capability>` / `defers-to: <NNN> (<capability>)`).
+
+- **SCP-064** [DEFERRED]: Capstone-country variants (PH typhoon, JP earthquake, BD flood) of this spec's capabilities are out of scope until: (i) capstone-reinterpretation decision per D-009; (ii) per-country regulatory + data-sharing preconditions documented in `specs/005-data-source-governance/spec.md` clear; (iii) responsible technical agents (ux-designer, solution-architect, state-government, local-government) sign off on country-specific calibration.
+- **SCP-065**: Constitutional-level changes (NON-NEGOTIABLE #1..#5) are not modified by this spec; any tension is documented as `[RISK]` in Assumptions, never resolved here.
+- **SCP-066**: Cross-spec authority disputes are arbitrated via `product-owner-ba` and the speckit governance flow; this spec does not unilaterally claim ownership of capabilities owned elsewhere. `defers-to:` 018 (recovery-phase indicators, triggers, phase-exit criteria); 008 (warning-tier authoring, multilingual delivery, misinformation defence) where applicable.
+
+
+## Capstone-Aligned Requirements (Feature 028 / FR-008)
+
+- **FR-CAP-022-001**: The jurisdiction filter supports a nested `country -> state/region` hierarchy. The existing AU 9-jurisdiction set is preserved unchanged; capstone-country nodes are added as **placeholders** with explicit preconditions.
+
+```text
+AU -> { NSW, VIC, QLD, SA, WA, TAS, ACT, NT, Commonwealth }   # status: validated (AU-v1)
+PH -> { placeholder }                                          # status: placeholder; preconditions: D-009 + per-country regulatory clearance
+JP -> { placeholder }                                          # status: placeholder; preconditions: D-009 + JMA / Cabinet Office DRR engagement
+BD -> { placeholder }                                          # status: placeholder; preconditions: D-009 + DDM / BWDB engagement
+```
+
+> No AU node is modified by this addition.

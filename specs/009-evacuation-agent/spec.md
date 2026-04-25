@@ -315,3 +315,50 @@ After a week-long flood event across multiple NSW jurisdictions, the post-incide
 - **SC-008**: When road network data is unavailable, the agent continues producing degraded plans with no processing interruption — measured as 0% handoff drop rate during data source outage periods.
 - **SC-009**: At least 90% of incident commanders in scenario-based exercises rate the evacuation plans as clear, actionable, and traceable, using a structured post-exercise survey.
 - **SC-010**: Dynamic route updates are generated within 15 seconds of receiving updated situational data (see replanning triggers: new road closure, hazard area expansion >10%, progress delay >30%, higher-severity assessment, or manual trigger), supporting the Constitution's target of enabling evacuation decisions 24 hours earlier for at-risk populations.
+
+## Assumptions
+
+Scoped to this spec's domain (evacuation routing + lead-time recommendations). Tagging follows `specs/027-spec-hardening` taxonomy: `[RISK]` (open externally-driven risk), `[DECISION]` (deliberate scoping decision), bare bullet (operating assumption).
+
+- **ASM-022**: The AU-v1 deployment context defined in `specs/001-disaster-response-hub/spec.md` is the operational baseline for this spec; capstone-country variants (PH / JP / BD) are deferred. `linked_gaps:` `specs/shared/gap-id-register.md` A-GAP-001..003. `status:` Open.
+- **ASM-023** [DECISION]: This spec's deliverables (evacuation routing + lead-time recommendations) integrate with the actor catalogue (`specs/004-actor-github-agents/spec.md`); responsible technical agents - planning-officer, operations-officer, resilience-planner - are consulted via the `agent` tool during authoring and review.
+- **ASM-024**: Speckit conventions (FR/SC numbering, ASM/HYP/PER/SCP families) and the persona-profile YAML schema (`specs/027-spec-hardening/contracts/persona-profile.md`) are authoritative; this spec defers to those rather than redefining them.
+- **ASM-025** [RISK]: AU-only data residency (constitution NON-NEGOTIABLE #2; Azure `australiaeast` / `australiasoutheast` only) is in tension with the capstone Asia framing (PH / JP / BD sovereign-data handling). Resolution requires a constitution-level amendment owned outside this feature (see `specs/028-capstone-alignment/research.md` D-009). `linked_gaps:` constitution NON-NEGOTIABLE #2. `status:` Open.
+
+## Personas
+
+Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
+
+- **PER-019**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
+- **PER-020**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
+- **PER-021** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
+
+## Hypotheses
+
+Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
+
+- **HYP-007**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-007.md` (created in feature 028 polish).
+
+## Out of Scope
+
+Items explicitly deferred from this spec; promotion to in-scope requires the named preconditions to clear. Cross-references to other specs use the canonical overlap phrasing (`authoritative for: <capability>` / `defers-to: <NNN> (<capability>)`).
+
+- **SCP-022** [DEFERRED]: Capstone-country variants (PH typhoon, JP earthquake, BD flood) of this spec's capabilities are out of scope until: (i) capstone-reinterpretation decision per D-009; (ii) per-country regulatory + data-sharing preconditions documented in `specs/005-data-source-governance/spec.md` clear; (iii) responsible technical agents (planning-officer, operations-officer, resilience-planner) sign off on country-specific calibration.
+- **SCP-023**: Constitutional-level changes (NON-NEGOTIABLE #1..#5) are not modified by this spec; any tension is documented as `[RISK]` in Assumptions, never resolved here.
+- **SCP-024**: Cross-spec authority disputes are arbitrated via `product-owner-ba` and the speckit governance flow; this spec does not unilaterally claim ownership of capabilities owned elsewhere. `defers-to:` 018 (recovery-phase indicators, triggers, phase-exit criteria); 008 (warning-tier authoring, multilingual delivery, misinformation defence) where applicable.
+
+
+## Capstone-Country Hypotheses (Feature 028 / US2)
+
+> Three deferred capstone-country hypotheses for evacuation routing + lead-time recommendations. Each cites an evidence stub at `specs/009-evacuation-agent/evidence/HYP-<id>.md` conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. `Status = Not tested` until D-009 capstone-reinterpretation clears and per-cohort preconditions are met.
+
+- **HYP-030** [PH deferred]: We believe pre-warned typhoon evacuation routing across archipelagic terrain will produce recommended evacuation start >= 24h earlier than the unaided NDRRMC reference timeline for the Philippines operator persona; we will know we are wrong if mean lead-time uplift < 12h across exercise scenarios during PH typhoon season Jun-Nov is observed in the measurement window (PH typhoon season Jun-Nov).
+  - **Falsification**: mean lead-time uplift < 12h across exercise scenarios during PH typhoon season Jun-Nov.
+  - **Evidence stub**: `specs/009-evacuation-agent/evidence/HYP-030.md` (created by feature 028 / US2 / T034..T038).
+- **HYP-031** [JP deferred]: We believe immediate-onset earthquake / tsunami evacuation routing in dense urban topology will produce first safe-route recommendation issued within 60s of JMA seismic warning, prioritising vertical evacuation where applicable for the Japan operator persona; we will know we are wrong if first-recommendation latency p95 > 120s during quarterly tabletop exercises is observed in the measurement window (JP continuous; quarterly review).
+  - **Falsification**: first-recommendation latency p95 > 120s during quarterly tabletop exercises.
+  - **Evidence stub**: `specs/009-evacuation-agent/evidence/HYP-031.md` (created by feature 028 / US2 / T034..T038).
+- **HYP-032** [BD deferred]: We believe pre-warned monsoon flood evacuation routing across deltaic / cyclone-shelter network (CPP) will produce recommended evacuation start >= 24h earlier than the unaided BD reference timeline using CPP shelter capacity awareness for the Bangladesh operator persona; we will know we are wrong if mean lead-time uplift < 12h across exercise scenarios during BD monsoon Apr-Sep is observed in the measurement window (BD monsoon Apr-Sep).
+  - **Falsification**: mean lead-time uplift < 12h across exercise scenarios during BD monsoon Apr-Sep.
+  - **Evidence stub**: `specs/009-evacuation-agent/evidence/HYP-032.md` (created by feature 028 / US2 / T034..T038).
+

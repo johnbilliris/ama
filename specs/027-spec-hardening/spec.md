@@ -15,13 +15,15 @@ This feature hardens the specification set so that:
 2. Every gap raised by the critical review (A-GAP, REQ-GAP, PER-GAP, HYP-GAP, SCP-GAP series) is resolved by producing normative content in `specs/001-disaster-response-hub/spec.md` and, where needed, supporting persona/hypothesis artefacts.
 3. The specification becomes self-sufficient for planning, testing, legal review, and UX evaluation without reliance on scattered plan/architecture notes.
 
-This feature is scoped to `specs/001-disaster-response-hub/spec.md` only. Cross-spec propagation of the same gap taxonomy across the remaining specs (notably 005, 007, 008–012, 018–026) is owned by feature `028-holistic-spec-hardening` and is explicitly deferred from this feature.
+This feature is scoped to `specs/001-disaster-response-hub/spec.md` only. Cross-spec propagation of the same gap taxonomy across the remaining specs (notably 005, 007, 008–012, 018–026) is owned by feature `028-capstone-alignment` and is explicitly deferred from this feature.
+
+> **Scope note (added by feature 028 / T009)**: portfolio-wide cross-spec hardening (assumption / persona / hypothesis / scope-boundary uplift across all 27 specs) is owned by `specs/028-capstone-alignment/spec.md`. This spec (`027-spec-hardening`) remains scoped to `001-disaster-response-hub` only; spec 028 reuses the taxonomies and contracts defined here (FR-005 reuse rule).
 
 ## Clarifications
 
 ### Session 2026-04-24
 
-- Q: What is the relationship between feature 027 (this hardening spec) and feature 028-holistic-spec-hardening? → A: 027 is scoped to spec 001; 028 handles cross-spec propagation for all other specs.
+- Q: What is the relationship between feature 027 (this hardening spec) and feature 028-capstone-alignment? → A: 027 is scoped to spec 001; 028 handles cross-spec propagation for all other specs.
 - Q: Who is authorised to move an Assumption, Hypothesis, or Persona between status values? → A: Role matrix with countersign — domain SME owns Assumption transitions, test lead owns Hypothesis transitions, UX lead owns Persona transitions; every transition requires a countersign by one other named role (planner, privacy reviewer, or the spec's maintainer).
 - Q: What constitutes "validation" of a persona for a jurisdiction (FR-016)? → A: SME review by a practitioner currently or formerly in the role, or a documented named proxy (e.g. an AIDR-accredited trainer); the reviewer's name, role, and review date are recorded against the persona.
 - Q: What is "the evidence pack" referenced in FR-020 and how is it located? → A: A per-feature `evidence/` folder within the owning spec directory (`specs/<feature>/evidence/<HYP-ID>.md`) containing rehearsal scenario, observed metric, date, observer, and links to supporting artefacts; cited from the hypothesis status by relative path.
@@ -170,7 +172,7 @@ Each requirement below amends `specs/001-disaster-response-hub/spec.md` (and whe
 ### Out of Scope
 
 - Implementing the Asia-region extensions (Philippines, Japan, Bangladesh) themselves. This feature only *documents* their deferral.
-- Propagating the hardening taxonomy (A-GAP / REQ-GAP / PER-GAP / HYP-GAP / SCP-GAP) across specs other than `specs/001-disaster-response-hub/spec.md`. That cross-spec propagation is owned by feature `028-holistic-spec-hardening` and MUST NOT be duplicated here.
+- Propagating the hardening taxonomy (A-GAP / REQ-GAP / PER-GAP / HYP-GAP / SCP-GAP) across specs other than `specs/001-disaster-response-hub/spec.md`. That cross-spec propagation is owned by feature `028-capstone-alignment` and MUST NOT be duplicated here.
 - Renegotiating capstone success metrics. The hardened spec may re-scope the *evaluation cohort* of existing success criteria (e.g. to the Australian cohort) but does not change the numeric targets in the capstone.
 - Rewriting architecture, data model, contracts, or task plan. These are only amended where they directly contradict the hardened spec; deeper rework is handled in follow-on features.
 - Producing the rehearsal evidence that would *settle* the new hypotheses. Hypotheses are introduced with status "Not tested"; actual settlement is a separate rehearsal activity.
@@ -250,3 +252,29 @@ Each requirement below amends `specs/001-disaster-response-hub/spec.md` (and whe
 ## Last Reviewed
 
 **2026-04-24** — hardened release authored by feature 027-spec-hardening (see spec 001 § Changelog).
+
+
+## Assumptions
+
+> Cross-reference: spec 027 is the *meta-contract* defining the assumption taxonomy itself (FR-001..FR-005 of this spec). Feature `028-capstone-alignment` reuses these definitions across the remaining 26 specs.
+
+- **ASM-082**: The taxonomy and YAML contracts in `specs/027-spec-hardening/contracts/*.md` are authoritative for the AMA portfolio; feature 028 and any subsequent hardening features defer to them rather than redefining shapes.
+- **ASM-083**: Spec 027's scope is intentionally limited to `specs/001-disaster-response-hub/spec.md`; cross-spec propagation is owned by feature 028.
+
+## Personas
+
+> Cross-reference: persona-profile YAML schema at `specs/027-spec-hardening/contracts/persona-profile.md` is authoritative for the portfolio; this spec defines the contract rather than enumerating personas.
+
+- **PER-073**: cross-ref to `specs/001-disaster-response-hub/spec.md` § Personas (the validated v1 persona set covered by spec 001's PER-001..PER-NNN).
+
+## Hypotheses
+
+- **HYP-025**: If feature 027's hardening taxonomy is faithfully reused by feature 028 (FR-005 reuse rule), then the AMA rubric criterion mean across the 26 propagated specs rises by at least +1 band relative to `specs/028-capstone-alignment/evidence/rubric-baseline.md` baseline. **Falsification**: post-feature rubric snapshot shows regression. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-025.md` (created in feature 028 polish).
+
+## Out of Scope
+
+- This spec is delivery-hygiene / enabling infrastructure; capstone-outcome-critical-path ownership lives in specs all capstone-critical-path specs (001, 005, 006, 008, 009, 010, 011, 012, 014, 015, 018, 019, 020, 021, 022, 023).
+
+- **SCP-082** [META]: This spec is delivery-hygiene / enabling infrastructure. It defines portfolio-wide hardening taxonomies but is itself **not** on the capstone outcome critical path. (Verbatim canonical meta-flag bullet added by feature 028 / US4 / T056.)
+- **SCP-083**: Cross-spec propagation across specs other than 001 — owned by feature 028.
+
