@@ -306,3 +306,62 @@ During a severe storm, the LLM service used for generating assessment explanatio
 
 - Q: What are the discrete severity levels, how are they computed, and what does each level mean? → A: 4-level enum aligned with AIDR: `low` (minimal impact expected), `moderate` (potential threat), `high` (significant threat within hours), `critical` (immediate life threat). Computed from signal category, confidence score, and affected population estimate. Severity is distinct from confidence — confidence measures data quality, severity measures impact magnitude.
 - Q: When the LLM is unavailable, how is severity computed in rule-based fallback mode? → A: Default signal-category-to-severity mapping: `fire` → `high`, `cyclone` → `critical`, `flood` → `high`, `earthquake` → `critical`, `tsunami` → `critical`; others default to `moderate`. Mapped severity downgraded one level if confidence (after 20% reduction) falls below 0.4.
+
+## Assumptions
+
+Scoped to this spec's domain (hazard risk-index calibration). Tagging follows `specs/027-spec-hardening` taxonomy: `[RISK]` (open externally-driven risk), `[DECISION]` (deliberate scoping decision), bare bullet (operating assumption).
+
+- **ASM-033**: The AU-v1 deployment context defined in `specs/001-disaster-response-hub/spec.md` is the operational baseline for this spec; capstone-country variants (PH / JP / BD) are deferred. `linked_gaps:` `specs/shared/gap-id-register.md` A-GAP-001..003. `status:` Open.
+- **ASM-034** [DECISION]: This spec's deliverables (hazard risk-index calibration) integrate with the actor catalogue (`specs/004-actor-github-agents/spec.md`); responsible technical agents - risk-manager, ga-national, ntes, bom-national - are consulted via the `agent` tool during authoring and review.
+- **ASM-035**: Speckit conventions (FR/SC numbering, ASM/HYP/PER/SCP families) and the persona-profile YAML schema (`specs/027-spec-hardening/contracts/persona-profile.md`) are authoritative; this spec defers to those rather than redefining them.
+
+## Personas
+
+Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
+
+- **PER-028**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
+- **PER-029**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
+- **PER-030** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
+
+## Hypotheses
+
+Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
+
+- **HYP-010**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-010.md` (created in feature 028 polish).
+
+## Out of Scope
+
+Items explicitly deferred from this spec; promotion to in-scope requires the named preconditions to clear. Cross-references to other specs use the canonical overlap phrasing (`authoritative for: <capability>` / `defers-to: <NNN> (<capability>)`).
+
+- **SCP-031** [DEFERRED]: Capstone-country variants (PH typhoon, JP earthquake, BD flood) of this spec's capabilities are out of scope until: (i) capstone-reinterpretation decision per D-009; (ii) per-country regulatory + data-sharing preconditions documented in `specs/005-data-source-governance/spec.md` clear; (iii) responsible technical agents (risk-manager, ga-national, ntes, bom-national) sign off on country-specific calibration.
+- **SCP-032**: Constitutional-level changes (NON-NEGOTIABLE #1..#5) are not modified by this spec; any tension is documented as `[RISK]` in Assumptions, never resolved here.
+- **SCP-033**: Cross-spec authority disputes are arbitrated via `product-owner-ba` and the speckit governance flow; this spec does not unilaterally claim ownership of capabilities owned elsewhere. `defers-to:` 018 (recovery-phase indicators, triggers, phase-exit criteria); 008 (warning-tier authoring, multilingual delivery, misinformation defence) where applicable.
+
+
+## Capstone-Aligned Requirements (Feature 028 / P-004)
+
+The hazard taxonomy owned here is *extended* - not replaced - to name capstone-country instances of the existing AU hazard classes.
+
+| Hazard class (AU-v1) | Capstone country | Country-scoped instance | Status |
+| --- | --- | --- | --- |
+| Tropical cyclone (analog) | Philippines | Typhoon (Pacific basin) | Deferred - see ASM [RISK] AU-residency tension |
+| Earthquake (existing) | Japan | Subduction-zone earthquake + tsunami | Deferred |
+| Riverine flood (existing) | Bangladesh | Monsoon + cyclone-driven coastal flood | Deferred |
+
+> No existing AU hazard row is modified.
+
+
+## Capstone-Country Hypotheses (Feature 028 / US2)
+
+> Three deferred capstone-country hypotheses for hazard risk-index calibration. Each cites an evidence stub at `specs/012-risk-assessment-agent/evidence/HYP-<id>.md` conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. `Status = Not tested` until D-009 capstone-reinterpretation clears and per-cohort preconditions are met.
+
+- **HYP-039** [PH deferred]: We believe typhoon (Pacific basin) risk-index calibration using PAGASA + historical track data will produce risk-index calibration error <= 15% on out-of-sample historical typhoon events for the Philippines operator persona; we will know we are wrong if calibration error > 25% on out-of-sample PH events during PH typhoon season Jun-Nov is observed in the measurement window (PH typhoon season Jun-Nov).
+  - **Falsification**: calibration error > 25% on out-of-sample PH events during PH typhoon season Jun-Nov.
+  - **Evidence stub**: `specs/012-risk-assessment-agent/evidence/HYP-039.md` (created by feature 028 / US2 / T034..T038).
+- **HYP-040** [JP deferred]: We believe subduction-zone earthquake + tsunami risk-index calibration using JMA + JSHIS data will produce risk-index calibration error <= 10% on out-of-sample historical earthquake events for the Japan operator persona; we will know we are wrong if calibration error > 20% on out-of-sample JP events during quarterly review is observed in the measurement window (JP continuous; quarterly review).
+  - **Falsification**: calibration error > 20% on out-of-sample JP events during quarterly review.
+  - **Evidence stub**: `specs/012-risk-assessment-agent/evidence/HYP-040.md` (created by feature 028 / US2 / T034..T038).
+- **HYP-041** [BD deferred]: We believe monsoon flood + cyclonic-flood risk-index calibration using BWDB + BMD data will produce risk-index calibration error <= 20% on out-of-sample historical flood events for the Bangladesh operator persona; we will know we are wrong if calibration error > 30% on out-of-sample BD events during BD monsoon Apr-Sep is observed in the measurement window (BD monsoon Apr-Sep).
+  - **Falsification**: calibration error > 30% on out-of-sample BD events during BD monsoon Apr-Sep.
+  - **Evidence stub**: `specs/012-risk-assessment-agent/evidence/HYP-041.md` (created by feature 028 / US2 / T034..T038).
+

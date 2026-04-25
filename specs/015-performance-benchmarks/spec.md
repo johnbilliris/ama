@@ -184,3 +184,29 @@ As an **SRE**, I want benchmark results stored as structured artifacts with auto
 - Benchmarking the web frontend (`apps/web`).
 - Benchmarking database or data layer operations.
 - Automatic baseline updates (baselines are updated explicitly by a team member, not overwritten by every CI run).
+
+
+## Personas
+
+Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
+
+- **PER-037**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
+- **PER-038**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
+- **PER-039** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
+
+## Hypotheses
+
+Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
+
+- **HYP-013**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-013.md` (created in feature 028 polish).
+
+
+## Capstone-Aligned Success Criteria (Feature 028 / FR-012)
+
+The five capstone success metrics MUST each map to at least one benchmark scenario in this spec; AU-v1 baselines are recorded today, capstone-country baselines are deferred. Cited by `specs/shared/capstone-metric-trace.md` SC-Owner cells (see feature 028 / US2 / T039..T043).
+
+- **SC-CAP-015-001** **`LIVES_SAVED`** - AU-v1 baseline scenario: lives at risk per major-flood exercise (BoM-driven); measurement method: pre/post intervention exercise outcomes; capstone target: >= 1,000 lives/yr saved at solution-of-whole level. Capstone-country baselines: deferred.
+- **SC-CAP-015-002** **`RESPONSE_SPEED`** - AU-v1 baseline scenario: alert-to-acknowledgement median latency; measurement method: end-to-end timing in benchmark exercises; capstone target: 50 % faster than the unaided reference. Capstone-country baselines: deferred.
+- **SC-CAP-015-003** **`EVAC_LEAD_TIME`** - AU-v1 baseline scenario: warning-issuance to recommended-evacuation-start delta; measurement method: timeline reconstruction in benchmark scenarios; capstone target: 24 h earlier evacuation than unaided reference. Capstone-country baselines: deferred.
+- **SC-CAP-015-004** **`LOGISTICS_EFFICIENCY`** - AU-v1 baseline scenario: resource utilisation rate (allocated vs idle) during exercise; measurement method: telemetry from `specs/011-resource-allocation-agent`; capstone target: 30 % efficiency uplift. Capstone-country baselines: deferred.
+- **SC-CAP-015-005** **`ECONOMIC_LOSS_REDUCTION`** - AU-v1 baseline scenario: estimated avoided economic loss in exercise (Sendai indicator alignment); measurement method: scenario-modelled counterfactual; capstone target: 30 % loss-reduction. Capstone-country baselines: deferred.

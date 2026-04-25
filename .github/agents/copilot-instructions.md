@@ -47,6 +47,10 @@ docs/           # Project documentation
 - Azure Cosmos DB — containers: `simulation` (tenants, scheduler state), `sim-events` (events, snapshots, annotations), `sim-chat` (chat history) (026-sim-warp-playback)
 - Markdown (CommonMark + GitHub-flavoured Markdown); no runtime language used by this feature. (027-spec-hardening)
 - Git (version-controlled markdown under `specs/` and `.github/`). No database, no blob store. (027-spec-hardening)
+- [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION] (028-capstone-alignment)
+- [if applicable, e.g., PostgreSQL, CoreData, files or N/A] (028-capstone-alignment)
+- N/A — documentation-only feature. (Portfolio-wide ambient stack, for reviewer context only: Python 3.12 (FastAPI API + agents), TypeScript / Next.js 16 (web dashboard), Bicep (infra). This feature does not edit any of these.) + `specs/shared/gap-id-register.md` (monotonic ID source); `specs/027-spec-hardening/contracts/persona-profile.md` (YAML persona schema); `capstone.md` (authoritative brief); `AMA_Rubric_Asia.md` (SC-009 measurement surface); `ama-rubric-grader` skill (SC-009 automation). (028-capstone-alignment)
+- N/A — Markdown files under version control only. (028-capstone-alignment)
 
 **Backend**: Python 3.12, FastAPI, Pydantic v2, Azure Cosmos DB SDK, Azure Blob Storage SDK, Azure Identity, Azure OpenAI SDK, tenacity
 **Frontend**: TypeScript 5.8, Next.js 16.2, React 19, Tailwind CSS, @ama/ui component library

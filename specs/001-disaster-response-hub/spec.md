@@ -476,7 +476,7 @@ accessibility_needs: [voice control, switch-access compatibility]
 | DEF-012 | capability | Shelter / evacuation-centre allocation | Not in v1 — couples to LGA shelter databases not yet integrated. | LGA shelter data integration. | Resilience Planner |
 | DEF-013 | capability | Utility-network isolation coordination | Not in v1 — safety-critical; requires utility-specific agreements. | Utility SCADA / advisory coupling design. | Platform Architect |
 | DEF-014 | capability | Search-and-Rescue tasking | Not in v1 — AMSA / state-police operational scope. | AMSA / police SAR integration design. | Resilience Planner |
-| DEF-015 | capability | Recovery (PPRR) phase surfaces | v1 scope is Response + rehearsal (Preparedness); Recovery deferred. | Recovery surface scoping + LGA handover model. | Resilience Planner |
+| DEF-015 | capability | Recovery (PPRR) phase surfaces | v1 scope is Response + rehearsal (Preparedness); Recovery deferred. `defers-to: 018` (recovery-phase indicators, triggers, phase-exit criteria; per feature 028 FR-018 / D-005). | Recovery surface scoping + LGA handover model owned by `specs/018-aidr-guidance-integration/spec.md`. | Resilience Planner |
 | DEF-016 | capability | Public self-service citizen reporting | v1 scope is ingest only; two-way citizen surface deferred. | Two-way citizen surface design + misinformation-resilience pack v2. | Product Owner |
 
 ### Hazard List
@@ -593,3 +593,18 @@ accessibility_needs: [voice control, switch-access compatibility]
 | 2026-04-24 | Initial hardened release: Assumptions promoted to table (ASM-001..008); added Non-Functional Requirements (NFR-001..013), Personas (18), Hypotheses (HYP-001..006), § Scope with 9 normative subsections, § Status-transition authority, § Open Deltas, § Changelog; Success Criteria scoped to v1 Australian evaluation cohort. | 027-spec-hardening (this PR) |
 
 > **Traceability**: the canonical Traceability Table covering every Gap ID resolved by this hardening lives in `specs/027-spec-hardening/spec.md` § Traceability Table. See also the cross-spec monotonic register at `specs/shared/gap-id-register.md`.
+
+
+## Assumptions
+
+> Cross-reference: this feature's authoritative assumption table is the H3 `### Assumptions` block under `## Requirements` (lines 98..111: ASM-001..ASM-008). Capstone-aligned assumptions added by feature `028-capstone-alignment` are listed below; later specs that need to reuse these IDs should reference them by `ASM-NNN` rather than redefining.
+
+- **ASM-080**: Australia is the v1 primary deployment jurisdiction (capstone-reinterpretation per `specs/028-capstone-alignment/research.md` D-009). Capstone countries (PH / JP / BD) are explicitly deferred and listed in the Out-of-Scope section below; promotion preconditions are documented in `specs/028-capstone-alignment/spec.md` and per-country `[DEFERRED]` items added by feature 028 / US1.
+- **ASM-081**: This spec is authoritative for AIIMS personas (Incident Commander, Planning Officer, Operations Officer, Logistics Officer, Public Information Officer, Field Coordinator, Resilience Planner, Observer / Auditor) per `### Personas` below; other specs reference these via `cross-ref to specs/001-disaster-response-hub/spec.md` rather than re-declaring.
+
+## Out of Scope
+
+> Cross-reference: detailed deferred-scope register is at `### Out of Scope (summary — detailed list under § Scope)` (line 113) and `### Hazard List` / `### Citizen-Surface List` under `## Scope`. The capstone-country deferral added by feature `028-capstone-alignment` is below.
+
+- **SCP-080** [DEFERRED] — capstone-country variants of every v1 capability defined in this spec are out of scope until: (i) capstone-reinterpretation decision per `specs/028-capstone-alignment/research.md` D-009 clears; (ii) per-country regulatory + data-residency preconditions documented in `specs/005-data-source-governance/spec.md` clear; (iii) per-country hazard-feed agreements documented in `specs/006-data-ingestion-storage/spec.md` clear; (iv) `incident-commander`, `resilience-planner`, and `compliance-auditor` actors sign off on country-scoped operating model. Specifically: **Philippines** (NDRRMC operating model, typhoon hazard taxonomy, PAGASA feeds, Filipino + regional language packs); **Japan** (Cabinet Office DRR / FDMA / JMA operating model, subduction-zone earthquake + tsunami hazard taxonomy, JMA seismic feeds, Japanese language pack); **Bangladesh** (DDM / CPP / BWDB operating model, monsoon + cyclonic-flood hazard taxonomy, BWDB hydro feeds, Bangla language pack).
+- **SCP-081** [DEFERRED] — Recovery (PPRR) phase coordination surfaces beyond the AU-v1 LGA handover referral defined in DEF-015. `defers-to: 018` (recovery-phase indicators, triggers, phase-exit criteria) per feature 028 FR-018 / D-005.

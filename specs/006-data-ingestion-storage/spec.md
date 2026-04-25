@@ -251,7 +251,7 @@ The ingestion layer receives field officer reports (manual text entries) and str
 - **FR-021**: The Risk Assessment Agent MUST operate on stored signals retrieved from the signal store. Per Constitution Principle II, it generates hazard maps and impact predictions with traceable inputs and assumptions. It receives handoff events from the Monitoring Agent containing signal references, then queries the signal store for the full signal data and related signals to generate hazard assessments and recommendations. It does NOT ingest data directly from external sources.
 - **FR-022**: The Evacuation Agent MUST operate on stored data: hazard assessments, road network status (from Transport authority signals ingested by the pipeline), and population data. Per Constitution Principle II, it proposes optimal routes and transport coordination plans. It is invoked by the Risk Assessment Agent via handoff when an evacuation recommendation is generated.
 - **FR-023**: The Resource Allocation Agent MUST operate on stored coordination tasks and resource inventories. Per Constitution Principle II, it prioritises supplies and personnel allocation using objective criteria. It does NOT interact with the ingestion layer directly; it receives task prioritisation requests from the incident workflow.
-- **FR-024**: The Communication Agent MUST operate on stored recommendations and approved alert content. Per Constitution Principle II, it generates targeted, multilingual alerts. It is invoked by the Risk Assessment Agent via handoff when a public alert recommendation is generated. It does NOT interact with the ingestion layer directly.
+- **FR-024**: The Communication Agent MUST operate on stored recommendations and approved alert content. Per Constitution Principle II, it generates targeted, multilingual alerts. It is invoked by the Risk Assessment Agent via handoff when a public alert recommendation is generated. It does NOT interact with the ingestion layer directly. `defers-to:` 008 (warning-tier multilingual authoring + delivery — the canonical authority sits in `specs/008-communication-agent/spec.md` per feature 028 / US3 / T044; this clause is retained as a contract-level pointer only).
 
 #### Storage Architecture
 
@@ -341,3 +341,45 @@ The ingestion layer receives field officer reports (manual text entries) and str
 - **SC-007**: Raw payloads and ingestion audit entries achieve 100% correlation: every persisted SignalEnvelope has a corresponding raw payload in Blob Storage and an audit entry, verified by audit trail reconciliation.
 - **SC-008**: Circuit breaker activation correctly marks degraded data sources within 3 minutes of sustained source unavailability, and auto-recovers within 1 minute of source restoration.
 - **SC-009**: Simulation data is fully isolated from live operational data: a query targeting live data returns zero simulation signals, and vice versa, verified by cross-partition query tests.
+
+## Assumptions
+
+Scoped to this spec's domain (ingestion + storage of authoritative hazard feeds). Tagging follows `specs/027-spec-hardening` taxonomy: `[RISK]` (open externally-driven risk), `[DECISION]` (deliberate scoping decision), bare bullet (operating assumption).
+
+- **ASM-011**: The AU-v1 deployment context defined in `specs/001-disaster-response-hub/spec.md` is the operational baseline for this spec; capstone-country variants (PH / JP / BD) are deferred. `linked_gaps:` `specs/shared/gap-id-register.md` A-GAP-001..003. `status:` Open.
+- **ASM-012** [DECISION]: This spec's deliverables (ingestion + storage of authoritative hazard feeds) integrate with the actor catalogue (`specs/004-actor-github-agents/spec.md`); responsible technical agents - data-engineer, bom-national, ga-national - are consulted via the `agent` tool during authoring and review.
+- **ASM-013**: Speckit conventions (FR/SC numbering, ASM/HYP/PER/SCP families) and the persona-profile YAML schema (`specs/027-spec-hardening/contracts/persona-profile.md`) are authoritative; this spec defers to those rather than redefining them.
+- **ASM-014** [RISK]: AU-only data residency (constitution NON-NEGOTIABLE #2; Azure `australiaeast` / `australiasoutheast` only) is in tension with the capstone Asia framing (PH / JP / BD sovereign-data handling). Resolution requires a constitution-level amendment owned outside this feature (see `specs/028-capstone-alignment/research.md` D-009). `linked_gaps:` constitution NON-NEGOTIABLE #2. `status:` Open.
+
+## Personas
+
+Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
+
+- **PER-010**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
+- **PER-011**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
+- **PER-012** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
+
+## Hypotheses
+
+Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
+
+- **HYP-004**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-004.md` (created in feature 028 polish).
+
+## Out of Scope
+
+Items explicitly deferred from this spec; promotion to in-scope requires the named preconditions to clear. Cross-references to other specs use the canonical overlap phrasing (`authoritative for: <capability>` / `defers-to: <NNN> (<capability>)`).
+
+- **SCP-012** [DEFERRED]: Capstone-country variants (PH typhoon, JP earthquake, BD flood) of this spec's capabilities are out of scope until: (i) capstone-reinterpretation decision per D-009; (ii) per-country regulatory + data-sharing preconditions documented in `specs/005-data-source-governance/spec.md` clear; (iii) responsible technical agents (data-engineer, bom-national, ga-national) sign off on country-specific calibration.
+- **SCP-013**: Constitutional-level changes (NON-NEGOTIABLE #1..#5) are not modified by this spec; any tension is documented as `[RISK]` in Assumptions, never resolved here.
+- **SCP-014**: Cross-spec authority disputes are arbitrated via `product-owner-ba` and the speckit governance flow; this spec does not unilaterally claim ownership of capabilities owned elsewhere. `defers-to:` 018 (recovery-phase indicators, triggers, phase-exit criteria); 008 (warning-tier authoring, multilingual delivery, misinformation defence) where applicable.
+
+
+## Capstone-Aligned Requirements (Feature 028 / FR-009)
+
+The candidate capstone-country hazard feeds below are deferred until the named preconditions clear. `defers-to:` 005 for residency / lawful basis; `defers-to:` 028 for capstone-reinterpretation.
+
+- **FR-CAP-006-001** [DEFERRED]: Philippines feed candidate **PAGASA** (typhoon + flood). Preconditions: (i) data-sharing MoU with DOST-PAGASA; (ii) JSON / CAP schema validator; (iii) freshness SLO <= 15 min during typhoon season (Jun-Nov).
+- **FR-CAP-006-002** [DEFERRED]: Japan feed candidate **JMA** (earthquake + tsunami; JAXA / QZSS for location-augmenting signals). Preconditions: (i) JMA data-licensing terms; (ii) sub-second seismic-event ingestion validator; (iii) 24x7 freshness SLO.
+- **FR-CAP-006-003** [DEFERRED]: Bangladesh feed candidate **BWDB / FFWC** (riverine flood). Preconditions: (i) BWDB data-sharing arrangement; (ii) hydro-station schema validator; (iii) freshness SLO <= 30 min during monsoon (Apr-Sep).
+
+> **Overlap note**: This spec carries an existing FR-024 that overlaps with `specs/008-communication-agent`. `defers-to:` 008 (warning-tier multilingual authoring + delivery); the canonical reciprocal `supersedes:` rule is added in spec 008 by feature 028 / US3 / T044.

@@ -58,3 +58,17 @@
 | SCP-GAP-007 | Scope | Citizen-facing surface list absent | J. Reviewer, Principal Architect | 027-spec-hardening | Open | 001-disaster-response-hub | — |
 | SCP-GAP-008 | Scope | Upstream / downstream integration list absent | J. Reviewer, Principal Architect | 027-spec-hardening | Open | 001-disaster-response-hub | — |
 | SCP-GAP-009 | Scope | Rehearsal content boundary unfixed | J. Reviewer, Principal Architect | 027-spec-hardening | Open | 001-disaster-response-hub | — |
+
+## Feature 028 Allocations
+
+**Reserved by**: `specs/028-capstone-alignment/plan.md` (2026-04-25). Append-only per FR-022. Every ID claimed below will be cited inside the affected `specs/NNN-*/spec.md` files (locally scoped, e.g. `ASM-NNN` inside spec 005). Cross-spec authority disputes resolved by `product-owner-ba`.
+
+| Family | Pre-feature current_max | Reserved range | Notes |
+| --- | --- | --- | --- |
+| ASM | 0 | ASM-001 .. ASM-100 | Per-spec assumptions; AU-only-residency [RISK] propagates across PII-touching specs (D-009). Actual usage post-feature: ASM-001 .. ASM-079 (79 IDs). |
+| HYP | 0 | HYP-001 .. HYP-100 | Capstone-country hypotheses (PH/JP/BD) for agent specs 008..012 + portfolio-wide HYPs. Reserved bumped from HYP-050 to HYP-100 by feature 028 / Phase 7 (T060) after monotonic audit. Actual usage post-feature: HYP-001 .. HYP-041 (41 IDs). |
+| PER | 0 | PER-001 .. PER-100 | Persona refs and placeholders; non-AU personas (PH/JP/BD) MUST carry status: placeholder + preconditions per FR-023. Reserved bumped from PER-050 to PER-100 by feature 028 / Phase 7 (T060) after monotonic audit (3 PER per spec x 26 specs = 78 actual). Actual usage post-feature: PER-001 .. PER-076 (76 IDs). |
+| SCP | 0 | SCP-001 .. SCP-100 | Out-of-scope items; >= 1 capstone-country deferral per spec where applicable. Actual usage post-feature: SCP-001 .. SCP-082 (82 IDs). |
+| REQ | 0 | REQ-001 .. REQ-030 | Reserved token; current spec set uses local FR-NNN scoping rather than global REQ-NNN. Unused by feature 028. |
+
+These ranges supersede no prior allocation. Existing `A-GAP-NNN` / `REQ-GAP-NNN` / `HYP-GAP-NNN` / `PER-GAP-NNN` / `SCP-GAP-NNN` entries above remain untouched.
