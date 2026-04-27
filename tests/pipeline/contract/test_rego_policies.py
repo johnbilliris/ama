@@ -1,4 +1,7 @@
-"""T017 — Contract tests for the OPA Rego policies (posture, cross_env, secret_hygiene, au_region, identity_consistency)."""
+"""T017 — Contract tests for OPA Rego policies.
+
+Covers: posture, cross_env, secret_hygiene, au_region, identity_consistency.
+"""
 
 from __future__ import annotations
 
@@ -23,7 +26,10 @@ pytestmark = pytest.mark.contract
 @pytest.fixture(scope="session")
 def opa_available():
     if not OPA:
-        pytest.skip("opa CLI not installed; install via .github/workflows/_reusable/install-opa.yml or `brew install opa`")
+        pytest.skip(
+            "opa CLI not installed; install via "
+            ".github/workflows/_reusable/install-opa.yml or `brew install opa`"
+        )
     return OPA
 
 

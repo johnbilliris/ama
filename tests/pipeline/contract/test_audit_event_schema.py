@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import json
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import jsonschema
 import pytest
-
 from pipeline_tools import _schema_loader
 
 SCHEMA = _schema_loader.load("audit-event.schema.json")
@@ -19,7 +17,7 @@ def _base_event(**overrides):
     e = {
         "id": str(uuid.uuid4()),
         "actor": "test-actor",
-        "timestamp": datetime.now(tz=timezone.utc).isoformat().replace("+00:00", "Z"),
+        "timestamp": datetime.now(tz=UTC).isoformat().replace("+00:00", "Z"),
         "action": "gate.decision",
         "outcome": "success",
     }
@@ -58,7 +56,9 @@ def test_action_enum_exhaustive():
 
 def test_invalid_timestamp_rejected():
     """jsonschema requires the format-checker to be enabled to validate format keyword."""
-    fc_validator = jsonschema.Draft202012Validator(SCHEMA, format_checker=jsonschema.Draft202012Validator.FORMAT_CHECKER)
+    fc_validator = jsonschema.Draft202012Validator(
+        SCHEMA, format_checker=jsonschema.Draft202012Validator.FORMAT_CHECKER
+    )
     with pytest.raises(jsonschema.ValidationError):
         fc_validator.validate(_base_event(timestamp="not-a-date"))
 
