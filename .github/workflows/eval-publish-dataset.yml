@@ -1,0 +1,114 @@
+name: eval-publish-dataset
+
+on:
+  push:
+    branches:
+      - "dataset/*"
+    paths:
+      - "packages/eval-dataset/**"
+  workflow_dispatch:
+    inputs:
+      dataset_path:
+        description: "Path to the generated dataset directory"
+        required: true
+        default: "packages/eval-dataset/data/dataset-disaster-core-1.0.0"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  validate-and-publish:
+    runs-on: ubuntu-latest
+    env:
+      DATASET_PATH: ${{ github.event.inputs.dataset_path || 'packages/eval-dataset/data/dataset-disaster-core-1.0.0' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install eval-core + eval-dataset
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e packages/eval-core --no-deps
+          python -m pip install -e packages/eval-dataset --no-deps
+          python -m pip install pydantic>=2.10.0 pytest ruff
+
+      - name: Lint (ruff)
+        run: python -m ruff check packages/eval-dataset/
+
+      - name: Unit tests
+        run: python -m pytest packages/eval-dataset/tests/ -q
+
+      - name: Validate committed corpus
+        run: |
+          python -m ama_eval_dataset validate \
+            --input "${DATASET_PATH}/cases.jsonl"
+
+      - name: Verify manifest contentHash matches cases.jsonl
+        run: |
+          python - <<'PY'
+          import json, hashlib, os, sys
+          from pathlib import Path
+          from ama_eval_core.models import EvaluationCase
+          base = Path(os.environ["DATASET_PATH"])
+          cases = [
+              EvaluationCase.model_validate_json(line)
+              for line in (base / "cases.jsonl").read_text(encoding="utf-8").splitlines()
+              if line.strip()
+          ]
+          canonical = json.dumps(
+              [json.loads(c.model_dump_json()) for c in cases],
+              sort_keys=True,
+              separators=(",", ":"),
+          ).encode()
+          digest = "sha256:" + hashlib.sha256(canonical).hexdigest()
+          manifest = json.loads((base / "manifest.json").read_text(encoding="utf-8"))
+          if manifest["contentHash"] != digest:
+              print(f"hash mismatch: manifest={manifest['contentHash']} computed={digest}", file=sys.stderr)
+              sys.exit(1)
+          print(f"OK: contentHash {digest} matches over {len(cases)} cases")
+          PY
+
+      - name: Upload cases + manifest as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dataset-${{ github.sha }}
+          path: |
+            ${{ env.DATASET_PATH }}/cases.jsonl
+            ${{ env.DATASET_PATH }}/manifest.json
+          retention-days: 30
+
+      # ---------------------------------------------------------------------
+      # Azure Storage publish (operator must wire OIDC federated credentials).
+      # Uncomment + configure secrets AZURE_CLIENT_ID / TENANT_ID / SUBSCRIPTION_ID
+      # and the immutable Blob container name before enabling.
+      # ---------------------------------------------------------------------
+      # - name: Azure login (OIDC)
+      #   uses: azure/login@v2
+      #   with:
+      #     client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      #     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #
+      # - name: Upload to immutable blob (FR-013)
+      #   run: |
+      #     az storage blob upload-batch \
+      #       --account-name ${{ secrets.AZURE_STORAGE_ACCOUNT }} \
+      #       --destination ${{ secrets.AZURE_DATASET_CONTAINER }} \
+      #       --destination-path datasets/disaster-response-core/1.0.0/ \
+      #       --source ${{ env.DATASET_PATH }} \
+      #       --auth-mode login \
+      #       --overwrite false
+      #
+      # - name: Publish dataset version via API
+      #   run: |
+      #     curl -sS -X POST \
+      #       "${{ secrets.AMA_API_BASE }}/api/eval/datasets/disaster-response-core/versions" \
+      #       -H "Authorization: Bearer ${{ steps.azlogin.outputs.token }}" \
+      #       -H "Content-Type: application/json" \
+      #       --data @${{ env.DATASET_PATH }}/manifest.json
