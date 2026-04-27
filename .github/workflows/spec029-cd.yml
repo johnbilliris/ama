@@ -18,26 +18,44 @@ permissions:
 jobs:
   staging:
     uses: ./.github/workflows/_reusable/canary-stage.yml
-    with: { service: ${{ inputs.service }}, environment: staging, stage_pct: 100 }
+    with:
+      service: ${{ inputs.service }}
+      environment: staging
+      stage_pct: 100
     secrets: inherit
 
   prod-5:
     needs: staging
     uses: ./.github/workflows/_reusable/canary-stage.yml
-    with: { service: ${{ inputs.service }}, environment: production, stage_pct: 5 }
+    with:
+      service: ${{ inputs.service }}
+      environment: production
+      stage_pct: 5
     secrets: inherit
+
   prod-25:
     needs: prod-5
     uses: ./.github/workflows/_reusable/canary-stage.yml
-    with: { service: ${{ inputs.service }}, environment: production, stage_pct: 25 }
+    with:
+      service: ${{ inputs.service }}
+      environment: production
+      stage_pct: 25
     secrets: inherit
+
   prod-50:
     needs: prod-25
     uses: ./.github/workflows/_reusable/canary-stage.yml
-    with: { service: ${{ inputs.service }}, environment: production, stage_pct: 50 }
+    with:
+      service: ${{ inputs.service }}
+      environment: production
+      stage_pct: 50
     secrets: inherit
+
   prod-100:
     needs: prod-50
     uses: ./.github/workflows/_reusable/canary-stage.yml
-    with: { service: ${{ inputs.service }}, environment: production, stage_pct: 100 }
+    with:
+      service: ${{ inputs.service }}
+      environment: production
+      stage_pct: 100
     secrets: inherit
