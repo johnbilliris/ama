@@ -1,0 +1,42 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://ama/specs/029/contracts/posture-exceptions.schema.yaml"
+title: "Posture Exceptions Register"
+description: "Canonical structure of `infra/policy/posture-exceptions.yaml` (FR-033, Q9 lifecycle)."
+type: array
+items:
+  type: object
+  required:
+    - name
+    - resource_id
+    - environment
+    - deviating_rule
+    - justification
+    - compensating_controls
+    - owning_team
+    - issued_at
+    - expires_at
+    - dual_approvers
+    - audit_pointer
+  properties:
+    name: { type: string, pattern: "^[a-z0-9-]+$" }
+    resource_id: { type: string, pattern: "^/subscriptions/" }
+    environment: { type: string, enum: [dev, staging, production] }
+    deviating_rule: { type: string, description: "Dotted path into posture matrix, e.g., identity.shared_key_disabled" }
+    justification: { type: string, minLength: 20 }
+    compensating_controls:
+      type: array
+      minItems: 1
+      items: { type: string }
+    owning_team: { type: string, pattern: "^@" }
+    issued_at: { type: string, format: date }
+    expires_at:
+      type: string
+      format: date
+      description: "MUST be no more than 90 days after issued_at (FR-033)."
+    dual_approvers:
+      type: array
+      minItems: 2
+      maxItems: 2
+      items: { type: string, pattern: "^@" }
+      description: "Both the security CODEOWNER and the compliance CODEOWNER GitHub handles."
+    audit_pointer: { type: string }

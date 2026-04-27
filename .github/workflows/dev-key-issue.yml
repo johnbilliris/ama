@@ -1,0 +1,32 @@
+name: Dev Key Issue (Spec 029 — T076..T079)
+
+on:
+  workflow_dispatch:
+    inputs:
+      developer_handle:
+        required: true
+      ttl_hours:
+        type: number
+        default: 8
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+jobs:
+  issue:
+    runs-on: ubuntu-latest
+    environment: dev-key-issuance
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ./tools/pipeline
+      - run: |
+          python -m pipeline_tools.audit_emitter \
+            --action devkey.issue \
+            --actor "${{ github.actor }}" \
+            --outcome success \
+            --rationale "developer=${{ inputs.developer_handle }} ttl_hours=${{ inputs.ttl_hours }}" \
+            --environment dev

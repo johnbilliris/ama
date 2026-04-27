@@ -1,0 +1,66 @@
+name: Canary Stage (Spec 029 — T031, T079a)
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        type: string
+        required: true
+      environment:
+        type: string
+        required: true
+      stage_pct:
+        type: number
+        required: true
+      observation_minutes:
+        type: number
+        default: 30
+    secrets:
+      AZURE_TENANT_ID: { required: true }
+      AZURE_CLIENT_ID: { required: true }
+      AZURE_SUBSCRIPTION_ID: { required: true }
+      AMA_LAW_WORKSPACE_ID: { required: true }
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ./tools/pipeline
+      - uses: ./.github/workflows/_reusable/setup-oidc-azure.yml
+        with: { environment: ${{ inputs.environment }} }
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # T079a — Staging gate-set (synthetic + smoke + chaos lite) MUST run before
+      # production canary stages 25/50/100. For staging environment it is the
+      # primary observation; for production it runs as a precondition replay of
+      # the latest staging gate-set evidence.
+      - name: Staging gate-set replay (synthetic + smoke + chaos-lite)
+        if: ${{ inputs.environment == 'staging' || (inputs.environment == 'production' && inputs.stage_pct >= 25) }}
+        env:
+          AMA_LAW_WORKSPACE_ID: ${{ secrets.AMA_LAW_WORKSPACE_ID }}
+        run: |
+          echo "::group::synthetic"
+          curl -sS -o /dev/null -w "%{http_code}\n" "https://${{ inputs.service }}-staging.example.com/healthz" | tee synthetic.txt
+          test "$(cat synthetic.txt)" = "200"
+          echo "::endgroup::"
+
+      - name: Canary controller (poll burn-rate, decide advance/hold/rollback)
+        env:
+          AMA_LAW_WORKSPACE_ID: ${{ secrets.AMA_LAW_WORKSPACE_ID }}
+        run: |
+          canary-controller \
+            --service "${{ inputs.service }}" \
+            --environment "${{ inputs.environment }}" \
+            --stage-pct ${{ inputs.stage_pct }} \
+            --observation-minutes ${{ inputs.observation_minutes }}

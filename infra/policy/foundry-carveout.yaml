@@ -1,0 +1,17 @@
+# Spec 029 — Foundry non-AU carve-out register (FR-018, NN-2)
+# Named, version-controlled list of Microsoft Foundry model-hosting endpoints
+# permitted to live outside australiaeast/australiasoutheast. No regulated
+# platform data may persist outside AU regions; gateway data-minimisation
+# applies. Additions require dual-CODEOWNER approval.
+version: 1
+last_reviewed: 2026-04-27
+
+carveouts: []
+# - id: FC-2026-001
+#   foundry_resource_id: /subscriptions/.../providers/Microsoft.CognitiveServices/accounts/foundry-gpt4
+#   region: eastus2
+#   reason: "model availability in AU regions does not include this model SKU"
+#   data_minimisation_controls: ["pii-scrubber", "pspf-marker-strip"]
+#   approved_by: ["@johnbilliris", "@second-collaborator"]
+#   added_at: 2026-04-01
+#   review_due: 2026-10-01

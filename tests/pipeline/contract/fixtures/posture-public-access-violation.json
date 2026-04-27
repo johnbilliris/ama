@@ -1,0 +1,18 @@
+{
+  "environment": "production",
+  "changes": [
+    {
+      "resource_id": "/subscriptions/11111111-1111-1111-1111-111111111111/resourceGroups/rg-ama-prod-australiaeast/providers/Microsoft.Storage/storageAccounts/stamaprodaustraliaeast001",
+      "after": {
+        "type": "Microsoft.Storage/storageAccounts",
+        "location": "australiaeast",
+        "properties": {
+          "publicNetworkAccess": "Enabled",
+          "allowSharedKeyAccess": true,
+          "disableLocalAuth": false,
+          "encryption": { "requireInfrastructureEncryption": true }
+        }
+      }
+    }
+  ]
+}

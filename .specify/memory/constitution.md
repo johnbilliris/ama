@@ -241,6 +241,33 @@ The platform SHALL embody the shared responsibility model:
    action without explicit human authorisation.
 2. **Data sovereignty** — All data MUST remain within Australian
    borders (Azure Australia East / Australia Southeast regions).
+
+   **Carve-out — Microsoft Foundry model-hosting endpoints**: Because of
+   model availability and quota restrictions in Australian Azure
+   regions, Microsoft Foundry (and equivalent Azure AI / Azure OpenAI)
+   *model-hosting endpoints* MAY be deployed in non-AU regions when
+   declared on a named, version-controlled carve-out list reviewed by
+   the security and compliance personas. This carve-out is bounded as
+   follows and MUST NOT be widened by interpretation:
+
+   - The exemption applies **only to the model-hosting resource
+     itself** (the inference endpoint). It does NOT extend to any
+     data-persisting service (Cosmos DB, Storage, Service Bus, Event
+     Grid, Application Insights, Log Analytics, Key Vault, Container
+     Registry, audit store, evidence store, telemetry, secrets) — all
+     of which remain bound by the AU-region requirement.
+   - **Regulated platform data** (incidents, alerts, recommendations,
+     operator actions, audit, evidence, PII, PSPF-marked content) MUST
+     NOT be stored or persistently logged outside Australian borders.
+   - Prompts and responses traversing a non-AU model-hosting endpoint
+     MUST be subject to **data-minimisation controls at the platform's
+     model gateway** so that personal information and PSPF-marked
+     content are removed, masked, or denied transit unless an explicit,
+     auditable use-case approval exists.
+   - The carve-out list MUST be auditable: each permitted non-AU model
+     deployment is recorded with model name, region, business
+     justification, approver identities, and review date, and is
+     re-evaluated whenever AU-region availability changes.
 3. **Privacy by design** — PII handling MUST comply with the Australian
    Privacy Act 1988 and applicable state/territory legislation.
 4. **Interoperability** — Agents MUST expose standards-based APIs
@@ -285,4 +312,15 @@ The platform SHALL embody the shared responsibility model:
 | Outcomes, Activities and Indicators     | 2020 | FR-015–024, VII-B            |
 
 ---
-*Version 1.1.0 · Last Amended 2025-07-17*
+*Version 1.2.0 · Last Amended 2026-04-26*
+
+## Amendment History
+
+- **1.2.0 (2026-04-26)** — Added a bounded carve-out under
+  Non-Negotiable #2 (Data sovereignty) permitting Microsoft Foundry
+  model-hosting endpoints in non-AU regions, conditioned on a named
+  carve-out list, no regulated data persistence outside AU, and
+  data-minimisation controls at the model gateway. All other
+  AU-residency obligations remain unchanged. Driven by spec
+  `029-progressive-delivery-pipeline`.
+- **1.1.0 (2025-07-17)** — Prior version baseline.

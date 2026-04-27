@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "changes": [
+    {
+      "resource_id": "/subscriptions/x/resourceGroups/rg-ama-prod-australiaeast/providers/Microsoft.Storage/storageAccounts/x",
+      "after": { "type": "Microsoft.Storage/storageAccounts", "location": "australiaeast", "properties": {} }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+name: Spec 029 Drift Detection (posture-verifier sweep)
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  drift:
+    strategy:
+      matrix:
+        environment: [dev, staging, production]
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ./tools/pipeline
+      - run: |
+          posture-verifier \
+            --environment "${{ matrix.environment }}" \
+            --subscription-id "${{ secrets.AZURE_SUBSCRIPTION_ID }}"

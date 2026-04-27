@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama/specs/029/contracts/audit-event.schema.json",
+  "title": "Deployment-Related Audit Event",
+  "description": "Schema-compatible with the platform's existing incident/operator audit event (FR-015, SC-012). The first five fields are the shared canonical schema; deployment-specific fields are optional.",
+  "type": "object",
+  "required": ["id", "actor", "timestamp", "action", "outcome"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "actor": { "type": "string", "description": "OIDC subject (workload identity) or Entra ID (human)." },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "action": {
+      "type": "string",
+      "enum": [
+        "gate.decision",
+        "build.complete",
+        "canary.advance",
+        "canary.hold",
+        "canary.rollback",
+        "freeze.activate",
+        "freeze.deactivate",
+        "emergency.approve",
+        "evidence.write",
+        "devkey.issue",
+        "devkey.rotate",
+        "devkey.revoke",
+        "posture.violation",
+        "posture.exception.add",
+        "posture.exception.expire",
+        "drift.detected",
+        "carveout.add",
+        "carveout.review"
+      ]
+    },
+    "rationale": { "type": "string" },
+    "outcome": { "type": "string", "enum": ["success", "failure", "denied"] },
+    "evidence_uri": { "type": "string", "format": "uri" },
+    "digest": { "type": "string" },
+    "correlation_id": { "type": "string" },
+    "service": { "type": "string", "enum": ["api", "agents", "ingestion", "web"] },
+    "environment": { "type": "string", "enum": ["dev", "staging", "production"] },
+    "stage_pct": { "type": "integer", "enum": [5, 25, 50, 100] }
+  },
+  "additionalProperties": false
+}

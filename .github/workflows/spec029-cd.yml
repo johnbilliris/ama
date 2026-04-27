@@ -1,0 +1,43 @@
+name: Spec 029 CD (canary 5/25/50/100)
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        type: choice
+        options: [api, agents, ingestion, web]
+        required: true
+      commit_sha:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+jobs:
+  staging:
+    uses: ./.github/workflows/_reusable/canary-stage.yml
+    with: { service: ${{ inputs.service }}, environment: staging, stage_pct: 100 }
+    secrets: inherit
+
+  prod-5:
+    needs: staging
+    uses: ./.github/workflows/_reusable/canary-stage.yml
+    with: { service: ${{ inputs.service }}, environment: production, stage_pct: 5 }
+    secrets: inherit
+  prod-25:
+    needs: prod-5
+    uses: ./.github/workflows/_reusable/canary-stage.yml
+    with: { service: ${{ inputs.service }}, environment: production, stage_pct: 25 }
+    secrets: inherit
+  prod-50:
+    needs: prod-25
+    uses: ./.github/workflows/_reusable/canary-stage.yml
+    with: { service: ${{ inputs.service }}, environment: production, stage_pct: 50 }
+    secrets: inherit
+  prod-100:
+    needs: prod-50
+    uses: ./.github/workflows/_reusable/canary-stage.yml
+    with: { service: ${{ inputs.service }}, environment: production, stage_pct: 100 }
+    secrets: inherit

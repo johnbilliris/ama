@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama/contracts/audit-event.schema.json",
+  "title": "Deployment-Related Audit Event (implementation copy of specs/029-progressive-delivery-pipeline/contracts/audit-event.schema.json)",
+  "description": "FR-015 / SC-012. Implementation-time canonical schema. Mutations require a contract-version bump (/$id and version field).",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["id", "actor", "timestamp", "action", "outcome"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "actor": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "action": {
+      "type": "string",
+      "enum": [
+        "gate.decision", "build.complete", "canary.advance", "canary.hold",
+        "canary.rollback", "freeze.activate", "freeze.deactivate",
+        "emergency.approve", "evidence.write", "devkey.issue", "devkey.rotate",
+        "devkey.revoke", "posture.violation", "posture.exception.add",
+        "posture.exception.expire", "drift.detected", "carveout.add",
+        "carveout.review", "deploy.warning"
+      ]
+    },
+    "rationale": { "type": "string", "maxLength": 2000 },
+    "outcome": { "type": "string", "enum": ["success", "failure", "denied"] },
+    "evidence_uri": { "type": "string", "format": "uri" },
+    "digest": { "type": "string" },
+    "correlation_id": { "type": "string" },
+    "service": { "type": "string", "enum": ["api", "agents", "ingestion", "web"] },
+    "environment": { "type": "string", "enum": ["dev", "staging", "production"] },
+    "stage_pct": { "type": "integer", "enum": [5, 25, 50, 100] },
+    "subscription_topology": { "type": "string", "enum": ["A", "B"] },
+    "commit_sha": { "type": "string" },
+    "pr_number": { "type": ["integer", "null"] },
+    "gate_set": { "type": "array", "items": { "type": "string" } },
+    "signature": { "type": "string" }
+  },
+  "additionalProperties": true
+}
