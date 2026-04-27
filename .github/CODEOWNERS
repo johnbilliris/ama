@@ -23,3 +23,28 @@ specs/shared/                     @johnbilliris/ama-spec-maintainers
 # Removing the line above and relying solely on the line below is a governance
 # regression — keep both until the team exists with ≥ 2 members.
 # specs/001-disaster-response-hub/  @johnbilliris
+
+# ---------------------------------------------------------------------------
+# Spec 029 — Progressive Delivery Pipeline (FR-003, FR-033)
+# Per ADR-029-01 (research.md §R17): repository is user-owned, so the dual-
+# CODEOWNER personas (security + compliance) collapse to the individual handle
+# @johnbilliris. The dual-approver requirement is enforced via branch protection
+# "require 2 approving reviews" plus the second-collaborator pre-flight (T000a).
+# Future-state team mapping: research.md §R17 table; substitute on org migration.
+# ---------------------------------------------------------------------------
+infra/policy/posture-matrix.yaml          @johnbilliris
+infra/policy/posture-exceptions.yaml      @johnbilliris
+infra/policy/foundry-carveout.yaml        @johnbilliris
+infra/policy/rego/                        @johnbilliris
+infra/IDENTITY.md                         @johnbilliris
+.github/workflows/cd.yml                  @johnbilliris
+.github/workflows/change-freeze.yml       @johnbilliris
+.github/workflows/emergency-hotfix.yml    @johnbilliris
+.github/workflows/evidence-pack.yml       @johnbilliris
+.github/workflows/_reusable/              @johnbilliris
+tools/pipeline/                           @johnbilliris
+
+# Safety-critical app paths (warning pathway, incident-domain APIs)
+apps/api/app/api/routes/incident*         @johnbilliris
+apps/agents/incident*                     @johnbilliris
+apps/web/src/app/incidents/**             @johnbilliris

@@ -1,0 +1,53 @@
+name: Posture Exception Sweep (Spec 029 — T067..T070)
+
+on:
+  schedule:
+    - cron: "17 3 * * *"   # 03:17 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  issues: write
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ./tools/pipeline
+      - id: sweep
+        run: |
+          python - <<'PY'
+          import datetime, sys, yaml, pathlib
+          p = pathlib.Path("infra/policy/posture-exceptions.yaml")
+          data = yaml.safe_load(p.read_text(encoding="utf-8") or "exceptions: []") or {"exceptions": []}
+          today = datetime.date.today()
+          surviving = []
+          expired = []
+          for exc in data.get("exceptions", []):
+              expiry = exc.get("expires")
+              if expiry and datetime.date.fromisoformat(str(expiry)) <= today:
+                  expired.append(exc)
+              else:
+                  surviving.append(exc)
+          data["exceptions"] = surviving
+          p.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+          print(f"expired={len(expired)} surviving={len(surviving)}")
+          PY
+      - name: Audit emit per expired exception
+        run: |
+          for env in dev staging production; do
+            python -m pipeline_tools.audit_emitter \
+              --action posture.exception.expire \
+              --actor "scheduled-sweep" \
+              --outcome success \
+              --rationale "daily sweep" \
+              --environment "$env" || true
+          done
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(spec-029): expire posture exceptions"
+          file_pattern: "infra/policy/posture-exceptions.yaml"

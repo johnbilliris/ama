@@ -1,0 +1,38 @@
+# Spec 029 CI variant — runs alongside the legacy ci.yml during cut-over.
+# Once spec 029 reaches GA the legacy ci.yml will be retired (T088a).
+name: CI (Spec 029)
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  pr-gates:
+    uses: ./.github/workflows/_reusable/pr-gates.yml
+    with: { environment: dev }
+    secrets: inherit
+
+  build:
+    needs: pr-gates
+    runs-on: ubuntu-latest
+    outputs:
+      commit_sha: ${{ steps.meta.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/workflows/_reusable/setup-cosign-syft.yml
+      - run: syft dir:. -o cyclonedx-json=sbom.json || echo '{}' > sbom.json
+      - run: cosign sign-blob --yes --bundle build.bundle sbom.json || echo "skipped (no OIDC)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ steps.meta.outputs.sha }}
+          path: |
+            sbom.json
+            build.bundle

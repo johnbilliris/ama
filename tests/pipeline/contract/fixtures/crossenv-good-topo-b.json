@@ -1,0 +1,10 @@
+{
+  "environment": "production",
+  "identity": { "subscription_topology": "B" },
+  "changes": [
+    {
+      "resource_id": "/subscriptions/c8703ebc-bc5d-488d-9489-5883c9fde6c2/resourceGroups/rg-ama-prod-australiaeast/providers/Microsoft.Storage/storageAccounts/stamaprodae001",
+      "after": { "type": "Microsoft.Storage/storageAccounts", "location": "australiaeast", "properties": {} }
+    }
+  ]
+}

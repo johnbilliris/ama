@@ -48,16 +48,26 @@ param restrictNetworkAccess bool = true
 @allowed(['dev', 'staging', 'prod'])
 param environmentTier string = 'dev'
 
+@description('Spec 029 — Subscription topology. A: per-environment subscriptions. B: single subscription per environment OR one subscription for all environments. Defaults to B; Topology A tenants must override.')
+@allowed([ 'A', 'B' ])
+param subscriptionTopology string = 'B'
+
+@description('Spec 029 — Azure subscription ID this deployment targets. Validated by deployment workflows against infra/IDENTITY.md.')
+param subscriptionId string = subscription().subscriptionId
+
+@description('Spec 029 — additional resource tags merged onto baseline tags.')
+param additionalTags object = {}
+
 // ────────────────────────────────────────────────────────────────────────────────
 // Variables
 // ────────────────────────────────────────────────────────────────────────────────
 
 var abbrs = loadJsonContent('./abbreviations.json')
-var tags = {
+var tags = union({
   'azd-env-name': environmentName
   project: 'disaster-response-hub'
   SecurityControl: 'Ignore'
-}
+}, additionalTags)
 var uniqueSuffix = uniqueString(resourceGroup().id)
 
 // Azure Portal and Azure-services IPs used to restrict Cosmos DB in production
@@ -876,3 +886,9 @@ output AZURE_OPENAI_ENDPOINT string = openAi.properties.endpoint
 output AZURE_APP_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
 output SERVICE_API_ENDPOINT_URL string = 'https://${apiContainerApp.properties.configuration.ingress.fqdn}'
 output SERVICE_WEB_ENDPOINT_URL string = 'https://${webApp.properties.defaultHostName}'
+
+@description('Spec 029 — subscription topology used for this deployment.')
+output AZURE_SUBSCRIPTION_TOPOLOGY string = subscriptionTopology
+
+@description('Spec 029 — target subscription id for this deployment.')
+output AZURE_TARGET_SUBSCRIPTION_ID string = subscriptionId

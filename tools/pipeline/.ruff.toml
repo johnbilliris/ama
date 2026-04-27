@@ -1,0 +1,11 @@
+line-length = 120
+target-version = "py312"
+extend-exclude = ["build", "dist", ".venv"]
+
+[lint]
+select = ["E", "F", "I", "B", "UP", "S", "RUF"]
+ignore = ["S101", "S603", "S607", "S105", "RUF002"]
+
+[lint.per-file-ignores]
+"tests/**" = ["S", "B"]
+

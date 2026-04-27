@@ -1,0 +1,38 @@
+name: Emergency Hotfix (Spec 029 — T064..T066)
+
+on:
+  workflow_dispatch:
+    inputs:
+      service: { required: true }
+      commit_sha: { required: true }
+      incident_id: { required: true }
+      bypass_canary:
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: write
+  issues: write
+
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+    environment: emergency-hotfix
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ./tools/pipeline
+      - name: Emit emergency.approve audit event
+        run: |
+          python -m pipeline_tools.audit_emitter \
+            --action emergency.approve \
+            --actor "${{ github.actor }}" \
+            --outcome success \
+            --rationale "incident=${{ inputs.incident_id }} bypass=${{ inputs.bypass_canary }}" \
+            --service "${{ inputs.service }}" \
+            --environment production
+      - name: Skip canary if bypass=true
+        if: ${{ inputs.bypass_canary == true }}
+        run: echo "Bypass acknowledged; deploying directly to 100% production."

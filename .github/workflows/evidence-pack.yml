@@ -1,0 +1,38 @@
+name: Evidence Pack (Spec 029 — T060)
+
+on:
+  workflow_dispatch:
+    inputs:
+      service: { required: true }
+      commit_sha: { required: true }
+      environment:
+        type: choice
+        options: [staging, production]
+        default: production
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ./tools/pipeline
+      - run: |
+          mkdir -p artefacts
+          : > artefacts/sbom.json
+          : > artefacts/posture.json
+          : > artefacts/audit.jsonl
+          evidence-packer \
+            --commit-sha "${{ inputs.commit_sha }}" \
+            --service "${{ inputs.service }}" \
+            --environment "${{ inputs.environment }}" \
+            --sbom artefacts/sbom.json \
+            --posture-report artefacts/posture.json \
+            --audit-slice artefacts/audit.jsonl

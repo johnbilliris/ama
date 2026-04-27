@@ -1,0 +1,19 @@
+{
+  "identity": {
+    "subscription_topology": "B",
+    "codeowners_handle_mode": "team",
+    "production_reviewers_mode": "scim_team",
+    "topology_subscription_ids": {
+      "dev": "11111111-1111-1111-1111-111111111111",
+      "staging": "11111111-1111-1111-1111-111111111111",
+      "production": "11111111-1111-1111-1111-111111111111"
+    }
+  },
+  "parameters": {
+    "dev":        { "subscriptionId": "11111111-1111-1111-1111-111111111111" },
+    "staging":    { "subscriptionId": "11111111-1111-1111-1111-111111111111" },
+    "production": { "subscriptionId": "11111111-1111-1111-1111-111111111111" }
+  },
+  "codeowners": "infra/policy/posture-matrix.yaml @johnbilliris\n",
+  "review_set": []
+}
