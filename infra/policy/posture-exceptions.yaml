@@ -1,21 +1,3 @@
-# yaml-language-server: $schema=../../specs/029-progressive-delivery-pipeline/contracts/posture-exceptions.schema.yaml
-# Spec 029 — Posture Exceptions Register (FR-033)
-# Each exception is dual-approved (security + compliance CODEOWNER under ADR-029-01),
-# carries a mandatory expires_at ≤ 90 days, and is auto-removed by
-# .github/workflows/posture-exception-sweep.yml on expiry.
 version: 1
 last_reviewed: 2026-04-27
-
 exceptions: []
-# Example entry shape (keep commented as schema documentation):
-# - id: PE-2026-001
-#   resource_type: Microsoft.Storage/storageAccounts
-#   environment: dev
-#   property_path: network.public_access
-#   expected: deny
-#   actual: allow
-#   rationale: "dev-only storage receives synthetic load-test traffic from a dynamic IP range; PE expires 90d"
-#   added_by: "@johnbilliris"
-#   approved_by: ["@johnbilliris", "@second-collaborator"]
-#   added_at: 2026-04-01
-#   expires_at: 2026-06-30
