@@ -1,13 +1,12 @@
 import logging
 import os
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
 from app.api.router import api_router
 from app.core.settings import get_settings
 from app.middleware.error_handler import add_error_handler_middleware
 from app.middleware.resilience import add_resilience_middleware
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
     try:
