@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama-disaster.dev/schemas/eval/judge.schema.json",
+  "title": "JudgeModelVersion",
+  "type": "object",
+  "required": ["judgeId","version","modelId","modelVersion","role","approvedAt","approvedBy"],
+  "additionalProperties": false,
+  "properties": {
+    "judgeId":      { "type": "string" },
+    "version":      { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "modelId":      { "type": "string" },
+    "modelVersion": { "type": "string" },
+    "role":         { "type": "string", "enum": ["primary","secondary"] },
+    "metricBindings": { "type": "array", "items": { "type": "string" } },
+    "promptTemplateRef": { "type": "string" },
+    "approvedAt":   { "type": "string", "format": "date-time" },
+    "approvedBy":   { "type": "string" }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "1625664856512082103"
+    }
+  },
+  "parameters": {
+    "runnerIdentityPrincipalId": {
+      "type": "string",
+      "metadata": {
+        "description": "Principal id of the runner managed identity"
+      }
+    },
+    "cosmosAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Cosmos account name (for data plane RBAC)"
+      }
+    },
+    "storageAccountResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Storage account resource id (for data plane RBAC)"
+      }
+    },
+    "keyVaultResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Key Vault resource id"
+      }
+    },
+    "foundryAccountResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Foundry/AI Services account resource id (for Azure AI Developer role)"
+      }
+    },
+    "ephemeralRunsResourceGroupId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource group id for ephemeral run-scoped RGs (e.g., rg-eval-runs-<env>)"
+      }
+    }
+  },
+  "variables": {
+    "roles": {
+      "storageBlobDataContributor": "ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+      "keyVaultSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6",
+      "contributor": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+      "azureAIDeveloper": "64702f94-c441-49e6-a78b-ef80e0188fee",
+      "cosmosDbDataContributor": "00000000-0000-0000-0000-000000000002"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "apiVersion": "2024-11-15",
+      "name": "[format('{0}/{1}', parameters('cosmosAccountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), parameters('runnerIdentityPrincipalId'), 'data-contributor'))]",
+      "properties": {
+        "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/{1}', resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), variables('roles').cosmosDbDataContributor)]",
+        "principalId": "[parameters('runnerIdentityPrincipalId')]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName'))]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(parameters('storageAccountResourceId'), parameters('runnerIdentityPrincipalId'), 'storage-blob-contrib')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roles').storageBlobDataContributor)]",
+        "principalId": "[parameters('runnerIdentityPrincipalId')]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(parameters('keyVaultResourceId'), parameters('runnerIdentityPrincipalId'), 'kv-secrets-user')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roles').keyVaultSecretsUser)]",
+        "principalId": "[parameters('runnerIdentityPrincipalId')]",
+        "principalType": "ServicePrincipal"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(parameters('foundryAccountResourceId'), parameters('runnerIdentityPrincipalId'), 'azure-ai-developer')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('roles').azureAIDeveloper)]",
+        "principalId": "[parameters('runnerIdentityPrincipalId')]",
+        "principalType": "ServicePrincipal"
+      }
+    }
+  ],
+  "outputs": {
+    "runnerIdentityPrincipalId": {
+      "type": "string",
+      "value": "[parameters('runnerIdentityPrincipalId')]"
+    },
+    "ephemeralRunsResourceGroupId": {
+      "type": "string",
+      "value": "[parameters('ephemeralRunsResourceGroupId')]"
+    }
+  }
+}

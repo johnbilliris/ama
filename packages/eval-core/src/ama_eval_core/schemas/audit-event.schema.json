@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama-disaster.dev/schemas/eval/audit-event.schema.json",
+  "title": "AuditEvent",
+  "type": "object",
+  "required": ["auditId","action","principal","timestamp","subject"],
+  "additionalProperties": false,
+  "properties": {
+    "auditId":   { "type": "string" },
+    "action":    { "type": "string" },
+    "principal": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "subject": {
+      "type": "object",
+      "required": ["type","id"],
+      "properties": {
+        "type": { "type": "string", "enum": ["dataset","case","metric","judge","run","scorecard","trace","policy","gate","infra","model"] },
+        "id":   { "type": "string" }
+      }
+    },
+    "runId":     { "type": "string" },
+    "metadata":  { "type": "object" },
+    "writtenAt": { "type": "string", "format": "date-time" }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama-disaster.dev/schemas/eval/case.schema.json",
+  "title": "EvaluationCase",
+  "description": "A single approved evaluation case (per FR-008). Stored line-per-case in the dataset's immutable JSONL. Schema mirrors data-model.md §EvaluationCase.",
+  "type": "object",
+  "required": ["caseId","datasetId","version","inputs","expectedBehaviour","sensitivityLabels","hazardTags","severity","language","provenance","provenanceMeta","approvalState","approvalChain","metricApplicability"],
+  "additionalProperties": false,
+  "properties": {
+    "caseId":   { "type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$|^case-[A-Za-z0-9_-]{1,64}$" },
+    "datasetId":{ "type": "string", "minLength": 1 },
+    "version":  { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "inputs":   { "type": "object" },
+    "expectedBehaviour": {
+      "type": "object",
+      "required": ["mustInclude","mustNotInclude","expectedAction"],
+      "additionalProperties": false,
+      "properties": {
+        "mustInclude":         { "type": "array", "items": { "type": "string" } },
+        "mustNotInclude":      { "type": "array", "items": { "type": "string" } },
+        "expectedAction":      { "type": "string", "enum": ["answer","refuse","escalate","clarify","redirect"] },
+        "escalationTriggers":  { "type": "array", "items": { "type": "string" } },
+        "referToAuthority":    { "type": "boolean" },
+        "tone":                { "type": "string", "enum": ["compassionate","directive","procedural"] }
+      }
+    },
+    "sensitivityLabels": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["graphic-fatality","human-remains","minor-involved","mass-casualty","prompt-injection","crisis-distress"] }
+    },
+    "hazardTags": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "enum": ["structure-fire","bushfire","flood","storm","building-collapse","hazmat","mass-casualty","missing-person","fatality-report","remains-recovery","evacuation-order","public-info","crisis-distress"] }
+    },
+    "jurisdictionTags": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[A-Z]{2}-[A-Z0-9]{1,3}$" }
+    },
+    "severity":  { "type": "string", "enum": ["low","medium","high","critical"] },
+    "language":  { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?(-[A-Za-z0-9]{1,8})*$" },
+    "provenance":{ "type": "string", "enum": ["synthetic","sanitised-real"] },
+    "provenanceMeta": {
+      "type": "object",
+      "required": ["author","reviewer"],
+      "properties": {
+        "author":          { "type": "string" },
+        "reviewer":        { "type": "string" },
+        "sourceRunId":     { "type": "string" },
+        "sanitisationLog": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["entityType","action","at"],
+            "properties": {
+              "entityType":  { "type": "string" },
+              "action":      { "type": "string", "enum": ["redacted","replaced"] },
+              "replacement": { "type": "string" },
+              "at":          { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "piiScanPass":     { "type": "boolean" }
+      }
+    },
+    "approvalState": { "type": "string", "enum": ["draft","in-review","approved","rejected"] },
+    "approvalChain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["role","principal","action","timestamp"],
+        "additionalProperties": false,
+        "properties": {
+          "role":      { "type": "string" },
+          "principal": { "type": "string" },
+          "action":    { "type": "string", "enum": ["draft","review","approve","reject","supersede"] },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "comment":   { "type": "string" }
+        }
+      }
+    },
+    "metricApplicability": { "type": "array", "items": { "type": "string" } },
+    "retrievalScope":   { "type": "boolean", "default": false },
+    "retrievedContext": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["docId","content","rank"],
+        "additionalProperties": false,
+        "properties": {
+          "docId":           { "type": "string" },
+          "content":         { "type": "string" },
+          "rank":            { "type": "integer", "minimum": 1 },
+          "relevanceLabel":  { "type": "string", "enum": ["relevant","partially-relevant","irrelevant"] }
+        }
+      }
+    }
+  }
+}

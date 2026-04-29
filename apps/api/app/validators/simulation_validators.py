@@ -1,7 +1,6 @@
-from fastapi import HTTPException
-
 from app.core.settings import get_settings
 from app.repositories.simulation_repository import SimulationRepository
+from fastapi import HTTPException
 
 
 class SimulationValidators:

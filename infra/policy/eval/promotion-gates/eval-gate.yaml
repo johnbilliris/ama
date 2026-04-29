@@ -1,0 +1,43 @@
+# infra/policy/eval/promotion-gates/eval-gate.yaml
+#
+# Promotion gate definition consumed by feature 029's progressive-delivery pipeline
+# (T067). Calls POST /api/eval/gate/check with mode=progressive-delivery-full between
+# staging and production canary, then attaches the returned signed evidence bundle to
+# the existing 029 evidence pack.
+
+gateId: eval-gate
+gateVersion: 1.0.0
+description: |
+  AMA Disaster-Response LLM Evaluation Gate — blocks promotion if any safety metric
+  drops below pass threshold or any quality metric regresses by more than its
+  per-metric regression delta. Override requires governance-reviewer + justification.
+
+invocation:
+  endpoint: /api/eval/gate/check
+  method: POST
+  mode: progressive-delivery-full
+  timeoutMinutes: 480
+
+requiredEvidence:
+  - signedEvidenceBundleBlobUri
+  - scorecardSummary
+  - regressionDiagnostics
+  - approvalChain
+
+failureBehaviour:
+  blockPromotion: true
+  notify:
+    - role: safety-reviewer
+    - role: governance-reviewer
+    - role: incident-commander
+
+override:
+  endpoint: /api/eval/gate/{runId}/override
+  requiredRoles:
+    - governance-reviewer
+  requiredFields:
+    justification: { minLength: 50 }
+    approvers:     { minCount: 2 }
+    writtenRecordLink: { type: url }
+
+attachedTo: features/029-progressive-delivery-pipeline/evidence-pack

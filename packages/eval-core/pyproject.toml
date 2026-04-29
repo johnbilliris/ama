@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ama-eval-core"
+version = "0.1.0"
+description = "Shared models, schemas, audit vocabulary, and policy evaluator for the AMA LLM evaluation framework"
+requires-python = ">=3.12"
+dependencies = [
+  "pydantic>=2.10.0",
+  "jsonschema>=4.23.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ama_eval_core"]

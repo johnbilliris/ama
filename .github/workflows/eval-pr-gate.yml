@@ -1,0 +1,109 @@
+name: eval-pr-gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/agents/**"
+      - "apps/eval-runner/**"
+      - "packages/eval-core/**"
+      - "specs/030-llm-eval-framework/**"
+      - ".github/workflows/eval-pr-gate.yml"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  AZURE_RUN_MODE: pr-fast-subset
+  EVAL_RUN_REGION: australiaeast
+
+jobs:
+  eval-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install eval framework
+        run: |
+          pip install -e packages/eval-core
+          pip install -e apps/eval-runner
+          pip install pytest ruff
+
+      - name: Lint
+        run: |
+          ruff check packages/eval-core/ apps/eval-runner/ tests/unit/eval/
+
+      - name: Run unit tests
+        run: |
+          python -m pytest packages/eval-core/tests/ tests/unit/eval/ -q
+
+      - name: Azure login (OIDC)
+        if: ${{ secrets.AZURE_CLIENT_ID != '' }}
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Trigger Container Apps Job
+        id: trigger
+        if: ${{ secrets.AZURE_CLIENT_ID != '' }}
+        run: |
+          set -euo pipefail
+          RUN_ID=$(az containerapp job start \
+            --name "${{ vars.EVAL_RUNNER_JOB_NAME }}" \
+            --resource-group "${{ vars.EVAL_RG }}" \
+            --env-vars "RUN_MODE=$AZURE_RUN_MODE" "PR_NUMBER=${{ github.event.pull_request.number }}" \
+            --query "properties.startTime" -o tsv)
+          echo "run_started_at=$RUN_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Poll for verdict
+        id: verdict
+        if: ${{ secrets.AZURE_CLIENT_ID != '' }}
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            VERDICT=$(az containerapp job execution list \
+              --name "${{ vars.EVAL_RUNNER_JOB_NAME }}" \
+              --resource-group "${{ vars.EVAL_RG }}" \
+              --query "[0].properties.template.containers[0].command" -o tsv || echo "running")
+            STATUS=$(az containerapp job execution list \
+              --name "${{ vars.EVAL_RUNNER_JOB_NAME }}" \
+              --resource-group "${{ vars.EVAL_RG }}" \
+              --query "[0].properties.status" -o tsv || echo "Running")
+            if [ "$STATUS" = "Succeeded" ] || [ "$STATUS" = "Failed" ]; then
+              echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+              break
+            fi
+            sleep 30
+          done
+
+      - name: Comment PR with scorecard summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = "${{ steps.verdict.outputs.status }}" || "skipped";
+            const body = `## LLM eval gate\n\n` +
+              `Status: **${status}**\n\n` +
+              `_Triggered for PR #${context.issue.number}; full scorecard published to artifact storage._`;
+            github.rest.issues.createComment({
+              owner: context.repo.owner, repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail job if eval failed
+        if: steps.verdict.outputs.status == 'Failed'
+        run: |
+          echo "::error::eval-runner reported failure — see linked scorecard artifact."
+          exit 1

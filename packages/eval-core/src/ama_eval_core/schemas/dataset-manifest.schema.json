@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama-disaster.dev/schemas/eval/dataset-manifest.schema.json",
+  "title": "EvaluationDatasetVersion",
+  "description": "Immutable manifest for a published dataset version (FR-009).",
+  "type": "object",
+  "required": ["datasetId","version","state","contentHash","caseCount","distribution","languageScope","manifestBlobUri","publishedAt","publishedBy","approvalChain"],
+  "additionalProperties": false,
+  "properties": {
+    "datasetId":       { "type": "string" },
+    "version":         { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "state":           { "type": "string", "enum": ["draft","published"] },
+    "contentHash":     { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "caseCount":       { "type": "integer", "minimum": 1 },
+    "distribution":    {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["count","percentage"],
+        "properties": {
+          "count":      { "type": "integer", "minimum": 0 },
+          "percentage": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    },
+    "languageScope":   { "type": "array", "items": { "type": "string" } },
+    "manifestBlobUri": { "type": "string", "format": "uri" },
+    "publishedAt":     { "type": "string", "format": "date-time" },
+    "publishedBy":     { "type": "string" },
+    "approvalChain":   { "type": "array" }
+  }
+}

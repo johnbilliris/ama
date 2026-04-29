@@ -1,0 +1,970 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "1210625337707864448"
+    }
+  },
+  "parameters": {
+    "env": {
+      "type": "string",
+      "allowedValues": [
+        "dev",
+        "staging",
+        "production"
+      ],
+      "metadata": {
+        "description": "Environment name (dev|staging|production)"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "australiaeast",
+      "metadata": {
+        "description": "Resource location — Australia East per constitution NN-2"
+      }
+    },
+    "jobCpu": {
+      "type": "string",
+      "defaultValue": "1.0",
+      "metadata": {
+        "description": "Container Apps Job CPU"
+      }
+    },
+    "jobMemory": {
+      "type": "string",
+      "defaultValue": "2.0Gi",
+      "metadata": {
+        "description": "Container Apps Job memory"
+      }
+    },
+    "storageImmutabilityState": {
+      "type": "string",
+      "defaultValue": "[if(equals(parameters('env'), 'dev'), 'Disabled', 'Unlocked')]",
+      "allowedValues": [
+        "Disabled",
+        "Unlocked",
+        "Locked"
+      ],
+      "metadata": {
+        "description": "Storage immutability state — Disabled (dev), Unlocked (staging|production initial)"
+      }
+    },
+    "deployContainerJobs": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Deploy Container Apps Jobs after the eval runner image has been published to the eval Azure Container Registry."
+      }
+    },
+    "deployApi": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Deploy the AMA API container app once the api image has been pushed to the eval Azure Container Registry."
+      }
+    },
+    "entraTenantId": {
+      "type": "string",
+      "defaultValue": "[subscription().tenantId]",
+      "metadata": {
+        "description": "Entra ID tenant id used for AMA API JWT validation."
+      }
+    },
+    "entraAudience": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Entra ID audience the AMA API expects on inbound JWTs (defaults to the dev app appId)."
+      }
+    },
+    "schedulerCron": {
+      "type": "string",
+      "defaultValue": "0 18 * * 0",
+      "metadata": {
+        "description": "Scheduler cron — weekly baseline (overnight Sun 18:00 UTC default)"
+      }
+    },
+    "keyVaultNameSalt": {
+      "type": "string",
+      "defaultValue": "",
+      "maxLength": 2,
+      "metadata": {
+        "description": "Optional salt appended to the Key Vault name to avoid collisions with prior soft-deleted purge-protected vaults."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {
+        "feature": "030-llm-eval-framework",
+        "workload": "ama-eval",
+        "env": "[parameters('env')]",
+        "managed-by": "bicep"
+      },
+      "metadata": {
+        "description": "Tags applied to every resource"
+      }
+    }
+  },
+  "variables": {
+    "nameSuffix": "[format('{0}-{1}', parameters('env'), uniqueString(resourceGroup().id))]",
+    "shortUniqueSuffix": "[take(uniqueString(resourceGroup().id), 6)]",
+    "storageEnvSegment": "[if(equals(parameters('env'), 'production'), 'prod', parameters('env'))]",
+    "storageAccountName": "[take(format('stamaeval{0}{1}', variables('storageEnvSegment'), uniqueString(resourceGroup().id)), 24)]",
+    "keyVaultName": "[format('kv-amaeval-{0}-{1}{2}', variables('storageEnvSegment'), variables('shortUniqueSuffix'), parameters('keyVaultNameSalt'))]",
+    "logAnalyticsWorkspaceName": "[take(format('log-ama-eval-{0}', variables('nameSuffix')), 63)]",
+    "containerRegistryName": "[format('acramaeval{0}{1}', variables('storageEnvSegment'), variables('shortUniqueSuffix'))]",
+    "evalRunnerImageRepository": "eval-runner",
+    "evalRunnerImageTag": "[parameters('env')]",
+    "apiImageRepository": "ama-api",
+    "apiImageTag": "[parameters('env')]",
+    "allowPublicEvalDataPlane": "[equals(parameters('env'), 'dev')]",
+    "dataPlanePublicNetworkAccess": "[if(variables('allowPublicEvalDataPlane'), 'Enabled', 'Disabled')]",
+    "dataPlaneNetworkDefaultAction": "[if(variables('allowPublicEvalDataPlane'), 'Allow', 'Deny')]",
+    "acrPullRoleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')]",
+    "containers": [
+      {
+        "name": "eval_datasets",
+        "partitionKey": "/datasetId"
+      },
+      {
+        "name": "eval_runs",
+        "partitionKey": "/runId"
+      },
+      {
+        "name": "eval_metric_definitions",
+        "partitionKey": "/metricId"
+      },
+      {
+        "name": "eval_audit",
+        "partitionKey": "/runId"
+      }
+    ],
+    "blobContainerNames": [
+      "datasets",
+      "runs",
+      "audit-archive"
+    ],
+    "foundryAccountName": "[take(format('aoai-amaeval-{0}-{1}', variables('storageEnvSegment'), variables('shortUniqueSuffix')), 32)]",
+    "foundryModelDeployments": [
+      {
+        "name": "gpt-5-4",
+        "modelName": "gpt-5.4",
+        "modelVersion": "2026-03-05",
+        "format": "OpenAI",
+        "sku": "GlobalStandard",
+        "capacity": 10
+      },
+      {
+        "name": "gpt-5-4-mini",
+        "modelName": "gpt-5.4-mini",
+        "modelVersion": "2026-03-17",
+        "format": "OpenAI",
+        "sku": "GlobalStandard",
+        "capacity": 10
+      },
+      {
+        "name": "gpt-4o-mini",
+        "modelName": "gpt-4o-mini",
+        "modelVersion": "2024-07-18",
+        "format": "OpenAI",
+        "sku": "GlobalStandard",
+        "capacity": 10
+      },
+      {
+        "name": "phi-4",
+        "modelName": "Phi-4",
+        "modelVersion": "7",
+        "format": "Microsoft",
+        "sku": "GlobalStandard",
+        "capacity": 1
+      },
+      {
+        "name": "llama-3-3-70b-instruct",
+        "modelName": "Llama-3.3-70B-Instruct",
+        "modelVersion": "9",
+        "format": "Meta",
+        "sku": "GlobalStandard",
+        "capacity": 1
+      },
+      {
+        "name": "mistral-large-3",
+        "modelName": "Mistral-Large-3",
+        "modelVersion": "1",
+        "format": "Mistral AI",
+        "sku": "GlobalStandard",
+        "capacity": 1
+      },
+      {
+        "name": "deepseek-v3-2",
+        "modelName": "DeepSeek-V3.2",
+        "modelVersion": "1",
+        "format": "DeepSeek",
+        "sku": "GlobalStandard",
+        "capacity": 1
+      }
+    ],
+    "cognitiveServicesOpenAIUserRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')]",
+    "storageBlobDataReaderRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1')]",
+    "jobNames": [
+      {
+        "name": "[format('caj-eval-runner-{0}', parameters('env'))]",
+        "triggerType": "Manual",
+        "cron": ""
+      },
+      {
+        "name": "[format('caj-eval-reconciler-{0}', parameters('env'))]",
+        "triggerType": "Schedule",
+        "cron": "*/30 * * * *"
+      },
+      {
+        "name": "[format('caj-eval-scheduler-{0}', parameters('env'))]",
+        "triggerType": "Schedule",
+        "cron": "[parameters('schedulerCron')]"
+      },
+      {
+        "name": "[format('caj-eval-audit-projection-{0}', parameters('env'))]",
+        "triggerType": "Schedule",
+        "cron": "0 3 * * *"
+      }
+    ],
+    "storageBlobDataContributorRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+    "keyVaultSecretsUserRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')]",
+    "cosmosBuiltinDataContributorId": "[guid(resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix'))), 'cosmos-data-contributor')]",
+    "containerAppsJobsOperatorRoleId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b9a307c4-5aa3-4b52-ba60-2b17c136cd7b')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2024-11-15",
+      "name": "[format('cosmos-ama-eval-{0}', variables('nameSuffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "kind": "GlobalDocumentDB",
+      "properties": {
+        "databaseAccountOfferType": "Standard",
+        "locations": [
+          {
+            "locationName": "[parameters('location')]",
+            "failoverPriority": 0,
+            "isZoneRedundant": false
+          }
+        ],
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "Session"
+        },
+        "capabilities": [
+          {
+            "name": "EnableServerless"
+          }
+        ],
+        "publicNetworkAccess": "[variables('dataPlanePublicNetworkAccess')]",
+        "minimalTlsVersion": "Tls12",
+        "disableLocalAuth": true,
+        "backupPolicy": {
+          "type": "Periodic",
+          "periodicModeProperties": {
+            "backupIntervalInMinutes": 240,
+            "backupRetentionIntervalInHours": 720,
+            "backupStorageRedundancy": "Zone"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "apiVersion": "2024-11-15",
+      "name": "[format('{0}/{1}', format('cosmos-ama-eval-{0}', variables('nameSuffix')), 'ama-eval')]",
+      "properties": {
+        "resource": {
+          "id": "ama-eval"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix')))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "cosmosContainers",
+        "count": "[length(variables('containers'))]"
+      },
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2024-11-15",
+      "name": "[format('{0}/{1}/{2}', format('cosmos-ama-eval-{0}', variables('nameSuffix')), 'ama-eval', variables('containers')[copyIndex()].name)]",
+      "properties": {
+        "resource": {
+          "id": "[variables('containers')[copyIndex()].name]",
+          "partitionKey": {
+            "paths": [
+              "[variables('containers')[copyIndex()].partitionKey]"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent"
+          },
+          "conflictResolutionPolicy": {
+            "mode": "LastWriterWins",
+            "conflictResolutionPath": "/_ts"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', format('cosmos-ama-eval-{0}', variables('nameSuffix')), 'ama-eval')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2024-01-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "sku": {
+        "name": "Standard_ZRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "accessTier": "Hot",
+        "minimumTlsVersion": "TLS1_2",
+        "allowBlobPublicAccess": false,
+        "allowSharedKeyAccess": false,
+        "supportsHttpsTrafficOnly": true,
+        "publicNetworkAccess": "[variables('dataPlanePublicNetworkAccess')]",
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "[variables('dataPlaneNetworkDefaultAction')]"
+        },
+        "encryption": {
+          "services": {
+            "blob": {
+              "enabled": true,
+              "keyType": "Account"
+            },
+            "file": {
+              "enabled": true,
+              "keyType": "Account"
+            }
+          },
+          "keySource": "Microsoft.Storage",
+          "requireInfrastructureEncryption": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2024-01-01",
+      "name": "[format('{0}/{1}', variables('storageAccountName'), 'default')]",
+      "properties": {
+        "isVersioningEnabled": true,
+        "changeFeed": {
+          "enabled": true,
+          "retentionInDays": 2555
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "blobContainers",
+        "count": "[length(variables('blobContainerNames'))]"
+      },
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2024-01-01",
+      "name": "[format('{0}/{1}/{2}', variables('storageAccountName'), 'default', variables('blobContainerNames')[copyIndex()])]",
+      "properties": {
+        "publicAccess": "None",
+        "immutableStorageWithVersioning": {
+          "enabled": true
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccountName'), 'default')]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "blobImmutabilityPolicies",
+        "count": "[length(variables('blobContainerNames'))]"
+      },
+      "condition": "[not(equals(parameters('storageImmutabilityState'), 'Disabled'))]",
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies",
+      "apiVersion": "2024-01-01",
+      "name": "[format('{0}/{1}/{2}/{3}', variables('storageAccountName'), 'default', variables('blobContainerNames')[copyIndex()], 'default')]",
+      "properties": {
+        "immutabilityPeriodSinceCreationInDays": 2555,
+        "allowProtectedAppendWrites": true
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', variables('storageAccountName'), 'default', variables('blobContainerNames')[copyIndex()])]"
+      ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2024-04-01-preview",
+      "name": "[variables('keyVaultName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "enableRbacAuthorization": true,
+        "enablePurgeProtection": "[if(equals(parameters('env'), 'dev'), null(), true())]",
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": "[if(equals(parameters('env'), 'dev'), 7, 90)]",
+        "publicNetworkAccess": "[variables('dataPlanePublicNetworkAccess')]",
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "defaultAction": "[variables('dataPlaneNetworkDefaultAction')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2025-04-01",
+      "name": "[variables('containerRegistryName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "sku": {
+        "name": "Basic"
+      },
+      "properties": {
+        "adminUserEnabled": false,
+        "anonymousPullEnabled": false,
+        "publicNetworkAccess": "Enabled",
+        "networkRuleBypassOptions": "AzureServices",
+        "policies": {
+          "azureADAuthenticationAsArmPolicy": {
+            "status": "enabled"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2023-09-01",
+      "name": "[variables('logAnalyticsWorkspaceName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 90,
+        "features": {
+          "enableLogAccessUsingOnlyResourcePermissions": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[format('appi-ama-eval-{0}', variables('nameSuffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]",
+        "RetentionInDays": 90,
+        "IngestionMode": "LogAnalytics",
+        "DisableLocalAuth": true,
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2024-10-01",
+      "name": "[variables('foundryAccountName')]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "kind": "AIServices",
+      "sku": {
+        "name": "S0"
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "customSubDomainName": "[variables('foundryAccountName')]",
+        "publicNetworkAccess": "[variables('dataPlanePublicNetworkAccess')]",
+        "networkAcls": {
+          "defaultAction": "[variables('dataPlaneNetworkDefaultAction')]",
+          "virtualNetworkRules": [],
+          "ipRules": []
+        },
+        "disableLocalAuth": true
+      }
+    },
+    {
+      "copy": {
+        "name": "foundryDeployments",
+        "count": "[length(variables('foundryModelDeployments'))]",
+        "mode": "serial",
+        "batchSize": 1
+      },
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "2024-10-01",
+      "name": "[format('{0}/{1}', variables('foundryAccountName'), variables('foundryModelDeployments')[copyIndex()].name)]",
+      "sku": {
+        "name": "[variables('foundryModelDeployments')[copyIndex()].sku]",
+        "capacity": "[variables('foundryModelDeployments')[copyIndex()].capacity]"
+      },
+      "properties": {
+        "model": {
+          "format": "[variables('foundryModelDeployments')[copyIndex()].format]",
+          "name": "[variables('foundryModelDeployments')[copyIndex()].modelName]",
+          "version": "[variables('foundryModelDeployments')[copyIndex()].modelVersion]"
+        },
+        "versionUpgradeOption": "NoAutoUpgrade",
+        "raiPolicyName": "Microsoft.DefaultV2"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('foundryAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', variables('foundryAccountName'))]",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', variables('foundryAccountName')), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), 'CognitiveServicesOpenAIUser')]",
+      "properties": {
+        "roleDefinitionId": "[variables('cognitiveServicesOpenAIUserRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), '2023-01-31').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('foundryAccountName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2024-03-01",
+      "name": "[format('cae-ama-eval-{0}', variables('nameSuffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName')), '2023-09-01').customerId]",
+            "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName')), '2023-09-01').primarySharedKey]"
+          }
+        },
+        "workloadProfiles": [
+          {
+            "name": "Consumption",
+            "workloadProfileType": "Consumption"
+          }
+        ],
+        "zoneRedundant": "[not(equals(parameters('env'), 'dev'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[format('id-caj-eval-runner-{0}', variables('nameSuffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]"
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "apiVersion": "2024-11-15",
+      "name": "[format('{0}/{1}', format('cosmos-ama-eval-{0}', variables('nameSuffix')), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix'))), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), 'cosmos-data-contributor'))]",
+      "properties": {
+        "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002', resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix'))))]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), '2023-01-31').principalId]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix')))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix')))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.Storage/storageAccounts/{0}', variables('storageAccountName'))]",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), 'StorageBlobDataReader')]",
+      "properties": {
+        "roleDefinitionId": "[variables('storageBlobDataReaderRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), '2023-01-31').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.ContainerRegistry/registries/{0}', variables('containerRegistryName'))]",
+      "name": "[guid(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), 'AcrPull')]",
+      "properties": {
+        "roleDefinitionId": "[variables('acrPullRoleDefinitionId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), '2023-01-31').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix')))]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "jobs",
+        "count": "[length(variables('jobNames'))]"
+      },
+      "condition": "[parameters('deployContainerJobs')]",
+      "type": "Microsoft.App/jobs",
+      "apiVersion": "2024-03-01",
+      "name": "[variables('jobNames')[copyIndex()].name]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))))]": {}
+        }
+      },
+      "properties": {
+        "environmentId": "[resourceId('Microsoft.App/managedEnvironments', format('cae-ama-eval-{0}', variables('nameSuffix')))]",
+        "workloadProfileName": "Consumption",
+        "configuration": {
+          "replicaTimeout": 28800,
+          "replicaRetryLimit": 0,
+          "triggerType": "[variables('jobNames')[copyIndex()].triggerType]",
+          "registries": [
+            {
+              "server": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), '2025-04-01').loginServer]",
+              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix')))]"
+            }
+          ],
+          "manualTriggerConfig": "[if(equals(variables('jobNames')[copyIndex()].triggerType, 'Manual'), createObject('parallelism', 1, 'replicaCompletionCount', 1), null())]",
+          "scheduleTriggerConfig": "[if(equals(variables('jobNames')[copyIndex()].triggerType, 'Schedule'), createObject('cronExpression', variables('jobNames')[copyIndex()].cron, 'parallelism', 1, 'replicaCompletionCount', 1), null())]"
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "runner",
+              "image": "[format('{0}/{1}:{2}', reference(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), '2025-04-01').loginServer, variables('evalRunnerImageRepository'), variables('evalRunnerImageTag'))]",
+              "resources": {
+                "cpu": "[json(parameters('jobCpu'))]",
+                "memory": "[parameters('jobMemory')]"
+              },
+              "env": [
+                {
+                  "name": "COSMOS_ENDPOINT",
+                  "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix'))), '2024-11-15').documentEndpoint]"
+                },
+                {
+                  "name": "COSMOS_DATABASE",
+                  "value": "ama-eval"
+                },
+                {
+                  "name": "EVAL_BLOB_ACCOUNT",
+                  "value": "[variables('storageAccountName')]"
+                },
+                {
+                  "name": "EVAL_KEY_VAULT",
+                  "value": "[variables('keyVaultName')]"
+                },
+                {
+                  "name": "AZURE_CLIENT_ID",
+                  "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), '2023-01-31').clientId]"
+                },
+                {
+                  "name": "AZURE_AI_PROJECT_ENDPOINT",
+                  "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('foundryAccountName')), '2024-10-01').endpoint]"
+                },
+                {
+                  "name": "AZURE_AI_PROJECT_DEPLOYMENTS",
+                  "value": "[join(map(variables('foundryModelDeployments'), lambda('d', format('{0}@{1}={2}', lambdaVariables('d').modelName, lambdaVariables('d').modelVersion, lambdaVariables('d').name))), ',')]"
+                },
+                {
+                  "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                  "value": "[reference(resourceId('Microsoft.Insights/components', format('appi-ama-eval-{0}', variables('nameSuffix'))), '2020-02-02').ConnectionString]"
+                },
+                {
+                  "name": "EVAL_JOB_ROLE",
+                  "value": "[split(variables('jobNames')[copyIndex()].name, '-')[2]]"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), 'Microsoft.Authorization/roleAssignments', guid(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), 'AcrPull'))]",
+        "[resourceId('Microsoft.Insights/components', format('appi-ama-eval-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.App/managedEnvironments', format('cae-ama-eval-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName'))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('foundryAccountName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+        "[extensionResourceId(resourceId('Microsoft.CognitiveServices/accounts', variables('foundryAccountName')), 'Microsoft.Authorization/roleAssignments', guid(resourceId('Microsoft.CognitiveServices/accounts', variables('foundryAccountName')), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), 'CognitiveServicesOpenAIUser'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployApi')]",
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[format('id-app-ama-api-{0}', variables('nameSuffix'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]"
+    },
+    {
+      "condition": "[parameters('deployApi')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.ContainerRegistry/registries/{0}', variables('containerRegistryName'))]",
+      "name": "[guid(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), 'api', 'AcrPull')]",
+      "properties": {
+        "roleDefinitionId": "[variables('acrPullRoleDefinitionId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix'))), '2023-01-31').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployApi')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.Storage/storageAccounts/{0}', variables('storageAccountName'))]",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), 'api', 'StorageBlobDataContributor')]",
+      "properties": {
+        "roleDefinitionId": "[variables('storageBlobDataContributorRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix'))), '2023-01-31').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployApi')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.KeyVault/vaults/{0}', variables('keyVaultName'))]",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), 'api', 'KeyVaultSecretsUser')]",
+      "properties": {
+        "roleDefinitionId": "[variables('keyVaultSecretsUserRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix'))), '2023-01-31').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployApi')]",
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "apiVersion": "2024-11-15",
+      "name": "[format('{0}/{1}', format('cosmos-ama-eval-{0}', variables('nameSuffix')), variables('cosmosBuiltinDataContributorId'))]",
+      "properties": {
+        "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002', resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix'))))]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix'))), '2023-01-31').principalId]",
+        "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix')))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix')))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployApi')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2024-03-01",
+      "name": "[format('app-ama-api-{0}', parameters('env'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix'))))]": {}
+        }
+      },
+      "properties": {
+        "environmentId": "[resourceId('Microsoft.App/managedEnvironments', format('cae-ama-eval-{0}', variables('nameSuffix')))]",
+        "workloadProfileName": "Consumption",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": 8000,
+            "transport": "auto",
+            "allowInsecure": false
+          },
+          "registries": [
+            {
+              "server": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), '2025-04-01').loginServer]",
+              "identity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix')))]"
+            }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "api",
+              "image": "[format('{0}/{1}:{2}', reference(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), '2025-04-01').loginServer, variables('apiImageRepository'), variables('apiImageTag'))]",
+              "resources": {
+                "cpu": "[json('0.5')]",
+                "memory": "1Gi"
+              },
+              "env": "[concat(createArray(createObject('name', 'ENVIRONMENT', 'value', parameters('env')), createObject('name', 'COSMOS_ENDPOINT', 'value', reference(resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix'))), '2024-11-15').documentEndpoint), createObject('name', 'COSMOS_DATABASE', 'value', 'ama-eval'), createObject('name', 'EVAL_STORAGE_ACCOUNT', 'value', variables('storageAccountName')), createObject('name', 'EVAL_TRACES_CONTAINER', 'value', 'runs'), createObject('name', 'AZURE_KEY_VAULT_URI', 'value', reference(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), '2024-04-01-preview').vaultUri), createObject('name', 'EVAL_EVIDENCE_SIGNING_KEY', 'value', 'eval-signing-key'), createObject('name', 'ENTRA_TENANT_ID', 'value', parameters('entraTenantId')), createObject('name', 'ENTRA_AUDIENCE', 'value', parameters('entraAudience')), createObject('name', 'AZURE_CLIENT_ID', 'value', reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix'))), '2023-01-31').clientId), createObject('name', 'AZURE_SUBSCRIPTION_ID', 'value', subscription().subscriptionId), createObject('name', 'EVAL_RUNNER_JOB_RESOURCE_GROUP', 'value', resourceGroup().name), createObject('name', 'EVAL_RUNNER_JOB_NAME', 'value', format('caj-eval-runner-{0}', parameters('env'))), createObject('name', 'EVAL_RUNNER_JOB_IMAGE', 'value', format('{0}/{1}:{2}', reference(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), '2025-04-01').loginServer, variables('evalRunnerImageRepository'), variables('evalRunnerImageTag'))), createObject('name', 'AZURE_AI_PROJECT_ENDPOINT', 'value', reference(resourceId('Microsoft.CognitiveServices/accounts', variables('foundryAccountName')), '2024-10-01').endpoint), createObject('name', 'AZURE_AI_PROJECT_DEPLOYMENTS', 'value', join(map(variables('foundryModelDeployments'), lambda('d', format('{0}@{1}={2}', lambdaVariables('d').modelName, lambdaVariables('d').modelVersion, lambdaVariables('d').name))), ',')), createObject('name', 'EVAL_ALLOW_DEV_TOKENS', 'value', if(equals(parameters('env'), 'dev'), '1', '')), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', reference(resourceId('Microsoft.Insights/components', format('appi-ama-eval-{0}', variables('nameSuffix'))), '2020-02-02').ConnectionString)), if(equals(parameters('env'), 'dev'), createArray(createObject('name', 'EVAL_ALLOW_ANONYMOUS', 'value', '1')), createArray()))]",
+              "probes": [
+                {
+                  "type": "Liveness",
+                  "httpGet": {
+                    "path": "/api/health",
+                    "port": 8000
+                  },
+                  "initialDelaySeconds": 15,
+                  "periodSeconds": 30
+                },
+                {
+                  "type": "Readiness",
+                  "httpGet": {
+                    "path": "/api/health",
+                    "port": 8000
+                  },
+                  "initialDelaySeconds": 5,
+                  "periodSeconds": 10
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 3
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), 'Microsoft.Authorization/roleAssignments', guid(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), 'api', 'AcrPull'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix')))]",
+        "[extensionResourceId(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), 'Microsoft.Authorization/roleAssignments', guid(resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName')), 'api', 'KeyVaultSecretsUser'))]",
+        "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), 'Microsoft.Authorization/roleAssignments', guid(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), 'api', 'StorageBlobDataContributor'))]",
+        "[resourceId('Microsoft.Insights/components', format('appi-ama-eval-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.App/managedEnvironments', format('cae-ama-eval-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName'))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix')))]",
+        "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments', format('cosmos-ama-eval-{0}', variables('nameSuffix')), variables('cosmosBuiltinDataContributorId'))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('foundryAccountName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployApi')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, 'api', 'ContainerAppsJobsOperator')]",
+      "properties": {
+        "roleDefinitionId": "[variables('containerAppsJobsOperatorRoleId')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix'))), '2023-01-31').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-app-ama-api-{0}', variables('nameSuffix')))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "cosmosEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', format('cosmos-ama-eval-{0}', variables('nameSuffix'))), '2024-11-15').documentEndpoint]"
+    },
+    "cosmosAccountName": {
+      "type": "string",
+      "value": "[format('cosmos-ama-eval-{0}', variables('nameSuffix'))]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[variables('storageAccountName')]"
+    },
+    "keyVaultName": {
+      "type": "string",
+      "value": "[variables('keyVaultName')]"
+    },
+    "containerRegistryName": {
+      "type": "string",
+      "value": "[variables('containerRegistryName')]"
+    },
+    "containerRegistryLoginServer": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), '2025-04-01').loginServer]"
+    },
+    "evalRunnerImage": {
+      "type": "string",
+      "value": "[format('{0}/{1}:{2}', reference(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), '2025-04-01').loginServer, variables('evalRunnerImageRepository'), variables('evalRunnerImageTag'))]"
+    },
+    "appInsightsConnectionString": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/components', format('appi-ama-eval-{0}', variables('nameSuffix'))), '2020-02-02').ConnectionString]"
+    },
+    "runnerIdentityResourceId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix')))]"
+    },
+    "runnerIdentityPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), '2023-01-31').principalId]"
+    },
+    "runnerIdentityClientId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-caj-eval-runner-{0}', variables('nameSuffix'))), '2023-01-31').clientId]"
+    },
+    "containerAppsEnvironmentId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.App/managedEnvironments', format('cae-ama-eval-{0}', variables('nameSuffix')))]"
+    },
+    "apiFqdn": {
+      "type": "string",
+      "value": "[if(parameters('deployApi'), reference(resourceId('Microsoft.App/containerApps', format('app-ama-api-{0}', parameters('env'))), '2024-03-01').configuration.ingress.fqdn, '')]"
+    },
+    "foundryAccountName": {
+      "type": "string",
+      "value": "[variables('foundryAccountName')]"
+    },
+    "foundryEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('foundryAccountName')), '2024-10-01').endpoint]"
+    },
+    "foundryDeploymentNames": {
+      "type": "string",
+      "value": "[join(map(variables('foundryModelDeployments'), lambda('d', lambdaVariables('d').name)), ',')]"
+    },
+    "foundryModelMap": {
+      "type": "string",
+      "value": "[join(map(variables('foundryModelDeployments'), lambda('d', format('{0}@{1}={2}', lambdaVariables('d').modelName, lambdaVariables('d').modelVersion, lambdaVariables('d').name))), ',')]"
+    },
+    "apiImage": {
+      "type": "string",
+      "value": "[format('{0}/{1}:{2}', reference(resourceId('Microsoft.ContainerRegistry/registries', variables('containerRegistryName')), '2025-04-01').loginServer, variables('apiImageRepository'), variables('apiImageTag'))]"
+    }
+  }
+}

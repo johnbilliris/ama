@@ -15,7 +15,6 @@ import logging
 from typing import Any, Literal
 
 import httpx
-
 from app.core.tenant_context import TenantContext, get_current_tenant
 from app.services.simulation.synthetic_delivery_service import (
     SyntheticDeliveryService,

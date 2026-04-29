@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "env":                       { "value": "dev" },
+    "location":                  { "value": "australiaeast" },
+    "storageImmutabilityState":  { "value": "Disabled" },
+    "keyVaultNameSalt":          { "value": "a" },
+    "schedulerCron":             { "value": "0 18 * * 0" },
+    "jobCpu":                    { "value": "1.0" },
+    "jobMemory":                 { "value": "2.0Gi" }
+  }
+}

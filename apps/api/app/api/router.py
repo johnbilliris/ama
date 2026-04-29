@@ -35,6 +35,15 @@ from app.api.routes.tasks import router as tasks_router
 from app.api.routes.warning_chain import router as warning_chain_router
 from fastapi import APIRouter
 
+# Lazy import for eval module to keep its repo deps optional
+try:
+    from app.api.routes.eval.router import register_subroutes as _register_eval_subroutes
+    from app.api.routes.eval.router import router as eval_router
+    _register_eval_subroutes()
+    _EVAL_AVAILABLE = True
+except Exception:  # pragma: no cover
+    _EVAL_AVAILABLE = False
+
 api_router = APIRouter()
 api_router.include_router(signals_router)
 api_router.include_router(incidents_router)
@@ -71,3 +80,6 @@ api_router.include_router(aidr_health_router)
 api_router.include_router(governance_dashboard_router)
 api_router.include_router(dead_letters_mgmt_router)
 api_router.include_router(radius_lookup_router)
+
+if _EVAL_AVAILABLE:
+    api_router.include_router(eval_router)

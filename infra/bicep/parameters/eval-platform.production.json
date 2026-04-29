@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "env":                       { "value": "production" },
+    "location":                  { "value": "australiaeast" },
+    "storageImmutabilityState":  { "value": "Unlocked" },
+    "schedulerCron":             { "value": "0 18 * * 0" },
+    "jobCpu":                    { "value": "4.0" },
+    "jobMemory":                 { "value": "8.0Gi" }
+  }
+}
