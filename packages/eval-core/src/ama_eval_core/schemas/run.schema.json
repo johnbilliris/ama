@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama-disaster.dev/schemas/eval/run.schema.json",
+  "title": "EvaluationRun",
+  "type": "object",
+  "required": ["runId","status","mode","datasetId","datasetVersion","models","metricSetVersion","createdAt","createdBy","policyVersion"],
+  "additionalProperties": true,
+  "properties": {
+    "runId":           { "type": "string" },
+    "status":          { "type": "string", "enum": ["queued","provisioning","running","succeeded","failed","cancelling","cancelled"] },
+    "mode":            { "type": "string", "enum": ["ad-hoc","scheduled-baseline","pr-fast-subset","progressive-delivery-full"] },
+    "datasetId":       { "type": "string" },
+    "datasetVersion":  { "type": "string" },
+    "datasetSubset":   {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hazardTags":       { "type": "array", "items": { "type": "string" } },
+        "jurisdictionTags": { "type": "array", "items": { "type": "string" } },
+        "severity":         { "type": "array", "items": { "type": "string" } },
+        "sensitivityLabels":{ "type": "array", "items": { "type": "string" } },
+        "provenance":       { "type": "array", "items": { "type": "string" } },
+        "maxCases":         { "type": "integer", "minimum": 1 }
+      }
+    },
+    "models":          {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["modelId","version"],
+        "properties": {
+          "modelId":           { "type": "string" },
+          "version":           { "type": "string" },
+          "deploymentRegion":  { "type": "string" },
+          "sku":               { "type": "string" },
+          "parameters":        { "type": "object" }
+        }
+      }
+    },
+    "metricSetVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "judgeSetVersion":  { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "policyVersion":    { "type": "string" },
+    "estimatedCostAud": { "type": "number", "minimum": 0 },
+    "actualCostAud":    { "type": "number", "minimum": 0 },
+    "createdAt":        { "type": "string", "format": "date-time" },
+    "createdBy":        { "type": "string" },
+    "startedAt":        { "type": "string", "format": "date-time" },
+    "completedAt":      { "type": "string", "format": "date-time" },
+    "exitCode":         { "type": "integer", "enum": [0,1,2,3] },
+    "changeRef":        { "type": "string" },
+    "baselineRunId":    { "type": "string" },
+    "infraLifecycle":   { "type": "object" }
+  }
+}

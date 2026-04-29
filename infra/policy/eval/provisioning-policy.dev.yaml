@@ -1,0 +1,39 @@
+# infra/policy/eval/provisioning-policy.dev.yaml
+#
+# Provisioning policy for the LLM Evaluation Framework — dev environment.
+# Loaded by `apps/api/app/services/eval/run_orchestrator.py` and used by
+# `packages/eval-core/src/ama_eval_core/policy.py:check_run_against_policy`.
+#
+# Bound to FR-018 (allowed regions, SKUs, concurrency, cost cap, duration cap)
+# and FR-019 (reconciler max-run-duration window).
+
+policyVersion: 1.0.0
+env: dev
+
+allowedRegions:
+  # Foundry carve-out list (constitution NN-2): model-hosting endpoints only.
+  # All other resources MUST be in australiaeast.
+  - australiaeast
+  - eastus
+  - eastus2
+  - westus3
+  - swedencentral
+
+allowedSkus:
+  - Standard
+  - GlobalStandard
+
+maxConcurrentDeployments: 6
+maxRunCostAud: 250.00
+maxRunDurationMinutes: 480     # 8h hard ceiling per FR-018
+prFastSubsetMaxMinutes: 30     # FR-024 PR gate ceiling
+secondaryJudgeSamplingRate: 0.05  # 5% of cases per metric (FR-003a/FR-003b)
+
+evaluatorRoles:
+  evalAuthor: eval-author
+  safetyReviewer: safety-reviewer
+  governanceReviewer: governance-reviewer
+
+# Per-metric overrides — secondary judge sampling rates may be metric-specific.
+# (Schema accepts overrides but dev defaults to the global rate above.)
+metricOverrides: {}

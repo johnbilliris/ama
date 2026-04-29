@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama-disaster.dev/schemas/eval/metric-definition.schema.json",
+  "title": "MetricDefinitionVersion",
+  "description": "Versioned definition of a single metric (FR-002, FR-003a/b).",
+  "type": "object",
+  "required": ["metricId","version","family","scoreScale","scoringMethod","tier","passThreshold","appliesTo","state"],
+  "additionalProperties": false,
+  "properties": {
+    "metricId":  { "type": "string" },
+    "version":   { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "family":    { "type": "string", "enum": ["quality","factuality","groundedness","retrieval","safety","refusal-correctness","tone","prompt-injection","operational"] },
+    "scoreScale":{
+      "type": "object",
+      "required": ["min","max"],
+      "properties": {
+        "min":  { "type": "number" },
+        "max":  { "type": "number" },
+        "unit": { "type": "string" }
+      }
+    },
+    "scoringMethod": { "type": "string", "enum": ["rule-based","primary-judge","secondary-judge-sampled","hybrid"] },
+    "tier":          { "type": "string", "enum": ["rule-based","primary-judge","secondary-judge-sampled"] },
+    "secondarySamplingRate": { "type": "number", "minimum": 0, "maximum": 1 },
+    "passThreshold": { "type": "number" },
+    "regressionDelta": { "type": "number", "minimum": 0 },
+    "evidenceFields":{ "type": "array", "items": { "type": "string" } },
+    "appliesTo":     {
+      "type": "object",
+      "properties": {
+        "hazardTags":    { "type": "array", "items": { "type": "string" } },
+        "expectedAction":{ "type": "array", "items": { "type": "string" } },
+        "retrievalOnly": { "type": "boolean" }
+      }
+    },
+    "judgeId":       { "type": "string" },
+    "state":         { "type": "string", "enum": ["draft","active","retired"] },
+    "approvalChain": { "type": "array" }
+  }
+}

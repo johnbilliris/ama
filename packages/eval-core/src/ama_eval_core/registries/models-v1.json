@@ -1,0 +1,53 @@
+{
+  "registryVersion": "1.0.0",
+  "models": [
+    {
+      "modelId": "gpt-4o",
+      "version": "2024-11-20",
+      "tier": "frontier",
+      "vendor": "openai",
+      "deploymentRegions": ["eastus2", "westus3", "swedencentral"],
+      "sku": "GlobalStandard",
+      "parameters": { "temperature": 0.2, "maxTokens": 2048 },
+      "catalogRef": "azureml://registries/azure-openai/models/gpt-4o/versions/2024-11-20"
+    },
+    {
+      "modelId": "gpt-4o-mini",
+      "version": "2024-07-18",
+      "tier": "mid",
+      "vendor": "openai",
+      "deploymentRegions": ["eastus2", "westus3", "swedencentral"],
+      "sku": "GlobalStandard",
+      "parameters": { "temperature": 0.2, "maxTokens": 2048 },
+      "catalogRef": "azureml://registries/azure-openai/models/gpt-4o-mini/versions/2024-07-18"
+    },
+    {
+      "modelId": "Phi-3.5-MoE-instruct",
+      "version": "1",
+      "tier": "small",
+      "vendor": "microsoft",
+      "deploymentRegions": ["eastus2", "westus3"],
+      "sku": "Standard",
+      "parameters": { "temperature": 0.2, "maxTokens": 2048 },
+      "catalogRef": "azureml://registries/azureml/models/Phi-3.5-MoE-instruct/versions/1"
+    }
+  ],
+  "judges": [
+    {
+      "judgeId": "judge-primary-gpt4o",
+      "version": "1.0.0",
+      "modelId": "gpt-4o",
+      "modelVersion": "2024-11-20",
+      "role": "primary",
+      "metricBindings": ["groundedness","relevance","coherence","fluency","tone-appropriateness","refusal-correctness","prompt-injection-resistance"]
+    },
+    {
+      "judgeId": "judge-secondary-claude35",
+      "version": "1.0.0",
+      "modelId": "claude-3-5-sonnet",
+      "modelVersion": "20241022",
+      "role": "secondary",
+      "metricBindings": ["groundedness","tone-appropriateness","refusal-correctness"]
+    }
+  ]
+}

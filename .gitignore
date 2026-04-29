@@ -32,3 +32,5 @@ obj/
 
 # Benchmark outputs (current.json is CI artifact, not committed)
 .benchmarks/current.json
+
+.eval-out/

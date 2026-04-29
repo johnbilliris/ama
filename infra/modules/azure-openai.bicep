@@ -68,50 +68,80 @@ resource openAiAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' existin
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
-// Responsible AI policy (simulation-only)
+// Responsible AI policy (emergency-management domain)
 //
-// The Simulation Controller routinely processes emergency-management vocabulary
-// (bushfire behaviour, escalation, casualty projections) that the DefaultV2
-// content filter scores as high-severity violence on the prompt side and blocks
-// before the model can respond. We attach a custom policy that raises the
-// Violence threshold from the default Medium → High on both Prompt and
-// Completion, while leaving Hate / Sexual / SelfHarm / Jailbreak / IndirectAttack
-// at base defaults. This policy is applied ONLY to the simulation deployment —
-// the live-incident reasoning and drafting deployments keep the stock filter.
+// All three model deployments — reasoning, drafting, and simulation — routinely
+// process emergency-management vocabulary (bushfire behaviour, escalation,
+// casualty projections) that the DefaultV2 content filter scores as
+// high-severity violence on the prompt side and blocks before the model can
+// respond. We attach a custom policy that raises the Violence threshold from
+// the default Medium → High on both Prompt and Completion, while leaving
+// Hate / Sexual / SelfHarm / Jailbreak / IndirectAttack at base defaults.
+//
+// Each deployment gets its own copy of the policy (identical contentFilters)
+// so that future per-tier tuning — e.g. relaxing the simulation tier further
+// without touching live-incident tiers — is a localised change.
 //
 // Reference: Microsoft.CognitiveServices/accounts/raiPolicies API 2024-10-01.
 // ────────────────────────────────────────────────────────────────────────────────
 
+var emDomainContentFilters = [
+  {
+    name: 'Violence'
+    source: 'Prompt'
+    enabled: true
+    blocking: true
+    severityThreshold: 'High'
+  }
+  {
+    name: 'Violence'
+    source: 'Completion'
+    enabled: true
+    blocking: true
+    severityThreshold: 'High'
+  }
+]
+
+var reasoningRaiPolicyName = 'reasoning-em-domain-${envPrefix}'
+var draftingRaiPolicyName = 'drafting-em-domain-${envPrefix}'
 var simulationRaiPolicyName = 'sim-em-domain-${envPrefix}'
 
 // NOTE: Cognitive Services accounts only allow ONE child operation (deployment
-// or RAI policy) at a time. Deploying this policy in parallel with
-// reasoningDeployment causes ARM to return "RequestConflict: Another operation
-// is being performed on the parent resource". We serialise it into the chain
-// AFTER draftingDeployment, so the end-to-end order is:
-//   reasoningDeployment → draftingDeployment → simulationRaiPolicy → simulationDeployment
+// or RAI policy) at a time. Deploying RAI policies in parallel with
+// deployments causes ARM to return "RequestConflict: Another operation is
+// being performed on the parent resource". We serialise the full chain:
+//   reasoningRaiPolicy → reasoningDeployment
+//     → draftingRaiPolicy → draftingDeployment
+//     → simulationRaiPolicy → simulationDeployment
+
+resource reasoningRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2024-10-01' = {
+  parent: openAiAccount
+  name: reasoningRaiPolicyName
+  properties: {
+    basePolicyName: 'Microsoft.DefaultV2'
+    mode: 'Blocking'
+    contentFilters: emDomainContentFilters
+  }
+}
+
+resource draftingRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2024-10-01' = {
+  parent: openAiAccount
+  name: draftingRaiPolicyName
+  properties: {
+    basePolicyName: 'Microsoft.DefaultV2'
+    mode: 'Blocking'
+    contentFilters: emDomainContentFilters
+  }
+  dependsOn: [reasoningDeployment]
+}
+
 resource simulationRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2024-10-01' = {
   parent: openAiAccount
   name: simulationRaiPolicyName
   properties: {
     basePolicyName: 'Microsoft.DefaultV2'
     mode: 'Blocking'
-    contentFilters: [
-      {
-        name: 'Violence'
-        source: 'Prompt'
-        enabled: true
-        blocking: true
-        severityThreshold: 'High'
-      }
-      {
-        name: 'Violence'
-        source: 'Completion'
-        enabled: true
-        blocking: true
-        severityThreshold: 'High'
-      }
-    ]
+    contentFilters: emDomainContentFilters
   }
   dependsOn: [draftingDeployment]
 }
@@ -133,6 +163,7 @@ resource reasoningDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
       name: reasoningModelName
       version: reasoningModelVersion
     }
+    raiPolicyName: reasoningRaiPolicy.name
   }
 }
 
@@ -149,16 +180,13 @@ resource draftingDeployment 'Microsoft.CognitiveServices/accounts/deployments@20
       name: draftingModelName
       version: draftingModelVersion
     }
+    raiPolicyName: draftingRaiPolicy.name
   }
-  dependsOn: [reasoningDeployment]
 }
 
 // Dedicated deployment for the Simulation Controller (spec 024).
 // GlobalStandard SKU isolates exercise traffic from live-incident reasoning/drafting
 // quota so a runaway simulation cannot starve real-incident agents.
-// Uses the custom RAI policy (see simulationRaiPolicy above) so emergency-management
-// vocabulary — fire escalation, casualty projections — doesn't trip the default
-// violence filter during an exercise.
 resource simulationDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: openAiAccount
   name: 'gpt-5.4-sim-${envPrefix}'
@@ -223,5 +251,7 @@ resource openAiDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
 output reasoningDeploymentName string = reasoningDeployment.name
 output draftingDeploymentName string = draftingDeployment.name
 output simulationDeploymentName string = simulationDeployment.name
+output reasoningRaiPolicyName string = reasoningRaiPolicy.name
+output draftingRaiPolicyName string = draftingRaiPolicy.name
 output simulationRaiPolicyName string = simulationRaiPolicy.name
 output openAiEndpoint string = openAiAccount.properties.endpoint

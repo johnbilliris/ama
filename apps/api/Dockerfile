@@ -5,6 +5,7 @@ COPY apps/api/pyproject.toml ./apps/api/
 COPY apps/api/app/ ./apps/api/app/
 COPY packages/ ./packages/
 RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir ./packages/eval-core && \
     cd apps/api && pip install --no-cache-dir .
 
 FROM python:3.12-slim AS runtime

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama-disaster.dev/schemas/eval/provisioning-policy.schema.json",
+  "title": "ProvisioningPolicy",
+  "type": "object",
+  "required": ["policyVersion","env","allowedRegions","allowedSkus","maxConcurrentDeployments","maxRunCostAud","maxRunDurationMinutes","prFastSubsetMaxMinutes","secondaryJudgeSamplingRate","evaluatorRoles"],
+  "additionalProperties": true,
+  "properties": {
+    "policyVersion":             { "type": "string" },
+    "env":                       { "type": "string", "enum": ["dev","staging","production"] },
+    "allowedRegions":            { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "allowedSkus":               { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "maxConcurrentDeployments":  { "type": "integer", "minimum": 1 },
+    "maxRunCostAud":             { "type": "number",  "minimum": 0 },
+    "maxRunDurationMinutes":     { "type": "integer", "minimum": 1, "maximum": 480 },
+    "prFastSubsetMaxMinutes":    { "type": "integer", "minimum": 1, "maximum": 30  },
+    "secondaryJudgeSamplingRate":{ "type": "number",  "minimum": 0, "maximum": 1 },
+    "evaluatorRoles": {
+      "type": "object",
+      "required": ["evalAuthor","safetyReviewer","governanceReviewer"],
+      "properties": {
+        "evalAuthor":         { "type": "string" },
+        "safetyReviewer":     { "type": "string" },
+        "governanceReviewer": { "type": "string" }
+      }
+    },
+    "metricOverrides": { "type": "object" }
+  }
+}

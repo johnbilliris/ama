@@ -435,6 +435,28 @@ Monorepo (per plan.md Project Structure):
 
 ---
 
+## Phase 10: Amendment — Dev-Only Anonymous API Access (FR-022a)
+
+**Purpose**: Allow operator validation of `/api/eval/*` against the synthetic dev dataset without standing up an Entra ID app or issuing tokens. Staging and production behaviour is unchanged.
+
+- [X] T091 Update `apps/api/app/middleware/eval_role_guard.py` to accept anonymous requests **only when** `ENVIRONMENT == "dev"` and `EVAL_ALLOW_ANONYMOUS=1` are both set, returning a synthetic `EvalPrincipal(sub="anonymous", roles=Eval.Operator+Eval.Viewer+Eval.Auditor, is_dev_token=True)` and tagging audit events with `principal=anonymous` and `environment=dev`. Refuse anonymous requests on any other environment value or when `EVAL_ALLOW_ANONYMOUS` is unset. Add unit tests covering: (a) anonymous accepted in dev, (b) anonymous rejected when `ENVIRONMENT=staging` even if env var is set, (c) anonymous rejected in dev when env var is unset, (d) bearer-token path still works in dev, (e) dataset routes for sensitivity-labelled cases reject anonymous principals.
+  - Agents: `software-developer`, `security-engineer`, `compliance-auditor`
+  - Tools: `read`, `edit`, `execute`
+- [X] T092 Update `infra/bicep/modules/eval/eval-platform.bicep` to set `EVAL_ALLOW_ANONYMOUS=1` and `ENVIRONMENT=dev` on the API container app **only when** `env == 'dev'`; ensure both env vars are absent on staging/production deployments. Re-build the eval Bicep template and re-run ARM `validate` for all three environment parameter files; assert no schema warnings escalate to errors.
+  - Agents: `infrastructure-devops`, `azure-principal-architect`
+  - Tools: `read`, `edit`, `execute`
+- [X] T093 Update `scripts/run_llm_evaluation.py` so dev publish/execute/archive stop minting a dev bearer token when the API has anonymous mode enabled (probe `GET /api/eval/health` to discover the mode) and pass no `Authorization` header. Outside dev, behaviour is unchanged. Add unit tests for both branches.
+  - Agents: `software-developer`, `qa-test-engineer`
+  - Tools: `read`, `edit`, `execute`
+- [X] T094 Refresh operator docs: `docs/llm-evaluation/manual-evaluation-guide.md` and `specs/030-llm-eval-framework/quickstart.md` describe the dev-only anonymous mode, call out that staging/production still require Entra tokens, and document the `EVAL_ALLOW_ANONYMOUS` env var.
+  - Agents: `tech-writer`, `software-developer`
+  - Tools: `read`, `edit`
+- [X] T095 Live-validate end-to-end in dev: `preflight → provision → publish → execute → archive` with no `--api-entra-audience`, no Entra app present, no `Authorization` header. Confirm scorecard saved, audit events tagged `principal=anonymous`, and the API rejects access to a synthetic case carrying a non-`synthetic-dev` sensitivity label. Capture the run id + audit excerpt in the PR description.
+  - Agents: `qa-test-engineer`, `incident-commander`
+  - Tools: `execute`, `read`
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

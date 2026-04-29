@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama-disaster.dev/schemas/eval/scorecard.schema.json",
+  "title": "Scorecard",
+  "type": "object",
+  "required": ["runId","datasetVersion","perModel","winner","createdAt"],
+  "additionalProperties": true,
+  "properties": {
+    "runId":          { "type": "string" },
+    "datasetVersion": { "type": "string" },
+    "metricSetVersion": { "type": "string" },
+    "perModel": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "required": ["mean","pass"],
+          "properties": {
+            "mean":          { "type": "number" },
+            "pass":          { "type": "boolean" },
+            "regression":    { "type": "number" },
+            "distribution":  { "type": "object" },
+            "tierBreakdown": {
+              "type": "object",
+              "properties": {
+                "rule-based":              { "type": "number" },
+                "primary-judge":           { "type": "number" },
+                "secondary-judge-sampled": { "type": "number" }
+              }
+            },
+            "judgeId":       { "type": "string" },
+            "judgeVersion":  { "type": "string" }
+          }
+        }
+      }
+    },
+    "winner": {
+      "type": "object",
+      "properties": {
+        "byMetric": { "type": "object" },
+        "overall":  { "type": ["string","null"] }
+      }
+    },
+    "regressionDiagnostics": { "type": "array" },
+    "secondaryJudgeDisagreements": { "type": "array" },
+    "costAttributionAud": { "type": "number" },
+    "createdAt":          { "type": "string", "format": "date-time" },
+    "baselineRunId":      { "type": ["string","null"] }
+  }
+}
