@@ -1,0 +1,255 @@
+{
+  "api_response_models": {
+    "apps/api/app/api/routes/ai_analysis.py::CommunitySummaryInput": [
+      "domain_filter",
+      "indicator_data"
+    ],
+    "apps/api/app/api/routes/ai_analysis.py::CrossDomainAnalysisInput": [
+      "indicator_data"
+    ],
+    "apps/api/app/api/routes/ai_analysis.py::RecommendationsInput": [
+      "lagging_indicator_ids"
+    ],
+    "apps/api/app/api/routes/aiims.py::AssignRoleInput": [
+      "agent_identifier",
+      "aiims_function",
+      "assigned_by"
+    ],
+    "apps/api/app/api/routes/aiims.py::ChangeLevelInput": [
+      "authorising_user",
+      "new_level",
+      "rationale"
+    ],
+    "apps/api/app/api/routes/aiims.py::UpdateAssignmentInput": [
+      "aiims_function",
+      "is_active"
+    ],
+    "apps/api/app/api/routes/alerts.py::ApplyTemplateInput": [
+      "templateKey"
+    ],
+    "apps/api/app/api/routes/alerts.py::PublishAlertInput": [
+      "publishedByPersonaId"
+    ],
+    "apps/api/app/api/routes/alerts.py::SupersedeAlertInput": [
+      "newAlertId"
+    ],
+    "apps/api/app/api/routes/emergency_plans.py::CreatePlanInput": [
+      "authority",
+      "created_by",
+      "hazard_types",
+      "hierarchy_level",
+      "parent_plan_id",
+      "region_id",
+      "security_rating",
+      "title"
+    ],
+    "apps/api/app/api/routes/emergency_plans.py::TransitionInput": [
+      "target_state",
+      "user_role"
+    ],
+    "apps/api/app/api/routes/emergency_plans.py::UpdateSectionInput": [
+      "content",
+      "title"
+    ],
+    "apps/api/app/api/routes/lessons.py::AssignInput": [
+      "assigned_to",
+      "target_resolution_date"
+    ],
+    "apps/api/app/api/routes/lessons.py::CaptureInput": [
+      "aiims_function",
+      "created_by",
+      "description",
+      "incident_id",
+      "originating_event_id",
+      "pprr_phase",
+      "scenario_run_id",
+      "severity",
+      "tags",
+      "title"
+    ],
+    "apps/api/app/api/routes/lessons.py::FlagContradictoryInput": [
+      "contradicts_config_ref"
+    ],
+    "apps/api/app/api/routes/lessons.py::ResolveInput": [
+      "escalation_approved_by",
+      "resolution_notes",
+      "resolution_reference"
+    ],
+    "apps/api/app/api/routes/me_frameworks.py::CreateEvaluationInput": [
+      "created_by",
+      "evaluation_period_end",
+      "evaluation_period_start",
+      "generated_by",
+      "incident_id"
+    ],
+    "apps/api/app/api/routes/me_frameworks.py::CreateFrameworkInput": [
+      "affected_community_definition",
+      "created_by",
+      "incident_id",
+      "program_name"
+    ],
+    "apps/api/app/api/routes/me_frameworks.py::CreateProgramLogicInput": [
+      "activities",
+      "final_outcomes",
+      "incident_id",
+      "intermediate_outcomes",
+      "model_type",
+      "outcome_chain_links",
+      "outputs",
+      "resources_inputs",
+      "timeline_months"
+    ],
+    "apps/api/app/api/routes/me_frameworks.py::MonitoringReportQuery": [
+      "incident_id"
+    ],
+    "apps/api/app/api/routes/me_frameworks.py::SelectOutcomesInput": [
+      "incident_id",
+      "outcomes"
+    ],
+    "apps/api/app/api/routes/me_frameworks.py::SetCollectionScheduleInput": [
+      "incident_id",
+      "schedules"
+    ],
+    "apps/api/app/api/routes/me_frameworks.py::SetStandardsInput": [
+      "incident_id",
+      "standards"
+    ],
+    "apps/api/app/api/routes/pprr.py::CreateContextInput": [
+      "activated_by",
+      "context_reference_id",
+      "context_type",
+      "notes",
+      "pprr_phase"
+    ],
+    "apps/api/app/api/routes/pprr.py::TransitionPhaseInput": [
+      "authorising_user",
+      "overlap_active",
+      "overlap_end_expected_at",
+      "rationale",
+      "target_phase"
+    ],
+    "apps/api/app/api/routes/pprr.py::TransitionToIncidentInput": [
+      "incident_id"
+    ],
+    "apps/api/app/api/routes/radius_lookup.py::RadiiUpdate": [
+      "radii"
+    ],
+    "apps/api/app/api/routes/radius_lookup.py::RadiusCreate": [
+      "hazard_type",
+      "radii"
+    ],
+    "apps/api/app/api/routes/recommendations.py::ApprovalDecisionInput": [
+      "approverPersonaId",
+      "conditions",
+      "outcome",
+      "rationale"
+    ],
+    "apps/api/app/api/routes/recovery.py::BatchIndicatorItem": [
+      "indicator_name",
+      "linked_alert_id",
+      "population_coverage",
+      "update_source",
+      "value"
+    ],
+    "apps/api/app/api/routes/recovery.py::BatchUpdateInput": [
+      "updates"
+    ],
+    "apps/api/app/api/routes/recovery.py::UpdateIndicatorInput": [
+      "linked_alert_id",
+      "population_coverage",
+      "update_source",
+      "value"
+    ],
+    "apps/api/app/api/routes/recovery_catalogue.py::SuggestActivitiesInput": [
+      "lagging_indicator_ids"
+    ],
+    "apps/api/app/api/routes/scenarios.py::ScenarioReplayInput": [
+      "jurisdictionIds",
+      "scenarioName",
+      "scenarioType"
+    ],
+    "apps/api/app/api/routes/simulation_chat.py::ChatRequest": [
+      "correlation_id",
+      "message"
+    ],
+    "apps/api/app/api/routes/simulation_playback.py::CreateAnnotationRequest": [
+      "sim_time_offset",
+      "text"
+    ],
+    "apps/api/app/api/routes/simulation_playback.py::UpdateAnnotationRequest": [
+      "text"
+    ],
+    "apps/api/app/api/routes/simulations.py::AddParticipantsRequest": [
+      "participants"
+    ],
+    "apps/api/app/api/routes/simulations.py::ArchiveRequest": [
+      "elapsed_seconds"
+    ],
+    "apps/api/app/api/routes/simulations.py::ChangeWarpSpeedRequest": [
+      "warp_speed"
+    ],
+    "apps/api/app/api/routes/simulations.py::CreateSimulationRequest": [
+      "jurisdictions",
+      "participants",
+      "resource_limits",
+      "scenario_template_id",
+      "scenario_type",
+      "warp_speed"
+    ],
+    "apps/api/app/api/routes/simulations.py::PauseResumeRequest": [
+      "elapsed_seconds"
+    ],
+    "apps/api/app/api/routes/simulations.py::SeedReplayRequest": [
+      "end",
+      "incident_id",
+      "start",
+      "time_compression"
+    ],
+    "apps/api/app/api/routes/simulations.py::SeedTemplateRequest": [
+      "template_id"
+    ],
+    "apps/api/app/api/routes/tasks.py::TaskStatusUpdateInput": [
+      "personaId",
+      "status"
+    ],
+    "apps/api/app/api/routes/workflow_runs.py::ApprovalGateMetricsResponse": [
+      "approvals",
+      "escalations",
+      "modifications",
+      "mtta_seconds",
+      "rejections",
+      "timeouts",
+      "window"
+    ],
+    "apps/api/app/api/routes/workflow_runs.py::AuditEntriesListResponse": [
+      "items"
+    ],
+    "apps/api/app/api/routes/workflow_runs.py::CancelRequest": [
+      "reason"
+    ],
+    "apps/api/app/api/routes/workflow_runs.py::CheckpointsListResponse": [
+      "items"
+    ],
+    "apps/api/app/api/routes/workflow_runs.py::WorkflowRunsListResponse": [
+      "continuation",
+      "items"
+    ]
+  },
+  "audit_entry_schema_fields": [
+    "agent_name",
+    "correlation_id",
+    "ended_at",
+    "failure_reason",
+    "id",
+    "incident_id",
+    "input_fingerprint",
+    "model_tier",
+    "outcome",
+    "output_fingerprint",
+    "run_id",
+    "started_at",
+    "step_name",
+    "tool_invocations"
+  ],
+  "otel_dashboard_fields": []
+}

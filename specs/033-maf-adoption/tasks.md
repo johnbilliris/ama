@@ -87,122 +87,122 @@ Monorepo (per `plan.md → Project Structure`):
 
 ### Infrastructure (Cosmos containers + immutability policy)
 
-- [ ] T008 Add `infra/bicep/modules/cosmos-workflow.bicep` defining three new Cosmos SQL containers in the existing `ama-platform` account: `workflow_runs` (partition `/incident_id`, no TTL), `checkpoints` (partition `/run_id`, defaultTtl=2592000), `tool_registrations` (partition `/tool_name`, no TTL)
+- [X] T008 Add `infra/bicep/modules/cosmos-workflow.bicep` defining three new Cosmos SQL containers in the existing `ama-platform` account: `workflow_runs` (partition `/incident_id`, no TTL), `checkpoints` (partition `/run_id`, defaultTtl=2592000), `tool_registrations` (partition `/tool_name`, no TTL)
   - **Agents**: infrastructure-devops, data-engineer, azure-principal-architect
   - **Tools**: edit, read
   - **Success**: `az bicep build --file infra/bicep/modules/cosmos-workflow.bicep` succeeds with no errors.
 
-- [ ] T009 Wire the new `cosmos-workflow.bicep` module into `infra/main.bicep`, exposing container names as outputs and adding `australiaeast` as the only allowed location parameter
+- [X] T009 Wire the new `cosmos-workflow.bicep` module into `infra/main.bicep`, exposing container names as outputs and adding `australiaeast` as the only allowed location parameter
   - **Agents**: infrastructure-devops, security-engineer
   - **Tools**: edit, read
   - **Success**: `az deployment group what-if --resource-group rg-drh-dev --template-file infra/main.bicep --parameters @infra/main.parameters.dev.json` reports the three new containers as `Create` and no other deltas (regression check for FR-024).
 
-- [ ] T009b Implement `tests/contract/test_audit_telemetry_fields_no_regression.py` proving FR-024 — a field-level snapshot test that captures the pre-MAF field set of (a) every operator-facing REST response in `apps/api/app/api/routes/`, (b) every `audit_entries` Cosmos document shape produced today, and (c) every OTel span attribute referenced by an existing dashboard query under `infra/bicep/modules/dashboards/`; the test FAILS the build if any field is removed or renamed by MAF code paths
+- [X] T009b Implement `tests/contract/test_audit_telemetry_fields_no_regression.py` proving FR-024 — a field-level snapshot test that captures the pre-MAF field set of (a) every operator-facing REST response in `apps/api/app/api/routes/`, (b) every `audit_entries` Cosmos document shape produced today, and (c) every OTel span attribute referenced by an existing dashboard query under `infra/bicep/modules/dashboards/`; the test FAILS the build if any field is removed or renamed by MAF code paths
   - **Agents**: qa-test-engineer, observer-auditor, sre-engineer
   - **Tools**: read, edit, execute, search
   - **Success**: A deliberate field rename in a draft PR causes `pytest tests/contract/test_audit_telemetry_fields_no_regression.py` to fail; reverting passes; the snapshot file is committed under `tests/contract/snapshots/audit_telemetry_fields.json`.
 
-- [ ] T010 Add `infra/policy/deny_audit_delete.rego` Rego rule that denies any role assignment granting `Microsoft.DocumentDB/.../items/delete` on the `audit_entries` container, satisfying R8 + FR-012a 7-year online retention
+- [X] T010 Add `infra/policy/deny_audit_delete.rego` Rego rule that denies any role assignment granting `Microsoft.DocumentDB/.../items/delete` on the `audit_entries` container, satisfying R8 + FR-012a 7-year online retention
   - **Agents**: security-engineer, compliance-auditor, infrastructure-devops
   - **Tools**: edit, execute
   - **Success**: `conftest test infra/bicep/modules/cosmos-workflow.bicep --policy infra/policy` blocks a deliberately added `delete` action in a fixture and passes the canonical posture matrix.
 
-- [ ] T011 [P] Add the `audit_entries` permanent-retention rule to the spec-029 posture matrix (`infra/policy/posture-matrix.yaml`) so the OPA gate enforces it on every PR
+- [X] T011 [P] Add the `audit_entries` permanent-retention rule to the spec-029 posture matrix (`infra/policy/posture-matrix.yaml`) so the OPA gate enforces it on every PR
   - **Agents**: security-engineer, compliance-auditor
   - **Tools**: edit
   - **Success**: PR diff shows a single additive rule under `cosmosdb.containers.audit_entries`; existing posture-matrix tests pass.
 
-- [ ] T011b Implement `apps/agents/maf_runtime/errors.py` exposing the canonical typed error hierarchy required by FR-004: `MafRuntimeError` (base) and subclasses `LlmFailure` (with sub-distinguished `LlmRateLimitError`, `LlmTimeoutError`, `LlmContentFilterError`, `LlmQuotaError`, `LlmServerError` to drive per-class retry policy in T042c), `ToolFailure` (with subclasses `ToolVersionMismatchError`, `ToolUnreachableError`, `ToolTimeoutError`, `ToolMalformedResponseError`), `ValidationFailure`, `OutputSchemaMismatchError`, `PolicyFailure`, `InvalidStateTransitionError`, `ActiveRunAlreadyExistsError`, `CheckpointStoreUnavailableError`, `DuplicateDecisionConflictError`. Every error MUST carry a `correlation_id`, an optional `run_id`, and a stable `error_code` string. The static-analysis check (no locally-defined error classes within `apps/agents/maf_runtime/`) MUST be split out into a separate polish-phase task (T074b) so it runs only after all downstream tasks have been completed
+- [X] T011b Implement `apps/agents/maf_runtime/errors.py` exposing the canonical typed error hierarchy required by FR-004: `MafRuntimeError` (base) and subclasses `LlmFailure` (with sub-distinguished `LlmRateLimitError`, `LlmTimeoutError`, `LlmContentFilterError`, `LlmQuotaError`, `LlmServerError` to drive per-class retry policy in T042c), `ToolFailure` (with subclasses `ToolVersionMismatchError`, `ToolUnreachableError`, `ToolTimeoutError`, `ToolMalformedResponseError`), `ValidationFailure`, `OutputSchemaMismatchError`, `PolicyFailure`, `InvalidStateTransitionError`, `ActiveRunAlreadyExistsError`, `CheckpointStoreUnavailableError`, `DuplicateDecisionConflictError`. Every error MUST carry a `correlation_id`, an optional `run_id`, and a stable `error_code` string. The static-analysis check (no locally-defined error classes within `apps/agents/maf_runtime/`) MUST be split out into a separate polish-phase task (T074b) so it runs only after all downstream tasks have been completed
   - **Agents**: principal-engineer, software-developer, api-architect
   - **Tools**: read, edit
   - **Success**: A new test `tests/unit/test_maf_runtime_errors.py` asserts every error subclass carries the required fields. The cross-module import-discipline check is delegated to T074b (Polish phase) so it does not falsely fail mid-phase before downstream tasks have wired up their imports.
 
 ### Shared MAF runtime building blocks
 
-- [ ] T012 Implement `apps/agents/maf_runtime/chat_client.py` exposing `build_azure_openai_chat_client(model_tier)` factory that uses `DefaultAzureCredential` + `get_bearer_token_provider("https://cognitiveservices.azure.com/.default")` and reads endpoint + deployment names from existing `LLMClientConfig` (mirrors `apps/agents/common/llm_client.py:18-39`)
+- [X] T012 Implement `apps/agents/maf_runtime/chat_client.py` exposing `build_azure_openai_chat_client(model_tier)` factory that uses `DefaultAzureCredential` + `get_bearer_token_provider("https://cognitiveservices.azure.com/.default")` and reads endpoint + deployment names from existing `LLMClientConfig` (mirrors `apps/agents/common/llm_client.py:18-39`)
   - **Agents**: ai-ml-engineer, security-engineer, software-developer
   - **Tools**: read, edit, execute
   - **Success**: A new unit test `tests/unit/test_maf_runtime_chat_client.py` constructs the client with both `reasoning` and `drafting` tiers without making any network call (deployment names verified, no API key referenced anywhere).
 
-- [ ] T013 Implement `apps/agents/maf_runtime/observability.py::setup_observability_once()` that registers MAF's OpenTelemetry hooks via `agent_framework.setup_observability(...)` and routes spans/metrics/logs through the existing `azure-monitor-opentelemetry` exporter (already initialised in `apps/agents/monitoring/agent.py:15-25`)
+- [X] T013 Implement `apps/agents/maf_runtime/observability.py::setup_observability_once()` that registers MAF's OpenTelemetry hooks via `agent_framework.setup_observability(...)` and routes spans/metrics/logs through the existing `azure-monitor-opentelemetry` exporter (already initialised in `apps/agents/monitoring/agent.py:15-25`)
   - **Agents**: sre-engineer, ai-ml-engineer, software-developer
   - **Tools**: read, edit, web
   - **Success**: Calling `setup_observability_once()` twice is idempotent (no duplicate handlers), and a smoke test asserts that a synthetic span carries the `service.name=ama-agents` resource attribute.
 
-- [ ] T014 [P] Implement `apps/agents/maf_runtime/workflow/run_state.py` exposing the 7-state `WorkflowRunStatus` Enum and a `validate_transition(from_state, to_state) -> None` function that raises `InvalidStateTransitionError` for any move not enumerated in `data-model.md §2.1`
+- [X] T014 [P] Implement `apps/agents/maf_runtime/workflow/run_state.py` exposing the 7-state `WorkflowRunStatus` Enum and a `validate_transition(from_state, to_state) -> None` function that raises `InvalidStateTransitionError` for any move not enumerated in `data-model.md §2.1`
   - **Agents**: software-developer, principal-engineer
   - **Tools**: read, edit
   - **Success**: New `tests/unit/test_run_state_transitions.py` exhaustively asserts every allowed transition is accepted and a representative set of illegal transitions is rejected with `InvalidStateTransitionError`.
 
-- [ ] T015 [P] Implement `apps/agents/maf_runtime/feature_flags.py::get_agent_mode(agent_name) -> Literal['legacy','maf','shadow']` reading env var `FEATURE_MAF_RUNTIME_<AGENT>` (default `legacy`) and integrating with the spec-029 progressive-delivery flag mechanism. ALL feature flags introduced by this feature MUST share the `FEATURE_MAF_RUNTIME_*` prefix (e.g., the retry-budget overrides in T042c use `FEATURE_MAF_RUNTIME_RETRY_*`)
+- [X] T015 [P] Implement `apps/agents/maf_runtime/feature_flags.py::get_agent_mode(agent_name) -> Literal['legacy','maf','shadow']` reading env var `FEATURE_MAF_RUNTIME_<AGENT>` (default `legacy`) and integrating with the spec-029 progressive-delivery flag mechanism. ALL feature flags introduced by this feature MUST share the `FEATURE_MAF_RUNTIME_*` prefix (e.g., the retry-budget overrides in T042c use `FEATURE_MAF_RUNTIME_RETRY_*`)
   - **Agents**: software-developer, infrastructure-devops
   - **Tools**: read, edit
   - **Success**: Unit test parameterises the env var across `legacy`/`maf`/`shadow`/unset for all five agent names; default is `legacy`; invalid values raise `ValueError` (so a typo cannot silently route to MAF).
 
-- [ ] T016 Implement `apps/agents/maf_runtime/repositories/workflow_run_repository.py` with `create(...)`, `get(run_id)`, `list(filters)`, `update_status(run_id, new_status)` methods. `create(...)` MUST execute a Cosmos transactional batch that asserts no document for the same `incident_id` has `is_active=true` (FR-011a)
+- [X] T016 Implement `apps/agents/maf_runtime/repositories/workflow_run_repository.py` with `create(...)`, `get(run_id)`, `list(filters)`, `update_status(run_id, new_status)` methods. `create(...)` MUST execute a Cosmos transactional batch that asserts no document for the same `incident_id` has `is_active=true` (FR-011a)
   - **Agents**: data-engineer, software-developer
   - **Tools**: read, edit
   - **Success**: `tests/unit/test_workflow_run_uniqueness.py` proves a second concurrent `create(...)` for the same incident raises a typed `ActiveRunAlreadyExistsError`; transactional batch verified with a fake Cosmos client.
 
-- [ ] T017 [P] Implement `apps/agents/maf_runtime/repositories/tool_registration_repository.py` with `register(tool_name, major_version, address, bound_agents)`, `get_for_agent(agent_name) -> list[ToolRegistration]`. `register(...)` MUST refuse in-place updates of an existing `(tool_name, major_version)` and instead require a NEW composite id per FR-019a + `contracts/tool-registration.schema.json`
+- [X] T017 [P] Implement `apps/agents/maf_runtime/repositories/tool_registration_repository.py` with `register(tool_name, major_version, address, bound_agents)`, `get_for_agent(agent_name) -> list[ToolRegistration]`. `register(...)` MUST refuse in-place updates of an existing `(tool_name, major_version)` and instead require a NEW composite id per FR-019a + `contracts/tool-registration.schema.json`
   - **Agents**: data-engineer, api-architect
   - **Tools**: read, edit
   - **Success**: Unit test confirms a re-register attempt with same `(tool_name, major_version)` is rejected; a major-version bump succeeds and the prior version remains queryable.
 
-- [ ] T018 Implement `apps/agents/maf_runtime/checkpoint/cosmos_checkpoint_storage.py` as a subclass of MAF's `CheckpointStorage` interface with `save_checkpoint(run_id, sequence, executor_states, pending_requests)`, `load_latest_checkpoint(run_id)`, `list_checkpoints(run_id)` — all writing to the `checkpoints` Cosmos container with partition key `/run_id`
+- [X] T018 Implement `apps/agents/maf_runtime/checkpoint/cosmos_checkpoint_storage.py` as a subclass of MAF's `CheckpointStorage` interface with `save_checkpoint(run_id, sequence, executor_states, pending_requests)`, `load_latest_checkpoint(run_id)`, `list_checkpoints(run_id)` — all writing to the `checkpoints` Cosmos container with partition key `/run_id`
   - **Agents**: ai-ml-engineer, data-engineer
   - **Tools**: read, edit, web
   - **Success**: Round-trip unit test in `tests/unit/test_cosmos_checkpoint_storage.py` saves an opaque `executor_states` dict and one `pending_requests` entry, then `load_latest_checkpoint` returns byte-equal payloads; AND a separate test simulates a Cosmos write failure and asserts the call surfaces as `CheckpointStoreUnavailableError` (from `errors.py`, T011b), the workflow refuses to proceed without durability, and an operator-visible alert is emitted (covers spec edge case "Checkpoint store is unavailable when a workflow tries to persist").
 
-- [ ] T019 Implement `apps/agents/maf_runtime/checkpoint/retention.py::stamp_terminal(run_id)` that re-saves each checkpoint document for the run with `_ttl=2592000` after the parent run reaches a terminal state, ensuring the 30-day countdown starts at terminality (FR-012a)
+- [X] T019 Implement `apps/agents/maf_runtime/checkpoint/retention.py::stamp_terminal(run_id)` that re-saves each checkpoint document for the run with `_ttl=2592000` after the parent run reaches a terminal state, ensuring the 30-day countdown starts at terminality (FR-012a)
   - **Agents**: data-engineer, software-developer
   - **Tools**: read, edit
   - **Success**: Unit test simulates terminal transition and asserts every checkpoint document for the run now has `_ttl=2592000`; non-terminal runs leave checkpoints with no TTL.
 
 ### Cross-cutting middleware (foundational because all agents bind to it)
 
-- [ ] T020 Implement `apps/agents/maf_runtime/middleware/audit_middleware.py` as a MAF `AgentMiddleware` that, around every agent invocation, computes SHA-256 fingerprints of canonicalised input and output JSON and writes one `audit-entry.schema.json`-compliant document to the existing `audit_entries` Cosmos container
+- [X] T020 Implement `apps/agents/maf_runtime/middleware/audit_middleware.py` as a MAF `AgentMiddleware` that, around every agent invocation, computes SHA-256 fingerprints of canonicalised input and output JSON and writes one `audit-entry.schema.json`-compliant document to the existing `audit_entries` Cosmos container
   - **Agents**: security-engineer, compliance-auditor, data-engineer, observer-auditor
   - **Tools**: read, edit
   - **Success**: `tests/unit/test_audit_middleware.py` confirms (a) fingerprints are deterministic across map iteration order, (b) raw payloads are never written, (c) `outcome=blocked_by_content_safety` and `tool_failure` paths each emit an entry with `failure_reason`.
 
-- [ ] T020b Add `tests/unit/test_audit_writer_uniqueness.py` enforcing Constitution NN-3 (Privacy by design): a static-analysis check that scans `apps/agents/maf_runtime/` and asserts the ONLY module that opens a Cosmos client against the `audit_entries` container is `apps/agents/maf_runtime/middleware/audit_middleware.py`. Any other module attempting to write raw payloads to `audit_entries` MUST fail the test
+- [X] T020b Add `tests/unit/test_audit_writer_uniqueness.py` enforcing Constitution NN-3 (Privacy by design): a static-analysis check that scans `apps/agents/maf_runtime/` and asserts the ONLY module that opens a Cosmos client against the `audit_entries` container is `apps/agents/maf_runtime/middleware/audit_middleware.py`. Any other module attempting to write raw payloads to `audit_entries` MUST fail the test
   - **Agents**: security-engineer, principal-engineer, observer-auditor
   - **Tools**: read, edit, search
   - **Success**: Adding a deliberate second writer in a draft PR causes the test to fail; reverting passes.
 
-- [ ] T021 Implement `apps/agents/maf_runtime/middleware/content_safety_middleware.py` wrapping the existing `ContentSafetyValidator` (`apps/agents/common/content_safety.py`) and the existing `ContentSafetyCircuitBreaker`, refusing to invoke the wrapped agent when verdict = block
+- [X] T021 Implement `apps/agents/maf_runtime/middleware/content_safety_middleware.py` wrapping the existing `ContentSafetyValidator` (`apps/agents/common/content_safety.py`) and the existing `ContentSafetyCircuitBreaker`, refusing to invoke the wrapped agent when verdict = block
   - **Agents**: security-engineer, ai-ml-engineer, public-information-officer
   - **Tools**: read, edit
   - **Success**: `tests/unit/test_content_safety_middleware.py` proves (a) blocked inputs short-circuit the agent, the rejection is audited (`outcome=blocked_by_content_safety`), (b) a degraded-mode fallback (circuit open) follows the existing FR-007/FR-008 contract from spec 025, AND (c) a content-safety rejection on the resumed Communication-agent step (i.e., a run already in `AwaitingApproval`) transitions the run to `Cancelled` with `failure_reason="content_safety_rejected"` and publishes a notification onto the existing commander queue (covers spec edge case "Content safety rejection at the middleware layer for an alert that is already in 'pending approval'").
 
-- [ ] T022 [P] Implement `apps/agents/maf_runtime/middleware/otel_middleware.py` that adds `workflow.run_id`, `workflow.step`, `workflow.parent_trace_id` custom attributes to the MAF-emitted span for each agent step (per `data-model.md §7`)
+- [X] T022 [P] Implement `apps/agents/maf_runtime/middleware/otel_middleware.py` that adds `workflow.run_id`, `workflow.step`, `workflow.parent_trace_id` custom attributes to the MAF-emitted span for each agent step (per `data-model.md §7`)
   - **Agents**: sre-engineer, ai-ml-engineer
   - **Tools**: read, edit
   - **Success**: `tests/unit/test_otel_middleware.py` captures spans via an in-memory exporter and asserts (a) all three custom attributes are populated on every agent-step span, AND (b) when the exporter raises (simulating Application Insights unavailability per spec edge case "Telemetry pipeline unavailable"), the agent invocation completes successfully and the exception is swallowed.
 
 ### Equivalence harness scaffold
 
-- [ ] T023 Implement `apps/agents/maf_runtime/equivalence/scorers.py::score(legacy_outputs, maf_outputs, agent_name) -> EquivalenceReport` implementing the FR-023 rule: ≥95% decision-equivalence on enumerated categorical fields + 100% schema-equivalence on populated fields, free-text fields excluded
+- [X] T023 Implement `apps/agents/maf_runtime/equivalence/scorers.py::score(legacy_outputs, maf_outputs, agent_name) -> EquivalenceReport` implementing the FR-023 rule: ≥95% decision-equivalence on enumerated categorical fields + 100% schema-equivalence on populated fields, free-text fields excluded
   - **Agents**: qa-test-engineer, ai-ml-engineer, principal-engineer
   - **Tools**: read, edit
   - **Success**: `tests/unit/test_equivalence_scorers.py` covers (a) a corpus that satisfies both thresholds (PASS), (b) one categorical disagreement above the 5% budget (FAIL), (c) one missing populated field (FAIL), (d) free-text divergence only (PASS).
 
-- [ ] T024 Implement `apps/agents/maf_runtime/equivalence/runner.py` CLI: loads per-agent fixtures from `tests/equivalence/fixtures/<agent>/` (which symlinks into existing per-agent fixtures + spec-025 audit fixtures), replays each through both legacy pipeline and MAF agent, scores with T023, emits `apps/agents/maf_runtime/equivalence/reports/<agent>-<UTC-timestamp>.{md,json}`. ALL error types raised by the equivalence harness MUST be imported from `apps/agents/maf_runtime/errors.py` (T011b) — no locally-defined error classes
+- [X] T024 Implement `apps/agents/maf_runtime/equivalence/runner.py` CLI: loads per-agent fixtures from `tests/equivalence/fixtures/<agent>/` (which symlinks into existing per-agent fixtures + spec-025 audit fixtures), replays each through both legacy pipeline and MAF agent, scores with T023, emits `apps/agents/maf_runtime/equivalence/reports/<agent>-<UTC-timestamp>.{md,json}`. ALL error types raised by the equivalence harness MUST be imported from `apps/agents/maf_runtime/errors.py` (T011b) — no locally-defined error classes
   - **Agents**: qa-test-engineer, ai-ml-engineer
   - **Tools**: read, edit, execute
   - **Success**: `python -m apps.agents.maf_runtime.equivalence.runner --agent monitoring --dry-run` succeeds against an empty fixtures directory and produces a valid report with zero items (used to wire the CI gate before fixtures are populated).
 
 ### Dashboard regression baseline (must be captured BEFORE any per-agent cutover)
 
-- [ ] T024b **Capture the existing-dashboard field snapshot** by running a one-time job that walks every workbook query under `infra/bicep/modules/dashboards/`, extracts every referenced field name (KQL columns, Application Insights span attributes, Cosmos query projections), and writes the canonical snapshot to `tests/contract/snapshots/existing_dashboard_fields.json`. This snapshot is the input that T060b's regression test asserts against AFTER cutover. MUST run in Foundational phase so the snapshot reflects pre-MAF state regardless of when individual agent cutovers occur in US1
+- [X] T024b **Capture the existing-dashboard field snapshot** by running a one-time job that walks every workbook query under `infra/bicep/modules/dashboards/`, extracts every referenced field name (KQL columns, Application Insights span attributes, Cosmos query projections), and writes the canonical snapshot to `tests/contract/snapshots/existing_dashboard_fields.json`. This snapshot is the input that T060b's regression test asserts against AFTER cutover. MUST run in Foundational phase so the snapshot reflects pre-MAF state regardless of when individual agent cutovers occur in US1
   - **Agents**: sre-engineer, qa-test-engineer, observer-auditor
   - **Tools**: read, edit, execute, search
   - **Success**: `tests/contract/snapshots/existing_dashboard_fields.json` is committed; running the snapshot-capture script a second time against unchanged dashboards produces a byte-equal file (deterministic).
 
 ### API surface foundation
 
-- [ ] T025 [P] Add `apps/api/app/api/routes/workflow_runs.py` skeleton with the **six** endpoints from `contracts/workflow-runs.api.md` (list, get, checkpoints, audit, cancel, approval-gate metrics) returning 501 Not Implemented placeholders, and register the router in `apps/api/app/api/router.py`
+- [X] T025 [P] Add `apps/api/app/api/routes/workflow_runs.py` skeleton with the **six** endpoints from `contracts/workflow-runs.api.md` (list, get, checkpoints, audit, cancel, approval-gate metrics) returning 501 Not Implemented placeholders, and register the router in `apps/api/app/api/router.py`
   - **Agents**: api-architect, software-developer
   - **Tools**: read, edit
   - **Success**: `curl -X GET http://localhost:8000/api/workflow_runs` returns 501; OpenAPI document at `/openapi.json` lists all six endpoints under the `workflow_runs` tag.
