@@ -15,7 +15,9 @@ on:
 
 permissions:
   contents: read
-  id-token: write
+  # Per spec 031 / FR-009: dropped `id-token: write` — auth now uses
+  # AZURE_CREDENTIALS (creds: JSON), not OIDC. Re-add only if the operator
+  # activates the commented Azure-publish block AND chooses an OIDC path.
 
 jobs:
   validate-and-publish:
@@ -84,16 +86,17 @@ jobs:
           retention-days: 30
 
       # ---------------------------------------------------------------------
-      # Azure Storage publish (operator must wire OIDC federated credentials).
-      # Uncomment + configure secrets AZURE_CLIENT_ID / TENANT_ID / SUBSCRIPTION_ID
-      # and the immutable Blob container name before enabling.
+      # Azure Storage publish (operator must activate by uncommenting).
+      # Per spec 031 / FR-019b: when activated, this block authenticates via
+      # AZURE_CREDENTIALS sourced from a GitHub Environment. The operator
+      # must also add `environment: dev` (or staging/production) at the job
+      # level so the secret resolves correctly. Recommended: `dev` for
+      # dataset-development workflow runs.
       # ---------------------------------------------------------------------
-      # - name: Azure login (OIDC)
-      #   uses: azure/login@v2
+      # - name: Azure login
+      #   uses: azure/login@v3
       #   with:
-      #     client-id: ${{ secrets.AZURE_CLIENT_ID }}
-      #     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-      #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #     creds: ${{ secrets.AZURE_CREDENTIALS }}
       #
       # - name: Upload to immutable blob (FR-013)
       #   run: |

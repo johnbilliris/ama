@@ -313,13 +313,26 @@ pnpm -C apps/web build
 
 ### CI/CD
 
-All pull requests are validated by the CI pipeline ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), which runs:
+All pull requests targeting `main` are validated by the CI pipeline ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)), which runs:
 
 - Python linting with Ruff
 - Python tests with pytest
 - TypeScript type checking
 - Next.js build validation
 - Performance benchmarks
+
+Deployments follow a **branch-equals-environment** model (spec [031](specs/031-simplify-cicd-pipeline/spec.md)):
+
+| Branch | Triggers | Deploys to |
+|---|---|---|
+| `main` | `ci` | _(no deploy — integration only)_ |
+| `dev` | `ci` → `cd` | `rg-drh-dev` (Australia East) |
+| `staging` | `ci` → `cd` | `rg-drh-staging` (Australia East, with rollback) |
+| `production` | `ci` → `cd` | `rg-drh-production` (Australia East, with rollback) |
+
+Authentication uses a single `AZURE_CREDENTIALS` JSON secret per GitHub Environment — see [ADR-031](docs/aidr/decisions/adr-031-azure-credentials-mvp.md) for the rationale and the planned migration back to OIDC.
+
+Operator runbook for first-time setup, secret rotation, smoke testing, and troubleshooting: [`specs/031-simplify-cicd-pipeline/quickstart.md`](specs/031-simplify-cicd-pipeline/quickstart.md).
 
 ### Pull Request Process
 

@@ -25,24 +25,13 @@ specs/shared/                     @johnbilliris/ama-spec-maintainers
 # specs/001-disaster-response-hub/  @johnbilliris
 
 # ---------------------------------------------------------------------------
-# Spec 029 — Progressive Delivery Pipeline (FR-003, FR-033)
-# Per ADR-029-01 (research.md §R17): repository is user-owned, so the dual-
-# CODEOWNER personas (security + compliance) collapse to the individual handle
-# @johnbilliris. The dual-approver requirement is enforced via branch protection
-# "require 2 approving reviews" plus the second-collaborator pre-flight (T000a).
-# Future-state team mapping: research.md §R17 table; substitute on org migration.
+# Spec 031 — Simplified branch-based CI/CD (FR-014).
+# The cd.yml workflow is the single deploy entrypoint per environment branch.
+# Spec-029 progressive-delivery footprint (posture/IDENTITY/_reusable/
+# tools-pipeline/change-freeze/emergency-hotfix/evidence-pack) was removed
+# by spec 031; the corresponding CODEOWNERS rules were deleted with it.
 # ---------------------------------------------------------------------------
-infra/policy/posture-matrix.yaml          @johnbilliris
-infra/policy/posture-exceptions.yaml      @johnbilliris
-infra/policy/foundry-carveout.yaml        @johnbilliris
-infra/policy/rego/                        @johnbilliris
-infra/IDENTITY.md                         @johnbilliris
 .github/workflows/cd.yml                  @johnbilliris
-.github/workflows/change-freeze.yml       @johnbilliris
-.github/workflows/emergency-hotfix.yml    @johnbilliris
-.github/workflows/evidence-pack.yml       @johnbilliris
-.github/workflows/_reusable/              @johnbilliris
-tools/pipeline/                           @johnbilliris
 
 # Safety-critical app paths (warning pathway, incident-domain APIs)
 apps/api/app/api/routes/incident*         @johnbilliris

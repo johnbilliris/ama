@@ -1,9 +1,0 @@
-{
-  "environment": "production",
-  "changes": [
-    {
-      "resource_id": "/subscriptions/x/resourceGroups/rg-ama-prod-eastus/providers/Microsoft.Storage/storageAccounts/x",
-      "after": { "type": "Microsoft.Storage/storageAccounts", "location": "eastus", "properties": {} }
-    }
-  ]
-}

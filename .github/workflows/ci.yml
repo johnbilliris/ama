@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - main
-      - "001-disaster-response-hub"
-      - "003-rubric-gap-closure"
-      - "015-performance-benchmarks"
+      - dev
+      - staging
+      - production
   pull_request:
+    branches:
+      - main
 
 jobs:
   quality:
