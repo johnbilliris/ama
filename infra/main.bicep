@@ -52,7 +52,7 @@ param environmentTier string = 'dev'
 @allowed([ 'A', 'B' ])
 param subscriptionTopology string = 'B'
 
-@description('Spec 029 — Azure subscription ID this deployment targets. Validated by deployment workflows against infra/IDENTITY.md.')
+@description('Azure subscription ID this deployment targets.')
 param subscriptionId string = subscription().subscriptionId
 
 @description('Spec 029 — additional resource tags merged onto baseline tags.')

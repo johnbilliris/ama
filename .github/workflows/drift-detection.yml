@@ -5,7 +5,7 @@
 #
 # Schedule: Saturday 16:00 UTC = Sunday 02:00 AEST
 #
-# See: specs/feature/017-cd-pipeline/contracts/drift-detection-workflow.md
+# See: specs/031-simplify-cicd-pipeline/contracts/drift-detection.contract.md
 
 name: drift-detection
 
@@ -15,7 +15,6 @@ on:
   workflow_dispatch:             # Manual trigger for on-demand checks
 
 permissions:
-  id-token: write                # OIDC token for Azure login
   contents: read                 # Checkout repository (Bicep files)
   issues: write                  # Create issues for drift findings
 
@@ -23,21 +22,21 @@ jobs:
   detect-drift:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Per spec 031 / FR-011: dev is intentionally excluded from drift detection.
     strategy:
       matrix:
         environment: [staging, production]
       fail-fast: false
+    environment: ${{ matrix.environment }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
+      - name: Azure Login
+        uses: azure/login@v3
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Run What-If analysis
         id: what-if

@@ -11,7 +11,6 @@ on:
       - ".github/workflows/eval-pr-gate.yml"
 
 permissions:
-  id-token: write
   contents: read
   pull-requests: write
 
@@ -23,14 +22,17 @@ jobs:
   eval-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    # Per spec 031 / FR-019a: PR evals run against dev infrastructure; the
+    # AZURE_CREDENTIALS secret resolves from the `dev` GitHub Environment.
+    environment: dev
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install eval framework
         run: |
@@ -46,17 +48,15 @@ jobs:
         run: |
           python -m pytest packages/eval-core/tests/ tests/unit/eval/ -q
 
-      - name: Azure login (OIDC)
-        if: ${{ secrets.AZURE_CLIENT_ID != '' }}
-        uses: azure/login@v2
+      - name: Azure login
+        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
+        uses: azure/login@v3
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Trigger Container Apps Job
         id: trigger
-        if: ${{ secrets.AZURE_CLIENT_ID != '' }}
+        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
         run: |
           set -euo pipefail
           RUN_ID=$(az containerapp job start \
@@ -68,7 +68,7 @@ jobs:
 
       - name: Poll for verdict
         id: verdict
-        if: ${{ secrets.AZURE_CLIENT_ID != '' }}
+        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
         run: |
           set -euo pipefail
           for i in $(seq 1 60); do

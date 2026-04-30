@@ -1,0 +1,14 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName":       { "value": "drh-dev" },
+    "location":              { "value": "australiaeast" },
+    "principalType":         { "value": "ServicePrincipal" },
+    "developerIpAddress":    { "value": "" },
+    "actionGroupEmail":      { "value": "dev-ops@example.com" },
+    "actionGroupWebhook":    { "value": "" },
+    "openAiDeploymentSku":   { "value": "GlobalStandard" },
+    "restrictNetworkAccess": { "value": false }
+  }
+}

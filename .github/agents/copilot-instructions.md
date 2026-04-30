@@ -53,6 +53,7 @@ docs/           # Project documentation
 - N/A — Markdown files under version control only. (028-capstone-alignment)
 - Python 3.13 (FastAPI api, evaluation worker, dataset packages); TypeScript 5.x on Next.js 16 (web) + `azure-ai-evaluation`, `azure-ai-projects`, `azure-identity`, `azure-cosmos`, `azure-storage-blob`, `azure-monitor-opentelemetry`, `presidio-analyzer`, `presidio-anonymizer`, FastAPI, Pydantic v2, Pydantic Settings; React 19, Next.js 16, native fetch (no SWR/React Query, per existing AMA convention); Bicep modules + Bicep AVM where available (030-llm-eval-framework)
 - Cosmos DB (Australia East) — new containers `eval_datasets`, `eval_runs`, `eval_metric_definitions`, `eval_audit`; Azure Blob Storage with time-based 7-year immutability policy for dataset versions, run artefacts, and audit archive; Azure Key Vault for Foundry endpoint URIs; Log Analytics workspace (existing AMA workspace) for telemetry (030-llm-eval-framework)
+- N/A for the pipeline itself. Deployed runtimes (api, agents, ingestion, web) continue to use their existing Cosmos DB / Storage / Service Bus resources provisioned by `infra/main.bicep`. (031-simplify-cicd-pipeline)
 
 **Backend**: Python 3.12, FastAPI, Pydantic v2, Azure Cosmos DB SDK, Azure Blob Storage SDK, Azure Identity, Azure OpenAI SDK, tenacity
 **Frontend**: TypeScript 5.8, Next.js 16.2, React 19, Tailwind CSS, @ama/ui component library
