@@ -1,0 +1,33 @@
+# Cosign keyless signing manifest for prompt artifacts (FR-AI09)
+# Apply this manifest in the prompt-publish workflow; verify in cd.yml deploy step.
+
+signing_strategy: sigstore-keyless
+identity_provider: github-oidc
+fulcio_url: https://fulcio.sigstore.dev
+rekor_url: https://rekor.sigstore.dev
+
+producer:
+  workflow: .github/workflows/prompts-publish.yml
+  identity_subject_pattern: "^https://github.com/<org>/ama/.github/workflows/prompts-publish.yml@refs/heads/(main|production)$"
+
+verifier:
+  workflow: .github/workflows/cd.yml
+  cosign_command: |
+    cosign verify-blob \
+      --certificate-identity-regexp "^https://github.com/<org>/ama/.github/workflows/prompts-publish.yml@refs/heads/(main|production)$" \
+      --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+      "${prompt_path}.sig" "${prompt_path}"
+  failure_behaviour: block_deploy
+  audit_event: ama.prompt.cosign_verify_failed
+
+artifact_manifest_format:
+  filename: "{prompt_id}-v{semver}.yaml"
+  signature_filename: "{filename}.sig"
+  cert_filename: "{filename}.crt"
+  bundle_filename: "{filename}.bundle"
+
+retention_days: 2555  # 7 years per spec 030 alignment
+
+revocation:
+  method: rekor-public-log + cosign-verify-against-revoked-identity-list
+  on_revoke: block_deploy + page_security_engineer

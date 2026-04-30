@@ -1,0 +1,308 @@
+# OpenAPI delta for spec 032
+# These additions/extensions go into apps/api/openapi.yaml when implemented.
+# Documented here for review before implementation.
+
+openapi: 3.0.3
+info:
+  title: AMA Rubric Improvements - API delta
+  version: "032"
+  description: New + extended API surfaces introduced by spec 032. Existing endpoints unchanged unless noted.
+servers:
+  - url: https://api.disaster-response-hub.example/api
+
+paths:
+
+  /health/audit-integrity:
+    get:
+      summary: Verify the append-only audit ledger has not been tampered with.
+      tags: [observability]
+      responses:
+        "200":
+          description: OK or failure with details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditIntegrityReport"
+
+  /recommendations/{id}/why-fired:
+    get:
+      summary: Returns the full provenance trace for a recommendation (US1).
+      tags: [recommendations]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Why-fired panel data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WhyFiredPanel"
+
+  /observability/slos:
+    get:
+      summary: Published SLO catalogue.
+      tags: [observability]
+      responses:
+        "200":
+          description: List of SLOs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SLO" }
+
+  /observability/metrics-catalogue:
+    get:
+      summary: Published custom metrics catalogue.
+      tags: [observability]
+      responses:
+        "200":
+          description: List of metric definitions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MetricDefinition" }
+
+  /agents/{agent_id}/killswitch:
+    get:
+      summary: Read kill-switch state.
+      tags: [agents]
+      security:
+        - entraBearer: [agent.killswitch.read]
+      parameters:
+        - in: path
+          name: agent_id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Current kill-switch state.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/KillSwitch" }
+    post:
+      summary: Engage or release the kill-switch.
+      description: |
+        Requires authenticated Entra session with `IncidentCommander` or `ExecutiveLeader`
+        RoleAuthority claim. Justification code drawn from published taxonomy
+        (`maintenance|drill|degraded_dependency|safety_incident|other`). In `production`,
+        the toggle MUST be a two-step propose+approve workflow with distinct identities
+        (FR-AG05a). Toggle propagation P99 ≤ 30 s; heartbeat metric `agent.killswitch.lag_seconds`.
+        Dual-approval check, audit-trail write, and Service Bus push are atomic; failure → 409.
+      tags: [agents]
+      security:
+        - entraBearer: [agent.killswitch.write]
+      parameters:
+        - in: path
+          name: agent_id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [engaged, reason, justification_code]
+              properties:
+                engaged: { type: boolean }
+                reason:
+                  type: string
+                  minLength: 8
+                  maxLength: 512
+                justification_code:
+                  type: string
+                  enum: [maintenance, drill, degraded_dependency, safety_incident, other]
+                expires_at:
+                  type: string
+                  format: date-time
+                approval_for:
+                  description: "Required in production: the proposer-toggle id this approval references."
+                  type: string
+                  format: uuid
+                  nullable: true
+      responses:
+        "202":
+          description: Toggle accepted (single-actor envs) or proposed (production awaiting approval).
+        "401": { description: Not authenticated. }
+        "403": { description: Insufficient role authority. }
+        "409":
+          description: Dual-approval workflow violated (e.g. same actor proposed and approved, or approval_for missing in production).
+
+  /agents/{agent_id}/status:
+    get:
+      summary: Live status (degraded_mode, autonomy_level, last_heartbeat).
+      tags: [agents]
+      parameters:
+        - in: path
+          name: agent_id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Status snapshot.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AgentStatus" }
+
+  /jurisdictions/{code}/policy:
+    get:
+      summary: Active jurisdiction policy (autonomy + language + role overrides).
+      tags: [jurisdictions]
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Active policy version.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/JurisdictionPolicy" }
+
+  /rag/search:
+    post:
+      summary: Internal RAG search over docs/aidr/. Returns chunks with citations.
+      tags: [ai]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [q]
+              properties:
+                q: { type: string }
+                top_k: { type: integer, default: 5 }
+      responses:
+        "200":
+          description: Hits with citations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RagCitation" }
+
+components:
+  securitySchemes:
+    entraBearer:
+      type: oauth2
+      description: Entra ID OAuth2 bearer token; scopes encode RoleAuthority claims.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/<tenant_id>/oauth2/v2.0/authorize
+          tokenUrl: https://login.microsoftonline.com/<tenant_id>/oauth2/v2.0/token
+          scopes:
+            agent.killswitch.read: Read agent kill-switch state.
+            agent.killswitch.write: Toggle agent kill-switch (subject to RoleAuthority + dual-approval).
+            agent.autonomy.write: Toggle autonomy dial (subject to RoleAuthority + dual-approval).
+            jurisdiction.policy.write: Update jurisdiction policy.
+  schemas:
+    AuditIntegrityReport:
+      type: object
+      required: [ok, segments_verified, last_segment_id, checked_at]
+      properties:
+        ok: { type: boolean }
+        segments_verified: { type: integer }
+        last_segment_id: { type: string, format: uuid }
+        broken_segment_id: { type: string, format: uuid, nullable: true }
+        checked_at: { type: string, format: date-time }
+    WhyFiredPanel:
+      type: object
+      required: [recommendation_id, prompt_sha, model_id, model_version, deployment_alias, autonomy_level_at_decision, kill_switch_state, audit_segment_hash]
+      properties:
+        recommendation_id: { type: string, format: uuid }
+        prompt_sha: { type: string }
+        prompt_version: { type: string }
+        model_id: { type: string }
+        model_version: { type: string }
+        deployment_alias: { type: string }
+        autonomy_level_at_decision: { type: string, enum: [low, standard, high] }
+        kill_switch_state: { type: string, enum: [off, engaged, partial] }
+        rag_sources:
+          type: array
+          items: { $ref: "#/components/schemas/RagCitation" }
+        approval_chain:
+          type: array
+          items:
+            type: object
+            properties:
+              state: { type: string }
+              operator_id: { type: string }
+              at: { type: string, format: date-time }
+        consensus_id: { type: string, format: uuid, nullable: true }
+        audit_segment_hash: { type: string }
+    RagCitation:
+      type: object
+      required: [handbook_id, chunk_id, score, quote]
+      properties:
+        handbook_id: { type: string }
+        chapter: { type: string, nullable: true }
+        page: { type: integer, nullable: true }
+        chunk_id: { type: string }
+        score: { type: number, format: float }
+        quote: { type: string, maxLength: 500 }
+    SLO:
+      type: object
+      required: [id, description, sli_metric_name, objective, error_budget_minutes_per_month, paging_severity]
+      properties:
+        id: { type: string }
+        description: { type: string }
+        sli_metric_name: { type: string }
+        objective: { type: string }
+        error_budget_minutes_per_month: { type: number, format: float }
+        paging_severity: { type: string, enum: [P1, P2, P3, P4, P5] }
+    MetricDefinition:
+      type: object
+      required: [name, kind, unit, dimensions, source_module, retention_days]
+      properties:
+        name: { type: string }
+        kind: { type: string, enum: [counter, gauge, histogram] }
+        unit: { type: string }
+        dimensions:
+          type: array
+          items: { type: string }
+        source_module: { type: string }
+        slo_link: { type: string, nullable: true }
+        retention_days: { type: integer }
+    KillSwitch:
+      type: object
+      required: [agent_id, engaged]
+      properties:
+        agent_id: { type: string }
+        engaged: { type: boolean }
+        engaged_at: { type: string, format: date-time, nullable: true }
+        engaged_by: { type: string, nullable: true }
+        reason: { type: string, nullable: true }
+        expires_at: { type: string, format: date-time, nullable: true }
+    AgentStatus:
+      type: object
+      properties:
+        agent_id: { type: string }
+        degraded_mode: { type: boolean }
+        autonomy_level: { type: string, enum: [low, standard, high] }
+        last_heartbeat: { type: string, format: date-time }
+        kill_switch_state: { type: string, enum: [off, engaged, partial] }
+    JurisdictionPolicy:
+      type: object
+      required: [jurisdiction_code, autonomy_level, language_priorities, version, effective_from, approved_by]
+      properties:
+        jurisdiction_code: { type: string }
+        autonomy_level: { type: string, enum: [low, standard, high] }
+        kill_switch_overrides:
+          type: object
+          additionalProperties: { type: boolean }
+        language_priorities:
+          type: array
+          items: { type: string }
+        aiims_role_overrides:
+          type: object
+          additionalProperties: { type: string }
+        version: { type: integer }
+        effective_from: { type: string, format: date-time }
+        approved_by: { type: string }

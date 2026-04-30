@@ -1,0 +1,70 @@
+# OpenTelemetry attribute schema for spec 032 (FR-O07)
+# These attributes MUST be set on every span emitted by web, api, and agent processes.
+# Custom attributes use the `ama.*` namespace; standard semantic conventions reused otherwise.
+
+required_resource_attributes:
+  - service.name              # apps.web | apps.api | apps.agents.<agent_id> | apps.ingestion | apps.eval-runner
+  - service.version           # git short SHA + semver if available
+  - deployment.environment    # dev | staging | production
+  - cloud.provider            # azure
+  - cloud.region              # australiaeast | australiasoutheast
+  - cloud.account.id          # subscription id
+
+required_span_attributes:
+  ama.tenant_id:
+    type: string
+    description: Tenant (organisation) the request operates against.
+  ama.jurisdiction_code:
+    type: string
+    description: Jurisdiction in scope (nsw, vic, ..., commonwealth).
+  ama.incident_id:
+    type: string
+    description: Incident id when applicable.
+  ama.agent_id:
+    type: string
+    description: Agent name when in agent runtime.
+  ama.recommendation_id:
+    type: string
+    description: Set when the span produced or modified a recommendation.
+  ama.autonomy_level:
+    type: string
+    enum: [low, standard, high]
+  ama.kill_switch_state:
+    type: string
+    enum: [off, engaged, partial]
+  ama.shadow:
+    type: boolean
+    description: True for shadow-model spans (Phi).
+
+llm_call_span_attributes:
+  ama.llm.model_id: { type: string, required: true }
+  ama.llm.model_version: { type: string, required: true }
+  ama.llm.deployment_alias: { type: string, required: true }
+  ama.llm.prompt_sha: { type: string, required: true }
+  ama.llm.prompt_version: { type: string, required: true }
+  ama.llm.tokens_prompt: { type: int, required: true }
+  ama.llm.tokens_completion: { type: int, required: true }
+  ama.llm.cost_aud_micros: { type: int, required: true }
+  ama.llm.budget_remaining_aud_micros: { type: int }
+  ama.llm.fallback_chain_step: { type: string }
+  ama.llm.rag_sources_count: { type: int }
+  ama.llm.structured_output_validated: { type: boolean }
+
+handoff_span_attributes:
+  ama.handoff.source_agent: { type: string, required: true }
+  ama.handoff.target_agent: { type: string, required: true }
+  ama.handoff.attempt: { type: int, required: true }
+  ama.handoff.dead_lettered: { type: boolean, required: true }
+  ama.handoff.timeout_ms: { type: int, required: true }
+
+audit_span_attributes:
+  ama.audit.segment_id: { type: string, required: true }
+  ama.audit.event_count: { type: int, required: true }
+  ama.audit.integrity_ok: { type: boolean }
+
+events_logged_to_app_insights:
+  - name: ama.killswitch.toggled
+  - name: ama.consensus.event
+  - name: ama.audit.integrity_failure
+  - name: ama.budget.warning
+  - name: ama.shadow.divergence_detected
