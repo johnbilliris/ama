@@ -18,6 +18,7 @@ from common.handoffs import AgentHandoffEvent
 async def _async_noop(h):
     pass
 
+
 # ── Sample data factories ────────────────────────────────────────────────────
 
 
@@ -186,48 +187,34 @@ def communication_pipeline():
 
 @pytest.mark.benchmark(group="pipeline")
 def test_pipeline_monitoring(benchmark, monitoring_pipeline) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="monitoring", metric_type="pipeline", slo_target_s=2.0
-    )
+    set_benchmark_metadata(benchmark, agent="monitoring", metric_type="pipeline", slo_target_s=2.0)
     sample = _make_signal()
-    benchmark(
-        lambda: asyncio.run(
-            monitoring_pipeline.process_signal(sample, signal_id="bench-001")
-        )
-    )
+    benchmark(lambda: asyncio.run(monitoring_pipeline.process_signal(sample, signal_id="bench-001")))
 
 
 @pytest.mark.benchmark(group="pipeline")
 def test_pipeline_risk(benchmark, risk_pipeline) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="risk", metric_type="pipeline", slo_target_s=2.0
-    )
+    set_benchmark_metadata(benchmark, agent="risk", metric_type="pipeline", slo_target_s=2.0)
     handoff = _make_handoff(source="monitoring", target="risk_assessment")
     benchmark(risk_pipeline.process_handoff, handoff)
 
 
 @pytest.mark.benchmark(group="pipeline")
 def test_pipeline_evacuation(benchmark, evacuation_pipeline) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="evacuation", metric_type="pipeline", slo_target_s=2.0
-    )
+    set_benchmark_metadata(benchmark, agent="evacuation", metric_type="pipeline", slo_target_s=2.0)
     handoff = _make_handoff(source="risk_assessment", target="evacuation")
     benchmark(evacuation_pipeline.process_handoff, handoff)
 
 
 @pytest.mark.benchmark(group="pipeline")
 def test_pipeline_resource(benchmark, resource_pipeline) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="resource", metric_type="pipeline", slo_target_s=2.0
-    )
+    set_benchmark_metadata(benchmark, agent="resource", metric_type="pipeline", slo_target_s=2.0)
     handoff = _make_handoff(source="risk_assessment", target="resource_allocation")
     benchmark(resource_pipeline.process_handoff, handoff)
 
 
 @pytest.mark.benchmark(group="pipeline")
 def test_pipeline_communication(benchmark, communication_pipeline) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="communication", metric_type="pipeline", slo_target_s=2.0
-    )
+    set_benchmark_metadata(benchmark, agent="communication", metric_type="pipeline", slo_target_s=2.0)
     handoff = _make_handoff(source="risk_assessment", target="communication")
     benchmark(communication_pipeline.process_handoff, handoff)

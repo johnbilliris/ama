@@ -18,9 +18,7 @@ def serialize_to_edxl(alert: PublicAlert) -> str:
     root = Element("EDXLDistribution", xmlns=EDXL_NAMESPACE)
     SubElement(root, "distributionID").text = alert.alert_id
     SubElement(root, "senderID").text = "disaster-response-hub"
-    SubElement(root, "dateTimeSent").text = (
-        alert.published_at.isoformat() if alert.published_at else ""
-    )
+    SubElement(root, "dateTimeSent").text = alert.published_at.isoformat() if alert.published_at else ""
     SubElement(root, "distributionStatus").text = "Actual"
     SubElement(root, "distributionType").text = "Alert"
 

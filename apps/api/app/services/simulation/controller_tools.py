@@ -53,9 +53,7 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "query_sub_agent",
-            "description": (
-                "Relay a question to one of the operational sub-agents in simulation mode."
-            ),
+            "description": ("Relay a question to one of the operational sub-agents in simulation mode."),
             "parameters": {
                 "type": "object",
                 "properties": {

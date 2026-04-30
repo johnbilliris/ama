@@ -71,29 +71,41 @@ class TestCapabilityMatch:
         assert check_capability_match(["a", "b"], []) == 1.0
 
     def test_full_match(self):
-        assert check_capability_match(
-            ["medical_transport", "patient_stabilization"],
-            ["medical_transport"],
-        ) == 1.0
+        assert (
+            check_capability_match(
+                ["medical_transport", "patient_stabilization"],
+                ["medical_transport"],
+            )
+            == 1.0
+        )
 
     def test_no_match(self):
-        assert check_capability_match(
-            ["firefighting"],
-            ["medical_transport"],
-        ) == 0.0
+        assert (
+            check_capability_match(
+                ["firefighting"],
+                ["medical_transport"],
+            )
+            == 0.0
+        )
 
     def test_partial_match_is_zero(self):
         # Binary: must have ALL required
-        assert check_capability_match(
-            ["medical_transport"],
-            ["medical_transport", "advanced_life_support"],
-        ) == 0.0
+        assert (
+            check_capability_match(
+                ["medical_transport"],
+                ["medical_transport", "advanced_life_support"],
+            )
+            == 0.0
+        )
 
     def test_superset_is_full_match(self):
-        assert check_capability_match(
-            ["a", "b", "c", "d"],
-            ["b", "c"],
-        ) == 1.0
+        assert (
+            check_capability_match(
+                ["a", "b", "c", "d"],
+                ["b", "c"],
+            )
+            == 1.0
+        )
 
 
 class TestTypeCompatibility:
@@ -191,9 +203,7 @@ class TestComputeScore:
     def test_returning_resource_half_score(self):
         config = ResourceAllocationConfig()
         resource_avail = self._make_resource(status=ResourceStatus.available)
-        resource_return = self._make_resource(
-            resource_id="res-002", status=ResourceStatus.returning
-        )
+        resource_return = self._make_resource(resource_id="res-002", status=ResourceStatus.returning)
         demand = self._make_demand()
 
         score_avail, _ = compute_score(resource_avail, demand, config)

@@ -1,4 +1,3 @@
-
 from apps.ingestion.normalisers.geojson_normaliser import (
     normalise_geojson,
     normalise_geojson_collection,
@@ -105,8 +104,18 @@ class TestGeoJSONNormaliser:
 
     def test_has_required_envelope_fields(self):
         envelope = normalise_geojson(NSW_RFS_SAMPLE)
-        required = ["source", "category", "occurredAt", "receivedAt", "location", "payload",
-                     "confidenceScore", "freshnessScore", "validationStatus", "provenance"]
+        required = [
+            "source",
+            "category",
+            "occurredAt",
+            "receivedAt",
+            "location",
+            "payload",
+            "confidenceScore",
+            "freshnessScore",
+            "validationStatus",
+            "provenance",
+        ]
         for field in required:
             assert field in envelope, f"Missing field: {field}"
 
@@ -123,17 +132,19 @@ class TestGeoJSONNormaliser:
             "source_kind": "authoritative",
             "jurisdiction_id": "vic",
             "state_key": "vic-cfa",
-            "features": [{
-                "type": "Feature",
-                "id": "vic-001",
-                "geometry": {"type": "Point", "coordinates": [145.0, -37.8]},
-                "properties": {
-                    "name": "Gippsland Fire",
-                    "type": "Bush Fire",
-                    "status": "Going",
-                    "alertLevel": "Emergency Warning",
-                },
-            }],
+            "features": [
+                {
+                    "type": "Feature",
+                    "id": "vic-001",
+                    "geometry": {"type": "Point", "coordinates": [145.0, -37.8]},
+                    "properties": {
+                        "name": "Gippsland Fire",
+                        "type": "Bush Fire",
+                        "status": "Going",
+                        "alertLevel": "Emergency Warning",
+                    },
+                }
+            ],
         }
         nsw_env = normalise_geojson(NSW_RFS_SAMPLE)
         vic_env = normalise_geojson(vic_sample)

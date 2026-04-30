@@ -173,10 +173,7 @@ class SimulationService:
         if tenant is None:
             raise ValueError(f"Simulation tenant '{tenant_id}' not found")
         if tenant.status not in ("Active", "Paused"):
-            raise ValueError(
-                "Simulation must be Active or Paused to change warp speed "
-                f"(got '{tenant.status}')"
-            )
+            raise ValueError(f"Simulation must be Active or Paused to change warp speed (got '{tenant.status}')")
         if tenant.created_by != actor_oid:
             raise PermissionError("Only the simulation controller can change warp speed")
         previous = tenant.current_warp_speed

@@ -181,6 +181,10 @@ Tracks available resources across agencies — personnel, vehicles, medical supp
 
 Manages multi-channel alert distribution — SMS, email, radio, social media. Supports multilingual messaging for diverse communities and coordinates cross-agency communications.
 
+### Dependency Notifier Agent
+
+Cross-agency dependency-graph notifier. Watches for upstream changes (e.g. weather, hydrology, road-closure) that would invalidate or escalate active recommendations, and pushes targeted notifications to the affected operators and partner agencies. Promoted to first-class agent per spec 032 (FR-AG04). See `apps/agents/dependency_notifier/`.
+
 </details>
 
 ## Repository Structure

@@ -95,8 +95,8 @@ class MultilingualTranslator(LLMCallMixin):
     ) -> ContentBlock:
         """Generate content for a single language with LLM + template fallback."""
         # Get template text as fallback
-        title_tmpl, body_tmpl, action_tmpl, translation_unavailable = (
-            self._get_template_text(hazard_type, severity, alert_type, language_code, template_values)
+        title_tmpl, body_tmpl, action_tmpl, translation_unavailable = self._get_template_text(
+            hazard_type, severity, alert_type, language_code, template_values
         )
 
         # Apply CORRECTION: prefix for correction change_type per FR-017
@@ -246,9 +246,7 @@ class MultilingualTranslator(LLMCallMixin):
         try:
             # Back-translate to English
             back_prompt = (
-                f"Translate this text back to Australian English:\n"
-                f"Title: {content.title}\n"
-                f"Body: {content.body}"
+                f"Translate this text back to Australian English:\nTitle: {content.title}\nBody: {content.body}"
             )
             response = self._generate_with_fallback(
                 purpose="drafting",

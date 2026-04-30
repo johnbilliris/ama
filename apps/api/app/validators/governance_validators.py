@@ -2,23 +2,27 @@ from fastapi import HTTPException
 
 from packages.domain.src.domain.models.handoff_chain import HandoffChainDefinition
 
-RECOGNIZED_AGENTS = frozenset({
-    "monitoring",
-    "risk_assessment",
-    "evacuation",
-    "resource_allocation",
-    "communication",
-})
+RECOGNIZED_AGENTS = frozenset(
+    {
+        "monitoring",
+        "risk_assessment",
+        "evacuation",
+        "resource_allocation",
+        "communication",
+    }
+)
 
 # Valid audit action types for dashboard search (021-governance-dashboard)
-DASHBOARD_ACTION_TYPES = frozenset({
-    "dashboard_view",
-    "dashboard_filter",
-    "dashboard_search",
-    "dashboard_export",
-    "dashboard_drill_down",
-    "dashboard_navigate_to_crud",
-})
+DASHBOARD_ACTION_TYPES = frozenset(
+    {
+        "dashboard_view",
+        "dashboard_filter",
+        "dashboard_search",
+        "dashboard_export",
+        "dashboard_drill_down",
+        "dashboard_navigate_to_crud",
+    }
+)
 
 VALID_EXPORT_FORMATS: frozenset[str] = frozenset({"pdf", "csv", "json"})
 MAX_EXPORT_RECORD_COUNT = 10000
@@ -98,7 +102,8 @@ def validate_audit_search_params(
             datetime.fromisoformat(date_from)
         except ValueError:
             raise HTTPException(
-                status_code=400, detail=f"Invalid date_from format: '{date_from}'. Use ISO 8601.",
+                status_code=400,
+                detail=f"Invalid date_from format: '{date_from}'. Use ISO 8601.",
             )
 
     if date_to:
@@ -106,7 +111,8 @@ def validate_audit_search_params(
             datetime.fromisoformat(date_to)
         except ValueError:
             raise HTTPException(
-                status_code=400, detail=f"Invalid date_to format: '{date_to}'. Use ISO 8601.",
+                status_code=400,
+                detail=f"Invalid date_to format: '{date_to}'. Use ISO 8601.",
             )
 
     if date_from and date_to:
@@ -114,5 +120,6 @@ def validate_audit_search_params(
         to_dt = datetime.fromisoformat(date_to)
         if from_dt > to_dt:
             raise HTTPException(
-                status_code=400, detail="date_from must be before date_to.",
+                status_code=400,
+                detail="date_from must be before date_to.",
             )

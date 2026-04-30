@@ -24,9 +24,7 @@ router = APIRouter(
 )
 
 _playback = PlaybackService(event_repository=_event_repo, simulation_repository=_repo)
-_annotations = AnnotationService(
-    event_repository=_event_repo, simulation_repository=_repo
-)
+_annotations = AnnotationService(event_repository=_event_repo, simulation_repository=_repo)
 
 
 def _principal(request: Request) -> str:
@@ -47,6 +45,7 @@ def _access_error_to_http(exc: Exception) -> HTTPException:
 
 
 # ── events ────────────────────────────────────────────────────────────
+
 
 @router.get("/events")
 async def list_playback_events(
@@ -87,6 +86,7 @@ async def list_playback_snapshots(
 
 
 # ── annotations (US5) ─────────────────────────────────────────────────
+
 
 class CreateAnnotationRequest(BaseModel):
     sim_time_offset: float = Field(..., ge=0)

@@ -156,11 +156,7 @@ ENVIRONMENTS: dict[str, EnvironmentConfig] = {
         runner_job="caj-eval-runner-dev",
         reconciler_job="caj-eval-reconciler-dev",
         bicep_template=REPO_ROOT / "infra" / "bicep" / "modules" / "eval" / "eval-platform.bicep",
-        bicep_parameters=REPO_ROOT
-        / "infra"
-        / "bicep"
-        / "parameters"
-        / "eval-platform.dev.json",
+        bicep_parameters=REPO_ROOT / "infra" / "bicep" / "parameters" / "eval-platform.dev.json",
         api_base_url="https://api.ama-dev.example",
         api_resource_uri="api://ama-api-dev",
         storage_account_query="[?starts_with(name, 'stamaevaldev')].name | [0]",
@@ -174,11 +170,7 @@ ENVIRONMENTS: dict[str, EnvironmentConfig] = {
         runner_job="caj-eval-runner-staging",
         reconciler_job="caj-eval-reconciler-staging",
         bicep_template=REPO_ROOT / "infra" / "bicep" / "modules" / "eval" / "eval-platform.bicep",
-        bicep_parameters=REPO_ROOT
-        / "infra"
-        / "bicep"
-        / "parameters"
-        / "eval-platform.staging.json",
+        bicep_parameters=REPO_ROOT / "infra" / "bicep" / "parameters" / "eval-platform.staging.json",
         api_base_url="https://api.ama-staging.example",
         api_resource_uri="api://ama-api-staging",
         storage_account_query="[?starts_with(name, 'stamaevalstaging')].name | [0]",
@@ -543,7 +535,13 @@ def _prepare_build_context(build_root: Path, paths: list[Path]) -> Path:
                 source,
                 destination,
                 ignore=shutil.ignore_patterns(
-                    "__pycache__", "*.pyc", "*.pyo", "*.egg-info", ".pytest_cache", "node_modules", ".next",
+                    "__pycache__",
+                    "*.pyc",
+                    "*.pyo",
+                    "*.egg-info",
+                    ".pytest_cache",
+                    "node_modules",
+                    ".next",
                 ),
             )
         elif source.exists():
@@ -606,8 +604,18 @@ def _run_acr_build(
 
 
 _ACR_TASK_STATUS_QUERY = [
-    "az", "acr", "task", "list-runs", "--registry", "{registry}",
-    "--top", "1", "--query", "[0].status", "-o", "tsv",
+    "az",
+    "acr",
+    "task",
+    "list-runs",
+    "--registry",
+    "{registry}",
+    "--top",
+    "1",
+    "--query",
+    "[0].status",
+    "-o",
+    "tsv",
 ]
 
 
@@ -660,7 +668,12 @@ def build_api_image(ctx: RunContext, stage: str, container_registry_name: str) -
     image = f"{API_IMAGE_REPOSITORY}:{ctx.env.name}"
     if ctx.dry_run:
         _run_acr_build(
-            ctx, stage, container_registry_name, image, API_DOCKERFILE_RELATIVE, Path("<minimal-api-context>"),
+            ctx,
+            stage,
+            container_registry_name,
+            image,
+            API_DOCKERFILE_RELATIVE,
+            Path("<minimal-api-context>"),
         )
         return
 
@@ -805,9 +818,7 @@ def stage_provision(ctx: RunContext) -> None:
         deploy_api=True,
         extra_parameters=api_extra_params,
     )
-    api_fqdn = (
-        "<apiFqdn>" if ctx.dry_run else deployment_output(api_deployment, "apiFqdn", stage)
-    )
+    api_fqdn = "<apiFqdn>" if ctx.dry_run else deployment_output(api_deployment, "apiFqdn", stage)
     if not ctx.dry_run and api_fqdn:
         ctx.state["api_fqdn"] = api_fqdn
         _persist_api_base_url(ctx, api_fqdn)
@@ -862,10 +873,15 @@ def resolve_foundry_account(ctx: RunContext, stage: str) -> str | None:
     name = az_json(
         stage,
         [
-            "deployment", "group", "show",
-            "--resource-group", ctx.env.resource_group,
-            "--name", "eval-platform",
-            "--query", "properties.outputs.foundryAccountName.value",
+            "deployment",
+            "group",
+            "show",
+            "--resource-group",
+            ctx.env.resource_group,
+            "--name",
+            "eval-platform",
+            "--query",
+            "properties.outputs.foundryAccountName.value",
         ],
         ctx.dry_run,
     )
@@ -886,10 +902,15 @@ def verify_foundry_deployments(ctx: RunContext, stage: str) -> None:
     expected_csv = az_json(
         stage,
         [
-            "deployment", "group", "show",
-            "--resource-group", ctx.env.resource_group,
-            "--name", "eval-platform",
-            "--query", "properties.outputs.foundryDeploymentNames.value",
+            "deployment",
+            "group",
+            "show",
+            "--resource-group",
+            ctx.env.resource_group,
+            "--name",
+            "eval-platform",
+            "--query",
+            "properties.outputs.foundryDeploymentNames.value",
         ],
         ctx.dry_run,
     )
@@ -900,10 +921,16 @@ def verify_foundry_deployments(ctx: RunContext, stage: str) -> None:
     actual = az_json(
         stage,
         [
-            "cognitiveservices", "account", "deployment", "list",
-            "-g", ctx.env.resource_group,
-            "-n", str(foundry_account),
-            "--query", "[].{name:name,state:properties.provisioningState}",
+            "cognitiveservices",
+            "account",
+            "deployment",
+            "list",
+            "-g",
+            ctx.env.resource_group,
+            "-n",
+            str(foundry_account),
+            "--query",
+            "[].{name:name,state:properties.provisioningState}",
         ],
         ctx.dry_run,
     )
@@ -1256,9 +1283,7 @@ def fetch_scorecard(ctx: RunContext, stage: str, token: str | None, run_id: str)
 
     verdicts = scorecard.get("modelVerdicts", [])
     log_event(stage, "info", "scorecard fetched", model_verdicts=verdicts)
-    blocked = [
-        v for v in verdicts if v.get("overallVerdict") not in (None, "pass", "allow")
-    ]
+    blocked = [v for v in verdicts if v.get("overallVerdict") not in (None, "pass", "allow")]
     if blocked and not ctx.args.continue_on_gate_block:
         log_event(stage, "error", "gate blocked one or more models", blocked=blocked)
         sys.exit(EXIT_GATE_BLOCK)
@@ -1343,22 +1368,25 @@ def stage_deprovision(ctx: RunContext) -> None:
     run_id = ctx.args.run_id or ctx.state.get("run_id")
     foundry_account = resolve_foundry_account(ctx, stage)
     if run_id and foundry_account:
-        deps = az_json(
-            stage,
-            [
-                "cognitiveservices",
-                "account",
-                "deployment",
-                "list",
-                "-n",
-                foundry_account,
-                "-g",
-                ctx.env.resource_group,
-                "--query",
-                f"[?tags.runId=='{run_id}'].name",
-            ],
-            ctx.dry_run,
-        ) or []
+        deps = (
+            az_json(
+                stage,
+                [
+                    "cognitiveservices",
+                    "account",
+                    "deployment",
+                    "list",
+                    "-n",
+                    foundry_account,
+                    "-g",
+                    ctx.env.resource_group,
+                    "--query",
+                    f"[?tags.runId=='{run_id}'].name",
+                ],
+                ctx.dry_run,
+            )
+            or []
+        )
         for dep in deps:
             run_cmd(
                 stage,
@@ -1405,22 +1433,25 @@ def stage_deprovision(ctx: RunContext) -> None:
     )
 
     if not ctx.dry_run and foundry_account:
-        orphans = az_json(
-            stage,
-            [
-                "cognitiveservices",
-                "account",
-                "deployment",
-                "list",
-                "-n",
-                foundry_account,
-                "-g",
-                ctx.env.resource_group,
-                "--query",
-                "[?tags.purpose=='ama-eval' && properties.provisioningState!='Succeeded']",
-            ],
-            ctx.dry_run,
-        ) or []
+        orphans = (
+            az_json(
+                stage,
+                [
+                    "cognitiveservices",
+                    "account",
+                    "deployment",
+                    "list",
+                    "-n",
+                    foundry_account,
+                    "-g",
+                    ctx.env.resource_group,
+                    "--query",
+                    "[?tags.purpose=='ama-eval' && properties.provisioningState!='Succeeded']",
+                ],
+                ctx.dry_run,
+            )
+            or []
+        )
         if orphans:
             fail(
                 stage,

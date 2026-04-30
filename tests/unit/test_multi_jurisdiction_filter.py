@@ -6,6 +6,7 @@ Tests cover:
 - PreparednessAnalysisService.analyse with real framework assignments
 - SeedService caching behaviour
 """
+
 import pytest
 
 from apps.api.app.services.organisation_intelligence_service import OrganisationIntelligenceService
@@ -110,10 +111,9 @@ class TestAnalyseUsesRealAssignments:
         """Assignments should come from seed data, not be a cartesian product."""
         result_single = prep_service.analyse("flood", ["nsw"])
         context = prep_service.get_context()
-        expected_count = len([
-            a for a in context["framework_assignments"]
-            if a.jurisdiction_id == "nsw" and a.effective_to is None
-        ])
+        expected_count = len(
+            [a for a in context["framework_assignments"] if a.jurisdiction_id == "nsw" and a.effective_to is None]
+        )
         assert len(result_single["assignments"]) == expected_count
 
     def test_analyse_frameworks_scoped_to_jurisdiction(self, prep_service):
@@ -151,12 +151,14 @@ class TestGetContext:
 
     def test_context_framework_assignments_are_typed(self, prep_service):
         from packages.domain.src.domain.models.framework_assignment import FrameworkAssignment
+
         ctx = prep_service.get_context()
         for a in ctx["framework_assignments"]:
             assert isinstance(a, FrameworkAssignment)
 
     def test_context_jurisdictions_are_typed(self, prep_service):
         from packages.domain.src.domain.models.jurisdiction import Jurisdiction
+
         ctx = prep_service.get_context()
         for j in ctx["jurisdictions"]:
             assert isinstance(j, Jurisdiction)
@@ -170,6 +172,7 @@ class TestSeedServiceCaching:
 
         from apps.api.app.services.seed_service import SeedService
         from packages.domain.src.domain.seed import bootstrap as _seed_mod
+
         seed_root = Path(_seed_mod.__file__).resolve().parent
         svc = SeedService()
         result1 = svc.load(seed_root)

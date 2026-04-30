@@ -32,9 +32,7 @@ class SubAgentInvoker:
     def available(self) -> list[str]:
         return sorted(self._adapters.keys())
 
-    async def invoke(
-        self, sub_agent: str, question: str, *, tenant_id: str, timeout_s: float = 30.0
-    ) -> SubAgentReply:
+    async def invoke(self, sub_agent: str, question: str, *, tenant_id: str, timeout_s: float = 30.0) -> SubAgentReply:
         fn = self._adapters.get(sub_agent)
         if fn is None:
             return SubAgentReply(

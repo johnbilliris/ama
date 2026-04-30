@@ -89,8 +89,7 @@ class LLMCallMixin:
         # Circuit breaker OPEN — skip directly to template fallback
         if not self._circuit_breaker.can_execute():
             logger.warning(
-                "Circuit breaker OPEN — skipping LLM call, using template fallback "
-                "(correlation_id=%s)",
+                "Circuit breaker OPEN — skipping LLM call, using template fallback (correlation_id=%s)",
                 correlation_id,
             )
             return self._template_fallback_response(
@@ -185,8 +184,7 @@ class LLMCallMixin:
         except Exception as error:
             self._circuit_breaker.record_failure()
             logger.warning(
-                "LLM generation failed; falling back to template: %s "
-                "(correlation_id=%s, circuit_breaker_state=%s)",
+                "LLM generation failed; falling back to template: %s (correlation_id=%s, circuit_breaker_state=%s)",
                 error,
                 correlation_id,
                 self._circuit_breaker.state.value,

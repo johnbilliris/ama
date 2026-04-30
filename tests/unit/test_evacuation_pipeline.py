@@ -1,6 +1,5 @@
 """Tests for evacuation.pipeline — end-to-end pipeline with mocks (T024)."""
 
-
 from common.handoffs import AgentHandoffEvent
 from evacuation.config import EvacuationConfig
 from evacuation.models import EvacuationPlan

@@ -21,18 +21,20 @@ def _make_envelope(
 ):
     from app.validators.signal_envelope import SignalEnvelope
 
-    return SignalEnvelope.model_validate({
-        "source": {"dataSourceId": "social-feed-001", "name": "Twitter", "kind": "social"},
-        "incidentId": incident_id,
-        "category": category,
-        "occurredAt": "2026-01-01T00:00:00Z",
-        "receivedAt": "2026-01-01T00:00:01Z",
-        "location": {"type": "Point", "coordinates": [151.2, -33.8]},
-        "payload": payload or {"text": "Fire spotted near Blue Mountains"},
-        "confidenceScore": confidence,
-        "freshnessScore": freshness,
-        "validationStatus": validation_status,
-    })
+    return SignalEnvelope.model_validate(
+        {
+            "source": {"dataSourceId": "social-feed-001", "name": "Twitter", "kind": "social"},
+            "incidentId": incident_id,
+            "category": category,
+            "occurredAt": "2026-01-01T00:00:00Z",
+            "receivedAt": "2026-01-01T00:00:01Z",
+            "location": {"type": "Point", "coordinates": [151.2, -33.8]},
+            "payload": payload or {"text": "Fire spotted near Blue Mountains"},
+            "confidenceScore": confidence,
+            "freshnessScore": freshness,
+            "validationStatus": validation_status,
+        }
+    )
 
 
 class TestMisinformationClassificationOutcomes:
@@ -75,14 +77,17 @@ class TestMisinformationClassificationOutcomes:
         mock_llm = MagicMock()
         # Simulate timeout by making generate_response take too long
         import time
+
         def slow_response(**kwargs):
             time.sleep(5)
             return {"text": "credible"}
+
         mock_llm.generate_response.side_effect = slow_response
 
         config = MonitoringConfig()
         # Override timeout to very short
         import dataclasses
+
         config = dataclasses.replace(config, llm_eval_timeout_seconds=0.1)
         agent = MonitoringAgent(llm_client=mock_llm, config=config)
 
@@ -223,9 +228,7 @@ class TestPromptInjectionSecurity:
         """Adversarial content in summaries should be caught by content safety."""
         mock_llm = MagicMock()
         # LLM returns an adversarial response
-        mock_llm.generate_response.return_value = {
-            "text": "This is a terror threat and you should evacuate"
-        }
+        mock_llm.generate_response.return_value = {"text": "This is a terror threat and you should evacuate"}
         agent = MonitoringAgent(llm_client=mock_llm)
         envelope = _make_envelope(validation_status="validated")
 

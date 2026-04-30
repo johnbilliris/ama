@@ -47,9 +47,7 @@ class EventBus:
                 incident_id = str(envelope.payload.get("incidentId") or envelope.scope_key)
                 HANDOFF_EVENTS.setdefault(incident_id, []).append(
                     {
-                        "handoffId": str(
-                            envelope.payload.get("handoffId") or f"handoff-{uuid4().hex}"
-                        ),
+                        "handoffId": str(envelope.payload.get("handoffId") or f"handoff-{uuid4().hex}"),
                         "incidentId": incident_id,
                         "sourceAgent": envelope.payload.get("sourceAgent"),
                         "targetAgent": envelope.payload.get("targetAgent"),

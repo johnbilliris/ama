@@ -75,8 +75,12 @@ class FoundryClient:
         self._api_key = api_key
         self._fake = chat_complete
         self._client: Any | None = None
-        self._deployments = deployments if deployments is not None else _parse_deployment_map(
-            os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS"),
+        self._deployments = (
+            deployments
+            if deployments is not None
+            else _parse_deployment_map(
+                os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS"),
+            )
         )
 
     def deployment_for(self, model_id: str, version: str | None = None) -> str | None:

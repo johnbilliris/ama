@@ -84,7 +84,8 @@ class ApprovalWorkflow:
 
         logger.info(
             "Approval requested for alert %s (v%d)",
-            alert.alert_id, alert.version,
+            alert.alert_id,
+            alert.version,
         )
 
     async def start_escalation_timer(
@@ -120,17 +121,15 @@ class ApprovalWorkflow:
                 level=max_levels,
                 from_commander_id=f"commander-level-{current_level}",
                 to_commander_id=None,
-                elapsed_minutes=float(
-                    self._config.approval_escalation_timeout_minutes * current_level
-                ),
+                elapsed_minutes=float(self._config.approval_escalation_timeout_minutes * current_level),
                 held_for_next_available=True,
             )
             alert.escalation_history.append(event)
             alert.escalation_level = max_levels
             logger.critical(
-                "Escalation exhausted for %s at level %d — holding with CRITICAL flag. "
-                "NEVER auto-approve per CHK019.",
-                alert_id, max_levels,
+                "Escalation exhausted for %s at level %d — holding with CRITICAL flag. NEVER auto-approve per CHK019.",
+                alert_id,
+                max_levels,
             )
             return
 
@@ -144,7 +143,9 @@ class ApprovalWorkflow:
         alert.escalation_level = new_level
 
         logger.info(
-            "Escalated alert %s to level %d", alert_id, new_level,
+            "Escalated alert %s to level %d",
+            alert_id,
+            new_level,
         )
 
         # Re-publish approval request for next commander
@@ -206,16 +207,12 @@ class ApprovalWorkflow:
                 doc = alert.model_dump(mode="json")
                 doc["id"] = alert.alert_id
                 if etag:
-                    self._cosmos.replace_item(
-                        item=alert.alert_id, body=doc, if_match=etag
-                    )
+                    self._cosmos.replace_item(item=alert.alert_id, body=doc, if_match=etag)
                 else:
                     self._cosmos.upsert_item(body=doc)
             except Exception as exc:
                 if "412" in str(exc) or "PreconditionFailed" in str(exc):
-                    raise ApprovalConflictError(
-                        "Concurrent approval conflict — first write wins"
-                    ) from exc
+                    raise ApprovalConflictError("Concurrent approval conflict — first write wins") from exc
                 raise
 
         return alert
@@ -233,23 +230,25 @@ class ApprovalWorkflow:
 
         # Start with the existing alert data
         new_data = alert.model_dump()
-        new_data.update({
-            "alert_id": new_alert_id,
-            "version": new_version,
-            "status": AlertStatus.pending_review,
-            "change_type": "update",
-            "change_summary": f"Modified by {user_id} ({role})",
-            "approval_mode": None,
-            "approved_by_user_id": None,
-            "approved_by_role": None,
-            "approval_action": None,
-            "approval_justification": None,
-            "approved_at": None,
-            "escalation_level": 0,
-            "escalation_history": [],
-            "created_at": datetime.now(UTC),
-            "updated_at": datetime.now(UTC),
-        })
+        new_data.update(
+            {
+                "alert_id": new_alert_id,
+                "version": new_version,
+                "status": AlertStatus.pending_review,
+                "change_type": "update",
+                "change_summary": f"Modified by {user_id} ({role})",
+                "approval_mode": None,
+                "approved_by_user_id": None,
+                "approved_by_role": None,
+                "approval_action": None,
+                "approval_justification": None,
+                "approved_at": None,
+                "escalation_level": 0,
+                "escalation_history": [],
+                "created_at": datetime.now(UTC),
+                "updated_at": datetime.now(UTC),
+            }
+        )
 
         # Apply modifications
         if "audience_segments" in modifications:
@@ -277,9 +276,7 @@ class ApprovalWorkflow:
 
         cancellable = {AlertStatus.drafting, AlertStatus.pending_review, AlertStatus.approved}
         if alert.status not in cancellable:
-            raise ApprovalConflictError(
-                f"Cannot cancel alert in {alert.status.value} status"
-            )
+            raise ApprovalConflictError(f"Cannot cancel alert in {alert.status.value} status")
 
         alert.status = AlertStatus.cancelled
         alert.updated_at = datetime.now(UTC)
@@ -294,7 +291,4 @@ class ApprovalWorkflow:
 
     def get_pending_count(self) -> int:
         """Return count of alerts in pending_review status."""
-        return sum(
-            1 for a in self._pending_alerts.values()
-            if a.status == AlertStatus.pending_review
-        )
+        return sum(1 for a in self._pending_alerts.values() if a.status == AlertStatus.pending_review)

@@ -41,15 +41,8 @@ class AiimsService:
 
         # Enforce one-function-per-agent-per-incident
         for a in AIIMS_ASSIGNMENTS.values():
-            if (
-                a.incident_id == incident_id
-                and a.agent_identifier == agent_identifier
-                and a.is_active
-            ):
-                msg = (
-                    f"Agent '{agent_identifier}' already assigned to "
-                    f"'{a.aiims_function}' in incident '{incident_id}'"
-                )
+            if a.incident_id == incident_id and a.agent_identifier == agent_identifier and a.is_active:
+                msg = f"Agent '{agent_identifier}' already assigned to '{a.aiims_function}' in incident '{incident_id}'"
                 raise ValueError(msg)
 
         assignment = AiimsRoleAssignment(
@@ -68,10 +61,7 @@ class AiimsService:
             msg = f"Incident '{incident_id}' not found"
             raise KeyError(msg)
 
-        assignments = [
-            a for a in AIIMS_ASSIGNMENTS.values()
-            if a.incident_id == incident_id and a.is_active
-        ]
+        assignments = [a for a in AIIMS_ASSIGNMENTS.values() if a.incident_id == incident_id and a.is_active]
         coverage_ratio, missing = self.get_coverage(incident_id)
         return {
             "incident_id": incident_id,
@@ -155,10 +145,7 @@ class AiimsService:
 
     def get_coverage(self, incident_id: str) -> tuple[float, list[str]]:
         """Return (coverage_ratio, list_of_missing_functions)."""
-        active = [
-            a for a in AIIMS_ASSIGNMENTS.values()
-            if a.incident_id == incident_id and a.is_active
-        ]
+        active = [a for a in AIIMS_ASSIGNMENTS.values() if a.incident_id == incident_id and a.is_active]
         covered = {a.aiims_function for a in active}
         missing = [f for f in ALL_AIIMS_FUNCTIONS if f not in covered]
         total = len(ALL_AIIMS_FUNCTIONS)

@@ -19,9 +19,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 
 # ── Circuit breaker state ──
 
-_circuit_state: dict[str, dict[str, Any]] = defaultdict(
-    lambda: {"failures": 0, "state": "closed", "last_failure": 0.0}
-)
+_circuit_state: dict[str, dict[str, Any]] = defaultdict(lambda: {"failures": 0, "state": "closed", "last_failure": 0.0})
 
 FAILURE_THRESHOLD = 5
 RECOVERY_TIMEOUT_SECONDS = 30.0
@@ -56,6 +54,7 @@ def record_failure(dependency: str) -> None:
 
 
 # ── Middleware ──
+
 
 class ResilienceMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:

@@ -27,9 +27,7 @@ class ScenarioSeedingService:
         self._scheduler = warp_scheduler
         self._recorder = event_recorder
 
-    async def seed_from_template(
-        self, tenant_id: str, template_id: str, warp_speed: float = 1.0
-    ) -> dict:
+    async def seed_from_template(self, tenant_id: str, template_id: str, warp_speed: float = 1.0) -> dict:
         template = await self._load_template(template_id)
         if template is None:
             raise ValueError(f"Template '{template_id}' not found")
@@ -86,10 +84,7 @@ class ScenarioSeedingService:
     ) -> dict:
         """Copy historical signals from the live partition into the simulation partition."""
         live_signals = await self._signals.list_by_tenant("live", limit=10_000)
-        source_signals = [
-            s for s in live_signals[0]
-            if s.get("incident_id") == incident_id
-        ]
+        source_signals = [s for s in live_signals[0] if s.get("incident_id") == incident_id]
 
         injected = 0
         for sig in source_signals:
@@ -142,7 +137,10 @@ class ScenarioSeedingService:
 
         logger.info(
             "replay_realtime_complete tenant_id=%s template=%s signals=%d multiplier=%s",
-            tenant_id, template_id, injected, time_multiplier,
+            tenant_id,
+            template_id,
+            injected,
+            time_multiplier,
         )
         return {"template_id": template_id, "signals_injected": injected, "mode": "realtime"}
 
@@ -151,13 +149,8 @@ class ScenarioSeedingService:
             try:
                 db = self._cosmos.get_database_client("disaster-hub")
                 container = db.get_container_client("seed")
-                query = (
-                    "SELECT * FROM c WHERE c.template_id = @tid "
-                    "AND c.document_type = 'scenario_template'"
-                )
-                items = list(container.query_items(
-                    query, parameters=[{"name": "@tid", "value": template_id}]
-                ))
+                query = "SELECT * FROM c WHERE c.template_id = @tid AND c.document_type = 'scenario_template'"
+                items = list(container.query_items(query, parameters=[{"name": "@tid", "value": template_id}]))
                 if items:
                     return ScenarioTemplate.model_validate(items[0])
             except Exception:

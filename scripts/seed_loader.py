@@ -10,6 +10,7 @@ Usage:
         --cosmos-database disaster-hub \
         --storage-account stname
 """
+
 import argparse
 import json
 from pathlib import Path
@@ -17,33 +18,33 @@ from pathlib import Path
 SEED_ROOT = Path(__file__).resolve().parent.parent / "packages" / "domain" / "src" / "domain" / "seed"
 
 SEED_FILES = {
-    "jurisdictions":          "jurisdictions_australia.json",
-    "frameworks":             "frameworks_australia.json",
-    "organisations":          "organisations_australia.json",
-    "data_sources":           "data_sources_australia.json",
-    "disasters":              "disasters_australia.json",
-    "framework_assignments":  "framework_assignments_australia.json",
-    "scenario_templates":     "scenario_templates_australia.json",
+    "jurisdictions": "jurisdictions_australia.json",
+    "frameworks": "frameworks_australia.json",
+    "organisations": "organisations_australia.json",
+    "data_sources": "data_sources_australia.json",
+    "disasters": "disasters_australia.json",
+    "framework_assignments": "framework_assignments_australia.json",
+    "scenario_templates": "scenario_templates_australia.json",
 }
 
 CONTAINER_MAP = {
-    "jurisdictions":          "seed",
-    "frameworks":             "seed",
-    "organisations":          "seed",
-    "data_sources":           "seed",
-    "disasters":              "seed",
-    "framework_assignments":  "seed",
-    "scenario_templates":     "seed",
+    "jurisdictions": "seed",
+    "frameworks": "seed",
+    "organisations": "seed",
+    "data_sources": "seed",
+    "disasters": "seed",
+    "framework_assignments": "seed",
+    "scenario_templates": "seed",
 }
 
 PARTITION_KEY_MAP = {
-    "jurisdictions":          "jurisdiction",
-    "frameworks":             "framework",
-    "organisations":          "organisation",
-    "data_sources":           "data_source",
-    "disasters":              "disaster",
-    "framework_assignments":  "framework_assignment",
-    "scenario_templates":     "scenario_template",
+    "jurisdictions": "jurisdiction",
+    "frameworks": "framework",
+    "organisations": "organisation",
+    "data_sources": "data_source",
+    "disasters": "disaster",
+    "framework_assignments": "framework_assignment",
+    "scenario_templates": "scenario_template",
 }
 
 CATALOGUE_ROOT = SEED_ROOT / "recovery-catalogue"
@@ -146,9 +147,7 @@ def load_catalogue_data() -> list[dict]:
         for outcome in raw.get("outcomes", []):
             outcome_id = outcome["outcome_id"]
             # Flatten outcome (without nested activities/indicators)
-            outcome_doc = {
-                k: v for k, v in outcome.items() if k not in ("activities", "indicators")
-            }
+            outcome_doc = {k: v for k, v in outcome.items() if k not in ("activities", "indicators")}
             outcome_doc.update({"id": outcome_id, "kind": "outcome", "domain": domain})
             docs.append(outcome_doc)
 

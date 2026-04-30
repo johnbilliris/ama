@@ -57,7 +57,9 @@ class TestDeliverHandoffWithRetry:
         handoff = _make_handoff()
 
         result = await deliver_handoff_with_retry(
-            handoff=handoff, deliver=deliver, max_retries=3,
+            handoff=handoff,
+            deliver=deliver,
+            max_retries=3,
         )
 
         assert result.status == "delivered"
@@ -84,6 +86,7 @@ class TestDeliverHandoffWithRetry:
     @pytest.mark.asyncio
     async def test_two_second_timeout(self):
         """FR-002: Each delivery attempt has a 2-second blocking cap."""
+
         async def slow_deliver(_):
             await asyncio.sleep(10)  # Would block for 10s without timeout
 
@@ -117,7 +120,9 @@ class TestDeliverHandoffWithRetry:
 
         with caplog.at_level("WARNING"):
             await deliver_handoff_with_retry(
-                handoff=handoff, deliver=deliver, max_retries=3,
+                handoff=handoff,
+                deliver=deliver,
+                max_retries=3,
             )
 
         assert any("handoff_retry" in r.message for r in caplog.records)
@@ -129,7 +134,9 @@ class TestDeliverHandoffWithRetry:
         handoff = _make_handoff()
 
         result = await deliver_handoff_with_retry(
-            handoff=handoff, deliver=deliver, max_retries=1,
+            handoff=handoff,
+            deliver=deliver,
+            max_retries=1,
         )
 
         assert result.status == "dead_lettered"

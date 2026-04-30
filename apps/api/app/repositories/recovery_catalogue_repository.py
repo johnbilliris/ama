@@ -46,8 +46,7 @@ class RecoveryCatalogueRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "RecoveryCatalogueRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "RecoveryCatalogueRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -91,11 +90,7 @@ class RecoveryCatalogueRepository:
             if objective_type is not None:
                 clauses.append("c.objective_type = @objective_type")
                 params.append({"name": "@objective_type", "value": objective_type})
-            query = (
-                "SELECT TOP @limit * FROM c WHERE "
-                + " AND ".join(clauses)
-                + " ORDER BY c.domain, c.outcome_id"
-            )
+            query = "SELECT TOP @limit * FROM c WHERE " + " AND ".join(clauses) + " ORDER BY c.domain, c.outcome_id"
             params.append({"name": "@limit", "value": limit})
             return list(
                 container.query_items(
@@ -120,38 +115,26 @@ class RecoveryCatalogueRepository:
         """Return all activity documents linked to a specific outcome."""
         container = self._get_container()
         if container:
-            query = (
-                "SELECT * FROM c "
-                "WHERE c.kind = 'activity' AND c.outcome_id = @outcome_id"
-            )
+            query = "SELECT * FROM c WHERE c.kind = 'activity' AND c.outcome_id = @outcome_id"
             params: list[dict[str, object]] = [
                 {"name": "@outcome_id", "value": outcome_id},
             ]
-            return list(
-                container.query_items(query, parameters=params, partition_key=domain)
-            )
+            return list(container.query_items(query, parameters=params, partition_key=domain))
         return [
-            d for d in self._in_memory.values()
-            if d.get("kind") == "activity" and d.get("outcome_id") == outcome_id
+            d for d in self._in_memory.values() if d.get("kind") == "activity" and d.get("outcome_id") == outcome_id
         ]
 
     async def get_indicators_for_outcome(self, outcome_id: str, domain: str) -> list[dict]:
         """Return all indicator documents linked to a specific outcome."""
         container = self._get_container()
         if container:
-            query = (
-                "SELECT * FROM c "
-                "WHERE c.kind = 'indicator' AND c.outcome_id = @outcome_id"
-            )
+            query = "SELECT * FROM c WHERE c.kind = 'indicator' AND c.outcome_id = @outcome_id"
             params: list[dict[str, object]] = [
                 {"name": "@outcome_id", "value": outcome_id},
             ]
-            return list(
-                container.query_items(query, parameters=params, partition_key=domain)
-            )
+            return list(container.query_items(query, parameters=params, partition_key=domain))
         return [
-            d for d in self._in_memory.values()
-            if d.get("kind") == "indicator" and d.get("outcome_id") == outcome_id
+            d for d in self._in_memory.values() if d.get("kind") == "indicator" and d.get("outcome_id") == outcome_id
         ]
 
     # ------------------------------------------------------------------
@@ -162,17 +145,11 @@ class RecoveryCatalogueRepository:
         """Return counts of outcomes, activities, and indicators for a domain."""
         container = self._get_container()
         if container:
-            query = (
-                "SELECT c.kind, COUNT(1) AS cnt FROM c "
-                "WHERE c.domain = @domain "
-                "GROUP BY c.kind"
-            )
+            query = "SELECT c.kind, COUNT(1) AS cnt FROM c WHERE c.domain = @domain GROUP BY c.kind"
             params: list[dict[str, object]] = [
                 {"name": "@domain", "value": domain},
             ]
-            rows = list(
-                container.query_items(query, parameters=params, partition_key=domain)
-            )
+            rows = list(container.query_items(query, parameters=params, partition_key=domain))
             summary = {"domain": domain, "outcomes": 0, "activities": 0, "indicators": 0}
             for row in rows:
                 kind = row.get("kind", "")
@@ -201,8 +178,10 @@ class RecoveryCatalogueRepository:
             container.upsert_item(item_doc)
         else:
             key = (
-                item_doc.get("id") or item_doc.get("outcome_id")
-                or item_doc.get("activity_id") or item_doc.get("indicator_id", "")
+                item_doc.get("id")
+                or item_doc.get("outcome_id")
+                or item_doc.get("activity_id")
+                or item_doc.get("indicator_id", "")
             )
             self._in_memory[key] = item_doc
         return item_doc

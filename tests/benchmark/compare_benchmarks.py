@@ -358,9 +358,7 @@ def format_report(report: ComparisonReport) -> str:
             pct_str = ""
 
         slo_part = f" ({slo_str})" if slo_str else ""
-        lines.append(
-            f" {emoji}  {r.benchmark_name:<35} {ms:>8.1f} ms{slo_part}  {pct_str}"
-        )
+        lines.append(f" {emoji}  {r.benchmark_name:<35} {ms:>8.1f} ms{slo_part}  {pct_str}")
 
     lines.append("─" * 55)
     lines.append(f" {report.summary}")

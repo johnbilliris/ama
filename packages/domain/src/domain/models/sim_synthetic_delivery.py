@@ -13,9 +13,7 @@ class SimSyntheticDelivery(BaseModel):
     channel: Literal["sms", "email", "broadcast", "social", "cap_push", "http"]
     audience: str
     payload_hash: str
-    block_reason: Literal[
-        "sim-egress-blocked", "publication-gate", "http-wrapper-gate"
-    ]
+    block_reason: Literal["sim-egress-blocked", "publication-gate", "http-wrapper-gate"]
     intended_url: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     document_type: str = "sim_synthetic_delivery"

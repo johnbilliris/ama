@@ -150,11 +150,7 @@ class TimelineEstimator:
                     )
 
             # Compute clearance time
-            buffer = (
-                self._config.vulnerable_population_buffer
-                if pop_type == "vulnerable"
-                else 1.0
-            )
+            buffer = self._config.vulnerable_population_buffer if pop_type == "vulnerable" else 1.0
             clearance_min = self._compute_clearance_time(
                 population=phase_pop,
                 road_capacity=total_capacity,
@@ -170,10 +166,7 @@ class TimelineEstimator:
             # Transition criteria
             time_threshold = clearance_min * self._config.phase_transition_time_factor
             pop_threshold = self._config.phase_transition_population_pct
-            transition = (
-                f"Previous phase {pop_threshold}% complete OR "
-                f"elapsed time >= {time_threshold:.0f} min"
-            )
+            transition = f"Previous phase {pop_threshold}% complete OR elapsed time >= {time_threshold:.0f} min"
 
             # Enriched description with transition criteria and timing detail
             enriched_desc = (
@@ -249,19 +242,11 @@ class TimelineEstimator:
 
         for zone in zones:
             zone_num = zone.get("zone_number", 0)
-            zone_routes = [
-                r
-                for r in routes
-                if _route_zone(r) == zone_num
-            ]
+            zone_routes = [r for r in routes if _route_zone(r) == zone_num]
 
             if zone_routes:
-                avg_dist = (
-                    sum(_route_distance(r) for r in zone_routes) / len(zone_routes)
-                )
-                total_cap = sum(
-                    r.get("capacity_vehicles_per_hour", 0) for r in zone_routes
-                )
+                avg_dist = sum(_route_distance(r) for r in zone_routes) / len(zone_routes)
+                total_cap = sum(r.get("capacity_vehicles_per_hour", 0) for r in zone_routes)
                 metrics[zone_num] = {
                     "avg_distance_km": avg_dist,
                     "total_capacity": total_cap,
@@ -296,10 +281,7 @@ class TimelineEstimator:
         if hazard_type in ("flood", "cyclone"):
             immediate_threshold_hours = 4.0
 
-        if (
-            hazard_time_horizon_hours is not None
-            and hazard_time_horizon_hours < immediate_threshold_hours
-        ):
+        if hazard_time_horizon_hours is not None and hazard_time_horizon_hours < immediate_threshold_hours:
             return ShelterInPlaceRecommendation(
                 recommended=False,
                 zone_number=zone_number,
@@ -338,11 +320,7 @@ class TimelineEstimator:
             start_offset_minutes=start_offset_minutes,
             duration_minutes=0,
             population_moved=0,
-            description=(
-                f"{description} | "
-                f"N/A — zone not in scope | "
-                f"Mobilisation: {mobilisation_min}min"
-            ),
+            description=(f"{description} | N/A — zone not in scope | Mobilisation: {mobilisation_min}min"),
         )
 
     def can_recover_from_shelter(

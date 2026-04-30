@@ -419,10 +419,7 @@ def run_monitoring_phase(
     signal_id = "signal-demo-001"
     incident_id = "incident-demo-001"
 
-    narrator.detail(
-        f"Injecting authoritative {scenario_config.scenario_type} signal "
-        f"from BoM sensor network"
-    )
+    narrator.detail(f"Injecting authoritative {scenario_config.scenario_type} signal from BoM sensor network")
 
     # Ingest signal via platform API
     signal_payload = {
@@ -478,10 +475,7 @@ def run_monitoring_phase(
     ingest_data = ingest_resp.json()
     actual_signal_id = ingest_data.get("signalId", signal_id)
 
-    narrator.detail(
-        f"Signal ID: {actual_signal_id} | Confidence: 0.92 | "
-        f"Category: {scenario_config.signal_category}"
-    )
+    narrator.detail(f"Signal ID: {actual_signal_id} | Confidence: 0.92 | Category: {scenario_config.signal_category}")
 
     # Associate signals via monitoring agent
     monitoring = clients["monitoring"]
@@ -540,7 +534,8 @@ def run_risk_assessment_phase(
     """Seed a recommendation, approve it via the risk assessment agent."""
     t0 = time.perf_counter()
     narrator.phase_start(
-        "risk_assessment", 3,
+        "risk_assessment",
+        3,
         "Analysing hazard and generating recommendation",
     )
 
@@ -732,9 +727,7 @@ def run_evacuation_phase(
     # Policy escalation (US3 — T022): large-scale evacuation
     pop_count = 0
     if seed_data.population.get("facilities"):
-        pop_count = sum(
-            f.get("capacity", 0) or 0 for f in seed_data.population["facilities"]
-        )
+        pop_count = sum(f.get("capacity", 0) or 0 for f in seed_data.population["facilities"])
     if pop_count > 100:  # threshold for escalation
         demo_run.audit_trail.append(
             DecisionRecord(
@@ -748,8 +741,7 @@ def run_evacuation_phase(
             )
         )
         narrator.warning(
-            f"POLICY ESCALATION: Large-scale evacuation ({pop_count} capacity) "
-            f"requires State Controller authorisation"
+            f"POLICY ESCALATION: Large-scale evacuation ({pop_count} capacity) requires State Controller authorisation"
         )
         narrator.success("ESCALATION AUTO-APPROVED")
 
@@ -798,7 +790,9 @@ def run_resource_allocation_phase(
     """Approve resource allocation plan."""
     t0 = time.perf_counter()
     narrator.phase_start(
-        "resource_allocation", 5, "Allocating emergency resources",
+        "resource_allocation",
+        5,
+        "Allocating emergency resources",
     )
 
     resource_client = clients["resource_allocation"]
@@ -861,8 +855,7 @@ def run_resource_allocation_phase(
             )
         )
         narrator.warning(
-            f"POLICY ESCALATION: {resource_count} resources mobilised — "
-            f"requires State Controller authorisation"
+            f"POLICY ESCALATION: {resource_count} resources mobilised — requires State Controller authorisation"
         )
         narrator.success("ESCALATION AUTO-APPROVED")
 
@@ -911,7 +904,9 @@ def run_communication_phase(
     """Process handoff to communication agent and generate multilingual alerts."""
     t0 = time.perf_counter()
     narrator.phase_start(
-        "communication", 6, "Generating multilingual public alerts",
+        "communication",
+        6,
+        "Generating multilingual public alerts",
     )
 
     comm_client = clients["communication"]
@@ -1039,9 +1034,7 @@ def run_summary_phase(
     total_decisions = len(demo_run.audit_trail)
     total_handoffs = len(demo_run.handoffs)
     total_languages = len(demo_run.alerts.languages)
-    total_escalations = sum(
-        1 for d in demo_run.audit_trail if d.decision_type == "policy_escalation"
-    )
+    total_escalations = sum(1 for d in demo_run.audit_trail if d.decision_type == "policy_escalation")
 
     # Summary banner (US2 — T028)
     if narrator._verbose:
@@ -1138,19 +1131,37 @@ def run_pipeline(
     phase_funcs = {
         "setup": lambda: run_setup_phase(clients, seed_data, narrator),
         "monitoring": lambda: run_monitoring_phase(
-            clients, seed_data, scenario_config, narrator,
+            clients,
+            seed_data,
+            scenario_config,
+            narrator,
         ),
         "risk_assessment": lambda: run_risk_assessment_phase(
-            clients, seed_data, scenario_config, narrator, demo_run,
+            clients,
+            seed_data,
+            scenario_config,
+            narrator,
+            demo_run,
         ),
         "evacuation": lambda: run_evacuation_phase(
-            clients, seed_data, scenario_config, narrator, demo_run,
+            clients,
+            seed_data,
+            scenario_config,
+            narrator,
+            demo_run,
         ),
         "resource_allocation": lambda: run_resource_allocation_phase(
-            clients, seed_data, narrator, demo_run,
+            clients,
+            seed_data,
+            narrator,
+            demo_run,
         ),
         "communication": lambda: run_communication_phase(
-            clients, seed_data, scenario_config, narrator, demo_run,
+            clients,
+            seed_data,
+            scenario_config,
+            narrator,
+            demo_run,
         ),
         "summary": lambda: run_summary_phase(demo_run, narrator),
     }
@@ -1160,7 +1171,8 @@ def run_pipeline(
         if phase_name == "summary":
             # Compute duration before summary phase
             demo_run.duration_seconds = round(
-                (datetime.now(UTC) - started_at).total_seconds(), 2,
+                (datetime.now(UTC) - started_at).total_seconds(),
+                2,
             )
 
         if failed:
@@ -1188,7 +1200,8 @@ def run_pipeline(
     demo_run.completed_at = datetime.now(UTC)
     if not failed:
         demo_run.duration_seconds = round(
-            (demo_run.completed_at - started_at).total_seconds(), 2,
+            (demo_run.completed_at - started_at).total_seconds(),
+            2,
         )
 
     serialize_output(demo_run, output_path)

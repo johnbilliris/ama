@@ -20,14 +20,25 @@ _AWS_TIERS = {
     "Advice": {"calm", "informational", "monitor", "aware", "stay informed"},
     "Watch and Act": {"action", "prepare", "ready", "act now", "conditions changing"},
     "Emergency Warning": {
-        "immediate", "threat", "danger", "life-threatening", "seek shelter",
-        "evacuate", "emergency", "critical",
+        "immediate",
+        "threat",
+        "danger",
+        "life-threatening",
+        "seek shelter",
+        "evacuate",
+        "emergency",
+        "critical",
     },
 }
 
 _EMERGENCY_ESCALATION_WORDS = {
-    "immediate", "life-threatening", "evacuate now", "danger", "critical danger",
-    "extreme", "catastrophic",
+    "immediate",
+    "life-threatening",
+    "evacuate now",
+    "danger",
+    "critical danger",
+    "extreme",
+    "catastrophic",
 }
 
 
@@ -69,11 +80,13 @@ class ContentSafetyValidator:
             env = os.environ.get("ENVIRONMENT", "local")
             if env == "local":
                 from azure.core.credentials import AzureKeyCredential
+
                 key = os.environ.get("AZURE_CONTENT_SAFETY_KEY", "")
                 if key:
                     return ContentSafetyClient(endpoint, AzureKeyCredential(key))
             else:
                 from azure.identity import DefaultAzureCredential
+
                 return ContentSafetyClient(endpoint, DefaultAzureCredential())
         except Exception:
             logger.debug("Azure AI Content Safety client not available")
@@ -148,7 +161,9 @@ class ContentSafetyValidator:
         )
 
     def _validate_keywords(
-        self, text: str, expected_language: str | None = None,
+        self,
+        text: str,
+        expected_language: str | None = None,
     ) -> ContentSafetyResult:
         """Keyword-based fallback validation — flags for human review."""
         normalized = text.lower()
@@ -257,4 +272,3 @@ class ContentSafetyValidator:
             confidence=0.0,
             validation_method="tone",
         )
-

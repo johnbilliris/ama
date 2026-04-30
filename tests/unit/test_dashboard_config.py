@@ -1,6 +1,5 @@
 """Unit tests for dashboard role-to-widget config resolution (T080)."""
 
-
 from apps.api.app.api.routes.governance_dashboard import (
     ROLE_WIDGET_CONFIGS,
     _resolve_widget_layout,
@@ -12,9 +11,16 @@ class TestRoleWidgetConfig:
     def test_all_10_roles_configured(self):
         """All 10 AIIMS roles plus field_coordinator have widget configurations."""
         expected_roles = {
-            "incident_controller", "operations_officer", "planning_officer",
-            "intelligence_officer", "logistics_officer", "public_information_officer",
-            "executive_leader", "observer_auditor", "risk_manager", "resilience_planner",
+            "incident_controller",
+            "operations_officer",
+            "planning_officer",
+            "intelligence_officer",
+            "logistics_officer",
+            "public_information_officer",
+            "executive_leader",
+            "observer_auditor",
+            "risk_manager",
+            "resilience_planner",
             "field_coordinator",
         }
         assert set(ROLE_WIDGET_CONFIGS.keys()) == expected_roles

@@ -35,8 +35,7 @@ class SignalRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "SignalRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "SignalRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -60,7 +59,10 @@ class SignalRepository:
         return signal_doc
 
     async def get_signal(
-        self, tenant_id: str, signal_id: str, partition_key: str | None = None,
+        self,
+        tenant_id: str,
+        signal_id: str,
+        partition_key: str | None = None,
     ) -> dict[str, Any] | None:
         container = self._get_container()
         if container:
@@ -91,9 +93,7 @@ class SignalRepository:
                 )
             )[0]
             return items, total
-        tenant_signals = [
-            v for k, v in self._in_memory.items() if k.startswith(f"{tenant_id}:")
-        ]
+        tenant_signals = [v for k, v in self._in_memory.items() if k.startswith(f"{tenant_id}:")]
         total = len(tenant_signals)
         return tenant_signals[offset : offset + limit], total
 

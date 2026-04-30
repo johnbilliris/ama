@@ -76,9 +76,7 @@ def test_record_tool_invocation_payload(recorder, tenant_id) -> None:
 
 def test_state_change_and_warp_change_events(recorder, tenant_id) -> None:
     rec, repo = recorder
-    rec.record_state_change(
-        tenant_id, 0.0, from_status="Provisioning", to_status="Active", trigger="start"
-    )
+    rec.record_state_change(tenant_id, 0.0, from_status="Provisioning", to_status="Active", trigger="start")
     rec.record_warp_speed_change(tenant_id, 1.0, old_speed=1.0, new_speed=10.0)
     events = repo.list_events(tenant_id)
     assert [e.event_type for e in events] == ["state_change", "warp_speed_change"]

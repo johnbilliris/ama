@@ -175,27 +175,22 @@ class RiskAssessmentAgent(LLMCallMixin):
         if extrapolation and extrapolation.trend_detected:
             trend_parts = [f"PREDICTIVE OUTLOOK: Trend is {extrapolation.trend_direction}"]
             trend_parts.append(
-                f"(slope {extrapolation.slope_per_hour:+.4f}/hr, "
-                f"R²={extrapolation.details.get('r_squared', 0):.2f})."
+                f"(slope {extrapolation.slope_per_hour:+.4f}/hr, R²={extrapolation.details.get('r_squared', 0):.2f})."
             )
             if extrapolation.hours_to_warning_threshold is not None:
                 trend_parts.append(
-                    f"Warning threshold breach projected in "
-                    f"~{extrapolation.hours_to_warning_threshold:.1f} hours."
+                    f"Warning threshold breach projected in ~{extrapolation.hours_to_warning_threshold:.1f} hours."
                 )
             if extrapolation.hours_to_emergency_threshold is not None:
                 trend_parts.append(
-                    f"Emergency threshold breach projected in "
-                    f"~{extrapolation.hours_to_emergency_threshold:.1f} hours."
+                    f"Emergency threshold breach projected in ~{extrapolation.hours_to_emergency_threshold:.1f} hours."
                 )
             trend_parts.append(
                 f"24h projection: {extrapolation.projected_value_24h:.2f}; "
                 f"48h projection: {extrapolation.projected_value_48h:.2f}."
             )
             if extrapolation.predictive_lead_time_hours > 0:
-                trend_parts.append(
-                    f"Predictive lead time: {extrapolation.predictive_lead_time_hours:.1f}h."
-                )
+                trend_parts.append(f"Predictive lead time: {extrapolation.predictive_lead_time_hours:.1f}h.")
                 # Boost confidence slightly when predictive data supports the assessment
                 confidence += self._config.extrapolation_confidence_boost
                 confidence = min(1.0, confidence)
@@ -227,7 +222,9 @@ class RiskAssessmentAgent(LLMCallMixin):
                 "projected_value_24h": extrapolation.projected_value_24h,
                 "projected_value_48h": extrapolation.projected_value_48h,
                 "extrapolation_confidence": extrapolation.extrapolation_confidence,
-            } if extrapolation else None,
+            }
+            if extrapolation
+            else None,
         }
 
         assessment_id = f"ha-{incident_id}-{assessment_type}-v{version}"
@@ -280,9 +277,7 @@ class RiskAssessmentAgent(LLMCallMixin):
 
         Maps assessment_type → recommendation types per contracts/assessment-pipeline.md §Stage 6.
         """
-        rec_types = list(ASSESSMENT_TO_RECOMMENDATION_TYPES.get(
-            assessment.assessment_type, ["public_alert"]
-        ))
+        rec_types = list(ASSESSMENT_TO_RECOMMENDATION_TYPES.get(assessment.assessment_type, ["public_alert"]))
 
         # Filter evacuation: only if severity ≥ high for spread_prediction
         if assessment.assessment_type == "spread_prediction":
@@ -395,7 +390,9 @@ class RiskAssessmentAgent(LLMCallMixin):
         return False
 
     def _threatens_evacuation_routes(
-        self, signals: list[dict], assessment: HazardAssessment,
+        self,
+        signals: list[dict],
+        assessment: HazardAssessment,
     ) -> bool:
         """Check if signals indicate threat to evacuation routes."""
         for sig in signals:
@@ -411,7 +408,9 @@ class RiskAssessmentAgent(LLMCallMixin):
     # ------------------------------------------------------------------
 
     def recommend_public_alert(
-        self, incident_id: str, signal_ids: list[str],
+        self,
+        incident_id: str,
+        signal_ids: list[str],
     ) -> Recommendation:
         """Generate a public_alert recommendation (backward-compatible API).
 
@@ -461,7 +460,8 @@ class RiskAssessmentAgent(LLMCallMixin):
     # ------------------------------------------------------------------
 
     def build_communication_handoff(
-        self, recommendation: Recommendation,
+        self,
+        recommendation: Recommendation,
     ) -> AgentHandoffEvent | None:
         """Build handoff to Communication Agent for public_alert recommendations.
 
@@ -489,7 +489,8 @@ class RiskAssessmentAgent(LLMCallMixin):
         )
 
     def build_evacuation_handoff(
-        self, recommendation: Recommendation,
+        self,
+        recommendation: Recommendation,
     ) -> AgentHandoffEvent | None:
         """Build handoff to Evacuation Agent.
 
@@ -517,7 +518,8 @@ class RiskAssessmentAgent(LLMCallMixin):
         )
 
     def build_resource_allocation_handoff(
-        self, recommendation: Recommendation,
+        self,
+        recommendation: Recommendation,
     ) -> AgentHandoffEvent | None:
         """Build handoff to Resource Allocation Agent.
 
@@ -678,10 +680,7 @@ def create_app(
         overall = "healthy"
         if queue_status == "offline":
             overall = "unhealthy"
-        elif any(
-            x != "healthy"
-            for x in [llm_status, signal_store_status, queue_status, audit_status]
-        ):
+        elif any(x != "healthy" for x in [llm_status, signal_store_status, queue_status, audit_status]):
             overall = "degraded"
 
         return _HealthResponse(
@@ -781,8 +780,7 @@ def create_app(
             recommendation_id=request.recommendation_id,
             decision_type=DecisionType.recommendation_generated,
             decision_rationale=(
-                f"Override by {request.user_id} ({request.role}): "
-                f"{request.action} — {request.justification}"
+                f"Override by {request.user_id} ({request.role}): {request.action} — {request.justification}"
             ),
             generation_method="human_override",
             agent_version=_config.agent_version,

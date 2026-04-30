@@ -105,7 +105,9 @@ async def select_outcomes(framework_id: str, payload: SelectOutcomesInput) -> di
     """Select outcomes from the catalogue for a framework."""
     try:
         return await _service.select_outcomes(
-            framework_id, payload.incident_id, payload.outcomes,
+            framework_id,
+            payload.incident_id,
+            payload.outcomes,
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -117,7 +119,9 @@ async def create_program_logic(framework_id: str, payload: CreateProgramLogicInp
     logic_data = payload.model_dump(exclude={"incident_id"})
     try:
         return await _service.create_program_logic(
-            framework_id, payload.incident_id, logic_data,
+            framework_id,
+            payload.incident_id,
+            logic_data,
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -140,7 +144,9 @@ async def set_standards(framework_id: str, payload: SetStandardsInput) -> dict:
     """Set standards of success for framework indicators."""
     try:
         return await _service.set_standards(
-            framework_id, payload.incident_id, payload.standards,
+            framework_id,
+            payload.incident_id,
+            payload.standards,
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -151,7 +157,9 @@ async def set_collection_schedule(framework_id: str, payload: SetCollectionSched
     """Set indicator data-collection schedule."""
     try:
         return await _service.set_collection_schedule(
-            framework_id, payload.incident_id, payload.schedules,
+            framework_id,
+            payload.incident_id,
+            payload.schedules,
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

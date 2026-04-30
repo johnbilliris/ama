@@ -3,6 +3,7 @@
 Tests: report creation, period validation, AI-assisted safety requirement,
 domain findings keys, severity levels, recommendations, dissemination.
 """
+
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -77,10 +78,16 @@ class TestDomainFinding:
         )
         assert len(df.evidence_references) == 2
 
-    @pytest.mark.parametrize("domain", [
-        "governance", "community_engagement", "effectiveness",
-        "efficiency", "implementation",
-    ])
+    @pytest.mark.parametrize(
+        "domain",
+        [
+            "governance",
+            "community_engagement",
+            "effectiveness",
+            "efficiency",
+            "implementation",
+        ],
+    )
     def test_all_evaluation_domains_valid(self, domain):
         df = DomainFinding(evaluation_domain=domain)
         assert df.evaluation_domain == domain
@@ -231,12 +238,16 @@ class TestEvaluationReport:
     def test_report_with_dissemination_records(self, base_kwargs):
         records = [
             DisseminationRecord(
-                recipient="Government", recipient_type="government",
-                disseminated_at=datetime.now(UTC), format="pdf",
+                recipient="Government",
+                recipient_type="government",
+                disseminated_at=datetime.now(UTC),
+                format="pdf",
             ),
             DisseminationRecord(
-                recipient="Community Group", recipient_type="community",
-                disseminated_at=datetime.now(UTC), format="presentation",
+                recipient="Community Group",
+                recipient_type="community",
+                disseminated_at=datetime.now(UTC),
+                format="presentation",
             ),
         ]
         base_kwargs["dissemination_records"] = records

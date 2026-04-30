@@ -68,7 +68,10 @@ def _case() -> EvaluationCase:
         approvalState="approved",
         approvalChain=[
             ApprovalEntry(
-                role="reviewer", principal="c@d", action="approve", timestamp=datetime.now(UTC),
+                role="reviewer",
+                principal="c@d",
+                action="approve",
+                timestamp=datetime.now(UTC),
             ),
         ],
     )

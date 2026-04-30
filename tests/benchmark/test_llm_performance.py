@@ -30,9 +30,7 @@ def mock_llm_client() -> LLMClient:
 
     # Build a mock response matching Azure OpenAI shape
     mock_response = MagicMock()
-    mock_response.choices = [
-        MagicMock(message=MagicMock(content="Benchmark test response"))
-    ]
+    mock_response.choices = [MagicMock(message=MagicMock(content="Benchmark test response"))]
     mock_response.usage = MagicMock(prompt_tokens=10, completion_tokens=20)
 
     # Replace the actual client with a mock that returns instantly
@@ -48,9 +46,7 @@ def mock_llm_client() -> LLMClient:
 
 @pytest.mark.benchmark(group="llm")
 def test_llm_client_overhead(benchmark, mock_llm_client) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="shared", metric_type="llm", slo_target_s=0.500
-    )
+    set_benchmark_metadata(benchmark, agent="shared", metric_type="llm", slo_target_s=0.500)
     result = benchmark(
         mock_llm_client.generate_response,
         purpose="reasoning",

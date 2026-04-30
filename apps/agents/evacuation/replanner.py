@@ -101,30 +101,21 @@ class DynamicReplanner:
         if new_road_closures:
             triggers.append(
                 f"road_closure: {len(new_road_closures)} new closure(s) — "
-                f"{', '.join(new_road_closures[:5])}"
-                + (" ..." if len(new_road_closures) > 5 else "")
+                f"{', '.join(new_road_closures[:5])}" + (" ..." if len(new_road_closures) > 5 else "")
             )
 
         # (b) Hazard expansion > threshold %
         expansion_threshold = self._config.hazard_expansion_replan_pct
-        if (
-            hazard_area_change_pct is not None
-            and hazard_area_change_pct > expansion_threshold
-        ):
+        if hazard_area_change_pct is not None and hazard_area_change_pct > expansion_threshold:
             triggers.append(
-                f"hazard_expansion: area changed by {hazard_area_change_pct:.1f}% "
-                f"(threshold: {expansion_threshold}%)"
+                f"hazard_expansion: area changed by {hazard_area_change_pct:.1f}% (threshold: {expansion_threshold}%)"
             )
 
         # (c) Progress delay > threshold %
         delay_threshold = self._config.progress_delay_replan_pct
-        if (
-            progress_delay_pct is not None
-            and progress_delay_pct > delay_threshold
-        ):
+        if progress_delay_pct is not None and progress_delay_pct > delay_threshold:
             triggers.append(
-                f"progress_delay: {progress_delay_pct:.1f}% behind schedule "
-                f"(threshold: {delay_threshold}%)"
+                f"progress_delay: {progress_delay_pct:.1f}% behind schedule (threshold: {delay_threshold}%)"
             )
 
         # (d) Higher-severity assessment
@@ -132,9 +123,7 @@ class DynamicReplanner:
             new_ord = _SEVERITY_ORDER.get(new_severity, -1)
             cur_ord = _SEVERITY_ORDER.get(current_severity, -1)
             if new_ord > cur_ord:
-                triggers.append(
-                    f"severity_escalation: {current_severity} → {new_severity}"
-                )
+                triggers.append(f"severity_escalation: {current_severity} → {new_severity}")
 
         # (e) Manual trigger
         if manual_trigger:
@@ -143,9 +132,7 @@ class DynamicReplanner:
         # (f) Shelter-to-evacuation recovery
         if shelter_zones_with_new_routes:
             zone_list = ", ".join(str(z) for z in shelter_zones_with_new_routes)
-            triggers.append(
-                f"shelter_recovery: zones [{zone_list}] now have viable evacuation routes"
-            )
+            triggers.append(f"shelter_recovery: zones [{zone_list}] now have viable evacuation routes")
 
         if triggers:
             logger.info(
@@ -208,12 +195,8 @@ class DynamicReplanner:
             return True
 
         # Route IDs changed
-        old_route_ids = sorted(
-            r.get("route_id", "") for r in old_plan.get("routes", [])
-        )
-        new_route_ids = sorted(
-            r.get("route_id", "") for r in new_plan.get("routes", [])
-        )
+        old_route_ids = sorted(r.get("route_id", "") for r in old_plan.get("routes", []))
+        new_route_ids = sorted(r.get("route_id", "") for r in new_plan.get("routes", []))
         if old_route_ids != new_route_ids:
             return True
 

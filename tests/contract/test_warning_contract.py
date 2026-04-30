@@ -144,9 +144,8 @@ def test_get_edxl_returns_valid_xml(client):
     assert dist_id is not None and dist_id.text == "alert-edxl"
     sender = root.find("senderID") or root.find("edxl:senderID", ns)
     assert sender is not None and sender.text == "disaster-response-hub"
-    tier_el = (
-        root.find("contentObject/awsWarning/warningTier")
-        or root.find("edxl:contentObject/edxl:awsWarning/edxl:warningTier", ns)
+    tier_el = root.find("contentObject/awsWarning/warningTier") or root.find(
+        "edxl:contentObject/edxl:awsWarning/edxl:warningTier", ns
     )
     assert tier_el is not None and tier_el.text == "emergency_warning"
 

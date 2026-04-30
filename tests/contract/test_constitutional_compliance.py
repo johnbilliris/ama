@@ -17,8 +17,11 @@ def service() -> GovernanceRegistryService:
 def _register_source(service: GovernanceRegistryService, ds_id: str = "") -> DataSource:
     ds_id = ds_id or f"ds-{uuid4().hex[:12]}"
     source = DataSource(
-        data_source_id=ds_id, name="Test", kind="authoritative",
-        sub_category="weather_climate", provider="BoM",
+        data_source_id=ds_id,
+        name="Test",
+        kind="authoritative",
+        sub_category="weather_climate",
+        provider="BoM",
         trust_tier="tier_1_authoritative_government",
     )
     return service.register_source(source, actor_id="tester")
@@ -83,8 +86,10 @@ class TestComplianceDerivation:
     def test_non_compliant_assessment_sets_source_non_compliant(self, service: GovernanceRegistryService) -> None:
         src = _register_source(service)
         assessment = _make_assessment(
-            src.data_source_id, status="non_compliant",
-            gaps=["privacy concern"], explanation="PII exposed",
+            src.data_source_id,
+            status="non_compliant",
+            gaps=["privacy concern"],
+            explanation="PII exposed",
         )
         service.create_assessment(assessment, actor_id="tester")
         updated = service.get_source(src.data_source_id)
@@ -108,9 +113,12 @@ class TestNonCompliantBlocking:
             actor_id="t",
         )
         assignment = AgentGovernanceAssignment(
-            assignment_id="assign-1", data_source_id=src.data_source_id,
-            agent_name="monitoring", role="primary",
-            scope_of_responsibility="ingest", assigned_by="arch",
+            assignment_id="assign-1",
+            data_source_id=src.data_source_id,
+            agent_name="monitoring",
+            role="primary",
+            scope_of_responsibility="ingest",
+            assigned_by="arch",
             assigned_at=datetime.now(UTC),
         )
         with pytest.raises(Exception, match="non-compliant"):

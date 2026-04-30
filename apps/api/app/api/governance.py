@@ -27,10 +27,16 @@ from packages.domain.src.domain.models.handoff_chain import (
 )
 
 GOVERNANCE_WRITE_ROLES = frozenset({"governance_lead", "safety_lead", "system_architect"})
-GOVERNANCE_READ_ROLES = frozenset({
-    "governance_lead", "safety_lead", "system_architect",
-    "incident_commander", "executive", "auditor",
-})
+GOVERNANCE_READ_ROLES = frozenset(
+    {
+        "governance_lead",
+        "safety_lead",
+        "system_architect",
+        "incident_commander",
+        "executive",
+        "auditor",
+    }
+)
 
 
 def _get_user_role(request: Request) -> str:
@@ -56,6 +62,7 @@ _cache = GovernanceCacheService()
 
 
 # --- Compliance endpoints (US2) ---
+
 
 class AssessmentCreate(BaseModel):
     principle: ConstitutionalPrinciple
@@ -91,6 +98,7 @@ async def create_assessment(data_source_id: str, body: AssessmentCreate) -> dict
 
 # --- Grace period (US2) ---
 
+
 class GracePeriodAction(BaseModel):
     action: str  # "extend" or "block"
     extend_hours: int | None = None
@@ -103,8 +111,10 @@ async def manage_grace_period(data_source_id: str, body: GracePeriodAction) -> d
         if not body.extend_hours or body.extend_hours < 1:
             raise HTTPException(status_code=400, detail="extend_hours must be >= 1 for extend action.")
         result = _service.extend_grace_period(
-            data_source_id, body.extend_hours,
-            actor_id="api-user", rationale=body.rationale,
+            data_source_id,
+            body.extend_hours,
+            actor_id="api-user",
+            rationale=body.rationale,
         )
     elif body.action == "block":
         result = _service.block_source_immediately(data_source_id, actor_id="api-user")
@@ -114,6 +124,7 @@ async def manage_grace_period(data_source_id: str, body: GracePeriodAction) -> d
 
 
 # --- Agent governance endpoints (US3) ---
+
 
 class AgentAssignmentCreate(BaseModel):
     agent_name: AgentName
@@ -147,6 +158,7 @@ async def assign_agent(data_source_id: str, body: AgentAssignmentCreate) -> dict
 
 # --- Handoff chain (US3) ---
 
+
 class HandoffStepCreate(BaseModel):
     step_order: int
     source_agent: str
@@ -177,6 +189,7 @@ async def define_handoff_chain(data_source_id: str, body: HandoffChainCreate) ->
 
 # --- Functional-domain precedence (US3) ---
 
+
 class PrecedenceCreate(BaseModel):
     hazard_type: SignalCategory
     jurisdiction_id: str | None = None
@@ -204,6 +217,7 @@ async def set_precedence(body: PrecedenceCreate) -> dict:
 
 # --- Handoff lookup (US3, NFR-001) ---
 
+
 @router.get("/governance/handoff-lookup")
 async def lookup_handoff_chain(data_source_id: str) -> dict:
     cached = _cache.get(data_source_id)
@@ -219,6 +233,7 @@ async def lookup_handoff_chain(data_source_id: str) -> dict:
 
 # --- Governance dashboard (US4) ---
 
+
 @router.get("/governance/dashboard")
 async def get_governance_dashboard(
     compliance_status: str | None = None,
@@ -229,12 +244,14 @@ async def get_governance_dashboard(
 ) -> dict:
     summary = _service.get_dashboard_summary()
     filters: dict[str, str | None] = {
-        k: v for k, v in {
+        k: v
+        for k, v in {
             "compliance_status": compliance_status,
             "governance_status": governance_status,
             "kind": kind,
             "geographic_coverage": geographic_coverage,
-        }.items() if v is not None
+        }.items()
+        if v is not None
     }
     sources = _service.list_sources(**filters)
     active_sources = [s for s in sources if s.status != "deactivated"]
@@ -245,6 +262,7 @@ async def get_governance_dashboard(
 
 
 # --- Audit trail (US4) ---
+
 
 @router.get("/data-sources/{data_source_id}/audit")
 async def get_audit_trail(

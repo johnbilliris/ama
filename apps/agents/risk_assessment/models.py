@@ -68,6 +68,7 @@ class SeverityLevel(StrEnum):
 # Helper: confidence → level
 # ---------------------------------------------------------------------------
 
+
 def confidence_to_level(score: float) -> ConfidenceLevel:
     """Map numeric confidence to discrete level.
 

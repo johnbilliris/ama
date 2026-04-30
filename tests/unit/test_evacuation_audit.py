@@ -1,7 +1,5 @@
 """Tests for evacuation.audit — three-tier degradation strategy (T049)."""
 
-
-
 from evacuation.audit import AuditWriter
 from evacuation.config import EvacuationConfig
 from evacuation.models import DecisionType, EvacuationDecisionRecord

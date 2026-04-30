@@ -1,7 +1,5 @@
 """Tests for evacuation.config — defaults, hash, mobilisation, env overrides (T013)."""
 
-
-
 from evacuation.config import EvacuationConfig
 
 # ---------------------------------------------------------------------------

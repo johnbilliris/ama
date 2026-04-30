@@ -23,13 +23,9 @@ TRUST_TIER_TO_RANK: dict[str, int] = {
     "tier_7_derived_computed": 7,
 }
 
-DataSourceKind = Literal[
-    "authoritative", "sensor", "iot", "field_report", "social", "community", "derived"
-]
+DataSourceKind = Literal["authoritative", "sensor", "iot", "field_report", "social", "community", "derived"]
 
-ComplianceStatus = Literal[
-    "unassessed", "compliant", "partially_compliant", "non_compliant", "compliance_lapsed"
-]
+ComplianceStatus = Literal["unassessed", "compliant", "partially_compliant", "non_compliant", "compliance_lapsed"]
 
 GovernanceStatus = Literal["unassigned", "assigned", "fully_governed"]
 

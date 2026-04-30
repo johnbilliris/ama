@@ -41,12 +41,14 @@ class GaTsunamiPipeline(BomWarningsPipeline):
                     self._known_files.add(filename)
                     continue
 
-                payloads.append({
-                    "xml": content,
-                    "filename": filename,
-                    "data_source_id": "ga-tsunami-warnings",
-                    "source_uri": f"ftp://{self._ftp_host}{self._ftp_path}{filename}",
-                })
+                payloads.append(
+                    {
+                        "xml": content,
+                        "filename": filename,
+                        "data_source_id": "ga-tsunami-warnings",
+                        "source_uri": f"ftp://{self._ftp_host}{self._ftp_path}{filename}",
+                    }
+                )
                 self._known_files.add(filename)
 
             ftp.quit()

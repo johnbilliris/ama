@@ -1,6 +1,5 @@
 """Contract tests — handoff event acceptance from upstream agents."""
 
-
 import pytest
 from common.handoffs import AgentHandoffEvent, build_handoff
 

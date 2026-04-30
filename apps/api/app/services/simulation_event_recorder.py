@@ -187,10 +187,7 @@ class SimulationEventRecorder:
 
     def _maybe_create_snapshot(self, tenant_id: str, event: SimulationEvent) -> None:
         last = self._last_snapshot_time.get(tenant_id)
-        crossed_time = (
-            last is not None
-            and event.sim_time_offset - last >= _SNAPSHOT_TIME_INTERVAL_SECONDS
-        )
+        crossed_time = last is not None and event.sim_time_offset - last >= _SNAPSHOT_TIME_INTERVAL_SECONDS
         crossed_count = event.event_seq % _SNAPSHOT_EVENT_INTERVAL == 0
         # On the very first event, seed the anchor so the 300-second
         # window is measured from the initial event's sim time.

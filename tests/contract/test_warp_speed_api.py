@@ -107,9 +107,7 @@ def test_create_with_invalid_warp_speed_400(client):
 def test_get_simulation_returns_clock(client):
     created = _create_sim(client, warp_speed=5).json()
     tenant_id = created["tenant_id"]
-    resp = client.get(
-        f"/api/simulations/{tenant_id}", headers=_auth_headers("user-1")
-    )
+    resp = client.get(f"/api/simulations/{tenant_id}", headers=_auth_headers("user-1"))
     assert resp.status_code == 200, resp.text
     data = resp.json()
     assert data["current_warp_speed"] == 5.0
@@ -122,17 +120,13 @@ def test_pause_resume_server_computed(client):
     created = _create_sim(client, warp_speed=10).json()
     tenant_id = created["tenant_id"]
 
-    pause = client.post(
-        f"/api/simulations/{tenant_id}/pause", json={}, headers=_auth_headers("user-1")
-    )
+    pause = client.post(f"/api/simulations/{tenant_id}/pause", json={}, headers=_auth_headers("user-1"))
     assert pause.status_code == 200, pause.text
     assert pause.json()["status"] == "Paused"
     assert "accumulated_sim_seconds" in pause.json()
     assert "elapsed_seconds" in pause.json()
 
-    resume = client.post(
-        f"/api/simulations/{tenant_id}/resume", json={}, headers=_auth_headers("user-1")
-    )
+    resume = client.post(f"/api/simulations/{tenant_id}/resume", json={}, headers=_auth_headers("user-1"))
     assert resume.status_code == 200, resume.text
     assert resume.json()["status"] == "Active"
     assert resume.json()["current_warp_speed"] == 10.0
@@ -141,9 +135,7 @@ def test_pause_resume_server_computed(client):
 def test_clock_endpoint(client):
     created = _create_sim(client, warp_speed=2).json()
     tenant_id = created["tenant_id"]
-    resp = client.get(
-        f"/api/simulations/{tenant_id}/clock", headers=_auth_headers("user-1")
-    )
+    resp = client.get(f"/api/simulations/{tenant_id}/clock", headers=_auth_headers("user-1"))
     assert resp.status_code == 200, resp.text
     data = resp.json()
     for key in (
@@ -213,8 +205,6 @@ def test_change_warp_speed_while_paused_succeeds(client):
     assert changed.json()["previous_speed"] == 5.0
 
     # Simulation should remain Paused after the warp change.
-    detail = client.get(
-        f"/api/simulations/{tenant_id}", headers=_auth_headers("controller-1")
-    ).json()
+    detail = client.get(f"/api/simulations/{tenant_id}", headers=_auth_headers("controller-1")).json()
     assert detail["status"] == "Paused"
     assert detail["current_warp_speed"] == 10.0

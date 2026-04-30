@@ -150,11 +150,7 @@ class MEFrameworkPlatformService:
         fw = await self._repo.get_framework(framework_id, incident_id)
         if not fw:
             raise ValueError(f"Framework {framework_id} not found")
-        overdue = [
-            s["indicator_id"]
-            for s in fw.get("indicator_collection_schedule", [])
-            if s.get("is_overdue")
-        ]
+        overdue = [s["indicator_id"] for s in fw.get("indicator_collection_schedule", []) if s.get("is_overdue")]
         return {
             "framework_id": framework_id,
             "incident_id": fw["incident_id"],

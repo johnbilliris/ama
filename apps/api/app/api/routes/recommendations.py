@@ -14,9 +14,7 @@ class ApprovalDecisionInput(BaseModel):
 
 
 @router.post("/{recommendation_id}/approvals")
-async def record_approval(
-    recommendation_id: str, payload: ApprovalDecisionInput
-) -> dict[str, object]:
+async def record_approval(recommendation_id: str, payload: ApprovalDecisionInput) -> dict[str, object]:
     if recommendation_id not in RECOMMENDATIONS:
         raise HTTPException(status_code=404, detail="Recommendation not found")
 

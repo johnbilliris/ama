@@ -41,19 +41,21 @@ class HimawariSatellitePipeline(IngestionPipelineBase):
 
             for filename in new_files[:20]:
                 source_uri = f"ftp://{self._ftp_host}{self._ftp_path}{filename}"
-                payloads.append({
-                    "data_source_id": "himawari-satellite",
-                    "source_name": "BoM Himawari-9 Satellite",
-                    "source_kind": "sensor",
-                    "product_type": "infrared",
-                    "source_uri": source_uri,
-                    "timestamp": filename,
-                    "coverage_bbox": [112.0, -44.0, 154.0, -10.0],
-                    "file_format": "png",
-                    "product_code": filename,
-                    "collection_method": "satellite_downlink",
-                    "jurisdiction_id": "national",
-                })
+                payloads.append(
+                    {
+                        "data_source_id": "himawari-satellite",
+                        "source_name": "BoM Himawari-9 Satellite",
+                        "source_kind": "sensor",
+                        "product_type": "infrared",
+                        "source_uri": source_uri,
+                        "timestamp": filename,
+                        "coverage_bbox": [112.0, -44.0, 154.0, -10.0],
+                        "file_format": "png",
+                        "product_code": filename,
+                        "collection_method": "satellite_downlink",
+                        "jurisdiction_id": "national",
+                    }
+                )
                 self._known_files.add(filename)
 
             ftp.quit()

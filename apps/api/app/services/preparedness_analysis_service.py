@@ -12,6 +12,7 @@ class PreparednessAnalysisService:
     def __init__(self, seed_root: Path | None = None) -> None:
         if seed_root is None:
             from packages.domain.src.domain.seed import bootstrap as _seed_mod
+
             seed_root = Path(_seed_mod.__file__).resolve().parent
         self.seed_root = seed_root
 
@@ -23,9 +24,7 @@ class PreparednessAnalysisService:
             "jurisdictions": [Jurisdiction(**item) for item in seeds["jurisdictions"]],
             "frameworks": [OperatingFramework(**item) for item in seeds["frameworks"]],
             "organisations": [Organisation(**item) for item in seeds["organisations"]],
-            "framework_assignments": [
-                FrameworkAssignment(**item) for item in seeds.get("framework_assignments", [])
-            ],
+            "framework_assignments": [FrameworkAssignment(**item) for item in seeds.get("framework_assignments", [])],
         }
 
     def list_frameworks_by_jurisdictions(self, jurisdiction_ids: list[str]) -> list[OperatingFramework]:
@@ -35,10 +34,7 @@ class PreparednessAnalysisService:
         assignments = context["framework_assignments"]
         matching_framework_ids: set[str] = set()
         for assignment in assignments:
-            if (
-                assignment.jurisdiction_id in jurisdiction_ids
-                and assignment.effective_to is None
-            ):
+            if assignment.jurisdiction_id in jurisdiction_ids and assignment.effective_to is None:
                 matching_framework_ids.add(assignment.framework_id)
         frameworks = context["frameworks"]
         return [fw for fw in frameworks if fw.framework_id in matching_framework_ids]
@@ -48,34 +44,24 @@ class PreparednessAnalysisService:
         organisations = [
             organisation
             for organisation in context["organisations"]
-            if any(
-                jurisdiction_id in organisation.jurisdiction_ids
-                for jurisdiction_id in jurisdiction_ids
-            )
+            if any(jurisdiction_id in organisation.jurisdiction_ids for jurisdiction_id in jurisdiction_ids)
         ]
         all_assignments = context["framework_assignments"]
-        assignments = [
-            a for a in all_assignments
-            if a.jurisdiction_id in jurisdiction_ids and a.effective_to is None
-        ]
+        assignments = [a for a in all_assignments if a.jurisdiction_id in jurisdiction_ids and a.effective_to is None]
         matched_framework_ids = {a.framework_id for a in assignments}
-        frameworks = [
-            fw for fw in context["frameworks"] if fw.framework_id in matched_framework_ids
-        ]
+        frameworks = [fw for fw in context["frameworks"] if fw.framework_id in matched_framework_ids]
         gaps = []
         if len(organisations) < 2:
             gaps.append("Insufficient multi-agency coverage for cross-organisational rehearsal.")
         if not any(framework.framework_type == "communications" for framework in frameworks):
             gaps.append("No communications framework assigned for public messaging rehearsal.")
         if scenario_type == "cyclone" and not any(
-            "commonwealth" in organisation.jurisdiction_ids
-            for organisation in organisations
+            "commonwealth" in organisation.jurisdiction_ids for organisation in organisations
         ):
             gaps.append("Cyclone scenario lacks commonwealth meteorology support.")
 
         findings = [
-            f"{len(organisations)} organisations available"
-            f" across {len(jurisdiction_ids)} jurisdictions.",
+            f"{len(organisations)} organisations available across {len(jurisdiction_ids)} jurisdictions.",
             f"{len(assignments)} framework assignments active for the selected jurisdictions.",
         ]
 

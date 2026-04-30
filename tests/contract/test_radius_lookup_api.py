@@ -15,6 +15,7 @@ def _env(monkeypatch):
 @pytest.fixture
 def client(_env):
     from app.main import app
+
     return TestClient(app)
 
 

@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FoundryCarveOutRegistry",
+  "description": "Carve-out registry for non-AU Foundry model deployments. Enforces Constitution Non-Negotiable #2.",
+  "type": "object",
+  "required": ["version", "last_reviewed", "reviewer_quorum", "deployments"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "last_reviewed": { "type": "string", "format": "date" },
+    "reviewer_quorum": { "type": "integer", "minimum": 2 },
+    "deployments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "model_name",
+          "region",
+          "purpose",
+          "business_justification",
+          "approver_identities",
+          "review_date",
+          "data_minimisation_required",
+          "classification_filter_required"
+        ],
+        "properties": {
+          "model_name": { "type": "string", "minLength": 3 },
+          "region": { "type": "string", "minLength": 4 },
+          "purpose": {
+            "type": "string",
+            "enum": ["production", "shadow", "evaluation", "research"]
+          },
+          "business_justification": { "type": "string", "minLength": 30 },
+          "approver_identities": {
+            "type": "array",
+            "minItems": 2,
+            "items": { "type": "string", "minLength": 3 }
+          },
+          "review_date": { "type": "string", "format": "date" },
+          "data_minimisation_required": { "type": "boolean", "const": true },
+          "classification_filter_required": { "type": "boolean", "const": true }
+        }
+      }
+    }
+  }
+}

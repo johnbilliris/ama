@@ -55,18 +55,10 @@ class ExerciseMetricsService:
         # SC-004: Coordinated response time improvement
         if baseline.timestamp_first_coordinated_action and hub.timestamp_first_coordinated_action:
             baseline_minutes = (
-                (baseline.timestamp_first_coordinated_action - baseline.timestamp_activation)
-                .total_seconds() / 60
-            )
-            hub_minutes = (
-                (hub.timestamp_first_coordinated_action - hub.timestamp_activation)
-                .total_seconds() / 60
-            )
-            improvement = (
-                ((baseline_minutes - hub_minutes) / baseline_minutes) * 100
-                if baseline_minutes > 0
-                else 0
-            )
+                baseline.timestamp_first_coordinated_action - baseline.timestamp_activation
+            ).total_seconds() / 60
+            hub_minutes = (hub.timestamp_first_coordinated_action - hub.timestamp_activation).total_seconds() / 60
+            improvement = ((baseline_minutes - hub_minutes) / baseline_minutes) * 100 if baseline_minutes > 0 else 0
             results["sc004_response_time"] = {
                 "baseline_minutes": round(baseline_minutes, 1),
                 "hub_minutes": round(hub_minutes, 1),
@@ -77,13 +69,9 @@ class ExerciseMetricsService:
         # SC-005: Evacuation decision timing improvement
         if baseline.timestamp_evacuation_decision and hub.timestamp_evacuation_decision:
             baseline_hours = (
-                (baseline.timestamp_evacuation_decision - baseline.timestamp_activation)
-                .total_seconds() / 3600
-            )
-            hub_hours = (
-                (hub.timestamp_evacuation_decision - hub.timestamp_activation)
-                .total_seconds() / 3600
-            )
+                baseline.timestamp_evacuation_decision - baseline.timestamp_activation
+            ).total_seconds() / 3600
+            hub_hours = (hub.timestamp_evacuation_decision - hub.timestamp_activation).total_seconds() / 3600
             hours_earlier = baseline_hours - hub_hours
             results["sc005_evacuation_timing"] = {
                 "baseline_hours": round(baseline_hours, 1),
@@ -93,10 +81,7 @@ class ExerciseMetricsService:
             }
 
         # SC-006: Resource deployment efficiency
-        if (
-            baseline.time_to_assignment_minutes is not None
-            and hub.time_to_assignment_minutes is not None
-        ):
+        if baseline.time_to_assignment_minutes is not None and hub.time_to_assignment_minutes is not None:
             time_improvement = (
                 (
                     (baseline.time_to_assignment_minutes - hub.time_to_assignment_minutes)
@@ -137,8 +122,6 @@ class ExerciseMetricsService:
 
         # Overall verdict
         sc_results = [v for k, v in results.items() if k.startswith("sc") and isinstance(v, dict)]
-        results["overall_pass"] = (
-            all(r.get("passes", False) for r in sc_results) if sc_results else False
-        )
+        results["overall_pass"] = all(r.get("passes", False) for r in sc_results) if sc_results else False
 
         return results

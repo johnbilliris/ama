@@ -29,8 +29,7 @@ def validate_warp_speed(speed: float) -> float:
         if abs(value - allowed) < 1e-9:
             return allowed
     raise ValueError(
-        f"Invalid warp speed {speed!r}. Allowed values: "
-        f"{', '.join(str(int(s)) for s in ALLOWED_WARP_SPEEDS)}"
+        f"Invalid warp speed {speed!r}. Allowed values: {', '.join(str(int(s)) for s in ALLOWED_WARP_SPEEDS)}"
     )
 
 
@@ -45,6 +44,5 @@ def validate_playback_speed(speed: float) -> float:
         if abs(value - allowed) < 1e-9:
             return allowed
     raise ValueError(
-        f"Invalid playback speed {speed!r}. Allowed values: "
-        f"{', '.join(str(int(s)) for s in PLAYBACK_SPEEDS)}"
+        f"Invalid playback speed {speed!r}. Allowed values: {', '.join(str(int(s)) for s in PLAYBACK_SPEEDS)}"
     )

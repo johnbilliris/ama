@@ -22,8 +22,12 @@ AiimsFunction = Literal[
 ]
 
 ALL_AIIMS_FUNCTIONS: list[str] = [
-    "control", "intelligence", "planning",
-    "operations", "logistics", "public_information",
+    "control",
+    "intelligence",
+    "planning",
+    "operations",
+    "logistics",
+    "public_information",
 ]
 
 

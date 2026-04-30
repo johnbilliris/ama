@@ -67,7 +67,8 @@ class DeadLetterStore:
         if self._container is not None:
             try:
                 doc = self._container.read_item(
-                    item=handoff_id, partition_key=handoff_id,
+                    item=handoff_id,
+                    partition_key=handoff_id,
                 )
                 return DeadLetterEntry(**doc)
             except Exception:
@@ -99,18 +100,21 @@ class DeadLetterStore:
 
             where_clause = " AND ".join(conditions)
             count_query = f"SELECT VALUE COUNT(1) FROM c WHERE {where_clause}"
-            total = list(self._container.query_items(
-                query=count_query, parameters=params, enable_cross_partition_query=True,
-            ))[0]
+            total = list(
+                self._container.query_items(
+                    query=count_query,
+                    parameters=params,
+                    enable_cross_partition_query=True,
+                )
+            )[0]
 
-            query_str = (
-                f"SELECT * FROM c WHERE {where_clause} "
-                f"ORDER BY c.failed_at DESC OFFSET {offset} LIMIT {limit}"
-            )
+            query_str = f"SELECT * FROM c WHERE {where_clause} ORDER BY c.failed_at DESC OFFSET {offset} LIMIT {limit}"
             items = [
                 DeadLetterEntry(**doc)
                 for doc in self._container.query_items(
-                    query=query_str, parameters=params, enable_cross_partition_query=True,
+                    query=query_str,
+                    parameters=params,
+                    enable_cross_partition_query=True,
                 )
             ]
             return items, total
@@ -155,8 +159,11 @@ class DeadLetterRedeliveryPoller:
         self._running = False
         self._task: asyncio.Task | None = None
         self._known_agents: set[str] = {
-            "monitoring", "risk_assessment", "evacuation",
-            "resource_allocation", "communication",
+            "monitoring",
+            "risk_assessment",
+            "evacuation",
+            "resource_allocation",
+            "communication",
         }
 
     async def start(self) -> None:
@@ -190,7 +197,8 @@ class DeadLetterRedeliveryPoller:
         for agent_name in self._known_agents:
             if await self._health_check_fn(agent_name):
                 entries, _ = self._store.query(
-                    target_agent=agent_name, status="dead_lettered",
+                    target_agent=agent_name,
+                    status="dead_lettered",
                 )
                 for entry in entries:
                     if entry.auto_redeliver_attempts >= _MAX_AUTO_REDELIVER:
@@ -200,7 +208,7 @@ class DeadLetterRedeliveryPoller:
     async def _attempt_redeliver(self, entry: DeadLetterEntry) -> None:
         """Attempt to redeliver a single dead-letter entry."""
         entry.auto_redeliver_attempts += 1
-        backoff = min(30 * (2 ** entry.auto_redeliver_attempts), 300)
+        backoff = min(30 * (2**entry.auto_redeliver_attempts), 300)
 
         try:
             if self._deliver_fn:
@@ -224,10 +232,7 @@ class DeadLetterRedeliveryPoller:
             entry.failure_reason = str(exc)
 
             # R14: permanently fail after 3 auto + 1 manual
-            if (
-                entry.auto_redeliver_attempts >= _MAX_AUTO_REDELIVER
-                and entry.manual_redeliver_attempts >= 1
-            ):
+            if entry.auto_redeliver_attempts >= _MAX_AUTO_REDELIVER and entry.manual_redeliver_attempts >= 1:
                 self._store.mark_permanently_failed(entry, reason)
                 logger.error(
                     "dead_letter_permanently_failed",

@@ -34,10 +34,25 @@ _error_count = 0
 # ── Allowed enum values ──────────────────────────────────────────────────
 
 VALID_TYPES = {
-    "biosecurity", "bushfire", "criminal", "cyclone", "earthquake",
-    "environment", "extreme_heat", "flood", "health", "industrial",
-    "landslide", "maritime_coastal", "other", "pandemic", "storm",
-    "tornado", "transport", "tsunami", "urban_fire",
+    "biosecurity",
+    "bushfire",
+    "criminal",
+    "cyclone",
+    "earthquake",
+    "environment",
+    "extreme_heat",
+    "flood",
+    "health",
+    "industrial",
+    "landslide",
+    "maritime_coastal",
+    "other",
+    "pandemic",
+    "storm",
+    "tornado",
+    "transport",
+    "tsunami",
+    "urban_fire",
 }
 VALID_SEVERITIES = {"advisory", "watch", "warning", "emergency"}
 VALID_STATUSES = {"monitoring", "active", "stabilising", "recovery", "closed"}
@@ -53,8 +68,7 @@ def _parse_csv(raw: str | None, allowed: set[str], name: str) -> list[str] | Non
     if invalid:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid value for '{name}': {', '.join(invalid)}. "
-            f"Must be one of {', '.join(sorted(allowed))}",
+            detail=f"Invalid value for '{name}': {', '.join(invalid)}. Must be one of {', '.join(sorted(allowed))}",
         )
     return values or None
 
@@ -86,9 +100,7 @@ def _to_feature(doc: dict) -> IncidentFeature:
             severity=severity,
             severity_tier=SEVERITY_TO_AWS_TIER.get(severity, "advice"),
             affected_jurisdiction_ids=doc.get("affected_jurisdiction_ids", []),
-            participating_organisation_ids=doc.get(
-                "participating_organisation_ids", []
-            ),
+            participating_organisation_ids=doc.get("participating_organisation_ids", []),
             started_at=started_at,
             pprr_phase=doc.get("pprr_phase"),
             incident_level=doc.get("incident_level", 1),
@@ -138,9 +150,7 @@ async def get_incidents_map(
     )
 
     try:
-        items, total = await _repo.query_incidents(
-            page=page, page_size=page_size, **filter_kwargs
-        )
+        items, total = await _repo.query_incidents(page=page, page_size=page_size, **filter_kwargs)
         unmapped_count = await _repo.count_unmapped(**filter_kwargs)
     except Exception:
         _error_count += 1

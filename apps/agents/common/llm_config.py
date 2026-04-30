@@ -15,39 +15,21 @@ class LLMClientConfig:
     """Immutable LLM configuration read from environment variables with sensible defaults."""
 
     # Connection
-    endpoint: str = field(
-        default_factory=lambda: os.getenv("AZURE_OPENAI_ENDPOINT", "")
-    )
-    reasoning_deployment: str = field(
-        default_factory=lambda: os.getenv("AZURE_OPENAI_REASONING_DEPLOYMENT", "")
-    )
-    drafting_deployment: str = field(
-        default_factory=lambda: os.getenv("AZURE_OPENAI_DRAFTING_DEPLOYMENT", "")
-    )
-    api_version: str = field(
-        default_factory=lambda: os.getenv("AZURE_OPENAI_API_VERSION", "2024-10-21")
-    )
+    endpoint: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_ENDPOINT", ""))
+    reasoning_deployment: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_REASONING_DEPLOYMENT", ""))
+    drafting_deployment: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_DRAFTING_DEPLOYMENT", ""))
+    api_version: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_API_VERSION", "2024-10-21"))
 
     # Model parameters
-    model_tier: str = field(
-        default_factory=lambda: os.getenv("LLM_MODEL_TIER", "drafting")
-    )
-    temperature: float = field(
-        default_factory=lambda: float(os.getenv("LLM_TEMPERATURE", "0.3"))
-    )
-    max_output_tokens: int = field(
-        default_factory=lambda: int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "2000"))
-    )
+    model_tier: str = field(default_factory=lambda: os.getenv("LLM_MODEL_TIER", "drafting"))
+    temperature: float = field(default_factory=lambda: float(os.getenv("LLM_TEMPERATURE", "0.3")))
+    max_output_tokens: int = field(default_factory=lambda: int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "2000")))
 
     # Retry & circuit breaker
-    retry_attempts: int = field(
-        default_factory=lambda: int(os.getenv("LLM_RETRY_ATTEMPTS", "3"))
-    )
+    retry_attempts: int = field(default_factory=lambda: int(os.getenv("LLM_RETRY_ATTEMPTS", "3")))
     retry_min_wait: float = field(default=1.0)
     retry_max_wait: float = field(default=4.0)
-    timeout_seconds: float = field(
-        default_factory=lambda: float(os.getenv("LLM_TIMEOUT_SECONDS", "30.0"))
-    )
+    timeout_seconds: float = field(default_factory=lambda: float(os.getenv("LLM_TIMEOUT_SECONDS", "30.0")))
     circuit_breaker_failure_threshold: int = field(
         default_factory=lambda: int(os.getenv("LLM_CB_FAILURE_THRESHOLD", "3"))
     )
@@ -56,17 +38,13 @@ class LLMClientConfig:
     )
 
     # Confidence
-    confidence_threshold: float = field(
-        default_factory=lambda: float(os.getenv("LLM_CONFIDENCE_THRESHOLD", "0.7"))
-    )
+    confidence_threshold: float = field(default_factory=lambda: float(os.getenv("LLM_CONFIDENCE_THRESHOLD", "0.7")))
     fallback_reduction_factor: float = field(
         default_factory=lambda: float(os.getenv("LLM_FALLBACK_REDUCTION_FACTOR", "0.5"))
     )
 
     # Cost tracking
-    monthly_budget_usd: float = field(
-        default_factory=lambda: float(os.getenv("LLM_MONTHLY_BUDGET_USD", "50.0"))
-    )
+    monthly_budget_usd: float = field(default_factory=lambda: float(os.getenv("LLM_MONTHLY_BUDGET_USD", "50.0")))
 
     def __post_init__(self) -> None:
         """Validate configuration values immediately after construction."""
@@ -93,9 +71,7 @@ class LLMClientConfig:
         if not (0.0 <= self.confidence_threshold <= 1.0):
             raise ValueError(f"LLM_CONFIDENCE_THRESHOLD must be 0.0–1.0, got {self.confidence_threshold}")
         if not (0.0 <= self.fallback_reduction_factor <= 1.0):
-            raise ValueError(
-                f"LLM_FALLBACK_REDUCTION_FACTOR must be 0.0–1.0, got {self.fallback_reduction_factor}"
-            )
+            raise ValueError(f"LLM_FALLBACK_REDUCTION_FACTOR must be 0.0–1.0, got {self.fallback_reduction_factor}")
         if self.monthly_budget_usd <= 0:
             raise ValueError(f"LLM_MONTHLY_BUDGET_USD must be > 0, got {self.monthly_budget_usd}")
 

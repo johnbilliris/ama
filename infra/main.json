@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "1510554714163411183"
+      "templateHash": "16330405061916542339"
     }
   },
   "parameters": {
@@ -97,7 +97,7 @@
     },
     "restrictNetworkAccess": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
         "description": "When true, restricts Cosmos DB network access to Azure Portal and Azure-services IPs only. Set to true for production; leave false for dev/staging to allow fully open public access."
       }
@@ -112,6 +112,31 @@
       ],
       "metadata": {
         "description": "Deployment environment tier — controls auth policies (e.g. Azure Maps local auth)"
+      }
+    },
+    "subscriptionTopology": {
+      "type": "string",
+      "defaultValue": "B",
+      "allowedValues": [
+        "A",
+        "B"
+      ],
+      "metadata": {
+        "description": "Spec 029 — Subscription topology. A: per-environment subscriptions. B: single subscription per environment OR one subscription for all environments. Defaults to B; Topology A tenants must override."
+      }
+    },
+    "subscriptionId": {
+      "type": "string",
+      "defaultValue": "[subscription().subscriptionId]",
+      "metadata": {
+        "description": "Azure subscription ID this deployment targets."
+      }
+    },
+    "additionalTags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Spec 029 — additional resource tags merged onto baseline tags."
       }
     }
   },
@@ -130,11 +155,7 @@
       "webSitesAppService": "app-"
     },
     "abbrs": "[variables('$fxv#0')]",
-    "tags": {
-      "azd-env-name": "[parameters('environmentName')]",
-      "project": "disaster-response-hub",
-      "SecurityControl": "Ignore"
-    },
+    "tags": "[union(createObject('azd-env-name', parameters('environmentName'), 'project', 'disaster-response-hub', 'SecurityControl', 'Ignore'), parameters('additionalTags'))]",
     "uniqueSuffix": "[uniqueString(resourceGroup().id)]",
     "portalAndServiceIpRules": [
       {
@@ -951,10 +972,6 @@
       "properties": {
         "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', take(format('{0}{1}', variables('abbrs').appManagedEnvironments, parameters('environmentName')), 60))]",
         "configuration": {
-          "ingress": {
-            "external": false,
-            "targetPort": 8081
-          },
           "registries": [
             {
               "server": "[reference('containerRegistry').loginServer]",
@@ -1614,6 +1631,415 @@
         }
       }
     },
+    "contentSafety": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "content-safety",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "contentSafetyName": {
+            "value": "[format('cs-{0}-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6))]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "6600022498152172701"
+            }
+          },
+          "parameters": {
+            "contentSafetyName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Content Safety resource"
+              }
+            },
+            "location": {
+              "type": "string",
+              "allowedValues": [
+                "australiaeast",
+                "australiasoutheast"
+              ],
+              "metadata": {
+                "description": "Location — restricted to Australian regions"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "metadata": {
+                "description": "Resource tags"
+              }
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "S0",
+              "allowedValues": [
+                "S0"
+              ],
+              "metadata": {
+                "description": "SKU for Content Safety"
+              }
+            },
+            "cognitiveServicesUserPrincipalIds": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Principal IDs to grant Cognitive Services User role"
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Log Analytics workspace ID for diagnostics"
+              }
+            }
+          },
+          "variables": {
+            "cognitiveServicesUserRoleId": "a97b65f3-24c7-4388-baec-2e87135dc908"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.CognitiveServices/accounts",
+              "apiVersion": "2024-10-01",
+              "name": "[parameters('contentSafetyName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "kind": "ContentSafety",
+              "sku": {
+                "name": "[parameters('skuName')]"
+              },
+              "properties": {
+                "customSubDomainName": "[parameters('contentSafetyName')]",
+                "publicNetworkAccess": "Disabled",
+                "networkAcls": {
+                  "defaultAction": "Deny"
+                },
+                "disableLocalAuth": true
+              },
+              "identity": {
+                "type": "SystemAssigned"
+              }
+            },
+            {
+              "copy": {
+                "name": "roleAssignment",
+                "count": "[length(parameters('cognitiveServicesUserPrincipalIds'))]"
+              },
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('contentSafetyName'))]",
+              "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName')), parameters('cognitiveServicesUserPrincipalIds')[copyIndex()], variables('cognitiveServicesUserRoleId'))]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesUserRoleId'))]",
+                "principalId": "[parameters('cognitiveServicesUserPrincipalIds')[copyIndex()]]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName'))]"
+              ]
+            },
+            {
+              "condition": "[not(empty(parameters('logAnalyticsWorkspaceId')))]",
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('contentSafetyName'))]",
+              "name": "[format('{0}-diag', parameters('contentSafetyName'))]",
+              "properties": {
+                "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+                "logs": [
+                  {
+                    "categoryGroup": "allLogs",
+                    "enabled": true
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "AllMetrics",
+                    "enabled": true
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Content Safety resource ID"
+              },
+              "value": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName'))]"
+            },
+            "resourceName": {
+              "type": "string",
+              "metadata": {
+                "description": "Content Safety resource name"
+              },
+              "value": "[parameters('contentSafetyName')]"
+            },
+            "endpoint": {
+              "type": "string",
+              "metadata": {
+                "description": "Content Safety endpoint URL"
+              },
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName')), '2024-10-01').endpoint]"
+            },
+            "principalId": {
+              "type": "string",
+              "metadata": {
+                "description": "Content Safety system-assigned principal ID"
+              },
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('contentSafetyName')), '2024-10-01', 'full').identity.principalId]"
+            }
+          }
+        }
+      }
+    },
+    "iotHub": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "iot-hub",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "iotHubName": {
+            "value": "[format('iot-{0}-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6))]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "12751093467716470887"
+            }
+          },
+          "parameters": {
+            "iotHubName": {
+              "type": "string",
+              "metadata": {
+                "description": "IoT Hub name"
+              }
+            },
+            "location": {
+              "type": "string",
+              "allowedValues": [
+                "australiaeast",
+                "australiasoutheast"
+              ],
+              "metadata": {
+                "description": "Location — restricted to Australian regions"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "metadata": {
+                "description": "Resource tags"
+              }
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "S1",
+              "allowedValues": [
+                "S1",
+                "S2",
+                "S3"
+              ],
+              "metadata": {
+                "description": "IoT Hub SKU"
+              }
+            },
+            "skuCapacity": {
+              "type": "int",
+              "defaultValue": 1,
+              "minValue": 1,
+              "metadata": {
+                "description": "IoT Hub SKU capacity (units)"
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Log Analytics workspace ID for diagnostics"
+              }
+            },
+            "eventGridWebhookEndpoint": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Event Grid webhook endpoint for telemetry events"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Devices/IotHubs",
+              "apiVersion": "2023-06-30",
+              "name": "[parameters('iotHubName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "[parameters('skuName')]",
+                "capacity": "[parameters('skuCapacity')]"
+              },
+              "properties": {
+                "minTlsVersion": "1.2",
+                "publicNetworkAccess": "Disabled",
+                "disableLocalAuth": true,
+                "features": "None",
+                "routing": {
+                  "routes": [
+                    {
+                      "name": "telemetry-to-events",
+                      "source": "DeviceMessages",
+                      "condition": "true",
+                      "endpointNames": [
+                        "events"
+                      ],
+                      "isEnabled": true
+                    }
+                  ]
+                }
+              },
+              "identity": {
+                "type": "SystemAssigned"
+              }
+            },
+            {
+              "type": "Microsoft.EventGrid/systemTopics",
+              "apiVersion": "2024-06-01-preview",
+              "name": "[format('{0}-events', parameters('iotHubName'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "source": "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]",
+                "topicType": "Microsoft.Devices.IoTHubs"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]"
+              ]
+            },
+            {
+              "condition": "[not(empty(parameters('eventGridWebhookEndpoint')))]",
+              "type": "Microsoft.EventGrid/systemTopics/eventSubscriptions",
+              "apiVersion": "2024-06-01-preview",
+              "name": "[format('{0}/{1}', format('{0}-events', parameters('iotHubName')), 'telemetry-to-monitoring')]",
+              "properties": {
+                "destination": {
+                  "endpointType": "WebHook",
+                  "properties": {
+                    "endpointUrl": "[parameters('eventGridWebhookEndpoint')]"
+                  }
+                },
+                "filter": {
+                  "includedEventTypes": [
+                    "Microsoft.Devices.DeviceTelemetry"
+                  ]
+                },
+                "retryPolicy": {
+                  "maxDeliveryAttempts": 10,
+                  "eventTimeToLiveInMinutes": 1440
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.EventGrid/systemTopics', format('{0}-events', parameters('iotHubName')))]"
+              ]
+            },
+            {
+              "condition": "[not(empty(parameters('logAnalyticsWorkspaceId')))]",
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[format('Microsoft.Devices/IotHubs/{0}', parameters('iotHubName'))]",
+              "name": "[format('{0}-diag', parameters('iotHubName'))]",
+              "properties": {
+                "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+                "logs": [
+                  {
+                    "categoryGroup": "allLogs",
+                    "enabled": true
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "AllMetrics",
+                    "enabled": true
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "resourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "IoT Hub resource ID"
+              },
+              "value": "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]"
+            },
+            "resourceName": {
+              "type": "string",
+              "metadata": {
+                "description": "IoT Hub resource name"
+              },
+              "value": "[parameters('iotHubName')]"
+            },
+            "hostname": {
+              "type": "string",
+              "metadata": {
+                "description": "IoT Hub hostname"
+              },
+              "value": "[reference(resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName')), '2023-06-30').hostName]"
+            },
+            "principalId": {
+              "type": "string",
+              "metadata": {
+                "description": "IoT Hub system-assigned principal ID"
+              },
+              "value": "[reference(resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName')), '2023-06-30', 'full').identity.principalId]"
+            },
+            "eventGridTopicId": {
+              "type": "string",
+              "metadata": {
+                "description": "Event Grid system topic ID"
+              },
+              "value": "[resourceId('Microsoft.EventGrid/systemTopics', format('{0}-events', parameters('iotHubName')))]"
+            }
+          }
+        }
+      }
+    },
     "recoveryLessons": {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
@@ -2118,7 +2544,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "3726348244177825907"
+              "templateHash": "14445073157661801116"
             }
           },
           "parameters": {
@@ -2242,9 +2668,64 @@
             }
           },
           "variables": {
+            "emDomainContentFilters": [
+              {
+                "name": "Violence",
+                "source": "Prompt",
+                "enabled": true,
+                "blocking": true,
+                "severityThreshold": "High"
+              },
+              {
+                "name": "Violence",
+                "source": "Completion",
+                "enabled": true,
+                "blocking": true,
+                "severityThreshold": "High"
+              }
+            ],
+            "reasoningRaiPolicyName": "[format('reasoning-em-domain-{0}', parameters('envPrefix'))]",
+            "draftingRaiPolicyName": "[format('drafting-em-domain-{0}', parameters('envPrefix'))]",
+            "simulationRaiPolicyName": "[format('sim-em-domain-{0}', parameters('envPrefix'))]",
             "cognitiveServicesOpenAiUserRoleId": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
           },
           "resources": [
+            {
+              "type": "Microsoft.CognitiveServices/accounts/raiPolicies",
+              "apiVersion": "2024-10-01",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), variables('reasoningRaiPolicyName'))]",
+              "properties": {
+                "basePolicyName": "Microsoft.DefaultV2",
+                "mode": "Blocking",
+                "contentFilters": "[variables('emDomainContentFilters')]"
+              }
+            },
+            {
+              "type": "Microsoft.CognitiveServices/accounts/raiPolicies",
+              "apiVersion": "2024-10-01",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), variables('draftingRaiPolicyName'))]",
+              "properties": {
+                "basePolicyName": "Microsoft.DefaultV2",
+                "mode": "Blocking",
+                "contentFilters": "[variables('emDomainContentFilters')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-{0}', parameters('envPrefix')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.CognitiveServices/accounts/raiPolicies",
+              "apiVersion": "2024-10-01",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), variables('simulationRaiPolicyName'))]",
+              "properties": {
+                "basePolicyName": "Microsoft.DefaultV2",
+                "mode": "Blocking",
+                "contentFilters": "[variables('emDomainContentFilters')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-mini-{0}', parameters('envPrefix')))]"
+              ]
+            },
             {
               "type": "Microsoft.CognitiveServices/accounts/deployments",
               "apiVersion": "2024-10-01",
@@ -2258,8 +2739,12 @@
                   "format": "OpenAI",
                   "name": "[parameters('reasoningModelName')]",
                   "version": "[parameters('reasoningModelVersion')]"
-                }
-              }
+                },
+                "raiPolicyName": "[variables('reasoningRaiPolicyName')]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts/raiPolicies', parameters('openAiAccountName'), variables('reasoningRaiPolicyName'))]"
+              ]
             },
             {
               "type": "Microsoft.CognitiveServices/accounts/deployments",
@@ -2274,10 +2759,11 @@
                   "format": "OpenAI",
                   "name": "[parameters('draftingModelName')]",
                   "version": "[parameters('draftingModelVersion')]"
-                }
+                },
+                "raiPolicyName": "[variables('draftingRaiPolicyName')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-{0}', parameters('envPrefix')))]"
+                "[resourceId('Microsoft.CognitiveServices/accounts/raiPolicies', parameters('openAiAccountName'), variables('draftingRaiPolicyName'))]"
               ]
             },
             {
@@ -2293,10 +2779,11 @@
                   "format": "OpenAI",
                   "name": "[parameters('simulationModelName')]",
                   "version": "[parameters('simulationModelVersion')]"
-                }
+                },
+                "raiPolicyName": "[variables('simulationRaiPolicyName')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-mini-{0}', parameters('envPrefix')))]"
+                "[resourceId('Microsoft.CognitiveServices/accounts/raiPolicies', parameters('openAiAccountName'), variables('simulationRaiPolicyName'))]"
               ]
             },
             {
@@ -2353,6 +2840,18 @@
               "type": "string",
               "value": "[format('gpt-5.4-sim-{0}', parameters('envPrefix'))]"
             },
+            "reasoningRaiPolicyName": {
+              "type": "string",
+              "value": "[variables('reasoningRaiPolicyName')]"
+            },
+            "draftingRaiPolicyName": {
+              "type": "string",
+              "value": "[variables('draftingRaiPolicyName')]"
+            },
+            "simulationRaiPolicyName": {
+              "type": "string",
+              "value": "[variables('simulationRaiPolicyName')]"
+            },
             "openAiEndpoint": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')), '2024-10-01').endpoint]"
@@ -2406,6 +2905,20 @@
     "SERVICE_WEB_ENDPOINT_URL": {
       "type": "string",
       "value": "[format('https://{0}', reference('webApp').defaultHostName)]"
+    },
+    "AZURE_SUBSCRIPTION_TOPOLOGY": {
+      "type": "string",
+      "metadata": {
+        "description": "Spec 029 — subscription topology used for this deployment."
+      },
+      "value": "[parameters('subscriptionTopology')]"
+    },
+    "AZURE_TARGET_SUBSCRIPTION_ID": {
+      "type": "string",
+      "metadata": {
+        "description": "Spec 029 — target subscription id for this deployment."
+      },
+      "value": "[parameters('subscriptionId')]"
     }
   }
 }

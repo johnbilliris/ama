@@ -36,11 +36,7 @@ class RecoveryService:
         indicators: list[RecoveryIndicator] = []
         for environment, names in AIDR_INDICATORS.items():
             for name in names:
-                classification = (
-                    "sensitive"
-                    if name in SENSITIVE_SOCIAL_INDICATORS
-                    else "public"
-                )
+                classification = "sensitive" if name in SENSITIVE_SOCIAL_INDICATORS else "public"
                 indicators.append(
                     RecoveryIndicator(
                         indicator_name=name,
@@ -110,14 +106,9 @@ class RecoveryService:
             raise KeyError(msg)
 
         # Enforce k-anonymity for sensitive social indicators
-        if (
-            target.data_classification == "sensitive"
-            and population_coverage is not None
-            and population_coverage < 10
-        ):
+        if target.data_classification == "sensitive" and population_coverage is not None and population_coverage < 10:
             msg = (
-                f"population_coverage must be ≥ 10 for sensitive indicator "
-                f"'{indicator_name}' (k-anonymity requirement)"
+                f"population_coverage must be ≥ 10 for sensitive indicator '{indicator_name}' (k-anonymity requirement)"
             )
             raise ValueError(msg)
 
@@ -167,10 +158,12 @@ class RecoveryService:
                 )
                 results.append(result)
             except (KeyError, ValueError) as exc:
-                errors.append({
-                    "indicator_name": item.get("indicator_name"),
-                    "error": str(exc),
-                })
+                errors.append(
+                    {
+                        "indicator_name": item.get("indicator_name"),
+                        "error": str(exc),
+                    }
+                )
         return {
             "updated": len(results),
             "failed": len(errors),
@@ -205,7 +198,8 @@ class RecoveryService:
 
     @staticmethod
     def check_regression_values(
-        baseline: float | None, value: float | None,
+        baseline: float | None,
+        value: float | None,
     ) -> bool:
         if baseline is None or value is None:
             return False

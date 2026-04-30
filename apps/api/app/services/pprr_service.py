@@ -48,10 +48,7 @@ class PprrService:
             raise ValueError(error)
 
         if overlap_active and not can_run_concurrently(current_phase, target_phase):
-            msg = (
-                f"Phases '{current_phase}' and '{target_phase}' cannot "
-                f"run concurrently"
-            )
+            msg = f"Phases '{current_phase}' and '{target_phase}' cannot run concurrently"
             raise ValueError(msg)
 
         previous_phase = current_phase
@@ -91,9 +88,7 @@ class PprrService:
         incident = INCIDENTS[incident_id]
         timeline = TIMELINE_EVENTS.get(incident_id, [])
         phase_events = [
-            e.model_dump(mode="json")
-            for e in timeline
-            if e.payload.get("action") == "pprr_phase_transition"
+            e.model_dump(mode="json") for e in timeline if e.payload.get("action") == "pprr_phase_transition"
         ]
         return {
             "incident_id": incident_id,

@@ -1,7 +1,5 @@
 """Tests for risk_assessment.pipeline – AssessmentProcessingPipeline."""
 
-
-
 from common.handoffs import AgentHandoffEvent
 from risk_assessment.audit import AuditWriter
 from risk_assessment.config import RiskAssessmentConfig

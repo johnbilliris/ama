@@ -3,9 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-AgentName = Literal[
-    "monitoring", "risk_assessment", "evacuation", "resource_allocation", "communication"
-]
+AgentName = Literal["monitoring", "risk_assessment", "evacuation", "resource_allocation", "communication"]
 
 AssignmentRole = Literal["primary", "secondary"]
 

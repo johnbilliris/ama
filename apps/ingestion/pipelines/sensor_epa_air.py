@@ -41,13 +41,15 @@ class EpaAirQualityPipeline(IngestionPipelineBase):
             records = [records]
         payloads: list[dict[str, Any]] = []
         for record in records[:50]:
-            payloads.append({
-                "observations": {"data": [record]},
-                "data_source_id": "epa-air-quality",
-                "source_kind": "sensor",
-                "source_uri": self._endpoint_url,
-                "collection_method": "sensor_network",
-            })
+            payloads.append(
+                {
+                    "observations": {"data": [record]},
+                    "data_source_id": "epa-air-quality",
+                    "source_kind": "sensor",
+                    "source_uri": self._endpoint_url,
+                    "collection_method": "sensor_network",
+                }
+            )
         return payloads
 
     def normalise(self, raw_payload: dict[str, Any]) -> dict[str, Any]:

@@ -31,9 +31,7 @@ class TestCDWorkflowSyntax:
         assert not missing, f"Missing top-level keys: {missing}"
 
     def test_cd_workflow_name_is_cd(self, cd_workflow):
-        assert cd_workflow["name"] == "cd", (
-            f"Workflow name must be 'cd', got '{cd_workflow['name']}'"
-        )
+        assert cd_workflow["name"] == "cd", f"Workflow name must be 'cd', got '{cd_workflow['name']}'"
 
     def test_cd_workflow_trigger_is_workflow_run(self, cd_workflow):
         trigger = cd_workflow["on"]
@@ -42,23 +40,17 @@ class TestCDWorkflowSyntax:
     def test_cd_workflow_trigger_references_ci(self, cd_workflow):
         wr = cd_workflow["on"]["workflow_run"]
         workflows = wr.get("workflows", [])
-        assert "ci" in workflows, (
-            f"workflow_run must reference 'ci' workflow, got {workflows}"
-        )
+        assert "ci" in workflows, f"workflow_run must reference 'ci' workflow, got {workflows}"
 
     def test_cd_workflow_trigger_completed_type(self, cd_workflow):
         wr = cd_workflow["on"]["workflow_run"]
         types = wr.get("types", [])
-        assert "completed" in types, (
-            f"workflow_run must include 'completed' type, got {types}"
-        )
+        assert "completed" in types, f"workflow_run must include 'completed' type, got {types}"
 
     def test_cd_workflow_trigger_main_branch(self, cd_workflow):
         wr = cd_workflow["on"]["workflow_run"]
         branches = wr.get("branches", [])
-        assert "main" in branches, (
-            f"workflow_run must filter to 'main' branch, got {branches}"
-        )
+        assert "main" in branches, f"workflow_run must filter to 'main' branch, got {branches}"
 
     def test_cd_workflow_permissions_oidc(self, cd_workflow):
         perms = cd_workflow.get("permissions", {})
@@ -84,9 +76,7 @@ class TestDeployStagingJobStructure:
     """Validate deploy-staging job structure and configuration."""
 
     def test_deploy_staging_job_exists(self, cd_workflow):
-        assert "deploy-staging" in cd_workflow["jobs"], (
-            "deploy-staging job must exist in CD workflow"
-        )
+        assert "deploy-staging" in cd_workflow["jobs"], "deploy-staging job must exist in CD workflow"
 
     def test_deploy_staging_environment(self, cd_workflow):
         job = cd_workflow["jobs"]["deploy-staging"]
@@ -104,19 +94,13 @@ class TestDeployStagingJobStructure:
     def test_deploy_staging_concurrency_no_cancel(self, cd_workflow):
         job = cd_workflow["jobs"]["deploy-staging"]
         concurrency = job.get("concurrency", {})
-        assert concurrency.get("cancel-in-progress") is False, (
-            "deploy-staging must not cancel in-progress deployments"
-        )
+        assert concurrency.get("cancel-in-progress") is False, "deploy-staging must not cancel in-progress deployments"
 
     def test_deploy_staging_success_condition(self, cd_workflow):
         job = cd_workflow["jobs"]["deploy-staging"]
         condition = job.get("if", "")
-        assert "workflow_run.conclusion" in condition, (
-            "deploy-staging must check workflow_run.conclusion"
-        )
-        assert "success" in condition, (
-            "deploy-staging must check for 'success' conclusion"
-        )
+        assert "workflow_run.conclusion" in condition, "deploy-staging must check workflow_run.conclusion"
+        assert "success" in condition, "deploy-staging must check for 'success' conclusion"
 
     def test_deploy_staging_runs_on_ubuntu(self, cd_workflow):
         job = cd_workflow["jobs"]["deploy-staging"]
@@ -127,9 +111,7 @@ class TestDeployStagingJobStructure:
     def test_deploy_staging_has_outputs(self, cd_workflow):
         job = cd_workflow["jobs"]["deploy-staging"]
         outputs = job.get("outputs", {})
-        assert "deployment-status" in outputs, (
-            "deploy-staging must output 'deployment-status'"
-        )
+        assert "deployment-status" in outputs, "deploy-staging must output 'deployment-status'"
 
     def test_deploy_staging_has_timeout(self, cd_workflow):
         job = cd_workflow["jobs"]["deploy-staging"]

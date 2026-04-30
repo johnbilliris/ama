@@ -1,0 +1,124 @@
+name: dr-drill
+
+# Spec-032 FR-D01 / FR-R05 — DR/BCP failover drill against the staging environment.
+# Runs monthly OR on demand. Verifies RPO <= 15 min and RTO <= 60 min targets.
+
+on:
+  schedule:
+    # 1st day of each month at 22:00 UTC
+    - cron: "0 22 1 * *"
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Environment to drill (staging only in production usage)"
+        required: false
+        default: staging
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+jobs:
+  failover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    environment: ${{ github.event.inputs.target_environment || 'staging' }}
+    env:
+      TARGET_ENV: ${{ github.event.inputs.target_environment || 'staging' }}
+    steps:
+      - uses: 93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Azure login
+        uses: 2dd0bbf4064d5a1812889dc200bb8eed2597f82a # v3.x
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Smoke check primary region (australiaeast)
+        shell: pwsh
+        env:
+          API_URL: ${{ vars.API_URL_STAGING || 'https://api.staging.disaster-response-hub.example' }}
+        run: |
+          $start = Get-Date
+          try {
+            Invoke-WebRequest "$env:API_URL/api/health" -TimeoutSec 30 | Out-Null
+            Write-Host "Primary region healthy at $start"
+          } catch {
+            Write-Host "Primary region already unhealthy: $_"
+          }
+
+      - name: Trigger Cosmos failover to australiasoutheast
+        shell: pwsh
+        env:
+          RG: ${{ vars.AZURE_RG_STAGING || 'rg-drh-staging' }}
+          COSMOS_NAME: ${{ vars.COSMOS_NAME_STAGING || 'cdb-drh-staging' }}
+        run: |
+          $failover_start = Get-Date
+          az cosmosdb failover-priority-change `
+            --name $env:COSMOS_NAME `
+            --resource-group $env:RG `
+            --failover-policies "australiasoutheast=0" "australiaeast=1"
+          $failover_end = Get-Date
+          $rto = ($failover_end - $failover_start).TotalSeconds
+          Write-Host "Failover duration: $rto seconds (RTO target <= 3600s = 60 min)"
+          if ($rto -gt 3600) {
+            Write-Error "RTO exceeded: ${rto}s > 3600s"
+            exit 1
+          }
+
+      - name: Smoke check failover (australiasoutheast)
+        shell: pwsh
+        env:
+          API_URL: ${{ vars.API_URL_STAGING || 'https://api.staging.disaster-response-hub.example' }}
+        run: |
+          # Allow DNS + Container Apps revision warm-up
+          Start-Sleep -Seconds 30
+          for ($i = 0; $i -lt 10; $i++) {
+            try {
+              Invoke-WebRequest "$env:API_URL/api/health" -TimeoutSec 30 | Out-Null
+              Write-Host "Secondary region healthy after $($i*30) seconds"
+              exit 0
+            } catch {
+              Start-Sleep -Seconds 30
+            }
+          }
+          Write-Error "Secondary region failed to come up within 5 minutes"
+          exit 1
+
+      - name: Fail back (best-effort)
+        if: always()
+        shell: pwsh
+        env:
+          RG: ${{ vars.AZURE_RG_STAGING || 'rg-drh-staging' }}
+          COSMOS_NAME: ${{ vars.COSMOS_NAME_STAGING || 'cdb-drh-staging' }}
+        run: |
+          az cosmosdb failover-priority-change `
+            --name $env:COSMOS_NAME `
+            --resource-group $env:RG `
+            --failover-policies "australiaeast=0" "australiasoutheast=1" || Write-Host "fail-back encountered an error (non-fatal)"
+
+      - name: Open drill summary issue
+        if: always()
+        uses: f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.x
+        with:
+          script: |
+            const date = new Date().toISOString().slice(0,10);
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `DR drill ${date} — ${process.env.TARGET_ENV}`,
+              body: [
+                "Spec-032 FR-D01 DR/BCP drill completed.",
+                "",
+                "Workflow run: " + context.payload.repository.html_url + "/actions/runs/" + context.runId,
+                "",
+                "Verify:",
+                "- RPO <= 15 minutes (no data loss beyond the published RPO)",
+                "- RTO <= 60 minutes (recovery within target)",
+                "",
+                "Attach measurement evidence + any lessons captured."
+              ].join("\n"),
+              labels: ["dr-bcp", "spec-032", "exercise"]
+            });

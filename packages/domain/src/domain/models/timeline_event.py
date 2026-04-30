@@ -8,8 +8,15 @@ class TimelineEvent(BaseModel):
     event_id: str
     incident_id: str
     event_type: Literal[
-        "signal", "recommendation", "approval", "alert", "task", "system",
-        "handoff", "dead_letter", "llm_call",
+        "signal",
+        "recommendation",
+        "approval",
+        "alert",
+        "task",
+        "system",
+        "handoff",
+        "dead_letter",
+        "llm_call",
     ]
     created_at: datetime = Field(default_factory=datetime.utcnow)
     summary: str

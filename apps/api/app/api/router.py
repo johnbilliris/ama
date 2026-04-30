@@ -39,6 +39,7 @@ from fastapi import APIRouter
 try:
     from app.api.routes.eval.router import register_subroutes as _register_eval_subroutes
     from app.api.routes.eval.router import router as eval_router
+
     _register_eval_subroutes()
     _EVAL_AVAILABLE = True
 except Exception:  # pragma: no cover

@@ -1,10 +1,16 @@
-
 from apps.ingestion.simulation.generators.flood_generator import FloodGenerator
 
 REQUIRED_ENVELOPE_KEYS = {
-    "source", "category", "occurredAt", "receivedAt",
-    "location", "payload", "confidenceScore", "freshnessScore",
-    "validationStatus", "provenance",
+    "source",
+    "category",
+    "occurredAt",
+    "receivedAt",
+    "location",
+    "payload",
+    "confidenceScore",
+    "freshnessScore",
+    "validationStatus",
+    "provenance",
 }
 REQUIRED_SOURCE_KEYS = {"dataSourceId", "name", "kind"}
 REQUIRED_LOCATION_KEYS = {"type", "coordinates", "precisionMeters"}

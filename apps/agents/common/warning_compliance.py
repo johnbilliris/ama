@@ -56,8 +56,7 @@ def validate_tier_colour_consistency(alert: PublicAlert) -> list[str]:
         expected_colour = TIER_COLOUR_MAP.get(alert.warning_tier)
         if alert.colour_code != expected_colour:
             errors.append(
-                f"Colour mismatch: tier '{alert.warning_tier}' requires "
-                f"'{expected_colour}', got '{alert.colour_code}'"
+                f"Colour mismatch: tier '{alert.warning_tier}' requires '{expected_colour}', got '{alert.colour_code}'"
             )
         if not alert.action_statement:
             errors.append("action_statement is required for tiered warnings")
@@ -127,9 +126,7 @@ def validate_warning_compliance(
         result.errors.extend(tier_errors)
 
     # Principles check
-    result.principles_checklist = validate_warning_principles(
-        alert, content_analysis=content_analysis
-    )
+    result.principles_checklist = validate_warning_principles(alert, content_analysis=content_analysis)
 
     # SC-006: 100% compliance required
     if not all(result.principles_checklist.values()):
