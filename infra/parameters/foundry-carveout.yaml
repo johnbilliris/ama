@@ -1,0 +1,29 @@
+# Foundry Carve-Out Registry (FR-AI03a, ADR-033)
+#
+# Lists every permitted non-AU model deployment used by the platform.
+# CD MUST refuse to deploy any non-AU model deployment NOT present here.
+#
+# Mutations require two distinct approver_identities and a fresh review_date.
+# Validated by:
+#   - infra/policies/foundry_carveout.rego (OPA)
+#   - scripts/verify-carveout.ps1 (CD step)
+
+version: 1
+last_reviewed: 2026-04-30
+reviewer_quorum: 2
+
+deployments: []
+  # Add entries in the form below once the Phi shadow path lands (T608).
+  # Schema validated by foundry-carveout.schema.json.
+  #
+  # - model_name: phi-3.5-mini
+  #   region: eastus
+  #   purpose: shadow
+  #   business_justification: "Spec 032 FR-AI03 — cost/quality shadow path for GPT-4o (NN-2 §3 carve-out)."
+  #   approver_identities:
+  #     - johnbilliris       # project lead
+  #     - <security-engineer-handle>
+  #     - <compliance-auditor-handle>
+  #   review_date: 2026-10-30
+  #   data_minimisation_required: true
+  #   classification_filter_required: true   # see ADR-033 Layer 2

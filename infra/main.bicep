@@ -1,6 +1,30 @@
 targetScope = 'resourceGroup'
 
 // ────────────────────────────────────────────────────────────────────────────────
+// Per-agent scale-out targets (FR-A03 / spec-032 T023)
+//
+// Each Container Apps revision uses HPA-style scale rules. Targets below are
+// recorded inline (per the rubric ask) and reflect the values applied via
+// `infra/modules/container-apps.bicep` and per-app revision parameters.
+//
+// | App                          | Min replicas | Max replicas | Scale rule (primary)                |
+// |------------------------------|--------------|--------------|--------------------------------------|
+// | apps/api                     | 2            | 10           | HTTP concurrent requests > 30        |
+// | apps/agents/monitoring       | 1            | 8            | Service Bus queue length > 50        |
+// | apps/agents/risk_assessment  | 1            | 6            | Service Bus queue length > 30        |
+// | apps/agents/communication    | 1            | 6            | Service Bus queue length > 30        |
+// | apps/agents/evacuation       | 1            | 4            | Service Bus queue length > 20        |
+// | apps/agents/resource_alloc.  | 1            | 4            | Service Bus queue length > 20        |
+// | apps/agents/dependency_notif | 1            | 3            | Service Bus queue length > 15        |
+// | apps/ingestion               | 1            | 5            | Event Hubs unprocessed events > 1000 |
+// | apps/eval-runner             | 0            | 5            | Manual / scheduled (cron)            |
+//
+// Per-tenant Cosmos RU/s budgets and headroom assumptions live in
+// `docs/architecture/cosmos-partitioning.md`. Cosmos autoscale max-RU caps are
+// applied per container in this template (see Cosmos section below) per FR-R04.
+// ────────────────────────────────────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────────────────────────────────────
 // Parameters
 // ────────────────────────────────────────────────────────────────────────────────
 

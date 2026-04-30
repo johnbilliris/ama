@@ -1,0 +1,40 @@
+# Cosign signing manifest for prompt artefacts (FR-AI09, ADR-035).
+# Read by:
+#  - .github/workflows/prompts-publish.yml (signing, T606)
+#  - .github/workflows/cd.yml (verification, T607)
+
+signing_strategy: sigstore-keyless
+identity_provider: github-oidc
+fulcio_url: https://fulcio.sigstore.dev
+rekor_url: https://rekor.sigstore.dev
+retention_days: 2555  # 7 years per spec 030 alignment
+
+producer:
+  workflow_path: .github/workflows/prompts-publish.yml
+  identity_subject_pattern: "^https://github.com/johnbilliris/ama/.github/workflows/prompts-publish.yml@refs/heads/(main|production)$"
+
+verifier:
+  workflow_path: .github/workflows/cd.yml
+  cosign_command_template: |
+    cosign verify-blob \
+      --certificate-identity-regexp "^https://github.com/johnbilliris/ama/.github/workflows/prompts-publish.yml@refs/heads/(main|production)$" \
+      --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+      "${prompt_path}.sig" "${prompt_path}"
+  failure_behaviour: block_deploy
+  audit_event_name: prompt.cosign_verify_failed
+
+artefact:
+  filename_pattern: "{prompt_id}-v{semver}.yaml"
+  signature_filename_pattern: "{filename}.sig"
+  cert_filename_pattern: "{filename}.crt"
+  bundle_filename_pattern: "{filename}.bundle"
+
+revocation:
+  method: rekor-public-log + cosign-verify-against-revoked-identity-list
+  on_revoke: block_deploy + page_security_engineer
+
+bypass:
+  flag: "--cosign-bypass=incident-{id}"
+  approvers_required: 2
+  approver_roles: [security-engineer, principal-engineer]
+  audit_required: true
