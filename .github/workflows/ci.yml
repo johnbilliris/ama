@@ -14,6 +14,9 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    env:
+      # Spec-032 FR-T01 ratcheting coverage; phase A is no-regression.
+      COVERAGE_PHASE: ${{ vars.COVERAGE_PHASE != '' && vars.COVERAGE_PHASE || 'A' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -34,17 +37,37 @@ jobs:
       - name: Install Python tooling
         run: |
           python -m pip install --upgrade pip
-          pip install pytest ruff pytest-benchmark pytest-asyncio
+          pip install pytest pytest-cov pytest-asyncio pytest-benchmark ruff mypy import-linter pyyaml
           pip install -e apps/api
           pip install -e apps/agents
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: python-test
-        run: pytest tests/contract tests/integration
-
       - name: python-lint
         run: ruff check apps tests packages
+
+      # Spec-032 FR-Q03 — formatting gate.
+      - name: python-format-check
+        run: ruff format --check apps tests packages
+
+      # Spec-032 FR-Q01 — strict typing gate.
+      - name: python-type-strict
+        run: mypy --strict apps packages
+        continue-on-error: true   # Phase-A grace: scope mypy adoption per Stream 1; flip to hard-fail in Stream 1 milestone PR.
+
+      # Spec-032 FR-Q02 — import boundaries.
+      - name: python-import-boundaries
+        run: lint-imports
+
+      - name: python-test
+        run: |
+          pytest tests/contract tests/integration --cov=apps --cov=packages --cov-report=xml --cov-report=term
+
+      # Spec-032 FR-T01 — ratcheting coverage check.
+      - name: coverage-ratchet-unit
+        if: always()
+        shell: pwsh
+        run: ./scripts/coverage-ratchet.ps1 -Phase $env:COVERAGE_PHASE -Tier unit
 
       - name: ts-typecheck
         run: pnpm --filter ./apps/web exec tsc --noEmit
@@ -52,9 +75,9 @@ jobs:
       - name: web-build
         run: pnpm --filter ./apps/web build
 
+      # Spec-032 FR-R01 — gate the benchmark step (no continue-on-error).
       - name: perf-benchmark
-        timeout-minutes: 2
-        continue-on-error: true
+        timeout-minutes: 5
         run: pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q
 
       - name: upload-benchmark-results
@@ -64,3 +87,12 @@ jobs:
           name: benchmark-results
           path: .benchmarks/current.json
           retention-days: 30
+
+      - name: upload-coverage-results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: coverage-results
+          path: coverage.xml
+          retention-days: 30
+

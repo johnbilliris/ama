@@ -1,0 +1,61 @@
+name: security-scan
+
+# FR-T04 + FR-S03 — supplementary security gates beyond CodeQL:
+#  - gitleaks: secret scan (push + PR)
+#  - PSRule for Bicep: IaC policy scan
+#  - Trivy: container vulnerability scan (Dockerfile-only on PR; image-scan in CD)
+
+on:
+  push:
+    branches: [main, dev, staging, production]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  psrule-bicep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Run PSRule for Azure (Bicep)
+        uses: microsoft/ps-rule@v3
+        with:
+          modules: PSRule.Rules.Azure
+          inputType: repository
+          inputPath: infra/
+          baseline: Azure.Default
+
+  trivy-fs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Trivy filesystem scan (Dockerfile + IaC)
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
