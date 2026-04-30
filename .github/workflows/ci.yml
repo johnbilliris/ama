@@ -46,6 +46,13 @@ jobs:
       - name: python-lint
         run: ruff check apps tests packages
 
+      - name: equivalence-gate
+        # Spec 033 / T041 — per-agent FR-023 equivalence harness gate.
+        # Refuses to merge a per-agent cutover PR whose corresponding
+        # equivalence test fails. With empty fixtures the harness reports
+        # a zero-cases PASS; once cutover fixtures land it scores ≥95% / 100%.
+        run: pytest tests/equivalence -q --tb=short
+
       - name: ts-typecheck
         run: pnpm --filter ./apps/web exec tsc --noEmit
 

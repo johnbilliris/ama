@@ -219,91 +219,91 @@ Monorepo (per `plan.md → Project Structure`):
 
 ### Per-agent definition + ChatAgent + equivalence (5 agents in parallel)
 
-- [ ] T026 [P] [US1] Author agent definition `apps/agents/maf_runtime/agents/monitoring.yaml` conforming to `contracts/agent-definition.schema.yaml` (model_tier=`reasoning`, output_schema = existing Pydantic model under `domain.models`, middleware = [content_safety, audit, otel], empty tool_allow_list)
+- [X] T026 [P] [US1] Author agent definition `apps/agents/maf_runtime/agents/monitoring.yaml` conforming to `contracts/agent-definition.schema.yaml` (model_tier=`reasoning`, output_schema = existing Pydantic model under `domain.models`, middleware = [content_safety, audit, otel], empty tool_allow_list)
   - **Agents**: ai-ml-engineer, software-developer, observer-auditor
   - **Tools**: read, edit
   - **Success**: `python -m jsonschema --instance apps/agents/maf_runtime/agents/monitoring.yaml --schema specs/033-maf-adoption/contracts/agent-definition.schema.yaml` validates.
 
-- [ ] T027 [P] [US1] Implement `apps/agents/maf_runtime/agents/monitoring_agent.py` — loads `monitoring.yaml`, builds a MAF `ChatAgent` backed by T012's chat client, binds the three foundational middleware, exposes `async run(input: SignalEnvelope) -> MonitoringTriageDecision`, and a `__main__` block that consumes a JSON fixture from stdin
+- [X] T027 [P] [US1] Implement `apps/agents/maf_runtime/agents/monitoring_agent.py` — loads `monitoring.yaml`, builds a MAF `ChatAgent` backed by T012's chat client, binds the three foundational middleware, exposes `async run(input: SignalEnvelope) -> MonitoringTriageDecision`, and a `__main__` block that consumes a JSON fixture from stdin
   - **Agents**: ai-ml-engineer, software-developer
   - **Tools**: read, edit, search
   - **Success**: Smoke test `python -m apps.agents.maf_runtime.agents.monitoring_agent` against `tests/fixtures/monitoring/sample_signal.json` returns a `MonitoringTriageDecision` JSON document; a fresh audit entry appears via the audit middleware.
 
-- [ ] T028 [P] [US1] Author agent definition `apps/agents/maf_runtime/agents/risk_assessment.yaml`
+- [X] T028 [P] [US1] Author agent definition `apps/agents/maf_runtime/agents/risk_assessment.yaml`
   - **Agents**: ai-ml-engineer, risk-manager, software-developer
   - **Tools**: read, edit
   - **Success**: Schema validation as in T026.
 
-- [ ] T029 [P] [US1] Implement `apps/agents/maf_runtime/agents/risk_assessment_agent.py` mirroring T027 (loads YAML, ChatAgent, middleware, `__main__`)
+- [X] T029 [P] [US1] Implement `apps/agents/maf_runtime/agents/risk_assessment_agent.py` mirroring T027 (loads YAML, ChatAgent, middleware, `__main__`)
   - **Agents**: ai-ml-engineer, risk-manager, software-developer
   - **Tools**: read, edit
   - **Success**: Smoke test with a representative fixture returns a schema-valid `HazardAssessment` and produces an audit entry.
 
-- [ ] T030 [P] [US1] Author agent definition `apps/agents/maf_runtime/agents/evacuation.yaml`
+- [X] T030 [P] [US1] Author agent definition `apps/agents/maf_runtime/agents/evacuation.yaml`
   - **Agents**: ai-ml-engineer, software-developer, ses-nsw, nswpf
   - **Tools**: read, edit
   - **Success**: Schema validation.
 
-- [ ] T031 [P] [US1] Implement `apps/agents/maf_runtime/agents/evacuation_agent.py` mirroring T027
+- [X] T031 [P] [US1] Implement `apps/agents/maf_runtime/agents/evacuation_agent.py` mirroring T027
   - **Agents**: ai-ml-engineer, software-developer
   - **Tools**: read, edit
   - **Success**: Smoke test returns a schema-valid `EvacuationPlan`.
 
-- [ ] T032 [P] [US1] Author agent definition `apps/agents/maf_runtime/agents/resource_allocation.yaml`
+- [X] T032 [P] [US1] Author agent definition `apps/agents/maf_runtime/agents/resource_allocation.yaml`
   - **Agents**: ai-ml-engineer, logistics-officer, software-developer
   - **Tools**: read, edit
   - **Success**: Schema validation.
 
-- [ ] T033 [P] [US1] Implement `apps/agents/maf_runtime/agents/resource_allocation_agent.py` mirroring T027
+- [X] T033 [P] [US1] Implement `apps/agents/maf_runtime/agents/resource_allocation_agent.py` mirroring T027
   - **Agents**: ai-ml-engineer, logistics-officer, software-developer
   - **Tools**: read, edit
   - **Success**: Smoke test returns a schema-valid `ResourceAllocationPlan`.
 
-- [ ] T034 [P] [US1] Author agent definition `apps/agents/maf_runtime/agents/communication.yaml`
+- [X] T034 [P] [US1] Author agent definition `apps/agents/maf_runtime/agents/communication.yaml`
   - **Agents**: ai-ml-engineer, public-information-officer, accessibility-tester, software-developer
   - **Tools**: read, edit
   - **Success**: Schema validation.
 
-- [ ] T035 [P] [US1] Implement `apps/agents/maf_runtime/agents/communication_agent.py` mirroring T027 — but include a clearly-marked TODO that the public-alert step still needs the HITL request port (delivered in US2/T046); for now the agent returns a draft alert without publishing
+- [X] T035 [P] [US1] Implement `apps/agents/maf_runtime/agents/communication_agent.py` mirroring T027 — but include a clearly-marked TODO that the public-alert step still needs the HITL request port (delivered in US2/T046); for now the agent returns a draft alert without publishing
   - **Agents**: ai-ml-engineer, public-information-officer, software-developer
   - **Tools**: read, edit
   - **Success**: Smoke test returns a schema-valid `AlertDraft`; no public-channel side effects occur (verified by mocking `delivery.py`).
 
 ### Per-agent equivalence harness (FR-023) — 5 in parallel
 
-- [ ] T036 [P] [US1] Populate `tests/equivalence/fixtures/monitoring/` (Python symlinks/refs into the existing `tests/{unit,integration,contract}/fixtures/monitoring/` and the spec-025 audit fixtures) and add `tests/equivalence/test_monitoring_equivalence.py` that runs T024 against the corpus and asserts ≥95% / 100%
+- [X] T036 [P] [US1] Populate `tests/equivalence/fixtures/monitoring/` (Python symlinks/refs into the existing `tests/{unit,integration,contract}/fixtures/monitoring/` and the spec-025 audit fixtures) and add `tests/equivalence/test_monitoring_equivalence.py` that runs T024 against the corpus and asserts ≥95% / 100%
   - **Agents**: qa-test-engineer, ai-ml-engineer
   - **Tools**: read, edit, execute, search
   - **Success**: `pytest tests/equivalence/test_monitoring_equivalence.py -q` PASSES; the latest report is committed under `apps/agents/maf_runtime/equivalence/reports/monitoring-*.md`.
 
-- [ ] T037 [P] [US1] Repeat T036 for Risk Assessment: `tests/equivalence/fixtures/risk_assessment/` + `tests/equivalence/test_risk_assessment_equivalence.py`
+- [X] T037 [P] [US1] Repeat T036 for Risk Assessment: `tests/equivalence/fixtures/risk_assessment/` + `tests/equivalence/test_risk_assessment_equivalence.py`
   - **Agents**: qa-test-engineer, risk-manager
   - **Tools**: read, edit, execute
   - **Success**: PASS; report committed.
 
-- [ ] T038 [P] [US1] Repeat T036 for Evacuation
+- [X] T038 [P] [US1] Repeat T036 for Evacuation
   - **Agents**: qa-test-engineer, ses-nsw
   - **Tools**: read, edit, execute
   - **Success**: PASS; report committed.
 
-- [ ] T039 [P] [US1] Repeat T036 for Resource Allocation
+- [X] T039 [P] [US1] Repeat T036 for Resource Allocation
   - **Agents**: qa-test-engineer, logistics-officer
   - **Tools**: read, edit, execute
   - **Success**: PASS; report committed.
 
-- [ ] T040 [P] [US1] Repeat T036 for Communication (note: equivalence runs against the legacy pipeline's pre-publication draft; HITL is not exercised here)
+- [X] T040 [P] [US1] Repeat T036 for Communication (note: equivalence runs against the legacy pipeline's pre-publication draft; HITL is not exercised here)
   - **Agents**: qa-test-engineer, public-information-officer
   - **Tools**: read, edit, execute
   - **Success**: PASS; report committed.
 
-- [ ] T040b [US1] Add `tests/unit/test_communication_prompt_invariant.py` enforcing FR-024a: the prompt string loaded from `apps/agents/maf_runtime/agents/communication.yaml` MUST be byte-equal to the legacy prompt constant in `apps/agents/communication/agent.py` (or a documented superset where the YAML adds machine-readable scaffolding around an unchanged human-readable prompt body); the populated output-field set MUST be unchanged. Backs Constitution V (Warnings — AWS, 10 principles) by preventing silent prompt drift
+- [X] T040b [US1] Add `tests/unit/test_communication_prompt_invariant.py` enforcing FR-024a: the prompt string loaded from `apps/agents/maf_runtime/agents/communication.yaml` MUST be byte-equal to the legacy prompt constant in `apps/agents/communication/agent.py` (or a documented superset where the YAML adds machine-readable scaffolding around an unchanged human-readable prompt body); the populated output-field set MUST be unchanged. Backs Constitution V (Warnings — AWS, 10 principles) by preventing silent prompt drift
   - **Agents**: ai-ml-engineer, public-information-officer, security-engineer, accessibility-tester
   - **Tools**: read, edit, search
   - **Success**: A deliberate single-character edit to the YAML prompt body causes the test to fail; reverting passes; populated-field comparison runs against the spec-025 fixture corpus and reports zero deltas.
 
 ### CI integration of the equivalence gate
 
-- [ ] T041 [US1] Add a CI step `equivalence-gate` to `.github/workflows/ci.yml` that runs `pytest tests/equivalence/ -q` and refuses to merge a per-agent cutover PR (detected by file changes touching `apps/agents/maf_runtime/agents/<agent>.yaml`) whose corresponding equivalence test fails
+- [X] T041 [US1] Add a CI step `equivalence-gate` to `.github/workflows/ci.yml` that runs `pytest tests/equivalence/ -q` and refuses to merge a per-agent cutover PR (detected by file changes touching `apps/agents/maf_runtime/agents/<agent>.yaml`) whose corresponding equivalence test fails
   - **Agents**: infrastructure-devops, qa-test-engineer
   - **Tools**: read, edit, execute
   - **Success**: A deliberately-broken fixture in a draft PR causes the gate to fail; reverting passes the gate.
