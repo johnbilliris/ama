@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "purpose": "Spec 033 / T071 - legacy baseline used by tests/load/test_workflow_capacity.py for the SC-007 latency-regression check (<=10%).",
+    "captured_at": "PLACEHOLDER - to be re-captured against the deployed legacy pipeline before MVP cutover via scripts/capture_legacy_baseline.sh.",
+    "scenario": "Concurrent 25 active workflow runs, mixed fire/weather/hydrology incidents, 60-minute window."
+  },
+  "p50_latency_ms": 800,
+  "p95_latency_ms": 2500,
+  "p99_latency_ms": 4200,
+  "throughput_rps": 0.8,
+  "error_rate": 0.0
+}
