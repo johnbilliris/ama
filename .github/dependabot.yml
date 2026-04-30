@@ -1,0 +1,76 @@
+# Dependabot configuration (FR-D02, T005)
+# Weekly updates for Dockerfiles + GitHub Actions; existing pip/npm groups co-located here.
+
+version: 2
+updates:
+  # Container Apps base images (FR-D02 patching cadence)
+  - package-ecosystem: "docker"
+    directory: "/apps/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "docker", "container-apps"]
+    groups:
+      python-base-images:
+        patterns: ["python*"]
+
+  - package-ecosystem: "docker"
+    directory: "/apps/agents"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "docker", "container-apps"]
+    groups:
+      python-base-images:
+        patterns: ["python*"]
+
+  - package-ecosystem: "docker"
+    directory: "/apps/ingestion"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "docker", "container-apps"]
+    groups:
+      python-base-images:
+        patterns: ["python*"]
+
+  - package-ecosystem: "docker"
+    directory: "/apps/eval-runner"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "docker", "container-apps"]
+    groups:
+      python-base-images:
+        patterns: ["python*"]
+
+  # GitHub Actions — supply-chain hygiene (FR-C03 SHA-pin sweep complementary)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "github-actions"]
+
+  # Python (root + per-app)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "python"]
+
+  # Node.js (web)
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "javascript"]

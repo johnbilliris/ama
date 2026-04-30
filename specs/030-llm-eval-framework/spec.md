@@ -2,7 +2,7 @@
 
 **Feature Branch**: `030-llm-eval-framework`
 **Created**: 2026-04-27
-**Status**: Draft
+**Status**: Approved (promoted by spec 032 task T006 — all tasks under spec 030 are tracked separately; status promotion gates spec-032 FR-I01)
 **Input**: User description: "Develop an LLM Evaluation framework based off Microsoft best practices (Microsoft Research metric framework; Azure Architecture RAG/LLM evaluation phase) suitable for a Disaster Response Coordination Hub. Implement evaluation criteria, produce an extraordinarily large set of inputs and responses typical of disaster scenarios (including language such as fire, death, burned bodies, human remains, etc.), and provision/deprovision infrastructure to execute these evaluations against multiple Microsoft Foundry models."
 
 ## Clarifications

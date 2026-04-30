@@ -34,3 +34,5 @@ obj/
 .benchmarks/current.json
 
 .eval-out/
+.coverage
+.benchmarks/
