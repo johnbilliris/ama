@@ -1,0 +1,116 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "4462670635843798016"
+    }
+  },
+  "parameters": {
+    "environmentName": {
+      "type": "string",
+      "metadata": {
+        "description": "Container Apps environment name to deploy into (existing)."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "australiaeast",
+      "allowedValues": [
+        "australiaeast",
+        "australiasoutheast"
+      ],
+      "metadata": {
+        "description": "Azure region (must be australiaeast / australiasoutheast per Constitution NN-2)."
+      }
+    },
+    "imageRef": {
+      "type": "string",
+      "metadata": {
+        "description": "Container image reference (ACR-hosted)."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Optional resource tags."
+      }
+    },
+    "env": {
+      "type": "string",
+      "defaultValue": "dev",
+      "allowedValues": [
+        "dev",
+        "staging",
+        "production"
+      ],
+      "metadata": {
+        "description": "Environment-suffix used in container app naming."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2024-08-02-preview",
+      "name": "[format('ca-routing-mcp-drh-{0}', parameters('env'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environmentName'))]",
+        "configuration": {
+          "activeRevisionsMode": "Single",
+          "ingress": {
+            "external": false,
+            "targetPort": 9000,
+            "transport": "http",
+            "traffic": [
+              {
+                "latestRevision": true,
+                "weight": 100
+              }
+            ]
+          }
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "routing-mcp",
+              "image": "[parameters('imageRef')]",
+              "resources": {
+                "cpu": "[json('0.25')]",
+                "memory": "0.5Gi"
+              },
+              "env": [
+                {
+                  "name": "PORT",
+                  "value": "9000"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 3
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "routingMcpAppName": {
+      "type": "string",
+      "value": "[format('ca-routing-mcp-drh-{0}', parameters('env'))]"
+    },
+    "routingMcpFqdn": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.App/containerApps', format('ca-routing-mcp-drh-{0}', parameters('env'))), '2024-08-02-preview').configuration.ingress.fqdn]"
+    }
+  }
+}

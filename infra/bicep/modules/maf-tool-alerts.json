@@ -1,0 +1,88 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "14258485158797069169"
+    }
+  },
+  "parameters": {
+    "appInsightsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Existing Application Insights component name."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "australiaeast",
+      "allowedValues": [
+        "australiaeast",
+        "australiasoutheast"
+      ],
+      "metadata": {
+        "description": "Azure region (must match the App Insights component)."
+      }
+    },
+    "actionGroupId": {
+      "type": "string",
+      "metadata": {
+        "description": "Action group resource id to notify on alert."
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Optional resource tags."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2024-01-01-preview",
+      "name": "[format('maf-tool-version-mismatch-{0}', parameters('appInsightsName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "enabled": true,
+        "severity": 1,
+        "evaluationFrequency": "PT5M",
+        "windowSize": "PT5M",
+        "autoMitigate": true,
+        "description": "FR-019a: an MCP tool advertised a major version that did not match the agent allow-list pin.",
+        "scopes": [
+          "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]"
+        ],
+        "criteria": {
+          "allOf": [
+            {
+              "query": "traces | where customDimensions[\"error_code\"] == \"tool_version_mismatch\" | summarize count()",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 0,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[parameters('actionGroupId')]"
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "alertId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/scheduledQueryRules', format('maf-tool-version-mismatch-{0}', parameters('appInsightsName')))]"
+    }
+  }
+}

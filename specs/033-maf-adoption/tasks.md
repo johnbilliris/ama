@@ -436,32 +436,32 @@ Monorepo (per `plan.md → Project Structure`):
 
 **Independent Test**: Add a synthetic "no-op" agent (T057) that contains no safety, audit, or telemetry code of its own; run it; verify (a) a content-safety verdict was recorded, (b) an audit entry exists with the same shape as the five real agents, (c) traces/metrics/logs appear in App Insights with the expected correlation ids — purely from the centralised middleware. Then verify the daily reconciliation job reports zero gap.
 
-- [ ] T057 [US3] Add a "no-op" agent under `tests/integration/no_op_agent/` consisting only of an Agent Definition YAML and a 10-line ChatAgent module with empty business logic; bind it to the three foundational middleware. This agent exists only as a worked example for SC-005 and SC-010
+- [X] T057 [US3] Add a "no-op" agent under `tests/integration/no_op_agent/` consisting only of an Agent Definition YAML and a 10-line ChatAgent module with empty business logic; bind it to the three foundational middleware. This agent exists only as a worked example for SC-005 and SC-010
   - **Agents**: qa-test-engineer, principal-engineer, ai-ml-engineer
   - **Tools**: read, edit
   - **Success**: Invoking the no-op agent produces an audit entry, a content-safety verdict, and an OTel span with `workflow.run_id` populated — without writing any agent-side audit/safety/OTel code.
 
-- [ ] T058 [US3] Implement `apps/api/app/api/routes/admin/reconciliation.py::run_daily_reconciliation()` (also exposed as a scheduled Container Apps job) that for the previous 24h compares (invocation count from OTel) vs (audit-entry count) vs (workflow-step count), writes a `reconciliation_reports` Cosmos document, and emits a `reconciliation.gap` metric to App Insights for SC-004 alerting
+- [X] T058 [US3] Implement `apps/api/app/api/routes/admin/reconciliation.py::run_daily_reconciliation()` (also exposed as a scheduled Container Apps job) that for the previous 24h compares (invocation count from OTel) vs (audit-entry count) vs (workflow-step count), writes a `reconciliation_reports` Cosmos document, and emits a `reconciliation.gap` metric to App Insights for SC-004 alerting
   - **Agents**: sre-engineer, observer-auditor, data-engineer
   - **Tools**: read, edit
   - **Success**: Synthetic test injects a deliberate audit-emission failure; reconciliation reports the gap and emits the metric; alert rule fires within 5 minutes in dev.
 
-- [ ] T059 [P] [US3] **Extend** `apps/web/src/components/workflow/ApprovalGateMetrics.tsx` (the day-one version landed in T056b) with selectable windows (1h / 7d / 30d) added alongside the default 24h, and a richer historical view satisfying SC-008's "first-class operator dashboard" beyond the minimum cutover requirement
+- [X] T059 [P] [US3] **Extend** `apps/web/src/components/workflow/ApprovalGateMetrics.tsx` (the day-one version landed in T056b) with selectable windows (1h / 7d / 30d) added alongside the default 24h, and a richer historical view satisfying SC-008's "first-class operator dashboard" beyond the minimum cutover requirement
   - **Agents**: ux-designer, software-developer
   - **Tools**: read, edit
   - **Success**: Window switcher updates without a full reload; all four windows render correctly; numbers match the API response.
 
-- [ ] T060 [US3] Update the existing Application Insights workbook(s) under `infra/bicep/modules/dashboards/` to add an "Agent runs" panel keyed by `ai.agent.name` and a "Workflow runs by state" panel keyed by `workflow.run.state`, satisfying SC-009 (no per-agent dashboard gaps)
+- [X] T060 [US3] Update the existing Application Insights workbook(s) under `infra/bicep/modules/dashboards/` to add an "Agent runs" panel keyed by `ai.agent.name` and a "Workflow runs by state" panel keyed by `workflow.run.state`, satisfying SC-009 (no per-agent dashboard gaps)
   - **Agents**: sre-engineer, ux-designer, infrastructure-devops
   - **Tools**: read, edit
   - **Success**: `az bicep build` succeeds; deploying to dev shows the two new panels populated by traffic from the no-op agent (T057).
 
-- [ ] T060b [US3] Add `tests/contract/test_existing_dashboards_no_regression.py` proving FR-017 + SC-009: read the pre-cutover snapshot from `tests/contract/snapshots/existing_dashboard_fields.json` (captured in Foundational phase by T024b), then assert every snapshotted field is still populated by at least one MAF-emitted span/metric/log for each of the five agents. Covers the "no per-agent telemetry gaps" guarantee
+- [X] T060b [US3] Add `tests/contract/test_existing_dashboards_no_regression.py` proving FR-017 + SC-009: read the pre-cutover snapshot from `tests/contract/snapshots/existing_dashboard_fields.json` (captured in Foundational phase by T024b), then assert every snapshotted field is still populated by at least one MAF-emitted span/metric/log for each of the five agents. Covers the "no per-agent telemetry gaps" guarantee
   - **Agents**: qa-test-engineer, sre-engineer, observer-auditor
   - **Tools**: read, edit, execute, search
   - **Success**: Test PASSES against the snapshot from T024b; deliberately removing one OTel attribute from `otel_middleware.py` causes the test to fail by reporting which dashboard query lost coverage.
 
-- [ ] T061 [US3] Document the worked example for SC-005 in `apps/agents/maf_runtime/middleware/README.md`: "How to add a new content-safety category in one place and have it apply to all five agents" — including a concrete diff that touches only `content_safety_middleware.py`
+- [X] T061 [US3] Document the worked example for SC-005 in `apps/agents/maf_runtime/middleware/README.md`: "How to add a new content-safety category in one place and have it apply to all five agents" — including a concrete diff that touches only `content_safety_middleware.py`
   - **Agents**: principal-engineer, security-engineer, software-developer
   - **Tools**: read, edit
   - **Success**: README's worked-example diff is a single-file change; rerunning the per-agent equivalence harness still PASSES (proves no agent-side code change required).
@@ -476,37 +476,37 @@ Monorepo (per `plan.md → Project Structure`):
 
 **Independent Test**: Stand up the routing-service MCP server in dev; register it for the Evacuation agent at `pinned_major_version=1`; invoke the agent against a fixture that requires routing; verify a successful tool invocation appears in `audit_entries.tool_invocations`. Then deploy a v2 server without registering it; verify the next invocation fails with `outcome=version_mismatch` and an operator-visible alert is emitted.
 
-- [ ] T062 [P] [US4] Scaffold `tools/routing_mcp_server/` with `pyproject.toml` (dependency on `mcp`), `server.py` exposing the existing routing logic as MCP tools, and a `serverInfo` block advertising semantic version `1.0.0`
+- [X] T062 [P] [US4] Scaffold `tools/routing_mcp_server/` with `pyproject.toml` (dependency on `mcp`), `server.py` exposing the existing routing logic as MCP tools, and a `serverInfo` block advertising semantic version `1.0.0`
   - **Agents**: api-architect, software-developer, transport
   - **Tools**: read, edit, web
   - **Success**: `python -m tools.routing_mcp_server.server --port 9000` starts; `curl http://localhost:9000/mcp` returns a valid MCP `initialize` response with `serverInfo.version="1.0.0"`.
 
-- [ ] T063 [US4] Implement `apps/agents/maf_runtime/mcp/routing_tool.py` wrapping `MCPStreamableHTTPTool` against the registered routing-service address; reads `pinned_major_version` from `tool_registrations` and validates it against the server's advertised major; raises typed `ToolVersionMismatchError` on mismatch
+- [X] T063 [US4] Implement `apps/agents/maf_runtime/mcp/routing_tool.py` wrapping `MCPStreamableHTTPTool` against the registered routing-service address; reads `pinned_major_version` from `tool_registrations` and validates it against the server's advertised major; raises typed `ToolVersionMismatchError` on mismatch
   - **Agents**: ai-ml-engineer, security-engineer, software-developer
   - **Tools**: read, edit, web
   - **Success**: `tests/integration/test_mcp_routing_tool.py` covers (a) successful invocation, (b) `ToolVersionMismatchError` when the server advertises v2 but allow-list pins v1, (c) typed `ToolTimeoutError` when the server is slow, (d) typed `ToolUnreachableError` when the server is down, AND (e) typed `ToolMalformedResponseError` when the server returns invalid JSON or violates the MCP envelope schema (covers spec edge case "A registered MCP tool starts returning malformed responses"); all five errors imported from `apps/agents/maf_runtime/errors.py` (T011b).
 
-- [ ] T064 [P] [US4] Implement `apps/agents/maf_runtime/mcp/allow_list.py::resolve_allowed_tools(agent_name) -> list[ToolBinding]` that loads from `tool_registrations` via T017's repository and refuses any tool not on the agent's allow-list
+- [X] T064 [P] [US4] Implement `apps/agents/maf_runtime/mcp/allow_list.py::resolve_allowed_tools(agent_name) -> list[ToolBinding]` that loads from `tool_registrations` via T017's repository and refuses any tool not on the agent's allow-list
   - **Agents**: security-engineer, software-developer
   - **Tools**: read, edit
   - **Success**: Unit test proves an agent attempting to invoke a non-allow-listed tool is rejected before any MCP call is made; the rejection is audited.
 
-- [ ] T065 [US4] Wire the routing tool into the Evacuation agent (T031) via `tool_allow_list` in `evacuation.yaml`, and update `evacuation_executor.py` to surface tool failures into the run's `failure_reason` rather than treating them as the agent's own failure
+- [X] T065 [US4] Wire the routing tool into the Evacuation agent (T031) via `tool_allow_list` in `evacuation.yaml`, and update `evacuation_executor.py` to surface tool failures into the run's `failure_reason` rather than treating them as the agent's own failure
   - **Agents**: ai-ml-engineer, software-developer, ses-nsw, transport
   - **Tools**: read, edit
   - **Success**: A fixture incident that requires routing produces an `EvacuationPlan` whose audit entry includes the `tool_invocations` array with `tool_name=routing_service`, `version=1`.
 
-- [ ] T066 [US4] Add a deployment for the `routing-mcp-server` Container App in `infra/bicep/modules/`: internal-only ingress, managed identity, restricted to the same RG as `ca-agents-drh-{env}`
+- [X] T066 [US4] Add a deployment for the `routing-mcp-server` Container App in `infra/bicep/modules/`: internal-only ingress, managed identity, restricted to the same RG as `ca-agents-drh-{env}`
   - **Agents**: infrastructure-devops, security-engineer, docker-container-engineer
   - **Tools**: read, edit, execute
   - **Success**: `az deployment group what-if` against dev reports a single new container app `ca-routing-mcp-drh-dev` with internal ingress only and no public endpoint.
 
-- [ ] T067 [US4] Seed the initial tool registration via `scripts/register_mcp_tool.py --tool-name routing_service --address https://routing-mcp-drh-dev.<region>.azurecontainerapps.io/mcp --pinned-major-version 1 --bind-agents evacuation`
+- [X] T067 [US4] Seed the initial tool registration via `scripts/register_mcp_tool.py --tool-name routing_service --address https://routing-mcp-drh-dev.<region>.azurecontainerapps.io/mcp --pinned-major-version 1 --bind-agents evacuation`
   - **Agents**: infrastructure-devops, software-developer
   - **Tools**: edit, execute
   - **Success**: A row appears in the `tool_registrations` container with composite id `routing_service:v1`; `resolve_allowed_tools("evacuation")` returns it.
 
-- [ ] T068 [US4] Add an Application Insights alert rule (Bicep) firing when `tool.outcome="version_mismatch"` count > 0 over 5 minutes (operator-visible alert per FR-019a)
+- [X] T068 [US4] Add an Application Insights alert rule (Bicep) firing when `tool.outcome="version_mismatch"` count > 0 over 5 minutes (operator-visible alert per FR-019a)
   - **Agents**: sre-engineer, infrastructure-devops
   - **Tools**: read, edit, execute
   - **Success**: A synthetic mismatch in dev triggers the alert within 5 minutes; alert routes to the existing on-call email distribution list.
