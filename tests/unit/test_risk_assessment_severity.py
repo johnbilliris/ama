@@ -23,27 +23,19 @@ class TestComputeSeverity:
         assert result == SeverityLevel.high
 
     def test_cyclone_yields_critical(self, computer):
-        result = computer.compute_severity(
-            "weather", confidence_adjusted=0.8, disaster_type="cyclone"
-        )
+        result = computer.compute_severity("weather", confidence_adjusted=0.8, disaster_type="cyclone")
         assert result == SeverityLevel.critical
 
     def test_flood_yields_high(self, computer):
-        result = computer.compute_severity(
-            "hydrology", confidence_adjusted=0.8, disaster_type="flood"
-        )
+        result = computer.compute_severity("hydrology", confidence_adjusted=0.8, disaster_type="flood")
         assert result == SeverityLevel.high
 
     def test_earthquake_yields_critical(self, computer):
-        result = computer.compute_severity(
-            "geohazard", confidence_adjusted=0.8, disaster_type="earthquake"
-        )
+        result = computer.compute_severity("geohazard", confidence_adjusted=0.8, disaster_type="earthquake")
         assert result == SeverityLevel.critical
 
     def test_tsunami_yields_critical(self, computer):
-        result = computer.compute_severity(
-            "geohazard", confidence_adjusted=0.8, disaster_type="tsunami"
-        )
+        result = computer.compute_severity("geohazard", confidence_adjusted=0.8, disaster_type="tsunami")
         assert result == SeverityLevel.critical
 
     def test_unknown_category_yields_moderate(self, computer):
@@ -55,12 +47,8 @@ class TestComputeSeverity:
     # -------------------------------------------------------------------
 
     def test_population_upgrades_by_one_level(self, computer):
-        base = computer.compute_severity(
-            "weather", confidence_adjusted=0.8
-        )
-        upgraded = computer.compute_severity(
-            "weather", confidence_adjusted=0.8, population_estimate=50_000
-        )
+        base = computer.compute_severity("weather", confidence_adjusted=0.8)
+        upgraded = computer.compute_severity("weather", confidence_adjusted=0.8, population_estimate=50_000)
         severity_order = [
             SeverityLevel.low,
             SeverityLevel.moderate,
@@ -87,9 +75,7 @@ class TestComputeSeverity:
         assert severity_order.index(low_conf) <= severity_order.index(high_conf)
 
     def test_low_confidence_floor_is_low(self, computer):
-        result = computer.compute_severity(
-            "community_report", confidence_adjusted=0.1
-        )
+        result = computer.compute_severity("community_report", confidence_adjusted=0.1)
         assert result == SeverityLevel.low
 
 

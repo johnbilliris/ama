@@ -8,8 +8,17 @@ from apps.api.app.services.ingestion.pipeline_base import IngestionPipelineBase
 logger = logging.getLogger(__name__)
 
 AUSTRALIAN_SUBREDDITS = [
-    "australia", "sydney", "melbourne", "brisbane", "perth", "adelaide",
-    "canberra", "hobart", "darwin", "bushfire", "AustralianEmergency",
+    "australia",
+    "sydney",
+    "melbourne",
+    "brisbane",
+    "perth",
+    "adelaide",
+    "canberra",
+    "hobart",
+    "darwin",
+    "bushfire",
+    "AustralianEmergency",
 ]
 
 

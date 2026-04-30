@@ -55,9 +55,7 @@ class SignalProcessingPipeline:
         on_dead_letter_fn=None,
     ) -> None:
         self._config = config or MonitoringConfig()
-        self._deduplicator = deduplicator or SignalDeduplicator(
-            window_minutes=self._config.signal_dedup_window_minutes
-        )
+        self._deduplicator = deduplicator or SignalDeduplicator(window_minutes=self._config.signal_dedup_window_minutes)
         self._freshness_tracker = freshness_tracker or DataFreshnessTracker(self._config)
         self._audit_writer = audit_writer or AuditWriter(self._config)
         self._agent = agent or MonitoringAgent(config=self._config)
@@ -260,9 +258,7 @@ class SignalProcessingPipeline:
     # Stage 5: Signal Summarisation
     # ------------------------------------------------------------------
 
-    def _summarise(
-        self, signal_id: str, envelope: SignalEnvelope, tenant_id: str
-    ) -> dict[str, object]:
+    def _summarise(self, signal_id: str, envelope: SignalEnvelope, tenant_id: str) -> dict[str, object]:
         """Stage 5: Generate signal summary with content safety validation."""
         summary = self._agent.summarize_signal(envelope)
         content_safety_result = summary.get("content_safety_result", "not_checked")
@@ -303,9 +299,7 @@ class SignalProcessingPipeline:
             tenant_id=tenant_id,
         )
         scope_key = _build_scope_key(tenant_id, envelope.incidentId, signal_id)
-        effective_confidence = max(
-            0.0, envelope.confidenceScore * envelope.freshnessScore - suspicious_penalty
-        )
+        effective_confidence = max(0.0, envelope.confidenceScore * envelope.freshnessScore - suspicious_penalty)
 
         if handoff is None:
             return None
@@ -394,9 +388,7 @@ class SignalProcessingPipeline:
         self._assess_freshness(signal_id, envelope, tenant_id)
 
         # Stage 4: Misinformation Evaluation (conditional)
-        classification, suspicious_penalty = await self._evaluate_misinformation(
-            signal_id, envelope, tenant_id
-        )
+        classification, suspicious_penalty = await self._evaluate_misinformation(signal_id, envelope, tenant_id)
         # If blocked or held, stop processing
         if classification in ("misinformation", "llm_timeout", "llm_unavailable", "held_for_review"):
             return None

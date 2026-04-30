@@ -6,6 +6,7 @@ descriptions and recommendations. All outputs through content safety.
 
 FRs: FR-025–028 | Research: R-006
 """
+
 import logging
 from datetime import UTC, datetime
 
@@ -29,7 +30,8 @@ class IndicatorAnalysisService:
         lagging_domains: list[dict] = []
         for domain, indicators in domains.items():
             lagging = [
-                i for i in indicators
+                i
+                for i in indicators
                 if i.get("trend") == "negative"
                 or (
                     i.get("value") is not None
@@ -38,27 +40,31 @@ class IndicatorAnalysisService:
                 )
             ]
             if lagging:
-                lagging_domains.append({
-                    "domain": domain,
-                    "lagging_count": len(lagging),
-                    "indicators": [i.get("indicator_name", "") for i in lagging],
-                })
+                lagging_domains.append(
+                    {
+                        "domain": domain,
+                        "lagging_count": len(lagging),
+                        "indicators": [i.get("indicator_name", "") for i in lagging],
+                    }
+                )
 
         # Cross-domain correlation detection
         if len(lagging_domains) > 1:
             for i, d1 in enumerate(lagging_domains):
-                for d2 in lagging_domains[i + 1:]:
-                    correlations.append({
-                        "domains": [d1["domain"], d2["domain"]],
-                        "description": (
-                            f"Both {d1['domain']} and {d2['domain']} domains show lagging "
-                            f"indicators, suggesting potential cross-domain impact"
-                        ),
-                        "evidence": (
-                            f"{d1['domain']}: {d1['lagging_count']} lagging, "
-                            f"{d2['domain']}: {d2['lagging_count']} lagging"
-                        ),
-                    })
+                for d2 in lagging_domains[i + 1 :]:
+                    correlations.append(
+                        {
+                            "domains": [d1["domain"], d2["domain"]],
+                            "description": (
+                                f"Both {d1['domain']} and {d2['domain']} domains show lagging "
+                                f"indicators, suggesting potential cross-domain impact"
+                            ),
+                            "evidence": (
+                                f"{d1['domain']}: {d1['lagging_count']} lagging, "
+                                f"{d2['domain']}: {d2['lagging_count']} lagging"
+                            ),
+                        }
+                    )
 
         result: dict = {
             "analysis_id": f"analysis-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}",
@@ -74,7 +80,9 @@ class IndicatorAnalysisService:
             try:
                 prompt = self._build_analysis_prompt(correlations, lagging_domains)
                 response = self._llm.generate_response(
-                    purpose="drafting", prompt=prompt, max_output_tokens=500,
+                    purpose="drafting",
+                    prompt=prompt,
+                    max_output_tokens=500,
                 )
                 llm_text = response.get("text", "").strip()
                 if llm_text and self._content_safety:
@@ -116,9 +124,7 @@ class IndicatorAnalysisService:
         for domain, indicators in sorted(domains.items()):
             progressing = sum(1 for i in indicators if i.get("trend") == "positive")
             total = len(indicators)
-            summary_parts.append(
-                f"{domain.title()} recovery: {progressing}/{total} indicators progressing"
-            )
+            summary_parts.append(f"{domain.title()} recovery: {progressing}/{total} indicators progressing")
 
         return {
             "summary": ". ".join(summary_parts) if summary_parts else "No indicator data available",
@@ -128,12 +134,8 @@ class IndicatorAnalysisService:
         }
 
     def _build_analysis_prompt(self, correlations: list[dict], lagging: list[dict]) -> str:
-        parts = [
-            "Analyse these cross-domain recovery correlations for an Australian disaster recovery program:"
-        ]
+        parts = ["Analyse these cross-domain recovery correlations for an Australian disaster recovery program:"]
         for c in correlations:
             parts.append(f"- {c['description']} (Evidence: {c['evidence']})")
-        parts.append(
-            "Provide a brief analysis of potential causal relationships and priority recommendations."
-        )
+        parts.append("Provide a brief analysis of potential causal relationships and priority recommendations.")
         return "\n".join(parts)

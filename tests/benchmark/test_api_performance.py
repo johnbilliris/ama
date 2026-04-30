@@ -15,9 +15,7 @@ from benchmark_helpers import set_benchmark_metadata
 
 @pytest.mark.benchmark(group="health")
 def test_health_monitoring(benchmark, monitoring_client) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="monitoring", metric_type="health", slo_target_s=0.100
-    )
+    set_benchmark_metadata(benchmark, agent="monitoring", metric_type="health", slo_target_s=0.100)
     response = benchmark(monitoring_client.get, "/health")
     assert response.status_code == 200
 
@@ -27,9 +25,7 @@ def test_health_monitoring(benchmark, monitoring_client) -> None:
 
 @pytest.mark.benchmark(group="health")
 def test_health_risk(benchmark, risk_client) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="risk", metric_type="health", slo_target_s=0.075
-    )
+    set_benchmark_metadata(benchmark, agent="risk", metric_type="health", slo_target_s=0.075)
     response = benchmark(risk_client.get, "/health")
     assert response.status_code == 200
 
@@ -39,9 +35,7 @@ def test_health_risk(benchmark, risk_client) -> None:
 
 @pytest.mark.benchmark(group="health")
 def test_health_evacuation(benchmark, evacuation_client) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="evacuation", metric_type="health", slo_target_s=0.075
-    )
+    set_benchmark_metadata(benchmark, agent="evacuation", metric_type="health", slo_target_s=0.075)
     response = benchmark(evacuation_client.get, "/health")
     assert response.status_code == 200
 
@@ -51,9 +45,7 @@ def test_health_evacuation(benchmark, evacuation_client) -> None:
 
 @pytest.mark.benchmark(group="health")
 def test_health_resource(benchmark, resource_client) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="resource", metric_type="health", slo_target_s=0.100
-    )
+    set_benchmark_metadata(benchmark, agent="resource", metric_type="health", slo_target_s=0.100)
     response = benchmark(resource_client.get, "/health")
     assert response.status_code == 200
 
@@ -63,8 +55,6 @@ def test_health_resource(benchmark, resource_client) -> None:
 
 @pytest.mark.benchmark(group="health")
 def test_health_communication(benchmark, communication_client) -> None:
-    set_benchmark_metadata(
-        benchmark, agent="communication", metric_type="health", slo_target_s=0.100
-    )
+    set_benchmark_metadata(benchmark, agent="communication", metric_type="health", slo_target_s=0.100)
     response = benchmark(communication_client.get, "/health")
     assert response.status_code == 200

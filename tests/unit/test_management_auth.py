@@ -28,6 +28,7 @@ def app(_local_env):
     import importlib
 
     import app.middleware.auth as auth_mod
+
     importlib.reload(auth_mod)
 
     from app.middleware.auth import authorize_management
@@ -84,7 +85,4 @@ class TestSecurityAuditLogging:
                 headers={"X-API-Key": "wrong-key"},
             )
 
-        assert any(
-            "management_auth_failure" in r.message
-            for r in caplog.records
-        )
+        assert any("management_auth_failure" in r.message for r in caplog.records)

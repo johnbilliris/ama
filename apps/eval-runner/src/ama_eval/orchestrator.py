@@ -155,8 +155,7 @@ def _run_single_case(
         {
             "role": "system",
             "content": (
-                "You are a Disaster Response Coordination assistant. "
-                "Provide accurate, safe, compassionate guidance."
+                "You are a Disaster Response Coordination assistant. Provide accurate, safe, compassionate guidance."
             ),
         },
         {"role": "user", "content": str(case.inputs.get("prompt") or case.inputs)},

@@ -58,10 +58,7 @@ class ResourceMatcher:
 
         for demand in demands:
             # Get unassigned eligible resources
-            available = [
-                r for r in eligible_resources
-                if r.resource_id not in assigned_resource_ids
-            ]
+            available = [r for r in eligible_resources if r.resource_id not in assigned_resource_ids]
 
             # Score all candidates
             candidates = self._score_candidates(demand, available, cfg)
@@ -133,11 +130,13 @@ class ResourceMatcher:
             scored.append((resource, score, rationale))
 
         # Sort by score descending, then apply tie-breaking
-        scored.sort(key=lambda x: (
-            -x[1],  # score descending
-            -len(x[0].capabilities),  # more capabilities preferred
-            x[0].resource_id,  # alphabetical as final tiebreak
-        ))
+        scored.sort(
+            key=lambda x: (
+                -x[1],  # score descending
+                -len(x[0].capabilities),  # more capabilities preferred
+                x[0].resource_id,  # alphabetical as final tiebreak
+            )
+        )
 
         # Mark tie-break if applied
         if len(scored) >= 2 and abs(scored[0][1] - scored[1][1]) < 1e-9:
@@ -171,14 +170,14 @@ class ResourceMatcher:
         res_loc = resource.location
         dem_loc = demand.location
         distance_km = haversine_distance(
-            res_loc.get("lat", 0.0), res_loc.get("lon", 0.0),
-            dem_loc.get("lat", 0.0), dem_loc.get("lon", 0.0),
+            res_loc.get("lat", 0.0),
+            res_loc.get("lon", 0.0),
+            dem_loc.get("lat", 0.0),
+            dem_loc.get("lon", 0.0),
         )
 
         res_type = (
-            resource.resource_type.value
-            if hasattr(resource.resource_type, "value")
-            else str(resource.resource_type)
+            resource.resource_type.value if hasattr(resource.resource_type, "value") else str(resource.resource_type)
         )
         travel_time = estimate_travel_time(
             distance_km=distance_km,
@@ -191,12 +190,12 @@ class ResourceMatcher:
 
         now = datetime.now(UTC)
         from datetime import timedelta
+
         estimated_arrival = now + timedelta(minutes=travel_time)
 
         # Update rationale with selection reason
         rationale.selection_reason = (
-            f"Highest-scoring resource (score: {score:.4f}) "
-            f"from {alternatives_count} candidate(s)"
+            f"Highest-scoring resource (score: {score:.4f}) from {alternatives_count} candidate(s)"
         )
         rationale.alternatives_considered = alternatives_count
 
@@ -279,10 +278,12 @@ class ResourceMatcher:
                     (r for r in eligible_resources if r.resource_id == resource_id),
                     None,
                 )
-                contentions.append({
-                    "resource_id": resource_id,
-                    "competing_incidents": sorted(incidents),
-                    "resource_type": resource.resource_type.value if resource else "unknown",
-                })
+                contentions.append(
+                    {
+                        "resource_id": resource_id,
+                        "competing_incidents": sorted(incidents),
+                        "resource_type": resource.resource_type.value if resource else "unknown",
+                    }
+                )
 
         return contentions

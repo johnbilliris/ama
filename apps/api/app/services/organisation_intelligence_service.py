@@ -9,6 +9,7 @@ class OrganisationIntelligenceService:
     def __init__(self, seed_root: Path | None = None) -> None:
         if seed_root is None:
             from packages.domain.src.domain.seed import bootstrap as _seed_mod
+
             seed_root = Path(_seed_mod.__file__).resolve().parent
         self.seed_root = seed_root
 

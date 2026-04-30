@@ -44,47 +44,55 @@ class HealthScoreService:
 
         # 1. Constitutional compliance (40%)
         const_score = self._calculate_constitutional_score(constitutional_gates or [])
-        dimensions.append(DimensionScore(
-            dimension="constitutional_compliance",
-            score=const_score["score"],
-            weight=DIMENSION_WEIGHTS["constitutional_compliance"],
-            weighted_score=const_score["score"] * DIMENSION_WEIGHTS["constitutional_compliance"],
-            input_count=const_score["input_count"],
-            stale=const_score.get("stale", False),
-        ))
+        dimensions.append(
+            DimensionScore(
+                dimension="constitutional_compliance",
+                score=const_score["score"],
+                weight=DIMENSION_WEIGHTS["constitutional_compliance"],
+                weighted_score=const_score["score"] * DIMENSION_WEIGHTS["constitutional_compliance"],
+                input_count=const_score["input_count"],
+                stale=const_score.get("stale", False),
+            )
+        )
 
         # 2. Operational readiness (25%)
         ops_score = self._calculate_readiness_score(readiness_data or {})
-        dimensions.append(DimensionScore(
-            dimension="operational_readiness",
-            score=ops_score["score"],
-            weight=DIMENSION_WEIGHTS["operational_readiness"],
-            weighted_score=ops_score["score"] * DIMENSION_WEIGHTS["operational_readiness"],
-            input_count=ops_score["input_count"],
-            stale=ops_score.get("stale", False),
-        ))
+        dimensions.append(
+            DimensionScore(
+                dimension="operational_readiness",
+                score=ops_score["score"],
+                weight=DIMENSION_WEIGHTS["operational_readiness"],
+                weighted_score=ops_score["score"] * DIMENSION_WEIGHTS["operational_readiness"],
+                input_count=ops_score["input_count"],
+                stale=ops_score.get("stale", False),
+            )
+        )
 
         # 3. Data source governance (20%)
         ds_score = self._calculate_data_source_score(data_source_stats or {})
-        dimensions.append(DimensionScore(
-            dimension="data_source_governance",
-            score=ds_score["score"],
-            weight=DIMENSION_WEIGHTS["data_source_governance"],
-            weighted_score=ds_score["score"] * DIMENSION_WEIGHTS["data_source_governance"],
-            input_count=ds_score["input_count"],
-            stale=ds_score.get("stale", False),
-        ))
+        dimensions.append(
+            DimensionScore(
+                dimension="data_source_governance",
+                score=ds_score["score"],
+                weight=DIMENSION_WEIGHTS["data_source_governance"],
+                weighted_score=ds_score["score"] * DIMENSION_WEIGHTS["data_source_governance"],
+                input_count=ds_score["input_count"],
+                stale=ds_score.get("stale", False),
+            )
+        )
 
         # 4. Recovery progress (15%)
         rec_score = self._calculate_recovery_score(recovery_data or {})
-        dimensions.append(DimensionScore(
-            dimension="recovery_progress",
-            score=rec_score["score"],
-            weight=DIMENSION_WEIGHTS["recovery_progress"],
-            weighted_score=rec_score["score"] * DIMENSION_WEIGHTS["recovery_progress"],
-            input_count=rec_score["input_count"],
-            stale=rec_score.get("stale", False),
-        ))
+        dimensions.append(
+            DimensionScore(
+                dimension="recovery_progress",
+                score=rec_score["score"],
+                weight=DIMENSION_WEIGHTS["recovery_progress"],
+                weighted_score=rec_score["score"] * DIMENSION_WEIGHTS["recovery_progress"],
+                input_count=rec_score["input_count"],
+                stale=rec_score.get("stale", False),
+            )
+        )
 
         composite = sum(d.weighted_score for d in dimensions)
         status = GovernanceHealthScore.derive_status(composite)

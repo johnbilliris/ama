@@ -45,8 +45,7 @@ class MEFrameworkRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "MEFrameworkRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "MEFrameworkRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -113,10 +112,7 @@ class MEFrameworkRepository:
                 )
             )
         # In-memory fallback
-        results = [
-            d for d in self._in_memory.values()
-            if d.get("document_type") == "me_framework"
-        ]
+        results = [d for d in self._in_memory.values() if d.get("document_type") == "me_framework"]
         if incident_id is not None:
             results = [d for d in results if d.get("incident_id") == incident_id]
         if status is not None:
@@ -194,12 +190,15 @@ class MEFrameworkRepository:
             ]
             return list(
                 container.query_items(
-                    query, parameters=params, partition_key=incident_id,
+                    query,
+                    parameters=params,
+                    partition_key=incident_id,
                 )
             )
         # In-memory fallback
         return [
-            d for d in self._in_memory.values()
+            d
+            for d in self._in_memory.values()
             if d.get("document_type") == "evaluation_report"
             and d.get("framework_id") == framework_id
             and d.get("incident_id") == incident_id

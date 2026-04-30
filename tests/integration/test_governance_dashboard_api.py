@@ -1,7 +1,6 @@
 """Integration tests for Governance Dashboard API endpoints
 (T034, T043, T050, T061, T068, T074, T081, T087)."""
 
-
 import pytest
 from fastapi.testclient import TestClient
 
@@ -22,6 +21,7 @@ def auth_headers():
 
 
 # ---- T034: US1 Executive Summary Endpoints ----
+
 
 class TestExecutiveSummaryEndpoints:
     def test_get_executive_summary(self, client, auth_headers):
@@ -64,6 +64,7 @@ class TestExecutiveSummaryEndpoints:
 
 # ---- T043: US2 Compliance Matrix Endpoints ----
 
+
 class TestComplianceMatrixEndpoints:
     def test_get_compliance_matrix(self, client, auth_headers):
         resp = client.get("/api/governance/dashboard/compliance", headers=auth_headers)
@@ -91,6 +92,7 @@ class TestComplianceMatrixEndpoints:
 
 
 # ---- T050: US3 Audit Trail Endpoints ----
+
 
 class TestAuditTrailEndpoints:
     def test_search_audit_trail(self, client, auth_headers):
@@ -154,6 +156,7 @@ class TestAuditTrailEndpoints:
 
 # ---- T061: US4 Operational Readiness Endpoints ----
 
+
 class TestOperationalReadinessEndpoints:
     def test_get_operational_readiness(self, client, auth_headers):
         resp = client.get("/api/governance/dashboard/readiness", headers=auth_headers)
@@ -175,6 +178,7 @@ class TestOperationalReadinessEndpoints:
 
 
 # ---- T068: US5 Recovery Progress Endpoints ----
+
 
 class TestRecoveryProgressEndpoints:
     def test_get_recovery_progress(self, client, auth_headers):
@@ -200,6 +204,7 @@ class TestRecoveryProgressEndpoints:
 
 # ---- T074: US6 Risk & Warning Endpoints ----
 
+
 class TestRiskWarningEndpoints:
     def test_get_risk_warning(self, client, auth_headers):
         resp = client.get("/api/governance/dashboard/risk", headers=auth_headers)
@@ -217,6 +222,7 @@ class TestRiskWarningEndpoints:
 
 
 # ---- T081: US7 Role Personalisation Endpoints ----
+
 
 class TestDashboardConfigEndpoints:
     def test_get_config_incident_controller(self, client):
@@ -249,9 +255,16 @@ class TestDashboardConfigEndpoints:
 
     def test_all_roles_have_widgets(self, client):
         roles = [
-            "incident_controller", "operations_officer", "planning_officer",
-            "intelligence_officer", "logistics_officer", "public_information_officer",
-            "executive_leader", "observer_auditor", "risk_manager", "resilience_planner",
+            "incident_controller",
+            "operations_officer",
+            "planning_officer",
+            "intelligence_officer",
+            "logistics_officer",
+            "public_information_officer",
+            "executive_leader",
+            "observer_auditor",
+            "risk_manager",
+            "resilience_planner",
         ]
         for role in roles:
             headers = {"X-User-Role": role, "X-Tenant-Id": "live"}
@@ -262,6 +275,7 @@ class TestDashboardConfigEndpoints:
 
 
 # ---- T087: US8 Audit Logging Integration ----
+
 
 class TestAuditLoggingIntegration:
     def test_view_emits_audit_event(self, client, auth_headers):

@@ -13,6 +13,4 @@ class AzureClientRegistry:
 
 
 def build_azure_clients(settings: Settings) -> AzureClientRegistry:
-    return AzureClientRegistry(
-        residency_policy=build_residency_policy(settings.allowed_azure_regions)
-    )
+    return AzureClientRegistry(residency_policy=build_residency_policy(settings.allowed_azure_regions))

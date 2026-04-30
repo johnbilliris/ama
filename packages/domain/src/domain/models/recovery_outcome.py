@@ -24,6 +24,7 @@ class RecoveryOutcome(BaseModel):
 
     FRs: FR-015–019 | Research: R-004
     """
+
     outcome_id: str
     domain: RecoveryDomain
     objective_type: ObjectiveType
@@ -45,6 +46,7 @@ class CatalogueActivity(BaseModel):
 
     FRs: FR-020 | Research: R-004
     """
+
     activity_id: str
     outcome_id: str
     domain: RecoveryDomain
@@ -63,6 +65,7 @@ class CatalogueIndicator(BaseModel):
 
     FRs: FR-021 | Research: R-004
     """
+
     indicator_id: str
     outcome_id: str
     domain: RecoveryDomain

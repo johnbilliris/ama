@@ -31,13 +31,15 @@ def normalise_binary_metadata(raw_payload: dict[str, Any]) -> dict[str, Any]:
         min_lon, min_lat, max_lon, max_lat = coverage_bbox
         location = {
             "type": "Polygon",
-            "coordinates": [[
-                [min_lon, min_lat],
-                [max_lon, min_lat],
-                [max_lon, max_lat],
-                [min_lon, max_lat],
-                [min_lon, min_lat],
-            ]],
+            "coordinates": [
+                [
+                    [min_lon, min_lat],
+                    [max_lon, min_lat],
+                    [max_lon, max_lat],
+                    [min_lon, max_lat],
+                    [min_lon, min_lat],
+                ]
+            ],
             "precisionMeters": 5000,
         }
     else:

@@ -75,9 +75,7 @@ class AllocationProcessingPipeline:
         cosmos_assessments_container: Any = None,
     ) -> None:
         self._config = config or ResourceAllocationConfig()
-        self._dedup = dedup or HandoffDeduplicator(
-            window_minutes=self._config.handoff_dedup_window_minutes
-        )
+        self._dedup = dedup or HandoffDeduplicator(window_minutes=self._config.handoff_dedup_window_minutes)
         self._inventory = inventory or ResourceInventoryManager(config=self._config)
         self._matcher = matcher or ResourceMatcher(config=self._config)
         self._version_counter = version_counter or VersionCounter()
@@ -104,9 +102,7 @@ class AllocationProcessingPipeline:
             return None
 
         # Stage 2: Retrieve recommendation/assessment data
-        recommendation_data, assessment_data = self._stage2_retrieve_data(
-            handoff, config_hash, incident_scope_key
-        )
+        recommendation_data, assessment_data = self._stage2_retrieve_data(handoff, config_hash, incident_scope_key)
 
         # Stage 3: Demand identification
         demands = self._stage3_identify_demands(
@@ -117,9 +113,7 @@ class AllocationProcessingPipeline:
             return None
 
         # Stage 4: Resource inventory query
-        eligible_resources = self._stage4_query_inventory(
-            demands, config_hash, incident_scope_key
-        )
+        eligible_resources = self._stage4_query_inventory(demands, config_hash, incident_scope_key)
 
         # Stage 5: Resource-demand matching
         assignments, shortfalls = self._stage5_match_resources(
@@ -147,14 +141,16 @@ class AllocationProcessingPipeline:
 
         # Stage 9: Audit finalisation
         duration_ms = (time.monotonic() - start_time) * 1000
-        self._stage9_audit_finalise(
-            handoff, plan, duration_ms, config_hash, incident_scope_key
-        )
+        self._stage9_audit_finalise(handoff, plan, duration_ms, config_hash, incident_scope_key)
 
         logger.info(
             "Plan %s generated in %.1fms (v%d, confidence=%.2f, %d assignments, %d shortfalls)",
-            plan.plan_id, duration_ms, plan.version,
-            plan.confidence_score, len(assignments), len(shortfalls),
+            plan.plan_id,
+            duration_ms,
+            plan.version,
+            plan.confidence_score,
+            len(assignments),
+            len(shortfalls),
         )
 
         return plan
@@ -397,23 +393,25 @@ class AllocationProcessingPipeline:
 
         # If no explicit needs found, create a generic demand from summary
         if not demands and summary:
-            demands.append(ResourceDemand(
-                demand_id=f"dem-{uuid4().hex[:12]}",
-                incident_id=handoff.incident_id,
-                source_id=payload.get("recommendationId", f"rec-{uuid4().hex[:8]}"),
-                source_type="coordination_task",
-                resource_type=ResourceType.personnel,
-                resource_sub_type="emergency_responder",
-                required_capabilities=[],
-                quantity=1,
-                location={"lat": -33.8688, "lon": 151.2093},
-                priority_tier=PriorityTier.tier_2_property,
-                urgency=UrgencyLevel.moderate,
-                urgency_raw="moderate",
-                fulfilment_status="pending",
-                handoff_id=handoff.handoff_id,
-                incident_scope_key=incident_scope_key,
-            ))
+            demands.append(
+                ResourceDemand(
+                    demand_id=f"dem-{uuid4().hex[:12]}",
+                    incident_id=handoff.incident_id,
+                    source_id=payload.get("recommendationId", f"rec-{uuid4().hex[:8]}"),
+                    source_type="coordination_task",
+                    resource_type=ResourceType.personnel,
+                    resource_sub_type="emergency_responder",
+                    required_capabilities=[],
+                    quantity=1,
+                    location={"lat": -33.8688, "lon": 151.2093},
+                    priority_tier=PriorityTier.tier_2_property,
+                    urgency=UrgencyLevel.moderate,
+                    urgency_raw="moderate",
+                    fulfilment_status="pending",
+                    handoff_id=handoff.handoff_id,
+                    incident_scope_key=incident_scope_key,
+                )
+            )
 
         return demands
 
@@ -472,12 +470,23 @@ class AllocationProcessingPipeline:
     def _extract_quantity(self, text: str, keyword: str) -> int:
         """Extract quantity from text near a keyword."""
         import re
+
         # Look for patterns like "3 ambulances", "five water tankers"
-        word_numbers = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
-                        "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+        word_numbers = {
+            "one": 1,
+            "two": 2,
+            "three": 3,
+            "four": 4,
+            "five": 5,
+            "six": 6,
+            "seven": 7,
+            "eight": 8,
+            "nine": 9,
+            "ten": 10,
+        }
         idx = text.find(keyword)
         if idx > 0:
-            preceding = text[max(0, idx - 20):idx].strip()
+            preceding = text[max(0, idx - 20) : idx].strip()
             # Check for digit
             match = re.search(r"(\d+)\s*$", preceding)
             if match:
@@ -600,9 +609,7 @@ class AllocationProcessingPipeline:
         incident_scope_key: str,
     ) -> TradeOffAnalysis | None:
         """Detect cross-incident contention and generate trade-off analysis."""
-        contentions = self._matcher.detect_cross_incident_contention(
-            demands, eligible_resources
-        )
+        contentions = self._matcher.detect_cross_incident_contention(demands, eligible_resources)
 
         if not contentions:
             return None
@@ -649,10 +656,12 @@ class AllocationProcessingPipeline:
     ) -> ResourceDeploymentPlan:
         """Generate versioned deployment plan with LLM or template summary."""
         # Assign version
-        version = run_async(self._version_counter.assign_version(
-            incident_id=handoff.incident_id,
-            incident_scope_key=incident_scope_key,
-        ))
+        version = run_async(
+            self._version_counter.assign_version(
+                incident_id=handoff.incident_id,
+                incident_scope_key=incident_scope_key,
+            )
+        )
 
         plan_id = f"rdp-{handoff.incident_id}-v{version}"
 
@@ -706,9 +715,7 @@ class AllocationProcessingPipeline:
             assessment_id=payload.get("assessmentId"),
             evacuation_plan_id=payload.get("evacuationPlanId"),
             transport_requirement_ids=[
-                r.get("requirementId", "")
-                for r in payload.get("transportRequirements", [])
-                if r.get("requirementId")
+                r.get("requirementId", "") for r in payload.get("transportRequirements", []) if r.get("requirementId")
             ],
         )
 
@@ -835,9 +842,7 @@ class AllocationProcessingPipeline:
         if self._cosmos_plans is not None:
             try:
                 # Supersede previous versions
-                self._supersede_previous_plans(
-                    plan.incident_id, plan.version, incident_scope_key, config_hash
-                )
+                self._supersede_previous_plans(plan.incident_id, plan.version, incident_scope_key, config_hash)
 
                 # Write new plan
                 doc = plan.model_dump(mode="json")

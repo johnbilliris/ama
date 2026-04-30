@@ -119,7 +119,9 @@ async def deliver_handoff_with_retry(
     """Deliver a handoff with async non-blocking retries and 2-second cap per attempt."""
     handoff.max_retries = max_retries
     handoff.retry_window_seconds = retry_window_seconds
-    retry_sleep = max(1, retry_window_seconds // max(1, max_retries))
+    # Exponential backoff: 0.5s, 1s, 2s, 4s ... capped at retry_window_seconds
+    # so the worst-case wait between attempts cannot exceed the configured window.
+    backoff_base_seconds = 0.5
     start_time = time.monotonic()
 
     for attempt in range(1, max_retries + 1):
@@ -154,6 +156,10 @@ async def deliver_handoff_with_retry(
                 },
             )
             if attempt < max_retries:
+                retry_sleep = min(
+                    float(retry_window_seconds),
+                    backoff_base_seconds * (2 ** (attempt - 1)),
+                )
                 await asyncio.sleep(retry_sleep)
 
     handoff.status = "dead_lettered"
@@ -193,7 +199,10 @@ def build_plan_activation_handoff(
 
 
 def build_evaluation_lessons_handoff(
-    *, incident_id: str, report_id: str, recommendations: list[dict],
+    *,
+    incident_id: str,
+    report_id: str,
+    recommendations: list[dict],
 ) -> AgentHandoffEvent:
     """Build a handoff from evaluation report recommendations to lessons management."""
     return build_handoff(

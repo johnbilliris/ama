@@ -1,4 +1,3 @@
-
 import pytest
 from app.repositories.simulation_repository import SimulationRepository
 from app.services.simulation_service import SimulationService

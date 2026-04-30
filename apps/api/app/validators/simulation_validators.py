@@ -43,8 +43,16 @@ class SimulationValidators:
 
     def validate_scenario_type(self, scenario_type: str) -> None:
         valid = {
-            "Bushfire", "Flood", "Cyclone", "Severe Storm", "Heatwave",
-            "Earthquake", "Tsunami", "Pandemic", "Other", "Cross-jurisdiction",
+            "Bushfire",
+            "Flood",
+            "Cyclone",
+            "Severe Storm",
+            "Heatwave",
+            "Earthquake",
+            "Tsunami",
+            "Pandemic",
+            "Other",
+            "Cross-jurisdiction",
         }
         if scenario_type not in valid:
             raise HTTPException(

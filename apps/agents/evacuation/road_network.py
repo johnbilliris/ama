@@ -25,6 +25,7 @@ MAX_EDGES = 5_000
 
 class RoadNode(BaseModel):
     """A node (intersection) in the road network."""
+
     id: str
     name: str
     coordinates: dict[str, float]  # {lat, lng}
@@ -35,6 +36,7 @@ class RoadNode(BaseModel):
 
 class RoadEdge(BaseModel):
     """A road segment connecting two nodes."""
+
     id: str
     from_node: str
     to_node: str
@@ -50,6 +52,7 @@ class RoadEdge(BaseModel):
 
 class AssemblyAreaConfig(BaseModel):
     """Pre-configured assembly area from reference data."""
+
     assembly_area_id: str
     name: str
     coordinates: dict[str, float]  # {lat, lng}
@@ -61,6 +64,7 @@ class AssemblyAreaConfig(BaseModel):
 
 class RoadNetworkMetadata(BaseModel):
     """Metadata about the road network dataset."""
+
     version: str
     region: str
     coordinate_system: str = "WGS84"
@@ -69,6 +73,7 @@ class RoadNetworkMetadata(BaseModel):
 
 class RoadNetworkData(BaseModel):
     """Complete road network dataset parsed from JSON."""
+
     metadata: RoadNetworkMetadata
     nodes: list[RoadNode]
     edges: list[RoadEdge]
@@ -103,22 +108,14 @@ class RoadNetworkLoader:
 
         # Size validation
         if len(self._data.nodes) > MAX_NODES:
-            raise ValueError(
-                f"Road network exceeds maximum node count: "
-                f"{len(self._data.nodes)} > {MAX_NODES}"
-            )
+            raise ValueError(f"Road network exceeds maximum node count: {len(self._data.nodes)} > {MAX_NODES}")
         if len(self._data.edges) > MAX_EDGES:
-            raise ValueError(
-                f"Road network exceeds maximum edge count: "
-                f"{len(self._data.edges)} > {MAX_EDGES}"
-            )
+            raise ValueError(f"Road network exceeds maximum edge count: {len(self._data.edges)} > {MAX_EDGES}")
 
         # Build indices
         self._nodes_by_id = {n.id: n for n in self._data.nodes}
         self._edges_by_id = {e.id: e for e in self._data.edges}
-        self._assembly_areas_by_id = {
-            a.assembly_area_id: a for a in self._data.assembly_areas
-        }
+        self._assembly_areas_by_id = {a.assembly_area_id: a for a in self._data.assembly_areas}
 
         # Build adjacency list (bidirectional)
         self._adjacency = {}

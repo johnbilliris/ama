@@ -1,11 +1,17 @@
-
 from apps.ingestion.simulation.generators.weather_generator import WeatherGenerator
 from apps.ingestion.simulation.scenario_templates import SEVERE_STORM_TEMPLATE
 
 REQUIRED_ENVELOPE_KEYS = {
-    "source", "category", "occurredAt", "receivedAt",
-    "location", "payload", "confidenceScore", "freshnessScore",
-    "validationStatus", "provenance",
+    "source",
+    "category",
+    "occurredAt",
+    "receivedAt",
+    "location",
+    "payload",
+    "confidenceScore",
+    "freshnessScore",
+    "validationStatus",
+    "provenance",
 }
 REQUIRED_SOURCE_KEYS = {"dataSourceId", "name", "kind"}
 REQUIRED_LOCATION_KEYS = {"type", "coordinates", "precisionMeters"}

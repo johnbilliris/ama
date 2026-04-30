@@ -27,7 +27,7 @@ DEFAULT_ZONE_3_BUFFER = 0.05  # ~5.5km additional buffer from Zone 2
 
 # Capacity reduction factors by zone
 ZONE_CAPACITY_FACTORS = {
-    1: 0.0,   # Zone 1: closed (0% capacity)
+    1: 0.0,  # Zone 1: closed (0% capacity)
     2: 0.50,  # Zone 2: 50% capacity
     3: 0.75,  # Zone 3: 75% capacity
 }
@@ -80,14 +80,16 @@ class ZoneComputer:
             pop_est = self._estimate_population(poly, population_data)
             vuln_est = int(pop_est * 0.15)  # ~15% vulnerable population estimate
 
-            zones.append(EvacuationZone(
-                zone_number=zone_num,
-                boundary=self._polygon_to_geojson(poly),
-                population_estimate=pop_est,
-                vulnerable_population=vuln_est,
-                evacuation_priority=priority,
-                status="pending",
-            ))
+            zones.append(
+                EvacuationZone(
+                    zone_number=zone_num,
+                    boundary=self._polygon_to_geojson(poly),
+                    population_estimate=pop_est,
+                    vulnerable_population=vuln_est,
+                    evacuation_priority=priority,
+                    status="pending",
+                )
+            )
 
         return zones
 
@@ -185,9 +187,7 @@ class ZoneComputer:
             results.append(edge_copy)
         return results
 
-    def get_zone_polygons(
-        self, zones: list[EvacuationZone]
-    ) -> list[tuple[int, Polygon]]:
+    def get_zone_polygons(self, zones: list[EvacuationZone]) -> list[tuple[int, Polygon]]:
         """Convert zone boundaries to Shapely polygons for spatial operations."""
         result = []
         for zone in zones:

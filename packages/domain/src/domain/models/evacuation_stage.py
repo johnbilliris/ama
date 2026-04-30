@@ -12,8 +12,13 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 EvacStageName = Literal[
-    "decision", "warning", "withdrawal", "shelter",
-    "return", "shelter_in_place", "completed",
+    "decision",
+    "warning",
+    "withdrawal",
+    "shelter",
+    "return",
+    "shelter_in_place",
+    "completed",
 ]
 
 EvacuationType = Literal["pre_warned", "immediate"]

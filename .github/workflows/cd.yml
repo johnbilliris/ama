@@ -58,7 +58,7 @@ jobs:
       # Step 1 — checkout the EXACT commit ci validated, not the default branch.
       # workflow_run runs default-branch context unless ref is set explicitly.
       - name: Checkout validated commit
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
@@ -83,26 +83,26 @@ jobs:
 
       # Step 4 — single auth path: AZURE_CREDENTIALS JSON (ADR-031).
       - name: Azure Login
-        uses: azure/login@v3
+        uses: azure/login@2dd0bbf4064d5a1812889dc200bb8eed2597f82a # v3.x
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Install Azure Developer CLI
-        uses: Azure/setup-azd@v2
+        uses: Azure/setup-azd@003306647c7696088e6dff0900435682cb5e6ebd # v2.x
 
       # Install the toolchain that azd's pre-provision/post-deploy hooks
       # need to build artefacts (apps/web requires pnpm; apps/api & agents
       # require Python). Order matches ci.yml: pnpm BEFORE setup-node so
       # node's package-manager-cache feature finds pnpm on PATH.
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
         with:
           version: 10.6.3
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: "24"
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
 
@@ -133,7 +133,7 @@ jobs:
           azd env new "${AZURE_ENV_NAME}" --no-prompt || true
           azd env set AZURE_ENV_NAME "${AZURE_ENV_NAME}"
           azd env set AZURE_LOCATION australiaeast
-          # azure/login@v3 with creds: exposes subscription via az context;
+          # 2dd0bbf4064d5a1812889dc200bb8eed2597f82a # v3.x with creds: exposes subscription via az context;
           # surface it explicitly for azd.
           SUB=$(az account show --query id -o tsv)
           azd env set AZURE_SUBSCRIPTION_ID "${SUB}"

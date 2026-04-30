@@ -8,8 +8,10 @@ from monitoring.config import MonitoringConfig
 
 def _async_deliver(target: list):
     """Return an async deliver function that appends to *target*."""
+
     async def _deliver(h):
         target.append(h)
+
     return _deliver
 
 
@@ -178,9 +180,7 @@ class TestPipelineSummarisation:
 
         mock_llm = MagicMock()
         # Return text with blocked keyword to trigger content safety failure
-        mock_llm.generate_response.return_value = {
-            "text": "This is a bomb threat near the fire zone"
-        }
+        mock_llm.generate_response.return_value = {"text": "This is a bomb threat near the fire zone"}
         agent = MonitoringAgent(llm_client=mock_llm)
         pipeline = _make_pipeline(agent=agent)
         raw = _make_valid_signal()

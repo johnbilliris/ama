@@ -52,9 +52,7 @@ class DashboardService:
             for recommendation in RECOMMENDATIONS.values()
             if recommendation.incident_id == incident_id
         ]
-        active_signals = [
-            signal for signal in SIGNALS.values() if signal.incident_id == incident_id
-        ]
+        active_signals = [signal for signal in SIGNALS.values() if signal.incident_id == incident_id]
         return {
             "incident": {
                 "incidentId": incident.incident_id,
@@ -78,17 +76,12 @@ class DashboardService:
             "activeTasks": [],
             "signalSummary": {
                 "authoritativeCount": sum(
-                    1 for signal in active_signals
-                    if signal.provenance.get("sourceKind") == "authoritative"
+                    1 for signal in active_signals if signal.provenance.get("sourceKind") == "authoritative"
                 ),
                 "communityCount": sum(
-                    1 for signal in active_signals
-                    if signal.provenance.get("sourceKind") in {"community", "social"}
+                    1 for signal in active_signals if signal.provenance.get("sourceKind") in {"community", "social"}
                 ),
-                "contradictedCount": sum(
-                    1 for signal in active_signals
-                    if signal.validation_status == "contradicted"
-                ),
+                "contradictedCount": sum(1 for signal in active_signals if signal.validation_status == "contradicted"),
             },
         }
 

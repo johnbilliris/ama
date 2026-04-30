@@ -13,9 +13,15 @@ class TestDecisionType:
         from monitoring.models import DecisionType
 
         expected = {
-            "summarised", "escalated", "blocked", "handed_off",
-            "held_for_review", "associated", "degradation_detected",
-            "discarded", "validation_failed",
+            "summarised",
+            "escalated",
+            "blocked",
+            "handed_off",
+            "held_for_review",
+            "associated",
+            "degradation_detected",
+            "discarded",
+            "validation_failed",
         }
         actual = {dt.value for dt in DecisionType}
         assert actual == expected

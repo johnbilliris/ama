@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/Microsoft.Insights/workbooks.json",
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Disaster Response Hub — Executive Governance Health\n\nLive view of audit ledger integrity, alert publication latency, agent handoff success, and kill-switch propagation. Spec-032 T508 must-land subset (FR-O04)."
+      },
+      "name": "header"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where Name == 'audit.integrity_check.failures_total'\n| summarize failures = sum(Sum) by bin(TimeGenerated, 5m)\n| render timechart with (title='Audit ledger integrity-check failures (P1 if >0)')",
+        "size": 0,
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "audit-integrity"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where Name == 'alert.publish.lag_seconds'\n| summarize p95 = percentile(Sum / Count, 95) by bin(TimeGenerated, 5m)\n| render timechart with (title='Alert publish latency P95 (target <=90s)')",
+        "size": 0,
+        "queryType": 0
+      },
+      "name": "alert-publish-p95"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where Name == 'agent.handoff.success_total' or Name == 'agent.handoff.failure_total'\n| summarize success = sumif(Sum, Name == 'agent.handoff.success_total'), failure = sumif(Sum, Name == 'agent.handoff.failure_total') by bin(TimeGenerated, 15m)\n| extend success_rate = todouble(success) / (todouble(success) + todouble(failure))\n| render timechart with (title='Agent handoff success rate (target >=99.5%)')",
+        "size": 0,
+        "queryType": 0
+      },
+      "name": "handoff-success"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where Name == 'agent.killswitch.lag_seconds'\n| summarize p99 = percentile(Sum / Count, 99) by bin(TimeGenerated, 15m)\n| render timechart with (title='Kill-switch propagation P99 (target <=30s)')",
+        "size": 0,
+        "queryType": 0
+      },
+      "name": "killswitch-p99"
+    }
+  ],
+  "fallbackResourceIds": [],
+  "fromTemplateId": "ama/spec-032/executive-governance"
+}

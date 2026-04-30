@@ -71,9 +71,16 @@ def classify_priority_tier(demand_context: dict) -> PriorityTier:
 
     # Tier 1 — life safety
     life_safety_keywords = {
-        "evacuation", "medical", "rescue", "ambulance", "paramedic",
-        "hospital", "transport_requirement", "wheelchair_accessible",
-        "patient", "life_safety",
+        "evacuation",
+        "medical",
+        "rescue",
+        "ambulance",
+        "paramedic",
+        "hospital",
+        "transport_requirement",
+        "wheelchair_accessible",
+        "patient",
+        "life_safety",
     }
     if source_type == "transport_requirement":
         return PriorityTier.tier_1_life_safety

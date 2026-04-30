@@ -147,11 +147,7 @@ class TestEdgeGeometry:
 
     def test_some_edges_have_geometry(self):
         """At least some edges should have LineString geometries built."""
-        count = sum(
-            1
-            for e in self.loader.get_all_edges()
-            if self.loader.get_edge_geometry(e.id) is not None
-        )
+        count = sum(1 for e in self.loader.get_all_edges() if self.loader.get_edge_geometry(e.id) is not None)
         assert count > 0
 
     def test_geometry_is_linestring(self):

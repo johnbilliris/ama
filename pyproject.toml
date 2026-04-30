@@ -16,8 +16,83 @@ dependencies = [
   "requests>=2.33.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "pytest-cov>=6.0",
+  "pytest-asyncio>=0.24",
+  "pytest-benchmark>=5.1",
+  "ruff>=0.8.4",
+  "mypy>=1.13",
+  "import-linter>=2.0",
+  "pre-commit>=4.0",
+  "pyyaml>=6.0",
+]
+
 [tool.pytest.ini_options]
 markers = [
   "integration: integration tests requiring mock external services (Cosmos DB, Service Bus)",
   "simulation: extended scenario simulation tests",
 ]
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Spec-032 Stream 1 — Code-quality gates (FR-Q01..FR-Q05).
+# These tools mirror the CI gates in .github/workflows/ci.yml and .pre-commit-config.yaml.
+# ────────────────────────────────────────────────────────────────────────────────
+
+[tool.coverage.run]
+source = ["apps", "packages"]
+branch = true
+omit = [
+  "*/tests/*",
+  "*/__init__.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+precision = 2
+exclude_lines = [
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "if TYPE_CHECKING:",
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+disallow_untyped_decorators = false
+warn_return_any = false
+files = ["apps", "packages"]
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+ignore_errors = true
+
+# Import-linter rules (FR-Q02). Keep narrow and provable; expand as the codebase matures.
+[tool.importlinter]
+root_packages = ["apps", "packages"]
+
+[[tool.importlinter.contracts]]
+name = "agents do not depend on api"
+type = "forbidden"
+source_modules = ["apps.agents"]
+forbidden_modules = ["apps.api"]
+
+[[tool.importlinter.contracts]]
+name = "ingestion does not depend on api"
+type = "forbidden"
+source_modules = ["apps.ingestion"]
+forbidden_modules = ["apps.api"]
+
+[[tool.importlinter.contracts]]
+name = "domain does not depend on apps"
+type = "forbidden"
+source_modules = ["packages.domain"]
+forbidden_modules = ["apps"]
+
+# NOTE: packages/prompts/ is a YAML-asset directory (no Python module), so it
+# has no imports to lint. Re-add a contract here only if Python code is added
+# under packages/prompts/.
+

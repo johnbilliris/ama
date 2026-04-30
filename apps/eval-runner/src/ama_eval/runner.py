@@ -47,11 +47,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args(argv)
 
-    missing = [name for name, value in (
-        ("--run-id/AMA_EVAL_RUN_ID", args.run_id),
-        ("--dataset-id/AMA_EVAL_DATASET_ID", args.dataset_id),
-        ("--dataset-version/AMA_EVAL_DATASET_VERSION", args.dataset_version),
-    ) if not value]
+    missing = [
+        name
+        for name, value in (
+            ("--run-id/AMA_EVAL_RUN_ID", args.run_id),
+            ("--dataset-id/AMA_EVAL_DATASET_ID", args.dataset_id),
+            ("--dataset-version/AMA_EVAL_DATASET_VERSION", args.dataset_version),
+        )
+        if not value
+    ]
     if missing:
         parser.error(f"missing required argument(s): {', '.join(missing)}")
 
@@ -103,7 +107,7 @@ def main(argv: list[str] | None = None) -> int:
         # Honour datasetSubset.maxCases on the run if --max-cases not passed
         run_max_cases = None
         try:
-            run_max_cases = (run.datasetSubset.maxCases if run.datasetSubset else None)
+            run_max_cases = run.datasetSubset.maxCases if run.datasetSubset else None
         except AttributeError:
             run_max_cases = None
         effective_max = args.max_cases or run_max_cases

@@ -333,13 +333,19 @@ class CustomEventEmitter:
 
     @classmethod
     def handoff_received(
-        cls, handoff_id: str, incident_id: str, tenant_id: str,
+        cls,
+        handoff_id: str,
+        incident_id: str,
+        tenant_id: str,
     ) -> None:
-        cls._emit("HandoffReceived", {
-            "handoff_id": handoff_id,
-            "incident_id": incident_id,
-            "tenant_id": tenant_id,
-        })
+        cls._emit(
+            "HandoffReceived",
+            {
+                "handoff_id": handoff_id,
+                "incident_id": incident_id,
+                "tenant_id": tenant_id,
+            },
+        )
 
     @classmethod
     def assessment_generated(
@@ -349,12 +355,15 @@ class CustomEventEmitter:
         severity: str,
         generation_method: str,
     ) -> None:
-        cls._emit("AssessmentGenerated", {
-            "assessment_id": assessment_id,
-            "confidence": confidence,
-            "severity": severity,
-            "generation_method": generation_method,
-        })
+        cls._emit(
+            "AssessmentGenerated",
+            {
+                "assessment_id": assessment_id,
+                "confidence": confidence,
+                "severity": severity,
+                "generation_method": generation_method,
+            },
+        )
 
     @classmethod
     def contradiction_detected(
@@ -363,45 +372,66 @@ class CustomEventEmitter:
         source_names: list[str],
         confidence_reduction: float,
     ) -> None:
-        cls._emit("ContradictionDetected", {
-            "signal_ids": ",".join(signal_ids),
-            "source_names": ",".join(source_names),
-            "confidence_reduction": confidence_reduction,
-        })
+        cls._emit(
+            "ContradictionDetected",
+            {
+                "signal_ids": ",".join(signal_ids),
+                "source_names": ",".join(source_names),
+                "confidence_reduction": confidence_reduction,
+            },
+        )
 
     @classmethod
     def escalation_triggered(
-        cls, target_agent: str, recommendation_id: str, confidence: float,
+        cls,
+        target_agent: str,
+        recommendation_id: str,
+        confidence: float,
     ) -> None:
-        cls._emit("EscalationTriggered", {
-            "target_agent": target_agent,
-            "recommendation_id": recommendation_id,
-            "confidence": confidence,
-        })
+        cls._emit(
+            "EscalationTriggered",
+            {
+                "target_agent": target_agent,
+                "recommendation_id": recommendation_id,
+                "confidence": confidence,
+            },
+        )
 
     @classmethod
     def degradation_event(cls, component: str, tier: int | str) -> None:
-        cls._emit("DegradationEvent", {
-            "component": component,
-            "tier": str(tier),
-        })
+        cls._emit(
+            "DegradationEvent",
+            {
+                "component": component,
+                "tier": str(tier),
+            },
+        )
 
     @classmethod
     def sla_breach(cls, handoff_id: str, actual_duration_ms: float) -> None:
-        cls._emit("SLABreach", {
-            "handoff_id": handoff_id,
-            "actual_duration_ms": actual_duration_ms,
-        })
+        cls._emit(
+            "SLABreach",
+            {
+                "handoff_id": handoff_id,
+                "actual_duration_ms": actual_duration_ms,
+            },
+        )
 
     @classmethod
     def version_conflict(
-        cls, incident_id: str, assessment_type: str, retry_count: int,
+        cls,
+        incident_id: str,
+        assessment_type: str,
+        retry_count: int,
     ) -> None:
-        cls._emit("VersionConflict", {
-            "incident_id": incident_id,
-            "assessment_type": assessment_type,
-            "retry_count": retry_count,
-        })
+        cls._emit(
+            "VersionConflict",
+            {
+                "incident_id": incident_id,
+                "assessment_type": assessment_type,
+                "retry_count": retry_count,
+            },
+        )
 
 
 # ---------------------------------------------------------------------------

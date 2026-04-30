@@ -60,15 +60,15 @@ class CircuitBreakerState:
             self.backoff_initial * (2 ** (self.total_trips - 1)),
             self.backoff_max,
         )
-        self.backoff_until = datetime.now(UTC).replace(
-            second=datetime.now(UTC).second
-        )
+        self.backoff_until = datetime.now(UTC).replace(second=datetime.now(UTC).second)
         from datetime import timedelta
+
         self.backoff_until = datetime.now(UTC) + timedelta(seconds=backoff)
         tel.circuit_breaker_trips.add(1)
         logger.warning(
             "Circuit breaker tripped (trip #%d), backoff %ds",
-            self.total_trips, backoff,
+            self.total_trips,
+            backoff,
         )
 
     def should_allow_request(self) -> bool:
@@ -184,7 +184,8 @@ class IngestionPipelineBase(ABC):
             if raw_payloads:
                 logger.info(
                     "Pipeline %s cycle complete: %d payloads processed",
-                    self.pipeline_id, len(raw_payloads),
+                    self.pipeline_id,
+                    len(raw_payloads),
                 )
 
     async def _process_payload(self, raw_payload: dict[str, Any]) -> None:

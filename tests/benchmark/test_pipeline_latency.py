@@ -27,29 +27,34 @@ class TestDeliveryLatencyBenchmark:
     @pytest.mark.asyncio
     async def test_successful_delivery_under_100ms(self):
         """Successful delivery should complete well under 2s."""
+
         async def fast_deliver(_):
             await asyncio.sleep(0.01)
 
         handoff = _make_handoff()
         start = time.monotonic()
         result = await deliver_handoff_with_retry(
-            handoff=handoff, deliver=fast_deliver,
+            handoff=handoff,
+            deliver=fast_deliver,
         )
         elapsed = time.monotonic() - start
 
         assert result.status == "delivered"
-        assert elapsed < 0.5, f"Expected <500ms, got {elapsed*1000:.0f}ms"
+        assert elapsed < 0.5, f"Expected <500ms, got {elapsed * 1000:.0f}ms"
 
     @pytest.mark.asyncio
     async def test_slow_delivery_capped_at_2s(self):
         """FR-002: Slow delivery must time out at ~2s, not block indefinitely."""
+
         async def slow_deliver(_):
             await asyncio.sleep(30)
 
         handoff = _make_handoff()
         start = time.monotonic()
         result = await deliver_handoff_with_retry(
-            handoff=handoff, deliver=slow_deliver, max_retries=0,
+            handoff=handoff,
+            deliver=slow_deliver,
+            max_retries=0,
         )
         elapsed = time.monotonic() - start
 
@@ -71,7 +76,9 @@ class TestDeliveryLatencyBenchmark:
         handoff = _make_handoff()
         start = time.monotonic()
         result = await deliver_handoff_with_retry(
-            handoff=handoff, deliver=fail_then_succeed, max_retries=3,
+            handoff=handoff,
+            deliver=fail_then_succeed,
+            max_retries=3,
         )
         elapsed = time.monotonic() - start
 

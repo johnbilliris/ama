@@ -167,7 +167,8 @@ class EmergencyPlanService:
         total_principles = len(PLANNING_PRINCIPLES)
 
         missing_sections = [
-            slug for slug in PLAN_SECTION_SLUGS
+            slug
+            for slug in PLAN_SECTION_SLUGS
             if slug not in sections or not sections.get(slug, {}).get("is_complete", False)
         ]
         unchecked_principles = [p for p in PLANNING_PRINCIPLES if not principles.get(p, False)]

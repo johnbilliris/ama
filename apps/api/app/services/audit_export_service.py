@@ -84,20 +84,24 @@ class AuditExportService:
             # In production, upload to Azure Blob Storage and get SAS URL
             download_url = f"https://storage.blob.core.windows.net/governance-exports/{job_id}.{job.format}"
 
-            job = job.model_copy(update={
-                "status": "complete",
-                "record_count": len(records),
-                "download_url": download_url,
-                "download_expires_at": datetime.now(UTC) + timedelta(hours=24),
-                "completed_at": datetime.now(UTC),
-            })
+            job = job.model_copy(
+                update={
+                    "status": "complete",
+                    "record_count": len(records),
+                    "download_url": download_url,
+                    "download_expires_at": datetime.now(UTC) + timedelta(hours=24),
+                    "completed_at": datetime.now(UTC),
+                }
+            )
 
         except Exception as e:
-            job = job.model_copy(update={
-                "status": "failed",
-                "error_message": str(e),
-                "completed_at": datetime.now(UTC),
-            })
+            job = job.model_copy(
+                update={
+                    "status": "failed",
+                    "error_message": str(e),
+                    "completed_at": datetime.now(UTC),
+                }
+            )
 
         self._jobs[job_id] = job
 

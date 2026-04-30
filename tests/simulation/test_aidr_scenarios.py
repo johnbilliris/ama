@@ -1,4 +1,5 @@
 """Simulation tests for end-to-end AIDR flows."""
+
 import pytest
 from app.main import create_app
 from app.services.state_store import INCIDENTS, reset_state
@@ -106,9 +107,7 @@ class TestFloodPPRRLifecycle:
     """Scenario: Flood event through full PPRR lifecycle."""
 
     def test_full_pprr_lifecycle(self, client):
-        INCIDENTS["inc-flood-1"] = _make_incident(
-            "inc-flood-1", "flood", pprr_phase="preparedness"
-        )
+        INCIDENTS["inc-flood-1"] = _make_incident("inc-flood-1", "flood", pprr_phase="preparedness")
 
         # Transition: preparedness → response
         resp = client.post(

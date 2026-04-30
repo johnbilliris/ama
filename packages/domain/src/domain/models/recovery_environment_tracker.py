@@ -15,40 +15,59 @@ RecoveryEnvironment = Literal["social", "built", "economic", "natural"]
 IndicatorUpdateSource = Literal["manual", "automated", "imported"]
 DataClassification = Literal["public", "official", "sensitive"]
 RecoveryPrinciple = Literal[
-    "understand_context", "recognise_complexity", "community_led",
-    "coordinate_activities", "communicate_effectively", "build_capacity",
+    "understand_context",
+    "recognise_complexity",
+    "community_led",
+    "coordinate_activities",
+    "communicate_effectively",
+    "build_capacity",
 ]
 
 # AIDR-defined indicators by environment (SC-005, 21 total)
 AIDR_INDICATORS: dict[str, list[str]] = {
     "social": [
-        "wealth", "employment", "amenity", "health",
-        "social_issues", "social_belonging", "recreation_leisure",
+        "wealth",
+        "employment",
+        "amenity",
+        "health",
+        "social_issues",
+        "social_belonging",
+        "recreation_leisure",
     ],
     "built": [
-        "essential_services", "community_infrastructure",
-        "transport_networks", "property_housing",
+        "essential_services",
+        "community_infrastructure",
+        "transport_networks",
+        "property_housing",
         "planning_building_compliance",
     ],
     "economic": [
-        "personal_income", "business_premises", "tourism",
-        "workforce_availability", "productive_land",
+        "personal_income",
+        "business_premises",
+        "tourism",
+        "workforce_availability",
+        "productive_land",
     ],
     "natural": [
-        "air_quality", "water_quality", "land_soil_health", "biodiversity",
+        "air_quality",
+        "water_quality",
+        "land_soil_health",
+        "biodiversity",
     ],
 }
 
-ALL_INDICATOR_NAMES: list[str] = [
-    name for names in AIDR_INDICATORS.values() for name in names
-]
+ALL_INDICATOR_NAMES: list[str] = [name for names in AIDR_INDICATORS.values() for name in names]
 
 # Indicators defaulting to sensitive classification
 SENSITIVE_SOCIAL_INDICATORS: set[str] = {"health", "employment"}
 
 ALL_RECOVERY_PRINCIPLES: list[str] = [
-    "understand_context", "recognise_complexity", "community_led",
-    "coordinate_activities", "communicate_effectively", "build_capacity",
+    "understand_context",
+    "recognise_complexity",
+    "community_led",
+    "coordinate_activities",
+    "communicate_effectively",
+    "build_capacity",
 ]
 
 
@@ -88,6 +107,7 @@ class RecoveryIndicator(BaseModel):
             raise ValueError(msg)
         if self.catalogue_indicator_id is not None:
             import re
+
             _pattern = r"^aidr:(overarching|social|economic|built|natural):[a-z0-9-]+:ind:\d+$"
             if not re.match(_pattern, self.catalogue_indicator_id):
                 raise ValueError(

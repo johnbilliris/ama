@@ -1,10 +1,16 @@
-
 from apps.ingestion.simulation.generators.cyclone_generator import CycloneGenerator
 
 REQUIRED_ENVELOPE_KEYS = {
-    "source", "category", "occurredAt", "receivedAt",
-    "location", "payload", "confidenceScore", "freshnessScore",
-    "validationStatus", "provenance",
+    "source",
+    "category",
+    "occurredAt",
+    "receivedAt",
+    "location",
+    "payload",
+    "confidenceScore",
+    "freshnessScore",
+    "validationStatus",
+    "provenance",
 }
 REQUIRED_SOURCE_KEYS = {"dataSourceId", "name", "kind"}
 REQUIRED_LOCATION_KEYS = {"type", "coordinates", "precisionMeters"}
@@ -20,7 +26,11 @@ class TestCycloneTrack:
     def test_track_positions_move_along_bearing(self) -> None:
         gen = CycloneGenerator()
         track = gen.generate_track(
-            start_lat=-15.0, start_lon=155.0, bearing=225.0, speed_kmh=20.0, duration_hours=24.0,
+            start_lat=-15.0,
+            start_lon=155.0,
+            bearing=225.0,
+            speed_kmh=20.0,
+            duration_hours=24.0,
         )
         first_lat, first_lon, _ = track[0]
         last_lat, last_lon, _ = track[-1]
@@ -52,7 +62,9 @@ class TestCycloneSignalSchema:
     def test_generated_signals_pass_schema_validation(self) -> None:
         gen = CycloneGenerator()
         signal = gen.generate_signal(
-            position=(-18.0, 148.0), category=3, wind_speed=180.0,
+            position=(-18.0, 148.0),
+            category=3,
+            wind_speed=180.0,
         )
 
         for key in REQUIRED_ENVELOPE_KEYS:

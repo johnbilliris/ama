@@ -68,32 +68,38 @@ class TestMEFrameworkRepository:
     @pytest.mark.asyncio
     async def test_list_frameworks_with_incident_filter(self, repo):
         for i in range(3):
-            await repo.create_framework({
-                "framework_id": f"mef-{i}",
-                "id": f"mef-{i}",
-                "document_type": "me_framework",
-                "incident_id": "inc-A" if i < 2 else "inc-B",
-                "status": "configuring",
-            })
+            await repo.create_framework(
+                {
+                    "framework_id": f"mef-{i}",
+                    "id": f"mef-{i}",
+                    "document_type": "me_framework",
+                    "incident_id": "inc-A" if i < 2 else "inc-B",
+                    "status": "configuring",
+                }
+            )
         results = await repo.list_frameworks(incident_id="inc-A")
         assert len(results) == 2
 
     @pytest.mark.asyncio
     async def test_list_frameworks_with_status_filter(self, repo):
-        await repo.create_framework({
-            "framework_id": "mef-s1",
-            "id": "mef-s1",
-            "document_type": "me_framework",
-            "incident_id": "inc-1",
-            "status": "active",
-        })
-        await repo.create_framework({
-            "framework_id": "mef-s2",
-            "id": "mef-s2",
-            "document_type": "me_framework",
-            "incident_id": "inc-1",
-            "status": "configuring",
-        })
+        await repo.create_framework(
+            {
+                "framework_id": "mef-s1",
+                "id": "mef-s1",
+                "document_type": "me_framework",
+                "incident_id": "inc-1",
+                "status": "active",
+            }
+        )
+        await repo.create_framework(
+            {
+                "framework_id": "mef-s2",
+                "id": "mef-s2",
+                "document_type": "me_framework",
+                "incident_id": "inc-1",
+                "status": "configuring",
+            }
+        )
         active = await repo.list_frameworks(status="active")
         assert len(active) == 1
         assert active[0]["framework_id"] == "mef-s1"
@@ -144,32 +150,38 @@ class TestMEFrameworkRepository:
     @pytest.mark.asyncio
     async def test_list_evaluation_reports(self, repo):
         for i in range(3):
-            await repo.create_evaluation_report({
-                "report_id": f"er-{i}",
-                "id": f"er-{i}",
-                "document_type": "evaluation_report",
-                "framework_id": "mef-1",
-                "incident_id": "inc-1",
-            })
+            await repo.create_evaluation_report(
+                {
+                    "report_id": f"er-{i}",
+                    "id": f"er-{i}",
+                    "document_type": "evaluation_report",
+                    "framework_id": "mef-1",
+                    "incident_id": "inc-1",
+                }
+            )
         reports = await repo.list_evaluation_reports("mef-1", "inc-1")
         assert len(reports) == 3
 
     @pytest.mark.asyncio
     async def test_list_evaluation_reports_filters_by_framework(self, repo):
-        await repo.create_evaluation_report({
-            "report_id": "er-a",
-            "id": "er-a",
-            "document_type": "evaluation_report",
-            "framework_id": "mef-1",
-            "incident_id": "inc-1",
-        })
-        await repo.create_evaluation_report({
-            "report_id": "er-b",
-            "id": "er-b",
-            "document_type": "evaluation_report",
-            "framework_id": "mef-2",
-            "incident_id": "inc-1",
-        })
+        await repo.create_evaluation_report(
+            {
+                "report_id": "er-a",
+                "id": "er-a",
+                "document_type": "evaluation_report",
+                "framework_id": "mef-1",
+                "incident_id": "inc-1",
+            }
+        )
+        await repo.create_evaluation_report(
+            {
+                "report_id": "er-b",
+                "id": "er-b",
+                "document_type": "evaluation_report",
+                "framework_id": "mef-2",
+                "incident_id": "inc-1",
+            }
+        )
         reports = await repo.list_evaluation_reports("mef-1", "inc-1")
         assert len(reports) == 1
         assert reports[0]["report_id"] == "er-a"
@@ -243,7 +255,9 @@ class TestMEFrameworkPlatformService:
         fw = await svc.create_framework(incident_id="inc-1", program_name="Test")
         fid = fw["framework_id"]
         logic = await svc.create_program_logic(
-            fid, "inc-1", {"model_type": "ex_ante", "activities": [{"name": "Build"}]},
+            fid,
+            "inc-1",
+            {"model_type": "ex_ante", "activities": [{"name": "Build"}]},
         )
         assert logic["model_id"].startswith("plm-")
         assert logic["framework_id"] == fid
@@ -290,7 +304,8 @@ class TestMEFrameworkPlatformService:
         fw = await svc.create_framework(incident_id="inc-1", program_name="Test")
         fid = fw["framework_id"]
         report = await svc.create_evaluation_report(
-            fid, "inc-1",
+            fid,
+            "inc-1",
             period_start="2026-01-01",
             period_end="2026-06-30",
             generated_by="manual",
@@ -310,7 +325,8 @@ class TestMEFrameworkPlatformService:
         fw = await svc.create_framework(incident_id="inc-1", program_name="Test")
         fid = fw["framework_id"]
         report = await svc.create_evaluation_report(
-            fid, "inc-1",
+            fid,
+            "inc-1",
             period_start="2026-01-01",
             period_end="2026-06-30",
         )
@@ -335,7 +351,9 @@ class TestMEFrameworkPlatformService:
 
         # Create logic
         logic = await svc.create_program_logic(
-            fid, "inc-lifecycle", {"model_type": "ex_ante"},
+            fid,
+            "inc-lifecycle",
+            {"model_type": "ex_ante"},
         )
 
         # Set standards
@@ -343,7 +361,9 @@ class TestMEFrameworkPlatformService:
 
         # Set schedule → activates
         updated = await svc.set_collection_schedule(
-            fid, "inc-lifecycle", [{"indicator_id": "i1", "frequency": "monthly"}],
+            fid,
+            "inc-lifecycle",
+            [{"indicator_id": "i1", "frequency": "monthly"}],
         )
         assert updated["status"] == "active"
 
@@ -353,7 +373,8 @@ class TestMEFrameworkPlatformService:
 
         # Evaluation
         eval_report = await svc.create_evaluation_report(
-            fid, "inc-lifecycle",
+            fid,
+            "inc-lifecycle",
             period_start="2026-01-01",
             period_end="2026-12-31",
         )

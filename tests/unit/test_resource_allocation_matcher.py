@@ -33,8 +33,16 @@ def _make_resource(resource_id, lat=-33.87, lon=151.21, capabilities=None, statu
     )
 
 
-def _make_demand(demand_id, quantity=1, urgency=UrgencyLevel.critical, lat=-33.87, lon=151.21,
-                 capabilities=None, sub_type="ambulance", incident_id="inc001"):
+def _make_demand(
+    demand_id,
+    quantity=1,
+    urgency=UrgencyLevel.critical,
+    lat=-33.87,
+    lon=151.21,
+    capabilities=None,
+    sub_type="ambulance",
+    incident_id="inc001",
+):
     return ResourceDemand(
         demand_id=demand_id,
         incident_id=incident_id,

@@ -114,10 +114,13 @@ class EvacuationProcessingPipeline:
         Returns the generated ``EvacuationPlan``, or ``None`` if the handoff
         was rejected (validation failure or duplicate).
         """
-        with tel.start_span("evacuation.process_handoff", attributes={
-            "handoff_id": handoff.handoff_id,
-            "incident_id": handoff.incident_id,
-        }):
+        with tel.start_span(
+            "evacuation.process_handoff",
+            attributes={
+                "handoff_id": handoff.handoff_id,
+                "incident_id": handoff.incident_id,
+            },
+        ):
             pipeline_start = time.monotonic()
             tenant_id = handoff.tenant_id or "live"
             incident_id = handoff.incident_id
@@ -143,13 +146,20 @@ class EvacuationProcessingPipeline:
             # Stage 2 — Assessment retrieval
             with tel.start_span("evacuation.retrieve_assessment"):
                 assessment_data = self._stage_2_retrieve_assessment(
-                    handoff, incident_scope_key, tenant_id, assumptions,
+                    handoff,
+                    incident_scope_key,
+                    tenant_id,
+                    assumptions,
                 )
 
             # Stage 3 — Zone computation
             with tel.start_span("evacuation.compute_zones") as s3:
                 zones = self._stage_3_compute_zones(
-                    handoff, assessment_data, incident_scope_key, tenant_id, assumptions,
+                    handoff,
+                    assessment_data,
+                    incident_scope_key,
+                    tenant_id,
+                    assumptions,
                 )
                 if hasattr(s3, "set_attribute"):
                     s3.set_attribute("zone.count", len(zones))
@@ -159,14 +169,23 @@ class EvacuationProcessingPipeline:
             # Stage 4 — Road network preparation
             with tel.start_span("evacuation.prepare_road_network"):
                 self._stage_4_road_network_preparation(
-                    handoff, zones, incident_scope_key, tenant_id, assumptions,
+                    handoff,
+                    zones,
+                    incident_scope_key,
+                    tenant_id,
+                    assumptions,
                 )
 
             # Stage 5 — Route computation
             with tel.start_span("evacuation.compute_routes") as s5:
                 route_start = time.monotonic()
                 routes = self._stage_5_compute_routes(
-                    handoff, zones, assessment_data, incident_scope_key, tenant_id, assumptions,
+                    handoff,
+                    zones,
+                    assessment_data,
+                    incident_scope_key,
+                    tenant_id,
+                    assumptions,
                 )
                 route_ms = (time.monotonic() - route_start) * 1000
                 tel.route_computation_time.record(route_ms)
@@ -187,7 +206,11 @@ class EvacuationProcessingPipeline:
             # Stage 6 — Transport coordination
             with tel.start_span("evacuation.coordinate_transport"):
                 transport_reqs = self._stage_6_transport_coordination(
-                    handoff, zones, incident_scope_key, tenant_id, assumptions,
+                    handoff,
+                    zones,
+                    incident_scope_key,
+                    tenant_id,
+                    assumptions,
                 )
                 tel.transport_requests_generated.add(len(transport_reqs))
                 for tr in transport_reqs:
@@ -199,8 +222,13 @@ class EvacuationProcessingPipeline:
             # Stage 7 — Timeline estimation
             with tel.start_span("evacuation.estimate_timeline"):
                 phases, shelter_zones, timeline_assumptions = self._stage_7_timeline_estimation(
-                    handoff, zones, routes, transport_reqs, assessment_data,
-                    incident_scope_key, tenant_id,
+                    handoff,
+                    zones,
+                    routes,
+                    transport_reqs,
+                    assessment_data,
+                    incident_scope_key,
+                    tenant_id,
                 )
                 assumptions.extend(timeline_assumptions)
 
@@ -236,8 +264,15 @@ class EvacuationProcessingPipeline:
             # Stage 8 — Plan summary generation
             with tel.start_span("evacuation.generate_summary"):
                 summary, generation_method, confidence_score = self._stage_8_plan_summary(
-                    handoff, zones, routes, transport_reqs, phases, assessment_data,
-                    incident_scope_key, tenant_id, assumptions,
+                    handoff,
+                    zones,
+                    routes,
+                    transport_reqs,
+                    phases,
+                    assessment_data,
+                    incident_scope_key,
+                    tenant_id,
+                    assumptions,
                 )
                 if generation_method in ("template_fallback", "safety_fallback"):
                     tel.fallback_mode_activations.add(1)
@@ -249,9 +284,19 @@ class EvacuationProcessingPipeline:
                 pass  # version assignment happens inside _stage_9
             with tel.start_span("evacuation.persist_plan"):
                 plan = self._stage_9_versioning_persistence(
-                    handoff, zones, routes, transport_reqs, phases, shelter_zones,
-                    summary, generation_method, confidence_score, assessment_data,
-                    incident_scope_key, tenant_id, assumptions,
+                    handoff,
+                    zones,
+                    routes,
+                    transport_reqs,
+                    phases,
+                    shelter_zones,
+                    summary,
+                    generation_method,
+                    confidence_score,
+                    assessment_data,
+                    incident_scope_key,
+                    tenant_id,
+                    assumptions,
                 )
 
             # Record zone population gauges
@@ -284,7 +329,11 @@ class EvacuationProcessingPipeline:
             # Stage 10 — Audit finalisation
             with tel.start_span("evacuation.write_audit"):
                 self._stage_10_audit_finalisation(
-                    handoff, plan, incident_scope_key, tenant_id, pipeline_start,
+                    handoff,
+                    plan,
+                    incident_scope_key,
+                    tenant_id,
+                    pipeline_start,
                 )
 
             # Update audit gauges
@@ -384,10 +433,7 @@ class EvacuationProcessingPipeline:
             handoff_id=handoff.handoff_id,
             incident_id=handoff.incident_id,
             decision_type=DecisionType.handoff_received,
-            rationale=(
-                f"Handoff accepted from {handoff.source_agent}. "
-                f"Confidence={handoff.confidence:.2f}"
-            ),
+            rationale=(f"Handoff accepted from {handoff.source_agent}. Confidence={handoff.confidence:.2f}"),
             duration_ms=duration_ms,
             incident_scope_key=incident_scope_key,
             tenant_id=tenant_id,
@@ -421,17 +467,15 @@ class EvacuationProcessingPipeline:
                 logger.info("Assessment retrieved: %s", assessment_id)
             except Exception as exc:
                 logger.warning(
-                    "Failed to retrieve assessment %s: %s", assessment_id, exc,
+                    "Failed to retrieve assessment %s: %s",
+                    assessment_id,
+                    exc,
                 )
                 assumptions.append(
-                    f"Assessment {assessment_id} could not be retrieved; "
-                    "using handoff payload data only."
+                    f"Assessment {assessment_id} could not be retrieved; using handoff payload data only."
                 )
         elif not assessment_id:
-            assumptions.append(
-                "No assessmentId in handoff payload; "
-                "plan generated from handoff metadata only."
-            )
+            assumptions.append("No assessmentId in handoff payload; plan generated from handoff metadata only.")
 
         # Fallback: extract what we can from the handoff payload
         if not assessment_data:
@@ -481,14 +525,9 @@ class EvacuationProcessingPipeline:
                 )
             except Exception as exc:
                 logger.warning("Zone computation failed: %s", exc)
-                assumptions.append(
-                    f"Zone computation from GeoJSON failed ({exc}); "
-                    "using default single zone."
-                )
+                assumptions.append(f"Zone computation from GeoJSON failed ({exc}); using default single zone.")
         else:
-            assumptions.append(
-                "No hazard GeoJSON available; zones estimated from metadata."
-            )
+            assumptions.append("No hazard GeoJSON available; zones estimated from metadata.")
 
         # Fallback: create a single zone if computation produced nothing
         if not zones:
@@ -511,10 +550,7 @@ class EvacuationProcessingPipeline:
             handoff_id=handoff.handoff_id,
             incident_id=handoff.incident_id,
             decision_type=DecisionType.zones_computed,
-            rationale=(
-                f"Computed {len(zones)} zone(s) with total population {total_pop}. "
-                f"Zone IDs: {zone_ids}"
-            ),
+            rationale=(f"Computed {len(zones)} zone(s) with total population {total_pop}. Zone IDs: {zone_ids}"),
             duration_ms=duration_ms,
             incident_scope_key=incident_scope_key,
             tenant_id=tenant_id,
@@ -544,10 +580,7 @@ class EvacuationProcessingPipeline:
                 self._road_network.load(self._config.road_network_file_path)
             except Exception as exc:
                 logger.warning("Road network load failed: %s", exc)
-                assumptions.append(
-                    f"Road network could not be loaded ({exc}); "
-                    "routing will use fallback estimates."
-                )
+                assumptions.append(f"Road network could not be loaded ({exc}); routing will use fallback estimates.")
 
         # Apply zone-based capacity reduction
         if self._road_network.is_loaded and zones:
@@ -562,7 +595,8 @@ class EvacuationProcessingPipeline:
                     edges_as_dicts.append(edge_dict)
 
                 self._zone_computer.apply_zone_capacity_reduction(
-                    edges_as_dicts, zone_polygons,
+                    edges_as_dicts,
+                    zone_polygons,
                 )
 
                 # Apply closures back to the road network
@@ -574,10 +608,7 @@ class EvacuationProcessingPipeline:
                         )
             except Exception as exc:
                 logger.warning("Zone capacity reduction failed: %s", exc)
-                assumptions.append(
-                    f"Zone-based capacity reduction failed ({exc}); "
-                    "using original road capacities."
-                )
+                assumptions.append(f"Zone-based capacity reduction failed ({exc}); using original road capacities.")
 
         node_count = self._road_network.node_count if self._road_network.is_loaded else 0
         edge_count = self._road_network.edge_count if self._road_network.is_loaded else 0
@@ -616,9 +647,7 @@ class EvacuationProcessingPipeline:
         hazard_type = assessment_data.get("hazard_type", "bushfire")
 
         if not self._road_network.is_loaded:
-            assumptions.append(
-                "Road network not available; route computation skipped."
-            )
+            assumptions.append("Road network not available; route computation skipped.")
             duration_ms = (time.monotonic() - t0) * 1000
             self._write_audit(
                 handoff_id=handoff.handoff_id,
@@ -647,10 +676,7 @@ class EvacuationProcessingPipeline:
                 all_nodes = self._road_network.get_all_nodes()
                 if all_nodes:
                     origin_nodes = [all_nodes[0].id]
-                    assumptions.append(
-                        f"No nodes mapped to Zone {zone.zone_number}; "
-                        "using fallback origin node."
-                    )
+                    assumptions.append(f"No nodes mapped to Zone {zone.zone_number}; using fallback origin node.")
 
             evacuation_routes = route_computer.compute_routes(
                 origin_nodes=origin_nodes,
@@ -670,10 +696,7 @@ class EvacuationProcessingPipeline:
             handoff_id=handoff.handoff_id,
             incident_id=handoff.incident_id,
             decision_type=DecisionType.routes_computed,
-            rationale=(
-                f"Computed {len(all_routes)} route(s) across {len(zones)} zone(s). "
-                f"Hazard type: {hazard_type}"
-            ),
+            rationale=(f"Computed {len(all_routes)} route(s) across {len(zones)} zone(s). Hazard type: {hazard_type}"),
             duration_ms=duration_ms,
             incident_scope_key=incident_scope_key,
             tenant_id=tenant_id,
@@ -697,14 +720,18 @@ class EvacuationProcessingPipeline:
         t0 = time.monotonic()
 
         zone_dicts = [z.model_dump() for z in zones]
-        assembly_area_dicts = [
-            {
-                "assembly_area_id": aa.assembly_area_id,
-                "name": aa.name,
-                "coordinates": aa.coordinates,
-            }
-            for aa in self._road_network.get_assembly_areas()
-        ] if self._road_network.is_loaded else []
+        assembly_area_dicts = (
+            [
+                {
+                    "assembly_area_id": aa.assembly_area_id,
+                    "name": aa.name,
+                    "coordinates": aa.coordinates,
+                }
+                for aa in self._road_network.get_assembly_areas()
+            ]
+            if self._road_network.is_loaded
+            else []
+        )
 
         transport_reqs_models = self._transport_coordinator.compute_transport_requirements(
             zones=zone_dicts,
@@ -715,9 +742,7 @@ class EvacuationProcessingPipeline:
         transport_reqs = [t.model_dump() for t in transport_reqs_models]
 
         if not transport_reqs and self._facility_data:
-            assumptions.append(
-                "No transport requirements matched facility/zone intersection."
-            )
+            assumptions.append("No transport requirements matched facility/zone intersection.")
 
         duration_ms = (time.monotonic() - t0) * 1000
         self._write_audit(
@@ -725,15 +750,12 @@ class EvacuationProcessingPipeline:
             incident_id=handoff.incident_id,
             decision_type=DecisionType.transport_coordinated,
             rationale=(
-                f"Identified {len(transport_reqs)} transport requirement(s) "
-                f"from {len(self._facility_data)} facilities."
+                f"Identified {len(transport_reqs)} transport requirement(s) from {len(self._facility_data)} facilities."
             ),
             duration_ms=duration_ms,
             incident_scope_key=incident_scope_key,
             tenant_id=tenant_id,
-            population_affected=sum(
-                z.vulnerable_population for z in zones
-            ),
+            population_affected=sum(z.vulnerable_population for z in zones),
         )
         return transport_reqs
 
@@ -774,9 +796,7 @@ class EvacuationProcessingPipeline:
             hazard_time_horizon_hours=time_horizon_hours,
         )
 
-        shelter_zone_ids = [
-            str(s.zone_number) for s in shelter_recs if s.recommended
-        ]
+        shelter_zone_ids = [str(s.zone_number) for s in shelter_recs if s.recommended]
 
         # Write shelter-in-place records
         for sip in shelter_recs:
@@ -865,9 +885,7 @@ class EvacuationProcessingPipeline:
         # Try LLM generation
         if self._llm_generate_fn is not None:
             try:
-                zone_desc = ", ".join(
-                    f"Zone {z.zone_number} (pop {z.population_estimate})" for z in zones
-                )
+                zone_desc = ", ".join(f"Zone {z.zone_number} (pop {z.population_estimate})" for z in zones)
                 response = self._llm_generate_fn(
                     purpose="reasoning",
                     prompt=(
@@ -894,10 +912,7 @@ class EvacuationProcessingPipeline:
                         handoff_id=handoff.handoff_id,
                         incident_id=handoff.incident_id,
                         decision_type=DecisionType.content_safety_failure,
-                        rationale=(
-                            f"Content safety check result: {content_safety_result}. "
-                            "Fell back to template."
-                        ),
+                        rationale=(f"Content safety check result: {content_safety_result}. Fell back to template."),
                         duration_ms=0,
                         incident_scope_key=incident_scope_key,
                         tenant_id=tenant_id,
@@ -916,10 +931,7 @@ class EvacuationProcessingPipeline:
             handoff_id=handoff.handoff_id,
             incident_id=handoff.incident_id,
             decision_type=DecisionType.plan_generated,
-            rationale=(
-                f"Summary generated via {generation_method}. "
-                f"Confidence: {confidence_score:.2f}"
-            ),
+            rationale=(f"Summary generated via {generation_method}. Confidence: {confidence_score:.2f}"),
             duration_ms=duration_ms,
             incident_scope_key=incident_scope_key,
             tenant_id=tenant_id,
@@ -955,10 +967,12 @@ class EvacuationProcessingPipeline:
         hazard_type = assessment_data.get("hazard_type", "bushfire")
 
         # Assign version via OCC
-        version = run_async(self._version_counter.assign_version(
-            incident_id=incident_id,
-            incident_scope_key=incident_scope_key,
-        ))
+        version = run_async(
+            self._version_counter.assign_version(
+                incident_id=incident_id,
+                incident_scope_key=incident_scope_key,
+            )
+        )
         plan_id = self._version_counter.format_plan_id(incident_id, version)
 
         # Build assembly areas from road network
@@ -990,10 +1004,7 @@ class EvacuationProcessingPipeline:
         # Build evacuation phases
         from evacuation.models import EvacuationPhase
 
-        phase_models = [
-            p if isinstance(p, EvacuationPhase) else EvacuationPhase.model_validate(p)
-            for p in phases
-        ]
+        phase_models = [p if isinstance(p, EvacuationPhase) else EvacuationPhase.model_validate(p) for p in phases]
 
         # Mobilisation time
         mobilisation_min = self._config.mobilisation_time_for(hazard_type)
@@ -1010,11 +1021,7 @@ class EvacuationProcessingPipeline:
             source_handoff_id=handoff.handoff_id,
             risk_assessment_id=str(assessment_id) if assessment_id else None,
             input_data_versions={
-                "road_network": (
-                    self._road_network.get_version()
-                    if self._road_network.is_loaded
-                    else "n/a"
-                ),
+                "road_network": (self._road_network.get_version() if self._road_network.is_loaded else "n/a"),
                 "config": self._config.compute_config_hash()[:16],
             },
             model_id=None,
@@ -1024,11 +1031,7 @@ class EvacuationProcessingPipeline:
 
         # Build data snapshot
         data_snapshot = DataSnapshot(
-            road_network_version=(
-                self._road_network.get_version()
-                if self._road_network.is_loaded
-                else ""
-            ),
+            road_network_version=(self._road_network.get_version() if self._road_network.is_loaded else ""),
             population_data_version=f"{len(self._population_data)} records",
             hazard_data_timestamp=datetime.now(UTC),
         )
@@ -1232,9 +1235,7 @@ class EvacuationProcessingPipeline:
             assessment["affected_area"] = affected_area
 
         if not any(v for v in [affected_area]):
-            assumptions.append(
-                "No hazard GeoJSON in payload; zone computation will use defaults."
-            )
+            assumptions.append("No hazard GeoJSON in payload; zone computation will use defaults.")
 
         return assessment
 

@@ -1,0 +1,56 @@
+name: prompts-publish
+
+# Spec-032 FR-AI09 + T606 — sign every prompt artefact with cosign keyless
+# (Sigstore Fulcio identity = GitHub Actions OIDC token).
+# cd.yml verifies before deploy (T607).
+
+on:
+  push:
+    branches: [main, production]
+    paths:
+      - "packages/prompts/**/*.yaml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # cosign keyless requires OIDC token
+  contents: write   # to commit signatures back
+
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3.x
+        with:
+          cosign-release: v2.4.1
+
+      - name: Sign prompt artefacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed=$(git diff --name-only HEAD~1 HEAD -- 'packages/prompts/*.yaml' 'packages/prompts/**/*.yaml' || true)
+          if [ -z "$changed" ]; then
+            echo "No prompt YAML changes to sign."
+            exit 0
+          fi
+          for f in $changed; do
+            if [ -f "$f" ]; then
+              echo "Signing $f"
+              cosign sign-blob --yes \
+                --output-signature "${f}.sig" \
+                --output-certificate "${f}.crt" \
+                "$f"
+            fi
+          done
+
+      - name: Commit signatures
+        if: github.event_name == 'push'
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5.x
+        with:
+          commit_message: "chore(prompts): cosign signatures (FR-AI09)"
+          file_pattern: "packages/prompts/**/*.{sig,crt}"

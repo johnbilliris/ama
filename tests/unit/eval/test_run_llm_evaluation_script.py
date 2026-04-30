@@ -320,11 +320,7 @@ def test_provision_builds_api_image_into_acr(monkeypatch):
     script.stage_provision(ctx)
 
     api_build = next(
-        (
-            c
-            for c in commands
-            if c[:4] == ["az", "acr", "build", "--registry"] and "ama-api:dev" in c
-        ),
+        (c for c in commands if c[:4] == ["az", "acr", "build", "--registry"] and "ama-api:dev" in c),
         None,
     )
     assert api_build is not None
@@ -352,7 +348,8 @@ def test_resolve_api_base_url_respects_cli_override(monkeypatch):
     script = _load_script()
     env = script.ENVIRONMENTS["dev"]
     ctx = script.RunContext(
-        env=env, args=SimpleNamespace(dry_run=False, api_base_url="https://api.custom.local"),
+        env=env,
+        args=SimpleNamespace(dry_run=False, api_base_url="https://api.custom.local"),
     )
 
     def fail_call(*_a, **_kw):
@@ -439,8 +436,12 @@ def test_stage_deprovision_uses_eval_resource_group(monkeypatch):
     assert all(not tok.startswith("rg-ama-foundry-") for tok in flat), flat
     assert all(not tok.startswith("ai-foundry-ama-") for tok in flat), flat
     # All RG-bearing args target the eval RG
-    rg_args = [tok for cmd in az_calls + run_calls for i, tok in enumerate(cmd)
-               if i and (cmd[i - 1] in {"-g", "--resource-group", "--name"} and tok.startswith("rg-"))]
+    rg_args = [
+        tok
+        for cmd in az_calls + run_calls
+        for i, tok in enumerate(cmd)
+        if i and (cmd[i - 1] in {"-g", "--resource-group", "--name"} and tok.startswith("rg-"))
+    ]
     assert all(rg == "rg-ama-eval-dev" for rg in rg_args), rg_args
 
 

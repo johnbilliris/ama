@@ -49,9 +49,7 @@ class PipelineWorker:
                 logger.warning("No pipeline factory — skipping %s", config.pipeline_id)
                 continue
             self._pipelines[config.pipeline_id] = pipeline
-            self._tasks[config.pipeline_id] = asyncio.create_task(
-                pipeline.run(), name=f"pipeline-{config.pipeline_id}"
-            )
+            self._tasks[config.pipeline_id] = asyncio.create_task(pipeline.run(), name=f"pipeline-{config.pipeline_id}")
             logger.info("Started pipeline %s (interval=%ds)", config.pipeline_id, config.poll_interval_seconds)
 
         loop = asyncio.get_event_loop()
@@ -93,11 +91,13 @@ class PipelineWorker:
     def get_status(self) -> dict[str, Any]:
         statuses = []
         for pid, pipeline in self._pipelines.items():
-            statuses.append({
-                "pipelineId": pid,
-                "circuitBreakerState": pipeline.circuit_breaker.state,
-                "metrics": pipeline._metrics.to_dict() if hasattr(pipeline, "_metrics") else {},
-            })
+            statuses.append(
+                {
+                    "pipelineId": pid,
+                    "circuitBreakerState": pipeline.circuit_breaker.state,
+                    "metrics": pipeline._metrics.to_dict() if hasattr(pipeline, "_metrics") else {},
+                }
+            )
         return {
             "running": self._running,
             "pipelineCount": len(self._pipelines),
@@ -164,6 +164,7 @@ if __name__ == "__main__":
     if _storage_account:
         try:
             from apps.ingestion.blob_store import RawPayloadBlobStore
+
             _blob_store = RawPayloadBlobStore(_storage_account)
             logger.info("Blob store initialised for account %s", _storage_account)
         except Exception:

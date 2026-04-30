@@ -143,9 +143,12 @@ class EvacuationAgent(LLMCallMixin):
         """
         import time as _time
 
-        with tel.start_span("evacuation.replan", attributes={
-            "incident_id": incident_id,
-        }):
+        with tel.start_span(
+            "evacuation.replan",
+            attributes={
+                "incident_id": incident_id,
+            },
+        ):
             replan_start = _time.monotonic()
 
             # Evaluate triggers
@@ -262,9 +265,7 @@ class EvacuationAgent(LLMCallMixin):
             "scenarioType": scenario_type,
             "jurisdictions": jurisdictions,
             "routePressure": route_pressure,
-            "recommendation": (
-                "Validate assembly areas and transport corridors before public release."
-            ),
+            "recommendation": ("Validate assembly areas and transport corridors before public release."),
         }
 
 
@@ -514,10 +515,7 @@ def create_app(
         if request.action not in _VALID_ACTIONS:
             raise HTTPException(
                 status_code=422,
-                detail=(
-                    f"Invalid action '{request.action}'. "
-                    f"Must be one of: {sorted(_VALID_ACTIONS)}"
-                ),
+                detail=(f"Invalid action '{request.action}'. Must be one of: {sorted(_VALID_ACTIONS)}"),
             )
 
         target_status = _ACTION_STATUS_MAP[request.action]
@@ -588,8 +586,7 @@ def create_app(
             plan_id=request.plan_id,
             decision_type=DecisionType.override_applied,
             decision_rationale=(
-                f"Override by {request.user_id} ({request.role}): "
-                f"{request.action} — {request.justification}"
+                f"Override by {request.user_id} ({request.role}): {request.action} — {request.justification}"
             ),
             generation_method="human_override",
             agent_version=_config.agent_version,

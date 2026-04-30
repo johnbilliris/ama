@@ -41,13 +41,10 @@ def _error_response(
 
 def add_error_handler_middleware(app: FastAPI) -> None:
     @app.exception_handler(RequestValidationError)
-    async def handle_validation_error(
-        request: Request, error: RequestValidationError
-    ) -> JSONResponse:
+    async def handle_validation_error(request: Request, error: RequestValidationError) -> JSONResponse:
         correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
         details = [
-            {"field": ".".join(str(item) for item in issue["loc"]), "reason": issue["msg"]}
-            for issue in error.errors()
+            {"field": ".".join(str(item) for item in issue["loc"]), "reason": issue["msg"]} for issue in error.errors()
         ]
         return _error_response(
             status_code=422,

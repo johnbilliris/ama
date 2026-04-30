@@ -95,7 +95,9 @@ class AssessmentProcessingPipeline:
     # ------------------------------------------------------------------
 
     def _validate_handoff(
-        self, handoff: AgentHandoffEvent, tenant_id: str,
+        self,
+        handoff: AgentHandoffEvent,
+        tenant_id: str,
     ) -> bool:
         """Stage 1: Validate incoming handoff."""
         scope_key = _build_scope_key(tenant_id, handoff.incident_id)
@@ -104,58 +106,60 @@ class AssessmentProcessingPipeline:
         if handoff.target_agent != "risk_assessment":
             self._rejection_count += 1
             metrics.inc_handoff_rejected()
-            self._write_audit(RiskAssessmentDecisionRecord(
-                handoff_id=handoff.handoff_id,
-                decision_type=DecisionType.handoff_rejected,
-                confidence_raw=handoff.confidence,
-                confidence_adjusted=handoff.confidence,
-                decision_rationale=(
-                    f"Handoff rejected: target_agent={handoff.target_agent}, "
-                    f"expected risk_assessment"
-                ),
-                generation_method="n/a",
-                agent_version=self._config.agent_version,
-                configuration_version=self._config.compute_config_hash(),
-                incident_scope_key=scope_key,
-                tenant_id=tenant_id,
-            ))
+            self._write_audit(
+                RiskAssessmentDecisionRecord(
+                    handoff_id=handoff.handoff_id,
+                    decision_type=DecisionType.handoff_rejected,
+                    confidence_raw=handoff.confidence,
+                    confidence_adjusted=handoff.confidence,
+                    decision_rationale=(
+                        f"Handoff rejected: target_agent={handoff.target_agent}, expected risk_assessment"
+                    ),
+                    generation_method="n/a",
+                    agent_version=self._config.agent_version,
+                    configuration_version=self._config.compute_config_hash(),
+                    incident_scope_key=scope_key,
+                    tenant_id=tenant_id,
+                )
+            )
             return False
 
         # Check idempotency
         if self._deduplicator.is_duplicate(handoff.handoff_id):
             self._dedup_discard_count += 1
             metrics.inc_duplicate_discard()
-            self._write_audit(RiskAssessmentDecisionRecord(
+            self._write_audit(
+                RiskAssessmentDecisionRecord(
+                    handoff_id=handoff.handoff_id,
+                    decision_type=DecisionType.duplicate_discarded,
+                    confidence_raw=handoff.confidence,
+                    confidence_adjusted=handoff.confidence,
+                    decision_rationale=f"Duplicate handoff discarded: {handoff.handoff_id}",
+                    generation_method="n/a",
+                    agent_version=self._config.agent_version,
+                    configuration_version=self._config.compute_config_hash(),
+                    incident_scope_key=scope_key,
+                    tenant_id=tenant_id,
+                )
+            )
+            return False
+
+        # Record handoff received
+        self._handoff_count += 1
+        self._write_audit(
+            RiskAssessmentDecisionRecord(
                 handoff_id=handoff.handoff_id,
-                decision_type=DecisionType.duplicate_discarded,
+                decision_type=DecisionType.handoff_received,
                 confidence_raw=handoff.confidence,
                 confidence_adjusted=handoff.confidence,
-                decision_rationale=f"Duplicate handoff discarded: {handoff.handoff_id}",
+                decision_rationale=(f"Handoff received from {handoff.source_agent} for incident {handoff.incident_id}"),
                 generation_method="n/a",
                 agent_version=self._config.agent_version,
                 configuration_version=self._config.compute_config_hash(),
                 incident_scope_key=scope_key,
                 tenant_id=tenant_id,
-            ))
-            return False
-
-        # Record handoff received
-        self._handoff_count += 1
-        self._write_audit(RiskAssessmentDecisionRecord(
-            handoff_id=handoff.handoff_id,
-            decision_type=DecisionType.handoff_received,
-            confidence_raw=handoff.confidence,
-            confidence_adjusted=handoff.confidence,
-            decision_rationale=(
-                f"Handoff received from {handoff.source_agent} for incident "
-                f"{handoff.incident_id}"
-            ),
-            generation_method="n/a",
-            agent_version=self._config.agent_version,
-            configuration_version=self._config.compute_config_hash(),
-            incident_scope_key=scope_key,
-            tenant_id=tenant_id,
-        ))
+            )
+        )
         return True
 
     # ------------------------------------------------------------------
@@ -163,7 +167,9 @@ class AssessmentProcessingPipeline:
     # ------------------------------------------------------------------
 
     def _retrieve_signals(
-        self, handoff: AgentHandoffEvent, tenant_id: str,
+        self,
+        handoff: AgentHandoffEvent,
+        tenant_id: str,
     ) -> list[dict]:
         """Stage 2: Retrieve signals from signal store.
 
@@ -198,50 +204,53 @@ class AssessmentProcessingPipeline:
         elif signal_ids:
             # No signal store — build synthetic signal entries from handoff payload
             for sid in signal_ids:
-                signals.append({
-                    "signal_id": sid,
+                signals.append(
+                    {
+                        "signal_id": sid,
+                        "confidence_score": handoff.confidence,
+                        "freshness_score": 1.0,
+                        "source_kind": source_kind,
+                        "category": category,
+                        "risk_direction": "increasing",
+                        "hazard_parameter": "general",
+                        "payload": {},
+                        "provenance": {},
+                    }
+                )
+        else:
+            # No signal IDs provided — use handoff payload as a synthetic signal
+            signals.append(
+                {
+                    "signal_id": f"synth-{handoff.handoff_id}",
                     "confidence_score": handoff.confidence,
                     "freshness_score": 1.0,
                     "source_kind": source_kind,
                     "category": category,
                     "risk_direction": "increasing",
                     "hazard_parameter": "general",
-                    "payload": {},
+                    "payload": payload,
                     "provenance": {},
-                })
-        else:
-            # No signal IDs provided — use handoff payload as a synthetic signal
-            signals.append({
-                "signal_id": f"synth-{handoff.handoff_id}",
-                "confidence_score": handoff.confidence,
-                "freshness_score": 1.0,
-                "source_kind": source_kind,
-                "category": category,
-                "risk_direction": "increasing",
-                "hazard_parameter": "general",
-                "payload": payload,
-                "provenance": {},
-            })
+                }
+            )
 
         signal_ids_retrieved = [s["signal_id"] for s in signals]
         total = len(signal_ids) if signal_ids else len(signals)
 
-        self._write_audit(RiskAssessmentDecisionRecord(
-            handoff_id=handoff.handoff_id,
-            input_signal_ids=signal_ids_retrieved,
-            decision_type=DecisionType.signals_retrieved,
-            confidence_raw=handoff.confidence,
-            confidence_adjusted=handoff.confidence,
-            decision_rationale=(
-                f"Retrieved {len(signals)}/{total} signals "
-                f"(missing: {missing_count})"
-            ),
-            generation_method="n/a",
-            agent_version=self._config.agent_version,
-            configuration_version=self._config.compute_config_hash(),
-            incident_scope_key=scope_key,
-            tenant_id=tenant_id,
-        ))
+        self._write_audit(
+            RiskAssessmentDecisionRecord(
+                handoff_id=handoff.handoff_id,
+                input_signal_ids=signal_ids_retrieved,
+                decision_type=DecisionType.signals_retrieved,
+                confidence_raw=handoff.confidence,
+                confidence_adjusted=handoff.confidence,
+                decision_rationale=(f"Retrieved {len(signals)}/{total} signals (missing: {missing_count})"),
+                generation_method="n/a",
+                agent_version=self._config.agent_version,
+                configuration_version=self._config.compute_config_hash(),
+                incident_scope_key=scope_key,
+                tenant_id=tenant_id,
+            )
+        )
 
         return signals
 
@@ -265,7 +274,8 @@ class AssessmentProcessingPipeline:
     # ------------------------------------------------------------------
 
     def _correlate_signals(
-        self, signals: list[dict],
+        self,
+        signals: list[dict],
     ):
         """Stage 3: Compute weighted confidence from multi-source signals."""
         return self._correlator.compute_weighted_confidence(signals)
@@ -275,7 +285,11 @@ class AssessmentProcessingPipeline:
     # ------------------------------------------------------------------
 
     def _detect_contradictions(
-        self, signals: list[dict], handoff_id: str, tenant_id: str, incident_id: str,
+        self,
+        signals: list[dict],
+        handoff_id: str,
+        tenant_id: str,
+        incident_id: str,
     ):
         """Stage 4: Detect contradictory signals."""
         result = self._contradiction_detector.detect(signals)
@@ -283,23 +297,25 @@ class AssessmentProcessingPipeline:
         if result.detected:
             self._contradiction_count += 1
             scope_key = _build_scope_key(tenant_id, incident_id)
-            self._write_audit(RiskAssessmentDecisionRecord(
-                handoff_id=handoff_id,
-                input_signal_ids=[s.get("signal_id", "") for s in signals],
-                decision_type=DecisionType.contradiction_detected,
-                confidence_raw=0.0,
-                confidence_adjusted=0.0,
-                decision_rationale=(
-                    f"Contradictory signals detected: {len(result.pairs)} pair(s). "
-                    f"Confidence will be reduced by "
-                    f"{(1 - self._config.contradiction_reduction_factor) * 100:.0f}%."
-                ),
-                generation_method="n/a",
-                agent_version=self._config.agent_version,
-                configuration_version=self._config.compute_config_hash(),
-                incident_scope_key=scope_key,
-                tenant_id=tenant_id,
-            ))
+            self._write_audit(
+                RiskAssessmentDecisionRecord(
+                    handoff_id=handoff_id,
+                    input_signal_ids=[s.get("signal_id", "") for s in signals],
+                    decision_type=DecisionType.contradiction_detected,
+                    confidence_raw=0.0,
+                    confidence_adjusted=0.0,
+                    decision_rationale=(
+                        f"Contradictory signals detected: {len(result.pairs)} pair(s). "
+                        f"Confidence will be reduced by "
+                        f"{(1 - self._config.contradiction_reduction_factor) * 100:.0f}%."
+                    ),
+                    generation_method="n/a",
+                    agent_version=self._config.agent_version,
+                    configuration_version=self._config.compute_config_hash(),
+                    incident_scope_key=scope_key,
+                    tenant_id=tenant_id,
+                )
+            )
 
         return result
 
@@ -327,34 +343,29 @@ class AssessmentProcessingPipeline:
 
         if result.trend_detected:
             scope_key = _build_scope_key(tenant_id, incident_id)
-            lead_time_msg = (
-                f"Trend extrapolation: {result.trend_direction} at "
-                f"{result.slope_per_hour:.4f}/hr. "
-            )
+            lead_time_msg = f"Trend extrapolation: {result.trend_direction} at {result.slope_per_hour:.4f}/hr. "
             if result.hours_to_warning_threshold is not None:
-                lead_time_msg += (
-                    f"Warning threshold breach in ~{result.hours_to_warning_threshold:.1f}h. "
-                )
+                lead_time_msg += f"Warning threshold breach in ~{result.hours_to_warning_threshold:.1f}h. "
             if result.hours_to_emergency_threshold is not None:
-                lead_time_msg += (
-                    f"Emergency threshold breach in ~{result.hours_to_emergency_threshold:.1f}h. "
-                )
+                lead_time_msg += f"Emergency threshold breach in ~{result.hours_to_emergency_threshold:.1f}h. "
             lead_time_msg += f"Predictive lead time: {result.predictive_lead_time_hours:.1f}h."
 
             logger.info(lead_time_msg)
-            self._write_audit(RiskAssessmentDecisionRecord(
-                handoff_id=handoff_id,
-                input_signal_ids=[s.get("signal_id", "") for s in signals],
-                decision_type=DecisionType.assessment_generated,
-                confidence_raw=result.current_value,
-                confidence_adjusted=result.extrapolation_confidence,
-                decision_rationale=lead_time_msg,
-                generation_method="extrapolation",
-                agent_version=self._config.agent_version,
-                configuration_version=self._config.compute_config_hash(),
-                incident_scope_key=scope_key,
-                tenant_id=tenant_id,
-            ))
+            self._write_audit(
+                RiskAssessmentDecisionRecord(
+                    handoff_id=handoff_id,
+                    input_signal_ids=[s.get("signal_id", "") for s in signals],
+                    decision_type=DecisionType.assessment_generated,
+                    confidence_raw=result.current_value,
+                    confidence_adjusted=result.extrapolation_confidence,
+                    decision_rationale=lead_time_msg,
+                    generation_method="extrapolation",
+                    agent_version=self._config.agent_version,
+                    configuration_version=self._config.compute_config_hash(),
+                    incident_scope_key=scope_key,
+                    tenant_id=tenant_id,
+                )
+            )
 
         return result
 
@@ -377,11 +388,13 @@ class AssessmentProcessingPipeline:
         assessment_type = self._severity_computer.derive_assessment_type(signal_category)
 
         # Assign version via optimistic concurrency
-        version = run_async(self._version_counter.assign_version(
-            incident_id=handoff.incident_id,
-            assessment_type=assessment_type,
-            incident_scope_key=scope_key,
-        ))
+        version = run_async(
+            self._version_counter.assign_version(
+                incident_id=handoff.incident_id,
+                assessment_type=assessment_type,
+                incident_scope_key=scope_key,
+            )
+        )
 
         config_hash = self._config.compute_config_hash()
 
@@ -407,31 +420,33 @@ class AssessmentProcessingPipeline:
                 logger.error("Failed to persist assessment %s", assessment.hazard_assessment_id)
 
         self._assessment_count += 1
-        self._write_audit(RiskAssessmentDecisionRecord(
-            handoff_id=handoff.handoff_id,
-            input_signal_ids=assessment.input_signal_ids,
-            assessment_id=assessment.hazard_assessment_id,
-            hazard_type=signal_category,
-            severity_level=assessment.severity_level,
-            confidence_raw=correlation.weighted_confidence,
-            confidence_adjusted=assessment.confidence_adjusted,
-            version=assessment.version,
-            decision_type=DecisionType.assessment_generated,
-            model_id=assessment.model_deployment_id,
-            processing_duration_ms=0.0,
-            decision_rationale=(
-                f"Assessment {assessment.hazard_assessment_id} generated: "
-                f"type={assessment_type}, severity={assessment.severity_level}, "
-                f"confidence={assessment.confidence_adjusted:.3f}, "
-                f"version={assessment.version}, "
-                f"method={assessment.generation_method}"
-            ),
-            generation_method=assessment.generation_method,
-            agent_version=self._config.agent_version,
-            configuration_version=config_hash,
-            incident_scope_key=scope_key,
-            tenant_id=tenant_id,
-        ))
+        self._write_audit(
+            RiskAssessmentDecisionRecord(
+                handoff_id=handoff.handoff_id,
+                input_signal_ids=assessment.input_signal_ids,
+                assessment_id=assessment.hazard_assessment_id,
+                hazard_type=signal_category,
+                severity_level=assessment.severity_level,
+                confidence_raw=correlation.weighted_confidence,
+                confidence_adjusted=assessment.confidence_adjusted,
+                version=assessment.version,
+                decision_type=DecisionType.assessment_generated,
+                model_id=assessment.model_deployment_id,
+                processing_duration_ms=0.0,
+                decision_rationale=(
+                    f"Assessment {assessment.hazard_assessment_id} generated: "
+                    f"type={assessment_type}, severity={assessment.severity_level}, "
+                    f"confidence={assessment.confidence_adjusted:.3f}, "
+                    f"version={assessment.version}, "
+                    f"method={assessment.generation_method}"
+                ),
+                generation_method=assessment.generation_method,
+                agent_version=self._config.agent_version,
+                configuration_version=config_hash,
+                incident_scope_key=scope_key,
+                tenant_id=tenant_id,
+            )
+        )
 
         if assessment.generation_method == "template_fallback":
             self._fallback_count += 1
@@ -464,26 +479,28 @@ class AssessmentProcessingPipeline:
                     logger.error("Failed to persist recommendation %s", rec.recommendation_id)
 
             self._recommendation_count += 1
-            self._write_audit(RiskAssessmentDecisionRecord(
-                handoff_id=handoff.handoff_id,
-                input_signal_ids=rec.supporting_signal_ids,
-                assessment_id=assessment.hazard_assessment_id,
-                recommendation_id=rec.recommendation_id,
-                severity_level=rec.severity_level,
-                confidence_raw=assessment.confidence_score,
-                confidence_adjusted=rec.confidence_score,
-                decision_type=DecisionType.recommendation_generated,
-                decision_rationale=(
-                    f"Recommendation {rec.recommendation_id} generated: "
-                    f"type={rec.type}, confidence={rec.confidence_score:.3f}, "
-                    f"method={rec.generation_method}"
-                ),
-                generation_method=rec.generation_method,
-                agent_version=self._config.agent_version,
-                configuration_version=self._config.compute_config_hash(),
-                incident_scope_key=scope_key,
-                tenant_id=tenant_id,
-            ))
+            self._write_audit(
+                RiskAssessmentDecisionRecord(
+                    handoff_id=handoff.handoff_id,
+                    input_signal_ids=rec.supporting_signal_ids,
+                    assessment_id=assessment.hazard_assessment_id,
+                    recommendation_id=rec.recommendation_id,
+                    severity_level=rec.severity_level,
+                    confidence_raw=assessment.confidence_score,
+                    confidence_adjusted=rec.confidence_score,
+                    decision_type=DecisionType.recommendation_generated,
+                    decision_rationale=(
+                        f"Recommendation {rec.recommendation_id} generated: "
+                        f"type={rec.type}, confidence={rec.confidence_score:.3f}, "
+                        f"method={rec.generation_method}"
+                    ),
+                    generation_method=rec.generation_method,
+                    agent_version=self._config.agent_version,
+                    configuration_version=self._config.compute_config_hash(),
+                    incident_scope_key=scope_key,
+                    tenant_id=tenant_id,
+                )
+            )
 
         return recommendations
 
@@ -530,33 +547,37 @@ class AssessmentProcessingPipeline:
 
             for target_name, downstream in downstream_handoffs:
                 # Record handoff created
-                self._write_audit(RiskAssessmentDecisionRecord(
-                    handoff_id=handoff.handoff_id,
-                    assessment_id=assessment.hazard_assessment_id,
-                    recommendation_id=rec.recommendation_id,
-                    decision_type=DecisionType.handoff_created,
-                    confidence_raw=rec.confidence_score,
-                    confidence_adjusted=rec.confidence_score,
-                    escalation_targets=[target_name],
-                    decision_rationale=(
-                        f"Handoff created for {target_name}: "
-                        f"rec={rec.recommendation_id}, "
-                        f"confidence={rec.confidence_score:.3f}"
-                    ),
-                    generation_method="n/a",
-                    agent_version=self._config.agent_version,
-                    configuration_version=self._config.compute_config_hash(),
-                    incident_scope_key=scope_key,
-                    tenant_id=tenant_id,
-                ))
+                self._write_audit(
+                    RiskAssessmentDecisionRecord(
+                        handoff_id=handoff.handoff_id,
+                        assessment_id=assessment.hazard_assessment_id,
+                        recommendation_id=rec.recommendation_id,
+                        decision_type=DecisionType.handoff_created,
+                        confidence_raw=rec.confidence_score,
+                        confidence_adjusted=rec.confidence_score,
+                        escalation_targets=[target_name],
+                        decision_rationale=(
+                            f"Handoff created for {target_name}: "
+                            f"rec={rec.recommendation_id}, "
+                            f"confidence={rec.confidence_score:.3f}"
+                        ),
+                        generation_method="n/a",
+                        agent_version=self._config.agent_version,
+                        configuration_version=self._config.compute_config_hash(),
+                        incident_scope_key=scope_key,
+                        tenant_id=tenant_id,
+                    )
+                )
 
                 # Deliver handoff
                 if self._deliver_fn is not None:
-                    delivered = run_async(deliver_handoff_with_retry(
-                        handoff=downstream,
-                        deliver=self._deliver_fn,
-                        on_dead_letter=self._on_dead_letter_fn,
-                    ))
+                    delivered = run_async(
+                        deliver_handoff_with_retry(
+                            handoff=downstream,
+                            deliver=self._deliver_fn,
+                            on_dead_letter=self._on_dead_letter_fn,
+                        )
+                    )
 
                     if delivered.status == "delivered":
                         self._escalation_count += 1
@@ -566,46 +587,47 @@ class AssessmentProcessingPipeline:
                             recommendation_id=rec.recommendation_id,
                             confidence=rec.confidence_score,
                         )
-                        self._write_audit(RiskAssessmentDecisionRecord(
-                            handoff_id=handoff.handoff_id,
-                            assessment_id=assessment.hazard_assessment_id,
-                            recommendation_id=rec.recommendation_id,
-                            decision_type=DecisionType.handoff_delivered,
-                            confidence_raw=rec.confidence_score,
-                            confidence_adjusted=rec.confidence_score,
-                            escalation_targets=[target_name],
-                            decision_rationale=(
-                                f"Handoff delivered to {target_name}: "
-                                f"{delivered.handoff_id}"
-                            ),
-                            generation_method="n/a",
-                            agent_version=self._config.agent_version,
-                            configuration_version=self._config.compute_config_hash(),
-                            incident_scope_key=scope_key,
-                            tenant_id=tenant_id,
-                        ))
+                        self._write_audit(
+                            RiskAssessmentDecisionRecord(
+                                handoff_id=handoff.handoff_id,
+                                assessment_id=assessment.hazard_assessment_id,
+                                recommendation_id=rec.recommendation_id,
+                                decision_type=DecisionType.handoff_delivered,
+                                confidence_raw=rec.confidence_score,
+                                confidence_adjusted=rec.confidence_score,
+                                escalation_targets=[target_name],
+                                decision_rationale=(f"Handoff delivered to {target_name}: {delivered.handoff_id}"),
+                                generation_method="n/a",
+                                agent_version=self._config.agent_version,
+                                configuration_version=self._config.compute_config_hash(),
+                                incident_scope_key=scope_key,
+                                tenant_id=tenant_id,
+                            )
+                        )
                     else:
                         self._dead_letter_count += 1
                         metrics.inc_dead_letter()
-                        self._write_audit(RiskAssessmentDecisionRecord(
-                            handoff_id=handoff.handoff_id,
-                            assessment_id=assessment.hazard_assessment_id,
-                            recommendation_id=rec.recommendation_id,
-                            decision_type=DecisionType.handoff_dead_lettered,
-                            confidence_raw=rec.confidence_score,
-                            confidence_adjusted=rec.confidence_score,
-                            escalation_targets=[target_name],
-                            decision_rationale=(
-                                f"Handoff dead-lettered for {target_name} after "
-                                f"{delivered.retry_count} retries: "
-                                f"{delivered.failure_reason}"
-                            ),
-                            generation_method="n/a",
-                            agent_version=self._config.agent_version,
-                            configuration_version=self._config.compute_config_hash(),
-                            incident_scope_key=scope_key,
-                            tenant_id=tenant_id,
-                        ))
+                        self._write_audit(
+                            RiskAssessmentDecisionRecord(
+                                handoff_id=handoff.handoff_id,
+                                assessment_id=assessment.hazard_assessment_id,
+                                recommendation_id=rec.recommendation_id,
+                                decision_type=DecisionType.handoff_dead_lettered,
+                                confidence_raw=rec.confidence_score,
+                                confidence_adjusted=rec.confidence_score,
+                                escalation_targets=[target_name],
+                                decision_rationale=(
+                                    f"Handoff dead-lettered for {target_name} after "
+                                    f"{delivered.retry_count} retries: "
+                                    f"{delivered.failure_reason}"
+                                ),
+                                generation_method="n/a",
+                                agent_version=self._config.agent_version,
+                                configuration_version=self._config.compute_config_hash(),
+                                incident_scope_key=scope_key,
+                                tenant_id=tenant_id,
+                            )
+                        )
 
                 handoffs.append(downstream)
 
@@ -644,7 +666,6 @@ class AssessmentProcessingPipeline:
         }
 
         with pipeline_span("risk_assessment.process_handoff", handoff.handoff_id) as root_span:
-
             # Stage 1: Validation
             with pipeline_span("risk_assessment.validate_handoff", handoff.handoff_id):
                 if not self._validate_handoff(handoff, effective_tenant):
@@ -652,7 +673,9 @@ class AssessmentProcessingPipeline:
                     return result
                 # Emit custom event + metric
                 CustomEventEmitter.handoff_received(
-                    handoff.handoff_id, handoff.incident_id, effective_tenant,
+                    handoff.handoff_id,
+                    handoff.incident_id,
+                    effective_tenant,
                 )
                 metrics.inc_handoff_intake()
 
@@ -661,16 +684,18 @@ class AssessmentProcessingPipeline:
                 signals = self._retrieve_signals(handoff, effective_tenant)
 
                 if not signals:
-                    self._write_audit(RiskAssessmentDecisionRecord(
-                        handoff_id=handoff.handoff_id,
-                        decision_type=DecisionType.degradation_detected,
-                        decision_rationale="All signals missing — degraded assessment",
-                        generation_method="n/a",
-                        agent_version=self._config.agent_version,
-                        configuration_version=self._config.compute_config_hash(),
-                        incident_scope_key=_build_scope_key(effective_tenant, handoff.incident_id),
-                        tenant_id=effective_tenant,
-                    ))
+                    self._write_audit(
+                        RiskAssessmentDecisionRecord(
+                            handoff_id=handoff.handoff_id,
+                            decision_type=DecisionType.degradation_detected,
+                            decision_rationale="All signals missing — degraded assessment",
+                            generation_method="n/a",
+                            agent_version=self._config.agent_version,
+                            configuration_version=self._config.compute_config_hash(),
+                            incident_scope_key=_build_scope_key(effective_tenant, handoff.incident_id),
+                            tenant_id=effective_tenant,
+                        )
+                    )
                     CustomEventEmitter.degradation_event("signal_store", 1)
 
             # Stage 3: Multi-Source Correlation
@@ -680,7 +705,10 @@ class AssessmentProcessingPipeline:
             # Stage 4: Contradiction Detection
             with pipeline_span("risk_assessment.detect_contradictions", handoff.handoff_id):
                 contradiction = self._detect_contradictions(
-                    signals, handoff.handoff_id, effective_tenant, handoff.incident_id,
+                    signals,
+                    handoff.handoff_id,
+                    effective_tenant,
+                    handoff.incident_id,
                 )
                 if contradiction.detected:
                     signal_ids = [s.get("signal_id", "") for s in signals]
@@ -697,7 +725,10 @@ class AssessmentProcessingPipeline:
             # Stage 5: Trend Extrapolation
             with pipeline_span("risk_assessment.extrapolate_trend", handoff.handoff_id):
                 extrapolation = self._extrapolate_trend(
-                    signals, handoff.handoff_id, effective_tenant, handoff.incident_id,
+                    signals,
+                    handoff.handoff_id,
+                    effective_tenant,
+                    handoff.incident_id,
                 )
                 result["extrapolation"] = extrapolation
                 if extrapolation.trend_detected:
@@ -711,7 +742,11 @@ class AssessmentProcessingPipeline:
             # Stage 6: Assessment Generation
             with pipeline_span("risk_assessment.generate_assessment", handoff.handoff_id):
                 assessment = self._generate_assessment(
-                    handoff, signals, correlation, contradiction, effective_tenant,
+                    handoff,
+                    signals,
+                    correlation,
+                    contradiction,
+                    effective_tenant,
                     extrapolation=extrapolation,
                 )
                 result["assessment"] = assessment
@@ -731,14 +766,20 @@ class AssessmentProcessingPipeline:
             # Stage 7: Recommendation Generation
             with pipeline_span("risk_assessment.generate_recommendations", handoff.handoff_id):
                 recommendations = self._generate_recommendations(
-                    handoff, assessment, signals, effective_tenant,
+                    handoff,
+                    assessment,
+                    signals,
+                    effective_tenant,
                 )
                 result["recommendations"] = recommendations
 
             # Stage 8: Downstream Escalation
             with pipeline_span("risk_assessment.evaluate_escalation", handoff.handoff_id):
                 downstream_handoffs = self._evaluate_escalation(
-                    handoff, assessment, recommendations, effective_tenant,
+                    handoff,
+                    assessment,
+                    recommendations,
+                    effective_tenant,
                 )
                 result["handoffs"] = downstream_handoffs
 
@@ -753,7 +794,8 @@ class AssessmentProcessingPipeline:
                     CustomEventEmitter.sla_breach(handoff.handoff_id, elapsed_ms)
                     logger.warning(
                         "SLA BREACH: handoff %s processed in %.2fms (>10s SLA)",
-                        handoff.handoff_id, elapsed_ms,
+                        handoff.handoff_id,
+                        elapsed_ms,
                     )
 
             result["status"] = "completed"
@@ -766,8 +808,7 @@ class AssessmentProcessingPipeline:
             root_span.set_attribute("escalation_count", len(downstream_handoffs))
 
         logger.info(
-            "Pipeline completed for handoff %s in %.2fms: "
-            "assessment=%s, recommendations=%d, escalations=%d",
+            "Pipeline completed for handoff %s in %.2fms: assessment=%s, recommendations=%d, escalations=%d",
             handoff.handoff_id,
             elapsed_ms,
             assessment.hazard_assessment_id,

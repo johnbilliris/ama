@@ -56,7 +56,11 @@ class TestInventoryLoading:
     def test_load_sample_inventory(self):
         sample_path = os.path.join(
             os.path.dirname(__file__),
-            "..", "..", "data", "resource-inventories", "sample-inventory.json",
+            "..",
+            "..",
+            "data",
+            "resource-inventories",
+            "sample-inventory.json",
         )
         if os.path.exists(sample_path):
             mgr = ResourceInventoryManager()
@@ -110,12 +114,17 @@ class TestStateMachine:
 
     def test_active_to_unavailable(self):
         """States that can transition to unavailable per state machine."""
-        for status in [ResourceStatus.assigned, ResourceStatus.en_route,
-                       ResourceStatus.deployed, ResourceStatus.returning,
-                       ResourceStatus.reserved]:
+        for status in [
+            ResourceStatus.assigned,
+            ResourceStatus.en_route,
+            ResourceStatus.deployed,
+            ResourceStatus.returning,
+            ResourceStatus.reserved,
+        ]:
             mgr = self._make_mgr_with_resource(status)
-            assert mgr.transition_status("res-001", ResourceStatus.unavailable), \
+            assert mgr.transition_status("res-001", ResourceStatus.unavailable), (
                 f"{status} → unavailable should be valid"
+            )
 
     def test_available_to_unavailable_rejected(self):
         """available → unavailable is NOT a valid transition."""
@@ -178,21 +187,35 @@ class TestOperationalFlags:
 class TestEligibleResources:
     def test_filters_by_type(self):
         mgr = ResourceInventoryManager()
-        mgr.add_resource(ResourceInventoryItem(
-            resource_id="amb-001", resource_type=ResourceType.vehicle,
-            resource_sub_type="ambulance", capabilities=["medical_transport"],
-            location={"lat": -33.87, "lon": 151.21}, status=ResourceStatus.available,
-        ))
-        mgr.add_resource(ResourceInventoryItem(
-            resource_id="per-001", resource_type=ResourceType.personnel,
-            resource_sub_type="paramedic", capabilities=["medical_treatment"],
-            location={"lat": -33.87, "lon": 151.21}, status=ResourceStatus.available,
-        ))
+        mgr.add_resource(
+            ResourceInventoryItem(
+                resource_id="amb-001",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="ambulance",
+                capabilities=["medical_transport"],
+                location={"lat": -33.87, "lon": 151.21},
+                status=ResourceStatus.available,
+            )
+        )
+        mgr.add_resource(
+            ResourceInventoryItem(
+                resource_id="per-001",
+                resource_type=ResourceType.personnel,
+                resource_sub_type="paramedic",
+                capabilities=["medical_treatment"],
+                location={"lat": -33.87, "lon": 151.21},
+                status=ResourceStatus.available,
+            )
+        )
 
         demand = ResourceDemand(
-            demand_id="d1", incident_id="inc001", source_id="r1",
-            source_type="coordination_task", resource_type=ResourceType.vehicle,
-            resource_sub_type="ambulance", required_capabilities=["medical_transport"],
+            demand_id="d1",
+            incident_id="inc001",
+            source_id="r1",
+            source_type="coordination_task",
+            resource_type=ResourceType.vehicle,
+            resource_sub_type="ambulance",
+            required_capabilities=["medical_transport"],
         )
         eligible = mgr.get_eligible_resources(demand)
         assert len(eligible) == 1
@@ -200,15 +223,23 @@ class TestEligibleResources:
 
     def test_excludes_unavailable(self):
         mgr = ResourceInventoryManager()
-        mgr.add_resource(ResourceInventoryItem(
-            resource_id="amb-001", resource_type=ResourceType.vehicle,
-            resource_sub_type="ambulance", capabilities=["medical_transport"],
-            location={"lat": -33.87, "lon": 151.21}, status=ResourceStatus.unavailable,
-        ))
+        mgr.add_resource(
+            ResourceInventoryItem(
+                resource_id="amb-001",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="ambulance",
+                capabilities=["medical_transport"],
+                location={"lat": -33.87, "lon": 151.21},
+                status=ResourceStatus.unavailable,
+            )
+        )
 
         demand = ResourceDemand(
-            demand_id="d1", incident_id="inc001", source_id="r1",
-            source_type="coordination_task", resource_type=ResourceType.vehicle,
+            demand_id="d1",
+            incident_id="inc001",
+            source_id="r1",
+            source_type="coordination_task",
+            resource_type=ResourceType.vehicle,
             resource_sub_type="ambulance",
         )
         eligible = mgr.get_eligible_resources(demand)
@@ -216,15 +247,23 @@ class TestEligibleResources:
 
     def test_returning_is_eligible(self):
         mgr = ResourceInventoryManager()
-        mgr.add_resource(ResourceInventoryItem(
-            resource_id="amb-001", resource_type=ResourceType.vehicle,
-            resource_sub_type="ambulance", capabilities=["medical_transport"],
-            location={"lat": -33.87, "lon": 151.21}, status=ResourceStatus.returning,
-        ))
+        mgr.add_resource(
+            ResourceInventoryItem(
+                resource_id="amb-001",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="ambulance",
+                capabilities=["medical_transport"],
+                location={"lat": -33.87, "lon": 151.21},
+                status=ResourceStatus.returning,
+            )
+        )
 
         demand = ResourceDemand(
-            demand_id="d1", incident_id="inc001", source_id="r1",
-            source_type="coordination_task", resource_type=ResourceType.vehicle,
+            demand_id="d1",
+            incident_id="inc001",
+            source_id="r1",
+            source_type="coordination_task",
+            resource_type=ResourceType.vehicle,
             resource_sub_type="ambulance",
         )
         eligible = mgr.get_eligible_resources(demand)
@@ -234,16 +273,26 @@ class TestEligibleResources:
 class TestBulkRelease:
     def test_release_incident_resources(self):
         mgr = ResourceInventoryManager()
-        mgr.add_resource(ResourceInventoryItem(
-            resource_id="res-001", resource_type=ResourceType.vehicle,
-            resource_sub_type="ambulance", location={"lat": -33.87, "lon": 151.21},
-            status=ResourceStatus.assigned, assigned_incident_id="inc001",
-        ))
-        mgr.add_resource(ResourceInventoryItem(
-            resource_id="res-002", resource_type=ResourceType.vehicle,
-            resource_sub_type="bus", location={"lat": -33.87, "lon": 151.21},
-            status=ResourceStatus.assigned, assigned_incident_id="inc002",
-        ))
+        mgr.add_resource(
+            ResourceInventoryItem(
+                resource_id="res-001",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="ambulance",
+                location={"lat": -33.87, "lon": 151.21},
+                status=ResourceStatus.assigned,
+                assigned_incident_id="inc001",
+            )
+        )
+        mgr.add_resource(
+            ResourceInventoryItem(
+                resource_id="res-002",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="bus",
+                location={"lat": -33.87, "lon": 151.21},
+                status=ResourceStatus.assigned,
+                assigned_incident_id="inc002",
+            )
+        )
 
         released = mgr.release_incident_resources("inc001")
         assert released == 1
@@ -254,16 +303,24 @@ class TestBulkRelease:
 class TestUtilisation:
     def test_compute_utilisation(self):
         mgr = ResourceInventoryManager()
-        mgr.add_resource(ResourceInventoryItem(
-            resource_id="r1", resource_type=ResourceType.vehicle,
-            resource_sub_type="ambulance", location={"lat": 0, "lon": 0},
-            status=ResourceStatus.available,
-        ))
-        mgr.add_resource(ResourceInventoryItem(
-            resource_id="r2", resource_type=ResourceType.vehicle,
-            resource_sub_type="ambulance", location={"lat": 0, "lon": 0},
-            status=ResourceStatus.deployed,
-        ))
+        mgr.add_resource(
+            ResourceInventoryItem(
+                resource_id="r1",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="ambulance",
+                location={"lat": 0, "lon": 0},
+                status=ResourceStatus.available,
+            )
+        )
+        mgr.add_resource(
+            ResourceInventoryItem(
+                resource_id="r2",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="ambulance",
+                location={"lat": 0, "lon": 0},
+                status=ResourceStatus.deployed,
+            )
+        )
 
         util = mgr.compute_utilisation()
         assert util["total"] == 2

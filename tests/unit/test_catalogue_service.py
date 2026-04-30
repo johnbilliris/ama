@@ -3,6 +3,7 @@
 The service loads from seed JSON files, so these tests use the real catalogue data
 to verify correct loading, filtering, lookup, and suggestion behaviour.
 """
+
 import pytest
 from monitoring.catalogue_service import DOMAIN_FILES, SEED_ROOT, CatalogueService
 
@@ -149,9 +150,7 @@ class TestSuggestActivities:
     """Test activity suggestion for lagging indicators."""
 
     def test_suggest_for_known_indicator(self, catalogue):
-        suggestions = catalogue.suggest_activities(
-            ["aidr:social:community-health-levels:ind:1"]
-        )
+        suggestions = catalogue.suggest_activities(["aidr:social:community-health-levels:ind:1"])
         assert isinstance(suggestions, list)
         assert len(suggestions) > 0
         for s in suggestions:
@@ -165,10 +164,12 @@ class TestSuggestActivities:
         assert suggestions == []
 
     def test_suggest_for_multiple_indicators(self, catalogue):
-        suggestions = catalogue.suggest_activities([
-            "aidr:social:community-health-levels:ind:1",
-            "nonexistent:ind:999",
-        ])
+        suggestions = catalogue.suggest_activities(
+            [
+                "aidr:social:community-health-levels:ind:1",
+                "nonexistent:ind:999",
+            ]
+        )
         # Only known indicators should produce suggestions
         assert len(suggestions) > 0
         for s in suggestions:

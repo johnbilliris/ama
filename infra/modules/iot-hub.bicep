@@ -66,6 +66,10 @@ resource eventGridTopic 'Microsoft.EventGrid/systemTopics@2024-06-01-preview' = 
   name: '${iotHubName}-events'
   location: location
   tags: tags
+  // PSRule: Azure.EventGrid.ManagedIdentity — system-assigned MI for outbound auth.
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     source: iotHub.id
     topicType: 'Microsoft.Devices.IoTHubs'

@@ -62,9 +62,7 @@ class PlaybackService:
             include_annotations=include_annotations,
         )
         total = self._events.count_events(tenant_id)
-        has_more = len(events) == limit and (
-            events and events[-1].event_seq < total
-        )
+        has_more = len(events) == limit and (events and events[-1].event_seq < total)
         next_cursor = events[-1].event_seq if events and has_more else None
         return {
             "events": [e.model_dump(mode="json") for e in events],
@@ -90,9 +88,4 @@ class PlaybackService:
         if before_sim_time is not None:
             snap = self._events.get_nearest_snapshot(tenant_id, before_sim_time)
             return {"snapshots": [snap.model_dump(mode="json")] if snap else []}
-        return {
-            "snapshots": [
-                s.model_dump(mode="json") for s in self._events.list_snapshots(tenant_id)
-            ]
-        }
-
+        return {"snapshots": [s.model_dump(mode="json") for s in self._events.list_snapshots(tenant_id)]}

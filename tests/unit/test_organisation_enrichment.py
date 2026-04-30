@@ -7,6 +7,7 @@ Tests cover:
 - New fields are properly populated across the dataset
 - API serialization includes all new fields
 """
+
 import json
 from pathlib import Path
 
@@ -51,23 +52,17 @@ class TestControlledVocabulary:
     def test_aiims_functions_use_valid_values(self, organisations):
         for org in organisations:
             for fn in org.aiims_functions:
-                assert fn in VALID_AIIMS, (
-                    f"{org.organisation_id}: aiims_function '{fn}' not in {VALID_AIIMS}"
-                )
+                assert fn in VALID_AIIMS, f"{org.organisation_id}: aiims_function '{fn}' not in {VALID_AIIMS}"
 
     def test_hazard_types_use_valid_values(self, organisations):
         for org in organisations:
             for ht in org.hazard_types:
-                assert ht in VALID_INCIDENT, (
-                    f"{org.organisation_id}: hazard_type '{ht}' not in valid IncidentType"
-                )
+                assert ht in VALID_INCIDENT, f"{org.organisation_id}: hazard_type '{ht}' not in valid IncidentType"
 
     def test_lead_agency_for_use_valid_values(self, organisations):
         for org in organisations:
             for la in org.lead_agency_for:
-                assert la in VALID_INCIDENT, (
-                    f"{org.organisation_id}: lead_agency_for '{la}' not in valid IncidentType"
-                )
+                assert la in VALID_INCIDENT, f"{org.organisation_id}: lead_agency_for '{la}' not in valid IncidentType"
 
     def test_workforce_type_uses_valid_values(self, organisations):
         for org in organisations:
@@ -90,11 +85,7 @@ class TestReferentialIntegrity:
         assert broken == [], f"Broken mutual_aid_partner_ids refs: {broken}"
 
     def test_no_self_referencing_mutual_aid(self, organisations):
-        self_refs = [
-            o.organisation_id
-            for o in organisations
-            if o.organisation_id in o.mutual_aid_partner_ids
-        ]
+        self_refs = [o.organisation_id for o in organisations if o.organisation_id in o.mutual_aid_partner_ids]
         assert self_refs == [], f"Orgs referencing themselves as mutual aid: {self_refs}"
 
 
@@ -129,9 +120,15 @@ class TestApiSerialization:
         org = organisations[0]
         data = org.model_dump()
         new_fields = [
-            "abbreviation", "aiims_functions", "lead_agency_for",
-            "primary_capabilities", "hazard_types", "workforce_type",
-            "legislative_basis", "mutual_aid_partner_ids", "activation_triggers",
+            "abbreviation",
+            "aiims_functions",
+            "lead_agency_for",
+            "primary_capabilities",
+            "hazard_types",
+            "workforce_type",
+            "legislative_basis",
+            "mutual_aid_partner_ids",
+            "activation_triggers",
         ]
         for field in new_fields:
             assert field in data, f"model_dump() missing field: {field}"

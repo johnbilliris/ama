@@ -4,6 +4,7 @@ Catalogue browsing, domain filtering, outcome detail, activity suggestion.
 
 FRs: FR-015–024
 """
+
 import logging
 
 logger = logging.getLogger(__name__)

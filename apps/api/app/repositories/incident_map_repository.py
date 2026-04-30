@@ -176,11 +176,7 @@ class IncidentMapRepository:
             offset=offset,
             limit=page_size,
         )
-        items = list(
-            container.query_items(
-                query, parameters=params, enable_cross_partition_query=True
-            )
-        )
+        items = list(container.query_items(query, parameters=params, enable_cross_partition_query=True))
 
         # Count query
         count_query, count_params = self._build_query(
@@ -239,11 +235,7 @@ class IncidentMapRepository:
             count_only=True,
             unmapped_only=True,
         )
-        result = list(
-            container.query_items(
-                query, parameters=params, enable_cross_partition_query=True
-            )
-        )
+        result = list(container.query_items(query, parameters=params, enable_cross_partition_query=True))
         return result[0] if result else 0
 
     # ── In-memory fallback ─────────────────────────────────────────────────
@@ -292,14 +284,11 @@ class IncidentMapRepository:
             return False
         return True
 
-    def _query_in_memory(
-        self, *, offset: int, limit: int, **filters: Any
-    ) -> tuple[list[dict[str, Any]], int]:
+    def _query_in_memory(self, *, offset: int, limit: int, **filters: Any) -> tuple[list[dict[str, Any]], int]:
         has_location = [
             d
             for d in self._in_memory
-            if d.get("location") and d["location"].get("type") == "Point"
-            and self._matches_filters(d, **filters)
+            if d.get("location") and d["location"].get("type") == "Point" and self._matches_filters(d, **filters)
         ]
         has_location.sort(key=lambda d: d.get("started_at", ""), reverse=True)
         return has_location[offset : offset + limit], len(has_location)
@@ -308,6 +297,5 @@ class IncidentMapRepository:
         return sum(
             1
             for d in self._in_memory
-            if (not d.get("location") or d["location"].get("type") != "Point")
-            and self._matches_filters(d, **filters)
+            if (not d.get("location") or d["location"].get("type") != "Point") and self._matches_filters(d, **filters)
         )

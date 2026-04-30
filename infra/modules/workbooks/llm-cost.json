@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/Microsoft.Insights/workbooks.json",
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Disaster Response Hub — LLM Cost Burn-Down\n\nMonthly LLM cost (AUD) accumulated per scope vs the published budget. Spec-032 T509 (evidence) FR-O04."
+      },
+      "name": "header"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where Name == 'llm.cost.aud_micros'\n| extend scope = tostring(Properties.scope)\n| summarize cost_aud = sum(Sum) / 1000000.0 by bin(TimeGenerated, 1h), scope\n| render areachart with (title='LLM cost (AUD) per scope per hour')",
+        "size": 0,
+        "queryType": 0
+      },
+      "name": "cost-per-scope"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where Name == 'llm.budget.warning_total'\n| extend scope = tostring(Properties.scope)\n| summarize warnings = sum(Sum) by bin(TimeGenerated, 1h), scope\n| render columnchart with (title='Budget warning events per scope (>=80% burn)')",
+        "size": 0,
+        "queryType": 0
+      },
+      "name": "budget-warnings"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "AppMetrics\n| where Name == 'llm.tokens.total'\n| extend model = tostring(Properties.model)\n| summarize tokens = sum(Sum) by bin(TimeGenerated, 1h), model\n| render barchart with (title='LLM tokens consumed per model')",
+        "size": 0,
+        "queryType": 0
+      },
+      "name": "tokens-per-model"
+    }
+  ],
+  "fallbackResourceIds": [],
+  "fromTemplateId": "ama/spec-032/llm-cost"
+}

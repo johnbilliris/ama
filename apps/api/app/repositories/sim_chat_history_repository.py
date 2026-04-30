@@ -45,8 +45,7 @@ class SimChatHistoryRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "SimChatHistoryRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "SimChatHistoryRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -72,10 +71,7 @@ class SimChatHistoryRepository:
         container = self._get_container()
         if container is None:
             return len(self._in_memory.get(tenant_id, [])) + 1
-        query = (
-            "SELECT VALUE MAX(c.sequence) FROM c "
-            "WHERE c.document_type = 'sim_chat_turn' AND c.tenant_id = @tid"
-        )
+        query = "SELECT VALUE MAX(c.sequence) FROM c WHERE c.document_type = 'sim_chat_turn' AND c.tenant_id = @tid"
         try:
             items = list(
                 container.query_items(
@@ -133,9 +129,7 @@ class SimChatHistoryRepository:
             turns = sorted(self._in_memory.get(tenant_id, []), key=lambda t: t.sequence)
         else:
             query = (
-                "SELECT * FROM c "
-                "WHERE c.document_type = 'sim_chat_turn' AND c.tenant_id = @tid "
-                "ORDER BY c.sequence ASC"
+                "SELECT * FROM c WHERE c.document_type = 'sim_chat_turn' AND c.tenant_id = @tid ORDER BY c.sequence ASC"
             )
             try:
                 items = list(
@@ -167,10 +161,7 @@ class SimChatHistoryRepository:
         if container is None:
             turns = self._in_memory.pop(tenant_id, [])
             return len(turns)
-        query = (
-            "SELECT c.id FROM c "
-            "WHERE c.document_type = 'sim_chat_turn' AND c.tenant_id = @tid"
-        )
+        query = "SELECT c.id FROM c WHERE c.document_type = 'sim_chat_turn' AND c.tenant_id = @tid"
         items = list(
             container.query_items(
                 query,

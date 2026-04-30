@@ -3,6 +3,7 @@
 Tests cross-domain correlation analysis, activity recommendations,
 community summary generation, and LLM enrichment paths.
 """
+
 from unittest.mock import MagicMock
 
 import pytest
@@ -34,9 +35,7 @@ def mock_catalogue():
 def mock_llm():
     """Mock LLM client that returns a valid response."""
     llm = MagicMock()
-    llm.generate_response.return_value = {
-        "text": "Cross-domain analysis shows interconnected recovery challenges."
-    }
+    llm.generate_response.return_value = {"text": "Cross-domain analysis shows interconnected recovery challenges."}
     return llm
 
 
@@ -79,8 +78,13 @@ class TestCrossDomainCorrelations:
     def test_two_domains_both_lagging(self, analysis_service):
         data = [
             {"domain": "social", "indicator_name": "health", "trend": "negative", "value": 0.3, "target_value": 1.0},
-            {"domain": "economic", "indicator_name": "employment", "trend": "negative",
-             "value": 0.2, "target_value": 1.0},
+            {
+                "domain": "economic",
+                "indicator_name": "employment",
+                "trend": "negative",
+                "value": 0.2,
+                "target_value": 1.0,
+            },
         ]
         result = analysis_service.analyse_cross_domain_correlations(data)
         assert len(result["lagging_domains"]) == 2
@@ -143,7 +147,8 @@ class TestCrossDomainCorrelations:
 class TestLLMEnrichment:
     def test_llm_enrichment_with_content_safety_pass(self, mock_llm, mock_content_safety):
         svc = IndicatorAnalysisService(
-            llm_client=mock_llm, content_safety=mock_content_safety,
+            llm_client=mock_llm,
+            content_safety=mock_content_safety,
         )
         data = [
             {"domain": "social", "indicator_name": "h", "trend": "negative"},
@@ -184,7 +189,8 @@ class TestLLMEnrichment:
 
     def test_no_llm_enrichment_when_no_correlations(self, mock_llm, mock_content_safety):
         svc = IndicatorAnalysisService(
-            llm_client=mock_llm, content_safety=mock_content_safety,
+            llm_client=mock_llm,
+            content_safety=mock_content_safety,
         )
         data = [
             {"domain": "social", "indicator_name": "h", "trend": "positive"},

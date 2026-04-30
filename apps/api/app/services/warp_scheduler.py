@@ -97,9 +97,7 @@ class WarpScheduler:
         return state
 
     def load_timeline(self, tenant_id: str, signal_timeline: list[dict[str, Any]]) -> None:
-        self._timelines[tenant_id] = sorted(
-            signal_timeline, key=lambda s: float(s.get("offset_seconds", 0.0))
-        )
+        self._timelines[tenant_id] = sorted(signal_timeline, key=lambda s: float(s.get("offset_seconds", 0.0)))
 
     def get_state(self, tenant_id: str) -> SignalSchedulerState | None:
         return self._events.get_scheduler_state(tenant_id)
@@ -228,9 +226,7 @@ class WarpScheduler:
                 heartbeat = now
                 state = self._events.get_scheduler_state(tenant_id)
                 if state is not None:
-                    self._events.save_scheduler_state(
-                        state.model_copy(update={"heartbeat_at": now})
-                    )
+                    self._events.save_scheduler_state(state.model_copy(update={"heartbeat_at": now}))
 
     # ------------------------------------------------------------------
     # control
@@ -239,9 +235,7 @@ class WarpScheduler:
     def pause(self, tenant_id: str) -> None:
         state = self._events.get_scheduler_state(tenant_id)
         if state is not None:
-            self._events.save_scheduler_state(
-                state.model_copy(update={"heartbeat_at": datetime.now(UTC)})
-            )
+            self._events.save_scheduler_state(state.model_copy(update={"heartbeat_at": datetime.now(UTC)}))
 
     def resume(self, tenant_id: str) -> None:
         self.pause(tenant_id)  # same bookkeeping
@@ -256,9 +250,7 @@ class WarpScheduler:
         """
         state = self._events.get_scheduler_state(tenant_id)
         if state is not None:
-            self._events.save_scheduler_state(
-                state.model_copy(update={"heartbeat_at": datetime.now(UTC)})
-            )
+            self._events.save_scheduler_state(state.model_copy(update={"heartbeat_at": datetime.now(UTC)}))
 
     # ------------------------------------------------------------------
     # diagnostics

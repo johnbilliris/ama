@@ -236,21 +236,31 @@ embedding_service_available = _meter.create_up_down_counter(
 llm_call_count = _meter.create_counter("llm.call.count", description="Total LLM API calls", unit="calls")
 llm_call_duration = _meter.create_histogram("llm.call.duration_ms", description="LLM call latency", unit="ms")
 llm_tokens_input = _meter.create_counter(
-    "llm.tokens.input", description="Cumulative input tokens consumed", unit="tokens",
+    "llm.tokens.input",
+    description="Cumulative input tokens consumed",
+    unit="tokens",
 )
 llm_tokens_output = _meter.create_counter(
-    "llm.tokens.output", description="Cumulative output tokens consumed", unit="tokens",
+    "llm.tokens.output",
+    description="Cumulative output tokens consumed",
+    unit="tokens",
 )
 llm_fallback_count = _meter.create_counter("llm.fallback.count", description="LLM fallback events", unit="events")
 llm_error_count = _meter.create_counter("llm.error.count", description="LLM error events", unit="events")
 llm_circuit_breaker_state_change = _meter.create_counter(
-    "llm.circuit_breaker.state_change", description="Circuit breaker state transitions", unit="events",
+    "llm.circuit_breaker.state_change",
+    description="Circuit breaker state transitions",
+    unit="events",
 )
 llm_budget_exceeded = _meter.create_counter(
-    "llm.budget.exceeded", description="Monthly budget threshold breaches", unit="events",
+    "llm.budget.exceeded",
+    description="Monthly budget threshold breaches",
+    unit="events",
 )
 llm_confidence_below_threshold = _meter.create_counter(
-    "llm.confidence.below_threshold", description="Outputs flagged for human review", unit="events",
+    "llm.confidence.below_threshold",
+    description="Outputs flagged for human review",
+    unit="events",
 )
 
 
@@ -302,9 +312,7 @@ class metrics:
 
 
 @contextmanager
-def pipeline_span(
-    name: str, attributes: dict[str, Any] | None = None
-) -> Generator[Any, None, None]:
+def pipeline_span(name: str, attributes: dict[str, Any] | None = None) -> Generator[Any, None, None]:
     """Context manager for pipeline stage spans."""
     tracer = _get_tracer()
     with tracer.start_as_current_span(name) as span:
@@ -334,102 +342,78 @@ class CustomEventEmitter:
     # Convenience methods for all 17 custom events
     @staticmethod
     def handoff_received(handoff_id: str, incident_id: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("HandoffReceived", {
-            "handoff_id": handoff_id, "incident_id": incident_id, **kwargs
-        })
+        CustomEventEmitter.emit("HandoffReceived", {"handoff_id": handoff_id, "incident_id": incident_id, **kwargs})
 
     @staticmethod
     def handoff_rejected(handoff_id: str, reason: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("HandoffRejected", {
-            "handoff_id": handoff_id, "reason": reason, **kwargs
-        })
+        CustomEventEmitter.emit("HandoffRejected", {"handoff_id": handoff_id, "reason": reason, **kwargs})
 
     @staticmethod
     def duplicate_discarded(handoff_id: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("DuplicateDiscarded", {
-            "handoff_id": handoff_id, **kwargs
-        })
+        CustomEventEmitter.emit("DuplicateDiscarded", {"handoff_id": handoff_id, **kwargs})
 
     @staticmethod
     def alert_drafted(alert_id: str, languages: int, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("AlertDrafted", {
-            "alert_id": alert_id, "language_count": languages, **kwargs
-        })
+        CustomEventEmitter.emit("AlertDrafted", {"alert_id": alert_id, "language_count": languages, **kwargs})
 
     @staticmethod
     def back_translation_flagged(alert_id: str, language: str, score: float, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("BackTranslationFlagged", {
-            "alert_id": alert_id, "language": language, "score": score, **kwargs
-        })
+        CustomEventEmitter.emit(
+            "BackTranslationFlagged", {"alert_id": alert_id, "language": language, "score": score, **kwargs}
+        )
 
     @staticmethod
     def content_safety_failed(alert_id: str, language: str, reason: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("ContentSafetyFailed", {
-            "alert_id": alert_id, "language": language, "reason": reason, **kwargs
-        })
+        CustomEventEmitter.emit(
+            "ContentSafetyFailed", {"alert_id": alert_id, "language": language, "reason": reason, **kwargs}
+        )
 
     @staticmethod
     def alert_version_created(alert_id: str, version: int, change_type: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("AlertVersionCreated", {
-            "alert_id": alert_id, "version": version, "change_type": change_type, **kwargs
-        })
+        CustomEventEmitter.emit(
+            "AlertVersionCreated", {"alert_id": alert_id, "version": version, "change_type": change_type, **kwargs}
+        )
 
     @staticmethod
     def approval_requested(alert_id: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("ApprovalRequested", {
-            "alert_id": alert_id, **kwargs
-        })
+        CustomEventEmitter.emit("ApprovalRequested", {"alert_id": alert_id, **kwargs})
 
     @staticmethod
     def escalation_triggered(alert_id: str, level: int, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("EscalationTriggered", {
-            "alert_id": alert_id, "level": level, **kwargs
-        })
+        CustomEventEmitter.emit("EscalationTriggered", {"alert_id": alert_id, "level": level, **kwargs})
 
     @staticmethod
     def escalation_exhausted(alert_id: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("EscalationExhausted", {
-            "alert_id": alert_id, **kwargs
-        })
+        CustomEventEmitter.emit("EscalationExhausted", {"alert_id": alert_id, **kwargs})
 
     @staticmethod
     def delivery_started(alert_id: str, channel: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("DeliveryStarted", {
-            "alert_id": alert_id, "channel": channel, **kwargs
-        })
+        CustomEventEmitter.emit("DeliveryStarted", {"alert_id": alert_id, "channel": channel, **kwargs})
 
     @staticmethod
     def delivery_completed(alert_id: str, channel: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("DeliveryCompleted", {
-            "alert_id": alert_id, "channel": channel, **kwargs
-        })
+        CustomEventEmitter.emit("DeliveryCompleted", {"alert_id": alert_id, "channel": channel, **kwargs})
 
     @staticmethod
     def delivery_failed(alert_id: str, channel: str, reason: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("DeliveryFailed", {
-            "alert_id": alert_id, "channel": channel, "reason": reason, **kwargs
-        })
+        CustomEventEmitter.emit(
+            "DeliveryFailed", {"alert_id": alert_id, "channel": channel, "reason": reason, **kwargs}
+        )
 
     @staticmethod
     def delivery_deduplicated(alert_id: str, segment_id: str, winner_id: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("DeliveryDeduplicated", {
-            "alert_id": alert_id, "segment_id": segment_id, "winner_id": winner_id, **kwargs
-        })
+        CustomEventEmitter.emit(
+            "DeliveryDeduplicated", {"alert_id": alert_id, "segment_id": segment_id, "winner_id": winner_id, **kwargs}
+        )
 
     @staticmethod
     def degradation_detected(service: str, fallback: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("DegradationDetected", {
-            "service": service, "fallback": fallback, **kwargs
-        })
+        CustomEventEmitter.emit("DegradationDetected", {"service": service, "fallback": fallback, **kwargs})
 
     @staticmethod
     def degradation_recovered(service: str, downtime_ms: int = 0, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("DegradationRecovered", {
-            "service": service, "downtime_ms": downtime_ms, **kwargs
-        })
+        CustomEventEmitter.emit("DegradationRecovered", {"service": service, "downtime_ms": downtime_ms, **kwargs})
 
     @staticmethod
     def template_file_missing(language: str, hazard_type: str, **kwargs: Any) -> None:
-        CustomEventEmitter.emit("TemplateFileMissing", {
-            "language": language, "hazard_type": hazard_type, **kwargs
-        })
+        CustomEventEmitter.emit("TemplateFileMissing", {"language": language, "hazard_type": hazard_type, **kwargs})

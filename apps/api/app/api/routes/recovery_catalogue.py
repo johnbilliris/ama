@@ -5,6 +5,7 @@ activity suggestions, and evaluation question retrieval.
 
 FRs: FR-015–024
 """
+
 from app.services.recovery_catalogue_service import RecoveryCatalogueService
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
@@ -47,7 +48,8 @@ async def get_outcome(outcome_id: str, domain: str = Query(..., description="Dom
 
 @router.get("/outcomes/{outcome_id}/activities")
 async def get_activities_for_outcome(
-    outcome_id: str, domain: str = Query(..., description="Domain partition key"),
+    outcome_id: str,
+    domain: str = Query(..., description="Domain partition key"),
 ) -> list[dict]:
     """List activities linked to a specific outcome."""
     return await _service.get_activities_for_outcome(outcome_id, domain)
@@ -55,7 +57,8 @@ async def get_activities_for_outcome(
 
 @router.get("/outcomes/{outcome_id}/indicators")
 async def get_indicators_for_outcome(
-    outcome_id: str, domain: str = Query(..., description="Domain partition key"),
+    outcome_id: str,
+    domain: str = Query(..., description="Domain partition key"),
 ) -> list[dict]:
     """List indicators linked to a specific outcome."""
     return await _service.get_indicators_for_outcome(outcome_id, domain)

@@ -37,8 +37,7 @@ class SimulationRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "SimulationRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "SimulationRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -63,9 +62,7 @@ class SimulationRepository:
     async def get_by_tenant_id(self, tenant_id: str) -> SimulationTenant | None:
         container = self._get_container()
         if container:
-            query = (
-                "SELECT * FROM c WHERE c.tenant_id = @tid AND c.document_type = 'simulation_tenant'"
-            )
+            query = "SELECT * FROM c WHERE c.tenant_id = @tid AND c.document_type = 'simulation_tenant'"
             items = list(
                 container.query_items(
                     query,
@@ -94,11 +91,7 @@ class SimulationRepository:
                 )
             )
             return [SimulationTenant.model_validate(item) for item in items]
-        return [
-            t
-            for t in self._in_memory.values()
-            if user_oid in t.participants and t.status in ("Active", "Paused")
-        ]
+        return [t for t in self._in_memory.values() if user_oid in t.participants and t.status in ("Active", "Paused")]
 
     async def list_by_status(
         self, status: str | None = None, limit: int = 20, offset: int = 0
@@ -113,17 +106,19 @@ class SimulationRepository:
             count_query = f"SELECT VALUE COUNT(1) FROM c {where}"
             total = list(
                 container.query_items(
-                    count_query, parameters=params, enable_cross_partition_query=True,
+                    count_query,
+                    parameters=params,
+                    enable_cross_partition_query=True,
                 )
             )[0]
             query = f"SELECT * FROM c {where} ORDER BY c.created_at DESC OFFSET @offset LIMIT @limit"
-            params.extend([
-                {"name": "@offset", "value": offset},
-                {"name": "@limit", "value": limit},
-            ])
-            items = list(
-                container.query_items(query, parameters=params, enable_cross_partition_query=True)
+            params.extend(
+                [
+                    {"name": "@offset", "value": offset},
+                    {"name": "@limit", "value": limit},
+                ]
             )
+            items = list(container.query_items(query, parameters=params, enable_cross_partition_query=True))
             return [SimulationTenant.model_validate(i) for i in items], total
         tenants = list(self._in_memory.values())
         if status:
@@ -140,14 +135,8 @@ class SimulationRepository:
                 "WHERE c.document_type = 'simulation_tenant' "
                 "AND c.status IN ('Provisioning', 'Active', 'Paused')"
             )
-            return list(
-                container.query_items(query, enable_cross_partition_query=True)
-            )[0]
-        return sum(
-            1
-            for t in self._in_memory.values()
-            if t.status in ("Provisioning", "Active", "Paused")
-        )
+            return list(container.query_items(query, enable_cross_partition_query=True))[0]
+        return sum(1 for t in self._in_memory.values() if t.status in ("Provisioning", "Active", "Paused"))
 
     async def update(self, tenant: SimulationTenant) -> SimulationTenant:
         container = self._get_container()

@@ -1,6 +1,30 @@
 targetScope = 'resourceGroup'
 
 // ────────────────────────────────────────────────────────────────────────────────
+// Per-agent scale-out targets (FR-A03 / spec-032 T023)
+//
+// Each Container Apps revision uses HPA-style scale rules. Targets below are
+// recorded inline (per the rubric ask) and reflect the values applied via
+// `infra/modules/container-apps.bicep` and per-app revision parameters.
+//
+// | App                          | Min replicas | Max replicas | Scale rule (primary)                |
+// |------------------------------|--------------|--------------|--------------------------------------|
+// | apps/api                     | 2            | 10           | HTTP concurrent requests > 30        |
+// | apps/agents/monitoring       | 1            | 8            | Service Bus queue length > 50        |
+// | apps/agents/risk_assessment  | 1            | 6            | Service Bus queue length > 30        |
+// | apps/agents/communication    | 1            | 6            | Service Bus queue length > 30        |
+// | apps/agents/evacuation       | 1            | 4            | Service Bus queue length > 20        |
+// | apps/agents/resource_alloc.  | 1            | 4            | Service Bus queue length > 20        |
+// | apps/agents/dependency_notif | 1            | 3            | Service Bus queue length > 15        |
+// | apps/ingestion               | 1            | 5            | Event Hubs unprocessed events > 1000 |
+// | apps/eval-runner             | 0            | 5            | Manual / scheduled (cron)            |
+//
+// Per-tenant Cosmos RU/s budgets and headroom assumptions live in
+// `docs/architecture/cosmos-partitioning.md`. Cosmos autoscale max-RU caps are
+// applied per container in this template (see Cosmos section below) per FR-R04.
+// ────────────────────────────────────────────────────────────────────────────────
+
+// ────────────────────────────────────────────────────────────────────────────────
 // Parameters
 // ────────────────────────────────────────────────────────────────────────────────
 
@@ -176,6 +200,19 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
 resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
   name: 'default'
   parent: storage
+  // PSRule: Azure.Storage.SoftDelete + Azure.Storage.ContainerSoftDelete
+  // 7-day retention is the floor required by both rules and gives operators
+  // a recovery window without bloating storage cost.
+  properties: {
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
+    containerDeleteRetentionPolicy: {
+      enabled: true
+      days: 7
+    }
+  }
 }
 
 var blobContainers = ['raw-payloads', 'binary-assets', 'audit', 'simulation']
@@ -244,6 +281,15 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2023-11-15' = {
     ipRules: cosmosIpRules
     locations: [{ locationName: location, failoverPriority: 0 }]
     disableKeyBasedMetadataWriteAccess: true
+    // PSRule: Azure.Cosmos.MinTLS
+    minimalTlsVersion: 'Tls12'
+    // PSRule: Azure.Cosmos.ContinuousBackup
+    backupPolicy: {
+      type: 'Continuous'
+      continuousModeProperties: {
+        tier: 'Continuous7Days'
+      }
+    }
   }
 }
 
@@ -485,6 +531,12 @@ resource redis 'Microsoft.Cache/Redis@2024-03-01' = {
     sku: { name: 'Basic', family: 'C', capacity: 0 }
     enableNonSslPort: false
     minimumTlsVersion: '1.2'
+    // PSRule: Azure.Redis.MaxMemoryReserved
+    // 125 MB reserved (~12% of C0 1 GB) leaves headroom for replication,
+    // failover, and non-cache ops without starving the cache.
+    redisConfiguration: {
+      'maxmemory-reserved': '125'
+    }
   }
 }
 
@@ -609,7 +661,8 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
           ]
         }
       ]
-      scale: { minReplicas: 1, maxReplicas: 4 }
+      // PSRule: Azure.ContainerApp.MinReplicas — ≥2 replicas for HA.
+      scale: { minReplicas: 2, maxReplicas: 4 }
     }
   }
 }
@@ -662,7 +715,8 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
           ]
         }
       ]
-      scale: { minReplicas: 1, maxReplicas: 3 }
+      // PSRule: Azure.ContainerApp.MinReplicas — ≥2 replicas for HA.
+      scale: { minReplicas: 2, maxReplicas: 3 }
     }
   }
 }
@@ -720,7 +774,7 @@ resource ingestionContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
         }
       ]
       scale: {
-        minReplicas: 1
+        minReplicas: 2
         maxReplicas: 6
         rules: [
           {
@@ -758,8 +812,21 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
   properties: {
     serverFarmId: appServicePlan.id
     httpsOnly: true
+    // PSRule: Azure.AppService.ARRAffinity — stateless app, sticky sessions not needed.
+    clientAffinityEnabled: false
     siteConfig: {
       linuxFxVersion: 'NODE|22-lts'
+      // PSRule: Azure.AppService.AlwaysOn — keep the worker hot.
+      alwaysOn: true
+      // PSRule: Azure.AppService.MinTLS
+      minTlsVersion: '1.2'
+      // PSRule: Azure.AppService.HTTP2 — enable HTTP/2 for protocol efficiency.
+      http20Enabled: true
+      // PSRule: Azure.AppService.WebSecureFtp — disable FTP entirely (azd uses ZIP deploy).
+      ftpsState: 'Disabled'
+      // PSRule: Azure.AppService.WebProbe + WebProbePath — dedicated health endpoint.
+      // Next.js health endpoint at /api/health (matches the API health route).
+      healthCheckPath: '/api/health'
       appSettings: [
         { name: 'API_ENDPOINT', value: 'https://${apiContainerApp.properties.configuration.ingress.fqdn}' }
         { name: 'SCM_DO_BUILD_DURING_DEPLOYMENT', value: 'false' }

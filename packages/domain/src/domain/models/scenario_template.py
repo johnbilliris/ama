@@ -33,8 +33,16 @@ class ScenarioTemplate(BaseModel):
     template_id: str
     kind: str = "scenario_template"
     scenario_type: Literal[
-        "Bushfire", "Flood", "Cyclone", "Severe Storm", "Heatwave",
-        "Earthquake", "Tsunami", "Pandemic", "Other", "Cross-jurisdiction",
+        "Bushfire",
+        "Flood",
+        "Cyclone",
+        "Severe Storm",
+        "Heatwave",
+        "Earthquake",
+        "Tsunami",
+        "Pandemic",
+        "Other",
+        "Cross-jurisdiction",
     ]
     name: str
     description: str = ""

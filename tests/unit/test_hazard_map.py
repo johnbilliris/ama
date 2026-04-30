@@ -75,10 +75,7 @@ class TestHazardMapGenerator:
         result_low = generator.generate(signals, "bushfire", 1)
         result_high = generator.generate(signals, "bushfire", 5)
 
-        assert (
-            result_low["properties"]["radius_metres"]
-            < result_high["properties"]["radius_metres"]
-        )
+        assert result_low["properties"]["radius_metres"] < result_high["properties"]["radius_metres"]
 
     def test_geojson_properties_include_timestamp(self, generator):
         signals = [{"latitude": 0.0, "longitude": 0.0}]

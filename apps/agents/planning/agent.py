@@ -119,13 +119,15 @@ class PlanningAgent:
 
         now = datetime.now(UTC).isoformat()
         section = plan["plan_sections"].get(section_slug, {})
-        section.update({
-            "section_slug": section_slug,
-            "title": title or section.get("title", section_slug.replace("_", " ").title()),
-            "content": content,
-            "is_complete": bool(content),
-            "last_edited_at": now,
-        })
+        section.update(
+            {
+                "section_slug": section_slug,
+                "title": title or section.get("title", section_slug.replace("_", " ").title()),
+                "content": content,
+                "is_complete": bool(content),
+                "last_edited_at": now,
+            }
+        )
         plan["plan_sections"][section_slug] = section
         plan["updated_at"] = now
 
@@ -192,14 +194,16 @@ class PlanningAgent:
 
         now = datetime.now(UTC).isoformat()
         step = plan["process_steps"].get(step_number, {})
-        step.update({
-            "step_number": step_number,
-            "step_name": PLANNING_STEPS[step_number],
-            "is_complete": is_complete,
-            "completed_at": now if is_complete else None,
-            "completed_by": completed_by if is_complete else None,
-            "notes": notes,
-        })
+        step.update(
+            {
+                "step_number": step_number,
+                "step_name": PLANNING_STEPS[step_number],
+                "is_complete": is_complete,
+                "completed_at": now if is_complete else None,
+                "completed_by": completed_by if is_complete else None,
+                "notes": notes,
+            }
+        )
         plan["process_steps"][step_number] = step
         plan["updated_at"] = now
 

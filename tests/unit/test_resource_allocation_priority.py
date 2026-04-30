@@ -140,14 +140,22 @@ class TestDistributeProportionally:
     def test_equal_distribution(self):
         demands = [
             ResourceDemand(
-                demand_id="d1", incident_id="inc1", source_id="r1",
-                source_type="coordination_task", resource_type=ResourceType.vehicle,
-                resource_sub_type="bus", quantity=5,
+                demand_id="d1",
+                incident_id="inc1",
+                source_id="r1",
+                source_type="coordination_task",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="bus",
+                quantity=5,
             ),
             ResourceDemand(
-                demand_id="d2", incident_id="inc2", source_id="r2",
-                source_type="coordination_task", resource_type=ResourceType.vehicle,
-                resource_sub_type="bus", quantity=5,
+                demand_id="d2",
+                incident_id="inc2",
+                source_id="r2",
+                source_type="coordination_task",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="bus",
+                quantity=5,
             ),
         ]
         result = distribute_proportionally(demands, 10, ["inc1", "inc2"])
@@ -157,14 +165,22 @@ class TestDistributeProportionally:
     def test_proportional_distribution(self):
         demands = [
             ResourceDemand(
-                demand_id="d1", incident_id="inc1", source_id="r1",
-                source_type="coordination_task", resource_type=ResourceType.vehicle,
-                resource_sub_type="bus", quantity=6,
+                demand_id="d1",
+                incident_id="inc1",
+                source_id="r1",
+                source_type="coordination_task",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="bus",
+                quantity=6,
             ),
             ResourceDemand(
-                demand_id="d2", incident_id="inc2", source_id="r2",
-                source_type="coordination_task", resource_type=ResourceType.vehicle,
-                resource_sub_type="bus", quantity=4,
+                demand_id="d2",
+                incident_id="inc2",
+                source_id="r2",
+                source_type="coordination_task",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="bus",
+                quantity=4,
             ),
         ]
         result = distribute_proportionally(demands, 10, ["inc1", "inc2"])

@@ -12,14 +12,18 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 EvaluationDomain = Literal[
-    "governance", "community_engagement", "effectiveness",
-    "efficiency", "implementation",
+    "governance",
+    "community_engagement",
+    "effectiveness",
+    "efficiency",
+    "implementation",
 ]
 RecoveryDomain = Literal["overarching", "social", "economic", "built", "natural"]
 
 
 class Finding(BaseModel):
     """A single finding within an evaluation domain."""
+
     finding_text: str
     evidence_summary: str
     severity: Literal["positive", "neutral", "concern", "critical"]
@@ -28,6 +32,7 @@ class Finding(BaseModel):
 
 class DomainFinding(BaseModel):
     """Findings for a single evaluation domain (KEQ)."""
+
     evaluation_domain: EvaluationDomain
     questions_addressed: list[str] = Field(default_factory=list)
     findings: list[Finding] = Field(default_factory=list)
@@ -36,6 +41,7 @@ class DomainFinding(BaseModel):
 
 class Recommendation(BaseModel):
     """An actionable recommendation from the evaluation report."""
+
     text: str
     priority: Literal["high", "medium", "low"]
     target_domain: RecoveryDomain | None = None
@@ -44,6 +50,7 @@ class Recommendation(BaseModel):
 
 class DisseminationRecord(BaseModel):
     """Record of report dissemination to stakeholders."""
+
     recipient: str
     recipient_type: Literal["government", "community", "ngo", "research"]
     disseminated_at: datetime
@@ -55,6 +62,7 @@ class EvaluationReport(BaseModel):
 
     FRs: FR-014, SC-009 | Research: R-009
     """
+
     report_id: str
     framework_id: str
     incident_id: str

@@ -16,18 +16,22 @@ class TestNamedLocationRepository:
     @pytest.fixture
     def repo(self):
         repo = NamedLocationRepository()
-        repo.upsert(NamedLocation(
-            location_id="sensor-001",
-            display_name="Katoomba Fire Station",
-            latitude=-33.7139,
-            longitude=150.3112,
-        ))
-        repo.upsert(NamedLocation(
-            location_id="sensor-002",
-            display_name="Penrith Council",
-            latitude=-33.7507,
-            longitude=150.6875,
-        ))
+        repo.upsert(
+            NamedLocation(
+                location_id="sensor-001",
+                display_name="Katoomba Fire Station",
+                latitude=-33.7139,
+                longitude=150.3112,
+            )
+        )
+        repo.upsert(
+            NamedLocation(
+                location_id="sensor-002",
+                display_name="Penrith Council",
+                latitude=-33.7507,
+                longitude=150.6875,
+            )
+        )
         return repo
 
     def test_resolve_known_location(self, repo):
@@ -44,11 +48,13 @@ class TestNamedLocationRepository:
         assert len(locations) == 2
 
     def test_upsert_overwrites(self, repo):
-        repo.upsert(NamedLocation(
-            location_id="sensor-001",
-            display_name="Updated Name",
-            latitude=-33.72,
-            longitude=150.32,
-        ))
+        repo.upsert(
+            NamedLocation(
+                location_id="sensor-001",
+                display_name="Updated Name",
+                latitude=-33.72,
+                longitude=150.32,
+            )
+        )
         lat, lon = repo.resolve("sensor-001")
         assert lat == pytest.approx(-33.72)

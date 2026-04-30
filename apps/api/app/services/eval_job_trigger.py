@@ -84,20 +84,26 @@ def start_run_execution(
 
     env_list: list[dict[str, Any]] = []
     for ev in runner_container.env or []:
-        env_list.append({
-            "name": ev.name,
-            "value": getattr(ev, "value", None),
-            "secretRef": getattr(ev, "secret_ref", None),
-        })
+        env_list.append(
+            {
+                "name": ev.name,
+                "value": getattr(ev, "value", None),
+                "secretRef": getattr(ev, "secret_ref", None),
+            }
+        )
 
     resources = runner_container.resources
     cpu_value = float(resources.cpu) if resources and resources.cpu is not None else 1.0
     memory_value = resources.memory if resources and resources.memory else "2Gi"
     args_list = [
-        "--run-id", run_id,
-        "--dataset-id", dataset_id,
-        "--dataset-version", dataset_version,
-        "--mode", mode,
+        "--run-id",
+        run_id,
+        "--dataset-id",
+        dataset_id,
+        "--dataset-version",
+        dataset_version,
+        "--mode",
+        mode,
     ]
     if max_cases is not None and max_cases > 0:
         args_list.extend(["--max-cases", str(max_cases)])

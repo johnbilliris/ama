@@ -134,11 +134,7 @@ class TransportCoordinator:
             facility_name = facility.get("name", "Unknown facility")
             dest_name = nearest_aa.get("name", nearest_aa.get("assembly_area_id", ""))
             coords = facility.get("coordinates", {})
-            coord_str = (
-                f"({coords.get('lat', 0):.4f}, {coords.get('lng', 0):.4f})"
-                if coords
-                else ""
-            )
+            coord_str = f"({coords.get('lat', 0):.4f}, {coords.get('lng', 0):.4f})" if coords else ""
             special_str = ", ".join(special) if special else "none"
 
             notes = (
@@ -162,9 +158,7 @@ class TransportCoordinator:
         # Sort by priority: critical > immediate > high
         requirements.sort(
             key=lambda r: (
-                _PRIORITY_ORDER.get(
-                    PRIORITY_MAP.get(r.category.value, "high"), 3
-                ),
+                _PRIORITY_ORDER.get(PRIORITY_MAP.get(r.category.value, "high"), 3),
                 _zone_from_notes(r.notes),
             )
         )
@@ -192,9 +186,7 @@ class TransportCoordinator:
                     boundary = zone.get("boundary")
                     if boundary:
                         zone_poly = shape(boundary)
-                        if zone_poly.contains(point) or zone_poly.intersects(
-                            point.buffer(0.001)
-                        ):
+                        if zone_poly.contains(point) or zone_poly.intersects(point.buffer(0.001)):
                             return zone.get("zone_number")
         except Exception:
             pass
@@ -225,10 +217,9 @@ class TransportCoordinator:
             aa_coords = aa.get("coordinates", {})
             if not aa_coords:
                 continue
-            dist = (
-                (facility_coords.get("lat", 0) - aa_coords.get("lat", 0)) ** 2
-                + (facility_coords.get("lng", 0) - aa_coords.get("lng", 0)) ** 2
-            )
+            dist = (facility_coords.get("lat", 0) - aa_coords.get("lat", 0)) ** 2 + (
+                facility_coords.get("lng", 0) - aa_coords.get("lng", 0)
+            ) ** 2
             if dist < best_dist:
                 best_dist = dist
                 best = aa

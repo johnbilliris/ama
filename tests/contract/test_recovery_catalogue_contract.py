@@ -2,6 +2,7 @@
 
 Verifies endpoint existence, request/response shapes, and status codes.
 """
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -43,9 +44,12 @@ class TestCatalogueEndpoints:
         assert resp.status_code == 200
 
     def test_suggest_activities(self, client):
-        resp = client.post("/catalogue/suggest-activities", json={
-            "lagging_indicator_ids": ["aidr:social:community-health-levels:ind:1"],
-        })
+        resp = client.post(
+            "/catalogue/suggest-activities",
+            json={
+                "lagging_indicator_ids": ["aidr:social:community-health-levels:ind:1"],
+            },
+        )
         assert resp.status_code == 200
 
 
@@ -53,31 +57,50 @@ class TestAnalysisEndpoints:
     """Contract tests for AI analysis endpoints on the monitoring agent."""
 
     def test_cross_domain_analysis(self, client):
-        resp = client.post("/analysis/cross-domain", json={
-            "indicator_data": [
-                {"domain": "social", "indicator_name": "health", "trend": "negative",
-                 "value": 0.3, "target_value": 1.0},
-                {"domain": "economic", "indicator_name": "employment", "trend": "positive",
-                 "value": 0.8, "target_value": 1.0},
-            ],
-        })
+        resp = client.post(
+            "/analysis/cross-domain",
+            json={
+                "indicator_data": [
+                    {
+                        "domain": "social",
+                        "indicator_name": "health",
+                        "trend": "negative",
+                        "value": 0.3,
+                        "target_value": 1.0,
+                    },
+                    {
+                        "domain": "economic",
+                        "indicator_name": "employment",
+                        "trend": "positive",
+                        "value": 0.8,
+                        "target_value": 1.0,
+                    },
+                ],
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert "analysis_id" in data
         assert "correlations" in data
 
     def test_recommendations_endpoint(self, client):
-        resp = client.post("/analysis/recommendations", json={
-            "lagging_indicator_ids": ["aidr:social:community-health-levels:ind:1"],
-        })
+        resp = client.post(
+            "/analysis/recommendations",
+            json={
+                "lagging_indicator_ids": ["aidr:social:community-health-levels:ind:1"],
+            },
+        )
         assert resp.status_code == 200
 
     def test_community_summary_endpoint(self, client):
-        resp = client.post("/analysis/community-summary", json={
-            "indicator_data": [
-                {"domain": "social", "indicator_name": "health", "trend": "positive"},
-            ],
-        })
+        resp = client.post(
+            "/analysis/community-summary",
+            json={
+                "indicator_data": [
+                    {"domain": "social", "indicator_name": "health", "trend": "positive"},
+                ],
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert "summary" in data

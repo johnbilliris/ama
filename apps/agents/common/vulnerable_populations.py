@@ -44,8 +44,11 @@ GROUP_ACCESSIBILITY_NEEDS: dict[str, list[str]] = {
     "elderly": ["large_text", "simplified_language", "phone_alerts"],
     "children": ["simplified_language", "visual_aids"],
     "people_with_disabilities": [
-        "screen_reader", "audio_description", "sign_language",
-        "easy_read", "large_text",
+        "screen_reader",
+        "audio_description",
+        "sign_language",
+        "easy_read",
+        "large_text",
     ],
     "cald_communities": ["translated_content", "multilingual_support", "visual_aids"],
     "pregnant_breastfeeding_women": ["medical_facility_info", "priority_transport"],

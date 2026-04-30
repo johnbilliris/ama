@@ -155,9 +155,7 @@ class RouteComputer:
             if population > estimated_throughput:
                 # Need additional paths — penalise first path edges
                 for edge_id in path["edge_ids"]:
-                    self._edge_penalties[edge_id] = (
-                        self._edge_penalties.get(edge_id, 1.0) * MULTI_PATH_PENALTY
-                    )
+                    self._edge_penalties[edge_id] = self._edge_penalties.get(edge_id, 1.0) * MULTI_PATH_PENALTY
 
                 for _ in range(MAX_ALTERNATIVE_PATHS - 1):
                     alt_path = self._dijkstra(origin, destination, excluded_edges)
@@ -179,9 +177,7 @@ class RouteComputer:
 
                     # Penalise this path too
                     for edge_id in alt_path["edge_ids"]:
-                        self._edge_penalties[edge_id] = (
-                            self._edge_penalties.get(edge_id, 1.0) * MULTI_PATH_PENALTY
-                        )
+                        self._edge_penalties[edge_id] = self._edge_penalties.get(edge_id, 1.0) * MULTI_PATH_PENALTY
 
         # Distribute population across routes
         if len(routes) > 1:
@@ -251,9 +247,7 @@ class RouteComputer:
 
         return None  # No path found — shelter-in-place
 
-    def _reconstruct_path(
-        self, origin: str, destination: str, prev: dict[str, tuple[str, str]]
-    ) -> dict[str, Any]:
+    def _reconstruct_path(self, origin: str, destination: str, prev: dict[str, tuple[str, str]]) -> dict[str, Any]:
         """Reconstruct path from Dijkstra's predecessor map."""
         node_path: list[str] = []
         edge_ids: list[str] = []
@@ -268,9 +262,7 @@ class RouteComputer:
             edge = self._network.get_edge(edge_id)
             if edge:
                 total_distance += edge.distance_km
-                bottleneck_capacity = min(
-                    bottleneck_capacity, edge.capacity_vehicles_per_hour
-                )
+                bottleneck_capacity = min(bottleneck_capacity, edge.capacity_vehicles_per_hour)
             current = prev_node
 
         node_path.append(origin)
@@ -305,9 +297,7 @@ class RouteComputer:
 
         # Estimate travel time under evacuation load (30 km/h loaded speed)
         avg_speed_loaded = 30.0  # km/h under evacuation load
-        loaded_time_min = (
-            (total_distance / avg_speed_loaded) * 60 if total_distance > 0 else 0.0
-        )
+        loaded_time_min = (total_distance / avg_speed_loaded) * 60 if total_distance > 0 else 0.0
 
         # Estimate utilisation as congestion_risk_pct (0-100)
         congestion_risk_pct = 0
@@ -315,9 +305,7 @@ class RouteComputer:
             # Rough: assume evacuation over 2 hours, 2 people per vehicle
             vehicles_needed = population / 2
             vehicles_per_hour = vehicles_needed / 2
-            congestion_risk_pct = min(
-                100, int((vehicles_per_hour / bottleneck_capacity) * 100)
-            )
+            congestion_risk_pct = min(100, int((vehicles_per_hour / bottleneck_capacity) * 100))
 
         # Vehicle suitability assessment (stored in route_name for context)
         vehicle_suitability = self._assess_vehicle_suitability(path["edge_ids"])
@@ -327,9 +315,7 @@ class RouteComputer:
 
         route_id = f"route-{uuid4().hex[:8]}"
 
-        suitability_note = ", ".join(
-            f"{k}={'yes' if v else 'no'}" for k, v in vehicle_suitability.items()
-        )
+        suitability_note = ", ".join(f"{k}={'yes' if v else 'no'}" for k, v in vehicle_suitability.items())
         route_name = (
             f"Capacity-weighted path from Zone {zone_number} "
             f"to {assembly_area.name} ({hazard_type}; {suitability_note})"
@@ -413,9 +399,7 @@ class RouteComputer:
 
         return excluded
 
-    def _distribute_population(
-        self, routes: list[EvacuationRoute], total_population: int
-    ) -> None:
+    def _distribute_population(self, routes: list[EvacuationRoute], total_population: int) -> None:
         """Distribute population across multiple routes based on capacity (T025).
 
         Updates congestion_risk_pct on each route proportionally.
@@ -429,7 +413,5 @@ class RouteComputer:
             route_pop = int(total_population * fraction)
             if route.capacity_vehicles_per_hour > 0:
                 vehicles_per_hour = (route_pop / 2) / 2  # 2 persons/vehicle over 2 hours
-                utilisation_pct = min(
-                    100.0, (vehicles_per_hour / route.capacity_vehicles_per_hour) * 100
-                )
+                utilisation_pct = min(100.0, (vehicles_per_hour / route.capacity_vehicles_per_hour) * 100)
                 route.congestion_risk_pct = int(round(utilisation_pct))
