@@ -31,10 +31,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: 93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
 
       - name: Azure Login
-        uses: 2dd0bbf4064d5a1812889dc200bb8eed2597f82a # v3.x
+        uses: azure/login@2dd0bbf4064d5a1812889dc200bb8eed2597f82a # v3.x
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
