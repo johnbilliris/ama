@@ -31,10 +31,10 @@ This research log resolves the architectural and integration choices that the sp
 
 ---
 
-## R3 — ChatClient: `AzureOpenAIChatClient` (managed identity), NOT `FoundryAgent`
+## R3 — ChatClient: `agent_framework_openai.OpenAIChatClient` configured for Azure (managed identity), NOT `FoundryAgent`
 
-- **Decision**: All five MAF ChatAgents back onto `AzureOpenAIChatClient` constructed with `azure_ad_token_provider=get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")`.
-- **Rationale**: MAF documentation states (Agent Executor — Checkpointing): *"Checkpointing with agents that use server-side sessions (such as `FoundryAgent`) has limitations. Server-side session state is not captured in checkpoints and can be modified by subsequent runs."* Because FR-007 (resume from checkpoint without re-execution) and SC-002 (≥99/100 successful resumes) are P1 acceptance gates, we cannot use a ChatClient whose state is only partially captured by the checkpoint. `AzureOpenAIChatClient` keeps all conversational state client-side, where MAF's `AgentExecutor.on_checkpoint_save` already captures it. Managed-identity authentication satisfies FR-025 and Constitution NN-2.
+- **Decision**: All five MAF `Agent` instances back onto `agent_framework_openai.OpenAIChatClient` constructed with `azure_endpoint=<env_aoai_endpoint>, api_version="2024-10-21", credential=get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")`. There is no separate `AzureOpenAIChatClient` class in the GA-track Python SDK at 1.2.x — the Azure-OpenAI variant is the parameterised form of `OpenAIChatClient`.
+- **Rationale**: MAF documentation states (Agent Executor — Checkpointing): *"Checkpointing with agents that use server-side sessions (such as `FoundryAgent`) has limitations. Server-side session state is not captured in checkpoints and can be modified by subsequent runs."* Because FR-007 (resume from checkpoint without re-execution) and SC-002 (≥99/100 successful resumes) are P1 acceptance gates, we cannot use a ChatClient whose state is only partially captured by the checkpoint. `OpenAIChatClient` keeps all conversational state client-side, where MAF's `AgentExecutor.on_checkpoint_save` already captures it. Managed-identity authentication satisfies FR-025 and Constitution NN-2.
 - **Alternatives Considered**:
   - **`FoundryAgent`** — incompatible with reliable checkpointing (above).
   - **`OpenAIChatClient` (non-Azure)** — would require API-key auth (forbidden by FR-025) and break Australian data-sovereignty (NN-2).

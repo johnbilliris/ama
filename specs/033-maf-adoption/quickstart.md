@@ -16,10 +16,10 @@ pip install mcp                 # peer dep used by the routing-service MCP clien
 Verify:
 
 ```bash
-python -c "from agent_framework import ChatAgent, WorkflowBuilder, AzureOpenAIChatClient; print('OK')"
+python -c "from agent_framework import Agent, WorkflowBuilder; from agent_framework_openai import OpenAIChatClient; print('OK')"
 ```
 
-The `agent-framework[azure-ai]` extra brings in the Azure-OpenAI-backed ChatClient and Azure Monitor OpenTelemetry exporter wiring used by `apps/agents/maf_runtime/observability.py`.
+The `agent-framework[azure-ai]` extra brings in the OpenTelemetry Azure Monitor exporter wiring; `OpenAIChatClient` (configured via `azure_endpoint=…` + `credential=DefaultAzureCredential()`) is the SDK class our ADR-033-01 calls "the Azure-OpenAI-via-Entra-ID chat client". `Agent` is the SDK's canonical chat-agent class — see ADR-033-01 + the SDK reality discoveries documented during implementation.
 
 ---
 
@@ -214,7 +214,8 @@ invocations | join kind=fullouter audits on agent_name | project agent_name, spa
 
 | Concern | Path |
 |---|---|
-| ChatAgent definitions | `apps/agents/maf_runtime/agents/<agent>.py` |
+| MAF agent (`Agent`) modules | `apps/agents/maf_runtime/agents/<agent>_agent.py` |
+| MAF agent definitions (YAML) | `apps/agents/maf_runtime/agents/<agent>.yaml` |
 | Workflow definition | `apps/agents/maf_runtime/workflow/builder.py` |
 | Custom executors per step | `apps/agents/maf_runtime/workflow/executors/` |
 | HITL `RequestPort` ↔ spec 008 wrapping | `apps/agents/maf_runtime/workflow/hitl_request_port.py` |

@@ -45,7 +45,7 @@ Monorepo (per `plan.md → Project Structure`):
 - [X] T001 Add `agent-framework`, `agent-framework[azure-ai]`, and `mcp` dependencies to `apps/agents/pyproject.toml`
   - **Agents**: software-developer, ai-ml-engineer
   - **Tools**: edit, execute
-  - **Success**: `pip install -e apps/agents` succeeds in `.venv` and `python -c "from agent_framework import ChatAgent, WorkflowBuilder, AzureOpenAIChatClient; print('OK')"` prints `OK`.
+  - **Success**: `pip install -e apps/agents` succeeds in `.venv` and `python -c "from agent_framework import Agent, WorkflowBuilder; from agent_framework_openai import OpenAIChatClient; print('OK')"` prints `OK`. (NOTE: SDK 1.2.x exposes `Agent` — not `ChatAgent` — and the Azure-OpenAI client is the parameterised form of `OpenAIChatClient`; ADR-033-01 documents this.)
 
 - [X] T002 [P] Create the `apps/agents/maf_runtime/` package skeleton with `__init__.py` files for all sub-package directories: `agents/`, `workflow/`, `workflow/executors/` (nested), `checkpoint/`, `middleware/`, `mcp/`, `repositories/`, `equivalence/`, `equivalence/reports/` (nested) — 9 directories total (7 top-level, 2 nested)
   - **Agents**: software-developer
