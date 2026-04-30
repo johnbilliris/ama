@@ -38,7 +38,11 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push'
     environment: ${{ github.event.workflow_run.head_branch }}
-    timeout-minutes: 20
+    # Initial dev provision of the full DRH stack (Container Apps environment +
+    # api/agents/ingestion containers + Cosmos + Storage + OpenAI + App Service
+    # + monitoring) takes 25-35 minutes. 60 leaves headroom; subsequent
+    # provisions on existing resources are faster (~5-10 min).
+    timeout-minutes: 60
     concurrency:
       group: deploy-${{ github.event.workflow_run.head_branch }}
       cancel-in-progress: false
