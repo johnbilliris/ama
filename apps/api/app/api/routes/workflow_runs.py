@@ -81,12 +81,20 @@ async def list_runs(  # noqa: D401
     limit: int = Query(default=50, ge=1, le=200),
     continuation: str | None = Query(default=None),
 ) -> WorkflowRunsListResponse:
-    """List workflow runs with optional status / incident_id filters (FR-011, FR-011b)."""
+    """List workflow runs with optional status / incident_id filters (FR-011, FR-011b).
+
+    When a single status (or no status) is requested the Cosmos continuation
+    token is threaded end-to-end via ``list_page()``.  Multi-status requests
+    perform a client-side merge across statuses, so continuation is not
+    supported and the response will always have ``continuation=null``.
+    """
     repo = _get_workflow_run_repo()
-    if status_filter:
+    if status_filter and len(status_filter) > 1:
+        # Multi-status: merge results client-side; continuation is not supported.
         items: list[dict[str, Any]] = []
         for s in status_filter:
-            items.extend(repo.list(status=s, incident_id=incident_id, limit=limit))
+            page_items, _ = repo.list_page(status=s, incident_id=incident_id, limit=limit)
+            items.extend(page_items)
         # De-duplicate by id, preserve order, cap to limit.
         seen: set[str] = set()
         deduped: list[dict[str, Any]] = []
@@ -97,10 +105,16 @@ async def list_runs(  # noqa: D401
             deduped.append(it)
             if len(deduped) >= limit:
                 break
-        items = deduped
-    else:
-        items = repo.list(incident_id=incident_id, limit=limit)
-    return WorkflowRunsListResponse(items=items, continuation=continuation)
+        return WorkflowRunsListResponse(items=deduped, continuation=None)
+    # Single status (or no filter): thread the continuation token end-to-end.
+    single_status = status_filter[0] if status_filter else None
+    items, next_token = repo.list_page(
+        status=single_status,
+        incident_id=incident_id,
+        limit=limit,
+        continuation=continuation,
+    )
+    return WorkflowRunsListResponse(items=items, continuation=next_token)
 
 
 @router.get("/metrics/approval-gate", response_model=ApprovalGateMetricsResponse)

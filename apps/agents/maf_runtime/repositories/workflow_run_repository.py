@@ -204,6 +204,54 @@ class WorkflowRunRepository:
         items.sort(key=lambda d: d.get("started_at", ""), reverse=True)
         return items[:limit]
 
+    def list_page(
+        self,
+        *,
+        status: str | None = None,
+        incident_id: str | None = None,
+        limit: int = 50,
+        continuation: str | None = None,
+    ) -> tuple[list[dict[str, Any]], str | None]:
+        """Paginated variant of ``list()`` that threads Cosmos continuation tokens.
+
+        Returns a ``(items, next_continuation_token)`` tuple.  The token is
+        ``None`` when no further pages exist or when running against the
+        in-memory store (which doesn't have real token support).
+        """
+        container = self._container()
+        if container is not None:
+            clauses: list[str] = []
+            params: list[dict[str, Any]] = []
+            if status:
+                clauses.append("c.status=@s")
+                params.append({"name": "@s", "value": status})
+            if incident_id:
+                clauses.append("c.incident_id=@i")
+                params.append({"name": "@i", "value": incident_id})
+            where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+            q = f"SELECT * FROM c{where} ORDER BY c.started_at DESC"
+            try:
+                pager = container.query_items(
+                    query=q,
+                    parameters=params,
+                    enable_cross_partition_query=True,
+                    max_item_count=limit,
+                ).by_page(continuation_token=continuation)
+                page = next(iter(pager))
+                return list(page), pager.continuation_token
+            except Exception:  # noqa: BLE001
+                logger.exception("list_page() query failed")
+                return [], None
+        # In-memory fallback — continuation tokens are not supported.
+        with self._mem_lock:
+            items = list(self._in_memory.values())
+        if status:
+            items = [i for i in items if i["status"] == status]
+        if incident_id:
+            items = [i for i in items if i["incident_id"] == incident_id]
+        items.sort(key=lambda d: d.get("started_at", ""), reverse=True)
+        return items[:limit], None
+
     def update_status(
         self,
         run_id: str,
