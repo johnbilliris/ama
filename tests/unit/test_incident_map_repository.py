@@ -191,9 +191,7 @@ class TestQueryIncidents:
     @pytest.mark.asyncio
     async def test_combined_filters_and_logic(self, repo: IncidentMapRepository):
         """AND logic: type=bushfire AND status=active → only inc-001."""
-        items, total = await repo.query_incidents(
-            incident_types=["bushfire"], statuses=["active"]
-        )
+        items, total = await repo.query_incidents(incident_types=["bushfire"], statuses=["active"])
         assert total == 1
         assert items[0]["incident_id"] == "inc-001"
 

@@ -24,13 +24,18 @@ PLANNING_STEPS: dict[int, str] = {
 }
 
 EngagementMethod = Literal[
-    "workshop", "survey", "interview", "public_meeting",
-    "written_submission", "other",
+    "workshop",
+    "survey",
+    "interview",
+    "public_meeting",
+    "written_submission",
+    "other",
 ]
 
 
 class StepCompletion(BaseModel):
     """Completion status for a single planning process step."""
+
     step_number: int
     step_name: str
     is_complete: bool = False
@@ -49,6 +54,7 @@ class StepCompletion(BaseModel):
 
 class TeamMember(BaseModel):
     """A member of the planning project team."""
+
     name: str
     role: str
     organisation: str
@@ -57,6 +63,7 @@ class TeamMember(BaseModel):
 
 class EngagementEntry(BaseModel):
     """Record of stakeholder engagement during the planning process."""
+
     stakeholder: str
     method: EngagementMethod
     date: datetime
@@ -66,6 +73,7 @@ class EngagementEntry(BaseModel):
 
 class EndorsementApproval(BaseModel):
     """Record of endorsement approval by a designated authority."""
+
     authority_name: str
     authority_role: str
     approved: bool
@@ -78,6 +86,7 @@ class PlanningProcessRecord(BaseModel):
 
     FRs: FR-001 | Research: R-001
     """
+
     record_id: str
     plan_id: str
     current_step: int = 1

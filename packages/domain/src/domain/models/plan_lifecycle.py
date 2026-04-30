@@ -9,8 +9,13 @@ FRs: FR-005, FR-006, FR-007 | Research: R-002
 from typing import Literal
 
 PlanLifecycleState = Literal[
-    "draft", "in_consultation", "under_review", "endorsed",
-    "activated", "post_event_review", "superseded",
+    "draft",
+    "in_consultation",
+    "under_review",
+    "endorsed",
+    "activated",
+    "post_event_review",
+    "superseded",
 ]
 
 # Valid transitions: source → list[target]
@@ -72,10 +77,7 @@ def validate_plan_transition(
     if valid_targets is None:
         return False, f"Unknown plan lifecycle state: '{current_state}'"
     if target_state not in valid_targets:
-        return False, (
-            f"Invalid plan transition: '{current_state}' → '{target_state}'. "
-            f"Valid targets: {valid_targets}"
-        )
+        return False, (f"Invalid plan transition: '{current_state}' → '{target_state}'. Valid targets: {valid_targets}")
     # Check role authorization if a user_role was provided
     if user_role is not None:
         required_role = TRANSITION_ROLE_REQUIREMENTS.get((current_state, target_state))

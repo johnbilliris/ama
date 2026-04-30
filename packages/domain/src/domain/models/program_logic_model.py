@@ -17,6 +17,7 @@ ObjectiveType = Literal["sustainability", "resilience"]
 
 class LogicElement(BaseModel):
     """A single element in the program logic chain."""
+
     element_id: str
     description: str
     catalogue_activity_id: str | None = None
@@ -25,6 +26,7 @@ class LogicElement(BaseModel):
 
 class FinalOutcome(BaseModel):
     """A final outcome distinguishing sustainability vs resilience."""
+
     element_id: str
     description: str
     catalogue_outcome_id: str | None = None
@@ -34,6 +36,7 @@ class FinalOutcome(BaseModel):
 
 class OutcomeChainLink(BaseModel):
     """A directed link between two elements in the logic chain."""
+
     from_element_id: str
     to_element_id: str
     link_type: Literal["produces", "contributes_to", "enables", "depends_on"]
@@ -44,6 +47,7 @@ class ProgramLogicModel(BaseModel):
 
     FRs: FR-010 | Research: R-005
     """
+
     model_id: str
     framework_id: str
     model_type: Literal["ex_ante", "ex_post"] = "ex_ante"

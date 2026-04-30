@@ -91,3 +91,21 @@ C4Container
 - [System context](system.md)
 - [Sequence: Monitoring → Risk → Communication](../sequence/monitoring-risk-comms.md)
 - [Cosmos partitioning math](../cosmos-partitioning.md)
+
+## Deployment topology
+
+Each environment (dev / staging / production) is a single Azure resource group inheriting:
+
+- A hub VNet with private DNS zones (per `infra/modules/private-endpoints.bicep`, T401 + T403 + T404 + T405 + T406).
+- A spoke VNet per app tier (apps/api, apps/agents, apps/web, apps/ingestion, apps/eval-runner).
+- Container Apps environment + workload identity per tier.
+- Cosmos DB account + Storage account + Key Vault Premium + Log Analytics workspace + App Insights.
+- Optional: Defender for Cloud + Sentinel (T407, T408 — production only).
+- Optional: Chaos Studio targets (T806 — staging only).
+
+## Component lifecycles
+
+- **Container Apps** revisions are immutable; deploys create a new revision and swap traffic via `cd.yml`. Revision retention preserves rollback per the model-rollback runbook.
+- **Cosmos containers** are versioned by ETag at the document level; PITR (continuous backup) gives 7-day point-in-time restore (FR-D04).
+- **Prompt artefacts** are versioned by semver in `packages/prompts/` and signed by cosign on every change (FR-AI09 + ADR-035).
+- **Foundry carve-out registry** is YAML in `infra/parameters/foundry-carveout.yaml`; mutations require 2 approver signatures (ADR-033).

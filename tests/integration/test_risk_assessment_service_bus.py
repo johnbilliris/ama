@@ -40,24 +40,26 @@ def _valid_handoff_json(
     incident_id: str = "inc-sb-001",
     source_agent: str = "monitoring",
 ) -> str:
-    return json.dumps({
-        "handoff_id": f"handoff-{incident_id}",
-        "incident_id": incident_id,
-        "source_agent": source_agent,
-        "target_agent": "risk_assessment",
-        "scope_key": f"live:{incident_id}",
-        "confidence": 0.85,
-        "payload": {
-            "signalSummary": {
-                "signal_ids": ["sig-001"],
+    return json.dumps(
+        {
+            "handoff_id": f"handoff-{incident_id}",
+            "incident_id": incident_id,
+            "source_agent": source_agent,
+            "target_agent": "risk_assessment",
+            "scope_key": f"live:{incident_id}",
+            "confidence": 0.85,
+            "payload": {
+                "signalSummary": {
+                    "signal_ids": ["sig-001"],
+                    "category": "fire",
+                    "sourceKind": "authoritative",
+                },
                 "category": "fire",
                 "sourceKind": "authoritative",
             },
-            "category": "fire",
-            "sourceKind": "authoritative",
-        },
-        "tenant_id": "live",
-    })
+            "tenant_id": "live",
+        }
+    )
 
 
 class _MockServiceBusMessage:
@@ -187,12 +189,7 @@ class TestPoisonMessageHandling:
 class TestQueueConsumerProcessesMultiple:
     def test_queue_consumer_processes_multiple(self) -> None:
         """Multiple messages processed in sequence."""
-        messages = [
-            _MockServiceBusMessage(
-                _valid_handoff_json(incident_id=f"inc-multi-{i}")
-            )
-            for i in range(5)
-        ]
+        messages = [_MockServiceBusMessage(_valid_handoff_json(incident_id=f"inc-multi-{i}")) for i in range(5)]
 
         config = _make_config()
         processed_ids: list[str] = []

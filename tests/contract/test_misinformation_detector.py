@@ -56,10 +56,12 @@ class TestBurstDetection:
         signals = []
         for i in range(25):
             t = base_time + timedelta(seconds=i * 20)
-            signals.append(_make_signal(
-                text=f"Fire spotted near Blue Mountains #{i}",
-                occurred_at=t.isoformat(),
-            ))
+            signals.append(
+                _make_signal(
+                    text=f"Fire spotted near Blue Mountains #{i}",
+                    occurred_at=t.isoformat(),
+                )
+            )
 
         flagged = detector.burst_detection(signals, threshold=20, window_minutes=10)
         assert len(flagged) >= 20

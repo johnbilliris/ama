@@ -1,4 +1,3 @@
-
 import pytest
 
 from apps.api.app.services.ingestion.pipeline_base import IngestionPipelineBase
@@ -58,6 +57,7 @@ class TestIngestionPipelineIntegration:
     @pytest.mark.asyncio
     async def test_dedup_skips_duplicate_payloads(self):
         from apps.api.app.services.ingestion.dedup_service import DedupService
+
         dedup = DedupService()
         payloads = [{"id": "dup-1"}, {"id": "dup-1"}]
         pipeline = MockPipeline(payloads=payloads, dedup_service=dedup)

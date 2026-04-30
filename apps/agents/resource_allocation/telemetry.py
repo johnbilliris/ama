@@ -404,13 +404,19 @@ class CustomEventEmitter:
 
     @classmethod
     def handoff_received(
-        cls, handoff_id: str, incident_id: str, tenant_id: str,
+        cls,
+        handoff_id: str,
+        incident_id: str,
+        tenant_id: str,
     ) -> None:
-        cls._emit("HandoffReceived", {
-            "handoff_id": handoff_id,
-            "incident_id": incident_id,
-            "tenant_id": tenant_id,
-        })
+        cls._emit(
+            "HandoffReceived",
+            {
+                "handoff_id": handoff_id,
+                "incident_id": incident_id,
+                "tenant_id": tenant_id,
+            },
+        )
 
     @classmethod
     def plan_generated(
@@ -421,13 +427,16 @@ class CustomEventEmitter:
         assignment_count: int,
         shortfall_count: int,
     ) -> None:
-        cls._emit("PlanGenerated", {
-            "plan_id": plan_id,
-            "confidence": confidence,
-            "generation_method": generation_method,
-            "assignment_count": assignment_count,
-            "shortfall_count": shortfall_count,
-        })
+        cls._emit(
+            "PlanGenerated",
+            {
+                "plan_id": plan_id,
+                "confidence": confidence,
+                "generation_method": generation_method,
+                "assignment_count": assignment_count,
+                "shortfall_count": shortfall_count,
+            },
+        )
 
     @classmethod
     def shortfall_detected(
@@ -437,12 +446,15 @@ class CustomEventEmitter:
         resource_type: str,
         quantity_unmet: int,
     ) -> None:
-        cls._emit("ShortfallDetected", {
-            "plan_id": plan_id,
-            "demand_id": demand_id,
-            "resource_type": resource_type,
-            "quantity_unmet": quantity_unmet,
-        })
+        cls._emit(
+            "ShortfallDetected",
+            {
+                "plan_id": plan_id,
+                "demand_id": demand_id,
+                "resource_type": resource_type,
+                "quantity_unmet": quantity_unmet,
+            },
+        )
 
     @classmethod
     def cross_incident_conflict(
@@ -450,10 +462,13 @@ class CustomEventEmitter:
         resource_id: str,
         incident_ids: list[str],
     ) -> None:
-        cls._emit("CrossIncidentConflict", {
-            "resource_id": resource_id,
-            "incident_ids": ",".join(incident_ids),
-        })
+        cls._emit(
+            "CrossIncidentConflict",
+            {
+                "resource_id": resource_id,
+                "incident_ids": ",".join(incident_ids),
+            },
+        )
 
     @classmethod
     def reallocation_recommended(
@@ -463,12 +478,15 @@ class CustomEventEmitter:
         to_incident: str,
         resource_id: str,
     ) -> None:
-        cls._emit("ReallocationRecommended", {
-            "plan_id": plan_id,
-            "from_incident": from_incident,
-            "to_incident": to_incident,
-            "resource_id": resource_id,
-        })
+        cls._emit(
+            "ReallocationRecommended",
+            {
+                "plan_id": plan_id,
+                "from_incident": from_incident,
+                "to_incident": to_incident,
+                "resource_id": resource_id,
+            },
+        )
 
     @classmethod
     def override_applied(
@@ -478,19 +496,25 @@ class CustomEventEmitter:
         user_id: str,
         role: str,
     ) -> None:
-        cls._emit("OverrideApplied", {
-            "plan_id": plan_id,
-            "action": action,
-            "user_id": user_id,
-            "role": role,
-        })
+        cls._emit(
+            "OverrideApplied",
+            {
+                "plan_id": plan_id,
+                "action": action,
+                "user_id": user_id,
+                "role": role,
+            },
+        )
 
     @classmethod
     def plan_expired(cls, plan_id: str, incident_id: str) -> None:
-        cls._emit("PlanExpired", {
-            "plan_id": plan_id,
-            "incident_id": incident_id,
-        })
+        cls._emit(
+            "PlanExpired",
+            {
+                "plan_id": plan_id,
+                "incident_id": incident_id,
+            },
+        )
 
     @classmethod
     def degradation_event(
@@ -499,11 +523,14 @@ class CustomEventEmitter:
         fallback: str,
         reason: str,
     ) -> None:
-        cls._emit("DegradationEvent", {
-            "component": component,
-            "fallback": fallback,
-            "reason": reason,
-        })
+        cls._emit(
+            "DegradationEvent",
+            {
+                "component": component,
+                "fallback": fallback,
+                "reason": reason,
+            },
+        )
 
     @classmethod
     def sla_breach(
@@ -512,11 +539,14 @@ class CustomEventEmitter:
         processing_time_ms: float,
         sla_threshold_ms: float = 15000,
     ) -> None:
-        cls._emit("SLABreach", {
-            "handoff_id": handoff_id,
-            "processing_time_ms": processing_time_ms,
-            "sla_threshold_ms": sla_threshold_ms,
-        })
+        cls._emit(
+            "SLABreach",
+            {
+                "handoff_id": handoff_id,
+                "processing_time_ms": processing_time_ms,
+                "sla_threshold_ms": sla_threshold_ms,
+            },
+        )
 
     @classmethod
     def version_conflict(
@@ -524,10 +554,13 @@ class CustomEventEmitter:
         incident_id: str,
         retry_count: int,
     ) -> None:
-        cls._emit("VersionConflict", {
-            "incident_id": incident_id,
-            "retry_count": retry_count,
-        })
+        cls._emit(
+            "VersionConflict",
+            {
+                "incident_id": incident_id,
+                "retry_count": retry_count,
+            },
+        )
 
 
 # ---------------------------------------------------------------------------

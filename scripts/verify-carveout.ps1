@@ -34,13 +34,13 @@ if (-not (Test-Path $RegistryPath)) {
 $yamlText = Get-Content -Raw $RegistryPath
 $tmpFile = New-TemporaryFile
 $yamlText | Out-File -FilePath $tmpFile -Encoding utf8
-$json = python -c "import sys, yaml, json; print(json.dumps(yaml.safe_load(open(sys.argv[1]))))" $tmpFile
+$json = python -c "import sys, yaml, json, datetime; data = yaml.safe_load(open(sys.argv[1])); print(json.dumps(data, default=lambda o: o.isoformat() if isinstance(o, (datetime.datetime, datetime.date)) else str(o)))" $tmpFile
 Remove-Item $tmpFile -Force
 
 $registry = $json | ConvertFrom-Json -Depth 20
 
-if (-not $registry.reviewer_quorum -or $registry.reviewer_quorum -lt 2) {
-  Write-Error "Carve-out registry requires reviewer_quorum >= 2."
+if (-not $registry.reviewer_quorum -or [int]$registry.reviewer_quorum -lt 2) {
+  [Console]::Error.WriteLine("Carve-out registry requires reviewer_quorum >= 2.")
   exit 3
 }
 
@@ -70,7 +70,7 @@ foreach ($d in @($registry.deployments)) {
 }
 
 if ($errors.Count -gt 0) {
-  Write-Error ("Carve-out validation failed:`n - " + ($errors -join "`n - "))
+  [Console]::Error.WriteLine("Carve-out validation failed:`n - " + ($errors -join "`n - "))
   exit 4
 }
 

@@ -42,9 +42,7 @@ class IncidentFeatureProperties(BaseModel):
     incident_type: str
     status: str
     severity: str
-    severity_tier: str = Field(
-        ..., description="Mapped AWS tier: advice | watch | emergency"
-    )
+    severity_tier: str = Field(..., description="Mapped AWS tier: advice | watch | emergency")
     affected_jurisdiction_ids: list[str]
     participating_organisation_ids: list[str]
     started_at: str = Field(..., description="ISO 8601 datetime string")
@@ -71,9 +69,7 @@ class IncidentMapMetadata(BaseModel):
     """Pagination and count metadata for the map endpoint response."""
 
     total: int = Field(..., description="Total matching incidents with location")
-    unmapped_count: int = Field(
-        ..., description="Matching incidents missing location"
-    )
+    unmapped_count: int = Field(..., description="Matching incidents missing location")
     page: int = Field(..., description="Current page number (1-based)")
     page_size: int = Field(..., description="Items per page")
     fetched_at: str = Field(..., description="ISO 8601 timestamp of data retrieval")

@@ -61,8 +61,7 @@ class SimulationEventRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "SimulationEventRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "SimulationEventRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -83,10 +82,7 @@ class SimulationEventRepository:
         container = self._get_container()
         if container is None:
             return len(self._events.get(tenant_id, [])) + 1
-        query = (
-            "SELECT VALUE MAX(c.event_seq) FROM c "
-            "WHERE c.document_type = 'simulation_event' AND c.tenant_id = @tid"
-        )
+        query = "SELECT VALUE MAX(c.event_seq) FROM c WHERE c.document_type = 'simulation_event' AND c.tenant_id = @tid"
         try:
             items = list(
                 container.query_items(
@@ -149,17 +145,10 @@ class SimulationEventRepository:
         ]
         if not include_annotations:
             filters.append("c.event_type != 'annotation'")
-        query = (
-            f"SELECT TOP @limit * FROM c WHERE {' AND '.join(filters)} "
-            "ORDER BY c.event_seq ASC"
-        )
+        query = f"SELECT TOP @limit * FROM c WHERE {' AND '.join(filters)} ORDER BY c.event_seq ASC"
         params.append({"name": "@limit", "value": limit})
         try:
-            items = list(
-                container.query_items(
-                    query, parameters=params, partition_key=tenant_id
-                )
-            )
+            items = list(container.query_items(query, parameters=params, partition_key=tenant_id))
             return [SimulationEvent.model_validate(i) for i in items]
         except Exception as exc:  # noqa: BLE001
             logger.warning("list_events: Cosmos query failed (%s)", exc)
@@ -169,10 +158,7 @@ class SimulationEventRepository:
         container = self._get_container()
         if container is None:
             return len(self._events.get(tenant_id, []))
-        query = (
-            "SELECT VALUE COUNT(1) FROM c "
-            "WHERE c.document_type = 'simulation_event' AND c.tenant_id = @tid"
-        )
+        query = "SELECT VALUE COUNT(1) FROM c WHERE c.document_type = 'simulation_event' AND c.tenant_id = @tid"
         try:
             items = list(
                 container.query_items(
@@ -288,12 +274,8 @@ class SimulationEventRepository:
             logger.warning("list_snapshots: Cosmos query failed (%s)", exc)
             return []
 
-    def get_nearest_snapshot(
-        self, tenant_id: str, before_sim_time: float
-    ) -> PlaybackSnapshot | None:
-        snapshots = [
-            s for s in self.list_snapshots(tenant_id) if s.sim_time_offset <= before_sim_time
-        ]
+    def get_nearest_snapshot(self, tenant_id: str, before_sim_time: float) -> PlaybackSnapshot | None:
+        snapshots = [s for s in self.list_snapshots(tenant_id) if s.sim_time_offset <= before_sim_time]
         return snapshots[-1] if snapshots else None
 
     # ------------------------------------------------------------------
@@ -304,10 +286,7 @@ class SimulationEventRepository:
         container = self._get_container()
         if container is None:
             return self._scheduler_states.get(tenant_id)
-        query = (
-            "SELECT * FROM c WHERE c.document_type = 'signal_scheduler_state' "
-            "AND c.tenant_id = @tid"
-        )
+        query = "SELECT * FROM c WHERE c.document_type = 'signal_scheduler_state' AND c.tenant_id = @tid"
         try:
             items = list(
                 container.query_items(

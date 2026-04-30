@@ -75,6 +75,12 @@ All Phi outputs are persisted **only** in the AU-resident Cosmos `recommendation
 - **Re-region Phi to AU East via dedicated Foundry deployment** — not currently available in AU East; revisit when Microsoft adds AU support.
 - **Hash-only transit (one-way hash of the prompt)** — defeats the cost/quality comparison purpose of the shadow.
 
+## Alternatives Considered
+
+- **Re-region Phi to AU East via dedicated Foundry deployment** — not currently available in AU East; revisit when Microsoft adds AU support.
+- **Hash-only transit (one-way hash of the prompt)** — defeats the cost/quality comparison purpose of the shadow.
+- **Drop FR-AI03 entirely** — accept the Constitution-NN-2 carve-out is too narrow for our needs; rejected because the carve-out is explicitly designed for this scenario.
+
 ## Compliance mapping
 
 | Constitution clause | Honoured how |

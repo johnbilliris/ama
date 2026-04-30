@@ -58,7 +58,9 @@ class VersionCounter:
             except VersionConflictError:
                 logger.warning(
                     "Version conflict on attempt %d/%d for %s",
-                    attempt, _MAX_RETRIES, counter_id,
+                    attempt,
+                    _MAX_RETRIES,
+                    counter_id,
                 )
                 if attempt < _MAX_RETRIES:
                     # Jittered backoff (non-blocking)
@@ -68,7 +70,8 @@ class VersionCounter:
         # Exhausted retries — fallback to UUID-suffixed version
         logger.error(
             "All %d OCC retries exhausted for %s; using UUID fallback",
-            _MAX_RETRIES, counter_id,
+            _MAX_RETRIES,
+            counter_id,
         )
         return self._fallback_version(counter_id, incident_scope_key)
 

@@ -166,9 +166,9 @@ class TestBushfireEscalationToCommunication:
 
         # Check audit records for handoff_created targeting communication
         handoff_created_records = [
-            r for r in audit.records
-            if r.decision_type == DecisionType.handoff_created
-            and "communication" in r.escalation_targets
+            r
+            for r in audit.records
+            if r.decision_type == DecisionType.handoff_created and "communication" in r.escalation_targets
         ]
         assert len(handoff_created_records) >= 1, (
             "Expected at least one handoff_created audit record targeting communication"
@@ -197,31 +197,17 @@ class TestBushfireAuditTrailComplete:
         decision_types = [r.decision_type for r in audit.records]
 
         # Core pipeline stages that always produce audit records
-        assert DecisionType.handoff_received in decision_types, (
-            "Stage 1: handoff_received missing"
-        )
-        assert DecisionType.signals_retrieved in decision_types, (
-            "Stage 2: signals_retrieved missing"
-        )
-        assert DecisionType.assessment_generated in decision_types, (
-            "Stage 5: assessment_generated missing"
-        )
-        assert DecisionType.recommendation_generated in decision_types, (
-            "Stage 6: recommendation_generated missing"
-        )
+        assert DecisionType.handoff_received in decision_types, "Stage 1: handoff_received missing"
+        assert DecisionType.signals_retrieved in decision_types, "Stage 2: signals_retrieved missing"
+        assert DecisionType.assessment_generated in decision_types, "Stage 5: assessment_generated missing"
+        assert DecisionType.recommendation_generated in decision_types, "Stage 6: recommendation_generated missing"
 
         # With deliver_fn, escalation stages should produce records
-        assert DecisionType.handoff_created in decision_types, (
-            "Stage 7: handoff_created missing"
-        )
-        assert DecisionType.handoff_delivered in decision_types, (
-            "Stage 7: handoff_delivered missing"
-        )
+        assert DecisionType.handoff_created in decision_types, "Stage 7: handoff_created missing"
+        assert DecisionType.handoff_delivered in decision_types, "Stage 7: handoff_delivered missing"
 
         # Minimum record count: intake + signals + assessment + recommendations + handoffs
-        assert len(audit.records) >= 6, (
-            f"Expected ≥6 audit records for full pipeline, got {len(audit.records)}"
-        )
+        assert len(audit.records) >= 6, f"Expected ≥6 audit records for full pipeline, got {len(audit.records)}"
 
 
 # ---------------------------------------------------------------------------
@@ -243,10 +229,7 @@ class TestBushfireMultipleSignalsWeighted:
         assert result["status"] == "completed"
 
         # Verify signals_retrieved audit record references all signal IDs
-        sig_records = [
-            r for r in audit.records
-            if r.decision_type == DecisionType.signals_retrieved
-        ]
+        sig_records = [r for r in audit.records if r.decision_type == DecisionType.signals_retrieved]
         assert len(sig_records) == 1
         retrieved_ids = sig_records[0].input_signal_ids
         assert len(retrieved_ids) == 3

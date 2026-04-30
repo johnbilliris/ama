@@ -77,7 +77,7 @@ class RagService:
                 select=["chunk_id", "handbook_id", "chapter", "page", "content"],
             )
             for r in results:
-                content = (r.get("content") or "")
+                content = r.get("content") or ""
                 quote = content[:480] + ("…" if len(content) > 480 else "")
                 hits.append(
                     RagCitation(
@@ -101,11 +101,7 @@ class RagService:
         try:
             from apps.api.app.observability.metrics import emit_counter, emit_histogram
 
-            emit_histogram(
-                "rag.retrieval.lag_milliseconds", elapsed_ms, {"index": self._index_name}, unit="ms"
-            )
-            emit_counter(
-                "rag.retrieval.hit_count", hit_count, {"index": self._index_name}
-            )
+            emit_histogram("rag.retrieval.lag_milliseconds", elapsed_ms, {"index": self._index_name}, unit="ms")
+            emit_counter("rag.retrieval.hit_count", hit_count, {"index": self._index_name})
         except Exception:  # noqa: BLE001
             logger.debug("rag metrics emit failed", exc_info=True)

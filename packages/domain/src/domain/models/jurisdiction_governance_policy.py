@@ -25,9 +25,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-JurisdictionCode = Literal[
-    "act", "nsw", "vic", "qld", "sa", "wa", "tas", "nt", "commonwealth"
-]
+JurisdictionCode = Literal["act", "nsw", "vic", "qld", "sa", "wa", "tas", "nt", "commonwealth"]
 GovernanceAutonomyLevel = Literal["low", "standard", "high"]
 GovernanceAiimsFunction = Literal[
     "control",

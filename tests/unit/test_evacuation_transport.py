@@ -1,7 +1,5 @@
 """Tests for evacuation.transport — vehicle types, quantities, priorities (T031)."""
 
-
-
 from evacuation.models import VulnerabilityCategory
 from evacuation.transport import (
     _PRIORITY_ORDER,
@@ -195,12 +193,14 @@ class TestMissingFacilityData:
     def test_unknown_category_skipped(self):
         tc = TransportCoordinator()
         zones = [_make_zone()]
-        facilities = [{
-            "vulnerability_category": "unknown_category",
-            "capacity": 10,
-            "name": "Unknown",
-            "coordinates": {"lat": -16.92, "lng": 145.77},
-        }]
+        facilities = [
+            {
+                "vulnerability_category": "unknown_category",
+                "capacity": 10,
+                "name": "Unknown",
+                "coordinates": {"lat": -16.92, "lng": 145.77},
+            }
+        ]
         reqs = tc.compute_transport_requirements(zones, facilities, [_make_assembly_area()])
         assert reqs == []
 

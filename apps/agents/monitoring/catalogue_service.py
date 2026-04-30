@@ -5,6 +5,7 @@ indicators, and evaluation question lookup.
 
 FRs: FR-015–024, FR-026
 """
+
 import json
 import logging
 from pathlib import Path
@@ -13,7 +14,12 @@ logger = logging.getLogger(__name__)
 
 SEED_ROOT = (
     Path(__file__).resolve().parent.parent.parent.parent
-    / "packages" / "domain" / "src" / "domain" / "seed" / "recovery-catalogue"
+    / "packages"
+    / "domain"
+    / "src"
+    / "domain"
+    / "seed"
+    / "recovery-catalogue"
 )
 
 DOMAIN_FILES = ["overarching", "social", "economic", "built", "natural"]
@@ -106,15 +112,17 @@ class CatalogueService:
                 continue
             activities = self.get_activities_for_outcome(outcome["outcome_id"])
             for act in activities:
-                suggestions.append({
-                    "activity": act,
-                    "for_indicator": ind_id,
-                    "outcome": outcome["title"],
-                    "rationale": (
-                        f"Activity addresses lagging indicator '{indicator.get('title', ind_id)}'"
-                        f" under outcome '{outcome['title']}'"
-                    ),
-                })
+                suggestions.append(
+                    {
+                        "activity": act,
+                        "for_indicator": ind_id,
+                        "outcome": outcome["title"],
+                        "rationale": (
+                            f"Activity addresses lagging indicator '{indicator.get('title', ind_id)}'"
+                            f" under outcome '{outcome['title']}'"
+                        ),
+                    }
+                )
         return suggestions
 
     def get_evaluation_questions(self, domain: str) -> dict | None:

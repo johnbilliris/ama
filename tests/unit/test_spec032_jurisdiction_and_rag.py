@@ -99,8 +99,7 @@ class TestRagServiceStub:
                         "chapter": "3.2",
                         "page": 14,
                         "content": (
-                            "An evacuation may be phased to balance road network capacity"
-                            " and shelter availability."
+                            "An evacuation may be phased to balance road network capacity and shelter availability."
                         ),
                         "@search.score": 0.93,
                     }

@@ -80,3 +80,31 @@ sequenceDiagram
 - Saga / Process Manager doc — `docs/agents/saga-approval-workflow.md` (T311)
 - Decision-rights matrix — `docs/agents/decision-rights.md` (T027)
 - Multi-agent state graph — `apps/agents/tools/render_state_graph.py` (T709) generates a state-graph rendering that consumes the same configuration this sequence reflects.
+
+## Failure modes
+
+The sequence above is the happy path. The platform handles five distinct failure modes:
+
+1. **Confidence below threshold** → dead-letter; operator review queue.
+2. **LLM unavailable (circuit-breaker open)** → Strategy chain falls through Primary → Secondary → TemplateFallback (FR-P01 + FR-P03).
+3. **Content Safety blocks output** → audit event `alert_blocked_by_safety`; operator chooses revised draft or alternate channel.
+4. **Service Bus DLQ growth** → dead-letter poller redelivers up to 3× over 300 s window; thereafter manual intervention.
+5. **Kill-switch engaged** → in-flight handoff drains in ≤5 s; agent flips to template-only mode (FR-AG05).
+
+## Audit + replay
+
+Every transition appends a typed event to `timeline_events` (Cosmos PK `/incident_id`):
+
+| Event kind | Producer | Used for |
+|---|---|---|
+| `signal_triaged` | monitoring agent | reconstruction |
+| `recommendation_proposed` | risk-assessment agent | provenance trail |
+| `alert_drafted` | communication agent | alert audit |
+| `alert_blocked_by_safety` | communication agent | safety review |
+| `approved` / `rejected` / `escalated` | operator | NN-1 audit |
+| `publish` | API | regulatory record |
+| `dead_letter` | any agent | DLQ analysis |
+| `recovery` / `lessons_capture` | API | AAR |
+| `consensus_event` | consensus detector | multi-agent agreement |
+
+The audit ledger hash chain (US1) ensures these events cannot be silently rewritten — `/api/health/audit-integrity` verifies on demand.

@@ -147,12 +147,15 @@ def test_eval_job_trigger_not_configured_by_default(monkeypatch):
 
     importlib.reload(eval_job_trigger)
     assert eval_job_trigger.is_configured() is False
-    assert eval_job_trigger.start_run_execution(
-        run_id="r1",
-        dataset_id="d1",
-        dataset_version="1.0.0",
-        mode="ad-hoc",
-    ) is None
+    assert (
+        eval_job_trigger.start_run_execution(
+            run_id="r1",
+            dataset_id="d1",
+            dataset_version="1.0.0",
+            mode="ad-hoc",
+        )
+        is None
+    )
 
 
 def test_eval_job_trigger_is_configured_when_env_set(monkeypatch):

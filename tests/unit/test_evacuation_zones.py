@@ -103,11 +103,15 @@ class TestEdgeZoneClassification:
         # Line fully inside the hazard polygon
         line = LineString([(145.76, -16.94), (145.78, -16.92)])
 
-        zone_1_poly = Polygon([
-            (145.75, -16.95), (145.80, -16.95),
-            (145.80, -16.90), (145.75, -16.90),
-            (145.75, -16.95),
-        ])
+        zone_1_poly = Polygon(
+            [
+                (145.75, -16.95),
+                (145.80, -16.95),
+                (145.80, -16.90),
+                (145.75, -16.90),
+                (145.75, -16.95),
+            ]
+        )
         zone_2_poly = zone_1_poly.buffer(0.05)
         zone_3_poly = zone_2_poly.buffer(0.05)
 
@@ -120,11 +124,15 @@ class TestEdgeZoneClassification:
         # Line far from the hazard
         line = LineString([(150.0, -20.0), (150.1, -20.1)])
 
-        zone_1_poly = Polygon([
-            (145.75, -16.95), (145.80, -16.95),
-            (145.80, -16.90), (145.75, -16.90),
-            (145.75, -16.95),
-        ])
+        zone_1_poly = Polygon(
+            [
+                (145.75, -16.95),
+                (145.80, -16.95),
+                (145.80, -16.90),
+                (145.75, -16.90),
+                (145.75, -16.95),
+            ]
+        )
         zone_polys = [(1, zone_1_poly)]
         result = zc.classify_edge_zone(line, zone_polys)
         assert result is None
@@ -135,11 +143,15 @@ class TestEdgeZoneClassification:
         # Line that crosses the edge of Zone 1
         line = LineString([(145.79, -16.93), (145.85, -16.93)])
 
-        zone_1_poly = Polygon([
-            (145.75, -16.95), (145.80, -16.95),
-            (145.80, -16.90), (145.75, -16.90),
-            (145.75, -16.95),
-        ])
+        zone_1_poly = Polygon(
+            [
+                (145.75, -16.95),
+                (145.80, -16.95),
+                (145.80, -16.90),
+                (145.75, -16.90),
+                (145.75, -16.95),
+            ]
+        )
         zone_2_poly = zone_1_poly.buffer(0.05)
         zone_3_poly = zone_2_poly.buffer(0.05)
 
@@ -189,8 +201,10 @@ class TestMultiHazardMerging:
             "type": "Polygon",
             "coordinates": [
                 [
-                    [145.75, -16.95], [145.80, -16.95],
-                    [145.80, -16.90], [145.75, -16.90],
+                    [145.75, -16.95],
+                    [145.80, -16.95],
+                    [145.80, -16.90],
+                    [145.75, -16.90],
                     [145.75, -16.95],
                 ]
             ],
@@ -199,8 +213,10 @@ class TestMultiHazardMerging:
             "type": "Polygon",
             "coordinates": [
                 [
-                    [145.78, -16.93], [145.83, -16.93],
-                    [145.83, -16.88], [145.78, -16.88],
+                    [145.78, -16.93],
+                    [145.83, -16.93],
+                    [145.83, -16.88],
+                    [145.78, -16.88],
                     [145.78, -16.93],
                 ]
             ],

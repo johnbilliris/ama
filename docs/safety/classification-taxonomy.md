@@ -38,5 +38,22 @@ Quarterly review by Compliance Auditor + Security Engineer; classifier rules ver
 - ADR-033 — Phi shadow boundary
 - Microsoft Presidio: <https://github.com/microsoft/presidio>
 
+## Version history
+
+| Version | Date | Change |
+|---|---|---|
+| v1 | 2026-04-30 | Initial taxonomy with 9 classes; PSPF + AU PII patterns. Authored by Security Engineer + Compliance Auditor + AI/ML Engineer personas via spec-032 Stream-0. |
+
+## Test coverage
+
+- Unit tests: `tests/unit/test_spec032_agent_subpackages.py::TestClassification` — 7 cases covering PII redaction, PSPF deny, ATSI deny, hash-redact determinism, and AU log policy.
+- Integration tests (forward): `tests/integration/test_phi_shadow.py` — exercises the classifier via the model gateway end-to-end (deferred to Stream 6 application code).
+
+## Operational notes
+
+- The classification taxonomy is declarative; pattern updates ship as code under `apps/agents/common/safety/classification.py`.
+- Detection actions (`redact`, `hash_redact`, `deny`, `allow`) are policy-driven via `DEFAULT_NON_AU_TRANSIT_POLICY` and `DEFAULT_AU_LOG_POLICY`; per-jurisdiction overrides are a forward-looking capability tracked separately.
+- Override usage is **page-routed to the Security Engineer** and audit-logged. Sustained override usage warrants a taxonomy review (false-positive tightening).
+
 ---
 *Author: Security Engineer + Compliance Auditor + AI/ML Engineer personas via spec-032 Stream-0. Date: 2026-04-30.*

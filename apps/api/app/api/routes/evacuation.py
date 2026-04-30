@@ -24,11 +24,13 @@ from apps.agents.evacuation.stages import (
 from packages.domain.src.domain.models.timeline_event import TimelineEvent
 
 router = APIRouter(
-    prefix="/incidents/{incident_id}/evacuation", tags=["evacuation"],
+    prefix="/incidents/{incident_id}/evacuation",
+    tags=["evacuation"],
 )
 
 
 # --- Request models ---
+
 
 class CreateStageInput(BaseModel):
     plan_id: str
@@ -64,6 +66,7 @@ class ReturnUpdateInput(BaseModel):
 
 # --- Helpers ---
 
+
 def _require_incident(incident_id: str) -> None:
     if incident_id not in INCIDENTS:
         raise HTTPException(status_code=404, detail="Incident not found")
@@ -76,9 +79,11 @@ def _require_stage(stage_id: str) -> None:
 
 # --- Routes ---
 
+
 @router.post("/stages")
 async def create_stage(
-    incident_id: str, payload: CreateStageInput,
+    incident_id: str,
+    payload: CreateStageInput,
 ) -> dict[str, object]:
     _require_incident(incident_id)
     stage = create_initial_stage(
@@ -96,7 +101,9 @@ async def create_stage(
 
 @router.post("/stages/{stage_id}/transition")
 async def transition(
-    incident_id: str, stage_id: str, payload: TransitionInput,
+    incident_id: str,
+    stage_id: str,
+    payload: TransitionInput,
 ) -> dict[str, object]:
     _require_incident(incident_id)
     _require_stage(stage_id)
@@ -126,17 +133,15 @@ async def transition(
         authorized_by=payload.authorized_by,
         rationale=payload.rationale,
         is_re_entry_transition=is_re_entry(
-            stage.current_stage, payload.target_stage,
+            stage.current_stage,
+            payload.target_stage,
         ),
     )
     event = TimelineEvent(
         event_id=str(uuid4()),
         incident_id=incident_id,
         event_type="system",
-        summary=(
-            f"Evacuation stage transitioned from "
-            f"'{stage.current_stage}' to '{payload.target_stage}'"
-        ),
+        summary=(f"Evacuation stage transitioned from '{stage.current_stage}' to '{payload.target_stage}'"),
         actor=payload.authorized_by,
         payload=event_payload,
     )
@@ -154,7 +159,9 @@ async def get_stage(incident_id: str, stage_id: str) -> dict[str, object]:
 
 @router.put("/stages/{stage_id}/withdrawal")
 async def update_withdrawal(
-    incident_id: str, stage_id: str, payload: WithdrawalUpdateInput,
+    incident_id: str,
+    stage_id: str,
+    payload: WithdrawalUpdateInput,
 ) -> dict[str, object]:
     _require_incident(incident_id)
     _require_stage(stage_id)
@@ -170,7 +177,9 @@ async def update_withdrawal(
 
 @router.put("/stages/{stage_id}/shelter")
 async def update_shelter(
-    incident_id: str, stage_id: str, payload: ShelterUpdateInput,
+    incident_id: str,
+    stage_id: str,
+    payload: ShelterUpdateInput,
 ) -> dict[str, object]:
     _require_incident(incident_id)
     _require_stage(stage_id)
@@ -186,7 +195,9 @@ async def update_shelter(
 
 @router.put("/stages/{stage_id}/return")
 async def update_return(
-    incident_id: str, stage_id: str, payload: ReturnUpdateInput,
+    incident_id: str,
+    stage_id: str,
+    payload: ReturnUpdateInput,
 ) -> dict[str, object]:
     _require_incident(incident_id)
     _require_stage(stage_id)

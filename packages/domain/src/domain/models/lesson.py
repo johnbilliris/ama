@@ -22,13 +22,26 @@ class Lesson(BaseModel):
     scenario_run_id: str | None = None
     title: str
     description: str
-    aiims_function: Literal[
-        "control", "intelligence", "planning",
-        "operations", "logistics", "public_information",
-    ] | None = None
-    pprr_phase: Literal[
-        "prevention", "preparedness", "response", "recovery",
-    ] | None = None
+    aiims_function: (
+        Literal[
+            "control",
+            "intelligence",
+            "planning",
+            "operations",
+            "logistics",
+            "public_information",
+        ]
+        | None
+    ) = None
+    pprr_phase: (
+        Literal[
+            "prevention",
+            "preparedness",
+            "response",
+            "recovery",
+        ]
+        | None
+    ) = None
     severity: LessonSeverity = "medium"
     status: LessonStatus = "identified"
     assigned_to: str | None = None

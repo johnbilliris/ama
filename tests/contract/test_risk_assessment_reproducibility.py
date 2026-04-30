@@ -34,12 +34,22 @@ def test_identical_inputs_produce_identical_confidence_and_severity() -> None:
     config_hash = config.compute_config_hash()
 
     assessment1 = agent.generate_assessment(
-        "inc-001", signals, correlation, contradiction,
-        "spread_prediction", 1, config_hash,
+        "inc-001",
+        signals,
+        correlation,
+        contradiction,
+        "spread_prediction",
+        1,
+        config_hash,
     )
     assessment2 = agent.generate_assessment(
-        "inc-001", signals, correlation, contradiction,
-        "spread_prediction", 1, config_hash,
+        "inc-001",
+        signals,
+        correlation,
+        contradiction,
+        "spread_prediction",
+        1,
+        config_hash,
     )
 
     assert assessment1.confidence_adjusted == assessment2.confidence_adjusted
@@ -57,12 +67,22 @@ def test_identical_inputs_produce_identical_recommendation_types() -> None:
     config_hash = config.compute_config_hash()
 
     assessment1 = agent.generate_assessment(
-        "inc-001", signals, correlation, contradiction,
-        "spread_prediction", 1, config_hash,
+        "inc-001",
+        signals,
+        correlation,
+        contradiction,
+        "spread_prediction",
+        1,
+        config_hash,
     )
     assessment2 = agent.generate_assessment(
-        "inc-001", signals, correlation, contradiction,
-        "spread_prediction", 1, config_hash,
+        "inc-001",
+        signals,
+        correlation,
+        contradiction,
+        "spread_prediction",
+        1,
+        config_hash,
     )
 
     recs1 = agent.generate_recommendations(assessment1, signals)
@@ -87,8 +107,13 @@ def test_configuration_version_tracked_in_assessment() -> None:
     config_hash = config.compute_config_hash()
 
     assessment = agent.generate_assessment(
-        "inc-001", signals, correlation, contradiction,
-        "spread_prediction", 1, config_hash,
+        "inc-001",
+        signals,
+        correlation,
+        contradiction,
+        "spread_prediction",
+        1,
+        config_hash,
     )
 
     assert assessment.configuration_version == config_hash
@@ -126,8 +151,13 @@ def test_input_snapshot_contains_all_signals_with_provenance() -> None:
     config_hash = config.compute_config_hash()
 
     assessment = agent.generate_assessment(
-        "inc-001", signals, correlation, contradiction,
-        "spread_prediction", 1, config_hash,
+        "inc-001",
+        signals,
+        correlation,
+        contradiction,
+        "spread_prediction",
+        1,
+        config_hash,
     )
 
     snapshot = assessment.input_snapshot
@@ -159,8 +189,13 @@ def test_model_deployment_id_recorded() -> None:
     config_hash = config.compute_config_hash()
 
     assessment = agent.generate_assessment(
-        "inc-001", signals, correlation, contradiction,
-        "spread_prediction", 1, config_hash,
+        "inc-001",
+        signals,
+        correlation,
+        contradiction,
+        "spread_prediction",
+        1,
+        config_hash,
     )
 
     snapshot = assessment.input_snapshot

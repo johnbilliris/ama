@@ -48,8 +48,12 @@ class TestPublicAlertSchema:
         alert = self._make_alert()
         data = alert.model_dump(mode="json")
         required = [
-            "alert_id", "incident_id", "version", "status",
-            "content_blocks", "confidence",
+            "alert_id",
+            "incident_id",
+            "version",
+            "status",
+            "content_blocks",
+            "confidence",
         ]
         for field in required:
             assert field in data, f"Missing required field: {field}"

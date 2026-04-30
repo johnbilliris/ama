@@ -3,7 +3,6 @@
 Uses mocks — does not require actual Cosmos DB connection.
 """
 
-
 import pytest
 from evacuation.models import (
     DecisionType,

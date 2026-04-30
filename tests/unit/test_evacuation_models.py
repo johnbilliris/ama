@@ -1,6 +1,5 @@
 """Tests for evacuation.models — enums, validators, and serialisation (T012)."""
 
-
 import pytest
 from evacuation.models import (
     AuditBufferEntry,
@@ -319,12 +318,8 @@ class TestEvacuationDecisionRecord:
             EvacuationDecisionRecord(handoff_id="hf-5")
 
     def test_id_auto_generated(self):
-        r1 = EvacuationDecisionRecord(
-            handoff_id="hf-a", decision_type=DecisionType.handoff_received
-        )
-        r2 = EvacuationDecisionRecord(
-            handoff_id="hf-b", decision_type=DecisionType.handoff_received
-        )
+        r1 = EvacuationDecisionRecord(handoff_id="hf-a", decision_type=DecisionType.handoff_received)
+        r2 = EvacuationDecisionRecord(handoff_id="hf-b", decision_type=DecisionType.handoff_received)
         assert r1.id != r2.id  # UUIDs should be unique
 
 

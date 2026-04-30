@@ -26,10 +26,7 @@ def validate_transition(current: str, target: str) -> tuple[bool, str]:
     valid_targets = VALID_TRANSITIONS.get(current, [])
     if target in valid_targets:
         return True, ""
-    return False, (
-        f"Invalid evacuation transition: '{current}' → '{target}'. "
-        f"Valid targets: {valid_targets}"
-    )
+    return False, (f"Invalid evacuation transition: '{current}' → '{target}'. Valid targets: {valid_targets}")
 
 
 def is_re_entry(current: str, target: str) -> bool:

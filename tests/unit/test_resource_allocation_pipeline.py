@@ -55,22 +55,26 @@ def _make_pipeline(resources=None):
         for r in resources:
             inventory.add_resource(r)
     else:
-        inventory.add_resource(ResourceInventoryItem(
-            resource_id="veh-wt-001",
-            resource_type=ResourceType.vehicle,
-            resource_sub_type="water_tanker",
-            capabilities=["water_delivery", "firefighting_support"],
-            location={"lat": -33.8, "lon": 151.2},
-            status=ResourceStatus.available,
-        ))
-        inventory.add_resource(ResourceInventoryItem(
-            resource_id="per-para-001",
-            resource_type=ResourceType.personnel,
-            resource_sub_type="paramedic",
-            capabilities=["medical_treatment", "patient_stabilization", "triage"],
-            location={"lat": -33.87, "lon": 151.21},
-            status=ResourceStatus.available,
-        ))
+        inventory.add_resource(
+            ResourceInventoryItem(
+                resource_id="veh-wt-001",
+                resource_type=ResourceType.vehicle,
+                resource_sub_type="water_tanker",
+                capabilities=["water_delivery", "firefighting_support"],
+                location={"lat": -33.8, "lon": 151.2},
+                status=ResourceStatus.available,
+            )
+        )
+        inventory.add_resource(
+            ResourceInventoryItem(
+                resource_id="per-para-001",
+                resource_type=ResourceType.personnel,
+                resource_sub_type="paramedic",
+                capabilities=["medical_treatment", "patient_stabilization", "triage"],
+                location={"lat": -33.87, "lon": 151.21},
+                status=ResourceStatus.available,
+            )
+        )
 
     pipeline = AllocationProcessingPipeline(
         config=config,
@@ -122,26 +126,30 @@ class TestStage1Validation:
 class TestStage3DemandExtraction:
     def test_demands_extracted_from_summary(self):
         pipeline = _make_pipeline()
-        handoff = _make_handoff(payload={
-            "recommendationId": "rec-001",
-            "summary": "Flood impacts requiring water tankers and medical teams",
-            "assessmentId": "ha-001",
-        })
+        handoff = _make_handoff(
+            payload={
+                "recommendationId": "rec-001",
+                "summary": "Flood impacts requiring water tankers and medical teams",
+                "assessmentId": "ha-001",
+            }
+        )
         plan = pipeline.process_handoff(handoff)
         assert plan is not None
         assert len(plan.demands) > 0
 
     def test_transport_demands_from_evacuation(self):
-        pipeline = _make_pipeline(resources=[
-            ResourceInventoryItem(
-                resource_id="bus-001",
-                resource_type=ResourceType.vehicle,
-                resource_sub_type="wheelchair_accessible",
-                capabilities=["passenger_transport", "wheelchair_accessible"],
-                location={"lat": -33.87, "lon": 151.21},
-                status=ResourceStatus.available,
-            ),
-        ])
+        pipeline = _make_pipeline(
+            resources=[
+                ResourceInventoryItem(
+                    resource_id="bus-001",
+                    resource_type=ResourceType.vehicle,
+                    resource_sub_type="wheelchair_accessible",
+                    capabilities=["passenger_transport", "wheelchair_accessible"],
+                    location={"lat": -33.87, "lon": 151.21},
+                    status=ResourceStatus.available,
+                ),
+            ]
+        )
         handoff = _make_handoff(
             source_agent="evacuation",
             payload={

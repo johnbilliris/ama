@@ -23,7 +23,11 @@ _DEFAULT_RADII: dict[str, dict[str, float]] = {
 }
 
 _FALLBACK_RADII: dict[str, float] = {
-    "1": 1000, "2": 2500, "3": 5000, "4": 7500, "5": 10000,
+    "1": 1000,
+    "2": 2500,
+    "3": 5000,
+    "4": 7500,
+    "5": 10000,
 }
 
 
@@ -55,7 +59,8 @@ class HazardRadiusRepository:
         """Seed in-memory store with defaults."""
         for hazard_type, radii in _DEFAULT_RADII.items():
             self._local[hazard_type] = HazardRadiusLookup(
-                hazard_type=hazard_type, radii=radii,
+                hazard_type=hazard_type,
+                radii=radii,
             )
 
     def get_radius(self, hazard_type: str, severity: int | str) -> float:
@@ -71,7 +76,8 @@ class HazardRadiusRepository:
         if self._container is not None:
             try:
                 doc = self._container.read_item(
-                    item=hazard_type, partition_key=hazard_type,
+                    item=hazard_type,
+                    partition_key=hazard_type,
                 )
                 return HazardRadiusLookup(**doc)
             except Exception:
@@ -81,10 +87,12 @@ class HazardRadiusRepository:
     def list_all(self) -> list[HazardRadiusLookup]:
         """List all radius lookup entries."""
         if self._container is not None:
-            docs = list(self._container.query_items(
-                query="SELECT * FROM c",
-                enable_cross_partition_query=True,
-            ))
+            docs = list(
+                self._container.query_items(
+                    query="SELECT * FROM c",
+                    enable_cross_partition_query=True,
+                )
+            )
             return [HazardRadiusLookup(**doc) for doc in docs]
         return list(self._local.values())
 

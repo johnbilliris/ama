@@ -33,9 +33,7 @@ class AuditWriter:
     ) -> None:
         self._config = config or ResourceAllocationConfig()
         self._cosmos_client = cosmos_client
-        self._buffer: deque[AuditBufferEntry] = deque(
-            maxlen=self._config.audit_buffer_capacity
-        )
+        self._buffer: deque[AuditBufferEntry] = deque(maxlen=self._config.audit_buffer_capacity)
         self._file_path = self._config.audit_buffer_file_path
         self._tier: str = "cosmos"
         self._records_written: int = 0

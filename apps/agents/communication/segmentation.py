@@ -52,9 +52,7 @@ class AudienceSegmenter:
         segments = self._create_zone_segments(zones)
 
         # Step 2: Identify vulnerable populations within zones
-        vulnerable_segments = self._identify_vulnerable_populations(
-            zones, vulnerability_data
-        )
+        vulnerable_segments = self._identify_vulnerable_populations(zones, vulnerability_data)
         segments.extend(vulnerable_segments)
 
         # Step 3: Assign language preferences
@@ -76,9 +74,7 @@ class AudienceSegmenter:
         segments = []
         for zone in zones:
             zone_level = zone.get("level", 3)
-            urgency, priority = _ZONE_MAPPING.get(
-                zone_level, (UrgencyLevel.advisory, SegmentPriority.moderate)
-            )
+            urgency, priority = _ZONE_MAPPING.get(zone_level, (UrgencyLevel.advisory, SegmentPriority.moderate))
 
             segment = AudienceSegment(
                 segment_id=uuid4().hex,
@@ -157,13 +153,9 @@ class AudienceSegmenter:
                 # Use the most common language for this segment
                 dominant_lang = max(zone_langs, key=lambda k: zone_langs[k])
                 if dominant_lang in self._config.supported_languages:
-                    segment = segment.model_copy(
-                        update={"preferred_language": dominant_lang}
-                    )
+                    segment = segment.model_copy(update={"preferred_language": dominant_lang})
             else:
-                segment = segment.model_copy(
-                    update={"preferred_language": default_lang}
-                )
+                segment = segment.model_copy(update={"preferred_language": default_lang})
 
             updated.append(segment)
 
@@ -174,17 +166,11 @@ class AudienceSegmenter:
         segments: list[AudienceSegment],
     ) -> list[AudienceSegment]:
         """Assign delivery channels per segment."""
-        channels = [
-            ChannelType(ch) for ch in self._config.delivery_channels
-            if ch in ChannelType.__members__
-        ]
+        channels = [ChannelType(ch) for ch in self._config.delivery_channels if ch in ChannelType.__members__]
         if not channels:
             channels = [ChannelType.sms, ChannelType.push]
 
-        return [
-            segment.model_copy(update={"delivery_channels": channels})
-            for segment in segments
-        ]
+        return [segment.model_copy(update={"delivery_channels": channels}) for segment in segments]
 
     def _estimate_segment_sizes(
         self,
@@ -194,9 +180,7 @@ class AudienceSegmenter:
         updated = []
         for segment in segments:
             est = segment.population_estimate or segment.estimated_segment_size
-            segment = segment.model_copy(
-                update={"estimated_segment_size": max(est, 0)}
-            )
+            segment = segment.model_copy(update={"estimated_segment_size": max(est, 0)})
             updated.append(segment)
         return updated
 

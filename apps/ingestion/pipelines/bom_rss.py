@@ -61,7 +61,8 @@ class BomRssPipeline(IngestionPipelineBase):
                     continue
                 # Filter for this state's XML products (skip .amoc.xml metadata files)
                 state_xmls = [
-                    f for f in all_files
+                    f
+                    for f in all_files
                     if f.startswith(prefix)
                     and f.endswith(".xml")
                     and not f.endswith(".amoc.xml")
@@ -78,13 +79,15 @@ class BomRssPipeline(IngestionPipelineBase):
                             self._known_files.add(filename)
                             continue
 
-                        payloads.append({
-                            "xml": content,
-                            "filename": filename,
-                            "data_source_id": "bom-warnings",
-                            "source_uri": f"ftp://{BOM_FTP_HOST}{BOM_FTP_FWO_PATH}{filename}",
-                            "jurisdiction_id": state,
-                        })
+                        payloads.append(
+                            {
+                                "xml": content,
+                                "filename": filename,
+                                "data_source_id": "bom-warnings",
+                                "source_uri": f"ftp://{BOM_FTP_HOST}{BOM_FTP_FWO_PATH}{filename}",
+                                "jurisdiction_id": state,
+                            }
+                        )
                         self._known_files.add(filename)
                     except Exception as exc:
                         logger.warning("Failed to retrieve %s: %s", filename, exc)

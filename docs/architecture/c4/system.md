@@ -58,3 +58,25 @@ C4Context
 
 - [Container view](container.md)
 - [Sequence: Monitoring → Risk → Communication](../sequence/monitoring-risk-comms.md)
+
+## Trust boundaries
+
+The platform recognises four primary trust boundaries:
+
+1. **Public internet → Web Dashboard**: TLS termination at App Service / Front Door; Entra-authenticated session.
+2. **Web Dashboard → Coordination API**: same-origin or CORS-restricted; bearer token verified by API middleware.
+3. **Coordination API → data planes**: managed identity (no static credentials); Cosmos / AOAI / AI Search behind Private Endpoint.
+4. **Coordination API → Foundry carve-out endpoints (Phi)**: classification gateway (deny-by-default per ADR-033) + carve-out registry (deploy-time gate).
+
+Cross-tenant isolation is enforced at every boundary by tenant-scoped middleware + OPA policy (`tenant-isolation.rego`).
+
+## Constitution mapping
+
+| Constitution clause | How honoured in this view |
+|---|---|
+| I. Primacy of life | Operator-in-the-loop approval gates all life-safety publication; degraded-mode fallback never blocks publication. |
+| II. AIIMS | All five business agents map to AIIMS functions via the typed registry (FR-P05). |
+| III. Multi-hazard / multi-agency | Tenant boundary per jurisdiction; jurisdiction policy drives autonomy + language priorities. |
+| IV. Auditability | Audit ledger with hash chain (US1); every recommendation carries provenance. |
+| V. Warning + public information | Communication agent + Content Safety + AWS-compliant tier mapping. |
+| NN-2 Data sovereignty | All data planes AU East; Phi carve-out only via gateway. |

@@ -19,9 +19,7 @@ class EvacuationConfig:
     road_network_file_path: str = field(
         default_factory=lambda: os.getenv("ROAD_NETWORK_FILE_PATH", "data/road-network.json")
     )
-    road_data_staleness_hours: int = field(
-        default_factory=lambda: int(os.getenv("ROAD_DATA_STALENESS_HOURS", "6"))
-    )
+    road_data_staleness_hours: int = field(default_factory=lambda: int(os.getenv("ROAD_DATA_STALENESS_HOURS", "6")))
 
     # Handoff deduplication
     handoff_dedup_window_minutes: int = field(
@@ -50,9 +48,7 @@ class EvacuationConfig:
     hazard_expansion_replan_pct: int = field(
         default_factory=lambda: int(os.getenv("HAZARD_EXPANSION_REPLAN_PCT", "10"))
     )
-    progress_delay_replan_pct: int = field(
-        default_factory=lambda: int(os.getenv("PROGRESS_DELAY_REPLAN_PCT", "30"))
-    )
+    progress_delay_replan_pct: int = field(default_factory=lambda: int(os.getenv("PROGRESS_DELAY_REPLAN_PCT", "30")))
 
     # Confidence
     fallback_confidence_reduction: float = field(
@@ -77,86 +73,47 @@ class EvacuationConfig:
     )
 
     # Audit
-    audit_buffer_capacity: int = field(
-        default_factory=lambda: int(os.getenv("AUDIT_BUFFER_CAPACITY", "10000"))
-    )
+    audit_buffer_capacity: int = field(default_factory=lambda: int(os.getenv("AUDIT_BUFFER_CAPACITY", "10000")))
     audit_buffer_file_path: str = field(
-        default_factory=lambda: os.getenv(
-            "AUDIT_BUFFER_FILE_PATH", "/var/log/evacuation-agent/audit-buffer.jsonl"
-        )
+        default_factory=lambda: os.getenv("AUDIT_BUFFER_FILE_PATH", "/var/log/evacuation-agent/audit-buffer.jsonl")
     )
 
     # Summary
-    max_summary_length: int = field(
-        default_factory=lambda: int(os.getenv("MAX_SUMMARY_LENGTH", "1000"))
-    )
+    max_summary_length: int = field(default_factory=lambda: int(os.getenv("MAX_SUMMARY_LENGTH", "1000")))
 
     # Replanning rate limit
-    replan_rate_limit_seconds: int = field(
-        default_factory=lambda: int(os.getenv("REPLAN_RATE_LIMIT_SECONDS", "30"))
-    )
+    replan_rate_limit_seconds: int = field(default_factory=lambda: int(os.getenv("REPLAN_RATE_LIMIT_SECONDS", "30")))
 
     # Version
-    agent_version: str = field(
-        default_factory=lambda: os.getenv("AGENT_VERSION", "0.1.0")
-    )
+    agent_version: str = field(default_factory=lambda: os.getenv("AGENT_VERSION", "0.1.0"))
 
     # Azure service connection strings (optional — injected at runtime)
-    azure_cosmos_endpoint: str = field(
-        default_factory=lambda: os.getenv("AZURE_COSMOS_ENDPOINT", "")
-    )
-    azure_cosmos_key: str = field(
-        default_factory=lambda: os.getenv("AZURE_COSMOS_KEY", "")
-    )
-    azure_servicebus_connection: str = field(
-        default_factory=lambda: os.getenv("AZURE_SERVICEBUS_CONNECTION", "")
-    )
+    azure_cosmos_endpoint: str = field(default_factory=lambda: os.getenv("AZURE_COSMOS_ENDPOINT", ""))
+    azure_cosmos_key: str = field(default_factory=lambda: os.getenv("AZURE_COSMOS_KEY", ""))
+    azure_servicebus_connection: str = field(default_factory=lambda: os.getenv("AZURE_SERVICEBUS_CONNECTION", ""))
 
     # --- LLM Configuration ---
-    llm_model_tier: str = field(
-        default_factory=lambda: os.getenv("LLM_MODEL_TIER", "reasoning")
-    )
-    llm_temperature: float = field(
-        default_factory=lambda: float(os.getenv("LLM_TEMPERATURE", "0.0"))
-    )
-    llm_max_output_tokens: int = field(
-        default_factory=lambda: int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "4000"))
-    )
-    llm_confidence_threshold: float = field(
-        default_factory=lambda: float(os.getenv("LLM_CONFIDENCE_THRESHOLD", "0.7"))
-    )
+    llm_model_tier: str = field(default_factory=lambda: os.getenv("LLM_MODEL_TIER", "reasoning"))
+    llm_temperature: float = field(default_factory=lambda: float(os.getenv("LLM_TEMPERATURE", "0.0")))
+    llm_max_output_tokens: int = field(default_factory=lambda: int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "4000")))
+    llm_confidence_threshold: float = field(default_factory=lambda: float(os.getenv("LLM_CONFIDENCE_THRESHOLD", "0.7")))
     llm_fallback_reduction_factor: float = field(
-        default_factory=lambda: float(
-            os.getenv("LLM_FALLBACK_REDUCTION_FACTOR", "0.5")
-        )
+        default_factory=lambda: float(os.getenv("LLM_FALLBACK_REDUCTION_FACTOR", "0.5"))
     )
-    llm_monthly_budget_usd: float = field(
-        default_factory=lambda: float(os.getenv("LLM_MONTHLY_BUDGET_USD", "50.0"))
-    )
+    llm_monthly_budget_usd: float = field(default_factory=lambda: float(os.getenv("LLM_MONTHLY_BUDGET_USD", "50.0")))
 
     def __post_init__(self) -> None:
         """Validate LLM configuration values immediately after construction."""
         if self.llm_model_tier not in ("reasoning", "drafting"):
-            raise ValueError(
-                f"Invalid LLM_MODEL_TIER: {self.llm_model_tier}"
-            )
+            raise ValueError(f"Invalid LLM_MODEL_TIER: {self.llm_model_tier}")
         if not (0.0 <= self.llm_temperature <= 2.0):
-            raise ValueError(
-                f"LLM_TEMPERATURE must be 0.0–2.0, got {self.llm_temperature}"
-            )
+            raise ValueError(f"LLM_TEMPERATURE must be 0.0–2.0, got {self.llm_temperature}")
         if self.llm_max_output_tokens <= 0 or self.llm_max_output_tokens > 16384:
-            raise ValueError(
-                f"LLM_MAX_OUTPUT_TOKENS must be 1–16384, got {self.llm_max_output_tokens}"
-            )
+            raise ValueError(f"LLM_MAX_OUTPUT_TOKENS must be 1–16384, got {self.llm_max_output_tokens}")
         if not (0.0 <= self.llm_confidence_threshold <= 1.0):
-            raise ValueError(
-                f"LLM_CONFIDENCE_THRESHOLD must be 0.0–1.0, got {self.llm_confidence_threshold}"
-            )
+            raise ValueError(f"LLM_CONFIDENCE_THRESHOLD must be 0.0–1.0, got {self.llm_confidence_threshold}")
         if not (0.0 <= self.llm_fallback_reduction_factor <= 1.0):
-            raise ValueError(
-                "LLM_FALLBACK_REDUCTION_FACTOR must be 0.0–1.0, "
-                f"got {self.llm_fallback_reduction_factor}"
-            )
+            raise ValueError(f"LLM_FALLBACK_REDUCTION_FACTOR must be 0.0–1.0, got {self.llm_fallback_reduction_factor}")
 
     def mobilisation_time_for(self, hazard_type: str) -> int:
         """Return mobilisation time in minutes for a given hazard type."""

@@ -53,9 +53,11 @@ class TestLinearRegression:
 
     def test_single_point_returns_zero_slope(self):
         t0 = datetime(2026, 1, 1, tzinfo=UTC)
-        slope, intercept = _linear_regression([
-            TrendPoint(timestamp=t0, value=0.5, signal_id="s1"),
-        ])
+        slope, intercept = _linear_regression(
+            [
+                TrendPoint(timestamp=t0, value=0.5, signal_id="s1"),
+            ]
+        )
         assert slope == 0.0
         assert intercept == 0.5
 

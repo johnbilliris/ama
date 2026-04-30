@@ -26,82 +26,104 @@ class TestOverrideEndpoint:
     @pytest.fixture
     def client(self, app):
         from fastapi.testclient import TestClient
+
         return TestClient(app)
 
     def test_approve_override(self, client):
-        response = client.post("/override", json={
-            "plan_id": "rdp-inc001-v1",
-            "action": "approve",
-            "user_id": "cmd-001",
-            "role": "incident_commander",
-            "justification": "Plan meets requirements",
-        })
+        response = client.post(
+            "/override",
+            json={
+                "plan_id": "rdp-inc001-v1",
+                "action": "approve",
+                "user_id": "cmd-001",
+                "role": "incident_commander",
+                "justification": "Plan meets requirements",
+            },
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True
         assert data["action_applied"] == "approve"
 
     def test_reject_override(self, client):
-        response = client.post("/override", json={
-            "plan_id": "rdp-inc001-v1",
-            "action": "reject",
-            "user_id": "cmd-001",
-            "role": "incident_commander",
-            "justification": "Insufficient resources allocated",
-        })
+        response = client.post(
+            "/override",
+            json={
+                "plan_id": "rdp-inc001-v1",
+                "action": "reject",
+                "user_id": "cmd-001",
+                "role": "incident_commander",
+                "justification": "Insufficient resources allocated",
+            },
+        )
         assert response.status_code == 200
         assert response.json()["success"] is True
 
     def test_cancel_override(self, client):
-        response = client.post("/override", json={
-            "plan_id": "rdp-inc001-v1",
-            "action": "cancel",
-            "user_id": "cmd-001",
-            "role": "incident_commander",
-            "justification": "Incident downgraded",
-        })
+        response = client.post(
+            "/override",
+            json={
+                "plan_id": "rdp-inc001-v1",
+                "action": "cancel",
+                "user_id": "cmd-001",
+                "role": "incident_commander",
+                "justification": "Incident downgraded",
+            },
+        )
         assert response.status_code == 200
 
     def test_reassign_override(self, client):
-        response = client.post("/override", json={
-            "plan_id": "rdp-inc001-v1",
-            "action": "reassign",
-            "user_id": "cmd-001",
-            "role": "incident_commander",
-            "justification": "Better resource available",
-            "details": {"resource_id": "veh-amb-002", "demand_id": "dem-001"},
-        })
+        response = client.post(
+            "/override",
+            json={
+                "plan_id": "rdp-inc001-v1",
+                "action": "reassign",
+                "user_id": "cmd-001",
+                "role": "incident_commander",
+                "justification": "Better resource available",
+                "details": {"resource_id": "veh-amb-002", "demand_id": "dem-001"},
+            },
+        )
         assert response.status_code == 200
         assert response.json()["action_applied"] == "reassign"
 
     def test_invalid_action_rejected(self, client):
-        response = client.post("/override", json={
-            "plan_id": "rdp-inc001-v1",
-            "action": "invalid_action",
-            "user_id": "cmd-001",
-            "role": "incident_commander",
-            "justification": "Testing",
-        })
+        response = client.post(
+            "/override",
+            json={
+                "plan_id": "rdp-inc001-v1",
+                "action": "invalid_action",
+                "user_id": "cmd-001",
+                "role": "incident_commander",
+                "justification": "Testing",
+            },
+        )
         assert response.status_code == 400
 
     def test_empty_justification_rejected(self, client):
-        response = client.post("/override", json={
-            "plan_id": "rdp-inc001-v1",
-            "action": "approve",
-            "user_id": "cmd-001",
-            "role": "incident_commander",
-            "justification": "   ",
-        })
+        response = client.post(
+            "/override",
+            json={
+                "plan_id": "rdp-inc001-v1",
+                "action": "approve",
+                "user_id": "cmd-001",
+                "role": "incident_commander",
+                "justification": "   ",
+            },
+        )
         assert response.status_code == 400
 
     def test_override_returns_record_id(self, client):
-        response = client.post("/override", json={
-            "plan_id": "rdp-inc001-v1",
-            "action": "approve",
-            "user_id": "cmd-001",
-            "role": "incident_commander",
-            "justification": "Approved after review",
-        })
+        response = client.post(
+            "/override",
+            json={
+                "plan_id": "rdp-inc001-v1",
+                "action": "approve",
+                "user_id": "cmd-001",
+                "role": "incident_commander",
+                "justification": "Approved after review",
+            },
+        )
         data = response.json()
         assert data["override_record_id"] is not None
 
@@ -115,6 +137,7 @@ class TestHealthEndpoint:
         agent = ResourceAllocationAgent(config=config)
         app = create_app(agent=agent, config=config)
         from fastapi.testclient import TestClient
+
         return TestClient(app)
 
     def test_health_returns_200(self, client):

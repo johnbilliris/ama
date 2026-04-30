@@ -8,37 +8,37 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         pipeline_id="bom-warnings",
         source_class="authoritative",
         data_source_ids=["bom-warnings"],
-        poll_interval_seconds=120,      # event-driven; FTP files persist 8h+
+        poll_interval_seconds=120,  # event-driven; FTP files persist 8h+
         endpoint_url="ftp://ftp.bom.gov.au/anon/gen/fwo/",
         endpoint_format="xml_bom",
-        dedup_ttl_seconds=28800,        # 8h — match FTP file retention
+        dedup_ttl_seconds=28800,  # 8h — match FTP file retention
     ),
     IngestionPipelineConfig(
         pipeline_id="bom-forecasts",
         source_class="authoritative",
         data_source_ids=["bom-forecasts"],
-        poll_interval_seconds=1800,     # published hourly; poll every 30min
+        poll_interval_seconds=1800,  # published hourly; poll every 30min
         endpoint_url="ftp://ftp.bom.gov.au/anon/gen/fwo/",
         endpoint_format="xml_bom",
-        dedup_ttl_seconds=7200,         # 2h
+        dedup_ttl_seconds=7200,  # 2h
     ),
     IngestionPipelineConfig(
         pipeline_id="bom-observations-nsw",
         source_class="sensor",
         data_source_ids=["bom-observations"],
-        poll_interval_seconds=600,      # published ~10min; poll every 10min
+        poll_interval_seconds=600,  # published ~10min; poll every 10min
         endpoint_url="http://www.bom.gov.au/fwo/IDN60901/IDN60901.94768.json",
         endpoint_format="json",
-        dedup_ttl_seconds=1200,         # 20min
+        dedup_ttl_seconds=1200,  # 20min
     ),
     IngestionPipelineConfig(
         pipeline_id="bom-radar",
         source_class="satellite",
         data_source_ids=["bom-radar"],
-        poll_interval_seconds=300,      # published every 5min; poll matches
+        poll_interval_seconds=300,  # published every 5min; poll matches
         endpoint_url="ftp://ftp.bom.gov.au/anon/gen/radar/",
         endpoint_format="png",
-        dedup_ttl_seconds=600,          # 10min
+        dedup_ttl_seconds=600,  # 10min
     ),
     IngestionPipelineConfig(
         pipeline_id="bom-flood-warnings",
@@ -54,57 +54,57 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         pipeline_id="bom-rss",
         source_class="authoritative",
         data_source_ids=["bom-warnings"],
-        poll_interval_seconds=120,      # event-driven; same as bom-warnings
+        poll_interval_seconds=120,  # event-driven; same as bom-warnings
         endpoint_url="ftp://ftp.bom.gov.au/anon/gen/fwo/",
         endpoint_format="rss",
-        dedup_ttl_seconds=28800,        # 8h
+        dedup_ttl_seconds=28800,  # 8h
     ),
     # --- Geoscience Australia ---
     IngestionPipelineConfig(
         pipeline_id="ga-earthquakes",
         source_class="authoritative",
         data_source_ids=["ga-earthquake-alerts"],
-        poll_interval_seconds=300,      # USGS feed updates ~5min
+        poll_interval_seconds=300,  # USGS feed updates ~5min
         endpoint_url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson",
         endpoint_format="geojson",
-        dedup_ttl_seconds=86400,        # 24h — day feed
+        dedup_ttl_seconds=86400,  # 24h — day feed
     ),
     IngestionPipelineConfig(
         pipeline_id="ga-tsunami",
         source_class="authoritative",
         data_source_ids=["ga-tsunami-warnings"],
-        poll_interval_seconds=120,      # event-driven; poll every 2min
+        poll_interval_seconds=120,  # event-driven; poll every 2min
         endpoint_url="ftp://ftp.bom.gov.au/anon/gen/fwo/",
         endpoint_format="cap_xml",
-        dedup_ttl_seconds=28800,        # 8h
+        dedup_ttl_seconds=28800,  # 8h
     ),
     IngestionPipelineConfig(
         pipeline_id="ga-hotspots",
         source_class="authoritative",
         data_source_ids=["ga-sentinel-hotspots"],
-        poll_interval_seconds=3600,     # published hourly; poll matches
+        poll_interval_seconds=3600,  # published hourly; poll matches
         endpoint_url="https://hotspots.dea.ga.gov.au/data/recent-hotspots.json",
         endpoint_format="geojson",
-        dedup_ttl_seconds=7200,         # 2h
+        dedup_ttl_seconds=7200,  # 2h
     ),
     # --- State fire services ---
     IngestionPipelineConfig(
         pipeline_id="nsw-rfs-fire",
         source_class="authoritative",
         data_source_ids=["nsw-rfs-fires-near-me"],
-        poll_interval_seconds=300,      # published ~5min; poll matches
+        poll_interval_seconds=300,  # published ~5min; poll matches
         endpoint_url="https://www.rfs.nsw.gov.au/feeds/majorIncidents.json",
         endpoint_format="geojson",
-        dedup_ttl_seconds=600,          # 10min
+        dedup_ttl_seconds=600,  # 10min
     ),
     IngestionPipelineConfig(
         pipeline_id="vic-cfa-fire",
         source_class="authoritative",
         data_source_ids=["vic-cfa"],
-        poll_interval_seconds=300,      # published ~5min
+        poll_interval_seconds=300,  # published ~5min
         endpoint_url="https://www.emergency.vic.gov.au/public/osom-geojson.json",
         endpoint_format="geojson",
-        dedup_ttl_seconds=600,          # 10min
+        dedup_ttl_seconds=600,  # 10min
     ),
     IngestionPipelineConfig(
         pipeline_id="qld-qfes-fire",
@@ -131,48 +131,48 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         pipeline_id="bom-aws-stations",
         source_class="sensor",
         data_source_ids=["bom-aws-stations"],
-        poll_interval_seconds=300,      # published every 5min; poll matches
+        poll_interval_seconds=300,  # published every 5min; poll matches
         endpoint_url="http://www.bom.gov.au/fwo/IDN60901/IDN60901.94767.json",
         endpoint_format="json",
-        dedup_ttl_seconds=600,          # 10min
+        dedup_ttl_seconds=600,  # 10min
     ),
     IngestionPipelineConfig(
         pipeline_id="bom-river-gauges",
         source_class="sensor",
         data_source_ids=["bom-river-gauges"],
-        poll_interval_seconds=900,      # published ~15min; poll every 15min
+        poll_interval_seconds=900,  # published ~15min; poll every 15min
         endpoint_url="http://www.bom.gov.au/waterdata/services",
         endpoint_format="json",
-        dedup_ttl_seconds=1800,         # 30min
+        dedup_ttl_seconds=1800,  # 30min
     ),
     IngestionPipelineConfig(
         pipeline_id="epa-air-quality",
         source_class="sensor",
         data_source_ids=["epa-air-quality"],
-        poll_interval_seconds=3600,     # published hourly; poll matches
+        poll_interval_seconds=3600,  # published hourly; poll matches
         endpoint_url="https://data.airquality.nsw.gov.au/api/Data/get_SiteDetails",
         endpoint_format="json",
-        dedup_ttl_seconds=7200,         # 2h
+        dedup_ttl_seconds=7200,  # 2h
     ),
     # --- Satellite ---
     IngestionPipelineConfig(
         pipeline_id="sentinel-satellite",
         source_class="satellite",
         data_source_ids=["sentinel-satellite"],
-        poll_interval_seconds=21600,    # published daily; poll every 6h
+        poll_interval_seconds=21600,  # published daily; poll every 6h
         endpoint_url="https://dataspace.copernicus.eu/",
         endpoint_format="geotiff",
-        dedup_ttl_seconds=86400,        # 24h
+        dedup_ttl_seconds=86400,  # 24h
         enabled=False,  # Copernicus Data Space requires OAuth2 registration
     ),
     IngestionPipelineConfig(
         pipeline_id="himawari-satellite",
         source_class="satellite",
         data_source_ids=["himawari-satellite"],
-        poll_interval_seconds=600,      # published every 10min; poll matches
+        poll_interval_seconds=600,  # published every 10min; poll matches
         endpoint_url="ftp://ftp.bom.gov.au/anon/gen/gms/",
         endpoint_format="geotiff",
-        dedup_ttl_seconds=1200,         # 20min
+        dedup_ttl_seconds=1200,  # 20min
     ),
     # --- Social (stubs — require API keys / OAuth, disabled until configured) ---
     IngestionPipelineConfig(

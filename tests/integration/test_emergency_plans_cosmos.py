@@ -74,11 +74,13 @@ class TestEmergencyPlanRepository:
     @pytest.mark.asyncio
     async def test_list_plans_with_filter(self, repo):
         for i in range(3):
-            await repo.create_plan({
-                "plan_id": f"ep-{i}",
-                "region_id": "r-nsw" if i < 2 else "r-vic",
-                "lifecycle_state": "draft",
-            })
+            await repo.create_plan(
+                {
+                    "plan_id": f"ep-{i}",
+                    "region_id": "r-nsw" if i < 2 else "r-vic",
+                    "lifecycle_state": "draft",
+                }
+            )
         nsw_plans = await repo.list_plans(region_id="r-nsw")
         assert len(nsw_plans) == 2
 
@@ -155,8 +157,11 @@ class TestEmergencyPlanService:
     async def test_update_section(self, svc):
         plan = await svc.create_plan(title="Test", region_id="r-1", hazard_types=["flood"])
         updated = await svc.update_section(
-            plan["plan_id"], "r-1", "authority",
-            title="Authority", content="Issued by NSW SES",
+            plan["plan_id"],
+            "r-1",
+            "authority",
+            title="Authority",
+            content="Issued by NSW SES",
         )
         section = updated["plan_sections"]["authority"]
         assert section["content"] == "Issued by NSW SES"
@@ -166,7 +171,8 @@ class TestEmergencyPlanService:
     async def test_transition_plan(self, svc):
         plan = await svc.create_plan(title="Test", region_id="r-1", hazard_types=["flood"])
         result = await svc.transition_plan(
-            plan["plan_id"], "r-1",
+            plan["plan_id"],
+            "r-1",
             target_state="in_consultation",
             user_role="planning_officer",
         )
@@ -178,7 +184,8 @@ class TestEmergencyPlanService:
         plan = await svc.create_plan(title="Test", region_id="r-1", hazard_types=["flood"])
         with pytest.raises(ValueError, match="Invalid plan transition"):
             await svc.transition_plan(
-                plan["plan_id"], "r-1",
+                plan["plan_id"],
+                "r-1",
                 target_state="endorsed",
                 user_role="planning_officer",
             )

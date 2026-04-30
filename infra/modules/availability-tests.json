@@ -1,0 +1,152 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "2352405535735035449"
+    }
+  },
+  "parameters": {
+    "appInsightsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Application Insights component name"
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location of the App Insights component"
+      }
+    },
+    "dashboardUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Public dashboard URL to probe"
+      }
+    },
+    "apiHealthUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Public API health URL"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Tags"
+      }
+    },
+    "testFrequencySeconds": {
+      "type": "int",
+      "defaultValue": 300,
+      "metadata": {
+        "description": "Test frequency in seconds (default 300 = every 5 min)"
+      }
+    },
+    "testTimeoutSeconds": {
+      "type": "int",
+      "defaultValue": 30,
+      "metadata": {
+        "description": "Test timeout in seconds"
+      }
+    },
+    "testLocations": {
+      "type": "array",
+      "defaultValue": [
+        {
+          "Id": "apac-au-syd-edge"
+        },
+        {
+          "Id": "apac-jp-kaw-edge"
+        },
+        {
+          "Id": "apac-sg-sin-azr"
+        },
+        {
+          "Id": "apac-hk-hkn-azr"
+        },
+        {
+          "Id": "us-ca-sjc-azr"
+        }
+      ],
+      "metadata": {
+        "description": "Geo-distributed test locations"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/webtests",
+      "apiVersion": "2022-06-15",
+      "name": "[format('avail-dashboard-{0}', parameters('appInsightsName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[union(parameters('tags'), createObject(format('hidden-link:{0}', resourceId('Microsoft.Insights/components', parameters('appInsightsName'))), 'Resource'))]",
+      "kind": "standard",
+      "properties": {
+        "SyntheticMonitorId": "[format('avail-dashboard-{0}', parameters('appInsightsName'))]",
+        "Name": "Disaster Response Dashboard availability",
+        "Description": "Spec-032 FR-O10 must-land probe of public dashboard URL.",
+        "Enabled": true,
+        "Frequency": "[parameters('testFrequencySeconds')]",
+        "Timeout": "[parameters('testTimeoutSeconds')]",
+        "Kind": "standard",
+        "RetryEnabled": true,
+        "Locations": "[parameters('testLocations')]",
+        "Request": {
+          "RequestUrl": "[parameters('dashboardUrl')]",
+          "HttpVerb": "GET",
+          "ParseDependentRequests": false,
+          "FollowRedirects": true
+        },
+        "ValidationRules": {
+          "ExpectedHttpStatusCode": 200,
+          "SSLCheck": true,
+          "SSLCertRemainingLifetimeCheck": 30
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/webtests",
+      "apiVersion": "2022-06-15",
+      "name": "[format('avail-api-{0}', parameters('appInsightsName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[union(parameters('tags'), createObject(format('hidden-link:{0}', resourceId('Microsoft.Insights/components', parameters('appInsightsName'))), 'Resource'))]",
+      "kind": "standard",
+      "properties": {
+        "SyntheticMonitorId": "[format('avail-api-{0}', parameters('appInsightsName'))]",
+        "Name": "Disaster Response API /api/health availability",
+        "Description": "Spec-032 FR-O10 must-land probe of API health endpoint.",
+        "Enabled": true,
+        "Frequency": "[parameters('testFrequencySeconds')]",
+        "Timeout": "[parameters('testTimeoutSeconds')]",
+        "Kind": "standard",
+        "RetryEnabled": true,
+        "Locations": "[parameters('testLocations')]",
+        "Request": {
+          "RequestUrl": "[parameters('apiHealthUrl')]",
+          "HttpVerb": "GET",
+          "ParseDependentRequests": false,
+          "FollowRedirects": false
+        },
+        "ValidationRules": {
+          "ExpectedHttpStatusCode": 200,
+          "SSLCheck": true
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "dashboardWebTestId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/webtests', format('avail-dashboard-{0}', parameters('appInsightsName')))]"
+    },
+    "apiWebTestId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/webtests', format('avail-api-{0}', parameters('appInsightsName')))]"
+    }
+  }
+}

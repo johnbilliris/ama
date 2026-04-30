@@ -56,7 +56,8 @@ async def list_data_sources(
     geographic_coverage: str | None = None,
 ) -> list[dict]:
     filters = {
-        k: v for k, v in {
+        k: v
+        for k, v in {
             "kind": kind,
             "sub_category": sub_category,
             "trust_tier": trust_tier,
@@ -64,7 +65,8 @@ async def list_data_sources(
             "governance_status": governance_status,
             "status": status,
             "geographic_coverage": geographic_coverage,
-        }.items() if v is not None
+        }.items()
+        if v is not None
     }
     sources = _service.list_sources(**filters)
     return [s.model_dump(mode="json") for s in sources]

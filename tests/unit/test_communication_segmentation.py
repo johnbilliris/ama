@@ -1,6 +1,5 @@
 """Tests for communication.segmentation — AudienceSegmenter."""
 
-
 from communication.models import SegmentPriority, UrgencyLevel
 from communication.segmentation import AudienceSegmenter
 
@@ -12,9 +11,7 @@ from communication.segmentation import AudienceSegmenter
 class TestZoneMapping:
     def test_zone_1_maps_to_immediate_high(self):
         segmenter = AudienceSegmenter()
-        segments = segmenter.segment_audience(
-            {"zones": [{"level": 1}]}
-        )
+        segments = segmenter.segment_audience({"zones": [{"level": 1}]})
         zone1 = [s for s in segments if s.zone_level == 1 and not s.vulnerability_categories]
         assert len(zone1) >= 1
         assert zone1[0].urgency_level == UrgencyLevel.immediate
@@ -22,9 +19,7 @@ class TestZoneMapping:
 
     def test_zone_2_maps_to_watch_moderate(self):
         segmenter = AudienceSegmenter()
-        segments = segmenter.segment_audience(
-            {"zones": [{"level": 2}]}
-        )
+        segments = segmenter.segment_audience({"zones": [{"level": 2}]})
         zone2 = [s for s in segments if s.zone_level == 2 and not s.vulnerability_categories]
         assert len(zone2) >= 1
         assert zone2[0].urgency_level == UrgencyLevel.watch
@@ -32,9 +27,7 @@ class TestZoneMapping:
 
     def test_zone_3_maps_to_advisory_moderate(self):
         segmenter = AudienceSegmenter()
-        segments = segmenter.segment_audience(
-            {"zones": [{"level": 3}]}
-        )
+        segments = segmenter.segment_audience({"zones": [{"level": 3}]})
         zone3 = [s for s in segments if s.zone_level == 3 and not s.vulnerability_categories]
         assert len(zone3) >= 1
         assert zone3[0].urgency_level == UrgencyLevel.advisory
@@ -56,41 +49,35 @@ class TestZoneMapping:
 class TestVulnerablePopulations:
     def test_vulnerability_creates_critical_segment(self):
         segmenter = AudienceSegmenter()
-        segments = segmenter.segment_audience({
-            "zones": [{"level": 1}],
-            "vulnerability_data": {
-                "facilities": [
-                    {"zone_level": 1, "category": "aged_care", "population": 50}
-                ]
-            },
-        })
+        segments = segmenter.segment_audience(
+            {
+                "zones": [{"level": 1}],
+                "vulnerability_data": {"facilities": [{"zone_level": 1, "category": "aged_care", "population": 50}]},
+            }
+        )
         critical = [s for s in segments if s.priority == SegmentPriority.critical]
         assert len(critical) >= 1
         assert "aged_care" in critical[0].vulnerability_categories
 
     def test_hospital_vulnerability(self):
         segmenter = AudienceSegmenter()
-        segments = segmenter.segment_audience({
-            "zones": [{"level": 1}],
-            "vulnerability_data": {
-                "facilities": [
-                    {"zone_level": 1, "category": "hospital", "population": 200}
-                ]
-            },
-        })
+        segments = segmenter.segment_audience(
+            {
+                "zones": [{"level": 1}],
+                "vulnerability_data": {"facilities": [{"zone_level": 1, "category": "hospital", "population": 200}]},
+            }
+        )
         critical = [s for s in segments if s.priority == SegmentPriority.critical]
         assert len(critical) >= 1
 
     def test_invalid_category_ignored(self):
         segmenter = AudienceSegmenter()
-        segments = segmenter.segment_audience({
-            "zones": [{"level": 1}],
-            "vulnerability_data": {
-                "facilities": [
-                    {"zone_level": 1, "category": "unknown_category"}
-                ]
-            },
-        })
+        segments = segmenter.segment_audience(
+            {
+                "zones": [{"level": 1}],
+                "vulnerability_data": {"facilities": [{"zone_level": 1, "category": "unknown_category"}]},
+            }
+        )
         critical = [s for s in segments if s.priority == SegmentPriority.critical]
         assert len(critical) == 0
 
@@ -105,11 +92,7 @@ class TestLanguagePreference:
         segmenter = AudienceSegmenter()
         segments = segmenter.segment_audience(
             {"zones": [{"level": 1}]},
-            incident_demographics={
-                "language_distribution": {
-                    "zone_1": {"zh-Hans": 0.6, "en-AU": 0.4}
-                }
-            },
+            incident_demographics={"language_distribution": {"zone_1": {"zh-Hans": 0.6, "en-AU": 0.4}}},
         )
         zone1 = [s for s in segments if s.zone_level == 1 and not s.vulnerability_categories]
         assert zone1[0].preferred_language == "zh-Hans"
@@ -124,11 +107,7 @@ class TestLanguagePreference:
         segmenter = AudienceSegmenter()
         segments = segmenter.segment_audience(
             {"zones": [{"level": 1}]},
-            incident_demographics={
-                "language_distribution": {
-                    "zone_1": {"fr": 0.9}
-                }
-            },
+            incident_demographics={"language_distribution": {"zone_1": {"fr": 0.9}}},
         )
         zone1 = [s for s in segments if s.zone_level == 1]
         # French not in default supported_languages → falls back to en-AU
@@ -165,15 +144,9 @@ class TestMissingDataFlags:
         segments = segmenter.segment_audience(
             {
                 "zones": [{"level": 1}],
-                "vulnerability_data": {
-                    "facilities": [
-                        {"zone_level": 1, "category": "school", "population": 100}
-                    ]
-                },
+                "vulnerability_data": {"facilities": [{"zone_level": 1, "category": "school", "population": 100}]},
             },
-            incident_demographics={
-                "language_distribution": {"zone_1": {"en-AU": 0.9}}
-            },
+            incident_demographics={"language_distribution": {"zone_1": {"en-AU": 0.9}}},
         )
         vuln = [s for s in segments if s.vulnerability_categories]
         assert len(vuln) >= 1

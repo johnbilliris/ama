@@ -1,6 +1,5 @@
 """Unit tests for DashboardAggregationService (T033, T042, T060, T067, T073)."""
 
-
 from apps.api.app.services.dashboard_aggregation_service import DashboardAggregationService
 
 
@@ -55,7 +54,8 @@ class TestGetComplianceMatrix:
 
     def test_filter_by_compliance_status(self):
         result = self.service.get_compliance_matrix(
-            tenant_id="live", compliance_status="non_compliant",
+            tenant_id="live",
+            compliance_status="non_compliant",
         )
         assert hasattr(result, "filters_applied")
         assert result.filters_applied.get("compliance_status") == "non_compliant"

@@ -211,9 +211,7 @@ async def seed_simulation(tenant_id: str, body: SeedTemplateRequest, request: Re
     if tenant.status != "Active":
         raise HTTPException(status_code=409, detail="Simulation must be active to seed")
 
-    result = await _seeding.seed_from_template(
-        tenant_id, body.template_id, warp_speed=tenant.current_warp_speed
-    )
+    result = await _seeding.seed_from_template(tenant_id, body.template_id, warp_speed=tenant.current_warp_speed)
     return {"status": "accepted", **result}
 
 
@@ -229,9 +227,7 @@ async def seed_replay(tenant_id: str, body: SeedReplayRequest, request: Request)
     if tenant.status != "Active":
         raise HTTPException(status_code=409, detail="Simulation must be active to seed")
 
-    result = await _seeding.seed_from_replay(
-        tenant_id, body.incident_id, body.start, body.end, body.time_compression
-    )
+    result = await _seeding.seed_from_replay(tenant_id, body.incident_id, body.start, body.end, body.time_compression)
     return {"status": "accepted", **result}
 
 
@@ -285,9 +281,7 @@ class PauseResumeRequest(BaseModel):
 
 
 @router.post("/{tenant_id}/pause")
-async def pause_simulation(
-    tenant_id: str, request: Request, body: PauseResumeRequest | None = None
-) -> dict:
+async def pause_simulation(tenant_id: str, request: Request, body: PauseResumeRequest | None = None) -> dict:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -308,9 +302,7 @@ async def pause_simulation(
 
 
 @router.post("/{tenant_id}/resume")
-async def resume_simulation(
-    tenant_id: str, request: Request, body: PauseResumeRequest | None = None
-) -> dict:
+async def resume_simulation(tenant_id: str, request: Request, body: PauseResumeRequest | None = None) -> dict:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -336,9 +328,7 @@ class ArchiveRequest(BaseModel):
 
 
 @router.post("/{tenant_id}/archive", status_code=202)
-async def archive_simulation(
-    tenant_id: str, request: Request, body: ArchiveRequest | None = None
-) -> dict:
+async def archive_simulation(tenant_id: str, request: Request, body: ArchiveRequest | None = None) -> dict:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -363,9 +353,7 @@ class ChangeWarpSpeedRequest(BaseModel):
 
 
 @router.post("/{tenant_id}/warp-speed")
-async def change_warp_speed(
-    tenant_id: str, body: ChangeWarpSpeedRequest, request: Request
-) -> dict:
+async def change_warp_speed(tenant_id: str, body: ChangeWarpSpeedRequest, request: Request) -> dict:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -376,9 +364,7 @@ async def change_warp_speed(
         raise HTTPException(status_code=400, detail=str(exc))
 
     try:
-        tenant, previous = await _service.change_warp_speed(
-            tenant_id, body.warp_speed, actor_oid=principal.subject
-        )
+        tenant, previous = await _service.change_warp_speed(tenant_id, body.warp_speed, actor_oid=principal.subject)
     except PermissionError as exc:
         raise HTTPException(status_code=403, detail=str(exc))
     except ValueError as exc:

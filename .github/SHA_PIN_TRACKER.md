@@ -46,12 +46,13 @@ gh api repos/<owner>/<repo>/commits/<branch> --jq '.sha'
 
 ## Status
 
-**Tooling delivered** (this commit):
-- Dependabot enabled for `github-actions` ecosystem (T005) — opens weekly SHA-bump PRs.
-- This tracker establishes the inventory.
+**SHA pinning sweep COMPLETED 2026-04-30.** All `uses:` references in `.github/workflows/*.yml` now reference 40-character commit SHAs with the human-readable tag in a trailing comment. Dependabot will keep the SHAs current via weekly PRs (T005).
 
-**Sweep execution deferred** to a follow-up Dependabot-orchestrated PR series so that the initial SHAs are always current and don't go stale by the time spec-032 merges. The first Dependabot run after merge will create the pinning PRs for review.
+**Verification command** (returns 0 if any unpinned `uses:` references remain):
+```pwsh
+(Select-String -Path .github\workflows\*.yml -Pattern 'uses:\s+[^@]+@v?\d+(\.\d+)?(\.\d+)?\s*$').Count
+```
 
 ## Audited
 
-- (initial inventory) 2026-04-30 — johnbilliris / spec-032 Stream 1
+- 2026-04-30 — johnbilliris / spec-032 Stream 1 — 12 workflows updated, 16 distinct action references pinned to commit SHAs.

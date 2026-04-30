@@ -71,6 +71,7 @@ _VALID_ACTIONS = set(_ACTION_STATUS_MAP.keys())
 # API models (at module level for PEP 563 compatibility)
 # ---------------------------------------------------------------------------
 
+
 class HealthCheck(_BaseModel):
     name: str
     status: str
@@ -221,18 +222,19 @@ class ResourceAllocationAgent(LLMCallMixin):
             config_hash = self._config.compute_config_hash()
             incident_id = resource.assigned_incident_id or "unknown"
             scope_key = f"live:{incident_id}"
-            self._audit.write(AllocationDecisionRecord(
-                handoff_id=f"status-update-{resource_id}",
-                resource_id=resource_id,
-                decision_type=DecisionType.resource_status_updated,
-                decision_rationale=(
-                    f"Resource {resource_id} transitioned: "
-                    f"{old_status.value} → {new_status.value}"
-                ),
-                agent_version=self._config.agent_version,
-                configuration_version=config_hash,
-                incident_scope_key=scope_key,
-            ))
+            self._audit.write(
+                AllocationDecisionRecord(
+                    handoff_id=f"status-update-{resource_id}",
+                    resource_id=resource_id,
+                    decision_type=DecisionType.resource_status_updated,
+                    decision_rationale=(
+                        f"Resource {resource_id} transitioned: {old_status.value} → {new_status.value}"
+                    ),
+                    agent_version=self._config.agent_version,
+                    configuration_version=config_hash,
+                    incident_scope_key=scope_key,
+                )
+            )
 
         return success
 
@@ -290,66 +292,80 @@ def create_app(
         # Inventory loaded check
         if agent_instance:
             inv_loaded = agent_instance.inventory.resource_count > 0
-            checks.append(HealthCheck(
-                name="inventory_loaded",
-                status="healthy" if inv_loaded else "degraded",
-                details={"resource_count": agent_instance.inventory.resource_count},
-            ))
+            checks.append(
+                HealthCheck(
+                    name="inventory_loaded",
+                    status="healthy" if inv_loaded else "degraded",
+                    details={"resource_count": agent_instance.inventory.resource_count},
+                )
+            )
             if not inv_loaded:
                 overall = "degraded"
         else:
-            checks.append(HealthCheck(
-                name="inventory_loaded",
-                status="unhealthy",
-                details={"error": "Agent not initialised"},
-            ))
+            checks.append(
+                HealthCheck(
+                    name="inventory_loaded",
+                    status="unhealthy",
+                    details={"error": "Agent not initialised"},
+                )
+            )
             overall = "unhealthy"
 
         # LLM connectivity (optimistic — check last status)
-        checks.append(HealthCheck(
-            name="llm_connectivity",
-            status="healthy",
-            details={"note": "Not actively checked — relies on fallback"},
-        ))
+        checks.append(
+            HealthCheck(
+                name="llm_connectivity",
+                status="healthy",
+                details={"note": "Not actively checked — relies on fallback"},
+            )
+        )
 
         # Cosmos connectivity (check via audit status)
         if agent_instance:
             audit_status = agent_instance.audit_writer.get_status()
             cosmos_status = "healthy" if audit_status == "healthy" else "degraded"
-            checks.append(HealthCheck(
-                name="cosmos_connectivity",
-                status=cosmos_status,
-                details={"audit_tier": audit_status},
-            ))
+            checks.append(
+                HealthCheck(
+                    name="cosmos_connectivity",
+                    status=cosmos_status,
+                    details={"audit_tier": audit_status},
+                )
+            )
             if cosmos_status != "healthy":
                 overall = "degraded"
         else:
-            checks.append(HealthCheck(
-                name="cosmos_connectivity",
-                status="unhealthy",
-            ))
+            checks.append(
+                HealthCheck(
+                    name="cosmos_connectivity",
+                    status="unhealthy",
+                )
+            )
             overall = "unhealthy"
 
         # Audit store
         if agent_instance:
             audit_status = agent_instance.audit_writer.get_status()
-            checks.append(HealthCheck(
-                name="audit_store",
-                status=audit_status if audit_status != "buffering" else "degraded",
-                details={
-                    "tier": audit_status,
-                    "buffer_depth": agent_instance.audit_writer.buffer_depth,
-                },
-            ))
+            checks.append(
+                HealthCheck(
+                    name="audit_store",
+                    status=audit_status if audit_status != "buffering" else "degraded",
+                    details={
+                        "tier": audit_status,
+                        "buffer_depth": agent_instance.audit_writer.buffer_depth,
+                    },
+                )
+            )
 
         # Utilisation metrics
         if agent_instance:
             util = agent_instance.inventory.compute_utilisation()
-            checks.append(HealthCheck(
-                name="resource_utilisation",
-                status="healthy",
-                details=util,
-            ))
+            checks.append(
+                HealthCheck(
+                    name="resource_utilisation",
+                    status="healthy",
+                    details=util,
+                )
+            )
 
         return HealthResponse(
             status=overall,

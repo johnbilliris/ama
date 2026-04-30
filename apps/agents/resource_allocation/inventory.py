@@ -109,7 +109,9 @@ class ResourceInventoryManager:
         if new_status not in valid_targets:
             logger.warning(
                 "Invalid transition for %s: %s → %s (valid: %s)",
-                resource_id, current.value, new_status.value,
+                resource_id,
+                current.value,
+                new_status.value,
                 {s.value for s in valid_targets},
             )
             return False
@@ -126,12 +128,15 @@ class ResourceInventoryManager:
 
         logger.info(
             "Resource %s transitioned: %s → %s",
-            resource_id, current.value, new_status.value,
+            resource_id,
+            current.value,
+            new_status.value,
         )
         return True
 
     def flag_operational_limits(
-        self, resources: list[ResourceInventoryItem] | None = None,
+        self,
+        resources: list[ResourceInventoryItem] | None = None,
     ) -> list[ResourceInventoryItem]:
         """Flag resources that have hit operational limits.
 
@@ -305,10 +310,7 @@ class ResourceInventoryManager:
 
     def compute_inventory_hash(self) -> str:
         """Compute a hash of the current inventory state for reproducibility."""
-        items = sorted(
-            (r.resource_id, r.status.value, r.resource_type.value)
-            for r in self._resources.values()
-        )
+        items = sorted((r.resource_id, r.status.value, r.resource_type.value) for r in self._resources.values())
         return hashlib.sha256(str(items).encode()).hexdigest()
 
     @property

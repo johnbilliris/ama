@@ -16,18 +16,27 @@ def service() -> GovernanceRegistryService:
 
 def _register(service: GovernanceRegistryService, ds_id: str = "", kind: str = "authoritative") -> DataSource:
     ds_id = ds_id or f"ds-{uuid4().hex[:12]}"
-    return service.register_source(DataSource(
-        data_source_id=ds_id, name=f"Source {ds_id}", kind=kind,
-        sub_category="weather_climate", provider="Test",
-        trust_tier="tier_1_authoritative_government",
-    ), actor_id="t")
+    return service.register_source(
+        DataSource(
+            data_source_id=ds_id,
+            name=f"Source {ds_id}",
+            kind=kind,
+            sub_category="weather_climate",
+            provider="Test",
+            trust_tier="tier_1_authoritative_government",
+        ),
+        actor_id="t",
+    )
 
 
 def _assess(service: GovernanceRegistryService, ds_id: str, status: str = "compliant", **kw) -> None:
     defaults = {
-        "assessment_id": f"a-{uuid4().hex[:8]}", "data_source_id": ds_id,
-        "principle": "life_safety_first", "compliance_status": status,
-        "explanation": "test", "assessor_id": "lead",
+        "assessment_id": f"a-{uuid4().hex[:8]}",
+        "data_source_id": ds_id,
+        "principle": "life_safety_first",
+        "compliance_status": status,
+        "explanation": "test",
+        "assessor_id": "lead",
         "assessed_at": datetime.now(UTC),
     }
     defaults.update(kw)

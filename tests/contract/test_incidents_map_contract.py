@@ -46,18 +46,24 @@ def _make_incident(
 @pytest.fixture
 def client():
     app = create_app()
-    _repo.seed([
-        _make_incident("inc-001", "Sydney Bushfire", "bushfire", "active", "warning"),
-        _make_incident(
-            "inc-002", "Brisbane Flood", "flood", "monitoring", "advisory",
-            started_at="2023-06-20T14:00:00Z",
-            location={"type": "Point", "coordinates": [153.0, -27.5]},
-        ),
-        _make_incident("inc-003", "Storm Watch", "storm", "stabilising", "watch"),
-        _make_incident("inc-004", "Emergency", "cyclone", "active", "emergency"),
-        _make_incident("inc-rehearsal", "Rehearsal", status="rehearsal"),
-        _make_incident("inc-nomap", "No Location", location=None),
-    ])
+    _repo.seed(
+        [
+            _make_incident("inc-001", "Sydney Bushfire", "bushfire", "active", "warning"),
+            _make_incident(
+                "inc-002",
+                "Brisbane Flood",
+                "flood",
+                "monitoring",
+                "advisory",
+                started_at="2023-06-20T14:00:00Z",
+                location={"type": "Point", "coordinates": [153.0, -27.5]},
+            ),
+            _make_incident("inc-003", "Storm Watch", "storm", "stabilising", "watch"),
+            _make_incident("inc-004", "Emergency", "cyclone", "active", "emergency"),
+            _make_incident("inc-rehearsal", "Rehearsal", status="rehearsal"),
+            _make_incident("inc-nomap", "No Location", location=None),
+        ]
+    )
     with TestClient(app) as c:
         yield c
 
@@ -157,17 +163,12 @@ class TestQueryParameters:
     def test_filter_by_status(self, client: TestClient):
         resp = client.get("/api/incidents/map?status=active")
         data = resp.json()
-        assert all(
-            f["properties"]["status"] == "active" for f in data["features"]
-        )
+        assert all(f["properties"]["status"] == "active" for f in data["features"])
 
     def test_filter_by_pprr_phase(self, client: TestClient):
         resp = client.get("/api/incidents/map?pprr_phase=response")
         data = resp.json()
-        assert all(
-            f["properties"]["pprr_phase"] == "response"
-            for f in data["features"]
-        )
+        assert all(f["properties"]["pprr_phase"] == "response" for f in data["features"])
 
     def test_keyword_filter(self, client: TestClient):
         resp = client.get("/api/incidents/map?keyword=sydney")

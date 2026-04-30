@@ -142,8 +142,6 @@ class TestAiimsRegistry:
 
     def test_coverage_calculation(self):
         r = AiimsRegistry.from_defaults()
-        ratio, missing = r.coverage(
-            ["intelligence", "planning", "operations", "logistics", "public_information"], 2
-        )
+        ratio, missing = r.coverage(["intelligence", "planning", "operations", "logistics", "public_information"], 2)
         assert ratio < 1.0  # 'control' is missing
         assert "control" in missing

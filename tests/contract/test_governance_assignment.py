@@ -21,26 +21,42 @@ def service() -> GovernanceRegistryService:
 
 def _approved_source(service: GovernanceRegistryService) -> DataSource:
     src = DataSource(
-        data_source_id=f"ds-{uuid4().hex[:12]}", name="Test", kind="authoritative",
-        sub_category="weather_climate", provider="BoM",
+        data_source_id=f"ds-{uuid4().hex[:12]}",
+        name="Test",
+        kind="authoritative",
+        sub_category="weather_climate",
+        provider="BoM",
         trust_tier="tier_1_authoritative_government",
     )
     service.register_source(src, actor_id="t")
-    service.create_assessment(ConstitutionalAssessment(
-        assessment_id=f"a-{uuid4().hex[:8]}", data_source_id=src.data_source_id,
-        principle="life_safety_first", compliance_status="compliant",
-        explanation="OK", assessor_id="lead", assessed_at=datetime.now(UTC),
-    ), actor_id="lead")
+    service.create_assessment(
+        ConstitutionalAssessment(
+            assessment_id=f"a-{uuid4().hex[:8]}",
+            data_source_id=src.data_source_id,
+            principle="life_safety_first",
+            compliance_status="compliant",
+            explanation="OK",
+            assessor_id="lead",
+            assessed_at=datetime.now(UTC),
+        ),
+        actor_id="lead",
+    )
     return service.get_source(src.data_source_id)
 
 
 def _assign_primary(
-    service: GovernanceRegistryService, ds_id: str, agent: str = "monitoring",
+    service: GovernanceRegistryService,
+    ds_id: str,
+    agent: str = "monitoring",
 ) -> AgentGovernanceAssignment:
     assignment = AgentGovernanceAssignment(
-        assignment_id=f"assign-{uuid4().hex[:12]}", data_source_id=ds_id,
-        agent_name=agent, role="primary", scope_of_responsibility="signal ingestion",
-        assigned_by="arch", assigned_at=datetime.now(UTC),
+        assignment_id=f"assign-{uuid4().hex[:12]}",
+        data_source_id=ds_id,
+        agent_name=agent,
+        role="primary",
+        scope_of_responsibility="signal ingestion",
+        assigned_by="arch",
+        assigned_at=datetime.now(UTC),
     )
     return service.assign_agent(assignment, actor_id="arch")
 
@@ -58,9 +74,12 @@ class TestAgentAssignment:
         src = _approved_source(service)
         _assign_primary(service, src.data_source_id)
         secondary = AgentGovernanceAssignment(
-            assignment_id=f"assign-{uuid4().hex[:12]}", data_source_id=src.data_source_id,
-            agent_name="risk_assessment", role="secondary",
-            scope_of_responsibility="hazard correlation", assigned_by="arch",
+            assignment_id=f"assign-{uuid4().hex[:12]}",
+            data_source_id=src.data_source_id,
+            agent_name="risk_assessment",
+            role="secondary",
+            scope_of_responsibility="hazard correlation",
+            assigned_by="arch",
             assigned_at=datetime.now(UTC),
         )
         result = service.assign_agent(secondary, actor_id="arch")
@@ -70,9 +89,12 @@ class TestAgentAssignment:
         src = _approved_source(service)
         with pytest.raises(Exception):
             AgentGovernanceAssignment(
-                assignment_id="assign-bad", data_source_id=src.data_source_id,
-                agent_name="nonexistent_agent", role="primary",
-                scope_of_responsibility="test", assigned_by="arch",
+                assignment_id="assign-bad",
+                data_source_id=src.data_source_id,
+                agent_name="nonexistent_agent",
+                role="primary",
+                scope_of_responsibility="test",
+                assigned_by="arch",
                 assigned_at=datetime.now(UTC),
             )
 
@@ -82,15 +104,19 @@ class TestHandoffChainValidation:
         src = _approved_source(service)
         _assign_primary(service, src.data_source_id)
         chain = HandoffChainDefinition(
-            chain_id=f"chain-{uuid4().hex[:12]}", data_source_id=src.data_source_id,
+            chain_id=f"chain-{uuid4().hex[:12]}",
+            data_source_id=src.data_source_id,
             steps=[
                 HandoffStep(
-                    step_order=1, source_agent="monitoring",
-                    target_agent="risk_assessment", confidence_threshold=0.8,
+                    step_order=1,
+                    source_agent="monitoring",
+                    target_agent="risk_assessment",
+                    confidence_threshold=0.8,
                 ),
                 HandoffStep(step_order=2, source_agent="risk_assessment", target_agent="evacuation"),
             ],
-            created_by="arch", created_at=datetime.now(UTC),
+            created_by="arch",
+            created_at=datetime.now(UTC),
         )
         result = service.define_handoff_chain(chain, actor_id="arch")
         assert len(result.steps) == 2
@@ -101,12 +127,14 @@ class TestHandoffChainValidation:
         src = _approved_source(service)
         _assign_primary(service, src.data_source_id)
         chain = HandoffChainDefinition(
-            chain_id="chain-bad", data_source_id=src.data_source_id,
+            chain_id="chain-bad",
+            data_source_id=src.data_source_id,
             steps=[
                 HandoffStep(step_order=1, source_agent="monitoring", target_agent="risk_assessment"),
                 HandoffStep(step_order=2, source_agent="evacuation", target_agent="communication"),
             ],
-            created_by="arch", created_at=datetime.now(UTC),
+            created_by="arch",
+            created_at=datetime.now(UTC),
         )
         with pytest.raises(Exception, match="continuity broken"):
             service.define_handoff_chain(chain, actor_id="arch")
@@ -115,12 +143,18 @@ class TestHandoffChainValidation:
         src = _approved_source(service)
         _assign_primary(service, src.data_source_id)
         chain = HandoffChainDefinition(
-            chain_id="chain-bad2", data_source_id=src.data_source_id,
-            steps=[HandoffStep(
-                step_order=1, source_agent="monitoring",
-                target_agent="risk_assessment", confidence_threshold=1.5,
-            )],
-            created_by="arch", created_at=datetime.now(UTC),
+            chain_id="chain-bad2",
+            data_source_id=src.data_source_id,
+            steps=[
+                HandoffStep(
+                    step_order=1,
+                    source_agent="monitoring",
+                    target_agent="risk_assessment",
+                    confidence_threshold=1.5,
+                )
+            ],
+            created_by="arch",
+            created_at=datetime.now(UTC),
         )
         with pytest.raises(Exception, match="between 0 and 1"):
             service.define_handoff_chain(chain, actor_id="arch")
@@ -130,9 +164,11 @@ class TestFunctionalDomainPrecedence:
     def test_set_national_default(self, service: GovernanceRegistryService) -> None:
         src = _approved_source(service)
         precedence = FunctionalDomainPrecedence(
-            precedence_id=f"prec-{uuid4().hex[:12]}", hazard_type="weather",
+            precedence_id=f"prec-{uuid4().hex[:12]}",
+            hazard_type="weather",
             primary_data_source_id=src.data_source_id,
-            rationale="BoM is the national authority for weather", created_by="arch",
+            rationale="BoM is the national authority for weather",
+            created_by="arch",
             created_at=datetime.now(UTC),
         )
         result = service.set_precedence(precedence, actor_id="arch")
@@ -140,18 +176,31 @@ class TestFunctionalDomainPrecedence:
 
     def test_jurisdictional_override(self, service: GovernanceRegistryService) -> None:
         src = _approved_source(service)
-        service.set_precedence(FunctionalDomainPrecedence(
-            precedence_id="prec-nat", hazard_type="fire",
-            primary_data_source_id=src.data_source_id,
-            rationale="National default", created_by="arch", created_at=datetime.now(UTC),
-        ), actor_id="arch")
+        service.set_precedence(
+            FunctionalDomainPrecedence(
+                precedence_id="prec-nat",
+                hazard_type="fire",
+                primary_data_source_id=src.data_source_id,
+                rationale="National default",
+                created_by="arch",
+                created_at=datetime.now(UTC),
+            ),
+            actor_id="arch",
+        )
 
         nsw_src = _approved_source(service)
-        service.set_precedence(FunctionalDomainPrecedence(
-            precedence_id="prec-nsw", hazard_type="fire", jurisdiction_id="nsw",
-            primary_data_source_id=nsw_src.data_source_id,
-            rationale="NSW RFS override", created_by="arch", created_at=datetime.now(UTC),
-        ), actor_id="arch")
+        service.set_precedence(
+            FunctionalDomainPrecedence(
+                precedence_id="prec-nsw",
+                hazard_type="fire",
+                jurisdiction_id="nsw",
+                primary_data_source_id=nsw_src.data_source_id,
+                rationale="NSW RFS override",
+                created_by="arch",
+                created_at=datetime.now(UTC),
+            ),
+            actor_id="arch",
+        )
 
         resolved = service._repo.resolve_precedence("fire", "nsw")
         assert resolved is not None

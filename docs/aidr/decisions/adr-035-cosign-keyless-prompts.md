@@ -73,6 +73,12 @@ The cosign-side manifest is documented in `specs/032-rubric-improvements/contrac
 - **GPG long-lived keys** — rejected (key management toil).
 - **Hardware security modules (HSM) signing** — overkill for prompt text artifacts; reserved for code-signing surfaces.
 
+## Alternatives Considered
+
+- **GPG long-lived keys** — rejected (key management toil).
+- **Hardware security modules (HSM) signing** — overkill for prompt text artifacts; reserved for code-signing surfaces.
+- **Notary v2 / oras-attestations** — equivalent capability but smaller community + tooling around it; rejected for the smaller adoption surface vs cosign.
+
 ## Compliance
 
 - **NN-1 (Human-in-the-loop)**: improved — operators see a verifiable audit trail for every prompt change.

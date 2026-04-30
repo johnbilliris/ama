@@ -82,9 +82,7 @@ class ResourceGovernor:
         affected = 0
         quota = self._settings.incident_throttle_quota_pct
         for tenant in all_tenants:
-            updated = tenant.model_copy(
-                update={"throttle_mode": "incident-throttled", "throttle_quota_pct": quota}
-            )
+            updated = tenant.model_copy(update={"throttle_mode": "incident-throttled", "throttle_quota_pct": quota})
             await self._repo.update(updated)
             affected += 1
 
@@ -101,9 +99,7 @@ class ResourceGovernor:
         restored = 0
         for tenant in all_tenants:
             if tenant.throttle_mode == "incident-throttled":
-                updated = tenant.model_copy(
-                    update={"throttle_mode": "normal", "throttle_quota_pct": 100}
-                )
+                updated = tenant.model_copy(update={"throttle_mode": "normal", "throttle_quota_pct": 100})
                 await self._repo.update(updated)
                 restored += 1
 

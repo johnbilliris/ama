@@ -125,7 +125,8 @@ class SimulationRunner:
                     self._tag_simulation_provenance(signal, run)
                     self._generated_envelopes.append(signal)
                     tel.simulation_signals_generated.add(
-                        1, {"simulation.run_id": run.run_id, "simulation.source_id": source_id},
+                        1,
+                        {"simulation.run_id": run.run_id, "simulation.source_id": source_id},
                     )
 
                     if self._signal_repository:

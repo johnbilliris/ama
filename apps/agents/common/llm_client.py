@@ -94,8 +94,7 @@ class LLMClient:
         output_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
 
         logger.info(
-            "llm_call correlation_id=%s deployment_id=%s"
-            " latency_ms=%s input_tokens=%s output_tokens=%s",
+            "llm_call correlation_id=%s deployment_id=%s latency_ms=%s input_tokens=%s output_tokens=%s",
             resolved_correlation_id,
             deployment,
             elapsed_ms,

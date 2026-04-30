@@ -18,14 +18,14 @@ jobs:
       # Spec-032 FR-T01 ratcheting coverage; phase A is no-regression.
       COVERAGE_PHASE: ${{ vars.COVERAGE_PHASE != '' && vars.COVERAGE_PHASE || 'A' }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: 93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
-      - uses: pnpm/action-setup@v5
+      - uses: a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
         with:
           version: 10.6.3
-      - uses: actions/setup-node@v5
+      - uses: a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: "24"
       - name: Validate workspace structure
@@ -81,7 +81,7 @@ jobs:
         run: pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q
 
       - name: upload-benchmark-results
-        uses: actions/upload-artifact@v6
+        uses: b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: benchmark-results
@@ -89,7 +89,7 @@ jobs:
           retention-days: 30
 
       - name: upload-coverage-results
-        uses: actions/upload-artifact@v6
+        uses: b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         if: always()
         with:
           name: coverage-results

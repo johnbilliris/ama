@@ -86,8 +86,18 @@ class TestBomXmlNormaliser:
 
     def test_has_required_envelope_fields(self):
         envelope = normalise_bom_xml({"xml": SAMPLE_BOM_WARNING_XML})
-        required = ["source", "category", "occurredAt", "receivedAt", "location", "payload",
-                     "confidenceScore", "freshnessScore", "validationStatus", "provenance"]
+        required = [
+            "source",
+            "category",
+            "occurredAt",
+            "receivedAt",
+            "location",
+            "payload",
+            "confidenceScore",
+            "freshnessScore",
+            "validationStatus",
+            "provenance",
+        ]
         for field in required:
             assert field in envelope, f"Missing required field: {field}"
 

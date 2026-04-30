@@ -47,9 +47,7 @@ class SyntheticDeliveryService:
             await self._repo.upsert(record)  # type: ignore[attr-defined]
         else:
             self._memory.append(record)
-        logger.info(
-            "sim.synthetic_delivery tenant=%s channel=%s reason=%s", tenant_id, channel, block_reason
-        )
+        logger.info("sim.synthetic_delivery tenant=%s channel=%s reason=%s", tenant_id, channel, block_reason)
         return record
 
     async def list_for_tenant(self, tenant_id: str) -> list[SimSyntheticDelivery]:

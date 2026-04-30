@@ -98,9 +98,7 @@ class PyBreakerCircuitBreaker:
             )
             self._using_pybreaker = True
         except ImportError:
-            logger.warning(
-                "pybreaker not installed; falling back to legacy CircuitBreaker for '%s'", name
-            )
+            logger.warning("pybreaker not installed; falling back to legacy CircuitBreaker for '%s'", name)
             self._impl = LegacyCircuitBreaker(
                 failure_threshold=failure_threshold,
                 recovery_timeout=recovery_timeout,
@@ -137,6 +135,7 @@ class PyBreakerCircuitBreaker:
 
     def record_failure(self) -> None:
         if self._using_pybreaker:
+
             def _raise() -> None:
                 raise RuntimeError("recorded failure")
 

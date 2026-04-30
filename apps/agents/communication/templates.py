@@ -36,15 +36,11 @@ class TemplateLoader:
     def _load_all(self) -> None:
         """Load all template files at startup. Fail-fast on malformed JSON."""
         if not self._template_dir.exists():
-            raise FileNotFoundError(
-                f"Template directory does not exist: {self._template_dir}"
-            )
+            raise FileNotFoundError(f"Template directory does not exist: {self._template_dir}")
 
         json_files = list(self._template_dir.glob("*.json"))
         if not json_files:
-            raise FileNotFoundError(
-                f"No template files found in: {self._template_dir}"
-            )
+            raise FileNotFoundError(f"No template files found in: {self._template_dir}")
 
         for file_path in json_files:
             lang_code = file_path.stem  # e.g., "en-AU" from "en-AU.json"
@@ -56,9 +52,7 @@ class TemplateLoader:
                 self._templates[lang_code] = templates
                 logger.info("Loaded %d templates for language %s", len(templates), lang_code)
             except (json.JSONDecodeError, ValueError) as exc:
-                raise ValueError(
-                    f"Malformed template file {file_path}: {exc}"
-                ) from exc
+                raise ValueError(f"Malformed template file {file_path}: {exc}") from exc
 
         # en-AU must exist
         if "en-AU" not in self._templates:
@@ -88,15 +82,16 @@ class TemplateLoader:
         if language_code != "en-AU":
             logger.warning(
                 "No template for %s/%s/%s in %s, falling back to en-AU (CHK008)",
-                hazard_type, severity, alert_type, language_code,
+                hazard_type,
+                severity,
+                alert_type,
+                language_code,
             )
             return self._get_en_au_fallback(hazard_type, severity, alert_type)
 
         return None
 
-    def _get_en_au_fallback(
-        self, hazard_type: str, severity: str, alert_type: str
-    ) -> dict | None:
+    def _get_en_au_fallback(self, hazard_type: str, severity: str, alert_type: str) -> dict | None:
         """Get en-AU template as fallback with [Translation unavailable] suffix."""
         for tmpl in self._templates.get("en-AU", []):
             if (

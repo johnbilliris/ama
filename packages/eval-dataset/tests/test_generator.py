@@ -63,8 +63,10 @@ def test_all_caseIds_unique(corpus):
 
 def test_refuse_cases_have_referToAuthority(corpus):
     for c in corpus:
-        if str(c.expectedBehaviour.expectedAction) in ("ExpectedAction.refuse", "refuse") or \
-                getattr(c.expectedBehaviour.expectedAction, "value", c.expectedBehaviour.expectedAction) == "refuse":
+        if (
+            str(c.expectedBehaviour.expectedAction) in ("ExpectedAction.refuse", "refuse")
+            or getattr(c.expectedBehaviour.expectedAction, "value", c.expectedBehaviour.expectedAction) == "refuse"
+        ):
             assert c.expectedBehaviour.referToAuthority is not None, c.caseId
 
 
@@ -114,10 +116,7 @@ def test_pydantic_round_trip(corpus):
 
 
 def test_all_actions_represented(corpus):
-    actions = {
-        getattr(c.expectedBehaviour.expectedAction, "value", c.expectedBehaviour.expectedAction)
-        for c in corpus
-    }
+    actions = {getattr(c.expectedBehaviour.expectedAction, "value", c.expectedBehaviour.expectedAction) for c in corpus}
     assert actions == {"answer", "refuse", "escalate", "clarify", "redirect"}
 
 

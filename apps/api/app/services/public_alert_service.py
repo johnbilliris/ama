@@ -47,9 +47,7 @@ CHANNEL_ADAPTERS = {
 
 def _validate_publishable(alert: PublicAlert) -> None:
     if alert.status not in {"approved", "pending_approval"}:
-        raise HTTPException(
-            status_code=409, detail=f"Alert status '{alert.status}' is not publishable"
-        )
+        raise HTTPException(status_code=409, detail=f"Alert status '{alert.status}' is not publishable")
     if not alert.content_blocks.get("headline"):
         raise HTTPException(status_code=422, detail="Alert must have a headline before publishing")
     if not alert.channel_set:
@@ -90,7 +88,8 @@ class PublicAlertService:
         if tenant and tenant.is_simulation:
             logger.info(
                 "alert_delivery_blocked_simulation tenant_id=%s alert_id=%s",
-                tenant.tenant_id, alert_id,
+                tenant.tenant_id,
+                alert_id,
             )
             return [{"channel": "simulation", "status": "published (simulation)", "alert_id": alert_id}]
 

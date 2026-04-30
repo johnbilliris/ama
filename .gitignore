@@ -36,3 +36,9 @@ obj/
 .eval-out/
 .coverage
 .benchmarks/
+
+infra/**/*.json
+!infra/parameters/**/*.json
+!infra/main.parameters.*.json
+!infra/modules/workbooks/*.json
+!infra/parameters/foundry-carveout.schema.json

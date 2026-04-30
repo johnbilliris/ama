@@ -109,11 +109,7 @@ async def get_cap_xml(alert_id: str) -> Response:
 
     headline = alert.content_blocks.get("headline", alert.alert_id)
     description = alert.content_blocks.get("areas", "")
-    event = (
-        alert.hazard_icon.replace("_", " ").title()
-        if alert.hazard_icon
-        else "Hazard"
-    )
+    event = alert.hazard_icon.replace("_", " ").title() if alert.hazard_icon else "Hazard"
     msg_type = "Cancel" if alert.is_all_clear else "Alert"
     status = "Actual" if alert.status == "published" else "Draft"
 

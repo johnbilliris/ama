@@ -42,9 +42,7 @@ class MonitoringConfig:
     )
 
     # LLM evaluation
-    llm_eval_timeout_seconds: float = field(
-        default_factory=lambda: float(os.getenv("LLM_EVAL_TIMEOUT_SECONDS", "3"))
-    )
+    llm_eval_timeout_seconds: float = field(default_factory=lambda: float(os.getenv("LLM_EVAL_TIMEOUT_SECONDS", "3")))
 
     # Misinformation
     suspicious_confidence_penalty: float = field(
@@ -52,13 +50,9 @@ class MonitoringConfig:
     )
 
     # Audit buffer
-    audit_buffer_capacity: int = field(
-        default_factory=lambda: int(os.getenv("AUDIT_BUFFER_CAPACITY", "10000"))
-    )
+    audit_buffer_capacity: int = field(default_factory=lambda: int(os.getenv("AUDIT_BUFFER_CAPACITY", "10000")))
     audit_buffer_file_path: str = field(
-        default_factory=lambda: os.getenv(
-            "AUDIT_BUFFER_FILE_PATH", "/var/log/monitoring-agent/audit-buffer.jsonl"
-        )
+        default_factory=lambda: os.getenv("AUDIT_BUFFER_FILE_PATH", "/var/log/monitoring-agent/audit-buffer.jsonl")
     )
 
     # Reasoning summary
@@ -67,39 +61,23 @@ class MonitoringConfig:
     )
 
     # Version
-    agent_version: str = field(
-        default_factory=lambda: os.getenv("AGENT_VERSION", "0.1.0")
-    )
+    agent_version: str = field(default_factory=lambda: os.getenv("AGENT_VERSION", "0.1.0"))
 
     # --- LLM Configuration ---
-    llm_model_tier: str = field(
-        default_factory=lambda: os.getenv("LLM_MODEL_TIER", "drafting")
-    )
-    llm_temperature: float = field(
-        default_factory=lambda: float(os.getenv("LLM_TEMPERATURE", "0.3"))
-    )
-    llm_max_output_tokens: int = field(
-        default_factory=lambda: int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "2000"))
-    )
-    llm_confidence_threshold: float = field(
-        default_factory=lambda: float(os.getenv("LLM_CONFIDENCE_THRESHOLD", "0.7"))
-    )
+    llm_model_tier: str = field(default_factory=lambda: os.getenv("LLM_MODEL_TIER", "drafting"))
+    llm_temperature: float = field(default_factory=lambda: float(os.getenv("LLM_TEMPERATURE", "0.3")))
+    llm_max_output_tokens: int = field(default_factory=lambda: int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "2000")))
+    llm_confidence_threshold: float = field(default_factory=lambda: float(os.getenv("LLM_CONFIDENCE_THRESHOLD", "0.7")))
     llm_fallback_reduction_factor: float = field(
-        default_factory=lambda: float(
-            os.getenv("LLM_FALLBACK_REDUCTION_FACTOR", "0.5")
-        )
+        default_factory=lambda: float(os.getenv("LLM_FALLBACK_REDUCTION_FACTOR", "0.5"))
     )
-    llm_monthly_budget_usd: float = field(
-        default_factory=lambda: float(os.getenv("LLM_MONTHLY_BUDGET_USD", "50.0"))
-    )
+    llm_monthly_budget_usd: float = field(default_factory=lambda: float(os.getenv("LLM_MONTHLY_BUDGET_USD", "50.0")))
 
     # M&E Configuration
     max_concurrent_me_frameworks: int = field(
         default_factory=lambda: int(os.getenv("MAX_CONCURRENT_ME_FRAMEWORKS", "10"))
     )
-    indicator_staleness_days: int = field(
-        default_factory=lambda: int(os.getenv("INDICATOR_STALENESS_DAYS", "7"))
-    )
+    indicator_staleness_days: int = field(default_factory=lambda: int(os.getenv("INDICATOR_STALENESS_DAYS", "7")))
     ai_analysis_timeout_seconds: float = field(
         default_factory=lambda: float(os.getenv("AI_ANALYSIS_TIMEOUT_SECONDS", "30"))
     )
@@ -110,26 +88,15 @@ class MonitoringConfig:
     def __post_init__(self) -> None:
         """Validate LLM configuration values immediately after construction."""
         if self.llm_model_tier not in ("reasoning", "drafting"):
-            raise ValueError(
-                f"Invalid LLM_MODEL_TIER: {self.llm_model_tier}"
-            )
+            raise ValueError(f"Invalid LLM_MODEL_TIER: {self.llm_model_tier}")
         if not (0.0 <= self.llm_temperature <= 2.0):
-            raise ValueError(
-                f"LLM_TEMPERATURE must be 0.0–2.0, got {self.llm_temperature}"
-            )
+            raise ValueError(f"LLM_TEMPERATURE must be 0.0–2.0, got {self.llm_temperature}")
         if self.llm_max_output_tokens <= 0 or self.llm_max_output_tokens > 16384:
-            raise ValueError(
-                f"LLM_MAX_OUTPUT_TOKENS must be 1–16384, got {self.llm_max_output_tokens}"
-            )
+            raise ValueError(f"LLM_MAX_OUTPUT_TOKENS must be 1–16384, got {self.llm_max_output_tokens}")
         if not (0.0 <= self.llm_confidence_threshold <= 1.0):
-            raise ValueError(
-                f"LLM_CONFIDENCE_THRESHOLD must be 0.0–1.0, got {self.llm_confidence_threshold}"
-            )
+            raise ValueError(f"LLM_CONFIDENCE_THRESHOLD must be 0.0–1.0, got {self.llm_confidence_threshold}")
         if not (0.0 <= self.llm_fallback_reduction_factor <= 1.0):
-            raise ValueError(
-                "LLM_FALLBACK_REDUCTION_FACTOR must be 0.0–1.0, "
-                f"got {self.llm_fallback_reduction_factor}"
-            )
+            raise ValueError(f"LLM_FALLBACK_REDUCTION_FACTOR must be 0.0–1.0, got {self.llm_fallback_reduction_factor}")
 
     def staleness_threshold_for(self, source_type: str) -> int:
         """Return the staleness threshold in minutes for a given source type."""

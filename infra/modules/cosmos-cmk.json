@@ -1,0 +1,108 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "12078861762245074082"
+    }
+  },
+  "parameters": {
+    "keyVaultName": {
+      "type": "string",
+      "metadata": {
+        "description": "Key Vault Premium name (CMK requires HSM-backed)"
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Tags"
+      }
+    },
+    "cosmosPrincipalId": {
+      "type": "string",
+      "metadata": {
+        "description": "Cosmos DB system-assigned principalId (for access)"
+      }
+    },
+    "keyName": {
+      "type": "string",
+      "defaultValue": "cosmos-cmk",
+      "metadata": {
+        "description": "Key name for Cosmos CMK"
+      }
+    }
+  },
+  "variables": {
+    "keyVaultCryptoServiceEncryptionUserRoleId": "e147488a-f6f5-4113-8e2d-b22465e65bf6"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults/keys",
+      "apiVersion": "2024-04-01-preview",
+      "name": "[format('{0}/{1}', parameters('keyVaultName'), parameters('keyName'))]",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "keySize": 4096,
+        "kty": "RSA-HSM",
+        "keyOps": [
+          "wrapKey",
+          "unwrapKey"
+        ],
+        "rotationPolicy": {
+          "lifetimeActions": [
+            {
+              "action": {
+                "type": "Rotate"
+              },
+              "trigger": {
+                "timeAfterCreate": "P90D"
+              }
+            },
+            {
+              "action": {
+                "type": "Notify"
+              },
+              "trigger": {
+                "timeBeforeExpiry": "P30D"
+              }
+            }
+          ],
+          "attributes": {
+            "expiryTime": "P2Y"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.KeyVault/vaults/{0}', parameters('keyVaultName'))]",
+      "name": "[guid(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), parameters('cosmosPrincipalId'), variables('keyVaultCryptoServiceEncryptionUserRoleId'))]",
+      "properties": {
+        "principalId": "[parameters('cosmosPrincipalId')]",
+        "principalType": "ServicePrincipal",
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('keyVaultCryptoServiceEncryptionUserRoleId'))]"
+      }
+    }
+  ],
+  "outputs": {
+    "keyVaultKeyUri": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.KeyVault/vaults/keys', parameters('keyVaultName'), parameters('keyName')), '2024-04-01-preview').keyUriWithVersion]"
+    },
+    "keyName": {
+      "type": "string",
+      "value": "[parameters('keyName')]"
+    }
+  }
+}

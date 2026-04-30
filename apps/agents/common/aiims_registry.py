@@ -70,9 +70,7 @@ class AiimsRegistry:
         """Apply a per-jurisdiction override (mutates in place)."""
         entry = self.entries.get(function)
         if entry is None:
-            entry = AiimsRoleEntry(
-                function=function, default_agent=agent, description=f"AIIMS {function} → {agent}"
-            )
+            entry = AiimsRoleEntry(function=function, default_agent=agent, description=f"AIIMS {function} → {agent}")
         new_overrides = {**entry.jurisdiction_overrides, jurisdiction_code: agent}
         self.entries[function] = AiimsRoleEntry(
             function=entry.function,
@@ -81,9 +79,7 @@ class AiimsRegistry:
             jurisdiction_overrides=new_overrides,
         )
 
-    def coverage(
-        self, assigned_functions: list[str], incident_level: int
-    ) -> tuple[float, list[str]]:
+    def coverage(self, assigned_functions: list[str], incident_level: int) -> tuple[float, list[str]]:
         """Convenience wrapper around the existing validate_coverage helper."""
         return validate_coverage(assigned_functions, incident_level)
 

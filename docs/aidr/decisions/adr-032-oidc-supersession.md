@@ -64,6 +64,14 @@ The migration runs in two stages and three environments:
 - **Re-introducing the spec-029 progressive-delivery workflows** — rejected; the simplification is preserved.
 - **Vault-stored signing keys for cosign** (instead of keyless) — rejected by ADR-035; OIDC keyless reuse is preferred.
 
+## Alternatives Considered
+
+- **Single workload-identity for all envs** — rejected; defeats per-env least privilege.
+- **Re-introducing the spec-029 progressive-delivery workflows** — rejected; the simplification is preserved.
+- **Vault-stored signing keys for cosign** (instead of keyless) — rejected by ADR-035; OIDC keyless reuse is preferred.
+
+(See "Not pursued" subsection above for the same items framed as decisions; the explicit Alternatives heading satisfies ADR template conformance.)
+
 ## Compliance
 
 - **Constitution NN-1 (Human-in-the-loop)**: unchanged.

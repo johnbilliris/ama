@@ -1,0 +1,136 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "16229170921021367333"
+    }
+  },
+  "parameters": {
+    "cosmosAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Cosmos DB account"
+      }
+    },
+    "monitoringAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Container App for monitoring agent"
+      }
+    },
+    "tags": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Tags"
+      }
+    },
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Location"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Chaos/targets",
+      "apiVersion": "2024-01-01",
+      "scope": "[format('Microsoft.DocumentDB/databaseAccounts/{0}', parameters('cosmosAccountName'))]",
+      "name": "Microsoft-DocumentDB",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Chaos/targets",
+      "apiVersion": "2024-01-01",
+      "scope": "[format('Microsoft.App/containerApps/{0}', parameters('monitoringAppName'))]",
+      "name": "Microsoft-ContainerApp",
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Chaos/experiments",
+      "apiVersion": "2024-01-01",
+      "name": "ama-quarterly-gameday",
+      "location": "[parameters('location')]",
+      "tags": "[parameters('tags')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "selectors": [
+          {
+            "type": "List",
+            "id": "monitoringSelector",
+            "targets": [
+              {
+                "type": "ChaosTarget",
+                "id": "[extensionResourceId(resourceId('Microsoft.App/containerApps', parameters('monitoringAppName')), 'Microsoft.Chaos/targets', 'Microsoft-ContainerApp')]"
+              }
+            ]
+          },
+          {
+            "type": "List",
+            "id": "cosmosSelector",
+            "targets": [
+              {
+                "type": "ChaosTarget",
+                "id": "[extensionResourceId(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), 'Microsoft.Chaos/targets', 'Microsoft-DocumentDB')]"
+              }
+            ]
+          }
+        ],
+        "steps": [
+          {
+            "name": "Step1-RestartMonitoring",
+            "branches": [
+              {
+                "name": "Branch1",
+                "actions": [
+                  {
+                    "type": "continuous",
+                    "name": "urn:csci:microsoft:containerApp:restart/1.0",
+                    "duration": "PT5M",
+                    "selectorId": "monitoringSelector",
+                    "parameters": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Step2-CosmosDelay",
+            "branches": [
+              {
+                "name": "Branch1",
+                "actions": [
+                  {
+                    "type": "delay",
+                    "name": "urn:csci:microsoft:chaosStudio:timedDelay/1.0",
+                    "duration": "PT2M"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "dependsOn": [
+        "[extensionResourceId(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), 'Microsoft.Chaos/targets', 'Microsoft-DocumentDB')]",
+        "[extensionResourceId(resourceId('Microsoft.App/containerApps', parameters('monitoringAppName')), 'Microsoft.Chaos/targets', 'Microsoft-ContainerApp')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "experimentId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Chaos/experiments', 'ama-quarterly-gameday')]"
+    },
+    "experimentPrincipalId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Chaos/experiments', 'ama-quarterly-gameday'), '2024-01-01', 'full').identity.principalId]"
+    }
+  }
+}

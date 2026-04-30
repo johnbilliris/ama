@@ -96,12 +96,16 @@ class GovernanceRepository:
         return self._backend.save_precedence(precedence)
 
     def list_precedence(
-        self, hazard_type: str | None = None, jurisdiction_id: str | None = None,
+        self,
+        hazard_type: str | None = None,
+        jurisdiction_id: str | None = None,
     ) -> list[FunctionalDomainPrecedence]:
         return self._backend.list_precedence(hazard_type, jurisdiction_id)
 
     def resolve_precedence(
-        self, hazard_type: str, jurisdiction_id: str | None = None,
+        self,
+        hazard_type: str,
+        jurisdiction_id: str | None = None,
     ) -> FunctionalDomainPrecedence | None:
         return self._backend.resolve_precedence(hazard_type, jurisdiction_id)
 
@@ -128,7 +132,6 @@ class GovernanceRepository:
 
 
 class _InMemoryBackend:
-
     def __init__(self) -> None:
         self._sources: dict[str, DataSource] = {}
         self._assessments: dict[str, ConstitutionalAssessment] = {}
@@ -171,10 +174,7 @@ class _InMemoryBackend:
         return assignment
 
     def get_assignments_for_source(self, data_source_id: str) -> list[AgentGovernanceAssignment]:
-        return [
-            a for a in self._assignments.values()
-            if a.data_source_id == data_source_id and a.status == "active"
-        ]
+        return [a for a in self._assignments.values() if a.data_source_id == data_source_id and a.status == "active"]
 
     def save_chain(self, chain: HandoffChainDefinition) -> HandoffChainDefinition:
         self._chains[chain.chain_id] = chain
@@ -191,7 +191,9 @@ class _InMemoryBackend:
         return precedence
 
     def list_precedence(
-        self, hazard_type: str | None = None, jurisdiction_id: str | None = None,
+        self,
+        hazard_type: str | None = None,
+        jurisdiction_id: str | None = None,
     ) -> list[FunctionalDomainPrecedence]:
         results = list(self._precedence.values())
         if hazard_type:
@@ -201,19 +203,23 @@ class _InMemoryBackend:
         return results
 
     def resolve_precedence(
-        self, hazard_type: str, jurisdiction_id: str | None = None,
+        self,
+        hazard_type: str,
+        jurisdiction_id: str | None = None,
     ) -> FunctionalDomainPrecedence | None:
         if jurisdiction_id:
             override = next(
-                (p for p in self._precedence.values()
-                 if p.hazard_type == hazard_type and p.jurisdiction_id == jurisdiction_id),
+                (
+                    p
+                    for p in self._precedence.values()
+                    if p.hazard_type == hazard_type and p.jurisdiction_id == jurisdiction_id
+                ),
                 None,
             )
             if override:
                 return override
         return next(
-            (p for p in self._precedence.values()
-             if p.hazard_type == hazard_type and p.jurisdiction_id is None),
+            (p for p in self._precedence.values() if p.hazard_type == hazard_type and p.jurisdiction_id is None),
             None,
         )
 
@@ -256,7 +262,6 @@ def _build_container() -> Any:
 
 
 class _CosmosBackend:
-
     def __init__(self, container: Any) -> None:
         self._container = container
 
@@ -267,6 +272,7 @@ class _CosmosBackend:
 
     def _point_read(self, item_id: str, partition_key: str) -> dict[str, Any] | None:
         from azure.cosmos.exceptions import CosmosResourceNotFoundError
+
         try:
             return self._container.read_item(item_id, partition_key=partition_key)
         except CosmosResourceNotFoundError:
@@ -393,7 +399,9 @@ class _CosmosBackend:
         return precedence
 
     def list_precedence(
-        self, hazard_type: str | None = None, jurisdiction_id: str | None = None,
+        self,
+        hazard_type: str | None = None,
+        jurisdiction_id: str | None = None,
     ) -> list[FunctionalDomainPrecedence]:
         clauses = ["c.type = @type"]
         params: list[dict[str, object]] = [{"name": "@type", "value": _TYPE_PRECEDENCE}]
@@ -408,12 +416,13 @@ class _CosmosBackend:
         return [FunctionalDomainPrecedence.model_validate(d) for d in docs]
 
     def resolve_precedence(
-        self, hazard_type: str, jurisdiction_id: str | None = None,
+        self,
+        hazard_type: str,
+        jurisdiction_id: str | None = None,
     ) -> FunctionalDomainPrecedence | None:
         if jurisdiction_id:
             docs = self._query(
-                "SELECT * FROM c WHERE c.type = @type"
-                " AND c.hazard_type = @ht AND c.jurisdiction_id = @jid",
+                "SELECT * FROM c WHERE c.type = @type AND c.hazard_type = @ht AND c.jurisdiction_id = @jid",
                 [
                     {"name": "@type", "value": _TYPE_PRECEDENCE},
                     {"name": "@ht", "value": hazard_type},

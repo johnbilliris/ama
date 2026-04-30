@@ -1,4 +1,3 @@
-
 import pytest
 from app.services.ingestion.incident_association import IncidentAssociationService
 from app.services.state_store import INCIDENTS, reset_state
@@ -78,12 +77,20 @@ class TestIncidentAssociation:
     @pytest.mark.asyncio
     async def test_multi_incident_overlap_creates_multiple_records(self, service):
         INCIDENTS["inc-a"] = Incident(
-            incident_id="inc-a", title="A", incident_type="flood",
-            status="active", severity="warning", affected_jurisdiction_ids=["nsw"],
+            incident_id="inc-a",
+            title="A",
+            incident_type="flood",
+            status="active",
+            severity="warning",
+            affected_jurisdiction_ids=["nsw"],
         )
         INCIDENTS["inc-b"] = Incident(
-            incident_id="inc-b", title="B", incident_type="bushfire",
-            status="active", severity="emergency", affected_jurisdiction_ids=["nsw"],
+            incident_id="inc-b",
+            title="B",
+            incident_type="bushfire",
+            status="active",
+            severity="emergency",
+            affected_jurisdiction_ids=["nsw"],
         )
         envelope = {
             "jurisdictionId": "nsw",
@@ -97,8 +104,12 @@ class TestIncidentAssociation:
     @pytest.mark.asyncio
     async def test_closed_incident_not_matched(self, service):
         INCIDENTS["inc-closed"] = Incident(
-            incident_id="inc-closed", title="Closed", incident_type="flood",
-            status="closed", severity="advisory", affected_jurisdiction_ids=["nsw"],
+            incident_id="inc-closed",
+            title="Closed",
+            incident_type="flood",
+            status="closed",
+            severity="advisory",
+            affected_jurisdiction_ids=["nsw"],
         )
         envelope = {
             "jurisdictionId": "nsw",

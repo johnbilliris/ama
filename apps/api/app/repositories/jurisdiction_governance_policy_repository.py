@@ -53,9 +53,7 @@ class JurisdictionGovernancePolicyRepository:
             return self._memory.get(jurisdiction_code)
         try:
             doc = self._container.read_item(item=jurisdiction_code, partition_key=jurisdiction_code)
-            return JurisdictionGovernancePolicy(
-                **{k: v for k, v in doc.items() if not k.startswith("_")}
-            )
+            return JurisdictionGovernancePolicy(**{k: v for k, v in doc.items() if not k.startswith("_")})
         except Exception:  # noqa: BLE001
             return None
 
@@ -73,12 +71,8 @@ class JurisdictionGovernancePolicyRepository:
             return list(self._memory.values())
         try:
             return [
-                JurisdictionGovernancePolicy(
-                    **{k: v for k, v in item.items() if not k.startswith("_")}
-                )
-                for item in self._container.query_items(
-                    query="SELECT * FROM c", enable_cross_partition_query=True
-                )
+                JurisdictionGovernancePolicy(**{k: v for k, v in item.items() if not k.startswith("_")})
+                for item in self._container.query_items(query="SELECT * FROM c", enable_cross_partition_query=True)
             ]
         except Exception:  # noqa: BLE001
             logger.exception("Cosmos query failed")

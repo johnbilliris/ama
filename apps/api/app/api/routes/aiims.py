@@ -35,7 +35,8 @@ class ChangeLevelInput(BaseModel):
 
 @router.post("/assignments")
 async def assign_role(
-    incident_id: str, payload: AssignRoleInput,
+    incident_id: str,
+    payload: AssignRoleInput,
 ) -> dict[str, object]:
     if incident_id not in INCIDENTS:
         raise HTTPException(status_code=404, detail="Incident not found")
@@ -78,7 +79,8 @@ async def update_assignment(
 
 @level_router.post("/level")
 async def change_incident_level(
-    incident_id: str, payload: ChangeLevelInput,
+    incident_id: str,
+    payload: ChangeLevelInput,
 ) -> dict[str, object]:
     if incident_id not in INCIDENTS:
         raise HTTPException(status_code=404, detail="Incident not found")

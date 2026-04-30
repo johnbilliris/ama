@@ -23,15 +23,19 @@ API = "https://api.github.com"
 
 
 def _get(url: str, token: str) -> Any:
-    req = urllib.request.Request(url, headers={
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "ama-dora-publisher/1.0",
-    })
+    req = urllib.request.Request(
+        url,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "ama-dora-publisher/1.0",
+        },
+    )
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310
             import json
+
             return json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         print(f"::warning::GitHub API {url}: {exc}")

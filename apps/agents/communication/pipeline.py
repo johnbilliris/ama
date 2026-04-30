@@ -97,10 +97,13 @@ class CommunicationProcessingPipeline:
         """
         pipeline_start = time.perf_counter()
 
-        with pipeline_span("communication.pipeline.process", {
-            "handoff_id": event.handoff_id,
-            "incident_id": event.incident_id,
-        }):
+        with pipeline_span(
+            "communication.pipeline.process",
+            {
+                "handoff_id": event.handoff_id,
+                "incident_id": event.incident_id,
+            },
+        ):
             try:
                 # Stage 1: Handoff Intake & Validation
                 if not self._stage_1_intake(event):
@@ -128,8 +131,13 @@ class CommunicationProcessingPipeline:
 
                 # Stage 8: Alert Versioning & Persistence
                 alert = self._stage_8_version_persist(
-                    event, content_blocks, segments, safety_result,
-                    safety_details, bt_penalty, recommendation_data,
+                    event,
+                    content_blocks,
+                    segments,
+                    safety_result,
+                    safety_details,
+                    bt_penalty,
+                    recommendation_data,
                 )
 
                 # Stage 9: Approval Notification (stub — full in US2)
@@ -151,7 +159,9 @@ class CommunicationProcessingPipeline:
             except Exception as exc:
                 logger.error(
                     "Pipeline failed for handoff %s: %s",
-                    event.handoff_id, exc, exc_info=True,
+                    event.handoff_id,
+                    exc,
+                    exc_info=True,
                 )
                 self._write_audit(
                     CommunicationDecisionType.handoff_rejected,
@@ -188,9 +198,7 @@ class CommunicationProcessingPipeline:
 
             # Check dedup by incident+hazard
             hazard_type = event.payload.get("hazard_type", "general")
-            if self._deduplicator.is_duplicate_by_incident(
-                event.incident_id, str(hazard_type)
-            ):
+            if self._deduplicator.is_duplicate_by_incident(event.incident_id, str(hazard_type)):
                 self._write_audit(
                     CommunicationDecisionType.duplicate_discarded,
                     handoff_id=event.handoff_id,
@@ -214,9 +222,7 @@ class CommunicationProcessingPipeline:
             CustomEventEmitter.handoff_received(event.handoff_id, event.incident_id)
             return True
 
-    def _stage_2_retrieve(
-        self, event: AgentHandoffEvent
-    ) -> tuple[dict, dict]:
+    def _stage_2_retrieve(self, event: AgentHandoffEvent) -> tuple[dict, dict]:
         """Stage 2: Data Retrieval — get recommendation and assessment."""
         with pipeline_span("communication.stage.retrieve"):
             recommendation_id = str(event.payload.get("recommendationId", ""))
@@ -262,9 +268,7 @@ class CommunicationProcessingPipeline:
 
             return assessment_data, recommendation_data
 
-    def _stage_3_segment(
-        self, event: AgentHandoffEvent, assessment_data: dict
-    ) -> list[AudienceSegment]:
+    def _stage_3_segment(self, event: AgentHandoffEvent, assessment_data: dict) -> list[AudienceSegment]:
         """Stage 3: Audience Segmentation."""
         with pipeline_span("communication.stage.segment"):
             demographics = dict(event.payload.get("demographics", {}) or {})
@@ -279,9 +283,7 @@ class CommunicationProcessingPipeline:
             )
             return segments
 
-    def _stage_4_templates(
-        self, event: AgentHandoffEvent, assessment_data: dict
-    ) -> dict[str, str]:
+    def _stage_4_templates(self, event: AgentHandoffEvent, assessment_data: dict) -> dict[str, str]:
         """Stage 4: Template Loading & Interpolation — build template values."""
         with pipeline_span("communication.stage.templates"):
             return {
@@ -318,9 +320,7 @@ class CommunicationProcessingPipeline:
 
             draft_elapsed = (time.perf_counter() - draft_start) * 1000
             metrics.alert_draft_latency.record(draft_elapsed)
-            CustomEventEmitter.alert_drafted(
-                alert_id="pending", languages=len(content_blocks)
-            )
+            CustomEventEmitter.alert_drafted(alert_id="pending", languages=len(content_blocks))
 
             self._write_audit(
                 CommunicationDecisionType.alert_drafted,
@@ -358,9 +358,7 @@ class CommunicationProcessingPipeline:
                         block.back_translation_flagged = True
                         bt_penalty = self._config.back_translation_penalty_factor
                         metrics.back_translation_quality.record(score, {"language": lang})
-                        CustomEventEmitter.back_translation_flagged(
-                            alert_id="pending", language=lang, score=score
-                        )
+                        CustomEventEmitter.back_translation_flagged(alert_id="pending", language=lang, score=score)
                         self._write_audit(
                             CommunicationDecisionType.back_translation_below_threshold,
                             output_summary=f"{lang} score={score:.3f} < {self._config.back_translation_threshold}",
@@ -370,9 +368,7 @@ class CommunicationProcessingPipeline:
                 except Exception:
                     # Embedding outage → skip per CHK051
                     logger.warning("Back-translation check failed for %s, skipping", lang)
-                    CustomEventEmitter.degradation_detected(
-                        service="embedding", fallback="skip_back_translation"
-                    )
+                    CustomEventEmitter.degradation_detected(service="embedding", fallback="skip_back_translation")
 
             return content_blocks, bt_penalty
 
@@ -391,9 +387,7 @@ class CommunicationProcessingPipeline:
 
             for lang, block in content_blocks.items():
                 # Skip validation for template-based content per FR-014
-                if block.generation_method in (
-                    GenerationMethod.template, GenerationMethod.template_fallback
-                ):
+                if block.generation_method in (GenerationMethod.template, GenerationMethod.template_fallback):
                     safety_details[lang] = ContentSafetyDetail(
                         language_code=lang,
                         passed=True,
@@ -480,9 +474,7 @@ class CommunicationProcessingPipeline:
 
             # Check if any language used template fallback
             for block in content_blocks.values():
-                if block.generation_method in (
-                    GenerationMethod.template_fallback, GenerationMethod.safety_fallback
-                ):
+                if block.generation_method in (GenerationMethod.template_fallback, GenerationMethod.safety_fallback):
                     fallback_penalty = self._config.fallback_reduction_factor
                     break
 
@@ -512,15 +504,10 @@ class CommunicationProcessingPipeline:
                 change_type = ChangeType.initial
 
             # Build alert
-            recommendation_id = str(
-                recommendation_data.get("recommendation_id", event.handoff_id)
-            )
+            recommendation_id = str(recommendation_data.get("recommendation_id", event.handoff_id))
             assessment_id = str(event.payload.get("assessmentId", event.handoff_id))
 
-            channels = [
-                ChannelType(ch) for ch in self._config.delivery_channels
-                if ch in ChannelType.__members__
-            ]
+            channels = [ChannelType(ch) for ch in self._config.delivery_channels if ch in ChannelType.__members__]
 
             alert = PublicAlert(
                 alert_id=alert_id,
@@ -550,9 +537,7 @@ class CommunicationProcessingPipeline:
 
             # Supersede previous version
             if version > 1:
-                self._version_counter.supersede_previous(
-                    event.incident_id, version, event.tenant_id
-                )
+                self._version_counter.supersede_previous(event.incident_id, version, event.tenant_id)
 
             # Persist to Cosmos
             if self._alert_store is not None:
@@ -582,9 +567,7 @@ class CommunicationProcessingPipeline:
                 tenant_id=event.tenant_id,
             )
 
-            CustomEventEmitter.alert_version_created(
-                alert_id=alert_id, version=version, change_type=change_type.value
-            )
+            CustomEventEmitter.alert_version_created(alert_id=alert_id, version=version, change_type=change_type.value)
             metrics.pending_approvals.add(1)
 
             return alert

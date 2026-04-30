@@ -1,6 +1,5 @@
 """Tests for risk_assessment.config – defaults, env overrides, helpers."""
 
-
 from risk_assessment.config import RiskAssessmentConfig
 
 # ---------------------------------------------------------------------------

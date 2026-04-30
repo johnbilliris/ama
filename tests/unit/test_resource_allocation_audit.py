@@ -104,8 +104,12 @@ class TestFlush:
         mock_cosmos = MagicMock()
         # First call fails (to buffer), then succeeds (for flush)
         mock_cosmos.create_item.side_effect = [
-            Exception("fail"), Exception("fail"), Exception("fail"),
-            None, None, None,  # flush succeeds
+            Exception("fail"),
+            Exception("fail"),
+            Exception("fail"),
+            None,
+            None,
+            None,  # flush succeeds
         ]
         writer = AuditWriter(cosmos_client=mock_cosmos)
 

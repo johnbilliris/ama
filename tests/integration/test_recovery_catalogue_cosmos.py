@@ -3,6 +3,7 @@
 Validates that the seed data can be loaded into the RecoveryCatalogueRepository
 (in-memory mode) and queried correctly, simulating Cosmos DB interactions.
 """
+
 import json
 from pathlib import Path
 
@@ -11,13 +12,7 @@ import pytest_asyncio
 from app.repositories.recovery_catalogue_repository import RecoveryCatalogueRepository
 
 SEED_ROOT = (
-    Path(__file__).resolve().parents[2]
-    / "packages"
-    / "domain"
-    / "src"
-    / "domain"
-    / "seed"
-    / "recovery-catalogue"
+    Path(__file__).resolve().parents[2] / "packages" / "domain" / "src" / "domain" / "seed" / "recovery-catalogue"
 )
 
 DOMAIN_FILES = ["overarching", "social", "economic", "built", "natural"]

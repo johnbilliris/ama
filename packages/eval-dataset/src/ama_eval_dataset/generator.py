@@ -211,9 +211,7 @@ def generate_corpus(seed: int, target_size: int = 5000) -> list[EvaluationCase]:
             provenanceMeta=provenance_meta,
             approvalState=ApprovalState.approved,
             approvalChain=approval_chain,
-            metricApplicability=(
-                METRIC_APPLICABILITY_RETRIEVAL if use_retrieval else METRIC_APPLICABILITY_BASE
-            ),
+            metricApplicability=(METRIC_APPLICABILITY_RETRIEVAL if use_retrieval else METRIC_APPLICABILITY_BASE),
             retrievalScope=use_retrieval,
             retrievedContext=retrieved_context,
         )

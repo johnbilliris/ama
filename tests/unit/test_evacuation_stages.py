@@ -189,12 +189,13 @@ class TestTransitionStage:
             decision_authority="IC Smith",
             decision_rationale="Fire",
         )
-        warning = transition_stage(
-            base, "warning", authorized_by="IC Smith", rationale="Escalate"
-        )
+        warning = transition_stage(base, "warning", authorized_by="IC Smith", rationale="Escalate")
         # Re-entry: warning → decision
         re_entry_stage = transition_stage(
-            warning, "decision", authorized_by="IC Smith", rationale="Conditions improved",
+            warning,
+            "decision",
+            authorized_by="IC Smith",
+            rationale="Conditions improved",
             shelter_in_place_rationale=None,
         )
         assert re_entry_stage.current_stage == "decision"
