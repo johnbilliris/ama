@@ -1,0 +1,103 @@
+# yaml-language-server: $schema=https://json-schema.org/draft/2020-12/schema
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://ama.gov.au/schemas/033/agent-definition.schema.yaml
+title: AMA Agent Definition
+description: |
+  Declarative description of one of the five named operational agents
+  hosted by the MAF runtime. One YAML file per agent under
+  apps/agents/maf_runtime/agents/<agent>.yaml. Loaded at runtime startup.
+  Backs FR-001, FR-002, FR-003, FR-004, FR-013, FR-019, FR-019a.
+
+type: object
+additionalProperties: false
+required: [name, display_name, prompt, model_tier, output_schema, tool_allow_list, middleware_bindings]
+
+properties:
+  name:
+    type: string
+    enum: [monitoring, risk_assessment, evacuation, resource_allocation, communication]
+    description: Canonical agent identifier. MUST be unique across the five definitions.
+
+  display_name:
+    type: string
+    minLength: 1
+    description: Operator-visible label.
+
+  prompt:
+    type: string
+    minLength: 1
+    description: System / instruction prompt for the ChatAgent.
+
+  model_tier:
+    type: string
+    enum: [reasoning, drafting]
+    description: |
+      Selects the Azure OpenAI deployment via the existing LLMClientConfig
+      (`reasoning` = high-reasoning model; `drafting` = lower-cost drafting model).
+
+  output_schema:
+    type: string
+    pattern: "^[a-zA-Z_][a-zA-Z0-9_.]*$"
+    description: |
+      Dotted Python class path resolving to a Pydantic v2 BaseModel
+      (e.g. domain.models.MonitoringTriageDecision). Used by the MAF
+      runtime to schema-validate every output (FR-003).
+
+  tool_allow_list:
+    type: array
+    description: Per-agent MCP tool allow-list (FR-019). Empty array = no tools.
+    items:
+      type: object
+      additionalProperties: false
+      required: [tool_name, pinned_major_version]
+      properties:
+        tool_name:
+          type: string
+          minLength: 1
+        pinned_major_version:
+          type: integer
+          minimum: 0
+          description: |
+            Major semantic version of the tool's interface that this agent
+            is bound to (FR-019a). The MCP runtime refuses to invoke a tool
+            whose advertised major version does not match.
+
+  middleware_bindings:
+    type: array
+    description: |
+      Names of MAF agent middleware to apply to this agent. MUST include
+      both `content_safety` and `audit` (FR-013, FR-014, FR-015 — refusal
+      to omit). Default value should be ["content_safety", "audit", "otel"].
+    minItems: 2
+    uniqueItems: true
+    items:
+      type: string
+      enum: [content_safety, audit, otel]
+    contains:
+      enum: [content_safety]
+    allOf:
+      - contains: { enum: [audit] }
+
+examples:
+  - name: monitoring
+    display_name: Monitoring Agent
+    prompt: |
+      You are the Monitoring agent for the AMA disaster-response platform.
+      Triage incoming signals as escalate / suppress / enrich. Apply the
+      misinformation classifier and freshness scoring per spec 010.
+    model_tier: reasoning
+    output_schema: domain.models.MonitoringTriageDecision
+    tool_allow_list: []
+    middleware_bindings: [content_safety, audit, otel]
+
+  - name: evacuation
+    display_name: Evacuation Agent
+    prompt: |
+      You are the Evacuation agent for the AMA platform. Plan zones,
+      transport, and timelines per the AIDR Evacuation Planning Handbook.
+    model_tier: reasoning
+    output_schema: domain.models.EvacuationPlan
+    tool_allow_list:
+      - tool_name: routing_service
+        pinned_major_version: 1
+    middleware_bindings: [content_safety, audit, otel]

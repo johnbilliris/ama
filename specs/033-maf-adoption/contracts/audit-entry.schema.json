@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.gov.au/schemas/033/audit-entry.schema.json",
+  "title": "AMA Agent Audit Entry",
+  "description": "Immutable record of one agent invocation, emitted by the centralised middleware. Backs FR-014, FR-015, FR-020. Stored in the existing audit_entries Cosmos container under the existing 7-year online retention policy (FR-012a, deny-delete role + Azure Policy initiative). NOTE on HITL approver identity: this schema deliberately does NOT carry an `approver_identity` field. For HITL approval events, approver identity (per spec 008) is recorded in the `approval_decisions` Cosmos container and correlated to this audit entry via the workflow run's `pending_request_id` / the wrapped MAF `RequestInfoEvent.request_id`. See contracts/hitl-request.envelope.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id", "incident_id", "run_id", "agent_name", "step_name",
+    "model_tier", "input_fingerprint", "correlation_id",
+    "started_at", "ended_at", "outcome"
+  ],
+  "properties": {
+    "id":           { "type": "string", "format": "uuid" },
+    "incident_id":  { "type": "string", "minLength": 1, "description": "Cosmos partition key." },
+    "run_id":       { "type": "string", "format": "uuid", "description": "FK to workflow_runs.id." },
+    "agent_name":   { "type": "string", "enum": ["monitoring", "risk_assessment", "evacuation", "resource_allocation", "communication"] },
+    "step_name":    { "type": "string", "minLength": 1 },
+    "model_tier":   { "type": "string", "enum": ["reasoning", "drafting"] },
+    "input_fingerprint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 hex of the canonicalised input JSON (sorted keys, no whitespace). MUST NOT be the raw input (NN-3 privacy by design)."
+    },
+    "output_fingerprint": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 hex of the canonicalised output JSON, when produced. Null when the invocation failed before producing an output."
+    },
+    "correlation_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$",
+      "description": "OpenTelemetry trace_id linking this audit entry to its span (FR-016)."
+    },
+    "started_at":  { "type": "string", "format": "date-time" },
+    "ended_at":    { "type": "string", "format": "date-time" },
+    "outcome": {
+      "type": "string",
+      "enum": ["success", "failed", "blocked_by_content_safety", "tool_failure", "version_mismatch"],
+      "description": "Categorical outcome; version_mismatch is set when an MCP tool's advertised major version did not match the allow-list (FR-019a)."
+    },
+    "failure_reason": {
+      "type": ["string", "null"],
+      "description": "Populated when outcome != success."
+    },
+    "tool_invocations": {
+      "type": "array",
+      "description": "Captured when the agent step called one or more MCP tools (FR-020).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tool_name", "version", "outcome", "latency_ms"],
+        "properties": {
+          "tool_name":  { "type": "string", "minLength": 1 },
+          "version":    { "type": "integer", "minimum": 0, "description": "Major version actually invoked." },
+          "outcome":    { "type": "string", "enum": ["success", "timeout", "unreachable", "malformed_response", "version_mismatch"] },
+          "latency_ms": { "type": "integer", "minimum": 0 }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if":   { "properties": { "outcome": { "const": "success" } } },
+      "then": { "required": ["output_fingerprint"], "properties": { "output_fingerprint": { "type": "string" } } }
+    },
+    {
+      "if":   { "properties": { "outcome": { "enum": ["failed", "blocked_by_content_safety", "tool_failure", "version_mismatch"] } } },
+      "then": { "required": ["failure_reason"], "properties": { "failure_reason": { "type": "string", "minLength": 1 } } }
+    }
+  ]
+}
