@@ -320,108 +320,108 @@ Monorepo (per `plan.md → Project Structure`):
 
 ### Workflow + executors
 
-- [ ] T042 [US2] Implement five custom MAF `Executor` subclasses in `apps/agents/maf_runtime/workflow/executors/{monitoring,risk,evacuation,resource,communication}_executor.py`, each one reading `feature_flags.get_agent_mode(<agent>)` to dispatch to the legacy pipeline (`apps/agents/<agent>/agent.py`), the new ChatAgent from US1, or both (shadow); each executor MUST override `on_checkpoint_save` / `on_checkpoint_restore`
+- [X] T042 [US2] Implement five custom MAF `Executor` subclasses in `apps/agents/maf_runtime/workflow/executors/{monitoring,risk,evacuation,resource,communication}_executor.py`, each one reading `feature_flags.get_agent_mode(<agent>)` to dispatch to the legacy pipeline (`apps/agents/<agent>/agent.py`), the new ChatAgent from US1, or both (shadow); each executor MUST override `on_checkpoint_save` / `on_checkpoint_restore`
   - **Agents**: ai-ml-engineer, software-developer, principal-engineer
   - **Tools**: read, edit, search
   - **Success**: Unit test per executor proves all three modes (`legacy`, `maf`, `shadow`) dispatch correctly and `on_checkpoint_save` round-trips through `on_checkpoint_restore` byte-equal.
 
-- [ ] T042b [US2] Implement an output-schema validator inside every executor — placed in a shared base module `apps/agents/maf_runtime/workflow/executors/_base.py::validate_output(agent_definition, output)` that, after each step's agent invocation, deserialises the output through the Pydantic class declared by `agent_definition.output_schema`; on a `ValidationError`, the executor MUST raise `OutputSchemaMismatchError` (imported from `apps/agents/maf_runtime/errors.py`, T011b) and the workflow MUST transition the run to `NeedsOperatorDecision` per FR-011b and the spec edge case "An agent's output schema changes"
+- [X] T042b [US2] Implement an output-schema validator inside every executor — placed in a shared base module `apps/agents/maf_runtime/workflow/executors/_base.py::validate_output(agent_definition, output)` that, after each step's agent invocation, deserialises the output through the Pydantic class declared by `agent_definition.output_schema`; on a `ValidationError`, the executor MUST raise `OutputSchemaMismatchError` (imported from `apps/agents/maf_runtime/errors.py`, T011b) and the workflow MUST transition the run to `NeedsOperatorDecision` per FR-011b and the spec edge case "An agent's output schema changes"
   - **Agents**: ai-ml-engineer, software-developer, principal-engineer
   - **Tools**: read, edit
   - **Success**: `tests/integration/test_output_schema_mismatch.py` injects a deliberately-malformed agent output, asserts `OutputSchemaMismatchError` is raised, asserts the run transitions to `NeedsOperatorDecision`, and asserts the audit entry has `outcome=failed` with `failure_reason` referencing the schema field that failed.
 
-- [ ] T042c [US2] Implement a per-executor retry budget in the shared `apps/agents/maf_runtime/workflow/executors/_base.py::with_retry_budget` decorator/context manager defaulting to **3 attempts** and **30 seconds total elapsed per step** per FR-012; on exhausted retries the executor MUST surface a typed error (from `apps/agents/maf_runtime/errors.py`, T011b) and the workflow MUST transition the run to `Failed` (failed-with-context) rather than dropping it. Retry bounds MUST be configurable per environment via `FEATURE_MAF_RUNTIME_RETRY_*` env vars (matches the FEATURE_MAF_RUNTIME_* prefix convention from T015). Per-error-class retry policy: `LlmRateLimitError` and `LlmServerError` are retryable; `LlmContentFilterError`, `LlmQuotaError`, `OutputSchemaMismatchError`, `ValidationFailure`, `ToolVersionMismatchError` are NOT retryable
+- [X] T042c [US2] Implement a per-executor retry budget in the shared `apps/agents/maf_runtime/workflow/executors/_base.py::with_retry_budget` decorator/context manager defaulting to **3 attempts** and **30 seconds total elapsed per step** per FR-012; on exhausted retries the executor MUST surface a typed error (from `apps/agents/maf_runtime/errors.py`, T011b) and the workflow MUST transition the run to `Failed` (failed-with-context) rather than dropping it. Retry bounds MUST be configurable per environment via `FEATURE_MAF_RUNTIME_RETRY_*` env vars (matches the FEATURE_MAF_RUNTIME_* prefix convention from T015). Per-error-class retry policy: `LlmRateLimitError` and `LlmServerError` are retryable; `LlmContentFilterError`, `LlmQuotaError`, `OutputSchemaMismatchError`, `ValidationFailure`, `ToolVersionMismatchError` are NOT retryable
   - **Agents**: sre-engineer, software-developer, principal-engineer
   - **Tools**: read, edit
   - **Success**: `tests/unit/test_executor_retry_budget.py` proves (a) a flaky-then-success step succeeds within budget, (b) a permanently-failing step exhausts the 3-attempt budget within 30 s and routes the run to `Failed`, (c) per-environment overrides via `FEATURE_MAF_RUNTIME_RETRY_*` are honoured, (d) non-retryable error classes fail fast on the first attempt without consuming the retry budget.
 
-- [ ] T043 [US2] Implement `apps/agents/maf_runtime/workflow/builder.py::build_workflow()` using `WorkflowBuilder` to wire the 5 executors as a directed graph (Monitoring → Risk Assessment → {Evacuation || Resource Allocation} → Communication), bind the T018 `CosmosCheckpointStorage`, and register the T046 HITL request port
+- [X] T043 [US2] Implement `apps/agents/maf_runtime/workflow/builder.py::build_workflow()` using `WorkflowBuilder` to wire the 5 executors as a directed graph (Monitoring → Risk Assessment → {Evacuation || Resource Allocation} → Communication), bind the T018 `CosmosCheckpointStorage`, and register the T046 HITL request port
   - **Agents**: ai-ml-engineer, software-developer, solution-architect
   - **Tools**: read, edit, web
   - **Success**: `python -m apps.agents.maf_runtime.workflow.builder --incident-fixture tests/fixtures/incidents/flood_level2.json --shadow` runs the full happy path end-to-end, persists ≥6 checkpoints, and exits cleanly with a `Completed` run document.
 
-- [ ] T044 [US2] Implement `apps/agents/maf_runtime/workflow/duration_watchdog.py` as a Container-Apps-compatible periodic task (5-minute interval) that scans `workflow_runs` for documents with `is_active=true AND now() - last_step_at > 72h`, transitions them to `NeedsOperatorDecision`, and writes an operator-visible alert (FR-012c)
+- [X] T044 [US2] Implement `apps/agents/maf_runtime/workflow/duration_watchdog.py` as a Container-Apps-compatible periodic task (5-minute interval) that scans `workflow_runs` for documents with `is_active=true AND now() - last_step_at > 72h`, transitions them to `NeedsOperatorDecision`, and writes an operator-visible alert (FR-012c)
   - **Agents**: sre-engineer, software-developer, observer-auditor
   - **Tools**: read, edit
   - **Success**: `tests/unit/test_duration_watchdog.py` proves a fake clock at +72h-epsilon does NOT transition; +72h+1s DOES transition and emits an alert; configurable threshold honoured.
 
 ### HITL — wraps spec 008
 
-- [ ] T045 [US2] Audit spec 008's existing approval queue and store: read `apps/agents/communication/approval.py`, the existing `ApprovalRequest` schema, and the existing `commander-approval-queue` Service Bus configuration. Document the discovered envelope in a new code comment block at the top of `apps/agents/maf_runtime/workflow/hitl_request_port.py`
+- [X] T045 [US2] Audit spec 008's existing approval queue and store: read `apps/agents/communication/approval.py`, the existing `ApprovalRequest` schema, and the existing `commander-approval-queue` Service Bus configuration. Document the discovered envelope in a new code comment block at the top of `apps/agents/maf_runtime/workflow/hitl_request_port.py`
   - **Agents**: software-developer, security-engineer, public-information-officer
   - **Tools**: read, search, agent
   - **Success**: The discovered fields exactly match the mapping in `contracts/hitl-request.envelope.md`; any drift triggers an update to the contract before T046 begins.
 
-- [ ] T046 [US2] Implement `apps/agents/maf_runtime/workflow/hitl_request_port.py` with two functions: `wrap_request_info_event(event) -> ApprovalRequest` (publishes to the existing `commander-approval-queue`, never to a new queue) and `on_decision_received(decision)` (subscribes to the existing `commander-approval-decisions-queue`, looks up the run by `pending_request_id`, calls `Workflow.send_response`)
+- [X] T046 [US2] Implement `apps/agents/maf_runtime/workflow/hitl_request_port.py` with two functions: `wrap_request_info_event(event) -> ApprovalRequest` (publishes to the existing `commander-approval-queue`, never to a new queue) and `on_decision_received(decision)` (subscribes to the existing `commander-approval-decisions-queue`, looks up the run by `pending_request_id`, calls `Workflow.send_response`)
   - **Agents**: ai-ml-engineer, security-engineer, public-information-officer
   - **Tools**: read, edit, search
   - **Success**: `tests/integration/test_hitl_round_trip.py` runs the full Communication step with a stubbed Service Bus, verifies that `ApprovalRequest.alert.payload.metadata.maf_run_id` is populated, and that `on_decision_received("approve")` resumes the workflow and produces a published alert.
 
-- [ ] T047 [US2] Add a static-analysis test `tests/unit/test_send_response_call_sites.py` that scans the entire repo and asserts the ONLY module that imports/calls `Workflow.send_response` is `apps/agents/maf_runtime/workflow/hitl_request_port.py` (Constitution NN-1 non-bypassability — see `contracts/hitl-request.envelope.md §5`)
+- [X] T047 [US2] Add a static-analysis test `tests/unit/test_send_response_call_sites.py` that scans the entire repo and asserts the ONLY module that imports/calls `Workflow.send_response` is `apps/agents/maf_runtime/workflow/hitl_request_port.py` (Constitution NN-1 non-bypassability — see `contracts/hitl-request.envelope.md §5`)
   - **Agents**: security-engineer, principal-engineer, observer-auditor
   - **Tools**: read, edit, search
   - **Success**: A deliberately-added second call site causes the test to fail; reverting passes.
 
-- [ ] T048 [US2] Add an idempotency check inside `hitl_request_port.py::on_request_emitted` so that on workflow restore, if `approval_decisions` already has a recorded decision for the re-emitted `request_id`, the workflow auto-resolves rather than re-publishing to the commander queue (covers spec edge case "mid-workflow crash during a paused HITL step")
+- [X] T048 [US2] Add an idempotency check inside `hitl_request_port.py::on_request_emitted` so that on workflow restore, if `approval_decisions` already has a recorded decision for the re-emitted `request_id`, the workflow auto-resolves rather than re-publishing to the commander queue (covers spec edge case "mid-workflow crash during a paused HITL step")
   - **Agents**: software-developer, sre-engineer
   - **Tools**: read, edit
   - **Success**: `tests/integration/test_hitl_resume.py` simulates crash mid-approval, verifies that re-launching does NOT cause a duplicate commander notification, and that an already-approved request resumes immediately.
 
-- [ ] T048b [US2] Add `tests/integration/test_hitl_concurrent_approval.py` proving the spec edge case "Two commanders approve the same alert simultaneously": fire two `on_decision_received` events for the same `request_id` from two distinct approver identities within milliseconds; assert exactly one decision wins, the workflow resumes once, the losing decision returns a typed `DuplicateDecisionConflictError`, and BOTH attempts are present in the `approval_decisions` audit trail
+- [X] T048b [US2] Add `tests/integration/test_hitl_concurrent_approval.py` proving the spec edge case "Two commanders approve the same alert simultaneously": fire two `on_decision_received` events for the same `request_id` from two distinct approver identities within milliseconds; assert exactly one decision wins, the workflow resumes once, the losing decision returns a typed `DuplicateDecisionConflictError`, and BOTH attempts are present in the `approval_decisions` audit trail
   - **Agents**: qa-test-engineer, security-engineer, public-information-officer
   - **Tools**: read, edit, execute
   - **Success**: Test PASSES; deliberately removing the conflict guard fails the test by causing a duplicate `Workflow.send_response` invocation (caught by T047's static check at runtime).
 
-- [ ] T048c [US2] Add `tests/integration/test_hitl_escalation_timeout.py` proving FR-010 still works through the wrapped envelope: simulate a pending approval that exceeds the configured spec-008 timeout; assert the spec-008 escalation message is delivered to the next commander in the chain; assert the workflow remains in `AwaitingApproval` (not `Cancelled` or `Failed`) until either an approve/reject/modify decision arrives or the configured maximum escalation level is exhausted (in which case the run transitions to `NeedsOperatorDecision`); the test MUST never auto-approve
+- [X] T048c [US2] Add `tests/integration/test_hitl_escalation_timeout.py` proving FR-010 still works through the wrapped envelope: simulate a pending approval that exceeds the configured spec-008 timeout; assert the spec-008 escalation message is delivered to the next commander in the chain; assert the workflow remains in `AwaitingApproval` (not `Cancelled` or `Failed`) until either an approve/reject/modify decision arrives or the configured maximum escalation level is exhausted (in which case the run transitions to `NeedsOperatorDecision`); the test MUST never auto-approve
   - **Agents**: qa-test-engineer, security-engineer, incident-commander, public-information-officer
   - **Tools**: read, edit, execute
   - **Success**: Test PASSES; mutation testing — flipping the auto-approve guard to true causes the test to fail (proving the FR-010 invariant is enforced).
 
 ### Crash recovery and capacity
 
-- [ ] T049 [US2] Implement `tests/integration/test_workflow_crash_recovery.py` — fault-injection harness that runs 100 trials per fixture: starts a workflow, kills the process at a randomised step boundary, restarts from checkpoint, asserts the re-launched run completes successfully without re-executing already-completed steps. Asserts ≥99/100 trials succeed (SC-002)
+- [X] T049 [US2] Implement `tests/integration/test_workflow_crash_recovery.py` — fault-injection harness that runs 100 trials per fixture: starts a workflow, kills the process at a randomised step boundary, restarts from checkpoint, asserts the re-launched run completes successfully without re-executing already-completed steps. Asserts ≥99/100 trials succeed (SC-002)
   - **Agents**: chaos-engineer, sre-engineer, qa-test-engineer
   - **Tools**: read, edit, execute
   - **Success**: `pytest tests/integration/test_workflow_crash_recovery.py -q` reports ≥99/100 successes; failures emit per-trial diagnostics; the test runs in <10 minutes wall-clock locally.
 
-- [ ] T050 [US2] Implement `tests/load/test_workflow_capacity.py` — Locust-style load harness validating FR-012b: 25 sustained concurrent active runs for 30 minutes + 50 burst for 60 minutes; asserts SC-007 (≤10% latency regression vs the legacy baseline captured in `tests/load/baselines/legacy_baseline.json`)
+- [X] T050 [US2] Implement `tests/load/test_workflow_capacity.py` — Locust-style load harness validating FR-012b: 25 sustained concurrent active runs for 30 minutes + 50 burst for 60 minutes; asserts SC-007 (≤10% latency regression vs the legacy baseline captured in `tests/load/baselines/legacy_baseline.json`)
   - **Agents**: sre-engineer, qa-test-engineer, chaos-engineer
   - **Tools**: read, edit, execute
   - **Success**: Test produces a `tests/load/results/maf-<timestamp>.json` artefact with `p95_latency_ms <= 1.10 * baseline_p95_latency_ms` and zero workflow failures across the load window.
 
 ### Operator REST API + dashboard
 
-- [ ] T051 [US2] Replace the 501 stubs in `apps/api/app/api/routes/workflow_runs.py` with full implementations of all six endpoints from `contracts/workflow-runs.api.md` (list with status filter, get, checkpoints, audit, cancel, approval-gate metrics) backed by `WorkflowRunRepository`, the `audit_entries` container, and Application Insights for the metrics endpoint
+- [X] T051 [US2] Replace the 501 stubs in `apps/api/app/api/routes/workflow_runs.py` with full implementations of all six endpoints from `contracts/workflow-runs.api.md` (list with status filter, get, checkpoints, audit, cancel, approval-gate metrics) backed by `WorkflowRunRepository`, the `audit_entries` container, and Application Insights for the metrics endpoint
   - **Agents**: api-architect, software-developer
   - **Tools**: read, edit, execute
   - **Success**: `tests/contract/test_workflow_run_api.py` exercises the documented schema for each endpoint; tenancy enforcement verified; cancel returns 409 on already-terminal runs.
 
-- [ ] T052 [P] [US2] Implement `apps/web/src/lib/api/workflow-runs.ts` — typed fetch client with `cache: "no-store"` per repo convention, exposing `listRuns(filters)`, `getRun(id)`, `listCheckpoints(id)`, `listAudit(id)`, `cancelRun(id, reason)`, `getApprovalGateMetrics(window)`
+- [X] T052 [P] [US2] Implement `apps/web/src/lib/api/workflow-runs.ts` — typed fetch client with `cache: "no-store"` per repo convention, exposing `listRuns(filters)`, `getRun(id)`, `listCheckpoints(id)`, `listAudit(id)`, `cancelRun(id, reason)`, `getApprovalGateMetrics(window)`
   - **Agents**: software-developer, api-architect
   - **Tools**: read, edit
   - **Success**: TypeScript types compile under `tsc --noEmit`; client maps cleanly to the OpenAPI types of T051.
 
-- [ ] T053 [P] [US2] Implement `apps/web/src/components/workflow/WorkflowRunList.tsx` rendering runs grouped into the 7 canonical state tabs (Running / AwaitingApproval / NeedsOperatorDecision / Completed / Failed / Cancelled / Superseded) with badge counts
+- [X] T053 [P] [US2] Implement `apps/web/src/components/workflow/WorkflowRunList.tsx` rendering runs grouped into the 7 canonical state tabs (Running / AwaitingApproval / NeedsOperatorDecision / Completed / Failed / Cancelled / Superseded) with badge counts
   - **Agents**: ux-designer, software-developer, accessibility-tester
   - **Tools**: read, edit
   - **Success**: Component renders against fixture data; all 7 tabs are keyboard-navigable; meets WCAG 2.2 AA on the new component (verified via the existing axe test harness).
 
-- [ ] T054 [P] [US2] Implement `apps/web/src/components/workflow/WorkflowRunDetail.tsx` showing step-by-step progress, checkpoint timeline, an "AwaitingApproval — pending commander action" banner when applicable, and a deep-link to the OTel trace in Application Insights
+- [X] T054 [P] [US2] Implement `apps/web/src/components/workflow/WorkflowRunDetail.tsx` showing step-by-step progress, checkpoint timeline, an "AwaitingApproval — pending commander action" banner when applicable, and a deep-link to the OTel trace in Application Insights
   - **Agents**: ux-designer, software-developer
   - **Tools**: read, edit
   - **Success**: Storybook entry renders all four notable states (Running mid-step, AwaitingApproval, NeedsOperatorDecision, Failed-with-context); checkpoint timeline scrolls correctly with 50+ entries.
 
-- [ ] T055 [P] [US2] Implement `apps/web/src/app/operations/workflows/page.tsx` server component that composes T053 + T054 and is mounted under the existing `operations/` segment
+- [X] T055 [P] [US2] Implement `apps/web/src/app/operations/workflows/page.tsx` server component that composes T053 + T054 and is mounted under the existing `operations/` segment
   - **Agents**: software-developer, ux-designer
   - **Tools**: read, edit
   - **Success**: `next build` succeeds; the page renders against a mocked API client with no client-side fetch errors.
 
-- [ ] T056 [US2] Add `tests/contract/test_hitl_audit_invariant.py` proving SC-003: scan the last N production-style traces in a fixture and assert that every `alert.published` event has a corresponding `approval_decisions` document AND vice versa (no orphan publishes)
+- [X] T056 [US2] Add `tests/contract/test_hitl_audit_invariant.py` proving SC-003: scan the last N production-style traces in a fixture and assert that every `alert.published` event has a corresponding `approval_decisions` document AND vice versa (no orphan publishes)
   - **Agents**: qa-test-engineer, observer-auditor, security-engineer
   - **Tools**: read, edit, execute
   - **Success**: Test PASSES against a clean fixture and FAILS when one decision is removed (proving the invariant detects gaps).
 
-- [ ] T056b [US2] Implement `apps/web/src/components/workflow/ApprovalGateMetrics.tsx` (initial day-one version) rendering MTTA / approvals / modifications / rejections / escalations / timeouts from `getApprovalGateMetrics(window)` with a default 24h window — moved into US2 from the original US3 placement so SC-008's "available on day one of cutover" invariant is satisfied at MVP cutover. Component is a **sibling** of `WorkflowRunDetail.tsx` (per `plan.md` project tree) and is composed alongside it in `apps/web/src/app/operations/workflows/page.tsx` so both paused-run context and approval-gate metrics surface on the same workflows page. T059 in US3 extends this component with selectable windows (1h / 7d / 30d)
+- [X] T056b [US2] Implement `apps/web/src/components/workflow/ApprovalGateMetrics.tsx` (initial day-one version) rendering MTTA / approvals / modifications / rejections / escalations / timeouts from `getApprovalGateMetrics(window)` with a default 24h window — moved into US2 from the original US3 placement so SC-008's "available on day one of cutover" invariant is satisfied at MVP cutover. Component is a **sibling** of `WorkflowRunDetail.tsx` (per `plan.md` project tree) and is composed alongside it in `apps/web/src/app/operations/workflows/page.tsx` so both paused-run context and approval-gate metrics surface on the same workflows page. T059 in US3 extends this component with selectable windows (1h / 7d / 30d)
   - **Agents**: ux-designer, software-developer
   - **Tools**: read, edit
   - **Success**: Component renders against fixture metrics with the 24h window only; numbers match the API response from T051; mounted as a sibling in the workflows page so an operator viewing a paused run sees both detail and approval-gate metrics without navigation.
