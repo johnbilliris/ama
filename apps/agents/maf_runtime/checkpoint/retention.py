@@ -31,7 +31,7 @@ def _build_container() -> Any | None:
         from azure.identity import DefaultAzureCredential
 
         client = CosmosClient(endpoint, credential=DefaultAzureCredential())
-        db = client.get_database_client(os.environ.get("AZURE_COSMOS_DATABASE_NAME", "platform"))
+        db = client.get_database_client(os.environ.get("AZURE_COSMOS_DATABASE_NAME", "disaster-hub"))
         return db.get_container_client(os.environ.get("MAF_CHECKPOINT_CONTAINER", "checkpoints"))
     except Exception:  # noqa: BLE001
         logger.exception("Failed to init Cosmos for checkpoint retention stamp")
