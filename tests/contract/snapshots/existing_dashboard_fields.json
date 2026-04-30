@@ -1,0 +1,7 @@
+{
+  "_meta": {
+    "purpose": "Pre-MAF dashboard field snapshot (T024b \u2192 T060b regression test)",
+    "schema": "{file_path: [field, ...]}"
+  },
+  "fields_by_file": {}
+}

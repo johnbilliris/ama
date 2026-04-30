@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.gov.au/schemas/033/checkpoint.schema.json",
+  "title": "AMA Workflow Checkpoint",
+  "description": "Persisted Cosmos document representing one MAF workflow checkpoint taken at an agent-step boundary. Backs FR-006, FR-007. Container TTL = 2,592,000 s (30 days), counted from the parent workflow_run.terminal_at (FR-012a).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "run_id", "sequence", "step_name", "executor_states", "pending_requests", "taken_at"],
+  "properties": {
+    "id":       { "type": "string", "format": "uuid" },
+    "run_id":   { "type": "string", "format": "uuid", "description": "Cosmos partition key; FK to workflow_runs.id." },
+    "sequence": { "type": "integer", "minimum": 0, "description": "Monotonically increasing per run. Starts at 0. Unique per run_id." },
+    "step_name":{ "type": "string", "minLength": 1, "description": "Agent-step boundary at which the checkpoint was taken." },
+    "executor_states": {
+      "type": "object",
+      "description": "Map of {executor_id: serialised state dict from on_checkpoint_save}. Opaque to the storage layer.",
+      "additionalProperties": { "type": "object" }
+    },
+    "pending_requests": {
+      "type": "array",
+      "description": "MAF-emitted pending RequestInfoEvent records (e.g., HITL approval requests) captured per MAF docs.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["request_id", "kind", "payload"],
+        "properties": {
+          "request_id": { "type": "string", "minLength": 1 },
+          "kind":       { "type": "string", "enum": ["approval_request", "function_approval_request", "input_request"] },
+          "payload":    { "type": "object", "description": "Opaque MAF payload; for approval_request, this wraps the spec-008 ApprovalRequest envelope." }
+        }
+      }
+    },
+    "taken_at": { "type": "string", "format": "date-time" }
+  }
+}

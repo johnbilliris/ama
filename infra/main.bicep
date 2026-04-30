@@ -433,6 +433,16 @@ module emergencyPlanning './modules/emergency-planning.bicep' = {
   }
 }
 
+// Spec 033 — MAF Workflow containers (workflow_runs, checkpoints, tool_registrations)
+module mafWorkflowCosmos './bicep/modules/cosmos-workflow.bicep' = {
+  name: 'maf-workflow-cosmos'
+  params: {
+    cosmosAccountName: cosmos.name
+    databaseName: cosmosDb.name
+    tags: tags
+  }
+}
+
 // Cosmos DB data-plane RBAC — grants the deploying principal read/write access
 // Required for postprovision seed script and local development
 resource cosmosDataContributorAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-11-15' = if (!empty(principalId)) {

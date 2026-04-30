@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.gov.au/schemas/033/tool-registration.schema.json",
+  "title": "AMA MCP Tool Registration",
+  "description": "Binds an out-of-process MCP tool to one or more agents' allow-lists. Backs FR-018, FR-019, FR-019a. Stored in the tool_registrations Cosmos container, partition key /tool_name. A new major version is a NEW document (NEW composite id), not an in-place update — preserves audit trail.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "tool_name", "address", "pinned_major_version", "bound_agents", "capability_description", "registered_at", "registered_by"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*:v[0-9]+$",
+      "description": "Composite key: <tool_name>:v<major>. Must match tool_name and pinned_major_version."
+    },
+    "tool_name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Cosmos partition key."
+    },
+    "address": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the MCP server (HTTP-Streamable transport per ADR-033-04)."
+    },
+    "pinned_major_version": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Major semantic version this registration binds to. The agent runtime refuses to invoke if the MCP server's serverInfo advertises a different major (typed version_mismatch error)."
+    },
+    "bound_agents": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["monitoring", "risk_assessment", "evacuation", "resource_allocation", "communication"]
+      }
+    },
+    "capability_description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable summary, surfaced in operator UI."
+    },
+    "registered_at": { "type": "string", "format": "date-time" },
+    "registered_by": { "type": "string", "minLength": 1, "description": "Operator identity that registered this version." }
+  }
+}

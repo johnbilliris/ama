@@ -33,6 +33,7 @@ from app.api.routes.simulation_playback import router as simulation_playback_rou
 from app.api.routes.simulations import router as simulations_router
 from app.api.routes.tasks import router as tasks_router
 from app.api.routes.warning_chain import router as warning_chain_router
+from app.api.routes.workflow_runs import router as workflow_runs_router
 from fastapi import APIRouter
 
 # Lazy import for eval module to keep its repo deps optional
@@ -81,6 +82,7 @@ api_router.include_router(aidr_health_router)
 api_router.include_router(governance_dashboard_router)
 api_router.include_router(dead_letters_mgmt_router)
 api_router.include_router(radius_lookup_router)
+api_router.include_router(workflow_runs_router)
 
 if _EVAL_AVAILABLE:
     api_router.include_router(eval_router)

@@ -1,0 +1,15 @@
+{
+  "_meta": {
+    "purpose": "Spec 033 / T071 - legacy baseline used by tests/load/test_workflow_capacity.py for the SC-007 latency-regression check (<=10%).",
+    "captured_at": "PLACEHOLDER",
+    "captured_against": "PLACEHOLDER - has not yet been captured against the deployed legacy pipeline",
+    "MUST_REPLACE_BEFORE": "first production cutover",
+    "how_to_capture": "Run scripts/capture_legacy_baseline.sh against the deployed legacy pipeline (any environment with full traffic shape). Replace this file with the script's output and commit the change as a separate PR before cutting the first MAF agent over to the maf flag in production.",
+    "scenario": "Concurrent 25 active workflow runs (FR-012b sustained band), mixed fire/weather/hydrology incidents, 60-minute window."
+  },
+  "p50_latency_ms": 800,
+  "p95_latency_ms": 2500,
+  "p99_latency_ms": 4200,
+  "throughput_rps": 0.8,
+  "error_rate": 0.0
+}

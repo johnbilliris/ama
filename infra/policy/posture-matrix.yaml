@@ -1,0 +1,28 @@
+# Spec 029 posture matrix (T011 stub for spec 033).
+#
+# This file is the canonical source of truth for per-environment Azure
+# infrastructure posture rules. Rules are consumed by the OPA / conftest
+# gate at PR time and by the post-deploy verifier (FR-031 of spec 029).
+#
+# Spec 033 contributes one rule for the audit_entries Cosmos container:
+# permanent online retention enforced at deploy-time. See
+# infra/policy/rego/deny_audit_delete.rego.
+
+cosmosdb:
+  containers:
+    audit_entries:
+      # FR-012a: 7-year online retention enforced by deny-delete role + no TTL.
+      retention: permanent_online
+      defaultTtlSeconds: -1
+      enforced_by:
+        - infra/policy/rego/deny_audit_delete.rego
+    workflow_runs:
+      retention: indefinite
+      defaultTtlSeconds: -1
+    checkpoints:
+      # FR-012a: 30 days from terminal_at (set by maf_runtime/checkpoint/retention.py).
+      retention: 30_days_post_terminal
+      defaultTtlSeconds: 2592000
+    tool_registrations:
+      retention: indefinite
+      defaultTtlSeconds: -1
