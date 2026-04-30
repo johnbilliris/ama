@@ -48,15 +48,19 @@ jobs:
         run: |
           python -m pytest packages/eval-core/tests/ tests/unit/eval/ -q
 
+      # Per spec 031: the job-level `environment: dev` binding ensures
+      # AZURE_CREDENTIALS is always present when this job runs (this repo
+      # does not accept fork PRs). The earlier `if: secrets.* != ''` guards
+      # were both redundant and rejected by GitHub's runtime YAML validator
+      # (secrets context is restricted in step-level `if:` expressions on
+      # pull_request triggers). Removed.
       - name: Azure login
-        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
         uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Trigger Container Apps Job
         id: trigger
-        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
         run: |
           set -euo pipefail
           RUN_ID=$(az containerapp job start \
@@ -68,7 +72,6 @@ jobs:
 
       - name: Poll for verdict
         id: verdict
-        if: ${{ secrets.AZURE_CREDENTIALS != '' }}
         run: |
           set -euo pipefail
           for i in $(seq 1 60); do
