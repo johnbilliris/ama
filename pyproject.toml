@@ -92,9 +92,7 @@ type = "forbidden"
 source_modules = ["packages.domain"]
 forbidden_modules = ["apps"]
 
-[[tool.importlinter.contracts]]
-name = "prompts do not depend on apps"
-type = "forbidden"
-source_modules = ["packages.prompts"]
-forbidden_modules = ["apps"]
+# NOTE: packages/prompts/ is a YAML-asset directory (no Python module), so it
+# has no imports to lint. Re-add a contract here only if Python code is added
+# under packages/prompts/.
 
