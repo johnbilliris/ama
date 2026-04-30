@@ -35,10 +35,12 @@ def _make_workflow_with_in_memory_publisher() -> tuple[AmaWorkflow, _ServiceBusP
 def test_happy_path_run_pauses_at_hitl_with_no_publish_until_gate() -> None:
     """SC-003 spine: a successful run reaches AwaitingApproval and exactly ONE envelope is published (by the gate)."""
     wf, publisher = _make_workflow_with_in_memory_publisher()
-    final = asyncio.run(wf.run_incident(
-        incident={"incident_id": "INC-happy-1", "category": "fire"},
-        created_by="test",
-    ))
+    final = asyncio.run(
+        wf.run_incident(
+            incident={"incident_id": "INC-happy-1", "category": "fire"},
+            created_by="test",
+        )
+    )
     assert final["status"] == WorkflowRunStatus.AWAITING_APPROVAL.value
     assert len(publisher.published) == 1, "Exactly one approval envelope must be published"
     assert publisher.published[0]["queue"] == "commander-approval-queue"
@@ -76,9 +78,12 @@ def test_workflow_failure_path_transitions_to_failed() -> None:
     wf._risk.run_legacy = boom  # type: ignore[method-assign]
 
     try:
-        asyncio.run(wf.run_incident(
-            incident={"incident_id": "INC-fail-1", "category": "fire"}, created_by="t",
-        ))
+        asyncio.run(
+            wf.run_incident(
+                incident={"incident_id": "INC-fail-1", "category": "fire"},
+                created_by="t",
+            )
+        )
     except LlmServerError:
         pass
 

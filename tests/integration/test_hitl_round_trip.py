@@ -31,8 +31,11 @@ def test_envelope_carries_maf_metadata() -> None:
     draft = MagicMock()
     draft.model_dump.return_value = {"alert_id": "ca-INC-1-v1", "metadata": {}}
     env = build_approval_envelope(
-        draft_alert=draft, incident_id="INC-1", run_id="run-1",
-        step_index=4, correlation_id="trace-1",
+        draft_alert=draft,
+        incident_id="INC-1",
+        run_id="run-1",
+        step_index=4,
+        correlation_id="trace-1",
     )
     md = env["alert"]["payload"]["metadata"]
     assert md["maf_run_id"] == "run-1"
@@ -52,10 +55,15 @@ def test_hitl_gate_publishes_and_pauses() -> None:
     gate = HitlGateExecutor(repo=repo, publisher=publisher)
     draft = MagicMock()
     draft.model_dump.return_value = {"alert_id": "ca-INC-1-v1"}
-    result = asyncio.run(gate.run(
-        draft_alert=draft, incident_id="INC-1", run_id=run_id,
-        step_index=4, correlation_id="t",
-    ))
+    result = asyncio.run(
+        gate.run(
+            draft_alert=draft,
+            incident_id="INC-1",
+            run_id=run_id,
+            step_index=4,
+            correlation_id="t",
+        )
+    )
     assert result["parked"] is True
     assert publisher.published[0]["queue"] == "commander-approval-queue"
     after = repo.get(run_id)
@@ -70,6 +78,7 @@ def test_hitl_gate_idempotent_resume_skips_publish() -> None:
     run_id = _make_run(repo, incident_id="INC-resume")
     publisher = _ServiceBusPublisher()
     fixed_request_id = deterministic_request_id(incident_id="INC-resume", run_id=run_id, step_index=4)
+
     def _decision_lookup(req_id: str) -> dict | None:
         return {"decision": "approve", "request_id": req_id} if req_id == fixed_request_id else None
 
@@ -80,10 +89,15 @@ def test_hitl_gate_idempotent_resume_skips_publish() -> None:
     )
     draft = MagicMock()
     draft.model_dump.return_value = {"alert_id": "ca-INC-resume-v1"}
-    result = asyncio.run(gate.run(
-        draft_alert=draft, incident_id="INC-resume", run_id=run_id,
-        step_index=4, correlation_id="t",
-    ))
+    result = asyncio.run(
+        gate.run(
+            draft_alert=draft,
+            incident_id="INC-resume",
+            run_id=run_id,
+            step_index=4,
+            correlation_id="t",
+        )
+    )
     assert result["parked"] is False
     assert result["decision"]["decision"] == "approve"
     assert publisher.published == [], "Publish must be skipped when existing decision found"
@@ -96,13 +110,22 @@ def test_decision_listener_resumes_run_on_approve() -> None:
     gate = HitlGateExecutor(repo=repo, publisher=publisher)
     draft = MagicMock()
     draft.model_dump.return_value = {"alert_id": "ca-INC-decide-v1"}
-    result = asyncio.run(gate.run(
-        draft_alert=draft, incident_id="INC-decide", run_id=run_id,
-        step_index=4, correlation_id="t",
-    ))
+    result = asyncio.run(
+        gate.run(
+            draft_alert=draft,
+            incident_id="INC-decide",
+            run_id=run_id,
+            step_index=4,
+            correlation_id="t",
+        )
+    )
     listener = HitlDecisionListener(repo=repo)
-    decision = {"request_id": result["request_id"], "decision": "approve",
-                "approver_identity": "commander-1", "correlation_id": "t"}
+    decision = {
+        "request_id": result["request_id"],
+        "decision": "approve",
+        "approver_identity": "commander-1",
+        "correlation_id": "t",
+    }
     updated = asyncio.run(listener.on_decision_received(decision))
     assert updated["status"] == WorkflowRunStatus.RUNNING.value
 
@@ -114,13 +137,22 @@ def test_decision_listener_cancels_on_reject() -> None:
     gate = HitlGateExecutor(repo=repo, publisher=publisher)
     draft = MagicMock()
     draft.model_dump.return_value = {"alert_id": "ca-INC-reject-v1"}
-    result = asyncio.run(gate.run(
-        draft_alert=draft, incident_id="INC-reject", run_id=run_id,
-        step_index=4, correlation_id="t",
-    ))
+    result = asyncio.run(
+        gate.run(
+            draft_alert=draft,
+            incident_id="INC-reject",
+            run_id=run_id,
+            step_index=4,
+            correlation_id="t",
+        )
+    )
     listener = HitlDecisionListener(repo=repo)
-    decision = {"request_id": result["request_id"], "decision": "reject",
-                "approver_identity": "commander-1", "correlation_id": "t"}
+    decision = {
+        "request_id": result["request_id"],
+        "decision": "reject",
+        "approver_identity": "commander-1",
+        "correlation_id": "t",
+    }
     updated = asyncio.run(listener.on_decision_received(decision))
     assert updated["status"] == WorkflowRunStatus.CANCELLED.value
 
@@ -133,15 +165,28 @@ def test_concurrent_approval_second_decision_conflict() -> None:
     gate = HitlGateExecutor(repo=repo, publisher=publisher)
     draft = MagicMock()
     draft.model_dump.return_value = {"alert_id": "ca-INC-concurrent-v1"}
-    result = asyncio.run(gate.run(
-        draft_alert=draft, incident_id="INC-concurrent", run_id=run_id,
-        step_index=4, correlation_id="t",
-    ))
+    result = asyncio.run(
+        gate.run(
+            draft_alert=draft,
+            incident_id="INC-concurrent",
+            run_id=run_id,
+            step_index=4,
+            correlation_id="t",
+        )
+    )
     listener = HitlDecisionListener(repo=repo)
-    decision_a = {"request_id": result["request_id"], "decision": "approve",
-                  "approver_identity": "commander-A", "correlation_id": "t-a"}
-    decision_b = {"request_id": result["request_id"], "decision": "approve",
-                  "approver_identity": "commander-B", "correlation_id": "t-b"}
+    decision_a = {
+        "request_id": result["request_id"],
+        "decision": "approve",
+        "approver_identity": "commander-A",
+        "correlation_id": "t-a",
+    }
+    decision_b = {
+        "request_id": result["request_id"],
+        "decision": "approve",
+        "approver_identity": "commander-B",
+        "correlation_id": "t-b",
+    }
     asyncio.run(listener.on_decision_received(decision_a))  # first wins
     with pytest.raises(DuplicateDecisionConflictError):
         asyncio.run(listener.on_decision_received(decision_b))
@@ -154,10 +199,15 @@ def test_unknown_decision_outcome_raises() -> None:
     gate = HitlGateExecutor(repo=repo, publisher=publisher)
     draft = MagicMock()
     draft.model_dump.return_value = {"alert_id": "ca-INC-unknown-v1"}
-    result = asyncio.run(gate.run(
-        draft_alert=draft, incident_id="INC-unknown", run_id=run_id,
-        step_index=4, correlation_id="t",
-    ))
+    result = asyncio.run(
+        gate.run(
+            draft_alert=draft,
+            incident_id="INC-unknown",
+            run_id=run_id,
+            step_index=4,
+            correlation_id="t",
+        )
+    )
     listener = HitlDecisionListener(repo=repo)
     # Unknown decision raises ValueError but the run remains in AwaitingApproval.
     with pytest.raises(ValueError):

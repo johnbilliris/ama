@@ -112,7 +112,9 @@ class AmaWorkflow:
         try:
             # 1. Monitoring
             monitoring_out = await self._monitoring.execute_step(
-                _DuckEnvelope(incident_clean), correlation_id=correlation_id, run_id=run_id,
+                _DuckEnvelope(incident_clean),
+                correlation_id=correlation_id,
+                run_id=run_id,
             )
             steps_completed.append("monitoring")
             await self._save_checkpoint(run_id, "monitoring", {"output": _to_jsonable(monitoring_out)})
@@ -120,7 +122,8 @@ class AmaWorkflow:
             # 2. Risk Assessment
             risk_out = await self._risk.execute_step(
                 {**incident_clean, "monitoring": _to_jsonable(monitoring_out)},
-                correlation_id=correlation_id, run_id=run_id,
+                correlation_id=correlation_id,
+                run_id=run_id,
             )
             steps_completed.append("risk_assessment")
             await self._save_checkpoint(run_id, "risk_assessment", {"output": _to_jsonable(risk_out)})
@@ -128,23 +131,30 @@ class AmaWorkflow:
             # 3. Evacuation || Resource Allocation (parallel)
             evac_task = self._evac.execute_step(
                 {**incident_clean, "risk": _to_jsonable(risk_out)},
-                correlation_id=correlation_id, run_id=run_id,
+                correlation_id=correlation_id,
+                run_id=run_id,
             )
             res_task = self._resource.execute_step(
                 {**incident_clean, "risk": _to_jsonable(risk_out)},
-                correlation_id=correlation_id, run_id=run_id,
+                correlation_id=correlation_id,
+                run_id=run_id,
             )
             evac_out, res_out = await asyncio.gather(evac_task, res_task)
             steps_completed.extend(["evacuation", "resource_allocation"])
-            await self._save_checkpoint(run_id, "evacuation_resource", {
-                "evacuation": _to_jsonable(evac_out),
-                "resource_allocation": _to_jsonable(res_out),
-            })
+            await self._save_checkpoint(
+                run_id,
+                "evacuation_resource",
+                {
+                    "evacuation": _to_jsonable(evac_out),
+                    "resource_allocation": _to_jsonable(res_out),
+                },
+            )
 
             # 4. Communication (draft only — never published)
             comm_out = await self._communication.execute_step(
                 {**incident_clean, "evacuation": _to_jsonable(evac_out), "resource": _to_jsonable(res_out)},
-                correlation_id=correlation_id, run_id=run_id,
+                correlation_id=correlation_id,
+                run_id=run_id,
             )
             steps_completed.append("communication")
             await self._save_checkpoint(run_id, "communication", {"output": _to_jsonable(comm_out)})
@@ -222,8 +232,11 @@ async def _amain(args: argparse.Namespace) -> int:
     workflow = AmaWorkflow()
     final_doc = await workflow.run_incident(incident=incident)
     print(json.dumps(final_doc, indent=2, sort_keys=True, default=str))
-    return 0 if final_doc["status"] in {WorkflowRunStatus.AWAITING_APPROVAL.value,
-                                         WorkflowRunStatus.COMPLETED.value} else 1
+    return (
+        0
+        if final_doc["status"] in {WorkflowRunStatus.AWAITING_APPROVAL.value, WorkflowRunStatus.COMPLETED.value}
+        else 1
+    )
 
 
 def main() -> int:  # pragma: no cover

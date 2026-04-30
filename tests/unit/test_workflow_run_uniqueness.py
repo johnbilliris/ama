@@ -54,7 +54,10 @@ def test_awaiting_approval_requires_pending_request_id() -> None:
     with pytest.raises(ValueError):
         repo.update_status(doc["id"], WorkflowRunStatus.AWAITING_APPROVAL, correlation_id="c")
     after = repo.update_status(
-        doc["id"], WorkflowRunStatus.AWAITING_APPROVAL, correlation_id="c", pending_request_id="req-1",
+        doc["id"],
+        WorkflowRunStatus.AWAITING_APPROVAL,
+        correlation_id="c",
+        pending_request_id="req-1",
     )
     assert after["pending_request_id"] == "req-1"
     assert after["is_active"] is True

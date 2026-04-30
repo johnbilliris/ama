@@ -55,9 +55,7 @@ def load_agent_definition(name: str) -> dict[str, Any]:
     if missing:
         raise ValueError(f"{yaml_path} is missing required fields: {missing}")
     if definition["name"] != name:
-        raise ValueError(
-            f"{yaml_path}: 'name' field is {definition['name']!r} but file is named {name}.yaml"
-        )
+        raise ValueError(f"{yaml_path}: 'name' field is {definition['name']!r} but file is named {name}.yaml")
     bindings = set(definition.get("middleware_bindings", []))
     if "content_safety" not in bindings or "audit" not in bindings:
         raise ValueError(
@@ -162,6 +160,7 @@ class MafAgentFacade:
             body = input_payload.model_dump_json()
         elif isinstance(input_payload, dict | list):
             import json
+
             body = json.dumps(input_payload, sort_keys=True)
         else:
             body = str(input_payload)
@@ -206,7 +205,8 @@ class MafAgentFacade:
             import time
 
             sink = (
-                Path(os.environ.get("MAF_SHADOW_SINK_DIR")) if os.environ.get("MAF_SHADOW_SINK_DIR")
+                Path(os.environ.get("MAF_SHADOW_SINK_DIR"))
+                if os.environ.get("MAF_SHADOW_SINK_DIR")
                 else _DEFINITIONS_DIR.parent / "equivalence" / "reports" / "shadow"
             )
             sink.mkdir(parents=True, exist_ok=True)

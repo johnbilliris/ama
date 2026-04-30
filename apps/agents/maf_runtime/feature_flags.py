@@ -52,8 +52,7 @@ def get_agent_mode(agent_name: str) -> AgentMode:
     raw = os.environ.get(_flag_name(agent_name), _DEFAULT_MODE).strip().lower()
     if raw not in _VALID_MODES:
         raise ValueError(
-            f"Invalid value {raw!r} for env var {_flag_name(agent_name)!r}; "
-            f"expected one of {sorted(_VALID_MODES)}."
+            f"Invalid value {raw!r} for env var {_flag_name(agent_name)!r}; expected one of {sorted(_VALID_MODES)}."
         )
     return raw  # type: ignore[return-value]
 
@@ -66,9 +65,7 @@ def get_retry_attempts(default: int = DEFAULT_RETRY_ATTEMPTS) -> int:
     try:
         value = int(raw)
     except ValueError as e:
-        raise ValueError(
-            f"FEATURE_MAF_RUNTIME_RETRY_ATTEMPTS must be a positive integer; got {raw!r}"
-        ) from e
+        raise ValueError(f"FEATURE_MAF_RUNTIME_RETRY_ATTEMPTS must be a positive integer; got {raw!r}") from e
     if value < 1:
         raise ValueError("FEATURE_MAF_RUNTIME_RETRY_ATTEMPTS must be >= 1")
     return value
@@ -82,9 +79,7 @@ def get_retry_total_seconds(default: float = DEFAULT_RETRY_TOTAL_SECONDS) -> flo
     try:
         value = float(raw)
     except ValueError as e:
-        raise ValueError(
-            f"FEATURE_MAF_RUNTIME_RETRY_TOTAL_SECONDS must be a positive number; got {raw!r}"
-        ) from e
+        raise ValueError(f"FEATURE_MAF_RUNTIME_RETRY_TOTAL_SECONDS must be a positive number; got {raw!r}") from e
     if value <= 0:
         raise ValueError("FEATURE_MAF_RUNTIME_RETRY_TOTAL_SECONDS must be > 0")
     return value

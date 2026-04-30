@@ -35,6 +35,7 @@ def _api_response_field_set() -> dict[str, list[str]]:
         return out
 
     import sys
+
     sys.path.insert(0, str(REPO_ROOT / "apps" / "api"))
 
     for fp in sorted(routes_dir.rglob("*.py")):
@@ -98,9 +99,7 @@ def test_no_field_regression() -> None:
     if not SNAPSHOT_PATH.exists():
         SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
         SNAPSHOT_PATH.write_text(json.dumps(current, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        pytest.skip(
-            "Snapshot did not exist; written for the first time. Re-run to assert regression."
-        )
+        pytest.skip("Snapshot did not exist; written for the first time. Re-run to assert regression.")
 
     expected = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
 

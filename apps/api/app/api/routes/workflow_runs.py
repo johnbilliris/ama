@@ -174,7 +174,9 @@ async def cancel_run(run_id: str, body: CancelRequest) -> dict[str, Any]:
             "reason_code": "operator_cancel",
             "last_completed_step": doc.get("current_step", "unknown"),
             "details": body.reason,
-        } if False else None,  # cancel != failed; we still record the reason in metadata
+        }
+        if False
+        else None,  # cancel != failed; we still record the reason in metadata
     )
     return updated
 

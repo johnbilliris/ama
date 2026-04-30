@@ -18,8 +18,13 @@ from apps.agents.maf_runtime.workflow.run_state import (
 
 def test_seven_canonical_states_exist() -> None:
     expected = {
-        "Running", "AwaitingApproval", "NeedsOperatorDecision",
-        "Completed", "Failed", "Cancelled", "Superseded",
+        "Running",
+        "AwaitingApproval",
+        "NeedsOperatorDecision",
+        "Completed",
+        "Failed",
+        "Cancelled",
+        "Superseded",
     }
     assert {s.value for s in WorkflowRunStatus} == expected
 

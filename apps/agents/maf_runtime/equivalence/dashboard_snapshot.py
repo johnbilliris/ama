@@ -107,16 +107,19 @@ def write_snapshot(snapshot_path: Path, fields_by_file: dict[str, list[str]]) ->
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--snapshot-path", type=Path, default=DEFAULT_SNAPSHOT_PATH)
-    parser.add_argument("--root", type=Path, action="append", default=None,
-                        help="Repeatable: directories to scan. Default: infra/bicep/modules/dashboards/.")
+    parser.add_argument(
+        "--root",
+        type=Path,
+        action="append",
+        default=None,
+        help="Repeatable: directories to scan. Default: infra/bicep/modules/dashboards/.",
+    )
     args = parser.parse_args(argv)
     roots = args.root or [DASHBOARDS_DIR]
     fields = collect_fields(roots)
     write_snapshot(args.snapshot_path, fields)
     total = sum(len(v) for v in fields.values())
-    print(
-        f"Wrote {args.snapshot_path} (files={len(fields)}, total_fields={total})."
-    )
+    print(f"Wrote {args.snapshot_path} (files={len(fields)}, total_fields={total}).")
     return 0
 
 

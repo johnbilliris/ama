@@ -192,7 +192,4 @@ def test_routing_client_compute_route_unreachable(monkeypatch: pytest.MonkeyPatc
 
 def test_find_allow_list_entry_returns_none_for_unregistered() -> None:
     repo = ToolRegistrationRepository()  # empty
-    assert (
-        find_allow_list_entry(agent_name="evacuation", tool_name="routing_service", repo=repo)
-        is None
-    )
+    assert find_allow_list_entry(agent_name="evacuation", tool_name="routing_service", repo=repo) is None

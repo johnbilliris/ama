@@ -29,10 +29,20 @@ def test_score_pass_when_decision_matches_above_95_percent() -> None:
     # 19/20 categorical matches = 95.0% — exactly on the threshold.
     pairs: list[tuple[str, dict, dict]] = []
     for i in range(19):
-        pairs.append((f"case-{i}", {"triage_decision": "escalate", "category": "fire"},
-                      {"triage_decision": "escalate", "category": "fire"}))
-    pairs.append(("case-bad", {"triage_decision": "escalate", "category": "fire"},
-                  {"triage_decision": "suppress", "category": "fire"}))
+        pairs.append(
+            (
+                f"case-{i}",
+                {"triage_decision": "escalate", "category": "fire"},
+                {"triage_decision": "escalate", "category": "fire"},
+            )
+        )
+    pairs.append(
+        (
+            "case-bad",
+            {"triage_decision": "escalate", "category": "fire"},
+            {"triage_decision": "suppress", "category": "fire"},
+        )
+    )
     report = score(agent_name="monitoring", pairs=pairs)
     assert report.decision_match_rate >= DECISION_EQUIVALENCE_THRESHOLD
     assert report.verdict == EquivalenceVerdict.PASS
@@ -50,9 +60,11 @@ def test_score_fail_when_categorical_disagreement_above_5_percent() -> None:
 
 def test_score_fail_when_populated_field_missing() -> None:
     pairs = [
-        ("c1",
-         {"triage_decision": "escalate", "category": "fire", "rationale": "..."},
-         {"triage_decision": "escalate"}),
+        (
+            "c1",
+            {"triage_decision": "escalate", "category": "fire", "rationale": "..."},
+            {"triage_decision": "escalate"},
+        ),
     ]
     report = score(agent_name="monitoring", pairs=pairs)
     assert report.schema_match_rate < SCHEMA_EQUIVALENCE_THRESHOLD
@@ -63,9 +75,11 @@ def test_score_fail_when_populated_field_missing() -> None:
 def test_score_pass_when_only_free_text_differs() -> None:
     """Free-text fields are excluded from the categorical comparison."""
     pairs = [
-        ("c1",
-         {"triage_decision": "escalate", "category": "fire", "rationale": "long prose A"},
-         {"triage_decision": "escalate", "category": "fire", "rationale": "long prose B (different)"}),
+        (
+            "c1",
+            {"triage_decision": "escalate", "category": "fire", "rationale": "long prose A"},
+            {"triage_decision": "escalate", "category": "fire", "rationale": "long prose B (different)"},
+        ),
     ]
     report = score(agent_name="monitoring", pairs=pairs)
     assert report.verdict == EquivalenceVerdict.PASS

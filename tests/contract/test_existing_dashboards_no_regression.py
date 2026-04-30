@@ -27,9 +27,7 @@ def _load_snapshot() -> dict[str, list[str]]:
 def test_no_dashboard_field_removed() -> None:
     snapshot = _load_snapshot()
     if not snapshot:
-        pytest.skip(
-            "Snapshot missing — run apps/agents/maf_runtime/equivalence/dashboard_snapshot.py first."
-        )
+        pytest.skip("Snapshot missing — run apps/agents/maf_runtime/equivalence/dashboard_snapshot.py first.")
     # Re-collect current fields.
     from apps.agents.maf_runtime.equivalence.dashboard_snapshot import (
         DASHBOARDS_DIR,

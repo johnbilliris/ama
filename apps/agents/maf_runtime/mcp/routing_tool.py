@@ -100,8 +100,7 @@ class RoutingToolClient:
             ) from exc
         if major != entry.pinned_major_version:
             raise ToolVersionMismatchError(
-                f"routing_service advertised major {major} != allow-list pin "
-                f"{entry.pinned_major_version}",
+                f"routing_service advertised major {major} != allow-list pin {entry.pinned_major_version}",
                 correlation_id="routing-handshake",
                 details={
                     "advertised_major": major,

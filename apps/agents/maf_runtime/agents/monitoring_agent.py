@@ -54,15 +54,17 @@ async def _amain() -> int:
     raw = sys.stdin.read().strip()
     if not raw:
         # Synthetic minimal input for smoke testing without stdin.
-        raw = json.dumps({
-            "envelope_id": "smoke-1",
-            "incidentId": "INC-001",
-            "category": "fire",
-            "confidenceScore": 0.9,
-            "freshnessScore": 1.0,
-            "source": {"kind": "social_media"},
-            "payload": {},
-        })
+        raw = json.dumps(
+            {
+                "envelope_id": "smoke-1",
+                "incidentId": "INC-001",
+                "category": "fire",
+                "confidenceScore": 0.9,
+                "freshnessScore": 1.0,
+                "source": {"kind": "social_media"},
+                "payload": {},
+            }
+        )
     payload = json.loads(raw)
     # Build a duck-typed envelope object for the legacy code path.
     from types import SimpleNamespace

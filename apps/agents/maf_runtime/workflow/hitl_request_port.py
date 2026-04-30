@@ -136,7 +136,9 @@ def build_approval_envelope(
     ``specs/033-maf-adoption/contracts/hitl-request.envelope.md``.
     """
     request_id = deterministic_request_id(
-        incident_id=incident_id, run_id=run_id, step_index=step_index,
+        incident_id=incident_id,
+        run_id=run_id,
+        step_index=step_index,
     )
     if hasattr(draft_alert, "model_dump"):
         alert_payload = draft_alert.model_dump(mode="json", by_alias=True)
@@ -258,8 +260,7 @@ class HitlDecisionListener:
         else:
             # Run is not in AwaitingApproval — someone else already resolved it.
             raise DuplicateDecisionConflictError(
-                f"No active AwaitingApproval run for request_id={request_id}; "
-                "another decision likely already applied.",
+                f"No active AwaitingApproval run for request_id={request_id}; another decision likely already applied.",
                 correlation_id=str(decision.get("correlation_id") or "hitl-decision"),
                 details={"request_id": request_id},
             )

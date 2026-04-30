@@ -59,10 +59,7 @@ def test_capacity_25_sustained_under_10_percent_regression() -> None:
         # Sustained: 25 concurrent.
         latencies_ms: list[float] = []
         for batch_start in range(0, 25, 5):
-            tasks = [
-                _one_run(wf, f"INC-load-{batch_start + j}")
-                for j in range(5)
-            ]
+            tasks = [_one_run(wf, f"INC-load-{batch_start + j}") for j in range(5)]
             latencies_ms.extend(await asyncio.gather(*tasks))
         return _percentile(latencies_ms, 50), _percentile(latencies_ms, 95), _percentile(latencies_ms, 99)
 
@@ -96,10 +93,7 @@ def test_capacity_smoke_5_runs_complete_or_pause() -> None:
     wf = AmaWorkflow(repo=WorkflowRunRepository())
 
     async def go() -> list[float]:
-        return [
-            await _one_run(wf, f"INC-smoke-load-{i}")
-            for i in range(5)
-        ]
+        return [await _one_run(wf, f"INC-smoke-load-{i}") for i in range(5)]
 
     latencies = asyncio.run(go())
     assert len(latencies) == 5

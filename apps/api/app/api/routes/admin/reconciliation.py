@@ -44,11 +44,15 @@ def reconcile(
     if has_gap:
         logger.error(
             "reconciliation.gap correlation_id=%s audit_gap=%d span_gap=%d",
-            correlation_id, audit_gap, span_gap,
+            correlation_id,
+            audit_gap,
+            span_gap,
         )
     else:
         logger.info(
-            "reconciliation.ok correlation_id=%s checks=%d", correlation_id, expected_invocations,
+            "reconciliation.ok correlation_id=%s checks=%d",
+            correlation_id,
+            expected_invocations,
         )
     return report
 

@@ -38,8 +38,7 @@ def test_only_hitl_module_resumes_workflows() -> None:
             offenders.append(fp.relative_to(REPO_ROOT).as_posix())
     assert not offenders, (
         "NN-1 violation: only `apps/agents/maf_runtime/workflow/hitl_request_port.py` "
-        "may reference `HitlDecisionListener` / `on_decision_received`. Offenders: "
-        + ", ".join(offenders)
+        "may reference `HitlDecisionListener` / `on_decision_received`. Offenders: " + ", ".join(offenders)
     )
 
 

@@ -62,9 +62,15 @@ def test_retry_budget_exhausts_then_raises() -> None:
         raise LlmServerError("permanent", correlation_id="c")
 
     with pytest.raises(LlmServerError):
-        asyncio.run(with_retry_budget(
-            work, correlation_id="c", max_attempts=3, total_seconds=2.0, sleep_seconds=0.01,
-        ))
+        asyncio.run(
+            with_retry_budget(
+                work,
+                correlation_id="c",
+                max_attempts=3,
+                total_seconds=2.0,
+                sleep_seconds=0.01,
+            )
+        )
     assert attempts["n"] == 3
 
 

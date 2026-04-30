@@ -83,3 +83,12 @@ rule:
 
     # Log Analytics workspace replication adds material cost for a demo.
     - Azure.Log.Replication
+
+# Bicep build timing — the spec-029 main.bicep + 20 modules expand a large
+# graph. Local `bicep build-params` against `infra/parameters/*.bicepparam`
+# takes ~12s on a warm cache, which trips the default 5s PSRule timeout and
+# fails the security-scan job before any rule runs (see run 25165451349).
+# Raise the cap to 60s — well below the 120s ceiling — so the build always
+# finishes; PSRule still aborts on a genuine compile error.
+configuration:
+  AZURE_BICEP_FILE_EXPANSION_TIMEOUT: 60

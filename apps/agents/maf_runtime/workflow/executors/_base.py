@@ -74,8 +74,7 @@ def validate_output(
     except ValidationError as exc:
         offending_fields = sorted({err["loc"][0] for err in exc.errors() if err.get("loc")})
         raise OutputSchemaMismatchError(
-            f"Agent output failed validation against {output_schema.__name__}: "
-            f"fields={offending_fields}",
+            f"Agent output failed validation against {output_schema.__name__}: fields={offending_fields}",
             correlation_id=correlation_id,
             run_id=run_id,
             details={
@@ -128,12 +127,17 @@ async def with_retry_budget(  # noqa: UP047 - PEP-695 type-params clash with asy
             if attempt >= attempts or remaining <= 0:
                 logger.warning(
                     "retry_budget_exhausted attempt=%d/%d elapsed=%.1fs",
-                    attempt, attempts, elapsed,
+                    attempt,
+                    attempts,
+                    elapsed,
                 )
                 raise
             logger.info(
                 "retry_budget_retry attempt=%d/%d elapsed=%.1fs error=%s",
-                attempt, attempts, elapsed, type(exc).__name__,
+                attempt,
+                attempts,
+                elapsed,
+                type(exc).__name__,
             )
             await asyncio.sleep(min(sleep_seconds, remaining))
     # Should be unreachable — defensive.

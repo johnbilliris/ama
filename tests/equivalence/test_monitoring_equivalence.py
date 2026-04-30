@@ -26,6 +26,5 @@ def test_monitoring_equivalence() -> None:
     report = score(agent_name=AGENT_NAME, pairs=pairs)
     assert report.verdict == EquivalenceVerdict.PASS, (
         f"Equivalence FAIL for {AGENT_NAME}: "
-        f"decision={report.decision_match_rate:.2%}, schema={report.schema_match_rate:.2%}\n"
-        + report.to_markdown()
+        f"decision={report.decision_match_rate:.2%}, schema={report.schema_match_rate:.2%}\n" + report.to_markdown()
     )

@@ -102,9 +102,7 @@ class _CosmosAuditWriter:
         if self._container_proxy is not None:
             return self._container_proxy
         if not self._endpoint:
-            logger.warning(
-                "AZURE_COSMOS_ENDPOINT not set; audit writes will be logged but not persisted."
-            )
+            logger.warning("AZURE_COSMOS_ENDPOINT not set; audit writes will be logged but not persisted.")
             return None
         try:
             from azure.cosmos.aio import CosmosClient

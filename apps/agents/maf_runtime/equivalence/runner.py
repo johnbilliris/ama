@@ -61,9 +61,17 @@ def _load_fixture_pairs(agent: str, fixtures_root: Path) -> list[tuple[str, Any,
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="MAF equivalence harness (FR-023).")
-    parser.add_argument("--agent", required=True, choices=[
-        "monitoring", "risk_assessment", "evacuation", "resource_allocation", "communication",
-    ])
+    parser.add_argument(
+        "--agent",
+        required=True,
+        choices=[
+            "monitoring",
+            "risk_assessment",
+            "evacuation",
+            "resource_allocation",
+            "communication",
+        ],
+    )
     parser.add_argument("--fixtures-root", type=Path, default=DEFAULT_FIXTURES_ROOT)
     parser.add_argument("--dry-run", action="store_true", help="Skip fixture loading; emit a zero-cases report.")
     parser.add_argument("--reports-dir", type=Path, default=REPORTS_DIR)

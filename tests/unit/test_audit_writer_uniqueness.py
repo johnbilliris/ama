@@ -26,6 +26,5 @@ def test_only_audit_middleware_writes_to_audit_entries() -> None:
             offenders.append(fp.relative_to(REPO_ROOT).as_posix())
     assert not offenders, (
         "NN-3 violation: only `apps/agents/maf_runtime/middleware/audit_middleware.py` "
-        "may open a Cosmos container client against `audit_entries`. Offenders: "
-        + ", ".join(offenders)
+        "may open a Cosmos container client against `audit_entries`. Offenders: " + ", ".join(offenders)
     )

@@ -32,10 +32,23 @@ from apps.agents.maf_runtime.errors import (
 )
 
 ALL_ERRORS = [
-    LlmFailure, LlmRateLimitError, LlmTimeoutError, LlmContentFilterError, LlmQuotaError, LlmServerError,
-    ToolFailure, ToolVersionMismatchError, ToolUnreachableError, ToolTimeoutError, ToolMalformedResponseError,
-    ValidationFailure, OutputSchemaMismatchError, PolicyFailure,
-    InvalidStateTransitionError, ActiveRunAlreadyExistsError, CheckpointStoreUnavailableError,
+    LlmFailure,
+    LlmRateLimitError,
+    LlmTimeoutError,
+    LlmContentFilterError,
+    LlmQuotaError,
+    LlmServerError,
+    ToolFailure,
+    ToolVersionMismatchError,
+    ToolUnreachableError,
+    ToolTimeoutError,
+    ToolMalformedResponseError,
+    ValidationFailure,
+    OutputSchemaMismatchError,
+    PolicyFailure,
+    InvalidStateTransitionError,
+    ActiveRunAlreadyExistsError,
+    CheckpointStoreUnavailableError,
     DuplicateDecisionConflictError,
 ]
 
@@ -86,7 +99,8 @@ def test_no_locally_defined_exception_in_errors_module() -> None:
     from apps.agents.maf_runtime import errors as mod
 
     found = [
-        n for n, obj in inspect.getmembers(mod, inspect.isclass)
+        n
+        for n, obj in inspect.getmembers(mod, inspect.isclass)
         if issubclass(obj, BaseException) and obj is not Exception and obj is not BaseException
     ]
     assert MafRuntimeError.__name__ in found

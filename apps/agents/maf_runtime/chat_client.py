@@ -68,9 +68,7 @@ def build_azure_openai_chat_client(
 
     deployment = cfg.deployment_for(model_tier)
     if not deployment:
-        raise ValueError(
-            f"AZURE_OPENAI_{model_tier.upper()}_DEPLOYMENT is not configured for tier {model_tier!r}."
-        )
+        raise ValueError(f"AZURE_OPENAI_{model_tier.upper()}_DEPLOYMENT is not configured for tier {model_tier!r}.")
 
     logger.info(
         "Building OpenAIChatClient",

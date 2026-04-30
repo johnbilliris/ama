@@ -55,6 +55,5 @@ def test_no_locally_defined_exception_subclasses_outside_errors_py() -> None:
             offenders.append(f"{fp.relative_to(REPO_ROOT).as_posix()}::{cls_name}")
     assert not offenders, (
         "FR-004 violation: error classes outside apps/agents/maf_runtime/errors.py. "
-        "All maf_runtime modules MUST import errors from errors.py. Offenders:\n  "
-        + "\n  ".join(offenders)
+        "All maf_runtime modules MUST import errors from errors.py. Offenders:\n  " + "\n  ".join(offenders)
     )
