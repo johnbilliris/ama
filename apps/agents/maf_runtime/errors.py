@@ -181,6 +181,15 @@ class CheckpointStoreUnavailableError(MafRuntimeError):
     error_code = "checkpoint_store_unavailable"
 
 
+# ---------- Repository / governance failures -------------------------------
+
+
+class ToolRegistrationConflictError(MafRuntimeError):
+    """Attempt to re-register an existing (tool_name, major_version) tuple (FR-019a)."""
+
+    error_code = "tool_registration_conflict"
+
+
 # ---------- HITL failures --------------------------------------------------
 
 
@@ -213,6 +222,8 @@ __all__ = [
     "InvalidStateTransitionError",
     "ActiveRunAlreadyExistsError",
     "CheckpointStoreUnavailableError",
+    # Governance
+    "ToolRegistrationConflictError",
     # HITL
     "DuplicateDecisionConflictError",
 ]

@@ -9,8 +9,8 @@ import sys
 # Make apps/agents importable from repo root.
 sys.path.insert(0, "apps/agents")
 
+from maf_runtime.errors import ToolRegistrationConflictError  # noqa: E402
 from maf_runtime.repositories.tool_registration_repository import (  # noqa: E402
-    ToolRegistrationConflictError,
     ToolRegistrationRepository,
 )
 

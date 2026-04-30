@@ -13,15 +13,13 @@ from datetime import UTC, datetime
 from threading import Lock
 from typing import Any
 
+from ..errors import ToolRegistrationConflictError
+
 logger = logging.getLogger(__name__)
 
 
 def _now_iso() -> str:
     return datetime.now(UTC).isoformat()
-
-
-class ToolRegistrationConflictError(ValueError):
-    """Raised when an attempt is made to re-register an existing (tool_name, major) pair."""
 
 
 class ToolRegistrationRepository:
@@ -85,7 +83,9 @@ class ToolRegistrationRepository:
         if existing is not None:
             raise ToolRegistrationConflictError(
                 f"Tool {tool_name} v{major_version} already registered as {composite_id}; "
-                "bump the major version and register a new entry."
+                "bump the major version and register a new entry.",
+                correlation_id="tool-register",
+                details={"tool_name": tool_name, "major_version": major_version},
             )
         doc = {
             "id": composite_id,
@@ -134,4 +134,4 @@ class ToolRegistrationRepository:
             return [d for d in self._in_memory.values() if agent_name in d.get("bound_agents", [])]
 
 
-__all__ = ["ToolRegistrationRepository", "ToolRegistrationConflictError"]
+__all__ = ["ToolRegistrationRepository"]

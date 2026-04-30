@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+from apps.agents.maf_runtime.errors import ToolRegistrationConflictError
 from apps.agents.maf_runtime.repositories.tool_registration_repository import (
-    ToolRegistrationConflictError,
     ToolRegistrationRepository,
 )
 

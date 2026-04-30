@@ -519,47 +519,47 @@ Monorepo (per `plan.md → Project Structure`):
 
 **Purpose**: Per-agent cutover playbook, legacy retirement, performance benchmark, quickstart validation.
 
-- [ ] T069 [P] Author `docs/aidr/runbooks/maf-cutover-playbook.md`: per-agent cutover steps (shadow → maf → rollback) using the FEATURE_MAF_RUNTIME_<AGENT> env var, including the equivalence-report attachment requirement and the per-environment FR-012b load-test prerequisite
+- [X] T069 [P] Author `docs/aidr/runbooks/maf-cutover-playbook.md`: per-agent cutover steps (shadow → maf → rollback) using the FEATURE_MAF_RUNTIME_<AGENT> env var, including the equivalence-report attachment requirement and the per-environment FR-012b load-test prerequisite
   - **Agents**: sre-engineer, infrastructure-devops, principal-engineer
   - **Tools**: read, edit
   - **Success**: A dry-run by a separate engineer (verified by a comment on the cutover PR template) successfully promotes the no-op agent from `legacy` to `maf` in dev using only the playbook.
 
-- [ ] T070 [P] Author `docs/aidr/runbooks/maf-rollback.md` for the FR-026 fallback: how to flip a single agent back to legacy mid-incident; expected operator-visible signals during rollback
+- [X] T070 [P] Author `docs/aidr/runbooks/maf-rollback.md` for the FR-026 fallback: how to flip a single agent back to legacy mid-incident; expected operator-visible signals during rollback
   - **Agents**: sre-engineer, incident-commander, observer-auditor
   - **Tools**: read, edit
   - **Success**: A dry-run rollback in dev completes within 5 minutes wall-clock and the next workflow run for that agent dispatches to the legacy code path.
 
-- [ ] T071 Capture the legacy-pipeline performance baseline into `tests/load/baselines/legacy_baseline.json` (used by T050 to check the SC-007 ≤10% regression bar) by running the existing legacy pipeline against the same load profile for 60 minutes
+- [X] T071 Capture the legacy-pipeline performance baseline into `tests/load/baselines/legacy_baseline.json` (used by T050 to check the SC-007 ≤10% regression bar) by running the existing legacy pipeline against the same load profile for 60 minutes
   - **Agents**: sre-engineer, qa-test-engineer
   - **Tools**: execute, edit
   - **Success**: Baseline JSON contains `p50_latency_ms`, `p95_latency_ms`, `p99_latency_ms`, `error_rate`, `throughput_rps`; committed under git LFS if >100KB.
 
-- [ ] T072 [P] Update `apps/agents/common/handoffs.py` with a deprecation banner pointing to `apps/agents/maf_runtime/workflow/builder.py` and the per-agent cutover playbook; do NOT remove the file (FR-026 fallback still needs it)
+- [X] T072 [P] Update `apps/agents/common/handoffs.py` with a deprecation banner pointing to `apps/agents/maf_runtime/workflow/builder.py` and the per-agent cutover playbook; do NOT remove the file (FR-026 fallback still needs it)
   - **Agents**: software-developer, principal-engineer
   - **Tools**: read, edit
   - **Success**: Module docstring carries a clear `DEPRECATED — superseded by maf_runtime/workflow/builder.py post-cutover` notice; existing imports still work.
 
-- [ ] T073 Run the entire `quickstart.md` end-to-end in dev as written and capture results; fix any drift between the document and reality in a single follow-up PR
+- [X] T073 Run the entire `quickstart.md` end-to-end in dev as written and capture results; fix any drift between the document and reality in a single follow-up PR
   - **Agents**: qa-test-engineer, software-developer
   - **Tools**: execute, read, edit
   - **Success**: All 9 sections of `quickstart.md` execute without manual intervention beyond the documented commands; the resulting report is appended as a new section "Last Validated: <date>".
 
-- [ ] T074 [P] Update `apps/agents/maf_runtime/equivalence/reports/.gitkeep` and add `.gitignore` entry for `apps/agents/maf_runtime/equivalence/reports/*.json` (keep `.md` reports in repo as cutover evidence; keep raw JSON out of repo to control size)
+- [X] T074 [P] Update `apps/agents/maf_runtime/equivalence/reports/.gitkeep` and add `.gitignore` entry for `apps/agents/maf_runtime/equivalence/reports/*.json` (keep `.md` reports in repo as cutover evidence; keep raw JSON out of repo to control size)
   - **Agents**: software-developer
   - **Tools**: edit
   - **Success**: `git status` after a fresh equivalence run shows the new `.md` report as tracked and the `.json` as ignored.
 
-- [ ] T074b Add `tests/unit/test_maf_runtime_error_imports.py` enforcing FR-004 import discipline: a static-analysis test that scans every Python module under `apps/agents/maf_runtime/` (excluding `errors.py` itself) and asserts no locally-defined `Exception` subclass exists. Every error type used inside the package MUST be imported from `apps/agents/maf_runtime/errors.py` (T011b). Runs in Polish phase so all downstream modules (T012, T016, T017, T018, T020, T021, T042b, T042c, T046, T048b, T063, T064) have had their chance to wire imports before the gate runs
+- [X] T074b Add `tests/unit/test_maf_runtime_error_imports.py` enforcing FR-004 import discipline: a static-analysis test that scans every Python module under `apps/agents/maf_runtime/` (excluding `errors.py` itself) and asserts no locally-defined `Exception` subclass exists. Every error type used inside the package MUST be imported from `apps/agents/maf_runtime/errors.py` (T011b). Runs in Polish phase so all downstream modules (T012, T016, T017, T018, T020, T021, T042b, T042c, T046, T048b, T063, T064) have had their chance to wire imports before the gate runs
   - **Agents**: principal-engineer, security-engineer, software-developer
   - **Tools**: read, edit, search, execute
   - **Success**: A deliberately-added local `class FakeError(Exception): pass` inside any `maf_runtime/` module fails the test; reverting passes; CI runs this gate as part of the Polish phase smoke-tests.
 
-- [ ] T075 Run the full repo lint + test suite and the new `tests/equivalence/` + `tests/load/test_workflow_capacity.py` (capacity test in dev only) to assert no regression
+- [X] T075 Run the full repo lint + test suite and the new `tests/equivalence/` + `tests/load/test_workflow_capacity.py` (capacity test in dev only) to assert no regression
   - **Agents**: qa-test-engineer
   - **Tools**: execute
   - **Success**: `ruff check apps tests packages` is clean; `python -m pytest tests/unit tests/integration tests/contract tests/equivalence -q --tb=line` passes; `pytest tests/load/test_workflow_capacity.py -q` PASSES against dev.
 
-- [ ] T076 Run `/speckit.analyze` to cross-check spec ↔ plan ↔ tasks consistency and address any findings before merging
+- [X] T076 Run `/speckit.analyze` to cross-check spec ↔ plan ↔ tasks consistency and address any findings before merging
   - **Agents**: speckit.analyze, principal-engineer
   - **Tools**: agent, read, edit
   - **Success**: Analyze report has zero High-severity findings; any Medium findings are either resolved or explicitly accepted with a recorded justification in this `tasks.md`.
