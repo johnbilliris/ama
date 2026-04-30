@@ -206,18 +206,13 @@ class AudienceSegment(BaseModel):
     def _validate_vulnerability_categories(cls, v: list[str]) -> list[str]:
         for cat in v:
             if cat not in ALLOWED_VULNERABILITY_CATEGORIES:
-                raise ValueError(
-                    f"Invalid vulnerability category '{cat}'. "
-                    f"Allowed: {ALLOWED_VULNERABILITY_CATEGORIES}"
-                )
+                raise ValueError(f"Invalid vulnerability category '{cat}'. Allowed: {ALLOWED_VULNERABILITY_CATEGORIES}")
         return v
 
     @model_validator(mode="after")
     def _vulnerable_must_be_critical(self) -> AudienceSegment:
         if self.vulnerability_categories and self.priority != SegmentPriority.critical:
-            raise ValueError(
-                "Segments with vulnerability_categories must have priority=critical"
-            )
+            raise ValueError("Segments with vulnerability_categories must have priority=critical")
         return self
 
 
@@ -264,9 +259,7 @@ class PublicAlert(BaseModel):
     referenced_alert_id: str | None = None
     content_blocks: dict[str, ContentBlock] = Field(default_factory=dict)
     audience_segments: list[str] = Field(default_factory=list)
-    languages: list[str] = Field(
-        default_factory=lambda: ["en-AU", "zh-Hans", "ar", "vi", "el", "it"]
-    )
+    languages: list[str] = Field(default_factory=lambda: ["en-AU", "zh-Hans", "ar", "vi", "el", "it"])
     accessibility_attributes: list[str] = Field(default_factory=lambda: ["plain-language"])
     channel_set: list[ChannelType] = Field(default_factory=list)
     generation_method: GenerationMethod = GenerationMethod.llm
@@ -295,9 +288,7 @@ class PublicAlert(BaseModel):
     @classmethod
     def _validate_alert_id(cls, v: str) -> str:
         if not _ALERT_ID_PATTERN.match(v):
-            raise ValueError(
-                f"alert_id must match pattern ^ca-[a-zA-Z0-9_-]+-v\\d+$, got '{v}'"
-            )
+            raise ValueError(f"alert_id must match pattern ^ca-[a-zA-Z0-9_-]+-v\\d+$, got '{v}'")
         return v
 
     @field_validator("confidence")
@@ -318,9 +309,7 @@ class PublicAlert(BaseModel):
         # referenced_alert_id required for correction and all_clear
         if self.change_type in (ChangeType.correction, ChangeType.all_clear):
             if not self.referenced_alert_id:
-                raise ValueError(
-                    f"referenced_alert_id is required for change_type={self.change_type.value}"
-                )
+                raise ValueError(f"referenced_alert_id is required for change_type={self.change_type.value}")
 
         # approval_justification required when rejection
         if self.approval_action == "reject" and not self.approval_justification:
@@ -392,9 +381,7 @@ class AwsWarningRequest(BaseModel):
     """Request payload to build an AWS three-tier warning alert."""
 
     incident_id: str
-    warning_tier: str = Field(
-        ..., pattern=r"^(advice|watch_and_act|emergency_warning)$"
-    )
+    warning_tier: str = Field(..., pattern=r"^(advice|watch_and_act|emergency_warning)$")
     hazard_type: str
     affected_areas: list[str] = Field(default_factory=list)
     action_statement_override: str | None = None

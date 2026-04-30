@@ -28,12 +28,8 @@ INCIDENT_TO_HAZARD_ICON: dict[str, HazardIcon] = {
 
 ACTION_TEMPLATES: dict[str, str] = {
     "advice": "Stay informed. Monitor conditions and follow official advice.",
-    "watch_and_act": (
-        "Be ready to act. Conditions are changing and you need to take action now."
-    ),
-    "emergency_warning": (
-        "Take action now. Your life is at risk. Do not wait."
-    ),
+    "watch_and_act": ("Be ready to act. Conditions are changing and you need to take action now."),
+    "emergency_warning": ("Take action now. Your life is at risk. Do not wait."),
 }
 
 TIER_ORDER: list[WarningTier] = ["advice", "watch_and_act", "emergency_warning"]
@@ -82,9 +78,7 @@ def build_aws_warning(
 
     alert_id = f"alert-{uuid4().hex[:12]}"
     hazard_icon = _resolve_hazard_icon(incident_type, hazard_icon_override)
-    action_statement = _resolve_action_statement(
-        warning_tier, action_statement_override
-    )
+    action_statement = _resolve_action_statement(warning_tier, action_statement_override)
 
     blocks = content_blocks or {
         "headline": f"{warning_tier.replace('_', ' ').title()} — {incident_type.replace('_', ' ').title()}",

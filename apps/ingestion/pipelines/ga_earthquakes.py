@@ -50,6 +50,7 @@ class GaEarthquakePipeline(IngestionPipelineBase):
 
     def normalise(self, raw_payload: dict[str, Any]) -> dict[str, Any]:
         from apps.ingestion.normalisers.geojson_normaliser import normalise_geojson_feature
+
         context = {
             "data_source_id": "ga-earthquake-alerts",
             "source_name": "Geoscience Australia — Earthquake Alerts",

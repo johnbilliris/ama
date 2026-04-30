@@ -72,10 +72,7 @@ def generate_plan_summary_template(
             "Standard evacuation vehicles apply.\n\n"
         )
 
-    summary += (
-        f"CONFIDENCE: {confidence_level} ({confidence:.0%}). "
-        f"Plan generated using template-based analysis."
-    )
+    summary += f"CONFIDENCE: {confidence_level} ({confidence:.0%}). Plan generated using template-based analysis."
 
     return summary[:max_length]
 
@@ -169,10 +166,7 @@ def generate_change_summary_template(
         changes.append(f"Confidence: {old_confidence:.0%} → {new_confidence:.0%}")
 
     if not changes:
-        return (
-            f"Plan updated due to {trigger_desc}. "
-            f"No material changes to routes or population estimates."
-        )
+        return f"Plan updated due to {trigger_desc}. No material changes to routes or population estimates."
 
     change_list = "; ".join(changes)
     return f"Plan updated due to {trigger_desc}. Changes: {change_list}."

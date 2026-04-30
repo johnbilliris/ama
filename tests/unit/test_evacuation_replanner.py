@@ -1,7 +1,5 @@
 """Tests for evacuation.replanner — triggers, rate limiting, change detection (T038)."""
 
-
-
 from evacuation.config import EvacuationConfig
 from evacuation.replanner import DynamicReplanner
 

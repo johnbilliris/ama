@@ -5,6 +5,7 @@ check → output formatting. Target: ≤15s (NFR-001).
 
 FRs: FR-001–004 | Research: R-007
 """
+
 from packages.domain.src.domain.models.emergency_plan import PLAN_SECTION_SLUGS, PLANNING_PRINCIPLES
 
 
@@ -22,7 +23,8 @@ def compute_completeness(plan_doc: dict) -> dict:
     total_principles = len(PLANNING_PRINCIPLES)
 
     missing_sections = [
-        slug for slug in PLAN_SECTION_SLUGS
+        slug
+        for slug in PLAN_SECTION_SLUGS
         if slug not in sections or not sections.get(slug, {}).get("is_complete", False)
     ]
     unchecked_principles = [p for p in PLANNING_PRINCIPLES if not principles.get(p, False)]
@@ -48,8 +50,8 @@ def validate_plan_for_endorsement(plan_doc: dict) -> tuple[bool, list[str]]:
     completeness = compute_completeness(plan_doc)
 
     if completeness["section_completeness"] < 0.5:
-        done = completeness['completed_sections']
-        total = completeness['total_sections']
+        done = completeness["completed_sections"]
+        total = completeness["total_sections"]
         issues.append(f"Only {done}/{total} sections complete (need ≥50%)")
 
     if completeness["principles_completeness"] < 1.0:

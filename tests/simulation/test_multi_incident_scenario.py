@@ -75,12 +75,12 @@ class TestMultiIncidentScenario:
             audit_writer=AuditWriter(config=config),
         )
 
-        plan1 = pipeline.process_handoff(_make_handoff(
-            "h-multi-001", "inc-north", "Flood in northern suburbs needs ambulance"
-        ))
-        plan2 = pipeline.process_handoff(_make_handoff(
-            "h-multi-002", "inc-south", "Bushfire in southern areas needs medical teams"
-        ))
+        plan1 = pipeline.process_handoff(
+            _make_handoff("h-multi-001", "inc-north", "Flood in northern suburbs needs ambulance")
+        )
+        plan2 = pipeline.process_handoff(
+            _make_handoff("h-multi-002", "inc-south", "Bushfire in southern areas needs medical teams")
+        )
 
         assert plan1 is not None
         assert plan2 is not None
@@ -102,15 +102,13 @@ class TestMultiIncidentScenario:
             audit_writer=AuditWriter(config=config),
         )
 
-        plan1 = pipeline.process_handoff(_make_handoff(
-            "h-multi-001", "inc-north", "Flood needs ambulance and medical teams"
-        ))
+        plan1 = pipeline.process_handoff(
+            _make_handoff("h-multi-001", "inc-north", "Flood needs ambulance and medical teams")
+        )
 
         assigned_to_inc1 = {a.resource_id for a in plan1.assignments}
 
-        plan2 = pipeline.process_handoff(_make_handoff(
-            "h-multi-002", "inc-south", "Bushfire needs ambulance"
-        ))
+        plan2 = pipeline.process_handoff(_make_handoff("h-multi-002", "inc-south", "Bushfire needs ambulance"))
 
         assigned_to_inc2 = {a.resource_id for a in plan2.assignments}
 
@@ -134,14 +132,14 @@ class TestMultiIncidentScenario:
         )
 
         # First incident takes all resources
-        plan1 = pipeline.process_handoff(_make_handoff(
-            "h-multi-001", "inc-north", "Major flood needs ambulance and paramedics"
-        ))
+        plan1 = pipeline.process_handoff(
+            _make_handoff("h-multi-001", "inc-north", "Major flood needs ambulance and paramedics")
+        )
 
         # Second incident should have shortfall
-        plan2 = pipeline.process_handoff(_make_handoff(
-            "h-multi-002", "inc-south", "Bushfire needs ambulance and medical teams"
-        ))
+        plan2 = pipeline.process_handoff(
+            _make_handoff("h-multi-002", "inc-south", "Bushfire needs ambulance and medical teams")
+        )
 
         assert plan2 is not None
         # If inc1 took the resources, inc2 may have shortfalls

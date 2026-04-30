@@ -1,4 +1,5 @@
 """Benchmark tests for AIDR performance targets (NFR-001–008)."""
+
 import time
 
 import pytest

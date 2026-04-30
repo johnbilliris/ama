@@ -12,9 +12,7 @@ ConstitutionalPrinciple = Literal[
     "cloud_platform",
 ]
 
-AssessmentComplianceStatus = Literal[
-    "compliant", "partially_compliant", "non_compliant", "not_applicable"
-]
+AssessmentComplianceStatus = Literal["compliant", "partially_compliant", "non_compliant", "not_applicable"]
 
 AssessmentTrigger = Literal["initial_review", "source_change", "constitution_amendment"]
 

@@ -3,6 +3,7 @@
 Tests: 9-step AIDR process tracking, step validation, team members,
 stakeholder engagement, endorsement approvals.
 """
+
 from datetime import UTC, datetime
 
 import pytest
@@ -41,8 +42,11 @@ class TestStepCompletion:
     def test_complete_step_with_completed_at(self):
         now = datetime.now(UTC)
         step = StepCompletion(
-            step_number=3, step_name="Communicate and consult",
-            is_complete=True, completed_at=now, completed_by="user-1",
+            step_number=3,
+            step_name="Communicate and consult",
+            is_complete=True,
+            completed_at=now,
+            completed_by="user-1",
         )
         assert step.is_complete is True
         assert step.completed_at == now
@@ -91,28 +95,41 @@ class TestTeamMember:
 class TestEngagementEntry:
     def test_valid_engagement_workshop(self):
         entry = EngagementEntry(
-            stakeholder="Local Council", method="workshop",
-            date=datetime.now(UTC), summary="Risk assessment workshop",
+            stakeholder="Local Council",
+            method="workshop",
+            date=datetime.now(UTC),
+            summary="Risk assessment workshop",
         )
         assert entry.method == "workshop"
         assert entry.attendee_count is None
 
     def test_engagement_with_attendee_count(self):
         entry = EngagementEntry(
-            stakeholder="Community Group", method="public_meeting",
-            date=datetime.now(UTC), summary="Community consultation",
+            stakeholder="Community Group",
+            method="public_meeting",
+            date=datetime.now(UTC),
+            summary="Community consultation",
             attendee_count=45,
         )
         assert entry.attendee_count == 45
 
-    @pytest.mark.parametrize("method", [
-        "workshop", "survey", "interview", "public_meeting",
-        "written_submission", "other",
-    ])
+    @pytest.mark.parametrize(
+        "method",
+        [
+            "workshop",
+            "survey",
+            "interview",
+            "public_meeting",
+            "written_submission",
+            "other",
+        ],
+    )
     def test_all_engagement_methods_valid(self, method):
         entry = EngagementEntry(
-            stakeholder="Test", method=method,
-            date=datetime.now(UTC), summary="Test",
+            stakeholder="Test",
+            method=method,
+            date=datetime.now(UTC),
+            summary="Test",
         )
         assert entry.method == method
 
@@ -162,7 +179,8 @@ class TestPlanningProcessRecord:
         step = StepCompletion(step_number=1, step_name="Test")
         with pytest.raises(ValueError, match="step_status key must be 1–9"):
             PlanningProcessRecord(
-                record_id="ppr-1", plan_id="ep-1",
+                record_id="ppr-1",
+                plan_id="ep-1",
                 step_status={0: step},
             )
 
@@ -170,7 +188,8 @@ class TestPlanningProcessRecord:
         step1 = StepCompletion(step_number=1, step_name="Establish project plan")
         step2 = StepCompletion(step_number=2, step_name="Establish project team")
         record = PlanningProcessRecord(
-            record_id="ppr-1", plan_id="ep-1",
+            record_id="ppr-1",
+            plan_id="ep-1",
             step_status={1: step1, 2: step2},
         )
         assert len(record.step_status) == 2
@@ -178,35 +197,43 @@ class TestPlanningProcessRecord:
     def test_record_with_team_members(self):
         member = TeamMember(name="A", role="Lead", organisation="SES", joined_at=datetime.now(UTC))
         record = PlanningProcessRecord(
-            record_id="ppr-1", plan_id="ep-1",
+            record_id="ppr-1",
+            plan_id="ep-1",
             project_team=[member],
         )
         assert len(record.project_team) == 1
 
     def test_record_with_engagement_log(self):
         entry = EngagementEntry(
-            stakeholder="Council", method="workshop",
-            date=datetime.now(UTC), summary="Planning workshop",
+            stakeholder="Council",
+            method="workshop",
+            date=datetime.now(UTC),
+            summary="Planning workshop",
         )
         record = PlanningProcessRecord(
-            record_id="ppr-1", plan_id="ep-1",
+            record_id="ppr-1",
+            plan_id="ep-1",
             stakeholder_engagement_log=[entry],
         )
         assert len(record.stakeholder_engagement_log) == 1
 
     def test_record_with_endorsement_approvals(self):
         approval = EndorsementApproval(
-            authority_name="Commissioner", authority_role="State Coordinator", approved=True,
+            authority_name="Commissioner",
+            authority_role="State Coordinator",
+            approved=True,
         )
         record = PlanningProcessRecord(
-            record_id="ppr-1", plan_id="ep-1",
+            record_id="ppr-1",
+            plan_id="ep-1",
             endorsement_approvals=[approval],
         )
         assert len(record.endorsement_approvals) == 1
 
     def test_record_with_risk_assessment_id(self):
         record = PlanningProcessRecord(
-            record_id="ppr-1", plan_id="ep-1",
+            record_id="ppr-1",
+            plan_id="ep-1",
             risk_assessment_id="ra-42",
         )
         assert record.risk_assessment_id == "ra-42"

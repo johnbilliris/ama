@@ -2,6 +2,7 @@
 
 NFR-007, R-013
 """
+
 import logging
 
 logger = logging.getLogger(__name__)

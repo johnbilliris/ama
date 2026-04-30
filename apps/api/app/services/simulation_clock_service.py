@@ -68,9 +68,7 @@ class SimulationClockService:
             }
         )
 
-    def change_speed(
-        self, tenant: SimulationTenant, new_speed: float
-    ) -> SimulationTenant:
+    def change_speed(self, tenant: SimulationTenant, new_speed: float) -> SimulationTenant:
         target = validate_warp_speed(new_speed)
         old_speed = tenant.current_warp_speed
         now = self._now()
@@ -115,9 +113,7 @@ class SimulationClockService:
             return tenant.accumulated_sim_seconds
         return self._compute_accumulated(tenant)
 
-    def _compute_accumulated(
-        self, tenant: SimulationTenant, *, now: datetime | None = None
-    ) -> float:
+    def _compute_accumulated(self, tenant: SimulationTenant, *, now: datetime | None = None) -> float:
         if tenant.last_resumed_at is None:
             return tenant.accumulated_sim_seconds
         now = now or self._now()

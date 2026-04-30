@@ -49,7 +49,9 @@ class IoTSignalDeduplicator:
             self._seen[key] = asyncio.get_event_loop().time()
             # Schedule eviction
             asyncio.get_event_loop().call_later(
-                self._ttl, self._evict, key,
+                self._ttl,
+                self._evict,
+                key,
             )
             return False
 
@@ -95,16 +97,23 @@ class IoTSignalAdapter:
             device_id=device_id,
             sequence_number=seq,
             message_id=message_id,
-            timestamp=datetime.fromisoformat(
-                sys_props.get("iothub-enqueuedtime", datetime.now(UTC).isoformat())
-            ),
+            timestamp=datetime.fromisoformat(sys_props.get("iothub-enqueuedtime", datetime.now(UTC).isoformat())),
             sensor_type=body.get("sensor_type", "unknown"),
             value=body.get("value", 0.0),
             unit=body.get("unit", ""),
             location=body.get("location", {}),
-            metadata={k: v for k, v in body.items() if k not in {
-                "sensor_type", "value", "unit", "location", "sequence_number",
-            }},
+            metadata={
+                k: v
+                for k, v in body.items()
+                if k
+                not in {
+                    "sensor_type",
+                    "value",
+                    "unit",
+                    "location",
+                    "sequence_number",
+                }
+            },
         )
 
         return await self.normalise(iot_msg)
@@ -117,7 +126,8 @@ class IoTSignalAdapter:
         if await self._dedup.is_duplicate(iot_msg.device_id, iot_msg.sequence_number):
             logger.debug(
                 "Duplicate IoT message dropped: device=%s seq=%d",
-                iot_msg.device_id, iot_msg.sequence_number,
+                iot_msg.device_id,
+                iot_msg.sequence_number,
             )
             return None
 

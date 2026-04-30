@@ -156,11 +156,7 @@ class LessonsService:
         for lesson in all_lessons:
             for tag in lesson.tags:
                 tag_freq[tag] = tag_freq.get(tag, 0) + 1
-        recurring_tags = {
-            k: v
-            for k, v in sorted(tag_freq.items(), key=lambda x: -x[1])
-            if v > 1
-        }
+        recurring_tags = {k: v for k, v in sorted(tag_freq.items(), key=lambda x: -x[1]) if v > 1}
 
         # SC-007 closure rate (90% within 90 days target)
         total = len(all_lessons)
@@ -188,11 +184,13 @@ class LessonsService:
         for lid in referenced_ids:
             lesson = LESSONS.get(lid) or LESSONS.get(f"lesson-{lid}")
             if lesson:
-                matched.append({
-                    "lesson_id": lesson.lesson_id,
-                    "status": lesson.status,
-                    "title": lesson.title,
-                })
+                matched.append(
+                    {
+                        "lesson_id": lesson.lesson_id,
+                        "status": lesson.status,
+                        "title": lesson.title,
+                    }
+                )
             else:
                 unmatched.append(lid)
         return {

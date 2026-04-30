@@ -32,9 +32,7 @@ class SignalRepository:
         partition_key = f"{scope}/{jurisdiction}/{signal.data_source_id}"
 
         if self._cosmos:
-            container = self._cosmos.get_database_client(self._database_name).get_container_client(
-                self._container_name
-            )
+            container = self._cosmos.get_database_client(self._database_name).get_container_client(self._container_name)
             doc = signal.model_dump(mode="json")
             doc["id"] = signal.signal_id
             doc["partitionKey"] = partition_key
@@ -68,9 +66,7 @@ class SignalRepository:
         limit: int = 100,
     ) -> list[Signal]:
         if self._cosmos:
-            container = self._cosmos.get_database_client(self._database_name).get_container_client(
-                self._container_name
-            )
+            container = self._cosmos.get_database_client(self._database_name).get_container_client(self._container_name)
             query = "SELECT * FROM c WHERE c.incident_id = @incidentId AND c.scope = @scope"
             params = [
                 {"name": "@incidentId", "value": incident_id},
@@ -79,9 +75,9 @@ class SignalRepository:
             items = container.query_items(query=query, parameters=params, max_item_count=limit)
             return [Signal(**item) async for item in items]
         return [
-            s for key, s in SIGNALS_STORE.items()
-            if s.incident_id == incident_id
-            and _SIGNAL_SCOPES.get(key, "live") == scope
+            s
+            for key, s in SIGNALS_STORE.items()
+            if s.incident_id == incident_id and _SIGNAL_SCOPES.get(key, "live") == scope
         ][:limit]
 
     async def query_by_jurisdiction(
@@ -103,9 +99,7 @@ class SignalRepository:
                 params.append({"name": "@since", "value": since.isoformat()})
 
             query = f"SELECT * FROM c WHERE {' AND '.join(conditions)} ORDER BY c.occurred_at DESC"
-            container = self._cosmos.get_database_client(self._database_name).get_container_client(
-                self._container_name
-            )
+            container = self._cosmos.get_database_client(self._database_name).get_container_client(self._container_name)
             items = container.query_items(
                 query=query,
                 parameters=params,
@@ -114,7 +108,8 @@ class SignalRepository:
             )
             return [Signal(**item) async for item in items]
         results = [
-            s for s in SIGNALS_STORE.values()
+            s
+            for s in SIGNALS_STORE.values()
             if (s.jurisdiction_id == jurisdiction_id or jurisdiction_id == "national")
             and (category is None or s.category == category)
             and (since is None or s.occurred_at >= since)
@@ -129,17 +124,12 @@ class SignalRepository:
         scope: str = "live",
     ) -> list[Signal]:
         if self._cosmos:
-            query = (
-                "SELECT * FROM c WHERE c.incident_id = null AND c.scope = @scope "
-                "AND c.occurred_at >= @since"
-            )
+            query = "SELECT * FROM c WHERE c.incident_id = null AND c.scope = @scope AND c.occurred_at >= @since"
             params = [
                 {"name": "@scope", "value": scope},
                 {"name": "@since", "value": (since or datetime.now(UTC)).isoformat()},
             ]
-            container = self._cosmos.get_database_client(self._database_name).get_container_client(
-                self._container_name
-            )
+            container = self._cosmos.get_database_client(self._database_name).get_container_client(self._container_name)
             items = container.query_items(
                 query=query,
                 parameters=params,
@@ -148,7 +138,8 @@ class SignalRepository:
             return [Signal(**item) async for item in items]
         cutoff = since or datetime.min.replace(tzinfo=UTC)
         return [
-            s for s in SIGNALS_STORE.values()
+            s
+            for s in SIGNALS_STORE.values()
             if s.incident_id is None
             and (s.jurisdiction_id == jurisdiction_id or jurisdiction_id == "national")
             and s.occurred_at >= cutoff

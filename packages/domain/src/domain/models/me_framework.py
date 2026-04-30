@@ -12,20 +12,27 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 EvaluationDomain = Literal[
-    "governance", "community_engagement", "effectiveness",
-    "efficiency", "implementation",
+    "governance",
+    "community_engagement",
+    "effectiveness",
+    "efficiency",
+    "implementation",
 ]
 RecoveryDomain = Literal["overarching", "social", "economic", "built", "natural"]
 ObjectiveType = Literal["sustainability", "resilience"]
 
 ALL_EVALUATION_DOMAINS: list[str] = [
-    "governance", "community_engagement", "effectiveness",
-    "efficiency", "implementation",
+    "governance",
+    "community_engagement",
+    "effectiveness",
+    "efficiency",
+    "implementation",
 ]
 
 
 class SelectedOutcome(BaseModel):
     """An AIDR catalogue outcome selected for this M&E framework."""
+
     catalogue_outcome_id: str
     domain: RecoveryDomain
     objective_type: ObjectiveType
@@ -35,6 +42,7 @@ class SelectedOutcome(BaseModel):
 
 class SuccessStandard(BaseModel):
     """Threshold for measuring success against a selected outcome's indicator."""
+
     catalogue_outcome_id: str
     indicator_id: str
     threshold_value: float
@@ -52,6 +60,7 @@ class SuccessStandard(BaseModel):
 
 class CollectionSchedule(BaseModel):
     """Data collection schedule for an indicator."""
+
     indicator_id: str
     frequency: Literal["weekly", "fortnightly", "monthly", "quarterly", "annually"]
     next_due_date: datetime
@@ -64,15 +73,14 @@ class MEFramework(BaseModel):
 
     FRs: FR-008–014 | Research: R-005, R-009
     """
+
     framework_id: str
     incident_id: str
     program_name: str
     affected_community_definition: str = ""
     selected_outcomes: list[SelectedOutcome] = Field(default_factory=list)
     program_logic_id: str | None = None
-    active_evaluation_domains: list[EvaluationDomain] = Field(
-        default_factory=lambda: list(ALL_EVALUATION_DOMAINS)
-    )
+    active_evaluation_domains: list[EvaluationDomain] = Field(default_factory=lambda: list(ALL_EVALUATION_DOMAINS))
     standards_of_success: list[SuccessStandard] = Field(default_factory=list)
     indicator_collection_schedule: list[CollectionSchedule] = Field(default_factory=list)
     evaluation_reports: list[str] = Field(default_factory=list)

@@ -20,8 +20,11 @@ BUSHFIRE_TEMPLATE: dict[str, Any] = {
             "name": "peak",
             "duration_seconds": 900,
             "sources": [
-                "nsw-rfs-fires-near-me", "bom-warnings", "epa-air-quality",
-                "ga-sentinel-hotspots", "twitter-disaster",
+                "nsw-rfs-fires-near-me",
+                "bom-warnings",
+                "epa-air-quality",
+                "ga-sentinel-hotspots",
+                "twitter-disaster",
             ],
             "params": {"severity": "extreme", "alert_level": "Emergency Warning"},
         },
@@ -33,8 +36,11 @@ BUSHFIRE_TEMPLATE: dict[str, Any] = {
         },
     ],
     "activated_sources": [
-        "bom-warnings", "ga-sentinel-hotspots", "nsw-rfs-fires-near-me",
-        "epa-air-quality", "twitter-disaster",
+        "bom-warnings",
+        "ga-sentinel-hotspots",
+        "nsw-rfs-fires-near-me",
+        "epa-air-quality",
+        "twitter-disaster",
     ],
 }
 
@@ -74,8 +80,11 @@ FLOOD_TEMPLATE: dict[str, Any] = {
         },
     ],
     "activated_sources": [
-        "bom-warnings", "bom-flood-warnings", "bom-river-gauges",
-        "nsw-ses-flood", "twitter-disaster",
+        "bom-warnings",
+        "bom-flood-warnings",
+        "bom-river-gauges",
+        "nsw-ses-flood",
+        "twitter-disaster",
     ],
 }
 
@@ -109,7 +118,10 @@ CYCLONE_TEMPLATE: dict[str, Any] = {
         },
     ],
     "activated_sources": [
-        "bom-warnings", "himawari-satellite", "bom-river-gauges", "twitter-disaster",
+        "bom-warnings",
+        "himawari-satellite",
+        "bom-river-gauges",
+        "twitter-disaster",
     ],
 }
 
@@ -137,7 +149,10 @@ SEVERE_STORM_TEMPLATE: dict[str, Any] = {
         },
     ],
     "activated_sources": [
-        "bom-warnings", "bom-radar", "bom-observations", "twitter-disaster",
+        "bom-warnings",
+        "bom-radar",
+        "bom-observations",
+        "twitter-disaster",
     ],
 }
 

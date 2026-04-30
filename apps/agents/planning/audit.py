@@ -4,11 +4,18 @@ Generates audit records for state transitions, section edits, and endorsements.
 
 FRs: FR-006 | Constitution §IV
 """
+
 from datetime import UTC, datetime
 
 
 def build_transition_audit(
-    *, plan_id: str, from_state: str, to_state: str, user_id: str, user_role: str, reason: str = "",
+    *,
+    plan_id: str,
+    from_state: str,
+    to_state: str,
+    user_id: str,
+    user_role: str,
+    reason: str = "",
 ) -> dict:
     return {
         "audit_type": "plan_transition",
@@ -23,7 +30,10 @@ def build_transition_audit(
 
 
 def build_section_edit_audit(
-    *, plan_id: str, section_slug: str, user_id: str,
+    *,
+    plan_id: str,
+    section_slug: str,
+    user_id: str,
 ) -> dict:
     return {
         "audit_type": "section_edit",
@@ -35,7 +45,11 @@ def build_section_edit_audit(
 
 
 def build_endorsement_audit(
-    *, plan_id: str, authority_name: str, authority_role: str, approved: bool,
+    *,
+    plan_id: str,
+    authority_name: str,
+    authority_role: str,
+    approved: bool,
 ) -> dict:
     return {
         "audit_type": "endorsement_decision",

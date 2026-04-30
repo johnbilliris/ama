@@ -68,9 +68,7 @@ class TestFullPipeline:
         assert len(output["phases"]) == 7
 
         for phase in output["phases"]:
-            assert phase["status"] == "pass", (
-                f"Phase {phase['phase']} failed: {phase.get('error')}"
-            )
+            assert phase["status"] == "pass", f"Phase {phase['phase']} failed: {phase.get('error')}"
 
     def test_json_output_schema_keys(self) -> None:
         """Verify JSON output contains all root schema keys per output-schema.md."""
@@ -102,9 +100,7 @@ class TestFullPipeline:
 
         output = json.loads(buf.getvalue())
         audit_trail = output["audit_trail"]
-        assert len(audit_trail) >= 4, (
-            f"Expected ≥4 decision records, got {len(audit_trail)}"
-        )
+        assert len(audit_trail) >= 4, f"Expected ≥4 decision records, got {len(audit_trail)}"
 
         # Check required fields
         for rec in audit_trail:

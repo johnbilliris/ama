@@ -52,9 +52,7 @@ def get_aidr_health():
         _check_service(LESSONS, "lessons"),
         _check_service(PPRR_CONTEXTS, "pprr"),
     ]
-    overall = (
-        "healthy" if all(s["status"] == "healthy" for s in services) else "degraded"
-    )
+    overall = "healthy" if all(s["status"] == "healthy" for s in services) else "degraded"
     return {"status": overall, "services": services}
 
 

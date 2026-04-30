@@ -34,9 +34,7 @@ def _signal(
 class TestSignalCorrelator:
     def test_single_authoritative_signal(self):
         correlator = SignalCorrelator()
-        result = correlator.compute_weighted_confidence(
-            [_signal(confidence=0.9, source_kind="authoritative")]
-        )
+        result = correlator.compute_weighted_confidence([_signal(confidence=0.9, source_kind="authoritative")])
         assert 0.85 <= result.weighted_confidence <= 0.95
         assert result.signal_count == 1
 
@@ -80,9 +78,7 @@ class TestSignalCorrelator:
 
     def test_single_source_assessment(self):
         correlator = SignalCorrelator()
-        result = correlator.compute_weighted_confidence(
-            [_signal(signal_id="s1", source_kind="iot", confidence=0.6)]
-        )
+        result = correlator.compute_weighted_confidence([_signal(signal_id="s1", source_kind="iot", confidence=0.6)])
         assert result.source_diversity == 1
         assert result.signal_count == 1
 

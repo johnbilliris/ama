@@ -129,8 +129,13 @@ class EmergencyPlanSummary(BaseModel):
     """Emergency plan counts by lifecycle status."""
 
     lifecycle_state: Literal[
-        "Draft", "InConsultation", "UnderReview", "Endorsed",
-        "Activated", "PostEventReview", "Superseded",
+        "Draft",
+        "InConsultation",
+        "UnderReview",
+        "Endorsed",
+        "Activated",
+        "PostEventReview",
+        "Superseded",
     ]
     count: int = Field(ge=0)
     overdue_count: int = Field(ge=0, description="Plans in this state with expired review date")
@@ -235,9 +240,16 @@ class AWSPrincipleCompliance(BaseModel):
     """Compliance rate for one of the 10 AWS warning principles."""
 
     principle: Literal[
-        "life_saving", "empowering", "trusted", "risk_scaled",
-        "timely_targeted", "impact_conveying", "action_calling",
-        "clearly_communicated", "accessible", "bigger_picture",
+        "life_saving",
+        "empowering",
+        "trusted",
+        "risk_scaled",
+        "timely_targeted",
+        "impact_conveying",
+        "action_calling",
+        "clearly_communicated",
+        "accessible",
+        "bigger_picture",
     ]
     display_name: str
     compliant_count: int = Field(ge=0)

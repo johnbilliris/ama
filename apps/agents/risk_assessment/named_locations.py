@@ -42,9 +42,7 @@ class NamedLocationRepository:
         """
         location = self._get(location_id)
         if location is None:
-            raise LocationResolutionError(
-                f"Named location '{location_id}' not found in lookup table"
-            )
+            raise LocationResolutionError(f"Named location '{location_id}' not found in lookup table")
         logger.info(
             "named_location_resolved",
             extra={
@@ -60,7 +58,8 @@ class NamedLocationRepository:
         if self._container is not None:
             try:
                 doc = self._container.read_item(
-                    item=location_id, partition_key=location_id,
+                    item=location_id,
+                    partition_key=location_id,
                 )
                 return NamedLocation(**doc)
             except Exception:
@@ -79,9 +78,11 @@ class NamedLocationRepository:
     def list_all(self) -> list[NamedLocation]:
         """List all named locations."""
         if self._container is not None:
-            docs = list(self._container.query_items(
-                query="SELECT * FROM c",
-                enable_cross_partition_query=True,
-            ))
+            docs = list(
+                self._container.query_items(
+                    query="SELECT * FROM c",
+                    enable_cross_partition_query=True,
+                )
+            )
             return [NamedLocation(**doc) for doc in docs]
         return list(self._local.values())

@@ -41,8 +41,15 @@ class WidgetDefinition(BaseModel):
 
     widget_id: str = Field(description="Unique widget identifier, e.g., 'health_score_gauge'")
     widget_type: Literal[
-        "gauge", "grid", "table", "chart", "indicator",
-        "search", "timeline", "progress_bar", "counter",
+        "gauge",
+        "grid",
+        "table",
+        "chart",
+        "indicator",
+        "search",
+        "timeline",
+        "progress_bar",
+        "counter",
     ]
     display_name: str
     priority: int = Field(ge=1, description="Display order within the role's layout")
@@ -55,11 +62,16 @@ class RoleWidgetMapping(BaseModel):
 
     role: AIIMSRole
     default_view: Literal[
-        "executive_summary", "compliance", "audit_trail",
-        "operational_readiness", "recovery", "risk_warning",
+        "executive_summary",
+        "compliance",
+        "audit_trail",
+        "operational_readiness",
+        "recovery",
+        "risk_warning",
     ]
     widgets: list[WidgetDefinition] = Field(min_length=1)
     authority_rank: int = Field(
-        ge=1, le=11,
+        ge=1,
+        le=11,
         description="Rank for multi-role ordering: 1=highest authority",
     )

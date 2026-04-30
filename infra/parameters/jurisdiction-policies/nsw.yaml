@@ -1,0 +1,14 @@
+jurisdiction_code: nsw
+autonomy_level: standard
+kill_switch_overrides: {}
+language_priorities:
+  - en-AU
+  - zh-Hans
+  - ar
+  - vi
+  - el
+  - it
+aiims_role_overrides: {}
+version: 1
+effective_from: 2026-04-30T00:00:00+00:00
+approved_by: johnbilliris

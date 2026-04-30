@@ -52,9 +52,7 @@ class SimulationTenant(BaseModel):
         "Cross-jurisdiction",
     ]
     scenario_template_id: str | None = None
-    status: Literal[
-        "Provisioning", "Active", "Paused", "Archiving", "Archived", "Deleted"
-    ] = "Provisioning"
+    status: Literal["Provisioning", "Active", "Paused", "Archiving", "Archived", "Deleted"] = "Provisioning"
     created_by: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     ttl_hours: int = 72
@@ -126,9 +124,7 @@ class SimulationTenant(BaseModel):
         allowed = VALID_STATUS_TRANSITIONS.get(self.status, set())
         return new_status in allowed
 
-    def transition_to(
-        self, new_status: str, *, elapsed_seconds: float | None = None
-    ) -> "SimulationTenant":
+    def transition_to(self, new_status: str, *, elapsed_seconds: float | None = None) -> "SimulationTenant":
         if not self.can_transition_to(new_status):
             raise ValueError(
                 f"Cannot transition from '{self.status}' to '{new_status}'. "

@@ -37,10 +37,7 @@ def generate_plan_summary(
             demand_id = getattr(assignment, "demand_id", "unknown")
             score = getattr(assignment, "score", 0.0)
             travel = getattr(assignment, "estimated_travel_minutes", 0.0)
-            parts.append(
-                f"  {i}. Resource {res_id} → Demand {demand_id} "
-                f"(score: {score:.2f}, ETA: {travel:.0f} min)"
-            )
+            parts.append(f"  {i}. Resource {res_id} → Demand {demand_id} (score: {score:.2f}, ETA: {travel:.0f} min)")
     else:
         parts.append("ASSIGNMENTS: No resources assigned.")
 
@@ -89,7 +86,7 @@ def generate_assignment_rationale(
     parts = [
         f"Resource {res_id} selected for demand {demand_id}.",
         f"Capability match: {'full' if cap_match == 1.0 else 'none'} ({cap_match:.1f}).",
-        f"Distance: {distance:.1f} km (factor: {1.0/max(distance, 0.1):.2f}).",
+        f"Distance: {distance:.1f} km (factor: {1.0 / max(distance, 0.1):.2f}).",
         f"Availability: {avail:.1f}. Priority weight: {priority:.1f}.",
         f"Final score: {score:.4f}.",
         f"Evaluated against {alternatives} alternative(s).",

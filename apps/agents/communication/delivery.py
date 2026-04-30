@@ -98,14 +98,10 @@ class MultiChannelDeliveryService:
                     channel=ChannelType(channel_str),
                     audience_segment_id=segment.segment_id,
                     language_used=segment.preferred_language,
-                    content_payload=self._format_content(
-                        content_block, ChannelType(channel_str)
-                    ),
+                    content_payload=self._format_content(content_block, ChannelType(channel_str)),
                     tenant_id=alert.tenant_id,
                     is_deduplicated=dedup_info is not None,
-                    deduplicated_by_segment_id=(
-                        dedup_info if dedup_info else None
-                    ),
+                    deduplicated_by_segment_id=(dedup_info if dedup_info else None),
                 )
 
                 if dedup_info:
@@ -152,9 +148,7 @@ class MultiChannelDeliveryService:
 
         return segments, dedup_map
 
-    def _sort_delivery_order(
-        self, segments: list[AudienceSegment]
-    ) -> list[AudienceSegment]:
+    def _sort_delivery_order(self, segments: list[AudienceSegment]) -> list[AudienceSegment]:
         """Order critical first, then by zone_level ascending per FR-024."""
         return sorted(
             segments,
@@ -164,9 +158,7 @@ class MultiChannelDeliveryService:
             ),
         )
 
-    async def _deliver_with_retry(
-        self, record: DeliveryRecord, channel: ChannelType
-    ) -> DeliveryRecord:
+    async def _deliver_with_retry(self, record: DeliveryRecord, channel: ChannelType) -> DeliveryRecord:
         """Implement per-channel independent retry with exponential backoff."""
         record.initiated_at = datetime.now(UTC)
         backoff = record.retry_backoff_intervals or [1.0, 2.0, 4.0]
@@ -193,8 +185,11 @@ class MultiChannelDeliveryService:
             except Exception as exc:
                 logger.warning(
                     "Delivery attempt %d/%d failed for %s/%s: %s",
-                    attempt + 1, max_retries + 1, channel.value,
-                    record.audience_segment_id, exc,
+                    attempt + 1,
+                    max_retries + 1,
+                    channel.value,
+                    record.audience_segment_id,
+                    exc,
                 )
                 record.failure_reason = str(exc)
 
@@ -206,9 +201,7 @@ class MultiChannelDeliveryService:
         record.delivery_status = DeliveryStatus.failed
         record.completed_at = datetime.now(UTC)
         if record.initiated_at:
-            record.delivery_duration_ms = int(
-                (record.completed_at - record.initiated_at).total_seconds() * 1000
-            )
+            record.delivery_duration_ms = int((record.completed_at - record.initiated_at).total_seconds() * 1000)
         self._channel_health[channel.value] = False
         return record
 
@@ -223,7 +216,7 @@ class MultiChannelDeliveryService:
             self._sms_client.send(
                 from_="EmergencyAlert",
                 to=[record.audience_segment_id],
-                message=content[:self._config.sms_max_length],
+                message=content[: self._config.sms_max_length],
             )
         else:
             logger.info("SMS delivery (no client): segment_count=%d", record.segment_count)
@@ -231,10 +224,12 @@ class MultiChannelDeliveryService:
     def _deliver_push(self, record: DeliveryRecord) -> None:
         """Deliver via Azure Notification Hubs."""
         if self._push_client is not None:
-            self._push_client.send_notification({
-                "title": record.content_payload[:100],
-                "body": record.content_payload,
-            })
+            self._push_client.send_notification(
+                {
+                    "title": record.content_payload[:100],
+                    "body": record.content_payload,
+                }
+            )
         else:
             logger.info("Push delivery (no client): %s", record.audience_segment_id)
 
@@ -267,9 +262,7 @@ class MultiChannelDeliveryService:
             return f"{content_block.title}\n{content_block.body}\n{content_block.action_items}"
         return content_block.body
 
-    def _create_simulation_records(
-        self, alert: PublicAlert, segments: list[AudienceSegment]
-    ) -> list[DeliveryRecord]:
+    def _create_simulation_records(self, alert: PublicAlert, segments: list[AudienceSegment]) -> list[DeliveryRecord]:
         """Create delivery records for simulation without real delivery."""
         records = []
         for segment in segments:

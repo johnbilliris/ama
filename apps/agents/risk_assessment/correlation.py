@@ -58,7 +58,8 @@ class SignalCorrelator:
         self._config = config or RiskAssessmentConfig()
 
     def compute_weighted_confidence(
-        self, signals: list[dict],
+        self,
+        signals: list[dict],
     ) -> CorrelationResult:
         """Compute weighted confidence from a list of signal dicts.
 
@@ -115,9 +116,7 @@ class SignalCorrelator:
         weighted_conf = numerator / denominator
 
         # Check if relies primarily on unverified sources
-        relies_on_unverified = (
-            total_weight > 0.0 and unverified_weight / total_weight > 0.5
-        )
+        relies_on_unverified = total_weight > 0.0 and unverified_weight / total_weight > 0.5
 
         return CorrelationResult(
             weighted_confidence=max(0.0, min(1.0, weighted_conf)),
@@ -179,15 +178,17 @@ class ContradictionDetector:
                             direction_b="decreasing",
                         )
                         pairs.append(pair)
-                        details.append({
-                            "signal_id_a": pair.signal_id_a,
-                            "signal_id_b": pair.signal_id_b,
-                            "source_a": pair.source_a,
-                            "source_b": pair.source_b,
-                            "hazard_parameter": param,
-                            "direction_a": "increasing",
-                            "direction_b": "decreasing",
-                        })
+                        details.append(
+                            {
+                                "signal_id_a": pair.signal_id_a,
+                                "signal_id_b": pair.signal_id_b,
+                                "source_a": pair.source_a,
+                                "source_b": pair.source_b,
+                                "hazard_parameter": param,
+                                "direction_a": "increasing",
+                                "direction_b": "decreasing",
+                            }
+                        )
 
         return ContradictionResult(
             detected=len(pairs) > 0,
@@ -196,7 +197,9 @@ class ContradictionDetector:
         )
 
     def apply_contradiction_penalty(
-        self, weighted_confidence: float, contradictions: ContradictionResult,
+        self,
+        weighted_confidence: float,
+        contradictions: ContradictionResult,
     ) -> float:
         """Apply multiplicative 0.7 penalty once if contradictions detected.
 

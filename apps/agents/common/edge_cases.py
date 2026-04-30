@@ -5,14 +5,13 @@ conflicting standards, and plan hierarchy conflicts.
 
 Spec: Edge cases section
 """
+
 from datetime import UTC, datetime
 
 
 def handle_overlapping_programs(program_a: dict, program_b: dict) -> dict:
     """Support linking programs to shared indicator data."""
-    shared_indicators = set(
-        i.get("indicator_id") for i in program_a.get("standards_of_success", [])
-    ) & set(
+    shared_indicators = set(i.get("indicator_id") for i in program_a.get("standards_of_success", [])) & set(
         i.get("indicator_id") for i in program_b.get("standards_of_success", [])
     )
     return {
@@ -29,6 +28,7 @@ def handle_indicator_unavailable(indicator: dict, staleness_days: int = 7) -> di
     is_stale = False
     if last_updated:
         from datetime import datetime as dt
+
         try:
             updated = dt.fromisoformat(last_updated) if isinstance(last_updated, str) else last_updated
             days_since = (datetime.now(UTC) - updated).days

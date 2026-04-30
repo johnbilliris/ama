@@ -3,6 +3,7 @@
 Tests: hierarchical ID validation, RecoveryOutcome, CatalogueActivity,
 CatalogueIndicator, RecoveryDomain, ObjectiveType.
 """
+
 import pytest
 
 from packages.domain.src.domain.models.recovery_outcome import (

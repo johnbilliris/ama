@@ -45,7 +45,8 @@ class TestDeadLetterEntry:
 
     def test_permanently_failed_transition(self):
         entry = _dead_letter_entry(
-            failure_reason="max_retries", retry_count=5,
+            failure_reason="max_retries",
+            retry_count=5,
         )
         entry.status = "permanently_failed"
         assert entry.status == "permanently_failed"

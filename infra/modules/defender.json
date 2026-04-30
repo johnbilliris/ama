@@ -1,0 +1,56 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.39.26.7824",
+      "templateHash": "13348870510460503776"
+    }
+  },
+  "parameters": {
+    "pricingPlans": {
+      "type": "array",
+      "defaultValue": [
+        "CloudPosture",
+        "KeyVaults",
+        "StorageAccounts",
+        "CosmosDbs",
+        "ContainerRegistry",
+        "Containers",
+        "AppServices",
+        "OpenSourceRelationalDatabases",
+        "AI"
+      ],
+      "metadata": {
+        "description": "Resource types to enable Defender Standard for"
+      }
+    }
+  },
+  "resources": [
+    {
+      "copy": {
+        "name": "pricings",
+        "count": "[length(parameters('pricingPlans'))]"
+      },
+      "type": "Microsoft.Security/pricings",
+      "apiVersion": "2024-01-01",
+      "name": "[parameters('pricingPlans')[copyIndex()]]",
+      "properties": {
+        "pricingTier": "Standard"
+      }
+    }
+  ],
+  "outputs": {
+    "enabled": {
+      "type": "array",
+      "copy": {
+        "count": "[length(parameters('pricingPlans'))]",
+        "input": {
+          "name": "[parameters('pricingPlans')[copyIndex()]]",
+          "id": "[subscriptionResourceId('Microsoft.Security/pricings', parameters('pricingPlans')[copyIndex()])]"
+        }
+      }
+    }
+  }
+}

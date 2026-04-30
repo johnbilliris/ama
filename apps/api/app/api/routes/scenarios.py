@@ -13,7 +13,5 @@ class ScenarioReplayInput(BaseModel):
 
 @router.post("/replay")
 async def replay_scenario(payload: ScenarioReplayInput) -> dict[str, object]:
-    scenario_run = RehearsalOrchestrator().run(
-        payload.scenarioName, payload.scenarioType, payload.jurisdictionIds
-    )
+    scenario_run = RehearsalOrchestrator().run(payload.scenarioName, payload.scenarioType, payload.jurisdictionIds)
     return scenario_run.model_dump(mode="json")

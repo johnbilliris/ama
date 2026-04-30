@@ -82,7 +82,8 @@ async def update_indicator(
 
 @router.post("/indicators/batch")
 async def batch_update_indicators(
-    incident_id: str, payload: BatchUpdateInput,
+    incident_id: str,
+    payload: BatchUpdateInput,
 ) -> dict[str, object]:
     _require_incident(incident_id)
     try:

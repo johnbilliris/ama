@@ -5,6 +5,7 @@ the four environments (social, built, economic, natural).
 
 FRs: FR-003 | Research: R-001
 """
+
 from typing import Literal
 
 RiskEnvironment = Literal["social", "built", "economic", "natural"]
@@ -35,8 +36,7 @@ def assess_risks(
             "risk_level": "medium",  # Placeholder — would integrate with risk models
             "hazard_exposure": [h for h in hazard_types],
             "cascading_risks": (
-                _identify_cascading_risks(env, hazard_types)
-                if scenario_type in ("cascading", "catastrophic") else []
+                _identify_cascading_risks(env, hazard_types) if scenario_type in ("cascading", "catastrophic") else []
             ),
             "mitigation_strategies": [],
         }

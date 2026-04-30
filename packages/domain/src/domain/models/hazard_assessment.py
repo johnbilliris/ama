@@ -7,9 +7,7 @@ from pydantic import BaseModel, Field, model_validator
 class HazardMap(BaseModel):
     """Embedded hazard map within a HazardAssessment."""
 
-    affected_area: dict[str, Any] = Field(
-        ..., description="GeoJSON Polygon of affected area"
-    )
+    affected_area: dict[str, Any] = Field(..., description="GeoJSON Polygon of affected area")
     severity_level: Literal["low", "moderate", "high", "critical"]
     hazard_type: str
     confidence_score: float = Field(..., ge=0.0, le=1.0)

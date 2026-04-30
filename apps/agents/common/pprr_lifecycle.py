@@ -6,7 +6,6 @@ Supports overlap periods where multiple PPRR phases are active simultaneously.
 FRs: FR-031, FR-053 | Research: R-001
 """
 
-
 # Valid PPRR phase transitions
 VALID_PPRR_TRANSITIONS: dict[str, list[str]] = {
     "prevention": ["preparedness"],
@@ -33,17 +32,12 @@ def validate_phase_transition(
     valid_targets = VALID_PPRR_TRANSITIONS.get(current_phase, [])
     if target_phase in valid_targets:
         return True, ""
-    return False, (
-        f"Invalid PPRR transition: '{current_phase}' → '{target_phase}'. "
-        f"Valid targets: {valid_targets}"
-    )
+    return False, (f"Invalid PPRR transition: '{current_phase}' → '{target_phase}'. Valid targets: {valid_targets}")
 
 
 def can_run_concurrently(phase_a: str, phase_b: str) -> bool:
     """Check if two PPRR phases can be active simultaneously."""
-    return (phase_a, phase_b) in CONCURRENT_PHASE_PAIRS or (
-        phase_b, phase_a
-    ) in CONCURRENT_PHASE_PAIRS
+    return (phase_a, phase_b) in CONCURRENT_PHASE_PAIRS or (phase_b, phase_a) in CONCURRENT_PHASE_PAIRS
 
 
 def build_phase_transition_payload(

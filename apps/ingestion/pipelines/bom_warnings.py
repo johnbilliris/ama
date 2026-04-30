@@ -45,15 +45,18 @@ class BomWarningsPipeline(IngestionPipelineBase):
 
             for filename in new_files[:50]:
                 import io
+
                 buf = io.BytesIO()
                 ftp.retrbinary(f"RETR {filename}", buf.write)
                 content = buf.getvalue().decode("utf-8", errors="replace")
-                payloads.append({
-                    "xml": content,
-                    "filename": filename,
-                    "data_source_id": "bom-warnings",
-                    "source_uri": f"ftp://{self._ftp_host}{self._ftp_path}{filename}",
-                })
+                payloads.append(
+                    {
+                        "xml": content,
+                        "filename": filename,
+                        "data_source_id": "bom-warnings",
+                        "source_uri": f"ftp://{self._ftp_host}{self._ftp_path}{filename}",
+                    }
+                )
                 self._known_files.add(filename)
 
             ftp.quit()

@@ -303,13 +303,8 @@ class SimulationControllerService:
             yield _emit_delta(preamble)
             yield ChatEvent("card.scenario", card)
         elif intent["kind"] == "sub_agent":
-            reply = await self._sub_agents.invoke(
-                intent["sub_agent"], user_message, tenant_id=tenant_id
-            )
-            text = (
-                f"{intent['sub_agent'].title()}: {reply.summary}"
-                + (" (degraded)" if reply.degraded else "")
-            )
+            reply = await self._sub_agents.invoke(intent["sub_agent"], user_message, tenant_id=tenant_id)
+            text = f"{intent['sub_agent'].title()}: {reply.summary}" + (" (degraded)" if reply.degraded else "")
             tool_call_id = str(uuid.uuid4())
             yield ChatEvent(
                 "tool.call",
@@ -421,9 +416,7 @@ class SimulationControllerService:
                     get_bearer_token_provider,
                 )
 
-                credential = DefaultAzureCredential(
-                    exclude_interactive_browser_credential=True
-                )
+                credential = DefaultAzureCredential(exclude_interactive_browser_credential=True)
                 client_kwargs["azure_ad_token_provider"] = get_bearer_token_provider(
                     credential, "https://cognitiveservices.azure.com/.default"
                 )
@@ -443,17 +436,13 @@ class SimulationControllerService:
         try:
             client = AsyncAzureOpenAI(**client_kwargs)
         except Exception as exc:
-            yield ChatEvent(
-                "error", {"code": "openai_client_init_failed", "message": str(exc)}
-            )
+            yield ChatEvent("error", {"code": "openai_client_init_failed", "message": str(exc)})
             return
 
         # Replay the rolling window of prior turns so the model has conversational
         # memory across requests. Ordering is [system, ...prior turns (oldest
         # first), current user message].
-        messages: list[dict[str, Any]] = [
-            {"role": "system", "content": self._prompt_text}
-        ]
+        messages: list[dict[str, Any]] = [{"role": "system", "content": self._prompt_text}]
         messages.extend(self._load_history_messages(tenant_id))
         messages.append({"role": "user", "content": user_message})
 
@@ -478,10 +467,7 @@ class SimulationControllerService:
                 # copy per code; the full technical detail is logged server-side and
                 # only surfaced to the client in local/development environments.
                 exc_str = str(exc)
-                if (
-                    "content_filter" in exc_str
-                    or "ResponsibleAIPolicyViolation" in exc_str
-                ):
+                if "content_filter" in exc_str or "ResponsibleAIPolicyViolation" in exc_str:
                     code = "content_filter"
                 else:
                     code = "openai_unavailable"
@@ -490,9 +476,7 @@ class SimulationControllerService:
                     code,
                     deployment,
                 )
-                yield ChatEvent(
-                    "error", {"code": code, "message": exc_str}
-                )
+                yield ChatEvent("error", {"code": code, "message": exc_str})
                 return
 
             round_text: list[str] = []
@@ -517,9 +501,7 @@ class SimulationControllerService:
                 if tcs:
                     for tc in tcs:
                         idx = getattr(tc, "index", 0) or 0
-                        slot = tool_acc.setdefault(
-                            idx, {"id": None, "name": None, "arguments": ""}
-                        )
+                        slot = tool_acc.setdefault(idx, {"id": None, "name": None, "arguments": ""})
                         if getattr(tc, "id", None):
                             slot["id"] = tc.id
                         fn = getattr(tc, "function", None)

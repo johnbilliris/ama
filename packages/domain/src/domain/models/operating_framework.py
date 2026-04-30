@@ -10,9 +10,7 @@ class OperatingFramework(BaseModel):
     name: str
     abbreviation: str | None = None
     description: str = ""
-    framework_type: Literal[
-        "aiims", "agency_specific", "jurisdictional_policy", "communications", "other"
-    ]
+    framework_type: Literal["aiims", "agency_specific", "jurisdictional_policy", "communications", "other"]
     applicable_jurisdiction_ids: list[str] = Field(default_factory=list)
     custodian_organisation_id: str | None = None
     pprr_phases: list[PprrPhase] = Field(default_factory=list)

@@ -10,9 +10,11 @@ from packages.domain.src.domain.models.handoff_chain import HandoffChainDefiniti
 
 def _make_chain(ds_id: str = "ds-test") -> HandoffChainDefinition:
     return HandoffChainDefinition(
-        chain_id=f"chain-{uuid4().hex[:12]}", data_source_id=ds_id,
+        chain_id=f"chain-{uuid4().hex[:12]}",
+        data_source_id=ds_id,
         steps=[HandoffStep(step_order=1, source_agent="monitoring", target_agent="risk_assessment")],
-        created_by="arch", created_at=datetime.now(UTC),
+        created_by="arch",
+        created_at=datetime.now(UTC),
     )
 
 

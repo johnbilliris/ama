@@ -59,8 +59,10 @@ class TestDataSourceListing:
         service.register_source(_make_source(data_source_id="ds-a", kind="authoritative"), actor_id="t")
         service.register_source(
             _make_source(
-                data_source_id="ds-b", kind="social",
-                sub_category="social_twitter", trust_tier="tier_6_social_unverified",
+                data_source_id="ds-b",
+                kind="social",
+                sub_category="social_twitter",
+                trust_tier="tier_6_social_unverified",
             ),
             actor_id="t",
         )

@@ -1,6 +1,5 @@
 """Tests for communication.dedup — HandoffDeduplicator with dual dedup keys."""
 
-
 from communication.dedup import HandoffDeduplicator
 
 # ---------------------------------------------------------------------------

@@ -58,8 +58,13 @@ class TestSimulationTenantContract:
         assert "offset" in response
         sim = response["simulations"][0]
         for key in (
-            "tenant_id", "scenario_type", "status", "created_at",
-            "participant_count", "signal_count", "storage_bytes",
+            "tenant_id",
+            "scenario_type",
+            "status",
+            "created_at",
+            "participant_count",
+            "signal_count",
+            "storage_bytes",
         ):
             assert key in sim
 
@@ -76,9 +81,18 @@ class TestSimulationTenantContract:
         )
         doc = tenant.model_dump(mode="json")
         required_fields = [
-            "tenant_id", "scenario_id", "scenario_run_id", "scenario_type",
-            "status", "created_by", "created_at", "participants", "jurisdictions",
-            "resource_limits", "resource_consumption", "elapsed_seconds",
+            "tenant_id",
+            "scenario_id",
+            "scenario_run_id",
+            "scenario_type",
+            "status",
+            "created_by",
+            "created_at",
+            "participants",
+            "jurisdictions",
+            "resource_limits",
+            "resource_consumption",
+            "elapsed_seconds",
         ]
         for field in required_fields:
             assert field in doc, f"Missing field: {field}"
@@ -201,8 +215,16 @@ class TestExerciseReportContract:
         )
         doc = report.model_dump(mode="json")
         for field in (
-            "report_id", "tenant_id", "scenario_run_id", "scenario_type", "generated_at",
-            "signal_summary", "recommendation_summary", "alert_summary",
-            "coordination_gaps", "performance_metrics", "benchmark_comparison",
+            "report_id",
+            "tenant_id",
+            "scenario_run_id",
+            "scenario_type",
+            "generated_at",
+            "signal_summary",
+            "recommendation_summary",
+            "alert_summary",
+            "coordination_gaps",
+            "performance_metrics",
+            "benchmark_comparison",
         ):
             assert field in doc

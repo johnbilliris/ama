@@ -1,6 +1,5 @@
 """Tests for communication.models — enums, Pydantic v2 models, and validation rules."""
 
-
 import pytest
 from communication.models import (
     VALID_STATUS_TRANSITIONS,

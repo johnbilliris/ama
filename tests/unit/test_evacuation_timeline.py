@@ -163,7 +163,9 @@ class TestShelterInPlace:
         zones = [_make_zone(1, pop=1000)]
         routes = []  # No routes!
         phases, shelter_recs, assumptions = te.estimate_timeline(
-            zones, routes, hazard_time_horizon_hours=12.0,
+            zones,
+            routes,
+            hazard_time_horizon_hours=12.0,
         )
         # Should have shelter-in-place recommendations
         assert len(shelter_recs) > 0
@@ -176,7 +178,9 @@ class TestShelterInPlace:
         zones = [_make_zone(1, pop=1000)]
         routes = []  # No routes
         phases, shelter_recs, assumptions = te.estimate_timeline(
-            zones, routes, hazard_type="bushfire",
+            zones,
+            routes,
+            hazard_type="bushfire",
             hazard_time_horizon_hours=1.0,  # Imminent
         )
         if shelter_recs:
@@ -196,7 +200,8 @@ class TestTimeDeficitDetection:
         zones = [_make_zone(1, pop=100_000, vuln=15_000)]
         routes = [_make_route(1, distance_km=50.0, capacity=100)]
         phases, _, assumptions = te.estimate_timeline(
-            zones, routes,
+            zones,
+            routes,
             hazard_type="bushfire",
             hazard_time_horizon_hours=1.0,  # Only 1 hour
         )
@@ -209,7 +214,8 @@ class TestTimeDeficitDetection:
         zones = [_make_zone(1, pop=100, vuln=15)]
         routes = [_make_route(1, distance_km=5.0, capacity=1000)]
         phases, _, assumptions = te.estimate_timeline(
-            zones, routes,
+            zones,
+            routes,
             hazard_type="bushfire",
             hazard_time_horizon_hours=100.0,  # Lots of time
         )

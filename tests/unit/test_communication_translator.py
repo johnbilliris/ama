@@ -11,9 +11,7 @@ from communication.translator import MultilingualTranslator
 
 class TestComputeSimilarity:
     def test_identical_texts_score_one(self):
-        score = MultilingualTranslator._compute_similarity(
-            "the fire is near", "the fire is near"
-        )
+        score = MultilingualTranslator._compute_similarity("the fire is near", "the fire is near")
         assert score == pytest.approx(1.0)
 
     def test_completely_different_texts_score_zero(self):
@@ -21,9 +19,7 @@ class TestComputeSimilarity:
         assert score == pytest.approx(0.0)
 
     def test_partial_overlap_between_zero_and_one(self):
-        score = MultilingualTranslator._compute_similarity(
-            "fire is approaching fast", "fire is near the town"
-        )
+        score = MultilingualTranslator._compute_similarity("fire is approaching fast", "fire is near the town")
         assert 0.0 < score < 1.0
 
     def test_empty_text_a_returns_zero(self):
@@ -46,9 +42,7 @@ class TestComputeCompoundConfidence:
         assert result == pytest.approx(1.0)
 
     def test_freshness_penalty_applied(self):
-        result = MultilingualTranslator.compute_compound_confidence(
-            1.0, freshness_penalty=0.9
-        )
+        result = MultilingualTranslator.compute_compound_confidence(1.0, freshness_penalty=0.9)
         assert result == pytest.approx(0.9)
 
     def test_back_translation_penalty_stacks(self):
@@ -67,15 +61,11 @@ class TestComputeCompoundConfidence:
         assert result == pytest.approx(0.648)
 
     def test_result_clamped_to_zero(self):
-        result = MultilingualTranslator.compute_compound_confidence(
-            -1.0, freshness_penalty=1.0
-        )
+        result = MultilingualTranslator.compute_compound_confidence(-1.0, freshness_penalty=1.0)
         assert result == 0.0
 
     def test_result_clamped_to_one(self):
-        result = MultilingualTranslator.compute_compound_confidence(
-            2.0, freshness_penalty=1.0
-        )
+        result = MultilingualTranslator.compute_compound_confidence(2.0, freshness_penalty=1.0)
         assert result == 1.0
 
     def test_all_penalties_at_one_no_effect(self):

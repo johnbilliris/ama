@@ -38,7 +38,8 @@ class TransitionToIncidentInput(BaseModel):
 
 @router.post("/transition")
 async def transition_phase(
-    incident_id: str, payload: TransitionPhaseInput,
+    incident_id: str,
+    payload: TransitionPhaseInput,
 ) -> dict[str, object]:
     if incident_id not in INCIDENTS:
         raise HTTPException(status_code=404, detail="Incident not found")
@@ -86,7 +87,8 @@ async def list_contexts(active_only: bool = True) -> list[dict[str, object]]:
 
 @context_router.put("/contexts/{context_id}/transition-to-incident")
 async def transition_context_to_incident(
-    context_id: str, payload: TransitionToIncidentInput,
+    context_id: str,
+    payload: TransitionToIncidentInput,
 ) -> dict[str, object]:
     try:
         context = service.transition_context_to_incident(

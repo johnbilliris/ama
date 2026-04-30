@@ -63,12 +63,8 @@ def client(monkeypatch):
         warp_scheduler=scheduler,
         event_recorder=recorder,
     )
-    playback = PlaybackService(
-        event_repository=event_repo, simulation_repository=repo
-    )
-    annotations = AnnotationService(
-        event_repository=event_repo, simulation_repository=repo
-    )
+    playback = PlaybackService(event_repository=event_repo, simulation_repository=repo)
+    annotations = AnnotationService(event_repository=event_repo, simulation_repository=repo)
 
     monkeypatch.setattr(sim_routes, "_repo", repo)
     monkeypatch.setattr(sim_routes, "_signal_repo", signal_repo)
@@ -119,6 +115,7 @@ def _seed_event(event_repo, tenant_id, seq, etype="signal_delivered", offset=0.0
 
 
 # ── events ────────────────────────────────────────────────────────────
+
 
 def test_get_events_returns_ordered(client, monkeypatch):
     from app.api.routes import simulation_playback as pb_routes
@@ -206,6 +203,7 @@ def test_get_events_include_annotations_filter(client):
 
 # ── snapshots ─────────────────────────────────────────────────────────
 
+
 def test_get_snapshots_returns_list(client):
 
     from app.api.routes import simulation_playback as pb_routes
@@ -230,6 +228,7 @@ def test_get_snapshots_returns_list(client):
 
 
 # ── annotations (US5) ─────────────────────────────────────────────────
+
 
 def test_create_annotation_201(client):
     tid = _create(client)

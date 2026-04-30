@@ -28,7 +28,7 @@ class FloodGenerator:
 
         # Rising limb
         for i in range(rise_steps):
-            t = (i / rise_steps)
+            t = i / rise_steps
             level = base_level + (peak_level - base_level) * (1 - math.cos(t * math.pi / 2))
             time_offset = (i / steps) * duration_hours
             points.append((round(time_offset, 2), round(level, 2)))

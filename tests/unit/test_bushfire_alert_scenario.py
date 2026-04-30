@@ -44,9 +44,7 @@ class TestBushfireAlertScenario:
     @patch("communication.telemetry.pipeline_span")
     @patch("communication.telemetry.CustomEventEmitter")
     @patch("communication.telemetry.metrics")
-    def test_bushfire_pipeline_produces_alert(
-        self, mock_metrics, mock_emitter, mock_span, mock_llm
-    ):
+    def test_bushfire_pipeline_produces_alert(self, mock_metrics, mock_emitter, mock_span, mock_llm):
         mock_span.return_value.__enter__ = MagicMock()
         mock_span.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -98,9 +96,7 @@ class TestBushfireAlertScenario:
     @patch("communication.telemetry.pipeline_span")
     @patch("communication.telemetry.CustomEventEmitter")
     @patch("communication.telemetry.metrics")
-    def test_bushfire_different_template_selected(
-        self, mock_metrics, mock_emitter, mock_span, mock_llm
-    ):
+    def test_bushfire_different_template_selected(self, mock_metrics, mock_emitter, mock_span, mock_llm):
         """Bushfire hazard_type flows through to the drafting stage."""
         mock_span.return_value.__enter__ = MagicMock()
         mock_span.return_value.__exit__ = MagicMock(return_value=False)

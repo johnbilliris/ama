@@ -48,6 +48,7 @@ class TestReproducibility:
 
         # Override via object construction (frozen dataclass requires new instance)
         import os
+
         original = os.environ.get("SMS_MAX_LENGTH")
         os.environ["SMS_MAX_LENGTH"] = "999"
         try:

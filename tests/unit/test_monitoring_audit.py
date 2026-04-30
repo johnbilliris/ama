@@ -103,10 +103,12 @@ class TestAuditWriterFileSpill:
                 "audit_buffer_capacity": 3,
                 "audit_buffer_file_path": file_path,
             }
-            config = MonitoringConfig(**{
-                **{f.name: getattr(config, f.name) for f in config.__dataclass_fields__.values()},
-                **config_dict,
-            })
+            config = MonitoringConfig(
+                **{
+                    **{f.name: getattr(config, f.name) for f in config.__dataclass_fields__.values()},
+                    **config_dict,
+                }
+            )
 
             writer = AuditWriter(config=config, cosmos_client=None)
 
@@ -178,10 +180,12 @@ class TestAuditWriterFlush:
 
             config = MonitoringConfig()
             config_dict = {"audit_buffer_file_path": file_path}
-            config = MonitoringConfig(**{
-                **{f.name: getattr(config, f.name) for f in config.__dataclass_fields__.values()},
-                **config_dict,
-            })
+            config = MonitoringConfig(
+                **{
+                    **{f.name: getattr(config, f.name) for f in config.__dataclass_fields__.values()},
+                    **config_dict,
+                }
+            )
 
             mock_cosmos = MagicMock()
             writer = AuditWriter(config=config, cosmos_client=mock_cosmos)

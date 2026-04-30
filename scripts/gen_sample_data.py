@@ -12,12 +12,7 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 6371.0
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
-    a = (
-        math.sin(dlat / 2) ** 2
-        + math.cos(math.radians(lat1))
-        * math.cos(math.radians(lat2))
-        * math.sin(dlon / 2) ** 2
-    )
+    a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
@@ -805,12 +800,9 @@ def main() -> None:
     pop = generate_population_data()
     pop_path = ROOT / "data" / "population" / "sample-population.json"
     pop_path.parent.mkdir(parents=True, exist_ok=True)
-    pop_path.write_text(
-        json.dumps(pop, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
+    pop_path.write_text(json.dumps(pop, indent=2, ensure_ascii=False), encoding="utf-8")
     print(
-        f"Population: {len(pop['facilities'])} facilities, "
-        f"{len(pop['population_density'])} density areas → {pop_path}"
+        f"Population: {len(pop['facilities'])} facilities, {len(pop['population_density'])} density areas → {pop_path}"
     )
 
 

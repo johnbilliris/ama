@@ -5,6 +5,7 @@ recommendations, and community summary generation.
 
 FRs: FR-025–028
 """
+
 from app.services.ai_analysis_service import AIAnalysisService
 from fastapi import APIRouter
 from pydantic import BaseModel

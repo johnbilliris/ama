@@ -24,6 +24,7 @@ async def list_jurisdictions(request: Request) -> list[dict[str, object]]:
     tenant_id = _get_tenant_id(request)
     logger.info("list_jurisdictions tenant_id=%s", tenant_id)
     from packages.domain.src.domain.seed import bootstrap as _seed_mod
+
     seed_root = Path(_seed_mod.__file__).resolve().parent
     seeds = SeedService().load(seed_root)
     jurisdictions = [Jurisdiction(**item) for item in seeds["jurisdictions"]]

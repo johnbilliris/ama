@@ -30,8 +30,12 @@ class GovernanceRegistryService:
     # --- Audit helper ---
 
     def _audit(
-        self, data_source_id: str, action: str, actor_id: str,
-        details: dict | None = None, related_entity_id: str | None = None,
+        self,
+        data_source_id: str,
+        action: str,
+        actor_id: str,
+        details: dict | None = None,
+        related_entity_id: str | None = None,
     ) -> GovernanceAuditEntry:
         entry = GovernanceAuditEntry(
             audit_entry_id=f"audit-{uuid4().hex}",
@@ -115,7 +119,8 @@ class GovernanceRegistryService:
             )
 
         current = [
-            a for a in self._repo.get_current_assessments(assessment.data_source_id)
+            a
+            for a in self._repo.get_current_assessments(assessment.data_source_id)
             if a.principle == assessment.principle
         ]
         for prev in current:
@@ -123,13 +128,17 @@ class GovernanceRegistryService:
             prev.superseded_by = assessment.assessment_id
             self._repo.save_assessment(prev)
             self._audit(
-                assessment.data_source_id, "assessment_superseded",
-                actor_id, related_entity_id=prev.assessment_id,
+                assessment.data_source_id,
+                "assessment_superseded",
+                actor_id,
+                related_entity_id=prev.assessment_id,
             )
 
         saved = self._repo.save_assessment(assessment)
         self._audit(
-            assessment.data_source_id, "assessment_created", actor_id,
+            assessment.data_source_id,
+            "assessment_created",
+            actor_id,
             {"principle": assessment.principle, "status": assessment.compliance_status},
             related_entity_id=saved.assessment_id,
         )
@@ -171,8 +180,10 @@ class GovernanceRegistryService:
             current = self._repo.get_current_assessments(source.data_source_id)
             if current:
                 self._audit(
-                    source.data_source_id, "rereview_triggered",
-                    actor_id, {"triggered_by": "constitution_amendment"},
+                    source.data_source_id,
+                    "rereview_triggered",
+                    actor_id,
+                    {"triggered_by": "constitution_amendment"},
                 )
                 flagged += 1
         return flagged
@@ -180,7 +191,9 @@ class GovernanceRegistryService:
     # --- Grace period ---
 
     def start_grace_period(
-        self, data_source_id: str, actor_id: str,
+        self,
+        data_source_id: str,
+        actor_id: str,
         grace_hours: int = DEFAULT_GRACE_PERIOD_HOURS,
     ) -> DataSource:
         source = self.get_source(data_source_id)
@@ -190,14 +203,19 @@ class GovernanceRegistryService:
         source.grace_period_end = now + timedelta(hours=grace_hours)
         saved = self._repo.save_source(source)
         self._audit(
-            data_source_id, "grace_period_started", actor_id,
+            data_source_id,
+            "grace_period_started",
+            actor_id,
             {"grace_hours": grace_hours, "expires_at": saved.grace_period_end.isoformat()},
         )
         return saved
 
     def extend_grace_period(
-        self, data_source_id: str, extend_hours: int,
-        actor_id: str, rationale: str = "",
+        self,
+        data_source_id: str,
+        extend_hours: int,
+        actor_id: str,
+        rationale: str = "",
     ) -> DataSource:
         source = self.get_source(data_source_id)
         if source.compliance_status != "compliance_lapsed":
@@ -205,7 +223,9 @@ class GovernanceRegistryService:
         source.grace_period_end = source.grace_period_end + timedelta(hours=extend_hours)
         saved = self._repo.save_source(source)
         self._audit(
-            data_source_id, "grace_period_extended", actor_id,
+            data_source_id,
+            "grace_period_extended",
+            actor_id,
             {
                 "extend_hours": extend_hours,
                 "rationale": rationale,
@@ -248,8 +268,7 @@ class GovernanceRegistryService:
 
         if assignment.role == "primary":
             existing_primary = [
-                a for a in self._repo.get_assignments_for_source(assignment.data_source_id)
-                if a.role == "primary"
+                a for a in self._repo.get_assignments_for_source(assignment.data_source_id) if a.role == "primary"
             ]
             for ep in existing_primary:
                 ep.status = "revoked"
@@ -257,7 +276,9 @@ class GovernanceRegistryService:
 
         saved = self._repo.save_assignment(assignment)
         self._audit(
-            assignment.data_source_id, "agent_assigned", actor_id,
+            assignment.data_source_id,
+            "agent_assigned",
+            actor_id,
             {"agent": assignment.agent_name, "role": assignment.role},
             related_entity_id=saved.assignment_id,
         )
@@ -277,14 +298,19 @@ class GovernanceRegistryService:
             existing.status = "deprecated"
             self._repo.save_chain(existing)
             self._audit(
-                chain.data_source_id, "handoff_deprecated",
-                actor_id, related_entity_id=existing.chain_id,
+                chain.data_source_id,
+                "handoff_deprecated",
+                actor_id,
+                related_entity_id=existing.chain_id,
             )
 
         saved = self._repo.save_chain(chain)
         self._audit(
-            chain.data_source_id, "handoff_defined", actor_id,
-            {"steps": len(chain.steps)}, related_entity_id=saved.chain_id,
+            chain.data_source_id,
+            "handoff_defined",
+            actor_id,
+            {"steps": len(chain.steps)},
+            related_entity_id=saved.chain_id,
         )
         self._derive_governance_status(chain.data_source_id)
         return saved
@@ -318,13 +344,17 @@ class GovernanceRegistryService:
     def set_precedence(self, precedence: FunctionalDomainPrecedence, actor_id: str) -> FunctionalDomainPrecedence:
         saved = self._repo.save_precedence(precedence)
         self._audit(
-            precedence.primary_data_source_id, "precedence_set", actor_id,
+            precedence.primary_data_source_id,
+            "precedence_set",
+            actor_id,
             {"hazard_type": precedence.hazard_type, "jurisdiction": precedence.jurisdiction_id},
         )
         return saved
 
     def list_precedence(
-        self, hazard_type: str | None = None, jurisdiction_id: str | None = None,
+        self,
+        hazard_type: str | None = None,
+        jurisdiction_id: str | None = None,
     ) -> list[FunctionalDomainPrecedence]:
         return self._repo.list_precedence(hazard_type, jurisdiction_id)
 
@@ -379,8 +409,11 @@ class GovernanceRegistryService:
     # --- Audit trail ---
 
     def get_audit_trail(
-        self, data_source_id: str, action: str | None = None,
-        from_dt: datetime | None = None, to_dt: datetime | None = None,
+        self,
+        data_source_id: str,
+        action: str | None = None,
+        from_dt: datetime | None = None,
+        to_dt: datetime | None = None,
     ) -> list[GovernanceAuditEntry]:
         return self._repo.get_audit_trail(data_source_id, action, from_dt, to_dt)
 

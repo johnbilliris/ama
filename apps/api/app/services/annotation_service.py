@@ -86,4 +86,3 @@ class AnnotationService:
         if ann.payload.get("author_oid") != requesting_user_oid:
             raise PermissionError("annotation_author_only")
         self._events.delete_event(tenant_id, ann.id)
-

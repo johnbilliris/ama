@@ -41,9 +41,7 @@ class TestCycloneAlertScenario:
     @patch("communication.telemetry.pipeline_span")
     @patch("communication.telemetry.CustomEventEmitter")
     @patch("communication.telemetry.metrics")
-    def test_cyclone_pipeline_produces_alert(
-        self, mock_metrics, mock_emitter, mock_span, mock_llm
-    ):
+    def test_cyclone_pipeline_produces_alert(self, mock_metrics, mock_emitter, mock_span, mock_llm):
         mock_span.return_value.__enter__ = MagicMock()
         mock_span.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -68,9 +66,7 @@ class TestCycloneAlertScenario:
     @patch("communication.telemetry.pipeline_span")
     @patch("communication.telemetry.CustomEventEmitter")
     @patch("communication.telemetry.metrics")
-    def test_cyclone_alert_has_en_au_content(
-        self, mock_metrics, mock_emitter, mock_span, mock_llm
-    ):
+    def test_cyclone_alert_has_en_au_content(self, mock_metrics, mock_emitter, mock_span, mock_llm):
         mock_span.return_value.__enter__ = MagicMock()
         mock_span.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -90,9 +86,7 @@ class TestCycloneAlertScenario:
     @patch("communication.telemetry.pipeline_span")
     @patch("communication.telemetry.CustomEventEmitter")
     @patch("communication.telemetry.metrics")
-    def test_cyclone_multiple_languages_requested(
-        self, mock_metrics, mock_emitter, mock_span, mock_llm
-    ):
+    def test_cyclone_multiple_languages_requested(self, mock_metrics, mock_emitter, mock_span, mock_llm):
         mock_span.return_value.__enter__ = MagicMock()
         mock_span.return_value.__exit__ = MagicMock(return_value=False)
 
@@ -113,9 +107,7 @@ class TestCycloneAlertScenario:
     @patch("communication.telemetry.pipeline_span")
     @patch("communication.telemetry.CustomEventEmitter")
     @patch("communication.telemetry.metrics")
-    def test_cyclone_zone1_immediate_high_priority(
-        self, mock_metrics, mock_emitter, mock_span, mock_llm
-    ):
+    def test_cyclone_zone1_immediate_high_priority(self, mock_metrics, mock_emitter, mock_span, mock_llm):
         """Zone 1 maps to urgency=immediate, priority=high."""
         mock_span.return_value.__enter__ = MagicMock()
         mock_span.return_value.__exit__ = MagicMock(return_value=False)
@@ -143,9 +135,7 @@ class TestCycloneAlertScenario:
     @patch("communication.telemetry.pipeline_span")
     @patch("communication.telemetry.CustomEventEmitter")
     @patch("communication.telemetry.metrics")
-    def test_cyclone_approval_workflow_engaged(
-        self, mock_metrics, mock_emitter, mock_span, mock_llm
-    ):
+    def test_cyclone_approval_workflow_engaged(self, mock_metrics, mock_emitter, mock_span, mock_llm):
         """After pipeline processing, alert status is pending_review (approval engaged)."""
         mock_span.return_value.__enter__ = MagicMock()
         mock_span.return_value.__exit__ = MagicMock(return_value=False)

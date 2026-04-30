@@ -53,9 +53,7 @@ class TenantMiddleware(BaseHTTPMiddleware):
                 candidate = parts[3]  # /api/simulations/{tenantId}/...
                 if candidate.startswith("sim-"):
                     if self._simulation_repo:
-                        is_member = await self._simulation_repo.is_participant(
-                            candidate, principal.subject
-                        )
+                        is_member = await self._simulation_repo.is_participant(candidate, principal.subject)
                         if not is_member:
                             logger.warning(
                                 "User %s not a participant of %s",

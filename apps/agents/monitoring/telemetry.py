@@ -55,31 +55,49 @@ _meter = _get_meter()
 
 # LLM metrics (spec-014)
 llm_call_count = _meter.create_counter(
-    "llm.call.count", description="Total LLM API calls", unit="calls",
+    "llm.call.count",
+    description="Total LLM API calls",
+    unit="calls",
 )
 llm_call_duration = _meter.create_histogram(
-    "llm.call.duration_ms", description="LLM call latency", unit="ms",
+    "llm.call.duration_ms",
+    description="LLM call latency",
+    unit="ms",
 )
 llm_tokens_input = _meter.create_counter(
-    "llm.tokens.input", description="Cumulative input tokens consumed", unit="tokens",
+    "llm.tokens.input",
+    description="Cumulative input tokens consumed",
+    unit="tokens",
 )
 llm_tokens_output = _meter.create_counter(
-    "llm.tokens.output", description="Cumulative output tokens consumed", unit="tokens",
+    "llm.tokens.output",
+    description="Cumulative output tokens consumed",
+    unit="tokens",
 )
 llm_fallback_count = _meter.create_counter(
-    "llm.fallback.count", description="LLM fallback events", unit="events",
+    "llm.fallback.count",
+    description="LLM fallback events",
+    unit="events",
 )
 llm_error_count = _meter.create_counter(
-    "llm.error.count", description="LLM error events", unit="events",
+    "llm.error.count",
+    description="LLM error events",
+    unit="events",
 )
 llm_circuit_breaker_state_change = _meter.create_counter(
-    "llm.circuit_breaker.state_change", description="Circuit breaker state transitions", unit="events",
+    "llm.circuit_breaker.state_change",
+    description="Circuit breaker state transitions",
+    unit="events",
 )
 llm_budget_exceeded = _meter.create_counter(
-    "llm.budget.exceeded", description="Monthly budget threshold breaches", unit="events",
+    "llm.budget.exceeded",
+    description="Monthly budget threshold breaches",
+    unit="events",
 )
 llm_confidence_below_threshold = _meter.create_counter(
-    "llm.confidence.below_threshold", description="Outputs flagged for human review", unit="events",
+    "llm.confidence.below_threshold",
+    description="Outputs flagged for human review",
+    unit="events",
 )
 
 # ---------------------------------------------------------------------------
@@ -93,13 +111,19 @@ _me_metrics: dict[str, float] = {
 }
 
 me_framework_completion = _meter.create_counter(
-    "me.framework.completion", description="M&E framework completion events", unit="events",
+    "me.framework.completion",
+    description="M&E framework completion events",
+    unit="events",
 )
 me_indicator_collection = _meter.create_counter(
-    "me.indicator.collection", description="Indicator data collection events", unit="events",
+    "me.indicator.collection",
+    description="Indicator data collection events",
+    unit="events",
 )
 me_outcome_achievement = _meter.create_counter(
-    "me.outcome.achievement", description="Outcome achievement evaluations", unit="events",
+    "me.outcome.achievement",
+    description="Outcome achievement evaluations",
+    unit="events",
 )
 
 

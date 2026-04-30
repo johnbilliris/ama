@@ -68,19 +68,25 @@ class RiverGaugePipeline(IngestionPipelineBase):
                     vdata = vresp.json()
                     readings = vdata[0].get("data", []) if vdata else []
                     for reading in readings[-5:]:
-                        payloads.append({
-                            "observations": {"data": [{
-                                "timestamp": reading[0],
-                                "value": reading[1],
-                                "quality": reading[2] if len(reading) > 2 else "",
-                                "gauge_id": station_no,
-                                "station_name": station_name,
-                            }]},
-                            "data_source_id": "bom-river-gauges",
-                            "source_kind": "sensor",
-                            "source_uri": self._endpoint_url,
-                            "collection_method": "sensor_network",
-                        })
+                        payloads.append(
+                            {
+                                "observations": {
+                                    "data": [
+                                        {
+                                            "timestamp": reading[0],
+                                            "value": reading[1],
+                                            "quality": reading[2] if len(reading) > 2 else "",
+                                            "gauge_id": station_no,
+                                            "station_name": station_name,
+                                        }
+                                    ]
+                                },
+                                "data_source_id": "bom-river-gauges",
+                                "source_kind": "sensor",
+                                "source_uri": self._endpoint_url,
+                                "collection_method": "sensor_network",
+                            }
+                        )
             except Exception as exc:
                 logger.warning("Failed to fetch ts_id %s for station %s: %s", ts_id, station_no, exc)
 

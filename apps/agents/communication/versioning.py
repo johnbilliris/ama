@@ -61,7 +61,9 @@ class VersionCounter:
             except VersionConflictError:
                 logger.warning(
                     "Version conflict on attempt %d/%d for %s",
-                    attempt, max_retries, counter_id,
+                    attempt,
+                    max_retries,
+                    counter_id,
                 )
                 if attempt < max_retries:
                     jitter = random.uniform(0.05, 0.2) * attempt
@@ -70,7 +72,8 @@ class VersionCounter:
         # Exhausted retries — fallback
         logger.error(
             "All %d OCC retries exhausted for %s; using fallback",
-            max_retries, counter_id,
+            max_retries,
+            counter_id,
         )
         return self._fallback_version(counter_id, incident_id)
 
@@ -157,15 +160,16 @@ class VersionCounter:
                 current_status = doc.get("status", "")
                 # Only supersede active versions
                 if current_status in (
-                    "delivered", "partially_delivered", "approved",
-                    "pending_review", "delivering",
+                    "delivered",
+                    "partially_delivered",
+                    "approved",
+                    "pending_review",
+                    "delivering",
                 ):
                     doc["status"] = "superseded"
                     doc["updated_at"] = datetime.now(UTC).isoformat()
                     self._container.upsert_item(body=doc)
-                    logger.info(
-                        "Superseded alert %s (was %s)", previous_alert_id, current_status
-                    )
+                    logger.info("Superseded alert %s (was %s)", previous_alert_id, current_status)
                     return True
             except Exception:
                 logger.warning("Failed to supersede %s", previous_alert_id)
@@ -237,10 +241,7 @@ class VersionCounter:
             return []
 
         try:
-            query = (
-                "SELECT * FROM c WHERE c.incident_id = @incident_id "
-                "ORDER BY c.version ASC"
-            )
+            query = "SELECT * FROM c WHERE c.incident_id = @incident_id ORDER BY c.version ASC"
             results = list(
                 self._container.query_items(
                     query=query,

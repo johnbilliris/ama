@@ -56,6 +56,7 @@ def create_pipeline(config: IngestionPipelineConfig, **extra_kwargs: Any) -> Any
 
     module_path, class_name = entry
     from importlib import import_module
+
     mod = import_module(module_path)
     cls = getattr(mod, class_name)
 

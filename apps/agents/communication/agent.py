@@ -161,13 +161,10 @@ def create_app(
 
         operational = {
             "pending_approvals_count": (
-                app.state.approval_workflow.get_pending_count()
-                if app.state.approval_workflow else 0
+                app.state.approval_workflow.get_pending_count() if app.state.approval_workflow else 0
             ),
             "active_deliveries_count": 0,
-            "processing_queue_depth": (
-                pipeline_obj.processed_count if pipeline_obj else 0
-            ),
+            "processing_queue_depth": (pipeline_obj.processed_count if pipeline_obj else 0),
             "audit_store": audit_status,
             "dedup_cache_size": 0,
         }
@@ -448,12 +445,8 @@ if __name__ == "__main__":
         logger.warning("Template directory not found, using no template loader")
         _template_loader = None
 
-    _deduplicator = HandoffDeduplicator(
-        window_minutes=_config.handoff_dedup_window_minutes
-    )
-    _translator = MultilingualTranslator(
-        config=_config, template_loader=_template_loader
-    )
+    _deduplicator = HandoffDeduplicator(window_minutes=_config.handoff_dedup_window_minutes)
+    _translator = MultilingualTranslator(config=_config, template_loader=_template_loader)
     _segmenter = AudienceSegmenter(config=_config)
     _version_counter = VersionCounter(config=_config)
     _audit_writer = AuditWriter(config=_config)

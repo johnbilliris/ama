@@ -16,21 +16,15 @@ class TestRollbackScriptExists:
     """Validate rollback script exists and is properly structured."""
 
     def test_rollback_script_file_exists(self, rollback_script_path):
-        assert rollback_script_path.exists(), (
-            f"Rollback script not found at {rollback_script_path}"
-        )
+        assert rollback_script_path.exists(), f"Rollback script not found at {rollback_script_path}"
 
     def test_rollback_script_has_shebang(self, rollback_script_path):
         content = rollback_script_path.read_text(encoding="utf-8")
-        assert content.startswith("#!/usr/bin/env bash"), (
-            "Rollback script must start with #!/usr/bin/env bash"
-        )
+        assert content.startswith("#!/usr/bin/env bash"), "Rollback script must start with #!/usr/bin/env bash"
 
     def test_rollback_script_has_strict_mode(self, rollback_script_path):
         content = rollback_script_path.read_text(encoding="utf-8")
-        assert "set -euo pipefail" in content, (
-            "Rollback script must use 'set -euo pipefail'"
-        )
+        assert "set -euo pipefail" in content, "Rollback script must use 'set -euo pipefail'"
 
 
 class TestRollbackScriptArguments:
@@ -58,9 +52,7 @@ class TestRollbackScriptArguments:
 
     def test_script_accepts_revision_ingestion_flag(self, rollback_script_path):
         content = rollback_script_path.read_text(encoding="utf-8")
-        assert "--revision-ingestion" in content, (
-            "Script must accept --revision-ingestion flag"
-        )
+        assert "--revision-ingestion" in content, "Script must accept --revision-ingestion flag"
 
     def test_script_accepts_revision_web_flag(self, rollback_script_path):
         content = rollback_script_path.read_text(encoding="utf-8")
@@ -107,9 +99,7 @@ class TestRollbackValidation:
 
     def test_validates_az_cli_availability(self, rollback_script_path):
         content = rollback_script_path.read_text(encoding="utf-8")
-        assert "command -v az" in content or "which az" in content, (
-            "Script must check for Azure CLI availability"
-        )
+        assert "command -v az" in content or "which az" in content, "Script must check for Azure CLI availability"
 
     def test_validates_resource_group_required(self, rollback_script_path):
         content = rollback_script_path.read_text(encoding="utf-8")
@@ -146,9 +136,7 @@ class TestRollbackFirstRunBootstrap:
     def test_first_run_exits_zero(self, rollback_script_path):
         content = rollback_script_path.read_text(encoding="utf-8")
         # There should be a path where first deployment → exit 0
-        assert "bootstrap" in content.lower() and "exit 0" in content, (
-            "First-run bootstrap must exit with code 0"
-        )
+        assert "bootstrap" in content.lower() and "exit 0" in content, "First-run bootstrap must exit with code 0"
 
 
 class TestRollbackOutputFormat:
@@ -168,9 +156,7 @@ class TestRollbackOutputFormat:
 
     def test_health_check_in_script(self, rollback_script_path):
         content = rollback_script_path.read_text(encoding="utf-8")
-        assert "health" in content.lower(), (
-            "Script must include post-rollback health checks"
-        )
+        assert "health" in content.lower(), "Script must include post-rollback health checks"
 
     def test_all_four_services_checked(self, rollback_script_path):
         """Verify all 4 service health endpoints are checked."""

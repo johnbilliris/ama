@@ -40,9 +40,7 @@ async def require_simulation_participant(
         return principal
     if principal.subject in getattr(tenant, "participants", []):
         return principal
-    raise PermissionError(
-        f"User {principal.subject} is not a participant of simulation {tenant_id}"
-    )
+    raise PermissionError(f"User {principal.subject} is not a participant of simulation {tenant_id}")
 
 
 def build_tenant_context(principal: AuthenticatedPrincipal, tenant_id: str = "live") -> TenantContext:

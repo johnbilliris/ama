@@ -33,17 +33,19 @@ class BomRadarPipeline(IngestionPipelineBase):
             new_files = [f for f in png_files if f not in self._known_files]
 
             for filename in new_files[:20]:
-                payloads.append({
-                    "data_source_id": "bom-radar",
-                    "source_name": "Bureau of Meteorology — Radar",
-                    "product_type": "radar",
-                    "product_code": filename.split(".")[0] if "." in filename else filename,
-                    "file_format": "png",
-                    "source_uri": f"ftp://ftp.bom.gov.au/anon/gen/radar/{filename}",
-                    "timestamp": filename,
-                    "collection_method": "api_pull",
-                    "source_kind": "sensor",
-                })
+                payloads.append(
+                    {
+                        "data_source_id": "bom-radar",
+                        "source_name": "Bureau of Meteorology — Radar",
+                        "product_type": "radar",
+                        "product_code": filename.split(".")[0] if "." in filename else filename,
+                        "file_format": "png",
+                        "source_uri": f"ftp://ftp.bom.gov.au/anon/gen/radar/{filename}",
+                        "timestamp": filename,
+                        "collection_method": "api_pull",
+                        "source_kind": "sensor",
+                    }
+                )
                 self._known_files.add(filename)
             ftp.quit()
         except Exception as exc:

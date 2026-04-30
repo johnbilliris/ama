@@ -38,7 +38,9 @@ class TestContentSafetyCircuitBreaker:
             return counter[0]
 
         cb = ContentSafetyCircuitBreaker(
-            trip_threshold=1, cooldown_seconds=10.0, clock=mock_clock,
+            trip_threshold=1,
+            cooldown_seconds=10.0,
+            clock=mock_clock,
         )
         cb.record_failure()
         assert cb.state == "open"
@@ -55,7 +57,9 @@ class TestContentSafetyCircuitBreaker:
             return counter[0]
 
         cb = ContentSafetyCircuitBreaker(
-            trip_threshold=1, cooldown_seconds=5.0, clock=mock_clock,
+            trip_threshold=1,
+            cooldown_seconds=5.0,
+            clock=mock_clock,
         )
         cb.record_failure()
         counter[0] = 10.0
@@ -102,7 +106,8 @@ class TestContentSafetyValidator:
 
     def test_language_mismatch_fails(self, validator):
         result = validator.validate(
-            text="这是中文", expected_language="en-AU",
+            text="这是中文",
+            expected_language="en-AU",
         )
         assert not result.passed
         assert result.reason == "language_mismatch"

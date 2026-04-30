@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 _bearer_scheme = HTTPBearer(auto_error=False)
 
+
 def _get_env() -> tuple[str, str, str, str]:
     """Read environment variables at call time (testable with monkeypatch)."""
     return (
@@ -41,7 +42,10 @@ def _log_auth_failure(request: Request, reason: str) -> None:
 
 
 def _log_auth_forbidden(
-    request: Request, identity: str, roles: list[str], required_role: str,
+    request: Request,
+    identity: str,
+    roles: list[str],
+    required_role: str,
 ) -> None:
     """Structured security audit log for authorization failures."""
     logger.warning(

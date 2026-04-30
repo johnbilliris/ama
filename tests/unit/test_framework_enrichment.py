@@ -9,6 +9,7 @@ Tests cover:
 - PPRR phases and hazard types use valid controlled vocab values
 - API serialization includes all new fields
 """
+
 import json
 from pathlib import Path
 
@@ -69,30 +70,22 @@ class TestControlledVocabulary:
     def test_pprr_phases_use_valid_values(self, frameworks):
         for fw in frameworks:
             for phase in fw.pprr_phases:
-                assert phase in VALID_PPRR, (
-                    f"{fw.framework_id}: pprr_phase '{phase}' not in {VALID_PPRR}"
-                )
+                assert phase in VALID_PPRR, f"{fw.framework_id}: pprr_phase '{phase}' not in {VALID_PPRR}"
 
     def test_hazard_types_use_valid_values(self, frameworks):
         for fw in frameworks:
             for ht in fw.hazard_types:
-                assert ht in VALID_INCIDENT, (
-                    f"{fw.framework_id}: hazard_type '{ht}' not in valid IncidentType"
-                )
+                assert ht in VALID_INCIDENT, f"{fw.framework_id}: hazard_type '{ht}' not in valid IncidentType"
 
     def test_framework_type_is_valid(self, frameworks):
         valid_types = {"aiims", "agency_specific", "jurisdictional_policy", "communications", "other"}
         for fw in frameworks:
-            assert fw.framework_type in valid_types, (
-                f"{fw.framework_id}: framework_type '{fw.framework_type}' invalid"
-            )
+            assert fw.framework_type in valid_types, f"{fw.framework_id}: framework_type '{fw.framework_type}' invalid"
 
     def test_status_is_valid(self, frameworks):
         valid_statuses = {"active", "retired", "draft"}
         for fw in frameworks:
-            assert fw.status in valid_statuses, (
-                f"{fw.framework_id}: status '{fw.status}' invalid"
-            )
+            assert fw.status in valid_statuses, f"{fw.framework_id}: status '{fw.status}' invalid"
 
 
 class TestReferentialIntegrity:
@@ -108,11 +101,7 @@ class TestReferentialIntegrity:
         assert broken == [], f"Broken related_framework_ids refs: {broken}"
 
     def test_no_self_referencing_related(self, frameworks):
-        self_refs = [
-            fw.framework_id
-            for fw in frameworks
-            if fw.framework_id in fw.related_framework_ids
-        ]
+        self_refs = [fw.framework_id for fw in frameworks if fw.framework_id in fw.related_framework_ids]
         assert self_refs == [], f"Frameworks referencing themselves: {self_refs}"
 
     def test_custodian_organisation_ids_exist(self, frameworks, org_ids):
@@ -136,11 +125,7 @@ class TestFrameworkAssignments:
 
     def test_all_assignments_reference_valid_frameworks(self, assignment_items, frameworks):
         fw_ids = {fw.framework_id for fw in frameworks}
-        broken = [
-            a["assignment_id"]
-            for a in assignment_items
-            if a["framework_id"] not in fw_ids
-        ]
+        broken = [a["assignment_id"] for a in assignment_items if a["framework_id"] not in fw_ids]
         assert broken == [], f"Assignments referencing missing frameworks: {broken}"
 
     def test_all_assignments_reference_valid_jurisdictions(self, assignment_items, jurisdiction_ids):
@@ -153,10 +138,7 @@ class TestFrameworkAssignments:
 
     def test_every_framework_has_at_least_one_assignment(self, frameworks, assignment_items):
         assigned_fw_ids = {a["framework_id"] for a in assignment_items}
-        unassigned = [
-            fw.framework_id for fw in frameworks
-            if fw.framework_id not in assigned_fw_ids
-        ]
+        unassigned = [fw.framework_id for fw in frameworks if fw.framework_id not in assigned_fw_ids]
         assert unassigned == [], f"Frameworks with no assignments (won't appear in UI): {unassigned}"
 
 
@@ -183,10 +165,17 @@ class TestApiSerialization:
         fw = frameworks[0]
         data = fw.model_dump()
         new_fields = [
-            "abbreviation", "description", "applicable_jurisdiction_ids",
-            "custodian_organisation_id", "pprr_phases", "hazard_types",
-            "activation_triggers", "legislative_basis", "version",
-            "source_uri", "related_framework_ids",
+            "abbreviation",
+            "description",
+            "applicable_jurisdiction_ids",
+            "custodian_organisation_id",
+            "pprr_phases",
+            "hazard_types",
+            "activation_triggers",
+            "legislative_basis",
+            "version",
+            "source_uri",
+            "related_framework_ids",
         ]
         for field in new_fields:
             assert field in data, f"model_dump() missing field: {field}"

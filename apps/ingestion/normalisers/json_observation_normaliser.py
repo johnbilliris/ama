@@ -51,9 +51,7 @@ def normalise_json_observation(raw_payload: dict[str, Any]) -> dict[str, Any]:
             try:
                 numeric = float(value)
                 if numeric < min_val or numeric > max_val:
-                    validation_issues.append(
-                        f"{field}={numeric} outside range [{min_val}, {max_val}]"
-                    )
+                    validation_issues.append(f"{field}={numeric} outside range [{min_val}, {max_val}]")
                     all_valid = False
                 else:
                     validated_values[field] = numeric

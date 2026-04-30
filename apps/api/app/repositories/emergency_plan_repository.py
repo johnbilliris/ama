@@ -45,8 +45,7 @@ class EmergencyPlanRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "EmergencyPlanRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "EmergencyPlanRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -143,13 +142,9 @@ class EmergencyPlanRepository:
                 clauses.append("c.hierarchy_level = @hierarchy_level")
                 params.append({"name": "@hierarchy_level", "value": hierarchy_level})
             query = "SELECT * FROM c WHERE " + " AND ".join(clauses) + " ORDER BY c.hierarchy_level"
-            return list(
-                container.query_items(query, parameters=params, partition_key=region_id)
-            )
+            return list(container.query_items(query, parameters=params, partition_key=region_id))
         # In-memory fallback
-        results = [
-            d for d in self._in_memory.values() if d.get("region_id") == region_id
-        ]
+        results = [d for d in self._in_memory.values() if d.get("region_id") == region_id]
         if hierarchy_level is not None:
             results = [d for d in results if d.get("hierarchy_level") == hierarchy_level]
         return results
@@ -162,11 +157,7 @@ class EmergencyPlanRepository:
         """Cross-partition query for plans in a specific lifecycle state."""
         container = self._get_container()
         if container:
-            query = (
-                "SELECT TOP @limit * FROM c "
-                "WHERE c.lifecycle_state = @lifecycle_state "
-                "ORDER BY c._ts DESC"
-            )
+            query = "SELECT TOP @limit * FROM c WHERE c.lifecycle_state = @lifecycle_state ORDER BY c._ts DESC"
             params: list[dict[str, object]] = [
                 {"name": "@lifecycle_state", "value": lifecycle_state},
                 {"name": "@limit", "value": limit},
@@ -179,8 +170,5 @@ class EmergencyPlanRepository:
                 )
             )
         # In-memory fallback
-        results = [
-            d for d in self._in_memory.values()
-            if d.get("lifecycle_state") == lifecycle_state
-        ]
+        results = [d for d in self._in_memory.values() if d.get("lifecycle_state") == lifecycle_state]
         return results[:limit]

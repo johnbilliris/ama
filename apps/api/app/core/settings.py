@@ -26,9 +26,7 @@ class Settings(BaseSettings):
     simulation_ttl_hours: int = Field(default=72, alias="SIMULATION_TTL_HOURS")
     throttle_threshold_pct: int = Field(default=70, alias="THROTTLE_THRESHOLD_PCT")
     incident_throttle_quota_pct: int = Field(default=20, alias="INCIDENT_THROTTLE_QUOTA_PCT")
-    simulation_archive_retention_days: int = Field(
-        default=90, alias="SIMULATION_ARCHIVE_RETENTION_DAYS"
-    )
+    simulation_archive_retention_days: int = Field(default=90, alias="SIMULATION_ARCHIVE_RETENTION_DAYS")
 
     @classmethod
     def model_validate_strings(cls, value: str | list[str]) -> list[str]:

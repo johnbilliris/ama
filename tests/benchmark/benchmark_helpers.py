@@ -14,9 +14,7 @@ def run_async(coro_fn, *args, **kwargs):
     return asyncio.run(coro_fn(*args, **kwargs))
 
 
-def set_benchmark_metadata(
-    benchmark, *, agent: str, metric_type: str, slo_target_s: float
-) -> None:
+def set_benchmark_metadata(benchmark, *, agent: str, metric_type: str, slo_target_s: float) -> None:
     """Add SLO metadata to benchmark ``extra_info``."""
     benchmark.extra_info["agent"] = agent
     benchmark.extra_info["metric_type"] = metric_type

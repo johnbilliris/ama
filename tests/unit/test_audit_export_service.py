@@ -1,6 +1,5 @@
 """Unit tests for AuditExportService (T049)."""
 
-
 import pytest
 
 from apps.api.app.services.audit_export_service import (
@@ -31,9 +30,12 @@ class TestAuditExportService:
             record_ids=[],
             requested_by="user-001",
         )
-        result = self.service.process_export(job.id, [
-            {"id": "1", "actor": "admin", "action": "registered"},
-        ])
+        result = self.service.process_export(
+            job.id,
+            [
+                {"id": "1", "actor": "admin", "action": "registered"},
+            ],
+        )
         assert result.status == "complete"
         assert result.download_url is not None
 

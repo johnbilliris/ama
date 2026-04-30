@@ -44,8 +44,15 @@ SEVERITY_TARGETS: dict[str, float] = {
 }
 
 JURISDICTION_CODES: list[str] = [
-    "AU-NSW", "AU-VIC", "AU-QLD", "AU-WA",
-    "AU-SA", "AU-TAS", "AU-NT", "AU-ACT", "NZ-AUK",
+    "AU-NSW",
+    "AU-VIC",
+    "AU-QLD",
+    "AU-WA",
+    "AU-SA",
+    "AU-TAS",
+    "AU-NT",
+    "AU-ACT",
+    "NZ-AUK",
 ]
 
 SENSITIVITY_THRESHOLDS: dict[str, float] = {

@@ -123,9 +123,7 @@ class MonitoringAgent:
             tenant_id=tenant_id,
         )
 
-    async def evaluate_escalated_signal(
-        self, envelope: SignalEnvelope
-    ) -> str:
+    async def evaluate_escalated_signal(self, envelope: SignalEnvelope) -> str:
         """Tier 2 LLM-based evaluation with async timeout and fail-safe-CLOSED.
 
         T020 bug fix: uses correct LLM client signature (purpose + prompt).
@@ -223,6 +221,7 @@ class MonitoringAgent:
 # FastAPI application — health endpoint and retrospective association API
 # ---------------------------------------------------------------------------
 
+
 def create_app(
     agent: MonitoringAgent | None = None,
     audit_writer=None,
@@ -289,13 +288,15 @@ def create_app(
         if app.state.freshness_tracker:
             freshness_summary = app.state.freshness_tracker.get_summary_status()
             for ind in app.state.freshness_tracker.get_all_indicators():
-                freshness_sources.append({
-                    "data_source_id": ind.data_source_id,
-                    "source_type": ind.source_type.value,
-                    "status": ind.status.value,
-                    "last_signal_received_at": ind.last_signal_received_at.isoformat(),
-                    "staleness_threshold_minutes": ind.staleness_threshold_minutes,
-                })
+                freshness_sources.append(
+                    {
+                        "data_source_id": ind.data_source_id,
+                        "source_type": ind.source_type.value,
+                        "status": ind.status.value,
+                        "last_signal_received_at": ind.last_signal_received_at.isoformat(),
+                        "staleness_threshold_minutes": ind.staleness_threshold_minutes,
+                    }
+                )
 
         # Processing queue (placeholder — real impl uses Service Bus client)
         queue_depth = 0
@@ -312,10 +313,7 @@ def create_app(
         overall = "healthy"
         if llm_status == "offline" or audit_status == "degraded":
             overall = "unhealthy"
-        elif any(
-            x != "healthy"
-            for x in [llm_status, freshness_summary, queue_status, audit_status]
-        ):
+        elif any(x != "healthy" for x in [llm_status, freshness_summary, queue_status, audit_status]):
             overall = "degraded"
 
         return HealthResponse(
@@ -361,6 +359,7 @@ def create_app(
             # T047: Emit audit record for retrospective association
             if app.state.audit_writer and count > 0:
                 from monitoring.models import DecisionType, MonitoringDecisionRecord
+
                 record = MonitoringDecisionRecord(
                     signal_id=f"association-{request.incident_id}",
                     decision=DecisionType.associated,
@@ -558,7 +557,8 @@ def create_app(
     async def analysis_community_summary(request: CommunitySummaryRequest) -> dict:
         """Generate a plain-language recovery summary for community communication."""
         return app.state.analysis_service.generate_community_summary(
-            request.indicator_data, domain_filter=request.domain_filter,
+            request.indicator_data,
+            domain_filter=request.domain_filter,
         )
 
     return app

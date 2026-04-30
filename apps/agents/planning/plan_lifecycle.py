@@ -30,8 +30,13 @@ TRANSITION_ROLES: dict[tuple[str, str], str] = {
 }
 
 ALL_LIFECYCLE_STATES: list[str] = [
-    "draft", "in_consultation", "under_review", "endorsed",
-    "activated", "post_event_review", "superseded",
+    "draft",
+    "in_consultation",
+    "under_review",
+    "endorsed",
+    "activated",
+    "post_event_review",
+    "superseded",
 ]
 
 
@@ -49,17 +54,13 @@ def validate_plan_transition(
     """
     valid_targets = VALID_PLAN_TRANSITIONS.get(current_state, [])
     if target_state not in valid_targets:
-        return False, (
-            f"Invalid plan transition: '{current_state}' → '{target_state}'. "
-            f"Valid targets: {valid_targets}"
-        )
+        return False, (f"Invalid plan transition: '{current_state}' → '{target_state}'. Valid targets: {valid_targets}")
     required_role = TRANSITION_ROLES.get((current_state, target_state))
     if required_role:
         allowed_roles = required_role.split("_or_")
         if user_role not in allowed_roles:
             return False, (
-                f"Role '{user_role}' cannot perform '{current_state}' → '{target_state}'. "
-                f"Required: {required_role}"
+                f"Role '{user_role}' cannot perform '{current_state}' → '{target_state}'. Required: {required_role}"
             )
     return True, ""
 
