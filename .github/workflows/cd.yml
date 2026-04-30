@@ -88,15 +88,15 @@ jobs:
 
       # Install the toolchain that azd's pre-provision/post-deploy hooks
       # need to build artefacts (apps/web requires pnpm; apps/api & agents
-      # require Python). Pin versions to match ci.yml so dev builds the
-      # same artefacts that ci validated.
-      - uses: actions/setup-node@v5
-        with:
-          node-version: "24"
-
+      # require Python). Order matches ci.yml: pnpm BEFORE setup-node so
+      # node's package-manager-cache feature finds pnpm on PATH.
       - uses: pnpm/action-setup@v5
         with:
           version: 10.6.3
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
 
       - uses: actions/setup-python@v6
         with:
