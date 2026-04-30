@@ -213,11 +213,11 @@ An evaluator/reviewer needs a 60-second walkthrough video, hosted Redoc/Swagger 
 
 ### Functional Requirements — Testing (FR-T##)
 
-- **FR-T01**: CI MUST enforce coverage targets via `pytest --cov` measured over `apps/` and `packages/`, using a **ratcheting strategy**:
+- **FR-T01**: CI MUST enforce coverage targets via `pytest --cov` measured over `apps/` and `packages/`, using a **ratcheting strategy** tracked in [`coverage-phase-tracker.md`](./coverage-phase-tracker.md):
   - **Phase A (immediate)**: CI fails on any coverage *regression* against the previous successful run on the same branch. Baseline (verified): unit ≈ 63%, integration ≈ 40%, contract ≈ 49%.
   - **Phase B (Stream 1 milestone)**: Floors set to baseline (63 / 40 / 49).
-  - **Phase C (closing milestone)**: Floors raised to **80% / 60% / 50%** (the rubric target) once Stream 6 + Stream 7 land enough new unit tests to bridge the gap; the date for Phase C activation is recorded in the milestone tracker.
-  CI uses the active phase's floors via `--cov-fail-under`. The only escape valve is a documented one-time `--coverage-bypass=incident-{id}` requiring Executive + Principal Engineer co-approval and audit logging. *(Rubric 5.1)*
+  - **Phase C (closing milestone)**: Floors raised to **80% / 60% / 50%** (the rubric target) once Stream 6 + Stream 7 land enough new unit tests to bridge the gap.
+  Phase activation is governed by the entries in `coverage-phase-tracker.md`; the active phase is read by CI from the GitHub Actions variable `COVERAGE_PHASE` and applied by `scripts/coverage-ratchet.ps1` via `--cov-fail-under`. The only escape valve is a documented one-time `--coverage-bypass=incident-{id}` requiring Executive + Principal Engineer co-approval and audit logging. *(Rubric 5.1)*
 - **FR-T02**: System MUST add a Web testing tier (Vitest) under `apps/web/__tests__/` and run it in CI. *(Rubric 5.2)*
 - **FR-T03**: System MUST publish chaos / fault-injection tests for the resilience middleware (circuit-breaker, dead-letter) with a dedicated `tests/chaos/` tier. *(Rubric 5.3)*
 - **FR-T04**: System MUST add a security test tier (SAST via CodeQL, IaC scan via Checkov/PSRule for Bicep, secret scan) gated in CI. *(Rubric 5.4)*
@@ -332,11 +332,11 @@ An evaluator/reviewer needs a 60-second walkthrough video, hosted Redoc/Swagger 
 - **SC-002**: Auditor opens the "why fired" panel for any recommendation in < 30 seconds and observes complete provenance (signals, prompt SHA, model version, approval chain, ledger hash).
 - **SC-003**: From a public network, every production data plane (Cosmos, Storage, Azure OpenAI, Content Safety) refuses connections in 100% of probes; from inside the VNet, operator workflows succeed in 100% of probes.
 - **SC-004**: SLO dashboard shows ≥99.9% availability of the public dashboard URL and ≥99.5% agent-handoff success over a rolling 30-day window.
-- **SC-005**: Eval-harness scorecards meet or exceed published baselines for accuracy, hallucination, and safety on the v1 ≥5,000-case dataset; CI gate fails any below-threshold change.
+- **SC-005**: Eval-harness scorecards meet or exceed published baselines for accuracy, hallucination, and safety on the v1 5,000-case dataset (per FR-I02 binding); CI gate fails any below-threshold change.
 - **SC-006**: Region failover drill in staging shifts traffic to Australia Southeast within the published RTO, with 0 data loss beyond the published RPO.
-- **SC-007**: First-time reviewers reach the video walkthrough, API docs, SLO doc, `CONTRIBUTING.md`, `CHANGELOG.md`, and `tests/README.md` in under 60 seconds with zero broken links.
+- **SC-007**: First-time reviewers reach the video walkthrough, hosted API docs (`/api-docs`, FR-DOC02), the consolidated governance hub (`docs/governance-hub/`, FR-DOC03), SLO doc, `CONTRIBUTING.md`, `CHANGELOG.md`, and `tests/README.md` in under 60 seconds with zero broken links.
 - **SC-008**: CI fails any PR introducing a new long-lived secret, an unpinned action, an unformatted file, an illegal cross-package import, or a coverage regression below the published target.
-- **SC-009**: Mean time-to-detect (MTTD) for any SLI burning >50% of monthly error budget is under 5 minutes; mean time-to-page (MTTP) is under 2 minutes after MTTD.
+- **SC-009**: Mean time-to-detect (MTTD) for any SLI burning >50% of monthly error budget is under 5 minutes; mean time-to-page (MTTP) is under 2 minutes after MTTD. Implemented via the burn-rate alerts in `docs/observability/slo.md` + paging routing in FR-O09 (Action Group); verified end-to-end during the quarterly chaos exercise (FR-R05 / T807).
 - **SC-010**: Quarterly LLM rehearsal and biannual chaos exercise are run on schedule with published outcomes for at least one full cycle.
 
 ---

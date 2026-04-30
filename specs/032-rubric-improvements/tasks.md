@@ -5,7 +5,7 @@
 **Spec**: [spec.md](./spec.md) · **Plan**: [plan.md](./plan.md) · **Research**: [research.md](./research.md)
 **Cross-stream prerequisites**: see `plan.md` "Cross-stream hard dependencies".
 
-> Notation: `[P]` = parallelisable with peers in the same phase. `[BLOCKS:Tnnn]` = downstream tasks blocked. Each task lists target files.
+> Notation: `[P]` = parallelisable with peers in the same phase. `[BLOCKS:Tnnn]` = downstream tasks blocked. `[ML]` = must-land for correctness/security in this feature; `[EV]` = evidence/maturity, may slip to a follow-up PR per the Top-5 schedule-risk split in `plan.md`. Each task lists target files.
 
 ## Phase 1 — Setup (T001–T010)
 
@@ -99,14 +99,14 @@ ADRs and spikes that gate downstream work. **Stream 0**.
 - **T405** Bicep: **AI Content Safety Private Endpoint** + private DNS. [→ FR-AI06] · `/infra/modules/content-safety.bicep`
 - **T406** Bicep: **Azure AI Search Private Endpoint** + private DNS. [→ FR-AI01, FR-AI06] · `/infra/modules/ai-search.bicep`
 - **T407** Bicep: Defender for Cloud Standard tier on AKS/Container Apps/Cosmos/Storage/Key Vault/ACR/AI services. [→ FR-S04] · `/infra/modules/defender.bicep`
-- **T408** Bicep: Microsoft Sentinel onto existing Log Analytics workspace + 2 priority analytics rules (`KeyVaultAnomalousAccess`, `CosmosFirewallChange`). Must-land subset per Top-5 split. [→ FR-S04] · `/infra/modules/sentinel.bicep`
+- **T408** [ML] Bicep: Microsoft Sentinel onto existing Log Analytics workspace + 2 priority analytics rules (`KeyVaultAnomalousAccess`, `CosmosFirewallChange`). Must-land subset per Top-5 split; full rule set is `[EV]`. [→ FR-S04] · `/infra/modules/sentinel.bicep`
 - **T409** OPA: `autonomy_dial.rego` policy. [→ FR-AG02] · `/infra/policies/autonomy_dial.rego`
 - **T410** OPA: `killswitch.rego` policy. [→ FR-AG05] · `/infra/policies/killswitch.rego`
 - **T411** OPA: `prompt_signing.rego` policy. [→ FR-AI09] · `/infra/policies/prompt_signing.rego`
 - **T412** OPA: `foundry_carveout.rego` policy + CI hook validates `infra/parameters/foundry-carveout.yaml`. [→ FR-AI03a, NN-2] · `/infra/policies/foundry_carveout.rego`
-- **T413** ADR-032 Stage-2 OIDC migration — dev environment only (BLOCKED until spec 031 prereq met). [→ FR-S02b] · `/.github/actions/setup-oidc-azure/action.yml`, `/.github/workflows/cd.yml`
-- **T414** Stage-2 staging migration (BLOCKED until 7-day dev soak passes). [→ FR-S02b] · same
-- **T415** Stage-2 production migration (BLOCKED until 7-day staging soak passes). [→ FR-S02b] · same
+- **T413** [ML] ADR-032 Stage-2 OIDC migration — dev environment only (BLOCKED until spec 031 prereq met). [→ FR-S02b] · `/.github/actions/setup-oidc-azure/action.yml`, `/.github/workflows/cd.yml`
+- **T414** [EV] Stage-2 staging migration (BLOCKED until 7-day dev soak passes). [→ FR-S02b] · same
+- **T415** [EV] Stage-2 production migration (BLOCKED until 7-day staging soak passes). [→ FR-S02b] · same
 - **T416** Probe job: synthetic public-IP probe of Cosmos / Storage / AOAI / Content Safety / AI Search; assert all reject; results to App Insights. [→ US2 acceptance] · `/.github/workflows/public-network-probe.yml`
 
 ## Phase 7 — User Story 3 (Observability + SLOs) — Stream 5 (T501–T540)
@@ -119,10 +119,10 @@ ADRs and spikes that gate downstream work. **Stream 0**.
 - **T504** Add OTel span attributes for LLM calls, handoffs, audit segments per contracts. [→ FR-O07] · `/apps/agents/llm/llm_client.py`, `/apps/agents/common/resilience/handoff_retry.py`
 - **T505** Bicep: per-tier retention split (audit / operational / security / eval) with separate Log Analytics tables OR retention overrides. [→ FR-O01] · `/infra/modules/monitoring.bicep`
 - **T506** Bicep: Action Group with paging severity routing P1–P5. [→ FR-O09] · `/infra/modules/monitoring.bicep`
-- **T507** Bicep: App Insights availability tests — 1 endpoint × 5 locations (must-land subset). [→ FR-O10] · `/infra/modules/availability-tests.bicep`
-- **T508** Bicep: Workbook JSON — Executive Governance Health (must-land subset). [→ FR-O04] · `/infra/modules/workbooks/executive-governance.json`
-- **T509** Bicep: Workbook JSON — LLM Cost Burn-down (evidence). [→ FR-O04] · `/infra/modules/workbooks/llm-cost.json`
-- **T510** Bicep: Workbook JSON — Agent Flow + Dead-Letter (evidence). [→ FR-O04, FR-O08] · `/infra/modules/workbooks/agent-flow.json`
+- **T507** [ML] Bicep: App Insights availability tests — 1 endpoint × 5 locations (must-land subset). Full 4-endpoint × 5-location matrix is `[EV]`. [→ FR-O10] · `/infra/modules/availability-tests.bicep`
+- **T508** [ML] Bicep: Workbook JSON — Executive Governance Health (must-land subset). [→ FR-O04] · `/infra/modules/workbooks/executive-governance.json`
+- **T509** [EV] Bicep: Workbook JSON — LLM Cost Burn-down (evidence). [→ FR-O04] · `/infra/modules/workbooks/llm-cost.json`
+- **T510** [EV] Bicep: Workbook JSON — Agent Flow + Dead-Letter (evidence). [→ FR-O04, FR-O08] · `/infra/modules/workbooks/agent-flow.json`
 - **T511** Implement `MetricDefinition` registry + customMetric emitter for token cost, dead-letter depth, killswitch lag. [→ FR-O02, FR-O03] · `/apps/api/app/observability/metrics.py`
 - **T512** Wire `llm.cost.aud_micros` + `llm.budget.warning` customMetrics. [→ FR-O03] · `/apps/agents/llm/llm_mixin.py`
 
@@ -138,7 +138,7 @@ ADRs and spikes that gate downstream work. **Stream 0**.
 - **T608** Phi shadow path in `apps/eval-runner` writing `shadow=true` recommendations to Cosmos (BLOCKED until T209 + T017 + T018 land). [→ FR-AI03] · `/apps/eval-runner/shadow.py`
 - **T609** Structured-output validation enforcement: scan all `_generate_with_fallback` call sites; fail any without `response_model`. [→ FR-AI04] · ruff custom rule + `/scripts/validate-structured-output.ps1`
 - **T610** Eval-baseline gates wired to CI (PR check fails any below-threshold change). [→ FR-T09 + spec 030] · `/.github/workflows/eval-pr-gate.yml`
-- **T611** Publish v1 5,000-case dataset subset gating CI (must-land); track ramp to 5,000 in `eval-dataset/v1/manifest.json`. [→ FR-I02] · `/eval-dataset/v1/`
+- **T611** [ML] Publish v1 5,000-case dataset subset gating CI (must-land); track ramp to 5,000 in `eval-dataset/v1/manifest.json`. Full 5,000 cases is `[EV]` (evidence; may slip per Top-5 split). [→ FR-I02] · `/eval-dataset/v1/`
 
 ## Phase 9 — User Story 5 (Multi-agent maturity) — Stream 7 (T701–T740)
 
@@ -166,18 +166,18 @@ ADRs and spikes that gate downstream work. **Stream 0**.
 - **T805** Bicep: Cosmos autoscale max-RU caps per container. [→ FR-R04] · `/infra/main.bicep`
 - **T806** Bicep: Azure Chaos Studio targets + experiments. [→ FR-R05] · `/infra/modules/chaos-studio.bicep`
 - **T807** Add `chaos-quarterly.yml` workflow (staging-only). [→ FR-R05, FR-T03] · `/.github/workflows/chaos-quarterly.yml`
-- **T808** Bicep: Cosmos PITR (continuous backup mode 7-day). [→ FR-D04] · `/infra/main.bicep`
-- **T809** Author DR/BCP runbook (RPO ≤ 15 min, RTO ≤ 60 min, AU Southeast failover steps). [→ FR-D01] · `/docs/operator-runbooks/dr-bcp.md`
-- **T810** Author Cosmos backup/restore runbook. [→ FR-D04] · `/docs/operator-runbooks/cosmos-backup-restore.md`
-- **T811** Author model-rollback runbook (deployment alias flip). [→ FR-AI07] · `/docs/operator-runbooks/model-rollback.md`
-- **T812** Author cost-report template tied to `llm_mixin.py` budget output. [→ FR-D03] · `/docs/operator-runbooks/cost-reporting.md`
+- **T808** [ML] Bicep: Cosmos PITR (continuous backup mode 7-day). [→ FR-D04] · `/infra/main.bicep`
+- **T809** [ML] Author DR/BCP runbook (RPO ≤ 15 min, RTO ≤ 60 min, AU Southeast failover steps). [→ FR-D01] · `/docs/operator-runbooks/dr-bcp.md`
+- **T810** [ML] Author Cosmos backup/restore runbook. [→ FR-D04] · `/docs/operator-runbooks/cosmos-backup-restore.md`
+- **T811** [EV] Author model-rollback runbook (deployment alias flip). [→ FR-AI07] · `/docs/operator-runbooks/model-rollback.md`
+- **T812** [EV] Author cost-report template tied to `llm_mixin.py` budget output. [→ FR-D03] · `/docs/operator-runbooks/cost-reporting.md`
 - **T813** Pin every Container Apps Dockerfile base image to a digest; Dependabot watches Dockerfiles. [→ FR-D02] · `/apps/*/Dockerfile`, `/.github/dependabot.yml`
 - **T814** DORA dashboard publisher GitHub Action — daily aggregator → App Insights customMetrics. [→ FR-C04] · `/.github/workflows/dora-metrics.yml`
 - **T815** Author progressive-delivery doc (post spec 031). [→ FR-C02] · `/docs/ci-cd/progressive-delivery.md`
 - **T816** Author DORA metrics doc. [→ FR-C04] · `/docs/ci-cd/dora-metrics.md`
 - **T817** Document AOAI quota request path. [→ FR-AI08] · `/docs/operator-runbooks/aoai-quota.md`
-- **T818** Add `dr-drill.yml` workflow (manual + scheduled monthly). [→ FR-D01, FR-R05] · `/.github/workflows/dr-drill.yml`
-- **T819** Add canary deployment for new model versions (or migrate equivalent gate into simplified pipeline). [→ FR-AI10] · `/.github/workflows/cd.yml`
+- **T818** [ML] Add `dr-drill.yml` workflow (manual + scheduled monthly). [→ FR-D01, FR-R05] · `/.github/workflows/dr-drill.yml`
+- **T819** [EV] Add canary deployment for new model versions (or migrate equivalent gate into simplified pipeline). [→ FR-AI10] · `/.github/workflows/cd.yml`
 
 ## Phase 11 — User Story 8 (Documentation) — Stream 9 (T901–T930)
 
