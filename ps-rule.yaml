@@ -1,0 +1,85 @@
+# PSRule configuration for the Disaster Response Hub demo platform.
+#
+# Scope: scans Bicep templates under `infra/` against the `Azure.Default` baseline
+# (PSRule.Rules.Azure ≥1.47.0). Invoked by `.github/workflows/security-scan.yml`.
+#
+# Two classes of exemption are encoded below, each with a written rationale so
+# the CI signal stays a useful gate rather than noise. New exemptions require a
+# rationale comment and a reviewer sign-off.
+#
+#   1. Cost-bound dev/cap-ex choices (single subscription, AUE, demo workload).
+#   2. Network-isolation rules that are a planned follow-on (Spec 029 phase 2:
+#      private endpoints + Cosmos/Redis VNet integration).
+#   3. Auth modernisation that requires application-side changes (Entra-only
+#      auth on Cosmos NoSQL / Redis), tracked in the platform backlog.
+
+requires:
+  PSRule.Rules.Azure: '>=1.47.0'
+
+input:
+  pathIgnore:
+    # Modules consumed only by the legacy spec-003 main (not deployed by spec-029).
+    - 'infra/bicep/**'
+    # Compiled ARM artefacts duplicated next to their .bicep sources.
+    - 'infra/main.json'
+    - 'infra/modules/**/*.json'
+    # Data file consumed via loadJsonContent, not a deployable template.
+    - 'infra/abbreviations.json'
+    # Foundry / policy assignment payloads are not Azure resource templates.
+    - 'infra/policies/**'
+    - 'infra/policy/**'
+    - 'infra/parameters/foundry-carveout.*'
+    - 'infra/parameters/jurisdiction-policies/**'
+
+rule:
+  exclude:
+    # ── Cost-bound dev choices ──────────────────────────────────────────────
+    # Premium ACR features. Demo uses Basic SKU — promotion to Standard/Premium
+    # is tracked for prod tenants in spec 029 phase 2.
+    - Azure.ACR.MinSku           # Basic SKU is intentional for the demo.
+    - Azure.ACR.GeoReplica       # Premium-only feature; AUE-only deployment.
+    - Azure.ACR.ExportPolicy     # Property unsupported on Basic SKU.
+    - Azure.ACR.AdminUser        # azd Container Apps deploy uses listCredentials();
+                                 # MI-based ACR pull is a planned migration.
+
+    # Storage replication / firewall. LRS is intentional for cost; firewall is
+    # incompatible with current azd seed/upload flow.
+    - Azure.Storage.UseReplication   # LRS — single-zone is acceptable for demo.
+    - Azure.Storage.Firewall         # Public access gated via app-layer RBAC.
+    - Azure.Storage.LocalAuth        # azd seed scripts use account keys.
+
+    # Cosmos DB cost / arch / auth modernisation.
+    - Azure.Cosmos.AvailabilityZone  # Multi-zone has cost; AUE has 3 zones.
+    - Azure.Cosmos.PublicAccess      # Gated via `restrictNetworkAccess` flag
+                                     # + IP rules; private endpoint is phase 2.
+    - Azure.Cosmos.NoSQLLocalAuth    # Seed/load scripts use connection strings;
+                                     # Entra-only is a planned follow-on.
+
+    # Redis cost / migration / auth.
+    - Azure.Redis.MinSKU             # Basic C0 is intentional for the demo.
+    - Azure.Redis.MigrateAMR         # Migration to Azure Managed Redis is on
+                                     # the roadmap; tracked separately.
+    - Azure.Redis.PublicNetworkAccess  # Public access intentional pre-VNet.
+    - Azure.Redis.FirewallIPRange     # Firewall N/A on Basic SKU.
+    - Azure.Redis.FirewallRuleCount   # Firewall N/A on Basic SKU.
+    - Azure.Redis.LocalAuth           # SDK uses access keys; Entra ID is roadmap.
+    - Azure.Redis.EntraID             # Pending app-side AAD auth migration.
+
+    # AI Services / OpenAI network isolation. Public access + RBAC is the
+    # current posture; private endpoints are spec 029 phase 2.
+    - Azure.AI.PublicAccess
+    - Azure.AI.PrivateEndpoints
+
+    # Container Apps environment hardening (zone redundancy + private VNet).
+    - Azure.ContainerApp.AvailabilityZone  # Cost: zone-redundant CAE env.
+    - Azure.ContainerApp.PublicAccess      # External ingress required for Web/API.
+    - Azure.ContainerApp.RestrictIngress   # API is intentionally public-ingress.
+
+    # App Service plan sizing — Basic B1 is the demo footprint. Production
+    # tenants override via parameter overlay.
+    - Azure.AppService.MinPlan
+    - Azure.AppService.PlanInstanceCount
+    - Azure.AppService.AvailabilityZone
+
+    # Log Analytics workspace replication adds material cost for a demo.
+    - Azure.Log.Replication
