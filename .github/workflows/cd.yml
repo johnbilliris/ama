@@ -141,21 +141,29 @@ jobs:
           SUB=$(az account show --query id -o tsv)
           azd env set AZURE_SUBSCRIPTION_ID "${SUB}"
 
-          role_response=$(az rest --method GET --url "https://graph.microsoft.com/v1.0/directoryRoles?\$filter=displayName%20eq%20'Global%20Administrator'")
-          role_id=$(echo "${role_response}" | jq -r '.value[0].id // empty')
-          if [[ -z "${role_id}" ]]; then
-            echo "::error::Could not resolve the Microsoft Entra Global Administrator directory role. Ensure the deployment identity can read directory roles."
-            exit 1
-          fi
-
           global_admin_ids='[]'
-          members_url="https://graph.microsoft.com/v1.0/directoryRoles/${role_id}/members?\$select=id,userPrincipalName"
-          while [[ -n "${members_url}" ]]; do
-            members_response=$(az rest --method GET --url "${members_url}")
-            page_ids=$(echo "${members_response}" | jq -c '[.value[] | select(."@odata.type" == "#microsoft.graph.user") | .id]')
-            global_admin_ids=$(jq -cn --argjson existing "${global_admin_ids}" --argjson page "${page_ids}" '$existing + $page | unique')
-            members_url=$(echo "${members_response}" | jq -r '."@odata.nextLink" // empty')
-          done
+          graph_error="$(mktemp)"
+          if role_response=$(az rest --method GET --url "https://graph.microsoft.com/v1.0/directoryRoles?\$filter=displayName%20eq%20'Global%20Administrator'" 2>"${graph_error}"); then
+            role_id=$(echo "${role_response}" | jq -r '.value[0].id // empty')
+            if [[ -z "${role_id}" ]]; then
+              echo "::warning::Could not resolve the Microsoft Entra Global Administrator directory role; skipping automatic Cosmos DB reader RBAC for Global Administrator users."
+            else
+              members_url="https://graph.microsoft.com/v1.0/directoryRoles/${role_id}/members?\$select=id,userPrincipalName"
+              while [[ -n "${members_url}" ]]; do
+                if ! members_response=$(az rest --method GET --url "${members_url}" 2>"${graph_error}"); then
+                  echo "::warning::Could not enumerate Global Administrator members via Microsoft Graph; skipping automatic Cosmos DB reader RBAC for Global Administrator users. Grant the deployment identity Microsoft Graph directory role read permissions to enable this."
+                  global_admin_ids='[]'
+                  break
+                fi
+                page_ids=$(echo "${members_response}" | jq -c '[.value[] | select(."@odata.type" == "#microsoft.graph.user") | .id]')
+                global_admin_ids=$(jq -cn --argjson existing "${global_admin_ids}" --argjson page "${page_ids}" '$existing + $page | unique')
+                members_url=$(echo "${members_response}" | jq -r '."@odata.nextLink" // empty')
+              done
+            fi
+          else
+            echo "::warning::Could not read Microsoft Entra directory roles via Microsoft Graph; skipping automatic Cosmos DB reader RBAC for Global Administrator users. Grant the deployment identity Microsoft Graph directory role read permissions to enable this."
+          fi
+          rm -f "${graph_error}"
 
           echo "Resolved $(echo "${global_admin_ids}" | jq 'length') Global Administrator user account(s) for Cosmos DB data-plane reader access."
           azd env set globalAdministratorPrincipalIds "$(echo "${global_admin_ids}" | jq -c '.')"
