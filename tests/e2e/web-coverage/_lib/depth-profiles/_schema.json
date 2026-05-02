@@ -28,11 +28,11 @@
     "safety_critical_workflow": {
       "type": "string",
       "enum": [
-        "approval",
+        "approve",
         "publish",
         "allocate",
         "decline",
-        "queue-sync",
+        "queue-and-sync",
         "escalate",
         "handover",
         "declare",
@@ -41,7 +41,7 @@
         "report-generate",
         "export-evidence"
       ],
-      "description": "Closed enum (12 values) covering FR-029(b) state-changing transitions for write personas (first 9) plus the read-only-persona variants from Pass 4 Q24 (last 3). Generators MUST NOT silently downgrade a read-only persona to a route-only stub — they MUST realise (a) tamper-attempt + read-back, (b) audit-derivative report-generate + export, or (c) briefing-acknowledgement when one of the read-only enum values is selected."
+      "description": "Closed enum (12 values) covering FR-029(b) state-changing transitions for write personas (first 9 — approve|publish|allocate|decline|queue-and-sync|escalate|handover|declare|reopen) plus the read-only-persona variants from Pass 4 Q24 (last 3 — observe-tamper-resist|report-generate|export-evidence). Generators MUST NOT silently downgrade a read-only persona to a route-only stub — they MUST realise (a) tamper-attempt + read-back, (b) audit-derivative report-generate + export, or (c) briefing-acknowledgement when one of the read-only enum values is selected."
     },
     "workflow_steps": {
       "type": "array",

@@ -1,5 +1,7 @@
 # Outcome Evaluator Contract — spec 034
 
+> **Status**: Accepted (cycle-1, /speckit.tasks 2026-02-05). Reviewed and integrated by T173.
+
 This is the human-readable contract for the FR-028 outcome-evaluator and
 audit-list endpoints. It is a Phase-1 contract peer of
 `coverage-trace-row.schema.json` and `persona-fixture.contract.md`,

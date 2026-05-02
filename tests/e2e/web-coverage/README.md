@@ -112,3 +112,17 @@ locator assertions instead.
 
 See `specs/034-webapp-capstone-coverage/quickstart.md` for the full ≤ 30 min
 cold-start walkthrough.
+
+## Cycle-1 contract index
+
+The cycle-1 amendment introduced three Phase-1 contracts under
+`specs/034-webapp-capstone-coverage/contracts/` plus the depth-profile
+schema co-located with this suite. Each is the binding reference for its
+section of the FR-028 / FR-029 wiring:
+
+| Contract                                                                 | Path                                                                          | Read for…                                                                                       |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `outcome-evaluator.contract.md` *(Accepted, cycle-1)*                    | `../../specs/034-webapp-capstone-coverage/contracts/outcome-evaluator.contract.md` | `POST /api/outcomes/sc-{001..005}/evaluate` request/response shape, idempotency tuple, error contract (HTTP 400 `evaluator_not_routable` for `sc-006..sc-011`), `GET /api/audit/list` cycle filter. |
+| `cycle-metadata.schema.json`                                              | `../../specs/034-webapp-capstone-coverage/contracts/cycle-metadata.schema.json`     | JSON-Schema (draft 2020-12) for `_artifacts/cycle-metadata.json` — `cycle_start_ts`, `cycle_id` (UUID v4), `commit_sha` (40-hex), `seed_hash` (SHA-256). Written by the reporter `onBegin`. |
+| `_lib/depth-profiles/_schema.json` *(draft-07, intentionally distinct)* | `_lib/depth-profiles/_schema.json`                                             | One YAML per persona; `safety_critical_workflow` enum closed to 12 values (9 write + 3 read-only). Missing or invalid → `GAP-DEPTH-PROFILE-MISSING-{persona-id}`. |
+| `persona-fixture.contract.md`                                            | `../../specs/034-webapp-capstone-coverage/contracts/persona-fixture.contract.md`    | Dual-guard activation rule (`AMA_TEST_SUPPORT == "1"` AND `environment in {"dev","test"}`) — reused verbatim by the evaluator + audit-list routers. |

@@ -34,6 +34,14 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TESTS_ROOT = REPO_ROOT / "tests" / "e2e" / "web-coverage"
 
+# Cycle-1 reservation (T174): the depth-profile schema validator is loaded by
+# the cycle-1 extension (T176) to translate `*.depth.yaml` into workflow-driven
+# Playwright spec bodies. Path is exposed as a module constant so the cycle-1
+# extension can import it without re-deriving the path. Draft-07 per Q28 —
+# deliberately distinct from the 2020-12 contracts under specs/034-…/contracts/.
+DEPTH_PROFILE_SCHEMA_PATH = TESTS_ROOT / "_lib" / "depth-profiles" / "_schema.json"
+DEPTH_PROFILE_DIR = TESTS_ROOT / "_lib" / "depth-profiles"
+
 
 @dataclass(frozen=True)
 class Spec:
