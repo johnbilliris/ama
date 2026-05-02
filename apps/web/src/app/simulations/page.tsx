@@ -27,29 +27,37 @@ export default function SimulationListPage() {
 
   return (
     <div className="mx-auto max-w-6xl p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Simulation Exercises</h1>
+      <header className="preparedness-header mb-5">
+        <p className="preparedness-kicker">Simulations</p>
+        <h1 className="preparedness-title">Simulation Dashboard</h1>
+        <p className="preparedness-copy">
+          Create, control, and review simulation exercises across tenants —
+          manage warp speeds, pause or archive runs, and inspect historical
+          scenario activity.
+        </p>
+      </header>
+
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded border px-3 py-1"
+            aria-label="Filter by status"
+          >
+            <option value="">All statuses</option>
+            <option value="Active">Active</option>
+            <option value="Paused">Paused</option>
+            <option value="Archived">Archived</option>
+          </select>
+          <span className="ml-2 text-sm text-gray-500">{total} total</span>
+        </div>
         <Link
           href="/simulations/create"
           className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Create Simulation
         </Link>
-      </div>
-
-      <div className="mb-4">
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded border px-3 py-1"
-          aria-label="Filter by status"
-        >
-          <option value="">All statuses</option>
-          <option value="Active">Active</option>
-          <option value="Paused">Paused</option>
-          <option value="Archived">Archived</option>
-        </select>
-        <span className="ml-2 text-sm text-gray-500">{total} total</span>
       </div>
 
       {simulations.length === 0 ? (

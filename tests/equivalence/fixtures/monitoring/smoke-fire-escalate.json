@@ -1,0 +1,24 @@
+{
+  "case_id": "smoke-fire-escalate",
+  "input": {
+    "envelope_id": "smoke-1",
+    "incidentId": "INC001",
+    "category": "fire",
+    "confidenceScore": 0.9,
+    "freshnessScore": 1.0
+  },
+  "legacy_output": {
+    "signal_id": "smoke-1",
+    "decision": "escalated",
+    "confidence": 0.9,
+    "category": "fire",
+    "severity": "high"
+  },
+  "maf_output": {
+    "signal_id": "smoke-1",
+    "decision": "escalated",
+    "confidence": 0.9,
+    "category": "fire",
+    "severity": "high"
+  }
+}

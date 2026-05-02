@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.gov.au/schemas/033/workflow-run.schema.json",
+  "title": "AMA Workflow Run",
+  "description": "Persisted Cosmos document representing one MAF workflow run for one incident. Backs FR-006, FR-007, FR-011, FR-011a, FR-011b, FR-012, FR-012c.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id", "run_id", "incident_id", "status", "is_active", "current_step",
+    "started_at", "last_step_at", "created_by", "tenant_id"
+  ],
+  "properties": {
+    "id":              { "type": "string", "format": "uuid" },
+    "run_id":          { "type": "string", "format": "uuid", "description": "Alias of id; used in API paths." },
+    "incident_id":     { "type": "string", "minLength": 1, "description": "Cosmos partition key." },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Running",
+        "AwaitingApproval",
+        "NeedsOperatorDecision",
+        "Completed",
+        "Failed",
+        "Cancelled",
+        "Superseded"
+      ],
+      "description": "Canonical 7-state model (FR-011b)."
+    },
+    "is_active": {
+      "type": "boolean",
+      "description": "Computed: status in {Running, AwaitingApproval}. Indexed; used for FR-011a uniqueness."
+    },
+    "current_step": {
+      "type": "string",
+      "description": "Name of the agent step currently executing or paused at."
+    },
+    "last_checkpoint_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "FK to checkpoints.id."
+    },
+    "prior_run_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "FK to a previously terminated run for the same incident (FR-011a supersession audit)."
+    },
+    "pending_request_id": {
+      "type": ["string", "null"],
+      "description": "When status = AwaitingApproval, the wrapped MAF RequestInfoEvent.request_id awaiting commander action."
+    },
+    "failure_reason": {
+      "type": ["object", "null"],
+      "description": "Set when status = Failed.",
+      "additionalProperties": false,
+      "properties": {
+        "reason_code":         { "type": "string", "minLength": 1 },
+        "last_completed_step": { "type": "string", "minLength": 1 },
+        "details":             { "type": "string" }
+      },
+      "required": ["reason_code", "last_completed_step"]
+    },
+    "terminal_at":  { "type": ["string", "null"], "format": "date-time", "description": "Set on first transition to a terminal status. Drives the 30-day checkpoint TTL clock (FR-012a)." },
+    "started_at":   { "type": "string", "format": "date-time" },
+    "last_step_at": { "type": "string", "format": "date-time", "description": "Updated on every step boundary; drives the FR-012c 72h watchdog." },
+    "created_by":   { "type": "string", "minLength": 1 },
+    "tenant_id":    { "type": "string", "minLength": 1 }
+  },
+  "allOf": [
+    {
+      "description": "is_active MUST be true iff status is non-terminal.",
+      "if":   { "properties": { "status": { "enum": ["Running", "AwaitingApproval"] } } },
+      "then": { "properties": { "is_active": { "const": true } } },
+      "else": { "properties": { "is_active": { "const": false } } }
+    },
+    {
+      "description": "terminal_at MUST be set iff status is terminal.",
+      "if":   { "properties": { "status": { "enum": ["Completed", "Failed", "Cancelled", "Superseded"] } } },
+      "then": { "required": ["terminal_at"], "properties": { "terminal_at": { "type": "string" } } },
+      "else": { "properties": { "terminal_at": { "type": "null" } } }
+    },
+    {
+      "description": "pending_request_id MUST be set iff status = AwaitingApproval.",
+      "if":   { "properties": { "status": { "const": "AwaitingApproval" } } },
+      "then": { "required": ["pending_request_id"], "properties": { "pending_request_id": { "type": "string", "minLength": 1 } } },
+      "else": { "properties": { "pending_request_id": { "type": "null" } } }
+    },
+    {
+      "description": "failure_reason MUST be set iff status = Failed.",
+      "if":   { "properties": { "status": { "const": "Failed" } } },
+      "then": { "required": ["failure_reason"] },
+      "else": { "properties": { "failure_reason": { "type": "null" } } }
+    }
+  ]
+}

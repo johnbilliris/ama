@@ -37,6 +37,10 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: CodeQL unavailable
+        run: echo "CodeQL analysis for ${{ matrix.language }} is currently not being checked because this repository does not have a GitHub code scanning license."
+
+      # Disabled until the repository has a GitHub code scanning license.
       - name: CodeQL disabled
         run: echo "CodeQL steps are commented out — Code Scanning is not enabled on this repository."
 

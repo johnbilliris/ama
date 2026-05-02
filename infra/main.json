@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "16330405061916542339"
+      "templateHash": "15152565633046335975"
     }
   },
   "parameters": {
@@ -2451,6 +2451,218 @@
               }
             }
           ]
+        }
+      },
+      "dependsOn": [
+        "cosmos",
+        "cosmosDb"
+      ]
+    },
+    "mafWorkflowCosmos": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "maf-workflow-cosmos",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "cosmosAccountName": {
+            "value": "[take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)]"
+          },
+          "databaseName": {
+            "value": "disaster-hub"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "3705969613021154522"
+            }
+          },
+          "parameters": {
+            "cosmosAccountName": {
+              "type": "string",
+              "metadata": {
+                "description": "Existing platform Cosmos account name to attach to."
+              }
+            },
+            "databaseName": {
+              "type": "string",
+              "defaultValue": "ama",
+              "metadata": {
+                "description": "SQL database name. Must already exist (created by audit-store.bicep)."
+              }
+            },
+            "checkpointsDefaultTtlSeconds": {
+              "type": "int",
+              "defaultValue": 2592000,
+              "metadata": {
+                "description": "TTL in seconds for the checkpoints container default; the retention helper re-stamps documents on terminal-state transition (FR-012a)."
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {}
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2024-08-15",
+              "name": "[format('{0}/{1}/{2}', parameters('cosmosAccountName'), parameters('databaseName'), 'workflow_runs')]",
+              "properties": {
+                "resource": {
+                  "id": "workflow_runs",
+                  "partitionKey": {
+                    "paths": [
+                      "/incident_id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "includedPaths": [
+                      {
+                        "path": "/*"
+                      }
+                    ],
+                    "excludedPaths": [
+                      {
+                        "path": "/_etag/?"
+                      }
+                    ],
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/incident_id",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/is_active",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  },
+                  "defaultTtl": -1,
+                  "uniqueKeyPolicy": {
+                    "uniqueKeys": [
+                      {
+                        "paths": [
+                          "/id"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "tags": "[parameters('tags')]"
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2024-08-15",
+              "name": "[format('{0}/{1}/{2}', parameters('cosmosAccountName'), parameters('databaseName'), 'checkpoints')]",
+              "properties": {
+                "resource": {
+                  "id": "checkpoints",
+                  "partitionKey": {
+                    "paths": [
+                      "/run_id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "includedPaths": [
+                      {
+                        "path": "/*"
+                      }
+                    ],
+                    "excludedPaths": [
+                      {
+                        "path": "/_etag/?"
+                      }
+                    ]
+                  },
+                  "defaultTtl": "[parameters('checkpointsDefaultTtlSeconds')]",
+                  "uniqueKeyPolicy": {
+                    "uniqueKeys": [
+                      {
+                        "paths": [
+                          "/run_id",
+                          "/sequence"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "tags": "[parameters('tags')]"
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2024-08-15",
+              "name": "[format('{0}/{1}/{2}', parameters('cosmosAccountName'), parameters('databaseName'), 'tool_registrations')]",
+              "properties": {
+                "resource": {
+                  "id": "tool_registrations",
+                  "partitionKey": {
+                    "paths": [
+                      "/tool_name"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "includedPaths": [
+                      {
+                        "path": "/*"
+                      }
+                    ],
+                    "excludedPaths": [
+                      {
+                        "path": "/_etag/?"
+                      }
+                    ]
+                  },
+                  "defaultTtl": -1,
+                  "uniqueKeyPolicy": {
+                    "uniqueKeys": [
+                      {
+                        "paths": [
+                          "/id"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "tags": "[parameters('tags')]"
+            }
+          ],
+          "outputs": {
+            "workflowRunsContainerName": {
+              "type": "string",
+              "value": "workflow_runs"
+            },
+            "checkpointsContainerName": {
+              "type": "string",
+              "value": "checkpoints"
+            },
+            "toolRegistrationsContainerName": {
+              "type": "string",
+              "value": "tool_registrations"
+            }
+          }
         }
       },
       "dependsOn": [

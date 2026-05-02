@@ -1,3 +1,16 @@
+"""Legacy point-to-point agent handoff primitives.
+
+DEPRECATED — superseded by ``apps/agents/maf_runtime/workflow/builder.py`` +
+the per-agent custom Executors under ``apps/agents/maf_runtime/workflow/executors/``.
+This module is retained for FR-026 fallback during the per-agent cutover
+window. Once SC-001 (legacy paths removed or behind documented fallback flag)
+is satisfied, this module may be deleted.
+
+See the cutover playbook (``docs/aidr/runbooks/maf-cutover-playbook.md``) and
+the rollback runbook (``docs/aidr/runbooks/maf-rollback.md``) for the operator
+flow.
+"""
+
 import asyncio
 import logging
 import time

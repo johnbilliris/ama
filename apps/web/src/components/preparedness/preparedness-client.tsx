@@ -147,7 +147,16 @@ export function PreparednessClient({ initialJurisdictionParam }: PreparednessCli
   }
 
   return (
-    <div className="preparedness-layout">
+    <>
+      <header className="preparedness-header mb-4">
+        <p className="preparedness-kicker">Preparedness</p>
+        <h1 className="preparedness-title">Preparedness Dashboard</h1>
+        <p className="preparedness-copy">
+          Review jurisdiction coverage, assigned operating frameworks, and likely
+          coordination gaps before a live event.
+        </p>
+      </header>
+      <div className="preparedness-layout">
       {/* Left: filter panel matching disaster map pattern */}
       <JurisdictionSelector
         jurisdictions={jurisdictions}
@@ -177,5 +186,6 @@ export function PreparednessClient({ initialJurisdictionParam }: PreparednessCli
         />
       </div>
     </div>
+    </>
   );
 }
