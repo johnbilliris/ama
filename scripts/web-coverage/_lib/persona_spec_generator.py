@@ -632,12 +632,12 @@ test(
     );
     expect(listRes.ok(), "/api/audit/list must succeed").toBe(true);
     const list = (await listRes.json()) as {{
-      entries: Array<{{
+      items: Array<{{
         audit_id: string;
         operator_identity: {{ persona_id: string }};
       }}>;
     }};
-    const match = list.entries.find((row) => row.audit_id === verdict.audit_id);
+    const match = list.items.find((row) => row.audit_id === verdict.audit_id);
     expect(match, "evaluator audit_id must appear in /api/audit/list").toBeTruthy();
     expect(match!.operator_identity.persona_id).toBe(persona.persona_id);
   }},
@@ -731,10 +731,10 @@ test(
     );
     expect(listPrimary.ok(), `${{SECONDARY}} should see ${{PRIMARY}} audit row`).toBe(true);
     const listPrimaryBody = (await listPrimary.json()) as {{
-      entries: Array<{{ audit_id: string }}>;
+      items: Array<{{ audit_id: string }}>;
     }};
     expect(
-      listPrimaryBody.entries.some((r) => r.audit_id === primaryVerdict.audit_id),
+      listPrimaryBody.items.some((r) => r.audit_id === primaryVerdict.audit_id),
       "primary audit_id must surface to secondary",
     ).toBe(true);
   }},

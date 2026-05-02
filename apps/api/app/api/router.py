@@ -93,6 +93,12 @@ if _EVAL_AVAILABLE:
 # otherwise direct requests collapse to a stock 404.
 test_support_guard.log_activation_status()
 if test_support_guard.is_enabled():
+    from app.api.routes.audit_list import router as audit_list_router
+    from app.api.routes.outcome_evaluator import router as outcome_evaluator_router
     from app.api.routes.test_support import router as test_support_router
 
     api_router.include_router(test_support_router)
+    # spec 034 (T178, T179) cycle-1 — outcome evaluator + audit-list under
+    # the same dual-guard. FR-028 + FR-029 routable surface.
+    api_router.include_router(outcome_evaluator_router)
+    api_router.include_router(audit_list_router)
