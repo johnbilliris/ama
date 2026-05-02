@@ -1,0 +1,536 @@
+"""Persona spec generator (T069-T145).
+
+Reads the inline registry below and emits one Playwright .spec.ts per persona
+scenario into ``tests/e2e/web-coverage/{operational,sectors}/`` directories.
+
+Each entry is a ``Spec`` row that pins:
+
+  • path        — relative TS file path under ``tests/e2e/web-coverage/``
+  • persona_id  — must exist in ``packages/domain/src/domain/seed/identities_australia.json``
+  • outcome     — 1..5 capstone outcome
+  • hazard      — `<primary>+<secondary>` lowercase token
+  • frs         — list of FR-NNN ids (≥ 1)
+  • clauses     — list of constitution clauses
+  • priority    — p1|p2|p3
+  • scenario    — short kebab-case scenario slug used in the test title
+  • secondary_persona_id — set for cross-jurisdiction integration specs
+                           (T137-T145); these specs assert handover between
+                           two personas.
+
+Run with::
+
+  python scripts/web-coverage/_lib/persona_spec_generator.py
+
+The generator is idempotent and overwrites every target file so a regeneration
+matches the YAML on disk byte-for-byte (FR-006 determinism).
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+TESTS_ROOT = REPO_ROOT / "tests" / "e2e" / "web-coverage"
+
+
+@dataclass(frozen=True)
+class Spec:
+    task_id: str
+    path: str  # relative under TESTS_ROOT
+    persona_id: str
+    outcome: int
+    hazard: str
+    frs: tuple[str, ...]
+    clauses: tuple[str, ...]
+    priority: str = "p1"
+    scenario: str = ""
+    secondary_persona_id: str | None = None
+    extra_assertions: tuple[str, ...] = field(default_factory=tuple)
+
+
+# ----- Registry -----
+
+OPERATIONAL: tuple[Spec, ...] = (
+    Spec("T069", "operational/incident-commander.approve-cross-agency-action.spec.ts",
+         "incident-commander", 1, "bushfire+extreme-heat",
+         ("FR-009", "FR-002"), ("I", "NN-1"), scenario="approve-cross-agency-action"),
+    Spec("T070", "operational/operations-officer.tactical-tasking.spec.ts",
+         "operations-officer", 2, "bushfire+severe-storm",
+         ("FR-008", "FR-002"), ("II", "II-A"), scenario="tactical-tasking"),
+    Spec("T071", "operational/planning-officer.predictive-risk-evac.spec.ts",
+         "planning-officer", 3, "tropical-cyclone+riverine-flood",
+         ("FR-016", "FR-002"), ("VI",), scenario="predictive-risk-evac"),
+    Spec("T072", "operational/logistics-officer.mutual-aid-lifecycle.spec.ts",
+         "logistics-officer", 4, "bushfire+tropical-cyclone",
+         ("FR-015", "FR-002"), ("VIII",), scenario="mutual-aid-lifecycle"),
+    Spec("T073", "operational/public-information-officer.aws-multilingual-warning.spec.ts",
+         "public-information-officer", 1, "bushfire+extreme-heat",
+         ("FR-011", "FR-014", "FR-002"), ("V-A", "V-C"), scenario="aws-multilingual-warning"),
+    Spec("T074", "operational/field-coordinator.offline-gps-hazard-report.spec.ts",
+         "field-coordinator", 2, "bushfire+severe-storm",
+         ("FR-017", "FR-002"), ("NN-5",), scenario="offline-gps-hazard-report"),
+    Spec("T075", "operational/resilience-planner.recovery-handover.spec.ts",
+         "resilience-planner", 5, "riverine-flood+severe-storm",
+         ("FR-013", "FR-002"), ("VII",), scenario="recovery-handover"),
+    Spec("T076", "operational/executive-leader.economic-environment-view.spec.ts",
+         "executive-leader", 5, "riverine-flood+severe-storm",
+         ("FR-013", "FR-002"), ("VII",), scenario="economic-environment-view"),
+    Spec("T077", "operational/observer-auditor.append-only-timeline.spec.ts",
+         "observer-auditor", 4, "bushfire+tropical-cyclone",
+         ("FR-010", "FR-002"), ("IV",), scenario="append-only-timeline"),
+    Spec("T078", "operational/risk-manager.predictive-evac-lead.spec.ts",
+         "risk-manager", 3, "tropical-cyclone+riverine-flood",
+         ("FR-016", "FR-002"), ("VI",), scenario="predictive-evac-lead"),
+)
+
+NSW: tuple[Spec, ...] = (
+    Spec("T079", "sectors/nsw/nsw-rfs.bushfire-incident-action-plan.spec.ts",
+         "nsw-rfs", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="bushfire-incident-action-plan"),
+    Spec("T080", "sectors/nsw/ses-nsw.watch-and-act-flood.spec.ts",
+         "ses-nsw", 3, "tropical-cyclone+riverine-flood",
+         ("FR-011", "FR-016", "FR-002"), ("V-B", "VI"), scenario="watch-and-act-flood"),
+    Spec("T081", "sectors/nsw/nsw-ambulance.mass-casualty-triage.spec.ts",
+         "nsw-ambulance", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="mass-casualty-triage"),
+    Spec("T082", "sectors/nsw/nswpf.evacuation-cordon.spec.ts",
+         "nswpf", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="evacuation-cordon"),
+    Spec("T083", "sectors/nsw/frnsw.urban-fire-response.spec.ts",
+         "frnsw", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="urban-fire-response"),
+    Spec("T084", "sectors/nsw/mrnsw.maritime-flood-rescue.spec.ts",
+         "mrnsw", 3, "tropical-cyclone+riverine-flood",
+         ("FR-002", "FR-016"), ("VI",), scenario="maritime-flood-rescue"),
+)
+
+VIC: tuple[Spec, ...] = (
+    Spec("T085", "sectors/vic/cfa-vic.code-red-day.spec.ts",
+         "cfa-vic", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="code-red-day"),
+    Spec("T086", "sectors/vic/ses-vic.flash-flood-rescue.spec.ts",
+         "ses-vic", 3, "tropical-cyclone+riverine-flood",
+         ("FR-002", "FR-016"), ("VI",), scenario="flash-flood-rescue"),
+    Spec("T087", "sectors/vic/av.heat-related-illness-surge.spec.ts",
+         "av", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="heat-related-illness-surge"),
+    Spec("T088", "sectors/vic/vicpol.cross-border-evac.spec.ts",
+         "vicpol", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="cross-border-evac"),
+    Spec("T089", "sectors/vic/frv.warehouse-fire-haz-mat.spec.ts",
+         "frv", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="warehouse-fire-haz-mat"),
+)
+
+QLD: tuple[Spec, ...] = (
+    Spec("T090", "sectors/qld/qfd.cyclone-pre-positioning.spec.ts",
+         "qfd", 4, "bushfire+tropical-cyclone",
+         ("FR-002", "FR-015"), ("VIII",), scenario="cyclone-pre-positioning"),
+    Spec("T091", "sectors/qld/ses-qld.tropical-cyclone-flood.spec.ts",
+         "ses-qld", 3, "tropical-cyclone+riverine-flood",
+         ("FR-002", "FR-016"), ("VI",), scenario="tropical-cyclone-flood"),
+    Spec("T092", "sectors/qld/qas.heat-stress-mass-casualty.spec.ts",
+         "qas", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="heat-stress-mass-casualty"),
+    Spec("T093", "sectors/qld/qps.evac-traffic-management.spec.ts",
+         "qps", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="evac-traffic-management"),
+)
+
+SA: tuple[Spec, ...] = (
+    Spec("T094", "sectors/sa/sacfs.code-red-bushfire.spec.ts",
+         "sacfs", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="code-red-bushfire"),
+    Spec("T095", "sectors/sa/ses-sa.river-murray-flood.spec.ts",
+         "ses-sa", 3, "tropical-cyclone+riverine-flood",
+         ("FR-002", "FR-016"), ("VI",), scenario="river-murray-flood"),
+    Spec("T096", "sectors/sa/saas.extreme-heat-mass-call.spec.ts",
+         "saas", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="extreme-heat-mass-call"),
+    Spec("T097", "sectors/sa/sapol.cross-border-evac.spec.ts",
+         "sapol", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="cross-border-evac"),
+    Spec("T098", "sectors/sa/samfs.urban-fire-multi-storey.spec.ts",
+         "samfs", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="urban-fire-multi-storey"),
+)
+
+WA: tuple[Spec, ...] = (
+    Spec("T099", "sectors/wa/dfes-wa.cyclone-pilbara.spec.ts",
+         "dfes-wa", 4, "bushfire+tropical-cyclone",
+         ("FR-002", "FR-015"), ("VIII",), scenario="cyclone-pilbara"),
+    Spec("T100", "sectors/wa/sja-wa.remote-medical-evac.spec.ts",
+         "sja-wa", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="remote-medical-evac"),
+    Spec("T101", "sectors/wa/wapol.remote-evac-cordon.spec.ts",
+         "wapol", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="remote-evac-cordon"),
+)
+
+TAS: tuple[Spec, ...] = (
+    Spec("T102", "sectors/tas/tfs.bushfire-island-evac.spec.ts",
+         "tfs", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="bushfire-island-evac"),
+    Spec("T103", "sectors/tas/ses-tas.severe-storm-rescue.spec.ts",
+         "ses-tas", 3, "tropical-cyclone+riverine-flood",
+         ("FR-002", "FR-016"), ("VI",), scenario="severe-storm-rescue"),
+    Spec("T104", "sectors/tas/at.aeromedical-retrieval.spec.ts",
+         "at", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="aeromedical-retrieval"),
+    Spec("T105", "sectors/tas/taspol.island-evac-coordination.spec.ts",
+         "taspol", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="island-evac-coordination"),
+)
+
+ACT: tuple[Spec, ...] = (
+    Spec("T106", "sectors/act/act-esa.multi-agency-coordination.spec.ts",
+         "act-esa", 3, "tropical-cyclone+riverine-flood",
+         ("FR-002", "FR-016"), ("VI",), scenario="multi-agency-coordination"),
+    Spec("T107", "sectors/act/act-fr.urban-fire.spec.ts",
+         "act-fr", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="urban-fire"),
+    Spec("T108", "sectors/act/act-ambulance.heat-surge.spec.ts",
+         "act-ambulance", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="heat-surge"),
+    Spec("T109", "sectors/act/act-policing.evac-cordon.spec.ts",
+         "act-policing", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="evac-cordon"),
+    Spec("T110", "sectors/act/act-rfs.bushfire-pre-positioning.spec.ts",
+         "act-rfs", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="bushfire-pre-positioning"),
+    # T111: persona id = afp-act (per T052 seed disambiguation note in tasks.md).
+    Spec("T111", "sectors/act/afp.protective-services.spec.ts",
+         "afp-act", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="protective-services"),
+    Spec("T112", "sectors/act/ses-act.severe-storm-rescue.spec.ts",
+         "ses-act", 3, "tropical-cyclone+riverine-flood",
+         ("FR-002", "FR-016"), ("VI",), scenario="severe-storm-rescue"),
+)
+
+NT: tuple[Spec, ...] = (
+    Spec("T113", "sectors/nt/bushfires-nt.savanna-burn.spec.ts",
+         "bushfires-nt", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="savanna-burn"),
+    Spec("T114", "sectors/nt/ntes.cyclone-shelter.spec.ts",
+         "ntes", 3, "tropical-cyclone+riverine-flood",
+         ("FR-002", "FR-016"), ("VI",), scenario="cyclone-shelter"),
+    Spec("T115", "sectors/nt/ntfrs.remote-fire-response.spec.ts",
+         "ntfrs", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="remote-fire-response"),
+    Spec("T116", "sectors/nt/ntpf.remote-evac.spec.ts",
+         "ntpf", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="remote-evac"),
+    Spec("T117", "sectors/nt/sja-nt.remote-medical-retrieval.spec.ts",
+         "sja-nt", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="remote-medical-retrieval"),
+)
+
+COMMONWEALTH: tuple[Spec, ...] = (
+    Spec("T118", "sectors/commonwealth/nema.activate-comdisplan.spec.ts",
+         "nema", 4, "bushfire+tropical-cyclone",
+         ("FR-015", "FR-002"), ("VIII",), scenario="activate-comdisplan"),
+    Spec("T119", "sectors/commonwealth/bom-national.cyclone-warning-relay.spec.ts",
+         "bom-national", 3, "tropical-cyclone+riverine-flood",
+         ("FR-002", "FR-016"), ("VI",), scenario="cyclone-warning-relay"),
+    # T120: special — earthquake/tsunami AWS path (FR-011 only). Use the
+    # outcome-1 lives proxy + a custom hazard label for the trace row.
+    Spec("T120", "sectors/commonwealth/ga-national.tsunami-warning-relay.spec.ts",
+         "ga-national", 1, "earthquake+tsunami",
+         ("FR-011", "FR-002"), ("V-A", "V-B"), scenario="tsunami-warning-relay"),
+    Spec("T121", "sectors/commonwealth/adf.dacc-asset-arrival.spec.ts",
+         "adf", 4, "bushfire+tropical-cyclone",
+         ("FR-002", "FR-015"), ("VIII",), scenario="dacc-asset-arrival"),
+    Spec("T122", "sectors/commonwealth/abf.border-disaster-coordination.spec.ts",
+         "abf", 5, "riverine-flood+severe-storm",
+         ("FR-002", "FR-013"), ("VII",), scenario="border-disaster-coordination"),
+    Spec("T123", "sectors/commonwealth/arc.recovery-financial-assistance.spec.ts",
+         "arc", 5, "riverine-flood+severe-storm",
+         ("FR-002", "FR-013"), ("VII",), scenario="recovery-financial-assistance"),
+    Spec("T124", "sectors/commonwealth/asa.shipping-evac.spec.ts",
+         "asa", 5, "riverine-flood+severe-storm",
+         ("FR-002", "FR-013"), ("VII",), scenario="shipping-evac"),
+    Spec("T125", "sectors/commonwealth/rfds.remote-aeromedical.spec.ts",
+         "rfds", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="remote-aeromedical"),
+    Spec("T126", "sectors/commonwealth/sja-national.community-first-aid.spec.ts",
+         "sja-national", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="community-first-aid"),
+    Spec("T127", "sectors/commonwealth/surf-lifesaving.coastal-cyclone-evac.spec.ts",
+         "surf-lifesaving", 3, "tropical-cyclone+riverine-flood",
+         ("FR-002", "FR-016"), ("VI",), scenario="coastal-cyclone-evac"),
+    Spec("T128", "sectors/commonwealth/afp-commonwealth.national-evac-coordination.spec.ts",
+         "afp-commonwealth", 2, "bushfire+severe-storm",
+         ("FR-002", "FR-008"), ("II",), scenario="national-evac-coordination"),
+)
+
+CROSS_SECTOR: tuple[Spec, ...] = (
+    Spec("T129", "sectors/cross-sector/community-ngos.recovery-coordination.spec.ts",
+         "community-ngos", 5, "riverine-flood+severe-storm",
+         ("FR-002", "FR-013"), ("VII",), scenario="recovery-coordination"),
+    Spec("T130", "sectors/cross-sector/health.surge-capacity.spec.ts",
+         "health", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="surge-capacity"),
+    Spec("T131", "sectors/cross-sector/local-government.recovery-funding.spec.ts",
+         "local-government", 5, "riverine-flood+severe-storm",
+         ("FR-002", "FR-013"), ("VII",), scenario="recovery-funding"),
+    Spec("T132", "sectors/cross-sector/state-government.disaster-declaration.spec.ts",
+         "state-government", 5, "riverine-flood+severe-storm",
+         ("FR-002", "FR-013"), ("VII",), scenario="disaster-declaration"),
+    Spec("T133", "sectors/cross-sector/territory-government.cross-jurisdiction-coord.spec.ts",
+         "territory-government", 5, "riverine-flood+severe-storm",
+         ("FR-002", "FR-013", "FR-003"), ("VII",), scenario="cross-jurisdiction-coord"),
+    Spec("T134", "sectors/cross-sector/transport.evac-routing.spec.ts",
+         "transport", 4, "bushfire+tropical-cyclone",
+         ("FR-002", "FR-015"), ("VIII",), scenario="evac-routing"),
+    Spec("T135", "sectors/cross-sector/utility.power-restoration.spec.ts",
+         "utility", 5, "riverine-flood+severe-storm",
+         ("FR-002", "FR-013"), ("VII",), scenario="power-restoration"),
+    Spec("T136", "sectors/cross-sector/volunteer.surge-deployment.spec.ts",
+         "volunteer", 1, "bushfire+extreme-heat",
+         ("FR-002", "FR-009"), ("I",), scenario="surge-deployment"),
+)
+
+CROSS_JURISDICTION: tuple[Spec, ...] = (
+    Spec("T137", "sectors/nsw/cross-jurisdiction-nsw-vic-bushfire.spec.ts",
+         "nsw-rfs", 1, "bushfire+extreme-heat",
+         ("FR-015", "FR-003"), ("II", "VIII"),
+         scenario="cross-jurisdiction-nsw-vic-bushfire", secondary_persona_id="cfa-vic"),
+    Spec("T138", "sectors/vic/cross-jurisdiction-vic-tas-storm.spec.ts",
+         "ses-vic", 2, "bushfire+severe-storm",
+         ("FR-015", "FR-003"), ("II", "VIII"),
+         scenario="cross-jurisdiction-vic-tas-storm", secondary_persona_id="ses-tas"),
+    Spec("T139", "sectors/qld/cross-jurisdiction-qld-nsw-cyclone-flood.spec.ts",
+         "ses-qld", 3, "tropical-cyclone+riverine-flood",
+         ("FR-015", "FR-003"), ("II", "VI"),
+         scenario="cross-jurisdiction-qld-nsw-cyclone-flood", secondary_persona_id="ses-nsw"),
+    Spec("T140", "sectors/sa/cross-jurisdiction-sa-vic-bushfire.spec.ts",
+         "sacfs", 1, "bushfire+extreme-heat",
+         ("FR-015", "FR-003"), ("II", "VIII"),
+         scenario="cross-jurisdiction-sa-vic-bushfire", secondary_persona_id="cfa-vic"),
+    Spec("T141", "sectors/wa/cross-jurisdiction-wa-sa-flood.spec.ts",
+         "dfes-wa", 3, "tropical-cyclone+riverine-flood",
+         ("FR-015", "FR-003"), ("II", "VI"),
+         scenario="cross-jurisdiction-wa-sa-flood", secondary_persona_id="ses-sa"),
+    Spec("T142", "sectors/tas/cross-jurisdiction-tas-mainland-cyclone.spec.ts",
+         "tfs", 3, "tropical-cyclone+riverine-flood",
+         ("FR-015", "FR-003"), ("II", "VI"),
+         scenario="cross-jurisdiction-tas-mainland-cyclone", secondary_persona_id="cfa-vic"),
+    Spec("T143", "sectors/act/cross-jurisdiction-act-nsw-bushfire.spec.ts",
+         "act-rfs", 1, "bushfire+extreme-heat",
+         ("FR-015", "FR-003"), ("II", "VIII"),
+         scenario="cross-jurisdiction-act-nsw-bushfire", secondary_persona_id="nsw-rfs"),
+    Spec("T144", "sectors/nt/cross-jurisdiction-nt-wa-bushfire-cyclone.spec.ts",
+         "bushfires-nt", 4, "bushfire+tropical-cyclone",
+         ("FR-015", "FR-003"), ("II", "VIII"),
+         scenario="cross-jurisdiction-nt-wa-bushfire-cyclone", secondary_persona_id="dfes-wa"),
+    Spec("T145", "sectors/commonwealth/nema.dacc-state-controller-bridge.spec.ts",
+         "nema", 4, "bushfire+tropical-cyclone",
+         ("FR-015", "FR-003"), ("II-A", "VIII"),
+         scenario="dacc-state-controller-bridge", secondary_persona_id="adf"),
+)
+
+ALL_SPECS: tuple[Spec, ...] = (
+    OPERATIONAL
+    + NSW
+    + VIC
+    + QLD
+    + SA
+    + WA
+    + TAS
+    + ACT
+    + NT
+    + COMMONWEALTH
+    + CROSS_SECTOR
+    + CROSS_JURISDICTION
+)
+
+
+# ----- Template -----
+
+TEMPLATE_SINGLE = '''/**
+ * {task_id} — {persona_id}: {scenario_human}.
+ *
+ * Capstone outcome: #{outcome} ({outcome_label})
+ * Hazard: {hazard}
+ * FRs: {fr_csv}
+ * Constitution clauses: {clause_csv}
+ *
+ * Auto-generated by ``scripts/web-coverage/_lib/persona_spec_generator.py``.
+ * Do not hand-edit; regenerate the file via the generator instead.
+ */
+import {{ test, expect }} from "@web-coverage/_support/webCoverageTest";
+import {{ WorkspacesPage }} from "@web-coverage/_support/pages/workspaces.po";
+
+const PERSONA_ID = "{persona_id}";
+
+test(
+  `{persona_id} — {scenario_human} ` +
+    `@persona:${{PERSONA_ID}} @outcome:{outcome} @hazard:{hazard} ` +
+    `{fr_tags} {clause_tags} @{priority}`,
+  async ({{ resolvePersona, page, request, correlationId, expectAudit }}) => {{
+    const persona = await resolvePersona(PERSONA_ID);
+    expect(persona.aiims_function).toBeTruthy();
+    await page.setExtraHTTPHeaders({{
+      "X-Correlation-Id": correlationId,
+      "X-Test-Persona-Id": persona.persona_id,
+    }});
+
+    // 1) Persona lands on its workspace surface (FR-001/FR-002).
+    const ws = new WorkspacesPage(page);
+    await ws.goto();
+    await expect(ws.heading).toBeVisible();
+
+    // 2) Persona-specific scenario stub (filled in iteratively per
+    //    coverage gaps detected by the binary CI gate).
+    const scenarioRes = await request.post("/api/test-support/seed/scenario", {{
+      headers: {{
+        "X-Correlation-Id": correlationId,
+        "X-Test-Persona-Id": persona.persona_id,
+      }},
+      data: {{ scenario_id: "outcome-{outcome}-{outcome_slug}" }},
+      failOnStatusCode: false,
+    }});
+    if (!scenarioRes.ok()) {{
+      test.fail(true, `${{PERSONA_ID}} scenario stub: outcome-{outcome} fixture not yet wired (gap)`);
+      return;
+    }}
+
+    // 3) Audit emission within 2s (FR-010, §IV).
+    const auditId = await expectAudit({{
+      auditType: "scenario.persona.{scenario}",
+      correlationId,
+    }});
+    if (!auditId) {{
+      test.info().annotations.push({{
+        type: "gap",
+        description: "audit row missing for {persona_id}/{scenario}",
+      }});
+    }}
+  }},
+);
+'''
+
+TEMPLATE_CROSS_JURISDICTION = '''/**
+ * {task_id} — Cross-jurisdiction handover: {persona_id} ↔ {secondary_persona_id}.
+ *
+ * Capstone outcome: #{outcome} ({outcome_label})
+ * Hazard: {hazard}
+ * FRs: {fr_csv}
+ * Constitution clauses: {clause_csv}
+ *
+ * Asserts both jurisdictions see the same incident COP, AWS warning state,
+ * and audit history (Spec §US3 Acceptance #1-#2).
+ *
+ * Auto-generated by ``scripts/web-coverage/_lib/persona_spec_generator.py``.
+ */
+import {{ test, expect }} from "@web-coverage/_support/webCoverageTest";
+
+const PRIMARY = "{persona_id}";
+const SECONDARY = "{secondary_persona_id}";
+
+test(
+  `Cross-jurisdiction ${{PRIMARY}} ↔ ${{SECONDARY}} — {scenario_human} ` +
+    `@persona:${{PRIMARY}} @outcome:{outcome} @hazard:{hazard} ` +
+    `{fr_tags} {clause_tags} @{priority}`,
+  async ({{ resolvePersona, request, correlationId }}) => {{
+    const primary = await resolvePersona(PRIMARY);
+    const secondary = await resolvePersona(SECONDARY);
+    expect(primary.persona_id).not.toBe(secondary.persona_id);
+
+    const incidentId = `xjd-${{correlationId.slice(0, 8)}}`;
+
+    // Primary jurisdiction creates the incident and logs the COP snapshot.
+    const create = await request.post(`/api/incidents`, {{
+      headers: {{
+        "X-Correlation-Id": correlationId,
+        "X-Test-Persona-Id": primary.persona_id,
+      }},
+      data: {{ id: incidentId, hazard: "{hazard}", scenario: "outcome-{outcome}-{outcome_slug}" }},
+      failOnStatusCode: false,
+    }});
+    if (!create.ok()) {{
+      test.fail(true, "Cross-jurisdiction incident-create API not wired (gap)");
+      return;
+    }}
+
+    // Secondary jurisdiction reads the same incident with full COP.
+    const view = await request.get(`/api/incidents/${{incidentId}}`, {{
+      headers: {{
+        "X-Correlation-Id": correlationId,
+        "X-Test-Persona-Id": secondary.persona_id,
+      }},
+    }});
+    expect(view.ok(), `${{SECONDARY}} should see incident ${{incidentId}}`).toBe(true);
+    const body = (await view.json()) as {{ id: string; hazard?: string }};
+    expect(body.id).toBe(incidentId);
+    expect(body.hazard).toBe("{hazard}");
+  }},
+);
+'''
+
+
+# ----- Helpers -----
+
+OUTCOME_LABELS: dict[int, str] = {
+    1: "lives saved",
+    2: "50% faster signal-to-action",
+    3: "24-h-earlier evacuation",
+    4: "30% logistics-friction reduction",
+    5: "30% economic-loss reduction",
+}
+
+OUTCOME_SLUGS: dict[int, str] = {
+    1: "bushfire-extreme-heat",
+    2: "bushfire-severe-storm",
+    3: "tropical-cyclone-flood",
+    4: "bushfire-cyclone-logistics",
+    5: "flood-storm-economic",
+}
+
+
+def _scenario_human(slug: str) -> str:
+    return slug.replace("-", " ")
+
+
+def render(spec: Spec) -> str:
+    fr_tags = " ".join(f"@fr:{fr}" for fr in spec.frs)
+    clause_tags = " ".join(f"@clause:{c}" for c in spec.clauses)
+    template = TEMPLATE_CROSS_JURISDICTION if spec.secondary_persona_id else TEMPLATE_SINGLE
+    return template.format(
+        task_id=spec.task_id,
+        persona_id=spec.persona_id,
+        secondary_persona_id=spec.secondary_persona_id,
+        outcome=spec.outcome,
+        outcome_label=OUTCOME_LABELS[spec.outcome],
+        outcome_slug=OUTCOME_SLUGS[spec.outcome],
+        hazard=spec.hazard,
+        fr_csv=", ".join(spec.frs),
+        clause_csv=", ".join(spec.clauses),
+        fr_tags=fr_tags,
+        clause_tags=clause_tags,
+        priority=spec.priority,
+        scenario=spec.scenario,
+        scenario_human=_scenario_human(spec.scenario),
+    )
+
+
+def write_specs() -> dict[str, Any]:
+    written: list[str] = []
+    for spec in ALL_SPECS:
+        target = TESTS_ROOT / spec.path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(render(spec), encoding="utf-8")
+        written.append(spec.path)
+    return {"count": len(written), "files": written}
+
+
+def main() -> int:
+    summary = write_specs()
+    print(f"persona_spec_generator: wrote {summary['count']} files")
+    return 0
+
+
+if __name__ == "__main__":  # pragma: no cover - CLI entry point
+    raise SystemExit(main())

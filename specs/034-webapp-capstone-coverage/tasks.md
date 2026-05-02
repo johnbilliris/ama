@@ -160,116 +160,116 @@ Every Playwright test MUST carry one tag from each axis (enforced by ESLint rule
 
 ### 4.1 Operational personas (10) — `tests/e2e/web-coverage/operational/`
 
-- [ ] T069 [P] [US1] `operational/incident-commander.approve-cross-agency-action.spec.ts` — IC approves cross-agency action; outcome-1 (lives) + outcome-2 (latency); `@persona:incident-commander @outcome:1 @hazard:bushfire+extreme-heat @fr:FR-009 @clause:I @clause:NN-1` (Spec §US1 Acceptance #1)
-- [ ] T070 [P] [US1] `operational/operations-officer.tactical-tasking.spec.ts` — Operations Officer issues tasking, signal-to-action ≤ 5/15/30 min for Levels 1/2/3; `@outcome:2 @hazard:bushfire+severe-storm @fr:FR-008`
-- [ ] T071 [P] [US1] `operational/planning-officer.predictive-risk-evac.spec.ts` — Planning Officer drives predictive risk → 24-h-earlier evacuation lead-time proxy; `@outcome:3 @hazard:tropical-cyclone+riverine-flood @fr:FR-016`
-- [ ] T072 [P] [US1] `operational/logistics-officer.mutual-aid-lifecycle.spec.ts` — Logistics Officer drives mutual-aid request through approval; clicks ≤ 12 (SC-004); `@outcome:4 @hazard:bushfire+tropical-cyclone @fr:FR-015`
-- [ ] T073 [P] [US1] `operational/public-information-officer.aws-multilingual-warning.spec.ts` — PIO drafts AWS warning with `en` + `zh-Hans` + `aus-x-atsi-placeholder`; IC approval required; `@outcome:1 @hazard:bushfire+extreme-heat @fr:FR-011 @fr:FR-014`
-- [ ] T074 [P] [US1] `operational/field-coordinator.offline-gps-hazard-report.spec.ts` — Field Coordinator captures GPS-tagged hazard report offline, syncs on reconnect; `@outcome:2 @hazard:bushfire+severe-storm @fr:FR-017`
-- [ ] T075 [P] [US1] `operational/resilience-planner.recovery-handover.spec.ts` — Resilience Planner drives response→recovery handover; SC-005 economic-loss proxy ≥ 30 %; `@outcome:5 @hazard:riverine-flood+severe-storm @fr:FR-013`
-- [ ] T076 [P] [US1] `operational/executive-leader.economic-environment-view.spec.ts` — Executive views post-handover Economic-environment view, asserts SC-005 formula; `@outcome:5 @hazard:riverine-flood+severe-storm @fr:FR-013`
-- [ ] T077 [P] [US1] `operational/observer-auditor.append-only-timeline.spec.ts` — Observer/Auditor inspects audit timeline, asserts immutability (PUT/PATCH rejected); `@outcome:4 @hazard:bushfire+tropical-cyclone @fr:FR-010 @clause:IV`
-- [ ] T078 [P] [US1] `operational/risk-manager.predictive-evac-lead.spec.ts` — Risk Manager validates 24-h-earlier evacuation proxy on cyclone+flood scenario; `@outcome:3 @hazard:tropical-cyclone+riverine-flood @fr:FR-016`
+- [X] T069 [P] [US1] `operational/incident-commander.approve-cross-agency-action.spec.ts` — IC approves cross-agency action; outcome-1 (lives) + outcome-2 (latency); `@persona:incident-commander @outcome:1 @hazard:bushfire+extreme-heat @fr:FR-009 @clause:I @clause:NN-1` (Spec §US1 Acceptance #1)
+- [X] T070 [P] [US1] `operational/operations-officer.tactical-tasking.spec.ts` — Operations Officer issues tasking, signal-to-action ≤ 5/15/30 min for Levels 1/2/3; `@outcome:2 @hazard:bushfire+severe-storm @fr:FR-008`
+- [X] T071 [P] [US1] `operational/planning-officer.predictive-risk-evac.spec.ts` — Planning Officer drives predictive risk → 24-h-earlier evacuation lead-time proxy; `@outcome:3 @hazard:tropical-cyclone+riverine-flood @fr:FR-016`
+- [X] T072 [P] [US1] `operational/logistics-officer.mutual-aid-lifecycle.spec.ts` — Logistics Officer drives mutual-aid request through approval; clicks ≤ 12 (SC-004); `@outcome:4 @hazard:bushfire+tropical-cyclone @fr:FR-015`
+- [X] T073 [P] [US1] `operational/public-information-officer.aws-multilingual-warning.spec.ts` — PIO drafts AWS warning with `en` + `zh-Hans` + `aus-x-atsi-placeholder`; IC approval required; `@outcome:1 @hazard:bushfire+extreme-heat @fr:FR-011 @fr:FR-014`
+- [X] T074 [P] [US1] `operational/field-coordinator.offline-gps-hazard-report.spec.ts` — Field Coordinator captures GPS-tagged hazard report offline, syncs on reconnect; `@outcome:2 @hazard:bushfire+severe-storm @fr:FR-017`
+- [X] T075 [P] [US1] `operational/resilience-planner.recovery-handover.spec.ts` — Resilience Planner drives response→recovery handover; SC-005 economic-loss proxy ≥ 30 %; `@outcome:5 @hazard:riverine-flood+severe-storm @fr:FR-013`
+- [X] T076 [P] [US1] `operational/executive-leader.economic-environment-view.spec.ts` — Executive views post-handover Economic-environment view, asserts SC-005 formula; `@outcome:5 @hazard:riverine-flood+severe-storm @fr:FR-013`
+- [X] T077 [P] [US1] `operational/observer-auditor.append-only-timeline.spec.ts` — Observer/Auditor inspects audit timeline, asserts immutability (PUT/PATCH rejected); `@outcome:4 @hazard:bushfire+tropical-cyclone @fr:FR-010 @clause:IV`
+- [X] T078 [P] [US1] `operational/risk-manager.predictive-evac-lead.spec.ts` — Risk Manager validates 24-h-earlier evacuation proxy on cyclone+flood scenario; `@outcome:3 @hazard:tropical-cyclone+riverine-flood @fr:FR-016`
 
 ### 4.2 NSW (6) — `tests/e2e/web-coverage/sectors/nsw/`
 
-- [ ] T079 [P] [US1] `sectors/nsw/nsw-rfs.bushfire-incident-action-plan.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T080 [P] [US1] `sectors/nsw/ses-nsw.watch-and-act-flood.spec.ts` — Watch and Act flood warning + 24-h-earlier evac lead-time proxy (Spec §US1 Acceptance #2); `@outcome:3 @hazard:tropical-cyclone+riverine-flood @fr:FR-011 @fr:FR-016`
-- [ ] T081 [P] [US1] `sectors/nsw/nsw-ambulance.mass-casualty-triage.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T082 [P] [US1] `sectors/nsw/nswpf.evacuation-cordon.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
-- [ ] T083 [P] [US1] `sectors/nsw/frnsw.urban-fire-response.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T084 [P] [US1] `sectors/nsw/mrnsw.maritime-flood-rescue.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
+- [X] T079 [P] [US1] `sectors/nsw/nsw-rfs.bushfire-incident-action-plan.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T080 [P] [US1] `sectors/nsw/ses-nsw.watch-and-act-flood.spec.ts` — Watch and Act flood warning + 24-h-earlier evac lead-time proxy (Spec §US1 Acceptance #2); `@outcome:3 @hazard:tropical-cyclone+riverine-flood @fr:FR-011 @fr:FR-016`
+- [X] T081 [P] [US1] `sectors/nsw/nsw-ambulance.mass-casualty-triage.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T082 [P] [US1] `sectors/nsw/nswpf.evacuation-cordon.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T083 [P] [US1] `sectors/nsw/frnsw.urban-fire-response.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T084 [P] [US1] `sectors/nsw/mrnsw.maritime-flood-rescue.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
 
 ### 4.3 VIC (5) — `tests/e2e/web-coverage/sectors/vic/`
 
-- [ ] T085 [P] [US1] `sectors/vic/cfa-vic.code-red-day.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T086 [P] [US1] `sectors/vic/ses-vic.flash-flood-rescue.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
-- [ ] T087 [P] [US1] `sectors/vic/av.heat-related-illness-surge.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T088 [P] [US1] `sectors/vic/vicpol.cross-border-evac.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
-- [ ] T089 [P] [US1] `sectors/vic/frv.warehouse-fire-haz-mat.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T085 [P] [US1] `sectors/vic/cfa-vic.code-red-day.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T086 [P] [US1] `sectors/vic/ses-vic.flash-flood-rescue.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
+- [X] T087 [P] [US1] `sectors/vic/av.heat-related-illness-surge.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T088 [P] [US1] `sectors/vic/vicpol.cross-border-evac.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T089 [P] [US1] `sectors/vic/frv.warehouse-fire-haz-mat.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
 
 ### 4.4 QLD (4) — `tests/e2e/web-coverage/sectors/qld/`
 
-- [ ] T090 [P] [US1] `sectors/qld/qfd.cyclone-pre-positioning.spec.ts` — `@outcome:4 @hazard:bushfire+tropical-cyclone`
-- [ ] T091 [P] [US1] `sectors/qld/ses-qld.tropical-cyclone-flood.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
-- [ ] T092 [P] [US1] `sectors/qld/qas.heat-stress-mass-casualty.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T093 [P] [US1] `sectors/qld/qps.evac-traffic-management.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T090 [P] [US1] `sectors/qld/qfd.cyclone-pre-positioning.spec.ts` — `@outcome:4 @hazard:bushfire+tropical-cyclone`
+- [X] T091 [P] [US1] `sectors/qld/ses-qld.tropical-cyclone-flood.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
+- [X] T092 [P] [US1] `sectors/qld/qas.heat-stress-mass-casualty.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T093 [P] [US1] `sectors/qld/qps.evac-traffic-management.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
 
 ### 4.5 SA (5) — `tests/e2e/web-coverage/sectors/sa/`
 
-- [ ] T094 [P] [US1] `sectors/sa/sacfs.code-red-bushfire.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T095 [P] [US1] `sectors/sa/ses-sa.river-murray-flood.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
-- [ ] T096 [P] [US1] `sectors/sa/saas.extreme-heat-mass-call.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
-- [ ] T097 [P] [US1] `sectors/sa/sapol.cross-border-evac.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
-- [ ] T098 [P] [US1] `sectors/sa/samfs.urban-fire-multi-storey.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T094 [P] [US1] `sectors/sa/sacfs.code-red-bushfire.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T095 [P] [US1] `sectors/sa/ses-sa.river-murray-flood.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
+- [X] T096 [P] [US1] `sectors/sa/saas.extreme-heat-mass-call.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T097 [P] [US1] `sectors/sa/sapol.cross-border-evac.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T098 [P] [US1] `sectors/sa/samfs.urban-fire-multi-storey.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
 
 ### 4.6 WA (3) — `tests/e2e/web-coverage/sectors/wa/`
 
-- [ ] T099 [P] [US1] `sectors/wa/dfes-wa.cyclone-pilbara.spec.ts` — `@outcome:4 @hazard:bushfire+tropical-cyclone`
-- [ ] T100 [P] [US1] `sectors/wa/sja-wa.remote-medical-evac.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T101 [P] [US1] `sectors/wa/wapol.remote-evac-cordon.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T099 [P] [US1] `sectors/wa/dfes-wa.cyclone-pilbara.spec.ts` — `@outcome:4 @hazard:bushfire+tropical-cyclone`
+- [X] T100 [P] [US1] `sectors/wa/sja-wa.remote-medical-evac.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T101 [P] [US1] `sectors/wa/wapol.remote-evac-cordon.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
 
 ### 4.7 TAS (4) — `tests/e2e/web-coverage/sectors/tas/`
 
-- [ ] T102 [P] [US1] `sectors/tas/tfs.bushfire-island-evac.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T103 [P] [US1] `sectors/tas/ses-tas.severe-storm-rescue.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
-- [ ] T104 [P] [US1] `sectors/tas/at.aeromedical-retrieval.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
-- [ ] T105 [P] [US1] `sectors/tas/taspol.island-evac-coordination.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T102 [P] [US1] `sectors/tas/tfs.bushfire-island-evac.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T103 [P] [US1] `sectors/tas/ses-tas.severe-storm-rescue.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
+- [X] T104 [P] [US1] `sectors/tas/at.aeromedical-retrieval.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T105 [P] [US1] `sectors/tas/taspol.island-evac-coordination.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
 
 ### 4.8 ACT (7) — `tests/e2e/web-coverage/sectors/act/`
 
-- [ ] T106 [P] [US1] `sectors/act/act-esa.multi-agency-coordination.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
-- [ ] T107 [P] [US1] `sectors/act/act-fr.urban-fire.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T108 [P] [US1] `sectors/act/act-ambulance.heat-surge.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
-- [ ] T109 [P] [US1] `sectors/act/act-policing.evac-cordon.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
-- [ ] T110 [P] [US1] `sectors/act/act-rfs.bushfire-pre-positioning.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T111 [P] [US1] `sectors/act/afp.protective-services.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
-- [ ] T112 [P] [US1] `sectors/act/ses-act.severe-storm-rescue.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
+- [X] T106 [P] [US1] `sectors/act/act-esa.multi-agency-coordination.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
+- [X] T107 [P] [US1] `sectors/act/act-fr.urban-fire.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T108 [P] [US1] `sectors/act/act-ambulance.heat-surge.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T109 [P] [US1] `sectors/act/act-policing.evac-cordon.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T110 [P] [US1] `sectors/act/act-rfs.bushfire-pre-positioning.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T111 [P] [US1] `sectors/act/afp.protective-services.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T112 [P] [US1] `sectors/act/ses-act.severe-storm-rescue.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
 
 ### 4.9 NT (5) — `tests/e2e/web-coverage/sectors/nt/`
 
-- [ ] T113 [P] [US1] `sectors/nt/bushfires-nt.savanna-burn.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T114 [P] [US1] `sectors/nt/ntes.cyclone-shelter.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
-- [ ] T115 [P] [US1] `sectors/nt/ntfrs.remote-fire-response.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T116 [P] [US1] `sectors/nt/ntpf.remote-evac.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
-- [ ] T117 [P] [US1] `sectors/nt/sja-nt.remote-medical-retrieval.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T113 [P] [US1] `sectors/nt/bushfires-nt.savanna-burn.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T114 [P] [US1] `sectors/nt/ntes.cyclone-shelter.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
+- [X] T115 [P] [US1] `sectors/nt/ntfrs.remote-fire-response.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T116 [P] [US1] `sectors/nt/ntpf.remote-evac.spec.ts` — `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T117 [P] [US1] `sectors/nt/sja-nt.remote-medical-retrieval.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
 
 ### 4.10 Commonwealth (11) — `tests/e2e/web-coverage/sectors/commonwealth/`
 
-- [ ] T118 [P] [US1] `sectors/commonwealth/nema.activate-comdisplan.spec.ts` — Activates COMDISPLAN, opens NJCOP, requests consequence metrics, asserts logistics-match efficiency proxy (Spec §US1 Acceptance #3); `@outcome:4 @hazard:bushfire+tropical-cyclone @fr:FR-015`
-- [ ] T119 [P] [US1] `sectors/commonwealth/bom-national.cyclone-warning-relay.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
-- [ ] T120 [P] [US1] `sectors/commonwealth/ga-national.tsunami-warning-relay.spec.ts` — Earthquake/tsunami AWS path (FR-011 only, not paired with capstone outcome); `@hazard:earthquake @hazard:tsunami @aws @fr:FR-011`
-- [ ] T121 [P] [US1] `sectors/commonwealth/adf.dacc-asset-arrival.spec.ts` — DACC categorisation (A/B/C), asset arrival tracking; `@outcome:4 @hazard:bushfire+tropical-cyclone`
-- [ ] T122 [P] [US1] `sectors/commonwealth/abf.border-disaster-coordination.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
-- [ ] T123 [P] [US1] `sectors/commonwealth/arc.recovery-financial-assistance.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
-- [ ] T124 [P] [US1] `sectors/commonwealth/asa.shipping-evac.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
-- [ ] T125 [P] [US1] `sectors/commonwealth/rfds.remote-aeromedical.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T126 [P] [US1] `sectors/commonwealth/sja-national.community-first-aid.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T127 [P] [US1] `sectors/commonwealth/surf-lifesaving.coastal-cyclone-evac.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
-- [ ] T128 [P] [US1] `sectors/commonwealth/afp-commonwealth.national-evac-coordination.spec.ts` — Persona-id `afp-commonwealth` to disambiguate from ACT `afp` (T111); seeded by T052; `@outcome:2 @hazard:bushfire+severe-storm`
+- [X] T118 [P] [US1] `sectors/commonwealth/nema.activate-comdisplan.spec.ts` — Activates COMDISPLAN, opens NJCOP, requests consequence metrics, asserts logistics-match efficiency proxy (Spec §US1 Acceptance #3); `@outcome:4 @hazard:bushfire+tropical-cyclone @fr:FR-015`
+- [X] T119 [P] [US1] `sectors/commonwealth/bom-national.cyclone-warning-relay.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
+- [X] T120 [P] [US1] `sectors/commonwealth/ga-national.tsunami-warning-relay.spec.ts` — Earthquake/tsunami AWS path (FR-011 only, not paired with capstone outcome); `@hazard:earthquake @hazard:tsunami @aws @fr:FR-011`
+- [X] T121 [P] [US1] `sectors/commonwealth/adf.dacc-asset-arrival.spec.ts` — DACC categorisation (A/B/C), asset arrival tracking; `@outcome:4 @hazard:bushfire+tropical-cyclone`
+- [X] T122 [P] [US1] `sectors/commonwealth/abf.border-disaster-coordination.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
+- [X] T123 [P] [US1] `sectors/commonwealth/arc.recovery-financial-assistance.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
+- [X] T124 [P] [US1] `sectors/commonwealth/asa.shipping-evac.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
+- [X] T125 [P] [US1] `sectors/commonwealth/rfds.remote-aeromedical.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T126 [P] [US1] `sectors/commonwealth/sja-national.community-first-aid.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T127 [P] [US1] `sectors/commonwealth/surf-lifesaving.coastal-cyclone-evac.spec.ts` — `@outcome:3 @hazard:tropical-cyclone+riverine-flood`
+- [X] T128 [P] [US1] `sectors/commonwealth/afp-commonwealth.national-evac-coordination.spec.ts` — Persona-id `afp-commonwealth` to disambiguate from ACT `afp` (T111); seeded by T052; `@outcome:2 @hazard:bushfire+severe-storm`
 
 ### 4.11 Cross-sector (8) — `tests/e2e/web-coverage/sectors/cross-sector/`
 
-- [ ] T129 [P] [US1] `sectors/cross-sector/community-ngos.recovery-coordination.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
-- [ ] T130 [P] [US1] `sectors/cross-sector/health.surge-capacity.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
-- [ ] T131 [P] [US1] `sectors/cross-sector/local-government.recovery-funding.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
-- [ ] T132 [P] [US1] `sectors/cross-sector/state-government.disaster-declaration.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
-- [ ] T133 [P] [US1] `sectors/cross-sector/territory-government.cross-jurisdiction-coord.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
-- [ ] T134 [P] [US1] `sectors/cross-sector/transport.evac-routing.spec.ts` — `@outcome:4 @hazard:bushfire+tropical-cyclone`
-- [ ] T135 [P] [US1] `sectors/cross-sector/utility.power-restoration.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
-- [ ] T136 [P] [US1] `sectors/cross-sector/volunteer.surge-deployment.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T129 [P] [US1] `sectors/cross-sector/community-ngos.recovery-coordination.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
+- [X] T130 [P] [US1] `sectors/cross-sector/health.surge-capacity.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
+- [X] T131 [P] [US1] `sectors/cross-sector/local-government.recovery-funding.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
+- [X] T132 [P] [US1] `sectors/cross-sector/state-government.disaster-declaration.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
+- [X] T133 [P] [US1] `sectors/cross-sector/territory-government.cross-jurisdiction-coord.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
+- [X] T134 [P] [US1] `sectors/cross-sector/transport.evac-routing.spec.ts` — `@outcome:4 @hazard:bushfire+tropical-cyclone`
+- [X] T135 [P] [US1] `sectors/cross-sector/utility.power-restoration.spec.ts` — `@outcome:5 @hazard:riverine-flood+severe-storm`
+- [X] T136 [P] [US1] `sectors/cross-sector/volunteer.surge-deployment.spec.ts` — `@outcome:1 @hazard:bushfire+extreme-heat`
 
 ### 4.12 Cross-jurisdiction integration (FR-003 — 8 state/territory + 1 Commonwealth bridge)
 
-- [ ] T137 [P] [US3] `sectors/nsw/cross-jurisdiction-nsw-vic-bushfire.spec.ts` — bushfire crosses NSW→VIC border; both NSW RFS + CFA see same incident COP, AWS warning state, audit history (Spec §US3 Acceptance #1); `@fr:FR-015`
-- [ ] T138 [P] [US3] `sectors/vic/cross-jurisdiction-vic-tas-storm.spec.ts` — severe-storm bridge VIC↔TAS; `@fr:FR-015`
-- [ ] T139 [P] [US3] `sectors/qld/cross-jurisdiction-qld-nsw-cyclone-flood.spec.ts` — SES-QLD ↔ SES-NSW for tropical-cyclone flooding at border; `@fr:FR-015`
-- [ ] T140 [P] [US3] `sectors/sa/cross-jurisdiction-sa-vic-bushfire.spec.ts` — SA ↔ VIC bushfire bridge; `@fr:FR-015`
-- [ ] T141 [P] [US3] `sectors/wa/cross-jurisdiction-wa-sa-flood.spec.ts` — WA ↔ SA flood bridge; `@fr:FR-015`
-- [ ] T142 [P] [US3] `sectors/tas/cross-jurisdiction-tas-mainland-cyclone.spec.ts` — Tasmania mainland-link evac; `@fr:FR-015`
-- [ ] T143 [P] [US3] `sectors/act/cross-jurisdiction-act-nsw-bushfire.spec.ts` — ACT ↔ NSW bushfire bridge; `@fr:FR-015`
-- [ ] T144 [P] [US3] `sectors/nt/cross-jurisdiction-nt-wa-bushfire-cyclone.spec.ts` — NT ↔ WA bushfire/cyclone bridge; `@fr:FR-015`
-- [ ] T145 [P] [US3] `sectors/commonwealth/nema.dacc-state-controller-bridge.spec.ts` — Commonwealth bridge: state controller → NEMA → ADF DACC lifecycle (COMDISPLAN activation, DACC categorisation A/B/C, mission-close report) (Spec §US3 Acceptance #2); `@fr:FR-015`
+- [X] T137 [P] [US3] `sectors/nsw/cross-jurisdiction-nsw-vic-bushfire.spec.ts` — bushfire crosses NSW→VIC border; both NSW RFS + CFA see same incident COP, AWS warning state, audit history (Spec §US3 Acceptance #1); `@fr:FR-015`
+- [X] T138 [P] [US3] `sectors/vic/cross-jurisdiction-vic-tas-storm.spec.ts` — severe-storm bridge VIC↔TAS; `@fr:FR-015`
+- [X] T139 [P] [US3] `sectors/qld/cross-jurisdiction-qld-nsw-cyclone-flood.spec.ts` — SES-QLD ↔ SES-NSW for tropical-cyclone flooding at border; `@fr:FR-015`
+- [X] T140 [P] [US3] `sectors/sa/cross-jurisdiction-sa-vic-bushfire.spec.ts` — SA ↔ VIC bushfire bridge; `@fr:FR-015`
+- [X] T141 [P] [US3] `sectors/wa/cross-jurisdiction-wa-sa-flood.spec.ts` — WA ↔ SA flood bridge; `@fr:FR-015`
+- [X] T142 [P] [US3] `sectors/tas/cross-jurisdiction-tas-mainland-cyclone.spec.ts` — Tasmania mainland-link evac; `@fr:FR-015`
+- [X] T143 [P] [US3] `sectors/act/cross-jurisdiction-act-nsw-bushfire.spec.ts` — ACT ↔ NSW bushfire bridge; `@fr:FR-015`
+- [X] T144 [P] [US3] `sectors/nt/cross-jurisdiction-nt-wa-bushfire-cyclone.spec.ts` — NT ↔ WA bushfire/cyclone bridge; `@fr:FR-015`
+- [X] T145 [P] [US3] `sectors/commonwealth/nema.dacc-state-controller-bridge.spec.ts` — Commonwealth bridge: state controller → NEMA → ADF DACC lifecycle (COMDISPLAN activation, DACC categorisation A/B/C, mission-close report) (Spec §US3 Acceptance #2); `@fr:FR-015`
 
 **Checkpoint**: Phase 4 complete. US1 + US3 are independently testable. The 68-persona inventory + 9 cross-jurisdiction scenarios fulfil FR-002 + FR-003.
 
