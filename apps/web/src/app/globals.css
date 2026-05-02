@@ -651,6 +651,10 @@ nav[aria-label] a {
   gap: 0.85rem;
 }
 
+.disaster-mapper-filter-content--hidden {
+  display: none;
+}
+
 .disaster-mapper-filter-group {
   border: 0;
   padding: 0;

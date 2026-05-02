@@ -31,16 +31,20 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@865f5f5c36632f18690a3d569fa0a764f2da0c3e # v3.x
-        with:
-          languages: ${{ matrix.language }}
-          queries: security-and-quality
+      - name: CodeQL unavailable
+        run: echo "CodeQL analysis for ${{ matrix.language }} is currently not being checked because this repository does not have a GitHub code scanning license."
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@865f5f5c36632f18690a3d569fa0a764f2da0c3e # v3.x
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@865f5f5c36632f18690a3d569fa0a764f2da0c3e # v3.x
-        with:
-          category: "/language:${{ matrix.language }}"
+      # Disabled until the repository has a GitHub code scanning license.
+      # - name: Initialize CodeQL
+      #   uses: github/codeql-action/init@865f5f5c36632f18690a3d569fa0a764f2da0c3e # v3.x
+      #   with:
+      #     languages: ${{ matrix.language }}
+      #     queries: security-and-quality
+      #
+      # - name: Autobuild
+      #   uses: github/codeql-action/autobuild@865f5f5c36632f18690a3d569fa0a764f2da0c3e # v3.x
+      #
+      # - name: Perform CodeQL Analysis
+      #   uses: github/codeql-action/analyze@865f5f5c36632f18690a3d569fa0a764f2da0c3e # v3.x
+      #   with:
+      #     category: "/language:${{ matrix.language }}"

@@ -19,6 +19,9 @@ import {
   type MapFilterParams,
 } from "./use-disaster-map-filters";
 import { IncidentTypeIcon } from "./incident-type-icon";
+import { StatusIcon } from "./status-icon";
+import { SeverityIcon } from "./severity-icon";
+import { PprrPhaseIcon } from "./pprr-phase-icon";
 
 export interface FilterPanelProps {
   filters: MapFilterParams;
@@ -133,22 +136,57 @@ export function FilterPanel({
       aria-label="Filter incidents"
     >
       {/* Mobile toggle header */}
-      {onToggle && (
-        <button
-          className="disaster-mapper-filter-toggle"
-          onClick={onToggle}
-          aria-expanded={isOpen}
-          aria-controls="filter-panel-content"
-        >
-          Filters {isOpen ? "▾" : "▸"}
-        </button>
-      )}
+      {onToggle &&
+        (isOpen ? (
+          <button
+            className="disaster-mapper-filter-toggle"
+            onClick={onToggle}
+            aria-expanded="true"
+            aria-controls="filter-panel-content"
+          >
+            Filters ▾
+          </button>
+        ) : (
+          <button
+            className="disaster-mapper-filter-toggle"
+            onClick={onToggle}
+            aria-expanded="false"
+            aria-controls="filter-panel-content"
+          >
+            Filters ▸
+          </button>
+        ))}
 
       <div
         id="filter-panel-content"
-        className="disaster-mapper-filter-content"
-        style={{ display: isOpen ? "block" : "none" }}
+        className={`disaster-mapper-filter-content ${isOpen ? "" : "disaster-mapper-filter-content--hidden"}`}
       >
+        {/* ── Status ── */}
+        <fieldset className="disaster-mapper-filter-group">
+          <legend>
+            Status
+            <span className="disaster-mapper-filter-actions">
+              <button type="button" onClick={selectAllStatuses}>
+                All
+              </button>
+              <button type="button" onClick={clearStatuses}>
+                Clear
+              </button>
+            </span>
+          </legend>
+          {OPERATIONAL_STATUSES.map((s) => (
+            <label key={s} className="disaster-mapper-checkbox">
+              <input
+                type="checkbox"
+                checked={csvHasValue(filters.status, s)}
+                onChange={() => toggleStatus(s)}
+              />
+              <StatusIcon status={s} size={20} />
+              {formatLabel(s)}
+            </label>
+          ))}
+        </fieldset>
+
         {/* ── Date range ── */}
         <fieldset className="disaster-mapper-filter-group">
           <legend>Date Range</legend>
@@ -234,38 +272,11 @@ export function FilterPanel({
                   checked={checked}
                   onChange={() => toggleSeverity(tier.values)}
                 />
-                <span
-                  className={`disaster-mapper-severity-dot disaster-mapper-severity-dot--${tier.label.toLowerCase().replace(/ /g, "-")}`}
-                />
+                <SeverityIcon tier={tier.label} size={20} />
                 {tier.label}
               </label>
             );
           })}
-        </fieldset>
-
-        {/* ── Status ── */}
-        <fieldset className="disaster-mapper-filter-group">
-          <legend>
-            Status
-            <span className="disaster-mapper-filter-actions">
-              <button type="button" onClick={selectAllStatuses}>
-                All
-              </button>
-              <button type="button" onClick={clearStatuses}>
-                Clear
-              </button>
-            </span>
-          </legend>
-          {OPERATIONAL_STATUSES.map((s) => (
-            <label key={s} className="disaster-mapper-checkbox">
-              <input
-                type="checkbox"
-                checked={csvHasValue(filters.status, s)}
-                onChange={() => toggleStatus(s)}
-              />
-              {formatLabel(s)}
-            </label>
-          ))}
         </fieldset>
 
         {/* ── PPRR Phase ── */}
@@ -288,6 +299,7 @@ export function FilterPanel({
                 checked={csvHasValue(filters.pprr_phase, p)}
                 onChange={() => togglePhase(p)}
               />
+              <PprrPhaseIcon phase={p} size={20} />
               {formatLabel(p)}
             </label>
           ))}
