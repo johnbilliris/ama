@@ -1,5 +1,11 @@
 name: codeql
 
+# CodeQL steps are commented out because GitHub Code Scanning is not enabled on the
+# target repository. The `github/codeql-action/*` actions require Code Scanning to be
+# turned on (Settings → Code security and analysis → Code scanning) before they can
+# upload SARIF results. Re-enable Code Scanning in repo settings, then uncomment the
+# steps below to restore CodeQL analysis.
+
 on:
   push:
     branches: [main, dev, staging, production]
@@ -35,6 +41,9 @@ jobs:
         run: echo "CodeQL analysis for ${{ matrix.language }} is currently not being checked because this repository does not have a GitHub code scanning license."
 
       # Disabled until the repository has a GitHub code scanning license.
+      - name: CodeQL disabled
+        run: echo "CodeQL steps are commented out — Code Scanning is not enabled on this repository."
+
       # - name: Initialize CodeQL
       #   uses: github/codeql-action/init@865f5f5c36632f18690a3d569fa0a764f2da0c3e # v3.x
       #   with:
