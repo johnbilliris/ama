@@ -559,9 +559,9 @@ With multiple developers:
 
 **Purpose**: Normalise the test-support env-var name to the canonical `AMA_TEST_SUPPORT=1` (not `AMA_TEST_SUPPORT_ENABLED`) across CI, quickstart, and README. The middleware (T007) is already canonical; this phase removes drift downstream. All three are `[P]` — independent files.
 
-- [ ] T200 [P] Update `.github/workflows/ci.yml` line 147 — replace `AMA_TEST_SUPPORT_ENABLED: "true"` with `AMA_TEST_SUPPORT: "1"` (matches the dual-guard middleware T007 + the persona-fixture contract canonical name); search the rest of the workflow for any other `AMA_TEST_SUPPORT_ENABLED` reference and remove (CHK213 mandates a single name) (FR-021, Q25; CHK213, CHK215)
-- [ ] T201 [P] Update `specs/034-webapp-capstone-coverage/quickstart.md` — replace line 281's narrative reference `AMA_TEST_SUPPORT_ENABLED=true` with `AMA_TEST_SUPPORT=1`; verify all `$env:AMA_TEST_SUPPORT = "1"` PowerShell examples (lines 36, 58, 62) and the troubleshooting section (lines 198, 200) remain consistent — no drift between body commands and the dual-guard semantic (FR-021, Q25; CHK214)
-- [ ] T202 [P] Update `README.md` line 296 — replace `$env:AMA_TEST_SUPPORT_ENABLED = "true"` with `$env:AMA_TEST_SUPPORT = "1"`; sweep the rest of `README.md` and `docs/` for any remaining `AMA_TEST_SUPPORT_ENABLED` reference and align to the canonical name (FR-021, Q25; CHK213, CHK215)
+- [X] T200 [P] Update `.github/workflows/ci.yml` line 147 — replace `AMA_TEST_SUPPORT_ENABLED: "true"` with `AMA_TEST_SUPPORT: "1"` (matches the dual-guard middleware T007 + the persona-fixture contract canonical name); search the rest of the workflow for any other `AMA_TEST_SUPPORT_ENABLED` reference and remove (CHK213 mandates a single name) (FR-021, Q25; CHK213, CHK215)
+- [X] T201 [P] Update `specs/034-webapp-capstone-coverage/quickstart.md` — replace line 281's narrative reference `AMA_TEST_SUPPORT_ENABLED=true` with `AMA_TEST_SUPPORT=1`; verify all `$env:AMA_TEST_SUPPORT = "1"` PowerShell examples (lines 36, 58, 62) and the troubleshooting section (lines 198, 200) remain consistent — no drift between body commands and the dual-guard semantic (FR-021, Q25; CHK214)
+- [X] T202 [P] Update `README.md` line 296 — replace `$env:AMA_TEST_SUPPORT_ENABLED = "true"` with `$env:AMA_TEST_SUPPORT = "1"`; sweep the rest of `README.md` and `docs/` for any remaining `AMA_TEST_SUPPORT_ENABLED` reference and align to the canonical name (FR-021, Q25; CHK213, CHK215)
 
 ### Phase 16: SC-012 closure measurement (CHK210-212)
 

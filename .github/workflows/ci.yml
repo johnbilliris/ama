@@ -144,7 +144,7 @@ jobs:
         run: ./scripts/seed-database.ps1
       - name: Run web-coverage shard ${{ matrix.shard }}/4
         env:
-          AMA_TEST_SUPPORT_ENABLED: "true"
+          AMA_TEST_SUPPORT: "1"
         run: |
           pnpm --filter @ama/web exec playwright test \
             --project=web-coverage-chromium \

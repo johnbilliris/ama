@@ -293,7 +293,7 @@ The Playwright capstone-coverage suite proves every capstone outcome × persona 
 ```pwsh
 pnpm install
 pwsh scripts/seed-database.ps1
-$env:AMA_TEST_SUPPORT_ENABLED = "true"
+$env:AMA_TEST_SUPPORT = "1"
 pnpm --filter @ama/web exec playwright test --project=web-coverage-chromium --grep "@p1"
 ```
 

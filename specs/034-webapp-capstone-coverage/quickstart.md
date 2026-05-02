@@ -278,7 +278,7 @@ that already shipped on this branch:
 
 - **Test-support API base path**: `/api/test-support/seed/{persona|scenario}`
   is mounted by `apps/api/app/api/router.py` and gated by the dual-guard
-  middleware (`AMA_TEST_SUPPORT_ENABLED=true` + non-prod env detection).
+  middleware (`AMA_TEST_SUPPORT=1` + non-prod env detection).
 - **Persona resolver**: imports `bootstrap_seed_data()` via
   `from packages.domain.src.domain.seed.bootstrap import bootstrap_seed_data`
   (matches the existing convention; the path-based seed root is
