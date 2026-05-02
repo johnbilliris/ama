@@ -281,11 +281,11 @@ Every Playwright test MUST carry one tag from each axis (enforced by ESLint rule
 
 **Independent Test**: Run only `tests/e2e/web-coverage/capstone/`; every file passes. Each spec asserts the SC-001..SC-005 outcome-proxy threshold against the corresponding hazard-pair fixture and closes the trace.
 
-- [ ] T146 [P] [US1] `tests/e2e/web-coverage/capstone/outcome-1-bushfire-extreme-heat.spec.ts` — Lives saved (zero preventable deaths); proxy = warning latency + IC-approval timeliness + multilingual reach within 2 min (SC-001); validates with `outcome-proxy.ts.lives` against `outcome-1-*.fixture.json`
-- [ ] T147 [P] [US1] `tests/e2e/web-coverage/capstone/outcome-2-bushfire-severe-storm.spec.ts` — 50 % faster signal-to-action; proxy = AIIMS Level 1/2/3 latencies ≤ 5/15/30 min (SC-002)
-- [ ] T148 [P] [US1] `tests/e2e/web-coverage/capstone/outcome-3-tropical-cyclone-flood.spec.ts` — 24-h-earlier evacuation; proxy = `evac_lead_hours ≥ 24` vs seed reference (SC-003)
-- [ ] T149 [P] [US1] `tests/e2e/web-coverage/capstone/outcome-4-bushfire-cyclone-logistics.spec.ts` — 30 % logistics-friction reduction; proxy = `logistics_clicks ≤ 7` routine / `≤ 12` mutual-aid (SC-004)
-- [ ] T150 [P] [US1] `tests/e2e/web-coverage/capstone/outcome-5-flood-storm-economic.spec.ts` — 30 % economic-loss reduction; proxy = `(baseline_loss − projected_loss) / baseline_loss ≥ 0.30` evaluated at response→recovery handover on the post-handover Economic-environment view (SC-005, Q7)
+- [X] T146 [P] [US1] `tests/e2e/web-coverage/capstone/outcome-1-bushfire-extreme-heat.spec.ts` — Lives saved (zero preventable deaths); proxy = warning latency + IC-approval timeliness + multilingual reach within 2 min (SC-001); validates with `outcome-proxy.ts.lives` against `outcome-1-*.fixture.json`
+- [X] T147 [P] [US1] `tests/e2e/web-coverage/capstone/outcome-2-bushfire-severe-storm.spec.ts` — 50 % faster signal-to-action; proxy = AIIMS Level 1/2/3 latencies ≤ 5/15/30 min (SC-002)
+- [X] T148 [P] [US1] `tests/e2e/web-coverage/capstone/outcome-3-tropical-cyclone-flood.spec.ts` — 24-h-earlier evacuation; proxy = `evac_lead_hours ≥ 24` vs seed reference (SC-003)
+- [X] T149 [P] [US1] `tests/e2e/web-coverage/capstone/outcome-4-bushfire-cyclone-logistics.spec.ts` — 30 % logistics-friction reduction; proxy = `logistics_clicks ≤ 7` routine / `≤ 12` mutual-aid (SC-004)
+- [X] T150 [P] [US1] `tests/e2e/web-coverage/capstone/outcome-5-flood-storm-economic.spec.ts` — 30 % economic-loss reduction; proxy = `(baseline_loss − projected_loss) / baseline_loss ≥ 0.30` evaluated at response→recovery handover on the post-handover Economic-environment view (SC-005, Q7)
 
 **Checkpoint**: Phase 5 complete. Trace closes at the capstone-outcome level. US1 is fully provable end-to-end.
 
