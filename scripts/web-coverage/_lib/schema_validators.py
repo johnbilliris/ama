@@ -164,7 +164,165 @@ def _build_parser() -> argparse.ArgumentParser:
     g.add_argument("--commonwealth-bridge-min", type=int, default=1)
     g.add_argument("--capstone-outcomes-min", type=int, default=5)
     g.set_defaults(func=_gate)
+
+    # T177 (cycle-1): depth-profile binary 68/68 gate. The check passes ONLY
+    # when every persona in the FR-002 inventory has a schema-valid YAML at
+    # `tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml`
+    # (draft-07 per Q28). Numerator/denominator emitted to stdout for
+    # CHK210/CHK212 traceability per data-model §10.
+    d = sub.add_parser(
+        "depth-profiles",
+        help="Cycle-1 binary 68/68 gate: every persona has a schema-valid depth profile",
+    )
+    d.add_argument(
+        "--personas-json",
+        default=str(
+            Path(__file__).resolve().parents[3]
+            / "packages" / "domain" / "src" / "domain" / "seed"
+            / "identities_australia.json",
+        ),
+        help="Persona inventory JSON (defaults to identities_australia.json)",
+    )
+    d.add_argument(
+        "--profiles-dir",
+        default=str(
+            Path(__file__).resolve().parents[3]
+            / "tests" / "e2e" / "web-coverage" / "_lib" / "depth-profiles",
+        ),
+        help="Directory containing {persona-id}.depth.yaml files",
+    )
+    d.add_argument(
+        "--schema-path",
+        default=str(
+            Path(__file__).resolve().parents[3]
+            / "tests" / "e2e" / "web-coverage" / "_lib" / "depth-profiles" / "_schema.json",
+        ),
+        help="Draft-07 depth-profile JSON schema path",
+    )
+    d.add_argument(
+        "--expected",
+        type=int,
+        default=68,
+        help="Expected denominator (FR-002 persona inventory size; default 68)",
+    )
+    d.set_defaults(func=_depth_profiles_gate)
+
     return p
+
+
+def _depth_profiles_gate(args: argparse.Namespace) -> int:
+    """Binary 68/68 gate (T177).
+
+    Loads the persona inventory + iterates each entry, asserting:
+      • a sibling YAML exists at ``{profiles-dir}/{persona-id}.depth.yaml``
+      • the YAML parses + validates against the draft-07 schema
+      • the YAML's ``persona_id`` matches the directory entry
+      • ``assertion_targets.evaluator_endpoint`` is one of sc-001..sc-005
+        (Q29 routable range) when not null
+
+    Emits ``::notice`` and ``::error`` GitHub Actions annotations. Exits non-
+    zero on any miss to fail the ``web-coverage / depth-profile-binary`` status
+    check; numerator/denominator embedded in stdout for trace audit.
+    """
+
+    try:
+        import yaml  # type: ignore[import-not-found]
+    except ImportError:  # pragma: no cover - CI installs pyyaml
+        sys.stderr.write("depth-profiles: pyyaml is required (pip install pyyaml)\n")
+        return 1
+    if not _HAS_JSONSCHEMA:  # pragma: no cover - CI installs jsonschema
+        sys.stderr.write("depth-profiles: jsonschema is required (pip install jsonschema)\n")
+        return 1
+    try:  # Draft-07 — depth-profile schema is deliberately distinct from the
+        #              draft 2020-12 contracts; per Pass 5 Q28.
+        from jsonschema import Draft7Validator  # type: ignore[import-untyped]
+    except ImportError:  # pragma: no cover
+        sys.stderr.write("depth-profiles: jsonschema Draft7Validator unavailable\n")
+        return 1
+
+    personas_path = Path(args.personas_json)
+    profiles_dir = Path(args.profiles_dir)
+    schema_path = Path(args.schema_path)
+
+    if not personas_path.exists():
+        sys.stderr.write(f"depth-profiles: persona inventory not found: {personas_path}\n")
+        return 1
+    if not profiles_dir.exists():
+        sys.stderr.write(f"depth-profiles: profiles dir not found: {profiles_dir}\n")
+        return 1
+    if not schema_path.exists():
+        sys.stderr.write(f"depth-profiles: schema not found: {schema_path}\n")
+        return 1
+
+    inventory = json.loads(personas_path.read_text(encoding="utf-8"))
+    if not isinstance(inventory, list):  # defensive — file is a list
+        sys.stderr.write("depth-profiles: persona inventory must be a JSON list\n")
+        return 1
+    persona_ids = sorted({entry["persona_id"] for entry in inventory if "persona_id" in entry})
+    expected = args.expected
+
+    if len(persona_ids) != expected:
+        sys.stderr.write(
+            f"depth-profiles: persona inventory mismatch: "
+            f"{len(persona_ids)} unique ids != expected {expected}\n",
+        )
+        return 1
+
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    validator = Draft7Validator(schema)
+
+    routable = {"sc-001", "sc-002", "sc-003", "sc-004", "sc-005"}
+    failures: list[str] = []
+    valid = 0
+
+    for persona_id in persona_ids:
+        path = profiles_dir / f"{persona_id}.depth.yaml"
+        if not path.exists():
+            failures.append(
+                f"::error::missing depth profile for persona '{persona_id}' "
+                f"(expected {path.name}); open GAP-DEPTH-PROFILE-MISSING-{persona_id}",
+            )
+            continue
+        try:
+            profile = yaml.safe_load(path.read_text(encoding="utf-8"))
+        except yaml.YAMLError as exc:
+            failures.append(f"::error::{path.name}: YAML parse error — {exc}")
+            continue
+        errors = sorted(validator.iter_errors(profile), key=lambda e: e.path)
+        if errors:
+            msgs = "; ".join(f"{list(e.path)}: {e.message}" for e in errors)
+            failures.append(f"::error::{path.name}: schema-invalid — {msgs}")
+            continue
+        if profile.get("persona_id") != persona_id:
+            failures.append(
+                f"::error::{path.name}: persona_id drift — file declares "
+                f"{profile.get('persona_id')!r}; expected {persona_id!r}",
+            )
+            continue
+        endpoint = profile.get("assertion_targets", {}).get("evaluator_endpoint")
+        if endpoint is not None and endpoint not in routable:
+            failures.append(
+                f"::error::{path.name}: evaluator_endpoint={endpoint!r} outside "
+                f"routable range sc-001..sc-005 (Q29)",
+            )
+            continue
+        valid += 1
+
+    # Always emit the numerator/denominator for trace audit (CHK210/CHK212).
+    sys.stdout.write(f"depth-profile binary coverage: {valid}/{expected}\n")
+    if failures:
+        for line in failures:
+            sys.stderr.write(line + "\n")
+        sys.stderr.write(
+            f"depth-profiles gate FAIL: {valid}/{expected} valid; "
+            f"{len(failures)} failure(s)\n",
+        )
+        return 1
+    sys.stdout.write(
+        f"::notice title=depth-profile-binary::{valid}/{expected} personas have "
+        f"schema-valid depth profiles (cycle-1)\n",
+    )
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:

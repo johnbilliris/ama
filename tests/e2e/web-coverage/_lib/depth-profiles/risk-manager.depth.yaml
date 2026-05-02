@@ -1,0 +1,15 @@
+persona_id: risk-manager
+workspace_route: /workspaces/risk-manager
+safety_critical_workflow: report-generate
+workflow_steps:
+- action: request audit-derivative report from observer surface
+  target_selector: getByRole:button:GenerateReport
+  expected_response_status: 200
+- action: GET /api/governance/reports/{id}
+  target_selector: GET:/api/governance/reports/{id}
+  expected_response_status: 200
+assertion_targets:
+  evaluator_endpoint: sc-003
+  audit_correlation_id_source: header
+capstone_outcome: 3
+hazard: tropical-cyclone

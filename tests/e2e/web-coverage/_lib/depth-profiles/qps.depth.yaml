@@ -1,0 +1,17 @@
+persona_id: qps
+workspace_route: /workspaces/qps
+safety_critical_workflow: declare
+workflow_steps:
+- action: open declaration dialog and confirm
+  target_selector: getByRole:button:Declare
+  expected_response_status: 201
+- action: POST /api/declarations
+  target_selector: POST:/api/declarations
+  expected_response_status: 201
+assertion_targets:
+  evaluator_endpoint: sc-002
+  audit_correlation_id_source: header
+capstone_outcome: 2
+hazard: bushfire
+coverage_tags:
+- state-government
