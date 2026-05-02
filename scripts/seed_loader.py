@@ -75,9 +75,10 @@ def seed_cosmos(endpoint: str, database: str, data: dict[str, list[dict]]) -> No
     try:
         from azure.cosmos import CosmosClient
         from azure.identity import DefaultAzureCredential
-    except ImportError:
-        print("  azure-cosmos or azure-identity not installed — running dry-run")
-        return
+    except ImportError as exc:
+        raise RuntimeError(
+            "azure-cosmos and azure-identity are required when --cosmos-endpoint is provided"
+        ) from exc
 
     print(f"\n  Connecting to Cosmos DB: {endpoint}")
     credential = DefaultAzureCredential()
@@ -89,6 +90,7 @@ def seed_cosmos(endpoint: str, database: str, data: dict[str, list[dict]]) -> No
         partition_kind = PARTITION_KEY_MAP.get(kind, kind)
         container = db.get_container_client(container_name)
         upserted = 0
+        failed = 0
         for record in records:
             original_kind = record.get("kind")
             doc = {**record, "id": record.get("id", record.get(f"{kind[:-1]}_id", "")), "kind": partition_kind}
@@ -101,17 +103,21 @@ def seed_cosmos(endpoint: str, database: str, data: dict[str, list[dict]]) -> No
                 container.upsert_item(doc)
                 upserted += 1
             except Exception as exc:
+                failed += 1
                 print(f"    ERROR upserting {kind}/{doc['id']}: {exc}")
         print(f"  Seeded {upserted:>4} {kind} into {container_name}")
+        if failed:
+            raise RuntimeError(f"Failed to upsert {failed} {kind} records into {container_name}")
 
 
 def seed_blob_containers(storage_account: str) -> None:
     try:
         from azure.identity import DefaultAzureCredential
         from azure.storage.blob import BlobServiceClient
-    except ImportError:
-        print("  azure-storage-blob not installed — skipping blob seed")
-        return
+    except ImportError as exc:
+        raise RuntimeError(
+            "azure-identity and azure-storage-blob are required when --storage-account is provided"
+        ) from exc
 
     print(f"\n  Connecting to Storage: {storage_account}")
     credential = DefaultAzureCredential()
@@ -198,9 +204,10 @@ def seed_catalogue(endpoint: str, database: str, data: list[dict]) -> None:
     try:
         from azure.cosmos import CosmosClient
         from azure.identity import DefaultAzureCredential
-    except ImportError:
-        print("  azure-cosmos or azure-identity not installed — skipping catalogue seed")
-        return
+    except ImportError as exc:
+        raise RuntimeError(
+            "azure-cosmos and azure-identity are required when --cosmos-endpoint is provided"
+        ) from exc
 
     print(f"\n  Connecting to Cosmos DB for catalogue: {endpoint}")
     credential = DefaultAzureCredential()
@@ -209,14 +216,18 @@ def seed_catalogue(endpoint: str, database: str, data: list[dict]) -> None:
     container = db.get_container_client("recovery-catalogue")
 
     upserted = 0
+    failed = 0
     for doc in data:
         try:
             container.upsert_item(doc)
             upserted += 1
         except Exception as exc:
+            failed += 1
             print(f"    ERROR upserting catalogue/{doc.get('id', '?')}: {exc}")
 
     print(f"  Seeded {upserted:>4} catalogue items into recovery-catalogue")
+    if failed:
+        raise RuntimeError(f"Failed to upsert {failed} catalogue records into recovery-catalogue")
 
 
 def main() -> None:

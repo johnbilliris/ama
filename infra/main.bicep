@@ -58,6 +58,9 @@ param principalId string = ''
 @allowed(['User', 'ServicePrincipal'])
 param principalType string = 'User'
 
+@description('Microsoft Entra user principal IDs that should receive Cosmos DB Built-in Data Reader access at account scope.')
+param globalAdministratorPrincipalIds array = []
+
 @description('Developer IP address to allow through Cosmos DB firewall (for local seed scripts, etc.)')
 param developerIpAddress string = ''
 
@@ -454,6 +457,16 @@ resource cosmosDataContributorAssignment 'Microsoft.DocumentDB/databaseAccounts/
     scope: cosmos.id
   }
 }
+
+resource cosmosGlobalAdministratorReaderAssignments 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-11-15' = [for globalAdministratorPrincipalId in globalAdministratorPrincipalIds: {
+  name: guid(cosmos.id, globalAdministratorPrincipalId, '00000000-0000-0000-0000-000000000001')
+  parent: cosmos
+  properties: {
+    roleDefinitionId: '${cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000001'
+    principalId: globalAdministratorPrincipalId
+    scope: cosmos.id
+  }
+}]
 
 // Cosmos DB Account Reader Role (control-plane) — required for readMetadata
 // Grants the deploying principal and Container App identities permission to
