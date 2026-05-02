@@ -45,6 +45,82 @@ This feature treats the following constitution clauses as **non-negotiable** ass
 | Non-Negotiable #5: Graceful degradation | Field offline mode + sync-on-reconnect (FR-017) |
 | Quality Gate: Public outputs human-reviewed | No alert publishes without IC approval (FR-009 + FR-011) |
 
+## Clarifications — Session 2026-05-02 (pass 1)
+
+These clarifications resolve high-impact ambiguities surfaced during the first `/speckit.clarify`
+pass. Recommended answers were derived directly from the constitution (`.specify/memory/constitution.md` v1.2.0),
+prior specs (`001`, `017`, `027`, `028`, `029`), the ADR series under `docs/aidr/decisions/`, and the
+persona-need syntheses (`operational-input.md`, `sector-eastern-input.md`, `sector-southwest-input.md`,
+`sector-tc-input.md`).
+
+- **Q1: Are the parenthetical "operationally:" budgets in SC-001..SC-005 the contractual targets the suite
+  asserts pass/fail, or guidance for `speckit.plan`?**
+  → **A: Contractual.** SC-001 (≤ 2 min in-app + community-language reach after IC approval), SC-002
+  (≤ 5 / 15 / 30 min signal-to-action for AIIMS Level 1 / 2 / 3), SC-003 (≥ 24 h evacuation lead vs seed
+  reference), SC-004 (≤ 7 clicks routine, ≤ 12 clicks mutual-aid lifecycle) and SC-005 (≥ 30 %
+  projected loss-reduction proxy on the post-handover Economic environment view) are now contractual
+  operator-visible thresholds the suite asserts. Plan phase may tighten, never relax.
+  *Sources: constitution §II-A AIIMS Levels 1/2/3, §IV Auditability ≤ 2 s; FR-010, FR-023(d); ASM-010.*
+
+- **Q2: Which specific community languages MUST be in scope for FR-014 / SC-001 vulnerable-population
+  coverage on AU territory?**
+  → **A:** Baseline is **Simplified Chinese** (v1 CALD language pack inherited from
+  `specs/001-disaster-response-hub/spec.md` NFR-013 / ASM-004), **plus an Aboriginal & Torres Strait
+  Islander language placeholder rendered on at least one warning per hazard category** (per
+  constitution §VI-C and `operational-input.md` PIO must-do "Localise into relevant languages incl.
+  Aboriginal and Torres Strait Islander languages where needed"). Canonical BCP-47 identifier selection
+  for any additional CALD or ATSI variants is **deferred to plan-phase `research.md`** per the
+  precedent set in `specs/028-capstone-alignment/spec.md` clarification Q ("Defer — canonical
+  identifier selection resolved in each owning spec's `research.md`"). Non-AU language packs (PH/JP/BD)
+  remain deferred per OOS-001 and spec-028.
+  *Sources: spec-001 NFR-013, ASM-004; spec-028 FR-006; constitution §VI-C; `operational-input.md` PIO.*
+
+- **Q3: Is FR-018's Foundry carve-out requirement display-only, or does it also enforce
+  data-minimisation at the model gateway (constitution NN#2)?**
+  → **A: Display + gateway enforcement + registry currency (all three).** The suite must (a) assert
+  the AU-region badge / banner on every route processing regulated platform data, (b) submit a
+  synthetic PSPF-marked or PII-bearing payload through the platform model gateway and assert it is
+  denied or masked before reaching any non-AU model-hosting endpoint, and (c) read the named
+  carve-out registry (`infra/parameters/foundry-carveout.yaml` or its successor) and assert
+  `review_date` is current (within 90 days) and `approver_identities[]` is non-empty.
+  *Sources: constitution NN#2 §3 ("data-minimisation controls at the platform's model gateway");
+  `docs/aidr/decisions/adr-033-phi-shadow-boundary.md` Layer 2 (three-classifier filter,
+  deny-by-default); `docs/aidr/decisions/adr-032-oidc-supersession.md` (deploy-time carve-out
+  enforcement restored); `specs/029-progressive-delivery-pipeline/spec.md` FR-018.*
+
+- **Q4: Does the suite carry a numeric upper bound for CI consumability (SC-011 / FR-022 / FR-023)?**
+  → **A: Yes — ≤ 30 min wall-clock on a developer machine and ≤ 45 min wall-clock on the CI gate
+  runner (`ubuntu-latest` shape).** Without a numeric ceiling, FR-023's "act as a CI quality gate"
+  cannot be enforced deterministically. If exceeded, the plan phase shards the suite across runners.
+  *Sources: `specs/029-progressive-delivery-pipeline/spec.md` line 6 ("PR gates within 10 minutes" for
+  the lighter unit/contract path implies a longer but capped e2e budget); `specs/017-cd-pipeline/spec.md`
+  runner shape.*
+
+- **Q5: For the US5 / FR-024 iteration loop, what is the maximum number of iterations before the gate
+  escalates, and the rollback policy when a fix breaks an unrelated persona?**
+  → **A:** **Maximum 3 iteration cycles per gap before escalation to the project lead** (constitution
+  §Governance: "The project lead has final authority on architectural decisions"); each cycle is one
+  (objection → spec amendment → re-implement → re-run) round. **On regression detection** (any
+  previously-passing persona now failing), the gate stays `Not Ready`, the offending change is reverted
+  to the prior known-good revision (per `specs/017-cd-pipeline/spec.md` FR-004 and
+  `specs/029-progressive-delivery-pipeline/spec.md` FR-008), the gap register row carries a
+  `regression_detected` flag, the original gap returns to `Open`, and the iteration counter is reset
+  for that gap. Rollback evidence is captured for grading. (Codified in updated FR-024 + new FR-027.)
+  *Sources: constitution §Governance; spec-017 FR-004; spec-029 FR-008; ASM-006.*
+
+### Additional ambiguities resolved without separate questions
+
+- **FR-021 / OOS-007 — fixture RBAC drift**: Tightened in new ASM-011 — fixture-impersonated personas
+  inherit RBAC strictly from `bootstrap_seed_data()`'s identity registry; no fixture-only identities
+  are permitted, so test impersonation cannot drift from real RBAC.
+- **ASM-006 — 85-agent review mechanics**: Tightened — orchestration is owned by the US5 iteration
+  loop runner; "meritorious" is decided by ≥ 2/3 majority of the agent panel; ties and final sign-off
+  rest with the project lead per constitution §Governance.
+- **HYP-002 — 30 % gap-uplift threshold**: Clarified as a *falsification trigger that re-scopes* (per
+  `specs/027-spec-hardening/spec.md` FR-018 hypothesis format), **not** a hard suite-fail; if the
+  threshold is crossed the AU-validated cohort still ships, and the un-validated routes/features spawn
+  a follow-on uplift feature.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Capstone-outcome traceability per persona is provable from the UI (Priority: P1)
@@ -165,20 +241,21 @@ The 85-agent (operational + sector + technical) review consumes the latest suite
 - **FR-011**: System MUST support AWS warnings in three states (Advice, Watch and Act, Emergency Warning) using the nested model (level + hazard/location + action statement), correct hazard iconography, de-escalation, and all-clear, asserted in `cross-cutting/aws-warning-compliance.spec.ts` and parameterised across hazard types (fire, flood, storm, cyclone, heat, other).
 - **FR-012**: System MUST support the 5-stage evacuation flow (Decision → Warning → Withdrawal → Shelter → Return), evacuation types (total / partial / phased), approaches (directed / recommended / self-initiated) and shelter-in-place, with explicit prioritisation for vulnerable populations (Aboriginal & Torres Strait Islander, CALD, disability, children, older persons, homeless, tourists, institutional care), asserted in `cross-cutting/evacuation-five-stage.spec.ts`.
 - **FR-013**: System MUST track all four recovery environments (Social, Built, Economic, Natural) and a managed handover from response to recovery, asserted in `cross-cutting/recovery-environments.spec.ts` and tied to outcome **#5** (30% economic-loss reduction).
-- **FR-014**: System MUST support multilingual alert payloads for ≥ 1 community language per warning category and pass automated WCAG 2.2 AA conformance scans on dashboards and warning surfaces, asserted in `cross-cutting/accessibility-and-multilingual.spec.ts`.
+- **FR-014**: System MUST support multilingual alert payloads for ≥ 1 community language per warning category, with the contractual baselines (per Clarifications Q2): (a) **Simplified Chinese** as the v1 CALD language pack inherited from `specs/001-disaster-response-hub/spec.md` NFR-013 / ASM-004, asserted on at least one warning per hazard category; (b) an **Aboriginal & Torres Strait Islander language placeholder** rendered on at least one warning per hazard category per constitution §VI-C and the Public Information Officer must-do in `operational-input.md`. Canonical BCP-47 identifier selection for any additional CALD or ATSI variants is **deferred to plan-phase `research.md`** per the `specs/028-capstone-alignment/spec.md` clarification precedent. Non-AU language packs (PH/JP/BD) remain deferred per OOS-001. The system MUST also pass automated WCAG 2.2 AA conformance scans on dashboards and warning surfaces. Asserted in `cross-cutting/accessibility-and-multilingual.spec.ts`.
 - **FR-015**: System MUST integrate the cross-jurisdiction handoff lifecycle (mutual aid, COMDISPLAN, DACC, NCM, NJCOP) such that the same incident COP is visible to the relevant neighbouring jurisdictions and the Commonwealth coordinator, asserted in `sectors/commonwealth/nema.*` and `sectors/<jurisdiction>/cross-jurisdiction-*.spec.ts`.
 - **FR-016**: System MUST exercise multi-hazard scenarios (bushfire, flood, cyclone, storm, heat, earthquake/tsunami) across the persona suites such that each capstone-outcome assertion (#1..#5) holds for at least two distinct hazard types.
 - **FR-017**: System MUST support offline / degraded-mode for field roles with queue-and-sync semantics, idempotent dedupe by client correlation ID, conservative life-safety defaults for stale data, and an offline-banner indicator, asserted in `cross-cutting/field-offline-mode.spec.ts`.
-- **FR-018**: System MUST display data-sovereignty signalling (AU-region banner/badge on routes processing regulated data, plus a discoverable Foundry-model carve-out list at `/governance/dashboard/compliance`) consistent with constitution Non-Negotiable #2 (incl. the Foundry carve-out conditions), asserted in `cross-cutting/data-sovereignty.spec.ts`.
+- **FR-018**: System MUST satisfy constitution Non-Negotiable #2 across **three contractual assertions** (per Clarifications Q3), all in `cross-cutting/data-sovereignty.spec.ts`: (a) **Display** — AU-region banner / badge present on every route processing regulated platform data, plus a discoverable Foundry-model carve-out list reachable from `/governance/dashboard/compliance`; (b) **Gateway enforcement** — a synthetic PSPF-marked or PII-bearing payload submitted through the platform model gateway is denied or masked before reaching any non-AU model-hosting endpoint, per constitution NN#2 §3 ("data-minimisation controls at the platform's model gateway") and the three-classifier deny-by-default filter described in `docs/aidr/decisions/adr-033-phi-shadow-boundary.md` Layer 2; (c) **Registry currency** — the named carve-out registry (`infra/parameters/foundry-carveout.yaml` or its successor, per `docs/aidr/decisions/adr-032-oidc-supersession.md` and `specs/029-progressive-delivery-pipeline/spec.md` FR-018) is read by the suite and asserted to have `review_date` within 90 days and a non-empty `approver_identities[]`.
 - **FR-019**: System MUST resolve `/workspaces/[personaId]` to a task-tailored landing page for every persona ID in the 68-persona inventory; missing routes are flagged `GAP-WORKSPACE-MISSING` (FR-005) and uplifted before sign-off.
 - **FR-020**: System MUST surface a span-of-control warning when a persona has > 7 direct reports in an incident, asserted in `cross-cutting/span-of-control.spec.ts`.
 
 #### Determinism, evidence, and CI gate
 
-- **FR-021**: System MUST run the suite against `http://127.0.0.1:3000/` using the existing deterministic seed-data path (`bootstrap_seed_data()` per the cited inputs) so that re-execution yields stable assertions; any non-determinism is a defect logged to the gap register.
+- **FR-021**: System MUST run the suite against `http://127.0.0.1:3000/` using the existing deterministic seed-data path (`bootstrap_seed_data()` per the cited inputs) so that re-execution yields stable assertions; any non-determinism is a defect logged to the gap register. Test fixtures impersonating personas (per OOS-007) MUST inherit RBAC strictly from `bootstrap_seed_data()`'s identity registry — no fixture-only identities are permitted — so test impersonation cannot drift from real RBAC (see ASM-011).
 - **FR-022**: System MUST emit machine-readable artefacts (JUnit XML + JSON trace + screenshot/video on failure) to a stable path under `tests/e2e/web-coverage/_artifacts/` so the CI gate, the iteration loop, and post-incident reviewers can consume them without manual interpretation.
 - **FR-023**: System MUST act as a CI quality gate: a run is `Capstone Ready` only when (a) every persona has ≥ 1 passing scenario, (b) every cross-cutting spec passes, (c) every state/territory has ≥ 1 passing cross-jurisdiction scenario, (d) every capstone outcome (#1..#5) has ≥ 1 traceable passing assertion, and (e) the gap register has no `Open` entries.
-- **FR-024**: System MUST support an iteration loop in which an agent-review objection becomes a spec amendment, the suite is updated, the gap register is updated, and the gate flips back to green when the objection is `Closed`.
+- **FR-024**: System MUST support an iteration loop in which an agent-review objection becomes a spec amendment, the suite is updated, the gap register is updated, and the gate flips back to green when the objection is `Closed`. Per Clarifications Q5, the loop is bounded: **maximum 3 iteration cycles per gap before escalation to the project lead** (constitution §Governance). Each cycle is one (objection → spec amendment → re-implement → re-run) round. On the 4th unresolved cycle the gap register row is flagged `escalated:project-lead` and the gate stays `Not Ready` pending project-lead disposition.
+- **FR-027** *(added during Clarifications Q5)*: System MUST detect regressions during the iteration loop. If any persona scenario that was passing in the prior suite run fails after a fix is merged for a different gap, the suite MUST (a) keep the gate at `Not Ready`, (b) revert the offending change to the prior known-good revision per `specs/017-cd-pipeline/spec.md` FR-004 and `specs/029-progressive-delivery-pipeline/spec.md` FR-008, (c) tag the relevant gap register row with `regression_detected`, return its status to `Open`, and reset its iteration counter, and (d) capture the rollback evidence (failing test, reverted commit SHA, restored revision) for grading.
 
 #### Closed-loop coverage uplift (the WHAT, not the HOW)
 
@@ -204,35 +281,36 @@ Outcome-proxy metrics below are technology-agnostic targets the Playwright suite
 
 ### Measurable Outcomes
 
-- **SC-001 (Outcome #1: Save 1,000+ lives annually)**: For every published Emergency Warning in the suite, the warning passes IC approval, includes the AWS-compliant nested model, and reaches its target audience surfaces (in-app + at least one community-language variant) within 2 minutes of approval. Vulnerable-population coverage filters (ATSI, CALD, disability, children, older persons, homeless, tourists, institutional care) are present and operable on at least one warning per hazard category.
-- **SC-002 (Outcome #2: 50% faster response)**: For every persona scenario, the time from signal ingestion to IC-approved coordinated action recorded in the audit timeline is ≤ 50% of the persona's pre-suite baseline (operationally: ≤ 5 minutes for Level 1, ≤ 15 minutes for Level 2, ≤ 30 minutes for Level 3 incidents in the seed data). Span-of-control breaches surface within one COP refresh.
+- **SC-001 (Outcome #1: Save 1,000+ lives annually)** *(contractual; per Clarifications Q1)*: For every published Emergency Warning in the suite, the warning passes IC approval, includes the AWS-compliant nested model, and reaches its target audience surfaces (in-app + at least one community-language variant — Simplified Chinese baseline plus an ATSI-language placeholder per Clarifications Q2) within **≤ 2 minutes** of approval. Vulnerable-population coverage filters (ATSI, CALD, disability, children, older persons, homeless, tourists, institutional care) are present and operable on at least one warning per hazard category.
+- **SC-002 (Outcome #2: 50% faster response)** *(contractual; per Clarifications Q1)*: For every persona scenario, the time from signal ingestion to IC-approved coordinated action recorded in the audit timeline is **≤ 50 % of the persona's pre-suite baseline AND** absolutely **≤ 5 minutes for AIIMS Level 1, ≤ 15 minutes for Level 2, ≤ 30 minutes for Level 3** incidents in the seed data (whichever is stricter). Span-of-control breaches surface within one COP refresh (≤ 5 s per FR-008).
 - **SC-003 (Outcome #3: 24-hour-earlier evacuations)**: For every pre-warned hazard scenario in the suite (flood, cyclone, bushfire), the predictive risk → 5-stage evacuation flow is actionable from the relevant persona workspace at least 24 hours earlier than the reference timestamp embedded in the seed-data scenario, with evidence captured in the audit timeline.
-- **SC-004 (Outcome #4: 30% logistics efficiency)**: For every Logistics Officer / mutual-aid / DACC scenario, the logistics-ledger task-to-resource match completes in ≤ 70% of the persona's pre-suite baseline number of operator interactions (operationally: ≤ 7 clicks for routine allocations, ≤ 12 for mutual-aid lifecycle), with no manual reconciliation outside the UI.
-- **SC-005 (Outcome #5: 30% economic-loss reduction)**: For every recovery scenario, all four recovery environments (Social, Built, Economic, Natural) are visible and updatable from `/governance/dashboard/recovery`, and the response → recovery handover is a managed transition (not an abrupt switch), with the post-handover Economic environment showing baseline + projected loss-reduction proxy.
+- **SC-004 (Outcome #4: 30% logistics efficiency)** *(contractual; per Clarifications Q1)*: For every Logistics Officer / mutual-aid / DACC scenario, the logistics-ledger task-to-resource match completes in **≤ 70 % of the persona's pre-suite baseline number of operator interactions AND** absolutely **≤ 7 clicks for routine allocations, ≤ 12 clicks for the mutual-aid lifecycle** (whichever is stricter), with no manual reconciliation outside the UI.
+- **SC-005 (Outcome #5: 30% economic-loss reduction)** *(contractual; per Clarifications Q1)*: For every recovery scenario, all four recovery environments (Social, Built, Economic, Natural) are visible and updatable from `/governance/dashboard/recovery`, and the response → recovery handover is a managed transition (not an abrupt switch), with the post-handover Economic environment showing baseline + a **≥ 30 % projected loss-reduction proxy** versus the seed-data baseline (asserted by the suite as the contractual outcome-#5 threshold).
 - **SC-006 (Persona coverage)**: 100% (68 / 68) of the in-scope personas have ≥ 1 passing Playwright scenario.
 - **SC-007 (Cross-jurisdiction coverage)**: 100% (8 / 8) of Australian states and territories have ≥ 1 passing cross-jurisdiction scenario plus ≥ 1 passing Commonwealth-bridge scenario.
 - **SC-008 (Cross-cutting compliance)**: 100% of the cross-cutting specs (RBAC, COP latency, audit append-only, AWS, evacuation, recovery, accessibility, multilingual, offline mode, data sovereignty, span-of-control) pass on a clean run.
 - **SC-009 (Iteration loop closure)**: 100% of meritorious objections raised in the 85-agent review are resolved before sign-off; the gap register has zero `Open` entries.
 - **SC-010 (Determinism)**: The suite re-run (same seed) produces identical pass/fail signals on at least 3 consecutive executions (no flakes).
-- **SC-011 (Re-runnable as quality gate)**: The suite completes within an operational time budget for a developer machine and produces JUnit + JSON artefacts that a CI gate can consume without human interpretation.
+- **SC-011 (Re-runnable as quality gate)** *(contractual; per Clarifications Q4)*: The full suite completes within **≤ 30 minutes wall-clock on a developer machine** and **≤ 45 minutes wall-clock on the CI gate runner (`ubuntu-latest` shape)**, and produces JUnit + JSON artefacts (FR-022) that a CI gate can consume without human interpretation. If the budget is breached, plan-phase shards the suite across runners; the budget is never relaxed.
 
 ## Assumptions
 
 - **ASM-001**: The persona-need syntheses in `operational-input.md`, `sector-eastern-input.md`, `sector-southwest-input.md`, and `sector-tc-input.md` are authoritative for what each of the 68 personas must be able to do in the web app; suite content is derived from those files.
 - **ASM-002**: The bootstrap seed-data path (`bootstrap_seed_data()`) provides deterministic baseline state across operational + sector personas; suite re-runs on the same seed produce identical outcome-proxy assertions.
 - **ASM-003**: The current Next.js route tree (`/`, `/disasters`, `/incidents` (+`[id]`), `/governance` (+ `[dataSourceId]` + `assignments` + `compliance`), `/governance/dashboard` (+ `audit` / `compliance` / `readiness` / `recovery` / `risk`), `/operations` (+ `workflows`), `/preparedness`, `/simulations` (+ `[tenantId]` + `playback` + `create` + `reports` + `[reportId]`), `/workspaces` (+ `[personaId]`), `/eval` (+ `[runId]`)) is the in-scope route surface; routes a persona requires that are absent are uplift candidates for the implement phase, not blockers for the spec phase.
-- **ASM-004**: The capstone-outcome proxy thresholds in SC-001..SC-005 are the spec-level baselines; the plan phase calibrates exact numerical budgets per scenario from seed-data baselines and persona acceptance gates, without weakening intent.
+- **ASM-004**: The capstone-outcome proxy thresholds in SC-001..SC-005 are now **contractual** (per Clarifications Q1) — the suite asserts them pass/fail. The plan phase MAY tighten the numeric thresholds further per scenario from seed-data baselines and persona acceptance gates, but MUST NOT relax them.
 - **ASM-005**: Asia (PH, JP, BD) personas, hazards, and language variants are deferred per `028-capstone-alignment` and constitution amendment 1.2.0 / spec 029; no Asia persona appears in the 68-persona inventory or the success criteria. AU-only scope is legitimised by this assumption.
-- **ASM-006**: The 85-agent review (operational + sector + technical) is delivered as part of this feature's iteration loop; meritorious objections become spec amendments and re-implementation, not unresolved noise.
+- **ASM-006**: The 85-agent review (operational + sector + technical) is delivered as part of this feature's iteration loop and orchestrated by the User Story 5 runner. An objection is **"meritorious"** when it is supported by ≥ 2/3 majority of the relevant agent panel (panel = the personas whose scenarios the objection touches); ties and final sign-off rest with the **project lead** per constitution §Governance. Meritorious objections become spec amendments and re-implementation per FR-024 (max 3 iteration cycles per gap). Non-meritorious objections are recorded but do not block the gate.
 - **ASM-007**: Net-new Azure infrastructure is permitted only if essential for an identified gap and approved during plan phase by the technical agents; spec phase records intent, plan phase records design, implement phase records code.
 - **ASM-008**: AWS warnings, evacuation flows, recovery environments, audit, RBAC, accessibility, span-of-control, offline mode, and data sovereignty are constitutional baselines, not optional behaviours; suite asserts them irrespective of persona.
 - **ASM-009**: WCAG 2.2 AA, multilingual variants for ≥ 1 community language per warning category, and AU-region data-sovereignty banners are achievable under the existing platform; if not, the gap register flags them as uplift, not as acceptable variance.
-- **ASM-010**: Performance budgets in SC-002 (≤ 5 / 15 / 30 min for L1/L2/L3) and FR-008 (COP ≤ 5 s) and FR-010 (audit ≤ 2 s) are operator-visible behaviour budgets, not infrastructure SLOs; the plan phase translates them to engineering targets if needed.
+- **ASM-010**: Performance budgets in SC-002 (≤ 5 / 15 / 30 min for L1/L2/L3), FR-008 (COP ≤ 5 s), FR-010 (audit ≤ 2 s) and SC-011 (suite wall-clock ≤ 30 min dev / ≤ 45 min CI) are **contractual operator-visible behaviour budgets the suite asserts pass/fail** (per Clarifications Q1 / Q4), not infrastructure SLOs; the plan phase translates them to tighter engineering targets if needed but never relaxes them.
+- **ASM-011** *(added during Clarifications Q5)*: Test fixtures impersonating personas (per OOS-007) inherit RBAC strictly from `bootstrap_seed_data()`'s identity registry. No fixture-only identities are permitted. This guarantees that suite assertions about role-based denial / approval reflect the real RBAC contract, not a test-side simplification.
 
 ## Hypotheses
 
 - **HYP-001**: We believe a persona-driven Playwright suite that asserts capstone-outcome proxies on every scenario will produce a credible, repeatable signal of capstone readiness for the AMA web application; we will know we are wrong if 3 consecutive clean runs disagree on pass/fail by > 0% (any flake), or if rubric evaluators dispute the validity of the outcome proxies during the 85-agent review.
-- **HYP-002**: We believe AIIMS-aligned RBAC, COP refresh ≤ 5 s, audit append-only ≤ 2 s, AWS-compliant warnings, 5-stage evacuation, and 4 recovery environments are mostly already present in the web app such that gap-uplift work is bounded; we will know we are wrong if > 30% of the 68 personas require new routes or features that the existing route tree (ASM-003) does not cover.
+- **HYP-002**: We believe AIIMS-aligned RBAC, COP refresh ≤ 5 s, audit append-only ≤ 2 s, AWS-compliant warnings, 5-stage evacuation, and 4 recovery environments are mostly already present in the web app such that gap-uplift work is bounded; we will know we are wrong if > 30% of the 68 personas require new routes or features that the existing route tree (ASM-003) does not cover. Per Clarifications, the 30 % threshold is a **falsification trigger that re-scopes** (per `specs/027-spec-hardening/spec.md` FR-018 hypothesis format), **not** a hard suite-fail: if crossed, the AU-validated cohort still ships and the un-validated routes/features spawn a follow-on uplift feature; the gate proceeds on the validated cohort.
 - **HYP-003**: We believe deferring Asia (PH/JP/BD) coverage to a later spec is acceptable for the capstone graders given AMA's Australia-first framing in spec 028; we will know we are wrong if the rubric grading flags Asia coverage as a non-deferable critical-path criterion in the 85-agent review.
 
 ## Out of Scope
