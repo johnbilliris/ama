@@ -144,30 +144,45 @@ def cmd_close(args: argparse.Namespace) -> None:
 
 
 def cmd_regress(args: argparse.Namespace) -> None:
-    """Reopen a previously closed gap with regression evidence (FR-027)."""
+    """Reopen a previously closed gap with regression evidence (FR-027).
+
+    Per data-model §2 invariants table: the Closed → Reopened transition resets
+    ``iteration_count`` to 0 (a regression starts a fresh remediation budget),
+    populates the ``regression_evidence`` block, and tags the row
+    ``regression_detected``. The 3-cycle escalation guard (FR-024) still fires
+    when a gap is regressed *and* the prior iteration_count was already at the
+    cap; we honour that by escalating before the reset.
+    """
 
     entries = load_register()
     idx = _find(entries, args.gap_id)
     entry = entries[idx]
-    if entry["iteration_count"] >= MAX_ITERATION_CYCLES:
-        # FR-024 max-3-cycles guard: regress beyond cap forces escalation.
+    prior_count = entry["iteration_count"]
+    if prior_count >= MAX_ITERATION_CYCLES:
+        # FR-024 max-3-cycles guard: regress beyond cap forces escalation,
+        # preserves the prior count for forensic traceability.
         entry["status"] = "Escalated"
     else:
         entry["status"] = "Reopened"
-    entry["iteration_count"] = min(entry["iteration_count"] + 1, MAX_ITERATION_CYCLES + 1)
+        entry["iteration_count"] = 0
     entry["regression_evidence"] = {
         "failing_test_id": args.failing_test_id,
         "reverted_commit_sha": args.reverted_commit_sha,
         "restored_revision_sha": args.restored_revision_sha,
         "detected_at": _now_iso(),
     }
+    entry["regression_detected"] = True
     entry["updated_at"] = _now_iso()
     validate_or_raise("gap-register-entry", entry)
     save_register(entries)
     append_audit(
         AUDIT_ROOT,
         "gap-regressed",
-        {"gap_id": args.gap_id, "iteration": entry["iteration_count"]},
+        {
+            "gap_id": args.gap_id,
+            "prior_iteration": prior_count,
+            "status": entry["status"],
+        },
     )
 
 
