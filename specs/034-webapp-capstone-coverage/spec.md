@@ -570,6 +570,239 @@ existing pass-1/2/3 clarifications + FRs in this spec, the persona-fixture contr
   FR-029(b); constitution §IV; User Story 4 Acceptance Scenario #3; §Cited inputs
   (Observer/Auditor + Executive Leader in the operational 10).*
 
+### Pass 5 — second-cycle ambiguity resolution
+
+Five second-order ambiguities introduced by Pass 4's own answers (Q20..Q24) and not
+yet propagated to the downstream artefacts (`plan.md`, `data-model.md`, `tasks.md`,
+`contracts/*`, `quickstart.md`, `.github/workflows/ci.yml`, and the live middleware
+code at `apps/api/app/middleware/test_support_guard.py`). Each is resolved here so the
+parent agent can run the post-Pass-5 checklist update + plan re-run without further
+ambiguity. Recommended answers were derived from the constitution
+(`.specify/memory/constitution.md` v1.2.0), Pass 1..4 of this spec, the Phase-1
+artefacts (`plan.md`, `research.md`, `data-model.md`, `contracts/*`,
+`checklists/validation.md`), the implemented middleware
+(`apps/api/app/middleware/test_support_guard.py:27`), the CI workflow
+(`.github/workflows/ci.yml:147`), and the ADR series under
+`docs/aidr/decisions/` (ADR-032 / ADR-033).
+
+- **Q25: Pass 3 Q19 declared the canonical test-support activation as
+  `AMA_TEST_SUPPORT_ENABLED=1` and labelled the implemented middleware
+  (`AMA_TEST_SUPPORT == "1"`) an implementation defect. Pass 4 Q21 + Q22 doubled
+  down on `AMA_TEST_SUPPORT_ENABLED=1`. But the actual contract
+  (`contracts/persona-fixture.contract.md` lines 21 / 37 / 41 / 139 / 187 / 196),
+  the implemented middleware
+  (`apps/api/app/middleware/test_support_guard.py:5,27,49,55`), `tasks.md` T007 + T010,
+  `quickstart.md` lines 36 / 58 / 62 / 200, and `plan.md` RISK-04 ALL use
+  `AMA_TEST_SUPPORT == "1"`. Only `spec.md` Pass 3 Q19 / Pass 4 Q21 / Pass 4 Q22 +
+  `quickstart.md` line 281 + `.github/workflows/ci.yml:147` use
+  `AMA_TEST_SUPPORT_ENABLED`. What is the canonical name?**
+  → **A: `AMA_TEST_SUPPORT=1` is canonical.** The persona-fixture contract is the
+  named source of truth for the dual-guard (Q19 itself cites it as authoritative).
+  The contract uses `AMA_TEST_SUPPORT == "1"`; the implemented middleware matches
+  the contract; tasks T007/T010 match the contract; `quickstart.md` body commands
+  match the contract. Pass 3 Q19's diagnosis was correct in direction (something
+  drifted) but **wrong about which side drifted**: the spec text + the CI workflow
+  drifted away from the contract, not the middleware. Therefore:
+  - **Code, contract, tasks T007/T010, and quickstart command lines stand
+    unchanged.**
+  - **Spec text in Pass 3 Q19, Pass 4 Q21 ("Activation"), and Pass 4 Q22 (any
+    embedded reference) is read as `AMA_TEST_SUPPORT=1`** going forward (no edits
+    re-litigating Q19..Q22 are required; this Q25 entry is the canonical override).
+  - **`.github/workflows/ci.yml:147` MUST be normalised to `AMA_TEST_SUPPORT: "1"`**
+    in plan/implement; the existing fix-up is the original Q19 implementation defect,
+    now correctly described as a CI-workflow defect (not a middleware defect).
+  - **`quickstart.md` line 281** (`AMA_TEST_SUPPORT_ENABLED=true`) is amended to
+    `AMA_TEST_SUPPORT=1` in the same plan/implement task that touches CI.
+  - The dual-guard semantic is unchanged: activation requires
+    `os.environ.get("AMA_TEST_SUPPORT") == "1"` AND `settings.environment in
+    {"dev","test"}`. The "Q19 implementation defect" item in this spec is now
+    re-scoped to "CI-workflow + quickstart line 281 normalisation".
+  *Sources: `apps/api/app/middleware/test_support_guard.py:27`;
+  `contracts/persona-fixture.contract.md` L21/L37; `tasks.md` T007/T010;
+  `plan.md` RISK-04; `.github/workflows/ci.yml:147`; Pass 3 Q19; Pass 4 Q21/Q22;
+  ASM-011 (contract is the source of truth for fixture identity binding); OOS-007
+  (no IdP changes — this is purely env-var naming).*
+
+- **Q26: Pass 4 Q22 says the deterministic suite-run-start timestamp is "surfaced
+  in the gap register's `cycle_start_ts` cell". But `contracts/gap-register-entry.schema.json`
+  has no `cycle_start_ts` field, and `data-model.md` `GapRegisterEntry` does not
+  declare one either. Where does `cycle_start_ts` actually live, and which artefact
+  publishes it?**
+  → **A: `cycle_start_ts` is suite-run-global metadata, NOT a per-gap cell.** Pass 4
+  Q22's wording ("gap register's cell") was loose; the correct home is a NEW
+  per-run metadata file emitted by the suite at start-up:
+  - **Location**: `tests/e2e/web-coverage/_artifacts/cycle-metadata.json`
+    (gitignored, written by the custom Playwright Reporter at `onBegin`).
+  - **Schema** (Phase-1 contract peer added in plan re-run, see Q27 + Q28
+    pattern): `contracts/cycle-metadata.schema.json`. Required keys:
+    `cycle_start_ts` (ISO-8601 UTC, sourced from
+    `bootstrap_seed_data().current_cycle_start`, deterministic per ASM-002),
+    `cycle_id` (UUID v4), `commit_sha` (HEAD of the run), `seed_hash` (SHA-256 of
+    the seed JSON used).
+  - **Consumers**: (a) the FR-028 audit-list endpoint (`/api/audit/list?cycle=current`)
+    reads `cycle_start_ts` directly from `bootstrap_seed_data().current_cycle_start`
+    (its server-side source — symmetric with the suite-side artefact); (b) the
+    `web-coverage-merge` job copies `cycle-metadata.json` into the canonical
+    `coverage-trace.json` header so the gap register CAN reference it via
+    `cycle_id` (NOT by duplicating the timestamp).
+  - **Gap register linkage**: `GapRegisterEntry` gains an OPTIONAL `cycle_id`
+    field (string|null) referencing the cycle in which the gap first opened —
+    this is a small additive change to `gap-register-entry.schema.json`, NOT a
+    new mandatory field. Plan re-run task (per Q27 / Q28 pattern) extends the
+    schema and `data-model.md §2`. The audit-list endpoint never reads the gap
+    register; it reads `bootstrap_seed_data().current_cycle_start` directly per
+    Pass 4 Q22.
+  - **Pass 4 Q22 is read as amended**: replace the phrase "surfaced in the gap
+    register's `cycle_start_ts` cell" with "surfaced in
+    `_artifacts/cycle-metadata.json` and referenced by `cycle_id` from any
+    affected `GapRegisterEntry`". No edit re-litigating Q22 is required; this
+    Q26 entry is the canonical override.
+  *Sources: Pass 4 Q22 (deterministic timestamp source =
+  `bootstrap_seed_data().current_cycle_start`); ASM-002 (deterministic seed);
+  FR-022 (machine-readable artefacts); `data-model.md §2` (existing
+  `GapRegisterEntry` shape); `plan.md` §"Custom reporter" L294-303 (existing
+  `onTestEnd` / `onEnd` hooks; `onBegin` is the natural place for cycle-metadata
+  emission); `contracts/gap-register-entry.schema.json` (additive, not breaking).*
+
+- **Q27: Pass 4 Q21 says "Plan phase MUST publish `contracts/outcome-evaluator.contract.md`",
+  but `plan.md` Phase-1 contracts list (L644-650) does not include it, and no task
+  in `tasks.md` creates it. When and how does this contract get written, and what
+  is its Phase-1 status?**
+  → **A: It is a Phase-1 contract peer of `coverage-trace-row.schema.json`, owned
+  by a NEW plan-phase catch-up task.** Concretely:
+  - **Promotion**: `contracts/outcome-evaluator.contract.md` is promoted to a
+    Phase-1 contract on plan re-run; `plan.md` §"Phase 1 Outputs" (L642-650) is
+    extended to include it alongside the existing 5 contracts. **Plan re-run
+    cannot exit Phase-1 without this contract committed.**
+  - **Authoring task**: a NEW task **T173** (added by `/speckit.tasks` re-run) of
+    the form "T173 [P] Author `contracts/outcome-evaluator.contract.md` codifying
+    Pass 4 Q21's request body, response 200, idempotency rule
+    (`(sc_id, scenario_id, persona_id, correlation_id)`), 404 / 400 error
+    contracts, and dual-guard activation per Q25; validate sample payloads with
+    `ajv` (consistent with T047 pattern); reference from FR-028 (already done in
+    spec); validate as a CI gate in `web-coverage-gate` (T153 extension)". T173
+    is a **dependency** of T146-T150 (the per-outcome capstone specs that consume
+    `/api/outcomes/sc-NNN/evaluate`).
+  - **Schema-form**: although the file extension is `.contract.md` (mirroring
+    `persona-fixture.contract.md`), the contract MUST embed a JSON-Schema block
+    for the request body so `scripts/web-coverage/_lib/schema_validators.py`
+    (T047) can validate evaluator payloads in CI. This is the pattern already
+    used by `persona-fixture.contract.md` lines 50-72.
+  - **Cross-link**: `data-model.md` gains a new entity `EvaluatorRequest` /
+    `EvaluatorResponse` cross-referenced to this contract; `plan.md` Phase-1
+    Outputs section adds the contract to its bullet list.
+  *Sources: Pass 4 Q21 (request/response codified); `plan.md` L644-650 (Phase-1
+  contracts list); `tasks.md` T047 (schema validator helper) + T146-T150
+  (capstone outcome specs that depend on the evaluator); `contracts/persona-fixture.contract.md`
+  (the `.contract.md` precedent + JSON-Schema embedding pattern);
+  `web-coverage-gate` job design in `plan.md` L442-447.*
+
+- **Q28: Pass 4 Q20 promises 68 depth-profile YAMLs at
+  `tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml` plus a
+  JSON-Schema at `_schema.json`, but `plan.md` §"Project Structure" L186-262 does
+  not list either path, and `tasks.md` has no task authoring them or wiring them
+  into the `web-coverage-gate`. Without these tasks, the FR-029 binary CI gate
+  cannot fire. Where do they enter the work breakdown?**
+  → **A: Add a NEW plan-phase task family (T174..T177) in the next `/speckit.tasks`
+  re-run, with `_schema.json` promoted to a Phase-1 contract.** Concretely:
+  - **T174 [P]**: Author `tests/e2e/web-coverage/_lib/depth-profiles/_schema.json`
+    (JSON-Schema draft-07) with the required keys enumerated in Pass 4 Q20:
+    `persona_id`, `workspace_route`, `safety_critical_workflow` (closed enum
+    extended per Pass 4 Q24: `approval | publish | allocate | decline |
+    queue-sync | escalate | handover | declare | reopen | observe-tamper-resist
+    | report-generate | export-evidence`), `workflow_steps` (ordered
+    `{action, target_selector, expected_response_status}` list),
+    `assertion_targets` (`{evaluator_endpoint?: "sc-001..sc-005"|null,
+    ui_selector?: string, audit_correlation_id_source: "header"|"response_body"}`
+    — note the evaluator-endpoint range is bounded per Q29), `capstone_outcome`
+    (1..5 per FR-016), `hazard` (constitution §III catalogue), optional
+    `multilingual_variant` (BCP-47 tag), optional `coverage_tags` (cross-jurisdiction
+    per Pass 4 Q23). Schema is promoted to a Phase-1 contract peer of
+    `coverage-trace-row.schema.json`; `plan.md` Phase-1 Outputs list grows by one.
+  - **T175 [parallelisable across 4 shards, total 68 YAMLs]**: Author one
+    `{persona-id}.depth.yaml` per persona in the FR-002 inventory. Each YAML is
+    sourced from the cited input files
+    (`{operational,sector-eastern,sector-southwest,sector-tc}-input.md`)
+    persona-must-do lists. Read-only personas (Observer/Auditor, Executive Leader,
+    plus any sector persona whose synthesis names no state-changing must-do)
+    use one of the Pass 4 Q24 enum values — never invented or omitted.
+  - **T176**: Extend `scripts/web-coverage/_lib/persona_spec_generator.py`
+    (the existing generator named in `quickstart.md` L291) to (a) load the
+    persona's `*.depth.yaml` from `tests/e2e/web-coverage/_lib/depth-profiles/`,
+    (b) validate against `_schema.json` via `scripts/web-coverage/_lib/schema_validators.py`
+    (T047), (c) emit the persona spec; (d) on missing OR invalid profile,
+    invoke `scripts/web-coverage/gap-register.py open --gap-id
+    GAP-DEPTH-PROFILE-MISSING-{persona-id}` per FR-005 + FR-029 final sentence.
+  - **T177**: Extend `web-coverage-gate` (T153) to fail when any persona in the
+    68-inventory lacks a valid `*.depth.yaml`; this realises the FR-029 binary
+    gate.
+  - **Plan-structure update**: `plan.md` §"Project Structure" L186-262 grows two
+    entries — `tests/e2e/web-coverage/_lib/depth-profiles/` (with its 68 YAMLs +
+    `_schema.json`) and an entry under §"Phase 1 Outputs" for the new contract.
+  - **Data-model update**: `data-model.md` gains a new entity `DepthProfile`
+    cross-referenced to `_schema.json`; the `safety_critical_workflow` enum is
+    listed in full.
+  *Sources: Pass 4 Q20 (location + schema requirements); Pass 4 Q24 (enum
+  extension); `plan.md` L240-244 (existing `scripts/web-coverage/_lib/` layout);
+  `tasks.md` T045 + T047 (analogous gap-register state-machine + schema-validator
+  patterns); `quickstart.md` L291 (existing generator path); FR-029 + FR-023
+  (binary CI gate).*
+
+- **Q29: Pass 4 Q21 sources `metric_inputs` from `data-model.md` §6
+  `HazardScenarioFixture.baseline`, which only carries 5 fields (lives_at_risk,
+  signal_to_action_ms, evac_lead_hours, logistics_clicks, economic_loss_aud) —
+  one per SC-001..SC-005. But FR-028 says `/api/outcomes/sc-{001..011}/evaluate`,
+  spanning 11 endpoints. SC-006..SC-011 are coverage / determinism / iteration /
+  CI-budget metrics, not per-scenario behaviour metrics. What `metric_inputs`
+  shape applies to SC-006..SC-011?**
+  → **A: Bound the FR-028 evaluator route to `sc-001..sc-005` only; SC-006..SC-011
+  are not route-served — they are derived from CI artefacts directly.** Concretely:
+  - **FR-028 routable range is `sc-001..sc-005`.** This matches Pass 4 Q21's
+    `metric_inputs` source (the 5-field `HazardScenarioFixture.baseline`) without
+    inventing a polymorphic per-criterion request shape.
+  - **SC-006..SC-011 metric ownership** (CI-artefact-derived; no evaluator
+    endpoint, no `test.fail` placeholder needed):
+    - **SC-006 (persona coverage)** — `web-coverage-gate` (T153) computes from
+      `coverage-trace.json` row count per persona; gate fails if < 68.
+    - **SC-007 (cross-jurisdiction coverage)** — `web-coverage-gate` (T153)
+      counts cross-jurisdiction trace tags; gate fails if any state/territory
+      missing or Commonwealth-bridge < 1.
+    - **SC-008 (cross-cutting compliance)** — `web-coverage-gate` (T153) reads
+      JUnit XML from `cross-cutting/` shard; gate fails on any failing spec.
+    - **SC-009 (iteration loop closure)** — `gap-register.py validate` (T045);
+      gate fails on any `Open` entry.
+    - **SC-010 (determinism)** — `verify-trace-determinism.ps1` (T051); gate
+      fails on byte-non-equal outputs.
+    - **SC-011 (re-runnable as quality gate)** — `web-coverage-shard` job
+      `timeout-minutes: 45` (per `plan.md` L419); gate fails on timeout.
+  - **Out-of-range behaviour**: `/api/outcomes/sc-006/evaluate` (and 007..011 +
+    any sc-NNN outside 001..005) returns HTTP 400 with body
+    `{ error: "evaluator_not_routable", sc_id: "...", suggested_action:
+    "see SC-XXX ownership in spec.md FR-028 / Pass 5 Q29 — this metric is
+    derived from CI artefacts (web-coverage-gate, gap-register, or
+    verify-trace-determinism), not from a workflow-state evaluator endpoint" }`.
+    This replaces Pass 4 Q21's narrower "out-of-range" rule (which only spoke to
+    sc-NNN outside 001..011).
+  - **FR-028 and `outcome-evaluator.contract.md` (Q27)** are amended at plan re-run
+    to reflect the routable range = sc-001..sc-005 (capstone-outcome metrics) and
+    the explicit non-routable-but-defined range = sc-006..sc-011 (CI-artefact
+    metrics with named CI-job owners).
+  - **Naming sanity**: this preserves the per-capstone-outcome 1:1 evaluator-to-outcome
+    mapping that Pass 3 Q16 originally proposed (5 outcomes → 5 evaluators); the
+    sc-006..sc-011 endpoints were a Pass-3 over-reach. SC-001..SC-011 in
+    `coverage-trace.md` continues to track ALL 11 success criteria; only the
+    evaluator-endpoint surface contracts to 5.
+  *Sources: Pass 4 Q21 (`metric_inputs` source = `HazardScenarioFixture.baseline`);
+  `data-model.md §6` (5-field baseline shape); FR-028 (route range);
+  Spec §SC-006..SC-011 (CI-artefact metric definitions); `plan.md` L442-447
+  (`web-coverage-gate` job is the authoritative owner of SC-006..SC-008);
+  `tasks.md` T045/T051/T153 (existing CI-artefact owners for SC-009/SC-010/SC-011);
+  Pass 3 Q16 (original 5-outcome scope of evaluator endpoints).*
+
+> **Pass 5 ambiguity count**: 5 raised (Q25..Q29), 5 answered, 0 deferred.
+> Pass 5 found 5 second-order ambiguities introduced by Pass 4's own
+> answers; all five were resolved here without re-litigating Q15..Q24.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Capstone-outcome traceability per persona is provable from the UI (Priority: P1)
