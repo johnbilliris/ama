@@ -115,6 +115,10 @@
         { "type": "null" }
       ],
       "description": "Optional reference to the suite-run cycle in which this gap first opened. Sourced from cycle-metadata.schema.json via tests/e2e/web-coverage/_artifacts/cycle-metadata.json. Added in cycle-1 amendment (spec.md Pass 5 Q26) — additive, NOT a required field; pre-cycle-1 entries omit or set null."
+    },
+    "regression_detected": {
+      "type": "boolean",
+      "description": "Set true by `gap-register.py regress` (FR-027) to flag rows whose regression_evidence block is populated. Additive optional flag — surfaced in the cycle-1 amendment when T183 added the `validate` subcommand and revealed this pre-existing drift between cmd_regress and the schema."
     }
   },
   "allOf": [

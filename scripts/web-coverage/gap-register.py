@@ -43,11 +43,36 @@ SPEC_ROOT = REPO_ROOT / "specs" / "034-webapp-capstone-coverage"
 REGISTER_MD = SPEC_ROOT / "gap-register.md"
 REGISTER_JSON = SPEC_ROOT / "gap-register.json"
 AUDIT_ROOT = SPEC_ROOT / "_evidence" / "audit" / "web-coverage-gaps"
+# Cycle-1 amendment (T183): suite-side cycle metadata emitted by the
+# Playwright reporter at onBegin (T182). Optional — when present, new
+# gap entries are stamped with cycle_id for FR-005 cross-cycle queries.
+CYCLE_METADATA_PATH = REPO_ROOT / "tests" / "e2e" / "web-coverage" / "_artifacts" / "cycle-metadata.json"
 MAX_ITERATION_CYCLES = 3
 
 
 def _now_iso() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
+
+
+def _read_current_cycle_id() -> str | None:
+    """Return the active cycle_id from the reporter's metadata file, or None.
+
+    The file is written once per Playwright run by ``coverage-reporter.ts``
+    (T182). It is gitignored — absence is normal in fresh checkouts and
+    in CLI flows that pre-date Playwright (e.g. seeding a gap from a
+    spec-review tribunal). When absent, gap entries simply omit the
+    optional ``cycle_id`` field — the gap-register-entry schema accepts
+    null/missing per the cycle-1 additive contract.
+    """
+
+    if not CYCLE_METADATA_PATH.exists():
+        return None
+    try:
+        payload = json.loads(CYCLE_METADATA_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    cycle_id = payload.get("cycle_id") if isinstance(payload, dict) else None
+    return cycle_id if isinstance(cycle_id, str) else None
 
 
 def load_register() -> list[dict]:
@@ -114,6 +139,12 @@ def cmd_open(args: argparse.Namespace) -> None:
         "tribunal_notes": args.notes or "",
         "updated_at": _now_iso(),
     }
+    # Cycle-1 amendment (T183, Q26): stamp the active cycle_id so FR-005
+    # cross-cycle reads can group gaps by the suite-run that opened them.
+    # Stays optional — null/missing is valid per the schema.
+    cycle_id = _read_current_cycle_id()
+    if cycle_id is not None:
+        entry["cycle_id"] = cycle_id
     validate_or_raise("gap-register-entry", entry)
     entries.append(entry)
     save_register(entries)
@@ -173,6 +204,13 @@ def cmd_regress(args: argparse.Namespace) -> None:
     }
     entry["regression_detected"] = True
     entry["updated_at"] = _now_iso()
+    # Cycle-1 amendment (T183, Q26 + FR-027): re-stamp cycle_id when a
+    # regression is detected — the FR-027 evidence cites the originating
+    # cycle so panels can audit cycle history rather than relying on
+    # detected_at timestamps alone.
+    cycle_id = _read_current_cycle_id()
+    if cycle_id is not None:
+        entry["cycle_id"] = cycle_id
     validate_or_raise("gap-register-entry", entry)
     save_register(entries)
     append_audit(
@@ -202,9 +240,70 @@ def cmd_escalate(args: argparse.Namespace) -> None:
     append_audit(AUDIT_ROOT, "gap-escalated", {"gap_id": args.gap_id})
 
 
-def cmd_list(_args: argparse.Namespace) -> None:
-    json.dump(load_register(), sys.stdout, indent=2, sort_keys=True)
+def _filter_by_cycle(entries: list[dict], cycle: str) -> list[dict]:
+    """Apply the FR-005 ``--cycle current|all`` filter (T183, Q26).
+
+    ``current`` keeps only rows whose ``cycle_id`` matches the active
+    suite-run cycle (sourced from ``cycle-metadata.json``). When that
+    file is absent (CLI run without a fresh Playwright invocation) we
+    fall back to returning *all* rows so operators don't see an empty
+    register; the caller logs a warning. ``all`` is opt-in and bypasses
+    the filter — the canonical FR-005 + FR-027 cross-cycle read.
+    """
+
+    if cycle == "all":
+        return list(entries)
+    active = _read_current_cycle_id()
+    if active is None:
+        # No reporter run in this checkout — degrade to ``all`` so the
+        # output is never empty for cycle-pre-aware callers. The CLI
+        # surfaces a notice via stderr (handled by the caller).
+        return list(entries)
+    return [e for e in entries if e.get("cycle_id") == active]
+
+
+def cmd_list(args: argparse.Namespace) -> None:
+    entries = load_register()
+    if args.cycle == "current" and _read_current_cycle_id() is None:
+        sys.stderr.write(
+            "notice: cycle-metadata.json missing — "
+            "'--cycle current' degraded to 'all' (run Playwright reporter to refresh)\n",
+        )
+    entries = _filter_by_cycle(entries, args.cycle)
+    json.dump(entries, sys.stdout, indent=2, sort_keys=True)
     sys.stdout.write("\n")
+
+
+def cmd_validate(args: argparse.Namespace) -> None:
+    """Re-validate every (filtered) entry against gap-register-entry.schema.json.
+
+    Cycle-1 amendment (T183): operators run this in CI to catch drift
+    after schema changes (e.g. the cycle_id additive field). Filter
+    semantics mirror ``cmd_list``: ``--cycle current`` (default)
+    validates only entries from the active suite-run; ``--cycle all``
+    validates the entire register.
+    """
+
+    entries = load_register()
+    if args.cycle == "current" and _read_current_cycle_id() is None:
+        sys.stderr.write(
+            "notice: cycle-metadata.json missing — "
+            "'--cycle current' degraded to 'all' (run Playwright reporter to refresh)\n",
+        )
+    filtered = _filter_by_cycle(entries, args.cycle)
+    failures: list[tuple[str, str]] = []
+    for entry in filtered:
+        try:
+            validate_or_raise("gap-register-entry", entry)
+        except Exception as exc:  # noqa: BLE001 - re-raise after report
+            failures.append((entry.get("gap_id", "<unknown>"), str(exc)))
+    if failures:
+        for gap_id, msg in failures:
+            sys.stderr.write(f"INVALID {gap_id}: {msg}\n")
+        raise SystemExit(
+            f"gap-register validate: {len(failures)}/{len(filtered)} entries failed schema",
+        )
+    sys.stdout.write(f"OK: {len(filtered)} entries validated (cycle={args.cycle})\n")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -244,7 +343,27 @@ def build_parser() -> argparse.ArgumentParser:
     p_escalate.set_defaults(func=cmd_escalate)
 
     p_list = sub.add_parser("list", help="print register JSON to stdout")
+    p_list.add_argument(
+        "--cycle",
+        choices=("current", "all"),
+        default="current",
+        help="filter by the active suite-run cycle (T183, Q26). 'current' "
+             "uses cycle_id from cycle-metadata.json (FR-005 default); "
+             "'all' is opt-in for FR-005 + FR-027 cross-cycle reads.",
+    )
     p_list.set_defaults(func=cmd_list)
+
+    p_validate = sub.add_parser(
+        "validate",
+        help="re-validate filtered entries against gap-register-entry.schema.json",
+    )
+    p_validate.add_argument(
+        "--cycle",
+        choices=("current", "all"),
+        default="current",
+        help="filter by the active suite-run cycle (T183, Q26). See 'list --help'.",
+    )
+    p_validate.set_defaults(func=cmd_validate)
 
     return p
 
