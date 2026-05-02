@@ -523,37 +523,37 @@ With multiple developers:
 
 #### SA (2)
 
-- [ ] T187 [P] [US3] Create `tests/e2e/web-coverage/sectors/sa/sapol.state-control-centre-rbac.spec.ts` — multi-LGA delegated authority + role separation; persona `sapol`; depth profile must specify `safety_critical_workflow: declare` and assertion target `evaluator:sc-001` or UI selector reflecting cross-LGA delegation persisted state; emit `@persona:sapol @outcome:1 @hazard:bushfire @fr:FR-030 @clause:I @p2` (FR-030, Q23; CHK205)
-- [ ] T188 [P] [US3] Create `tests/e2e/web-coverage/sectors/sa/ses-sa.long-distance-multi-lga-evacuation.spec.ts` — convoy staging + inter-LGA shelter routing under degraded comms; persona `ses-sa`; FR-016 hazard pair #4 (bushfire+TC) per CHK184; depth profile `safety_critical_workflow: handover`, evaluator `sc-003` (24-h evac lead) (FR-030, FR-016, Q23; CHK184, CHK205)
+- [X] T187 [P] [US3] Create `tests/e2e/web-coverage/sectors/sa/sapol.state-control-centre-rbac.spec.ts` — multi-LGA delegated authority + role separation; persona `sapol`; depth profile must specify `safety_critical_workflow: declare` and assertion target `evaluator:sc-001` or UI selector reflecting cross-LGA delegation persisted state; emit `@persona:sapol @outcome:1 @hazard:bushfire @fr:FR-030 @clause:I @p2` (FR-030, Q23; CHK205)
+- [X] T188 [P] [US3] Create `tests/e2e/web-coverage/sectors/sa/ses-sa.long-distance-multi-lga-evacuation.spec.ts` — convoy staging + inter-LGA shelter routing under degraded comms; persona `ses-sa`; FR-016 hazard pair #4 (bushfire+TC) per CHK184; depth profile `safety_critical_workflow: handover`, evaluator `sc-003` (24-h evac lead) (FR-030, FR-016, Q23; CHK184, CHK205)
 
 #### WA (2)
 
-- [ ] T189 [P] [US3] Create `tests/e2e/web-coverage/sectors/wa/dfes-wa.atsi-handoff-culturally-safe.spec.ts` — culturally safe messaging + audit trail to remote ATSI community; persona `dfes-wa`; depth profile `safety_critical_workflow: publish` with multilingual variant assertion; evaluator `sc-001` (lives saved with community-language variant) (FR-030, FR-014, Q23; CHK205)
-- [ ] T190 [P] [US3] Create `tests/e2e/web-coverage/sectors/wa/dfes-wa.iron-ore-critical-infrastructure.spec.ts` — port/rail/power-corridor protection under cyclone + bushfire compound; FR-016 hazard pair #4 per CHK184; depth profile `safety_critical_workflow: allocate`, evaluator `sc-004` (logistics clicks) (FR-030, FR-016, Q23; CHK184, CHK205)
+- [X] T189 [P] [US3] Create `tests/e2e/web-coverage/sectors/wa/dfes-wa.atsi-handoff-culturally-safe.spec.ts` — culturally safe messaging + audit trail to remote ATSI community; persona `dfes-wa`; depth profile `safety_critical_workflow: publish` with multilingual variant assertion; evaluator `sc-001` (lives saved with community-language variant) (FR-030, FR-014, Q23; CHK205)
+- [X] T190 [P] [US3] Create `tests/e2e/web-coverage/sectors/wa/dfes-wa.iron-ore-critical-infrastructure.spec.ts` — port/rail/power-corridor protection under cyclone + bushfire compound; FR-016 hazard pair #4 per CHK184; depth profile `safety_critical_workflow: allocate`, evaluator `sc-004` (logistics clicks) (FR-030, FR-016, Q23; CHK184, CHK205)
 
 #### TAS (2)
 
-- [ ] T191 [P] [US3] Create `tests/e2e/web-coverage/sectors/tas/at.island-isolation-aeromedical-disruption.spec.ts` — ferry/air medevac disruption + rescue-to-care handoff; persona `at` (Ambulance Tasmania); depth profile `safety_critical_workflow: handover`, evaluator `sc-001` (FR-030, Q23; CHK205)
-- [ ] T192 [P] [US3] Create `tests/e2e/web-coverage/sectors/tas/taspol.palawa-multilingual-warning.spec.ts` — palawa-language warning variant per FR-014 ATSI baseline; persona `taspol`; depth profile `safety_critical_workflow: publish`, evaluator `sc-001` with community-language variant assertion (FR-030, FR-014, Q23; CHK205)
+- [X] T191 [P] [US3] Create `tests/e2e/web-coverage/sectors/tas/at.island-isolation-aeromedical-disruption.spec.ts` — ferry/air medevac disruption + rescue-to-care handoff; persona `at` (Ambulance Tasmania); depth profile `safety_critical_workflow: handover`, evaluator `sc-001` (FR-030, Q23; CHK205)
+- [X] T192 [P] [US3] Create `tests/e2e/web-coverage/sectors/tas/taspol.palawa-multilingual-warning.spec.ts` — palawa-language warning variant per FR-014 ATSI baseline; persona `taspol`; depth profile `safety_critical_workflow: publish`, evaluator `sc-001` with community-language variant assertion (FR-030, FR-014, Q23; CHK205)
 
 #### ACT (2)
 
-- [ ] T193 [P] [US3] Create `tests/e2e/web-coverage/sectors/act/afp.national-capital-security-mechanics.spec.ts` — Parliament/Defence precincts + Commonwealth tenancy escalation; persona `afp`; depth profile `safety_critical_workflow: escalate`, evaluator `sc-002` (signal-to-action) (FR-030, Q23; CHK185)
-- [ ] T194 [P] [US3] Create `tests/e2e/web-coverage/sectors/act/ses-act.territory-emergency-declaration.spec.ts` — territory-government declaration mechanics; persona `ses-act`; depth profile `safety_critical_workflow: declare`, evaluator `sc-001` (FR-030, Q23; CHK185)
+- [X] T193 [P] [US3] Create `tests/e2e/web-coverage/sectors/act/afp.national-capital-security-mechanics.spec.ts` — Parliament/Defence precincts + Commonwealth tenancy escalation; persona `afp`; depth profile `safety_critical_workflow: escalate`, evaluator `sc-002` (signal-to-action) (FR-030, Q23; CHK185)
+- [X] T194 [P] [US3] Create `tests/e2e/web-coverage/sectors/act/ses-act.territory-emergency-declaration.spec.ts` — territory-government declaration mechanics; persona `ses-act`; depth profile `safety_critical_workflow: declare`, evaluator `sc-001` (FR-030, Q23; CHK185)
 
 #### NT (2)
 
-- [ ] T195 [P] [US3] Create `tests/e2e/web-coverage/sectors/nt/ntes.atsi-multilingual-at-persona-level.spec.ts` — NT-specific palawa/Yolŋu/Kriol variants applied at persona scope (NOT just cross-cutting); persona `ntes`; depth profile `safety_critical_workflow: publish`, evaluator `sc-001` with community-language variant assertion (FR-030, FR-014, Q23; CHK185)
-- [ ] T196 [P] [US3] Create `tests/e2e/web-coverage/sectors/nt/sja-nt.tropical-disease-remote-logistics.spec.ts` — tropical-disease surge + remote-area logistics chain; persona `sja-nt`; depth profile `safety_critical_workflow: allocate`, evaluator `sc-004` (logistics clicks ≤ 12 mutual-aid) (FR-030, Q23; CHK185)
+- [X] T195 [P] [US3] Create `tests/e2e/web-coverage/sectors/nt/ntes.atsi-multilingual-at-persona-level.spec.ts` — NT-specific palawa/Yolŋu/Kriol variants applied at persona scope (NOT just cross-cutting); persona `ntes`; depth profile `safety_critical_workflow: publish`, evaluator `sc-001` with community-language variant assertion (FR-030, FR-014, Q23; CHK185)
+- [X] T196 [P] [US3] Create `tests/e2e/web-coverage/sectors/nt/sja-nt.tropical-disease-remote-logistics.spec.ts` — tropical-disease surge + remote-area logistics chain; persona `sja-nt`; depth profile `safety_critical_workflow: allocate`, evaluator `sc-004` (logistics clicks ≤ 12 mutual-aid) (FR-030, Q23; CHK185)
 
 #### Commonwealth (2 — Q23 owning-persona placement)
 
-- [ ] T197 [P] [US3] Create `tests/e2e/web-coverage/sectors/commonwealth/bom-national.abc-sbs-warning-relay.spec.ts` — relay path with `Source = ABC/SBS` recorded in audit + multilingual variants per FR-014; also exercises FR-018 sovereignty triple at relay handoff; persona `bom-national`; depth profile `safety_critical_workflow: publish`, evaluator `sc-002` (signal-to-action) (FR-030, FR-014, FR-018, Q23; CHK185)
-- [ ] T198 [P] [US3] Create `tests/e2e/web-coverage/sectors/commonwealth/nema.dacc-jatwc-cross-jurisdiction.spec.ts` — DACC + JATWC handoff via `state-government` and `territory-government` cross-jurisdiction tags in `coverage_tags[]` per Q23; persona `nema` (Commonwealth-owned per spec.md L524); depth profile `safety_critical_workflow: handover`, evaluator `sc-003`; sits under `sectors/commonwealth/` per the Q23 owning-persona rule (moved from cross-sector) (FR-030, FR-015, Q23; CHK185)
+- [X] T197 [P] [US3] Create `tests/e2e/web-coverage/sectors/commonwealth/bom-national.abc-sbs-warning-relay.spec.ts` — relay path with `Source = ABC/SBS` recorded in audit + multilingual variants per FR-014; also exercises FR-018 sovereignty triple at relay handoff; persona `bom-national`; depth profile `safety_critical_workflow: publish`, evaluator `sc-002` (signal-to-action) (FR-030, FR-014, FR-018, Q23; CHK185)
+- [X] T198 [P] [US3] Create `tests/e2e/web-coverage/sectors/commonwealth/nema.dacc-jatwc-cross-jurisdiction.spec.ts` — DACC + JATWC handoff via `state-government` and `territory-government` cross-jurisdiction tags in `coverage_tags[]` per Q23; persona `nema` (Commonwealth-owned per spec.md L524); depth profile `safety_critical_workflow: handover`, evaluator `sc-003`; sits under `sectors/commonwealth/` per the Q23 owning-persona rule (moved from cross-sector) (FR-030, FR-015, Q23; CHK185)
 
 #### Cross-sector (1)
 
-- [ ] T199 [P] [US3] Create `tests/e2e/web-coverage/sectors/cross-sector/utility.insurance-recovery-handoff.spec.ts` — insurance recovery handoff producing Built + Economic Recovery Environment assertions per FR-013; persona `utility`; depth profile `safety_critical_workflow: handover`, evaluator `sc-005` (economic-loss reduction); FR-016 hazard pair #5 (riverine flood + severe storm) per CHK184 (FR-030, FR-013, FR-016, Q23; CHK184, CHK185)
+- [X] T199 [P] [US3] Create `tests/e2e/web-coverage/sectors/cross-sector/utility.insurance-recovery-handoff.spec.ts` — insurance recovery handoff producing Built + Economic Recovery Environment assertions per FR-013; persona `utility`; depth profile `safety_critical_workflow: handover`, evaluator `sc-005` (economic-loss reduction); FR-016 hazard pair #5 (riverine flood + severe storm) per CHK184 (FR-030, FR-013, FR-016, Q23; CHK184, CHK185)
 
 ### Phase 15: Env-var canonicalisation (Q25, CHK213-215)
 
