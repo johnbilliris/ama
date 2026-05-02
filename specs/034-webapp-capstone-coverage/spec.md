@@ -424,6 +424,152 @@ audit trail of merit validation.
 - OOS-001..OOS-010 are unchanged. No Asia personas, no IdP changes, no net-new infra
   beyond the already-approved `web-coverage-evidence` blob container.
 
+### Pass 4 — cycle-1 ambiguity resolution
+
+These five clarifications resolve under-specifications introduced by the cycle-1 amendments
+themselves (FR-028 / FR-029 / FR-030 / SC-012); Q15..Q19 are not re-litigated. Recommended
+answers were derived from the constitution (`.specify/memory/constitution.md` v1.2.0), the
+existing pass-1/2/3 clarifications + FRs in this spec, the persona-fixture contract
+(`contracts/persona-fixture.contract.md`), the data-model artefact
+(`specs/034-webapp-capstone-coverage/data-model.md`), the persona-need syntheses
+(`operational-input.md`, `sector-eastern-input.md`, `sector-southwest-input.md`,
+`sector-tc-input.md`), and the ADR series under `docs/aidr/decisions/`.
+
+- **Q20: What MUST each FR-029 depth-profile YAML carry, where do the files live, what
+  schema validates them, and how does the spec generator behave when a persona has no
+  depth profile?**
+  → **A: Codify the contract here.**
+  - **Location**: `tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml`
+    (one per persona, 68 total).
+  - **Schema**: `tests/e2e/web-coverage/_lib/depth-profiles/_schema.json` (JSON-Schema
+    draft-07). Required keys: `persona_id` (kebab-case, MUST resolve in
+    `bootstrap_seed_data().identities` per ASM-011); `workspace_route` (drawn from
+    ASM-003's route tree); `safety_critical_workflow` (enum
+    `approval | publish | allocate | decline | queue-sync | escalate | handover |
+    declare | reopen | observe-tamper-resist | report-generate | export-evidence` —
+    last three added per Q24 for read-only personas); `workflow_steps` (ordered
+    `{action, target_selector, expected_response_status}` list); `assertion_targets`
+    (`{ evaluator_endpoint?: "sc-001..sc-011"|null, ui_selector?: string,
+    audit_correlation_id_source: "header"|"response_body" }`); `capstone_outcome`
+    (1..5 per FR-016); `hazard` (constitution §III catalogue); optional
+    `multilingual_variant` (BCP-47 tag per FR-014); optional `coverage_tags` (for the
+    cross-jurisdiction rule in Q23).
+  - **Generator behaviour**: refuses to emit a spec when a persona's profile is absent
+    OR fails schema validation; CI fails at the depth-profile-validation step (binary
+    gate per FR-029 final sentence). **Opt-out is not permitted** — every persona in
+    the FR-002 inventory of 68 MUST have a profile; a missing or invalid profile emits
+    `GAP-DEPTH-PROFILE-MISSING` per FR-005 and blocks `Capstone Ready` per FR-023.
+  *Sources: FR-002 + FR-029 (depth contract); ASM-011 +
+  contracts/persona-fixture.contract.md (seed-registry binding); ASM-003 (route tree);
+  constitution §III (hazard catalogue) + §V-B (multilingual baseline); Q24 (read-only
+  enum extension).*
+
+- **Q21: What is the request/response schema for the FR-028 outcome evaluator
+  (`POST /api/outcomes/sc-{001..011}/evaluate`), what idempotency applies, and what
+  happens for unknown `scenario_id` or out-of-range `sc_id`?**
+  → **A: Plan phase MUST publish `contracts/outcome-evaluator.contract.md` with these
+  bindings:**
+  - **Request body**: `{ scenario_id: string (kebab-case), persona_id: string
+    (kebab-case, MUST resolve in seed registry per ASM-011), correlation_id: string
+    (UUID v4), metric_inputs: { ...sc-specific shape, sourced from data-model.md
+    HazardScenarioFixture.baseline } }`.
+  - **Response 200**: matches FR-028 — `{ status: "pass"|"fail"|"gap", evidence_refs:
+    string[], metric_value: number|null, threshold: number|null, audit_id: string }`.
+  - **Idempotency**: keyed by `(sc_id, scenario_id, persona_id, correlation_id)`. A
+    repeated request with the same key returns the same `audit_id` and verdict; a new
+    `correlation_id` triggers fresh evaluation and a new audit-timeline row.
+  - **Unknown `scenario_id`**: HTTP `404` with body `{ error: "scenario_not_found",
+    scenario_id: "...", suggested_action: "register in bootstrap_seed_data() or update
+    depth profile" }`. The suite MUST treat 404 as `GAP-EVALUATOR-SCENARIO-MISSING` per
+    FR-005 — silent pass is forbidden.
+  - **Out-of-range `sc_id`**: HTTP `400`; only `sc-001..sc-011` are routable.
+  - **Activation**: dual-guard per FR-021 (`AMA_TEST_SUPPORT_ENABLED=1` AND
+    `ENVIRONMENT in {dev,test}`); production registration is forbidden, mirroring the
+    persona-fixture contract.
+  *Sources: FR-021 + persona-fixture.contract.md (dual-guard activation); FR-028
+  (response shape); ASM-011 (seed-registry binding); FR-005 (gap register);
+  data-model.md HazardScenarioFixture.baseline; constitution §IV (audit identity +
+  rationale).*
+
+- **Q22: For the FR-028 audit-list endpoint, is the read-back current-cycle-only or
+  all-time, what pagination is supported, and what retention semantics apply?**
+  → **A: Current-cycle by default; opt-in for all-time; cursor-paginated; rows are
+  append-only forever.**
+  - **Request**: `GET /api/audit/list?correlation_id={uuid}&cycle={current|all}&limit={1..500}&cursor={opaque}`.
+  - **Default `cycle=current`**: returns rows with `audit_timestamp >=
+    bootstrap_seed_data().current_cycle_start` (a deterministic timestamp recorded at
+    suite-run start; surfaced in the gap register's `cycle_start_ts` cell). Default
+    chosen because pass-3 Q15 + Q16 motivated the endpoint to verify post-amendment
+    scenario behaviour, not historical state.
+  - **Opt-in `cycle=all`**: required for FR-005 status-transition reads (operator
+    identity, rationale, source PR / commit SHA across cycles) and FR-027 regression
+    evidence (failing Test ID + reverted commit SHA + restored revision).
+  - **Pagination**: cursor-based; response includes `next_cursor: string|null`;
+    `limit` defaults to 100 and is capped at 500 to bound CI runtime per SC-011.
+  - **Retention**: rows are append-only and **never deleted** (constitution §IV +
+    FR-010); the endpoint surface only filters and paginates, never truncates or
+    rewrites the timeline. Tamper attempts are themselves audit events (per Q24).
+  - **Response schema**: `{ count: number, items: AuditRow[], next_cursor: string|null,
+    cycle: "current"|"all" }` where `AuditRow` matches FR-010's required fields
+    (timestamp, rationale, confidence, source_refs, operator_identity, correlation_id).
+  *Sources: FR-005 (cross-cycle audit reads); FR-010 (append-only timeline); FR-027
+  (regression evidence); SC-011 (CI runtime budget); constitution §IV;
+  persona-fixture.contract.md (X-Correlation-Id pattern).*
+
+- **Q23: Some FR-030 scenarios reference cross-jurisdiction tags (`territory-government`,
+  `state-government` for DACC/JATWC; ABC/SBS for the BoM relay). Do they live under
+  `sectors/cross-sector/` or `sectors/commonwealth/`?**
+  → **A: Folder placement pivots on the *owning persona*, not the union of
+  cross-jurisdiction tags.** A scenario lives where its persona ID sits in §Suite Layout:
+  - `nema.dacc-jatwc-cross-jurisdiction.spec.ts` → `sectors/commonwealth/` (NEMA is
+    Commonwealth-canonical per §Cited inputs; FR-030 is amended below to move this entry
+    out of the cross-sector bullet).
+  - `bom-national.abc-sbs-warning-relay.spec.ts` → `sectors/commonwealth/` (BoM owns
+    the relay path; already correctly placed).
+  - `utility.insurance-recovery-handoff.spec.ts` → `sectors/cross-sector/` (`utility`
+    is in the cross-sector roster of 8 per §Cited inputs and §Suite Layout).
+  - All other FR-030 scenarios are unambiguous and stay in their named jurisdiction
+    folder.
+  Cross-jurisdiction reach is preserved via `coverage_tags` in the depth-profile YAML
+  (Q20) and a per-tuple row in `coverage-trace.md` (FR-004), so traceability remains
+  explicit while folder placement stays deterministic and the FR-001 file-naming
+  convention remains persona-id-rooted.
+  *Sources: §Cited inputs (Commonwealth roster of 11 includes NEMA + BoM-national;
+  cross-sector roster of 8 includes utility); FR-001 (naming convention); FR-003
+  (cross-jurisdiction per state/territory); FR-004 (per-tuple trace row); FR-015
+  (NEMA / BoM / GA cross-jurisdiction integration); §Suite Layout.*
+
+- **Q24: For personas whose canonical safety-critical workflow is read-only (Observer/
+  Auditor, Executive Leader, plus any sector persona whose persona-need synthesis names
+  no state-changing must-do), how is "state-changing transition" defined under
+  FR-029(b)? Is a tamper-attempt + read-back sufficient?**
+  → **A: Yes — and two audit-derivative state changes also qualify.** For audit-only /
+  read-only personas, FR-029(b) is satisfied by ANY of:
+  - **(a) Tamper-attempt + read-back** — the scenario submits a mutation request (e.g.,
+    `PATCH /api/incidents/{id}` or `DELETE /api/audit/{id}`) using the persona's RBAC
+    context, and asserts (i) the mutation is rejected with `403` or `409`, AND (ii)
+    the post-attempt `/api/audit/list?cycle=current` read-back contains an entry
+    recording the attempted mutation with `outcome: "denied"`,
+    `operator_identity: {persona_id}`, and a non-empty `rationale` (per constitution
+    §IV append-only auditability).
+  - **(b) Audit-derivative report generation** — Observer/Auditor personas may instead
+    exercise `/simulations/[tenantId]/playback` → `/simulations/reports/[reportId]` →
+    export, with the suite asserting the report ID is persisted, retrievable, and
+    audit-logged (this binds User Story 4 Acceptance Scenario #3).
+  - **(c) Briefing-acknowledgement state change** — Executive Leader personas may pin /
+    acknowledge a briefing item that is written to the audit timeline (operator
+    identity + rationale + timestamp) and surfaced under
+    `/governance/dashboard/readiness`.
+  Any of (a), (b), or (c) qualifies as the FR-029(b) state-changing transition; the
+  depth-profile YAML's `safety_critical_workflow` enum (Q20) is therefore extended with
+  `observe-tamper-resist`, `report-generate`, and `export-evidence`. FR-002's existing
+  example list ("an audit-list read-back that survives a tamper attempt") is consistent
+  with this; this clarification makes the read-only baseline explicit so the generator
+  does not flag read-only personas as depth-profile-missing.
+  *Sources: FR-002 example list; FR-020 "Warning is N/A" cohort = the read-only cohort;
+  FR-029(b); constitution §IV; User Story 4 Acceptance Scenario #3; §Cited inputs
+  (Observer/Auditor + Executive Leader in the operational 10).*
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Capstone-outcome traceability per persona is provable from the UI (Priority: P1)
@@ -581,9 +727,9 @@ The 85-agent (operational + sector + technical) review consumes the latest suite
 
 #### Cycle-1 amendments (added during Clarifications pass 3)
 
-- **FR-028** *(added during Clarifications Q16)*: System MUST expose capstone outcome evaluator endpoints `/api/outcomes/sc-{001..011}/evaluate` (one per success criterion) and an audit-list read-back endpoint `/api/audit/list` so the suite can drive workflow-state assertions (per FR-002, FR-009, FR-010, FR-029) without bailing on `test.fail(true, "<API not wired>")`. The evaluator endpoints accept a scenario ID + persona context and return a structured judgement (`status: pass|fail|gap`, `evidence_refs: []`, `metric_value: number|null`, `threshold: number|null`, `audit_id: string`); the audit-list endpoint accepts a correlation ID and returns the append-only timeline rows for that correlation. Both endpoints MUST be guarded by the dual-guard test-support contract in FR-021 + persona-fixture.contract.md (canonical activation: `AMA_TEST_SUPPORT_ENABLED=1` AND `ENVIRONMENT in {dev,test}`). They are route-only additions (no net-new Azure resource) so OOS-003 does not apply.
+- **FR-028** *(added during Clarifications Q16; refined during Pass 4 Q21 + Q22)*: System MUST expose capstone outcome evaluator endpoints `/api/outcomes/sc-{001..011}/evaluate` (one per success criterion) and an audit-list read-back endpoint `/api/audit/list` so the suite can drive workflow-state assertions (per FR-002, FR-009, FR-010, FR-029) without bailing on `test.fail(true, "<API not wired>")`. The evaluator endpoints accept a scenario ID + persona context and return a structured judgement (`status: pass|fail|gap`, `evidence_refs: []`, `metric_value: number|null`, `threshold: number|null`, `audit_id: string`); the audit-list endpoint accepts a correlation ID and returns the append-only timeline rows for that correlation. Both endpoints MUST be guarded by the dual-guard test-support contract in FR-021 + persona-fixture.contract.md (canonical activation: `AMA_TEST_SUPPORT_ENABLED=1` AND `ENVIRONMENT in {dev,test}`). They are route-only additions (no net-new Azure resource) so OOS-003 does not apply. The full evaluator request/response schema, idempotency rule (keyed by `(sc_id, scenario_id, persona_id, correlation_id)`), and error contract (`404` for unknown `scenario_id` → `GAP-EVALUATOR-SCENARIO-MISSING`; `400` for out-of-range `sc_id`) are codified in Pass 4 Q21 and the to-be-published `contracts/outcome-evaluator.contract.md` (plan phase). The audit-list endpoint's pagination (cursor-based, `limit` default 100, max 500), retention (append-only, never deleted), and `cycle={current|all}` semantics are codified in Pass 4 Q22.
 
-- **FR-029** *(added during Clarifications Q15)*: System MUST conform to a **per-persona scenario depth contract** for every Playwright spec under `tests/e2e/web-coverage/{operational,sectors/<jurisdiction>}/`. The contract requires each scenario file to (a) load the persona's primary workspace, (b) drive the persona-specific safety-critical workflow at least to a state-changing transition (approval, publish, allocate, decline, queue+sync, escalate, handover, declare, reopen), (c) assert the post-transition state via either the relevant capstone evaluator endpoint (FR-028) or a UI selector that reflects persisted state, and (d) read back the audit timeline via `/api/audit/list` to confirm the rationale, source, confidence, and operator identity were recorded. The persona spec generator under `scripts/web-coverage/_lib/` MUST consume a depth-profile YAML per persona (workflow steps + assertion targets) so generated specs are workflow-driven, not stubs. Depth-profile coverage is a binary CI gate (FR-023): a persona scenario without a depth profile fails the gate.
+- **FR-029** *(added during Clarifications Q15; refined during Pass 4 Q20 + Q24)*: System MUST conform to a **per-persona scenario depth contract** for every Playwright spec under `tests/e2e/web-coverage/{operational,sectors/<jurisdiction>}/`. The contract requires each scenario file to (a) load the persona's primary workspace, (b) drive the persona-specific safety-critical workflow at least to a state-changing transition (approval, publish, allocate, decline, queue+sync, escalate, handover, declare, reopen — extended for read-only personas per Pass 4 Q24 with `observe-tamper-resist`, `report-generate`, `export-evidence`), (c) assert the post-transition state via either the relevant capstone evaluator endpoint (FR-028) or a UI selector that reflects persisted state, and (d) read back the audit timeline via `/api/audit/list` to confirm the rationale, source, confidence, and operator identity were recorded. The persona spec generator under `scripts/web-coverage/_lib/` MUST consume a depth-profile YAML per persona (workflow steps + assertion targets) so generated specs are workflow-driven, not stubs. Depth-profile YAML location, JSON-Schema, required keys, and missing-profile gate behaviour are codified in Pass 4 Q20 (location: `tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml`; schema: `_schema.json`; missing or invalid profile emits `GAP-DEPTH-PROFILE-MISSING`). The read-only-persona variant of (b) — where Observer/Auditor, Executive Leader, and analogous personas use tamper-attempt + read-back, audit-derivative report generation, or briefing acknowledgement — is codified in Pass 4 Q24. Depth-profile coverage is a binary CI gate (FR-023): a persona scenario without a depth profile fails the gate.
 
 - **FR-030** *(added during Clarifications Q17 + Q18)*: System MUST provide the following net-new persona-level scenarios required by the cycle-1 review, all on personas already in the 68-persona FR-002 inventory:
   - **SA**: `sapol.state-control-centre-rbac.spec.ts` (multi-LGA delegated authority + role separation); `ses-sa.long-distance-multi-lga-evacuation.spec.ts` (convoy staging + inter-LGA shelter routing under degraded comms).
@@ -591,10 +737,10 @@ The 85-agent (operational + sector + technical) review consumes the latest suite
   - **TAS**: `at.island-isolation-aeromedical-disruption.spec.ts` (ferry/air medevac disruption + rescue-to-care handoff); `taspol.palawa-multilingual-warning.spec.ts` (palawa-language warning variant per FR-014 ATSI baseline).
   - **ACT**: `afp.national-capital-security-mechanics.spec.ts` (Parliament/Defence precincts + Commonwealth tenancy escalation); `ses-act.territory-emergency-declaration.spec.ts` (territory-government declaration mechanics).
   - **NT**: `ntes.atsi-multilingual-at-persona-level.spec.ts` (NT-specific palawa/Yolŋu/Kriol variants applied at persona scope, not just cross-cutting); `sja-nt.tropical-disease-remote-logistics.spec.ts` (tropical-disease surge + remote-area logistics chain).
-  - **Commonwealth**: `bom-national.abc-sbs-warning-relay.spec.ts` (relay path with `Source = ABC/SBS` recorded in audit + multilingual variants per FR-014); also exercises FR-018 sovereignty triple at relay handoff.
-  - **Cross-sector**: `utility.insurance-recovery-handoff.spec.ts` (insurance recovery handoff producing Built + Economic Recovery Environment assertions per FR-013); `nema.dacc-jatwc-cross-jurisdiction.spec.ts` (DACC + JATWC handoff via `state-government` and `territory-government`).
+  - **Commonwealth**: `bom-national.abc-sbs-warning-relay.spec.ts` (relay path with `Source = ABC/SBS` recorded in audit + multilingual variants per FR-014; also exercises FR-018 sovereignty triple at relay handoff); `nema.dacc-jatwc-cross-jurisdiction.spec.ts` (DACC + JATWC handoff via `state-government` and `territory-government` cross-jurisdiction tags; placed under `sectors/commonwealth/` per Pass 4 Q23 owning-persona rule, moved here from the cross-sector bullet).
+  - **Cross-sector**: `utility.insurance-recovery-handoff.spec.ts` (insurance recovery handoff producing Built + Economic Recovery Environment assertions per FR-013).
 
-  Each scenario MUST conform to FR-029's depth contract and emit at least one row in `coverage-trace.md` against the persona's primary capstone outcome (mapped per the cited input file's persona must-do list).
+  Each scenario MUST conform to FR-029's depth contract and emit at least one row in `coverage-trace.md` against the persona's primary capstone outcome (mapped per the cited input file's persona must-do list). Folder placement follows the Pass 4 Q23 owning-persona rule — multi-jurisdiction reach is recorded as `coverage_tags` in the depth-profile YAML (Q20), not used for folder placement.
 
 #### Closed-loop coverage uplift (the WHAT, not the HOW)
 
