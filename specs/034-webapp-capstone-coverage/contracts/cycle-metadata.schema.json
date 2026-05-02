@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.local/contracts/spec-034/cycle-metadata.schema.json",
+  "title": "CycleMetadata",
+  "description": "Per-suite-run global metadata emitted by the custom Playwright Reporter at onBegin and persisted to tests/e2e/web-coverage/_artifacts/cycle-metadata.json (gitignored). Authored under spec 034 cycle-1 amendment Q26 to host the deterministic cycle_start_ts that Pass 4 Q22 originally placed (loosely) on a per-gap GapRegisterEntry cell. The audit-list endpoint (FR-028, /api/audit/list?cycle=current) reads cycle_start_ts directly from bootstrap_seed_data().current_cycle_start server-side; this artefact is the symmetric suite-side surface. The web-coverage-merge job copies this file into the coverage-trace.json header so any GapRegisterEntry can reference the cycle by cycle_id rather than duplicating the timestamp. See research.md R-023 + spec.md Pass 5 Q26.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cycle_start_ts",
+    "cycle_id",
+    "commit_sha",
+    "seed_hash"
+  ],
+  "properties": {
+    "cycle_start_ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp sourced from bootstrap_seed_data().current_cycle_start (deterministic per ASM-002). MUST be byte-equal across re-runs on the same seed (SC-010)."
+    },
+    "cycle_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID v4 generated once per suite invocation. Referenced by GapRegisterEntry.cycle_id (additive, optional) when a gap first opens during this cycle."
+    },
+    "commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{7,40}$",
+      "description": "Full or short SHA of the HEAD commit the run was executed against."
+    },
+    "seed_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 (lowercase hex) of the seed JSON used by bootstrap_seed_data(). Confirms the suite ran against the seed the trace assertions assume."
+    }
+  }
+}

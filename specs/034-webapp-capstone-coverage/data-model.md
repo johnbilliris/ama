@@ -132,6 +132,12 @@ type GapRegisterEntry = {
 
   /** Last transition timestamp */
   updated_at: string;
+
+  /** Optional reference to the suite-run cycle in which this gap first opened.
+   *  Sourced from CycleMetadata.cycle_id (see entity 10). Added in cycle-1
+   *  amendment per spec.md Pass 5 Q26 — additive, NOT mandatory; pre-cycle-1
+   *  entries set this to null. Consumers MUST handle missing/null gracefully. */
+  cycle_id: string | null;
 };
 ```
 
@@ -364,6 +370,228 @@ type AgentObjection = {
 
 JSON Schema in `contracts/agent-objection.schema.json`.
 
+## Cycle-1 amendment entities
+
+> Added at plan re-run per spec.md passes 4 + 5 (Q20, Q21, Q24, Q26, Q27,
+> Q28, Q29). These entities back FR-028 (outcome evaluator + audit-list
+> endpoints), FR-029 (per-persona depth contract), FR-030 (net-new
+> persona scenarios), and SC-012 (review-cycle outcome closure). They
+> compose with — they do not replace — the cycle-0 entities above.
+
+### 10. `CycleMetadata` — Q26 (suite-run-global metadata)
+
+Purpose: deterministic per-run metadata emitted by the custom Playwright
+Reporter at `onBegin` and persisted to
+`tests/e2e/web-coverage/_artifacts/cycle-metadata.json` (gitignored).
+Hosts the `cycle_start_ts` value Pass 4 Q22 originally placed on a
+per-gap `GapRegisterEntry` cell — the correct home is per-run, not
+per-gap. The audit-list endpoint reads `cycle_start_ts` directly from
+`bootstrap_seed_data().current_cycle_start` server-side; this artefact
+is the symmetric suite-side surface.
+
+```typescript
+type CycleMetadata = {
+  /** ISO-8601 UTC timestamp from bootstrap_seed_data().current_cycle_start.
+   *  MUST be byte-equal across re-runs on the same seed (SC-010). */
+  cycle_start_ts: string;
+
+  /** UUID v4 generated once per suite invocation. Referenced by
+   *  GapRegisterEntry.cycle_id (additive, optional). */
+  cycle_id: string;
+
+  /** Full or short SHA of HEAD when the suite ran. */
+  commit_sha: string;
+
+  /** SHA-256 (lowercase hex) of the seed JSON used by
+   *  bootstrap_seed_data(). Confirms the suite ran against the seed
+   *  the trace assertions assume. */
+  seed_hash: string;
+};
+```
+
+JSON Schema in `contracts/cycle-metadata.schema.json`.
+
+### 11. `DepthProfile` — Q20 + Q24 + Q28 (FR-029 per-persona contract)
+
+Purpose: the per-persona scenario depth contract that the persona
+spec generator under `scripts/web-coverage/_lib/persona_spec_generator.py`
+consumes when emitting Playwright specs. One YAML per persona at
+`tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml`;
+68 total. A missing or invalid profile opens
+`GAP-DEPTH-PROFILE-MISSING-{persona-id}` per FR-005 and blocks
+`Capstone Ready` per FR-023.
+
+```typescript
+type DepthProfile = {
+  /** Kebab-case persona id; MUST resolve in bootstrap_seed_data().identities (ASM-011) */
+  persona_id: string;
+
+  /** Primary workspace route the persona enters at scenario start (drawn from ASM-003) */
+  workspace_route: `/${string}`;
+
+  /** Closed enum of 12 values — first 9 cover write personas (Q20),
+   *  last 3 cover read-only personas (Pass 4 Q24). Generators MUST NOT
+   *  silently downgrade a read-only persona to a route-only stub. */
+  safety_critical_workflow:
+    | "approval"
+    | "publish"
+    | "allocate"
+    | "decline"
+    | "queue-sync"
+    | "escalate"
+    | "handover"
+    | "declare"
+    | "reopen"
+    | "observe-tamper-resist"     // Q24 (a) — tamper-attempt + read-back
+    | "report-generate"            // Q24 (b) — audit-derivative report
+    | "export-evidence";           // Q24 (c) — briefing-acknowledgement
+
+  /** Ordered list of UI / API actions; each step ends in a status assertion */
+  workflow_steps: Array<{
+    action: string;
+    target_selector: string;       // role/label/test-id locator OR HTTP route — never raw CSS
+    expected_response_status: number;  // 100..599
+  }>;
+
+  /** Where the post-transition state is asserted. AT LEAST ONE of
+   *  evaluator_endpoint or ui_selector MUST be present (oneOf rule in schema). */
+  assertion_targets: {
+    /** Bound to FR-028 routable range per Pass 5 Q29 — sc-001..sc-005 only.
+     *  SC-006..SC-011 are CI-artefact-derived; using them here fails validation. */
+    evaluator_endpoint?: "sc-001" | "sc-002" | "sc-003" | "sc-004" | "sc-005" | null;
+
+    /** Playwright locator on which persisted state is asserted */
+    ui_selector?: string;
+
+    /** Where the spec retrieves X-Correlation-Id for the audit-list read-back */
+    audit_correlation_id_source: "header" | "response_body";
+  };
+
+  /** Capstone outcome 1..5 per FR-016; drives @outcome:N tag emission */
+  capstone_outcome: 1 | 2 | 3 | 4 | 5;
+
+  /** Constitution §III hazard catalogue (single primary hazard) */
+  hazard:
+    | "bushfire"
+    | "tropical-cyclone"
+    | "riverine-flood"
+    | "severe-storm"
+    | "extreme-heat"
+    | "earthquake"
+    | "tsunami"
+    | "pandemic";
+
+  /** Optional BCP-47 tag per FR-014 / Clarif Q2; canonical ATSI selection
+   *  deferred per research.md R-008 */
+  multilingual_variant?: string;
+
+  /** Optional cross-jurisdiction reach tags per Pass 4 Q23 — folder
+   *  placement pivots on owning persona; this field records reach
+   *  without breaking the FR-001 naming convention */
+  coverage_tags?: Array<
+    | "state-government" | "territory-government" | "local-government"
+    | "commonwealth" | "cross-sector" | "abc-sbs"
+    | "aboriginal-torres-strait-islander" | "remote-community"
+    | "critical-infrastructure" | "mutual-aid" | "dacc" | "jatwc"
+  >;
+};
+```
+
+JSON Schema (JSON-Schema **draft-07** — deliberately distinct from the
+2020-12 schemas under `contracts/`; the spec generator's `ajv` instance
+selects the meta-schema per file) at
+`tests/e2e/web-coverage/_lib/depth-profiles/_schema.json` (Phase-1
+contract peer of `coverage-trace-row.schema.json` per Q28).
+
+### 12. `EvaluatorRequest` — Q21 + Q27 (FR-028 evaluator request)
+
+Purpose: typed request body sent by the suite to
+`POST /api/outcomes/sc-{001..005}/evaluate`. Idempotency keying tuple
+is `(sc_id, scenario_id, persona_id, correlation_id)`.
+
+```typescript
+type EvaluatorRequest = {
+  /** Kebab-case scenario id; MUST resolve in bootstrap_seed_data() scenarios.
+   *  Unknown values trigger HTTP 404 → GAP-EVALUATOR-SCENARIO-MISSING (FR-005). */
+  scenario_id: string;
+
+  /** Kebab-case persona id; MUST resolve in bootstrap_seed_data().identities
+   *  per ASM-011. Fixture-only identities are forbidden. */
+  persona_id: string;
+
+  /** UUID v4 propagated via X-Correlation-Id. Idempotency tuple member. */
+  correlation_id: string;
+
+  /** Sc_id-specific shape; sourced from HazardScenarioFixture.baseline §6.
+   *  Per Pass 5 Q29 the routable range is sc-001..sc-005 only. */
+  metric_inputs:
+    | { lives_at_risk: number }                  // sc-001
+    | { signal_to_action_ms: number }            // sc-002
+    | { evac_lead_hours: number }                // sc-003
+    | { logistics_clicks: number }               // sc-004
+    | { economic_loss_aud: number };             // sc-005
+};
+```
+
+Embedded JSON Schema in `contracts/outcome-evaluator.contract.md`
+(under §"Request JSON Schema"). The same contract documents the per-
+`sc_id` `metric_inputs` sub-schemas.
+
+### 13. `EvaluatorResponse` — Q21 + Q27 (FR-028 evaluator response)
+
+Purpose: typed 200 response from
+`POST /api/outcomes/sc-{001..005}/evaluate`.
+
+```typescript
+type EvaluatorResponse = {
+  /** Three-state verdict (FR-028 contract). "gap" surfaces when the metric
+   *  is unknowable from the available baseline + actual readings. */
+  status: "pass" | "fail" | "gap";
+
+  /** Free-form pointers to evidence rows (e.g. "audit:{audit_id}",
+   *  "trace:tests/e2e/web-coverage/.../*.spec.ts"). Suite uses these to
+   *  enrich coverage-trace.md cells. */
+  evidence_refs: string[];
+
+  /** Numeric metric value computed by the evaluator; null when status=="gap" */
+  metric_value: number | null;
+
+  /** Threshold the evaluator compared against; null when status=="gap" */
+  threshold: number | null;
+
+  /** UUID v4 — resolves via /api/audit/list?correlation_id={id} to an
+   *  append-only audit row carrying rationale, source_refs, confidence,
+   *  operator_identity. The audit append SLO is ≤ 2 s (FR-004). */
+  audit_id: string;
+};
+```
+
+Embedded JSON Schema in `contracts/outcome-evaluator.contract.md`
+(under §"Response 200 JSON Schema").
+
+### Cycle-1 cross-entity invariants
+
+- `CycleMetadata.cycle_start_ts` MUST byte-equal
+  `bootstrap_seed_data().current_cycle_start` (the server-side source
+  read by the audit-list endpoint when `cycle=current`). Asymmetry is
+  detected by the merge job's determinism check (SC-010).
+- `GapRegisterEntry.cycle_id`, when non-null, MUST equal an existing
+  `CycleMetadata.cycle_id` from the run during which the gap first
+  opened. The field remains optional for backward compatibility.
+- `DepthProfile.persona_id` MUST be one of the 68 personas in the
+  FR-002 inventory. The CI gate (T177) fails if any inventory persona
+  lacks a valid profile.
+- `DepthProfile.assertion_targets.evaluator_endpoint`, when non-null,
+  MUST be in `{sc-001..sc-005}` (Pass 5 Q29). Setting it to
+  `sc-006..sc-011` fails schema validation.
+- For every `EvaluatorRequest`, the suite MUST observe an audit row
+  via `/api/audit/list?correlation_id={request.correlation_id}` whose
+  `operator_identity.persona_id == request.persona_id` and whose
+  `audit_id` matches the corresponding `EvaluatorResponse.audit_id`.
+- A repeated `EvaluatorRequest` with identical
+  `(sc_id, scenario_id, persona_id, correlation_id)` MUST return the
+  same `EvaluatorResponse.audit_id` and the same verdict (idempotency).
+
 ## Cross-entity invariants
 
 - Every `CoverageTraceRow.audit_evidence_id` (when non-null) MUST resolve
@@ -384,9 +612,20 @@ JSON Schema in `contracts/agent-objection.schema.json`.
 
 ## Validation surfaces
 
-- Every contract above has a JSON Schema in `contracts/`.
+- Every contract above has a JSON Schema in `contracts/`, except
+  `DepthProfile` whose JSON Schema lives at
+  `tests/e2e/web-coverage/_lib/depth-profiles/_schema.json` (it is a
+  Phase-1 contract peer per Pass 5 Q28; co-located with the data files
+  it validates so the spec generator can resolve it without a
+  cross-package import).
 - The merge job (`web-coverage-merge`) validates
-  `coverage-trace.json` and the JSONL audit shadow against their
-  schemas via `ajv`.
+  `coverage-trace.json`, the JSONL audit shadow, and
+  `_artifacts/cycle-metadata.json` against their schemas via `ajv`.
 - The `web-coverage-gate` job validates these cross-entity invariants
-  before posting the GitHub status check.
+  before posting the GitHub status check, including (cycle-1):
+  - every persona in the FR-002 inventory has a valid `*.depth.yaml` (T177);
+  - every captured `EvaluatorRequest` / `EvaluatorResponse` payload
+    matches its embedded schema (Q27);
+  - any 400 response from the evaluator is tagged `@expect:400` in the
+    originating spec, otherwise the gate fails on accidental
+    `sc-006..sc-011` URL references (Q29).

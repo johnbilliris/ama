@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://ama.local/contracts/spec-034/depth-profile.schema.json",
+  "title": "DepthProfile",
+  "description": "Per-persona scenario depth-profile YAML schema mandated by FR-029 (refined under Pass 4 Q20 + Q24 and Pass 5 Q28). One YAML per persona at tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml; 68 total (matching the FR-002 inventory). The persona spec generator under scripts/web-coverage/_lib/persona_spec_generator.py loads the matching YAML, validates against this schema, and emits a workflow-driven Playwright spec. Missing or invalid profiles open GAP-DEPTH-PROFILE-MISSING per FR-005 and block Capstone Ready per FR-023 (binary CI gate, opt-out forbidden). draft-07 is mandated by Pass 5 Q28 (deliberately distinct from the 2020-12 schemas under contracts/ — ajv must pick the right meta-schema per file).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "persona_id",
+    "workspace_route",
+    "safety_critical_workflow",
+    "workflow_steps",
+    "assertion_targets",
+    "capstone_outcome",
+    "hazard"
+  ],
+  "properties": {
+    "persona_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "description": "Kebab-case persona id. MUST resolve in bootstrap_seed_data().identities (ASM-011 binding via persona-fixture.contract.md). MUST be one of the 68 personas in FR-002's inventory."
+    },
+    "workspace_route": {
+      "type": "string",
+      "pattern": "^/[A-Za-z0-9/_:\\[\\]-]*$",
+      "description": "Primary workspace route the persona enters at scenario start. Drawn from ASM-003's route tree (e.g. /workspaces/[personaId], /incidents/[incidentId], /governance/dashboard/readiness)."
+    },
+    "safety_critical_workflow": {
+      "type": "string",
+      "enum": [
+        "approval",
+        "publish",
+        "allocate",
+        "decline",
+        "queue-sync",
+        "escalate",
+        "handover",
+        "declare",
+        "reopen",
+        "observe-tamper-resist",
+        "report-generate",
+        "export-evidence"
+      ],
+      "description": "Closed enum (12 values) covering FR-029(b) state-changing transitions for write personas (first 9) plus the read-only-persona variants from Pass 4 Q24 (last 3). Generators MUST NOT silently downgrade a read-only persona to a route-only stub — they MUST realise (a) tamper-attempt + read-back, (b) audit-derivative report-generate + export, or (c) briefing-acknowledgement when one of the read-only enum values is selected."
+    },
+    "workflow_steps": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ordered list of UI / API actions the generated spec drives. Each step ends in an assertion against expected_response_status.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action", "target_selector", "expected_response_status"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Imperative description of the step (e.g. 'click approve button', 'submit AWS draft', 'PATCH /api/incidents/{id}'). Free-form for human readability; the generator translates approved verb prefixes into Playwright primitives."
+          },
+          "target_selector": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Either a Playwright role/label/test-id locator (e.g. 'getByRole:button:Approve') or an HTTP route ('PATCH:/api/incidents/{id}'). Generator forbids raw CSS selectors per plan.md §Page-object responsibilities."
+          },
+          "expected_response_status": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 599,
+            "description": "HTTP status the step MUST observe (e.g. 200 for approval, 201 for publish, 403 for tamper-attempt, 409 for stale-state retry). Tamper-attempt steps under safety_critical_workflow=observe-tamper-resist MUST list 403 or 409."
+          }
+        }
+      }
+    },
+    "assertion_targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["audit_correlation_id_source"],
+      "description": "Where the generated spec asserts the post-transition state. AT LEAST ONE of evaluator_endpoint or ui_selector MUST be present (oneOf below).",
+      "properties": {
+        "evaluator_endpoint": {
+          "oneOf": [
+            { "type": "string", "enum": ["sc-001", "sc-002", "sc-003", "sc-004", "sc-005"] },
+            { "type": "null" }
+          ],
+          "description": "Bound to FR-028 routable range per Pass 5 Q29 — sc-001..sc-005 only. SC-006..SC-011 are CI-artefact-derived and have no evaluator endpoint; using them here MUST fail schema validation."
+        },
+        "ui_selector": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Playwright locator (role/label/test-id) on which the post-transition persisted state is asserted. Mutually inclusive with evaluator_endpoint — both MAY be present."
+        },
+        "audit_correlation_id_source": {
+          "type": "string",
+          "enum": ["header", "response_body"],
+          "description": "Where the spec retrieves the X-Correlation-Id used for the /api/audit/list read-back: from the response header (preferred, set by FastAPI middleware) or from the response body (legacy paths only)."
+        }
+      },
+      "oneOf": [
+        { "required": ["evaluator_endpoint"], "not": { "properties": { "evaluator_endpoint": { "type": "null" } } } },
+        { "required": ["ui_selector"] }
+      ]
+    },
+    "capstone_outcome": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Capstone outcome 1..5 per FR-016 (1=lives saved, 2=signal-to-action, 3=evac uplift, 4=logistics, 5=economic loss). Drives @outcome:N tag emission and coverage-trace.md row keying."
+    },
+    "hazard": {
+      "type": "string",
+      "enum": [
+        "bushfire",
+        "tropical-cyclone",
+        "riverine-flood",
+        "severe-storm",
+        "extreme-heat",
+        "earthquake",
+        "tsunami",
+        "pandemic"
+      ],
+      "description": "Constitution §III hazard catalogue. Single primary hazard for this persona's depth profile; multi-hazard reach is recorded via the @hazard:* tags emitted by the generator from the matching HazardScenarioFixture."
+    },
+    "multilingual_variant": {
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]+)*$",
+      "description": "Optional BCP-47 tag per FR-014 / Clarif Q2 (e.g. 'en', 'zh-Hans', 'aus-x-atsi-placeholder'). Missing variants are NOT a gate failure (Q20). Unrecognised tags fail schema validation; canonical ATSI selection deferred per plan-phase research.md R-008."
+    },
+    "coverage_tags": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "state-government",
+          "territory-government",
+          "local-government",
+          "commonwealth",
+          "cross-sector",
+          "abc-sbs",
+          "aboriginal-torres-strait-islander",
+          "remote-community",
+          "critical-infrastructure",
+          "mutual-aid",
+          "dacc",
+          "jatwc"
+        ]
+      },
+      "description": "Optional cross-jurisdiction reach tags per Pass 4 Q23 (folder placement pivots on owning persona; this field records the multi-jurisdiction reach without breaking the FR-001 file-naming convention). Used by web-coverage-gate to verify SC-007 (cross-jurisdiction coverage)."
+    }
+  }
+}

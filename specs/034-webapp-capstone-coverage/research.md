@@ -552,7 +552,244 @@ Each item follows: **Decision · Rationale · Alternatives considered**.
     floor too high; technical-input principal-engineer flags
     "85-agent disputes can be unbounded".
 
-## Summary of resolved unknowns
+## Cycle-1 amendments — research items added at plan re-run
+
+> Added per spec.md passes 4 + 5 (Q20..Q29). These items resolve
+> downstream design questions raised by FR-028, FR-029, FR-030, and
+> SC-012; cycle-0 R-001..R-019 above remain authoritative for their
+> original scope and are NOT re-litigated here.
+
+## R-020 — Depth-profile YAML schema design rationale (Q20)
+
+- **Decision**: One YAML per persona at
+  `tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml`
+  (68 total), validated by a co-located JSON-Schema **draft-07** file
+  `_schema.json` (note the deliberate version difference from the
+  2020-12 schemas under `contracts/` — see below). The schema's required
+  keys are: `persona_id` (must resolve in `bootstrap_seed_data().identities`
+  per ASM-011), `workspace_route` (drawn from ASM-003's route tree),
+  `safety_critical_workflow` (closed enum of 12 values — 9 write + 3
+  read-only per Q24), `workflow_steps` (ordered
+  `{action, target_selector, expected_response_status}`),
+  `assertion_targets` (`{evaluator_endpoint?: sc-001..sc-005|null,
+  ui_selector?, audit_correlation_id_source: header|response_body}`),
+  `capstone_outcome` (1..5), `hazard` (constitution §III catalogue).
+  Optional keys: `multilingual_variant` (BCP-47), `coverage_tags`
+  (cross-jurisdiction reach per Q23). The `assertion_targets` member
+  uses a `oneOf` rule requiring AT LEAST ONE of `evaluator_endpoint` or
+  `ui_selector`.
+- **Rationale**: A typed, schema-validated YAML lets the spec generator
+  refuse to emit a stub when a persona's profile is missing OR invalid,
+  realising the FR-029 binary CI gate without per-persona special-casing.
+  YAML (over JSON) keeps the per-persona files human-editable and
+  diff-readable for the 85-agent review tribunal. **Draft-07 was chosen
+  deliberately**: (a) it's the version `python-jsonschema` ships with
+  zero extra deps and the simplest version supported by the Node `ajv`
+  default ruleset; (b) it isolates the depth-profile validator from the
+  2020-12 schemas under `contracts/` so a meta-schema bump on one side
+  cannot silently break the other; (c) the `enum`, `oneOf`, and
+  `additionalProperties` features used here are all draft-07-stable. The
+  closed `safety_critical_workflow` enum is the gate that prevents
+  read-only personas from being silently downgraded to route-only stubs
+  (Q24's correctness invariant).
+- **Alternatives considered**:
+  - *JSON instead of YAML for the per-persona files* — rejected; less
+    diff-friendly for hand-curated content, and the seed-builder
+    already prefers YAML for human-editable parameter files
+    (`infra/parameters/foundry-carveout.yaml` precedent).
+  - *Single big YAML containing all 68 profiles* — rejected; merge
+    conflicts in a 68-entry file would dominate review-tribunal cycles,
+    and per-persona files allow `T175` to parallelise across 4 shards
+    (one shard ≈ 17 personas).
+  - *Use 2020-12 schema* — rejected; meta-schema mismatch with the
+    co-located Python `python-jsonschema` validator and unnecessary
+    burden on the spec generator (which already pins `ajv` for
+    `_schema.json` validation).
+
+## R-021 — Outcome-evaluator endpoint design (Q21 + Q27 + Q29)
+
+- **Decision**: `POST /api/outcomes/sc-{001..005}/evaluate` is a
+  route-only addition under `apps/api/app/api/routes/outcome_evaluator.py`
+  (no net-new Azure resource — OOS-003 does not apply). The contract is
+  codified in `contracts/outcome-evaluator.contract.md` (Phase-1 peer of
+  the cycle-0 contracts). Request body =
+  `{scenario_id, persona_id, correlation_id, metric_inputs}`; response
+  200 = `{status: pass|fail|gap, evidence_refs, metric_value, threshold,
+  audit_id}` per FR-028. Idempotency is keyed by
+  `(sc_id, scenario_id, persona_id, correlation_id)` — repeated requests
+  return the same `audit_id` and verdict; a new `correlation_id`
+  triggers fresh evaluation. Errors:
+  - HTTP **404** for unknown `scenario_id` (suite MUST treat as
+    `GAP-EVALUATOR-SCENARIO-MISSING`; silent pass forbidden).
+  - HTTP **400** for `sc_id ∉ {001..005}` (per Q29 — see R-021's
+    routable-range section below).
+  Activation reuses the persona-fixture dual guard
+  (`AMA_TEST_SUPPORT == "1"` AND `environment in {dev,test}`); router
+  is not registered in production.
+- **Rationale (idempotency tuple)**: `correlation_id` is the only
+  member of the tuple that the suite can deliberately rotate to force a
+  fresh evaluation while keeping `(sc_id, scenario_id, persona_id)`
+  stable — exactly what FR-027 needs to record a regression as a
+  distinct audit row without duplicating cell entries in
+  `coverage-trace.md`. The persona-id binding to
+  `bootstrap_seed_data().identities` is the same ASM-011 invariant the
+  persona-fixture contract enforces; rebuilding it in the evaluator
+  closes the loop where an FR-028 endpoint COULD have introduced a
+  fixture-only identity, which would have undermined the entire spec.
+- **Rationale (routable range bounded to sc-001..sc-005 — Q29)**:
+  `metric_inputs` are sourced from `HazardScenarioFixture.baseline`
+  (data-model.md §6), which carries exactly five fields — one per
+  capstone outcome. SC-006..SC-011 are CI-artefact-derived metrics
+  (persona coverage, cross-jurisdiction tags, cross-cutting JUnit XML,
+  iteration-loop closure, determinism, CI runtime) and have no
+  per-scenario `metric_inputs` shape. Forcing a polymorphic request
+  envelope to cover all 11 would have produced a fragile API surface
+  with type-narrow assertions for half the routes; bounding the
+  routable range to the 5 outcomes that actually have measurable
+  workflow-state evidence keeps the contract tight. The 400 body names
+  the CI-artefact owner of each non-routable `sc_id` so a misuse
+  produces a self-correcting failure rather than a silent degradation.
+- **Alternatives considered**:
+  - *Idempotency key includes a server-generated request hash* —
+    rejected; couples client retry behaviour to opaque server state and
+    breaks the determinism the suite needs to assert byte-equal
+    `audit_id` returns across re-runs.
+  - *Implement all 11 sc_id endpoints with polymorphic `metric_inputs`*
+    — rejected per Q29 (pointless route surface for metrics whose
+    natural home is CI artefacts; raises maintenance cost without
+    strengthening any FR).
+  - *200 with `status: "gap"` instead of 404 for unknown `scenario_id`*
+    — rejected; the suite needs a hard signal that the seed registry
+    drifted, not a soft signal indistinguishable from
+    "metric is unmeasurable in this scenario".
+
+## R-022 — Audit-list cycle filter retention model (Q22)
+
+- **Decision**: `GET /api/audit/list?correlation_id={uuid}&cycle={current|all}&limit={1..500}&cursor={opaque}`
+  lives under `apps/api/app/api/routes/audit_list.py`. Default
+  `cycle=current` filters by
+  `audit_timestamp >= bootstrap_seed_data().current_cycle_start` —
+  read directly server-side; the endpoint never consults the gap
+  register or the suite-side `cycle-metadata.json` artefact. Pagination
+  is cursor-based (`limit` default 100, max 500) to keep gate runs
+  bounded by SC-011's CI runtime budget. Retention is append-only
+  forever (constitution §IV + FR-010); the endpoint surface only
+  filters and paginates, never truncates or rewrites the timeline.
+  Tamper attempts ARE themselves audit events (per Q24 (a)) — they
+  appear in the same response with `outcome: "denied"`.
+- **Rationale**: Pass 4 Q22's "current-cycle by default" choice is
+  what makes the endpoint usable at gate time without dragging in
+  cross-cycle history that would inflate response payloads and obscure
+  the post-amendment behaviour the gap-closure path needs to verify.
+  `cycle=all` exists for the two genuinely cross-cycle reads (FR-005
+  status-transition operator-identity reads + FR-027 regression
+  evidence) and is opt-in only. Cursor-based pagination dovetails with
+  Cosmos DB's continuation-token model (the audit append uses Blob
+  Storage append-blobs internally; the read-side index is a thin
+  Cosmos projection — no new Cosmos container is added per
+  R-013, it reuses the existing audit projection).
+- **Alternatives considered**:
+  - *Offset-based pagination* — rejected; brittle when the timeline
+    grows during pagination (a write between two pages can shift
+    indices).
+  - *No cycle filter (always all-time)* — rejected; pushes
+    cross-cycle scan cost onto every gate run, breaching SC-011 on a
+    1000+-row timeline.
+  - *Server reads `cycle_start_ts` from a per-gap GapRegisterEntry
+    field* — rejected per Q26; the timestamp is per-run global, not
+    per-gap. The gap register would have had to be a side-input to a
+    runtime read path (i.e. a coupling violation).
+
+## R-023 — Cycle-metadata artefact location (Q26)
+
+- **Decision**: `cycle_start_ts`, `cycle_id`, `commit_sha`, and
+  `seed_hash` live in
+  `tests/e2e/web-coverage/_artifacts/cycle-metadata.json` (gitignored,
+  written by the custom Playwright Reporter at `onBegin`). JSON Schema
+  at `contracts/cycle-metadata.schema.json` (Phase-1 contract peer per
+  Q26). The `web-coverage-merge` job copies the file into the
+  canonical `coverage-trace.json` header so any `GapRegisterEntry` can
+  reference the cycle by `cycle_id` (additive, optional field) without
+  duplicating the timestamp. Pass 4 Q22's wording ("surfaced in the
+  gap register's `cycle_start_ts` cell") was loose; the canonical
+  override (Q26) places the value on a per-run artefact, not a per-gap
+  cell.
+- **Rationale**: The audit-list endpoint reads `cycle_start_ts`
+  directly from `bootstrap_seed_data().current_cycle_start` server-side
+  (R-022), so the suite-side artefact's job is purely *traceability*:
+  let any `coverage-trace.md` row or `gap-register.md` row be linked
+  back to the run during which it was emitted, without re-deriving the
+  timestamp from heuristic file-mtime checks. The `cycle_id` UUID is
+  generated once per suite invocation rather than reused from
+  `commit_sha` because two CI re-runs on the same SHA need distinct
+  cycle ids (regression detection MUST distinguish them).
+  `_artifacts/` placement reuses the existing gitignored shard-partial
+  convention from cycle-0 §Project Structure.
+- **Alternatives considered**:
+  - *Add `cycle_start_ts` as a mandatory field on every
+    GapRegisterEntry* — rejected; per-run global metadata duplicated
+    onto every gap row would (a) violate normalisation, (b) fail
+    `additionalProperties: false` schema checks every time the seed
+    timestamp changes, (c) require a non-additive schema bump (whereas
+    `cycle_id` as additive is non-breaking).
+  - *Emit the metadata to the canonical `coverage-trace.json` only
+    (no separate `cycle-metadata.json` file)* — rejected; the merge
+    job needs a per-shard pre-merge artefact to assert byte-equality,
+    and embedding the timestamp inside `coverage-trace.json` rows
+    would make the determinism check in T051 brittle.
+  - *Use `commit_sha` as the cycle id* — rejected; two CI re-runs on
+    the same SHA produce identical `commit_sha` but distinct
+    `cycle_id`, which is exactly what regression detection needs.
+
+## R-024 — Env-var canonicalisation: middleware is canonical (Q25)
+
+- **Decision**: `AMA_TEST_SUPPORT=1` is the canonical activation
+  variable across the entire suite. The persona-fixture contract
+  (`contracts/persona-fixture.contract.md` L21/L37/L41/L139/L187/L196)
+  is the authoritative source per ASM-011; the implemented middleware
+  (`apps/api/app/middleware/test_support_guard.py:5,27,49,55`), tasks
+  T007/T010, and `quickstart.md` body commands all match the contract.
+  The drift sits in three places that must be normalised at
+  plan/implement time (NOT here in research):
+  1. `.github/workflows/ci.yml:147` — currently
+     `AMA_TEST_SUPPORT_ENABLED: "true"`; MUST become
+     `AMA_TEST_SUPPORT: "1"` (matching the dual-guard middleware
+     contract).
+  2. `quickstart.md` line 281 — currently
+     `AMA_TEST_SUPPORT_ENABLED=true`; MUST become
+     `AMA_TEST_SUPPORT=1`.
+  3. Spec text in Pass 3 Q19, Pass 4 Q21 ("Activation"), and Pass 4
+     Q22 (any embedded reference) is **read as amended** to use
+     `AMA_TEST_SUPPORT` (no spec edit re-litigating Q19..Q22 is
+     required; spec.md Pass 5 Q25 IS the canonical override).
+- **Rationale**: Pass 3 Q19's diagnosis was correct in direction (env
+  var name drifted somewhere between contract and spec) but **wrong
+  about which side drifted**. The contract is the named source of
+  truth (ASM-011); the contract uses `AMA_TEST_SUPPORT`; therefore
+  the middleware (which matches the contract) is correct, and the
+  spec text + CI workflow + quickstart line 281 are the drift. This
+  inversion is captured here in research so that future agents and
+  PRs do not re-introduce `AMA_TEST_SUPPORT_ENABLED` "to match the
+  spec" — they would be matching drift, not the contract. OOS-007
+  (no IdP changes) still holds — this is purely an env-var name
+  question.
+- **Alternatives considered**:
+  - *Standardise on `AMA_TEST_SUPPORT_ENABLED` (rename middleware +
+    contract + tasks to match the spec text)* — rejected; the
+    contract is the named source of truth per ASM-011, and renaming
+    the middleware would (a) require a non-trivial migration of
+    every call site, (b) churn `tasks.md` T007/T010 which already
+    use the canonical name, and (c) re-introduce the same drift in
+    the next iteration cycle when an agent re-reads the contract.
+    Far cheaper to fix three drifted callers (CI line 147,
+    quickstart line 281, and the spec text override at Pass 5 Q25).
+  - *Support both names with a deprecation alias* — rejected; the
+    dual-guard semantics rely on a single boolean check at startup;
+    aliasing two env vars would force the middleware to run two
+    `os.environ.get` calls and would make production refusals
+    log-noisy if both vars happen to be set inconsistently.
+
+
 
 | #     | Topic                                  | Status   |
 |-------|----------------------------------------|----------|
@@ -575,5 +812,10 @@ Each item follows: **Decision · Rationale · Alternatives considered**.
 | R-017 | Tag taxonomy                            | Resolved |
 | R-018 | Outcome-proxy reuse of spec-015 vocab   | Resolved |
 | R-019 | Iteration-loop trigger surface          | Resolved |
+| R-020 | Depth-profile YAML schema (Q20 + Q24)   | Resolved (cycle-1) |
+| R-021 | Outcome-evaluator endpoint (Q21 + Q27 + Q29) | Resolved (cycle-1) |
+| R-022 | Audit-list cycle filter (Q22)           | Resolved (cycle-1) |
+| R-023 | Cycle-metadata artefact location (Q26)  | Resolved (cycle-1) |
+| R-024 | Env-var canonicalisation (Q25)          | Resolved (cycle-1) |
 
 No `NEEDS CLARIFICATION` markers remain. Phase 1 design proceeds.

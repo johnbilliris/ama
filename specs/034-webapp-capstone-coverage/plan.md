@@ -1,8 +1,8 @@
 # Implementation Plan: Web Application Capstone Coverage Validation
 
 **Branch**: `034-webapp-capstone-coverage` · **Spec**: `specs/034-webapp-capstone-coverage/spec.md`
-**Date**: 2025-11-20 · **Author**: planning agent (grounded in 17-agent technical input)
-**Status**: Phase 0 + Phase 1 complete · Ready for `/speckit.tasks`
+**Date**: 2025-11-20 (cycle-0) · 2026-02-05 (cycle-1 amendments) · **Author**: planning agent (grounded in 17-agent technical input)
+**Status**: Phase 0 + Phase 1 complete (cycle-0) · cycle-1 amendments landed (FR-028..FR-030, SC-012, depth-profile, evaluator) · Ready for `/speckit.tasks` re-run
 
 ## Summary
 
@@ -85,7 +85,22 @@ to start in production.
 | Non-Negotiable #5 Graceful Degradation                       | FR-017 offline / partition test asserts user-visible status banner + safe-mode UX.                                             |
 | QG-1 Public Outputs                                          | Audit / outputs surfaced in tests carry the `data-classification` landmark; redaction reporter prevents PII bleed.             |
 
-**Result**: PASS. No deviations require Complexity Tracking entries.
+**Result (cycle-0)**: PASS. No deviations require Complexity Tracking entries.
+
+### Cycle-1 amendment Constitution re-check
+
+> Re-evaluated 2026-02-05 after spec passes 4 + 5 (Q20..Q29; FR-028, FR-029, FR-030, SC-012). Same constitution v1.2.0; no clause additions; carve-outs unchanged.
+
+| Cycle-1 delta | Clause(s) consulted | How this amendment honours them |
+| ------------- | ------------------- | ------------------------------- |
+| **FR-028 — Outcome evaluator (`POST /api/outcomes/sc-{001..005}/evaluate`) + audit-list (`GET /api/audit/list`)** | §IV (Auditability) · §V-A (AWS) · NN-2 (Sovereignty) · §VIII (Cloud Sovereignty) | Route-only addition under `apps/api/app/api/routes/`; no net-new Azure resource (OOS-003 holds, §VIII compliant). Dual-guard activation (`AMA_TEST_SUPPORT == "1"` AND `environment ∈ {dev,test}`) reuses persona-fixture middleware (Q25) so the router is *physically un-importable* in production — NN-2 preserved. Idempotency tuple `(sc_id, scenario_id, persona_id, correlation_id)` plus append-only audit-list (default `cycle=current`, max `limit=500`, cursor pagination, tamper attempts themselves audited per Q24) discharge §IV's "every action observable" requirement. SC-001..SC-005 routable; SC-006..SC-011 → 400 per Q29 because their oracles (web-coverage-gate, gap-register, verify-trace-determinism) are CI-artefact-derived and a route would corrupt the audit narrative. |
+| **FR-029 — Per-persona scenario depth contract (`_lib/depth-profiles/{persona-id}.depth.yaml × 68` validated by `_schema.json` draft-07)** | §I (Primacy of Life) · §IV (Auditability) · NN-1 (HITL) | Closed enum (12 values per Q24, including the read-only triplet `observe-tamper-resist | report-generate | export-evidence`) prevents the silent-stub failure mode where a persona spec passes the suite while testing nothing safety-critical — the depth contract turns "did we test this?" into a binary, machine-checked question. T177 gate is non-bypassable. Where the panel finds the depth shallow it is FR-024-empowered to escalate without the planner being able to lower the bar. Every depth profile names the workflow + RBAC clauses + audit assertions + iteration-loop hooks — preserving §IV's traceability to constitutional clause. NN-1 unaffected: no autonomous action, only test depth specification. |
+| **FR-030 — Net-new persona-level scenarios (13 specs across SA / WA / TAS / ACT / NT / Commonwealth / cross-sector)** | §III (Multi-Hazard) · §VII-A/B/C (Recovery Doctrine) · AEMA #11 (Continual Improvement) | All scenarios bind to existing FR-002 personas (no new persona ids → no IdP changes, OOS-007 holds; folder placement pivots on owning persona per Q23, *not* tags). Each scenario must conform to FR-029's depth contract (no exemption). Scenario topics chosen to fill coverage gaps in §III (storm, heat, earthquake variants) and §VII recovery environments (Built+Economic e.g. utility-insurance handoff, Social e.g. ATSI-led recovery committees). All evidence audited via the same FR-028 audit-list — single accountability surface. |
+| **SC-012 — ≥ 80 % merit-validated objections closed per cycle** | AEMA #11 (Continual Improvement) · §IV (Auditability) | Per-cycle measurement via `review-log.py`; closure proven by three artefacts (gap register state + scenario PR pass + depth-contract assertion present) per the FR-024 escalation policy. Numerator/denominator/escalated set audited before each gate flip per CHK212 — meets §IV. Threshold codifies the constitutional principle that the system must *demonstrably learn* from each tribunal cycle; below-threshold closure auto-opens an iteration-loop gap per FR-005. |
+| **`_artifacts/cycle-metadata.json` + `cycle_id` on `GapRegisterEntry`** | §IV (Auditability) | Per-run cycle metadata is centralised (Q26) — no per-gap-row drift; `cycle_id` is OPTIONAL on `GapRegisterEntry` (additive, non-breaking) so cycle-0 historical rows remain valid while cycle-1 rows can be filtered. Fully discharges §IV's "evidence trail tied to cycle" implicit requirement that pass 4 surfaced. |
+| **Env-var canonicalisation: `AMA_TEST_SUPPORT=1`** | NN-2 (Sovereignty) · §VIII (Cloud Sovereignty) | Q25 confirmed the middleware + persona-fixture contract is canonical (CI line 147 + quickstart line 281 are drift to be fixed in T173 prep). Single env var name → impossible to "accidentally" enable test-support routes in prod via the wrong toggle — NN-2 holds. |
+
+**Cycle-1 verdict**: **PASS**. No new deviations. No new Azure resources (§VIII compliant). No IdP changes (OOS-007 holds). No persona inventory changes (FR-002 stable). All cycle-1 additions are either route-only (under existing FastAPI app), test-only (under `tests/e2e/`), or contract-only (under `specs/034-webapp-capstone-coverage/contracts/`). Complexity Tracking entries: **none required** — every addition is constitutionally pre-authorised by §IV (Auditability) or §I (Primacy of Life).
 
 ## Architecture Overview
 
@@ -226,27 +241,42 @@ tests/e2e/web-coverage/
     │   └── languagePackProbe.ts               # EN, zh-Hans, aus-x-atsi-placeholder
     ├── eslint-rules/
     │   └── no-waitfortimeout.cjs              # determinism guard
-    └── types/
-        ├── coverage.d.ts                      # CoverageTraceRow type
-        ├── gap.d.ts                           # GapRegisterEntry type
-        └── review.d.ts                        # ReviewVote type
+    ├── types/
+    │   ├── coverage.d.ts                      # CoverageTraceRow type
+    │   ├── gap.d.ts                           # GapRegisterEntry type
+    │   └── review.d.ts                        # ReviewVote type
+    └── reporter/
+        └── cycle-metadata.ts                  # NEW (cycle-1, Q26): onBegin emit of _artifacts/cycle-metadata.json
+
+tests/e2e/web-coverage/_lib/                   # NEW (cycle-1, Q20 + Q28)
+└── depth-profiles/
+    ├── _schema.json                           # JSON-Schema draft-07 for DepthProfile (Phase-1 contract peer)
+    └── {persona-id}.depth.yaml                # 68 files — one per FR-002 persona; consumed by persona_spec_generator.py
 
 tests/e2e/web-coverage/_artifacts/             # gitignored
 ├── coverage-trace.partial-{shard}.json
 ├── junit/
 ├── screenshots/
-└── gap-register-audit.jsonl                   # local dev fallback
+├── gap-register-audit.jsonl                   # local dev fallback
+└── cycle-metadata.json                        # NEW (cycle-1, Q26): per-run cycle_start_ts / cycle_id / commit_sha / seed_hash
 
 scripts/web-coverage/
 ├── gap-register.py                            # FR-005 state machine CLI
 ├── review-log.py                              # 85-agent vote recorder + panel resolver
 ├── trace-merge.py                             # multi-shard trace merger
-└── known-good.py                              # FR-027 manifest manager
+├── known-good.py                              # FR-027 manifest manager
+└── _lib/
+    ├── persona_spec_generator.py              # EXTENDED (cycle-1, Q28 / T176): loads + validates depth-profile YAML; opens GAP-DEPTH-PROFILE-MISSING on miss
+    └── schema_validators.py                   # T047: shared ajv-style validator (now also serves _schema.json + cycle-metadata.schema.json)
+
+apps/api/app/api/routes/                       # NEW (cycle-1, Q21 + Q22): route-only additions, OOS-003 does NOT apply
+├── outcome_evaluator.py                       # POST /api/outcomes/sc-{001..005}/evaluate; sc-006..sc-011 → 400 per Q29
+└── audit_list.py                              # GET /api/audit/list?correlation_id=&cycle=&limit=&cursor=
 
 specs/034-webapp-capstone-coverage/
 ├── plan.md                                    # this file
-├── research.md                                # phase 0
-├── data-model.md                              # phase 1
+├── research.md                                # phase 0 + R-020..R-024 (cycle-1)
+├── data-model.md                              # phase 1 + cycle-1 entities (DepthProfile, EvaluatorRequest, EvaluatorResponse, CycleMetadata)
 ├── quickstart.md                              # phase 1
 ├── coverage-trace.md                          # generated, deterministic
 ├── coverage-trace.json                        # generated, deterministic
@@ -255,10 +285,12 @@ specs/034-webapp-capstone-coverage/
 ├── known-good.json                            # FR-027 manifest (committed)
 └── contracts/
     ├── coverage-trace-row.schema.json
-    ├── gap-register-entry.schema.json
+    ├── gap-register-entry.schema.json         # cycle-1: additive cycle_id field (Q26)
     ├── review-vote.schema.json
     ├── persona-fixture.contract.md
-    └── agent-objection.schema.json
+    ├── agent-objection.schema.json
+    ├── outcome-evaluator.contract.md          # NEW (cycle-1, Q21 + Q27 + Q29): FR-028 evaluator + audit-list contract with embedded JSON Schemas
+    └── cycle-metadata.schema.json             # NEW (cycle-1, Q26): per-run metadata schema
 ```
 
 ### Page-object responsibilities
@@ -294,6 +326,12 @@ Each PO file exposes a typed surface for one route. Page objects MUST:
 ### Custom reporter
 
 Implements:
+- `onBegin(config, suite)` — *(NEW, cycle-1, Q26)* writes
+  `tests/e2e/web-coverage/_artifacts/cycle-metadata.json` with
+  `{cycle_start_ts, cycle_id, commit_sha, seed_hash}` validated against
+  `contracts/cycle-metadata.schema.json`. `cycle_start_ts` is read from
+  `bootstrap_seed_data().current_cycle_start` so it byte-equals the
+  server-side value the audit-list endpoint filters on (R-022 / R-023).
 - `onTestEnd(test, result)` — extracts annotations, dedupes by tuple,
   buffers in-memory.
 - `onEnd(result)` — flushes a partial JSON named
@@ -305,7 +343,25 @@ Implements:
 `scripts/web-coverage/trace-merge.py` runs in the merge job, sorts by
 `(persona, outcome, hazard, fr_id)`, joins duplicate test IDs with `;`,
 emits the canonical `coverage-trace.md` (Markdown table) and
-`coverage-trace.json` (JSON array).
+`coverage-trace.json` (JSON array). At cycle-1 it ALSO copies
+`_artifacts/cycle-metadata.json` into the canonical
+`coverage-trace.json` header (Q26) so any `GapRegisterEntry.cycle_id`
+reference resolves without consulting the gitignored artefact.
+
+### Cycle-1 net-new modules
+
+> Added per spec.md passes 4 + 5 (Q20, Q21, Q22, Q26, Q27, Q28).
+> Each is a route-only or script-only addition — no net-new Azure
+> resource (OOS-003 still holds), no net-new top-level files outside
+> the `_lib/`, `_artifacts/`, `apps/api/app/api/routes/`, and
+> `contracts/` paths called out in §Project Structure above.
+
+| Module | Path | Purpose | Source clarification |
+| ------ | ---- | ------- | -------------------- |
+| **Cycle metadata recorder** | `tests/e2e/web-coverage/_support/reporter/cycle-metadata.ts` | Writes `_artifacts/cycle-metadata.json` at `onBegin`. Schema-validates against `contracts/cycle-metadata.schema.json`. The merge job copies the file into the `coverage-trace.json` header. | Q26 (R-023) |
+| **Outcome evaluator router** | `apps/api/app/api/routes/outcome_evaluator.py` | FastAPI router exposing `POST /api/outcomes/sc-{001..005}/evaluate`. Idempotency keyed by `(sc_id, scenario_id, persona_id, correlation_id)`. Unknown `scenario_id` → 404 + `GAP-EVALUATOR-SCENARIO-MISSING`. `sc_id ∉ {001..005}` (i.e. `sc-006..sc-011` or any other value) → 400 per Q29 with body naming the CI-artefact owner. Dual-guard activation reuses the persona-fixture middleware (`AMA_TEST_SUPPORT == "1"` AND `environment in {dev,test}`) — router is not registered in production. | Q21 + Q27 + Q29 (R-021) |
+| **Audit-list endpoint** | `apps/api/app/api/routes/audit_list.py` | FastAPI router exposing `GET /api/audit/list?correlation_id={uuid}&cycle={current\|all}&limit={1..500}&cursor={opaque}`. Default `cycle=current` filters by `bootstrap_seed_data().current_cycle_start` (server-side; never reads the gap register or `_artifacts/cycle-metadata.json`). Cursor-based pagination, `limit` capped at 500. Append-only retention; tamper attempts are themselves audit rows per Q24 (a). | Q22 (R-022) |
+| **Depth-profile validator + generator extension** | `scripts/web-coverage/_lib/persona_spec_generator.py` (extended; T176) | Loads `tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml`, validates against `_schema.json` via `schema_validators.py` (T047), emits a workflow-driven Playwright spec. On missing OR invalid profile, calls `gap-register.py open --gap-id GAP-DEPTH-PROFILE-MISSING-{persona-id}` per FR-005 + FR-029 final sentence. Closed `safety_critical_workflow` enum (12 values incl. Q24 read-only triplet) prevents silent stub downgrade. | Q20 + Q24 + Q28 (R-020) |
 
 ## Data Flow — Trace Emitter
 
@@ -517,6 +573,30 @@ Veto resolution (per Q13):
   ≥ 50% of *all* 85 agents (`override_supermajority`).
 - All overrides written to `review-log.md` with rationale.
 
+### Cycle-1 closure threshold (SC-012)
+
+> Added 2026-02-05 per pass 5 / Q-clause closure: `review-log.py` MUST
+> track per-cycle closure rate and gate any cycle's "complete" stamp on
+> meeting the threshold.
+
+- **Threshold**: `≥ 80 %` of merit-validated objections raised in a
+  cycle MUST reach `GapRegisterEntry.status == Closed` before the cycle
+  is closed. Cycle id is read from `_artifacts/cycle-metadata.json`.
+- **Inclusion rule** (per FR-024 + Q22): objections that escalated
+  (`iteration_count ≥ 4`) are excluded from BOTH numerator and
+  denominator — escalation is a separate constitutional path (§IV
+  audit trail still captures them).
+- **Closure proof** (per CHK205): each closed gap row MUST cite
+  (a) its closing PR sha, (b) the post-amendment scenario passing on
+  that sha, AND (c) the closing PR diff containing the FR-029
+  depth-contract assertion the panel demanded.
+- **Below-threshold behaviour**: `web-coverage-iteration.yml` opens a
+  meta-gap `GAP-CYCLE-{id}-CLOSURE-RATE-LOW` with the missing closures
+  enumerated; the next cycle inherits these as carry-over Open gaps;
+  the gate (`web-coverage-gate`) records the numerator / denominator /
+  excluded-escalated set in the audit trail before flipping per
+  CHK212. No silent under-reporting.
+
 ## Net-New Azure Resources
 
 ### Adopted (1)
@@ -590,6 +670,7 @@ Drawn from technical-input.md (lines 300–311) plus this plan's analysis:
 | RISK-13 | Trace merge non-determinism (sort order) | Low | Medium | `trace-merge.py` sorts by tuple keys; CI re-runs merge twice on same inputs and asserts byte-equal output | qa-test-engineer |
 | RISK-14 | Adding evidence container subtly delays CD on first deploy | Low | Low | Idempotent Bicep; deployed once per env; no runtime hot-path | platform-engineer |
 | RISK-15 | Sector personas reference seeded orgs that break when seed schema evolves | Medium | Medium | `bootstrap_seed_data()` is the single SoT; persona fixture asserts org_id presence and fails fast with actionable message | data-engineer |
+| **RISK-16** *(cycle-1)* | **Depth-profile YAML drift across 68 personas** — A new persona is added under FR-002 but its `tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml` is forgotten, OR an existing profile is hand-edited and falls out of `_schema.json` (draft-07) compliance, silently regressing FR-029's depth contract and producing a ghost-stub spec that PASSES the suite but tests nothing | Medium | High | Defence-in-depth: (a) T174 ships `_schema.json` with closed `safety_critical_workflow` enum (12 values per Q24) — typos rejected; (b) T176 extends `persona_spec_generator.py` to FAIL the generator (not skip) and call `gap-register.py open --gap-id GAP-DEPTH-PROFILE-MISSING-{persona-id}` per FR-029 final sentence; (c) T177 extends `web-coverage-gate` to load every FR-002 inventory persona id and assert a matching valid YAML exists — gate is binary, opt-out forbidden; (d) review-log panel (FR-009) reviews each new YAML before merge per CHK196 | platform-engineer + spec-author |
 
 ## Hazard-Pair Coverage (FR-016)
 
@@ -617,6 +698,10 @@ Drawn from technical-input.md (lines 300–311) plus this plan's analysis:
 | SC-009 — Iteration loop closure: 0 `Open` gap-register entries at gate flip | `gap-register.py validate` + `web-coverage-gate` | gate job + nightly tribunal |
 | SC-010 — 3 consecutive identical runs (no flakes) | `known-good.py reaffirm` + `verify-trace-determinism.ps1` | nightly main-branch run |
 | SC-011 — Suite ≤ 30 min dev / ≤ 45 min CI | 4-worker default; sharding in CI; profile gates in `quickstart.md` | local profiling + `web-coverage-shard` matrix |
+| **SC-012 — ≥ 80 % merit-validated objections closed per cycle (cycle-1)** | `review-log.py` per-cycle calculation; closure evidenced by (a) `GapRegisterEntry.status == Closed` (FR-005), (b) post-amendment scenario passing on the closing PR's commit, (c) closing PR diff containing the FR-029 depth-contract assertion the panel demanded; escalated objections (`iteration_count ≥ 4`) excluded from BOTH numerator and denominator per FR-024 | `web-coverage-iteration.yml` nightly run + `web-coverage-gate` post-merge audit-row check (FR-010 captures numerator/denominator/escalated set before gate flip per CHK212) |
+| **FR-028 — Outcome evaluator + audit-list (cycle-1)** | `outcome_evaluator.py` (sc-001..sc-005 routable; sc-006..sc-011 → 400 per Q29), `audit_list.py` (cursor pagination, append-only); embedded JSON Schemas in `contracts/outcome-evaluator.contract.md` validated by `web-coverage-gate` (T153 extension per Q27); idempotency tuple `(sc_id, scenario_id, persona_id, correlation_id)`; dual-guard activation reuses persona-fixture middleware | `capstone/outcome-{1..5}-*.spec.ts` consume `/api/outcomes/sc-NNN/evaluate`; every `cross-cutting/audit-trail.spec.ts` row reads back via `/api/audit/list?correlation_id={id}` |
+| **FR-029 — Per-persona scenario depth contract (cycle-1)** | `_lib/depth-profiles/{persona-id}.depth.yaml × 68` validated by `_schema.json` (draft-07 per Q28); `persona_spec_generator.py` refuses to emit on missing/invalid profile and opens `GAP-DEPTH-PROFILE-MISSING-{persona-id}`; `web-coverage-gate` (T177 extension) fails when any FR-002 inventory persona lacks a valid profile (binary, opt-out forbidden); read-only-persona triplet `observe-tamper-resist | report-generate | export-evidence` prevents silent stub downgrade per Q24 | every persona spec under `operational/` + `sectors/<jurisdiction>/`; gate verification at `web-coverage-gate` |
+| **FR-030 — Net-new persona-level scenarios (cycle-1)** | 13 new persona specs across SA/WA/TAS/ACT/NT/Commonwealth/cross-sector authored under existing FR-002 personas (no new persona ids); folder placement pivots on owning persona per Q23; each conforms to FR-029's depth contract and emits ≥ 1 row in `coverage-trace.md` mapped to the persona's primary capstone outcome | `sectors/sa/`, `sectors/wa/`, `sectors/tas/`, `sectors/act/`, `sectors/nt/`, `sectors/commonwealth/`, `sectors/cross-sector/` plus depth-profile YAMLs in T175 |
 
 ## Project Structure Decisions
 
@@ -647,6 +732,9 @@ R-019 decisions, rationales, and rejected alternatives.
 - `contracts/review-vote.schema.json`
 - `contracts/persona-fixture.contract.md`
 - `contracts/agent-objection.schema.json`
+- **`contracts/outcome-evaluator.contract.md`** *(cycle-1, Q21 + Q27 + Q29)* — FR-028 contract with embedded request/response JSON Schemas (draft 2020-12); routable range bounded to `sc-001..sc-005`; `sc-006..sc-011` → 400 documenting the CI-artefact owner; idempotency keyed by `(sc_id, scenario_id, persona_id, correlation_id)`; ALSO contracts the `GET /api/audit/list` audit-list endpoint (Q22).
+- **`contracts/cycle-metadata.schema.json`** *(cycle-1, Q26)* — JSON-Schema 2020-12 for `_artifacts/cycle-metadata.json` (`cycle_start_ts`, `cycle_id`, `commit_sha`, `seed_hash`).
+- **`tests/e2e/web-coverage/_lib/depth-profiles/_schema.json`** *(cycle-1, Q20 + Q24 + Q28)* — JSON-Schema **draft-07** (deliberately distinct meta-schema from the contracts/ family, so the generator's per-file `ajv` instance picks the right meta-schema by location); 12-value closed `safety_critical_workflow` enum (extends 9-write set with read-only triplet `observe-tamper-resist | report-generate | export-evidence`). **Lives under `tests/` not `contracts/` per Q28** because it is co-located with the 68 YAML files it validates and is consumed by the spec generator at runtime.
 - `quickstart.md` — developer onboarding for spec 034.
 - Agent context updated via
   `.specify/scripts/powershell/update-agent-context.ps1 -AgentType copilot`.
@@ -672,5 +760,50 @@ constitutional/spec citations:
 |----------|-----------------------------------------|
 | Custom Playwright Reporter (vs. parsing JUnit) | JUnit cannot carry the per-row `Audit Evidence ID` cell required by FR-004 without `<system-out>` parsing, which is non-deterministic. |
 | New test-support endpoint (vs. JWT injection) | Spec ASM-011 forbids fixture-only identities; persona impersonation must use seeded RBAC. Building a real Entra ID test tenant adds infrastructure (rejected per "minimal Azure additions"). The env-gated endpoint is the lowest-risk realisation. |
+| **Cycle-1: New `outcome-evaluator` route group (vs. piggybacking on existing `/api/audits` or `/api/test-support`)** | Q21 demands a stable contract callable from suite tests with idempotency keyed by `(sc_id, scenario_id, persona_id, correlation_id)` — re-using `/api/audits` would conflate query and mutation surfaces; re-using `/api/test-support` would break the dual-guard activation principle (test-support is *seeding*, evaluator is *invocation*). Q29 further requires the routable range to be bounded to `sc-001..sc-005` — a dedicated router lets us return 400 with a structured "owner: web-coverage-gate" body for sc-006..sc-011 instead of muddying an existing endpoint's contract. |
+| **Cycle-1: Draft-07 meta-schema for `_lib/depth-profiles/_schema.json` (vs. matching the contracts/ family on draft 2020-12)** | Q28 directs the depth-profile schema to live with the YAML data files it validates (under `tests/`), not with contracts (under `specs/`). The spec generator's `ajv` instance is already configured per-file; standardising on a single meta-version would *force* the spec gen to load both meta-schemas anyway. Keeping draft-07 here matches the YAML-tooling ecosystem (most YAML schema editors target draft-07) while leaving 2020-12 for the API/JSON contracts where `unevaluatedProperties` and `prefixItems` matter. |
 
 No further deviations.
+
+## Cycle-1 amendment summary
+
+> Added 2026-02-05. Lists every artefact that changed in this re-run of
+> `/speckit.plan` so reviewers (and the `/speckit.tasks` re-run that
+> follows) can audit the delta.
+
+### Artefacts modified
+
+| File | Change | Reason |
+| ---- | ------ | ------ |
+| `specs/034-webapp-capstone-coverage/plan.md` (this file) | Status header refreshed; §Project Structure adds `_lib/depth-profiles/`, `_artifacts/cycle-metadata.json`, `apps/api/app/api/routes/{outcome_evaluator,audit_list}.py`, 2 new contracts; §Module Breakdown adds reporter `onBegin` + 4 cycle-1 module table; §Constitution Check adds cycle-1 re-verification table; §NFR Verification adds SC-012 + FR-028 + FR-029 + FR-030 rows; §Risk Register adds RISK-16; §Iteration Loop adds SC-012 closure threshold; §Phase 1 Outputs lists 3 new contracts; §Complexity Tracking adds 2 cycle-1 entries | Q20..Q29 + FR-028/029/030 + SC-012 |
+| `specs/034-webapp-capstone-coverage/research.md` | Appended R-020..R-024 plus 5 summary-table rows | Phase-0 backfill of the 5 new design decisions |
+| `specs/034-webapp-capstone-coverage/data-model.md` | Added optional `cycle_id` to GapRegisterEntry (entity #2); appended entities #10..#13: `CycleMetadata`, `DepthProfile`, `EvaluatorRequest`, `EvaluatorResponse`; added cycle-1 cross-entity invariants; updated §Validation surfaces to note `_schema.json` lives under `tests/` per Q28 | Q20, Q21, Q26, Q27 + FR-028/029 |
+| `specs/034-webapp-capstone-coverage/contracts/gap-register-entry.schema.json` | Added optional `cycle_id` property (additive, non-breaking) | Q26 |
+
+### Artefacts created (3)
+
+| File | Purpose |
+| ---- | ------- |
+| `specs/034-webapp-capstone-coverage/contracts/outcome-evaluator.contract.md` | Phase-1 contract for FR-028: `POST /api/outcomes/sc-{001..005}/evaluate` + `GET /api/audit/list`. Embeds request + response JSON Schemas (draft 2020-12). Codifies idempotency tuple `(sc_id, scenario_id, persona_id, correlation_id)`, dual-guard activation, sc-006..sc-011 → 400 owner mapping (Q29), tamper-attempt-as-audit-row rule (Q22). |
+| `specs/034-webapp-capstone-coverage/contracts/cycle-metadata.schema.json` | JSON-Schema 2020-12 for `_artifacts/cycle-metadata.json` (`cycle_start_ts` ISO-8601, `cycle_id` ULID, `commit_sha` 40-hex, `seed_hash`). |
+| `tests/e2e/web-coverage/_lib/depth-profiles/_schema.json` | JSON-Schema **draft-07** for the 68 `{persona-id}.depth.yaml` files. 12-value closed `safety_critical_workflow` enum (9 write + 3 read-only per Q24). Lives under `tests/` not `contracts/` per Q28. |
+
+### Constitution check
+
+**Verdict: PASS** for cycle-1 deltas. See §Constitution Check (cycle-1 amendment Constitution re-check) for the per-clause justification table. No new Azure resources (§VIII compliant), no IdP changes (OOS-007 holds), no persona inventory changes (FR-002 stable), all additions are constitutionally pre-authorised by §I (Primacy of Life), §III (Multi-Hazard), §IV (Auditability), §VII-A/B/C (Recovery Doctrine), or AEMA #11 (Continual Improvement).
+
+### Tasks delta — to be authored by `/speckit.tasks` re-run
+
+The parent `/speckit.tasks` invocation will append (current `tasks.md` ends at T172):
+
+- **T173** — author `contracts/outcome-evaluator.contract.md` (already created; T173 is the formal review/integration task)
+- **T174** — author `tests/e2e/web-coverage/_lib/depth-profiles/_schema.json` (already created; T174 is the formal review/integration task)
+- **T175** — generate the 68 `{persona-id}.depth.yaml` files
+- **T176** — extend `scripts/web-coverage/_lib/persona_spec_generator.py` to load + validate depth-profiles, emit `GAP-DEPTH-PROFILE-MISSING-{persona-id}` on miss
+- **T177** — extend `web-coverage-gate` job to assert every FR-002 inventory persona has a valid depth profile
+
+(T173 and T174 deliverables exist as a result of this plan amendment; the corresponding tasks frame the *review and CI integration* of those deliverables.)
+
+### Confirmation
+
+The parent agent can now proceed to the `/speckit.tasks` re-run, which will append T173..T177 to `tasks.md`, after which `/speckit.implement` may resume.

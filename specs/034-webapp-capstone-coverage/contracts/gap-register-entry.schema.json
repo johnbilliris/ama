@@ -108,6 +108,13 @@
     "updated_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "cycle_id": {
+      "oneOf": [
+        { "type": "string", "format": "uuid" },
+        { "type": "null" }
+      ],
+      "description": "Optional reference to the suite-run cycle in which this gap first opened. Sourced from cycle-metadata.schema.json via tests/e2e/web-coverage/_artifacts/cycle-metadata.json. Added in cycle-1 amendment (spec.md Pass 5 Q26) — additive, NOT a required field; pre-cycle-1 entries omit or set null."
     }
   },
   "allOf": [
