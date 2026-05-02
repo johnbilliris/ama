@@ -333,6 +333,97 @@ under `.github/agents/operational/` and `.github/agents/sectors/`, and the perso
   achievable; failures are uplift not variance); constitution §V-B Principle 9 ("Warnings are
   readily accessible").*
 
+## Clarifications — Session 2026-05-02 (pass 3 — review cycle 1)
+
+These clarifications resolve material objections raised during the **first 85-agent
+review cycle** (4 panels with material objections; 1 panel — sector eastern — endorsed
+the implementation outright). All cited objections were validated against the actual
+implementation on branch `034-webapp-capstone-coverage` commit `2b00330` before being
+admitted as amendments. See `<session>/files/agent-review/consolidated-review.md` for the
+audit trail of merit validation.
+
+### Cycle 1 — material objections accepted
+
+- **Q15: The operational panel objects that every persona scenario file is currently a stub
+  (open workspace → seed scenario → assert audit emission), and many bail with
+  `test.fail(true, "...")` when the underlying API endpoint is not wired (81 such bails
+  detected by repository grep). Does FR-002 admit a "stub-with-gap" scenario as proof of
+  capstone coverage, or does it require workflow-state assertions?**
+  → **A: Workflow-state assertions are required.** FR-002 (and FR-009) are tightened in
+  this pass to require **at least one workflow-state assertion** per persona scenario that
+  proves the persona's actual capstone capability — not just route reachability and audit
+  emission. A scenario that bails with `test.fail(true, "<API not wired>")` is **not** a
+  passing scenario for FR-002; the underlying API gap MUST be closed (see Q16). The
+  implementer's own "Known limitations" note in `quickstart.md` confirms the panel finding;
+  this clarification removes the workaround.
+  *Sources: operational-review.md cross-cutting objection lines 71–75; constitution §IV
+  ("auditability is a non-negotiable behavioural assertion, not a route assertion"); spec
+  028 capstone-alignment FR-002 (per-persona evidence rather than per-route presence).*
+
+- **Q16: The operational panel objects that capstone outcome evaluator endpoints
+  (`/api/outcomes/sc-{001..011}/evaluate`) and the audit-list endpoint (`/api/audit/list`)
+  are not yet wired, forcing the suite to rely on `test.fail()` placeholders. Are these
+  endpoints in scope for this feature, or do they belong to a follow-on spec?**
+  → **A: In scope for this feature.** The capstone evaluator endpoints are required by FR-009
+  / FR-010 / SC-001..SC-005 to actually run; without them the suite cannot prove the
+  capstone outcomes it claims to assert. Adding them is route-only work against the existing
+  Next.js + FastAPI baseline (no net-new Azure resource), so OOS-003 does not apply. They
+  are added as FR-028 below.
+  *Sources: implementer's `quickstart.md` Known limitations §1; constitution §V-A; SC-001
+  through SC-005 contractual numerics.*
+
+- **Q17: The sector southwest panel raises 6 persona-level coverage gaps (SA control-centre
+  RBAC, SA multi-LGA long-distance evacuation, WA ATSI handoff with culturally safe
+  messaging, WA iron-ore region critical-infrastructure protection, TAS island-isolation
+  ferry/air medevac, TAS palawa multilingual at persona level). Are these inside the FR-002
+  inventory or follow-on?**
+  → **A: Inside FR-002.** All 6 are persona-level scenarios for personas already in the
+  68-persona inventory (SAPOL, SACFS+SES-SA, DFES-WA, WAPOL, AT, SES-TAS+TasPol). They are
+  net-new scenarios (not new personas), so they fit under the existing FR-002 +
+  FR-016 hazard-pair commitment. Added as new scenario tags in FR-030.
+  *Sources: sector-southwest-review.md lines 3–13; FR-016 hazard pair #4 (bushfire+cyclone)
+  for WA cyclone+iron-ore; FR-016 hazard pair #5 (riverine-flood+severe-storm) for SA river
+  Murray + TAS storm; constitution §VI-C (vulnerable populations including ATSI).*
+
+- **Q18: The sector territories+Commonwealth panel raises 5 gaps: ACT national-capital
+  security mechanics + emergency-declaration mechanics, NT ATSI multilingual at persona
+  level, NT tropical disease + remote-area logistics, Commonwealth ABC/SBS AWS exercise at
+  persona level, cross-sector insurance recovery + DACC/JATWC handoff + Built/Economic
+  Recovery Environment assertions. Same disposition?**
+  → **A: Yes — inside FR-002 + FR-013 + FR-015.** All five are scenarios on personas /
+  agencies already in the 68-persona inventory (AFP for ACT national-capital, ses-act +
+  territory-government for declarations, ntes + sja-nt for ATSI/multilingual, NEMA + ADF for
+  DACC, BoM-national + GA-national for JATWC, utility + community-ngos for insurance/Built/
+  Economic recovery). ABC and SBS are NOT in the canonical 11-Commonwealth roster (per
+  spec §Cited inputs) — coverage of ABC/SBS-style public-warning relay personas is
+  delegated to the existing **bom-national.cyclone-warning-relay** persona scenario
+  augmented with the AWS multilingual variants required by FR-014 + FR-018, plus an audit
+  assertion that `Source = ABC/SBS` is recorded when the relay propagates the warning.
+  *Sources: sector-tc-review.md ACT/NT/Commonwealth/Cross-sector sections; constitution
+  §VII-A/B/C (recovery environments); §V-A (AWS); §V-C (Total Warning System six elements);
+  §III (multi-hazard).*
+
+- **Q19: The technical panel raises a HIGH-severity defect: the test-support guard reads
+  `AMA_TEST_SUPPORT` but CI exports `AMA_TEST_SUPPORT_ENABLED="true"`, so the endpoint stays
+  off in CI. Does this need a spec amendment or is it an implementation defect?**
+  → **A: Implementation defect, not a spec amendment.** The dual-guard contract in spec
+  §FR-021 + persona-fixture.contract.md already names `AMA_TEST_SUPPORT_ENABLED=1` plus
+  `ENVIRONMENT in {dev,test}` as the canonical activation. The code drifted from the
+  contract. Defect to be fixed in plan/tasks/implement under cycle-2 budget; no FR change.
+  Recorded here for traceability only.
+  *Sources: technical-review.md Infrastructure/DevOps objection;
+  `apps/api/app/middleware/test_support_guard.py:27`; `.github/workflows/ci.yml:147`.*
+
+### Cycle 1 — what is NOT amended
+
+- The sector eastern panel raised **0 material objections**. NSW/VIC/QLD coverage stands as
+  implemented; no FR change.
+- The 81 `test.fail(true, ...)` calls themselves are not directly amended — they are a
+  consequence of Q15 + Q16. Once Q16's endpoints are wired and Q15's depth requirement is
+  enforced, the bail-outs disappear; the gap register tracks any residual.
+- OOS-001..OOS-010 are unchanged. No Asia personas, no IdP changes, no net-new infra
+  beyond the already-approved `web-coverage-evidence` blob container.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Capstone-outcome traceability per persona is provable from the UI (Priority: P1)
@@ -440,7 +531,7 @@ The 85-agent (operational + sector + technical) review consumes the latest suite
 #### Suite organisation, naming, and traceability
 
 - **FR-001**: System MUST publish a Playwright suite under the fixed layout `tests/e2e/web-coverage/{operational,sectors/<jurisdiction>,cross-cutting,capstone}/` using the file-naming convention `<persona-id>.<scenario-slug>.spec.ts`, where `<persona-id>` is the kebab-case ID drawn verbatim from the cited input files (`operational-input.md`, `sector-eastern-input.md`, `sector-southwest-input.md`, `sector-tc-input.md`).
-- **FR-002**: System MUST provide ≥ 1 passing Playwright scenario per persona for each of the 68 personas (10 operational + 58 sector/jurisdiction). Persona inventory: NSW (6), VIC (5), QLD (4), SA (5), WA (3), TAS (4), ACT (7), NT (5), Commonwealth (11), Cross-Sector (8), Operational (10).
+- **FR-002**: System MUST provide ≥ 1 passing Playwright scenario per persona for each of the 68 personas (10 operational + 58 sector/jurisdiction). Persona inventory: NSW (6), VIC (5), QLD (4), SA (5), WA (3), TAS (4), ACT (7), NT (5), Commonwealth (11), Cross-Sector (8), Operational (10). **A passing scenario MUST contain at least one workflow-state assertion** that proves the persona's safety-critical capstone capability (per Clarifications Q15) — examples: a state-changing approval that returns the new state, an AWS warning draft that completes the IC-approval-then-publish path with the published payload validated, an offline action that survives a reconnect-and-replay, an audit-list read-back that survives a tamper attempt, a logistics task that completes a match → allocation transition. **Route reachability + audit emission alone are NOT sufficient**; a scenario that bails with `test.fail(true, "<reason>")` because the underlying API is missing does NOT satisfy FR-002 — the missing capability MUST be added (see FR-028) and the scenario MUST then assert the workflow state.
 - **FR-003**: System MUST provide ≥ 1 cross-jurisdiction integration scenario per Australian state/territory (NSW, VIC, QLD, SA, WA, TAS, ACT, NT) and ≥ 1 Commonwealth-bridge scenario invoking COMDISPLAN/DACC/NJCOP.
 - **FR-004**: System MUST emit a traceability artefact `specs/034-webapp-capstone-coverage/coverage-trace.md` (and a machine-readable companion `coverage-trace.json`) with **one row per (persona × capstone-outcome × hazard) tuple** (per Clarifications Q10). Schema columns, in order: `Persona | Outcome (#1..#5) | Hazard | FR | Test ID | Route | Audit Evidence ID | Status`. Every row MUST resolve to a real persona ID, a real capstone outcome (#1..#5), a hazard drawn from the AU catalogue (`bushfire | riverine flood | tropical cyclone | severe storm | extreme heat | earthquake/tsunami`), a real spec ID, a real test ID, and a route present in the application's route tree. When multiple Playwright scenarios assert the same (persona × outcome × hazard) tuple, their Test IDs MUST be joined with `;` in the `Test ID` cell — rows are never duplicated on this key. The artefact is the AU-v1 evidence stream that feeds `specs/shared/capstone-metric-trace.md`'s AU-v1 cohort cells (per Clarifications Q12); spec-028's matching cell MUST flip from `Validated` to `Unresolved` whenever a row supporting it shows `Status = Failing` or `Open` here.
 - **FR-005**: System MUST emit a gap register `specs/034-webapp-capstone-coverage/gap-register.md` recording every test failure or `GAP-*` flag with columns `Gap ID | Persona | Route | Constitution Clause | Owner | Status (Open|In-Progress|Closed) | Closing Spec/PR`. Status transitions (per Clarifications Q11) are evidence-anchored and one-way except via FR-027:
@@ -488,6 +579,23 @@ The 85-agent (operational + sector + technical) review consumes the latest suite
 - **FR-024**: System MUST support an iteration loop in which an agent-review objection becomes a spec amendment, the suite is updated, the gap register is updated, and the gate flips back to green when the objection is `Closed`. Per Clarifications Q5, the loop is bounded: **maximum 3 iteration cycles per gap before escalation to the project lead** (constitution §Governance). Each cycle is one (objection → spec amendment → re-implement → re-run) round. On the 4th unresolved cycle the gap register row is flagged `escalated:project-lead` and the gate stays `Not Ready` pending project-lead disposition.
 - **FR-027** *(added during Clarifications Q5)*: System MUST detect regressions during the iteration loop. If any persona scenario that was passing in the prior suite run fails after a fix is merged for a different gap, the suite MUST (a) keep the gate at `Not Ready`, (b) revert the offending change to the prior known-good revision per `specs/017-cd-pipeline/spec.md` FR-004 and `specs/029-progressive-delivery-pipeline/spec.md` FR-008, (c) tag the relevant gap register row with `regression_detected`, return its status to `Open`, and reset its iteration counter, and (d) capture the rollback evidence (failing test, reverted commit SHA, restored revision) for grading.
 
+#### Cycle-1 amendments (added during Clarifications pass 3)
+
+- **FR-028** *(added during Clarifications Q16)*: System MUST expose capstone outcome evaluator endpoints `/api/outcomes/sc-{001..011}/evaluate` (one per success criterion) and an audit-list read-back endpoint `/api/audit/list` so the suite can drive workflow-state assertions (per FR-002, FR-009, FR-010, FR-029) without bailing on `test.fail(true, "<API not wired>")`. The evaluator endpoints accept a scenario ID + persona context and return a structured judgement (`status: pass|fail|gap`, `evidence_refs: []`, `metric_value: number|null`, `threshold: number|null`, `audit_id: string`); the audit-list endpoint accepts a correlation ID and returns the append-only timeline rows for that correlation. Both endpoints MUST be guarded by the dual-guard test-support contract in FR-021 + persona-fixture.contract.md (canonical activation: `AMA_TEST_SUPPORT_ENABLED=1` AND `ENVIRONMENT in {dev,test}`). They are route-only additions (no net-new Azure resource) so OOS-003 does not apply.
+
+- **FR-029** *(added during Clarifications Q15)*: System MUST conform to a **per-persona scenario depth contract** for every Playwright spec under `tests/e2e/web-coverage/{operational,sectors/<jurisdiction>}/`. The contract requires each scenario file to (a) load the persona's primary workspace, (b) drive the persona-specific safety-critical workflow at least to a state-changing transition (approval, publish, allocate, decline, queue+sync, escalate, handover, declare, reopen), (c) assert the post-transition state via either the relevant capstone evaluator endpoint (FR-028) or a UI selector that reflects persisted state, and (d) read back the audit timeline via `/api/audit/list` to confirm the rationale, source, confidence, and operator identity were recorded. The persona spec generator under `scripts/web-coverage/_lib/` MUST consume a depth-profile YAML per persona (workflow steps + assertion targets) so generated specs are workflow-driven, not stubs. Depth-profile coverage is a binary CI gate (FR-023): a persona scenario without a depth profile fails the gate.
+
+- **FR-030** *(added during Clarifications Q17 + Q18)*: System MUST provide the following net-new persona-level scenarios required by the cycle-1 review, all on personas already in the 68-persona FR-002 inventory:
+  - **SA**: `sapol.state-control-centre-rbac.spec.ts` (multi-LGA delegated authority + role separation); `ses-sa.long-distance-multi-lga-evacuation.spec.ts` (convoy staging + inter-LGA shelter routing under degraded comms).
+  - **WA**: `dfes-wa.atsi-handoff-culturally-safe.spec.ts` (culturally safe messaging + audit trail to remote ATSI community); `dfes-wa.iron-ore-critical-infrastructure.spec.ts` (port/rail/power-corridor protection under cyclone + bushfire).
+  - **TAS**: `at.island-isolation-aeromedical-disruption.spec.ts` (ferry/air medevac disruption + rescue-to-care handoff); `taspol.palawa-multilingual-warning.spec.ts` (palawa-language warning variant per FR-014 ATSI baseline).
+  - **ACT**: `afp.national-capital-security-mechanics.spec.ts` (Parliament/Defence precincts + Commonwealth tenancy escalation); `ses-act.territory-emergency-declaration.spec.ts` (territory-government declaration mechanics).
+  - **NT**: `ntes.atsi-multilingual-at-persona-level.spec.ts` (NT-specific palawa/Yolŋu/Kriol variants applied at persona scope, not just cross-cutting); `sja-nt.tropical-disease-remote-logistics.spec.ts` (tropical-disease surge + remote-area logistics chain).
+  - **Commonwealth**: `bom-national.abc-sbs-warning-relay.spec.ts` (relay path with `Source = ABC/SBS` recorded in audit + multilingual variants per FR-014); also exercises FR-018 sovereignty triple at relay handoff.
+  - **Cross-sector**: `utility.insurance-recovery-handoff.spec.ts` (insurance recovery handoff producing Built + Economic Recovery Environment assertions per FR-013); `nema.dacc-jatwc-cross-jurisdiction.spec.ts` (DACC + JATWC handoff via `state-government` and `territory-government`).
+
+  Each scenario MUST conform to FR-029's depth contract and emit at least one row in `coverage-trace.md` against the persona's primary capstone outcome (mapped per the cited input file's persona must-do list).
+
 #### Closed-loop coverage uplift (the WHAT, not the HOW)
 
 - **FR-025**: System MUST close any web-app coverage gap surfaced by the suite as a precondition for the gate flipping to `Capstone Ready`. The plan phase decides which uplift is route-only, which requires net-new infra, and which is deferred (per Out of Scope).
@@ -523,6 +631,7 @@ Outcome-proxy metrics below are technology-agnostic targets the Playwright suite
 - **SC-009 (Iteration loop closure)**: 100% of meritorious objections raised in the 85-agent review are resolved before sign-off; the gap register has zero `Open` entries.
 - **SC-010 (Determinism)**: The suite re-run (same seed) produces identical pass/fail signals on at least 3 consecutive executions (no flakes).
 - **SC-011 (Re-runnable as quality gate)** *(contractual; per Clarifications Q4)*: The full suite completes within **≤ 30 minutes wall-clock on a developer machine** and **≤ 45 minutes wall-clock on the CI gate runner (`ubuntu-latest` shape)**, and produces JUnit + JSON artefacts (FR-022) that a CI gate can consume without human interpretation. If the budget is breached, plan-phase shards the suite across runners; the budget is never relaxed.
+- **SC-012 (Review-cycle outcome closure)** *(added during Clarifications pass 3)*: For every iteration cycle (per FR-024 max 3), **≥ 80 % of merit-validated objections are closed within the next implement phase**, evidenced by (a) the gap register row flipping to `Closed` per FR-005, (b) the originally-failing scenario or generator-driven scenario producing a passing run on the post-amendment commit, and (c) the closing PR's diff containing the FR-029 depth-contract assertion that the panel's objection demanded. Objections that survive 3 cycles escalate to project lead per FR-024 and are excluded from the 80 % numerator + denominator.
 
 ## Assumptions
 
