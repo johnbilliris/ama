@@ -50,7 +50,6 @@ resource workflowRunsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabas
         ]
       }
       defaultTtl: -1
-      uniqueKeyPolicy: { uniqueKeys: [ { paths: [ '/id' ] } ] }
     }
   }
   tags: tags
@@ -96,7 +95,11 @@ resource toolRegistrationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDa
         excludedPaths: [ { path: '/_etag/?' } ]
       }
       defaultTtl: -1
-      uniqueKeyPolicy: { uniqueKeys: [ { paths: [ '/id' ] } ] }
+      uniqueKeyPolicy: {
+        uniqueKeys: [
+          { paths: [ '/pinned_major_version' ] }
+        ]
+      }
     }
   }
   tags: tags

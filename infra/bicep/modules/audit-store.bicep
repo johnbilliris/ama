@@ -30,7 +30,6 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
         excludedPaths: [ { path: '/_etag/?' } ]
       }
       defaultTtl: -1
-      uniqueKeyPolicy: { uniqueKeys: [ { paths: [ '/id' ] } ] }
     }
   }
 }
