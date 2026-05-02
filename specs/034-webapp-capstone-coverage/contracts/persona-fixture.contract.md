@@ -96,13 +96,22 @@ export type PersonaFixture = {
   jurisdiction_id:
     | "nsw" | "vic" | "qld" | "sa" | "wa" | "tas" | "act"
     | "nt" | "commonwealth" | "cross-sector";
-  role:
-    | "incident-controller"
-    | "operations-officer"
-    | "planning-officer"
-    | "logistics-officer"
-    | "public-information-officer";
+  // Persona's organisational role title. Free-form so the contract can
+  // represent all 68 personas (10 operational + 58 sector). Not limited
+  // to AIIMS-5: 63 of the 68 personas have titles like "BoM Forecaster",
+  // "NSW RFS Captain", "Risk Manager", "Field Coordinator",
+  // "Observer/Auditor" that fall outside the AIIMS Control / Operations
+  // / Planning / Logistics / Public-Information enum. Examples:
+  //   "Incident Commander", "Operations Officer", "Planning Officer",
+  //   "Logistics Officer", "Public Information Officer",
+  //   "Field Coordinator", "Resilience Planner", "Executive Leader",
+  //   "Observer/Auditor", "Risk Manager",
+  //   "BoM Forecaster", "NEMA Coordinator", "NSW RFS Captain", ...
+  // RBAC checks MUST use `aiims_function` (below), not this string.
+  role: string;
   permissions: string[];
+  // AIIMS-5 function the persona enacts in the test scenario; this is
+  // the field that RBAC and span-of-control checks assert against.
   aiims_function: "control" | "operations" | "planning" | "logistics" | "public-information";
   direct_reports: string[];
 };

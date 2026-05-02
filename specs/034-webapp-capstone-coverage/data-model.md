@@ -248,14 +248,25 @@ type PersonaFixture = {
   jurisdiction_id:                                            // 8 + cross + Cwlth
     | "nsw" | "vic" | "qld" | "sa" | "wa" | "tas" | "act"
     | "nt" | "commonwealth" | "cross-sector";
-  role:                                                        // AIIMS roles
-    | "incident-controller"
-    | "operations-officer"
-    | "planning-officer"
-    | "logistics-officer"
-    | "public-information-officer";
+  role: string;                                                // Persona's organisational role title.
+                                                                // Free-form (e.g. "Incident Commander",
+                                                                // "Logistics Officer", "Field Coordinator",
+                                                                // "Risk Manager", "BoM Forecaster",
+                                                                // "NSW RFS Captain"). Constrained by the
+                                                                // 68-persona inventory in spec.md §Cited
+                                                                // inputs; not limited to AIIMS-5 because
+                                                                // 63 of the 68 personas (sector combat
+                                                                // agencies + non-AIIMS-5 operational
+                                                                // roles) have organisational titles that
+                                                                // do not match AIIMS function names.
+                                                                // RBAC checks use `aiims_function` below,
+                                                                // not this string.
   permissions: string[];                                       // RBAC verbs
-  aiims_function: CoverageTraceRow["aiims_function"];
+  aiims_function: CoverageTraceRow["aiims_function"];          // AIIMS-5 function the persona enacts in
+                                                                // the test scenario (closed enum:
+                                                                // control / operations / planning /
+                                                                // logistics / public-information).
+                                                                // This is the field RBAC asserts against.
   direct_reports: string[];                                    // span-of-control
 };
 ```

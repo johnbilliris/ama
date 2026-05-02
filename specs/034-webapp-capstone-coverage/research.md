@@ -296,12 +296,17 @@ Each item follows: **Decision · Rationale · Alternatives considered**.
     composite (NSW + VIC).
   - `outcome-2-bushfire-severe-storm.fixture.json` — rapid-onset
     bushfire + thunderstorm asthma (VIC).
-  - `outcome-3-tropical-cyclone-riverine-flood.fixture.json` — Cyclone
-    Yasi-equivalent + Brisbane River flood (QLD).
-  - `outcome-4-bushfire-tropical-cyclone.fixture.json` — long-campaign
-    + DACC pre-positioning (NEMA + ADF).
-  - `outcome-5-riverine-flood-severe-storm.fixture.json` — eastern
+  - `outcome-3-tropical-cyclone-flood.fixture.json` — Cyclone
+    Yasi-equivalent + Brisbane River flood (QLD). Hazard pair (canonical):
+    tropical cyclone + riverine flood. Filename abbreviated for
+    readability; canonical tags `@hazard:tropical-cyclone
+    @hazard:riverine-flood` (per `tasks.md` line 21 taxonomy).
+  - `outcome-4-bushfire-cyclone-logistics.fixture.json` — long-campaign
+    + DACC pre-positioning (NEMA + ADF). Hazard pair (canonical):
+    bushfire + tropical cyclone.
+  - `outcome-5-flood-storm-economic.fixture.json` — eastern
     seaboard floods + storm aftermath (NSW + QLD ICA-data baseline).
+    Hazard pair (canonical): riverine flood + severe storm.
   Plus a non-mandatory tsunami fixture for Geoscience Australia / BoM
   per FR-016. Fixtures are loaded via `bootstrap_seed_data()` so
   re-runs on the same seed produce identical assertions (SC-010 / FR-021).

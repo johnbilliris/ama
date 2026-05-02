@@ -154,28 +154,28 @@ path:
 
 ```
 tests/e2e/web-coverage/
-├── operational/                              # 10 operational personas
-│   ├── 01-incident-controller.spec.ts        # IC, AIIMS Control function
-│   ├── 02-operations-officer.spec.ts
-│   ├── 03-planning-officer.spec.ts
-│   ├── 04-logistics-officer.spec.ts
-│   ├── 05-public-information.spec.ts
-│   ├── 06-recovery-coordinator.spec.ts
-│   ├── 07-volunteer-coordinator.spec.ts
-│   ├── 08-resource-deployer.spec.ts
-│   ├── 09-evacuation-marshal.spec.ts
-│   └── 10-warning-officer.spec.ts
-├── sectors/                                  # 58 sector personas
-│   ├── nsw/{rfs,ses,nswpol,health,...}.spec.ts
-│   ├── vic/{cfa,vicses,vicpol,health,...}.spec.ts
-│   ├── qld/{qfes,sesqld,qps,qhealth,...}.spec.ts
-│   ├── sa/{sa-cfs,sa-ses,sapol,sa-health}.spec.ts
-│   ├── wa/{wa-dfes,wapol,wa-health,...}.spec.ts
-│   ├── tas/{tas-fire,tas-ses,tas-pol,tas-health}.spec.ts
-│   ├── act/{act-esa,act-pol,act-health}.spec.ts
-│   ├── nt/{nt-pfes,nt-pol,nt-health}.spec.ts
-│   ├── commonwealth/{nema,bom,geoscience,defence-dacc,abs,abc-emergency,esta-triple-zero}.spec.ts
-│   └── cross-sector/{ica,red-cross,salvation-army,electricity-tx,water-utils,telco,supply-chain,disability,health-utility,multi-faith}.spec.ts
+├── operational/                              # 10 operational personas (spec §Cited inputs + §Suite Layout)
+│   ├── incident-commander.<scenario>.spec.ts        # AIIMS Control
+│   ├── operations-officer.<scenario>.spec.ts        # AIIMS Operations
+│   ├── planning-officer.<scenario>.spec.ts          # AIIMS Planning
+│   ├── logistics-officer.<scenario>.spec.ts         # AIIMS Logistics
+│   ├── public-information-officer.<scenario>.spec.ts# AIIMS Public Information
+│   ├── field-coordinator.<scenario>.spec.ts
+│   ├── resilience-planner.<scenario>.spec.ts
+│   ├── executive-leader.<scenario>.spec.ts
+│   ├── observer-auditor.<scenario>.spec.ts
+│   └── risk-manager.<scenario>.spec.ts
+├── sectors/                                  # 58 sector personas (IDs match spec lines 17–19)
+│   ├── nsw/{frnsw,mrnsw,nsw-ambulance,nsw-rfs,nswpf,ses-nsw}.spec.ts            # 6
+│   ├── vic/{av,cfa-vic,frv,ses-vic,vicpol}.spec.ts                              # 5
+│   ├── qld/{qas,qfd,qps,ses-qld}.spec.ts                                        # 4
+│   ├── sa/{saas,sacfs,ses-sa,samfs,sapol}.spec.ts                               # 5
+│   ├── wa/{dfes-wa,sja-wa,wapol}.spec.ts                                        # 3
+│   ├── tas/{at,ses-tas,taspol,tfs}.spec.ts                                      # 4
+│   ├── act/{act-ambulance,act-esa,act-fr,act-policing,act-rfs,afp,ses-act}.spec.ts # 7
+│   ├── nt/{bushfires-nt,ntes,ntfrs,ntpf,sja-nt}.spec.ts                         # 5
+│   ├── commonwealth/{abf,adf,afp-commonwealth,arc,asa,bom-national,ga-national,nema,rfds,sja-national,surf-lifesaving}.spec.ts # 11
+│   └── cross-sector/{community-ngos,health,local-government,state-government,territory-government,transport,utility,volunteer}.spec.ts # 8
 ├── cross-cutting/
 │   ├── span-of-control.spec.ts               # AEMA #4
 │   ├── audit-trail.spec.ts                   # constitution IV
@@ -597,26 +597,26 @@ Drawn from technical-input.md (lines 300–311) plus this plan's analysis:
 |---------|------------------------|---------|-----------|
 | 1: Lives saved (zero preventable deaths) | Bushfire AND Extreme heat | `outcome-1-bushfire-extreme-heat.fixture.json` | `@outcome:1 @hazard:bushfire @hazard:extreme-heat` |
 | 2: 50% faster signal-to-action | Bushfire AND Severe storm | `outcome-2-bushfire-severe-storm.fixture.json` | `@outcome:2 @hazard:bushfire @hazard:severe-storm` |
-| 3: 24-hour evac uplift | Tropical cyclone AND Riverine flood | `outcome-3-tropical-cyclone-flood.fixture.json` | `@outcome:3 @hazard:tropical-cyclone @hazard:flood` |
+| 3: 24-hour evac uplift | Tropical cyclone AND Riverine flood | `outcome-3-tropical-cyclone-flood.fixture.json` | `@outcome:3 @hazard:tropical-cyclone @hazard:riverine-flood` |
 | 4: 30% logistics-friction reduction | Bushfire AND Tropical cyclone | `outcome-4-bushfire-cyclone-logistics.fixture.json` | `@outcome:4 @hazard:bushfire @hazard:tropical-cyclone` |
-| 5: 30% economic-loss reduction | Riverine flood AND Severe storm | `outcome-5-flood-storm-economic.fixture.json` | `@outcome:5 @hazard:flood @hazard:severe-storm` |
+| 5: 30% economic-loss reduction | Riverine flood AND Severe storm | `outcome-5-flood-storm-economic.fixture.json` | `@outcome:5 @hazard:riverine-flood @hazard:severe-storm` |
 | n/a (FR-011 only) | Earthquake / Tsunami | seeded but not paired (AWS-only) | `@hazard:earthquake @hazard:tsunami @aws` |
 
 ## NFR Verification
 
 | NFR / SC | Plan element verifying it | Test surface |
 |----------|---------------------------|--------------|
-| SC-001 — every persona × outcome × hazard has ≥1 passing scenario | trace-merge gate | `web-coverage-merge` job |
-| SC-002 — ≥1 cross-cutting clause assertion per persona | reporter dedupe + persona coverage check | `web-coverage-gate` job |
-| SC-003 — ≥3 dependency-hazard cross-jurisdictional traces | hazard-pair fixtures + tag selectors | `capstone/*` |
-| SC-004 — Audit append ≤ 2 s | `auditObserverFixture` + `expect.poll` | every state-changing test |
-| SC-005 — Outcome-proxy assertion per outcome | `validators/outcome-proxy.ts` | `capstone/*` |
-| SC-006 — FR-018 triple per scenario | `cross-cutting/data-sovereignty.spec.ts` | every cross-cutting + capstone test |
-| SC-007 — Gap closure cycle ≤ 3 cycles | FR-024 enforced by `gap-register.py` | review-log + escalation path |
-| SC-008 — FR-027 rollback ≤ 10 min | known-good manifest + cd.yml step | CD pipeline post-deploy |
-| SC-009 — FR-014 a11y on P1 surfaces | `web-coverage-axe` project | nightly + PR `@p1` |
-| SC-010 — 3 consecutive identical runs | `known-good.py reaffirm` | nightly main-branch run |
-| SC-011 — Dev loop ≤ 30 min | 4-worker default; spec gates Single-runner perf in `quickstart.md` | local profiling |
+| SC-001 — Outcome #1 (1,000+ lives saved) — every published Emergency Warning passes IC approval, AWS-nested model, ≤ 2 min to target audiences with ≥ 1 community-language variant + vulnerable-population filters | `validators/aws-cap-envelope.ts` + `cross-cutting/public-warnings.spec.ts` + `cross-cutting/accessibility-and-multilingual.spec.ts` + `capstone/outcome-1-lives-saved.spec.ts` | `capstone/outcome-1-*` + cross-cutting `public-warnings` + `accessibility-and-multilingual` |
+| SC-002 — Outcome #2 (50% faster response) — signal→IC-action ≤ persona's pre-suite baseline AND ≤ 5/15/30 min for L1/L2/L3 | `auditObserverFixture` (≤ 2 s) + `validators/outcome-proxy.ts` time-to-action assertion | `capstone/outcome-2-*` + every persona scenario records signal→action timing |
+| SC-003 — Outcome #3 (24-h-earlier evacuation) — `evac_lead_hours ≥ 24` on every pre-warned hazard scenario | hazard-pair fixtures + `validators/outcome-proxy.ts` evac-lead computation | `capstone/outcome-3-*` + planning-officer / risk-manager scenarios |
+| SC-004 — Outcome #4 (30% logistics efficiency) — `logistics_clicks ≤ 7` routine / `≤ 12` mutual-aid AND ≤ 70% baseline | `validators/outcome-proxy.ts` click-count counter | `capstone/outcome-4-*` + logistics-officer / DACC scenarios |
+| SC-005 — Outcome #5 (30% economic-loss reduction) — `(baseline − projected) / baseline ≥ 0.30` at response→recovery handover, Sendai Indicator C aligned | `validators/outcome-proxy.ts` economic-environment view assertion | `capstone/outcome-5-*` + resilience-planner / executive-leader scenarios |
+| SC-006 — 100 % (68/68) personas have ≥ 1 passing Playwright scenario | trace-merge persona-coverage check + `web-coverage-gate` blocker | `web-coverage-merge` job |
+| SC-007 — 100 % (8/8) states/territories have ≥ 1 cross-jurisdiction scenario + Commonwealth-bridge scenario | `cross-jurisdiction.spec.ts` + sector tag selectors | sector specs T137–T145 |
+| SC-008 — 100 % cross-cutting compliance (RBAC, COP, audit, AWS, evac, recovery, a11y, multilingual, offline, data-sovereignty, span-of-control) | one cross-cutting spec per clause + reporter dedupe per persona | `cross-cutting/*` |
+| SC-009 — Iteration loop closure: 0 `Open` gap-register entries at gate flip | `gap-register.py validate` + `web-coverage-gate` | gate job + nightly tribunal |
+| SC-010 — 3 consecutive identical runs (no flakes) | `known-good.py reaffirm` + `verify-trace-determinism.ps1` | nightly main-branch run |
+| SC-011 — Suite ≤ 30 min dev / ≤ 45 min CI | 4-worker default; sharding in CI; profile gates in `quickstart.md` | local profiling + `web-coverage-shard` matrix |
 
 ## Project Structure Decisions
 
