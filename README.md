@@ -284,6 +284,20 @@ These targets are drawn from the [Capstone Brief](capstone.md) and represent the
 - [Feature Specifications](specs/) — detailed specs for each feature
 - [Project Constitution](.specify/memory/constitution.md) — guiding principles and decision rights
 - [Demo Walkthrough](docs/disaster-response-hub/demo/walkthrough.md) — step-by-step demo scenario
+- [Web coverage suite](specs/034-webapp-capstone-coverage/quickstart.md) — Playwright tribunal that proves every capstone outcome × persona combination
+
+### Web coverage suite (spec 034)
+
+The Playwright capstone-coverage suite proves every capstone outcome × persona combination is exercised end-to-end and emits a deterministic trace + gap register that gates merges to `main`. Run the `@p1` smoke locally:
+
+```pwsh
+pnpm install
+pwsh scripts/seed-database.ps1
+$env:AMA_TEST_SUPPORT_ENABLED = "true"
+pnpm --filter @ama/web exec playwright test --project=web-coverage-chromium --grep "@p1"
+```
+
+See `specs/034-webapp-capstone-coverage/quickstart.md` for the full developer onboarding (≤ 30 min cold start) and `tests/e2e/web-coverage/README.md` for the persona-id-to-spec map and tag taxonomy.
 
 ### For Operators
 

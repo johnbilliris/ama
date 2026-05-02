@@ -326,15 +326,15 @@ Every Playwright test MUST carry one tag from each axis (enforced by ESLint rule
 
 **Purpose**: Finalise human-facing artefacts; populate skeletons; capture grading evidence.
 
-- [ ] T164 [P] Update `specs/034-webapp-capstone-coverage/quickstart.md` with any deltas surfaced during implementation (paths, env vars, troubleshooting); add a "Known limitations" section if gaps remain on first pass
-- [ ] T165 [P] Add a "Web coverage suite" section to repo `README.md` linking to `specs/034-webapp-capstone-coverage/quickstart.md` with a 5-line snippet for running the `@p1` smoke locally
-- [ ] T166 [P] Author `tests/e2e/web-coverage/README.md` documenting: tag taxonomy (R-017), persona-id-to-spec mapping (10 + 58 = 68), hazard-pair fixture index, ESLint determinism rules
-- [ ] T167 [P] Generate initial `specs/034-webapp-capstone-coverage/known-good.json` skeleton matching `KnownGoodManifest` schema with `version: 1`, current commit SHA, empty `last_regression: null`; cd.yml will refresh on first deploy (T155)
-- [ ] T168 [P] Author `specs/034-webapp-capstone-coverage/review-log.md` skeleton with cycle 0 header (date, suite-run id placeholder, panel sign-off rows for operational/sector/technical)
-- [ ] T169 [P] Author `specs/034-webapp-capstone-coverage/coverage-trace.md` placeholder with column header row only (`Persona | Outcome | Hazard | FR | Test ID | Route | Audit Evidence ID | Status`); first real run will replace via T152
-- [ ] T170 [P] Initialise `specs/034-webapp-capstone-coverage/gap-register.md` with empty Markdown table + `GAP-AI-CONTENT-SAFETY-CANDIDATE` row in `Open` state per plan §Conditionally proposed
-- [ ] T171 Run `pwsh scripts/web-coverage/verify-trace-determinism.ps1` locally + `pnpm --filter @ama/web exec playwright test --project=web-coverage-chromium --grep "@p1"` and capture run output to `specs/034-webapp-capstone-coverage/_evidence/first-run.log` (RISK-12 redaction applied)
-- [ ] T172 [P] Cross-link this tasks.md from `specs/034-webapp-capstone-coverage/checklists/validation.md` CHK-IDs (CHK034, CHK045, CHK090, CHK130, CHK160) so iteration-loop runners can mark gates without re-tracing
+- [X] T164 [P] Update `specs/034-webapp-capstone-coverage/quickstart.md` with any deltas surfaced during implementation (paths, env vars, troubleshooting); add a "Known limitations" section if gaps remain on first pass
+- [X] T165 [P] Add a "Web coverage suite" section to repo `README.md` linking to `specs/034-webapp-capstone-coverage/quickstart.md` with a 5-line snippet for running the `@p1` smoke locally
+- [X] T166 [P] Author `tests/e2e/web-coverage/README.md` documenting: tag taxonomy (R-017), persona-id-to-spec mapping (10 + 58 = 68), hazard-pair fixture index, ESLint determinism rules
+- [X] T167 [P] Generate initial `specs/034-webapp-capstone-coverage/known-good.json` skeleton matching `KnownGoodManifest` schema with `version: 1`, current commit SHA, empty `last_regression: null`; cd.yml will refresh on first deploy (T155)
+- [X] T168 [P] Author `specs/034-webapp-capstone-coverage/review-log.md` skeleton with cycle 0 header (date, suite-run id placeholder, panel sign-off rows for operational/sector/technical)
+- [X] T169 [P] Author `specs/034-webapp-capstone-coverage/coverage-trace.md` placeholder with column header row only (`Persona | Outcome | Hazard | FR | Test ID | Route | Audit Evidence ID | Status`); first real run will replace via T152
+- [X] T170 [P] Initialise `specs/034-webapp-capstone-coverage/gap-register.md` with empty Markdown table + `GAP-AI-CONTENT-SAFETY-CANDIDATE` row in `Open` state per plan §Conditionally proposed
+- [X] T171 Run `pwsh scripts/web-coverage/verify-trace-determinism.ps1` locally + `pnpm --filter @ama/web exec playwright test --project=web-coverage-chromium --grep "@p1"` and capture run output to `specs/034-webapp-capstone-coverage/_evidence/first-run.log` (RISK-12 redaction applied)
+- [X] T172 [P] Cross-link this tasks.md from `specs/034-webapp-capstone-coverage/checklists/validation.md` CHK-IDs (CHK034, CHK045, CHK090, CHK130, CHK160) so iteration-loop runners can mark gates without re-tracing
 
 ---
 

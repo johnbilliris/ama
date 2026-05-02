@@ -288,6 +288,23 @@
 - [ ] CHK173 Sector sub-panel (58 agents — NSW 6 + VIC 5 + QLD 4 + SA 5 + WA 3 + TAS 4 + ACT 7 + NT 5 + Commonwealth 11 + Cross-Sector 8) — every meritorious objection (≥ 2/3 of relevant sector sub-panel) is `Closed` [ASM-006, Spec §Cited inputs]
 - [ ] CHK174 Technical sub-panel (17 agents) — every meritorious objection (≥ 2/3 panel) is `Closed` [ASM-006, Clarif Q13]
 - [ ] CHK175 Total 85 agents (10 + 58 + 17) accounted for in the review log [ASM-006]
+
+---
+
+## Section I — Tasks ↔ checklist cross-reference (T172)
+
+The iteration loop runners use this table to mark coverage gates without
+re-tracing every CHK-ID. Each row links a checklist item to the spec-034
+task(s) that satisfy it; once those tasks are marked `[X]` in
+`tasks.md`, the corresponding CHK can be ticked.
+
+| CHK-ID  | Satisfied by tasks            | Notes                                                                                       |
+| ------- | ----------------------------- | ------------------------------------------------------------------------------------------- |
+| CHK034  | T053, T157, T158, T162        | Sector panel review wired via `review-log.py panel` resolver and nightly iteration workflow. |
+| CHK045  | T069 (incident-commander), T146, T146 (Outcome 1 closure), T065 (span-of-control) | Workspace + scenario + outcome 1+2 trace + Tier-1 evaluation. |
+| CHK090  | T080 (act-esa)                | ACT ESA workspace + must-do scenario.                                                        |
+| CHK130  | T055                          | COP refresh latency assertion in `cross-cutting/cop-refresh-latency.spec.ts`.                |
+| CHK160  | T051, T152, T153              | Determinism: 3-run script, trace-merge sort_keys, CI gate determinism step.                  |
 - [ ] CHK176 Operational-panel domain-veto exercised correctly: any ≥ 2/3 operational objection on `Const §I` (Primacy of Life), `§IV` (Auditability), NN#1 (Human-in-the-loop), NN#2 (Data sovereignty), or "Public outputs human-reviewed" was addressed before any gate flip [ASM-006, Clarif Q13] [Veto]
 - [ ] CHK177 Sector and technical panels did NOT exercise an analogous unilateral veto; their objections fell under default 2/3 weighting + project-lead adjudication [ASM-006, Clarif Q13]
 - [ ] CHK178 Cross-panel disputes carry recorded project-lead disposition per `Const §Governance` ("project lead has final authority on architectural decisions") [Const §Governance, ASM-006]

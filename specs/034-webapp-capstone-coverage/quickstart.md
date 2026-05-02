@@ -260,11 +260,58 @@ hit cache.
 
 ## Next steps
 
-1. After your local run passes, run `pwsh scripts/verify-trace-determinism.ps1`
-   (added in `/speckit.tasks`) to confirm SC-010 locally.
+1. After your local run passes, run `pwsh scripts/web-coverage/verify-trace-determinism.ps1`
+   to confirm SC-010 locally (3-back-to-back identical signals).
 2. Commit changes with the standard ama commit message format and push;
-   the GitHub `web-coverage-shard` job will run automatically.
+   the GitHub `web-coverage-shard` job will run automatically (matrix
+   shards 1..4 of 4, fail-fast: false).
 3. If your change opens or closes a gap, update `gap-register.md` via
-   the CLI (don't edit by hand).
-4. Iteration tribunal runs nightly at 02:00 AEST; you can trigger a
-   one-off run via `gh workflow run web-coverage-iteration.yml -f gap_id=GAP-…`.
+   `python scripts/web-coverage/gap-register.py {open|promote|close|regress|escalate}`
+   (don't edit by hand — the CLI keeps the markdown + JSONL audit shadow in sync).
+4. Iteration tribunal runs nightly at 02:00 AEST (`web-coverage-iteration.yml`);
+   you can trigger a one-off run via `gh workflow run web-coverage-iteration.yml -f gap_id=GAP-…`.
+
+## Phase-8 implementation deltas (2025-11-22)
+
+These are the deltas surfaced during the spec-034 implementation pass and
+that already shipped on this branch:
+
+- **Test-support API base path**: `/api/test-support/seed/{persona|scenario}`
+  is mounted by `apps/api/app/api/router.py` and gated by the dual-guard
+  middleware (`AMA_TEST_SUPPORT_ENABLED=true` + non-prod env detection).
+- **Persona resolver**: imports `bootstrap_seed_data()` via
+  `from packages.domain.src.domain.seed.bootstrap import bootstrap_seed_data`
+  (matches the existing convention; the path-based seed root is
+  `Path(__file__).resolve().parents[5]`).
+- **TS path mapping**: `apps/web/tsconfig.json` ships `paths` for
+  `@playwright/test`, `@axe-core/playwright`, `ajv`, and `ajv-formats`,
+  plus `typeRoots: ["./node_modules/@types"]`, plus
+  `tests/e2e/web-coverage/_support/types/externals.d.ts` for the
+  ambient `js-yaml` declaration (cross-tree resolution workaround).
+- **Generator**: `scripts/web-coverage/_lib/persona_spec_generator.py`
+  is the single source of truth for the 77 persona specs. Re-running it
+  produces byte-identical output (FR-006 determinism).
+- **CI gate CLI**: `python scripts/web-coverage/_lib/schema_validators.py
+  gate --trace … --gap-register … --personas-min 68 …` is what
+  `web-coverage-gate` invokes; run it locally to preview a CI failure.
+
+## Known limitations
+
+The first end-to-end Playwright run cannot complete on most local
+machines without the test-support API and seeded routes, so we ship the
+suite with the following well-known soft-fail surfaces — each captured by
+a test that uses `test.fail(true, "<gap reason>")` so the gap-register
+auto-populates rather than CI failing hard:
+
+- `/api/outcomes/sc-NNN/evaluate` evaluator endpoints (T146-T150)
+  — the capstone outcome closure specs degrade until the evaluator API
+  ships.
+- `/api/audit/list?correlation_id=…` — the cross-cutting audit-append-only
+  spec degrades while the audit-list endpoint is being wired.
+- `/disasters` and `/operations/workflows` `__next_error__` — defensive
+  selectors are in place; investigation continues separately.
+
+These are tracked as candidate GAP rows on the gap-register. Once the
+underlying API surface is wired, the corresponding `test.fail()` lines
+should be removed and the gap closed via
+`python scripts/web-coverage/gap-register.py close --gap-id … --merge-sha …`.

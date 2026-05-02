@@ -1,0 +1,18 @@
+[
+  {
+    "gap_id": "GAP-AI-CONTENT-SAFETY-CANDIDATE",
+    "affected_personas": ["public-information-officer"],
+    "affected_routes": ["/operations/workflows"],
+    "fr_ids": ["FR-014"],
+    "constitution_clauses": ["IV"],
+    "owner": "spec-034",
+    "status": "Open",
+    "closing_pr_url": null,
+    "merge_sha": null,
+    "iteration_count": 0,
+    "regression_evidence": null,
+    "regression_detected": false,
+    "tribunal_notes": "Conditionally proposed per plan. Pending content-safety review before formally tracked.",
+    "updated_at": "2025-11-22T00:00:00+00:00"
+  }
+]

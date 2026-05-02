@@ -1,0 +1,45 @@
+# Spec 034 first-run evidence (T171)
+
+> Initial linted-only run captured on the `034-webapp-capstone-coverage`
+> branch before live Playwright execution is wired up in this environment.
+> This file documents the local verification baseline; the real first-run
+> evidence will be uploaded as the `web-coverage-canonical` artefact by
+> `.github/workflows/ci.yml`.
+
+## Verification baseline (local, this commit)
+
+```
+$ cd apps/web
+$ pnpm exec tsc --noEmit
+(clean)
+
+$ ruff check apps tests packages scripts
+All checks passed!
+
+$ pwsh scripts/web-coverage/verify-trace-determinism.ps1
+(deferred to CI — requires a real Playwright run; see ci.yml > web-coverage-merge)
+
+$ pnpm --filter @ama/web exec playwright test --project=web-coverage-chromium --grep "@p1"
+(deferred to CI — Playwright browsers and the test-support API are wired in
+the GitHub Actions runner only; see ci.yml > web-coverage-shard)
+```
+
+## RISK-12 redaction
+
+Any future first-run output captured locally must run through
+`tests/e2e/web-coverage/_support/reporter/redact.ts` before being committed
+to this evidence directory. Personally-identifying data (names, emails,
+phone numbers, GPS coordinates) is replaced with `<<redacted>>` markers
+prior to artefact retention.
+
+## Composition with CI
+
+This evidence file is the **starter** state. The first PR-merge that lands
+on `main` will trigger `web-coverage-shard × 4 → web-coverage-merge →
+web-coverage-gate`, which will:
+
+1. Replace `coverage-trace.md` and `coverage-trace.json` with the merged
+   trace.
+2. Refresh `gap-register.md` if any new GAPs are detected.
+3. Upload the canonical artefacts (90-day retention) consumed by the
+   nightly `web-coverage-iteration.yml`.
