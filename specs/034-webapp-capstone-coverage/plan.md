@@ -785,7 +785,7 @@ No further deviations.
 | File | Purpose |
 | ---- | ------- |
 | `specs/034-webapp-capstone-coverage/contracts/outcome-evaluator.contract.md` | Phase-1 contract for FR-028: `POST /api/outcomes/sc-{001..005}/evaluate` + `GET /api/audit/list`. Embeds request + response JSON Schemas (draft 2020-12). Codifies idempotency tuple `(sc_id, scenario_id, persona_id, correlation_id)`, dual-guard activation, sc-006..sc-011 → 400 owner mapping (Q29), tamper-attempt-as-audit-row rule (Q22). |
-| `specs/034-webapp-capstone-coverage/contracts/cycle-metadata.schema.json` | JSON-Schema 2020-12 for `_artifacts/cycle-metadata.json` (`cycle_start_ts` ISO-8601, `cycle_id` ULID, `commit_sha` 40-hex, `seed_hash`). |
+| `specs/034-webapp-capstone-coverage/contracts/cycle-metadata.schema.json` | JSON-Schema 2020-12 for `_artifacts/cycle-metadata.json` (`cycle_start_ts` ISO-8601, `cycle_id` UUID v4 per spec.md L640 + data-model.md §10 + schema `format: "uuid"`, `commit_sha` 40-hex, `seed_hash` SHA-256). |
 | `tests/e2e/web-coverage/_lib/depth-profiles/_schema.json` | JSON-Schema **draft-07** for the 68 `{persona-id}.depth.yaml` files. 12-value closed `safety_critical_workflow` enum (9 write + 3 read-only per Q24). Lives under `tests/` not `contracts/` per Q28. |
 
 ### Constitution check
