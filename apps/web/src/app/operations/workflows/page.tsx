@@ -23,10 +23,11 @@ import { WorkflowRunList } from "@/components/workflow/WorkflowRunList";
 export default async function WorkflowsPage({
   searchParams,
 }: {
-  searchParams?: { run?: string; state?: string };
+  searchParams?: Promise<{ run?: string; state?: string }>;
 }) {
+  const params = await searchParams;
   const { items } = await listRuns({ limit: 100 });
-  const selectedId = searchParams?.run;
+  const selectedId = params?.run;
   const selected: WorkflowRun | undefined =
     items.find((r) => r.id === selectedId) ?? items[0];
 
