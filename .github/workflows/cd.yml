@@ -263,6 +263,41 @@ jobs:
           echo "revision-web=${web_id}" >> "$GITHUB_OUTPUT"
           echo "📌 web deployment: ${web_id}"
 
+          # Spec-034 FR-027 — emit a JSON blob the next step consumes.
+          revisions_json=$(jq -nc \
+            --arg api "${api_rev}" \
+            --arg agents "$(echo '${{ steps.record-revisions.outputs.revision-agents }}' || true)" \
+            --arg ingest "$(echo '${{ steps.record-revisions.outputs.revision-ingest }}' || true)" \
+            --arg web "${web_id}" \
+            '{api: $api, web: $web}')
+          echo "json=${revisions_json}" >> "$GITHUB_OUTPUT"
+
+      # Spec-034 FR-027 — refresh the known-good rollback manifest after a
+      # successful deploy, so a future regression can be auto-rolled back to
+      # this commit's combination of (api revision, web deployment id, trace).
+      - name: Update FR-027 known-good manifest
+        id: update-known-good
+        if: success() && env.TARGET_ENV != 'dev'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip >/dev/null
+          python -m pip install jsonschema >/dev/null
+          python scripts/web-coverage/known-good.py update \
+            --commit "${{ github.sha }}" \
+            --revisions-json '${{ steps.record-revisions.outputs.json }}' \
+            --trace specs/034-webapp-capstone-coverage/coverage-trace.json
+          if ! git diff --quiet specs/034-webapp-capstone-coverage/known-good.json; then
+            git config user.name  "ama-bot"
+            git config user.email "ama-bot@users.noreply.github.com"
+            git add specs/034-webapp-capstone-coverage/known-good.json
+            git commit -m "chore(034): refresh known-good manifest at ${{ github.sha }} [skip ci]"
+            git push origin HEAD:${{ github.ref_name }} || echo "::warning::known-good push skipped (likely tag/PR ref)"
+          else
+            echo "::notice::known-good manifest unchanged"
+          fi
+
       # FR-015a: rollback runs only for staging and production (never for dev).
       - name: Rollback on health failure (staging/prod only)
         id: rollback

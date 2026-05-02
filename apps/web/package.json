@@ -14,7 +14,8 @@
     "test:web-coverage": "playwright test --project=web-coverage-chromium",
     "test:web-coverage:mobile": "playwright test --project=web-coverage-mobile",
     "test:web-coverage:axe": "playwright test --project=web-coverage-axe",
-    "test:web-coverage:p1": "playwright test --project=web-coverage-chromium --grep @p1"
+    "test:web-coverage:p1": "playwright test --project=web-coverage-chromium --grep @p1",
+    "test:web-coverage:shard": "playwright test --project=web-coverage-chromium"
   },
   "dependencies": {
     "@ama/ui": "workspace:*",
