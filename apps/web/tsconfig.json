@@ -26,13 +26,17 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@web-coverage/*": [
+        "../../tests/e2e/web-coverage/*"
       ]
     }
   },
   "include": [
     "src/**/*",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "../../tests/e2e/web-coverage/**/*.ts"
   ],
   "exclude": [
     "node_modules"

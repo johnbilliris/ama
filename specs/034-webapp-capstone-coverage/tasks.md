@@ -26,12 +26,12 @@ Every Playwright test MUST carry one tag from each axis (enforced by ESLint rule
 
 **Purpose**: Project scaffolding for `tests/e2e/web-coverage/**` and `scripts/web-coverage/**` without disturbing the existing Playwright suite at `tests/e2e/*.spec.ts`.
 
-- [ ] T001 Create directory tree `tests/e2e/web-coverage/{operational,sectors/{nsw,vic,qld,sa,wa,tas,act,nt,commonwealth,cross-sector},cross-cutting,capstone,_support/{pages,fixtures,fixtures/data,reporter,validators,a11y,types,eslint-rules},_artifacts/{junit,screenshots}}` and `scripts/web-coverage/_lib/`
-- [ ] T002 Add devDependencies `@axe-core/playwright@^4.10.0`, `js-yaml@^4`, `ajv@^8`, `ajv-formats@^3` to `apps/web/package.json`; pin Playwright at `1.59.1`; run `pnpm install --filter @ama/web` and commit lockfile delta
-- [ ] T003 [P] Add path alias `@web-coverage/*` → `tests/e2e/web-coverage/_support/*` in `apps/web/tsconfig.json` and matching alias in `apps/web/playwright.config.ts`
-- [ ] T004 [P] Append `tests/e2e/web-coverage/_artifacts/` and `tests/e2e/web-coverage/**/*.partial-*.json` to `.gitignore`; explicitly NOT-ignore `specs/034-webapp-capstone-coverage/coverage-trace.{md,json}` and `gap-register.md`
-- [ ] T005 Extend `apps/web/playwright.config.ts` with three new `projects` entries — `web-coverage-chromium` (default), `web-coverage-mobile` (Pixel 7 emulation), `web-coverage-axe` (WCAG run); preserve existing legacy project list; wire `reporter` to `[['junit', { outputFile: 'tests/e2e/web-coverage/_artifacts/junit/results.xml' }], ['json', { outputFile: 'tests/e2e/web-coverage/_artifacts/playwright.json' }], ['./tests/e2e/web-coverage/_support/reporter/coverage-reporter.ts']]`; set `forbidOnly: !!process.env.CI`, `retries: 0` on PR, `workers: process.env.CI ? 4 : 4`, base URL `http://127.0.0.1:3000`
-- [ ] T006 [P] Author ESLint rule `tests/e2e/web-coverage/_support/eslint-rules/no-waitfortimeout.cjs` (forbids `page.waitForTimeout`, R-015); register in `apps/web/.eslintrc.cjs` `rules` block scoped to `tests/e2e/web-coverage/**`
+- [X] T001 Create directory tree `tests/e2e/web-coverage/{operational,sectors/{nsw,vic,qld,sa,wa,tas,act,nt,commonwealth,cross-sector},cross-cutting,capstone,_support/{pages,fixtures,fixtures/data,reporter,validators,a11y,types,eslint-rules},_artifacts/{junit,screenshots}}` and `scripts/web-coverage/_lib/`
+- [X] T002 Add devDependencies `@axe-core/playwright@^4.10.0`, `js-yaml@^4`, `ajv@^8`, `ajv-formats@^3` to `apps/web/package.json`; pin Playwright at `1.59.1`; run `pnpm install --filter @ama/web` and commit lockfile delta
+- [X] T003 [P] Add path alias `@web-coverage/*` → `tests/e2e/web-coverage/_support/*` in `apps/web/tsconfig.json` and matching alias in `apps/web/playwright.config.ts`
+- [X] T004 [P] Append `tests/e2e/web-coverage/_artifacts/` and `tests/e2e/web-coverage/**/*.partial-*.json` to `.gitignore`; explicitly NOT-ignore `specs/034-webapp-capstone-coverage/coverage-trace.{md,json}` and `gap-register.md`
+- [X] T005 Extend `apps/web/playwright.config.ts` with three new `projects` entries — `web-coverage-chromium` (default), `web-coverage-mobile` (Pixel 7 emulation), `web-coverage-axe` (WCAG run); preserve existing legacy project list; wire `reporter` to `[['junit', { outputFile: 'tests/e2e/web-coverage/_artifacts/junit/results.xml' }], ['json', { outputFile: 'tests/e2e/web-coverage/_artifacts/playwright.json' }], ['./tests/e2e/web-coverage/_support/reporter/coverage-reporter.ts']]`; set `forbidOnly: !!process.env.CI`, `retries: 0` on PR, `workers: process.env.CI ? 4 : 4`, base URL `http://127.0.0.1:3000`
+- [X] T006 [P] Author ESLint rule `tests/e2e/web-coverage/_support/eslint-rules/no-waitfortimeout.cjs` (forbids `page.waitForTimeout`, R-015); register in `apps/web/.eslintrc.cjs` `rules` block scoped to `tests/e2e/web-coverage/**`
 
 ---
 
@@ -471,3 +471,4 @@ With multiple developers:
 ---
 
 **End of tasks.md** — Total: 172 tasks. Ready for `/speckit.analyze`.
+

@@ -42,3 +42,20 @@ infra/**/*.json
 !infra/main.parameters.*.json
 !infra/modules/workbooks/*.json
 !infra/parameters/foundry-carveout.schema.json
+
+# Web coverage suite — local artefacts only; canonical evidence is committed under specs/034-webapp-capstone-coverage/
+tests/e2e/web-coverage/_artifacts/
+tests/e2e/web-coverage/coverage-trace.json
+tests/e2e/web-coverage/coverage-trace.md
+tests/e2e/web-coverage/gap-register.json
+playwright-report/
+test-results/
+
+# Explicitly KEEP committed canonical artefacts (override broader ignores above)
+!specs/034-webapp-capstone-coverage/coverage-trace.json
+!specs/034-webapp-capstone-coverage/coverage-trace.md
+!specs/034-webapp-capstone-coverage/gap-register.json
+!specs/034-webapp-capstone-coverage/gap-register.md
+!specs/034-webapp-capstone-coverage/known-good.json
+!specs/034-webapp-capstone-coverage/review-log.md
+!specs/034-webapp-capstone-coverage/_evidence/**
