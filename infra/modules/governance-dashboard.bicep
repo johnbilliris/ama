@@ -81,13 +81,6 @@ resource dashboardContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/
         ]
       }
       defaultTtl: -1 // No automatic expiration
-      uniqueKeyPolicy: {
-        uniqueKeys: [
-          {
-            paths: ['/id']
-          }
-        ]
-      }
     }
     options: {
       autoscaleSettings: {
