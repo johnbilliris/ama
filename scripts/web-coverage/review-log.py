@@ -1,4 +1,4 @@
-"""Review log CLI (T050 + T157 + T158).
+"""Review log CLI (T050 + T157 + T158 + T203).
 
 Builds ``specs/034-webapp-capstone-coverage/review-log.md`` from agent
 objections collected by the nightly tribunal. Each row is one
@@ -12,12 +12,18 @@ Subcommands:
   panel      Resolve all votes for one panel + cycle (deduplicates against
              gap status; emits dispositions per the contract veto rules).
   list       Print the log JSON to stdout.
+  closure    Compute the SC-012 closure ratio for a given cycle_id from
+             ``_artifacts/cycle-metadata.json`` and the gap register;
+             opens a meta-gap GAP-CYCLE-{id}-CLOSURE-RATE-LOW when the
+             ratio falls below 0.80 (FR-005 + Q22 + CHK210..212).
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
+import subprocess
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -34,6 +40,19 @@ SPEC_ROOT = REPO_ROOT / "specs" / "034-webapp-capstone-coverage"
 LOG_MD = SPEC_ROOT / "review-log.md"
 LOG_JSON = SPEC_ROOT / "review-log.json"
 AUDIT_ROOT = SPEC_ROOT / "_evidence" / "audit" / "web-coverage-review"
+
+# Cycle-1 amendment (T203): SC-012 closure measurement reads the active
+# suite-run cycle metadata emitted by the Playwright reporter at
+# onBegin (T182), and the gap-register state machine (T045 + T183).
+CYCLE_METADATA_PATH = REPO_ROOT / "tests" / "e2e" / "web-coverage" / "_artifacts" / "cycle-metadata.json"
+GAP_REGISTER_JSON = SPEC_ROOT / "gap-register.json"
+GAP_REGISTER_CLI = Path(__file__).resolve().parent / "gap-register.py"
+CLOSURE_RATIO_FLOOR = 0.80  # SC-012 / Q22 / CHK210
+ITERATION_ESCALATED_AT = 4  # CHK211 — iteration_count >= 4 is escalated
+UUID_V4_RE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
 
 
 def load_log() -> list[dict]:
@@ -215,6 +234,199 @@ def cmd_list(_args: argparse.Namespace) -> None:
     sys.stdout.write("\n")
 
 
+# ---------- T203: SC-012 closure measurement ---------------------------------
+
+
+def _read_cycle_metadata() -> dict | None:
+    """Return the parsed reporter cycle metadata, or None if absent/invalid."""
+
+    if not CYCLE_METADATA_PATH.exists():
+        return None
+    try:
+        payload = json.loads(CYCLE_METADATA_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _load_gap_register() -> list[dict]:
+    if not GAP_REGISTER_JSON.exists():
+        return []
+    try:
+        payload = json.loads(GAP_REGISTER_JSON.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return []
+    return payload if isinstance(payload, list) else []
+
+
+def _is_escalated(entry: dict) -> bool:
+    """CHK211 escalation predicate.
+
+    A row is escalated (excluded from BOTH numerator and denominator) when:
+      • iteration_count >= ITERATION_ESCALATED_AT (Q22 ceiling), OR
+      • status == "Escalated" (FR-024 escalate command), OR
+      • owner contains the literal token "project-lead" (escalated:project-lead).
+    """
+
+    iteration = entry.get("iteration_count")
+    if isinstance(iteration, int) and iteration >= ITERATION_ESCALATED_AT:
+        return True
+    if entry.get("status") == "Escalated":
+        return True
+    owner = entry.get("owner") or ""
+    if isinstance(owner, str) and "project-lead" in owner.lower():
+        return True
+    return False
+
+
+def _compute_closure(entries: list[dict], cycle_id: str) -> dict:
+    """Compute the closure summary for one cycle.
+
+    Numerator   = entries where status == "Closed" AND iteration_count < 4
+                  AND not escalated.
+    Denominator = entries (same cycle_id) where iteration_count < 4 AND
+                  not escalated. Per CHK211, every row in the gap register
+                  is by construction a merit-validated objection (only
+                  meritorious tribunal dispositions open gaps).
+    """
+
+    in_cycle = [e for e in entries if e.get("cycle_id") == cycle_id]
+    escalated = [e for e in in_cycle if _is_escalated(e)]
+    eligible = [e for e in in_cycle if not _is_escalated(e)]
+    closed = [e for e in eligible if e.get("status") == "Closed"]
+
+    numerator = len(closed)
+    denominator = len(eligible)
+    ratio = (numerator / denominator) if denominator > 0 else 1.0
+
+    return {
+        "cycle_id": cycle_id,
+        "computed_at": _now_iso(),
+        "numerator": numerator,
+        "denominator": denominator,
+        "ratio": ratio,
+        "ratio_floor": CLOSURE_RATIO_FLOOR,
+        "passes_floor": ratio >= CLOSURE_RATIO_FLOOR,
+        "closed_gap_ids": sorted(e["gap_id"] for e in closed),
+        "raw_objection_gap_ids": sorted(e["gap_id"] for e in eligible),
+        "escalated_gap_ids": sorted(e["gap_id"] for e in escalated),
+    }
+
+
+def _now_iso() -> str:
+    return datetime.now(UTC).isoformat(timespec="seconds")
+
+
+def _open_meta_gap(cycle_id: str, summary: dict) -> dict:
+    """Open a meta-gap when closure < 80 %.
+
+    Shells out to ``gap-register.py open`` so we go through the canonical
+    state-machine + audit-append wiring rather than duplicating it.
+    """
+
+    short_id = cycle_id[:8]
+    meta_gap_id = f"GAP-CYCLE-{short_id}-CLOSURE-RATE-LOW"
+    notes = (
+        f"Auto-opened by review-log.py closure for cycle_id={cycle_id}. "
+        f"Closure ratio {summary['numerator']}/{summary['denominator']} = "
+        f"{summary['ratio']:.3f} fell below floor {CLOSURE_RATIO_FLOOR:.2f} "
+        f"(SC-012, Q22, CHK210). Carry-over for the next cycle."
+    )
+    cmd = [
+        sys.executable,
+        str(GAP_REGISTER_CLI),
+        "open",
+        "--gap-id",
+        meta_gap_id,
+        "--personas",
+        "all",
+        "--routes",
+        "/",
+        "--frs",
+        "FR-005",
+        "FR-024",
+        "FR-010",
+        "--clauses",
+        "QG-1",
+        "--owner",
+        "project-lead",
+        "--notes",
+        notes,
+    ]
+    proc = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        cwd=REPO_ROOT,
+        check=False,
+    )
+    return {
+        "meta_gap_id": meta_gap_id,
+        "exit_code": proc.returncode,
+        "stdout": proc.stdout.strip(),
+        "stderr": proc.stderr.strip(),
+    }
+
+
+def cmd_closure(args: argparse.Namespace) -> None:
+    """SC-012 closure-ratio computation (T203).
+
+    Reads the active cycle_id from --cycle-id (or falls back to
+    _artifacts/cycle-metadata.json), filters gap-register entries by
+    that cycle_id, applies CHK211 escalation exclusions, and emits
+    numerator/denominator/ratio + raw lists to stdout. Audits the
+    decision via append_audit so FR-010 has the full trail. When the
+    ratio falls below CLOSURE_RATIO_FLOOR (0.80), opens a carry-over
+    meta-gap via the gap-register CLI.
+    """
+
+    metadata = _read_cycle_metadata()
+    cycle_id = args.cycle_id or (metadata or {}).get("cycle_id")
+    if not cycle_id:
+        sys.stderr.write(
+            "review-log closure: no cycle_id supplied and "
+            f"{CYCLE_METADATA_PATH} is missing or invalid — "
+            "run a Playwright cycle first or pass --cycle-id\n",
+        )
+        raise SystemExit(2)
+    if not UUID_V4_RE.match(cycle_id):
+        sys.stderr.write(
+            f"review-log closure: cycle_id '{cycle_id}' is not a UUID v4 "
+            "(reporter contract violation)\n",
+        )
+        raise SystemExit(2)
+
+    entries = _load_gap_register()
+    summary = _compute_closure(entries, cycle_id)
+
+    # CHK212: emit numerator + denominator + escalated-set + raw-objection
+    # list to the audit timeline (FR-010) BEFORE flipping the meta-gap.
+    append_audit(
+        AUDIT_ROOT,
+        "cycle-closure-computed",
+        {
+            "cycle_id": cycle_id,
+            "numerator": summary["numerator"],
+            "denominator": summary["denominator"],
+            "ratio": summary["ratio"],
+            "passes_floor": summary["passes_floor"],
+            "raw_objection_count": len(summary["raw_objection_gap_ids"]),
+            "escalated_count": len(summary["escalated_gap_ids"]),
+        },
+    )
+
+    # CHK210: open a carry-over meta-gap when the cycle missed the floor.
+    if not summary["passes_floor"] and not args.dry_run:
+        summary["meta_gap"] = _open_meta_gap(cycle_id, summary)
+
+    json.dump(summary, sys.stdout, indent=2, sort_keys=True)
+    sys.stdout.write("\n")
+    if not summary["passes_floor"]:
+        # Non-zero exit so CI fails fast when SC-012 is breached and
+        # operators see the carry-over meta-gap clearly.
+        raise SystemExit(1)
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="command", required=True)
@@ -247,6 +459,24 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_list = sub.add_parser("list", help="print review log JSON to stdout")
     p_list.set_defaults(func=cmd_list)
+
+    p_closure = sub.add_parser(
+        "closure",
+        help="compute the SC-012 closure ratio for a given cycle_id (T203)",
+    )
+    p_closure.add_argument(
+        "--cycle-id",
+        default=None,
+        help="UUID v4 cycle_id to score; falls back to "
+             "_artifacts/cycle-metadata.json when omitted",
+    )
+    p_closure.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="skip the carry-over GAP-CYCLE-{id}-CLOSURE-RATE-LOW open call "
+             "(report-only mode)",
+    )
+    p_closure.set_defaults(func=cmd_closure)
 
     return p
 
