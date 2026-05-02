@@ -16,7 +16,7 @@ import os
 import statistics
 import urllib.error
 import urllib.request
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from typing import Any
 
 API = "https://api.github.com"
@@ -42,15 +42,28 @@ def _get(url: str, token: str) -> Any:
         return None
 
 
-def _paged(url: str, token: str) -> Iterator[Any]:
+def _page_items(data: Any, item_key: str | None) -> Sequence[Any]:
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict):
+        if item_key and isinstance(data.get(item_key), list):
+            return data[item_key]
+        print(f"::warning::GitHub API response did not include expected list key: {item_key}")
+        return []
+    print(f"::warning::GitHub API response was not a list or object: {type(data).__name__}")
+    return []
+
+
+def _paged(url: str, token: str, item_key: str | None = None) -> Iterator[Any]:
     page = 1
     while True:
         sep = "&" if "?" in url else "?"
         data = _get(f"{url}{sep}per_page=100&page={page}", token)
         if not data:
             break
-        yield from data
-        if len(data) < 100:
+        items = _page_items(data, item_key)
+        yield from items
+        if len(items) < 100:
             break
         page += 1
         if page > 5:
@@ -65,7 +78,7 @@ def collect(repo: str, token: str) -> dict[str, dict[str, float]]:
 
     deployments: dict[str, list[_dt.datetime]] = {"dev": [], "staging": [], "production": []}
     lead_times: dict[str, list[float]] = {"dev": [], "staging": [], "production": []}
-    for run in _paged(runs_url, token):
+    for run in _paged(runs_url, token, item_key="workflow_runs"):
         env = (run.get("head_branch") or "").lower()
         if env not in deployments:
             continue
