@@ -121,6 +121,218 @@ persona-need syntheses (`operational-input.md`, `sector-eastern-input.md`, `sect
   threshold is crossed the AU-validated cohort still ships, and the un-validated routes/features spawn
   a follow-on uplift feature.
 
+## Clarifications — Session 2026-05-02 (pass 2)
+
+These clarifications close the five follow-ups carried forward from pass 1 and resolve four further
+ambiguities surfaced during the second `/speckit.clarify` pass. After this pass the spec carries zero
+known open ambiguities. Recommended answers were derived directly from the constitution
+(`.specify/memory/constitution.md` v1.2.0), prior specs (`001`, `015`, `017`, `027`, `028`, `029`),
+the ADR series under `docs/aidr/decisions/` (031, 032, 033-*, 034, 035, 036), the actor agent files
+under `.github/agents/operational/` and `.github/agents/sectors/`, and the persona-need syntheses
+(`operational-input.md`, `sector-eastern-input.md`, `sector-southwest-input.md`,
+`sector-tc-input.md`).
+
+### Pass-1 follow-ups closed
+
+- **Q6: For US5, codify Given/When/Then acceptance scenarios covering (a) the 4th-cycle escalation
+  path (FR-024 max-3-cycles → escalate to project lead) and (b) the regression-rollback path
+  (FR-027 revert to prior known-good revision; gap → Open; iteration counter reset).**
+  → **A: Codified.** Two new acceptance scenarios appended to User Story 5 (Acceptance Scenarios
+  #3 and #4 — see § User Scenarios & Testing / User Story 5). Scenario #3 binds FR-024's 4th-cycle
+  escalation: gap stays `Not Ready`, the row is tagged `escalated:project-lead`, the iteration
+  counter for that gap is halted (no further automated cycles), and the project lead's disposition
+  (override / re-baseline / abandon) is recorded in the audit timeline before the gate may flip.
+  Scenario #4 binds FR-027's regression-rollback: the gate stays `Not Ready`, the offending change
+  is reverted to the prior known-good revision, the regressed gap returns to `Open`, the row is
+  tagged `regression_detected`, the iteration counter is reset for that gap, and the rollback
+  evidence (failing Test ID, reverted commit SHA, restored revision SHA) is captured for grading.
+  *Sources: constitution §Governance ("The project lead has final authority on architectural
+  decisions"); `specs/017-cd-pipeline/spec.md` FR-004 + FR-011 (known-good baseline + automated
+  rollback); `specs/029-progressive-delivery-pipeline/spec.md` FR-008 + FR-021 (5-min auto-rollback
+  to known-good revision; ≥ 3 retained known-good digests); FR-024 + FR-027 (this spec).*
+
+- **Q7: Pin SC-005's "≥ 30 % projected loss-reduction proxy" — define the measurement window and
+  the proxy formula, or codify a deferral.**
+  → **A: Pinned, per-scenario evaluation, Sendai-aligned counterfactual.** SC-005 now asserts:
+  at the response → recovery handover for every pre-warned hazard scenario in the seed data, the
+  post-handover Economic-environment view MUST satisfy
+  `(baseline_loss − projected_loss) / baseline_loss ≥ 0.30`, where:
+  - `baseline_loss` = the seed-data scenario's pre-suite Economic baseline (recorded by
+    `bootstrap_seed_data()` at scenario load), framed per Sendai Framework Indicator C
+    ("direct economic loss attributed to disasters") and aligned with
+    `specs/015-performance-benchmarks/spec.md` SC-CAP-015-005's "scenario-modelled counterfactual"
+    measurement method;
+  - `projected_loss` = the post-handover Economic-environment view's projected residual loss after
+    the platform-recommended recovery actions are applied.
+  - **Measurement window**: per-scenario, evaluated at the response → recovery transition (not
+    annualised). The portfolio-level annualised "≥ 30 % economic-loss reduction" claim is owned by
+    `specs/shared/capstone-metric-trace.md` row `ECONOMIC_LOSS_REDUCTION × AU-v1` (per
+    `specs/028-capstone-alignment/spec.md` D-003 / FR-013); this suite's per-scenario assertion is
+    the AU-v1 evidence stream that feeds that portfolio cell. The 5-year horizon implied by the
+    capstone framing is honoured at portfolio level via spec-015 SC-CAP-015-005, not at per-scenario
+    level in this spec.
+  *Sources: constitution §VII-B (Four Recovery Environments — Economic);
+  `specs/015-performance-benchmarks/spec.md` SC-CAP-015-005 ("Sendai indicator alignment");
+  `specs/028-capstone-alignment/spec.md` FR-013 + D-003; Sendai Framework for Disaster Risk
+  Reduction 2015–2030 Indicator C-1.*
+
+- **Q8: Pin FR-016 multi-hazard cross-coverage — enumerate which two distinct hazard types are
+  mandatory per outcome (#1..#5).**
+  → **A: Enumerated with AU-canonical pairs per outcome.** FR-016 now binds each capstone outcome
+  to two distinct AU-relevant hazard types drawn from constitution §III's hazard catalogue
+  (bushfire, riverine flood, tropical cyclone, severe storm, extreme heat, earthquake/tsunami):
+  - **Outcome #1 (1,000+ lives)** — `bushfire` AND `extreme heat` (the two highest-fatality
+    natural hazards in AU per AIDR / NEMA disaster-fatality records).
+  - **Outcome #2 (50 % faster response)** — `bushfire` AND `severe storm` (rapid-onset hazards
+    that exercise signal-to-action latency at AIIMS Levels 1 / 2).
+  - **Outcome #3 (24-h earlier evacuation)** — `tropical cyclone` AND `riverine flood` (the two
+    pre-warned hazards with meaningful 24-h+ lead time per constitution §VI-B).
+  - **Outcome #4 (30 % logistics efficiency)** — `bushfire` AND `tropical cyclone` (long-campaign
+    and pre-positioning workloads that exercise the mutual-aid / DACC / COMDISPLAN lifecycle).
+  - **Outcome #5 (30 % economic-loss reduction)** — `riverine flood` AND `severe storm` (the two
+    top economic-loss contributors in AU per ICA insurance-loss data).
+  - `earthquake/tsunami` remains in scope for AWS warning composition (FR-011) and ≥ 1 persona
+    suite SHOULD exercise it (Geoscience Australia / BoM tsunami-warning relay), but it is NOT
+    mandated as the second hazard for any specific capstone outcome — to keep the suite
+    AU-realistic and bounded.
+  *Sources: constitution §III (Multi-Hazard) and §VI-B (pre-warned vs immediate evacuations);
+  `.github/agents/sectors/commonwealth/bom-national.agent.md`,
+  `.github/agents/sectors/commonwealth/ga-national.agent.md` (hazard catalogue);
+  `.github/agents/sectors/nt/ntes.agent.md` (tropical cyclone preparedness);
+  `specs/001-disaster-response-hub/spec.md` § Edge Cases (multi-hazard scenarios).*
+
+- **Q9: Pin FR-020 span-of-control scope — enumerate the command-side personas for which the
+  warning fires.**
+  → **A: Enumerated, command-side only.** The span-of-control warning fires for the AIIMS
+  command-side personas who supervise direct reports per constitution §II-A and the AIIMS 3–7
+  direct-reports guidance recorded in `.github/agents/operational/incident-commander.agent.md`
+  § "Span of Control" and `.github/agents/operational/operations-officer.agent.md` § Responsibilities:
+  - **Tier-1 (always evaluated)**: Incident Commander (`incident-commander`).
+  - **Tier-2 AIIMS function leads (evaluated when supervising direct reports)**: Operations Officer
+    (`operations-officer`) — for the field supervisors they manage; Logistics Officer
+    (`logistics-officer`) — for the supply / transport / medical / welfare branch supervisors they
+    manage.
+  - **Warning is N/A (negative test asserts suppression)**: Planning Officer, Public Information
+    Officer, Field Coordinator, Resilience Planner, Executive Leader, Observer/Auditor, Risk
+    Manager, and all 58 sector / jurisdiction personas when they are not in an active AIIMS
+    command chain. For these personas, FR-020 asserts the warning surface stays suppressed.
+  *Sources: constitution §II-A (AIIMS Functions: Control, Operations, Logistics);
+  `.github/agents/operational/incident-commander.agent.md` lines 44, 93–94 (3–7 direct reports);
+  `.github/agents/operational/operations-officer.agent.md` line 33 (field-supervisor span-of-control);
+  `operational-input.md` Operations Officer + Logistics Officer must-do lists.*
+
+- **Q10: Pin FR-004 `coverage-trace.md` schema cardinality — one row per (persona × outcome),
+  (persona × outcome × hazard), or (persona × outcome × scenario)?**
+  → **A: One row per (persona × outcome × hazard).** Selected because:
+  - **Constitution §IV (Transparency and Auditability)** requires every claim be traceable
+    end-to-end; FR-016 (Q8) requires each outcome to hold across two named hazard types, so the
+    hazard dimension MUST be visible in the trace or FR-016 is unverifiable.
+  - **Capstone evaluator UX**: the canonical reviewer question is "for persona X, for outcome #N,
+    which AU-hazard types have been empirically validated?" — answerable in O(1) lookup only when
+    `Hazard` is a row key.
+  - **Bounded row count**: at most 68 personas × 5 outcomes × 6 AU hazards ≈ 2,040 rows, bounded
+    and grep-verifiable; (persona × outcome × scenario) would explode beyond this and duplicate
+    hazard/outcome pairs.
+  - **Aligned with spec-028 precedent**: `specs/shared/capstone-metric-trace.md` uses
+    (metric × cohort) = 20 rows; this spec's coverage-trace is the AU-v1 evidence stream feeding
+    spec-028's `*** × AU-v1` cells, one dimension finer-grained because the suite operates at
+    persona + hazard precision the portfolio-level trace does not.
+  - **Test ID cell**: when multiple Playwright scenarios assert the same
+    (persona × outcome × hazard) tuple, their Test IDs are joined with `;` in the row's
+    `Test ID` cell; rows are not duplicated. Schema columns therefore become:
+    `Persona | Outcome (#1..#5) | Hazard | FR | Test ID | Route | Audit Evidence ID | Status`.
+  *Sources: constitution §IV (auditability); FR-016 (multi-hazard cross-coverage);
+  `specs/028-capstone-alignment/spec.md` D-003 / FR-013 / clarification Q (metric-trace schema);
+  `specs/028-capstone-alignment/research.md` D-003.*
+
+### Additional ambiguities surfaced and resolved during pass 2
+
+- **Q11: What triggers the `In-Progress` status in the gap register (FR-005)? The
+  Open / In-Progress / Closed enum is declared but transitions are not codified.**
+  → **A: Status transitions are evidence-anchored, mirroring spec-028 metric-trace and spec-027
+  evidence-stub semantics.** Transition rules (now codified in updated FR-005):
+  - `Open` is set when a `GAP-*` flag is emitted (test failure, missing route, missing capability);
+    `Owner` and `Closing Spec/PR` cells may be unfilled at this point.
+  - `Open` → `In-Progress` on the first commit that fills the row's `Closing Spec/PR` cell with a
+    real, in-flight spec amendment or PR reference (i.e., a closing artefact is identified and work
+    has begun) AND the suite has been re-run at least once since the gap was first opened (so the
+    gap is confirmed as not transient).
+  - `In-Progress` → `Closed` only when the closing PR has merged AND the suite has been re-run on
+    the merge commit AND the previously failing test now passes AND no regression has been detected
+    per FR-027.
+  - `In-Progress` → `Open` (re-open) when FR-027 fires and the gap's iteration counter is reset.
+  - `Closed` → `Open` is permitted only via FR-027 regression handling; never by manual edit.
+  - Every status change MUST append a row to the audit timeline (FR-010) with operator identity,
+    rationale, and source PR / commit SHA, satisfying constitution §IV.
+  *Sources: constitution §IV (auditability); `specs/027-spec-hardening/spec.md` FR-018 + FR-020
+  (evidence-stub status transitions); `specs/028-capstone-alignment/spec.md` D-003 (Status enum
+  semantics); FR-010, FR-024, FR-027 (this spec).*
+
+- **Q12: What is the relationship between this spec's `coverage-trace.json` /
+  `coverage-trace.md` and `028-capstone-alignment`'s `specs/shared/capstone-metric-trace.md`? Is one
+  a subset of the other?**
+  → **A: They live at different scopes and granularities; this spec's trace is the AU-v1 evidence
+  stream that feeds spec-028's AU-v1 trace cells. Neither is a strict subset of the other.**
+  - `specs/shared/capstone-metric-trace.md` (spec-028) is the **portfolio-level trace**:
+    5 metrics × 4 cohorts = 20 rows; per-cohort `SC Owner` / `HYP Owner` cells point to spec IDs
+    (e.g., `015:SC-CAP-015-005`).
+  - `specs/034-webapp-capstone-coverage/coverage-trace.md` (this spec) is the **suite-level
+    evidence trace** that empirically validates the AU-v1 cohort claim: one row per
+    (persona × outcome × hazard) per Q10, with per-test passing evidence.
+  - **Linkage rule**: every AU-v1 row in spec-028's trace whose owner cells cite an outcome covered
+    by this suite MUST be re-citable to ≥ 1 passing row in spec-034's coverage-trace. If
+    spec-034's coverage-trace shows a `Status = Failing` or `Open` row for a
+    (persona × outcome × hazard) tuple supporting an AU-v1 claim, spec-028's matching cell MUST
+    flip from `Validated` to `Unresolved` until the gap closes.
+  - **No overlap of purpose**: spec-028 answers "which spec owns this metric for this cohort?"
+    (portfolio governance); spec-034 answers "is the AU web app empirically delivering on this
+    metric for this persona on this hazard?" (executable validation).
+  - Codified in updated FR-004 and Cross-References § "Capstone metric trace".
+  *Sources: `specs/028-capstone-alignment/spec.md` FR-013 + D-003;
+  `specs/028-capstone-alignment/data-model.md` lines 79, 105;
+  `specs/028-capstone-alignment/research.md` D-003.*
+
+- **Q13: For the 85-agent review's three sub-panels (operational + sector + technical), are
+  objections weighted equally, or does any panel hold a veto on its own domain?**
+  → **A: Equal weighting by default, with a domain-veto guarantee for safety-critical clauses
+  held by the operational panel.**
+  - **Default**: an objection is meritorious when ≥ 2/3 of the relevant panel (the panel whose
+    personas the objection touches — operational, sector, or technical) supports it. Cross-panel
+    disputes are resolved by the project lead per constitution §Governance ("The project lead has
+    final authority on architectural decisions").
+  - **Domain-veto guarantee** (operational panel): any objection that ≥ 2/3 of the operational
+    panel raises against a constitutional safety-critical clause — constitution §I (Primacy of
+    Life), §IV (Transparency and Auditability), Non-Negotiable #1 (Human-in-the-loop),
+    Non-Negotiable #2 (Data sovereignty), or the Quality Gate "Public outputs human-reviewed" —
+    MUST be addressed before the suite gate may flip to `Capstone Ready`, regardless of sector or
+    technical panel weighting. The project lead may adjudicate the remediation path but MAY NOT
+    bypass the operational veto on these specific clauses.
+  - Sector and technical panels do NOT carry an analogous unilateral veto; their objections fall
+    under the default 2/3 weighting plus project-lead adjudication.
+  - Codified in updated ASM-006.
+  *Sources: constitution §I (Primacy of Life), §IV (Auditability), Non-Negotiables #1 and #2,
+  Quality Gates ("Public-facing outputs … MUST be reviewed by a human operator"), §Governance
+  (project-lead final authority); ASM-006.*
+
+- **Q14: Does FR-014's WCAG 2.2 AA scope include the persona workspace routes
+  (`/workspaces/[personaId]`) specifically, or only top-level dashboards?**
+  → **A: Includes persona workspace routes explicitly, plus all P1 operator surfaces.** Per
+  `specs/001-disaster-response-hub/spec.md` NFR-001 ("All operator and public surfaces MUST conform
+  to WCAG 2.2 Level AA … screen-reader, keyboard-only, and high-contrast paths MUST complete every
+  P1 user journey"), persona workspaces are operator surfaces and every persona's must-do flow is
+  P1 (it is the platform's primary use case). FR-014 therefore asserts WCAG 2.2 AA conformance on:
+  - Every `/workspaces/[personaId]` route (persona workspace landing pages — FR-019);
+  - Every `/governance/dashboard/*` route (audit, compliance, readiness, recovery, risk);
+  - Every warning-composition surface (`/incidents/[id]` warning panels, AWS draft composer);
+  - Every simulation control surface (`/simulations/*`);
+  - The audit timeline view.
+  Asserted in `cross-cutting/accessibility-and-multilingual.spec.ts`. A persona workspace failing
+  WCAG 2.2 AA emits `GAP-A11Y-WORKSPACE` and blocks the gate.
+  *Sources: `specs/001-disaster-response-hub/spec.md` NFR-001 (WCAG 2.2 AA scope = all operator
+  and public surfaces, every P1 flow); FR-019 (persona workspace routing); ASM-009 (WCAG
+  achievable; failures are uplift not variance); constitution §V-B Principle 9 ("Warnings are
+  readily accessible").*
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Capstone-outcome traceability per persona is provable from the UI (Priority: P1)
@@ -203,6 +415,8 @@ The 85-agent (operational + sector + technical) review consumes the latest suite
 
 1. **Given** an agent-review objection raised against a persona scenario, **When** the spec amendment merges, **Then** the corresponding test exists or is updated, and the gap register row references the spec/PR ID.
 2. **Given** the suite report and gap register, **When** any meritorious objection remains `Open`, **Then** the suite-level signal is `Not Ready`; **When** all are `Closed`, **Then** the signal is `Capstone Ready`.
+3. **Given** a single gap that has cycled through three (objection → spec amendment → re-implement → re-run) iterations without closure (FR-024), **When** a fourth iteration would otherwise begin, **Then** the gap register row is flagged `escalated:project-lead`, the iteration counter for that gap is halted (no further automated cycles), the suite-level signal stays `Not Ready`, and the gate may not flip until the project lead's disposition (override / re-baseline / abandon) is recorded in the audit timeline per constitution §Governance (per Clarifications Q6).
+4. **Given** a fix that closed gap A is merged, **When** the next suite run shows that a previously-passing persona scenario for an unrelated gap B now fails (regression detected per FR-027), **Then** the gate stays `Not Ready`; the offending change is reverted to the prior known-good revision per `specs/017-cd-pipeline/spec.md` FR-004 and `specs/029-progressive-delivery-pipeline/spec.md` FR-008; gap B's row is tagged `regression_detected`, returned to `Open`, and its iteration counter is reset; rollback evidence (failing Test ID, reverted commit SHA, restored revision SHA) is appended to the audit timeline for grading (per Clarifications Q6).
 
 ### Edge Cases
 
@@ -228,8 +442,14 @@ The 85-agent (operational + sector + technical) review consumes the latest suite
 - **FR-001**: System MUST publish a Playwright suite under the fixed layout `tests/e2e/web-coverage/{operational,sectors/<jurisdiction>,cross-cutting,capstone}/` using the file-naming convention `<persona-id>.<scenario-slug>.spec.ts`, where `<persona-id>` is the kebab-case ID drawn verbatim from the cited input files (`operational-input.md`, `sector-eastern-input.md`, `sector-southwest-input.md`, `sector-tc-input.md`).
 - **FR-002**: System MUST provide ≥ 1 passing Playwright scenario per persona for each of the 68 personas (10 operational + 58 sector/jurisdiction). Persona inventory: NSW (6), VIC (5), QLD (4), SA (5), WA (3), TAS (4), ACT (7), NT (5), Commonwealth (11), Cross-Sector (8), Operational (10).
 - **FR-003**: System MUST provide ≥ 1 cross-jurisdiction integration scenario per Australian state/territory (NSW, VIC, QLD, SA, WA, TAS, ACT, NT) and ≥ 1 Commonwealth-bridge scenario invoking COMDISPLAN/DACC/NJCOP.
-- **FR-004**: System MUST emit a traceability artefact `specs/034-webapp-capstone-coverage/coverage-trace.md` (and a machine-readable companion `coverage-trace.json`) with one row per (persona × capstone-outcome) claim, columns: `Persona | Outcome (#1..#5) | FR | Test ID | Route | Audit Evidence ID | Status`. Every row MUST resolve to a real persona ID, real spec ID, real test ID, and a route present in the application's route tree.
-- **FR-005**: System MUST emit a gap register `specs/034-webapp-capstone-coverage/gap-register.md` recording every test failure or `GAP-*` flag with columns `Gap ID | Persona | Route | Constitution Clause | Owner | Status (Open|In-Progress|Closed) | Closing Spec/PR`.
+- **FR-004**: System MUST emit a traceability artefact `specs/034-webapp-capstone-coverage/coverage-trace.md` (and a machine-readable companion `coverage-trace.json`) with **one row per (persona × capstone-outcome × hazard) tuple** (per Clarifications Q10). Schema columns, in order: `Persona | Outcome (#1..#5) | Hazard | FR | Test ID | Route | Audit Evidence ID | Status`. Every row MUST resolve to a real persona ID, a real capstone outcome (#1..#5), a hazard drawn from the AU catalogue (`bushfire | riverine flood | tropical cyclone | severe storm | extreme heat | earthquake/tsunami`), a real spec ID, a real test ID, and a route present in the application's route tree. When multiple Playwright scenarios assert the same (persona × outcome × hazard) tuple, their Test IDs MUST be joined with `;` in the `Test ID` cell — rows are never duplicated on this key. The artefact is the AU-v1 evidence stream that feeds `specs/shared/capstone-metric-trace.md`'s AU-v1 cohort cells (per Clarifications Q12); spec-028's matching cell MUST flip from `Validated` to `Unresolved` whenever a row supporting it shows `Status = Failing` or `Open` here.
+- **FR-005**: System MUST emit a gap register `specs/034-webapp-capstone-coverage/gap-register.md` recording every test failure or `GAP-*` flag with columns `Gap ID | Persona | Route | Constitution Clause | Owner | Status (Open|In-Progress|Closed) | Closing Spec/PR`. Status transitions (per Clarifications Q11) are evidence-anchored and one-way except via FR-027:
+  - `Open` is set when a `GAP-*` flag is emitted (test failure, missing route, missing capability); `Owner` and `Closing Spec/PR` cells may be unfilled at this point.
+  - `Open` → `In-Progress` requires (a) the `Closing Spec/PR` cell is filled with a real, in-flight spec amendment or PR reference, AND (b) the suite has been re-run at least once since the gap was first opened (so the gap is confirmed not transient).
+  - `In-Progress` → `Closed` requires (a) the closing PR has merged, AND (b) the suite has been re-run on the merge commit, AND (c) the previously failing test now passes, AND (d) no regression has been detected per FR-027.
+  - `In-Progress` → `Open` (re-open) only when FR-027 fires; the iteration counter is reset.
+  - `Closed` → `Open` is permitted only via FR-027 regression handling; never by manual edit.
+  - Every status change MUST append an entry to the audit timeline (FR-010) recording operator identity, rationale, and source PR / commit SHA, satisfying constitution §IV.
 - **FR-006**: System MUST exercise all four PPRR phases (Prevention, Preparedness, Response, Recovery) across the suite by mapping each persona scenario to at least one phase tag in the trace artefact.
 
 #### Capstone-outcome assertions (capstone/ subfolder)
@@ -241,13 +461,24 @@ The 85-agent (operational + sector + technical) review consumes the latest suite
 - **FR-011**: System MUST support AWS warnings in three states (Advice, Watch and Act, Emergency Warning) using the nested model (level + hazard/location + action statement), correct hazard iconography, de-escalation, and all-clear, asserted in `cross-cutting/aws-warning-compliance.spec.ts` and parameterised across hazard types (fire, flood, storm, cyclone, heat, other).
 - **FR-012**: System MUST support the 5-stage evacuation flow (Decision → Warning → Withdrawal → Shelter → Return), evacuation types (total / partial / phased), approaches (directed / recommended / self-initiated) and shelter-in-place, with explicit prioritisation for vulnerable populations (Aboriginal & Torres Strait Islander, CALD, disability, children, older persons, homeless, tourists, institutional care), asserted in `cross-cutting/evacuation-five-stage.spec.ts`.
 - **FR-013**: System MUST track all four recovery environments (Social, Built, Economic, Natural) and a managed handover from response to recovery, asserted in `cross-cutting/recovery-environments.spec.ts` and tied to outcome **#5** (30% economic-loss reduction).
-- **FR-014**: System MUST support multilingual alert payloads for ≥ 1 community language per warning category, with the contractual baselines (per Clarifications Q2): (a) **Simplified Chinese** as the v1 CALD language pack inherited from `specs/001-disaster-response-hub/spec.md` NFR-013 / ASM-004, asserted on at least one warning per hazard category; (b) an **Aboriginal & Torres Strait Islander language placeholder** rendered on at least one warning per hazard category per constitution §VI-C and the Public Information Officer must-do in `operational-input.md`. Canonical BCP-47 identifier selection for any additional CALD or ATSI variants is **deferred to plan-phase `research.md`** per the `specs/028-capstone-alignment/spec.md` clarification precedent. Non-AU language packs (PH/JP/BD) remain deferred per OOS-001. The system MUST also pass automated WCAG 2.2 AA conformance scans on dashboards and warning surfaces. Asserted in `cross-cutting/accessibility-and-multilingual.spec.ts`.
+- **FR-014**: System MUST support multilingual alert payloads for ≥ 1 community language per warning category, with the contractual baselines (per Clarifications Q2): (a) **Simplified Chinese** as the v1 CALD language pack inherited from `specs/001-disaster-response-hub/spec.md` NFR-013 / ASM-004, asserted on at least one warning per hazard category; (b) an **Aboriginal & Torres Strait Islander language placeholder** rendered on at least one warning per hazard category per constitution §VI-C and the Public Information Officer must-do in `operational-input.md`. Canonical BCP-47 identifier selection for any additional CALD or ATSI variants is **deferred to plan-phase `research.md`** per the `specs/028-capstone-alignment/spec.md` clarification precedent. Non-AU language packs (PH/JP/BD) remain deferred per OOS-001. The system MUST also pass automated WCAG 2.2 AA conformance scans on **every P1 operator surface** (per Clarifications Q14 and `specs/001-disaster-response-hub/spec.md` NFR-001), explicitly including (a) every `/workspaces/[personaId]` route (persona workspace landing pages — FR-019); (b) every `/governance/dashboard/*` route (audit, compliance, readiness, recovery, risk); (c) every warning-composition surface (`/incidents/[id]` warning panels and the AWS draft composer); (d) every simulation control surface under `/simulations/*`; and (e) the audit-timeline view. A persona workspace failing WCAG 2.2 AA emits `GAP-A11Y-WORKSPACE` (FR-005) and blocks the gate. Asserted in `cross-cutting/accessibility-and-multilingual.spec.ts`.
 - **FR-015**: System MUST integrate the cross-jurisdiction handoff lifecycle (mutual aid, COMDISPLAN, DACC, NCM, NJCOP) such that the same incident COP is visible to the relevant neighbouring jurisdictions and the Commonwealth coordinator, asserted in `sectors/commonwealth/nema.*` and `sectors/<jurisdiction>/cross-jurisdiction-*.spec.ts`.
-- **FR-016**: System MUST exercise multi-hazard scenarios (bushfire, flood, cyclone, storm, heat, earthquake/tsunami) across the persona suites such that each capstone-outcome assertion (#1..#5) holds for at least two distinct hazard types.
+- **FR-016**: System MUST exercise multi-hazard scenarios across the persona suites such that each capstone-outcome assertion (#1..#5) holds for two **named** AU-relevant hazard types drawn from constitution §III's catalogue (per Clarifications Q8). Mandatory pairs:
+  - **Outcome #1 (1,000+ lives)** — `bushfire` AND `extreme heat`.
+  - **Outcome #2 (50 % faster response)** — `bushfire` AND `severe storm`.
+  - **Outcome #3 (24-h earlier evacuation)** — `tropical cyclone` AND `riverine flood`.
+  - **Outcome #4 (30 % logistics efficiency)** — `bushfire` AND `tropical cyclone`.
+  - **Outcome #5 (30 % economic-loss reduction)** — `riverine flood` AND `severe storm`.
+  - `earthquake/tsunami` remains in scope for AWS warning composition (FR-011) and ≥ 1 persona suite SHOULD exercise it (e.g., Geoscience Australia / BoM tsunami-warning relay), but it is NOT mandated as the second hazard for any specific outcome — to keep the suite AU-realistic and bounded.
+  - Cross-trace verification: every (outcome × hazard) pair above MUST resolve to ≥ 1 passing row in `coverage-trace.md` (FR-004) before the gate may flip to `Capstone Ready`.
 - **FR-017**: System MUST support offline / degraded-mode for field roles with queue-and-sync semantics, idempotent dedupe by client correlation ID, conservative life-safety defaults for stale data, and an offline-banner indicator, asserted in `cross-cutting/field-offline-mode.spec.ts`.
 - **FR-018**: System MUST satisfy constitution Non-Negotiable #2 across **three contractual assertions** (per Clarifications Q3), all in `cross-cutting/data-sovereignty.spec.ts`: (a) **Display** — AU-region banner / badge present on every route processing regulated platform data, plus a discoverable Foundry-model carve-out list reachable from `/governance/dashboard/compliance`; (b) **Gateway enforcement** — a synthetic PSPF-marked or PII-bearing payload submitted through the platform model gateway is denied or masked before reaching any non-AU model-hosting endpoint, per constitution NN#2 §3 ("data-minimisation controls at the platform's model gateway") and the three-classifier deny-by-default filter described in `docs/aidr/decisions/adr-033-phi-shadow-boundary.md` Layer 2; (c) **Registry currency** — the named carve-out registry (`infra/parameters/foundry-carveout.yaml` or its successor, per `docs/aidr/decisions/adr-032-oidc-supersession.md` and `specs/029-progressive-delivery-pipeline/spec.md` FR-018) is read by the suite and asserted to have `review_date` within 90 days and a non-empty `approver_identities[]`.
 - **FR-019**: System MUST resolve `/workspaces/[personaId]` to a task-tailored landing page for every persona ID in the 68-persona inventory; missing routes are flagged `GAP-WORKSPACE-MISSING` (FR-005) and uplifted before sign-off.
-- **FR-020**: System MUST surface a span-of-control warning when a persona has > 7 direct reports in an incident, asserted in `cross-cutting/span-of-control.spec.ts`.
+- **FR-020**: System MUST surface a span-of-control warning when a **command-side persona** has > 7 direct reports in an incident (per Clarifications Q9). Command-side personas in scope, drawn from constitution §II-A AIIMS Functions and the AIIMS 3–7-direct-reports guidance recorded in `.github/agents/operational/incident-commander.agent.md` and `.github/agents/operational/operations-officer.agent.md`:
+  - **Tier-1 (always evaluated)**: Incident Commander (`incident-commander`).
+  - **Tier-2 AIIMS function leads (evaluated when supervising direct reports)**: Operations Officer (`operations-officer`) — for the field supervisors they manage; Logistics Officer (`logistics-officer`) — for the supply / transport / medical / welfare branch supervisors they manage.
+  - **Warning is N/A (negative test asserts the warning surface stays suppressed)**: Planning Officer, Public Information Officer, Field Coordinator, Resilience Planner, Executive Leader, Observer/Auditor, Risk Manager, and all 58 sector / jurisdiction personas when they are not in an active AIIMS command chain.
+  - Asserted in `cross-cutting/span-of-control.spec.ts` with both positive (Tier-1 / Tier-2 with > 7 reports → warning fires) and negative (N/A personas → warning suppressed) coverage.
 
 #### Determinism, evidence, and CI gate
 
@@ -285,7 +516,7 @@ Outcome-proxy metrics below are technology-agnostic targets the Playwright suite
 - **SC-002 (Outcome #2: 50% faster response)** *(contractual; per Clarifications Q1)*: For every persona scenario, the time from signal ingestion to IC-approved coordinated action recorded in the audit timeline is **≤ 50 % of the persona's pre-suite baseline AND** absolutely **≤ 5 minutes for AIIMS Level 1, ≤ 15 minutes for Level 2, ≤ 30 minutes for Level 3** incidents in the seed data (whichever is stricter). Span-of-control breaches surface within one COP refresh (≤ 5 s per FR-008).
 - **SC-003 (Outcome #3: 24-hour-earlier evacuations)**: For every pre-warned hazard scenario in the suite (flood, cyclone, bushfire), the predictive risk → 5-stage evacuation flow is actionable from the relevant persona workspace at least 24 hours earlier than the reference timestamp embedded in the seed-data scenario, with evidence captured in the audit timeline.
 - **SC-004 (Outcome #4: 30% logistics efficiency)** *(contractual; per Clarifications Q1)*: For every Logistics Officer / mutual-aid / DACC scenario, the logistics-ledger task-to-resource match completes in **≤ 70 % of the persona's pre-suite baseline number of operator interactions AND** absolutely **≤ 7 clicks for routine allocations, ≤ 12 clicks for the mutual-aid lifecycle** (whichever is stricter), with no manual reconciliation outside the UI.
-- **SC-005 (Outcome #5: 30% economic-loss reduction)** *(contractual; per Clarifications Q1)*: For every recovery scenario, all four recovery environments (Social, Built, Economic, Natural) are visible and updatable from `/governance/dashboard/recovery`, and the response → recovery handover is a managed transition (not an abrupt switch), with the post-handover Economic environment showing baseline + a **≥ 30 % projected loss-reduction proxy** versus the seed-data baseline (asserted by the suite as the contractual outcome-#5 threshold).
+- **SC-005 (Outcome #5: 30% economic-loss reduction)** *(contractual; per Clarifications Q1 + Q7)*: For every recovery scenario, all four recovery environments (Social, Built, Economic, Natural) are visible and updatable from `/governance/dashboard/recovery`, and the response → recovery handover is a managed transition (not an abrupt switch). At the response → recovery handover for every pre-warned hazard scenario in the seed data, the post-handover Economic-environment view MUST satisfy **`(baseline_loss − projected_loss) / baseline_loss ≥ 0.30`** where `baseline_loss` is the seed-data scenario's pre-suite Economic baseline (recorded by `bootstrap_seed_data()` at scenario load, framed per Sendai Framework Indicator C "direct economic loss attributed to disasters" and aligned with `specs/015-performance-benchmarks/spec.md` SC-CAP-015-005's "scenario-modelled counterfactual"), and `projected_loss` is the post-handover Economic-environment view's projected residual loss after the platform-recommended recovery actions are applied. **Measurement window**: per-scenario, evaluated at the response → recovery transition (not annualised). Portfolio-level annualised "≥ 30 % economic-loss reduction" is owned by `specs/shared/capstone-metric-trace.md` row `ECONOMIC_LOSS_REDUCTION × AU-v1` per `specs/028-capstone-alignment/spec.md` D-003 / FR-013; the suite's per-scenario assertion is the AU-v1 evidence stream that feeds that portfolio cell.
 - **SC-006 (Persona coverage)**: 100% (68 / 68) of the in-scope personas have ≥ 1 passing Playwright scenario.
 - **SC-007 (Cross-jurisdiction coverage)**: 100% (8 / 8) of Australian states and territories have ≥ 1 passing cross-jurisdiction scenario plus ≥ 1 passing Commonwealth-bridge scenario.
 - **SC-008 (Cross-cutting compliance)**: 100% of the cross-cutting specs (RBAC, COP latency, audit append-only, AWS, evacuation, recovery, accessibility, multilingual, offline mode, data sovereignty, span-of-control) pass on a clean run.
@@ -300,7 +531,7 @@ Outcome-proxy metrics below are technology-agnostic targets the Playwright suite
 - **ASM-003**: The current Next.js route tree (`/`, `/disasters`, `/incidents` (+`[id]`), `/governance` (+ `[dataSourceId]` + `assignments` + `compliance`), `/governance/dashboard` (+ `audit` / `compliance` / `readiness` / `recovery` / `risk`), `/operations` (+ `workflows`), `/preparedness`, `/simulations` (+ `[tenantId]` + `playback` + `create` + `reports` + `[reportId]`), `/workspaces` (+ `[personaId]`), `/eval` (+ `[runId]`)) is the in-scope route surface; routes a persona requires that are absent are uplift candidates for the implement phase, not blockers for the spec phase.
 - **ASM-004**: The capstone-outcome proxy thresholds in SC-001..SC-005 are now **contractual** (per Clarifications Q1) — the suite asserts them pass/fail. The plan phase MAY tighten the numeric thresholds further per scenario from seed-data baselines and persona acceptance gates, but MUST NOT relax them.
 - **ASM-005**: Asia (PH, JP, BD) personas, hazards, and language variants are deferred per `028-capstone-alignment` and constitution amendment 1.2.0 / spec 029; no Asia persona appears in the 68-persona inventory or the success criteria. AU-only scope is legitimised by this assumption.
-- **ASM-006**: The 85-agent review (operational + sector + technical) is delivered as part of this feature's iteration loop and orchestrated by the User Story 5 runner. An objection is **"meritorious"** when it is supported by ≥ 2/3 majority of the relevant agent panel (panel = the personas whose scenarios the objection touches); ties and final sign-off rest with the **project lead** per constitution §Governance. Meritorious objections become spec amendments and re-implementation per FR-024 (max 3 iteration cycles per gap). Non-meritorious objections are recorded but do not block the gate.
+- **ASM-006**: The 85-agent review (operational + sector + technical) is delivered as part of this feature's iteration loop and orchestrated by the User Story 5 runner. An objection is **"meritorious"** when it is supported by ≥ 2/3 majority of the relevant agent panel (panel = the personas whose scenarios the objection touches); ties and final sign-off rest with the **project lead** per constitution §Governance. Sub-panel weighting (per Clarifications Q13): sub-panels (operational / sector / technical) carry **equal default weight**, with cross-panel disputes adjudicated by the project lead. **Domain-veto guarantee**: if ≥ 2/3 of the **operational panel** raises an objection against a constitutional safety-critical clause — constitution §I (Primacy of Life), §IV (Transparency and Auditability), Non-Negotiable #1 (Human-in-the-loop), Non-Negotiable #2 (Data sovereignty), or the Quality Gate "Public outputs human-reviewed" — the objection MUST be addressed before the suite gate may flip to `Capstone Ready`, regardless of sector or technical panel weighting; the project lead may adjudicate the remediation path but MAY NOT bypass the operational veto on these specific clauses. Sector and technical panels do NOT carry an analogous unilateral veto. Meritorious objections become spec amendments and re-implementation per FR-024 (max 3 iteration cycles per gap). Non-meritorious objections are recorded but do not block the gate.
 - **ASM-007**: Net-new Azure infrastructure is permitted only if essential for an identified gap and approved during plan phase by the technical agents; spec phase records intent, plan phase records design, implement phase records code.
 - **ASM-008**: AWS warnings, evacuation flows, recovery environments, audit, RBAC, accessibility, span-of-control, offline mode, and data sovereignty are constitutional baselines, not optional behaviours; suite asserts them irrespective of persona.
 - **ASM-009**: WCAG 2.2 AA, multilingual variants for ≥ 1 community language per warning category, and AU-region data-sovereignty banners are achievable under the existing platform; if not, the gap register flags them as uplift, not as acceptable variance.
@@ -391,5 +622,9 @@ Naming convention reminder (FR-001): `<persona-id>.<scenario-slug>.spec.ts`. Per
 - Constitution: `.specify/memory/constitution.md` (v1.2.0)
 - Persona-need syntheses: `operational-input.md`, `sector-eastern-input.md`, `sector-southwest-input.md`, `sector-tc-input.md` (per session-state path)
 - Asia deferral: `specs/028-capstone-alignment/spec.md`
+- Capstone metric trace (portfolio-level): `specs/shared/capstone-metric-trace.md` — this spec's `coverage-trace.md` is the AU-v1 evidence stream that feeds the AU-v1 cohort cells of that artefact (per Clarifications Q12).
 - Persona-profile contract: `specs/027-spec-hardening/contracts/persona-profile.md`
-- Foundry carve-out: constitution Non-Negotiable #2; `specs/029-progressive-delivery-pipeline/spec.md`
+- Foundry carve-out: constitution Non-Negotiable #2; `specs/029-progressive-delivery-pipeline/spec.md`; `docs/aidr/decisions/adr-032-oidc-supersession.md`; `docs/aidr/decisions/adr-033-phi-shadow-boundary.md`.
+- Known-good baseline + auto-rollback: `specs/017-cd-pipeline/spec.md` FR-004 + FR-011; `specs/029-progressive-delivery-pipeline/spec.md` FR-008 + FR-021.
+- Economic-loss baseline framing: `specs/015-performance-benchmarks/spec.md` SC-CAP-015-005 (Sendai indicator alignment, scenario-modelled counterfactual).
+- AIIMS span-of-control source: `.github/agents/operational/incident-commander.agent.md` § "Span of Control"; `.github/agents/operational/operations-officer.agent.md` § Responsibilities.
