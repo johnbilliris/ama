@@ -106,6 +106,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install seed loader dependencies
+        run: python -m pip install -e apps/api
+
       # azd has its own auth flow, separate from azure/login. Authenticate
       # with the same service principal so `azd provision`/`azd deploy`
       # inherit the right context.
@@ -137,6 +140,25 @@ jobs:
           # surface it explicitly for azd.
           SUB=$(az account show --query id -o tsv)
           azd env set AZURE_SUBSCRIPTION_ID "${SUB}"
+
+          role_response=$(az rest --method GET --url "https://graph.microsoft.com/v1.0/directoryRoles?\$filter=displayName%20eq%20'Global%20Administrator'")
+          role_id=$(echo "${role_response}" | jq -r '.value[0].id // empty')
+          if [[ -z "${role_id}" ]]; then
+            echo "::error::Could not resolve the Microsoft Entra Global Administrator directory role. Ensure the deployment identity can read directory roles."
+            exit 1
+          fi
+
+          global_admin_ids='[]'
+          members_url="https://graph.microsoft.com/v1.0/directoryRoles/${role_id}/members?\$select=id,userPrincipalName"
+          while [[ -n "${members_url}" ]]; do
+            members_response=$(az rest --method GET --url "${members_url}")
+            page_ids=$(echo "${members_response}" | jq -c '[.value[] | select(."@odata.type" == "#microsoft.graph.user") | .id]')
+            global_admin_ids=$(jq -cn --argjson existing "${global_admin_ids}" --argjson page "${page_ids}" '$existing + $page | unique')
+            members_url=$(echo "${members_response}" | jq -r '."@odata.nextLink" // empty')
+          done
+
+          echo "Resolved $(echo "${global_admin_ids}" | jq 'length') Global Administrator user account(s) for Cosmos DB data-plane reader access."
+          azd env set globalAdministratorPrincipalIds "$(echo "${global_admin_ids}" | jq -c '.')"
 
       - name: Provision infrastructure
         run: azd provision --no-prompt
