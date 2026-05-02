@@ -470,5 +470,156 @@ With multiple developers:
 
 ---
 
-**End of tasks.md** — Total: 172 tasks. Ready for `/speckit.analyze`.
+**End of cycle-0 tasks** — Total: 172 tasks (T001..T172).
+
+---
+
+## Cycle-1 Amendment Tasks (T173+)
+
+> Added 2026-02-05 by `/speckit.tasks` re-run, grounded in `plan.md` §Cycle-1 amendment summary (lines 768–810), `research.md` R-020..R-024, `data-model.md` entities #10..#13 (`CycleMetadata`, `DepthProfile`, `EvaluatorRequest`, `EvaluatorResponse`) plus the optional `cycle_id` on `GapRegisterEntry`, the three new contracts (`outcome-evaluator.contract.md`, `cycle-metadata.schema.json`, `tests/e2e/web-coverage/_lib/depth-profiles/_schema.json`), and the cycle-1 portion of the validation checklist (CHK181..CHK185, CHK205, CHK210..CHK215). Dependency order honoured: contracts → depth-profile family + evaluator endpoints (parallel) → cycle metadata → workflow refactors → FR-030 net-new scenarios → env-var canonicalisation + SC-012 closure → documentation polish.
+
+### Phase 9: Cycle-1 contract integration (foundation)
+
+**Purpose**: Formal review + acceptance of the three artefacts authored during the plan re-run. No implementation here; T173/T174 are the "review and integrate" gates that unblock T175..T181. **No depth-profile, evaluator, or refactor task may begin until this phase is complete.**
+
+- [ ] T173 Review and integrate `specs/034-webapp-capstone-coverage/contracts/outcome-evaluator.contract.md` — confirm Pass-4 Q21 / Pass-5 Q27 + Q29 alignment (idempotency tuple `(sc_id, scenario_id, persona_id, correlation_id)`, dual-guard activation reused from `persona-fixture.contract.md`, `sc-001..sc-005` routable range with `sc-006..sc-011 → 400 evaluator_not_routable` body naming the CI-artefact owner, embedded JSON Schemas draft 2020-12 for request + response, audit emission ≤ 2 s SLO, scenario-not-found → `GAP-EVALUATOR-SCENARIO-MISSING`); cross-link from `tests/e2e/web-coverage/README.md` and stamp the contract `Status: Accepted (cycle-1, /speckit.tasks)` (FR-028, Q21, Q27, Q29; CHK183)
+- [ ] T174 [P] Review and integrate `specs/034-webapp-capstone-coverage/contracts/cycle-metadata.schema.json` AND `tests/e2e/web-coverage/_lib/depth-profiles/_schema.json` — confirm: cycle-metadata schema (JSON-Schema draft 2020-12) carries `cycle_start_ts` (ISO-8601), `cycle_id` (ULID), `commit_sha` (40-hex), `seed_hash`; depth-profile schema (JSON-Schema **draft-07** per Q28) closes the `safety_critical_workflow` enum to the 12-value set (9 write + 3 read-only per Q24: `approve|publish|allocate|decline|queue-and-sync|escalate|handover|declare|reopen|observe-tamper-resist|report-generate|export-evidence`); add `_schema.json` to `_lib/persona_spec_generator.py` validator import list reservation (Q20, Q24, Q26, Q28; CHK191, CHK202)
+
+### Phase 10: Depth-profile family (FR-029)
+
+**Purpose**: Realise the 68-of-68 binary depth-profile coverage gate per FR-029 final sentence. Each persona must have an authored, schema-valid `*.depth.yaml`; missing or invalid profile emits `GAP-DEPTH-PROFILE-MISSING-{persona-id}` and fails the gate. Begins after T173/T174.
+
+- [ ] T175 [P] Generate 68 `tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml` files (one per FR-002 persona — 10 operational + 58 sector/jurisdiction) per the persona-need synthesis embedded in `plan.md` §Module Breakdown and `spec.md` Pass 4 Q15/Q24; each file MUST validate against `tests/e2e/web-coverage/_lib/depth-profiles/_schema.json` (draft-07) and MUST carry: `persona_id`, `primary_workspace_route`, `safety_critical_workflow` (one of the 12 enum values from T174), `workflow_steps[]` (≥ 3 steps with selector + expected post-state), `assertion_targets[]` (UI selector or evaluator endpoint reference), `audit_readback` (correlation-id rule), `coverage_tags[]` (multi-jurisdiction reach per Q23 — folder placement is fixed by owning persona, NOT by tags), `read_only_variant` flag if applicable per Q24 (Observer/Auditor, Executive Leader, analogous personas) — split workload between operational (10 files) + each jurisdiction folder so reviewers can shard (FR-002, FR-029, Q15, Q20, Q24; CHK181, CHK191)
+- [ ] T176 Extend `scripts/web-coverage/_lib/persona_spec_generator.py` — load each `tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml`, validate against `_schema.json` via existing `schema_validators.py` (T047 ajv pattern), translate workflow steps + assertion targets into a Playwright spec body that drives the FR-028 evaluator endpoint (no `test.fail` bail); on missing OR schema-invalid profile, fail-fast and call `python scripts/web-coverage/gap-register.py open --gap-id GAP-DEPTH-PROFILE-MISSING-{persona-id} --status Open --reason "depth-profile missing or invalid"` per FR-005; emit deterministic output (sorted keys, stable spec ordering) to satisfy SC-010 (FR-005, FR-029, Q20, Q28; ref `contracts/outcome-evaluator.contract.md` §Client-side fixture binding)
+- [ ] T177 Extend `web-coverage-gate` job (T153 in `.github/workflows/ci.yml`) — read all 68 depth-profile YAML paths via `Get-ChildItem tests/e2e/web-coverage/_lib/depth-profiles/*.depth.yaml`, cross-reference against the FR-002 persona inventory (10 operational + 58 sector), assert binary coverage (68/68 valid profiles); fail the gate AND post GitHub status check `web-coverage / depth-profile-binary` if any persona is missing a valid profile; embed numerator/denominator in the gate's audit-trail step output for CHK210/CHK212 traceability (FR-023, FR-029; CHK183, CHK191, CHK202)
+
+### Phase 11: Outcome-evaluator + audit-list endpoints (FR-028)
+
+**Purpose**: Wire the FR-028 route-only endpoints behind the dual-guard so the suite stops bailing with `test.fail(true, "<API not wired>")`. Runs in parallel with Phase 10 (different files). Begins after T173.
+
+- [ ] T178 [P] Create `apps/api/app/api/routes/outcome_evaluator.py` per `contracts/outcome-evaluator.contract.md` — FastAPI router exposing `POST /api/outcomes/sc-{sc_id}/evaluate` with path-param regex `^00[1-5]$` (`sc-006..sc-011` and any other value → HTTP 400 `evaluator_not_routable` body naming the CI-artefact owner per Q29 table); request validated against the embedded `EvaluatorRequest` JSON Schema; `404 scenario_not_found` → suite emits `GAP-EVALUATOR-SCENARIO-MISSING`; wire into `apps/api/app/api/router.py` aggregator behind `test_support_guard.is_enabled()` (T009 dual-guard pattern); never registered in production (`environment == "production"` branch returns no router) (FR-028, Q21, Q27, Q29; CHK183, CHK184)
+- [ ] T179 [P] Create `apps/api/app/api/routes/audit_list.py` per `contracts/outcome-evaluator.contract.md` §Server-side contract — audit-list — FastAPI router exposing `GET /api/audit/list?correlation_id={uuid}&cycle={current|all}&limit={1..500}&cursor={opaque}`; default `cycle=current` reads `bootstrap_seed_data().current_cycle_start` directly (server NEVER consults the gap register or `_artifacts/cycle-metadata.json` per Q22); cursor pagination, `limit` defaults 100 caps at 500 to bound SC-011; append-only retention — tamper attempts are themselves audit rows with `outcome: "denied"` per Q24 (a); wire into router aggregator behind same dual-guard as T178 (FR-010, FR-028, Q22, Q24; CHK183)
+- [ ] T180 Implement `apps/api/app/services/outcome_evaluator_service.py` — covers SC-001..SC-005 with deterministic counterfactual evaluation reading `metric_inputs` from `bootstrap_seed_data().scenarios[scenario_id].baseline` (data-model §6 — `lives_at_risk`, `signal_to_action_ms`, `evac_lead_hours`, `logistics_clicks`, `economic_loss_aud`); idempotency tuple `(sc_id, scenario_id, persona_id, correlation_id)` keyed via in-memory cache (worker-scoped) returning the same `audit_id` + verdict on retry; emits one append-only audit row per fresh evaluation via the existing `audit_writer` (FR-010), preserving the ≤ 2 s SLO (FR-004); response shape conforms to embedded `EvaluatorResponse` JSON Schema (status `pass|fail|gap`, `evidence_refs[]`, `metric_value`, `threshold`, `audit_id` UUID) (FR-028, Q21; ref `contracts/outcome-evaluator.contract.md` §Idempotency + §Audit emission)
+- [ ] T181 [P] Author contract tests `apps/api/tests/contract/test_outcome_evaluator.py` and `apps/api/tests/contract/test_audit_list.py` — for the evaluator: assert (a) 404 when `AMA_TEST_SUPPORT` unset, (b) 404 when `environment == "production"` regardless of env var, (c) 200 + schema-valid `EvaluatorResponse` for each of `sc-001..sc-005`, (d) 400 `evaluator_not_routable` for `sc-006..sc-011` with body naming the CI-artefact owner per Q29 table, (e) 404 `scenario_not_found` for unknown `scenario_id`, (f) idempotency — same tuple → same `audit_id` + same verdict + no duplicate audit row, (g) 422 on schema-invalid body. For audit-list: (h) `cycle=current` filters by `bootstrap_seed_data().current_cycle_start`, (i) cursor pagination is stable + sorted, (j) `limit > 500` clamps to 500, (k) tamper-attempt rows surface with `outcome: "denied"` (FR-021, FR-028, Q22, Q24, Q29; CHK183)
+
+### Phase 12: Cycle metadata recorder (Q26)
+
+**Purpose**: Emit `_artifacts/cycle-metadata.json` once per Playwright run so the suite-side has a symmetric Playwright surface for the same cycle boundary the audit-list endpoint reads from `bootstrap_seed_data()`. Begins after T173 + T179.
+
+- [ ] T182 Extend the Playwright reporter `tests/e2e/web-coverage/_support/reporter/coverage-reporter.ts` (existing reporter from T039 — DO NOT create a parallel reporter) to add an `onBegin(config, suite)` hook that writes `tests/e2e/web-coverage/_artifacts/cycle-metadata.json` exactly once per run; payload conforms to `contracts/cycle-metadata.schema.json` with `cycle_start_ts` (ISO-8601 UTC), `cycle_id` (ULID via `monotonic-ulid` or equivalent — pin in `apps/web/package.json`), `commit_sha` (40-hex from `process.env.GITHUB_SHA` ?? `git rev-parse HEAD`), `seed_hash` (sha256 of `bootstrap_seed_data()` payload via `GET /api/test-support/personas` → JSON.stringify with sorted keys); validate the payload against the embedded schema via `ajv` before writing; the `web-coverage-merge` job (T152) MUST copy this file into the `coverage-trace.json` header — extend T152's CLI invocation to pass `--cycle-metadata tests/e2e/web-coverage/_artifacts/cycle-metadata.json` (FR-027, Q26; ref `contracts/cycle-metadata.schema.json`)
+- [ ] T183 Update `scripts/web-coverage/gap-register.py` — when opening or transitioning a gap, read `tests/e2e/web-coverage/_artifacts/cycle-metadata.json` (if present) and stamp `cycle_id` on the new `GapRegisterEntry` (additive, optional per `contracts/gap-register-entry.schema.json`); add `--cycle current|all` option to `gap-register.py validate` and `gap-register.py list` for FR-005 cross-cycle queries — `current` filters by the active `cycle_id`, `all` is opt-in; FR-027 regression evidence (failing test id + reverted commit SHA + restored revision) MUST cite the originating `cycle_id` so panel resolutions can audit the cycle history (FR-005, FR-027, Q22, Q26)
+
+### Phase 13: Workflow-state assertion refactors (FR-002 + FR-029)
+
+**Purpose**: Drop every `test.fail(true, "<API not wired>")` bail and drive workflow via the now-wired evaluator endpoint, parameterised by depth-profile YAML. **MUST NOT begin until Phase 10 + Phase 11 + Phase 12 are complete** — depth-profile + evaluator + cycle metadata are required preconditions.
+
+- [ ] T184 [US1] Refactor 81 persona spec stubs (10 operational + 71 sector/jurisdiction non-cross-jurisdiction specs) currently bailing with `test.fail(true, ...)` to consume the depth-profile YAML via `persona_spec_generator.py` (T176) and drive the safety-critical workflow through `POST /api/outcomes/sc-{NNN}/evaluate` (or the persona's specified non-evaluator transition); drop ALL `test.fail(true, ...)` use; assert post-transition state via either evaluator response (`status: pass|fail|gap`) OR a UI selector reflecting persisted state per FR-029 (c); read back audit timeline via `GET /api/audit/list?correlation_id={cid}` per FR-029 (d); regenerate via `python scripts/web-coverage/_lib/persona_spec_generator.py --rewrite-stubs` so the change is deterministic (FR-002, FR-029, Q15, Q24; CHK181, CHK182)
+- [ ] T185 [US2] Refactor 10 cross-cutting suites that currently bail — `tests/e2e/web-coverage/cross-cutting/{aws-warning-compliance,audit-append-only,decision-support-hitl,span-of-control,recovery-environments,field-offline-mode,data-source-multiplicity,evacuation-five-stage,lessons-management,simulation-playback}.spec.ts` — to drive workflow via the FR-028 evaluator endpoint where the suite covers SC-001..SC-005, OR via the existing test-support seed mutator + `audit-list` read-back where the suite covers FR-009/FR-010/FR-012/FR-013/FR-014/FR-015 invariants; remove ALL `test.fail(true, ...)` use; preserve the existing `@persona/@outcome/@hazard/@fr/@clause` tag taxonomy (R-017) (FR-002, FR-009, FR-010, FR-012, FR-013, FR-029; CHK181, CHK182)
+- [ ] T186 [US1] Refactor 5 capstone outcome specs `tests/e2e/web-coverage/capstone/outcome-{1..5}-*.spec.ts` (`outcome-1-bushfire-extreme-heat`, `outcome-2-bushfire-severe-storm`, `outcome-3-tropical-cyclone-flood`, `outcome-4-bushfire-cyclone-logistics`, `outcome-5-flood-storm-economic`) to call `POST /api/outcomes/sc-{001..005}/evaluate` (one outcome per spec) with `metric_inputs` derived from the matching `outcome-N-*.fixture.json` baseline (T028..T032), assert `status === "pass"` against the per-outcome threshold (SC-001 lives saved, SC-002 ≤ 5/15/30 min Levels 1/2/3, SC-003 ≥ 24 h evac lead, SC-004 ≤ 7/12 logistics clicks, SC-005 ≥ 30 % economic-loss reduction), assert `audit_id` resolves via `GET /api/audit/list?correlation_id={cid}` to a row whose `operator_identity.persona_id` matches the persona under test (SC-001..SC-005, FR-028, Q21; CHK181, CHK183)
+
+### Phase 14: FR-030 net-new persona scenarios (13 specs, owning-persona placement per Q23)
+
+**Purpose**: Author the 13 net-new scenarios required by the cycle-1 review per FR-030. Each scenario MUST conform to FR-029's depth contract, sit under the **owning persona's** sector folder per Q23 (multi-jurisdiction reach goes in `coverage_tags[]`, NOT folder placement), emit ≥ 1 `coverage-trace.md` row mapped to the persona's primary capstone outcome, and use the FR-028 evaluator endpoint or a state-changing UI transition (no `test.fail` bail). All tasks `[P]` — independent files. Begins after Phase 13 (depth-profile + evaluator are preconditions).
+
+#### SA (2)
+
+- [ ] T187 [P] [US3] Create `tests/e2e/web-coverage/sectors/sa/sapol.state-control-centre-rbac.spec.ts` — multi-LGA delegated authority + role separation; persona `sapol`; depth profile must specify `safety_critical_workflow: declare` and assertion target `evaluator:sc-001` or UI selector reflecting cross-LGA delegation persisted state; emit `@persona:sapol @outcome:1 @hazard:bushfire @fr:FR-030 @clause:I @p2` (FR-030, Q23; CHK205)
+- [ ] T188 [P] [US3] Create `tests/e2e/web-coverage/sectors/sa/ses-sa.long-distance-multi-lga-evacuation.spec.ts` — convoy staging + inter-LGA shelter routing under degraded comms; persona `ses-sa`; FR-016 hazard pair #4 (bushfire+TC) per CHK184; depth profile `safety_critical_workflow: handover`, evaluator `sc-003` (24-h evac lead) (FR-030, FR-016, Q23; CHK184, CHK205)
+
+#### WA (2)
+
+- [ ] T189 [P] [US3] Create `tests/e2e/web-coverage/sectors/wa/dfes-wa.atsi-handoff-culturally-safe.spec.ts` — culturally safe messaging + audit trail to remote ATSI community; persona `dfes-wa`; depth profile `safety_critical_workflow: publish` with multilingual variant assertion; evaluator `sc-001` (lives saved with community-language variant) (FR-030, FR-014, Q23; CHK205)
+- [ ] T190 [P] [US3] Create `tests/e2e/web-coverage/sectors/wa/dfes-wa.iron-ore-critical-infrastructure.spec.ts` — port/rail/power-corridor protection under cyclone + bushfire compound; FR-016 hazard pair #4 per CHK184; depth profile `safety_critical_workflow: allocate`, evaluator `sc-004` (logistics clicks) (FR-030, FR-016, Q23; CHK184, CHK205)
+
+#### TAS (2)
+
+- [ ] T191 [P] [US3] Create `tests/e2e/web-coverage/sectors/tas/at.island-isolation-aeromedical-disruption.spec.ts` — ferry/air medevac disruption + rescue-to-care handoff; persona `at` (Ambulance Tasmania); depth profile `safety_critical_workflow: handover`, evaluator `sc-001` (FR-030, Q23; CHK205)
+- [ ] T192 [P] [US3] Create `tests/e2e/web-coverage/sectors/tas/taspol.palawa-multilingual-warning.spec.ts` — palawa-language warning variant per FR-014 ATSI baseline; persona `taspol`; depth profile `safety_critical_workflow: publish`, evaluator `sc-001` with community-language variant assertion (FR-030, FR-014, Q23; CHK205)
+
+#### ACT (2)
+
+- [ ] T193 [P] [US3] Create `tests/e2e/web-coverage/sectors/act/afp.national-capital-security-mechanics.spec.ts` — Parliament/Defence precincts + Commonwealth tenancy escalation; persona `afp`; depth profile `safety_critical_workflow: escalate`, evaluator `sc-002` (signal-to-action) (FR-030, Q23; CHK185)
+- [ ] T194 [P] [US3] Create `tests/e2e/web-coverage/sectors/act/ses-act.territory-emergency-declaration.spec.ts` — territory-government declaration mechanics; persona `ses-act`; depth profile `safety_critical_workflow: declare`, evaluator `sc-001` (FR-030, Q23; CHK185)
+
+#### NT (2)
+
+- [ ] T195 [P] [US3] Create `tests/e2e/web-coverage/sectors/nt/ntes.atsi-multilingual-at-persona-level.spec.ts` — NT-specific palawa/Yolŋu/Kriol variants applied at persona scope (NOT just cross-cutting); persona `ntes`; depth profile `safety_critical_workflow: publish`, evaluator `sc-001` with community-language variant assertion (FR-030, FR-014, Q23; CHK185)
+- [ ] T196 [P] [US3] Create `tests/e2e/web-coverage/sectors/nt/sja-nt.tropical-disease-remote-logistics.spec.ts` — tropical-disease surge + remote-area logistics chain; persona `sja-nt`; depth profile `safety_critical_workflow: allocate`, evaluator `sc-004` (logistics clicks ≤ 12 mutual-aid) (FR-030, Q23; CHK185)
+
+#### Commonwealth (2 — Q23 owning-persona placement)
+
+- [ ] T197 [P] [US3] Create `tests/e2e/web-coverage/sectors/commonwealth/bom-national.abc-sbs-warning-relay.spec.ts` — relay path with `Source = ABC/SBS` recorded in audit + multilingual variants per FR-014; also exercises FR-018 sovereignty triple at relay handoff; persona `bom-national`; depth profile `safety_critical_workflow: publish`, evaluator `sc-002` (signal-to-action) (FR-030, FR-014, FR-018, Q23; CHK185)
+- [ ] T198 [P] [US3] Create `tests/e2e/web-coverage/sectors/commonwealth/nema.dacc-jatwc-cross-jurisdiction.spec.ts` — DACC + JATWC handoff via `state-government` and `territory-government` cross-jurisdiction tags in `coverage_tags[]` per Q23; persona `nema` (Commonwealth-owned per spec.md L524); depth profile `safety_critical_workflow: handover`, evaluator `sc-003`; sits under `sectors/commonwealth/` per the Q23 owning-persona rule (moved from cross-sector) (FR-030, FR-015, Q23; CHK185)
+
+#### Cross-sector (1)
+
+- [ ] T199 [P] [US3] Create `tests/e2e/web-coverage/sectors/cross-sector/utility.insurance-recovery-handoff.spec.ts` — insurance recovery handoff producing Built + Economic Recovery Environment assertions per FR-013; persona `utility`; depth profile `safety_critical_workflow: handover`, evaluator `sc-005` (economic-loss reduction); FR-016 hazard pair #5 (riverine flood + severe storm) per CHK184 (FR-030, FR-013, FR-016, Q23; CHK184, CHK185)
+
+### Phase 15: Env-var canonicalisation (Q25, CHK213-215)
+
+**Purpose**: Normalise the test-support env-var name to the canonical `AMA_TEST_SUPPORT=1` (not `AMA_TEST_SUPPORT_ENABLED`) across CI, quickstart, and README. The middleware (T007) is already canonical; this phase removes drift downstream. All three are `[P]` — independent files.
+
+- [ ] T200 [P] Update `.github/workflows/ci.yml` line 147 — replace `AMA_TEST_SUPPORT_ENABLED: "true"` with `AMA_TEST_SUPPORT: "1"` (matches the dual-guard middleware T007 + the persona-fixture contract canonical name); search the rest of the workflow for any other `AMA_TEST_SUPPORT_ENABLED` reference and remove (CHK213 mandates a single name) (FR-021, Q25; CHK213, CHK215)
+- [ ] T201 [P] Update `specs/034-webapp-capstone-coverage/quickstart.md` — replace line 281's narrative reference `AMA_TEST_SUPPORT_ENABLED=true` with `AMA_TEST_SUPPORT=1`; verify all `$env:AMA_TEST_SUPPORT = "1"` PowerShell examples (lines 36, 58, 62) and the troubleshooting section (lines 198, 200) remain consistent — no drift between body commands and the dual-guard semantic (FR-021, Q25; CHK214)
+- [ ] T202 [P] Update `README.md` line 296 — replace `$env:AMA_TEST_SUPPORT_ENABLED = "true"` with `$env:AMA_TEST_SUPPORT = "1"`; sweep the rest of `README.md` and `docs/` for any remaining `AMA_TEST_SUPPORT_ENABLED` reference and align to the canonical name (FR-021, Q25; CHK213, CHK215)
+
+### Phase 16: SC-012 closure measurement (CHK210-212)
+
+**Purpose**: Compute the per-cycle closure rate (≥ 80 % threshold) so `web-coverage-iteration.yml` (T162) can decide whether to flip a cycle to `Closed` or open a meta-gap.
+
+- [ ] T203 Extend `scripts/web-coverage/review-log.py` with subcommand `python scripts/web-coverage/review-log.py closure --cycle-id {ULID}` — reads `_artifacts/cycle-metadata.json` (T182) for the active `cycle_id`, queries gap-register entries with that `cycle_id` (T183), computes numerator (gap rows with `Status == Closed` AND `iteration_count < 4`) over denominator (all merit-validated objection gap rows with `iteration_count < 4`); excludes escalated rows (`escalated:project-lead` OR `iteration_count >= 4`) from BOTH numerator and denominator per Q22 + CHK211; closure proof MUST cite (a) closing PR sha, (b) post-amendment scenario passing on that sha, (c) closing PR diff containing the FR-029 depth-contract assertion the panel demanded per CHK205; emits numerator + denominator + escalated-set + raw-objection list to the audit timeline (FR-010) before flipping per CHK212; if closure < 80 %, opens meta-gap `GAP-CYCLE-{id}-CLOSURE-RATE-LOW` via `gap-register.py open` so the next cycle inherits the carry-over (SC-012, FR-005, FR-010, FR-024, ASM-006, Q22, Q26; CHK210, CHK211, CHK212)
+
+### Phase 17: Cycle-1 documentation polish
+
+**Purpose**: Roll documentation forward so quickstart, suite README, and validation checklist reflect the cycle-1 deltas. All `[P]` — independent files. Validation tick-off at `/speckit.implement` time (CHK closure proof).
+
+- [ ] T204 [P] Update `specs/034-webapp-capstone-coverage/quickstart.md` Known limitations section — remove the workaround note about FR-028 endpoints not being wired (now closed by T178/T179/T180); add a new subsection on the `_artifacts/cycle-metadata.json` artefact and the `cycle=current|all` query semantic on `/api/audit/list`; document the `python scripts/web-coverage/review-log.py closure --cycle-id` invocation (T203) (FR-028, FR-029, Q22, Q26; CHK183)
+- [ ] T205 [P] Update `tests/e2e/web-coverage/README.md` with a depth-profile YAML authoring guide — covers: file location (`_lib/depth-profiles/{persona-id}.depth.yaml`), schema reference (`_lib/depth-profiles/_schema.json` draft-07), the 12-value `safety_critical_workflow` enum (9 write per Q15 + 3 read-only per Q24), required keys, multi-jurisdiction `coverage_tags[]` rule (Q23 — folder is owning-persona, tags carry the rest), missing-profile failure mode (`GAP-DEPTH-PROFILE-MISSING-{persona-id}`); link to `contracts/outcome-evaluator.contract.md` for the evaluator binding pattern (FR-029, Q20, Q23, Q24, Q28)
+- [ ] T206 [P] Update `specs/034-webapp-capstone-coverage/checklists/validation.md` cycle-1 section (CHK181..CHK215) — add a "T-id" column to each row pointing at the closing task (e.g. CHK181 → T184, CHK183 → T173/T178/T179, CHK184 → T188/T190/T199, CHK185 → T193..T198, CHK191 → T175/T177, CHK202 → T177, CHK205 → T187..T192, CHK210..CHK212 → T203, CHK213 → T200, CHK214 → T201, CHK215 → T202); checkboxes are NOT ticked here — actual closure is recorded at `/speckit.implement` per the validation gate rules (FR-023; CHK181..CHK215)
+
+---
+
+## Dependencies & Execution Order — Cycle-1
+
+```text
+Phase 9  (T173, T174)               ──▶ Phase 10 (T175..T177, depth-profile family)
+                                    ▷    Phase 11 (T178..T181, evaluator + audit-list — parallel with Phase 10)
+Phase 10 + Phase 11                 ──▶ Phase 12 (T182, T183, cycle metadata)
+Phase 10 + Phase 11 + Phase 12      ──▶ Phase 13 (T184..T186, workflow refactors)
+Phase 13                            ──▶ Phase 14 (T187..T199, FR-030 net-new — all [P])
+                                    ▷    Phase 15 (T200..T202, env-var — all [P], no blocker)
+                                    ▷    Phase 16 (T203, SC-012 closure — needs T182/T183)
+Phase 14 + Phase 15 + Phase 16      ──▶ Phase 17 (T204..T206, docs polish — all [P])
+```
+
+### Cycle-1 parallel opportunities
+
+- **T173 ⇄ T174**: contract reviews touch independent files → parallel-safe.
+- **T175 ⇄ T178/T179/T181**: depth-profile YAML authoring is independent from FastAPI router scaffolding → cross-phase parallel.
+- **T187..T199**: 13 FR-030 spec files → all parallel; can be split across 4 owners (SA+WA+TAS, ACT+NT, Commonwealth, cross-sector).
+- **T200 ⇄ T201 ⇄ T202**: env-var canonicalisation hits 3 independent files → parallel-safe.
+- **T204 ⇄ T205 ⇄ T206**: documentation files → parallel-safe.
+
+### Cycle-1 implementation strategy (MVP slice)
+
+1. **T173 → T174 → T178 → T179 → T180 → T181**: light a single SC-001 evaluator path end-to-end; one capstone outcome spec passes against the wired endpoint. This is the cycle-1 MVP slice that proves FR-028 + FR-029 for one persona × one outcome.
+2. **T175 (10 operational profiles first) → T176 → T184 (10 operational specs)**: extend to all operational personas; gate now binary on 10/10 operational depth profiles + 10/10 operational specs passing.
+3. **T175 (58 sector profiles) + T184 (71 sector specs) + T185 + T186 in parallel**: complete the 68/68 + 5/5 capstone fan-out; sector authors run in parallel per Q23 jurisdiction.
+4. **T187..T199 in parallel**: FR-030 net-new specs.
+5. **T200..T202 + T203 + T204..T206**: cleanup, closure measurement, docs.
+
+---
+
+## Notes — Cycle-1 deltas
+
+- All cycle-1 tasks are **route-only** or **script-only** additions per `plan.md` §Cycle-1 amendment summary — no net-new Azure resource (OOS-003 still holds), no IdP changes (OOS-007 still holds), no persona inventory changes (FR-002 stable at 68).
+- The dual-guard activation rule (`AMA_TEST_SUPPORT == "1"` AND `environment in {"dev","test"}`) is the **canonical name** per `contracts/persona-fixture.contract.md` and Pass 5 Q25; T200..T202 align downstream consumers (CI workflow, quickstart, README) to that canonical name.
+- The `safety_critical_workflow` enum is closed at 12 values (per Q24): 9 write paths (`approve|publish|allocate|decline|queue-and-sync|escalate|handover|declare|reopen`) + 3 read-only paths (`observe-tamper-resist|report-generate|export-evidence`). Any additional value requires a `_schema.json` amendment + a Pass-4 / Pass-5 clarifications round.
+- FR-030 folder placement follows Q23 owning-persona rule: `nema.dacc-jatwc-cross-jurisdiction.spec.ts` lives under `sectors/commonwealth/` (NEMA is Commonwealth-owned) NOT `sectors/cross-sector/`; cross-jurisdiction reach is recorded in `coverage_tags[]` in the depth-profile YAML.
+- SC-012 closure measurement (T203) explicitly excludes escalated rows (`iteration_count >= 4`) from BOTH numerator and denominator — escalation is a separate constitutional path (§IV audit trail still captures them) per CHK211.
+- Re-running `python scripts/web-coverage/_lib/persona_spec_generator.py` on the same depth-profile YAML inputs MUST produce byte-equal Playwright spec output (SC-010, RISK-13) — T176 enforces this.
+
+---
+
+**End of cycle-1 amendment tasks** — Total: 34 tasks (T173..T206). Cycle-0 + cycle-1 grand total: 206 tasks. Ready for `/speckit.analyze`.
 
