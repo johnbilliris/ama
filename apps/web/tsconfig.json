@@ -18,6 +18,9 @@
     "jsx": "react-jsx",
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
     "plugins": [
       {
         "name": "next"
@@ -29,6 +32,21 @@
       ],
       "@web-coverage/*": [
         "../../tests/e2e/web-coverage/*"
+      ],
+      "@playwright/test": [
+        "./node_modules/@playwright/test"
+      ],
+      "@playwright/test/reporter": [
+        "./node_modules/@playwright/test/reporter"
+      ],
+      "@axe-core/playwright": [
+        "./node_modules/@axe-core/playwright"
+      ],
+      "ajv": [
+        "./node_modules/ajv"
+      ],
+      "ajv-formats": [
+        "./node_modules/ajv-formats"
       ]
     }
   },

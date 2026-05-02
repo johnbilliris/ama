@@ -218,6 +218,33 @@ resource simulationBlob 'Microsoft.Storage/storageAccounts/blobServices/containe
   }
 }
 
+// spec 034 — web coverage evidence container (immutable).
+// Stores coverage-trace.json/md, gap-register.json/md, review-log.md, known-good.json
+// emitted by the FR-004/FR-005/FR-027 pipeline. Public access denied; data plane
+// access governed by the role assignment below.
+resource webCoverageEvidenceBlob 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+  name: '${storage.name}/default/web-coverage-evidence'
+  properties: {
+    publicAccess: 'None'
+    metadata: {
+      spec: '034-webapp-capstone-coverage'
+      retention: 'long-term-evidence'
+      classification: 'OFFICIAL'
+    }
+  }
+}
+
+// Immutability policy on web-coverage-evidence (FR-006: trace replay determinism;
+// rows are append-only). 30-day legal hold; matches existing audit container policy.
+resource webCoverageImmutability 'Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies@2023-05-01' = {
+  name: 'default'
+  parent: webCoverageEvidenceBlob
+  properties: {
+    immutabilityPeriodSinceCreationInDays: 30
+    allowProtectedAppendWrites: true
+  }
+}
+
 resource redis 'Microsoft.Cache/Redis@2024-03-01' = {
   name: '${envPrefix}-redis'
   location: location
@@ -425,6 +452,24 @@ resource cosmosIngestionRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sq
   }
 }
 
+// spec 034 (T012) — Storage Blob Data Contributor role on web-coverage-evidence
+// container scoped to the API container app's managed identity. Enables the
+// coverage-trace pipeline to upload evidence artefacts without granting any
+// other storage data plane access.
+resource webCoverageEvidenceBlobContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(webCoverageEvidenceBlob.id, apiContainerApp.id, 'StorageBlobDataContributor')
+  scope: webCoverageEvidenceBlob
+  properties: {
+    // Storage Blob Data Contributor — built-in role definition GUID.
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+    )
+    principalId: apiContainerApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 output apiContainerAppId string = apiContainerApp.id
 output agentsContainerAppId string = agentsContainerApp.id
 output ingestionWorkerId string = ingestionWorker.id
@@ -433,3 +478,4 @@ output redisId string = redis.id
 output storageId string = storage.id
 output openAiId string = openAi.id
 output actionGroupId string = monitoring.outputs.actionGroupId
+output webCoverageEvidenceContainerName string = webCoverageEvidenceBlob.name

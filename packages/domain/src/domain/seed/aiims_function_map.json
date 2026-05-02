@@ -1,0 +1,15 @@
+{
+  "$schema": "internal://aiims-function-map",
+  "description": "Maps each persona id from identities_australia.json to its AIIMS-5 function for span-of-control / RBAC checks (FR-007). Generated with bootstrap_seed_data() at startup; spec 034 R-008.",
+  "functions": ["control", "operations", "planning", "logistics", "public-information"],
+  "spans_of_control": {
+    "incident-commander": ["operations-officer", "planning-officer", "logistics-officer", "public-information-officer"],
+    "operations-officer": ["field-coordinator"],
+    "planning-officer": ["risk-manager", "observer-auditor"],
+    "logistics-officer": [],
+    "public-information-officer": []
+  },
+  "negative_spans": {
+    "planning-officer": ["operations-officer", "logistics-officer", "public-information-officer"]
+  }
+}

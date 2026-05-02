@@ -40,4 +40,13 @@ def bootstrap_seed_data(seed_root: Path) -> dict[str, list[dict[str, object]]]:
         "framework_assignments": load_seed_file(seed_root / "framework_assignments_australia.json"),
         "scenario_templates": load_seed_file(seed_root / "scenario_templates_australia.json"),
         "recovery_catalogue": _load_recovery_catalogue(seed_root),
+        # ----------------------------------------------------------------
+        # spec 034 — web coverage capstone validation suite (T052).
+        # Idempotent: re-loading is a pure read.
+        # ASM-011: persona fixtures MUST resolve to identities here, never
+        # synthesised inside the test suite.
+        # ----------------------------------------------------------------
+        "identities": load_seed_file(seed_root / "identities_australia.json"),
+        "hazard_scenarios": load_seed_file(seed_root / "hazard_scenarios_australia.json"),
+        "aiims_function_map": load_seed_file(seed_root / "aiims_function_map.json"),
     }

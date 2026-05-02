@@ -41,86 +41,86 @@ Every Playwright test MUST carry one tag from each axis (enforced by ESLint rule
 
 ### Test-support endpoint (per `contracts/persona-fixture.contract.md`)
 
-- [ ] T007 Implement `apps/api/app/middleware/test_support_guard.py` — dual-guard middleware (refuses requests when `settings.environment == "production"` OR `os.environ.get("AMA_TEST_SUPPORT") != "1"`); emits structured `test-support disabled: environment=… AMA_TEST_SUPPORT=…` log on startup
-- [ ] T008 Implement `apps/api/app/api/routes/test_support.py` — FastAPI router exposing `GET /api/test-support/personas`, `GET /api/test-support/personas/{persona_id}`, `POST /api/test-support/seed/scenario`; reads identities only from `bootstrap_seed_data().identities` (ASM-011); returns shape per `contracts/persona-fixture.contract.md` lines 50–80
-- [ ] T009 Wire test-support router into `apps/api/app/main.py` — conditional `include_router` gated by `test_support_guard.is_enabled()`; ensure no router registration when disabled (404 path); update `apps/api/app/api/router.py` aggregator
-- [ ] T010 [P] Author contract test `apps/api/tests/test_test_support_router.py` asserting (a) 404 when `AMA_TEST_SUPPORT` unset, (b) 404 when `settings.environment == "production"` regardless of env var, (c) 200 + correct shape when both guards green, (d) refuses to mutate seed data on any verb
+- [X] T007 Implement `apps/api/app/middleware/test_support_guard.py` — dual-guard middleware (refuses requests when `settings.environment == "production"` OR `os.environ.get("AMA_TEST_SUPPORT") != "1"`); emits structured `test-support disabled: environment=… AMA_TEST_SUPPORT=…` log on startup
+- [X] T008 Implement `apps/api/app/api/routes/test_support.py` — FastAPI router exposing `GET /api/test-support/personas`, `GET /api/test-support/personas/{persona_id}`, `POST /api/test-support/seed/scenario`; reads identities only from `bootstrap_seed_data().identities` (ASM-011); returns shape per `contracts/persona-fixture.contract.md` lines 50–80
+- [X] T009 Wire test-support router into `apps/api/app/main.py` — conditional `include_router` gated by `test_support_guard.is_enabled()`; ensure no router registration when disabled (404 path); update `apps/api/app/api/router.py` aggregator
+- [X] T010 [P] Author contract test `apps/api/tests/test_test_support_router.py` asserting (a) 404 when `AMA_TEST_SUPPORT` unset, (b) 404 when `settings.environment == "production"` regardless of env var, (c) 200 + correct shape when both guards green, (d) refuses to mutate seed data on any verb
 
 ### Net-new Azure infrastructure (Bicep + RBAC)
 
-- [ ] T011 [P] Add Bicep child resource `web-coverage-evidence` blob container + 7-year `immutabilityPolicy` (`allowProtectedAppendWrites: true`) to `infra/bicep/main.bicep` (insert under existing `storageBlob` parent); follow plan §Net-New Azure Resources HCL example verbatim; output container resourceId for downstream RBAC binding
-- [ ] T012 [P] Extend the API Container App's managed-identity role assignment in `infra/bicep/modules/identity.bicep` (or equivalent existing assignments file) — grant `Storage Blob Data Contributor` (`ba92f5b4-2d11-453d-a403-e96b0029c9fe`) scoped **only** to the `web-coverage-evidence` container resourceId from T011; verify with `verify-iam-zero-trust.ps1` (RISK-10)
-- [ ] T013 [P] Run `bicep build infra/bicep/main.bicep` and `az deployment group what-if` against the dev subscription; capture the diff in `specs/034-webapp-capstone-coverage/bicep-whatif.txt` for grading evidence
+- [X] T011 [P] Add Bicep child resource `web-coverage-evidence` blob container + 7-year `immutabilityPolicy` (`allowProtectedAppendWrites: true`) to `infra/bicep/main.bicep` (insert under existing `storageBlob` parent); follow plan §Net-New Azure Resources HCL example verbatim; output container resourceId for downstream RBAC binding
+- [X] T012 [P] Extend the API Container App's managed-identity role assignment in `infra/bicep/modules/identity.bicep` (or equivalent existing assignments file) — grant `Storage Blob Data Contributor` (`ba92f5b4-2d11-453d-a403-e96b0029c9fe`) scoped **only** to the `web-coverage-evidence` container resourceId from T011; verify with `verify-iam-zero-trust.ps1` (RISK-10)
+- [X] T013 [P] Run `bicep build infra/bicep/main.bicep` and `az deployment group what-if` against the dev subscription; capture the diff in `specs/034-webapp-capstone-coverage/bicep-whatif.txt` for grading evidence
 
 ### Page objects (one per route in plan §Module Breakdown)
 
-- [ ] T014 [P] Page object `tests/e2e/web-coverage/_support/pages/workspaces.po.ts` (`/workspaces/[personaId]`) — `getByRole`/`getByLabel`/`getByTestId` only; emits `auditApprove()` returning `audit_id`
-- [ ] T015 [P] Page object `tests/e2e/web-coverage/_support/pages/incidents.po.ts` (`/incidents/[incidentId]`) — drives warning composer + IC approval modal
-- [ ] T016 [P] Page object `tests/e2e/web-coverage/_support/pages/disasters.po.ts` (`/disasters/`) — disaster index + drill-down
-- [ ] T017 [P] Page object `tests/e2e/web-coverage/_support/pages/governance.dashboard.po.ts` (`/governance/dashboard/{audit,compliance,readiness,recovery,risk}`)
-- [ ] T018 [P] Page object `tests/e2e/web-coverage/_support/pages/governance.dataSource.po.ts` (`/governance/[dataSourceId]`)
-- [ ] T019 [P] Page object `tests/e2e/web-coverage/_support/pages/operations.workflows.po.ts` (`/operations/workflows`)
-- [ ] T020 [P] Page object `tests/e2e/web-coverage/_support/pages/preparedness.po.ts` (`/preparedness/`)
-- [ ] T021 [P] Page object `tests/e2e/web-coverage/_support/pages/simulations.po.ts` (`/simulations/{create,[tenantId]/playback,reports/[reportId]}`)
-- [ ] T022 [P] Page object `tests/e2e/web-coverage/_support/pages/eval.po.ts` (`/eval/[runId]`)
+- [X] T014 [P] Page object `tests/e2e/web-coverage/_support/pages/workspaces.po.ts` (`/workspaces/[personaId]`) — `getByRole`/`getByLabel`/`getByTestId` only; emits `auditApprove()` returning `audit_id`
+- [X] T015 [P] Page object `tests/e2e/web-coverage/_support/pages/incidents.po.ts` (`/incidents/[incidentId]`) — drives warning composer + IC approval modal
+- [X] T016 [P] Page object `tests/e2e/web-coverage/_support/pages/disasters.po.ts` (`/disasters/`) — disaster index + drill-down
+- [X] T017 [P] Page object `tests/e2e/web-coverage/_support/pages/governance.dashboard.po.ts` (`/governance/dashboard/{audit,compliance,readiness,recovery,risk}`)
+- [X] T018 [P] Page object `tests/e2e/web-coverage/_support/pages/governance.dataSource.po.ts` (`/governance/[dataSourceId]`)
+- [X] T019 [P] Page object `tests/e2e/web-coverage/_support/pages/operations.workflows.po.ts` (`/operations/workflows`)
+- [X] T020 [P] Page object `tests/e2e/web-coverage/_support/pages/preparedness.po.ts` (`/preparedness/`)
+- [X] T021 [P] Page object `tests/e2e/web-coverage/_support/pages/simulations.po.ts` (`/simulations/{create,[tenantId]/playback,reports/[reportId]}`)
+- [X] T022 [P] Page object `tests/e2e/web-coverage/_support/pages/eval.po.ts` (`/eval/[runId]`)
 
 ### Fixtures
 
-- [ ] T023 [P] Persona fixture `tests/e2e/web-coverage/_support/fixtures/persona.fixture.ts` — calls `GET /api/test-support/personas/{id}`, sets `X-Test-Persona-Id` header on context, exposes typed `PersonaFixture` per `data-model.md` §5; worker-scoped; fails fast if persona absent from seed (ASM-011)
-- [ ] T024 [P] Hazard scenario fixture `tests/e2e/web-coverage/_support/fixtures/hazardScenario.fixture.ts` — loads `outcome-{N}-*.fixture.json`, calls `POST /api/test-support/seed/scenario`, exposes typed `HazardScenarioFixture` per `data-model.md` §6
-- [ ] T025 [P] Correlation-id fixture `tests/e2e/web-coverage/_support/fixtures/correlationId.fixture.ts` — emits `crypto.randomUUID()` and attaches `X-Correlation-Id` to every request via `context.setExtraHTTPHeaders`
-- [ ] T026 [P] Audit observer fixture `tests/e2e/web-coverage/_support/fixtures/auditObserver.fixture.ts` — wraps `expect.poll(GET /api/audits?cid=…)` with 2-second deadline (FR-010, SC-004); returns observed `audit_evidence_id`
-- [ ] T027 [P] Carve-out registry fixture `tests/e2e/web-coverage/_support/fixtures/carveoutRegistry.fixture.ts` — loads `infra/parameters/foundry-carveout.yaml` once per worker, validates with `infra/parameters/foundry-carveout.schema.json` via `ajv`, asserts `review_date` ≤ 90 days old + `approver_identities[]` non-empty (FR-018(c))
+- [X] T023 [P] Persona fixture `tests/e2e/web-coverage/_support/fixtures/persona.fixture.ts` — calls `GET /api/test-support/personas/{id}`, sets `X-Test-Persona-Id` header on context, exposes typed `PersonaFixture` per `data-model.md` §5; worker-scoped; fails fast if persona absent from seed (ASM-011)
+- [X] T024 [P] Hazard scenario fixture `tests/e2e/web-coverage/_support/fixtures/hazardScenario.fixture.ts` — loads `outcome-{N}-*.fixture.json`, calls `POST /api/test-support/seed/scenario`, exposes typed `HazardScenarioFixture` per `data-model.md` §6
+- [X] T025 [P] Correlation-id fixture `tests/e2e/web-coverage/_support/fixtures/correlationId.fixture.ts` — emits `crypto.randomUUID()` and attaches `X-Correlation-Id` to every request via `context.setExtraHTTPHeaders`
+- [X] T026 [P] Audit observer fixture `tests/e2e/web-coverage/_support/fixtures/auditObserver.fixture.ts` — wraps `expect.poll(GET /api/audits?cid=…)` with 2-second deadline (FR-010, SC-004); returns observed `audit_evidence_id`
+- [X] T027 [P] Carve-out registry fixture `tests/e2e/web-coverage/_support/fixtures/carveoutRegistry.fixture.ts` — loads `infra/parameters/foundry-carveout.yaml` once per worker, validates with `infra/parameters/foundry-carveout.schema.json` via `ajv`, asserts `review_date` ≤ 90 days old + `approver_identities[]` non-empty (FR-018(c))
 
 ### Hazard-pair fixture data (FR-016)
 
-- [ ] T028 [P] Author `tests/e2e/web-coverage/_support/fixtures/data/outcome-1-bushfire-extreme-heat.fixture.json` — bushfire+extreme-heat seed scenario with baseline `lives_at_risk` numeric per data-model §6
-- [ ] T029 [P] Author `tests/e2e/web-coverage/_support/fixtures/data/outcome-2-bushfire-severe-storm.fixture.json` — baseline `signal_to_action_ms` per AIIMS Levels 1/2/3 budgets (SC-002 contractual: ≤ 5/15/30 min)
-- [ ] T030 [P] Author `tests/e2e/web-coverage/_support/fixtures/data/outcome-3-tropical-cyclone-flood.fixture.json` — baseline `evac_lead_hours` ≥ 24 (SC-003)
-- [ ] T031 [P] Author `tests/e2e/web-coverage/_support/fixtures/data/outcome-4-bushfire-cyclone-logistics.fixture.json` — baseline `logistics_clicks` ≤ 7 routine / ≤ 12 mutual-aid (SC-004)
-- [ ] T032 [P] Author `tests/e2e/web-coverage/_support/fixtures/data/outcome-5-flood-storm-economic.fixture.json` — baseline `economic_loss_aud` per Sendai Indicator C (SC-005 formula `(baseline-projected)/baseline ≥ 0.30`)
+- [X] T028 [P] Author `tests/e2e/web-coverage/_support/fixtures/data/outcome-1-bushfire-extreme-heat.fixture.json` — bushfire+extreme-heat seed scenario with baseline `lives_at_risk` numeric per data-model §6
+- [X] T029 [P] Author `tests/e2e/web-coverage/_support/fixtures/data/outcome-2-bushfire-severe-storm.fixture.json` — baseline `signal_to_action_ms` per AIIMS Levels 1/2/3 budgets (SC-002 contractual: ≤ 5/15/30 min)
+- [X] T030 [P] Author `tests/e2e/web-coverage/_support/fixtures/data/outcome-3-tropical-cyclone-flood.fixture.json` — baseline `evac_lead_hours` ≥ 24 (SC-003)
+- [X] T031 [P] Author `tests/e2e/web-coverage/_support/fixtures/data/outcome-4-bushfire-cyclone-logistics.fixture.json` — baseline `logistics_clicks` ≤ 7 routine / ≤ 12 mutual-aid (SC-004)
+- [X] T032 [P] Author `tests/e2e/web-coverage/_support/fixtures/data/outcome-5-flood-storm-economic.fixture.json` — baseline `economic_loss_aud` per Sendai Indicator C (SC-005 formula `(baseline-projected)/baseline ≥ 0.30`)
 
 ### Custom reporter + types (FR-004)
 
-- [ ] T033 Implement `tests/e2e/web-coverage/_support/reporter/coverage-reporter.ts` — Playwright `Reporter` interface; `onTestEnd` extracts `coverage` annotations + dedupes by `(persona, outcome, hazard, fr_id)` tuple; `onEnd` writes `tests/e2e/web-coverage/_artifacts/coverage-trace.partial-${PW_SHARD ?? 1}.json` matching `contracts/coverage-trace-row.schema.json`; `onStdErr` converts `waitForTimeout` matches into test failures (R-002, R-015)
-- [ ] T034 [P] Annotation helpers `tests/e2e/web-coverage/_support/reporter/annotations.ts` — typed `recordCoverage({persona, outcome, hazard, fr, clauses, route, audit_evidence_id, status})` wrapper around `test.info().annotations.push(...)`
-- [ ] T035 [P] Trace-row helper `tests/e2e/web-coverage/_support/reporter/trace-row.ts` — `CoverageTraceRow` factory + sort key `(persona_id, outcome, hazard, fr_id)` for deterministic merge
-- [ ] T036 [P] Redaction helper `tests/e2e/web-coverage/_support/reporter/redact.ts` — strips PII (names, emails, GPS coords < 1km precision) from screenshots/JSON before artefact upload (RISK-07, R-016)
-- [ ] T037 [P] Type declaration `tests/e2e/web-coverage/_support/types/coverage.d.ts` — exports `CoverageTraceRow` matching `data-model.md` §1
-- [ ] T038 [P] Type declaration `tests/e2e/web-coverage/_support/types/gap.d.ts` — exports `GapRegisterEntry` matching `data-model.md` §2
-- [ ] T039 [P] Type declaration `tests/e2e/web-coverage/_support/types/review.d.ts` — exports `ReviewVote`, `AgentObjection`, `KnownGoodManifest` matching `data-model.md` §§3–4, §9
+- [X] T033 Implement `tests/e2e/web-coverage/_support/reporter/coverage-reporter.ts` — Playwright `Reporter` interface; `onTestEnd` extracts `coverage` annotations + dedupes by `(persona, outcome, hazard, fr_id)` tuple; `onEnd` writes `tests/e2e/web-coverage/_artifacts/coverage-trace.partial-${PW_SHARD ?? 1}.json` matching `contracts/coverage-trace-row.schema.json`; `onStdErr` converts `waitForTimeout` matches into test failures (R-002, R-015)
+- [X] T034 [P] Annotation helpers `tests/e2e/web-coverage/_support/reporter/annotations.ts` — typed `recordCoverage({persona, outcome, hazard, fr, clauses, route, audit_evidence_id, status})` wrapper around `test.info().annotations.push(...)`
+- [X] T035 [P] Trace-row helper `tests/e2e/web-coverage/_support/reporter/trace-row.ts` — `CoverageTraceRow` factory + sort key `(persona_id, outcome, hazard, fr_id)` for deterministic merge
+- [X] T036 [P] Redaction helper `tests/e2e/web-coverage/_support/reporter/redact.ts` — strips PII (names, emails, GPS coords < 1km precision) from screenshots/JSON before artefact upload (RISK-07, R-016)
+- [X] T037 [P] Type declaration `tests/e2e/web-coverage/_support/types/coverage.d.ts` — exports `CoverageTraceRow` matching `data-model.md` §1
+- [X] T038 [P] Type declaration `tests/e2e/web-coverage/_support/types/gap.d.ts` — exports `GapRegisterEntry` matching `data-model.md` §2
+- [X] T039 [P] Type declaration `tests/e2e/web-coverage/_support/types/review.d.ts` — exports `ReviewVote`, `AgentObjection`, `KnownGoodManifest` matching `data-model.md` §§3–4, §9
 
 ### Validators (outcome-proxy + AWS + PSPF)
 
-- [ ] T040 [P] Outcome-proxy validator `tests/e2e/web-coverage/_support/validators/outcome-proxy.ts` — implements all five proxies (lives, latency, evac lead, logistics clicks, SC-005 economic-loss formula `(baseline_loss − projected_loss) / baseline_loss ≥ 0.30`)
-- [ ] T041 [P] AWS CAP envelope validator `tests/e2e/web-coverage/_support/validators/aws-cap-envelope.ts` — asserts CAP v1.2 nested model (level + hazard/location + action statement), de-escalation chain, all-clear, hazard iconography (FR-011)
-- [ ] T042 [P] PSPF classification validator `tests/e2e/web-coverage/_support/validators/pspf-classification.ts` — synthetic OFFICIAL:Sensitive / PROTECTED markers; gateway probe payload generator (FR-018(b))
+- [X] T040 [P] Outcome-proxy validator `tests/e2e/web-coverage/_support/validators/outcome-proxy.ts` — implements all five proxies (lives, latency, evac lead, logistics clicks, SC-005 economic-loss formula `(baseline_loss − projected_loss) / baseline_loss ≥ 0.30`)
+- [X] T041 [P] AWS CAP envelope validator `tests/e2e/web-coverage/_support/validators/aws-cap-envelope.ts` — asserts CAP v1.2 nested model (level + hazard/location + action statement), de-escalation chain, all-clear, hazard iconography (FR-011)
+- [X] T042 [P] PSPF classification validator `tests/e2e/web-coverage/_support/validators/pspf-classification.ts` — synthetic OFFICIAL:Sensitive / PROTECTED markers; gateway probe payload generator (FR-018(b))
 
 ### Accessibility wrappers
 
-- [ ] T043 [P] Axe builder `tests/e2e/web-coverage/_support/a11y/axeBuilder.ts` — wraps `@axe-core/playwright` with WCAG 2.2 AA rule pack + critical-violation gate (R-007, FR-014, Q14)
-- [ ] T044 [P] Language pack probe `tests/e2e/web-coverage/_support/a11y/languagePackProbe.ts` — toggles `en`, `zh-Hans`, `aus-x-atsi-placeholder` (R-008) and asserts payload variants
+- [X] T043 [P] Axe builder `tests/e2e/web-coverage/_support/a11y/axeBuilder.ts` — wraps `@axe-core/playwright` with WCAG 2.2 AA rule pack + critical-violation gate (R-007, FR-014, Q14)
+- [X] T044 [P] Language pack probe `tests/e2e/web-coverage/_support/a11y/languagePackProbe.ts` — toggles `en`, `zh-Hans`, `aus-x-atsi-placeholder` (R-008) and asserts payload variants
 
 ### Gap-register state machine + audit append (FR-005, R-009)
 
-- [ ] T045 Implement `scripts/web-coverage/gap-register.py` — state-machine CLI with subcommands `open|progress|close|regress|validate|escalate`; enforces transitions per `data-model.md` §2 invariants table; writes markdown to `specs/034-webapp-capstone-coverage/gap-register.md` and appends JSONL to `audit/web-coverage-gaps/{date}/{hour}.jsonl`; validates entries against `contracts/gap-register-entry.schema.json` via `ajv` (Python `jsonschema` package)
-- [ ] T046 [P] Shared audit-append helper `scripts/web-coverage/_lib/__init__.py` and `scripts/web-coverage/_lib/audit_append.py` — append-only JSONL writer (local fallback + Blob `web-coverage-evidence` container via managed identity); honours `AMA_AUDIT_FALLBACK=1` for offline dev
-- [ ] T047 [P] Schema validator helper `scripts/web-coverage/_lib/schema_validators.py` — single entry point for validating `coverage-trace.json`, `gap-register.md`, review-log JSONL, and known-good.json against contracts via `jsonschema`
+- [X] T045 Implement `scripts/web-coverage/gap-register.py` — state-machine CLI with subcommands `open|progress|close|regress|validate|escalate`; enforces transitions per `data-model.md` §2 invariants table; writes markdown to `specs/034-webapp-capstone-coverage/gap-register.md` and appends JSONL to `audit/web-coverage-gaps/{date}/{hour}.jsonl`; validates entries against `contracts/gap-register-entry.schema.json` via `ajv` (Python `jsonschema` package)
+- [X] T046 [P] Shared audit-append helper `scripts/web-coverage/_lib/__init__.py` and `scripts/web-coverage/_lib/audit_append.py` — append-only JSONL writer (local fallback + Blob `web-coverage-evidence` container via managed identity); honours `AMA_AUDIT_FALLBACK=1` for offline dev
+- [X] T047 [P] Schema validator helper `scripts/web-coverage/_lib/schema_validators.py` — single entry point for validating `coverage-trace.json`, `gap-register.md`, review-log JSONL, and known-good.json against contracts via `jsonschema`
 
 ### Trace merge + known-good + review-log scaffolding
 
-- [ ] T048 Implement `scripts/web-coverage/trace-merge.py` — reads N partial JSONs, dedupes by `(persona, outcome, hazard, fr_id)` joining `test_ids` with `;`, sorts deterministically, emits `specs/034-webapp-capstone-coverage/coverage-trace.json` + Markdown render `coverage-trace.md` (FR-004 column order); validates against `contracts/coverage-trace-row.schema.json`; idempotent — re-running on the same input MUST produce byte-equal output (SC-010, RISK-13)
-- [ ] T049 [P] Implement `scripts/web-coverage/known-good.py` — manifest manager with `update` subcommand (called from cd.yml after `record-revisions`); writes `specs/034-webapp-capstone-coverage/known-good.json` matching `KnownGoodManifest` schema (data-model §4); computes `trace_hash = sha256(coverage-trace.json)`
-- [ ] T050 [P] Implement `scripts/web-coverage/review-log.py` skeleton — `run` subcommand loads `.github/agents/{operational,sectors,technical}/**/*.agent.md`, ingests AgentObjection JSON sidecars, emits `specs/034-webapp-capstone-coverage/review-log.md`; panel-resolution stub (full logic in T140)
-- [ ] T051 [P] Implement `scripts/web-coverage/verify-trace-determinism.ps1` — runs `trace-merge.py` twice on the same partials and asserts byte-equal output; surfaces `GAP-DET-TRACE-MERGE` on failure (RISK-13, SC-010)
+- [X] T048 Implement `scripts/web-coverage/trace-merge.py` — reads N partial JSONs, dedupes by `(persona, outcome, hazard, fr_id)` joining `test_ids` with `;`, sorts deterministically, emits `specs/034-webapp-capstone-coverage/coverage-trace.json` + Markdown render `coverage-trace.md` (FR-004 column order); validates against `contracts/coverage-trace-row.schema.json`; idempotent — re-running on the same input MUST produce byte-equal output (SC-010, RISK-13)
+- [X] T049 [P] Implement `scripts/web-coverage/known-good.py` — manifest manager with `update` subcommand (called from cd.yml after `record-revisions`); writes `specs/034-webapp-capstone-coverage/known-good.json` matching `KnownGoodManifest` schema (data-model §4); computes `trace_hash = sha256(coverage-trace.json)`
+- [X] T050 [P] Implement `scripts/web-coverage/review-log.py` skeleton — `run` subcommand loads `.github/agents/{operational,sectors,technical}/**/*.agent.md`, ingests AgentObjection JSON sidecars, emits `specs/034-webapp-capstone-coverage/review-log.md`; panel-resolution stub (full logic in T140)
+- [X] T051 [P] Implement `scripts/web-coverage/verify-trace-determinism.ps1` — runs `trace-merge.py` twice on the same partials and asserts byte-equal output; surfaces `GAP-DET-TRACE-MERGE` on failure (RISK-13, SC-010)
 
 ### Seed-data extension
 
-- [ ] T052 Extend `bootstrap_seed_data()` (`packages/domain/src/domain/seed/bootstrap.py` + driver `scripts/seed_loader.py`) to materialise: (a) the 68 persona identities (10 operational + 58 sector with persona-id matching agent file basenames; Commonwealth AFP keyed as `afp-commonwealth` to disambiguate from ACT `afp`); (b) 5 hazard-pair scenario seeds (one per outcome) with disaster + primary incident chain referenced by T028–T032 fixtures; (c) the AIIMS function map per `data-model.md` §5; idempotent re-execution required (FR-021, SC-010)
+- [X] T052 Extend `bootstrap_seed_data()` (`packages/domain/src/domain/seed/bootstrap.py` + driver `scripts/seed_loader.py`) to materialise: (a) the 68 persona identities (10 operational + 58 sector with persona-id matching agent file basenames; Commonwealth AFP keyed as `afp-commonwealth` to disambiguate from ACT `afp`); (b) 5 hazard-pair scenario seeds (one per outcome) with disaster + primary incident chain referenced by T028–T032 fixtures; (c) the AIIMS function map per `data-model.md` §5; idempotent re-execution required (FR-021, SC-010)
 
 ### Persona-fixture contract test (closure)
 
-- [ ] T053 [P] Implement contract test `tests/e2e/web-coverage/_support/fixtures/__tests__/persona.contract.spec.ts` — drives all 68 persona ids through the fixture, asserts each resolves to a seeded identity with non-empty `permissions[]`, fails fast if any id is fixture-only (ASM-011 closure)
+- [X] T053 [P] Implement contract test `tests/e2e/web-coverage/_support/fixtures/__tests__/persona.contract.spec.ts` — drives all 68 persona ids through the fixture, asserts each resolves to a seeded identity with non-empty `permissions[]`, fails fast if any id is fixture-only (ASM-011 closure)
 
 **Checkpoint**: Phase 2 complete. Foundation ready. Cross-cutting, persona, capstone, and CI work may now proceed in parallel.
 

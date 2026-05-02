@@ -1,0 +1,37 @@
+{
+  "$schema": "internal://outcome-fixture",
+  "outcome": 3,
+  "name": "Tropical Cyclone & Riverine Flood",
+  "fixture_version": "1.0.0",
+  "primary_hazards": ["tropical-cyclone", "riverine-flood"],
+  "scenario_seed": "outcome-3-tropical-cyclone-flood",
+  "audit_correlation_template": "wc-o3-{persona_id}-{run_id}",
+  "expected_routes": ["/incidents", "/disasters", "/operations/workflows", "/preparedness", "/governance/dashboard"],
+  "expected_audit_types": [
+    "incident.created",
+    "warning.issued",
+    "cyclone.category-upgrade",
+    "evac.stage-3-evacuate-now",
+    "evac.stage-4-shelter",
+    "task.assigned",
+    "mutual-aid.requested",
+    "dacc.requested"
+  ],
+  "expected_warnings": [
+    {
+      "type": "tropical-cyclone",
+      "level": "emergency-warning",
+      "languages": ["en", "tl", "id"],
+      "issuer_aiims_function": "public-information"
+    },
+    {
+      "type": "riverine-flood",
+      "level": "emergency-warning",
+      "languages": ["en", "tl"],
+      "issuer_aiims_function": "public-information"
+    }
+  ],
+  "evac_stage_progression": ["prepare", "stand-by", "evacuate-now", "shelter", "all-clear"],
+  "constitution_clauses": ["I", "II", "II-A", "III", "IV", "V", "V-A", "V-B", "V-C", "NN-1", "NN-2", "NN-3", "NN-4"],
+  "fr_ids": ["FR-003", "FR-007", "FR-009", "FR-014", "FR-018", "FR-019", "FR-021"]
+}

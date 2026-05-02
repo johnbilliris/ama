@@ -34,6 +34,7 @@ from app.api.routes.simulations import router as simulations_router
 from app.api.routes.tasks import router as tasks_router
 from app.api.routes.warning_chain import router as warning_chain_router
 from app.api.routes.workflow_runs import router as workflow_runs_router
+from app.middleware import test_support_guard
 from fastapi import APIRouter
 
 # Lazy import for eval module to keep its repo deps optional
@@ -86,3 +87,12 @@ api_router.include_router(workflow_runs_router)
 
 if _EVAL_AVAILABLE:
     api_router.include_router(eval_router)
+
+# spec 034 (T009) — test-support router gated by dual-guard. The router is
+# registered ONLY when both guards pass (env=dev|test AND AMA_TEST_SUPPORT=1);
+# otherwise direct requests collapse to a stock 404.
+test_support_guard.log_activation_status()
+if test_support_guard.is_enabled():
+    from app.api.routes.test_support import router as test_support_router
+
+    api_router.include_router(test_support_router)

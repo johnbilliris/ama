@@ -1,0 +1,1028 @@
+[
+  {
+    "persona_id": "incident-commander",
+    "display_name": "Fiona Reilly",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "Incident Commander",
+    "permissions": [
+      "declarations:issue",
+      "incidents:read",
+      "incidents:write",
+      "warnings:issue",
+      "workflows:approve"
+    ],
+    "aiims_function": "control",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "operations-officer",
+    "display_name": "Marcus Chen",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "Operations Officer",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "planning-officer",
+    "display_name": "Anjali Patel",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "Planning Officer",
+    "permissions": [
+      "incidents:read",
+      "lessons:author",
+      "plans:author",
+      "risk:assess"
+    ],
+    "aiims_function": "planning",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "logistics-officer",
+    "display_name": "Daniel Brooks",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "Logistics Officer",
+    "permissions": [
+      "incidents:read",
+      "mutual-aid:coordinate",
+      "recovery:fund-claim",
+      "resources:request"
+    ],
+    "aiims_function": "logistics",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "public-information-officer",
+    "display_name": "Sarah Kim",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "Public Information Officer",
+    "permissions": [
+      "incidents:read",
+      "media:publish",
+      "multilingual:author",
+      "warnings:issue"
+    ],
+    "aiims_function": "public-information",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "field-coordinator",
+    "display_name": "Tom Riordan",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "Field Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "resilience-planner",
+    "display_name": "Linh Nguyen",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "Resilience Planner",
+    "permissions": [
+      "incidents:read",
+      "lessons:author",
+      "plans:author",
+      "risk:assess"
+    ],
+    "aiims_function": "planning",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "executive-leader",
+    "display_name": "Margaret Hollings",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "Executive Leader",
+    "permissions": [
+      "declarations:issue",
+      "incidents:read",
+      "incidents:write",
+      "warnings:issue",
+      "workflows:approve"
+    ],
+    "aiims_function": "control",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "observer-auditor",
+    "display_name": "Priya Krishnan",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "Observer/Auditor",
+    "permissions": [
+      "incidents:read",
+      "lessons:author",
+      "plans:author",
+      "risk:assess"
+    ],
+    "aiims_function": "planning",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "risk-manager",
+    "display_name": "James OBrien",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "Risk Manager",
+    "permissions": [
+      "incidents:read",
+      "lessons:author",
+      "plans:author",
+      "risk:assess"
+    ],
+    "aiims_function": "planning",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "act-ambulance",
+    "display_name": "Karen McAllister",
+    "organisation_id": "org-act-ambulance",
+    "jurisdiction_id": "act",
+    "role": "ACT Ambulance Officer",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "act-esa",
+    "display_name": "David Lewis",
+    "organisation_id": "org-act-esa",
+    "jurisdiction_id": "act",
+    "role": "ACT ESA Coordinator",
+    "permissions": [
+      "declarations:issue",
+      "incidents:read",
+      "incidents:write",
+      "warnings:issue",
+      "workflows:approve"
+    ],
+    "aiims_function": "control",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "act-fr",
+    "display_name": "Robert Sun",
+    "organisation_id": "org-act-fr",
+    "jurisdiction_id": "act",
+    "role": "ACT Fire & Rescue Captain",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "act-policing",
+    "display_name": "Helena Park",
+    "organisation_id": "org-act-policing",
+    "jurisdiction_id": "act",
+    "role": "ACT Policing Inspector",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "act-rfs",
+    "display_name": "Greg Thompson",
+    "organisation_id": "org-act-rfs",
+    "jurisdiction_id": "act",
+    "role": "ACT RFS Captain",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "afp-act",
+    "display_name": "Lisa Tran",
+    "organisation_id": "org-afp",
+    "jurisdiction_id": "act",
+    "role": "AFP Senior Sergeant",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "ses-act",
+    "display_name": "Michael Hayes",
+    "organisation_id": "org-ses-act",
+    "jurisdiction_id": "act",
+    "role": "ACT SES Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "abf",
+    "display_name": "Ravi Singh",
+    "organisation_id": "org-abf",
+    "jurisdiction_id": "commonwealth",
+    "role": "Australian Border Force Officer",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "adf",
+    "display_name": "Captain Janet Walsh",
+    "organisation_id": "org-adf",
+    "jurisdiction_id": "commonwealth",
+    "role": "ADF DACC Liaison",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "afp-commonwealth",
+    "display_name": "Dr. Karen Davis",
+    "organisation_id": "org-afp",
+    "jurisdiction_id": "commonwealth",
+    "role": "AFP Commonwealth Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "arc",
+    "display_name": "Emma Wilson",
+    "organisation_id": "org-arc",
+    "jurisdiction_id": "commonwealth",
+    "role": "Australian Red Cross Coordinator",
+    "permissions": [
+      "incidents:read",
+      "mutual-aid:coordinate",
+      "recovery:fund-claim",
+      "resources:request"
+    ],
+    "aiims_function": "logistics",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "asa",
+    "display_name": "Grant Mitchell",
+    "organisation_id": "org-asa",
+    "jurisdiction_id": "commonwealth",
+    "role": "Australian Shipping Authority Officer",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "bom-national",
+    "display_name": "Dr. Hannah Lee",
+    "organisation_id": "org-bom",
+    "jurisdiction_id": "commonwealth",
+    "role": "BoM Forecaster",
+    "permissions": [
+      "incidents:read",
+      "lessons:author",
+      "plans:author",
+      "risk:assess"
+    ],
+    "aiims_function": "planning",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "ga-national",
+    "display_name": "Dr. Alan Foster",
+    "organisation_id": "org-ga",
+    "jurisdiction_id": "commonwealth",
+    "role": "GA Tsunami Analyst",
+    "permissions": [
+      "incidents:read",
+      "lessons:author",
+      "plans:author",
+      "risk:assess"
+    ],
+    "aiims_function": "planning",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "nema",
+    "display_name": "Catherine Mills",
+    "organisation_id": "org-nema",
+    "jurisdiction_id": "commonwealth",
+    "role": "NEMA Coordinator",
+    "permissions": [
+      "declarations:issue",
+      "incidents:read",
+      "incidents:write",
+      "warnings:issue",
+      "workflows:approve"
+    ],
+    "aiims_function": "control",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "rfds",
+    "display_name": "Dr. Olivia Reed",
+    "organisation_id": "org-rfds",
+    "jurisdiction_id": "commonwealth",
+    "role": "RFDS Aeromedical Lead",
+    "permissions": [
+      "incidents:read",
+      "mutual-aid:coordinate",
+      "recovery:fund-claim",
+      "resources:request"
+    ],
+    "aiims_function": "logistics",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "sja-national",
+    "display_name": "Brian Cooper",
+    "organisation_id": "org-sja",
+    "jurisdiction_id": "commonwealth",
+    "role": "St John National Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "surf-lifesaving",
+    "display_name": "Mia Brennan",
+    "organisation_id": "org-sla",
+    "jurisdiction_id": "commonwealth",
+    "role": "Surf Life Saving Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "community-ngos",
+    "display_name": "Sister Anne Marie",
+    "organisation_id": "org-ngo-coalition",
+    "jurisdiction_id": "cross-sector",
+    "role": "NGO Recovery Lead",
+    "permissions": [
+      "incidents:read",
+      "mutual-aid:coordinate",
+      "recovery:fund-claim",
+      "resources:request"
+    ],
+    "aiims_function": "logistics",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "health",
+    "display_name": "Dr. Vikram Joshi",
+    "organisation_id": "org-health",
+    "jurisdiction_id": "cross-sector",
+    "role": "Health Surge Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "local-government",
+    "display_name": "Mayor Robert Hayes",
+    "organisation_id": "org-lga",
+    "jurisdiction_id": "cross-sector",
+    "role": "LGA Recovery Manager",
+    "permissions": [
+      "incidents:read",
+      "lessons:author",
+      "plans:author",
+      "risk:assess"
+    ],
+    "aiims_function": "planning",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "state-government",
+    "display_name": "Premier Adviser Yuki Tanaka",
+    "organisation_id": "org-state-govt",
+    "jurisdiction_id": "cross-sector",
+    "role": "State Disaster Coordinator",
+    "permissions": [
+      "declarations:issue",
+      "incidents:read",
+      "incidents:write",
+      "warnings:issue",
+      "workflows:approve"
+    ],
+    "aiims_function": "control",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "territory-government",
+    "display_name": "Territory Adviser Karen Tippett",
+    "organisation_id": "org-territory",
+    "jurisdiction_id": "cross-sector",
+    "role": "Territory Disaster Coordinator",
+    "permissions": [
+      "declarations:issue",
+      "incidents:read",
+      "incidents:write",
+      "warnings:issue",
+      "workflows:approve"
+    ],
+    "aiims_function": "control",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "transport",
+    "display_name": "Phil Anderson",
+    "organisation_id": "org-transport",
+    "jurisdiction_id": "cross-sector",
+    "role": "Transport Operations Lead",
+    "permissions": [
+      "incidents:read",
+      "mutual-aid:coordinate",
+      "recovery:fund-claim",
+      "resources:request"
+    ],
+    "aiims_function": "logistics",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "utility",
+    "display_name": "Sandra Petrov",
+    "organisation_id": "org-utility",
+    "jurisdiction_id": "cross-sector",
+    "role": "Utility Restoration Coordinator",
+    "permissions": [
+      "incidents:read",
+      "mutual-aid:coordinate",
+      "recovery:fund-claim",
+      "resources:request"
+    ],
+    "aiims_function": "logistics",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "volunteer",
+    "display_name": "James Wilson",
+    "organisation_id": "org-volunteer",
+    "jurisdiction_id": "cross-sector",
+    "role": "Volunteer Surge Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "frnsw",
+    "display_name": "Captain Mark Reynolds",
+    "organisation_id": "org-frnsw",
+    "jurisdiction_id": "nsw",
+    "role": "FRNSW Captain",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "mrnsw",
+    "display_name": "Skipper Tony Ng",
+    "organisation_id": "org-mrnsw",
+    "jurisdiction_id": "nsw",
+    "role": "MRNSW Skipper",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "nsw-ambulance",
+    "display_name": "Paramedic Sarah Connors",
+    "organisation_id": "org-nsw-ambulance",
+    "jurisdiction_id": "nsw",
+    "role": "NSW Ambulance Inspector",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "nsw-rfs",
+    "display_name": "Captain John Stanford",
+    "organisation_id": "org-nsw-rfs",
+    "jurisdiction_id": "nsw",
+    "role": "NSW RFS Captain",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "nswpf",
+    "display_name": "Inspector Maya Singh",
+    "organisation_id": "org-nswpf",
+    "jurisdiction_id": "nsw",
+    "role": "NSW Police Inspector",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "ses-nsw",
+    "display_name": "Coordinator Ahmad Khalil",
+    "organisation_id": "org-ses-nsw",
+    "jurisdiction_id": "nsw",
+    "role": "NSW SES Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "bushfires-nt",
+    "display_name": "Ranger Joe Long",
+    "organisation_id": "org-bushfires-nt",
+    "jurisdiction_id": "nt",
+    "role": "Bushfires NT Ranger",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "ntes",
+    "display_name": "Coordinator Bella Watson",
+    "organisation_id": "org-ntes",
+    "jurisdiction_id": "nt",
+    "role": "NT Emergency Service Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "ntfrs",
+    "display_name": "Captain Leo Yates",
+    "organisation_id": "org-ntfrs",
+    "jurisdiction_id": "nt",
+    "role": "NT Fire & Rescue Captain",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "ntpf",
+    "display_name": "Sergeant Amelia Ross",
+    "organisation_id": "org-ntpf",
+    "jurisdiction_id": "nt",
+    "role": "NT Police Sergeant",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "sja-nt",
+    "display_name": "Officer Conrad Greene",
+    "organisation_id": "org-sja-nt",
+    "jurisdiction_id": "nt",
+    "role": "St John NT Officer",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "qas",
+    "display_name": "Inspector Hannah Wells",
+    "organisation_id": "org-qas",
+    "jurisdiction_id": "qld",
+    "role": "QLD Ambulance Inspector",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "qfd",
+    "display_name": "Captain Rohan Pillai",
+    "organisation_id": "org-qfd",
+    "jurisdiction_id": "qld",
+    "role": "QLD Fire Department Captain",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "qps",
+    "display_name": "Sergeant Elena Romano",
+    "organisation_id": "org-qps",
+    "jurisdiction_id": "qld",
+    "role": "QLD Police Sergeant",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "ses-qld",
+    "display_name": "Coordinator Trevor Ng",
+    "organisation_id": "org-ses-qld",
+    "jurisdiction_id": "qld",
+    "role": "QLD SES Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "saas",
+    "display_name": "Officer Priya Bhatia",
+    "organisation_id": "org-saas",
+    "jurisdiction_id": "sa",
+    "role": "SA Ambulance Officer",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "sacfs",
+    "display_name": "Captain Robert Edwards",
+    "organisation_id": "org-sacfs",
+    "jurisdiction_id": "sa",
+    "role": "SA CFS Captain",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "samfs",
+    "display_name": "Captain Olivia Bennett",
+    "organisation_id": "org-samfs",
+    "jurisdiction_id": "sa",
+    "role": "SA MFS Captain",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "sapol",
+    "display_name": "Sergeant Marco Rinaldi",
+    "organisation_id": "org-sapol",
+    "jurisdiction_id": "sa",
+    "role": "SA Police Sergeant",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "ses-sa",
+    "display_name": "Coordinator Anastasia Ford",
+    "organisation_id": "org-ses-sa",
+    "jurisdiction_id": "sa",
+    "role": "SA SES Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "at",
+    "display_name": "Coordinator Joel Murphy",
+    "organisation_id": "org-at",
+    "jurisdiction_id": "tas",
+    "role": "Ambulance Tasmania Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "ses-tas",
+    "display_name": "Coordinator Sophie Webb",
+    "organisation_id": "org-ses-tas",
+    "jurisdiction_id": "tas",
+    "role": "TAS SES Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "taspol",
+    "display_name": "Sergeant Brett Halloran",
+    "organisation_id": "org-taspol",
+    "jurisdiction_id": "tas",
+    "role": "TAS Police Sergeant",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "tfs",
+    "display_name": "Captain Niamh OSullivan",
+    "organisation_id": "org-tfs",
+    "jurisdiction_id": "tas",
+    "role": "TAS Fire Service Captain",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "av",
+    "display_name": "Inspector Beth Ryan",
+    "organisation_id": "org-av",
+    "jurisdiction_id": "vic",
+    "role": "AV Inspector",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "cfa-vic",
+    "display_name": "Captain David Walker",
+    "organisation_id": "org-cfa",
+    "jurisdiction_id": "vic",
+    "role": "CFA Captain",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "frv",
+    "display_name": "Commander Maria Castelli",
+    "organisation_id": "org-frv",
+    "jurisdiction_id": "vic",
+    "role": "FRV Commander",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "ses-vic",
+    "display_name": "Coordinator Andrew Pham",
+    "organisation_id": "org-ses-vic",
+    "jurisdiction_id": "vic",
+    "role": "VIC SES Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "vicpol",
+    "display_name": "Inspector Carlos Mendez",
+    "organisation_id": "org-vicpol",
+    "jurisdiction_id": "vic",
+    "role": "VIC Police Inspector",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "dfes-wa",
+    "display_name": "Coordinator Tara McKenzie",
+    "organisation_id": "org-dfes-wa",
+    "jurisdiction_id": "wa",
+    "role": "DFES WA Coordinator",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "sja-wa",
+    "display_name": "Officer Krishna Iyer",
+    "organisation_id": "org-sja-wa",
+    "jurisdiction_id": "wa",
+    "role": "St John WA Officer",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  },
+  {
+    "persona_id": "wapol",
+    "display_name": "Inspector Owen Carter",
+    "organisation_id": "org-wapol",
+    "jurisdiction_id": "wa",
+    "role": "WA Police Inspector",
+    "permissions": [
+      "incidents:read",
+      "incidents:write",
+      "resources:dispatch",
+      "tasks:assign"
+    ],
+    "aiims_function": "operations",
+    "direct_reports": []
+  }
+]

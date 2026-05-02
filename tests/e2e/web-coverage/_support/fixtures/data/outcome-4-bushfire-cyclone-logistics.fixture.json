@@ -1,0 +1,36 @@
+{
+  "$schema": "internal://outcome-fixture",
+  "outcome": 4,
+  "name": "Multi-State Logistics Surge: Bushfire + Cyclone",
+  "fixture_version": "1.0.0",
+  "primary_hazards": ["bushfire", "tropical-cyclone"],
+  "scenario_seed": "outcome-4-bushfire-cyclone-logistics",
+  "audit_correlation_template": "wc-o4-{persona_id}-{run_id}",
+  "expected_routes": ["/incidents", "/disasters", "/operations/workflows", "/governance/dashboard", "/governance/data-sources"],
+  "expected_audit_types": [
+    "incident.created",
+    "mutual-aid.requested",
+    "mutual-aid.accepted",
+    "dacc.requested",
+    "dacc.dispatched",
+    "logistics.surge-tasked",
+    "task.assigned"
+  ],
+  "expected_warnings": [
+    {
+      "type": "bushfire",
+      "level": "watch-and-act",
+      "languages": ["en"],
+      "issuer_aiims_function": "public-information"
+    },
+    {
+      "type": "tropical-cyclone",
+      "level": "emergency-warning",
+      "languages": ["en"],
+      "issuer_aiims_function": "public-information"
+    }
+  ],
+  "evac_stage_progression": ["prepare", "stand-by", "evacuate-now", "shelter", "all-clear"],
+  "constitution_clauses": ["I", "II", "II-A", "IV", "V", "V-A", "V-B", "V-C", "NN-1", "NN-2", "NN-3", "NN-4", "NN-5"],
+  "fr_ids": ["FR-003", "FR-009", "FR-014", "FR-016", "FR-018", "FR-019", "FR-021", "FR-024"]
+}
