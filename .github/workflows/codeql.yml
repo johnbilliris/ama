@@ -1,5 +1,11 @@
 name: codeql
 
+# CodeQL steps are commented out because GitHub Code Scanning is not enabled on the
+# target repository. The `github/codeql-action/*` actions require Code Scanning to be
+# turned on (Settings → Code security and analysis → Code scanning) before they can
+# upload SARIF results. Re-enable Code Scanning in repo settings, then uncomment the
+# steps below to restore CodeQL analysis.
+
 on:
   push:
     branches: [main, dev, staging, production]
