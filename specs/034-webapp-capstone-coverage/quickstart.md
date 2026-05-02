@@ -297,21 +297,73 @@ that already shipped on this branch:
 
 ## Known limitations
 
-The first end-to-end Playwright run cannot complete on most local
-machines without the test-support API and seeded routes, so we ship the
-suite with the following well-known soft-fail surfaces — each captured by
-a test that uses `test.fail(true, "<gap reason>")` so the gap-register
-auto-populates rather than CI failing hard:
+The cycle-1 amendment closed the major soft-fail surfaces from the
+phase-8 ship: the FR-028 evaluator (`/api/outcomes/sc-{001..005}/evaluate`)
+and FR-029 audit-list (`/api/audit/list`) are now wired (T178-T181), and
+every previously-bailed `test.fail(true, "<gap reason>")` placeholder in
+`tests/e2e/web-coverage/` has been refactored to a real assertion (T184,
+T185, T186). Run the bail census to confirm no regressions:
 
-- `/api/outcomes/sc-NNN/evaluate` evaluator endpoints (T146-T150)
-  — the capstone outcome closure specs degrade until the evaluator API
-  ships.
-- `/api/audit/list?correlation_id=…` — the cross-cutting audit-append-only
-  spec degrades while the audit-list endpoint is being wired.
-- `/disasters` and `/operations/workflows` `__next_error__` — defensive
-  selectors are in place; investigation continues separately.
+```pwsh
+Get-ChildItem tests/e2e/web-coverage -Recurse -Filter "*.spec.ts" `
+  | Select-String -Pattern 'test\.fail\(true' `
+  | Where-Object { $_.Line -notmatch '^\s*\*' -and $_.Line -notmatch '^\s*//' }
+```
 
-These are tracked as candidate GAP rows on the gap-register. Once the
-underlying API surface is wired, the corresponding `test.fail()` lines
-should be removed and the gap closed via
-`python scripts/web-coverage/gap-register.py close --gap-id … --merge-sha …`.
+Outstanding non-bail caveats:
+
+- **`/disasters` and `/operations/workflows` `__next_error__`** — defensive
+  selectors remain; investigation continues separately and is tracked
+  on the gap-register, not a bail.
+
+### Cycle-metadata artefact (FR-029, T182)
+
+The Playwright reporter writes
+`tests/e2e/web-coverage/_artifacts/cycle-metadata.json` at `onBegin()` on
+shard 1 only. The file carries the `cycle_id` (UUID v4) used by every
+gap-register entry opened during the run, plus the seed hash and commit
+SHA the cycle ran against. The file is gitignored — absence is normal in
+fresh checkouts and CLI flows that pre-date a Playwright run.
+
+### Cycle-aware queries on `/api/audit/list`
+
+The FR-029 audit-list endpoint accepts an optional `cycle=current|all`
+filter that mirrors the gap-register CLI's `--cycle` flag (T183, Q26).
+`current` (default) restricts results to the active suite-run via the
+reporter-emitted cycle metadata; `all` opts into a cross-cycle read for
+FR-005 + FR-027 regression auditing.
+
+```pwsh
+# All audit rows for the current Playwright run only
+curl "http://localhost:8000/api/audit/list?correlation_id=$cid&cycle=current"
+
+# Cross-cycle read for FR-027 regression triage
+curl "http://localhost:8000/api/audit/list?cycle=all"
+```
+
+### SC-012 closure-ratio invocation (T203)
+
+After every Playwright run, the closure subcommand on the review log
+computes the SC-012 closure ratio (closed gaps over merit-validated
+objections, excluding escalations) for the active cycle and audits the
+result into `_evidence/audit/web-coverage-review/`. When the ratio falls
+below 0.80, a carry-over meta-gap
+`GAP-CYCLE-{first8}-CLOSURE-RATE-LOW` is opened on the gap-register so
+the next cycle inherits the deficit.
+
+```pwsh
+# Use the cycle_id baked into _artifacts/cycle-metadata.json (default).
+python scripts/web-coverage/review-log.py closure
+
+# Or pin it explicitly (e.g. for replay against a captured cycle):
+python scripts/web-coverage/review-log.py closure `
+  --cycle-id 11111111-2222-4333-8444-555555555555
+
+# Report-only: skip the meta-gap open call (e.g. for dry-run audits):
+python scripts/web-coverage/review-log.py closure --dry-run
+```
+
+The CLI exits `0` when the cycle passes the floor, `1` when it falls
+below (CI gate), and `2` on contract violations (missing/invalid
+`cycle_id`).
+

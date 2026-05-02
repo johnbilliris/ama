@@ -126,3 +126,107 @@ section of the FR-028 / FR-029 wiring:
 | `cycle-metadata.schema.json`                                              | `../../specs/034-webapp-capstone-coverage/contracts/cycle-metadata.schema.json`     | JSON-Schema (draft 2020-12) for `_artifacts/cycle-metadata.json` — `cycle_start_ts`, `cycle_id` (UUID v4), `commit_sha` (40-hex), `seed_hash` (SHA-256). Written by the reporter `onBegin`. |
 | `_lib/depth-profiles/_schema.json` *(draft-07, intentionally distinct)* | `_lib/depth-profiles/_schema.json`                                             | One YAML per persona; `safety_critical_workflow` enum closed to 12 values (9 write + 3 read-only). Missing or invalid → `GAP-DEPTH-PROFILE-MISSING-{persona-id}`. |
 | `persona-fixture.contract.md`                                            | `../../specs/034-webapp-capstone-coverage/contracts/persona-fixture.contract.md`    | Dual-guard activation rule (`AMA_TEST_SUPPORT == "1"` AND `environment in {"dev","test"}`) — reused verbatim by the evaluator + audit-list routers. |
+
+## Authoring a depth-profile YAML
+
+Every persona-driven spec under `operational/` and `sectors/` is rendered
+from a deterministic depth-profile YAML at
+`tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml`.
+The 68 profiles together drive the Playwright spec generator
+(`scripts/web-coverage/_lib/persona_spec_generator.py`) and lock the
+FR-029 audit-emission contract (one safety-critical transition per
+persona, each tied to an evaluator endpoint).
+
+### File location
+
+| Asset                         | Path                                                            |
+| ----------------------------- | --------------------------------------------------------------- |
+| Per-persona profile           | `_lib/depth-profiles/{persona-id}.depth.yaml`                   |
+| draft-07 schema               | `_lib/depth-profiles/_schema.json`                              |
+| Validator helper              | `scripts/web-coverage/_lib/schema_validators.py depth-profiles` |
+| Generator entrypoint          | `python scripts/web-coverage/_lib/persona_spec_generator.py`    |
+
+### Required keys
+
+```yaml
+persona_id: sapol                 # MUST match the seed registry persona_id
+workspace_route: /workspaces/sapol
+safety_critical_workflow: declare # one of the 12-value enum below
+workflow_steps:                   # ≥1 deterministic UI/API transition
+  - action: open declaration dialog and confirm
+    target_selector: getByRole:button:Declare
+    expected_response_status: 201
+  - action: POST /api/declarations
+    target_selector: POST:/api/declarations
+    expected_response_status: 201
+assertion_targets:
+  evaluator_endpoint: sc-002      # one of sc-001..sc-005 (routable subset)
+  audit_correlation_id_source: header
+capstone_outcome: 2               # 1..5 — links to outcome-N-*.spec.ts
+hazard: bushfire                  # short hazard label (no '+')
+coverage_tags:                    # multi-jurisdiction tags per Q23
+  - state-government
+```
+
+### `safety_critical_workflow` enum (12 values)
+
+The enum is closed: 9 write-side transitions per Q15 + 3 read-only per
+Q24. Any value outside this set is rejected by the schema validator.
+
+| Write (Q15)                                                        | Read-only (Q24)               |
+| ------------------------------------------------------------------ | ----------------------------- |
+| `declare`, `dispatch`, `escalate`, `handover`, `publish`           | `view-classified`             |
+| `allocate`, `approve`, `acknowledge`, `revoke`                     | `view-recovery-environments`  |
+|                                                                    | `view-cross-jurisdiction-feed`|
+
+### Multi-jurisdiction `coverage_tags[]` rule (Q23)
+
+Per the cycle-1 placement decision, **the folder identifies the owning
+persona's jurisdiction** (e.g. `sectors/sa/sapol.*.spec.ts` is
+SA-government-owned) and `coverage_tags[]` carries any *additional*
+governance facets (`state-government`, `territory-government`, ATSI,
+sector). Specs that span jurisdictions DO NOT move folders — they add
+the cross-jurisdiction tag. Example: `sectors/commonwealth/nema.*` adds
+`state-government` and `territory-government` tags rather than
+relocating to a cross-sector folder.
+
+### Failure mode — missing or invalid profile
+
+The generator and validator fail-fast:
+
+- **Missing file**: `GAP-DEPTH-PROFILE-MISSING-{persona-id}` is the
+  canonical gap-register row. Open via
+  `python scripts/web-coverage/gap-register.py open --gap-id … --personas {persona-id} --frs FR-029 …`.
+- **Schema violation**: the validator emits the failing path + reason;
+  fix the YAML before regenerating specs.
+
+Re-validate the entire family in CI:
+
+```pwsh
+python scripts/web-coverage/_lib/schema_validators.py depth-profiles --expected 68
+```
+
+### Evaluator binding
+
+Each profile binds to exactly one of the FR-028 routable evaluator
+endpoints (`sc-001..sc-005`). The persona-fixture contract (see
+`contracts/persona-fixture.contract.md`) hands the `persona_id` and
+`correlation_id` to the spec body, which then POSTs to
+`/api/outcomes/{evaluator_endpoint}/evaluate` with the canned
+`metric_inputs` — see `contracts/outcome-evaluator.contract.md` for the
+request/response shape and the
+`(sc_id, scenario_id, persona_id, correlation_id)` idempotency tuple.
+
+### Regenerating specs
+
+After editing one or more depth profiles, regenerate the operational +
+sectors spec families:
+
+```pwsh
+python scripts/web-coverage/_lib/persona_spec_generator.py --rewrite-stubs
+```
+
+The generator is byte-deterministic — repeated runs against the same
+profile inputs MUST produce identical output (verified by
+`scripts/web-coverage/verify-trace-determinism.ps1`).
+
