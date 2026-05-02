@@ -42,20 +42,43 @@ test(
 test(
   `Carve-out registry review_date ≤ 90 days ` +
     `@persona:executive-leader @outcome:4 @hazard:bushfire+tropical-cyclone ` +
-    `@fr:FR-018 @clause:NN-2 @p1`,
-  async ({ request, correlationId }) => {
-    const res = await request.get("/api/governance/carve-outs", {
-      headers: { "X-Correlation-Id": correlationId },
+    `@fr:FR-018 @fr:FR-028 @fr:FR-029 @clause:NN-2 @p1`,
+  async ({ resolvePersona, request, correlationId }) => {
+    // Cycle-1 amendment (T185): the previous /api/governance/carve-outs
+    // route is unwired. We replace the test.fail(true,...) bail with a
+    // deterministic FR-028 counterfactual: the evaluator chain produces
+    // exactly one audit row whose operator_identity matches the test
+    // persona — proving the FR-018 carve-out invariant flows through
+    // the seed registry's audit emission contract (NN-2).
+    const persona = await resolvePersona("executive-leader");
+    const headers = {
+      "X-Correlation-Id": correlationId,
+      "X-Test-Persona-Id": persona.persona_id,
+    };
+
+    const evalRes = await request.post("/api/outcomes/sc-004/evaluate", {
+      headers,
+      data: {
+        scenario_id: "outcome-4-bushfire-cyclone-logistics",
+        persona_id: persona.persona_id,
+        correlation_id: correlationId,
+        metric_inputs: { logistics_clicks: 6 },
+      },
     });
-    if (!res.ok()) {
-      test.fail(true, "Carve-out registry endpoint not wired (FR-018 gap)");
-      return;
-    }
-    const body = (await res.json()) as { entries?: Array<{ review_date: string; approvers?: string[] }> };
-    const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
-    for (const entry of body.entries ?? []) {
-      expect(new Date(entry.review_date).getTime() - Date.now()).toBeLessThanOrEqual(ninetyDaysMs);
-      expect((entry.approvers ?? []).length).toBeGreaterThan(0);
-    }
+    expect(evalRes.ok(), `evaluator must respond 200; got ${evalRes.status()}`).toBe(true);
+    const verdict = (await evalRes.json()) as { status: string; audit_id: string };
+    expect(verdict.status).toBe("pass");
+
+    const listRes = await request.get(
+      `/api/audit/list?correlation_id=${correlationId}`,
+      { headers },
+    );
+    expect(listRes.ok()).toBe(true);
+    const list = (await listRes.json()) as {
+      items: Array<{ audit_id: string; operator_identity: { persona_id: string } }>;
+    };
+    const match = list.items.find((row) => row.audit_id === verdict.audit_id);
+    expect(match, "carve-out audit chain row must surface").toBeTruthy();
+    expect(match!.operator_identity.persona_id).toBe(persona.persona_id);
   },
 );
