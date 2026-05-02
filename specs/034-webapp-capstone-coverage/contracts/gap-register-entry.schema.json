@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.local/contracts/spec-034/gap-register-entry.schema.json",
+  "title": "GapRegisterEntry",
+  "description": "One row of the FR-005 gap register artefact for spec 034. Persistence is a hybrid of a markdown source-of-truth (specs/034-…/gap-register.md) and an append-only JSONL audit shadow in Blob storage (audit/web-coverage-gaps/{date}/{hour}.jsonl).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gap_id",
+    "affected_personas",
+    "affected_routes",
+    "fr_ids",
+    "constitution_clauses",
+    "owner",
+    "status",
+    "closing_pr_url",
+    "merge_sha",
+    "iteration_count",
+    "regression_evidence",
+    "tribunal_notes",
+    "updated_at"
+  ],
+  "properties": {
+    "gap_id": {
+      "type": "string",
+      "pattern": "^GAP-[A-Z0-9][A-Z0-9-]*[A-Z0-9]$"
+    },
+    "affected_personas": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$" }
+    },
+    "affected_routes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^/[A-Za-z0-9/_-]*$" }
+    },
+    "fr_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^FR-\\d{3}[a-z]?$" }
+    },
+    "constitution_clauses": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "I", "II", "II-A", "III", "IV",
+          "V", "V-A", "V-B", "V-C",
+          "VI", "VII", "VIII",
+          "NN-1", "NN-2", "NN-3", "NN-4", "NN-5",
+          "QG-1", "QG-2", "QG-3"
+        ]
+      }
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1,
+      "description": "GitHub team handle (e.g., '@ama/web-team') or 'unassigned'."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["Open", "In-Progress", "Closed", "Reopened", "Escalated"]
+    },
+    "closing_pr_url": {
+      "oneOf": [
+        { "type": "string", "format": "uri", "pattern": "^https://github.com/" },
+        { "type": "null" }
+      ]
+    },
+    "merge_sha": {
+      "oneOf": [
+        { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+        { "type": "null" }
+      ]
+    },
+    "iteration_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4,
+      "description": "FR-024 cycle counter; once it reaches 4 the gap MUST transition to Escalated."
+    },
+    "regression_evidence": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["failing_test_id", "reverted_commit_sha", "restored_revision_sha", "detected_at"],
+          "properties": {
+            "failing_test_id": { "type": "string", "minLength": 1 },
+            "reverted_commit_sha": { "type": "string", "pattern": "^[0-9a-f]{7,40}$" },
+            "restored_revision_sha": { "type": "string", "minLength": 1 },
+            "detected_at": { "type": "string", "format": "date-time" }
+          }
+        }
+      ]
+    },
+    "tribunal_notes": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "description": "When status is Closed, both closing_pr_url and merge_sha MUST be present.",
+      "if": { "properties": { "status": { "const": "Closed" } } },
+      "then": {
+        "properties": {
+          "closing_pr_url": { "type": "string" },
+          "merge_sha": { "type": "string" }
+        }
+      }
+    },
+    {
+      "description": "When status is In-Progress, closing_pr_url MUST be present.",
+      "if": { "properties": { "status": { "const": "In-Progress" } } },
+      "then": {
+        "properties": { "closing_pr_url": { "type": "string" } }
+      }
+    },
+    {
+      "description": "When status is Reopened, regression_evidence MUST be a populated object.",
+      "if": { "properties": { "status": { "const": "Reopened" } } },
+      "then": {
+        "properties": {
+          "regression_evidence": { "type": "object" }
+        }
+      }
+    }
+  ]
+}
