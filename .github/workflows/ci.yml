@@ -140,7 +140,14 @@ jobs:
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
       - name: Install API package
-        run: python -m pip install -e apps/api
+        run: |
+          python -m pip install -e apps/api
+          # apps/api/app/api/router.py transitively imports the `evacuation`
+          # agent package (apps/agents/pyproject.toml exposes it as a
+          # top-level package), so the agents wheel must be installed too —
+          # otherwise uvicorn fails at import-time with
+          # `ModuleNotFoundError: No module named 'evacuation'`.
+          python -m pip install -e apps/agents
       - name: Install Playwright Chromium
         run: pnpm --filter @ama/web exec playwright install --with-deps chromium
       - name: Seed database
