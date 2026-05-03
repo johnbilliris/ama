@@ -193,9 +193,10 @@ jobs:
       - name: Merge trace shards (FR-006 deterministic)
         run: |
           python scripts/web-coverage/trace-merge.py \
-            --inputs tests/e2e/web-coverage/_artifacts/coverage-trace.partial-*.json \
-            --out-md specs/034-webapp-capstone-coverage/coverage-trace.md \
-            --out-json specs/034-webapp-capstone-coverage/coverage-trace.json
+            --shards-dir tests/e2e/web-coverage/_artifacts \
+            --shard-glob 'coverage-trace.partial-*.json' \
+            --output-md specs/034-webapp-capstone-coverage/coverage-trace.md \
+            --output-json specs/034-webapp-capstone-coverage/coverage-trace.json
       - name: Validate gap-register
         run: python scripts/web-coverage/gap-register.py validate
       - name: Verify trace determinism (FR-006)
