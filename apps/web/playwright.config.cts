@@ -7,12 +7,35 @@ export default defineConfig({
   // loading tests under tests/e2e/web-coverage/. Without this, Playwright
   // walks up from each test file and never finds a tsconfig with the alias.
   tsconfig: "./tsconfig.json",
-  webServer: {
-    command: "corepack pnpm --filter @ama/web dev",
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: true,
-    timeout: 120000,
-  },
+  // Spec 034 web-coverage shards depend on the FastAPI backend (test-support
+  // endpoints + Next.js /api proxy). Start uvicorn alongside the Next.js
+  // dev server so a single `playwright test` invocation boots everything.
+  // - `cwd: "../.."` runs from the repo root so `app.main:app` resolves via
+  //   the editable install AND `packages.domain.*` imports work from cwd.
+  // - `AMA_TEST_SUPPORT=1` + `AMA_ENVIRONMENT=dev` flip the dual-guard so
+  //   `/api/test-support/personas/{id}` is registered (see
+  //   apps/api/app/middleware/test_support_guard.py).
+  webServer: [
+    {
+      command: "python -m uvicorn app.main:app --host 127.0.0.1 --port 8000",
+      cwd: "../..",
+      url: "http://127.0.0.1:8000/api/health",
+      reuseExistingServer: true,
+      timeout: 120000,
+      stdout: "pipe",
+      stderr: "pipe",
+      env: {
+        AMA_TEST_SUPPORT: "1",
+        AMA_ENVIRONMENT: "dev",
+      },
+    },
+    {
+      command: "corepack pnpm --filter @ama/web dev",
+      url: "http://127.0.0.1:3000",
+      reuseExistingServer: true,
+      timeout: 120000,
+    },
+  ],
   use: {
     baseURL: "http://127.0.0.1:3000"
   },
