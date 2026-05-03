@@ -2,6 +2,11 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "../../tests/e2e",
+  // Spec 034 T003 — point Playwright at apps/web/tsconfig.json so the
+  // `@web-coverage/*` path alias (defined there) resolves at runtime when
+  // loading tests under tests/e2e/web-coverage/. Without this, Playwright
+  // walks up from each test file and never finds a tsconfig with the alias.
+  tsconfig: "./tsconfig.json",
   webServer: {
     command: "corepack pnpm --filter @ama/web dev",
     url: "http://127.0.0.1:3000",
