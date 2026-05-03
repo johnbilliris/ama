@@ -115,10 +115,7 @@ def test_compute_closure_mixed_above_floor(review_log_module) -> None:
 def test_compute_closure_below_floor(review_log_module) -> None:
     """3 closed of 5 eligible = 0.60 — below floor."""
 
-    entries = [
-        _mk(f"g{i}", status="Closed" if i < 4 else "Open")
-        for i in range(1, 6)
-    ]
+    entries = [_mk(f"g{i}", status="Closed" if i < 4 else "Open") for i in range(1, 6)]
     # entries: g1=Closed, g2=Closed, g3=Closed, g4=Open, g5=Open => 3/5 = 0.6
     summary = review_log_module._compute_closure(entries, CYCLE_A)
     assert summary["numerator"] == 3
@@ -131,10 +128,10 @@ def test_compute_closure_escalated_excluded(review_log_module) -> None:
     """Escalated rows are excluded from BOTH numerator and denominator."""
 
     entries = [
-        _mk("g1", status="Closed"),                       # eligible, closed
-        _mk("g2", status="Closed", iteration_count=4),    # escalated -> excluded
-        _mk("g3", status="Open", owner="project-lead"),   # escalated -> excluded
-        _mk("g4", status="Open"),                         # eligible, open
+        _mk("g1", status="Closed"),  # eligible, closed
+        _mk("g2", status="Closed", iteration_count=4),  # escalated -> excluded
+        _mk("g3", status="Open", owner="project-lead"),  # escalated -> excluded
+        _mk("g4", status="Open"),  # eligible, open
     ]
     summary = review_log_module._compute_closure(entries, CYCLE_A)
     assert summary["numerator"] == 1
@@ -148,9 +145,9 @@ def test_compute_closure_filters_by_cycle_id(review_log_module) -> None:
     """Entries from other cycles must not influence the numerator/denom."""
 
     entries = [
-        _mk("g1", status="Closed"),                            # CYCLE_A
-        _mk("g2", status="Closed", cycle_id=CYCLE_B),          # other cycle
-        _mk("g3", status="Open", cycle_id=None),               # untagged
+        _mk("g1", status="Closed"),  # CYCLE_A
+        _mk("g2", status="Closed", cycle_id=CYCLE_B),  # other cycle
+        _mk("g3", status="Open", cycle_id=None),  # untagged
     ]
     summary = review_log_module._compute_closure(entries, CYCLE_A)
     assert summary["numerator"] == 1

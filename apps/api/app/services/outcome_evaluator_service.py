@@ -112,9 +112,7 @@ def _persona_index() -> dict[str, dict[str, Any]]:
         if not isinstance(identities, list):  # pragma: no cover - defensive
             return {}
         _PERSONA_INDEX = {
-            ident["persona_id"]: ident
-            for ident in identities
-            if isinstance(ident, dict) and "persona_id" in ident
+            ident["persona_id"]: ident for ident in identities if isinstance(ident, dict) and "persona_id" in ident
         }
     return _PERSONA_INDEX
 
@@ -220,9 +218,7 @@ def evaluate(
             {
                 "error": "scenario_not_found",
                 "scenario_id": scenario_id,
-                "suggested_action": (
-                    "register in bootstrap_seed_data() or update depth profile"
-                ),
+                "suggested_action": ("register in bootstrap_seed_data() or update depth profile"),
             },
         )
 
@@ -232,9 +228,7 @@ def evaluate(
             {
                 "error": "persona_not_resolvable",
                 "persona_id": persona_id,
-                "suggested_action": (
-                    "ASM-011: persona must resolve in bootstrap_seed_data().identities"
-                ),
+                "suggested_action": ("ASM-011: persona must resolve in bootstrap_seed_data().identities"),
             },
         )
 
@@ -246,9 +240,7 @@ def evaluate(
                 "error": "metric_inputs_invalid",
                 "sc_id": sc_id,
                 "required_field": required_field,
-                "suggested_action": (
-                    f"metric_inputs.{required_field} is required for {sc_id}"
-                ),
+                "suggested_action": (f"metric_inputs.{required_field} is required for {sc_id}"),
             },
         )
 
@@ -258,13 +250,11 @@ def evaluate(
             return _IDEMPOTENCY[key]
 
         scenario = scenarios[scenario_id]
-        baseline = (
-            scenario.get("baseline", {})
-            if isinstance(scenario, dict)
-            else {}
-        )
+        baseline = scenario.get("baseline", {}) if isinstance(scenario, dict) else {}
         status_, metric_value, threshold = _evaluate_metric(
-            sc_id, baseline, metric_inputs,
+            sc_id,
+            baseline,
+            metric_inputs,
         )
 
         audit_id = str(uuid.uuid4())
@@ -274,10 +264,7 @@ def evaluate(
             "audit_timestamp": audit_timestamp,
             "correlation_id": correlation_id,
             "operator_identity": {"persona_id": persona_id},
-            "rationale": (
-                f"Counterfactual evaluation for {sc_id} on scenario "
-                f"{scenario_id}: status={status_}"
-            ),
+            "rationale": (f"Counterfactual evaluation for {sc_id} on scenario {scenario_id}: status={status_}"),
             "confidence": 0.95 if status_ == "pass" else 0.85,
             "source_refs": [
                 f"scenario:{scenario_id}",
@@ -346,6 +333,7 @@ def list_audit(
     if correlation_id is not None:
         rows = [r for r in rows if r.get("correlation_id") == correlation_id]
     if cycle == "current":
+
         def _ts(r: dict[str, Any]) -> datetime:
             ts = r.get("audit_timestamp", "")
             return datetime.fromisoformat(ts.replace("Z", "+00:00")) if ts else datetime.fromtimestamp(0, tz=UTC)

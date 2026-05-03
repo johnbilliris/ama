@@ -40,10 +40,10 @@ SC_TO_SCENARIO: dict[str, str] = {
 # Canned metric_inputs that score "pass" against the seeded baselines.
 # See data-model §13 + bootstrap.py CURRENT_CYCLE_START rationale.
 PASS_METRIC_INPUTS: dict[str, dict[str, float]] = {
-    "sc-001": {"lives_at_risk": 800.0},          # baseline 2000 → saved 1200 ≥ 1000
-    "sc-002": {"signal_to_action_ms": 4500.0},   # baseline 10000 → 0.45× ≤ 0.5
-    "sc-003": {"evac_lead_hours": 26.0},         # ≥ 24h
-    "sc-004": {"logistics_clicks": 6.0},         # ≤ 7
+    "sc-001": {"lives_at_risk": 800.0},  # baseline 2000 → saved 1200 ≥ 1000
+    "sc-002": {"signal_to_action_ms": 4500.0},  # baseline 10000 → 0.45× ≤ 0.5
+    "sc-003": {"evac_lead_hours": 26.0},  # ≥ 24h
+    "sc-004": {"logistics_clicks": 6.0},  # ≤ 7
     "sc-005": {"economic_loss_aud": 1_400_000_000.0},  # baseline 2e9 → 30% reduction
 }
 
@@ -55,16 +55,20 @@ def _build_client(monkeypatch) -> TestClient:
     monkeypatch.setenv("AMA_ENVIRONMENT", "dev")
 
     import app.core.settings as settings_module
+
     importlib.reload(settings_module)
     settings_module.get_settings.cache_clear()
 
     import app.middleware.test_support_guard as guard_module
+
     importlib.reload(guard_module)
 
     import app.api.router as router_module
+
     importlib.reload(router_module)
 
     import app.main as main_module
+
     importlib.reload(main_module)
 
     return TestClient(main_module.create_app())
@@ -77,6 +81,7 @@ def _reset_evaluator_state():
     yield  # Setup happens in fixture body before yield is unnecessary; reset on entry+exit.
     try:
         from app.services.outcome_evaluator_service import reset_for_tests
+
         reset_for_tests()
     except ImportError:  # pragma: no cover - module is the SUT
         pass
@@ -257,9 +262,16 @@ def test_audit_list_response_uses_items_field(monkeypatch):
     assert "count" in body
     assert "cycle" in body
     item = body["items"][0]
-    for key in ("audit_id", "audit_timestamp", "correlation_id",
-                "operator_identity", "rationale", "confidence",
-                "source_refs", "outcome"):
+    for key in (
+        "audit_id",
+        "audit_timestamp",
+        "correlation_id",
+        "operator_identity",
+        "rationale",
+        "confidence",
+        "source_refs",
+        "outcome",
+    ):
         assert key in item, f"audit-list item missing required field {key}"
     assert item["operator_identity"]["persona_id"] == "incident-commander"
 
@@ -319,16 +331,20 @@ def test_routes_404_when_test_support_disabled(monkeypatch):
     monkeypatch.setenv("AMA_ENVIRONMENT", "dev")
 
     import app.core.settings as settings_module
+
     importlib.reload(settings_module)
     settings_module.get_settings.cache_clear()
 
     import app.middleware.test_support_guard as guard_module
+
     importlib.reload(guard_module)
 
     import app.api.router as router_module
+
     importlib.reload(router_module)
 
     import app.main as main_module
+
     importlib.reload(main_module)
 
     client = TestClient(main_module.create_app())

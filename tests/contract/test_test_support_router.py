@@ -29,16 +29,20 @@ def _build_client(monkeypatch, *, environment: str, test_support_flag: str | Non
 
     # Force reload of settings + router so the dual-guard sees current env.
     import app.core.settings as settings_module
+
     importlib.reload(settings_module)
     settings_module.get_settings.cache_clear()
 
     import app.middleware.test_support_guard as guard_module
+
     importlib.reload(guard_module)
 
     import app.api.router as router_module
+
     importlib.reload(router_module)
 
     import app.main as main_module
+
     importlib.reload(main_module)
 
     return TestClient(main_module.create_app())
@@ -74,8 +78,16 @@ def test_router_returns_personas_when_enabled(monkeypatch):
     # 68 personas per spec 034 (10 operational + 58 sector, no asia)
     assert body["count"] == 68
     sample = body["items"][0]
-    for key in ("persona_id", "display_name", "organisation_id", "jurisdiction_id",
-                "role", "permissions", "aiims_function", "direct_reports"):
+    for key in (
+        "persona_id",
+        "display_name",
+        "organisation_id",
+        "jurisdiction_id",
+        "role",
+        "permissions",
+        "aiims_function",
+        "direct_reports",
+    ):
         assert key in sample, f"missing key {key} in persona fixture shape"
 
 
