@@ -32,6 +32,6 @@
     }
   ],
   "evac_stage_progression": ["prepare", "stand-by", "evacuate-now", "shelter", "all-clear"],
-  "constitution_clauses": ["I", "II", "II-A", "III", "IV", "V", "V-A", "V-B", "V-C", "NN-1", "NN-2", "NN-3", "NN-4"],
+  "constitution_clauses": ["I", "II", "II-A", "III", "IV", "V", "V-A", "V-B", "V-C", "VI", "NN-1", "NN-2", "NN-3", "NN-4"],
   "fr_ids": ["FR-003", "FR-007", "FR-009", "FR-014", "FR-016", "FR-018", "FR-019", "FR-021"]
 }
