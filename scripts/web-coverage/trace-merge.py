@@ -61,6 +61,26 @@ def merge_rows(shards: list[Path]) -> list[dict]:
     return rows
 
 
+def _resolve_generated_at(shards: list[Path]) -> str:
+    """Pick the most recent ``generated_at`` from input shards.
+
+    Determinism (FR-006): the merge step must produce byte-identical output
+    when invoked twice with the same shards. Using ``datetime.now()`` here
+    would violate that. Instead, take the max ``generated_at`` from the
+    shards themselves — it is stable across re-runs while still reflecting
+    when the underlying test runs completed.
+    """
+    timestamps: list[str] = []
+    for shard in shards:
+        payload = json.loads(shard.read_text(encoding="utf-8"))
+        ts = payload.get("generated_at")
+        if isinstance(ts, str) and ts:
+            timestamps.append(ts)
+    if timestamps:
+        return max(timestamps)
+    return datetime.fromtimestamp(0, tz=UTC).isoformat(timespec="seconds")
+
+
 def render_markdown(rows: list[dict]) -> str:
     lines = [
         "# Web Coverage Trace (spec 034)",
@@ -102,7 +122,7 @@ def main(argv: list[str] | None = None) -> int:
         rows = merge_rows(shards)
 
     payload = {
-        "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        "generated_at": _resolve_generated_at(shards),
         "spec": "034-webapp-capstone-coverage",
         "schema_version": 1,
         "rows": rows,
