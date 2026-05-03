@@ -13,6 +13,7 @@ from app.api.routes.evacuation import router as evacuation_router
 from app.api.routes.frameworks import router as frameworks_router
 from app.api.routes.governance_dashboard import router as governance_dashboard_router
 from app.api.routes.health import router as aidr_health_router
+from app.api.routes.i18n import router as i18n_router
 from app.api.routes.incidents import router as incidents_router
 from app.api.routes.incidents_map import router as incidents_map_router
 from app.api.routes.jurisdictions import router as jurisdictions_router
@@ -84,6 +85,7 @@ api_router.include_router(governance_dashboard_router)
 api_router.include_router(dead_letters_mgmt_router)
 api_router.include_router(radius_lookup_router)
 api_router.include_router(workflow_runs_router)
+api_router.include_router(i18n_router)
 
 if _EVAL_AVAILABLE:
     api_router.include_router(eval_router)

@@ -29,5 +29,5 @@
   ],
   "evac_stage_progression": ["prepare", "stand-by", "evacuate-now", "shelter", "all-clear"],
   "constitution_clauses": ["I", "II", "II-A", "IV", "V", "V-A", "NN-1", "NN-2"],
-  "fr_ids": ["FR-001", "FR-003", "FR-007", "FR-009", "FR-018", "FR-019"]
+  "fr_ids": ["FR-001", "FR-003", "FR-007", "FR-009", "FR-011", "FR-018", "FR-019"]
 }

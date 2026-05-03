@@ -238,6 +238,7 @@ def evaluate(
             422,
             {
                 "error": "metric_inputs_invalid",
+                "error_code": "validation_error",
                 "sc_id": sc_id,
                 "required_field": required_field,
                 "suggested_action": (f"metric_inputs.{required_field} is required for {sc_id}"),
