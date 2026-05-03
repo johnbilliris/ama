@@ -191,8 +191,16 @@ export default class CoverageReporter implements Reporter {
       ?? resolve(__dirname, "..", "..", "..", "..", "..");
   }
 
-  onBegin(_config: FullConfig, _suite: Suite): void {
+  onBegin(config: FullConfig, _suite: Suite): void {
     mkdirSync(this.outputDir, { recursive: true });
+
+    // Pull the shard index from Playwright's FullConfig — this is the
+    // canonical source when the suite was launched with `--shard=N/M`.
+    // The constructor's process.env fallbacks remain for local one-shard
+    // runs and for tests that instantiate the reporter directly.
+    if (config.shard && typeof config.shard.current === "number") {
+      this.shardId = String(config.shard.current);
+    }
 
     // Cycle metadata is shard-invariant — only shard 1 writes it so
     // parallel shards don't race on the same path. Other shards still

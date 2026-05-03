@@ -25,10 +25,16 @@ type PersonaFixtures = {
 const cache = new Map<string, PersonaFixture>();
 
 export const personaResolver = baseTest.extend<{ resolvePersona: (id: string) => Promise<PersonaFixture> }>({
-  resolvePersona: async ({ request }, use) => {
+  resolvePersona: async ({ request }, use, testInfo) => {
+    let lastSeen: PersonaFixture | null = null;
     await use(async (id: string) => {
       const cached = cache.get(id);
       if (cached) {
+        lastSeen = cached;
+        await testInfo.attach("aiims-function", {
+          body: cached.aiims_function,
+          contentType: "text/plain",
+        });
         return cached;
       }
       const res = await request.get(`/api/test-support/personas/${encodeURIComponent(id)}`, {
@@ -42,8 +48,18 @@ export const personaResolver = baseTest.extend<{ resolvePersona: (id: string) =>
       }
       const persona = (await res.json()) as PersonaFixture;
       cache.set(id, persona);
+      lastSeen = persona;
+      // Surface the persona's AIIMS function to the coverage reporter via a
+      // Playwright attachment. The reporter reads this on each onTestEnd to
+      // tag every emitted CoverageTraceRow with the right aiims_function
+      // (FR-018 cross-jurisdiction gate + FR-007 RBAC counts depend on it).
+      await testInfo.attach("aiims-function", {
+        body: persona.aiims_function,
+        contentType: "text/plain",
+      });
       return persona;
     });
+    void lastSeen;
   },
 });
 
