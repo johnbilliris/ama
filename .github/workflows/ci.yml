@@ -142,7 +142,7 @@ jobs:
       - name: Install API package
         run: python -m pip install -e apps/api
       - name: Install Playwright Chromium
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm --filter @ama/web exec playwright install --with-deps chromium
       - name: Seed database
         shell: pwsh
         run: ./scripts/seed-database.ps1
