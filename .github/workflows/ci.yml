@@ -118,12 +118,16 @@ jobs:
         shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
-        with:
-          node-version: "24"
+      # pnpm must be installed BEFORE setup-node, because setup-node@v5 reads
+      # `packageManager` from package.json and pre-warms its pnpm cache; if
+      # pnpm is not on PATH yet, setup-node fails with "Unable to locate
+      # executable file: pnpm". Same ordering as the `quality` job above.
       - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
         with:
           version: 10.6.3
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "24"
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
