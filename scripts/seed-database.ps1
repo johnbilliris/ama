@@ -11,14 +11,21 @@ Write-Host ""
 
 # ── Load azd environment variables ──
 
-Write-Host "Loading azd environment variables..."
-$envValues = azd env get-values 2>$null
-if ($envValues) {
-    foreach ($line in $envValues -split "`n") {
-        if ($line -match '^([^=]+)="?([^"]*)"?$') {
-            [System.Environment]::SetEnvironmentVariable($Matches[1], $Matches[2])
+# In CI / non-azd contexts (e.g. web-coverage-shard) `azd` is not on PATH.
+# Tolerate that and let downstream env-var fallbacks kick in (seed_loader.py
+# falls through to a dry-run when no Cosmos/Storage endpoints are provided).
+if (Get-Command azd -ErrorAction SilentlyContinue) {
+    Write-Host "Loading azd environment variables..."
+    $envValues = azd env get-values 2>$null
+    if ($envValues) {
+        foreach ($line in $envValues -split "`n") {
+            if ($line -match '^([^=]+)="?([^"]*)"?$') {
+                [System.Environment]::SetEnvironmentVariable($Matches[1], $Matches[2])
+            }
         }
     }
+} else {
+    Write-Host "azd not found on PATH — skipping azd env load (dry-run mode)"
 }
 
 $cosmosEndpoint   = $env:AZURE_COSMOS_ENDPOINT
