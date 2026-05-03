@@ -232,13 +232,14 @@ jobs:
           name: web-coverage-canonical
           path: specs/034-webapp-capstone-coverage/
       - name: Schema-validate trace rows + gate thresholds (FR-018, FR-019, FR-023(e))
-        run: python scripts/web-coverage/_lib/schema_validators.py gate \
-          --trace specs/034-webapp-capstone-coverage/coverage-trace.json \
-          --gap-register specs/034-webapp-capstone-coverage/gap-register.md \
-          --personas-min 68 \
-          --cross-jurisdiction-min 8 \
-          --commonwealth-bridge-min 1 \
-          --capstone-outcomes-min 5
+        run: |
+          python scripts/web-coverage/_lib/schema_validators.py gate \
+            --trace specs/034-webapp-capstone-coverage/coverage-trace.json \
+            --gap-register specs/034-webapp-capstone-coverage/gap-register.md \
+            --personas-min 68 \
+            --cross-jurisdiction-min 8 \
+            --commonwealth-bridge-min 1 \
+            --capstone-outcomes-min 5
       # T177 (cycle-1): binary 68/68 depth-profile gate. Asserts every persona
       # in identities_australia.json has a schema-valid YAML alongside the
       # suite. Fails the `web-coverage / depth-profile-binary` status check on
