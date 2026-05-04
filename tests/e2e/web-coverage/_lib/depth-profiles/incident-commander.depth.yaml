@@ -1,0 +1,15 @@
+persona_id: incident-commander
+workspace_route: /workspaces/incident-commander
+safety_critical_workflow: approve
+workflow_steps:
+- action: click approve button on warning draft
+  target_selector: getByRole:button:Approve
+  expected_response_status: 200
+- action: PATCH /api/warnings/{id} approve transition
+  target_selector: PATCH:/api/warnings/{id}
+  expected_response_status: 200
+assertion_targets:
+  evaluator_endpoint: sc-001
+  audit_correlation_id_source: header
+capstone_outcome: 1
+hazard: bushfire

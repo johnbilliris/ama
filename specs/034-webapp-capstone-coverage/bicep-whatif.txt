@@ -1,0 +1,51 @@
+spec 034 — Bicep what-if validation log (T013)
+=================================================
+
+Date          : 2026-05-02
+Branch        : 034-webapp-capstone-coverage
+Bicep version : Azure CLI bicep build (v0.42.x compatible) — see CI for exact version
+Template      : infra/bicep/main.bicep
+
+Local validation
+----------------
+- `az bicep build --file infra/bicep/main.bicep` → SUCCESS (no errors, only the
+  upgrade-available informational notice).
+
+what-if status
+--------------
+SKIPPED — no Azure tenant context is available to the implementation agent.
+The branch's CI pipeline (.github/workflows/ci.yml) executes
+`az deployment group what-if` against a sandbox subscription on every PR push;
+the gating job will surface any drift before merge.
+
+Net-new resources delivered in this template (compared to commit e028bf7)
+-------------------------------------------------------------------------
+1. `Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01`
+   • Name : `${storage.name}/default/web-coverage-evidence`
+   • Public access: None
+   • Metadata    : spec=034-webapp-capstone-coverage, retention=long-term-evidence,
+                   classification=OFFICIAL.
+
+2. `Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies@2023-05-01`
+   • Parent : web-coverage-evidence container
+   • Period : 30 days, allowProtectedAppendWrites=true (matches existing audit
+              container policy; supports FR-006 trace replay determinism).
+
+3. `Microsoft.Authorization/roleAssignments@2022-04-01`
+   • Scope        : web-coverage-evidence container
+   • Role         : Storage Blob Data Contributor
+                    (ba92f5b4-2d11-453d-a403-e96b0029c9fe)
+   • PrincipalId  : apiContainerApp.identity.principalId
+   • PrincipalType: ServicePrincipal
+
+NO other Azure resources are introduced (no APIM, ACR, Front Door, Service Bus,
+Key Vault, Log Analytics or Application Insights additions). Cosmos / Redis /
+Storage / Container Apps / OpenAI definitions are untouched, preserving the
+existing landing-zone footprint and meeting plan §Bicep delta scope.
+
+Validation gates run by CI when this branch reaches PR
+------------------------------------------------------
+- `az bicep build` (linted + ARM emission)
+- `az deployment group what-if` against the sandbox RG
+- ps-rule baseline (ps-rule.yaml)
+- web-coverage-gate (added by T153) — fails when this template fails to compile

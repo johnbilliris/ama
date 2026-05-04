@@ -1,0 +1,17 @@
+persona_id: ses-act
+workspace_route: /workspaces/ses-act
+safety_critical_workflow: publish
+workflow_steps:
+- action: submit AWS warning draft
+  target_selector: getByRole:button:Publish
+  expected_response_status: 201
+- action: POST /api/warnings publish
+  target_selector: POST:/api/warnings
+  expected_response_status: 201
+assertion_targets:
+  evaluator_endpoint: sc-003
+  audit_correlation_id_source: header
+capstone_outcome: 3
+hazard: tropical-cyclone
+coverage_tags:
+- territory-government

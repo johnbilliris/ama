@@ -33,6 +33,7 @@ services:
     docker:
       path: ./Dockerfile
       context: ../..
+      remoteBuild: true
 
   agents:
     project: ./apps/agents
@@ -41,6 +42,7 @@ services:
     docker:
       path: ./Dockerfile
       context: ../..
+      remoteBuild: true
 
   ingestion:
     project: ./apps/ingestion
@@ -49,6 +51,7 @@ services:
     docker:
       path: ./Dockerfile
       context: ../..
+      remoteBuild: true
 
   web:
     project: ./apps/web

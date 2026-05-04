@@ -1,0 +1,17 @@
+persona_id: public-information-officer
+workspace_route: /workspaces/public-information-officer
+safety_critical_workflow: publish
+workflow_steps:
+- action: submit AWS warning draft
+  target_selector: getByRole:button:Publish
+  expected_response_status: 201
+- action: POST /api/warnings publish
+  target_selector: POST:/api/warnings
+  expected_response_status: 201
+assertion_targets:
+  evaluator_endpoint: sc-001
+  audit_correlation_id_source: header
+capstone_outcome: 1
+hazard: bushfire
+coverage_tags:
+- abc-sbs

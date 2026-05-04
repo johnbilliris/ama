@@ -1,0 +1,15 @@
+persona_id: executive-leader
+workspace_route: /workspaces/executive-leader
+safety_critical_workflow: export-evidence
+workflow_steps:
+- action: export evidence pack as signed bundle
+  target_selector: getByRole:button:Export
+  expected_response_status: 200
+- action: GET /api/governance/evidence/export
+  target_selector: GET:/api/governance/evidence/export
+  expected_response_status: 200
+assertion_targets:
+  evaluator_endpoint: sc-005
+  audit_correlation_id_source: header
+capstone_outcome: 5
+hazard: riverine-flood

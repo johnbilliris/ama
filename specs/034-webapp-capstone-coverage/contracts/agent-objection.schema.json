@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.local/contracts/spec-034/agent-objection.schema.json",
+  "title": "AgentObjection",
+  "description": "Structured objection emitted by an agent during the nightly tribunal. Sourced from .github/agents/{panel}/{agent_id}.agent.md front-matter or a sibling .objection.json file. Consumed by scripts/web-coverage/review-log.py to produce ReviewVote records.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agent_id",
+    "panel",
+    "cycle",
+    "touched_personas",
+    "touched_frs",
+    "touched_clauses",
+    "rationale",
+    "evidence",
+    "proposed_remediation"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+    },
+    "panel": {
+      "type": "string",
+      "enum": ["operational", "sector", "technical"]
+    },
+    "cycle": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4
+    },
+    "gap_id": {
+      "type": "string",
+      "pattern": "^GAP-[A-Z0-9][A-Z0-9-]*[A-Z0-9]$",
+      "description": "Optional: omit for blanket objections that apply across multiple gaps."
+    },
+    "touched_personas": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$" }
+    },
+    "touched_frs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^FR-\\d{3}[a-z]?$" }
+    },
+    "touched_clauses": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "I", "II", "II-A", "III", "IV",
+          "V", "V-A", "V-B", "V-C",
+          "VI", "VII", "VIII",
+          "NN-1", "NN-2", "NN-3", "NN-4", "NN-5",
+          "QG-1", "QG-2", "QG-3"
+        ]
+      }
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "pointer"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["test-failure", "trace-row", "audit-event", "spec-ref", "external-reference"]
+          },
+          "pointer": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Path:line, audit_id, spec FR-NNN, or canonical URL."
+          }
+        }
+      }
+    },
+    "proposed_remediation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "description": "Concrete proposed fix; required for any non-approve objection."
+    }
+  }
+}

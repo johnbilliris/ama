@@ -1,0 +1,35 @@
+{
+  "$schema": "internal://outcome-fixture",
+  "outcome": 2,
+  "name": "Concurrent Bushfire & Severe Storm",
+  "fixture_version": "1.0.0",
+  "primary_hazards": ["bushfire", "severe-storm"],
+  "scenario_seed": "outcome-2-bushfire-severe-storm",
+  "audit_correlation_template": "wc-o2-{persona_id}-{run_id}",
+  "expected_routes": ["/incidents", "/disasters", "/operations/workflows", "/preparedness"],
+  "expected_audit_types": [
+    "incident.created",
+    "warning.issued",
+    "wind-shift.detected",
+    "evac.stage-2-stand-by",
+    "task.assigned",
+    "lessons.captured"
+  ],
+  "expected_warnings": [
+    {
+      "type": "bushfire",
+      "level": "emergency-warning",
+      "languages": ["en", "vi", "el"],
+      "issuer_aiims_function": "public-information"
+    },
+    {
+      "type": "severe-storm",
+      "level": "watch-and-act",
+      "languages": ["en"],
+      "issuer_aiims_function": "public-information"
+    }
+  ],
+  "evac_stage_progression": ["prepare", "stand-by", "evacuate-now", "shelter", "all-clear"],
+  "constitution_clauses": ["I", "II", "II-A", "IV", "V", "V-A", "V-B", "NN-1", "NN-3"],
+  "fr_ids": ["FR-003", "FR-007", "FR-008", "FR-009", "FR-018", "FR-019", "FR-024"]
+}

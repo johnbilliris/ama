@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.local/contracts/spec-034/coverage-trace-row.schema.json",
+  "title": "CoverageTraceRow",
+  "description": "One row of the FR-004 coverage-trace.json artefact for spec 034. Every row pins one (persona × outcome × hazard × FR) tuple to one or more passing Playwright test IDs and an audit evidence reference.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "persona_id",
+    "aiims_function",
+    "outcome",
+    "hazard",
+    "fr_id",
+    "constitution_clauses",
+    "test_ids",
+    "route",
+    "audit_evidence_id",
+    "correlation_id",
+    "status",
+    "duration_ms",
+    "emitted_at"
+  ],
+  "properties": {
+    "persona_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "description": "Stable persona identifier sourced from bootstrap_seed_data().identities."
+    },
+    "aiims_function": {
+      "type": "string",
+      "enum": ["control", "operations", "planning", "logistics", "public-information"]
+    },
+    "outcome": {
+      "type": "integer",
+      "enum": [1, 2, 3, 4, 5]
+    },
+    "hazard": {
+      "type": "string",
+      "pattern": "^[a-z][a-z-]*(\\+[a-z][a-z-]*)?$",
+      "description": "Hazard or alphabetically-sorted hazard pair, e.g. 'bushfire' or 'bushfire+extreme-heat'."
+    },
+    "fr_id": {
+      "type": "string",
+      "pattern": "^FR-\\d{3}[a-z]?$"
+    },
+    "constitution_clauses": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "I", "II", "II-A", "III", "IV",
+          "V", "V-A", "V-B", "V-C",
+          "VI", "VII", "VIII",
+          "NN-1", "NN-2", "NN-3", "NN-4", "NN-5",
+          "QG-1", "QG-2", "QG-3"
+        ]
+      }
+    },
+    "test_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "route": {
+      "type": "string",
+      "pattern": "^/[A-Za-z0-9/_-]*$"
+    },
+    "audit_evidence_id": {
+      "oneOf": [
+        { "type": "string", "format": "uuid" },
+        { "type": "null" }
+      ],
+      "description": "UUIDv4 of the audit record observed within ≤ 2s of the state-changing action; null only for read-only assertions."
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["passed", "failing", "flake-known", "skipped"]
+    },
+    "duration_ms": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "emitted_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

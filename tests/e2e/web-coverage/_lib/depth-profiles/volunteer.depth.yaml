@@ -1,0 +1,17 @@
+persona_id: volunteer
+workspace_route: /workspaces/volunteer
+safety_critical_workflow: handover
+workflow_steps:
+- action: initiate cross-jurisdiction handover
+  target_selector: getByRole:button:Handover
+  expected_response_status: 200
+- action: POST /api/handoffs
+  target_selector: POST:/api/handoffs
+  expected_response_status: 200
+assertion_targets:
+  evaluator_endpoint: sc-001
+  audit_correlation_id_source: header
+capstone_outcome: 1
+hazard: bushfire
+coverage_tags:
+- cross-sector

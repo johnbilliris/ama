@@ -1,0 +1,232 @@
+# Web Coverage Test Suite (spec 034)
+
+> Playwright-driven capstone coverage tribunal for AMA. Proves the 5 capstone
+> outcomes are exercised across all 68 personas, emits a deterministic trace
+> + gap register, and gates merges to `main`.
+
+## Layout
+
+```
+tests/e2e/web-coverage/
+├── _support/              # fixtures, page objects, validators, types, reporter
+│   ├── webCoverageTest.ts # merged test surface (persona + scenario + correlation + audit)
+│   ├── fixtures/          # 4 baseTest.extend(...) modules + 5 outcome JSON fixtures
+│   ├── pages/             # 9 page objects
+│   ├── validators/        # outcome-proxy, aws-cap, pspf
+│   ├── a11y/              # axeBuilder, languagePackProbe
+│   ├── reporter/          # custom Playwright reporter -> coverage-trace.partial-N.json
+│   └── types/             # TypeScript contracts (CoverageTraceRow, GapRegisterEntry, …)
+├── cross-cutting/         # 15 specs covering rbac/cop/audit/aws/evac/recovery/…
+├── operational/           # 10 specs (T069–T078) — the AIIMS function leads
+├── sectors/
+│   ├── nsw/   vic/   qld/   sa/   wa/   tas/   act/   nt/    # state/territory specs
+│   ├── commonwealth/                                          # Cwlth bridge specs
+│   ├── cross-sector/                                          # NGO + utilities + ADF
+│   └── …                                                      # 9 *.cross-jurisdiction.* specs
+├── capstone/              # 5 SC-001..SC-005 outcome closure specs (T146–T150)
+└── README.md              # ← you are here
+```
+
+Generator: `scripts/web-coverage/_lib/persona_spec_generator.py` is the
+**single source of truth** for the 77 persona specs. Edit the inline `Spec`
+list there, re-run `python scripts/web-coverage/_lib/persona_spec_generator.py`,
+and commit the regenerated `.spec.ts` files alongside the change.
+
+## Tag taxonomy (R-017)
+
+Every persona / capstone spec MUST emit the following tags via the test
+title so the custom reporter can derive coverage trace rows:
+
+| Tag           | Form                            | Notes                                                                  |
+| ------------- | ------------------------------- | ---------------------------------------------------------------------- |
+| `@persona:`   | `@persona:incident-commander`   | Must match a `persona_id` in `identities_australia.json`.              |
+| `@outcome:`   | `@outcome:1` … `@outcome:5`     | One of the 5 capstone outcomes (FR-018).                               |
+| `@hazard:`    | `@hazard:bushfire+severe-storm` | Lower-kebab; concurrent hazards joined with `+` (FR-026).              |
+| `@fr:`        | `@fr:FR-008` (multi allowed)    | Must reference an FR in spec.md.                                       |
+| `@clause:`    | `@clause:I` `@clause:NN-1`      | Must reference a Constitution clause; multi allowed.                   |
+| `@p1`         | _bareword_                      | The CI smoke filter (`--grep "@p1"`) selects these for fast feedback.  |
+
+Specs that intentionally fail because an API surface is not yet wired use
+`test.fail(true, "<reason>")` so the reporter still emits a row and the
+gap-register CLI can capture the GAP automatically.
+
+## Persona-id → spec map (68 personas)
+
+The 10 operational personas are exercised once each in `operational/`:
+
+| File                                                                   | Persona id            |
+| ---------------------------------------------------------------------- | --------------------- |
+| `incident-commander.bushfire-extreme-heat.spec.ts`                     | `incident-commander`  |
+| `executive-leader.economic-environment-view.spec.ts`                   | `executive-leader`    |
+| `operations-officer.bushfire-severe-storm.spec.ts`                     | `operations-officer`  |
+| `planning-officer.tropical-cyclone-flood.spec.ts`                      | `planning-officer`    |
+| `logistics-officer.bushfire-cyclone-logistics.spec.ts`                 | `logistics-officer`   |
+| `public-information-officer.flood-storm-economic.spec.ts`              | `public-information-officer` |
+| `field-coordinator.offline-gps-hazard-report.spec.ts`                  | `field-coordinator`   |
+| `resilience-planner.recovery-environments.spec.ts`                     | `resilience-planner`  |
+| `risk-manager.span-of-control-tier-2.spec.ts`                          | `risk-manager`        |
+| `observer-auditor.audit-trail-readonly.spec.ts`                        | `observer-auditor`    |
+
+The 58 sector personas are exercised across `sectors/{nsw|vic|qld|sa|wa|tas|act|nt|commonwealth|cross-sector}/`. The 9 cross-jurisdiction handover specs (`*.cross-jurisdiction.*`) double up — naming a primary + secondary persona — to satisfy FR-018's ≥ 8 cross-jurisdiction requirement.
+
+To regenerate the map:
+
+```pwsh
+python scripts/web-coverage/_lib/persona_spec_generator.py
+```
+
+## Hazard-pair fixture index
+
+The five outcome fixtures under `_support/fixtures/data/` define each
+outcome's canonical hazard pair:
+
+| Fixture                                          | Outcome | Hazard                            | SC      |
+| ------------------------------------------------ | ------: | --------------------------------- | ------- |
+| `outcome-1-bushfire-extreme-heat.fixture.json`   | 1       | `bushfire+extreme-heat`           | SC-001  |
+| `outcome-2-bushfire-severe-storm.fixture.json`   | 2       | `bushfire+severe-storm`           | SC-002  |
+| `outcome-3-tropical-cyclone-flood.fixture.json`  | 3       | `tropical-cyclone+riverine-flood` | SC-003  |
+| `outcome-4-bushfire-cyclone-logistics.fixture.json` | 4    | `bushfire+tropical-cyclone`       | SC-004  |
+| `outcome-5-flood-storm-economic.fixture.json`    | 5       | `riverine-flood+severe-storm`     | SC-005  |
+
+Specs that need a different hazard for persona-coverage purposes (e.g.,
+WA-cyclone, NT-bushfires) ship their own scenario seed via
+`POST /api/test-support/seed/scenario`.
+
+## ESLint determinism rules
+
+`eslint.config.*` ships a custom rule that bans `page.waitForTimeout()` in
+this directory tree (FR-006 determinism). Use `expect.poll()` or web-first
+locator assertions instead.
+
+## Local run snippets
+
+| Goal                              | Command                                                                                              |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `@p1` smoke (≈ 90s)               | `pnpm --filter @ama/web exec playwright test --project=web-coverage-chromium --grep "@p1"`           |
+| Full Chromium suite               | `pnpm --filter @ama/web exec playwright test --project=web-coverage-chromium`                        |
+| Mobile / axe-only sweeps          | `pnpm --filter @ama/web test:web-coverage:mobile` / `:axe`                                           |
+| Determinism check (3× back-to-back) | `pwsh scripts/web-coverage/verify-trace-determinism.ps1`                                           |
+| Merge shards into canonical trace | `python scripts/web-coverage/trace-merge.py --inputs … --out-md … --out-json …`                      |
+| Open / promote / close a gap      | `python scripts/web-coverage/gap-register.py {open\|promote\|close\|regress\|escalate} …`            |
+| Refresh known-good after deploy   | `python scripts/web-coverage/known-good.py update --commit … --revisions-json … --trace …`           |
+
+See `specs/034-webapp-capstone-coverage/quickstart.md` for the full ≤ 30 min
+cold-start walkthrough.
+
+## Cycle-1 contract index
+
+The cycle-1 amendment introduced three Phase-1 contracts under
+`specs/034-webapp-capstone-coverage/contracts/` plus the depth-profile
+schema co-located with this suite. Each is the binding reference for its
+section of the FR-028 / FR-029 wiring:
+
+| Contract                                                                 | Path                                                                          | Read for…                                                                                       |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `outcome-evaluator.contract.md` *(Accepted, cycle-1)*                    | `../../specs/034-webapp-capstone-coverage/contracts/outcome-evaluator.contract.md` | `POST /api/outcomes/sc-{001..005}/evaluate` request/response shape, idempotency tuple, error contract (HTTP 400 `evaluator_not_routable` for `sc-006..sc-011`), `GET /api/audit/list` cycle filter. |
+| `cycle-metadata.schema.json`                                              | `../../specs/034-webapp-capstone-coverage/contracts/cycle-metadata.schema.json`     | JSON-Schema (draft 2020-12) for `_artifacts/cycle-metadata.json` — `cycle_start_ts`, `cycle_id` (UUID v4), `commit_sha` (40-hex), `seed_hash` (SHA-256). Written by the reporter `onBegin`. |
+| `_lib/depth-profiles/_schema.json` *(draft-07, intentionally distinct)* | `_lib/depth-profiles/_schema.json`                                             | One YAML per persona; `safety_critical_workflow` enum closed to 12 values (9 write + 3 read-only). Missing or invalid → `GAP-DEPTH-PROFILE-MISSING-{persona-id}`. |
+| `persona-fixture.contract.md`                                            | `../../specs/034-webapp-capstone-coverage/contracts/persona-fixture.contract.md`    | Dual-guard activation rule (`AMA_TEST_SUPPORT == "1"` AND `environment in {"dev","test"}`) — reused verbatim by the evaluator + audit-list routers. |
+
+## Authoring a depth-profile YAML
+
+Every persona-driven spec under `operational/` and `sectors/` is rendered
+from a deterministic depth-profile YAML at
+`tests/e2e/web-coverage/_lib/depth-profiles/{persona-id}.depth.yaml`.
+The 68 profiles together drive the Playwright spec generator
+(`scripts/web-coverage/_lib/persona_spec_generator.py`) and lock the
+FR-029 audit-emission contract (one safety-critical transition per
+persona, each tied to an evaluator endpoint).
+
+### File location
+
+| Asset                         | Path                                                            |
+| ----------------------------- | --------------------------------------------------------------- |
+| Per-persona profile           | `_lib/depth-profiles/{persona-id}.depth.yaml`                   |
+| draft-07 schema               | `_lib/depth-profiles/_schema.json`                              |
+| Validator helper              | `scripts/web-coverage/_lib/schema_validators.py depth-profiles` |
+| Generator entrypoint          | `python scripts/web-coverage/_lib/persona_spec_generator.py`    |
+
+### Required keys
+
+```yaml
+persona_id: sapol                 # MUST match the seed registry persona_id
+workspace_route: /workspaces/sapol
+safety_critical_workflow: declare # one of the 12-value enum below
+workflow_steps:                   # ≥1 deterministic UI/API transition
+  - action: open declaration dialog and confirm
+    target_selector: getByRole:button:Declare
+    expected_response_status: 201
+  - action: POST /api/declarations
+    target_selector: POST:/api/declarations
+    expected_response_status: 201
+assertion_targets:
+  evaluator_endpoint: sc-002      # one of sc-001..sc-005 (routable subset)
+  audit_correlation_id_source: header
+capstone_outcome: 2               # 1..5 — links to outcome-N-*.spec.ts
+hazard: bushfire                  # short hazard label (no '+')
+coverage_tags:                    # multi-jurisdiction tags per Q23
+  - state-government
+```
+
+### `safety_critical_workflow` enum (12 values)
+
+The enum is closed: 9 write-side transitions per Q15 + 3 read-only per
+Q24. Any value outside this set is rejected by the schema validator.
+
+| Write (Q15)                                                        | Read-only (Q24)               |
+| ------------------------------------------------------------------ | ----------------------------- |
+| `declare`, `dispatch`, `escalate`, `handover`, `publish`           | `view-classified`             |
+| `allocate`, `approve`, `acknowledge`, `revoke`                     | `view-recovery-environments`  |
+|                                                                    | `view-cross-jurisdiction-feed`|
+
+### Multi-jurisdiction `coverage_tags[]` rule (Q23)
+
+Per the cycle-1 placement decision, **the folder identifies the owning
+persona's jurisdiction** (e.g. `sectors/sa/sapol.*.spec.ts` is
+SA-government-owned) and `coverage_tags[]` carries any *additional*
+governance facets (`state-government`, `territory-government`, ATSI,
+sector). Specs that span jurisdictions DO NOT move folders — they add
+the cross-jurisdiction tag. Example: `sectors/commonwealth/nema.*` adds
+`state-government` and `territory-government` tags rather than
+relocating to a cross-sector folder.
+
+### Failure mode — missing or invalid profile
+
+The generator and validator fail-fast:
+
+- **Missing file**: `GAP-DEPTH-PROFILE-MISSING-{persona-id}` is the
+  canonical gap-register row. Open via
+  `python scripts/web-coverage/gap-register.py open --gap-id … --personas {persona-id} --frs FR-029 …`.
+- **Schema violation**: the validator emits the failing path + reason;
+  fix the YAML before regenerating specs.
+
+Re-validate the entire family in CI:
+
+```pwsh
+python scripts/web-coverage/_lib/schema_validators.py depth-profiles --expected 68
+```
+
+### Evaluator binding
+
+Each profile binds to exactly one of the FR-028 routable evaluator
+endpoints (`sc-001..sc-005`). The persona-fixture contract (see
+`contracts/persona-fixture.contract.md`) hands the `persona_id` and
+`correlation_id` to the spec body, which then POSTs to
+`/api/outcomes/{evaluator_endpoint}/evaluate` with the canned
+`metric_inputs` — see `contracts/outcome-evaluator.contract.md` for the
+request/response shape and the
+`(sc_id, scenario_id, persona_id, correlation_id)` idempotency tuple.
+
+### Regenerating specs
+
+After editing one or more depth profiles, regenerate the operational +
+sectors spec families:
+
+```pwsh
+python scripts/web-coverage/_lib/persona_spec_generator.py --rewrite-stubs
+```
+
+The generator is byte-deterministic — repeated runs against the same
+profile inputs MUST produce identical output (verified by
+`scripts/web-coverage/verify-trace-determinism.ps1`).
+

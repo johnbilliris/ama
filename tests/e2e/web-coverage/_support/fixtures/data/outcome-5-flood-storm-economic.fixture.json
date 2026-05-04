@@ -1,0 +1,38 @@
+{
+  "$schema": "internal://outcome-fixture",
+  "outcome": 5,
+  "name": "Flood + Severe Storm with Economic Recovery Cascade",
+  "fixture_version": "1.0.0",
+  "primary_hazards": ["riverine-flood", "severe-storm"],
+  "scenario_seed": "outcome-5-flood-storm-economic",
+  "audit_correlation_template": "wc-o5-{persona_id}-{run_id}",
+  "expected_routes": ["/incidents", "/disasters", "/preparedness", "/governance/dashboard", "/eval"],
+  "expected_audit_types": [
+    "incident.created",
+    "warning.issued",
+    "recovery.environment-social-tasked",
+    "recovery.environment-economic-tasked",
+    "recovery.environment-built-tasked",
+    "recovery.environment-natural-tasked",
+    "lessons.captured",
+    "evaluation.report-issued"
+  ],
+  "expected_warnings": [
+    {
+      "type": "riverine-flood",
+      "level": "watch-and-act",
+      "languages": ["en", "zh-Hans"],
+      "issuer_aiims_function": "public-information"
+    },
+    {
+      "type": "severe-storm",
+      "level": "advice",
+      "languages": ["en"],
+      "issuer_aiims_function": "public-information"
+    }
+  ],
+  "evac_stage_progression": ["prepare", "stand-by", "evacuate-now", "shelter", "all-clear"],
+  "recovery_environments": ["social", "economic", "built", "natural"],
+  "constitution_clauses": ["I", "II", "II-A", "IV", "V", "V-A", "V-B", "V-C", "VI", "VII", "NN-1", "NN-3", "NN-4", "NN-5", "QG-1", "QG-2", "QG-3"],
+  "fr_ids": ["FR-003", "FR-009", "FR-013", "FR-016", "FR-018", "FR-019", "FR-022", "FR-023", "FR-024"]
+}

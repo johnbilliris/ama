@@ -1,0 +1,33 @@
+{
+  "$schema": "internal://outcome-fixture",
+  "outcome": 1,
+  "name": "Concurrent Bushfire & Extreme Heat",
+  "fixture_version": "1.0.0",
+  "primary_hazards": ["bushfire", "extreme-heat"],
+  "scenario_seed": "outcome-1-bushfire-extreme-heat",
+  "audit_correlation_template": "wc-o1-{persona_id}-{run_id}",
+  "expected_routes": ["/incidents", "/disasters", "/operations/workflows"],
+  "expected_audit_types": [
+    "incident.created",
+    "warning.issued",
+    "evac.stage-1-prepare",
+    "task.assigned"
+  ],
+  "expected_warnings": [
+    {
+      "type": "bushfire",
+      "level": "watch-and-act",
+      "languages": ["en", "zh-Hans", "ar"],
+      "issuer_aiims_function": "public-information"
+    },
+    {
+      "type": "extreme-heat",
+      "level": "advice",
+      "languages": ["en"],
+      "issuer_aiims_function": "public-information"
+    }
+  ],
+  "evac_stage_progression": ["prepare", "stand-by", "evacuate-now", "shelter", "all-clear"],
+  "constitution_clauses": ["I", "II", "II-A", "IV", "V", "V-A", "NN-1", "NN-2"],
+  "fr_ids": ["FR-001", "FR-003", "FR-007", "FR-009", "FR-011", "FR-018", "FR-019"]
+}

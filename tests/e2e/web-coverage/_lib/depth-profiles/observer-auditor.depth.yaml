@@ -1,0 +1,15 @@
+persona_id: observer-auditor
+workspace_route: /workspaces/observer-auditor
+safety_critical_workflow: observe-tamper-resist
+workflow_steps:
+- action: attempt edit on append-only audit row (must reject)
+  target_selector: PATCH:/api/audit/{id}
+  expected_response_status: 403
+- action: read back audit timeline showing tamper-attempt row
+  target_selector: GET:/api/audit/list
+  expected_response_status: 200
+assertion_targets:
+  evaluator_endpoint: sc-004
+  audit_correlation_id_source: header
+capstone_outcome: 4
+hazard: bushfire
