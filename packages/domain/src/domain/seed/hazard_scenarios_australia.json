@@ -1,0 +1,317 @@
+[
+  {
+    "scenario_id": "outcome-1-bushfire-extreme-heat",
+    "outcome": 1,
+    "name": "Concurrent Bushfire & Extreme Heat",
+    "hazards": [
+      "bushfire",
+      "extreme-heat"
+    ],
+    "primary_jurisdiction": "nsw",
+    "secondary_jurisdictions": [
+      "vic",
+      "act"
+    ],
+    "season": "summer",
+    "trigger_event": "Multiple bushfires under code-red conditions with heatwave overlay; concurrent mass-casualty heat-stress activations.",
+    "constitution_clauses": [
+      "I",
+      "II",
+      "II-A",
+      "IV",
+      "V",
+      "V-A",
+      "NN-1",
+      "NN-2"
+    ],
+    "applicable_personas": [
+      "incident-commander",
+      "operations-officer",
+      "planning-officer",
+      "logistics-officer",
+      "public-information-officer",
+      "field-coordinator",
+      "nsw-rfs",
+      "ses-nsw",
+      "nsw-ambulance",
+      "nswpf",
+      "frnsw",
+      "cfa-vic",
+      "av",
+      "act-rfs",
+      "act-ambulance",
+      "bom-national",
+      "nema",
+      "adf",
+      "arc",
+      "rfds",
+      "health",
+      "transport",
+      "utility"
+    ],
+    "baseline": {
+      "lives_at_risk": 2000,
+      "signal_to_action_ms": 10000,
+      "evac_lead_hours": 0,
+      "logistics_clicks": 12,
+      "economic_loss_aud": 1500000000
+    }
+  },
+  {
+    "scenario_id": "outcome-2-bushfire-severe-storm",
+    "outcome": 2,
+    "name": "Concurrent Bushfire & Severe Storm",
+    "hazards": [
+      "bushfire",
+      "severe-storm"
+    ],
+    "primary_jurisdiction": "vic",
+    "secondary_jurisdictions": [
+      "nsw",
+      "tas"
+    ],
+    "season": "spring-summer",
+    "trigger_event": "Active bushfire perimeter overrun by severe storm front producing wind shifts, lightning ignitions, and flash flooding in burn scar.",
+    "constitution_clauses": [
+      "I",
+      "II",
+      "II-A",
+      "IV",
+      "V",
+      "V-A",
+      "V-B",
+      "NN-1",
+      "NN-3"
+    ],
+    "applicable_personas": [
+      "incident-commander",
+      "operations-officer",
+      "planning-officer",
+      "logistics-officer",
+      "public-information-officer",
+      "field-coordinator",
+      "cfa-vic",
+      "ses-vic",
+      "av",
+      "vicpol",
+      "frv",
+      "nsw-rfs",
+      "ses-nsw",
+      "tfs",
+      "ses-tas",
+      "bom-national",
+      "nema",
+      "adf",
+      "transport",
+      "utility"
+    ],
+    "baseline": {
+      "lives_at_risk": 1500,
+      "signal_to_action_ms": 10000,
+      "evac_lead_hours": 0,
+      "logistics_clicks": 12,
+      "economic_loss_aud": 1200000000
+    }
+  },
+  {
+    "scenario_id": "outcome-3-tropical-cyclone-flood",
+    "outcome": 3,
+    "name": "Tropical Cyclone & Riverine Flood",
+    "hazards": [
+      "tropical-cyclone",
+      "riverine-flood"
+    ],
+    "primary_jurisdiction": "qld",
+    "secondary_jurisdictions": [
+      "nsw",
+      "nt"
+    ],
+    "season": "wet-season",
+    "trigger_event": "Severe tropical cyclone landfall with category-3+ winds and storm surge cascading into riverine flooding across multiple catchments.",
+    "constitution_clauses": [
+      "I",
+      "II",
+      "II-A",
+      "III",
+      "IV",
+      "V",
+      "V-A",
+      "V-B",
+      "V-C",
+      "NN-1",
+      "NN-2",
+      "NN-3",
+      "NN-4"
+    ],
+    "applicable_personas": [
+      "incident-commander",
+      "operations-officer",
+      "planning-officer",
+      "logistics-officer",
+      "public-information-officer",
+      "field-coordinator",
+      "qfd",
+      "ses-qld",
+      "qas",
+      "qps",
+      "nsw-rfs",
+      "ses-nsw",
+      "ntes",
+      "ntpf",
+      "bom-national",
+      "ga-national",
+      "nema",
+      "adf",
+      "abf",
+      "arc",
+      "rfds",
+      "asa",
+      "surf-lifesaving",
+      "transport",
+      "utility",
+      "health"
+    ],
+    "baseline": {
+      "lives_at_risk": 1800,
+      "signal_to_action_ms": 10000,
+      "evac_lead_hours": 0,
+      "logistics_clicks": 12,
+      "economic_loss_aud": 1800000000
+    }
+  },
+  {
+    "scenario_id": "outcome-4-bushfire-cyclone-logistics",
+    "outcome": 4,
+    "name": "Multi-State Logistics Surge: Bushfire + Cyclone",
+    "hazards": [
+      "bushfire",
+      "tropical-cyclone"
+    ],
+    "primary_jurisdiction": "wa",
+    "secondary_jurisdictions": [
+      "nt",
+      "sa",
+      "commonwealth"
+    ],
+    "season": "transition",
+    "trigger_event": "Pilbara cyclone landfall coincides with Kimberley/north-west bushfire complex; mutual-aid surge from southern jurisdictions saturates aviation and ground logistics chains.",
+    "constitution_clauses": [
+      "I",
+      "II",
+      "II-A",
+      "IV",
+      "V",
+      "V-A",
+      "V-B",
+      "V-C",
+      "NN-1",
+      "NN-2",
+      "NN-3",
+      "NN-4",
+      "NN-5"
+    ],
+    "applicable_personas": [
+      "incident-commander",
+      "operations-officer",
+      "planning-officer",
+      "logistics-officer",
+      "public-information-officer",
+      "field-coordinator",
+      "dfes-wa",
+      "wapol",
+      "sja-wa",
+      "bushfires-nt",
+      "ntes",
+      "ntfrs",
+      "sapol",
+      "sacfs",
+      "ses-sa",
+      "nema",
+      "adf",
+      "arc",
+      "rfds",
+      "abf",
+      "asa",
+      "transport",
+      "utility"
+    ],
+    "baseline": {
+      "lives_at_risk": 1200,
+      "signal_to_action_ms": 10000,
+      "evac_lead_hours": 0,
+      "logistics_clicks": 12,
+      "economic_loss_aud": 1600000000
+    }
+  },
+  {
+    "scenario_id": "outcome-5-flood-storm-economic",
+    "outcome": 5,
+    "name": "Flood + Severe Storm with Economic Recovery Cascade",
+    "hazards": [
+      "riverine-flood",
+      "severe-storm"
+    ],
+    "primary_jurisdiction": "sa",
+    "secondary_jurisdictions": [
+      "vic",
+      "commonwealth"
+    ],
+    "season": "winter-spring",
+    "trigger_event": "River Murray flood coupled with severe-storm front damages economic infrastructure (agriculture, transport corridors, utility networks); recovery enters multi-environment phase across social, economic, built, and natural domains.",
+    "constitution_clauses": [
+      "I",
+      "II",
+      "II-A",
+      "IV",
+      "V",
+      "V-A",
+      "V-B",
+      "V-C",
+      "VI",
+      "NN-1",
+      "NN-3",
+      "NN-4",
+      "NN-5",
+      "QG-1",
+      "QG-2",
+      "QG-3"
+    ],
+    "applicable_personas": [
+      "incident-commander",
+      "operations-officer",
+      "planning-officer",
+      "logistics-officer",
+      "public-information-officer",
+      "field-coordinator",
+      "resilience-planner",
+      "executive-leader",
+      "sacfs",
+      "ses-sa",
+      "saas",
+      "sapol",
+      "samfs",
+      "cfa-vic",
+      "ses-vic",
+      "av",
+      "vicpol",
+      "nema",
+      "arc",
+      "transport",
+      "utility",
+      "health",
+      "local-government",
+      "state-government",
+      "community-ngos",
+      "volunteer",
+      "observer-auditor",
+      "risk-manager"
+    ],
+    "baseline": {
+      "lives_at_risk": 900,
+      "signal_to_action_ms": 10000,
+      "evac_lead_hours": 0,
+      "logistics_clicks": 12,
+      "economic_loss_aud": 2000000000
+    }
+  }
+]

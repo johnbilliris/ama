@@ -83,31 +83,31 @@ export default function AuditPage() {
     }
   };
 
-  if (loading && !data) {
-    return <div className="h-64 animate-pulse rounded-lg bg-gray-200" />;
-  }
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="audit-timeline">
       <h2 className="text-xl font-bold text-gray-900">Audit Trail</h2>
 
-      <WidgetErrorBoundary widgetName="Audit Trail">
-        {data && (
-          <AuditTrailSearch
-            events={data.events}
-            totalCount={data.total_count}
-            continuationToken={data.continuation_token}
-            onSearch={fetchData}
-            onPageNext={(token) => fetchData({ continuation_token: token })}
-            onEventClick={handleEventClick}
-            onExport={(ids) => {
-              setSelectedIds(ids);
-              setShowExport(true);
-              setExportStatus("idle");
-            }}
-          />
-        )}
-      </WidgetErrorBoundary>
+      {loading && !data ? (
+        <div className="h-64 animate-pulse rounded-lg bg-gray-200" />
+      ) : (
+        <WidgetErrorBoundary widgetName="Audit Trail">
+          {data && (
+            <AuditTrailSearch
+              events={data.events}
+              totalCount={data.total_count}
+              continuationToken={data.continuation_token}
+              onSearch={fetchData}
+              onPageNext={(token) => fetchData({ continuation_token: token })}
+              onEventClick={handleEventClick}
+              onExport={(ids) => {
+                setSelectedIds(ids);
+                setShowExport(true);
+                setExportStatus("idle");
+              }}
+            />
+          )}
+        </WidgetErrorBoundary>
+      )}
 
       {/* Decision chain slide-out */}
       {chain && (

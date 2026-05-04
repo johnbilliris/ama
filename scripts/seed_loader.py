@@ -179,7 +179,7 @@ def load_catalogue_data() -> list[dict]:
                 }
                 docs.append(indicator_doc)
 
-        print(f"  Loaded {filename}: {len(raw.get('outcomes', []))} outcomes → domain '{domain}'")
+        print(f"  Loaded {filename}: {len(raw.get('outcomes', []))} outcomes -> domain '{domain}'")
 
     # Evaluation questions (single document)
     eq_path = CATALOGUE_ROOT / "evaluation-questions.json"

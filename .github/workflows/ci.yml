@@ -103,3 +103,152 @@ jobs:
           path: coverage.xml
           retention-days: 30
 
+  # ---------------------------------------------------------------------------
+  # Spec-034 FR-018, FR-019, FR-023(e), SC-001..SC-005 — web coverage suite.
+  # Three sequential jobs (shard → merge → gate) with the gate marked as a
+  # required check for merging to main (see .github/branch-protection.json).
+  # ---------------------------------------------------------------------------
+  web-coverage-shard:
+    needs: [quality]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      # pnpm must be installed BEFORE setup-node, because setup-node@v5 reads
+      # `packageManager` from package.json and pre-warms its pnpm cache; if
+      # pnpm is not on PATH yet, setup-node fails with "Unable to locate
+      # executable file: pnpm". Same ordering as the `quality` job above.
+      - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
+        with:
+          version: 10.6.3
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "24"
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Cache Playwright browsers
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-pw-${{ hashFiles('apps/web/pnpm-lock.yaml') }}
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install API package
+        run: |
+          python -m pip install -e apps/api
+          # apps/api/app/api/router.py transitively imports the `evacuation`
+          # agent package (apps/agents/pyproject.toml exposes it as a
+          # top-level package), so the agents wheel must be installed too —
+          # otherwise uvicorn fails at import-time with
+          # `ModuleNotFoundError: No module named 'evacuation'`.
+          python -m pip install -e apps/agents
+      - name: Install Playwright Chromium
+        run: pnpm --filter @ama/web exec playwright install --with-deps chromium
+      - name: Seed database
+        shell: pwsh
+        run: ./scripts/seed-database.ps1
+      - name: Run web-coverage shard ${{ matrix.shard }}/4
+        env:
+          AMA_TEST_SUPPORT: "1"
+        run: |
+          pnpm --filter @ama/web exec playwright test \
+            --project=web-coverage-chromium \
+            --shard=${{ matrix.shard }}/4
+      - name: Upload partial trace
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: web-coverage-shard-${{ matrix.shard }}
+          path: |
+            tests/e2e/web-coverage/_artifacts/coverage-trace.partial-*.json
+            tests/e2e/web-coverage/_artifacts/junit-*.xml
+            tests/e2e/web-coverage/_artifacts/screenshots/**/*.png
+          retention-days: 30
+
+  web-coverage-merge:
+    needs: [web-coverage-shard]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Install python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyyaml jsonschema
+      - name: Download all shards
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: tests/e2e/web-coverage/_artifacts
+          pattern: web-coverage-shard-*
+          merge-multiple: true
+      - name: Merge trace shards (FR-006 deterministic)
+        run: |
+          python scripts/web-coverage/trace-merge.py \
+            --shards-dir tests/e2e/web-coverage/_artifacts \
+            --shard-glob 'coverage-trace.partial-*.json' \
+            --output-md specs/034-webapp-capstone-coverage/coverage-trace.md \
+            --output-json specs/034-webapp-capstone-coverage/coverage-trace.json
+      - name: Validate gap-register
+        run: python scripts/web-coverage/gap-register.py validate
+      - name: Verify trace determinism (FR-006)
+        shell: pwsh
+        run: ./scripts/web-coverage/verify-trace-determinism.ps1
+      - name: Upload canonical artefacts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: web-coverage-canonical
+          path: |
+            specs/034-webapp-capstone-coverage/coverage-trace.md
+            specs/034-webapp-capstone-coverage/coverage-trace.json
+            specs/034-webapp-capstone-coverage/gap-register.md
+          retention-days: 90
+
+  web-coverage-gate:
+    needs: [web-coverage-merge]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Install python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install jsonschema pyyaml
+      - name: Download canonical artefacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: web-coverage-canonical
+          path: specs/034-webapp-capstone-coverage/
+      - name: Schema-validate trace rows + gate thresholds (FR-018, FR-019, FR-023(e))
+        run: |
+          python scripts/web-coverage/_lib/schema_validators.py gate \
+            --trace specs/034-webapp-capstone-coverage/coverage-trace.json \
+            --gap-register specs/034-webapp-capstone-coverage/gap-register.md \
+            --personas-min 68 \
+            --cross-jurisdiction-min 8 \
+            --commonwealth-bridge-min 1 \
+            --capstone-outcomes-min 5
+      # T177 (cycle-1): binary 68/68 depth-profile gate. Asserts every persona
+      # in identities_australia.json has a schema-valid YAML alongside the
+      # suite. Fails the `web-coverage / depth-profile-binary` status check on
+      # any miss; numerator/denominator embedded in stdout for CHK210/CHK212.
+      - name: Depth-profile binary 68/68 (cycle-1, T177)
+        run: |
+          python scripts/web-coverage/_lib/schema_validators.py depth-profiles \
+            --expected 68
+      - name: Post status check
+        if: success()
+        run: echo "::notice title=web-coverage::capstone-ready ✓ all 5 outcomes closed, 68 personas covered, 68/68 depth profiles valid, 0 Open gaps"
+

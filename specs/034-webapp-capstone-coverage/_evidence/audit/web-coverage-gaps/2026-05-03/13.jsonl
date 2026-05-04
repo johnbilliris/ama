@@ -1,0 +1,2 @@
+{"audit_type": "gap-promoted", "emitted_at": "2026-05-03T13:07:30+00:00", "payload": {"gap_id": "GAP-AI-CONTENT-SAFETY-CANDIDATE", "pr": "https://github.com/johnbilliris/ama/pull/63"}}
+{"audit_type": "gap-closed", "emitted_at": "2026-05-03T13:07:30+00:00", "payload": {"gap_id": "GAP-AI-CONTENT-SAFETY-CANDIDATE", "merge_sha": "001ba2f"}}

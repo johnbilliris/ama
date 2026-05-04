@@ -1,0 +1,15 @@
+persona_id: logistics-officer
+workspace_route: /workspaces/logistics-officer
+safety_critical_workflow: queue-and-sync
+workflow_steps:
+- action: queue mutual-aid request and sync to peer jurisdiction
+  target_selector: getByRole:button:Queue
+  expected_response_status: 202
+- action: POST /api/mutual-aid/queue
+  target_selector: POST:/api/mutual-aid/queue
+  expected_response_status: 202
+assertion_targets:
+  evaluator_endpoint: sc-004
+  audit_correlation_id_source: header
+capstone_outcome: 4
+hazard: bushfire

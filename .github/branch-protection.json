@@ -1,0 +1,15 @@
+{
+  "_comment": "Spec-034 FR-018 / FR-019 — required checks on main. This file is descriptive only (GitHub does not consume it directly); apply via Repo Settings → Branches → Branch protection rules. Each entry is the GitHub Actions job-name string that must report success before a PR can merge.",
+  "branch": "main",
+  "required_status_checks": [
+    "ci / quality",
+    "ci / web-coverage-shard (1)",
+    "ci / web-coverage-shard (2)",
+    "ci / web-coverage-shard (3)",
+    "ci / web-coverage-shard (4)",
+    "ci / web-coverage-merge",
+    "ci / web-coverage-gate"
+  ],
+  "spec": "specs/034-webapp-capstone-coverage/spec.md",
+  "rationale": "T154 — the gate-job is the binary capstone-readiness check; without all 4 shards + merge succeeding, the gate cannot evaluate the trace, so all are required."
+}

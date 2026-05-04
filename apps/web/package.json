@@ -10,7 +10,12 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:web-coverage": "playwright test --project=web-coverage-chromium",
+    "test:web-coverage:mobile": "playwright test --project=web-coverage-mobile",
+    "test:web-coverage:axe": "playwright test --project=web-coverage-axe",
+    "test:web-coverage:p1": "playwright test --project=web-coverage-chromium --grep @p1",
+    "test:web-coverage:shard": "playwright test --project=web-coverage-chromium"
   },
   "dependencies": {
     "@ama/ui": "workspace:*",
@@ -22,16 +27,21 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
     "@eslint/eslintrc": "^3.3.5",
     "@playwright/test": "1.59.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.4",
+    "js-yaml": "^4.1.0",
     "jsdom": "^25.0.1",
     "typescript": "6.0.3",
     "vitest": "^2.1.8"

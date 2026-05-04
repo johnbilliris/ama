@@ -1,0 +1,9 @@
+{
+  "spec": "034-webapp-capstone-coverage",
+  "schema_version": 1,
+  "entries": {},
+  "last_regression": null,
+  "last_updated_at": null,
+  "last_updated_commit": null,
+  "_readme": "FR-027 known-good rollback manifest. cd.yml refreshes this on every successful deploy via 'python scripts/web-coverage/known-good.py update'. Branch protection: see .github/branch-protection.json — the web-coverage-gate job must pass (which requires this manifest's manifest.json schema_version=1)."
+}

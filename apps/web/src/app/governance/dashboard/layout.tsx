@@ -30,6 +30,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           Monitor constitutional compliance, operational readiness, recovery
           progress, and risk posture across all jurisdictions.
         </p>
+        <div
+          data-testid="au-region-banner"
+          role="note"
+          aria-label="Data residency"
+          className="mt-3 inline-flex items-center rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-900"
+        >
+          Hosted in Australia · AU data residency
+        </div>
       </header>
 
       {/* Tab navigation */}

@@ -13,6 +13,7 @@ from app.api.routes.evacuation import router as evacuation_router
 from app.api.routes.frameworks import router as frameworks_router
 from app.api.routes.governance_dashboard import router as governance_dashboard_router
 from app.api.routes.health import router as aidr_health_router
+from app.api.routes.i18n import router as i18n_router
 from app.api.routes.incidents import router as incidents_router
 from app.api.routes.incidents_map import router as incidents_map_router
 from app.api.routes.jurisdictions import router as jurisdictions_router
@@ -34,6 +35,7 @@ from app.api.routes.simulations import router as simulations_router
 from app.api.routes.tasks import router as tasks_router
 from app.api.routes.warning_chain import router as warning_chain_router
 from app.api.routes.workflow_runs import router as workflow_runs_router
+from app.middleware import test_support_guard
 from fastapi import APIRouter
 
 # Lazy import for eval module to keep its repo deps optional
@@ -83,6 +85,22 @@ api_router.include_router(governance_dashboard_router)
 api_router.include_router(dead_letters_mgmt_router)
 api_router.include_router(radius_lookup_router)
 api_router.include_router(workflow_runs_router)
+api_router.include_router(i18n_router)
 
 if _EVAL_AVAILABLE:
     api_router.include_router(eval_router)
+
+# spec 034 (T009) — test-support router gated by dual-guard. The router is
+# registered ONLY when both guards pass (env=dev|test AND AMA_TEST_SUPPORT=1);
+# otherwise direct requests collapse to a stock 404.
+test_support_guard.log_activation_status()
+if test_support_guard.is_enabled():
+    from app.api.routes.audit_list import router as audit_list_router
+    from app.api.routes.outcome_evaluator import router as outcome_evaluator_router
+    from app.api.routes.test_support import router as test_support_router
+
+    api_router.include_router(test_support_router)
+    # spec 034 (T178, T179) cycle-1 — outcome evaluator + audit-list under
+    # the same dual-guard. FR-028 + FR-029 routable surface.
+    api_router.include_router(outcome_evaluator_router)
+    api_router.include_router(audit_list_router)

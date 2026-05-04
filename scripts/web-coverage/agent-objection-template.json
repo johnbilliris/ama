@@ -1,0 +1,17 @@
+{
+  "$schema": "../../specs/034-webapp-capstone-coverage/contracts/agent-objection.schema.json",
+  "_template_for": "scripts/web-coverage/agent-objection-template.json",
+  "agent_id": "REPLACE-ME-agent-id",
+  "panel": "operational",
+  "cycle": 1,
+  "gap_id": "GAP-EXAMPLE-001",
+  "vote": "object",
+  "rationale": "REPLACE-ME — concise sentence citing the FR/clause being violated.",
+  "touched_personas": ["incident-commander"],
+  "touched_frs": ["FR-008"],
+  "touched_clauses": ["I"],
+  "evidence_uris": [
+    "https://github.com/johnbilliris/ama/actions/runs/REPLACE-ME"
+  ],
+  "recorded_at": "REPLACE-ME-iso8601-utc"
+}

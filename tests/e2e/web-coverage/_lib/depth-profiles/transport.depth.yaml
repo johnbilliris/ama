@@ -1,0 +1,17 @@
+persona_id: transport
+workspace_route: /workspaces/transport
+safety_critical_workflow: allocate
+workflow_steps:
+- action: select resource and confirm allocation
+  target_selector: getByRole:button:Allocate
+  expected_response_status: 200
+- action: POST /api/resources/allocate
+  target_selector: POST:/api/resources/allocate
+  expected_response_status: 200
+assertion_targets:
+  evaluator_endpoint: sc-004
+  audit_correlation_id_source: header
+capstone_outcome: 4
+hazard: bushfire
+coverage_tags:
+- cross-sector

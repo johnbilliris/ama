@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
     api_host: str = Field(default="0.0.0.0", alias="API_HOST")
     api_port: int = Field(default=8000, alias="API_PORT")
+    environment: str = Field(default="production", alias="AMA_ENVIRONMENT")
     allowed_azure_regions: list[str] = Field(
         default_factory=lambda: ["Australia East", "Australia Southeast"],
         alias="ALLOWED_AZURE_REGIONS",

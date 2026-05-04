@@ -1,0 +1,17 @@
+persona_id: act-ambulance
+workspace_route: /workspaces/act-ambulance
+safety_critical_workflow: escalate
+workflow_steps:
+- action: escalate incident severity tier
+  target_selector: getByRole:button:Escalate
+  expected_response_status: 200
+- action: PATCH /api/incidents/{id}/severity
+  target_selector: PATCH:/api/incidents/{id}/severity
+  expected_response_status: 200
+assertion_targets:
+  evaluator_endpoint: sc-002
+  audit_correlation_id_source: header
+capstone_outcome: 2
+hazard: bushfire
+coverage_tags:
+- territory-government

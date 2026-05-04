@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.local/contracts/spec-034/review-vote.schema.json",
+  "title": "ReviewVote",
+  "description": "One agent's vote in the 85-agent iteration tribunal (ASM-006, Q13). Recorded by scripts/web-coverage/review-log.py per cycle and committed with a Co-authored-by: Copilot trailer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "agent_id",
+    "panel",
+    "cycle",
+    "gap_id",
+    "touched_personas",
+    "touched_frs",
+    "touched_clauses",
+    "vote",
+    "rationale",
+    "disposition",
+    "recorded_at"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "description": "Filename basename of the .agent.md file under .github/agents/."
+    },
+    "panel": {
+      "type": "string",
+      "enum": ["operational", "sector", "technical"]
+    },
+    "cycle": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4
+    },
+    "gap_id": {
+      "type": "string",
+      "pattern": "^GAP-[A-Z0-9][A-Z0-9-]*[A-Z0-9]$"
+    },
+    "touched_personas": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$" }
+    },
+    "touched_frs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^FR-\\d{3}[a-z]?$" }
+    },
+    "touched_clauses": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "I", "II", "II-A", "III", "IV",
+          "V", "V-A", "V-B", "V-C",
+          "VI", "VII", "VIII",
+          "NN-1", "NN-2", "NN-3", "NN-4", "NN-5",
+          "QG-1", "QG-2", "QG-3"
+        ]
+      }
+    },
+    "vote": {
+      "type": "string",
+      "enum": ["approve", "object", "abstain"]
+    },
+    "rationale": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "Required when vote is not 'approve'; should be empty string when vote == 'approve'."
+    },
+    "disposition": {
+      "type": "string",
+      "enum": ["meritorious", "rejected", "veto", "override", "pending"]
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "description": "When vote == 'object', rationale MUST be non-empty.",
+      "if": { "properties": { "vote": { "const": "object" } } },
+      "then": { "properties": { "rationale": { "type": "string", "minLength": 1 } } }
+    },
+    {
+      "description": "Operational-panel veto can only be applied to safety-critical clauses.",
+      "if": { "properties": { "disposition": { "const": "veto" } } },
+      "then": {
+        "properties": {
+          "panel": { "const": "operational" },
+          "touched_clauses": {
+            "type": "array",
+            "contains": { "enum": ["I", "IV", "NN-1", "NN-2"] }
+          }
+        }
+      }
+    }
+  ]
+}

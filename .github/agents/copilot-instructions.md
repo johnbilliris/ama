@@ -1,4 +1,4 @@
----
+﻿---
 description: "AMA development guidelines and project conventions shared with all agents."
 ---
 
@@ -56,6 +56,7 @@ docs/           # Project documentation
 - N/A for the pipeline itself. Deployed runtimes (api, agents, ingestion, web) continue to use their existing Cosmos DB / Storage / Service Bus resources provisioned by `infra/main.bicep`. (031-simplify-cicd-pipeline)
 - Python 3.12 (apps/api, apps/agents, apps/ingestion, apps/eval-runner), TypeScript 5.8 (apps/web on Next.js 16.2) + FastAPI, Pydantic v2, Azure SDK for Python, Azure OpenAI SDK, Next.js 16.2, React 19, openai, opentelemetry (NEW), pybreaker (NEW — replaces hand-rolled circuit breaker), import-linter (NEW), mypy (existing, now `--strict`), ruff (existing, now `format` enforced), cosign (NEW), Azure AI Search SDK (NEW) (032-rubric-improvements)
 - Cosmos DB (existing — partition strategy expanded; CMK + Private Endpoint added), Azure Storage (CMK + Private Endpoint added), Azure AI Search (NEW — `Standard S1` AU East, indexes the `docs/aidr/` corpus + a future prompt library mirror) (032-rubric-improvements)
+- existing Azure Storage (`${envPrefix}storage`) — adds one container (034-webapp-capstone-coverage)
 
 **Backend**: Python 3.12, FastAPI, Pydantic v2, Azure Cosmos DB SDK, Azure Blob Storage SDK, Azure Identity, Azure OpenAI SDK, tenacity
 **Frontend**: TypeScript 5.8, Next.js 16.2, React 19, Tailwind CSS, @ama/ui component library

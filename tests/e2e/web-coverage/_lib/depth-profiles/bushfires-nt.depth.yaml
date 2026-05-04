@@ -1,0 +1,17 @@
+persona_id: bushfires-nt
+workspace_route: /workspaces/bushfires-nt
+safety_critical_workflow: declare
+workflow_steps:
+- action: open declaration dialog and confirm
+  target_selector: getByRole:button:Declare
+  expected_response_status: 201
+- action: POST /api/declarations
+  target_selector: POST:/api/declarations
+  expected_response_status: 201
+assertion_targets:
+  evaluator_endpoint: sc-001
+  audit_correlation_id_source: header
+capstone_outcome: 1
+hazard: bushfire
+coverage_tags:
+- territory-government

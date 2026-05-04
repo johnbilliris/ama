@@ -1,0 +1,26 @@
+[
+  {
+    "affected_personas": [
+      "public-information-officer"
+    ],
+    "affected_routes": [
+      "/operations/workflows"
+    ],
+    "closing_pr_url": "https://github.com/johnbilliris/ama/pull/63",
+    "constitution_clauses": [
+      "IV"
+    ],
+    "fr_ids": [
+      "FR-014"
+    ],
+    "gap_id": "GAP-AI-CONTENT-SAFETY-CANDIDATE",
+    "iteration_count": 0,
+    "merge_sha": "001ba2f",
+    "owner": "spec-034",
+    "regression_detected": false,
+    "regression_evidence": null,
+    "status": "Closed",
+    "tribunal_notes": "Conditionally proposed per plan. Pending content-safety review before formally tracked.",
+    "updated_at": "2026-05-03T13:07:30+00:00"
+  }
+]
