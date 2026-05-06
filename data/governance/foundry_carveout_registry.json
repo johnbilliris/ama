@@ -1,0 +1,19 @@
+[
+  {
+    "model_id": "azure-openai-gpt-4o-2024-11-20-australiaeast",
+    "review_date": "2025-09-01T00:00:00+00:00",
+    "approver_identities": [
+      "platform-architect@ama.local",
+      "chief-data-officer@ama.local"
+    ],
+    "notes": "Australia East deployment with regional carve-out approved by ASD assessment 2025-08."
+  },
+  {
+    "model_id": "azure-openai-text-embedding-3-large-australiaeast",
+    "review_date": "2025-10-15T00:00:00+00:00",
+    "approver_identities": [
+      "platform-architect@ama.local"
+    ],
+    "notes": "Used by ingestion + RAG pipeline."
+  }
+]

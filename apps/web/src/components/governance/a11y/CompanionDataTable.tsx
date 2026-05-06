@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 interface CompanionDataTableProps {
   /** Caption for the data table */
   caption: string;
   /** Column headers */
   headers: string[];
-  /** Row data — array of arrays matching headers */
-  rows: (string | number)[][];
+  /** Row data — array of arrays matching headers. Cells may be plain
+   *  strings/numbers or rich React nodes (for inline tooltips, icons, …). */
+  rows: (string | number | ReactNode)[][];
   /** Optional ID for ARIA linking */
   id?: string;
 }

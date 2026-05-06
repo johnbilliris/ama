@@ -30,6 +30,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
 markers = [
   "integration: integration tests requiring mock external services (Cosmos DB, Service Bus)",
   "simulation: extended scenario simulation tests",

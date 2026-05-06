@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComplianceMatrixEntry } from "@/lib/api/governance";
+import Link from "next/link";
 import { useState } from "react";
 
 interface ComplianceMatrixProps {
@@ -125,7 +126,15 @@ export function ComplianceMatrix({
                     if (e.key === "Enter" || e.key === " ") onRowClick(entry.data_source_id);
                   }}
                 >
-                  <td className="px-3 py-2 font-medium">{entry.data_source_name}</td>
+                  <td className="px-3 py-2 font-medium">
+                    <Link
+                      href={`/governance/${encodeURIComponent(entry.data_source_id)}/compliance`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-blue-600 hover:underline"
+                    >
+                      {entry.data_source_name}
+                    </Link>
+                  </td>
                   <td className="px-3 py-2">
                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${badge.bg} ${badge.text}`}>
                       {badge.label}

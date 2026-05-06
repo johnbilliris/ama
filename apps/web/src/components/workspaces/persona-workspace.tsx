@@ -1,5 +1,13 @@
 import type { PersonaWorkspacePayload } from "../../lib/api/personas";
 import { TaskStatusPanel } from "./task-status-panel";
+import FieldCoordinatorOffline from "../../app/workspaces/[personaId]/_panels/field-coordinator-offline";
+import IcApprovalCard from "../../app/workspaces/[personaId]/_panels/ic-approval-card";
+import ObserverAuditorTimeline from "../../app/workspaces/[personaId]/_panels/observer-auditor-timeline";
+import PioAwsComposer from "../../app/workspaces/[personaId]/_panels/pio-aws-composer";
+import PlanningIapComposer from "../../app/workspaces/[personaId]/_panels/planning-iap-composer";
+import ResilienceHandoverPdf from "../../app/workspaces/[personaId]/_panels/resilience-handover-pdf";
+import RiskMatrix from "../../app/workspaces/[personaId]/_panels/risk-matrix";
+import SpanOfControlWarning from "../../app/workspaces/[personaId]/_panels/span-of-control-warning";
 
 interface PersonaWorkspaceProps {
   workspace: PersonaWorkspacePayload;
@@ -7,6 +15,8 @@ interface PersonaWorkspaceProps {
 
 export function PersonaWorkspace({ workspace }: PersonaWorkspaceProps) {
   const primaryTask = workspace.tasks[0];
+  const role = workspace.persona.role;
+  const scenarioId = primaryTask?.task_id ?? "0";
 
   return (
     <section className="workspace-shell">
@@ -49,6 +59,34 @@ export function PersonaWorkspace({ workspace }: PersonaWorkspaceProps) {
       </div>
 
       {primaryTask ? <TaskStatusPanel personaId={workspace.persona.persona_id} taskId={primaryTask.task_id} /> : null}
+
+      {/* Spec-035 role-aware operator panels (T036–T044, FR-001..FR-008). */}
+      <div className="workspace-role-panels grid gap-4 mt-4">
+        {role === "incident-commander" ? (
+          <IcApprovalCard
+            scenarioId={scenarioId}
+            rationale="Awaiting evaluation to bind rationale, sources, and confidence."
+            sources={[]}
+            confidence={0}
+            approverIdentity={workspace.persona.persona_id}
+          />
+        ) : null}
+        {role === "public-information-officer" ? <PioAwsComposer /> : null}
+        {role === "observer-auditor" ? (
+          <ObserverAuditorTimeline rows={[]} />
+        ) : null}
+        {role === "risk-manager" ? <RiskMatrix scenarioId={scenarioId} /> : null}
+        {role === "field-coordinator" ? <FieldCoordinatorOffline /> : null}
+        {role === "planning-officer" ? (
+          <PlanningIapComposer scenarioId={scenarioId} />
+        ) : null}
+        {role === "incident-commander" || role === "operations-officer" ? (
+          <SpanOfControlWarning appRole={role} directReports={[]} />
+        ) : null}
+        {role === "resilience-planner" ? (
+          <ResilienceHandoverPdf payloadFactory={() => ({ scenario_id: scenarioId })} />
+        ) : null}
+      </div>
     </section>
   );
 }

@@ -3,6 +3,7 @@ import os
 
 from app.api.router import api_router
 from app.core.settings import get_settings
+from app.middleware.activation_mutex import activation_mutex_lifespan
 from app.middleware.error_handler import add_error_handler_middleware
 from app.middleware.resilience import add_resilience_middleware
 from fastapi import FastAPI
@@ -28,6 +29,7 @@ def create_app() -> FastAPI:
         version="0.1.0",
         docs_url=f"{settings.api_prefix}/docs",
         openapi_url=f"{settings.api_prefix}/openapi.json",
+        lifespan=activation_mutex_lifespan,
     )
     add_error_handler_middleware(app)
     add_resilience_middleware(app)
@@ -42,11 +44,31 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    from app.middleware.audit_appender import add_audit_appender_middleware
     from app.middleware.auth_middleware import add_auth_middleware
+    from app.middleware.classifier_gateway import add_classifier_gateway_middleware
+    from app.middleware.entra_auth import add_entra_auth_middleware
+    from app.middleware.rate_limit_audit import add_rate_limit_audit_middleware
+    from app.middleware.rbac_check import add_rbac_check_middleware
     from app.middleware.tenant_middleware import add_tenant_middleware
 
     add_tenant_middleware(app)
     add_auth_middleware(app)
+
+    # spec-035 production-auth stack. Activated only when
+    # AMA_ENABLE_PRODUCTION_AUTH=1. In Starlette the LAST registered middleware
+    # is the OUTERMOST — runs first on requests and last on responses. We need
+    # ``audit_appender`` to see the FINAL response (after rate-limit / classifier
+    # rewrites), so we add it LAST.
+    #
+    # Runtime order (outer → inner):
+    #   audit_appender → classifier_gateway → entra_auth → rbac_check
+    #   → rate_limit_audit → route handler
+    add_rate_limit_audit_middleware(app)
+    add_rbac_check_middleware(app)
+    add_entra_auth_middleware(app)
+    add_classifier_gateway_middleware(app)
+    add_audit_appender_middleware(app)
 
     app.include_router(api_router, prefix=settings.api_prefix)
     return app

@@ -1,0 +1,117 @@
+openapi: 3.1.0
+info:
+  title: AMA Auth + RBAC API (spec-035)
+  version: 1.0.0
+  description: |
+    Production-reachable Entra-bound auth surface implementing FR-010, FR-011 and
+    Clarifications Q1 (11-AppRole inventory) + Q9 (X-Impersonate-Persona pairing).
+servers:
+  - url: https://app-ama-zo6bb5.azurewebsites.net
+paths:
+  /api/auth/whoami:
+    get:
+      operationId: getCurrentPrincipal
+      summary: Return resolved AppRole + persona_id + impersonation context.
+      security:
+        - EntraBearer: []
+      parameters:
+        - in: header
+          name: X-Impersonate-Persona
+          required: false
+          schema:
+            type: string
+          description: |
+            Per-request impersonation header. ONLY honoured when the bearer carries
+            the system-administrator AppRole. Sticky sessions are forbidden (Q9).
+            PSPF/PII gateway (FR-027) is NEVER bypassed by this header.
+      responses:
+        "200":
+          description: Resolved principal context.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Principal"
+        "401":
+          description: Bearer invalid/missing.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: |
+            AppRole or persona_id mismatch (e.g., non-admin AppRole presenting an
+            X-Impersonate-Persona header → forbidden).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+components:
+  securitySchemes:
+    EntraBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Principal:
+      type: object
+      required: [principal_oid, app_role, persona_id, tenant_id]
+      properties:
+        principal_oid:
+          type: string
+          description: Entra OID of the *operator* (the human bearer subject).
+        app_role:
+          type: string
+          enum:
+            - incident-commander
+            - operations-officer
+            - logistics-officer
+            - planning-officer
+            - public-information-officer
+            - field-coordinator
+            - observer-auditor
+            - risk-manager
+            - resilience-planner
+            - executive-leader
+            - system-administrator
+          description: Closed enum per Q1 — no 12th role permitted.
+        persona_id:
+          type: string
+          description: |
+            Scoping claim. AIIMS-function tokens carry one of the 68 spec-034 personas;
+            system-administrator carries "*" or absent.
+        tenant_id:
+          type: string
+        impersonation:
+          type: object
+          nullable: true
+          required: [impersonated_persona_id, audit_correlation_id]
+          properties:
+            impersonated_persona_id:
+              type: string
+              description: Resolved from X-Impersonate-Persona; this is the *target* persona for downstream calls.
+            audit_correlation_id:
+              type: string
+              description: |
+                Correlation ID under which the paired audit rows (admin_override + normal-outcome)
+                will be emitted on the next state-changing call (Q9).
+    ErrorEnvelope:
+      type: object
+      required: [error_code, audit_id, correlation_id]
+      properties:
+        error_code:
+          type: string
+          enum:
+            - unauthorized
+            - forbidden
+            - sovereignty_denied
+            - rate_limited
+            - evaluator_not_routable
+            - schema_invalid
+            - seed_not_ready
+        retry_after_seconds:
+          type: integer
+          nullable: true
+        audit_id:
+          type: string
+        correlation_id:
+          type: string

@@ -1,0 +1,14 @@
+<step title="Incoming Request" date="2026-05-05T06:31:00.879" instance="849c8d" url="/api/zipdeploy?isAsync=true" method="POST" type="request" pid="833,1,3" Accept="application/json" Host="app-ama-zo6bb5.scm.azurewebsites.net" User-Agent="azsdk-go-zip-deploy/1.0.0 (go1.26.1-X:loopvar; Windows_NT),azdev/1.24.1 (Go go1.26.1-X:loopvar; windows/amd64)" Accept-Encoding="gzip" Authorization="Bea..." Content-Type="application/octet-stream" Content-Length="2529746" x-ms-correlation-request-id="3786252806adc38d5b363848ad6ea6e4" X-ARR-LOG-ID="37862528-06ad-c38d-5b36-3848ad6ea6e4" CLIENT-IP="110.144.204.83:51913" X-SITE-DEPLOYMENT-ID="app-ama-zo6bb5" WAS-DEFAULT-HOSTNAME="app-ama-zo6bb5.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/api/zipdeploy?isAsync=true" X-Client-IP="110.144.204.83" X-Client-Port="51913" >
+  <step title="ZipPushDeploy" date="2026-05-05T06:31:00.934" >
+    <step title="ZipDeploy. Extract zip." date="2026-05-05T06:31:00.937" /><!-- duration: 5ms -->
+    <step title="Starting PushDeployAsync" date="2026-05-05T06:31:00.945" /><!-- duration: 1ms -->
+    <step title="Writing artifact to /tmp/zipdeploy/b7df1018-3a64-417d-91cd-e897650020d4.zip" date="2026-05-05T06:31:00.981" >
+      <step title="Writing multipart request body to /tmp/zipdeploy/b7df1018-3a64-417d-91cd-e897650020d4.zip" date="2026-05-05T06:31:01.001" /><!-- duration: 29ms -->
+    </step><!-- duration: 255ms -->
+    <step title="Start deployment in the background" date="2026-05-05T06:31:01.256" >
+      <step title="Acquiring Deployment Lock" date="2026-05-05T06:31:01.276" /><!-- duration: 2ms -->
+      <step title="Acquired Deployment Lock" date="2026-05-05T06:31:01.297" /><!-- duration: 2ms -->
+    </step><!-- duration: 147ms -->
+  </step><!-- duration: 492ms -->
+  <step title="Outgoing response" date="2026-05-05T06:31:01.432" type="response" statusCode="202" statusText="Accepted" /><!-- duration: 2ms -->
+</step><!-- duration: 557ms -->

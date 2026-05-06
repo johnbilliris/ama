@@ -105,6 +105,9 @@ export default function ExecutiveSummaryPage() {
                 <h3 className="text-sm font-semibold text-gray-900">
                   Active Incidents
                 </h3>
+                <p className="mt-1 text-xs text-gray-600">
+                  Count of open disaster incidents currently being managed across all jurisdictions.
+                </p>
                 <p className="mt-2 text-3xl font-bold text-blue-700">
                   {data.active_incident_count}
                 </p>
@@ -116,6 +119,9 @@ export default function ExecutiveSummaryPage() {
                 <h3 className="text-sm font-semibold text-gray-900">
                   Resource Utilisation
                 </h3>
+                <p className="mt-1 text-xs text-gray-600">
+                  Share of allocated response resources currently committed to active operations.
+                </p>
                 <p className="mt-2 text-3xl font-bold text-purple-700">
                   {data.resource_utilisation_pct.toFixed(1)}%
                 </p>
