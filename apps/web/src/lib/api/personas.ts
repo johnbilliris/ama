@@ -20,13 +20,40 @@ export interface PersonaWorkspacePayload {
   }>;
 }
 
+export class PersonaWorkspaceError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "PersonaWorkspaceError";
+    this.status = status;
+  }
+}
+
 export async function getPersonaWorkspace(personaId: string): Promise<PersonaWorkspacePayload> {
-  const response = await fetch(`${API_BASE_URL}/personas/${personaId}/workspace`, {
-    cache: "no-store",
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}/personas/${personaId}/workspace`, {
+      cache: "no-store",
+    });
+  } catch (cause) {
+    throw new PersonaWorkspaceError(
+      cause instanceof Error ? cause.message : "Network request failed",
+      0,
+    );
+  }
 
   if (!response.ok) {
-    throw new Error("Failed to load persona workspace");
+    let message = `Failed to load persona workspace (HTTP ${response.status})`;
+    try {
+      const body = (await response.json()) as { message?: unknown };
+      if (typeof body?.message === "string" && body.message.length > 0) {
+        message = body.message;
+      }
+    } catch {
+      // Body was not JSON — keep the default message.
+    }
+    throw new PersonaWorkspaceError(message, response.status);
   }
 
   return (await response.json()) as PersonaWorkspacePayload;

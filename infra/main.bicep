@@ -129,6 +129,65 @@ module monitoring './modules/monitoring.bicep' = {
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
+// Spec-035 (T009/T010/T011/T012) — APIM rate-limit, immutable handover blob,
+// App Configuration store. Gated behind `enableSpec035Hardening` so dev tenants
+// can ship without paying for APIM until staging.
+// ────────────────────────────────────────────────────────────────────────────────
+
+@description('Spec-035 — Provision APIM rate-limit + immutable handover container + App Configuration store. Default OFF in dev to keep cost low; enable for staging/production.')
+param enableSpec035Hardening bool = false
+
+@description('Spec-035 — APIM publisher email override.')
+param spec035ApimPublisherEmail string = 'ops@example.com'
+
+@description('Spec-035 — Recovery handover signing certificate name in Key Vault (FR-007).')
+param spec035RecoverySigningCertName string = 'recovery-handover-signing'
+
+module spec035AppConfig './modules/app-configuration.bicep' = if (enableSpec035Hardening) {
+  name: 'spec035-app-configuration'
+  params: {
+    location: location
+    envPrefix: environmentName
+    tags: tags
+  }
+}
+
+module spec035ApimRateLimit './modules/apim-rate-limit.bicep' = if (enableSpec035Hardening) {
+  name: 'spec035-apim-rate-limit'
+  params: {
+    location: location
+    envPrefix: environmentName
+    tags: tags
+    publisherEmail: spec035ApimPublisherEmail
+    skuName: environmentTier == 'prod' ? 'StandardV2' : 'Developer'
+  }
+  dependsOn: [
+    spec035AppConfig
+  ]
+}
+
+module spec035BlobImmutable './modules/blob-immutable.bicep' = if (enableSpec035Hardening) {
+  name: 'spec035-blob-immutable'
+  params: {
+    location: location
+    envPrefix: environmentName
+    tags: tags
+    storageSku: environmentTier == 'prod' ? 'Standard_ZRS' : 'Standard_LRS'
+  }
+}
+
+module spec035RecoverySigningKv './modules/recovery-signing-keyvault.bicep' = if (enableSpec035Hardening) {
+  name: 'spec035-recovery-signing-kv'
+  params: {
+    location: location
+    envPrefix: environmentName
+    tags: tags
+    signingKeyName: spec035RecoverySigningCertName
+    apiPrincipalId: ''
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
 // Azure Maps (Disaster Mapper UI — data sovereignty: Australia East only)
 // ────────────────────────────────────────────────────────────────────────────────
 
@@ -407,6 +466,38 @@ resource governanceContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases
           [
             { path: '/type', order: 'ascending' }
             { path: '/data_source_id', order: 'ascending' }
+          ]
+        ]
+      }
+    }
+    options: { autoscaleSettings: { maxThroughput: 1000 } }
+  }
+}
+
+// Coordination tasks — drives Assigned-Tasks + Dependencies columns on the
+// persona workspace. Partitioned by /assigned_organisation_id so the common
+// access pattern (list all tasks for an org + dependency chain inside the
+// same org) is a single-partition query. Composite indexes accelerate
+// per-persona and per-incident filters within an organisation.
+resource coordinationTasksContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+  name: 'coordination_tasks'
+  parent: cosmosDb
+  properties: {
+    resource: {
+      id: 'coordination_tasks'
+      partitionKey: { paths: ['/assigned_organisation_id'], kind: 'Hash' }
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        includedPaths: [ { path: '/*' } ]
+        excludedPaths: [ { path: '/_etag/?' } ]
+        compositeIndexes: [
+          [
+            { path: '/assigned_organisation_id', order: 'ascending' }
+            { path: '/assigned_persona_id', order: 'ascending' }
+          ]
+          [
+            { path: '/assigned_organisation_id', order: 'ascending' }
+            { path: '/incident_id', order: 'ascending' }
           ]
         ]
       }
@@ -839,6 +930,15 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
     clientAffinityEnabled: false
     siteConfig: {
       linuxFxVersion: 'NODE|22-lts'
+      // Next.js startup command. The deployed bundle is produced by
+      // `pnpm deploy --node-linker=hoisted` (see apps/web/scripts/
+      // copy-standalone-assets.mjs) which lays out a flat node_modules/
+      // and the .next/ build at the deploy root. Running `next start`
+      // directly avoids Next's `output: standalone` server which carries
+      // pnpm symlinks that break across the Windows→Linux deploy boundary.
+      // Bind to 0.0.0.0 so App Service's load balancer can reach the
+      // process; PORT is supplied by the platform.
+      appCommandLine: 'node node_modules/next/dist/bin/next start -H 0.0.0.0'
       // PSRule: Azure.AppService.AlwaysOn — keep the worker hot.
       alwaysOn: true
       // PSRule: Azure.AppService.MinTLS
