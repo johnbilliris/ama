@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import uuid
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Final
 
 from fastapi import APIRouter, Request
@@ -40,9 +40,7 @@ class DeniedMutationRequest(BaseModel):
 
 
 @router.post("/denied-mutation", status_code=202)
-async def record_denied_mutation(
-    payload: DeniedMutationRequest, request: Request
-) -> dict[str, Any]:
+async def record_denied_mutation(payload: DeniedMutationRequest, request: Request) -> dict[str, Any]:
     correlation_id = request.headers.get("x-correlation-id") or str(uuid.uuid4())
     row = {
         "audit_id": str(uuid.uuid4()),
@@ -53,7 +51,7 @@ async def record_denied_mutation(
         "target_audit_id": payload.target_audit_id,
         "rationale": payload.rationale,
         "correlation_id": correlation_id,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "actor": "ui-policy-enforcer",
     }
     _DENIED_MUTATIONS.append(row)

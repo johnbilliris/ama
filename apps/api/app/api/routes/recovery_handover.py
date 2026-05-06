@@ -26,13 +26,9 @@ router = APIRouter(prefix="/recovery", tags=["recovery-handover"])
 
 @router.post("/handover/sign", response_model=HandoverResponse)
 async def sign_handover(payload: HandoverRequest, request: Request) -> HandoverResponse:
-    service: RecoveryHandoverService | None = getattr(
-        request.app.state, "recovery_handover_service", None
-    )
+    service: RecoveryHandoverService | None = getattr(request.app.state, "recovery_handover_service", None)
     if service is None:
-        audit_repo: Any | None = getattr(
-            request.app.state, "audit_repository", None
-        )
+        audit_repo: Any | None = getattr(request.app.state, "audit_repository", None)
         service = RecoveryHandoverService(audit_repository=audit_repo)
 
     correlation_id = request.headers.get("X-Correlation-Id")
@@ -49,11 +45,7 @@ async def sign_handover(payload: HandoverRequest, request: Request) -> HandoverR
             correlation_id=correlation_id,
         ) from exc
     except HandoverValidationError as exc:
-        code = (
-            ExtensionErrorCode.SEED_NOT_READY
-            if exc.code == "seed_not_ready"
-            else ExtensionErrorCode.SCHEMA_INVALID
-        )
+        code = ExtensionErrorCode.SEED_NOT_READY if exc.code == "seed_not_ready" else ExtensionErrorCode.SCHEMA_INVALID
         raise ExtensionEnvelopeError(
             code,
             detail=str(exc),

@@ -112,9 +112,7 @@ class AuditRepository:
         tgt_norm = self._normalise_row(target_row, correlation_id)
 
         if op_norm.get("outcome") != "admin_override":
-            raise ValueError(
-                "append_paired operator_row.outcome MUST be 'admin_override' (Q9 paired-row rule)"
-            )
+            raise ValueError("append_paired operator_row.outcome MUST be 'admin_override' (Q9 paired-row rule)")
 
         container = self._get_container()
         if container:
@@ -130,9 +128,7 @@ class AuditRepository:
             except AttributeError:
                 # SDKs without execute_item_batch — fall back to two creates.
                 # NN-2 is preserved (append-only); atomicity downgrades to per-row.
-                logger.warning(
-                    "AuditRepository: TransactionalBatch unavailable; degrading to sequential creates"
-                )
+                logger.warning("AuditRepository: TransactionalBatch unavailable; degrading to sequential creates")
                 container.create_item(op_norm)
                 container.create_item(tgt_norm)
         else:

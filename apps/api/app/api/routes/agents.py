@@ -84,7 +84,8 @@ def _classify(scenario_id: str) -> tuple[str, str, str, list[str]]:
         return (
             "Possible",
             "Major",
-            "Indicators of compromise on regulated platform data require precautionary isolation and integrity verification.",
+            "Indicators of compromise on regulated platform data require "
+            "precautionary isolation and integrity verification.",
             [
                 "Isolate affected segments and rotate credentials",
                 "Engage ASD / ACSC under the Cyber Incident Management Arrangements",
@@ -144,9 +145,7 @@ async def risk_assessment_recommend(
 # Communication agent bridge (FR-002).
 # ---------------------------------------------------------------------------
 
-_AWS_LEVELS: Final[frozenset[str]] = frozenset(
-    {"Advice", "Watch and Act", "Emergency Warning"}
-)
+_AWS_LEVELS: Final[frozenset[str]] = frozenset({"Advice", "Watch and Act", "Emergency Warning"})
 
 # Languages requiring community-reviewer signature before publish (NN-4 v1).
 # Mirrors apps/web/src/lib/i18n/language-packs.ts so the UI's language picker
@@ -205,9 +204,7 @@ async def communication_draft_aws(payload: DraftAwsRequest) -> dict[str, Any]:
             detail=f"level must be one of {sorted(_AWS_LEVELS)}",
         )
     languages = payload.languages or ["en"]
-    english = _english_draft(
-        payload.level, payload.hazard, payload.location, payload.action
-    )
+    english = _english_draft(payload.level, payload.hazard, payload.location, payload.action)
     variants = [
         {
             "language": lang,

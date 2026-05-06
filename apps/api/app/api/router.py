@@ -147,10 +147,7 @@ elif _os.environ.get("AMA_ENABLE_PRODUCTION_AUTH", "0") == "1":
 # fallback so the panel renders a defensible response instead of 404. The
 # guard ensures we only ever mount this when both gated branches above are
 # inactive, so there is no path-shadowing risk.
-if (
-    _os.environ.get("AMA_ENABLE_PRODUCTION_AUTH", "0") != "1"
-    and not test_support_guard.is_enabled()
-):
+if _os.environ.get("AMA_ENABLE_PRODUCTION_AUTH", "0") != "1" and not test_support_guard.is_enabled():
     from app.api.routes.workspace_bridges import router as workspace_bridges_router
 
     api_router.include_router(workspace_bridges_router)

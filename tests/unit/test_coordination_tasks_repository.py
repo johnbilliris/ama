@@ -146,8 +146,7 @@ class _StubContainer:
                 rows = [
                     r
                     for r in rows
-                    if r["assigned_persona_id"] == params["@pid"]
-                    or r["assigned_organisation_id"] == params["@oid"]
+                    if r["assigned_persona_id"] == params["@pid"] or r["assigned_organisation_id"] == params["@oid"]
                 ]
             else:
                 rows = [r for r in rows if r["assigned_persona_id"] == params["@pid"]]
@@ -210,18 +209,14 @@ class TestCosmosBackend:
 
 
 class TestSingletonCache:
-    def test_singleton_rebuilds_when_endpoint_changes(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_singleton_rebuilds_when_endpoint_changes(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.delenv("COSMOS_ENDPOINT", raising=False)
         repo_a = get_coordination_tasks_repository()
         assert repo_a.is_cosmos_backed is False
 
         monkeypatch.setenv("COSMOS_ENDPOINT", "https://stub.example.invalid/")
         # patch _build_container so we don't try to open a real connection
-        monkeypatch.setattr(
-            repo_module, "_build_container", lambda: _StubContainer()
-        )
+        monkeypatch.setattr(repo_module, "_build_container", lambda: _StubContainer())
         repo_b = get_coordination_tasks_repository()
         assert repo_b is not repo_a
         assert repo_b.is_cosmos_backed is True

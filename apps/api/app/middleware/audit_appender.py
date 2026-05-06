@@ -86,9 +86,7 @@ class AuditAppenderMiddleware(BaseHTTPMiddleware):
 
         request_hash = _sha256_hex(body) if body else "n/a"
         correlation_id = (
-            request.headers.get("X-Correlation-Id")
-            or request.headers.get("X-Request-Id")
-            or str(uuid.uuid4())
+            request.headers.get("X-Correlation-Id") or request.headers.get("X-Request-Id") or str(uuid.uuid4())
         )
         request.state.correlation_id = correlation_id
 

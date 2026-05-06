@@ -104,12 +104,7 @@ async def replay_offline_queue(
         raise HTTPException(status_code=413, detail="batch_too_large")
 
     claims: dict[str, Any] = getattr(request.state, "claims", None) or {}
-    persona_id = (
-        request.headers.get("X-Persona-Id")
-        or claims.get("persona_id")
-        or claims.get("personaId")
-        or "unknown"
-    )
+    persona_id = request.headers.get("X-Persona-Id") or claims.get("persona_id") or claims.get("personaId") or "unknown"
 
     repo = _resolve_repository(request)
 
@@ -172,9 +167,7 @@ async def _emit_audit_row(
     outcome: str,
 ) -> dict[str, Any]:
     correlation_id = entry.client_correlation_id
-    body_hash = hashlib.sha256(
-        f"{entry.payload_hash}:{entry.captured_ts}".encode()
-    ).hexdigest()
+    body_hash = hashlib.sha256(f"{entry.payload_hash}:{entry.captured_ts}".encode()).hexdigest()
 
     row = {
         "outcome": outcome,

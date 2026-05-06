@@ -142,10 +142,7 @@ class RbacCheckMiddleware(BaseHTTPMiddleware):
         if function_name and function_name not in allowed_functions:
             raise ExtensionEnvelopeError(
                 ExtensionErrorCode.FORBIDDEN,
-                detail=(
-                    f"persona '{persona_id}' (AIIMS '{function_name}') outside "
-                    f"AppRole '{role}' scope"
-                ),
+                detail=(f"persona '{persona_id}' (AIIMS '{function_name}') outside AppRole '{role}' scope"),
             )
 
 

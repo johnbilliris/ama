@@ -92,9 +92,7 @@ def test_missing_economic_environment_is_rejected(app: FastAPI) -> None:
 def test_signing_key_expired_returns_schema_invalid_with_signing_detail(app: FastAPI) -> None:
     from app.services.recovery_handover_service import RecoveryHandoverService
 
-    expired_service = RecoveryHandoverService(
-        cert_not_after=datetime.now(UTC) - timedelta(days=1)
-    )
+    expired_service = RecoveryHandoverService(cert_not_after=datetime.now(UTC) - timedelta(days=1))
     app.state.recovery_handover_service = expired_service
 
     res = TestClient(app).post("/api/recovery/handover/sign", json=_full_payload())

@@ -17,21 +17,15 @@ def _index(code: ExtensionErrorCode) -> int:
 
 
 def test_evaluator_not_routable_beats_sovereignty_denied() -> None:
-    assert _index(ExtensionErrorCode.EVALUATOR_NOT_ROUTABLE) < _index(
-        ExtensionErrorCode.SOVEREIGNTY_DENIED
-    )
+    assert _index(ExtensionErrorCode.EVALUATOR_NOT_ROUTABLE) < _index(ExtensionErrorCode.SOVEREIGNTY_DENIED)
 
 
 def test_sovereignty_denied_beats_unauthorized() -> None:
-    assert _index(ExtensionErrorCode.SOVEREIGNTY_DENIED) < _index(
-        ExtensionErrorCode.UNAUTHORIZED
-    )
+    assert _index(ExtensionErrorCode.SOVEREIGNTY_DENIED) < _index(ExtensionErrorCode.UNAUTHORIZED)
 
 
 def test_unauthorized_beats_forbidden() -> None:
-    assert _index(ExtensionErrorCode.UNAUTHORIZED) < _index(
-        ExtensionErrorCode.FORBIDDEN
-    )
+    assert _index(ExtensionErrorCode.UNAUTHORIZED) < _index(ExtensionErrorCode.FORBIDDEN)
 
 
 def test_forbidden_beats_rate_limited() -> None:
@@ -39,15 +33,11 @@ def test_forbidden_beats_rate_limited() -> None:
 
 
 def test_rate_limited_beats_schema_invalid() -> None:
-    assert _index(ExtensionErrorCode.RATE_LIMITED) < _index(
-        ExtensionErrorCode.SCHEMA_INVALID
-    )
+    assert _index(ExtensionErrorCode.RATE_LIMITED) < _index(ExtensionErrorCode.SCHEMA_INVALID)
 
 
 def test_rate_limited_beats_seed_not_ready() -> None:
-    assert _index(ExtensionErrorCode.RATE_LIMITED) < _index(
-        ExtensionErrorCode.SEED_NOT_READY
-    )
+    assert _index(ExtensionErrorCode.RATE_LIMITED) < _index(ExtensionErrorCode.SEED_NOT_READY)
 
 
 def test_evaluator_not_routable_is_top_of_ladder() -> None:
@@ -64,6 +54,5 @@ def test_precedence_full_chain_is_total_order() -> None:
     ]
     indices = [_index(c) for c in chain]
     assert indices == sorted(indices), (
-        f"precedence must be evaluator_not_routable→sovereignty→unauth→forbidden"
-        f"→rate_limited; got indices {indices}"
+        f"precedence must be evaluator_not_routable→sovereignty→unauth→forbidden→rate_limited; got indices {indices}"
     )

@@ -54,9 +54,7 @@ _PII_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("dob", re.compile(r"\b\d{1,2}/\d{1,2}/\d{4}\b")),
     (
         "address",
-        re.compile(
-            r"\b\d+\s+[A-Z][a-z]+\s+(St|Street|Rd|Road|Ave|Avenue|Cres|Crescent|Pl|Place)\b"
-        ),
+        re.compile(r"\b\d+\s+[A-Z][a-z]+\s+(St|Street|Rd|Road|Ave|Avenue|Cres|Crescent|Pl|Place)\b"),
     ),
 )
 

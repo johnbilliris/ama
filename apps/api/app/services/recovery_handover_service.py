@@ -70,17 +70,13 @@ class HandoverValidationError(Exception):
 def _require_recovery_environments(envs: dict[str, RecoveryEnvironment]) -> None:
     missing = [e for e in _REQUIRED_ENVIRONMENTS if e not in envs]
     if missing:
-        raise HandoverValidationError(
-            f"recovery_environments missing required keys: {missing}"
-        )
+        raise HandoverValidationError(f"recovery_environments missing required keys: {missing}")
 
 
 def _require_sendai_ratio(baseline: float, projected: float) -> float:
     ratio = (baseline - projected) / baseline
     if ratio < _SENDAI_THRESHOLD:
-        raise HandoverValidationError(
-            f"sendai_ratio {ratio:.3f} below threshold {_SENDAI_THRESHOLD}"
-        )
+        raise HandoverValidationError(f"sendai_ratio {ratio:.3f} below threshold {_SENDAI_THRESHOLD}")
     return ratio
 
 
@@ -191,9 +187,7 @@ class RecoveryHandoverService:
         )
         self.cert_not_after = cert_not_after
 
-    async def sign(
-        self, payload: HandoverRequest, *, correlation_id: str | None = None
-    ) -> HandoverResponse:
+    async def sign(self, payload: HandoverRequest, *, correlation_id: str | None = None) -> HandoverResponse:
         if self.cert_not_after is not None and datetime.now(UTC) > self.cert_not_after:
             raise SigningKeyExpiredError("recovery handover signing cert past notAfter")
 

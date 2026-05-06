@@ -75,8 +75,7 @@ class CoordinationTasksRepository:
                 self._container = _build_container()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "CoordinationTasksRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "CoordinationTasksRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._container = None
@@ -110,9 +109,7 @@ class CoordinationTasksRepository:
             return None
         return _from_doc(docs[0])
 
-    def list_for_persona_or_org(
-        self, persona_id: str, organisation_id: str
-    ) -> list[CoordinationTask]:
+    def list_for_persona_or_org(self, persona_id: str, organisation_id: str) -> list[CoordinationTask]:
         """Tasks where assignee == persona OR assigned-org == organisation.
 
         Single-partition Cosmos query when ``organisation_id`` is provided
@@ -125,8 +122,7 @@ class CoordinationTasksRepository:
             return [
                 task
                 for task in state_store.TASKS.values()
-                if task.assigned_persona_id == persona_id
-                or task.assigned_organisation_id == organisation_id
+                if task.assigned_persona_id == persona_id or task.assigned_organisation_id == organisation_id
             ]
         docs = self._query(
             "SELECT * FROM c WHERE c.assigned_persona_id = @pid OR c.assigned_organisation_id = @oid",
@@ -140,11 +136,7 @@ class CoordinationTasksRepository:
 
     def list_for_organisation(self, organisation_id: str) -> list[CoordinationTask]:
         if self._container is None:
-            return [
-                task
-                for task in state_store.TASKS.values()
-                if task.assigned_organisation_id == organisation_id
-            ]
+            return [task for task in state_store.TASKS.values() if task.assigned_organisation_id == organisation_id]
         docs = self._query(
             "SELECT * FROM c WHERE c.assigned_organisation_id = @oid",
             [{"name": "@oid", "value": organisation_id}],
@@ -152,9 +144,7 @@ class CoordinationTasksRepository:
         )
         return [_from_doc(doc) for doc in docs]
 
-    def list_dependencies(
-        self, organisation_id: str, dependency_ids: list[str]
-    ) -> list[CoordinationTask]:
+    def list_dependencies(self, organisation_id: str, dependency_ids: list[str]) -> list[CoordinationTask]:
         """Resolve dependency-chain tasks scoped to a single organisation.
 
         Returns tasks whose ``task_id`` is in ``dependency_ids`` AND whose
@@ -172,9 +162,7 @@ class CoordinationTasksRepository:
                 if task.task_id in ids and task.assigned_organisation_id == organisation_id
             ]
         placeholders = ", ".join(f"@id{i}" for i in range(len(dependency_ids)))
-        params: list[dict[str, object]] = [
-            {"name": f"@id{i}", "value": tid} for i, tid in enumerate(dependency_ids)
-        ]
+        params: list[dict[str, object]] = [{"name": f"@id{i}", "value": tid} for i, tid in enumerate(dependency_ids)]
         params.append({"name": "@oid", "value": organisation_id})
         docs = self._query(
             f"SELECT * FROM c WHERE c.assigned_organisation_id = @oid AND c.task_id IN ({placeholders})",
@@ -191,11 +179,7 @@ class CoordinationTasksRepository:
         ``state_store.TASKS`` directly.
         """
         if self._container is None:
-            return [
-                task
-                for task in state_store.TASKS.values()
-                if task.assigned_persona_id == persona_id
-            ]
+            return [task for task in state_store.TASKS.values() if task.assigned_persona_id == persona_id]
         docs = self._query(
             "SELECT * FROM c WHERE c.assigned_persona_id = @pid",
             [{"name": "@pid", "value": persona_id}],
@@ -240,11 +224,7 @@ class CoordinationTasksRepository:
             kwargs["partition_key"] = partition_key
         else:
             kwargs["enable_cross_partition_query"] = True
-        return list(
-            self._container.query_items(
-                query=query, parameters=parameters, **kwargs
-            )
-        )
+        return list(self._container.query_items(query=query, parameters=parameters, **kwargs))
 
 
 _singleton: CoordinationTasksRepository | None = None

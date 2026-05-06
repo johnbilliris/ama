@@ -53,9 +53,7 @@ class CulturalSafetyOutcome(StrEnum):
 
 
 _DEFAULT_TIMEOUT_SECONDS = 90
-_TIMEOUT_OVERRIDE_AWS_LEVELS: frozenset[AwsLevel] = frozenset(
-    {AwsLevel.emergency_warning}
-)
+_TIMEOUT_OVERRIDE_AWS_LEVELS: frozenset[AwsLevel] = frozenset({AwsLevel.emergency_warning})
 
 
 @dataclass
@@ -98,9 +96,7 @@ class CulturalSafetyService:
     ) -> None:
         self._elder_router = elder_router
         self._timeout_seconds = timeout_seconds
-        self._timeout_override_aws_levels = (
-            timeout_override_aws_levels or _TIMEOUT_OVERRIDE_AWS_LEVELS
-        )
+        self._timeout_override_aws_levels = timeout_override_aws_levels or _TIMEOUT_OVERRIDE_AWS_LEVELS
 
     @property
     def timeout_seconds(self) -> int:
@@ -132,9 +128,7 @@ class CulturalSafetyService:
 
         is_override_eligible = draft.aws_level in self._timeout_override_aws_levels
         if ic_confirmer_oid is not None and not is_override_eligible:
-            raise CulturalSafetyError(
-                f"IC override not permitted on aws_level={draft.aws_level.value}"
-            )
+            raise CulturalSafetyError(f"IC override not permitted on aws_level={draft.aws_level.value}")
 
         ts = datetime.now(UTC).isoformat()
         if is_override_eligible and ic_confirmer_oid is not None:
@@ -187,9 +181,7 @@ class CulturalSafetyService:
         )
         return CulturalSafetyDecision(state=state, outcome=outcome, audit_row=audit_row)
 
-    def on_elder_decline(
-        self, draft: CulturalSafetyDraft
-    ) -> CulturalSafetyDecision:
+    def on_elder_decline(self, draft: CulturalSafetyDraft) -> CulturalSafetyDecision:
         """Elder-decline outcome is held regardless of AWS level."""
 
         ts = datetime.now(UTC).isoformat()

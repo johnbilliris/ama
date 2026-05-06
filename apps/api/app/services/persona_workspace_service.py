@@ -49,14 +49,9 @@ class PersonaWorkspaceService:
         visible = repo.list_for_persona_or_org(persona_id, organisation_id)
         visible_tasks = [task.model_dump(mode="json") for task in visible]
 
-        dependency_ids = [
-            dep_id
-            for task in visible_tasks
-            for dep_id in task.get("dependency_task_ids", [])
-        ]
+        dependency_ids = [dep_id for task in visible_tasks for dep_id in task.get("dependency_task_ids", [])]
         dependency_chain = [
-            task.model_dump(mode="json")
-            for task in repo.list_dependencies(organisation_id, dependency_ids)
+            task.model_dump(mode="json") for task in repo.list_dependencies(organisation_id, dependency_ids)
         ]
 
         return {

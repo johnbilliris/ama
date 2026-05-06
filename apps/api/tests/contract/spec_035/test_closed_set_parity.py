@@ -58,9 +58,7 @@ def ts_app_roles() -> list[str]:
 @pytest.fixture(scope="module")
 def ts_extension_codes() -> list[str]:
     text = _read(REPO_ROOT / "packages" / "domain" / "src" / "extension-envelope.ts")
-    block = re.search(
-        r"EXTENSION_ERROR_CODES\s*=\s*\[(?P<body>.*?)\]\s*as const", text, re.DOTALL
-    )
+    block = re.search(r"EXTENSION_ERROR_CODES\s*=\s*\[(?P<body>.*?)\]\s*as const", text, re.DOTALL)
     assert block is not None
     return [m.group(1) for m in re.finditer(r'"([^"]+)"', block.group("body"))]
 
@@ -141,13 +139,13 @@ def test_extension_error_precedence_is_complete_and_unique() -> None:
     # evaluator_not_routable wins over everything else (cheap pre-auth check).
     assert ERROR_PRECEDENCE[0] is ExtensionErrorCode.EVALUATOR_NOT_ROUTABLE
     # sovereignty_denied beats unauthorized (NN-1).
-    assert ERROR_PRECEDENCE.index(
-        ExtensionErrorCode.SOVEREIGNTY_DENIED
-    ) < ERROR_PRECEDENCE.index(ExtensionErrorCode.UNAUTHORIZED)
+    assert ERROR_PRECEDENCE.index(ExtensionErrorCode.SOVEREIGNTY_DENIED) < ERROR_PRECEDENCE.index(
+        ExtensionErrorCode.UNAUTHORIZED
+    )
     # rate_limited beats schema_invalid (429 short-circuits validation).
-    assert ERROR_PRECEDENCE.index(
-        ExtensionErrorCode.RATE_LIMITED
-    ) < ERROR_PRECEDENCE.index(ExtensionErrorCode.SCHEMA_INVALID)
+    assert ERROR_PRECEDENCE.index(ExtensionErrorCode.RATE_LIMITED) < ERROR_PRECEDENCE.index(
+        ExtensionErrorCode.SCHEMA_INVALID
+    )
 
 
 def test_offline_queue_tier_typescript_parity(ts_offline_tiers: list[str]) -> None:

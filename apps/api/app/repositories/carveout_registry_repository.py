@@ -22,12 +22,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Final
 
-_SEED_PATH: Final[Path] = (
-    Path(__file__).resolve().parents[4]
-    / "data"
-    / "governance"
-    / "foundry_carveout_registry.json"
-)
+_SEED_PATH: Final[Path] = Path(__file__).resolve().parents[4] / "data" / "governance" / "foundry_carveout_registry.json"
 
 _STALE_AFTER = timedelta(days=90)
 

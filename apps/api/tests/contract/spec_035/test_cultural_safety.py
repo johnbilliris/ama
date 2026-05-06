@@ -10,8 +10,7 @@ and the elder-decline path.
 from __future__ import annotations
 
 import pytest
-
-from apps.api.app.services.cultural_safety_service import (
+from app.services.cultural_safety_service import (
     AwsLevel,
     CulturalSafetyDraft,
     CulturalSafetyError,
@@ -68,9 +67,7 @@ def test_advice_timeout_holds_publication() -> None:
 def test_ic_override_rejected_on_non_emergency_aws_level() -> None:
     service = CulturalSafetyService()
     with pytest.raises(CulturalSafetyError):
-        service.on_timeout(
-            _draft(AwsLevel.watch_and_act), ic_confirmer_oid="ic-oid"
-        )
+        service.on_timeout(_draft(AwsLevel.watch_and_act), ic_confirmer_oid="ic-oid")
 
 
 def test_elder_decline_yields_held_outcome_regardless_of_level() -> None:

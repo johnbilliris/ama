@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import uuid
 from collections import deque
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Final
 
 from fastapi import APIRouter, Path, Request
@@ -73,11 +73,7 @@ async def workspace_outcome_evaluate(
 ) -> JSONResponse:
     correlation_id = request.headers.get("x-correlation-id") or _new_correlation_id()
     audit_id = str(uuid.uuid4())
-    masked = sum(
-        1
-        for src in payload.sources
-        if src.excerpt and any(t in src.excerpt for t in ("[REDACTED]", "***"))
-    )
+    masked = sum(1 for src in payload.sources if src.excerpt and any(t in src.excerpt for t in ("[REDACTED]", "***")))
     classifier_outcome = "masked" if masked > 0 else "clean"
     row: dict[str, Any] = {
         "audit_id": audit_id,
@@ -89,7 +85,7 @@ async def workspace_outcome_evaluate(
         "approver_identity": payload.approver_identity,
         "scenario_id": f"sc-{sc_id}",
         "correlation_id": correlation_id,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "sources": [src.model_dump() for src in payload.sources],
         "actor": payload.approver_identity or "unknown",
     }
