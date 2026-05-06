@@ -54,7 +54,7 @@ jobs:
       - name: spec-035 spec-hardening invariant
         if: hashFiles('scripts/verify-spec-hardening.ps1') != ''
         shell: pwsh
-        run: ./scripts/verify-spec-hardening.ps1 -SpecId 035
+        run: ./scripts/verify-spec-hardening.ps1
 
       - name: spec-035 activation-mutex invariant
         if: hashFiles('scripts/verify-activation-mutex.ps1') != ''
