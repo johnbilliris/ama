@@ -180,6 +180,34 @@ jobs:
           echo "Resolved $(echo "${global_admin_ids}" | jq 'length') Global Administrator user account(s) for Cosmos DB data-plane reader access."
           azd env set globalAdministratorPrincipalIds "$(echo "${global_admin_ids}" | jq -c '.')"
 
+      # Self-heal soft-deleted Cognitive Services (OpenAI) accounts in the
+      # target resource group before provisioning. Bicep regenerates the
+      # OpenAI account name deterministically from `uniqueString(rg.id)`
+      # (infra/main.bicep:661-662), so a soft-deleted account from a prior
+      # destroyed deploy collides on the next `azd provision` with
+      # `FlagMustBeSetForRestore`. Purge is idempotent and a no-op when
+      # nothing matches. Scoped to the deployment RG and `kind=='OpenAI'`
+      # to avoid touching unrelated soft-deleted accounts.
+      - name: Purge soft-deleted Cognitive Services accounts (self-heal)
+        run: |
+          set -euo pipefail
+          deleted=$(az cognitiveservices account list-deleted \
+            --query "[?contains(id, '/resourceGroups/${RESOURCE_GROUP}/') && kind=='OpenAI' && location=='australiaeast'].{name:name, location:location}" \
+            -o json)
+          count=$(echo "${deleted}" | jq 'length')
+          echo "Soft-deleted OpenAI accounts in ${RESOURCE_GROUP}: ${count}"
+          if [[ "${count}" -gt 0 ]]; then
+            echo "${deleted}" | jq -c '.[]' | while read -r row; do
+              name=$(echo "${row}" | jq -r .name)
+              loc=$(echo "${row}" | jq -r .location)
+              echo "Purging ${name} in ${loc}..."
+              az cognitiveservices account purge \
+                --name "${name}" \
+                --location "${loc}" \
+                --resource-group "${RESOURCE_GROUP}"
+            done
+          fi
+
       - name: Provision infrastructure
         run: azd provision --no-prompt
 
