@@ -34,7 +34,7 @@
   },
   "allOf": [
     {
-      "comment": "retry_after_seconds is non-null only for rate_limited and seed_not_ready.",
+      "$comment": "retry_after_seconds is non-null only for rate_limited and seed_not_ready.",
       "if": {
         "not": {
           "properties": {

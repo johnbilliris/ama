@@ -252,6 +252,7 @@ export function HealthScoreGauge({
                 <span>{d.dimension.replace(/_/g, " ")}</span>
                 <Tooltip content={dimensionExplanation} side="top" widthPx={300}>
                   <span
+                    role="img"
                     aria-label={`About ${meta.label}`}
                     style={{ display: "inline-flex", alignItems: "center" }}
                   >

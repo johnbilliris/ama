@@ -72,4 +72,4 @@ jobs:
 
       - name: extension envelope schema lint
         run: |
-          npx --yes ajv-cli@5.0.0 compile -s packages/schemas/spec_035/extension_envelope.schema.json
+          npx --yes ajv-cli@5.0.0 compile --spec=draft2020 -s packages/schemas/spec_035/extension_envelope.schema.json
