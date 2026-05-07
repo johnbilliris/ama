@@ -1,4 +1,4 @@
-﻿---
+---
 description: "AMA development guidelines and project conventions shared with all agents."
 ---
 

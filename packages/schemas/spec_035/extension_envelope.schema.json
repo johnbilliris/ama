@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama/spec_035/extension_envelope.schema.json",
+  "title": "ExtensionEnvelope",
+  "description": "Spec-035 production-auth error envelope (FR-009 / Q10). Returned on every error response from production-reachable endpoints. The body MUST byte-equal the extension_envelope field on the audit row.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["error_code", "retry_after_seconds", "audit_id", "correlation_id"],
+  "properties": {
+    "error_code": {
+      "type": "string",
+      "enum": [
+        "unauthorized",
+        "forbidden",
+        "sovereignty_denied",
+        "rate_limited",
+        "evaluator_not_routable",
+        "schema_invalid",
+        "seed_not_ready"
+      ]
+    },
+    "retry_after_seconds": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "audit_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "retry_after_seconds is non-null only for rate_limited and seed_not_ready.",
+      "if": {
+        "not": {
+          "properties": {
+            "error_code": {
+              "enum": ["rate_limited", "seed_not_ready"]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "retry_after_seconds": { "type": "null" }
+        }
+      }
+    }
+  ]
+}

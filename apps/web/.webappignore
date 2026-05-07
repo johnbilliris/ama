@@ -1,0 +1,13 @@
+# azd .webappignore — overrides azd's default Node.js packaging exclusions.
+#
+# Without this file, azd automatically excludes `node_modules/` from the zip
+# uploaded to App Service. That breaks our deploy because we ship a flat
+# pre-built bundle (produced by `pnpm deploy --node-linker=hoisted`), and
+# Linux App Service has no way to recreate the dependencies (Oryx is
+# disabled via SCM_DO_BUILD_DURING_DEPLOYMENT=false on this site).
+#
+# Patterns here use gitignore syntax. Anything listed is excluded; an empty
+# file means "ship everything" — which is exactly what we want for the
+# `apps/web/.next/standalone-deploy/` bundle.
+#
+# See: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/service-packaging-ignore-files

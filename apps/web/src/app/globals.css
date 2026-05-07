@@ -1109,7 +1109,7 @@ nav[aria-label] a {
 
 .incident-hero {
   position: relative;
-  min-height: 340px;
+  min-height: 170px;
   background-size: cover;
   background-position: center;
   border-radius: 0 0 var(--ama-radius-panel) var(--ama-radius-panel);
@@ -1144,7 +1144,7 @@ nav[aria-label] a {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.4rem;
   transition: color var(--ama-transition-fast);
 }
 
@@ -1157,7 +1157,7 @@ nav[aria-label] a {
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   font-size: 0.85rem;
   opacity: 0.9;
 }
@@ -1356,7 +1356,7 @@ nav[aria-label] a {
 
 @media (max-width: 640px) {
   .incident-hero {
-    min-height: 240px;
+    min-height: 140px;
   }
   .incident-hero-title {
     font-size: 1.4rem;
@@ -1693,6 +1693,20 @@ nav[aria-label] a {
   .workspace-columns {
     grid-template-columns: 1fr;
   }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SHARED PAGE CHROME (Governance / Workspaces / Sectors /
+   Preparedness / Help share this header gutter).
+   ═══════════════════════════════════════════════════════ */
+
+.page-gutter-header {
+  margin: 1.25rem 1.5rem 0;
+}
+
+.page-gutter-x {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -2168,16 +2182,6 @@ nav[aria-label] a {
 
 .preparedness-loading {
   padding: 2rem;
-  color: var(--ama-color-ink-soft);
-  font-size: 0.875rem;
-}
-
-.preparedness-empty-state {
-  background: var(--ama-surface-elevated);
-  border: 1px dashed var(--ama-border-medium);
-  border-radius: var(--ama-radius-panel);
-  padding: 2rem;
-  text-align: center;
   color: var(--ama-color-ink-soft);
   font-size: 0.875rem;
 }

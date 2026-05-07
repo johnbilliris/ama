@@ -9,6 +9,39 @@ import {
   type RecoveryProgressResponse,
   type RecoveryDomainDetail,
 } from "@/lib/api/governance";
+import {
+  ClaimsVelocityDashboard,
+  type ClaimsVelocitySnapshot,
+} from "@/components/claims-velocity";
+
+const FR_024_BUILT_SUBDOMAINS = [
+  "housing-restoration",
+  "infrastructure-rebuild",
+] as const;
+
+const FR_024_ECONOMIC_SUBDOMAINS = [
+  "insurance-recovery",
+  "small-business-grants",
+  "supply-chain-restoration",
+  "tourism-reactivation",
+] as const;
+
+const PLACEHOLDER_CLAIMS_VELOCITY: ClaimsVelocitySnapshot = {
+  as_at: new Date().toISOString(),
+  claims_lodged: 0,
+  claims_closed: 0,
+  dollars_lodged: 0,
+  dollars_paid: 0,
+  lga_breakdown: [],
+};
+
+interface SendaiCounterfactual {
+  baseline_loss: number;
+  projected_loss: number;
+  ratio: number;
+  threshold: number;
+  status: "satisfied" | "blocked";
+}
 
 /**
  * Recovery progress view page (US5).
@@ -19,6 +52,11 @@ export default function RecoveryPage() {
   const [detail, setDetail] = useState<RecoveryDomainDetail | null>(null);
   const [selectedIncident, setSelectedIncident] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
+  const [claimsVelocity, setClaimsVelocity] = useState<ClaimsVelocitySnapshot>(
+    PLACEHOLDER_CLAIMS_VELOCITY,
+  );
+  const [sendai, setSendai] = useState<SendaiCounterfactual | null>(null);
+  const [sendaiError, setSendaiError] = useState<string | null>(null);
 
   const fetchData = async (incidentId?: string) => {
     try {
@@ -33,6 +71,41 @@ export default function RecoveryPage() {
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetch("/api/recovery/claims-velocity", { signal: ctrl.signal })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const body = (await res.json()) as ClaimsVelocitySnapshot;
+        setClaimsVelocity(body);
+      })
+      .catch(() => {
+        /* keep placeholder */
+      });
+    return () => ctrl.abort();
+  }, []);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetch("/api/recovery/sendai-counterfactual", { signal: ctrl.signal })
+      .then(async (res) => {
+        if (res.status === 422) {
+          const body = await res.json().catch(() => ({}));
+          setSendaiError(
+            (body as { detail?: string }).detail ?? "Sendai counterfactual blocked.",
+          );
+          return;
+        }
+        if (!res.ok) return;
+        const body = (await res.json()) as SendaiCounterfactual;
+        setSendai(body);
+      })
+      .catch(() => {
+        /* silent */
+      });
+    return () => ctrl.abort();
+  }, []);
 
   const handleDomainClick = async (domain: string) => {
     try {
@@ -131,6 +204,74 @@ export default function RecoveryPage() {
           </div>
         </div>
       )}
+
+      <section
+        className="grid gap-3 lg:grid-cols-2"
+        data-testid="fr-024-recovery-environments"
+      >
+        <article
+          className="rounded-lg border border-slate-200 bg-white p-4"
+          data-testid="recovery-env-built"
+        >
+          <h3 className="text-sm font-semibold">Built environment (FR-024)</h3>
+          <ul className="mt-2 list-disc pl-5 text-xs text-slate-600">
+            {FR_024_BUILT_SUBDOMAINS.map((sub) => (
+              <li key={sub} data-testid={`fr-024-${sub}`}>
+                {sub}
+              </li>
+            ))}
+          </ul>
+        </article>
+        <article
+          className="rounded-lg border border-slate-200 bg-white p-4"
+          data-testid="recovery-env-economic"
+        >
+          <h3 className="text-sm font-semibold">Economic environment (FR-024)</h3>
+          <ul className="mt-2 list-disc pl-5 text-xs text-slate-600">
+            {FR_024_ECONOMIC_SUBDOMAINS.map((sub) => (
+              <li key={sub} data-testid={`fr-024-${sub}`}>
+                {sub}
+              </li>
+            ))}
+          </ul>
+          {sendai ? (
+            <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
+              <div>
+                <dt className="text-slate-500">Baseline loss</dt>
+                <dd className="font-mono">${sendai.baseline_loss.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Projected loss</dt>
+                <dd className="font-mono">${sendai.projected_loss.toLocaleString()}</dd>
+              </div>
+              <div>
+                <dt className="text-slate-500">Sendai ratio</dt>
+                <dd
+                  className={`font-mono ${
+                    sendai.status === "blocked" ? "text-rose-700" : "text-emerald-700"
+                  }`}
+                  data-testid="sendai-ratio"
+                >
+                  {sendai.ratio.toFixed(1)}
+                </dd>
+              </div>
+            </dl>
+          ) : null}
+          {sendaiError ? (
+            <p
+              className="mt-2 rounded-md bg-rose-50 p-2 text-xs text-rose-900"
+              role="alert"
+              data-testid="sendai-threshold-warning"
+            >
+              {sendaiError}
+            </p>
+          ) : null}
+        </article>
+      </section>
+
+      <section data-testid="recovery-claims-velocity">
+        <ClaimsVelocityDashboard snapshot={claimsVelocity} />
+      </section>
     </div>
   );
 }

@@ -1,0 +1,53 @@
+name: Foundry carve-out review (spec-035 T071)
+
+on:
+  schedule:
+    # Run weekly so stale carveout entries are caught within ~7d of the 90d gate.
+    - cron: "0 7 * * 1"
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - "data/governance/foundry_carveout_registry.json"
+      - "apps/api/app/repositories/carveout_registry_repository.py"
+      - ".github/workflows/foundry-carveout-review.yml"
+
+jobs:
+  review-cadence-gate:
+    name: Fail if any carveout entry is older than 90 days
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Evaluate carveout review dates
+        run: |
+          python <<'PY'
+          import json
+          import sys
+          from datetime import datetime, timedelta, timezone
+
+          STALE = timedelta(days=90)
+          path = "data/governance/foundry_carveout_registry.json"
+          with open(path, encoding="utf-8") as fh:
+              entries = json.load(fh)
+
+          now = datetime.now(tz=timezone.utc)
+          stale = []
+          for entry in entries:
+              review = datetime.fromisoformat(entry["review_date"])
+              if review.tzinfo is None:
+                  review = review.replace(tzinfo=timezone.utc)
+              if now - review > STALE:
+                  stale.append((entry["model_id"], entry["review_date"]))
+
+          if stale:
+              print("Stale carveout entries (>90 days):")
+              for model_id, review_date in stale:
+                  print(f"  - {model_id} (review_date={review_date})")
+              sys.exit(1)
+          print(f"All {len(entries)} carveout entries reviewed within 90 days.")
+          PY
