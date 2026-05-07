@@ -1,10 +1,10 @@
 # .github/workflows/cd.yml — Continuous Deployment pipeline (spec 031)
 #
-# Branch-based deployment model:
-#   push to main       → CI runs → CD deploys to rg-drh-dev
+# Branch-based deployment model (1:1 branch → environment):
 #   push to dev        → CI runs → CD deploys to rg-drh-dev
 #   push to staging    → CI runs → CD deploys to rg-drh-staging
 #   push to production → CI runs → CD deploys to rg-drh-production
+#   push to main       → CI runs (no CD)
 #   PR to main         → CI runs (no deploy)
 #
 # Auth: single AZURE_CREDENTIALS JSON secret per GitHub Environment
@@ -21,7 +21,6 @@ on:
     workflows: ["ci"]
     types: [completed]
     branches:
-      - main
       - dev
       - staging
       - production
@@ -33,21 +32,22 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy to ${{ github.event.workflow_run.head_branch == 'main' && 'dev' || github.event.workflow_run.head_branch }}
+    name: Deploy to ${{ github.event.workflow_run.head_branch }}
     runs-on: ubuntu-latest
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push'
-    environment: ${{ github.event.workflow_run.head_branch == 'main' && 'dev' || github.event.workflow_run.head_branch }}
+    environment: ${{ github.event.workflow_run.head_branch }}
     # Initial dev provision of the full DRH stack (Container Apps environment +
     # api/agents/ingestion containers + Cosmos + Storage + OpenAI + App Service
     # + monitoring) takes 25-35 minutes. 60 leaves headroom; subsequent
     # provisions on existing resources are faster (~5-10 min).
     timeout-minutes: 60
     concurrency:
-      # Group by target environment, not source branch, so simultaneous pushes
-      # to main and dev (both → dev environment) serialise rather than racing.
-      group: deploy-${{ github.event.workflow_run.head_branch == 'main' && 'dev' || github.event.workflow_run.head_branch }}
+      # Branch ↔ environment is 1:1, so grouping by head_branch is equivalent
+      # to grouping by target environment and prevents concurrent deploys to
+      # the same environment.
+      group: deploy-${{ github.event.workflow_run.head_branch }}
       cancel-in-progress: false
 
     outputs:
@@ -66,17 +66,14 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
 
       # Step 2 — pin TARGET_ENV from the source branch for downstream steps.
-      # `main` is treated as the source branch for the `dev` environment;
-      # `dev`/`staging`/`production` map 1:1 to their environments.
+      # Branch ↔ environment is 1:1: dev/staging/production map to their
+      # respective environments. `main` is excluded by the trigger filter
+      # above, so head_branch is always one of these three here.
       - name: Resolve target environment
         env:
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
-          if [[ "${HEAD_BRANCH}" == "main" ]]; then
-            TARGET_ENV="dev"
-          else
-            TARGET_ENV="${HEAD_BRANCH}"
-          fi
+          TARGET_ENV="${HEAD_BRANCH}"
           echo "TARGET_ENV=${TARGET_ENV}" >> "$GITHUB_ENV"
           echo "AZURE_ENV_NAME=drh-${TARGET_ENV}" >> "$GITHUB_ENV"
           echo "RESOURCE_GROUP=rg-drh-${TARGET_ENV}" >> "$GITHUB_ENV"
