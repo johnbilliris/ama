@@ -31,7 +31,37 @@ python scripts/disaster_corpus/validate.py
 | `validate.py` | Enforces invariants per topic folder (PDF magic, sha256 match, image refs resolve). |
 | `aidr_backfill.py` | One-shot to synthesise `source.json` for the pre-pipeline AIDR samples. |
 | `sitemap_crawl.py` | Discovery aid — parse a publisher's sitemap, filter by EM keywords, extract PDF anchors from candidate pages. Use to find new sources to curate into `sources.yaml`. |
-| `discover.py`, `discover_browser.py`, `sitemap_pdfs.py`, `probe.py`, `wayback_discover.py`, `filter_wayback.py` | Lower-level discovery helpers (plain-HTML scraping, sitemap parsing, range probes, Wayback CDX). Mostly used while expanding the catalogue, not on every build. |
+| `discover_pdfs.py` | HTML-anchor PDF harvester — fetches a publisher's index/landing pages and extracts every `*.pdf` link. Useful when sitemap is missing. |
+| `cdx_only.py`, `cdx_filter.py`, `cdx_harvest.py` | Wayback Machine CDX-API discovery — list every PDF the Internet Archive has captured for a publisher domain. `cdx_only.py` is the fastest (no live HEAD); `cdx_filter.py` HEAD-verifies each result. Only `http://web.archive.org/cdx/...` works reliably; `https://` connections often abort. |
+| `wayback_lookup.py`, `wayback_bulk.py` | Look up the most recent successful PDF capture for each input URL. `wayback_bulk.py` makes one CDX call per host (much faster than per-URL); `wayback_lookup.py` queries per URL and is only used for one-off look-ups. Output is `<timestamp>\t<original>\t<wayback-id_-url>` ready for a `fetch_url` field. |
+| `discover.py`, `discover_browser.py`, `sitemap_pdfs.py`, `probe.py`, `wayback_discover.py`, `filter_wayback.py` | Lower-level legacy discovery helpers. Mostly used while expanding the catalogue, not on every build. |
+
+## Wayback Machine fetch fallback
+
+Some publisher URLs return 404 even though the document is current and
+publicly distributed (sites get migrated faster than third-party citations
+can update). For those, set `fetch_url:` in the source's YAML block to a
+Wayback Machine `id_` identity URL — the orchestrator downloads the bytes
+from Wayback while the citation `url` stays the publisher's URL. The
+resulting `source.json` records both as `url` (citation) and `wayback_url`
+(actual fetch); `handbook.md` adds an "Archived copy" line to the front
+matter so RAG output is fully attributable.
+
+```yaml
+  - jurisdiction: wa
+    topic: wa-state-hazard-plan-tsunami
+    title: Western Australia State Hazard Plan — Tsunami
+    publisher: WA SEMC
+    url: https://semc.wa.gov.au/.../StateHazardPlanTsunami.pdf
+    fetch_url: https://web.archive.org/web/20190315115759id_/https://semc.wa.gov.au/.../StateHazardPlanTsunami.pdf
+    licence: ...
+    mode: full-text
+    filename: wa-state-hazard-plan-tsunami.pdf
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20190315115759 (id_ identity URL).
+```
+
+To find the timestamp, pipe a list of original URLs to
+`python scripts/disaster_corpus/wayback_bulk.py`.
 
 ## Adding a new source
 

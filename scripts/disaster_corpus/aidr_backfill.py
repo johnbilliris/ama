@@ -12,7 +12,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
-DOCS = Path(__file__).resolve().parents[2] / "docs" / "aidr"
+DOCS = Path(__file__).resolve().parents[2] / "docs" / "corpus" / "aidr"
 
 
 def _front_matter(md_text: str) -> dict:

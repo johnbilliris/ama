@@ -1,9 +1,9 @@
-"""Generate docs/MANIFEST.md aggregating every ingested source under docs/.
+"""Generate docs/corpus/MANIFEST.md aggregating every ingested source under docs/corpus/.
 
-Walks the docs/ tree, reads each `source.json`, extracts metadata from the
+Walks the corpus tree, reads each `source.json`, extracts metadata from the
 matching `handbook.md`'s front-matter blockquote, and emits a single Markdown
 table grouping rows by jurisdiction. The output mirrors the schema used by
-`docs/aidr/LICENCE-INVENTORY.md` so existing tooling can consume it.
+`docs/corpus/aidr/LICENCE-INVENTORY.md` so existing tooling can consume it.
 """
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-DOC_ROOT = Path(__file__).resolve().parents[2] / "docs"
+DOC_ROOT = Path(__file__).resolve().parents[2] / "docs" / "corpus"
 MANIFEST = DOC_ROOT / "MANIFEST.md"
 
 JURISDICTION_LABELS = {
@@ -99,7 +99,7 @@ def render(rows: list[dict]) -> str:
     lines.append("# Australian Disaster-Management Corpus — MANIFEST")
     lines.append("")
     lines.append(
-        "Auto-generated from `source.json` sidecars under `docs/`. "
+        "Auto-generated from `source.json` sidecars under `docs/corpus/`. "
         "Every entry is the canonical ingest record for one source publication: "
         "the original artifact (PDF) is preserved verbatim alongside a "
         "high-fidelity page-by-page Markdown render (`handbook.md`) plus an "

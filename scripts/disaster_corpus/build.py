@@ -30,7 +30,7 @@ from fetch import CorpusFetcher  # noqa: E402  (path-adjusted)
 from pdf_to_md import convert as pdf_to_md_convert  # noqa: E402
 
 REPO_ROOT = HERE.parent.parent  # scripts/disaster_corpus -> scripts -> repo
-DOCS_ROOT = REPO_ROOT / "docs"
+DOCS_ROOT = REPO_ROOT / "docs" / "corpus"
 SOURCES_YAML = HERE / "sources.yaml"
 
 
@@ -46,10 +46,15 @@ class Source:
     mode: str = "full-text"  # full-text | metadata-only | excluded
     filename: Optional[str] = None  # override download filename
     notes: Optional[str] = None
+    fetch_url: Optional[str] = None  # if set, fetch from here (e.g. Wayback id_) but cite `url`
 
     @property
     def out_dir(self) -> Path:
         return DOCS_ROOT / self.jurisdiction / self.topic
+
+    @property
+    def effective_fetch_url(self) -> str:
+        return self.fetch_url or self.url
 
 
 def load_sources(path: Path = SOURCES_YAML) -> list[Source]:
@@ -70,6 +75,39 @@ def _safe_pdf_filename(url: str, source: Source) -> str:
     from urllib.parse import unquote
 
     return unquote(last)
+
+
+def _annotate_wayback(source: Source, fr) -> None:
+    """Augment source.json + handbook.md with the actual Wayback fetch URL.
+
+    Used when the live publisher URL has 404'd and we recovered the artifact
+    from the Internet Archive Wayback Machine. The citation ``url`` stays the
+    publisher's original URL (so RAG citations are publisher-attributable),
+    but we record the precise archived snapshot for full provenance.
+    """
+    src_json = source.out_dir / "source.json"
+    if src_json.exists():
+        try:
+            data = json.loads(src_json.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            data = {}
+        data["wayback_url"] = source.fetch_url
+        data["fetch_url"] = source.fetch_url
+        src_json.write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
+
+    md = source.out_dir / "handbook.md"
+    if md.exists():
+        text = md.read_text(encoding="utf-8")
+        marker = "> *Converted from PDF to Markdown format.*"
+        injection = (
+            f"> **Archived copy**: Internet Archive Wayback Machine — "
+            f"`{source.fetch_url}`\n"
+            f"> *(Live publisher URL no longer resolves; this archived snapshot was used "
+            f"for ingest. Cite the publisher URL above.)*\n"
+        )
+        if marker in text and "Archived copy" not in text:
+            text = text.replace(marker, injection + marker, 1)
+            md.write_text(text, encoding="utf-8")
 
 
 def process(
@@ -105,7 +143,7 @@ def process(
         try:
             s.out_dir.mkdir(parents=True, exist_ok=True)
             fname = _safe_pdf_filename(s.url, s)
-            fr = fetcher.fetch(s.url, s.out_dir, filename=fname)
+            fr = fetcher.fetch(s.effective_fetch_url, s.out_dir, filename=fname)
             rec.update({"sha256": fr.sha256, "bytes": fr.bytes, "cached": fr.cached})
 
             if s.mode == "excluded":
@@ -122,6 +160,8 @@ def process(
                 edition=s.edition,
                 licence=s.licence,
             )
+            if s.fetch_url and s.fetch_url != s.url:
+                _annotate_wayback(s, fr)
             rec.update({
                 "pages": cr.pages,
                 "images": cr.images,

@@ -108,7 +108,22 @@ DEFAULT_ALLOW_HOSTS: tuple[str, ...] = (
     # ACT
     "esa.act.gov.au",
     "www.esa.act.gov.au",
+    "cdn.esa.act.gov.au",
+    "data.esa.act.gov.au",
     "www.justice.act.gov.au",
+    # SA SAFECOM CDN
+    "resources-production.safecom.sa.gov.au",
+    # Vic SES CDN (reachable via dev. hostname in archive)
+    "dev.ses.vic.gov.au",
+    # WA bare domains
+    "semc.wa.gov.au",
+    "dfes.wa.gov.au",
+    # AMSA NATSAR sub-domain
+    "natsar.amsa.gov.au",
+    # NT additional
+    "nt.gov.au",
+    # Wayback Machine — used for sources whose live publisher URL has 404'd
+    "web.archive.org",
 )
 
 

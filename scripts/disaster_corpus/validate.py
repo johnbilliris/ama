@@ -14,7 +14,7 @@ import json
 import re
 from pathlib import Path
 
-DOCS = Path(__file__).resolve().parents[2] / "docs"
+DOCS = Path(__file__).resolve().parents[2] / "docs" / "corpus"
 
 
 def _sha256(p: Path) -> str:
