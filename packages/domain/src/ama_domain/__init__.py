@@ -20,6 +20,7 @@ Schema-mirror parity verified by ``tests/contract/test_schema_mirror_parity.py``
 # Re-exports for the public surface (T071–T074 filled).
 from .audit_record import AuditRecord, OperatorAction, RetrievedChunkRef
 from .citation import Citation
+from .equivalence_test_result import EquivalenceTestResult
 from .offline_cache import (
     OfflineCacheEntry,
     OfflineCacheManifest,
@@ -36,6 +37,7 @@ from .retrieval import (
 __all__ = [
     "AuditRecord",
     "Citation",
+    "EquivalenceTestResult",
     "Jurisdiction",
     "LicenceMode",
     "OfflineCacheEntry",

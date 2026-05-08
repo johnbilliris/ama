@@ -232,12 +232,129 @@ def cli_main(argv: list[str] | None = None) -> int:
     return 0 if result.passed else 1
 
 
+# --------------------------------------------------------------------------- #
+# Final canary gate (T142, FR-RAG-FM-06, SC-011) — extends the per-agent gate
+# with the four binding thresholds tracked in
+# data-model.md §EquivalenceTestResult, keyed by (corpus_build_sha,
+# embedding_model_id) for SC-011 reproducibility.
+# --------------------------------------------------------------------------- #
+
+
+# Final-gate thresholds (data-model.md §EquivalenceTestResult).
+FINAL_DECISION_EQUIVALENCE_THRESHOLD: float = 0.95
+FINAL_SCHEMA_EQUIVALENCE_THRESHOLD: float = 1.0
+FINAL_CITATION_FIDELITY_THRESHOLD: float = 0.70
+FINAL_VERBATIM_SOURCE_MATCH_THRESHOLD: float = 0.90
+
+
+@dataclass(frozen=True)
+class FinalCanaryGateResult:
+    """Final canary gate outcome (T142, T145).
+
+    Mirrors the spec-036 ``EquivalenceTestResult`` JSON shape in
+    ``data-model.md`` so the same record can be uploaded to App Insights
+    and replayed against historical canaries.
+    """
+
+    agent_name: str
+    cases_total: int
+    decision_equivalence: float
+    schema_equivalence: float
+    citation_fidelity: float
+    verbatim_source_match: float
+    hallucinated_citation_count: int
+    corpus_build_sha: str
+    embedding_model_id: str
+    passed: bool
+    failures: tuple[str, ...] = field(default_factory=tuple)
+
+
+def run_final_canary_gate(
+    *,
+    agent_name: str,
+    legacy_results: list[dict[str, object]],
+    foundry_results: list[dict[str, object]],
+    corpus_build_sha: str,
+    embedding_model_id: str,
+) -> FinalCanaryGateResult:
+    """Compute the final canary gate result for ``agent_name``.
+
+    Computes the same four metrics as ``parity_report.build_parity_report``
+    but binds them with the SC-011 reproducibility key. Zero-case fixtures
+    PASS by convention (matches per-agent gate baseline) but still carry
+    the reproducibility key.
+    """
+    # Local import keeps the module's import-time cost low and lets
+    # parity_report import from us without circularity.
+    from .citation_fidelity import compute_citation_fidelity
+    from .parity_report import (
+        DECISION_EQUIVALENCE_THRESHOLD,
+        SCHEMA_EQUIVALENCE_THRESHOLD,
+        _decision_equivalence,
+        _hallucinated_citation_count,
+        _schema_equivalence,
+    )
+
+    if not legacy_results and not foundry_results:
+        return FinalCanaryGateResult(
+            agent_name=agent_name,
+            cases_total=0,
+            decision_equivalence=1.0,
+            schema_equivalence=1.0,
+            citation_fidelity=1.0,
+            verbatim_source_match=1.0,
+            hallucinated_citation_count=0,
+            corpus_build_sha=corpus_build_sha,
+            embedding_model_id=embedding_model_id,
+            passed=True,
+        )
+
+    decision_eq = _decision_equivalence(legacy_results, foundry_results)
+    schema_eq = _schema_equivalence(legacy_results, foundry_results)
+    fidelity_signal = compute_citation_fidelity(foundry_results)
+    hallucinated = _hallucinated_citation_count(foundry_results)
+
+    failures: list[str] = []
+    if decision_eq < DECISION_EQUIVALENCE_THRESHOLD:
+        failures.append(f"decision_equivalence {decision_eq:.3f} < {DECISION_EQUIVALENCE_THRESHOLD}")
+    if schema_eq < SCHEMA_EQUIVALENCE_THRESHOLD:
+        failures.append(f"schema_equivalence {schema_eq:.3f} < {SCHEMA_EQUIVALENCE_THRESHOLD}")
+    if fidelity_signal.fidelity < FINAL_CITATION_FIDELITY_THRESHOLD:
+        failures.append(f"citation_fidelity {fidelity_signal.fidelity:.3f} < {FINAL_CITATION_FIDELITY_THRESHOLD}")
+    if fidelity_signal.verbatim_match < FINAL_VERBATIM_SOURCE_MATCH_THRESHOLD:
+        failures.append(
+            f"verbatim_source_match {fidelity_signal.verbatim_match:.3f} < {FINAL_VERBATIM_SOURCE_MATCH_THRESHOLD}"
+        )
+    if hallucinated > 0:
+        failures.append(f"hallucinated_citation_count {hallucinated} > 0")
+
+    return FinalCanaryGateResult(
+        agent_name=agent_name,
+        cases_total=fidelity_signal.cases_total,
+        decision_equivalence=decision_eq,
+        schema_equivalence=schema_eq,
+        citation_fidelity=fidelity_signal.fidelity,
+        verbatim_source_match=fidelity_signal.verbatim_match,
+        hallucinated_citation_count=hallucinated,
+        corpus_build_sha=corpus_build_sha,
+        embedding_model_id=embedding_model_id,
+        passed=not failures,
+        failures=tuple(failures),
+    )
+
+
 __all__ = [
     "DEFAULT_CITATION_THRESHOLD",
     "DEFAULT_DECISION_THRESHOLD",
     "DEFAULT_SCHEMA_THRESHOLD",
+    "FINAL_CITATION_FIDELITY_THRESHOLD",
+    "FINAL_DECISION_EQUIVALENCE_THRESHOLD",
+    "FINAL_SCHEMA_EQUIVALENCE_THRESHOLD",
+    "FINAL_VERBATIM_SOURCE_MATCH_THRESHOLD",
+    "FinalCanaryGateResult",
     "GateResult",
     "cli_main",
+    "run_final_canary_gate",
     "run_per_agent_gate",
 ]
 

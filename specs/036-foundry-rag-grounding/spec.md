@@ -327,9 +327,9 @@ When the Communication agent composes a public warning that touches an Aborigina
 
 ---
 
-## Open Questions
+## Closed Questions
 
-> All three original `[NEEDS CLARIFICATION]` markers were resolved in the **2026-05-08 Pass 1** clarification session, and four additional residual ambiguities surfaced by **Pass 2** (cutover sequencing, embedding rebuild SLA, test seam, Observer-Auditor carve-out) were resolved in the same day's **Pass 2** session — see the **Clarifications** section above. None remain outstanding for spec authoring; planning may proceed.
+> All three original `[NEEDS CLARIFICATION]` markers were resolved in the **2026-05-08 Pass 1** clarification session, and four additional residual ambiguities surfaced by **Pass 2** (cutover sequencing, embedding rebuild SLA, test seam, Observer-Auditor carve-out) were resolved in the same day's **Pass 2** session — see the **Clarifications** section above. **None remain outstanding** at Phase E close (T149 / 2026-05-08); spec is shippable.
 
 **Pass 1 (2026-05-08) — original `[NEEDS CLARIFICATION]` markers**
 
