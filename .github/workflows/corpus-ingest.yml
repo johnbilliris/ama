@@ -22,8 +22,10 @@ on:
       - "apps/ingest-runner/**"
       - ".github/workflows/corpus-ingest.yml"
   schedule:
-    # 18:00 UTC daily ≈ 04:00/05:00 AEST — quiet hours for AU East tenants.
-    - cron: "0 18 * * *"
+    # Spec 036 T213 — 14:00 UTC daily = 0100 AEST / 0000 AEDT (Plan §F-A8.1).
+    # Pre-T213 schedule was "0 18 * * *"; tightened so drift detection runs at
+    # the start of the AU business day rather than overlapping European prime.
+    - cron: "0 14 * * *"
   workflow_dispatch:
     inputs:
       environment:
@@ -98,6 +100,32 @@ jobs:
       - name: Lint INDEXING-LICENCE-INVENTORY drift
         run: |
           python tools/lint/check_licence_inventory.py
+
+      # Spec 036 T213 — Nightly source drift detection. When invoked from the
+      # 0 14 * * * UTC cron, short-circuit cheaply if no source.json has
+      # changed since the last manifest. (Plan §F-A8.1)
+      - name: Detect source drift
+        id: drift
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          set -euo pipefail
+          drift=0
+          if [[ -f "artifacts/corpus_build.manifest.json" ]]; then
+            prev_sha=$(jq -r '.corpus_build_sha // ""' artifacts/corpus_build.manifest.json)
+            cur_sha="${{ steps.build_sha.outputs.corpus_build_sha }}"
+            if [[ "${prev_sha}" != "${cur_sha}" && -n "${prev_sha}" ]]; then
+              drift=1
+            fi
+          else
+            # No prior manifest -> treat as drift to bootstrap.
+            drift=1
+          fi
+          if [[ "${drift}" -eq 0 ]]; then
+            echo "::notice::no_drift_detected — skipping image build + ingest run"
+            echo "no_drift=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "drift_detected=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Resolve ACR + push image
         id: build_image

@@ -28,6 +28,7 @@ MIRRORED_SCHEMAS = (
     # Spec 036 amend-loop additions (Phase F):
     "chunk-metadata.schema.json",
     "cultural-authority-registry.schema.json",
+    "staleness_alert.schema.json",
 )
 
 
