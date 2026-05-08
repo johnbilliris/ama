@@ -288,6 +288,7 @@ class OfflineCacheRetrievalService:
             classification_filter_applied=False,
             cache_hit=False,
             alias_active_index="offline-cache",
+            retrieval_index_name="offline-cache",
         )
 
 

@@ -531,6 +531,7 @@ class SimulationControllerService:
         retrieval_result: Any = None
         sim_corpus_build_sha: str | None = None
         sim_embedding_model_id: str | None = None
+        sim_retrieval_index_name: str | None = None
         if self._retrieval is not None:
             try:
                 from ama_domain import (  # type: ignore[import-not-found]
@@ -555,6 +556,13 @@ class SimulationControllerService:
                 retrieved_chunks = list(getattr(retrieval_result, "chunks", []) or [])
                 sim_corpus_build_sha = getattr(retrieval_result, "corpus_build_sha", None)
                 sim_embedding_model_id = getattr(retrieval_result, "embedding_model_id", None)
+                # F-A7 / ADR-16 — propagate the pinned concrete index name
+                # into the audit shape (NOT the alias). Falls back to
+                # ``alias_active_index`` for legacy retrieval clients that
+                # haven't yet been retrofit with alias-pinning.
+                sim_retrieval_index_name = getattr(
+                    retrieval_result, "retrieval_index_name", None
+                ) or getattr(retrieval_result, "alias_active_index", None)
             except Exception as exc:  # noqa: BLE001 — retrieval failure must not abort the turn
                 logger.warning("sim_retrieval_failed turn_id=%s err=%s", turn_id, exc)
                 retrieval_result = None
@@ -827,6 +835,7 @@ class SimulationControllerService:
                                 for c in retrieved_chunks
                             ],
                             citations=citation_dicts,
+                            retrieval_index_name=sim_retrieval_index_name,
                         )
                         await self._audit_writer.write(record)
                     except Exception as exc:  # noqa: BLE001

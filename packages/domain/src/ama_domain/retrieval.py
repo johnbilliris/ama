@@ -147,6 +147,12 @@ class RetrievalResult(BaseModel):
     classification_filter_applied: bool = False
     cache_hit: bool = False
     alias_active_index: str = Field(..., min_length=1)
+    # F-A7 / ADR-16 — concrete index name pinned at query start for the entire
+    # query lifecycle (e.g. ``"corpus-v3"``). MUST NOT be an alias. SSE
+    # multi-turn sessions pin once at session start; no alias re-resolution
+    # mid-query. Defaults to ``alias_active_index`` for backward compatibility
+    # with pre-Phase-F callers; new callers MUST pass the resolved index name.
+    retrieval_index_name: str | None = Field(default=None, min_length=1)
 
 
 __all__ = [

@@ -294,11 +294,42 @@ class AzureSearchRetrievalService:
     lexical_weight: float = RRF_LEXICAL_WEIGHT_DEFAULT
     quota_limiter: _QuotaLimiter = field(default_factory=_QuotaLimiter)
     cache: _QueryCache = field(default_factory=_QueryCache)
+    # F-A7 / ADR-16 — pinned index resolver. Tests inject a stub returning the
+    # concrete name (e.g. "corpus-v3"); production wires this to the AI Search
+    # alias-management API. None → fall back to ``index_alias`` itself
+    # (legacy behaviour pre-Phase-F).
+    alias_resolver: Any | None = None
 
     def __post_init__(self) -> None:
         # Deferred SDK import — keeps the unit test path hermetic.
         if self.endpoint is None:
             self.endpoint = os.environ.get("AZURE_SEARCH_ENDPOINT")
+
+    async def resolve_alias_to_index_name(self) -> str:
+        """Resolve ``self.index_alias`` to the concrete index name (F-A7 / ADR-16).
+
+        Pinned ONCE at query start; the same concrete name MUST flow through
+        every downstream operation (vector search, BM25 search, RetrievalResult,
+        AuditRecord.retrieval_index_name) for the rest of the query's
+        lifecycle. SSE multi-turn sessions pin once at session start; no
+        alias re-resolution mid-query.
+
+        Resolution order:
+          1. Injected ``alias_resolver`` callable (test seam) — preferred.
+          2. Env var ``RETRIEVAL_INDEX_NAME_OVERRIDE`` — useful for canary
+             pinning during chaos game-days.
+          3. Fall back to ``self.index_alias`` itself (legacy behaviour).
+        """
+        if self.alias_resolver is not None:
+            result = self.alias_resolver(self.index_alias)
+            if asyncio.iscoroutine(result):
+                result = await result
+            if isinstance(result, str) and result:
+                return result
+        override = os.environ.get("RETRIEVAL_INDEX_NAME_OVERRIDE")
+        if override:
+            return override
+        return self.index_alias
 
     def _ensure_search_client(self) -> Any:
         if self.search_client is not None:
@@ -345,6 +376,13 @@ class AzureSearchRetrievalService:
         agent_name = getattr(request, "agent_name", "UnknownAgent")
         await self.quota_limiter.consume(agent_name)
 
+        # F-A7 / ADR-16 — pin the alias-resolved concrete index name ONCE at
+        # query start. The pinned name flows through cache key, search calls,
+        # and the RetrievalResult so audit replay sees the exact index name
+        # used at decision time, not whichever index the alias happens to
+        # point at when the audit is replayed.
+        pinned_index_name = await self.resolve_alias_to_index_name()
+
         union = _expand_jurisdictions(request)
         query_text = getattr(request, "query_text", "")
         top_k = int(getattr(request, "top_k", 5) or 5)
@@ -356,7 +394,11 @@ class AzureSearchRetrievalService:
         )
         cached = self.cache.get(cache_key)
         if cached is not None:
-            return _stamp_cache_hit(cached, alias=self.index_alias)
+            return _stamp_cache_hit(
+                cached,
+                alias=self.index_alias,
+                pinned_index_name=pinned_index_name,
+            )
 
         start = time.perf_counter()
         embedding = await self._embed(query_text)
@@ -402,6 +444,7 @@ class AzureSearchRetrievalService:
             classification_filter_applied=False,
             cache_hit=False,
             alias_active_index=self.index_alias,
+            retrieval_index_name=pinned_index_name,
         )
         self.cache.put(cache_key, result)
         return result
@@ -456,13 +499,26 @@ async def _collect(iterable: Any) -> list[Any]:
     return list(iterable)
 
 
-def _stamp_cache_hit(result: Any, *, alias: str) -> Any:
-    """Return a copy of ``result`` with ``cache_hit=True`` (frozen-aware)."""
+def _stamp_cache_hit(result: Any, *, alias: str, pinned_index_name: str | None = None) -> Any:
+    """Return a copy of ``result`` with ``cache_hit=True`` (frozen-aware).
+
+    F-A7 / ADR-16 — when a cache-hit occurs, the cached result's
+    ``retrieval_index_name`` MUST be re-stamped to the freshly-pinned name.
+    The pinned name comes from the *current* query's alias resolution, not
+    the original cache-fill query's resolution; this preserves the invariant
+    that ``audit.retrieval_index_name`` reflects the index actually queried
+    during *this* call.
+    """
+    update: dict[str, Any] = {"cache_hit": True}
+    if pinned_index_name:
+        update["retrieval_index_name"] = pinned_index_name
     if hasattr(result, "model_copy"):
-        return result.model_copy(update={"cache_hit": True})
+        return result.model_copy(update=update)
     # Fallback: duck-typed result.
     try:
         result.cache_hit = True
+        if pinned_index_name:
+            result.retrieval_index_name = pinned_index_name
     except AttributeError:
         pass
     return result
@@ -507,6 +563,7 @@ class FakeRetrievalService:
             classification_filter_applied=False,
             cache_hit=False,
             alias_active_index="corpus-test",
+            retrieval_index_name="corpus-test",
         )
 
 
