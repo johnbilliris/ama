@@ -79,6 +79,12 @@ export function RecommendationCard({
           role="region"
           aria-label={`Sources cited by ${agentName}`}
         >
+          {/* Spec 036 / F-A12 / T241 — fire a polite live-region announcement when
+              the grounded recommendation renders so screen readers acknowledge that
+              the response is sourced from N citations. */}
+          <p className="sr-only" role="status" aria-live="polite">
+            {`Grounded recommendation with ${citations.length} citation${citations.length === 1 ? "" : "s"}`}
+          </p>
           {citations.map((c, i) => (
             <CitationCard
               key={c.sha256_of_chunk || `${id}-cite-${i}`}

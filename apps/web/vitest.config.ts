@@ -16,6 +16,9 @@ export default defineConfig({
       "__tests__/**/*.test.{ts,tsx}",
       "tests/unit/**/*.test.{ts,tsx}",
       "tests/integration/**/*.test.{ts,tsx}",
+      // Spec 036 / F-A12 / T239+T240 — accessibility tests live under a path
+      // that mirrors the source layout (tests/web/src/components/...).
+      "tests/web/**/*.test.{ts,tsx}",
     ],
     setupFiles: ["__tests__/setup.ts"],
     coverage: {

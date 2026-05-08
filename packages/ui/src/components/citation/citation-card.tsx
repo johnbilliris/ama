@@ -82,6 +82,7 @@ export function CitationCard({ citation, className, idPrefix }: CitationCardProp
     <article
       className={`rounded-md border border-slate-200 bg-white shadow-sm ${className ?? ""}`}
       aria-labelledby={headerId}
+      aria-label={`Cite: ${jurisdictionLabel}/${citation.topic}/handbook.md#page-${citation.page}`}
     >
       <header className="flex flex-wrap items-center gap-2 px-3 py-2 text-sm" id={headerId}>
         <span
@@ -104,13 +105,13 @@ export function CitationCard({ citation, className, idPrefix }: CitationCardProp
 
       <div className="flex flex-wrap items-center gap-3 px-3 pb-2 text-sm">
         <a
-          className="text-blue-700 underline underline-offset-2 hover:text-blue-900"
+          className="text-blue-700 underline underline-offset-2 hover:text-blue-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           href={citation.rendered_url}
         >
           Open handbook
         </a>
         <a
-          className="text-blue-700 underline underline-offset-2 hover:text-blue-900"
+          className="text-blue-700 underline underline-offset-2 hover:text-blue-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           href={citation.source_url}
           target="_blank"
           rel="noopener noreferrer"
@@ -120,10 +121,20 @@ export function CitationCard({ citation, className, idPrefix }: CitationCardProp
         {hasSnippet ? (
           <button
             type="button"
-            className="ml-auto rounded border border-slate-300 px-2 py-0.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="ml-auto rounded border border-slate-300 px-2 py-0.5 text-xs font-medium text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             aria-expanded={open}
             aria-controls={panelId}
             onClick={() => setOpen((v) => !v)}
+            onKeyDown={(e) => {
+              // Spec 036 / F-A12 / T241 — explicit Enter/Space activation so
+              // keyboard users get the same expand/collapse semantics in browsers
+              // that don't synthesise click-on-Enter for buttons inside interactive
+              // ancestors. T240 covers this explicitly.
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setOpen((v) => !v);
+              }
+            }}
           >
             {open ? "Hide quote" : "Show quote"}
           </button>

@@ -178,6 +178,43 @@ jobs:
           python tools/lint/check_golden_set_canonical.py
 
   # ---------------------------------------------------------------------------
+  # Spec-036 / F-A12 / T242 — accessibility lane for <CitationCard />.
+  # Marked SHOULD per F-A12.5 — fails the job only on infrastructure errors;
+  # axe violations log as warnings until the baseline at
+  # docs/accessibility/spec-036-citation-card-baseline.md hits zero for two
+  # consecutive PRs, after which the test is flipped to assert
+  # ``violations.toEqual([])`` and this job becomes a required check.
+  # ---------------------------------------------------------------------------
+  accessibility-citation-card:
+    needs: [quality]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true # warn-only per F-A12.5; flip to false post-baseline.
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
+        with:
+          version: 10.6.3
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "24"
+          cache: "pnpm"
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+      - name: Run accessibility tests (CitationCard, vitest + axe-core)
+        working-directory: apps/web
+        run: |
+          pnpm exec vitest run tests/web/src/components/citation \
+            --reporter=default --reporter=junit --outputFile.junit=axe-junit.xml
+      - name: Upload junit report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: spec-036-axe-junit
+          path: apps/web/axe-junit.xml
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------------------
   # Spec-034 FR-018, FR-019, FR-023(e), SC-001..SC-005 — web coverage suite.
   # Three sequential jobs (shard → merge → gate) with the gate marked as a
   # required check for merging to main (see .github/branch-protection.json).
