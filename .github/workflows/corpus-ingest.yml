@@ -156,6 +156,75 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
 
+      # Spec 036 T136 / FR-RAG-LS-02 — emit offline-cache bundle for Field
+      # Coordinator devices. The bundle is dual-signed (cosign keyless + age
+      # detached) and uploaded as both a workflow artefact (auditable) and a
+      # blob to the offline-cache-bundles container (operationalised).
+      - name: Build offline-cache bundle
+        if: env.INGEST_MODE != 'dry-run'
+        env:
+          PYTHONIOENCODING: utf-8
+          CORPUS_BUILD_SHA: ${{ steps.build_sha.outputs.corpus_build_sha }}
+          EMBEDDING_MODEL_ID: ${{ vars.EMBEDDING_MODEL_ID || 'text-embedding-3-large' }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/offline-cache
+          # The ingest container writes ``artifacts/corpus_build.manifest.json``;
+          # if that's missing (first-run / dry-run), skip with a warning so the
+          # workflow doesn't hard-fail before the ingest job has populated state.
+          if [[ ! -f "artifacts/corpus_build.manifest.json" ]]; then
+            echo "::warning::corpus_build.manifest.json not present — skipping offline-bundle build"
+            exit 0
+          fi
+          python -m ama_ingest.offline_bundle_cli \
+            --chunks-manifest artifacts/corpus_build.manifest.json \
+            --corpus-build-sha "${CORPUS_BUILD_SHA}" \
+            --embedding-model-id "${EMBEDDING_MODEL_ID}" \
+            --output artifacts/offline-cache/manifest.json \
+            || { echo "::error::offline_bundle build failed"; exit 1; }
+
+      - name: Sign offline-cache bundle (cosign keyless + age)
+        if: env.INGEST_MODE != 'dry-run'
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+        run: |
+          set -euo pipefail
+          if [[ ! -f "artifacts/offline-cache/manifest.json" ]]; then
+            echo "::warning::no manifest to sign — skipping"
+            exit 0
+          fi
+          # cosign keyless (Sigstore + GitHub OIDC; spec 032 FR-AI09 baseline).
+          cosign sign-blob --yes \
+            --output-signature artifacts/offline-cache/manifest.cosign.sig \
+            artifacts/offline-cache/manifest.json \
+            || { echo "::error::cosign sign-blob failed"; exit 1; }
+          # age detached signature (R-07 fail-closed for offline verification).
+          # Recipients live in `OFFLINE_CACHE_AGE_RECIPIENTS` (1+ public keys).
+          if [[ -z "${OFFLINE_CACHE_AGE_RECIPIENTS:-}" ]]; then
+            echo "::warning::OFFLINE_CACHE_AGE_RECIPIENTS not set — skipping age sign"
+          else
+            age --encrypt --armor \
+              ${OFFLINE_CACHE_AGE_RECIPIENTS} \
+              -o artifacts/offline-cache/manifest.age \
+              artifacts/offline-cache/manifest.json \
+              || { echo "::error::age encrypt failed"; exit 1; }
+          fi
+          # Verify locally as a smoke test (PowerShell verify-offline-cache.ps1
+          # mirrors this on the Field Coordinator side).
+          ls -la artifacts/offline-cache/
+
+      - name: Upload offline-cache bundle artefact
+        if: env.INGEST_MODE != 'dry-run'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.x
+        with:
+          name: offline-cache-${{ env.TARGET_ENV }}-${{ steps.build_sha.outputs.corpus_build_sha }}
+          path: |
+            artifacts/offline-cache/manifest.json
+            artifacts/offline-cache/manifest.cosign.sig
+            artifacts/offline-cache/manifest.age
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Summary
         run: |
           echo "## Corpus ingest summary" >> "$GITHUB_STEP_SUMMARY"

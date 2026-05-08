@@ -11,6 +11,13 @@
 #       soft_qps: float  # WARN above this; downgrades confidence
 #       hard_qps: float  # FAIL above this; agent falls back to template
 #       monthly_token_budget: int  # rough capacity-planning anchor
+#       confidence_downgrade_threshold: int   # max number of low-confidence
+#         #   chunks tolerated before the recommendation is downgraded to
+#         #   ``confidence: low`` (T135 / FR-RAG-AG-04 / R-10 Quality memo).
+#         #   Default is 1 (single low-confidence chunk → downgrade). The
+#         #   Communication agent runs at 2 because warning composition
+#         #   tolerates one borderline chunk if at least one strong chunk is
+#         #   also retrieved — revisit post-canary per Quality memo R10.
 #
 # DependencyNotifierAgent is RAG-OPTOUT (Phase D); included here for parity
 # but quota is set to 0 (no retrieval calls expected).
@@ -20,27 +27,36 @@ agents:
     soft_qps: 10.0
     hard_qps: 25.0
     monthly_token_budget: 500_000_000
+    confidence_downgrade_threshold: 1
   RiskAssessmentAgent:
     soft_qps: 8.0
     hard_qps: 20.0
     monthly_token_budget: 400_000_000
+    confidence_downgrade_threshold: 1
   EvacuationAgent:
     soft_qps: 5.0
     hard_qps: 15.0
     monthly_token_budget: 250_000_000
+    confidence_downgrade_threshold: 1
   ResourceAllocationAgent:
     soft_qps: 5.0
     hard_qps: 15.0
     monthly_token_budget: 250_000_000
+    confidence_downgrade_threshold: 1
   CommunicationAgent:
     soft_qps: 4.0
     hard_qps: 12.0
     monthly_token_budget: 200_000_000
+    # Quality memo R10: revisit post-canary; warning composition can tolerate
+    # one borderline chunk provided at least one strong chunk is also present.
+    confidence_downgrade_threshold: 2
   SimulationController:
     soft_qps: 3.0
     hard_qps: 10.0
     monthly_token_budget: 100_000_000
+    confidence_downgrade_threshold: 1
   DependencyNotifierAgent:
     soft_qps: 0.0
     hard_qps: 0.0
     monthly_token_budget: 0
+    confidence_downgrade_threshold: 0

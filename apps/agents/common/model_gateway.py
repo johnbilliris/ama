@@ -195,6 +195,7 @@ def apply(*, text: str, deployment_region: str) -> GatewayDecision:
         return GatewayDecision(gateway_decision="allow", transmitted_text=text)
 
     # 1. PSPF-marking detection.
+    # RAG-OPTOUT [FR-RAG-NS-07]: Above-OFFICIAL classified content (PSPF marking detected); RAG bypass enforced; classified channel uses its own knowledge-base. ADR: docs/decisions/036-foundry-rag-grounding/07-rag-optout-classified.md  # noqa: E501
     marking = _detect_pspf_marking(text)
     if marking is not None:
         return GatewayDecision(

@@ -60,6 +60,7 @@ class AuditExportService:
         return self._jobs.get(job_id)
 
     def process_export(self, job_id: str, records: list[dict]) -> AuditExportJob:
+        # RAG-OPTOUT [FR-RAG-NS-09]: Observer-Auditor read-only path; serialises archived records without re-grounding to preserve byte-replay determinism. ADR: docs/decisions/036-foundry-rag-grounding/09-rag-optout-observer-auditor.md  # noqa: E501
         """Process an export job (synchronous simulation of async worker)."""
         job = self._jobs.get(job_id)
         if not job:

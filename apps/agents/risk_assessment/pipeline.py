@@ -171,6 +171,7 @@ class AssessmentProcessingPipeline:
         handoff: AgentHandoffEvent,
         tenant_id: str,
     ) -> list[dict]:
+        # RAG-OPTOUT [FR-RAG-NS-03]: GA seismic-feed signals are authoritative; doctrine grounding moves to the downstream assessment call. ADR: docs/decisions/036-foundry-rag-grounding/03-rag-optout-ga-live.md  # noqa: E501
         """Stage 2: Retrieve signals from signal store.
 
         Handles partial unavailability by proceeding with available signals.

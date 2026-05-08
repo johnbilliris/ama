@@ -63,6 +63,12 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: python tools/lint/check_licence_inventory.py
 
+      # Spec 036 T128 / FR-RAG-NS-08 — fail CI on RAG-OPTOUT marker ↔ ADR drift.
+      - name: rag-optout-binding-lint
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python tools/lint/check_rag_optout_bindings.py
+
       - name: equivalence-gate
         # Spec 033 / T041 — per-agent FR-023 equivalence harness gate.
         # Refuses to merge a per-agent cutover PR whose corresponding

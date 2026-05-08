@@ -312,13 +312,8 @@ class SimulationControllerService:
     async def _stream_offline(
         self, *, turn_id: str, tenant_id: str, simulation_id: str, user_message: str
     ) -> AsyncIterator[ChatEvent]:
-        # Spec 036 — RAG-OPTOUT [FR-RAG-NS-06]: scripted-scenario / offline
-        # streaming path. The deterministic offline backend produces canned
-        # responses by intent — there is no LLM call to ground, so no
-        # retrieval and no citation event is emitted. Audit records for this
-        # path use call_kind=inference, rag_used=false,
-        # rag_optout_reason="scenario-execution",
-        # adr_pointer="docs/decisions/036-foundry-rag-grounding/06-rag-optout-scenario-execution.md".
+        # RAG-OPTOUT [FR-RAG-NS-06]: scripted-scenario / offline streaming path; canned responses by intent — no LLM call to ground. ADR: docs/decisions/036-foundry-rag-grounding/06-rag-optout-scenario-execution.md  # noqa: E501
+        # Audit records: call_kind=inference, rag_used=false, rag_optout_reason="scenario-execution".
         assistant_parts: list[str] = []
 
         def _emit_delta(text: str) -> ChatEvent:

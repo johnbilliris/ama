@@ -161,6 +161,51 @@ resource equivalenceRegressionAlert 'Microsoft.Insights/scheduledQueryRules@2024
   }
 }
 
+// ────────────────────────────────────────────────────────────────────────── //
+// Alert 4: offline-cache TTL exhaustion (T132 / FR-RAG-LS-02 / R-07).
+// Field-Coordinator offline cache has a 14-day TTL with 11-day stale warning.
+// Any agent reporting `offline_cache_ttl_days_remaining < 3` is approaching
+// the hard-fail-closed window. Page the SRE on call so refresh can be
+// sequenced before the 14-day expiry.
+// ────────────────────────────────────────────────────────────────────────── //
+resource offlineCacheTtlAlert 'Microsoft.Insights/scheduledQueryRules@2024-01-01-preview' = {
+  name: 'foundry-rag-offline-cache-ttl-${appInsightsName}'
+  location: location
+  tags: tags
+  properties: {
+    enabled: true
+    severity: 2
+    evaluationFrequency: 'PT15M'
+    windowSize: 'PT15M'
+    autoMitigate: true
+    description: 'Spec 036 FR-RAG-LS-02 / R-07 - offline cache TTL <= 3 days remaining. Field Coordinator must re-sync before 14-day fail-closed expiry.'
+    scopes: [appInsights.id]
+    criteria: {
+      allOf: [
+        {
+          query: '''customMetrics
+| where name == "offline_cache_ttl_days_remaining"
+| extend tenant_id = tostring(customDimensions["tenant_id"])
+| extend region = tostring(customDimensions["region"])
+| summarize min_days = min(value) by bin(timestamp, 15m), tenant_id, region
+| where min_days < 3'''
+          timeAggregation: 'Count'
+          operator: 'GreaterThan'
+          threshold: 0
+          failingPeriods: {
+            numberOfEvaluationPeriods: 1
+            minFailingPeriodsToAlert: 1
+          }
+        }
+      ]
+    }
+    actions: {
+      actionGroups: [actionGroupId]
+    }
+  }
+}
+
 output gatewayDenyAlertId string = gatewayDenyAlert.id
 output citationDropAlertId string = citationDropAlert.id
 output equivalenceRegressionAlertId string = equivalenceRegressionAlert.id
+output offlineCacheTtlAlertId string = offlineCacheTtlAlert.id

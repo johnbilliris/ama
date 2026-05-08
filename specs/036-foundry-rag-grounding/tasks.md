@@ -217,46 +217,46 @@ description: "Dependency-ordered task list for spec 036 — Microsoft Foundry-Ba
 
 ### D — Tests (write red first)
 
-- [ ] T110 [P] Contract test `tests/contract/test_rag_optout_lint.py` — walk every Python module under `apps/agents/` and `apps/api/app/services/`; find `# RAG-OPTOUT [FR-RAG-NS-NN]` markers; assert (i) each marker has a matching `docs/decisions/036-foundry-rag-grounding/<NN>-rag-optout-*.md` ADR, (ii) every non-grounded production call site (any `chat_complete` / `LLMClient.generate_response` not preceded by a `retrieval.retrieve` call within the same function body) carries the marker OR is explicitly whitelisted. (FR-RAG-NS-08, SC-008)
-- [ ] T111 [P] Entity test `tests/contract/test_rag_optout_adr.py` — every ADR file conforms to the RagOptoutAdr schema (data-model.md §RagOptoutAdr): `Context`, `Decision`, `Audit-log shape`, `Code-comment marker`, `Consequences`. (RagOptoutAdr entity)
-- [ ] T112 [P] Integration test `tests/integration/test_offline_cache.py` — cosign + age dual signature verification (fail-closed on either signature failure); 14-day TTL; 11-day "warning" badge; queued offline audit reconciled within 60s with original timestamps preserved on reconnect. (FR-RAG-LS-02, R-04, R-07, SC-009)
-- [ ] T113 [P] Contract test `tests/contract/test_offline_cache_manifest.py` — round-trip JSON Schema 2020-12 validation against `contracts/offline-cache-manifest.json`. (FR-RAG-LS-02)
-- [ ] T114 [P] Entity test `tests/contract/test_offline_cache_manifest_entity.py` — pydantic-v2 round-trip on OfflineCacheManifest. (OfflineCacheManifest entity)
-- [ ] T115 [P] E2E Playwright `tests/e2e/citation_rendering.spec.ts` — Risk Manager + Simulation citation cards visible, expandable, screen-reader friendly. (FR-RAG-AG-03, R-14, Accessibility memo)
-- [ ] T116 [P] E2E Playwright `tests/e2e/degraded_mode_badge.spec.ts` — stale-corpus + offline-cache-active + retrieval-unavailable banner UI states. (FR-RAG-LS-02, R-14)
-- [ ] T117 [P] Integration test `tests/integration/test_human_approval_preserved.py` — RAG-grounded warning draft + human approval both present in audit; Quality Gates preserved. (FR-RAG-LS-01, FR-RAG-LS-03)
+- [X] T110 [P] Contract test `tests/contract/test_rag_optout_lint.py` — walk every Python module under `apps/agents/` and `apps/api/app/services/`; find `# RAG-OPTOUT [FR-RAG-NS-NN]` markers; assert (i) each marker has a matching `docs/decisions/036-foundry-rag-grounding/<NN>-rag-optout-*.md` ADR, (ii) every non-grounded production call site (any `chat_complete` / `LLMClient.generate_response` not preceded by a `retrieval.retrieve` call within the same function body) carries the marker OR is explicitly whitelisted. (FR-RAG-NS-08, SC-008)
+- [X] T111 [P] Entity test `tests/contract/test_rag_optout_adr.py` — every ADR file conforms to the RagOptoutAdr schema (data-model.md §RagOptoutAdr): `Context`, `Decision`, `Audit-log shape`, `Code-comment marker`, `Consequences`. (RagOptoutAdr entity)
+- [X] T112 [P] Integration test `tests/integration/test_offline_cache.py` — cosign + age dual signature verification (fail-closed on either signature failure); 14-day TTL; 11-day "warning" badge; queued offline audit reconciled within 60s with original timestamps preserved on reconnect. (FR-RAG-LS-02, R-04, R-07, SC-009)
+- [X] T113 [P] Contract test `tests/contract/test_offline_cache_manifest.py` — round-trip JSON Schema 2020-12 validation against `contracts/offline-cache-manifest.json`. (FR-RAG-LS-02)
+- [X] T114 [P] Entity test `tests/contract/test_offline_cache_manifest_entity.py` — pydantic-v2 round-trip on OfflineCacheManifest. (OfflineCacheManifest entity)
+- [X] T115 [P] E2E Playwright `tests/e2e/citation_rendering.spec.ts` — Risk Manager + Simulation citation cards visible, expandable, screen-reader friendly. (FR-RAG-AG-03, R-14, Accessibility memo)
+- [X] T116 [P] E2E Playwright `tests/e2e/degraded_mode_badge.spec.ts` — stale-corpus + offline-cache-active + retrieval-unavailable banner UI states. (FR-RAG-LS-02, R-14)
+- [X] T117 [P] Integration test `tests/integration/test_human_approval_preserved.py` — RAG-grounded warning draft + human approval both present in audit; Quality Gates preserved. (FR-RAG-LS-01, FR-RAG-LS-03)
 
 ### D — Implementation: nine RAG-OPTOUT ADRs
 
-- [ ] T118 [P] Author `docs/decisions/036-foundry-rag-grounding/01-rag-optout-dependency-notifier.md` — Dependency Notifier is a structured-signal pipeline. (FR-RAG-NS-01)
-- [ ] T119 [P] Author `02-rag-optout-bom-live.md` — Monitoring agent BoM live-feed path. (FR-RAG-NS-02)
-- [ ] T120 [P] Author `03-rag-optout-ga-live.md` — Risk Assessment agent GA seismic-feed path. (FR-RAG-NS-03)
-- [ ] T121 [P] Author `04-rag-optout-planning-collection.md` — Planning Officer-aligned pure-data-collection paths. (FR-RAG-NS-04)
-- [ ] T122 [P] Author `05-rag-optout-logistics-transactional.md` — Logistics-aligned transactional resource-movement paths. (FR-RAG-NS-05)
-- [ ] T123 [P] Author `06-rag-optout-scenario-execution.md` — Resilience Planner scenario-execution paths. (FR-RAG-NS-06; FR-RAG-SIM-06)
-- [ ] T124 [P] Author `07-rag-optout-classified.md` — Classified content (ADF DACC > OFFICIAL, AFP classified annex). (FR-RAG-NS-07; Constitution §NN-2)
-- [ ] T125 [P] Author `08-rag-optout-ci-lint.md` — ADR for the lint mechanism itself. (FR-RAG-NS-08)
-- [ ] T126 [P] Author `09-rag-optout-observer-auditor.md` — Observer-Auditor non-decision paths (read-only, audit-replay, integrity verification). (FR-RAG-NS-09; Quality-memo §No-RAG Opt-Out Audit Trail)
+- [X] T118 [P] Author `docs/decisions/036-foundry-rag-grounding/01-rag-optout-dependency-notifier.md` — Dependency Notifier is a structured-signal pipeline. (FR-RAG-NS-01)
+- [X] T119 [P] Author `02-rag-optout-bom-live.md` — Monitoring agent BoM live-feed path. (FR-RAG-NS-02)
+- [X] T120 [P] Author `03-rag-optout-ga-live.md` — Risk Assessment agent GA seismic-feed path. (FR-RAG-NS-03)
+- [X] T121 [P] Author `04-rag-optout-planning-collection.md` — Planning Officer-aligned pure-data-collection paths. (FR-RAG-NS-04)
+- [X] T122 [P] Author `05-rag-optout-logistics-transactional.md` — Logistics-aligned transactional resource-movement paths. (FR-RAG-NS-05)
+- [X] T123 [P] Author `06-rag-optout-scenario-execution.md` — Resilience Planner scenario-execution paths. (FR-RAG-NS-06; FR-RAG-SIM-06)
+- [X] T124 [P] Author `07-rag-optout-classified.md` — Classified content (ADF DACC > OFFICIAL, AFP classified annex). (FR-RAG-NS-07; Constitution §NN-2)
+- [X] T125 [P] Author `08-rag-optout-ci-lint.md` — ADR for the lint mechanism itself. (FR-RAG-NS-08)
+- [X] T126 [P] Author `09-rag-optout-observer-auditor.md` — Observer-Auditor non-decision paths (read-only, audit-replay, integrity verification). (FR-RAG-NS-09; Quality-memo §No-RAG Opt-Out Audit Trail)
 
 ### D — Implementation: opt-out markers + lint binding
 
-- [ ] T127 Apply `# RAG-OPTOUT [FR-RAG-NS-NN]` markers to all 9 production opt-out call sites across `apps/agents/` and `apps/api/`. (FR-RAG-NS-01..09, SC-008)
-- [ ] T128 Wire `tests/contract/test_rag_optout_lint.py` into `.github/workflows/ci.yml` as a blocking step. (FR-RAG-NS-08, Quality Gates)
+- [X] T127 Apply `# RAG-OPTOUT [FR-RAG-NS-NN]` markers to all 9 production opt-out call sites across `apps/agents/` and `apps/api/`. (FR-RAG-NS-01..09, SC-008)
+- [X] T128 Wire `tests/contract/test_rag_optout_lint.py` into `.github/workflows/ci.yml` as a blocking step. (FR-RAG-NS-08, Quality Gates)
 
 ### D — Implementation: offline cache + degraded-mode UI
 
-- [ ] T129 Create `apps/agents/common/offline_cache.py` — verifier loads ≤ 500 MB per-device bundle; **fail-closed** on either signature failure (cosign keyless or `age` detached); 14-day hard TTL; emit `offline_cache_load.success|fail` audit; mode-aware retrieval reads from `OfflineCacheManifest` chunks. (FR-RAG-LS-02, R-04, R-07)
-- [ ] T130 Implement `OfflineCacheRetrievalService` (RetrievalService implementation, contracts/retrieval-service.md §1 alt-impl) — reads from signed offline manifest; injected by Field-Coordinator-aligned agent runtime when no AI Search reachability. (FR-RAG-LS-02)
-- [ ] T131 [P] Implement queued offline audit replay — local SQLite spool; on reconnect drain to Cosmos within 60s, preserve original timestamps. (FR-RAG-LS-02, SC-009)
-- [ ] T132 [P] Telemetry gauge `offline_cache_ttl_days_remaining` + alert at < 3 days; pre-deploy 30-day extended TTL via spec-029 FF override (`field_deployment_extended_ttl: true`) for declared field deployments. (R-07, Quality-memo R3)
-- [ ] T133 [P] Build `<DegradedModeBadge />` final implementation in `packages/ui/` — surfaces stale-cache age, offline-cache-active, retrieval-unavailable banner; WCAG 2.2 AA conformance; jurisdiction labels expanded for screen readers. (FR-RAG-LS-02, R-14, Accessibility memo)
+- [X] T129 Create `apps/agents/common/offline_cache.py` — verifier loads ≤ 500 MB per-device bundle; **fail-closed** on either signature failure (cosign keyless or `age` detached); 14-day hard TTL; emit `offline_cache_load.success|fail` audit; mode-aware retrieval reads from `OfflineCacheManifest` chunks. (FR-RAG-LS-02, R-04, R-07)
+- [X] T130 Implement `OfflineCacheRetrievalService` (RetrievalService implementation, contracts/retrieval-service.md §1 alt-impl) — reads from signed offline manifest; injected by Field-Coordinator-aligned agent runtime when no AI Search reachability. (FR-RAG-LS-02)
+- [X] T131 [P] Implement queued offline audit replay — local SQLite spool; on reconnect drain to Cosmos within 60s, preserve original timestamps. (FR-RAG-LS-02, SC-009)
+- [X] T132 [P] Telemetry gauge `offline_cache_ttl_days_remaining` + alert at < 3 days; pre-deploy 30-day extended TTL via spec-029 FF override (`field_deployment_extended_ttl: true`) for declared field deployments. (R-07, Quality-memo R3)
+- [X] T133 [P] Build `<DegradedModeBadge />` final implementation in `packages/ui/` — surfaces stale-cache age, offline-cache-active, retrieval-unavailable banner; WCAG 2.2 AA conformance; jurisdiction labels expanded for screen readers. (FR-RAG-LS-02, R-14, Accessibility memo)
 
 ### D — Implementation: multi-jurisdiction QA + hallucination hardening
 
-- [ ] T134 [P] Build curated 50-query persona-driven test set `tests/integration/test_jurisdiction_disambiguation.py` (extends T065 fixture) — covers NSW–VIC border, NT–QLD cyclone crossing, ACT–NSW handoff, DFES-WA single-agency, plus 30 additional persona-driven cases sourced from `personas-input/sectors-{commonwealth,crosssector,eastern,southern-western,territories}.md`. (FR-RAG-AG-04, SC-010, US7)
-- [ ] T135 [P] Tune hallucinated-citation downgrade threshold per agent (R-10): per-agent `confidence_downgrade_threshold` in `infra/parameters/foundry-agent-quotas.yaml`; default 1; revisit Communication agent post-canary. (FR-RAG-AG-05, R-10)
-- [ ] T136 [P] Wire `offline_bundle.py` into ingest-runner schedule — emit per-build offline-cache bundle to Blob `offline-cache-bundles/`; OIDC-signed manifest + `age`-detached signature. (FR-RAG-LS-02, T047)
-- [ ] T137 Persona traceability check task — verify every "Top 10" / "Top 5" item from each of the 9 persona memos at `personas-input/{operational,sectors-commonwealth,sectors-crosssector,sectors-eastern,sectors-southern-western,sectors-territories,technical-architecture,technical-delivery,technical-quality}.md` maps to ≥ 1 task in this file (link out via cross-reference index). Output a report `specs/036-foundry-rag-grounding/persona-traceability.md`. (Plan §Phasing anchors)
+- [X] T134 [P] Build curated 50-query persona-driven test set `tests/integration/test_jurisdiction_disambiguation.py` (extends T065 fixture) — covers NSW–VIC border, NT–QLD cyclone crossing, ACT–NSW handoff, DFES-WA single-agency, plus 30 additional persona-driven cases sourced from `personas-input/sectors-{commonwealth,crosssector,eastern,southern-western,territories}.md`. (FR-RAG-AG-04, SC-010, US7)
+- [X] T135 [P] Tune hallucinated-citation downgrade threshold per agent (R-10): per-agent `confidence_downgrade_threshold` in `infra/parameters/foundry-agent-quotas.yaml`; default 1; revisit Communication agent post-canary. (FR-RAG-AG-05, R-10)
+- [X] T136 [P] Wire `offline_bundle.py` into ingest-runner schedule — emit per-build offline-cache bundle to Blob `offline-cache-bundles/`; OIDC-signed manifest + `age`-detached signature. (FR-RAG-LS-02, T047)
+- [X] T137 Persona traceability check task — verify every "Top 10" / "Top 5" item from each of the 9 persona memos at `personas-input/{operational,sectors-commonwealth,sectors-crosssector,sectors-eastern,sectors-southern-western,sectors-territories,technical-architecture,technical-delivery,technical-quality}.md` maps to ≥ 1 task in this file (link out via cross-reference index). Output a report `specs/036-foundry-rag-grounding/persona-traceability.md`. (Plan §Phasing anchors)
 
 **Checkpoint D**: all 9 ADRs landed; lint blocks new opt-outs without ADR; offline cache fully signed + reconciles in 60s; 50-query disambiguation suite passes.
 
@@ -266,10 +266,10 @@ description: "Dependency-ordered task list for spec 036 — Microsoft Foundry-Ba
 
 **Goal G6 complete.** The PR that flips the **last** agent ALSO atomically: (a) deletes the legacy Azure-OpenAI path, (b) binds the FR-RAG-FM-04 lint, (c) removes/legacy-tags the legacy Bicep, (d) collapses `_generate_with_fallback` to its template-only branch.
 
-- [ ] T138 [P] **Game-Day 1** (monthly cadence): blue-green alias flip under load + offline-cache fallback under simulated AI Search 503; runbook `docs/runbooks/036-foundry-rag-gameday.md`. (FR-RAG-IDX-04, FR-RAG-LS-02, R7, SRE-memo Top-9)
-- [ ] T139 [P] **Game-Day 2** (monthly): offline cache fallback (Field Coordinator deployment + 14-day TTL countdown). (FR-RAG-LS-02, Risk R5)
-- [ ] T140 [P] **Game-Day 3** (quarterly): multi-agent canary sequencing under cascading Foundry quota exhaustion; assert spec-014 template fallback covers every agent without silencing. (FR-RAG-FM-06, Risk R2, R-12)
-- [ ] T141 [P] Author `docs/runbooks/036-foundry-rag-gameday.md` covering Game-Days 1/2/3 + post-incident replay-within-48h template. (SRE-memo Top-9, R-15-related)
+- [X] T138 [P] **Game-Day 1** (monthly cadence): blue-green alias flip under load + offline-cache fallback under simulated AI Search 503; runbook `docs/runbooks/036-foundry-rag-gameday.md`. (FR-RAG-IDX-04, FR-RAG-LS-02, R7, SRE-memo Top-9)
+- [X] T139 [P] **Game-Day 2** (monthly): offline cache fallback (Field Coordinator deployment + 14-day TTL countdown). (FR-RAG-LS-02, Risk R5)
+- [X] T140 [P] **Game-Day 3** (quarterly): multi-agent canary sequencing under cascading Foundry quota exhaustion; assert spec-014 template fallback covers every agent without silencing. (FR-RAG-FM-06, Risk R2, R-12)
+- [X] T141 [P] Author `docs/runbooks/036-foundry-rag-gameday.md` covering Game-Days 1/2/3 + post-incident replay-within-48h template. (SRE-memo Top-9, R-15-related)
 - [ ] T142 Extend `apps/eval-runner` final canary gate query: `decision-equivalence ≥ 95% AND schema-equivalence == 100% AND citation-fidelity ≥ 0.7 AND verbatim-source-match` — keyed by `(corpus_build_sha, embedding_model_id)`. (FR-RAG-FM-06, FR-RAG-AG-05, SC-011, R-13, Quality-memo Top-6)
 - [ ] T143 EquivalenceTestResult entity test `tests/contract/test_equivalence_test_result.py` — extends spec-033 FR-023 shape with `citation_fidelity`, `verbatim_source_match`, `corpus_build_sha`, `embedding_model_id`. (EquivalenceTestResult entity, FR-RAG-FM-06)
 - [ ] T144 Compliance audit byte-replay automation — sampled SC-011 ≥ 95% reproduction across one-month rolling window; KQL alert on dip. (SC-011, FR-RAG-AG-02, Compliance-memo)
@@ -514,3 +514,4 @@ git worktree add ../wt-hallucination    # T066 + T080 [P]
 ---
 
 *End of tasks.md — **Next command**: `/speckit.analyze` (cross-artefact consistency + readiness gate).*
+
