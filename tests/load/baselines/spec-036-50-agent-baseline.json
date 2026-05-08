@@ -1,0 +1,35 @@
+{
+  "$comment": "Spec 036 / F-A10 / T219 baseline (FR-RAG-TEST-02). Set on first green weekly run; subsequent runs ratchet against this until a deliberate refresh.",
+  "$schemaVersion": "1.0.0",
+  "spec": "036-foundry-rag-grounding",
+  "harness": "tests/load/locustfile.py::RetrievalSession",
+  "scope": {
+    "agent_pool_size": 50,
+    "rps_target": 50,
+    "duration_seconds": 60
+  },
+  "slo": {
+    "latency_p95_ms": 500,
+    "latency_p99_ms": 800,
+    "error_rate_max": 0.01
+  },
+  "baseline": {
+    "captured_at": null,
+    "git_sha": null,
+    "latency_p50_ms": null,
+    "latency_p95_ms": null,
+    "latency_p99_ms": null,
+    "rps_observed": null,
+    "memory_rss_mb_p95": null,
+    "cpu_pct_p95": null
+  },
+  "regression_policy": {
+    "fail_if_p95_exceeds_baseline_by_pct": 15,
+    "fail_if_error_rate_exceeds": 0.02,
+    "ratchet_when_p95_improves_by_pct": 10
+  },
+  "notes": [
+    "First green run populates the `baseline` block; commit the resulting JSON in a follow-up PR.",
+    "`fail_if_p95_exceeds_baseline_by_pct` is the SHOULD-class regression gate — pre-promotion only, NOT per-PR (Plan §F-A10.2)."
+  ]
+}

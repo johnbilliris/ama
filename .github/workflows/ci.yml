@@ -127,6 +127,57 @@ jobs:
           retention-days: 30
 
   # ---------------------------------------------------------------------------
+  # Spec 036 / F-A10 / T218 + T222 — per-PR Windows compatibility job. Runs the
+  # contract + integration sweep on windows-latest so platform-only regressions
+  # are caught before merge (closes F-DEL-01 + F-DEL-08).
+  # ---------------------------------------------------------------------------
+  quality-windows:
+    needs: [quality]
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Install Python tooling
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio ruff
+          pip install -e apps/api
+          pip install -e apps/agents
+      - name: ruff check (Windows)
+        shell: pwsh
+        run: ruff check apps tests packages
+      - name: pytest contract + integration (Windows)
+        shell: pwsh
+        run: |
+          # Spec 036 / F-A10 / T218 — Windows runner mirrors the Linux contract+integration
+          # sweep so packaging regressions surface on PRs (FR-RAG-TEST-01).
+          pytest tests/contract tests/integration -q --tb=line --maxfail=10
+
+  # ---------------------------------------------------------------------------
+  # Spec 036 / F-A10 / T220 + T222 — per-PR golden-set canonicalisation gate.
+  # Asserts that no fixture file other than tests/fixtures/golden-set-v1.json
+  # carries golden-set entries (FR-RAG-TEST-03 / Pass 1 Q-P1-08).
+  # ---------------------------------------------------------------------------
+  golden-set-canonical:
+    needs: [quality]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: golden-set v1 canonicalisation
+        run: |
+          python tools/lint/check_golden_set_canonical.py
+
+  # ---------------------------------------------------------------------------
   # Spec-034 FR-018, FR-019, FR-023(e), SC-001..SC-005 — web coverage suite.
   # Three sequential jobs (shard → merge → gate) with the gate marked as a
   # required check for merging to main (see .github/branch-protection.json).
