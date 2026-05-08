@@ -89,6 +89,8 @@ def _grounded_inference_example() -> dict:
         "output_text_hash": "1a2b3c4d5e6f70819203a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5",
         "tenant_id": "agency-nsw-rfs",
         "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
+        # F-A5 / ADR-16 invariant 6: rag_used == true → retrieval_index_name required.
+        "retrieval_index_name": "corpus-v3",
     }
 
 

@@ -168,6 +168,15 @@ def make_inference_record(
     hallucinated_citation_count: int = 0,
     chat_turn_index: int | None = None,
     call_id: str | None = None,
+    # ---- F-A5 (Cluster A5; ADR-14) — additive-nullable extension fields ----
+    operator_override_rationale: str | None = None,
+    approval_workflow_state: str | None = None,
+    approval_authority: str | None = None,
+    downgrade_justification: str | None = None,
+    retrieval_index_name: str | None = None,
+    field_coordinator_offline_decision: str | None = None,
+    conflict_group_id: str | None = None,
+    precedence_tiebreak_applied: list[str] | None = None,
 ) -> dict[str, Any]:
     """Build a record dict matching the audit-record-llm-call.json schema."""
     record: dict[str, Any] = {
@@ -196,6 +205,17 @@ def make_inference_record(
         record["corpus_build_sha"] = corpus_build_sha
         record["retrieved_chunks"] = list(retrieved_chunks)
         record["citations"] = list(citations or [])
+        # F-A5 / ADR-16: rag_used == true → retrieval_index_name SHOULD be a
+        # concrete index name. Soft-warn for legacy callers that haven't been
+        # wired through F-A7 yet; hard-required at the AuditRecord pydantic
+        # boundary so production paths must supply it.
+        if not retrieval_index_name:
+            logger.warning(
+                "audit_record_missing_retrieval_index_name agent=%s correlation_id=%s "
+                "(F-A7 wiring at retrieval_client.py pending; ADR-16 alias-pinning protocol)",
+                agent_name,
+                correlation_id,
+            )
     else:
         record["retrieved_chunks"] = []
         if not rag_optout_reason or not adr_pointer:
@@ -206,6 +226,34 @@ def make_inference_record(
         if not gateway_deny_reason:
             raise ValueError("gateway_decision=deny requires gateway_deny_reason")
         record["gateway_deny_reason"] = gateway_deny_reason
+
+    # F-A5 (Cluster A5) — emit only the fields the caller supplied. Empty
+    # values stay absent from the record so legacy KQL queries don't see
+    # nullable rows where the field was never relevant.
+    if operator_override_rationale:
+        record["operator_override_rationale"] = operator_override_rationale
+    if approval_workflow_state:
+        record["approval_workflow_state"] = approval_workflow_state
+        # ADR-14 invariant 7: terminal state requires approval_authority.
+        if approval_workflow_state in {"approved", "rejected"} and not approval_authority:
+            raise ValueError(
+                "approval_workflow_state in {approved, rejected} requires approval_authority"
+            )
+    if approval_authority:
+        record["approval_authority"] = approval_authority
+    if downgrade_justification:
+        record["downgrade_justification"] = downgrade_justification
+    if retrieval_index_name:
+        record["retrieval_index_name"] = retrieval_index_name
+    if field_coordinator_offline_decision:
+        record["field_coordinator_offline_decision"] = field_coordinator_offline_decision
+        # F-A5.4 / ADR-14 invariant 8: offline decisions queue for IC review.
+        if approval_workflow_state is None:
+            record["approval_workflow_state"] = "pending"
+    if conflict_group_id:
+        record["conflict_group_id"] = conflict_group_id
+    if precedence_tiebreak_applied:
+        record["precedence_tiebreak_applied"] = list(precedence_tiebreak_applied)
     return record
 
 

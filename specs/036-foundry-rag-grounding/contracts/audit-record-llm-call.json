@@ -209,6 +209,53 @@
       "type": "string",
       "format": "uuid",
       "description": "Trace correlation across retrieval → inference → audit → SSE."
+    },
+    "operator_override_rationale": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 2048,
+      "description": "Spec 036 F-A5 NEW field (Cluster A5; Pass 2 Q-P2-01 additive-nullable). Free-text rationale captured when an operator modifies or rejects an agent recommendation. Required by SC-017 on every override event; nullable for legacy rows + non-override paths."
+    },
+    "approval_workflow_state": {
+      "type": ["string", "null"],
+      "enum": ["pending", "approved", "rejected", null],
+      "description": "Spec 036 F-A5 NEW field. State of the approval state machine for public-warning events and other queued-for-review actions. Transitions: pending → approved | rejected (terminal). Approval state machine implementation lives at apps/api/app/services/approval_workflow.py."
+    },
+    "approval_authority": {
+      "type": ["string", "null"],
+      "minLength": 3,
+      "maxLength": 256,
+      "description": "Spec 036 F-A5 NEW field. Identity of the actor who transitioned approval_workflow_state to approved or rejected (Entra ID / OID). Required iff approval_workflow_state in {approved, rejected}; nullable otherwise."
+    },
+    "downgrade_justification": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 2048,
+      "description": "Spec 036 F-A5 NEW field. Free-text justification when an agent or operator downgrades a recommendation from grounded → opt-out (FR-RAG-NS-01..09) for an explicit operational reason rather than a routine carve-out path."
+    },
+    "retrieval_index_name": {
+      "type": ["string", "null"],
+      "pattern": "^corpus-(v[0-9]+|test-[a-z0-9-]+)$",
+      "description": "Spec 036 F-A5 NEW field (Cluster A7). Concrete AI Search index name (e.g. corpus-v3) NOT the alias (corpus-search). Pinned at query start by the alias-pinning protocol (FR-RAG-IDX-04a / ADR-16). Required iff rag_used == true so audit replay can target the exact index version even after the alias has flipped."
+    },
+    "field_coordinator_offline_decision": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "Spec 036 F-A5 NEW field. Summary of an offline Field Coordinator decision queued during disconnected operation (FR-RAG-LS-02 ext). Set on reconnect when the offline decision is reconciled to the audit trail; null otherwise."
+    },
+    "conflict_group_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Spec 036 F-A5 NEW field (Cluster A9). UUID v7 (time-ordered) linking this audit record to a row in the conflictDetectionLog Cosmos container. Set by the multi-agent conflict detector (FR-RAG-COORD-01) on every record involved in a detected conflict; null otherwise."
+    },
+    "precedence_tiebreak_applied": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["recency", "licence_mode", "embedding_model_id", "chunk_id"]
+      },
+      "description": "Spec 036 F-A5 NEW field (Cluster A3). Trace of which deterministic tie-break tiers were applied during retrieval ranking when two chunks shared `precedence_rank` (FR-RAG-AC-01; Pass 1 Q-P1-02). Empty list when no tie occurred. Order matches the Pass 1 Q-P1-02 sequence: (1) recency, (2) licence_mode, (3) embedding_model_id, (4) chunk_id."
     }
   },
   "allOf": [

@@ -392,6 +392,103 @@ def offline_cache_ttl_days_remaining(load_result: OfflineCacheLoadResult) -> flo
     return load_result.days_remaining
 
 
+# --------------------------------------------------------------------------- #
+# F-A5 (T165) — Field-Coordinator offline-decision boundary (FR-RAG-LS-02 ext;
+# Plan §F-A5.4; ADR-14).
+# --------------------------------------------------------------------------- #
+
+
+# Decisions Field Coordinators MAY make while offline (Pass 2 cross-cluster
+# matrix A5.4): resource allocation within local jurisdiction, immediate
+# safety escalation, evacuation-centre setup. Aligned with FR-RAG-LS-02
+# original scope.
+_OFFLINE_SAFE_DECISIONS: frozenset[str] = frozenset(
+    {
+        "resource-allocation-local",
+        "safety-escalation-local",
+        "evacuation-centre-setup",
+    }
+)
+
+
+# Decisions Field Coordinators MUST NOT make while offline; on reconnect the
+# FC queues these decisions for IC review with `approval_workflow_state =
+# pending` per F-A5.4.
+_OFFLINE_FORBIDDEN_DECISIONS: frozenset[str] = frozenset(
+    {
+        "public-warning",
+        "cross-jurisdiction-mutual-aid",
+        "state-escalation",
+        "national-escalation",
+    }
+)
+
+
+def is_decision_offline_safe(decision_type: str) -> bool:
+    """Return True iff a Field Coordinator MAY take ``decision_type`` while
+    offline (FR-RAG-LS-02 ext; Plan §F-A5.4).
+
+    Unknown decision types fail closed (return False) so any decision the
+    code base hasn't classified yet is queued for IC review on reconnect.
+    """
+    if not decision_type:
+        return False
+    key = decision_type.strip().lower()
+    if key in _OFFLINE_SAFE_DECISIONS:
+        return True
+    if key in _OFFLINE_FORBIDDEN_DECISIONS:
+        return False
+    logger.info(
+        "field_coordinator_offline_unknown_decision_type type=%s — failing closed (queued for IC review)",
+        decision_type,
+    )
+    return False
+
+
+@dataclass(frozen=True)
+class QueuedOfflineDecision:
+    """A decision that was rejected by ``is_decision_offline_safe`` and queued
+    for IC review on reconnect. Carrier shape for the audit emission.
+
+    Maps to:
+      * ``AuditRecord.field_coordinator_offline_decision`` (decision_summary)
+      * ``AuditRecord.approval_workflow_state`` = ``"pending"``
+    """
+
+    decision_type: str
+    decision_summary: str
+    queued_at: datetime
+    field_coordinator_id: str
+
+
+def queue_offline_decision_for_review(
+    *,
+    decision_type: str,
+    decision_summary: str,
+    field_coordinator_id: str,
+    now_fn: Callable[[], datetime] = lambda: datetime.now(tz=UTC),
+) -> QueuedOfflineDecision:
+    """Queue a forbidden offline decision for IC review on reconnect.
+
+    Caller wires the result into the audit record as:
+      * ``field_coordinator_offline_decision`` (the ``decision_summary``)
+      * ``approval_workflow_state`` = ``"pending"`` (set automatically by the
+        ``make_inference_record`` builder when ``field_coordinator_offline_decision``
+        is present).
+    """
+    if is_decision_offline_safe(decision_type):
+        # Caller misuse — would dead-letter. Raise so the bug surfaces.
+        raise ValueError(
+            f"decision type {decision_type!r} is offline-safe; do not queue for review"
+        )
+    return QueuedOfflineDecision(
+        decision_type=decision_type,
+        decision_summary=decision_summary,
+        queued_at=now_fn(),
+        field_coordinator_id=field_coordinator_id,
+    )
+
+
 __all__ = [
     "AgeVerifier",
     "AuditSpool",
@@ -400,8 +497,11 @@ __all__ = [
     "OfflineCacheLoader",
     "OfflineCacheLoadResult",
     "OfflineCacheRetrievalService",
+    "QueuedOfflineDecision",
     "SIZE_BYTES_CAP",
     "STALE_WARNING_DAYS",
     "TTL_DAYS",
+    "is_decision_offline_safe",
     "offline_cache_ttl_days_remaining",
+    "queue_offline_decision_for_review",
 ]

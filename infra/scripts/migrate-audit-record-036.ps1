@@ -53,7 +53,9 @@ param(
     [string]$DatabaseName = "platform",
     [string]$ContainerName = "audit_records",
     [string]$AccountName  = $env:AZURE_COSMOS_ACCOUNT_NAME,
-    [string]$ResourceGroup = $env:AZURE_COSMOS_RESOURCE_GROUP
+    [string]$ResourceGroup = $env:AZURE_COSMOS_RESOURCE_GROUP,
+    [ValidateSet("Initial", "F")]
+    [string]$Phase = "Initial"
 )
 
 $ErrorActionPreference = "Stop"
@@ -131,6 +133,63 @@ $additiveFields = @(
     "rag_used", "rag_optout_reason", "adr_pointer", "gateway_decision",
     "gateway_deny_reason", "hallucinated_citation_count"
 )
+
+# Spec 036 F-A5 (Phase F amend-loop) — 8 additional additive-nullable fields
+# per Cluster A5 / Pass 2 Q-P2-01. Cosmos schema-on-read tolerates missing
+# fields on legacy rows, so this remains a no-rewrite migration.
+$phaseFFields = @(
+    "operator_override_rationale",
+    "approval_workflow_state",
+    "approval_authority",
+    "downgrade_justification",
+    "retrieval_index_name",
+    "field_coordinator_offline_decision",
+    "conflict_group_id",
+    "precedence_tiebreak_applied"
+)
+
+# When -Phase F is supplied, also patch the indexing policy to cover the
+# Phase F fields (best-effort; az CLI patch is idempotent).
+if ($Phase -eq "F") {
+    Write-Host ""
+    Write-Host "Spec 036 F-A5 — Phase F amend-loop additive fields:"
+    $phaseFFields | ForEach-Object { Write-Host "  + $_" }
+
+    $phaseFIndexAdds = @(
+        @{ path = "/approval_workflow_state/?" },
+        @{ path = "/approval_authority/?" },
+        @{ path = "/retrieval_index_name/?" },
+        @{ path = "/conflict_group_id/?" },
+        @{ path = "/field_coordinator_offline_decision/?" }
+    )
+
+    if ($PSCmdlet.ShouldProcess($ContainerName, "Patch indexing policy with Phase F amend-loop fields")) {
+        if ($AccountName -and $ResourceGroup) {
+            $indexingPolicy.includedPaths = @($indexingPolicy.includedPaths) + $phaseFIndexAdds
+            Write-Host "Patching Phase F indexing additions via az CLI..."
+            $tmpF = New-TemporaryFile
+            try {
+                $indexingPolicy | ConvertTo-Json -Depth 10 | Set-Content -Path $tmpF -Encoding UTF8
+                $argsF = @(
+                    "cosmosdb", "sql", "container", "update",
+                    "--account-name", $AccountName,
+                    "--database-name", $DatabaseName,
+                    "--name", $ContainerName,
+                    "--resource-group", $ResourceGroup,
+                    "--idx", "@$tmpF"
+                )
+                & az @argsF
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Warning "az cosmosdb sql container update (Phase F) returned $LASTEXITCODE; continuing best-effort."
+                }
+            } finally {
+                Remove-Item -Path $tmpF -ErrorAction SilentlyContinue
+            }
+        } else {
+            Write-Host "AZURE_COSMOS_ACCOUNT_NAME / AZURE_COSMOS_RESOURCE_GROUP not set; skipping az CLI Phase F patch."
+        }
+    }
+}
 
 Write-Host ""
 Write-Host "Additive fields introduced by spec 036 (no row rewrite required):"

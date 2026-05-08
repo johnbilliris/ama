@@ -81,6 +81,17 @@ _RagOptoutReason = Literal[
 _OperatorAction = Literal["approve", "edit", "dismiss", "escalate"]
 
 
+_ApprovalWorkflowState = Literal["pending", "approved", "rejected"]
+"""F-A5 (Cluster A5; ADR-14) approval state machine values. Transitions:
+``pending → approved | rejected`` (terminal). Source of truth:
+``apps/api/app/services/approval_workflow.py``."""
+
+
+_PrecedenceTiebreakTier = Literal["recency", "licence_mode", "embedding_model_id", "chunk_id"]
+"""F-A5 (Cluster A3) deterministic tie-break tiers; order pinned by Pass 1
+Q-P1-02. Recorded in audit emission via ``apps/agents/common/retrieval_client``."""
+
+
 # --------------------------------------------------------------------------- #
 # Sub-records
 # --------------------------------------------------------------------------- #
@@ -157,6 +168,22 @@ class AuditRecord(BaseModel):
     correlation_id: str = Field(..., min_length=1)
 
     # ------------------------------------------------------------------ #
+    # F-A5 (Cluster A5; ADR-14) — additive-nullable extension fields.
+    # All fields default to None for legacy rows + non-applicable paths.
+    # ------------------------------------------------------------------ #
+    operator_override_rationale: str | None = Field(default=None, min_length=1, max_length=2048)
+    approval_workflow_state: _ApprovalWorkflowState | None = None
+    approval_authority: str | None = Field(default=None, min_length=3, max_length=256)
+    downgrade_justification: str | None = Field(default=None, min_length=1, max_length=2048)
+    retrieval_index_name: str | None = Field(
+        default=None,
+        pattern=r"^corpus-(v[0-9]+|test-[a-z0-9-]+)$",
+    )
+    field_coordinator_offline_decision: str | None = Field(default=None, min_length=1, max_length=1024)
+    conflict_group_id: str | None = Field(default=None, min_length=1)
+    precedence_tiebreak_applied: list[_PrecedenceTiebreakTier] = Field(default_factory=list)
+
+    # ------------------------------------------------------------------ #
     # Invariants (mirror the schema's allOf blocks)
     # ------------------------------------------------------------------ #
 
@@ -199,6 +226,15 @@ class AuditRecord(BaseModel):
         # 5: gateway_decision == deny → gateway_deny_reason required.
         if self.gateway_decision == "deny" and self.gateway_deny_reason is None:
             raise ValueError("gateway_decision=deny requires gateway_deny_reason")
+        # 6 (F-A5; ADR-16): rag_used == true → retrieval_index_name required.
+        if self.rag_used and not self.retrieval_index_name:
+            raise ValueError("rag_used=true requires retrieval_index_name (ADR-16 alias-pinning protocol)")
+        # 7 (F-A5; ADR-14): approval_workflow_state ∈ {approved, rejected} →
+        # approval_authority required.
+        if self.approval_workflow_state in {"approved", "rejected"} and not self.approval_authority:
+            raise ValueError(
+                "approval_workflow_state in {approved, rejected} requires approval_authority"
+            )
         return self
 
 

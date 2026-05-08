@@ -24,10 +24,63 @@ deny_foundry_carveout[msg] {
     msg := sprintf("FR-RAG-CV-03 violation: deployment %v missing classification_filter_required.", [deployment.model_name])
 }
 
+# Spec 036 F-A4 (T152) — environment-aware approver-count quorum
+# (FR-RAG-CV-01; SC-016; Plan §F-A4.1).
+#
+# `prod`             → count(approver_identities) >= min_approvers_prod (default 3)
+# `dev` or `staging` → count(approver_identities) >= min_approvers_dev  (default 2)
+#
+# Schema mirror: `infra/parameters/foundry-carveout.schema.json` (registry-root
+# `min_approvers_prod` + `min_approvers_dev`; per-row `environment` enum).
+# Spec contract mirror: `specs/036-foundry-rag-grounding/contracts/foundry-cv.schema.json`.
+
+# Default floors when the registry omits the keys (preserves spec-032 behaviour).
+default_min_approvers_prod := 3
+default_min_approvers_dev := 2
+
+min_approvers_prod := input.min_approvers_prod {
+    input.min_approvers_prod
+} else := default_min_approvers_prod
+
+min_approvers_dev := input.min_approvers_dev {
+    input.min_approvers_dev
+} else := default_min_approvers_dev
+
+# prod row → require >= min_approvers_prod (default 3).
 deny_foundry_carveout[msg] {
     deployment := input.deployments[_]
-    count(deployment.approver_identities) < 2
-    msg := sprintf("FR-RAG-CV-01 violation: deployment %v has fewer than 2 approver_identities.", [deployment.model_name])
+    lower(deployment.environment) == "prod"
+    count(deployment.approver_identities) < min_approvers_prod
+    msg := sprintf(
+        "FR-RAG-CV-01 violation: deployment %v has fewer than %v approver_identities (prod requires >= %v).",
+        [deployment.model_name, min_approvers_prod, min_approvers_prod],
+    )
+}
+
+# dev / staging row → require >= min_approvers_dev (default 2).
+deny_foundry_carveout[msg] {
+    deployment := input.deployments[_]
+    env := lower(deployment.environment)
+    env != "prod"
+    env != ""
+    count(deployment.approver_identities) < min_approvers_dev
+    msg := sprintf(
+        "FR-RAG-CV-01 violation: deployment %v has fewer than %v approver_identities (dev/staging requires >= %v).",
+        [deployment.model_name, min_approvers_dev, min_approvers_dev],
+    )
+}
+
+# Backward-compat: rows missing the `environment` field (legacy spec-032
+# registries) still get the dev floor — the discriminator MUST be added at the
+# next CD apply per Pass 2 Q-P2-03.
+deny_foundry_carveout[msg] {
+    deployment := input.deployments[_]
+    not deployment.environment
+    count(deployment.approver_identities) < min_approvers_dev
+    msg := sprintf(
+        "FR-RAG-CV-01 violation: deployment %v has fewer than %v approver_identities (no environment set; treating as dev/staging).",
+        [deployment.model_name, min_approvers_dev],
+    )
 }
 
 deny_foundry_carveout[msg] {
