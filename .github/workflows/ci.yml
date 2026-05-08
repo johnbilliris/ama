@@ -40,11 +40,28 @@ jobs:
           pip install pytest pytest-cov pytest-asyncio pytest-benchmark ruff mypy import-linter pyyaml
           pip install -e apps/api
           pip install -e apps/agents
+      - name: Install age CLI (spec 036 FR-RAG-LS-02 offline-cache dual-signing)
+        run: |
+          # `age` is required by ama_ingest.offline_bundle (T047) and the
+          # offline-cache verifier (T129). Fetch the upstream binary to keep
+          # the CI image hermetic and reproducible across runs.
+          AGE_VERSION=v1.2.1
+          curl -fsSL "https://github.com/FiloSottile/age/releases/download/${AGE_VERSION}/age-${AGE_VERSION}-linux-amd64.tar.gz" \
+            | tar -xz -C /tmp
+          sudo install /tmp/age/age /usr/local/bin/age
+          sudo install /tmp/age/age-keygen /usr/local/bin/age-keygen
+          age --version
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
 
       - name: python-lint
         run: ruff check apps tests packages
+
+      # Spec 036 T055 / T039 — fail CI on docs/corpus/INDEXING-LICENCE-INVENTORY drift.
+      - name: licence-inventory-lint
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python tools/lint/check_licence_inventory.py
 
       - name: equivalence-gate
         # Spec 033 / T041 — per-agent FR-023 equivalence harness gate.
