@@ -107,6 +107,9 @@ class Chunk:
     # Phase F (T182 — Cluster A3)
     authority_level: str | None = None
     precedence_rank: int | None = None
+    # Phase F (T200 — Cluster A2 cultural authority)
+    cultural_classification: str = "public"
+    cultural_authority_required: bool = False
 
 
 @dataclass
@@ -176,6 +179,8 @@ def chunk_handbook(
     agency_role: str | None = None,
     authority_level: str | None = None,
     precedence_rank: int | None = None,
+    cultural_classification: str = "public",
+    cultural_authority_required: bool = False,
 ) -> list[Chunk]:
     """Split a Markdown handbook into chunks.
 
@@ -239,6 +244,8 @@ def chunk_handbook(
                     agency_role=agency_role,
                     authority_level=authority_level,
                     precedence_rank=precedence_rank,
+                    cultural_classification=cultural_classification,
+                    cultural_authority_required=cultural_authority_required,
                 )
             )
             stats.chunk_size_tokens.append(tokens)
@@ -426,6 +433,11 @@ def chunks_to_index_docs(
             doc["authority_level"] = chunk.authority_level
         if chunk.precedence_rank is not None:
             doc["precedence_rank"] = chunk.precedence_rank
+        # Phase F (T200) — cultural authority gating fields. Always emitted
+        # so the post-retrieval gate has stable inputs (default public/false
+        # is per spec contract chunk-metadata.schema.json).
+        doc["cultural_classification"] = chunk.cultural_classification
+        doc["cultural_authority_required"] = chunk.cultural_authority_required
         if retrieval_index_name:
             doc["retrieval_index_name"] = retrieval_index_name
         docs.append(doc)
@@ -453,6 +465,9 @@ _AGENCY_ROLE_ENUM: frozenset[str] = frozenset(
 _AUTHORITY_LEVEL_ENUM: frozenset[str] = frozenset(
     {"state-territory", "commonwealth", "national-institution"}
 )
+_CULTURAL_CLASSIFICATION_ENUM: frozenset[str] = frozenset(
+    {"public", "indigenous-language", "sacred-site", "land-governance"}
+)
 
 
 class ChunkMetadataError(ValueError):
@@ -467,11 +482,12 @@ def validate_chunk_metadata(
     *,
     enforce_agency: bool = True,
     enforce_authority: bool = True,
+    enforce_cultural: bool = True,
 ) -> None:
-    """Lint a chunk batch against the F-A1 + F-A3 contract.
+    """Lint a chunk batch against the F-A1 + F-A3 + F-A2 contract.
 
     Raises ``ChunkMetadataError`` on the first violation. Production CI
-    sets both ``enforce_*`` flags True; pre-Phase-F handbooks (legacy
+    sets all ``enforce_*`` flags True; pre-Phase-F handbooks (legacy
     re-runs) can disable to avoid false positives — but this MUST be
     documented in the build artefact.
     """
@@ -498,6 +514,24 @@ def validate_chunk_metadata(
                 raise ChunkMetadataError(
                     f"chunk_invalid_precedence_rank: chunk_id={chunk.chunk_id} "
                     f"rank={chunk.precedence_rank} (expected 1–3)"
+                )
+        if enforce_cultural:
+            if chunk.cultural_classification not in _CULTURAL_CLASSIFICATION_ENUM:
+                raise ChunkMetadataError(
+                    f"chunk_invalid_cultural_classification: chunk_id={chunk.chunk_id} "
+                    f"value={chunk.cultural_classification!r} not in "
+                    f"{sorted(_CULTURAL_CLASSIFICATION_ENUM)}"
+                )
+            # Spec contract chunk-metadata.schema.json allOf invariant 3:
+            # cultural_classification != 'public' → cultural_authority_required MUST be true.
+            if (
+                chunk.cultural_classification != "public"
+                and not chunk.cultural_authority_required
+            ):
+                raise ChunkMetadataError(
+                    f"chunk_cultural_invariant_violation: chunk_id={chunk.chunk_id} "
+                    f"cultural_classification={chunk.cultural_classification!r} requires "
+                    "cultural_authority_required=True (chunk-metadata.schema.json allOf 3)."
                 )
 
 

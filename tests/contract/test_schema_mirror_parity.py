@@ -27,6 +27,7 @@ MIRRORED_SCHEMAS = (
     "offline-cache-manifest.json",
     # Spec 036 amend-loop additions (Phase F):
     "chunk-metadata.schema.json",
+    "cultural-authority-registry.schema.json",
 )
 
 
@@ -47,7 +48,7 @@ def test_schema_mirror_byte_equal(filename: str) -> None:
 
 
 def test_all_schemas_mirrored() -> None:
-    """The four contracts MUST exist in both locations."""
+    """The five contracts MUST exist in both locations."""
     for filename in MIRRORED_SCHEMAS:
         assert (SPEC_CONTRACTS / filename).exists(), f"missing spec {filename}"
         assert (PACKAGE_SCHEMAS / filename).exists(), f"missing mirror {filename}"
