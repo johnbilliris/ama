@@ -1,4 +1,4 @@
-"""Spec 036 — Citation entity (T004 stub → T072 fill).
+"""Spec 036 — Citation entity (T072).
 
 Pydantic-v2 mirror of ``packages/schemas/spec_036/citation-envelope.json``.
 Used by both recommendation cards (FR-RAG-AG-03) and simulation SSE
@@ -19,7 +19,7 @@ from .retrieval import Jurisdiction, LicenceMode
 
 
 class Citation(BaseModel):
-    """Citation envelope (T004 stub — T072 fills the full surface).
+    """Citation envelope — pydantic mirror of contracts/citation-envelope.json.
 
     Frozen + extra=forbid to match JSON Schema ``additionalProperties: false``.
     """

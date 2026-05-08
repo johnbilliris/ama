@@ -17,10 +17,8 @@ Schema-mirror parity verified by ``tests/contract/test_schema_mirror_parity.py``
 (T063, T064, T114).
 """
 
-# Re-exports for the public surface — populated as T071–T074 land.
-# Relative imports keep the package path-agnostic: importable as either
-# ``ama_domain`` (if on sys.path) or ``packages.domain.src.ama_domain``
-# (the existing tests/conftest.py convention).
+# Re-exports for the public surface (T071–T074 filled).
+from .audit_record import AuditRecord, OperatorAction, RetrievedChunkRef
 from .citation import Citation
 from .offline_cache import (
     OfflineCacheEntry,
@@ -36,13 +34,16 @@ from .retrieval import (
 )
 
 __all__ = [
+    "AuditRecord",
     "Citation",
     "Jurisdiction",
     "LicenceMode",
     "OfflineCacheEntry",
     "OfflineCacheManifest",
     "OfflineCacheSignatures",
+    "OperatorAction",
     "RetrievalRequest",
     "RetrievalResult",
     "RetrievedChunk",
+    "RetrievedChunkRef",
 ]
