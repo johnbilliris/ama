@@ -77,6 +77,15 @@ class Chunk:
     Mirrors ``data-model.md §Chunk``. The ``embedding`` and ``embedding_model_id``
     fields are populated downstream by ``embedder.py``; the chunker only
     produces text + provenance.
+
+    Spec-036 Phase F (T181 + T182) NEW fields:
+      * ``agency`` + ``agency_role``       — Cluster A1 disambiguation.
+      * ``authority_level`` + ``precedence_rank`` — Cluster A3 ranking.
+
+    All four NEW fields are optional on the dataclass for backward-compat
+    with pre-Phase-F handbooks; the ingest-time lint
+    (``validate_chunk_metadata``) enforces presence at the boundary so a
+    rebuild that omits them fails non-zero before the alias flip.
     """
 
     chunk_id: str
@@ -92,6 +101,12 @@ class Chunk:
     rendered_url: str
     cross_page: bool = False
     summary: str | None = None  # populated by licence_filter for metadata-only entries.
+    # Phase F (T181 — Cluster A1)
+    agency: str | None = None
+    agency_role: str | None = None
+    # Phase F (T182 — Cluster A3)
+    authority_level: str | None = None
+    precedence_rank: int | None = None
 
 
 @dataclass
@@ -154,6 +169,13 @@ def chunk_handbook(
     max_tokens: int = MAX_TOKENS,
     overlap_ratio: float = OVERLAP_RATIO,
     stats: ChunkerStats | None = None,
+    # Phase F (T181 + T182) — additive metadata; default None keeps pre-F
+    # ingest paths working but the post-chunk lint will reject any chunk
+    # that doesn't carry them in production rebuilds.
+    agency: str | None = None,
+    agency_role: str | None = None,
+    authority_level: str | None = None,
+    precedence_rank: int | None = None,
 ) -> list[Chunk]:
     """Split a Markdown handbook into chunks.
 
@@ -213,6 +235,10 @@ def chunk_handbook(
                     source_url=source_url,
                     rendered_url=rendered_url,
                     cross_page=cross_page,
+                    agency=agency,
+                    agency_role=agency_role,
+                    authority_level=authority_level,
+                    precedence_rank=precedence_rank,
                 )
             )
             stats.chunk_size_tokens.append(tokens)
@@ -355,12 +381,18 @@ def chunks_to_index_docs(
     embedding_model_id: str,
     corpus_build_sha: str,
     embeddings: dict[str, list[float]] | None = None,
+    retrieval_index_name: str | None = None,
 ) -> list[dict[str, Any]]:
     """Project a chunk iterable into AI-Search-shaped index documents.
 
     The ``embeddings`` map is keyed by ``chunk_id``. When omitted, ``embedding``
     is left absent (``metadata-only`` mode) and the indexer caller must enforce
     that no body text leaks downstream.
+
+    Phase F (T182 — Cluster A3): emits ``authority_level`` + ``precedence_rank``
+    when set on the source ``Chunk``. ``retrieval_index_name`` is the concrete
+    target index for this rebuild (e.g. ``"corpus-v3"``); ingest stamps the
+    same name on every doc so audit replay can pin without alias resolution.
     """
     docs: list[dict[str, Any]] = []
     for chunk in chunks:
@@ -385,16 +417,98 @@ def chunks_to_index_docs(
                 doc["embedding"] = embeddings[chunk.chunk_id]
         elif chunk.licence_mode == "metadata-only":
             doc["summary"] = chunk.summary or ""
+        # Phase F additive metadata.
+        if chunk.agency is not None:
+            doc["agency"] = chunk.agency
+        if chunk.agency_role is not None:
+            doc["agency_role"] = chunk.agency_role
+        if chunk.authority_level is not None:
+            doc["authority_level"] = chunk.authority_level
+        if chunk.precedence_rank is not None:
+            doc["precedence_rank"] = chunk.precedence_rank
+        if retrieval_index_name:
+            doc["retrieval_index_name"] = retrieval_index_name
         docs.append(doc)
     return docs
+
+
+# --------------------------------------------------------------------------- #
+# Phase F ingest-time metadata lint (T181 + T182)
+# --------------------------------------------------------------------------- #
+
+
+_AGENCY_ROLE_ENUM: frozenset[str] = frozenset(
+    {
+        "urban-fire",
+        "rural-fire",
+        "ses",
+        "combined",
+        "police",
+        "ambulance",
+        "marine-rescue",
+        "national-security",
+        "other",
+    }
+)
+_AUTHORITY_LEVEL_ENUM: frozenset[str] = frozenset(
+    {"state-territory", "commonwealth", "national-institution"}
+)
+
+
+class ChunkMetadataError(ValueError):
+    """Raised by ``validate_chunk_metadata`` when a chunk is missing or
+    has an invalid F-A1/F-A3 metadata field. Ingest-time lint fails the
+    build non-zero per Plan §F-A1.2 + §F-A3.1.
+    """
+
+
+def validate_chunk_metadata(
+    chunks: Iterable[Chunk],
+    *,
+    enforce_agency: bool = True,
+    enforce_authority: bool = True,
+) -> None:
+    """Lint a chunk batch against the F-A1 + F-A3 contract.
+
+    Raises ``ChunkMetadataError`` on the first violation. Production CI
+    sets both ``enforce_*`` flags True; pre-Phase-F handbooks (legacy
+    re-runs) can disable to avoid false positives — but this MUST be
+    documented in the build artefact.
+    """
+    for chunk in chunks:
+        if enforce_agency:
+            if not chunk.agency and not chunk.agency_role:
+                raise ChunkMetadataError(
+                    f"chunk_missing_agency_metadata: chunk_id={chunk.chunk_id} "
+                    f"corpus_entry_id={chunk.corpus_entry_id} — Plan §F-A1.2 "
+                    "requires at least one of (agency, agency_role)."
+                )
+            if chunk.agency_role and chunk.agency_role not in _AGENCY_ROLE_ENUM:
+                raise ChunkMetadataError(
+                    f"chunk_invalid_agency_role: chunk_id={chunk.chunk_id} "
+                    f"role={chunk.agency_role!r} not in {sorted(_AGENCY_ROLE_ENUM)}"
+                )
+        if enforce_authority:
+            if chunk.authority_level and chunk.authority_level not in _AUTHORITY_LEVEL_ENUM:
+                raise ChunkMetadataError(
+                    f"chunk_invalid_authority_level: chunk_id={chunk.chunk_id} "
+                    f"level={chunk.authority_level!r} not in {sorted(_AUTHORITY_LEVEL_ENUM)}"
+                )
+            if chunk.precedence_rank is not None and not (1 <= chunk.precedence_rank <= 3):
+                raise ChunkMetadataError(
+                    f"chunk_invalid_precedence_rank: chunk_id={chunk.chunk_id} "
+                    f"rank={chunk.precedence_rank} (expected 1–3)"
+                )
 
 
 __all__ = [
     "CHUNK_NAMESPACE",
     "Chunk",
+    "ChunkMetadataError",
     "ChunkerStats",
     "MAX_TOKENS",
     "OVERLAP_RATIO",
     "chunk_handbook",
     "chunks_to_index_docs",
+    "validate_chunk_metadata",
 ]

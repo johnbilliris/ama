@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/johnbilliris/ama/specs/036-foundry-rag-grounding/contracts/chunk-metadata.schema.json",
+  "title": "Chunk Metadata — Spec 036 amend-loop authoritative wire shape",
+  "description": "Spec-036 amend-loop authoritative wire shape for a single AI Search index document under `corpus-v{N}`. EXTENDS the chunk shape inlined in `data-model.md §Chunk` and `contracts/retrieval-service.md` with the R3-amend-loop fields introduced by Clusters A1 (agency disambiguation), A3 (Commonwealth precedence), A2 (cultural classification gating), and A7 (alias-name capture for audit replay). Schema migration MUST follow the blue-green rebuild path per Pass 2 Q-P2-01 — never in-place — because legacy chunks lacking the new required fields would silently fail FR-RAG-AG-04 + SC-013 + SC-015.",
+  "type": "object",
+  "required": [
+    "chunk_id",
+    "corpus_entry_id",
+    "jurisdiction",
+    "topic",
+    "page",
+    "tokens",
+    "embedding_model_id",
+    "corpus_build_sha",
+    "sha256_of_chunk",
+    "licence_mode",
+    "source_url",
+    "rendered_url",
+    "agency",
+    "agency_role",
+    "authority_level",
+    "precedence_rank",
+    "retrieval_index_name"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "chunk_id": {
+      "type": "string",
+      "description": "UUID-v5 of `(corpus_entry_id, page, chunk_offset_in_page)` for stable identity across re-runs. AI Search index key."
+    },
+    "corpus_entry_id": {
+      "type": "string",
+      "description": "`<jurisdiction>/<topic>` from CorpusEntry."
+    },
+    "jurisdiction": {
+      "type": "string",
+      "enum": ["act", "nsw", "nt", "qld", "sa", "tas", "vic", "wa", "national", "aidr"]
+    },
+    "topic": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,128}$"
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "text": {
+      "type": "string",
+      "description": "Conditionally present iff `licence_mode == 'full-text'`; OMITTED for `metadata-only` (R-11).",
+      "minLength": 1
+    },
+    "tokens": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1024,
+      "description": "Post-tokeniser count; ≤ 1024 (R-04). Ingest emits a chunk_size_tokens histogram and CI fails if any chunk > 1024."
+    },
+    "embedding": {
+      "type": "array",
+      "items": {"type": "number"},
+      "minItems": 3072,
+      "maxItems": 3072,
+      "description": "Conditionally present iff `licence_mode == 'full-text'`. 3072-dim vector for `text-embedding-3-large` (R-02)."
+    },
+    "embedding_model_id": {
+      "type": "string",
+      "description": "E.g. `text-embedding-3-large`. Exactly one distinct value per `corpus-v{N}` index (R-05 signal 4)."
+    },
+    "corpus_build_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sha256_of_chunk": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "licence_mode": {
+      "type": "string",
+      "enum": ["full-text", "metadata-only"],
+      "description": "`excluded` chunks are never persisted (FR-RAG-IDX-02)."
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "rendered_url": {
+      "type": "string",
+      "pattern": "^/docs/corpus/[a-z]+/[a-z0-9-]+/handbook\\.md#page-\\d+$"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Conditionally present iff `licence_mode == 'metadata-only'` (no body, just publisher-supplied summary)."
+    },
+    "cross_page": {
+      "type": "boolean",
+      "description": "true iff this chunk overlaps a page boundary (R-04)."
+    },
+    "agency": {
+      "type": "string",
+      "description": "Spec-036 amend-loop NEW field (Cluster A1). E.g. 'NSW-RFS', 'FRNSW', 'DFES-WA', 'SAMFS', 'NTES'. Drives FR-RAG-AG-04 disambiguation across multi-agency jurisdictions. Required for SC-013 ≥95% on agency-disambiguation subset of `tests/fixtures/golden-set-v1.json`.",
+      "minLength": 2,
+      "maxLength": 64
+    },
+    "agency_role": {
+      "type": "string",
+      "enum": ["urban-fire", "rural-fire", "ses", "combined", "police", "ambulance", "marine-rescue", "national-security", "other"],
+      "description": "Spec-036 amend-loop NEW field (Cluster A1). Distinguishes urban-fire (FRNSW, FRV, SAMFS) from rural-fire (NSW RFS, CFA-VIC, SACFS, Bushfires NT) within shared jurisdictions, and SES from combined-agency (DFES-WA)."
+    },
+    "authority_level": {
+      "type": "string",
+      "enum": ["state-territory", "commonwealth", "national-institution"],
+      "description": "Spec-036 amend-loop NEW field (Cluster A3). Drives FR-RAG-AC-01 + FR-RAG-COMP-04 precedence ranking (Commonwealth wins for national institutions in ACT)."
+    },
+    "precedence_rank": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "Spec-036 amend-loop NEW field (Cluster A3). 1=highest, 3=lowest. ACT-Commonwealth coexistence: Commonwealth=1, ACT=2 for national institutions. When two chunks share `precedence_rank`, the deterministic tie-break order from Pass 1 Q-P1-02 + ADR-13 applies."
+    },
+    "precedence_tiebreak_applied": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["recency", "licence_mode", "embedding_model_id", "chunk_id"]
+      },
+      "description": "Optional. Trace of which tie-breakers were applied during ranking. Recorded in audit log so SC-011 ≥95% byte-identical replay holds even when ranks tie. Empty list when no tie occurred. Order matches the Pass 1 Q-P1-02 sequence."
+    },
+    "cultural_classification": {
+      "type": "string",
+      "enum": ["public", "indigenous-language", "sacred-site", "land-governance"],
+      "description": "Spec-036 amend-loop NEW field (Cluster A2). `public` is the default and always retrievable; `indigenous-language` / `sacred-site` / `land-governance` are gated by `cultural_authority_required: true` and the post-retrieval cultural-authority gate per ADR-12."
+    },
+    "cultural_authority_required": {
+      "type": "boolean",
+      "description": "Spec-036 amend-loop NEW field (Cluster A2). When true, the cultural-authority gate (ADR-12) MUST verify operator consent in the `culturalAuthorityRegistry` Cosmos container before this chunk is surfaced. When the registry is unreachable at retrieval time, the gate fails closed and emits `cultural_authority_registry_unavailable` to the audit log (Pass 1 Q-P1-01)."
+    },
+    "retrieval_index_name": {
+      "type": "string",
+      "description": "Spec-036 amend-loop NEW field (Cluster A7). The concrete AI Search index name (e.g. `corpus-v3`) NOT the alias (`corpus-search`). Resolved at query start by the retrieval client per FR-RAG-IDX-04a; recorded on every chunk surfaced through retrieval and propagated to `AuditRecord.retrieval_index_name` so audit replay can pin to the exact index version even after the alias has flipped (per ADR-16)."
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "full-text → text + embedding required.",
+      "if": {"properties": {"licence_mode": {"const": "full-text"}}, "required": ["licence_mode"]},
+      "then": {"required": ["text", "embedding"]}
+    },
+    {
+      "$comment": "metadata-only → summary required; text + embedding forbidden.",
+      "if": {"properties": {"licence_mode": {"const": "metadata-only"}}, "required": ["licence_mode"]},
+      "then": {"required": ["summary"], "not": {"anyOf": [{"required": ["text"]}, {"required": ["embedding"]}]}}
+    },
+    {
+      "$comment": "cultural-authority gate (Cluster A2). cultural_classification != 'public' → cultural_authority_required MUST be true. ADR-12 enforces the runtime gate; this schema enforces the data-model invariant.",
+      "if": {
+        "not": {"properties": {"cultural_classification": {"const": "public"}}, "required": ["cultural_classification"]}
+      },
+      "then": {"properties": {"cultural_authority_required": {"const": true}}, "required": ["cultural_authority_required"]}
+    }
+  ],
+  "examples": [
+    {
+      "chunk_id": "abc-123",
+      "corpus_entry_id": "nsw/evacuation-planning",
+      "jurisdiction": "nsw",
+      "topic": "evacuation-planning",
+      "page": 47,
+      "text": "When the area is deemed safe, the Incident Controller authorises return of evacuees in coordination with NSW Police and the affected LGA…",
+      "tokens": 612,
+      "embedding": [0.012, -0.034, 0.089],
+      "embedding_model_id": "text-embedding-3-large",
+      "corpus_build_sha": "f9c3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a26",
+      "sha256_of_chunk": "f9c3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a26",
+      "licence_mode": "full-text",
+      "source_url": "https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0009/evac-plan.pdf",
+      "rendered_url": "/docs/corpus/nsw/evacuation-planning/handbook.md#page-47",
+      "agency": "NSW-RFS",
+      "agency_role": "rural-fire",
+      "authority_level": "state-territory",
+      "precedence_rank": 2,
+      "precedence_tiebreak_applied": [],
+      "cultural_classification": "public",
+      "cultural_authority_required": false,
+      "retrieval_index_name": "corpus-v3"
+    },
+    {
+      "chunk_id": "act-pp-001",
+      "corpus_entry_id": "act/parliament-house-emergency-protocols",
+      "jurisdiction": "act",
+      "topic": "parliament-house-emergency-protocols",
+      "page": 12,
+      "text": "In the event of a Commonwealth emergency declaration affecting Parliament House, the Australian Federal Police assumes operational command in coordination with the National Emergency Management Agency...",
+      "tokens": 408,
+      "embedding": [0.012, -0.034, 0.089],
+      "embedding_model_id": "text-embedding-3-large",
+      "corpus_build_sha": "f9c3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a26",
+      "sha256_of_chunk": "0a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5",
+      "licence_mode": "full-text",
+      "source_url": "https://www.nema.gov.au/comdisplan/parliament-house-protocols",
+      "rendered_url": "/docs/corpus/act/parliament-house-emergency-protocols/handbook.md#page-12",
+      "agency": "AFP-COMMONWEALTH",
+      "agency_role": "national-security",
+      "authority_level": "national-institution",
+      "precedence_rank": 1,
+      "precedence_tiebreak_applied": [],
+      "cultural_classification": "public",
+      "cultural_authority_required": false,
+      "retrieval_index_name": "corpus-v3"
+    }
+  ]
+}

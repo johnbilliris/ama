@@ -261,6 +261,266 @@ def _reciprocal_rank_fusion(
 
 
 # --------------------------------------------------------------------------- #
+# F-A1 (T183) — agency-filtered retrieval helpers
+# --------------------------------------------------------------------------- #
+
+
+def filter_by_agency(
+    chunks: list[Any],
+    *,
+    requested_agency: str | None = None,
+    requested_role: str | None = None,
+) -> list[Any]:
+    """Filter ``chunks`` to those matching ``requested_agency`` / ``requested_role``.
+
+    Plan §F-A1.3: agency-filtered retrieval so urban-fire and rural-fire
+    queries within the same jurisdiction never collide. ``None`` filters
+    are no-ops; both filters are AND-combined.
+    """
+    if not requested_agency and not requested_role:
+        return chunks
+    out: list[Any] = []
+    for chunk in chunks:
+        agency = getattr(chunk, "agency", None) or (chunk.get("agency") if isinstance(chunk, dict) else None)
+        role = getattr(chunk, "agency_role", None) or (chunk.get("agency_role") if isinstance(chunk, dict) else None)
+        if requested_agency and agency != requested_agency:
+            continue
+        if requested_role and role != requested_role:
+            continue
+        out.append(chunk)
+    return out
+
+
+# --------------------------------------------------------------------------- #
+# F-A3 (T185) — deterministic precedence tie-break (Pass 1 Q-P1-02; ADR-13)
+# --------------------------------------------------------------------------- #
+
+
+def _chunk_field(chunk: Any, name: str, default: Any = None) -> Any:
+    if isinstance(chunk, dict):
+        return chunk.get(name, default)
+    return getattr(chunk, name, default)
+
+
+def apply_precedence_tiebreak(chunks: list[Any]) -> tuple[list[Any], list[str]]:
+    """Apply the deterministic 4-tier tie-break to ``chunks``.
+
+    Returns ``(ordered_chunks, applied_tiers)`` where ``applied_tiers`` is
+    a list of tier names actually triggered (in tier order). Tier definitions
+    per Pass 1 Q-P1-02 + ADR-13 + Plan §F-A3.3:
+
+      1. ``recency``           — newer ``corpus_build_generated_at`` wins.
+      2. ``licence_mode``      — ``full-text`` > ``metadata-only``.
+      3. ``embedding_model_id`` — lexicographic ascending.
+      4. ``chunk_id``           — lexicographic ascending.
+
+    Higher tiers (lower index) are evaluated first; only when they tie does
+    the next tier engage. ``applied_tiers`` lists every tier that was *needed*
+    to produce a strict order.
+    """
+    if not chunks:
+        return ([], [])
+
+    licence_priority = {"full-text": 0, "metadata-only": 1}
+
+    def sort_key(chunk: Any) -> tuple:
+        return (
+            # Recency: descending → invert by negating the ISO string sort.
+            # Use the string itself with reverse=True at sort-time.
+            _chunk_field(chunk, "corpus_build_generated_at", ""),
+            licence_priority.get(_chunk_field(chunk, "licence_mode", ""), 99),
+            _chunk_field(chunk, "embedding_model_id", "") or "",
+            _chunk_field(chunk, "chunk_id", "") or "",
+        )
+
+    # Two-pass sort: descending recency first; everything else ascending.
+    # We achieve this with a stable sort + composite key where recency is the
+    # primary descending dimension; Python's sort is stable so we apply
+    # ascending sub-keys first then reverse-sort by recency.
+    ordered = sorted(chunks, key=lambda c: (
+        licence_priority.get(_chunk_field(c, "licence_mode", ""), 99),
+        _chunk_field(c, "embedding_model_id", "") or "",
+        _chunk_field(c, "chunk_id", "") or "",
+    ))
+    ordered = sorted(ordered, key=lambda c: _chunk_field(c, "corpus_build_generated_at", ""), reverse=True)
+
+    # Determine which tiers were "needed". A tier is "applied" when it was
+    # required to disambiguate at least one adjacent pair: either because
+    # this tier broke the tie (after all higher tiers tied), or because
+    # this is a higher tier that *also* distinguished. In other words,
+    # "applied" lists every tier traversed top-down up to the deepest
+    # deciding tier across all adjacent pairs (inclusive).
+    applied: list[str] = []
+    tier_names = ("recency", "licence_mode", "embedding_model_id", "chunk_id")
+    tier_extractors = (
+        lambda c: _chunk_field(c, "corpus_build_generated_at", ""),
+        lambda c: _chunk_field(c, "licence_mode", ""),
+        lambda c: _chunk_field(c, "embedding_model_id", "") or "",
+        lambda c: _chunk_field(c, "chunk_id", "") or "",
+    )
+    max_depth = 0
+    for i in range(len(ordered) - 1):
+        # Find the first tier at which this adjacent pair became distinct.
+        for tier_idx in range(len(tier_names)):
+            if tier_extractors[tier_idx](ordered[i]) != tier_extractors[tier_idx](ordered[i + 1]):
+                # depth is 1-indexed (number of tiers traversed inclusive).
+                if tier_idx + 1 > max_depth:
+                    max_depth = tier_idx + 1
+                break
+    applied = list(tier_names[:max_depth])
+
+    return (ordered, applied)
+
+
+# --------------------------------------------------------------------------- #
+# F-A3 (T186) — COMDISPLAN activation interlock (FR-RAG-COMP-04)
+# --------------------------------------------------------------------------- #
+
+
+_NATIONAL_EMERGENCY_ACTIVE: bool = False
+
+# F-A3 (T187) — Reversible feature flag (Pass 2 Q-P2-08)
+# When False, retrieval ranking falls back to recency-only ordering (no
+# precedence_rank elevation, no tie-break by licence_mode/embedding_model_id).
+_AUTHORITY_PRECEDENCE_RANKING_ENABLED: bool = True
+
+
+def get_authority_precedence_ranking_enabled() -> bool:
+    """Return the current ``feature.authority_precedence_ranking.enabled`` flag."""
+    return _AUTHORITY_PRECEDENCE_RANKING_ENABLED
+
+
+def set_authority_precedence_ranking_flag(
+    *,
+    value: bool,
+    actor: str,
+    change_reason: str,
+    audit_sink: Any | None = None,
+    now_fn: Any = None,
+) -> None:
+    """Flip the ``feature.authority_precedence_ranking.enabled`` flag (T187,
+    Reversible class per Pass 2 Q-P2-08).
+
+    Disabling falls back to recency-only ranking. Emits the audit event
+    ``authority_precedence_ranking_disabled`` (Plan §F-A3.5) with
+    ``{flag_name, old_value, new_value, actor_id, change_reason}``.
+    """
+    from datetime import UTC, datetime  # noqa: PLC0415
+
+    global _AUTHORITY_PRECEDENCE_RANKING_ENABLED
+    if not actor:
+        raise ValueError("actor required for feature-flag change (audit invariant)")
+    if not change_reason:
+        raise ValueError("change_reason required for Reversible flag flip")
+    old_value = _AUTHORITY_PRECEDENCE_RANKING_ENABLED
+    _AUTHORITY_PRECEDENCE_RANKING_ENABLED = bool(value)
+    if audit_sink is not None:
+        ts = (now_fn or (lambda: datetime.now(tz=UTC)))()
+        audit_sink(
+            {
+                "event_type": "authority_precedence_ranking_disabled"
+                if not bool(value)
+                else "authority_precedence_ranking_enabled",
+                "flag_name": "feature.authority_precedence_ranking.enabled",
+                "old_value": old_value,
+                "new_value": _AUTHORITY_PRECEDENCE_RANKING_ENABLED,
+                "actor_id": actor,
+                "change_reason": change_reason,
+                "timestamp": ts.isoformat() if hasattr(ts, "isoformat") else str(ts),
+            }
+        )
+
+
+def get_national_emergency_active() -> bool:
+    """Return the current ``national_emergency_active`` flag value."""
+    return _NATIONAL_EMERGENCY_ACTIVE
+
+
+def set_national_emergency_flag(
+    *,
+    value: bool,
+    actor: str,
+    audit_sink: Any | None = None,
+    now_fn: Any = None,
+) -> None:
+    """Flip the ``national_emergency_active`` flag and emit
+    ``audit.feature_flag_change`` per Plan §F-A6.4.
+
+    ``audit_sink`` accepts a callable receiving a single dict event.
+    Production wires this to the AuditWriter; tests inject a list-append.
+    """
+    from datetime import UTC, datetime  # noqa: PLC0415
+
+    global _NATIONAL_EMERGENCY_ACTIVE
+    if not actor:
+        raise ValueError("actor required for feature-flag change (audit invariant)")
+    old_value = _NATIONAL_EMERGENCY_ACTIVE
+    _NATIONAL_EMERGENCY_ACTIVE = bool(value)
+    if audit_sink is not None:
+        ts = (now_fn or (lambda: datetime.now(tz=UTC)))()
+        audit_sink(
+            {
+                "event_type": "audit.feature_flag_change",
+                "flag": "national_emergency_active",
+                "old_value": old_value,
+                "new_value": _NATIONAL_EMERGENCY_ACTIVE,
+                "actor": actor,
+                "timestamp": ts.isoformat() if hasattr(ts, "isoformat") else str(ts),
+            }
+        )
+
+
+def apply_comdisplan_activation(
+    chunks: list[Any],
+    *,
+    national_emergency_active: bool | None = None,
+) -> list[Any]:
+    """Elevate ``authority_level=commonwealth`` chunks to ``precedence_rank=1``
+    when the ``national_emergency_active`` flag is set (FR-RAG-COMP-04).
+
+    Returns shallow copies of the chunks with the elevated rank; non-commonwealth
+    chunks are returned unchanged. When the flag is unset, the input is returned
+    as-is.
+
+    Pass ``national_emergency_active`` explicitly OR rely on the module-level
+    flag set via ``set_national_emergency_flag``.
+    """
+    flag = (
+        national_emergency_active
+        if national_emergency_active is not None
+        else _NATIONAL_EMERGENCY_ACTIVE
+    )
+    if not flag:
+        return chunks
+    out: list[Any] = []
+    for chunk in chunks:
+        level = _chunk_field(chunk, "authority_level")
+        if level != "commonwealth":
+            out.append(chunk)
+            continue
+        if isinstance(chunk, dict):
+            elevated = dict(chunk)
+            elevated["precedence_rank"] = 1
+            out.append(elevated)
+        else:
+            # Pydantic / frozen dataclass — try model_copy / replace.
+            if hasattr(chunk, "model_copy"):
+                out.append(chunk.model_copy(update={"precedence_rank": 1}))
+            else:
+                # Best-effort mutation; if frozen will raise, caller must
+                # use dicts in COMDISPLAN flows (or wrap in a non-frozen
+                # adapter). The retrieval pipeline uses dicts at this stage
+                # of the pipeline so frozen-mutation is not exercised in
+                # production paths.
+                try:
+                    chunk.precedence_rank = 1  # type: ignore[attr-defined]
+                except AttributeError:
+                    pass
+                out.append(chunk)
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # AzureSearchRetrievalService (production)
 # --------------------------------------------------------------------------- #
 
@@ -575,4 +835,11 @@ __all__ = [
     "RRF_VECTOR_WEIGHT_DEFAULT",
     "RetrievalQuotaExceeded",
     "RetrievalService",
+    "apply_comdisplan_activation",
+    "apply_precedence_tiebreak",
+    "filter_by_agency",
+    "get_authority_precedence_ranking_enabled",
+    "get_national_emergency_active",
+    "set_authority_precedence_ranking_flag",
+    "set_national_emergency_flag",
 ]

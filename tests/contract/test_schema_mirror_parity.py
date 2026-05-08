@@ -25,6 +25,8 @@ MIRRORED_SCHEMAS = (
     "citation-envelope.json",
     "audit-record-llm-call.json",
     "offline-cache-manifest.json",
+    # Spec 036 amend-loop additions (Phase F):
+    "chunk-metadata.schema.json",
 )
 
 
@@ -44,8 +46,8 @@ def test_schema_mirror_byte_equal(filename: str) -> None:
     )
 
 
-def test_all_three_schemas_mirrored() -> None:
-    """The three contracts MUST exist in both locations."""
+def test_all_schemas_mirrored() -> None:
+    """The four contracts MUST exist in both locations."""
     for filename in MIRRORED_SCHEMAS:
         assert (SPEC_CONTRACTS / filename).exists(), f"missing spec {filename}"
         assert (PACKAGE_SCHEMAS / filename).exists(), f"missing mirror {filename}"
