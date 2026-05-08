@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/johnbilliris/ama/specs/036-foundry-rag-grounding/contracts/citation-envelope.json",
+  "title": "Citation Envelope",
+  "description": "Wire format for a single corpus citation surfaced by a grounded agent recommendation card (FR-RAG-AG-03) or a simulation chat SSE 'citation' event (FR-RAG-SIM-02). Canonical for spec 036 — every grounded UI surface and audit projection MUST conform.",
+  "type": "object",
+  "required": [
+    "jurisdiction",
+    "topic",
+    "page",
+    "source_url",
+    "rendered_url",
+    "sha256_of_chunk",
+    "licence_mode",
+    "confidence"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "jurisdiction": {
+      "description": "Issuing jurisdiction of the source document. Single value; jurisdiction-union retrieval (own + national + aidr) per FR-RAG-AG-04 / R-03 is performed at retrieval time, not at citation time.",
+      "type": "string",
+      "enum": ["act", "nsw", "nt", "qld", "sa", "tas", "vic", "wa", "national", "aidr"]
+    },
+    "topic": {
+      "description": "Topic slug from the CorpusEntry (e.g. 'evacuation-planning', 'aiims-span-of-control'). Free-form lowercase-kebab-case; validated against the live corpus index at retrieval time.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,128}$"
+    },
+    "page": {
+      "description": "1-indexed page within handbook.md. Anchors the rendered_url fragment.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "source_url": {
+      "description": "Original publisher URL (PDF or HTML) — what the operator clicks through to inspect the publisher's authoritative copy.",
+      "type": "string",
+      "format": "uri"
+    },
+    "rendered_url": {
+      "description": "Internal link to the rendered Markdown copy with page anchor: `/docs/corpus/<jurisdiction>/<topic>/handbook.md#page-N` (FR-RAG-AG-03).",
+      "type": "string",
+      "pattern": "^/docs/corpus/[a-z]+/[a-z0-9-]+/handbook\\.md#page-\\d+$"
+    },
+    "sha256_of_chunk": {
+      "description": "SHA-256 of the retrieved chunk text (or, for metadata-only chunks, of the canonical (jurisdiction, topic, page, summary) tuple). MUST match a chunk_id in the originating RetrievalResult.chunks[]; otherwise this is a hallucinated citation and MUST be suppressed (FR-RAG-AG-05).",
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "licence_mode": {
+      "description": "Licence mode of the underlying CorpusEntry. 'excluded' MUST never appear (server-side filter at retrieval — FR-RAG-IDX-02).",
+      "type": "string",
+      "enum": ["full-text", "metadata-only"]
+    },
+    "confidence": {
+      "description": "Per R-16: min(embedding_similarity, semantic_coherence, licence_mode_safety_gate). Below the per-agent threshold (R-10) the citation is downgraded but not suppressed; suppression only occurs on hallucination.",
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "snippet": {
+      "description": "Verbatim excerpt from the chunk text. Conditionally present per R-11: REQUIRED iff licence_mode == 'full-text'; OMITTED iff licence_mode == 'metadata-only' (publisher does not grant excerpt redistribution).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 800
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "licence_mode": { "const": "full-text" } }
+      },
+      "then": {
+        "required": ["snippet"]
+      },
+      "else": {
+        "not": { "required": ["snippet"] }
+      }
+    }
+  ],
+  "examples": [
+    {
+      "jurisdiction": "nsw",
+      "topic": "evacuation-planning",
+      "page": 47,
+      "source_url": "https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0009/evac-plan.pdf",
+      "rendered_url": "/docs/corpus/nsw/evacuation-planning/handbook.md#page-47",
+      "sha256_of_chunk": "f9c3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a26",
+      "licence_mode": "full-text",
+      "confidence": 0.84,
+      "snippet": "When the area is deemed safe, the Incident Controller authorises return of evacuees in coordination with NSW Police and the affected LGA…"
+    },
+    {
+      "jurisdiction": "national",
+      "topic": "aiims",
+      "page": 12,
+      "source_url": "https://www.afac.com.au/docs/default-source/doctrine/aiims-handbook.pdf",
+      "rendered_url": "/docs/corpus/national/aiims/handbook.md#page-12",
+      "sha256_of_chunk": "0a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5",
+      "licence_mode": "metadata-only",
+      "confidence": 0.71
+    }
+  ]
+}

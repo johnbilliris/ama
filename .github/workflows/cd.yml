@@ -208,6 +208,19 @@ jobs:
             done
           fi
 
+      - name: Verify Foundry carve-out registry (spec 036, FR-RAG-CV-01..04)
+        # Spec 036 T026 — block deploy if any Foundry deployment lacks
+        # carve-out approval, has placeholder approvers, an expired or out-of-window
+        # review_date, or sits outside Australian data-residency. Pre-plan-apply
+        # gate runs **before** ``azd provision`` so CD never reaches Bicep with a
+        # non-conformant registry.
+        run: |
+          if ! command -v pwsh >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y --no-install-recommends powershell
+          fi
+          pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/verify-carveout.ps1 \
+            -RegistryPath infra/parameters/foundry-carveout.yaml -Strict
+
       - name: Provision infrastructure
         run: azd provision --no-prompt
 

@@ -31,6 +31,9 @@ dependencies = [
   "azure-keyvault-certificates>=4.9.0",
   "azure-keyvault-keys>=4.10.0",
   "python-jose[cryptography]>=3.3.0",
+  # Spec 036 — Foundry RAG grounding (FR-RAG-FM-03, FR-RAG-AG-01, R-01).
+  "azure-ai-inference>=1.0.0b9",            # Async Foundry seam used by simulation Controller.
+  "azure-search-documents>=11.5.2",         # Shared retrieval client for SSE citation events.
 ]
 
 [tool.hatch.build.targets.wheel]

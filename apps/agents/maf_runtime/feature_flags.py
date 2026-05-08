@@ -85,6 +85,52 @@ def get_retry_total_seconds(default: float = DEFAULT_RETRY_TOTAL_SECONDS) -> flo
     return value
 
 
+# --------------------------------------------------------------------------- #
+# Spec 036 — Foundry RAG grounding per-agent feature flag (T028, FR-RAG-FM-06).
+#
+# Reuses the spec-029 progressive-delivery mechanism: each named agent has an
+# independent ``FEATURE_FOUNDRY_RAG_<AGENT>`` env var that flips the agent
+# from "legacy ungrounded LLM" to "grounded LLM via shared retrieval +
+# Foundry chat client". All five agents default to ``false`` so that landing
+# this code does not change runtime behaviour — the canary cutover (T093…T097)
+# flips them one at a time once the FR-023 equivalence gate is ≥95%.
+# --------------------------------------------------------------------------- #
+
+_TRUE_VALUES: Final[frozenset[str]] = frozenset({"1", "true", "yes", "on"})
+_FALSE_VALUES: Final[frozenset[str]] = frozenset({"0", "false", "no", "off", ""})
+
+
+def _foundry_rag_flag_name(agent_name: str) -> str:
+    return f"FEATURE_FOUNDRY_RAG_{agent_name.upper()}"
+
+
+def is_foundry_rag_enabled(agent_name: str) -> bool:
+    """Return True when spec-036 Foundry-grounded path is enabled for *agent_name*.
+
+    Defaults to ``False`` — the canary cutover (FR-RAG-FM-06) sets the
+    ``FEATURE_FOUNDRY_RAG_<AGENT>`` env var to ``1`` per agent, one at a time,
+    only after the FR-023 equivalence gate (T029) clears ≥95% on the regression
+    suite for that agent.
+
+    Raises ``ValueError`` for unrecognised values so typos can never silently
+    flip an agent into the grounded path mid-cutover.
+    """
+    raw = os.environ.get(_foundry_rag_flag_name(agent_name), "0").strip().lower()
+    if raw in _TRUE_VALUES:
+        return True
+    if raw in _FALSE_VALUES:
+        return False
+    raise ValueError(
+        f"Invalid value {raw!r} for env var {_foundry_rag_flag_name(agent_name)!r}; "
+        f"expected one of {sorted(_TRUE_VALUES | _FALSE_VALUES)}."
+    )
+
+
+def list_foundry_rag_enabled_agents() -> tuple[str, ...]:
+    """Return the tuple of agent names with FR-RAG-FM grounding currently enabled."""
+    return tuple(name for name in KNOWN_AGENTS if is_foundry_rag_enabled(name))
+
+
 __all__ = [
     "AgentMode",
     "KNOWN_AGENTS",
@@ -93,4 +139,6 @@ __all__ = [
     "get_agent_mode",
     "get_retry_attempts",
     "get_retry_total_seconds",
+    "is_foundry_rag_enabled",
+    "list_foundry_rag_enabled_agents",
 ]

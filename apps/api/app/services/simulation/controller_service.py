@@ -207,6 +207,35 @@ class SimulationControllerService:
                 out.append({"role": t.role, "content": t.content})
         return out
 
+    @staticmethod
+    def _resolve_simulation_deployment(*, legacy_only: bool) -> str | None:
+        """Resolve the simulation deployment name across Foundry + legacy envs.
+
+        Spec 036 (T020, FR-RAG-FM-03): when not in legacy-only mode the Foundry
+        deployment_map (``AZURE_AI_PROJECT_DEPLOYMENTS``) is preferred; the
+        legacy ``AZURE_OPENAI_*_DEPLOYMENT`` envs remain as fall-throughs so
+        the controller "just works" during cutover and rollback drills.
+        """
+        if not legacy_only:
+            csv = os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS", "")
+            model_key = (
+                os.environ.get("AZURE_AI_SIMULATION_MODEL_KEY")
+                or os.environ.get("AZURE_AI_REASONING_MODEL_KEY")
+                or "gpt-4o"
+            )
+            if csv:
+                for entry in (e.strip() for e in csv.split(",") if e.strip()):
+                    if "=" not in entry:
+                        continue
+                    key, name = entry.split("=", 1)
+                    if key.strip() == model_key:
+                        return name.strip()
+        return (
+            os.environ.get("AZURE_OPENAI_DEPLOYMENT")
+            or os.environ.get("AZURE_OPENAI_SIMULATION_DEPLOYMENT")
+            or os.environ.get("AZURE_OPENAI_REASONING_DEPLOYMENT")
+        )
+
     async def stream_turn(
         self,
         *,
@@ -364,6 +393,17 @@ class SimulationControllerService:
     async def _stream_from_azure(
         self, *, turn_id: str, tenant_id: str, simulation_id: str, user_message: str
     ) -> AsyncIterator[ChatEvent]:  # pragma: no cover
+        # Spec 036 (T020, FR-RAG-FM-03): the simulation controller now backs onto
+        # Foundry by default. Endpoint and deployment are resolved from
+        # AZURE_AI_PROJECT_* with a transparent fall-through to the legacy
+        # AZURE_OPENAI_* envs during the per-agent canary cutover. The
+        # ``controller_prompt.md`` system prompt and the ``TOOL_SCHEMAS``
+        # tool-calling 3-round loop are preserved verbatim (OOS-6, spec 024).
+        #
+        # Authentication is AAD-only (FR-RAG-FM-04). The legacy
+        # ``AZURE_OPENAI_API_KEY`` path is retained **only** when
+        # ``LEGACY_AZURE_OPENAI=1`` so rollback drills (FR-RAG-FM-06) stay
+        # bit-identical to pre-cutover behaviour.
         try:
             from openai import AsyncAzureOpenAI
         except Exception:
@@ -373,30 +413,32 @@ class SimulationControllerService:
             )
             return
 
-        endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
-        # Look for a deployment name in priority order so the controller "just works"
-        # whether the operator wired a dedicated simulation deployment, the canonical
-        # AZURE_OPENAI_DEPLOYMENT, or only the reasoning-tier deployment.
-        deployment = (
-            os.environ.get("AZURE_OPENAI_DEPLOYMENT")
-            or os.environ.get("AZURE_OPENAI_SIMULATION_DEPLOYMENT")
-            or os.environ.get("AZURE_OPENAI_REASONING_DEPLOYMENT")
+        legacy_only = os.environ.get("LEGACY_AZURE_OPENAI", "0") == "1"
+        endpoint = (
+            os.environ.get("AZURE_OPENAI_ENDPOINT")
+            if legacy_only
+            else (os.environ.get("AZURE_AI_PROJECT_ENDPOINT") or os.environ.get("AZURE_OPENAI_ENDPOINT"))
         )
+
+        # Deployment resolution: Foundry deployment_map first, then legacy envs.
+        deployment = self._resolve_simulation_deployment(legacy_only=legacy_only)
         api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
-        api_key = os.environ.get("AZURE_OPENAI_API_KEY")
+        # Spec 036 FR-RAG-FM-04: API-key auth is forbidden on the Foundry path;
+        # only the explicit legacy rollback mode honours AZURE_OPENAI_API_KEY.
+        api_key = os.environ.get("AZURE_OPENAI_API_KEY") if legacy_only else None
         if not (endpoint and deployment):
             missing = (
-                "AZURE_OPENAI_ENDPOINT"
+                "AZURE_AI_PROJECT_ENDPOINT (or AZURE_OPENAI_ENDPOINT)"
                 if not endpoint
-                else "AZURE_OPENAI_DEPLOYMENT"
-                " (or AZURE_OPENAI_SIMULATION_DEPLOYMENT"
+                else "AZURE_AI_PROJECT_DEPLOYMENTS"
+                " (or AZURE_OPENAI_DEPLOYMENT / AZURE_OPENAI_SIMULATION_DEPLOYMENT"
                 " / AZURE_OPENAI_REASONING_DEPLOYMENT)"
             )
             yield ChatEvent(
                 "error",
                 {
                     "code": "openai_unavailable",
-                    "message": f"Azure OpenAI is not fully configured (missing {missing}).",
+                    "message": f"Foundry chat endpoint is not fully configured (missing {missing}).",
                 },
             )
             return
@@ -408,8 +450,10 @@ class SimulationControllerService:
         if api_key:
             client_kwargs["api_key"] = api_key
         else:
-            # No API key set — use Microsoft Entra ID.
-            # Container Apps -> managed identity; local dev -> az/azd login.
+            # No API key — use Microsoft Entra ID (managed identity in Container
+            # Apps; az/azd login locally). Spec 036 hard-binds this scope to the
+            # ``cognitiveservices`` audience to keep tokens compatible with both
+            # Foundry and the legacy AOAI surface during cutover (FR-RAG-FM-05).
             try:
                 from azure.identity import (
                     DefaultAzureCredential,
@@ -426,9 +470,7 @@ class SimulationControllerService:
                     {
                         "code": "openai_client_init_failed",
                         "message": (
-                            "Azure OpenAI credential unavailable. Set AZURE_OPENAI_API_KEY "
-                            "or ensure managed identity / az login is configured: "
-                            f"{exc}"
+                            f"Foundry credential unavailable. Ensure managed identity or az login is configured: {exc}"
                         ),
                     },
                 )
@@ -439,12 +481,35 @@ class SimulationControllerService:
             yield ChatEvent("error", {"code": "openai_client_init_failed", "message": str(exc)})
             return
 
+        # Spec 036 FR-RAG-CV-03: data-minimisation gateway for non-AU
+        # deployments. AU deployments bypass redaction (data residency holds);
+        # non-AU deployments redact PII / deny PSPF-marked / sensitive
+        # operational content **before** the message hits Foundry.
+        deployment_region = os.environ.get("AZURE_AI_PROJECT_REGION", "australiaeast").lower()
+        forwarded_message = user_message
+        try:
+            from common.model_gateway import apply as gateway_apply  # type: ignore[import-not-found]
+        except Exception:
+            gateway_apply = None  # type: ignore[assignment]
+        if gateway_apply is not None and not legacy_only:
+            decision = gateway_apply(text=user_message, deployment_region=deployment_region)
+            if decision.gateway_decision == "deny":
+                yield ChatEvent(
+                    "error",
+                    {
+                        "code": "gateway_denied",
+                        "message": f"Data-minimisation gateway denied the request: {decision.reason}",
+                    },
+                )
+                return
+            forwarded_message = decision.transmitted_text
+
         # Replay the rolling window of prior turns so the model has conversational
         # memory across requests. Ordering is [system, ...prior turns (oldest
         # first), current user message].
         messages: list[dict[str, Any]] = [{"role": "system", "content": self._prompt_text}]
         messages.extend(self._load_history_messages(tenant_id))
-        messages.append({"role": "user", "content": user_message})
+        messages.append({"role": "user", "content": forwarded_message})
 
         collected_all: list[str] = []
 

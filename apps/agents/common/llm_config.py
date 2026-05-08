@@ -12,13 +12,28 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
 class LLMClientConfig:
-    """Immutable LLM configuration read from environment variables with sensible defaults."""
+    """Immutable LLM configuration read from environment variables with sensible defaults.
 
-    # Connection
+    Spec 036 extension (T021): adds Foundry-side env vars
+    ``AZURE_AI_PROJECT_ENDPOINT`` and ``AZURE_AI_PROJECT_DEPLOYMENTS`` (CSV of
+    ``modelId@version=deploymentName``) per ``apps/eval-runner/src/ama_eval/foundry_client.py``.
+
+    During the per-agent canary window (FR-RAG-FM-06), both the legacy
+    ``AZURE_OPENAI_*`` env vars and the new ``AZURE_AI_PROJECT_*`` vars are
+    read; ``LEGACY_AZURE_OPENAI=1`` forces the legacy path for rollback drills.
+    """
+
+    # ───────── Legacy Azure-OpenAI connection (kept until T146 deletes it) ─────────
     endpoint: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_ENDPOINT", ""))
     reasoning_deployment: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_REASONING_DEPLOYMENT", ""))
     drafting_deployment: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_DRAFTING_DEPLOYMENT", ""))
     api_version: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_API_VERSION", "2024-10-21"))
+
+    # ───────── Spec 036 — Foundry connection (FR-RAG-FM-01, R-01) ─────────
+    foundry_endpoint: str = field(default_factory=lambda: os.getenv("AZURE_AI_PROJECT_ENDPOINT", ""))
+    foundry_deployments: str = field(default_factory=lambda: os.getenv("AZURE_AI_PROJECT_DEPLOYMENTS", ""))
+    foundry_region: str = field(default_factory=lambda: os.getenv("AZURE_AI_PROJECT_REGION", "australiaeast"))
+    legacy_openai_only: bool = field(default_factory=lambda: os.getenv("LEGACY_AZURE_OPENAI", "0") == "1")
 
     # Model parameters
     model_tier: str = field(default_factory=lambda: os.getenv("LLM_MODEL_TIER", "drafting"))
@@ -82,3 +97,37 @@ class LLMClientConfig:
         if purpose == "drafting":
             return self.drafting_deployment
         raise ValueError(f"Unknown LLM purpose: {purpose!r}. Must be 'reasoning' or 'drafting'.")
+
+    # Spec 036 (T021) — return the Foundry deployment **map** for the
+    # constructor-injectable seam (FR-RAG-FM-07). The CSV format mirrors
+    # apps/eval-runner/src/ama_eval/foundry_client._parse_deployment_map.
+    def foundry_deployment_map(self) -> dict[str, str]:
+        """Parse ``AZURE_AI_PROJECT_DEPLOYMENTS`` into ``{modelKey: deploymentName}``."""
+        out: dict[str, str] = {}
+        if not self.foundry_deployments:
+            return out
+        for entry in (e.strip() for e in self.foundry_deployments.split(",") if e.strip()):
+            if "=" not in entry:
+                continue
+            key, name = entry.split("=", 1)
+            out[key.strip()] = name.strip()
+        return out
+
+    def foundry_model_key_for(self, purpose: str) -> str:
+        """Resolve the Foundry ``modelId@version`` key for an LLM purpose.
+
+        Lookup order:
+          1. ``AZURE_AI_<PURPOSE>_MODEL_KEY`` (e.g. ``AZURE_AI_REASONING_MODEL_KEY``).
+          2. Reuse the legacy ``AZURE_OPENAI_<PURPOSE>_DEPLOYMENT`` value as the model key
+             (single-deployment-per-tier convention from spec 014/032).
+          3. Default to ``gpt-4o`` (reasoning) / ``gpt-4o-mini`` (drafting) per
+             plan.md Performance Goals.
+        """
+        env_key = f"AZURE_AI_{purpose.upper()}_MODEL_KEY"
+        explicit = os.getenv(env_key)
+        if explicit:
+            return explicit
+        legacy = self.deployment_for(purpose)
+        if legacy:
+            return legacy
+        return "gpt-4o" if purpose == "reasoning" else "gpt-4o-mini"
