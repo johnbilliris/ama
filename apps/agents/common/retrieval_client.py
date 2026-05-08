@@ -643,7 +643,38 @@ class AzureSearchRetrievalService:
         # point at when the audit is replayed.
         pinned_index_name = await self.resolve_alias_to_index_name()
 
+        # Spec 036 / F-A11 / T234 — emit retrieval.retrieve OTel span with
+        # the agent_name / jurisdiction / hazard_type tags and the pinned
+        # index name as an attribute. Failures are captured via the context
+        # manager's error handling.
+        from common.otel_telemetry import retrieval_span  # noqa: PLC0415
+
         union = _expand_jurisdictions(request)
+        primary_jurisdiction = union[0] if union else "unknown"
+        with retrieval_span(
+            agent_name=agent_name,
+            jurisdiction=primary_jurisdiction,
+            hazard_type=getattr(request, "hazard_type", "unknown") or "unknown",
+            retrieval_index_name=pinned_index_name,
+            correlation_id=getattr(request, "correlation_id", None),
+        ) as _otel_span:
+            result = await self._retrieve_inner(
+                request=request,
+                agent_name=agent_name,
+                pinned_index_name=pinned_index_name,
+                union=union,
+            )
+            _otel_span.histograms["retrieval_chunk_count"] = len(getattr(result, "chunks", []))
+            return result
+
+    async def _retrieve_inner(
+        self,
+        *,
+        request: Any,
+        agent_name: str,
+        pinned_index_name: str | None,
+        union: list[str],
+    ) -> Any:
         query_text = getattr(request, "query_text", "")
         top_k = int(getattr(request, "top_k", 5) or 5)
 

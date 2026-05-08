@@ -155,7 +155,43 @@ def run(
     parity-gate failures (T034) — it short-circuits the inputs the
     orchestrator would otherwise compute from indexer + embedder stats.
     """
+    # Spec 036 / F-A11 / T236 — wrap the ingest pipeline in an OTel span so
+    # ``ingest_duration_seconds``, ``chunks_processed``, ``embedding_calls``,
+    # and ``ingest_errors`` show up on the Grafana dashboard. Any exception
+    # below propagates after the span is finalised.
+    try:
+        from common.otel_telemetry import ingest_span as _ingest_span  # noqa: PLC0415
+    except Exception:  # noqa: BLE001 - keep ingest runnable when agents pkg not on path
+        _ingest_span = None  # type: ignore[assignment]
 
+    if _ingest_span is None:
+        return _run_inner(
+            args=args, index=index, alias=alias, embed=embed,
+            audit_emitter=audit_emitter, parity_inputs_override=parity_inputs_override, today=today,
+        )
+
+    with _ingest_span(pipeline_name="ama-ingest") as _span:
+        result = _run_inner(
+            args=args, index=index, alias=alias, embed=embed,
+            audit_emitter=audit_emitter, parity_inputs_override=parity_inputs_override, today=today,
+        )
+        _span.counters["chunks_processed"] = int(getattr(result, "chunks_emitted", 0) or 0)
+        _span.counters["embedding_calls"] = int(getattr(result, "embedding_calls", 0) or 0)
+        _span.counters["ingest_errors"] = int(getattr(result, "errors", 0) or 0)
+        return result
+
+
+def _run_inner(
+    *,
+    args: argparse.Namespace,
+    index: indexer.IndexClient | None = None,
+    alias: indexer.AliasService | None = None,
+    embed: embedder.EmbedFn | None = None,
+    audit_emitter: audit_mod.AuditEmitter | None = None,
+    parity_inputs_override: parity_gate.ParityInputs | None = None,
+    today: Any = None,
+) -> IngestRunResult:
+    """Inner run(); separated from ``run()`` so the OTel span can wrap cleanly."""
     started_at = datetime.now(tz=UTC)
 
     # ---------------------------------------------------------------- 0. Carve-out pre-flight (T057)

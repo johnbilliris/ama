@@ -35,9 +35,15 @@ from __future__ import annotations
 import logging
 import os
 import time
+import uuid
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
+
+
+def _uuid_hex() -> str:
+    """Spec 036 / F-A11 / T235 — fallback correlation id when caller omits one."""
+    return uuid.uuid4().hex
 
 logger = logging.getLogger(__name__)
 
@@ -323,6 +329,7 @@ class LiveFoundryChatClient:
         temperature: float | None = None,
         max_tokens: int | None = None,
         timeout_s: float = 30.0,
+        correlation_id: str | None = None,
     ) -> FoundryResponse:
         """Single-shot chat completion."""
         deployment = self._resolve(model_key)
@@ -337,21 +344,33 @@ class LiveFoundryChatClient:
         if max_tokens is not None:
             kwargs["max_tokens"] = max_tokens
 
-        start = time.perf_counter()
-        try:
-            result = client.complete(**kwargs)
-        except FoundryGatewayDenied:
-            raise
-        except FoundryConfigurationError:
-            raise
-        except Exception as exc:  # noqa: BLE001
-            latency_ms = int((time.perf_counter() - start) * 1000)
-            status = getattr(exc, "status_code", None) or getattr(exc, "code", None)
-            if status in (401, 403, 404):
-                raise FoundryConfigurationError(f"Foundry deployment {deployment!r} returned {status}: {exc}") from exc
-            raise FoundryTransportError(f"Foundry transport error after {latency_ms}ms: {exc}") from exc
+        # Spec 036 / F-A11 / T235 — emit foundry.inference OTel span. The
+        # correlation_id stitches this span back to the surrounding
+        # retrieval.retrieve span so end-to-end SLO + retrieval-only SLO
+        # are independently observable (Pass 1 Q-P1-06 + SC-012).
+        from common.otel_telemetry import foundry_inference_span  # noqa: PLC0415
 
-        latency_ms = int((time.perf_counter() - start) * 1000)
+        cid = correlation_id or _uuid_hex()
+        with foundry_inference_span(correlation_id=cid, model_id=deployment):
+            start = time.perf_counter()
+            try:
+                result = client.complete(**kwargs)
+            except FoundryGatewayDenied:
+                raise
+            except FoundryConfigurationError:
+                raise
+            except Exception as exc:  # noqa: BLE001
+                latency_ms = int((time.perf_counter() - start) * 1000)
+                status = getattr(exc, "status_code", None) or getattr(exc, "code", None)
+                if status in (401, 403, 404):
+                    raise FoundryConfigurationError(
+                        f"Foundry deployment {deployment!r} returned {status}: {exc}"
+                    ) from exc
+                raise FoundryTransportError(
+                    f"Foundry transport error after {latency_ms}ms: {exc}"
+                ) from exc
+
+            latency_ms = int((time.perf_counter() - start) * 1000)
         choice = result.choices[0]
         message = getattr(choice, "message", None)
         text = getattr(message, "content", "") if message else ""
