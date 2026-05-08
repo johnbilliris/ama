@@ -1,6 +1,18 @@
 // ────────────────────────────────────────────────────────────────────────────────
 // Azure OpenAI Model Deployments, RBAC, and Diagnostics
+//
+// **DEPRECATED (Spec 036 — T058)** — kept available for the canary fallback
+// path during the Foundry migration window. Deletion is deferred to spec 036
+// task E1 once parity has been demonstrated on three consecutive scheduled
+// audits (FR-RAG-FM-06). New deployments MUST consume the Foundry-hosted
+// equivalents via ``apps/agents/common/foundry_chat_client.py`` + spec-036
+// ai-search-blue-green wrapper. See specs/036-foundry-rag-grounding/plan.md
+// §Phasing E for the deletion checklist.
 // ────────────────────────────────────────────────────────────────────────────────
+
+metadata deprecated = '036-foundry-rag-grounding'
+metadata deprecationReason = 'Replaced by Foundry-hosted models per spec 036; kept for canary fallback (FR-RAG-FM-06). Delete in E1.'
+metadata replacedBy = 'apps/agents/common/foundry_chat_client.py + infra/modules/ai-search-blue-green.bicep'
 
 @description('Name of the existing Azure OpenAI resource')
 param openAiAccountName string
