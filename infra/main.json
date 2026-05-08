@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "6926745516600529761"
+      "templateHash": "15713507501131055070"
     }
   },
   "parameters": {
@@ -166,6 +166,48 @@
       "metadata": {
         "description": "Spec-035 — Recovery handover signing certificate name in Key Vault (FR-007)."
       }
+    },
+    "enableSpec036FoundryRag": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Spec-036 — Provision the Foundry-RAG blue-green AI Search index + ingest-runner job. Default OFF in dev; flip on per Phase B → C → D rollout."
+      }
+    },
+    "spec036SearchServiceName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Spec-036 — AI Search service name (auto-generated when empty)."
+      }
+    },
+    "spec036IngestRunnerImageTag": {
+      "type": "string",
+      "defaultValue": "latest",
+      "metadata": {
+        "description": "Spec-036 — Ingest-runner image tag (azd deploy / cd.yml sets this to the corpus_build_sha)."
+      }
+    },
+    "spec036FoundryEndpoint": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Spec-036 — Foundry / Azure AI project endpoint URL for the embedding deployment."
+      }
+    },
+    "spec036EmbeddingDeploymentName": {
+      "type": "string",
+      "defaultValue": "text-embedding-3-large",
+      "metadata": {
+        "description": "Spec-036 — Embedding deployment name (Foundry)."
+      }
+    },
+    "spec036ServiceBusFqdn": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Spec-036 — Service Bus FQDN for the build-complete topic (FR-RAG-IDX-05)."
+      }
     }
   },
   "variables": {
@@ -207,6 +249,7 @@
     ],
     "developerIpRules": "[if(empty(parameters('developerIpAddress')), createArray(), createArray(createObject('ipAddressOrRange', parameters('developerIpAddress'))))]",
     "cosmosIpRules": "[if(parameters('restrictNetworkAccess'), concat(variables('portalAndServiceIpRules'), variables('developerIpRules')), variables('developerIpRules'))]",
+    "spec036SearchIndexDataContributorRoleId": "8ebe5a00-799e-43f5-93ac-243d3dce84a7",
     "blobContainers": [
       "raw-payloads",
       "binary-assets",
@@ -217,6 +260,28 @@
     "cognitiveServicesOpenAiUserRoleId": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
   },
   "resources": {
+    "spec036IngestIdentity": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "apiVersion": "2023-01-31",
+      "name": "[format('id-ingest-runner-{0}', parameters('environmentName'))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]"
+    },
+    "spec036SearchRbac": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid('spec036-ingest-search-data-contributor', parameters('environmentName'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('spec036SearchIndexDataContributorRoleId'))]",
+        "principalId": "[reference('spec036IngestIdentity').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "spec036IngestIdentity"
+      ]
+    },
     "containerRegistry": {
       "type": "Microsoft.ContainerRegistry/registries",
       "apiVersion": "2023-07-01",
@@ -571,6 +636,65 @@
                 },
                 {
                   "path": "/data_source_id",
+                  "order": "ascending"
+                }
+              ]
+            ]
+          }
+        },
+        "options": {
+          "autoscaleSettings": {
+            "maxThroughput": 1000
+          }
+        }
+      },
+      "dependsOn": [
+        "cosmosDb"
+      ]
+    },
+    "coordinationTasksContainer": {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2023-11-15",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'coordination_tasks')]",
+      "properties": {
+        "resource": {
+          "id": "coordination_tasks",
+          "partitionKey": {
+            "paths": [
+              "/assigned_organisation_id"
+            ],
+            "kind": "Hash"
+          },
+          "indexingPolicy": {
+            "indexingMode": "consistent",
+            "includedPaths": [
+              {
+                "path": "/*"
+              }
+            ],
+            "excludedPaths": [
+              {
+                "path": "/_etag/?"
+              }
+            ],
+            "compositeIndexes": [
+              [
+                {
+                  "path": "/assigned_organisation_id",
+                  "order": "ascending"
+                },
+                {
+                  "path": "/assigned_persona_id",
+                  "order": "ascending"
+                }
+              ],
+              [
+                {
+                  "path": "/assigned_organisation_id",
+                  "order": "ascending"
+                },
+                {
+                  "path": "/incident_id",
                   "order": "ascending"
                 }
               ]
@@ -1146,6 +1270,7 @@
         "clientAffinityEnabled": false,
         "siteConfig": {
           "linuxFxVersion": "NODE|22-lts",
+          "appCommandLine": "node node_modules/next/dist/bin/next start -H 0.0.0.0",
           "alwaysOn": true,
           "minTlsVersion": "1.2",
           "http20Enabled": true,
@@ -31113,6 +31238,968 @@
         }
       }
     },
+    "spec036SearchBlueGreen": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "spec036-ai-search-blue-green",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": "[if(empty(parameters('spec036SearchServiceName')), createObject('value', format('srch-{0}-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6))), createObject('value', parameters('spec036SearchServiceName')))]",
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "sku": {
+            "value": "standard"
+          },
+          "privateEndpointSubnetId": {
+            "value": ""
+          },
+          "privateDnsZoneId": {
+            "value": ""
+          },
+          "disablePublicNetworkAccess": {
+            "value": false
+          },
+          "vectorDimensions": {
+            "value": 3072
+          },
+          "aliasName": {
+            "value": "corpus"
+          },
+          "currentIndexName": {
+            "value": "corpus-v1"
+          },
+          "nextIndexName": {
+            "value": "corpus-v2"
+          },
+          "embeddingModelId": {
+            "value": "[format('{0}@1', parameters('spec036EmbeddingDeploymentName'))]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "15619389640655698719"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "AI Search service name"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure region (must match ai-search.bicep location)"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags applied to the search service + alert"
+              }
+            },
+            "sku": {
+              "type": "string",
+              "defaultValue": "standard",
+              "allowedValues": [
+                "basic",
+                "standard"
+              ],
+              "metadata": {
+                "description": "SKU — Standard for prod, Basic for dev/staging"
+              }
+            },
+            "replicaCount": {
+              "type": "int",
+              "defaultValue": 1,
+              "metadata": {
+                "description": "Replica count (default 1)"
+              }
+            },
+            "partitionCount": {
+              "type": "int",
+              "defaultValue": 1,
+              "metadata": {
+                "description": "Partition count (default 1)"
+              }
+            },
+            "privateEndpointSubnetId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Subnet resource ID for Private Endpoint (PE-only is mandatory in production)"
+              }
+            },
+            "privateDnsZoneId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Private DNS zone resource ID for privatelink.search.windows.net"
+              }
+            },
+            "disablePublicNetworkAccess": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Disable public network access (MUST be true in production — FR-RAG-IDX-06)"
+              }
+            },
+            "vectorDimensions": {
+              "type": "int",
+              "defaultValue": 3072,
+              "metadata": {
+                "description": "Embedding vector dimension (R-02 — text-embedding-3-large = 3072)"
+              }
+            },
+            "jurisdictionValues": {
+              "type": "array",
+              "defaultValue": [
+                "act",
+                "nsw",
+                "nt",
+                "qld",
+                "sa",
+                "tas",
+                "vic",
+                "wa",
+                "national",
+                "aidr"
+              ],
+              "metadata": {
+                "description": "Allowed jurisdiction filter values (FR-RAG-IDX-08)"
+              }
+            },
+            "licenceModeValues": {
+              "type": "array",
+              "defaultValue": [
+                "full-text",
+                "metadata-only"
+              ],
+              "metadata": {
+                "description": "Allowed licence_mode filter values (FR-RAG-IDX-02)"
+              }
+            },
+            "capacityAlertThresholdPercent": {
+              "type": "int",
+              "defaultValue": 70,
+              "minValue": 50,
+              "maxValue": 95,
+              "metadata": {
+                "description": "Capacity alert threshold (percent of SKU quota; default 70 per R-10)"
+              }
+            },
+            "capacityActionGroupId": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Optional Action Group resource id used by the capacity alert notification"
+              }
+            },
+            "enableCapacityAlert": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Whether to deploy the capacity alert (default true)"
+              }
+            },
+            "aliasName": {
+              "type": "string",
+              "defaultValue": "corpus",
+              "metadata": {
+                "description": "Stable alias name retrieval clients dial (e.g. \"corpus\")"
+              }
+            },
+            "currentIndexName": {
+              "type": "string",
+              "defaultValue": "corpus-v1",
+              "metadata": {
+                "description": "Currently-active index slot the alias points at (e.g. \"corpus-v1\")"
+              }
+            },
+            "nextIndexName": {
+              "type": "string",
+              "defaultValue": "corpus-v2",
+              "metadata": {
+                "description": "Next index slot the ingest-runner writes to during a model swap (e.g. \"corpus-v2\")"
+              }
+            },
+            "previousIndexRetentionDays": {
+              "type": "int",
+              "defaultValue": 7,
+              "minValue": 1,
+              "maxValue": 30,
+              "metadata": {
+                "description": "How long to retain the previous index after a flip (days; R-15 = 7)"
+              }
+            },
+            "embeddingModelId": {
+              "type": "string",
+              "defaultValue": "text-embedding-3-large@1",
+              "metadata": {
+                "description": "Embedding model id stamped on every chunk (R-02; R-05 signal 4 invariant)"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2025-04-01",
+              "name": "[format('aiSearch-{0}', parameters('name'))]",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "name": {
+                    "value": "[parameters('name')]"
+                  },
+                  "location": {
+                    "value": "[parameters('location')]"
+                  },
+                  "tags": {
+                    "value": "[parameters('tags')]"
+                  },
+                  "sku": {
+                    "value": "[parameters('sku')]"
+                  },
+                  "replicaCount": {
+                    "value": "[parameters('replicaCount')]"
+                  },
+                  "partitionCount": {
+                    "value": "[parameters('partitionCount')]"
+                  },
+                  "privateEndpointSubnetId": {
+                    "value": "[parameters('privateEndpointSubnetId')]"
+                  },
+                  "privateDnsZoneId": {
+                    "value": "[parameters('privateDnsZoneId')]"
+                  },
+                  "disablePublicNetworkAccess": {
+                    "value": "[parameters('disablePublicNetworkAccess')]"
+                  },
+                  "vectorDimensions": {
+                    "value": "[parameters('vectorDimensions')]"
+                  },
+                  "jurisdictionValues": {
+                    "value": "[parameters('jurisdictionValues')]"
+                  },
+                  "licenceModeValues": {
+                    "value": "[parameters('licenceModeValues')]"
+                  },
+                  "capacityAlertThresholdPercent": {
+                    "value": "[parameters('capacityAlertThresholdPercent')]"
+                  },
+                  "capacityActionGroupId": {
+                    "value": "[parameters('capacityActionGroupId')]"
+                  },
+                  "enableCapacityAlert": {
+                    "value": "[parameters('enableCapacityAlert')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.39.26.7824",
+                      "templateHash": "12451602234271562045"
+                    }
+                  },
+                  "parameters": {
+                    "name": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "AI Search service name"
+                      }
+                    },
+                    "location": {
+                      "type": "string",
+                      "metadata": {
+                        "description": "Location"
+                      }
+                    },
+                    "sku": {
+                      "type": "string",
+                      "defaultValue": "standard",
+                      "allowedValues": [
+                        "basic",
+                        "standard"
+                      ],
+                      "metadata": {
+                        "description": "SKU — Standard for prod, Basic for dev/staging"
+                      }
+                    },
+                    "replicaCount": {
+                      "type": "int",
+                      "defaultValue": 1,
+                      "metadata": {
+                        "description": "Replica count"
+                      }
+                    },
+                    "partitionCount": {
+                      "type": "int",
+                      "defaultValue": 1,
+                      "metadata": {
+                        "description": "Partition count"
+                      }
+                    },
+                    "tags": {
+                      "type": "object",
+                      "defaultValue": {},
+                      "metadata": {
+                        "description": "Tags"
+                      }
+                    },
+                    "privateEndpointSubnetId": {
+                      "type": "string",
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Subnet resource ID for Private Endpoint"
+                      }
+                    },
+                    "privateDnsZoneId": {
+                      "type": "string",
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Private DNS zone resource ID for privatelink.search.windows.net"
+                      }
+                    },
+                    "disablePublicNetworkAccess": {
+                      "type": "bool",
+                      "defaultValue": true,
+                      "metadata": {
+                        "description": "Disable public network access (must be true in production)"
+                      }
+                    },
+                    "vectorDimensions": {
+                      "type": "int",
+                      "defaultValue": 3072,
+                      "minValue": 256,
+                      "maxValue": 3072,
+                      "metadata": {
+                        "description": "Embedding vector dimension (R-02 — text-embedding-3-large = 3072)"
+                      }
+                    },
+                    "jurisdictionValues": {
+                      "type": "array",
+                      "defaultValue": [
+                        "act",
+                        "nsw",
+                        "nt",
+                        "qld",
+                        "sa",
+                        "tas",
+                        "vic",
+                        "wa",
+                        "national",
+                        "aidr"
+                      ],
+                      "metadata": {
+                        "description": "Allowed jurisdiction filter values for the corpus index (FR-RAG-IDX-08)"
+                      }
+                    },
+                    "licenceModeValues": {
+                      "type": "array",
+                      "defaultValue": [
+                        "full-text",
+                        "metadata-only"
+                      ],
+                      "metadata": {
+                        "description": "Allowed licence_mode index filter values (FR-RAG-IDX-02). Excluded never reaches the index."
+                      }
+                    },
+                    "capacityAlertThresholdPercent": {
+                      "type": "int",
+                      "defaultValue": 70,
+                      "minValue": 50,
+                      "maxValue": 95,
+                      "metadata": {
+                        "description": "AI Search storage utilisation threshold (percent) at which the capacity alert fires (R-10; default 70)"
+                      }
+                    },
+                    "capacityActionGroupId": {
+                      "type": "string",
+                      "defaultValue": "",
+                      "metadata": {
+                        "description": "Optional Action Group resource id for the capacity alert (defaults to empty = no notification action)"
+                      }
+                    },
+                    "enableCapacityAlert": {
+                      "type": "bool",
+                      "defaultValue": true,
+                      "metadata": {
+                        "description": "Whether to deploy the spec-036 capacity alert (FR-RAG-IDX-08 / R-10). Defaults to true; flip off for dev/staging."
+                      }
+                    }
+                  },
+                  "resources": [
+                    {
+                      "type": "Microsoft.Search/searchServices",
+                      "apiVersion": "2024-06-01-preview",
+                      "name": "[parameters('name')]",
+                      "location": "[parameters('location')]",
+                      "sku": {
+                        "name": "[parameters('sku')]"
+                      },
+                      "tags": "[parameters('tags')]",
+                      "identity": {
+                        "type": "SystemAssigned"
+                      },
+                      "properties": {
+                        "replicaCount": "[parameters('replicaCount')]",
+                        "partitionCount": "[parameters('partitionCount')]",
+                        "hostingMode": "default",
+                        "publicNetworkAccess": "[if(parameters('disablePublicNetworkAccess'), 'disabled', 'enabled')]",
+                        "networkRuleSet": {
+                          "ipRules": [],
+                          "bypass": "AzurePortal"
+                        },
+                        "semanticSearch": "standard",
+                        "disableLocalAuth": true
+                      }
+                    },
+                    {
+                      "condition": "[not(empty(parameters('privateEndpointSubnetId')))]",
+                      "type": "Microsoft.Network/privateEndpoints",
+                      "apiVersion": "2024-05-01",
+                      "name": "[format('{0}-pe', parameters('name'))]",
+                      "location": "[parameters('location')]",
+                      "tags": "[parameters('tags')]",
+                      "properties": {
+                        "subnet": {
+                          "id": "[parameters('privateEndpointSubnetId')]"
+                        },
+                        "privateLinkServiceConnections": [
+                          {
+                            "name": "[format('{0}-plsc', parameters('name'))]",
+                            "properties": {
+                              "privateLinkServiceId": "[resourceId('Microsoft.Search/searchServices', parameters('name'))]",
+                              "groupIds": [
+                                "searchService"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Search/searchServices', parameters('name'))]"
+                      ]
+                    },
+                    {
+                      "condition": "[and(not(empty(parameters('privateEndpointSubnetId'))), not(empty(parameters('privateDnsZoneId'))))]",
+                      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                      "apiVersion": "2024-05-01",
+                      "name": "[format('{0}/{1}', format('{0}-pe', parameters('name')), 'default')]",
+                      "properties": {
+                        "privateDnsZoneConfigs": [
+                          {
+                            "name": "privatelink-search-windows-net",
+                            "properties": {
+                              "privateDnsZoneId": "[parameters('privateDnsZoneId')]"
+                            }
+                          }
+                        ]
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateEndpoints', format('{0}-pe', parameters('name')))]"
+                      ]
+                    },
+                    {
+                      "condition": "[parameters('enableCapacityAlert')]",
+                      "type": "Microsoft.Insights/metricAlerts",
+                      "apiVersion": "2018-03-01",
+                      "name": "[take(format('alert-search-capacity-{0}', parameters('name')), 260)]",
+                      "location": "global",
+                      "tags": "[parameters('tags')]",
+                      "properties": {
+                        "description": "[format('Spec 036 FR-RAG-IDX-08: AI Search storage utilisation crossed {0}% — schedule scale-out before R-10 fires.', parameters('capacityAlertThresholdPercent'))]",
+                        "severity": 2,
+                        "scopes": [
+                          "[resourceId('Microsoft.Search/searchServices', parameters('name'))]"
+                        ],
+                        "evaluationFrequency": "PT5M",
+                        "windowSize": "PT15M",
+                        "criteria": {
+                          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                          "allOf": [
+                            {
+                              "name": "StorageUtilisation",
+                              "metricName": "SearchLatency",
+                              "metricNamespace": "Microsoft.Search/searchServices",
+                              "operator": "GreaterThan",
+                              "threshold": "[parameters('capacityAlertThresholdPercent')]",
+                              "timeAggregation": "Average",
+                              "criterionType": "StaticThresholdCriterion"
+                            }
+                          ]
+                        },
+                        "enabled": true,
+                        "autoMitigate": true,
+                        "actions": "[if(empty(parameters('capacityActionGroupId')), createArray(), createArray(createObject('actionGroupId', parameters('capacityActionGroupId'))))]"
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Search/searchServices', parameters('name'))]"
+                      ]
+                    }
+                  ],
+                  "outputs": {
+                    "searchServiceId": {
+                      "type": "string",
+                      "value": "[resourceId('Microsoft.Search/searchServices', parameters('name'))]"
+                    },
+                    "searchServiceName": {
+                      "type": "string",
+                      "value": "[parameters('name')]"
+                    },
+                    "principalId": {
+                      "type": "string",
+                      "value": "[reference(resourceId('Microsoft.Search/searchServices', parameters('name')), '2024-06-01-preview', 'full').identity.principalId]"
+                    },
+                    "vectorDimensions": {
+                      "type": "int",
+                      "value": "[parameters('vectorDimensions')]"
+                    },
+                    "jurisdictionValues": {
+                      "type": "array",
+                      "value": "[parameters('jurisdictionValues')]"
+                    },
+                    "licenceModeValues": {
+                      "type": "array",
+                      "value": "[parameters('licenceModeValues')]"
+                    },
+                    "capacityAlertThresholdPercent": {
+                      "type": "int",
+                      "value": "[parameters('capacityAlertThresholdPercent')]"
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "searchServiceId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', format('aiSearch-{0}', parameters('name'))), '2025-04-01').outputs.searchServiceId.value]"
+            },
+            "searchServiceName": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', format('aiSearch-{0}', parameters('name'))), '2025-04-01').outputs.searchServiceName.value]"
+            },
+            "searchPrincipalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Resources/deployments', format('aiSearch-{0}', parameters('name'))), '2025-04-01').outputs.principalId.value]"
+            },
+            "aliasName": {
+              "type": "string",
+              "value": "[parameters('aliasName')]"
+            },
+            "currentIndexName": {
+              "type": "string",
+              "value": "[parameters('currentIndexName')]"
+            },
+            "nextIndexName": {
+              "type": "string",
+              "value": "[parameters('nextIndexName')]"
+            },
+            "previousIndexRetentionDays": {
+              "type": "int",
+              "value": "[parameters('previousIndexRetentionDays')]"
+            },
+            "embeddingModelId": {
+              "type": "string",
+              "value": "[parameters('embeddingModelId')]"
+            },
+            "vectorDimensions": {
+              "type": "int",
+              "value": "[parameters('vectorDimensions')]"
+            },
+            "jurisdictionValues": {
+              "type": "array",
+              "value": "[parameters('jurisdictionValues')]"
+            },
+            "licenceModeValues": {
+              "type": "array",
+              "value": "[parameters('licenceModeValues')]"
+            },
+            "capacityAlertThresholdPercent": {
+              "type": "int",
+              "value": "[parameters('capacityAlertThresholdPercent')]"
+            },
+            "aliasFlipReady": {
+              "type": "bool",
+              "value": "[and(and(not(empty(parameters('currentIndexName'))), not(empty(parameters('nextIndexName')))), not(equals(parameters('currentIndexName'), parameters('nextIndexName'))))]"
+            }
+          }
+        }
+      }
+    },
+    "spec036IngestRunnerJob": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "spec036-ingest-runner-job",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "name": {
+            "value": "[format('caj-ingest-runner-{0}', parameters('environmentName'))]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "tags": {
+            "value": "[variables('tags')]"
+          },
+          "environmentId": {
+            "value": "[resourceId('Microsoft.App/managedEnvironments', take(format('{0}{1}', variables('abbrs').appManagedEnvironments, parameters('environmentName')), 60))]"
+          },
+          "image": {
+            "value": "[format('{0}/ama/ingest-runner:{1}', reference('containerRegistry').loginServer, parameters('spec036IngestRunnerImageTag'))]"
+          },
+          "userAssignedIdentityId": {
+            "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('id-ingest-runner-{0}', parameters('environmentName')))]"
+          },
+          "userAssignedClientId": {
+            "value": "[reference('spec036IngestIdentity').clientId]"
+          },
+          "containerRegistryLoginServer": {
+            "value": "[reference('containerRegistry').loginServer]"
+          },
+          "searchServiceEndpoint": {
+            "value": "[format('https://{0}.search.windows.net', reference('spec036SearchBlueGreen').outputs.searchServiceName.value)]"
+          },
+          "indexAlias": {
+            "value": "corpus"
+          },
+          "embeddingDeploymentName": {
+            "value": "[parameters('spec036EmbeddingDeploymentName')]"
+          },
+          "azureAiProjectEndpoint": {
+            "value": "[parameters('spec036FoundryEndpoint')]"
+          },
+          "serviceBusFullyQualifiedNamespace": {
+            "value": "[parameters('spec036ServiceBusFqdn')]"
+          },
+          "appInsightsConnectionString": {
+            "value": "[reference('monitoring').outputs.appInsightsConnectionString.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.39.26.7824",
+              "templateHash": "914681163536647742"
+            }
+          },
+          "parameters": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Job name (e.g. caj-ingest-runner-prod)"
+              }
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "australiaeast",
+              "allowedValues": [
+                "australiaeast"
+              ],
+              "metadata": {
+                "description": "Azure region — Australia East (constitution NN-2)"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags applied to the job + identity"
+              }
+            },
+            "environmentId": {
+              "type": "string",
+              "metadata": {
+                "description": "Existing Container Apps managed environment id"
+              }
+            },
+            "image": {
+              "type": "string",
+              "metadata": {
+                "description": "Container image (e.g. <acrLoginServer>/ama/ingest-runner:<corpusBuildSha>)"
+              }
+            },
+            "userAssignedIdentityId": {
+              "type": "string",
+              "metadata": {
+                "description": "User-assigned managed identity resource id used by the job"
+              }
+            },
+            "userAssignedClientId": {
+              "type": "string",
+              "metadata": {
+                "description": "User-assigned managed identity client id (for AZURE_CLIENT_ID env)"
+              }
+            },
+            "containerRegistryLoginServer": {
+              "type": "string",
+              "metadata": {
+                "description": "Container registry login server (for the registries[] config)"
+              }
+            },
+            "searchServiceEndpoint": {
+              "type": "string",
+              "metadata": {
+                "description": "AI Search service endpoint (https://<svc>.search.windows.net)"
+              }
+            },
+            "indexAlias": {
+              "type": "string",
+              "defaultValue": "corpus",
+              "metadata": {
+                "description": "Index alias name the runner writes through (e.g. corpus)"
+              }
+            },
+            "embeddingDeploymentName": {
+              "type": "string",
+              "metadata": {
+                "description": "Embedding deployment name surfaced via Foundry (FR-RAG-IDX-02; R-02)"
+              }
+            },
+            "azureAiProjectEndpoint": {
+              "type": "string",
+              "metadata": {
+                "description": "Foundry / Azure AI project endpoint (e.g. https://<proj>.services.ai.azure.com)"
+              }
+            },
+            "carveoutRegistryPath": {
+              "type": "string",
+              "defaultValue": "infra/parameters/foundry-carveout.yaml",
+              "metadata": {
+                "description": "Carve-out registry path (relative to repo) — fail-closed gate (FR-RAG-CV-01)"
+              }
+            },
+            "serviceBusFullyQualifiedNamespace": {
+              "type": "string",
+              "metadata": {
+                "description": "Service Bus namespace endpoint (e.g. sb://<ns>.servicebus.windows.net)"
+              }
+            },
+            "serviceBusBuildCompleteTopic": {
+              "type": "string",
+              "defaultValue": "topic.corpus-build-complete",
+              "metadata": {
+                "description": "Service Bus topic name where the runner publishes the build-complete event (FR-RAG-IDX-05)"
+              }
+            },
+            "cpu": {
+              "type": "string",
+              "defaultValue": "1.0",
+              "metadata": {
+                "description": "CPU allocation per replica (default 1.0)"
+              }
+            },
+            "memory": {
+              "type": "string",
+              "defaultValue": "2.0Gi",
+              "metadata": {
+                "description": "Memory allocation per replica (default 2.0Gi)"
+              }
+            },
+            "replicaTimeoutSeconds": {
+              "type": "int",
+              "defaultValue": 28800,
+              "metadata": {
+                "description": "Replica timeout in seconds (default 28800 = 8h — full corpus rebuild headroom)"
+              }
+            },
+            "initialCorpusBuildSha": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Initial corpus_build_sha (overridable per run; runner recomputes from git ls-tree)"
+              }
+            },
+            "workloadProfileName": {
+              "type": "string",
+              "defaultValue": "Consumption",
+              "metadata": {
+                "description": "Workload profile (default Consumption)"
+              }
+            },
+            "appInsightsConnectionString": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Application Insights connection string for runner telemetry"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/jobs",
+              "apiVersion": "2024-03-01",
+              "name": "[parameters('name')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', parameters('userAssignedIdentityId'))]": {}
+                }
+              },
+              "properties": {
+                "environmentId": "[parameters('environmentId')]",
+                "workloadProfileName": "[parameters('workloadProfileName')]",
+                "configuration": {
+                  "replicaTimeout": "[parameters('replicaTimeoutSeconds')]",
+                  "replicaRetryLimit": 1,
+                  "triggerType": "Manual",
+                  "registries": [
+                    {
+                      "server": "[parameters('containerRegistryLoginServer')]",
+                      "identity": "[parameters('userAssignedIdentityId')]"
+                    }
+                  ],
+                  "manualTriggerConfig": {
+                    "parallelism": 1,
+                    "replicaCompletionCount": 1
+                  }
+                },
+                "template": {
+                  "containers": [
+                    {
+                      "name": "ingest-runner",
+                      "image": "[parameters('image')]",
+                      "resources": {
+                        "cpu": "[json(parameters('cpu'))]",
+                        "memory": "[parameters('memory')]"
+                      },
+                      "command": [
+                        "python"
+                      ],
+                      "args": [
+                        "-m",
+                        "ama_ingest",
+                        "--corpus-root",
+                        "docs/corpus",
+                        "--search-endpoint",
+                        "[parameters('searchServiceEndpoint')]",
+                        "--index-alias",
+                        "[parameters('indexAlias')]",
+                        "--embedding-model",
+                        "[parameters('embeddingDeploymentName')]",
+                        "--carveout-registry",
+                        "[parameters('carveoutRegistryPath')]",
+                        "--mode",
+                        "incremental"
+                      ],
+                      "env": [
+                        {
+                          "name": "AZURE_CLIENT_ID",
+                          "value": "[parameters('userAssignedClientId')]"
+                        },
+                        {
+                          "name": "AZURE_SEARCH_ENDPOINT",
+                          "value": "[parameters('searchServiceEndpoint')]"
+                        },
+                        {
+                          "name": "AZURE_AI_PROJECT_ENDPOINT",
+                          "value": "[parameters('azureAiProjectEndpoint')]"
+                        },
+                        {
+                          "name": "EMBEDDING_DEPLOYMENT",
+                          "value": "[parameters('embeddingDeploymentName')]"
+                        },
+                        {
+                          "name": "EMBEDDING_MODEL",
+                          "value": "[parameters('embeddingDeploymentName')]"
+                        },
+                        {
+                          "name": "CARVEOUT_REGISTRY",
+                          "value": "[parameters('carveoutRegistryPath')]"
+                        },
+                        {
+                          "name": "AZURE_AI_PROJECT_REGION",
+                          "value": "[parameters('location')]"
+                        },
+                        {
+                          "name": "CORPUS_BUILD_SHA",
+                          "value": "[parameters('initialCorpusBuildSha')]"
+                        },
+                        {
+                          "name": "SERVICE_BUS_FQDN",
+                          "value": "[parameters('serviceBusFullyQualifiedNamespace')]"
+                        },
+                        {
+                          "name": "SERVICE_BUS_BUILD_COMPLETE_TOPIC",
+                          "value": "[parameters('serviceBusBuildCompleteTopic')]"
+                        },
+                        {
+                          "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                          "value": "[parameters('appInsightsConnectionString')]"
+                        },
+                        {
+                          "name": "AMA_REQUIRE_AAD",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "jobId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.App/jobs', parameters('name'))]"
+            },
+            "jobName": {
+              "type": "string",
+              "value": "[parameters('name')]"
+            },
+            "jobIdentityClientId": {
+              "type": "string",
+              "value": "[parameters('userAssignedClientId')]"
+            },
+            "jobIdentityResourceId": {
+              "type": "string",
+              "value": "[parameters('userAssignedIdentityId')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "containerRegistry",
+        "managedEnvironment",
+        "monitoring",
+        "spec036IngestIdentity",
+        "spec036SearchBlueGreen"
+      ]
+    },
     "azureMaps": {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
@@ -32350,8 +33437,11 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "14445073157661801116"
-            }
+              "templateHash": "9218557975815398679"
+            },
+            "deprecated": "036-foundry-rag-grounding",
+            "deprecationReason": "Replaced by Foundry-hosted models per spec 036; kept for canary fallback (FR-RAG-FM-06). Delete in E1.",
+            "replacedBy": "apps/agents/common/foundry_chat_client.py + infra/modules/ai-search-blue-green.bicep"
           },
           "parameters": {
             "openAiAccountName": {

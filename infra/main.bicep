@@ -188,6 +188,89 @@ module spec035RecoverySigningKv './modules/recovery-signing-keyvault.bicep' = if
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
+// Spec-036 (T048/T049/T050) — Foundry RAG: AI Search blue-green index +
+// corpus ingest-runner Container Apps Job. Gated behind enableSpec036FoundryRag
+// so the migration can be staged independently of the existing AIDR-only path.
+// ────────────────────────────────────────────────────────────────────────────────
+
+@description('Spec-036 — Provision the Foundry-RAG blue-green AI Search index + ingest-runner job. Default OFF in dev; flip on per Phase B → C → D rollout.')
+param enableSpec036FoundryRag bool = false
+
+@description('Spec-036 — AI Search service name (auto-generated when empty).')
+param spec036SearchServiceName string = ''
+
+@description('Spec-036 — Ingest-runner image tag (azd deploy / cd.yml sets this to the corpus_build_sha).')
+param spec036IngestRunnerImageTag string = 'latest'
+
+@description('Spec-036 — Foundry / Azure AI project endpoint URL for the embedding deployment.')
+param spec036FoundryEndpoint string = ''
+
+@description('Spec-036 — Embedding deployment name (Foundry).')
+param spec036EmbeddingDeploymentName string = 'text-embedding-3-large'
+
+@description('Spec-036 — Service Bus FQDN for the build-complete topic (FR-RAG-IDX-05).')
+param spec036ServiceBusFqdn string = ''
+
+resource spec036IngestIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = if (enableSpec036FoundryRag) {
+  name: 'id-ingest-runner-${environmentName}'
+  location: location
+  tags: tags
+}
+
+module spec036SearchBlueGreen './modules/ai-search-blue-green.bicep' = if (enableSpec036FoundryRag) {
+  name: 'spec036-ai-search-blue-green'
+  params: {
+    name: empty(spec036SearchServiceName) ? 'srch-${environmentName}-${take(uniqueSuffix, 6)}' : spec036SearchServiceName
+    location: location
+    tags: tags
+    sku: 'standard'
+    // PE-only is the production posture; dev tenants override via param overrides if needed.
+    privateEndpointSubnetId: ''
+    privateDnsZoneId: ''
+    disablePublicNetworkAccess: false
+    vectorDimensions: 3072
+    aliasName: 'corpus'
+    currentIndexName: 'corpus-v1'
+    nextIndexName: 'corpus-v2'
+    embeddingModelId: '${spec036EmbeddingDeploymentName}@1'
+  }
+}
+
+module spec036IngestRunnerJob './modules/ingest-runner-job.bicep' = if (enableSpec036FoundryRag) {
+  name: 'spec036-ingest-runner-job'
+  params: {
+    name: 'caj-ingest-runner-${environmentName}'
+    location: location
+    tags: tags
+    environmentId: managedEnvironment.id
+    image: '${containerRegistry.properties.loginServer}/ama/ingest-runner:${spec036IngestRunnerImageTag}'
+    userAssignedIdentityId: spec036IngestIdentity!.id
+    userAssignedClientId: spec036IngestIdentity!.properties.clientId
+    containerRegistryLoginServer: containerRegistry.properties.loginServer
+    searchServiceEndpoint: 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net'
+    indexAlias: 'corpus'
+    embeddingDeploymentName: spec036EmbeddingDeploymentName
+    azureAiProjectEndpoint: spec036FoundryEndpoint
+    serviceBusFullyQualifiedNamespace: spec036ServiceBusFqdn
+    appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
+  }
+}
+
+// Spec-036 RBAC — grant the ingest-runner UAMI Search Index Data Contributor on
+// the search service (FR-RAG-IDX-04 write path; FR-S03 AAD-only).
+var spec036SearchIndexDataContributorRoleId = '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
+
+resource spec036SearchRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (enableSpec036FoundryRag) {
+  name: guid('spec036-ingest-search-data-contributor', environmentName)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036SearchIndexDataContributorRoleId)
+    principalId: spec036IngestIdentity!.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
 // Azure Maps (Disaster Mapper UI — data sovereignty: Australia East only)
 // ────────────────────────────────────────────────────────────────────────────────
 
