@@ -145,3 +145,56 @@ All items in this checklist were resolved during the Phase E final docs sweep (T
 Items with residual scope (none identified in this pass) would have been flagged inline with `[ ]` + a tracking-issue link rather than auto-ticked.
 
 For the cross-artefact consistency analysis that closes T150, see [`analyze-report.md`](../analyze-report.md).
+
+---
+
+## Post-R3-Amendment Spec-Quality Items (Sessions 3 + 4 + 5)
+
+> **Added**: 2026-05-09 — these items extend the original CHK001–CHK082 spec-quality coverage to validate the R3 amend-loop additions (Sessions 3 + 4 + 5: 25 new FRs across families CA, COMP, AC, FRESH, COORD, TEST, OBS, UI, plus IDX-04a/05a/09; 2 new User Stories US9 + US10; 7 new SCs SC-013..SC-019; 1 new OOS-8; 4 new Assumptions A9–A12).
+> Domain-specific items live in the new files: `cultural-authority-protocols.md`, `federal-compliance-mapping.md`, `audit-and-approval-workflow.md`, `multi-agent-coordination.md`, `test-coverage-windows.md`, `observability.md`, `accessibility.md`.
+> Items here check **spec-level quality fundamentals** for the amend-loop content: priority assignment, ID stability, traceability, ADR lifecycle, deterministic-replay invariant.
+
+### Post-Amend User Story & Success Criteria Quality
+
+- [ ] CHK297 Are User Story 9 (Cultural-authority gating) and User Story 10 (Cross-jurisdiction agency disambiguation) — both new at **P1** — consistent with the Priority assignments in the User Story prelude (no P1 demoted; no P3 silently promoted)? [Consistency, Spec §US9 / §US10]
+- [ ] CHK298 Are User Stories 9 and 10's Independent Test sections sufficient for a reviewer to execute (concrete artefact, command, or grep target — per CHK036 convention)? [Measurability, Spec §US9 / §US10]
+- [ ] CHK299 Are the seven new Success Criteria (SC-013..SC-019) each tied to a specific FR or User Story by ID, per the existing CHK034 traceability convention? [Traceability, Spec §SC-013..SC-019]
+
+### Post-Amend FR Family & ID Stability
+
+- [ ] CHK300 Are the new FR family prefixes (**CA**, **COMP**, **AC**, **FRESH**, **COORD**, **TEST**, **OBS**, **UI**) introduced via section headings — per CHK077's "every family prefix introduced" convention — so a first-time reader can resolve every FR ID? [Clarity, Spec §Requirements section headings]
+- [ ] CHK301 Is the post-amend FR ID-stability invariant preserved — i.e., no pre-amend FR-RAG-FM-*, FR-RAG-CV-*, FR-RAG-IDX-*, FR-RAG-AG-*, FR-RAG-NS-*, FR-RAG-SIM-*, FR-RAG-LS-* identifier was renumbered when the 25 new FRs were added (CI lint anchors `# RAG-OPTOUT [FR-RAG-NS-NN]` and ADR cross-references stay valid)? [Consistency, Spec §FR-RAG-FM-* / §FR-RAG-NS-* / etc. across pre- and post-amend]
+
+### Post-Amend Out-of-Scope & Assumption Quality
+
+- [ ] CHK302 Is **OOS-8** (Indigenous language corpus body authoring is HUMAN-IN-LOOP) consistent with FR-RAG-CA-01..03's "in-scope plumbing, out-of-scope authoring" delineation — neither widening nor narrowing the carve-out by interpretation? [Consistency, Spec §OOS-8 vs §FR-RAG-CA-01..03]
+- [ ] CHK303 Are the four new Assumptions (**A9** HUMAN-IN-LOOP authorities, **A10** schema migration, **A11** ADR lifecycle, **A12** feature-flag taxonomy) each testable by inspection of an existing artefact (T082 script for A10; existing 01-09 ADR convention for A11; spec-029 FR-008 for A12)? [Measurability, Spec §A9..A12]
+- [ ] CHK304 Is each new FR's `*(Driven by …)*` parenthetical traceable to either a persona memo, a Constitution clause, or a referenced spec ID — per CHK081's existing convention? [Traceability, Spec §FR-RAG-CA-* / §FR-RAG-COMP-* / §FR-RAG-COORD-* / §FR-RAG-TEST-* / §FR-RAG-OBS-* / §FR-RAG-UI-* / §FR-RAG-AC-*]
+
+### ADR Lifecycle Discipline (Assumption A11)
+
+- [ ] CHK305 Are all `[NEEDS ADR]` markers (12-cultural-authority-gating … 19-test-coverage-windows) listed in Assumption A11 AND consistent with the ADRs cited inline in each FR body (no ADR cited in an FR but missing from A11; no ADR listed in A11 but not cited in any FR)? [Consistency, Spec §A11 vs §FR-RAG-* `[NEEDS ADR]` markers]
+- [ ] CHK306 Does Assumption A11 codify the three-phase ADR lifecycle (markers in `/speckit.specify` → stubs in `/speckit.plan` → body in `/speckit.implement`) consistent with the existing 01-09 ADR convention so a future contributor cannot shortcut to body authoring without a stub? [Coverage, Spec §A11 vs existing `docs/decisions/036-foundry-rag-grounding/01..09-*.md`]
+
+### Closed-Question & Edge-Case Coverage
+
+- [ ] CHK307 Does §Closed Questions accurately log the resolution authority for each Pass 1 / Pass 2 amend-loop question (per CHK078 — no orphan resolutions; every Q-P1-NN and Q-P2-NN points to a specific FR / SC / Assumption update)? [Consistency, Spec §Closed Questions Sessions 4 + 5 vs §FR-RAG-* / §SC]
+- [ ] CHK308 Are the new Edge Case interactions (cultural-authority gate fail-closed; conflict_detected; corpus-stale alert; alias-flip in-flight queries) each linked back to an FR per CHK041's "every Edge Case linked to an addressing FR" convention? [Coverage, Spec §Edge Cases vs §FR-RAG-CA-04 / §FR-RAG-COORD-01 / §FR-RAG-FRESH-02 / §FR-RAG-IDX-04a]
+
+### Deterministic-Replay Invariant (SC-011 preservation)
+
+- [ ] CHK309 Is "deterministic audit replay" (SC-011 ≥ 95% byte-identical) preserved despite the new fields (`precedence_tiebreak_applied[]`, `retrieval_index_name`, `conflict_group_id`, `cultural_authority_*` audit events) — i.e., is each new field deterministic given the same inputs (no system clock leakage, no random UUIDs assigned post-decision)? [Measurability, Spec §SC-011 vs §FR-RAG-AG-04 / §FR-RAG-IDX-04a / §FR-RAG-COORD-01 / §FR-RAG-CA-04]
+
+### Pre-Amend FR Coverage Backfill (post-`/speckit.analyze` 2026-05-09)
+
+> **Authority**: `/speckit.analyze` post-R3-amend-loop pass surfaced three pre-amend FRs that lacked any direct CHK coverage. These items close the gap so that every FR in §Functional Requirements has at least one CHK anchor (companion to the every-FR-has-≥1-task invariant in `tasks.md`).
+
+- [ ] CHK340 Does **FR-RAG-IDX-01** specify the corpus tree to be ingested with sufficient precision that a reviewer can verify the scope from `docs/corpus/` directory inspection (national + every state/territory + Commonwealth + agency operational doctrine + hazard-specialty material — no orphan top-level subtree)? [Coverage, Spec §FR-RAG-IDX-01 vs `docs/corpus/` tree]
+- [ ] CHK341 Does **FR-RAG-IDX-07** bind the inventory file path (`docs/corpus/INDEXING-LICENCE-INVENTORY.md`), required column set (publisher, edition, citation URL, redistribution rights, `mode`), and machine-check trigger (CI failure on drift) measurably enough that a reviewer can implement the gate from the FR alone? [Measurability, Spec §FR-RAG-IDX-07]
+- [ ] CHK342 Does **FR-RAG-SIM-06** clarify the boundary between scripted-scenario timeline events (deterministic, no RAG round-trip per FR-RAG-NS-06) and free-form chat answers in the same simulation (grounded), so a reviewer can implement the carve-out without re-deriving the contract from FR-RAG-NS-06? [Clarity, Spec §FR-RAG-SIM-06 vs §FR-RAG-NS-06]
+
+### Notes (Post-R3 Amend Loop)
+
+- **Item count (this section)**: 13 items (CHK297–CHK309) + 3 backfill items (CHK340–CHK342).
+- **Numbering continuation**: Items continue from `compliance.md` (which closed at CHK165 pre-amend). New numbering preserves the existing global sequence; CHK340–342 are appended after the highest-used ID (CHK339 in `compliance.md` post-R3) to avoid collision.
+- **Why these items live here vs. in domain checklists**: Items 297–309 + 340–342 test **spec-quality fundamentals** that span all amend-loop additions or pre-amend coverage gaps (priority/ID-stability/traceability/lifecycle/coverage-backfill). Domain-specific items (registry schemas, conflict classes, OTel transport, etc.) live in their respective new files.

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/johnbilliris/ama/specs/036-foundry-rag-grounding/contracts/audit-record-llm-call.json",
   "title": "AuditRecord (LLM-call)",
-  "description": "Append-only audit record emitted on every LLM call (inference or embedding) by every agent and the simulation Controller. Spec 036 EXTENDS the existing audit shape (spec 014/030/032) with the bold rows from data-model.md §AuditRecord. Discriminator: `call_kind`. Source of truth for retrieval+inference equivalence replay (SC-011) and for FR-RAG-NS-01..09 carve-out enforcement.",
+  "description": "Append-only audit record emitted on every LLM call (inference or embedding) by every agent and the simulation Controller. Spec 036 EXTENDS the existing audit shape (spec 014/030/032) with the bold rows from data-model.md §AuditRecord. R3 amend-loop (Sessions 3+4+5) ADDS the additive-nullable fields: operator_override_rationale, approval_workflow_state, approval_authority, downgrade_justification, retrieval_index_name, field_coordinator_offline_decision, conflict_group_id, precedence_tiebreak_applied. Discriminator: call_kind. Source of truth for retrieval+inference equivalence replay (SC-011), FR-RAG-NS-01..09 carve-out enforcement, FR-RAG-AG-02 amend-loop audit-shape extension, FR-RAG-COORD-01/02 conflict trace stitching, and FR-RAG-IDX-04a in-flight-query-atomicity replay. Migration strategy per Pass 2 Q-P2-01: additive, in-place, schema-on-read via existing `infra/scripts/migrate-audit-record-036.ps1` (Phase D2 task T082).",
   "type": "object",
   "required": [
     "call_id",
@@ -163,6 +163,44 @@
         }
       }
     },
+    "operator_override_rationale": {
+      "type": ["string", "null"],
+      "maxLength": 1024,
+      "description": "Spec-036 amend-loop NEW field (Cluster A5 / ADR-14). Captured when operator modifies or rejects the LLM recommendation. Nullable on legacy rows per the additive-in-place migration strategy (Pass 2 Q-P2-01)."
+    },
+    "approval_workflow_state": {
+      "type": ["string", "null"],
+      "enum": ["pending", "approved", "rejected", null],
+      "description": "Spec-036 amend-loop NEW field (Cluster A5 / ADR-14). Tracks PIO/IC approval workflow for public-facing outputs (FR-RAG-LS-03). Nullable on legacy rows."
+    },
+    "approval_authority": {
+      "type": ["string", "null"],
+      "maxLength": 256,
+      "description": "Spec-036 amend-loop NEW field (Cluster A5 / ADR-14). Identity (Entra ID) of the approving IC/PIO when approval_workflow_state transitions to approved or rejected. Required iff approval_workflow_state in (approved, rejected); null otherwise and on legacy rows."
+    },
+    "downgrade_justification": {
+      "type": ["string", "null"],
+      "maxLength": 1024,
+      "description": "Spec-036 amend-loop NEW field (Cluster A5 / ADR-14). Captured when IC downgrades the incident level. Nullable on legacy rows."
+    },
+    "retrieval_index_name": {
+      "type": ["string", "null"],
+      "description": "Spec-036 amend-loop NEW field (Cluster A7 / ADR-16). Concrete AI Search index name (NOT the alias) resolved at query start by the retrieval client per FR-RAG-IDX-04a. Pinned for the entire query lifecycle to guarantee in-flight atomicity across blue-green alias flips. Required iff rag_used == true; null otherwise and on legacy rows."
+    },
+    "field_coordinator_offline_decision": {
+      "type": ["boolean", "null"],
+      "description": "Spec-036 amend-loop NEW field (Cluster A5 / ADR-14). True when the decision was made by Field Coordinator while offline using cached doctrine (FR-RAG-LS-02 offline boundaries). Decisions tagged true MUST queue for IC review on reconnect with approval_workflow_state == 'pending'."
+    },
+    "conflict_group_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Spec-036 amend-loop NEW field (Cluster A9 / ADR-18). UUID v7 emitted by the multi-agent conflict detector (FR-RAG-COORD-01) when this AuditRecord is part of a conflicting recommendation pair/set. Foreign key to `conflictDetectionLog.conflict_group_id`. Null when no conflict; null on legacy rows."
+    },
+    "precedence_tiebreak_applied": {
+      "type": ["array", "null"],
+      "items": {"type": "string", "enum": ["recency", "licence_mode", "embedding_model_id", "chunk_id"]},
+      "description": "Spec-036 amend-loop NEW field (Cluster A1+A3 / ADR-13 / Pass 1 Q-P1-02). Trace of which deterministic tie-breakers were applied during precedence ranking when chunks shared `precedence_rank`. Empty array when no tie occurred; null on legacy rows. Recorded so SC-011 ≥95% byte-identical replay holds even when ranks tie."
+    },
     "tenant_id": {
       "type": "string",
       "description": "Tenant isolation; matches the existing spec-029 tenant model."
@@ -220,6 +258,21 @@
       "$comment": "Invariant 5: gateway_decision == 'deny' → gateway_deny_reason required.",
       "if": { "properties": { "gateway_decision": { "const": "deny" } }, "required": ["gateway_decision"] },
       "then": { "required": ["gateway_deny_reason"] }
+    },
+    {
+      "$comment": "Invariant 6 (R3 amend-loop ADR-16): rag_used == true → retrieval_index_name MUST be a concrete AI-Search index name (not the alias) so audit replay can pin to the exact index version even after the alias has flipped.",
+      "if": { "properties": { "rag_used": { "const": true } }, "required": ["rag_used"] },
+      "then": { "required": ["retrieval_index_name"], "properties": {"retrieval_index_name": {"type": "string", "minLength": 1}} }
+    },
+    {
+      "$comment": "Invariant 7 (R3 amend-loop ADR-14): approval_workflow_state in (approved, rejected) → approval_authority required (Entra ID of the approving IC/PIO).",
+      "if": { "properties": { "approval_workflow_state": { "enum": ["approved", "rejected"] } }, "required": ["approval_workflow_state"] },
+      "then": { "required": ["approval_authority"], "properties": {"approval_authority": {"type": "string", "minLength": 3}} }
+    },
+    {
+      "$comment": "Invariant 8 (R3 amend-loop ADR-14): field_coordinator_offline_decision == true → approval_workflow_state MUST be 'pending' on emission so reconnect-time IC review is enforced.",
+      "if": { "properties": { "field_coordinator_offline_decision": { "const": true } }, "required": ["field_coordinator_offline_decision"] },
+      "then": { "properties": { "approval_workflow_state": { "const": "pending" } }, "required": ["approval_workflow_state"] }
     }
   ],
   "examples": [

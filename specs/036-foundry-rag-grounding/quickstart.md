@@ -341,4 +341,104 @@ foreach ($sha in $shas) {
 
 ---
 
-*End of quickstart.md — if you got through every step above without a manual workaround, the spec-036 stack is correctly wired in your local + Azure environment.*
+---
+
+## R3 Amend-Loop steps (§12 — §15)
+
+> **Provenance**: The Round-3 amend loop introduced 25 new FRs across 12 clusters, four of which require new local-dev verification commands. These steps are appended after the original 11 steps; they are independent of each other and may be executed in any order. Each step is keyed to the spec FR + Phase F sub-phase + ADR stub for traceability.
+
+### §12 — Cultural-authority registry seeding (FR-RAG-CA-04 / F-A2 / ADR-12)
+
+> Verifies: gate fail-closes for protected chunks when registry is empty (Constitution VI-C); local-dev override path uses fixture-only entries.
+
+The `culturalAuthorityRegistry` Cosmos container is provisioned **empty** in prod; population is HUMAN-IN-LOOP per FR-RAG-CA-05 + Assumption A9. For local development you seed fixture-only entries:
+
+```pwsh
+# 1. Provision local Cosmos emulator container (skip if already present)
+.\infra\scripts\dev\provision-cosmos-cultural-authority-local.ps1
+
+# 2. Seed two fixture entries (test-operator with full_cultural_authority + IC-acting-only with cultural_consultation)
+uv run python apps/agents/common/cultural_authority_registry.py seed `
+    --source tests/fixtures/cultural-authority-registry-fixtures.json `
+    --target https://localhost:8081 `
+    --emulator
+
+# 3. Verify (registry-empty → gate fail-closes for sacred-site chunks)
+uv run pytest tests/integration/test_cultural_authority_gate.py::test_empty_registry_fails_closed_for_protected -v
+
+# 4. Verify (with seed → gate unsuppresses for verified operator + permitted scope)
+uv run pytest tests/integration/test_cultural_authority_gate.py::test_seeded_registry_unsuppresses_in_scope -v
+```
+
+**Expected outcome**: empty-registry test asserts the gate emits `cultural_authority_registry_unavailable` audit event and chunks with `cultural_classification != public` are suppressed from the recommendation while non-protected chunks remain. Seeded test asserts that for `chunk.cultural_classification == "indigenous-language"` and operator `test-operator` whose registry entry has `scope == "full_cultural_authority"` the gate unsuppresses and the recommendation contains the chunk.
+
+**Production note**: The local seed file `tests/fixtures/cultural-authority-registry-fixtures.json` has `environment: "local-dev"` and is rejected by the prod seed validator. Prod registry entries are loaded only via the HUMAN-IN-LOOP NEMA + AFAC + Indigenous community sign-off workflow per FR-RAG-CA-05.
+
+### §13 — 50-agent concurrency load test (FR-RAG-TEST-02 / F-A10.2 / ADR-19)
+
+> Verifies: SC-012 30%-end-to-end + SHOULD-class p95 retrieval-only ≤500ms hold under sustained load.
+
+```pwsh
+# Prerequisite: ensure local foundry-rag-stack is up (steps 1-3 of this quickstart).
+# The harness exercises 50 distinct agent_session_id values (per Pass 1 Q-P1-07) at RPS=50 sustained for 60s.
+
+uv run locust -f tests/load/locustfile.py `
+    --tags retrieval_session `
+    --users 50 `
+    --spawn-rate 50 `
+    --run-time 60s `
+    --headless `
+    --html artifacts/load-50-agent-$(Get-Date -Format yyyyMMddHHmmss).html `
+    --csv artifacts/load-50-agent-$(Get-Date -Format yyyyMMddHHmmss)
+```
+
+**Expected outcome**: 60-second sustained run with the `RetrievalSession` task class; HTML report at `artifacts/load-50-agent-*.html`; CSV breakdown at `artifacts/load-50-agent-*_stats.csv`. The harness uses `psutil` to probe per-process memory + CPU; if p95 retrieval latency >500ms the report flags the SHOULD-class regression but the run does NOT exit non-zero (warn-only locally; CI weekly + pre-promotion stage gates more strictly).
+
+### §14 — Blue-green alias-flip E2E (FR-RAG-IDX-04a / F-A7 + F-A10.4 / ADR-16)
+
+> Verifies: in-flight queries pin to a concrete index name across alias flips; rollback completes ≤5 min.
+
+```pwsh
+# Prerequisite: local AI Search emulator OR shared dev AI Search service.
+# The test creates ephemeral corpus-test-* indices, performs the flip, and asserts atomicity invariants.
+
+uv run pytest tests/e2e/test_blue_green_alias_flip.py -v --no-cov
+
+# Optional: scope to specific assertions (faster iteration during debugging)
+uv run pytest tests/e2e/test_blue_green_alias_flip.py -v -k "flip_pins_in_flight"
+uv run pytest tests/e2e/test_blue_green_alias_flip.py -v -k "rollback_5min_slo"
+```
+
+**Expected outcome**: four test assertions land green: (a) alias flip <60s, (b) post-flip retrieval resolves to new index, (c) previous index accessible 7 days, (d) rollback flips back ≤5 min and emits the audit-shape rollback record `{old_index_name, new_index_name, parity_gate_failure_reason, release_manager_id, completed_at}`. Production cadence: nightly (mirrors FR-RAG-IDX-05a) + pre-release stage of spec-029 progressive delivery.
+
+### §15 — WCAG 2.2 AA accessibility verification (FR-RAG-UI-01 / F-A12.4 / ADR-19)
+
+> Verifies: `<CitationCard />` keyboard accessibility + ARIA attributes hold (SHOULD-class — warn-only initially per F-A12.5).
+
+Two paths — `jest-axe` (preferred, integrated into Testing-Library pipeline) AND `pa11y` (browser-driver path for the deployed surface):
+
+```pwsh
+# Path 1 — jest-axe (component-level, runs in CI per-PR)
+pnpm --filter @ama/web run test:a11y
+
+# Path 2 — pa11y (page-level against running dev server)
+pnpm --filter @ama/web exec pa11y http://localhost:3000/sim/recommendation/sample `
+    --standard WCAG2AA `
+    --reporter json `
+    --output artifacts/pa11y-citationcard-$(Get-Date -Format yyyyMMddHHmmss).json
+```
+
+**Expected outcome**: jest-axe path emits zero violations on `<CitationCard />` and the recommendation card. pa11y path returns zero issues at WCAG 2.2 AA level for the sample recommendation surface. SHOULD-class gate (warn-only initially per F-A12.5); a non-zero violation count flags the regression but does not block CI on landing — promoted to MUST-class once the implement-phase remediation lands.
+
+---
+
+## Cross-references — amend-loop quickstart
+
+- **§12 fixture file** (NEW): `tests/fixtures/cultural-authority-registry-fixtures.json` — local-dev only; rejected by prod seed validator per FR-RAG-CA-05.
+- **§13 Locust extension**: existing `tests/load/locustfile.py` gains a `RetrievalSession` task class (F-A10.2); `psutil` dependency added per the amend-loop tech-stack additions documented in `plan.md`.
+- **§14 E2E** (NEW): `tests/e2e/test_blue_green_alias_flip.py`.
+- **§15 dependencies**: `jest-axe` (preferred) added to `apps/web` devDependencies per F-A12.4; `pa11y` is the alternative.
+
+---
+
+*End of quickstart.md — if you got through every step above (including §12–§15 amend-loop steps) without a manual workaround, the spec-036 stack is correctly wired in your local + Azure environment.*

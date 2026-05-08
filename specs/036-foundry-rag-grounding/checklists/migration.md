@@ -74,3 +74,41 @@ All items in this checklist were resolved during the Phase E final docs sweep (T
 Items with residual scope (none identified in this pass) would have been flagged inline with `[ ]` + a tracking-issue link rather than auto-ticked.
 
 For the cross-artefact consistency analysis that closes T150, see [`analyze-report.md`](../analyze-report.md).
+
+---
+
+## Post-R3-Amendment Citation & Audit Contract (Sessions 3 + 4 + 5)
+
+> **Added**: 2026-05-09 — these items extend the original CHK083–CHK113 migration / test-seam / citation-contract coverage to validate that the R3 amend-loop additions (new audit fields, new chunk metadata fields, new audit events) preserve the end-to-end citation contract (agent log → audit doc → UI → SSE) and remain hermetically testable via the FR-RAG-FM-07 constructor-injection seam.
+> Items continue numbering from `requirements.md` post-R3 extension (CHK297..CHK309).
+
+### Citation Contract Under New Chunk-Metadata Fields
+
+- [ ] CHK310 Does the citation token shape (`<jurisdiction>/<topic>/handbook.md#page-N` per FR-RAG-AG-03) hold under the new agency-aware retrieval fields (FR-RAG-AG-04: `agency`, `agency_role`, `authority_level`, `precedence_rank`) — or does the token need to be widened to reflect agency, and if not, where is the agency context surfaced on the recommendation card? [Consistency, Spec §FR-RAG-AG-03 vs §FR-RAG-AG-04]
+- [ ] CHK311 Does the citation contract end-to-end (agent log → audit doc → UI → SSE) carry the new `precedence_tiebreak_applied[]` trace where applicable, so SC-011 byte-identical replay holds across the boundary? [Coverage, Spec §FR-RAG-AG-04 vs §FR-RAG-AG-02 / §FR-RAG-SIM-02 / §SC-011]
+- [ ] CHK312 Is the citation surface for **cultural-authority-suppressed chunks** defined — does the recommendation card show a suppression notice, or remain silent (with the suppression visible only in the audit `cultural_authority_*` event)? [Edge Case, Spec §FR-RAG-CA-04 vs §FR-RAG-AG-03]
+
+### Audit Contract Under New AuditRecord Fields
+
+- [ ] CHK313 Are `retrieval_index_name` (FR-RAG-IDX-04a) and `corpus_build_sha` jointly recorded in audit so blue-green replay reconstruction is unambiguous about **which concrete index served the query** at audit time? [Consistency, Spec §FR-RAG-IDX-04a vs §FR-RAG-AG-02 / §FR-RAG-SIM-04]
+- [ ] CHK314 Is the `conflict_group_id` audit field surfaced on the recommendation card UI, the simulation chat panel, or both — per CHK101's "end-to-end testability of the citation contract" principle? [Consistency, Spec §FR-RAG-COORD-01 vs §FR-RAG-AG-03 / §FR-RAG-SIM-02]
+
+### Test-Seam Contract Compatibility (FR-RAG-FM-07)
+
+- [ ] CHK315 Does the FR-RAG-FM-07 test seam contract still hold with the new audit fields injected — i.e., a `FakeFoundryClient` (or callable returning a `FoundryResponse`-shaped payload) can drive the new override / approval / downgrade / cultural-authority audit fields without monkey-patching the Azure AI Inference SDK transport? [Coverage, Spec §FR-RAG-FM-07 vs §FR-RAG-AG-02 amendments]
+
+### Cutover Compatibility With Amend-Loop Schema Migration
+
+- [ ] CHK316 Is the migration window's per-agent canary gating (FR-RAG-FM-06) compatible with the new amend-loop schema migration (T082 additive AuditRecord + blue-green Chunk re-index per Assumption A10) — i.e., can canaries flip at any point during or after the schema migration without breaking equivalence comparisons? [Consistency, Spec §FR-RAG-FM-06 vs §A10]
+- [ ] CHK317 Is the cutover audit-trail field set widened to capture the new amend-loop fields (`operator_override_rationale`, `approval_workflow_state`, `retrieval_index_name`, `conflict_group_id`) so post-cutover analysis remains deterministic per CHK092's migration-audit-trail requirement? [Coverage, Spec §FR-RAG-FM-06 vs §FR-RAG-AG-02]
+- [ ] CHK318 Is the legacy → Foundry equivalence test (spec-033 FR-023 ≥95% decision-equivalence) calibrated to handle the new categorical fields (e.g., `approval_workflow_state` enum, `agency_role` enum, `authority_level` enum) without false-positive equivalence failures (i.e., legacy null vs amend-loop populated values are tolerated)? [Consistency, Spec §FR-RAG-FM-06 vs §FR-RAG-AG-02 / §FR-RAG-AG-04]
+
+### Feature-Flag Audit Trail (Assumption A12)
+
+- [ ] CHK319 Is the `audit.feature_flag_change` event (Assumption A12) covered by the FR-RAG-FM-06 migration audit trail so flag flips during cutover are deterministic and post-mortem-reconstructable (which canary cohort, which flag, which old/new value, which actor)? [Traceability, Spec §A12 vs §FR-RAG-FM-06]
+
+### Notes (Post-R3 Amend Loop)
+
+- **Item count (this section)**: 10 items (CHK310–CHK319).
+- **Cross-references**: New items frequently cite FR-RAG-AG-02 (extended), FR-RAG-AG-04 (extended), FR-RAG-AG-03, FR-RAG-IDX-04a, FR-RAG-CA-04, FR-RAG-COORD-01, FR-RAG-FM-06/07, SC-011, Assumptions A10 + A12, and spec-033 FR-023.
+- **Why these items live here vs. in domain checklists**: These items test the **migration / test-seam / citation-contract** surface from the original migration.md scope, extended to cover amend-loop additions. They check that the existing end-to-end testability principle (CHK101–CHK113) survives the schema/audit-shape changes.

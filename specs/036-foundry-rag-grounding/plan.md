@@ -2,7 +2,7 @@
 
 **Branch**: `036-foundry-rag-grounding` | **Date**: 2026-05-08 | **Spec**: [`spec.md`](./spec.md)
 **Input**: Feature specification from `specs/036-foundry-rag-grounding/spec.md`
-**Status**: Draft (Phase 0 + Phase 1 complete; ready for `/speckit.tasks`)
+**Status**: Draft (Phase 0 + Phase 1 complete; **Phase F R3 amend-loop appended 2026-05-08**; ready for `/speckit.tasks`)
 
 ---
 
@@ -292,7 +292,7 @@ The Constitution Check above is PASS at both the pre-Phase-0 and post-Phase-1 ga
 
 ## Cross-references
 
-- **Spec**: [`spec.md`](./spec.md) (43 FRs, 8 USs, 12 SCs, 7 OOS, 8 assumptions; Pass-1 + Pass-2 clarifications complete).
+- **Spec**: [`spec.md`](./spec.md) (68 FRs, 10 USs, 19 SCs, 8 OOS, 12 assumptions; Pass-1 + Pass-2 + R3 amend-loop Pass-1 + R3 amend-loop Pass-2 clarifications complete).
 - **Checklists**: [`checklists/requirements.md`](./checklists/requirements.md), [`checklists/migration.md`](./checklists/migration.md), [`checklists/compliance.md`](./checklists/compliance.md).
 - **Phase 0 research**: [`research.md`](./research.md).
 - **Phase 1 design**: [`data-model.md`](./data-model.md), [`contracts/`](./contracts/), [`quickstart.md`](./quickstart.md).
@@ -303,4 +303,251 @@ The Constitution Check above is PASS at both the pre-Phase-0 and post-Phase-1 ga
 
 ---
 
-*End of plan.md — proceed to `/speckit.tasks` for the dependency-ordered task breakdown.*
+*End of original plan.md sections (Phases A–E + R1–R13). The R3 amend-loop appendix begins below.*
+
+---
+
+## Phase F — R3 Amend Loop Implementation (post-A–E)
+
+> **Provenance**: Round 3 persona review (Sessions 3–5 in `spec.md`) surfaced 12 amendment clusters (A1–A12) addressing 34 of 89 individual findings raised by 85 personas across 9 R3 memos (`personas-input/r3-*.md`). The amend loop added **25 new FRs** (FR-RAG-CA-01..05, FR-RAG-COMP-01..04, FR-RAG-COORD-01..02, FR-RAG-TEST-01..04, FR-RAG-OBS-01..03, FR-RAG-UI-01, FR-RAG-IDX-04a/05a/09, FR-RAG-FRESH-01/02, FR-RAG-NS-09) and extended FR-RAG-AG-02/-04, FR-RAG-LS-02, FR-RAG-CV-01. Two clarify passes (Sessions 4 + 5) added 16 Q&A resolutions. Final spec counts: **68 FRs, 10 USs, 19 SCs, 8 OOS, 12 Assumptions, 5 Clarification sessions**. Phase F is the planning view of those amendments; it lands **after** the existing Phases A–E (i.e., relative to `tasks.md`, F-A* tasks come AFTER T142–T150, NOT before — see [§Updated phase ordering](#phase-f-ordering-vs-existing-tasks-t142-t150) below). It does not re-do prior work; it appends new sub-phases mapped to clusters A1–A12.
+
+### F-A1 — Agency disambiguation (Cluster A1)
+*Anchored by R3 sectors-eastern, southern-western, territories memos (multi-agency jurisdiction reality); Pass 1 Q-P1-02 tie-break order.*
+
+- **F-A1.1** — Add chunk-metadata fields `agency` (e.g., `NSW-RFS`, `FRNSW`, `DFES-WA`, `SAMFS`) and `agency_role` (`urban-fire | rural-fire | ses | combined | police | ambulance | marine-rescue | national-security | other`) to the AI Search index; required on every `corpus-v{N+1}` document. Schema authority: `contracts/chunk-metadata.schema.json`.
+- **F-A1.2** — Extend `apps/ingest-runner/src/ama_ingest/chunker.py` to emit `agency` + `agency_role` from `source.json` per-entry metadata; ingest-time lint fails the build if any chunk lacks both.
+- **F-A1.3** — Wire FR-RAG-AG-04 disambiguation into `apps/agents/common/retrieval_client.py` so urban-fire and rural-fire queries within the same jurisdiction never collide.
+- **F-A1.4** — Migration: blue-green rebuild ONLY (no in-place chunk mutation per Pass 2 Q-P2-01 + Assumption A10) — legacy `corpus-v{N}` is retained 7 days post-flip per FR-RAG-IDX-04 + ADR-16.
+- **F-A1.5** — SC-013 acceptance: ≥95% on agency-disambiguation subset of `tests/fixtures/golden-set-v1.json` (entries tagged `agency_disambiguation`, ≥20 entries).
+
+### F-A2 — Cultural Authority Registry & Gating (Cluster A2)
+*Anchored by Constitution VI-C non-negotiable; ADR-12; sectors-territories memo Indigenous-liaison emphasis.*
+
+- **F-A2.1** — Provision Cosmos DB container `culturalAuthorityRegistry` in Australia East (NN-2 + FR-RAG-CV-04) via `infra/modules/cosmos-cultural-authority.bicep` (NEW). Schema authority: `contracts/cultural-authority-registry.schema.json`.
+- **F-A2.2** — Container is provisioned **empty**; population is HUMAN-IN-LOOP per FR-RAG-CA-05 (NEMA + AFAC + ≥3 Indigenous community representatives sign-off). SC-014 verifies sign-offs at CD time.
+- **F-A2.3** — Implement `apps/agents/common/cultural_authority_registry.py` (NEW) — Cosmos client + signature verifier (cosign keyless OR age-encrypted detached, mirroring FR-RAG-LS-02 dual-sig pattern).
+- **F-A2.4** — Implement the **post-retrieval, in-process gate** inside `apps/agents/common/retrieval_service.py` (the FR-RAG-AG-01 entry point, between AI Search round-trip and Foundry inference) per Pass 2 Q-P2-02. Gate suppresses Sacred Site / Indigenous protocol chunks unless operator consent is verified; emits `cultural_authority_registry_unavailable` audit event on registry-unreachable per Pass 1 Q-P1-01 (fail-closed for protected chunks; non-protected chunks remain retrievable so the agent does not silence — Constitution Principle I).
+- **F-A2.5** — Add chunk fields `cultural_classification` (`public | indigenous-language | sacred-site | land-governance`) and `cultural_authority_required` (bool) — see `contracts/chunk-metadata.schema.json`.
+- **F-A2.6** — Feature flag `feature.cultural_authority_gate.enabled` is **Locked-on in prod** (A12 class taxonomy) — disabling permitted only for `environment=test` chaos runs and OPA-blocked at flag-flip time per Constitution VI-C.
+- **F-A2.7** — Corpus body authoring (Indigenous-language translations, Sacred Site protocols, ALT/APY consent gates) is **HUMAN-IN-LOOP** per FR-RAG-CA-01..03 + Assumption A9 + OOS-8; tracked in `tasks.md` but performed outside this AI workflow.
+
+### F-A3 — Authority Precedence Ranking (Cluster A3)
+*Anchored by ADR-13; sectors-territories memo (ACT national-institution precedence); sectors-commonwealth memo (COMDISPLAN activation); Pass 1 Q-P1-02 tie-break order.*
+
+- **F-A3.1** — Add chunk fields `authority_level` (`state-territory | commonwealth | national-institution`) and `precedence_rank` (int 1=highest, 3=lowest) — schema in `contracts/chunk-metadata.schema.json`.
+- **F-A3.2** — Extend `apps/agents/common/retrieval_client.py` ranking pass: when retrieval surfaces conflicting guidance from multiple authority levels (e.g., ACT ESA + Commonwealth NEMA), the recommendation card MUST present both with precedence indicators and a conflict-resolution note directing operators to escalate to IC + NEMA liaison (FR-RAG-AC-01).
+- **F-A3.3** — Implement deterministic tie-break order per Pass 1 Q-P1-02 — sequence: (1) recency (`corpus_build_sha.generated_at`), (2) `licence_mode` (`full-text` > `metadata-only`), (3) `embedding_model_id` lexicographic, (4) `chunk_id` lexicographic. Trace recorded as `precedence_tiebreak_applied[]` in audit.
+- **F-A3.4** — Wire FR-RAG-COMP-04 COMDISPLAN activation: when `national_emergency_active` flag is set, retrieval ranking elevates `authority_level=commonwealth` chunks to `precedence_rank=1` for the duration of the activation.
+- **F-A3.5** — Feature flag `feature.authority_precedence_ranking.enabled` (Reversible class) — disable falls back to recency-only ranking; emits `authority_precedence_ranking_disabled` audit event.
+- **F-A3.6** — SC-015 acceptance: Commonwealth doctrine first in ≥95% of national-institution queries (Parliament House, Defence estates, embassies) when `jurisdiction == act`.
+
+### F-A4 — OPA Carve-Out Bug Fix (Cluster A4)
+*Anchored by R3 architecture memo F-ARCH-05 BLOCKER finding; Pass 2 Q-P2-03 sequencing.*
+
+- **F-A4.1** — **PLAN-ONLY DELIVERABLE** (per user's "NOT to implement here" directive): document the rego change at `infra/policy/rego/foundry_carveout.rego`. The rule at line 29 currently reads `count(deployment.approver_identities) < 2 ...` which is correct for dev/staging but violates FR-RAG-CV-01 prod 3-approver requirement. Plan: introduce an `input.environment` discriminator so:
+  - `environment == "prod"` → `count(deployment.approver_identities) < 3` is a deny
+  - `environment in {"dev", "staging"}` → `< 2` is a deny (existing behaviour preserved)
+- **F-A4.2** — Sequencing per Pass 2 Q-P2-03: rego tightening MUST be coupled with the amend-loop merge in the **same PR** (no bifurcated rollout window — splitting it across two PRs would create a window where prod could deploy a 2-approver carve-out, the very gap FR-RAG-CV-01 closes).
+- **F-A4.3** — Contract test at `tests/contract/test_foundry_carveout.py` (NEW, sibling of existing `tests/contract/test_carveout_registry_entry.py`):
+  - 2-approver dev payload → empty `deny_foundry_carveout` set, exit 0.
+  - 2-approver prod payload → non-empty deny set, exit 1.
+  - 3-approver prod payload → empty deny set, exit 0.
+- **F-A4.4** — Spec-036 amend-loop schema mirror at `contracts/foundry-cv.schema.json` documents the registry-root `min_approvers_prod` (default 3) + `min_approvers_dev` (default 2) and per-row `environment` enum, kept in sync with `infra/parameters/foundry-carveout.schema.json`.
+- **F-A4.5** — SC-016 acceptance covers all three contract-test cases.
+
+### F-A5 — Audit Schema Extension & Field-Coordinator Offline Boundaries (Cluster A5)
+*Anchored by ADR-14; Constitution Principle IV; FR-RAG-LS-02 offline autonomy.*
+
+- **F-A5.1** — Extend Cosmos DB `audit_records` container schema (additive, nullable per Pass 2 Q-P2-01 + A10) with: `operator_override_rationale`, `approval_workflow_state` (enum `pending|approved|rejected`), `approval_authority`, `downgrade_justification`, `retrieval_index_name`, `field_coordinator_offline_decision`, `conflict_group_id`, `precedence_tiebreak_applied[]`. Schema authority: `contracts/audit-record-llm-call.json` (extended in this amend-loop).
+- **F-A5.2** — Migration runs via the **existing** `infra/scripts/migrate-audit-record-036.ps1` script (Phase D2 task **T082**, "additive fields only; preserve existing rows"); no migration window required because Cosmos tolerates missing fields on legacy rows. The script gains a Phase F entry point that adds the 8 new fields.
+- **F-A5.3** — Wire `apps/agents/common/audit.py` to emit the new fields on every applicable record: `operator_override_rationale` whenever an operator modifies/rejects a recommendation; `approval_workflow_state` on every public-warning event; `retrieval_index_name` on every `rag_used == true` record (concrete AI-Search index name, NOT the alias — per ADR-16); `field_coordinator_offline_decision` on Field-Coordinator offline path.
+- **F-A5.4** — Extend FR-RAG-LS-02 Field-Coordinator offline boundaries: MAY make resource-allocation, safety-escalation, and evacuation-centre setup decisions offline using cached doctrine; MUST NOT issue public warnings, request mutual aid across jurisdictions, or escalate to state/national level offline (requires IC approval on reconnect). On reconnect, queued decisions audit-emit `approval_workflow_state: "pending"` and are flagged for IC review before they become operational.
+- **F-A5.5** — SC-017 acceptance: `operator_override_rationale` present in 100% of override events; `approval_workflow_state` present in 100% of public-warning events.
+
+### F-A6 — Federal Compliance (Cluster A6)
+*Anchored by ADR-15; sectors-commonwealth memo NEMA / AGD / AFP federal alignment; OOS-8 / Assumption A9 HUMAN-IN-LOOP gates.*
+
+- **F-A6.1** — Author `docs/compliance/ISM-2024-mapping.md` (NEW) referencing ISM-0468 (TLS 1.2+ for Foundry + AI Search), ISM-1552 (audit-log cryptographic integrity via cosign + detached sigs).
+- **F-A6.2** — Implement Privacy Act 1988 APP 1/3/5/6/11 surfaces: SAR (Subject Access Request) workflow at `GET /api/audit/sar?subject=...`; PII anonymisation hook in `apps/agents/common/audit.py` before write; existing 7-year retention from spec 030 reused.
+- **F-A6.3** — Implement PSPF audit export: `GET /api/audit/export?format=pspf&start=...&end=...` returns CSV with mandated columns: `Timestamp, User, Action, Resource, Outcome, Justification`. The existing audit shape (post-F-A5 extensions) covers every column without further schema change.
+- **F-A6.4** — Wire FR-RAG-COMP-04 COMDISPLAN ranking interlock (already covered by F-A3.4).
+- **F-A6.5** — **HUMAN-IN-LOOP gates** per Assumption A9: the codebase scaffolds the implementation but federal sign-off (NEMA, AGD, AFP, AIATSIS) is performed outside this AI workflow. Tasks for sign-off acquisition are tracked in `tasks.md` but their completion is external.
+- **F-A6.6** — SC-018 acceptance: `docs/compliance/ISM-2024-mapping.md` exists, references the two ISM controls, and the PSPF export endpoint returns valid PSPF-format CSV.
+
+### F-A7 — Blue-Green Audit Replay Consistency (Cluster A7)
+*Anchored by ADR-16; R3 architecture memo F-ARCH-02 + F-ARCH-03 findings; Pass 1 Q-P1-04 rollback SLO timer; spec 029 FR-008 5-min pattern.*
+
+- **F-A7.1** — Implement FR-RAG-IDX-04a in-flight atomicity: `apps/agents/common/retrieval_client.py` resolves the alias `corpus-search` to a concrete index name at query start (e.g. `corpus-v3`) and pins that name for the entire query lifecycle. SSE multi-turn sessions pin once at session start; no alias re-resolution mid-query.
+- **F-A7.2** — Wire `retrieval_index_name` into every `RetrievalResult` and propagate to `AuditRecord.retrieval_index_name` (covered by F-A5.3 audit-emission wiring).
+- **F-A7.3** — Implement FR-RAG-IDX-09 5-minute rollback SLO: timer starts at emission of the `index_rollback` Service Bus event (parity-gate failure detection). "Rollback complete" = (a) alias resolves to old index for all new queries after the SLO deadline, AND (b) rollback record `{old_index_name, new_index_name, parity_gate_failure_reason, release_manager_id, completed_at}` appended to audit store.
+- **F-A7.4** — Rollback is **manual** (Release Manager approval required) per Pass 2 Q-P2-08 Manual operator action class; on-call paged via existing alert pipeline.
+- **F-A7.5** — Previous index retained 7 days post-flip per FR-RAG-IDX-04 (Bicep TTL tag; enforced by `infra/scripts/cleanup-stale-indices.ps1`).
+- **F-A7.6** — SC-019 acceptance: concurrent retrieval queries spanning blue-green flip return consistent index name in audit log; rollback completes ≤5 min.
+
+### F-A8 — Corpus Freshness (Cluster A8)
+*Anchored by ADR-17; R3 quality memo F-SRE-01 finding; Pass 1 Q-P1-05 alert scope.*
+
+- **F-A8.1** — Implement FR-RAG-IDX-05a nightly drift-detection schedule: `.github/workflows/corpus-ingest.yml` cron at `"0 14 * * *"` UTC (= 0100 AEST / 0000 AEDT). On run: pipeline checks every `source.json.sha256` for drift; if drift → re-run ingest + alias flip per ADR-16; if no drift → log `no_drift_detected` and exit cheaply.
+- **F-A8.2** — Implement FR-RAG-FRESH-01 UI freshness indicator in `<CitationCard />` and the Simulation chat surface: "Corpus last updated: <timestamp>" derived from `corpus_build_sha` manifest `generated_at`. Yellow if age >7 days; red if >14 days.
+- **F-A8.3** — Implement FR-RAG-FRESH-02 staleness alert at the **global corpus index** scope (Pass 1 Q-P1-05; NOT per-jurisdiction): emit `corpus_stale` to on-call + Service Bus when `corpus_build_sha.generated_at` age >14 days AND no ingest in last 48h. Schema authority: `contracts/staleness_alert.schema.json`.
+- **F-A8.4** — Feature flag `feature.corpus_freshness_alert.enabled` (Reversible class) — disable suppresses the alert but records underlying state in audit log.
+- **F-A8.5** — Author runbook `docs/runbooks/036-foundry-rag-corpus-stale.md` covering the four common stale causes (corpus repo stalled / ingest pipeline failing / cron misconfigured / parity gate blocking).
+
+### F-A9 — Multi-Agent Conflict Detection (Cluster A9)
+*Anchored by ADR-18; Pass 1 Q-P1-03 escalation chain; Pass 2 Q-P2-06 detection mechanics.*
+
+- **F-A9.1** — Provision Cosmos DB container `conflictDetectionLog` in Australia East (NN-2 + FR-RAG-CV-04) via `infra/modules/cosmos-conflict-detection.bicep` (NEW). Schema authority: `contracts/conflict_detection.schema.json`.
+- **F-A9.2** — Implement `apps/api/app/services/conflict_detection.py` (NEW) — reactive, post-return, deterministic, rule-based detector running in the recommendation-aggregation layer (NOT inside any individual agent and NOT in real-time streaming, per Pass 2 Q-P2-06). Compares each pair of agent recommendations after both return; pre-emptive divergence detection rejected because it breaks Constitution Principle IV deterministic replay + spec 033 MAF agent-isolation model.
+- **F-A9.3** — Implement four conflict classes per ADR-18: **resource** (same `resource_id`, overlapping `(start_time, end_time)`); **spatial** (incompatible recs over overlapping `(geo_bbox, time_window)`); **temporal** (action verbs with mutually exclusive deadlines); **severity** (hazard severity buckets with delta ≥1 AIIMS incident level for the same hazard).
+- **F-A9.4** — Wire `conflict_group_id` into AuditRecord (covered by F-A5.1) so trace stitching works without a JOIN.
+- **F-A9.5** — Implement AIIMS escalation chain per Pass 1 Q-P1-03: (1) `conflict_detected` event routes first to Ops Officer; (2) 5-min unack timeout → IC; (3) full-AIIMS-unreachable + degraded-connectivity → Field Coordinator queues for IC review on reconnect (Field Coordinator MUST NOT auto-resolve cross-agent conflicts).
+- **F-A9.6** — Feature flag `feature.multi_agent_conflict_detection.enabled` (Reversible class) — disable reverts to single-agent behaviour; emits `multi_agent_coordination_disabled` audit event.
+
+### F-A10 — Test Coverage Expansion (Cluster A10)
+*Anchored by ADR-19; R3 delivery memo F-DEL-01/F-DEL-08 Windows findings; quality memo F-PERF-02/F-TEST-01 load + cold-start findings; Pass 1 Q-P1-07/-08 + Pass 2 Q-P2-04 fixture canonicalisation.*
+
+- **F-A10.1 — Windows compat (FR-RAG-TEST-01)** — Add Windows runner job to `.github/workflows/ci.yml` mirroring the existing Linux job (per-PR trigger). Add shared `clean_tmp_path` fixture to `tests/conftest.py` (closes F-DEL-01: `gc.collect()` + `time.sleep(0.05)` + retry). Force `PYTHONIOENCODING=utf-8` via env-var (closes F-DEL-08). No new fixture directory; cases live alongside Linux counterparts under `tests/contract/`, `tests/integration/`, `apps/agents/tests/` gated by `@pytest.mark.skipif(sys.platform != "win32")`.
+- **F-A10.2 — 50-agent load (FR-RAG-TEST-02)** — Add `RetrievalSession` Locust task class to existing `tests/load/locustfile.py`; harness MUST exercise 50 distinct `agent_session_id` values (per Pass 1 Q-P1-07) sustained at RPS=50 for 60s with p95 retrieval latency ≤500ms. Triggers: scheduled weekly CI + pre-promotion stage of spec-029 progressive-delivery (NOT per-PR — too long). SHOULD-class quality gate.
+- **F-A10.3 — Golden set consolidation (FR-RAG-TEST-03)** — Single fixture at `tests/fixtures/golden-set-v1.json` (per Pass 1 Q-P1-08). Each entry: `(agent_name, jurisdictions, hazard_type, query_text, expected_chunk_ids, expected_jurisdiction_filters, tags[])`. The `tags[]` field MUST support `agency_disambiguation` for the SC-013 subset (≥20 of 50 entries). Per-PR trigger.
+- **F-A10.4 — Blue-green E2E (FR-RAG-TEST-04)** — New file `tests/e2e/test_blue_green_alias_flip.py`; runs against staging Azure AI Search using ephemeral `corpus-test-*` index names. Asserts: (a) alias flip <60s, (b) post-flip retrieval resolves to new index, (c) previous index accessible 7 days, (d) rollback flips back. Triggers: scheduled nightly (mirrors FR-RAG-IDX-05a 1 AM AU-Eastern cadence) + pre-release stage of spec-029.
+- **F-A10.5 — Test-strategy doc** — Author `docs/testing/spec-036-test-strategy.md` documenting the unit/contract/integration/e2e split with `@pytest.mark.unit|integration|contract|e2e` markers (closes F-DEL-07 finding).
+
+### F-A11 — Observability (Cluster A11)
+*Anchored by R3 architecture memo F-ARCH-15 OTel + delivery memo F-DEL-06 OTel-in-foundry-seam findings; Pass 2 Q-P2-05 emission transport.*
+
+- **F-A11.1 — FR-RAG-OBS-01 retrieval metrics** — Wrap `RetrievalService.retrieve()` in `apps/agents/common/retrieval_service.py` in a dedicated OTel span emitting `retrieval_latency_ms` (histogram, p50/p95/p99), `retrieval_chunk_count` (histogram), `retrieval_error_rate` (counter). Tags: `agent_name`, `jurisdiction`, `hazard_type`. Transport: **existing OTel-to-App-Insights bridge per spec 014 FR-016** (per Pass 2 Q-P2-05) — direct App-Insights SDK calls forbidden in production paths.
+- **F-A11.2 — Foundry inference span** — Wrap the Foundry inference call in a **separate** OTel span emitting `foundry_inference_latency_ms` so retrieval-only (Pass 1 Q-P1-06) and end-to-end (SC-012) SLOs are independently observable. Both spans share the same `correlation_id` for trace stitching (closes F-ARCH-15 + F-DEL-06).
+- **F-A11.3 — FR-RAG-OBS-02 ingest metrics** — `apps/ingest-runner/src/ama_ingest/__main__.py` emits `ingest_duration_seconds` (gauge), `chunks_processed` (counter), `embedding_calls` (counter), `ingest_errors` (counter). Author Grafana dashboard `infra/dashboards/foundry-rag-ingest.json`.
+- **F-A11.4 — FR-RAG-OBS-03 latency alert** — Alert if **retrieval-only** p95 >500ms for >5 min (degraded performance; not a hard failure). Foundry inference governed independently by SC-012. Both reported as separate App Insights metrics.
+- **F-A11.5 — SC dashboard** — Author `infra/bicep/modules/foundry-rag-success-criteria-dashboard.bicep` with Application Insights workbook tiles for SC-001..SC-019 (closes F-QA-03).
+
+### F-A12 — Accessibility (Cluster A12)
+*Anchored by R3 delivery memo F-DEL-05 CitationCard accessibility finding; FR-RAG-UI-01 SHOULD-class WCAG 2.2 AA.*
+
+- **F-A12.1 — `<CitationCard />` keyboard accessibility (closes F-DEL-05)** — Wrap collapsible header in `<button>` element with `onClick`, `aria-expanded`, `aria-controls`. Visible focus ring (`focus-visible:ring-2`). Add Testing-Library tests at `tests/web/src/components/citation/citation-card.test.tsx` asserting (1) button in tab order, (2) Enter toggles, (3) Space toggles.
+- **F-A12.2 — `aria-label` for citations** — `aria-label="Cite: <jurisdiction>/<topic>/handbook.md#page-N"` on each citation row.
+- **F-A12.3 — Screen-reader announcement** — On grounded recommendation render, fire `aria-live="polite"` announcement: "Grounded recommendation with N citations".
+- **F-A12.4 — Automated accessibility lint** — Add `jest-axe` (preferred) OR `pa11y` to the existing UI-test pipeline; gate at CI as a SHOULD (warn-only initially). Trigger: per-PR.
+- **F-A12.5 — SHOULD scope** — FR-RAG-UI-01 is SHOULD, not MUST; not blocking Step 9 acceptance per persona memo guidance.
+
+### Phase F ordering vs existing tasks T142–T150
+
+Existing `tasks.md` numbers run to **T150** (Phase E close, 2026-05-08). Phase F sub-phases land **after** T150 in the dependency-ordered task graph. Recommended task-numbering convention for Phase F (to be generated by `/speckit.tasks`):
+
+| Sub-phase | Task range (recommended) | Predecessors | Notes |
+|---|---|---|---|
+| F-A4 (rego bug-fix) | T151–T155 | T150 | **First** in Phase F because it is a single-PR bug-fix coupled with the amend-loop merge per Pass 2 Q-P2-03. |
+| F-A1 (agency disambiguation) + F-A3 (precedence ranking) | T156–T170 | T155, T040 (B-phase blue-green wrapper) | Co-scheduled — share the same blue-green rebuild pass. |
+| F-A2 (cultural authority) | T171–T180 | T170, T085 (D-phase RAG-OPTOUT lint pattern) | Provision empty container + plumbing only — body authoring + sign-off is HUMAN-IN-LOOP per Assumption A9. |
+| F-A5 (audit shape) + F-A7 (blue-green replay) | T181–T192 | T082 (existing audit-migration script), T040 | F-A5.1 audit-shape and F-A7.2 `retrieval_index_name` are co-emitted. |
+| F-A6 (federal compliance) | T193–T200 | T180, T192 | HUMAN-IN-LOOP federal sign-off gates F-A6.5; codebase-side scaffolding is in scope. |
+| F-A8 (corpus freshness) + F-A10 (test coverage) | T201–T215 | T192 | F-A10.4 blue-green E2E depends on F-A7 atomicity; F-A8.1 nightly schedule depends on existing `corpus-ingest.yml`. |
+| F-A9 (conflict detection) | T216–T222 | T192 (audit shape) | `conflict_group_id` written to AuditRecord (F-A5.1) is the trace-stitching anchor. |
+| F-A11 (observability) | T223–T230 | T192 | OTel spans wrap pre-existing call sites; ordering matters only relative to F-A5 (so spans can include `retrieval_index_name` attribute). |
+| F-A12 (accessibility) | T231–T235 | T223 | Last because UI components consume metrics + audit fields landed earlier. |
+
+**No re-ordering of T001–T150 is required.** All Phase F tasks are appended.
+
+---
+
+## Risk Register Additions (R3 amend-loop)
+
+The original 13-row Risk Register (R1–R13) covers the Phase A–E surface. The amend loop adds 5 new risks (R14–R18) plus refines 2 prior risks (R-update notes added to R7 + R13). Severity uses the same L × I × {L|M|H|Critical} scale.
+
+| # | Risk | L × I | Mitigation | Anchored by | Owner |
+|---|---|---|---|---|---|
+| **R14** | **Cultural-authority registry partial population at go-live** — registry container provisioned but corpus body authoring (Indigenous-language translations, Sacred Site protocols) HUMAN-IN-LOOP per FR-RAG-CA-01..03 + A9; if go-live happens before sign-off, the gate fail-closes for all protected chunks. | M × H | F-A2.6 OPA-blocked flag-flip enforces Locked-on in prod; FR-RAG-CA-05 + SC-014 governance gate; CD verifies sign-offs at deploy time; Constitution Principle I no-silencing preserved (non-protected chunks still retrievable). | R3 sectors-territories memo + R3 sectors-commonwealth memo §A2; Constitution VI-C; OOS-8 | HUMAN-IN-LOOP NEMA + AFAC + Indigenous community owners |
+| **R15** | **Federal compliance attestation slipped past go-live** — Privacy Act + ISM 2024 + PSPF sign-off requires NEMA + AGD + AFP HUMAN-IN-LOOP; mis-sequencing means CD lands the implementation before attestation lands. | M × Critical | F-A6.5 explicit HUMAN-IN-LOOP gate; A9 documented; tasks.md Phase F-A6 carries sign-off acquisition tasks; CD blocking pre-prod release until ISM-2024-mapping.md + PSPF audit endpoint verifications pass. | R3 sectors-commonwealth memo §A6; Constitution NN-3 Privacy Act; A9 | Compliance Auditor + HUMAN-IN-LOOP federal owners |
+| **R16** | **Multi-agent conflict false positives** — reactive, rule-based detector may flag legitimate parallel recommendations as conflicts (e.g., Risk Assessment + Monitoring both flag a hazard with severity-delta=1 by design). | M × M | F-A9.6 Reversible flag (one-click disable falls back to single-agent behaviour); ADR-18 four-class taxonomy is deterministic and pre-agreed; SRE runbook + Ops Officer dual-track resolution; SRE F-SRE-02 false-positive characterisation deferred to post-launch metric review. | R3 quality memo F-SRE-02; ADR-18; Pass 1 Q-P1-03 | Software Developer + Ops Officer persona owner |
+| **R17** | **OTel-to-App-Insights bridge failure mode under canary load** — per Pass 2 Q-P2-05 the existing OTel pipeline is the binding emission path; if the bridge degrades during the per-agent canary, retrieval + foundry latency become unobservable AND the SC-012 30%-end-to-end gate cannot be diagnosed. | M × M | F-A11.1/.2 dual-span wiring; existing no-op fallback in spec-014 OTel pipeline ensures spans degrade gracefully (no production impact); SRE alert on OTel exporter queue depth >threshold; existing `apps/agents/common/lifecycle/heartbeat.py` + `pybreaker_adapter.py` precedents. | R3 architecture memo F-ARCH-15 + delivery memo F-DEL-06; Pass 2 Q-P2-05 | DevOps + SRE |
+| **R18** | **Schema-on-read tolerance leaks legacy nullable fields into ranking pipeline** — Cosmos additive-nullable migration (Pass 2 Q-P2-01) means legacy `AuditRecord` rows have `null` for `retrieval_index_name`, `precedence_tiebreak_applied`, etc.; if ranking or replay code paths assume non-null, replay can fail in production. | L × H | F-A5.1 schema (`audit-record-llm-call.json`) marks every amend-loop field nullable explicitly; type-check seam (Protocol/runtime) accepts None; replay code path tested with legacy + post-migration fixtures (golden-set tagged `legacy_pre_amend`); PR review checklist for null-safety on every amend-loop field consumer. | R3 architecture memo F-ARCH-14; Pass 2 Q-P2-01; A10 | Principal Engineer + Data Engineer |
+
+**R-updates** (deltas to existing risks, NOT replacements):
+
+- **R7 (alias flip cutover timeout)** — gains F-A7.3 explicit 5-minute SLO timer-start condition (Service Bus `index_rollback` event emission per Pass 1 Q-P1-04), F-A7.4 manual-not-automatic Release Manager gate, and Manual operator action class flag taxonomy (Pass 2 Q-P2-08).
+- **R13 (citation rendering accessibility regression)** — gains F-A12.1..5 concrete remediation actions for the F-DEL-05 keyboard-focus-trap finding; jest-axe / pa11y CI integration is the binding gate.
+
+---
+
+## Rollback-Class Taxonomy (Pass 2 Q-P2-08)
+
+All amend-loop feature flags follow the **spec-029 progressive-delivery flag pattern** (FR-008 5-minute rollback via flag flip). Flags partition into three reversibility classes:
+
+| Class | FRs | Flag (`feature.*`) | Disable behaviour | Reversibility | Audit emission on flip |
+|---|---|---|---|---|---|
+| **Locked-on** | FR-RAG-CA-04 (cultural-authority gate); FR-RAG-AG-02 (audit fields once written) | `cultural_authority_gate.enabled` (defaults `true`; flag exists only for `environment=test` chaos runs) | n/a in prod — disabling violates Constitution VI-C and is **policy-blocked by OPA at flag-flip time** (the OPA bug-fix in F-A4 is a prerequisite) | One-way; only re-enable is permitted in prod | `cultural_authority_gate_test_disable_attempt` (denied by OPA) |
+| **Reversible (≤5-min flag flip)** | FR-RAG-COORD-01/02 (conflict detection); FR-RAG-AG-04 precedence ranking; FR-RAG-FRESH-02 staleness alert | `multi_agent_conflict_detection.enabled`; `authority_precedence_ranking.enabled`; `corpus_freshness_alert.enabled` | Disabled → agents revert to single-agent behaviour / SHA-recency-only ranking / suppressed alert; underlying state still recorded in audit log; **never silences the agent** (Constitution Principle I) | Reversible mid-incident per spec 029 FR-008 5-min SLO | `<feature>_disabled` audit event with `flag_name`, `old_value`, `new_value`, `actor_id`, `change_reason` |
+| **Manual operator action (not flag-driven)** | FR-RAG-IDX-09 alias-flip rollback | n/a — alias re-flip is the rollback mechanism itself | Release Manager re-flips alias to old index; 5-min SLO timer per Pass 1 Q-P1-04 (timer starts at `index_rollback` Service Bus event emission) | Reversible (alias-flip path) | `index_rollback` Service Bus event + audit append `{old_index_name, new_index_name, parity_gate_failure_reason, release_manager_id, completed_at}` |
+
+Every flag flip MUST emit `audit.feature_flag_change` carrying `{flag_name, old_value, new_value, actor_id, change_reason}` (Constitution Principle IV full provenance). **No flag flip MAY silence an agent** (Constitution Principle I) — disabling a coordination flag falls back to single-agent behaviour, never to a no-op.
+
+---
+
+## HUMAN-IN-LOOP Escalation Paths (Pass 2 Q-P2-07)
+
+The amend loop introduces three classes of work that the codebase scaffolds but does NOT autonomously complete. Plan-phase deliverables provide the seam; implement-phase tasks track sign-off acquisition; execution is external.
+
+| Path | What the codebase does | What HUMAN-IN-LOOP owns | Anchored by |
+|---|---|---|---|
+| **Cultural-authority corpus body** | Indigenous-language corpus structure + signature gating (`culturalAuthorityRegistry` Cosmos container) + retrieval-side fail-closed gate + audit-event surface | Translation authoring (Arrernte, Tiwi, Warlpiri, Pitjantjatjara, Torres Strait Islander) + Sacred Site protocols + ALT/APY consent + AIATSIS Ethics Committee sign-off | FR-RAG-CA-01..05; OOS-8; A9; ADR-12 |
+| **Federal compliance attestation** | Privacy Act 1988 APP 1/3/5/6/11 surfaces (privacy policy + SAR endpoint + PII anonymisation hook + 7-yr retention); ISM-2024-mapping.md scaffold; PSPF audit-export endpoint; COMDISPLAN ranking interlock | NEMA + AGD + AFP federal sign-off on the compliance attestations + production go-live authorisation | FR-RAG-COMP-01..04; A9; ADR-15 |
+| **Cultural-authority registry population** | Cosmos container provisioned empty + signature-verifier ready | NEMA + AFAC + ≥3 Indigenous community representatives sign-off + initial row population + revocation workflow ownership | FR-RAG-CA-05; SC-014; A9 |
+
+**Plan-phase deferral pattern** (Pass 2 Q-P2-07 + A11):
+- `[NEEDS ADR]` markers in spec.md = **`/speckit.specify`-phase** deliverable (already landed).
+- ADR stub files at `docs/decisions/036-foundry-rag-grounding/12-...md` through `19-...md` = **`/speckit.plan`-phase** deliverable (landed by this amend-loop run).
+- ADR body authoring + HUMAN-IN-LOOP sign-off = **`/speckit.implement`-phase** deliverable (paralleling Phase E ADR-authoring tasks T118–T126).
+
+---
+
+## Tech-stack Additions (R3 amend-loop)
+
+The amend loop adds **3 new dependencies** to the existing stack (no new Azure services). All additions are additive over the Phase A–E baseline.
+
+| Dependency | Purpose | Where landed | Anchored by |
+|---|---|---|---|
+| `opentelemetry-sdk` + `opentelemetry-instrumentation-azure-search-documents` (Python) + `opentelemetry-exporter-azure-monitor` (Python) | Required by F-A11.1/.2 to wrap `RetrievalService.retrieve()` and the Foundry inference call in dedicated OTel spans exported to Application Insights via the existing OTel-to-App-Insights bridge per spec 014 FR-016. **Direct App Insights SDK calls remain forbidden in production paths.** | `apps/agents/common/retrieval_service.py`, `apps/agents/common/foundry_chat_client.py`, `apps/agents/maf_runtime/middleware/otel_middleware.py` | F-A11; Pass 2 Q-P2-05; F-ARCH-15 + F-DEL-06 R3 findings |
+| `jest-axe` (Node, preferred) **OR** `pa11y` (Node, alt) | Required by F-A12.4 to lint WCAG 2.2 AA on `<CitationCard />` + recommendation card in CI. `jest-axe` integrates cleanly with the existing Testing-Library pipeline; `pa11y` is the alternative if jest-axe coverage is insufficient. SHOULD-class gate (warn-only initially). | `apps/web/__tests__/`, `packages/ui/__tests__/` | F-A12; FR-RAG-UI-01; F-DEL-05 R3 finding |
+| `psutil` (Python) | Required by F-A10.2 50-agent Locust harness to probe per-process memory + CPU during the 60-second sustained-load test (validates SC-012 + the SHOULD-class p95 ≤500ms gate without false positives from CI-runner contention). | `tests/load/locustfile.py`, `tests/load/test_workflow_capacity.py`, `tests/load/baselines/` | F-A10; FR-RAG-TEST-02; F-PERF-02 R3 finding |
+
+**No new Azure service families.** `culturalAuthorityRegistry` and `conflictDetectionLog` are net-new Cosmos DB **containers** within the existing Cosmos account — same SKU, same region, same private-endpoint envelope. All other amend-loop changes are within the existing Container Apps + AI Search + Foundry envelope.
+
+---
+
+## Cross-cluster dependencies
+
+Several amend-loop clusters share data structures or sequencing constraints. The matrix below documents the dependencies so `/speckit.tasks` orders T151–T235 correctly.
+
+| From cluster | To cluster | Dependency | Why |
+|---|---|---|---|
+| **A2** (cultural authority) | **A5** (audit shape) | A5 audit field `cultural_authority_check_result` carries the gate decision for replay | Pass 2 Q-P2-02 gate emits its decision into the existing `retrieved_chunks[]` audit shape; needs ADR-14 audit extension landed first |
+| **A1+A3** (agency + precedence) | **A5** (audit shape) | A5 audit field `precedence_tiebreak_applied[]` carries the tie-break trace per Pass 1 Q-P1-02 | SC-011 ≥95% byte-identical replay holds even when ranks tie |
+| **A4** (rego bug-fix) | **All amend-loop merges** | F-A4.2 sequencing — coupled with amend-loop merge in same PR | Splitting it across PRs creates a window where prod could deploy a 2-approver carve-out (Pass 2 Q-P2-03) |
+| **A7** (blue-green atomicity) | **A1+A3** (agency + precedence) | A1+A3 chunk-schema extensions land via blue-green rebuild per Pass 2 Q-P2-01; A7 atomicity protocol must be in place before the rebuild | A1+A3 are required Chunk fields; in-place mutation forbidden per A10 |
+| **A5** (audit shape) | **A7** (blue-green replay) | A5 `retrieval_index_name` field is what A7 audit replay pins to | Field added in F-A5.1 → emitted in F-A5.3 → consumed by F-A7.1 retrieval client |
+| **A5** (audit shape) | **A9** (conflict detection) | A9 `conflict_group_id` is added to AuditRecord in F-A5.1 | A9 detector emits `conflict_group_id` to the same field for trace stitching |
+| **A6** (federal compliance) | **A3** (precedence ranking) | F-A6.4 wires COMDISPLAN activation interlock via the F-A3 precedence-ranking mechanism | Single mechanism, two consumers |
+| **A11** (observability) | **A5** + **A7** | OTel spans include `retrieval_index_name` (A5+A7) as a span attribute | Span attribute key matches audit field name |
+| **A10.4** (blue-green E2E) | **A7** (in-flight atomicity) | E2E test asserts the F-A7.1 query-pinning protocol holds across alias flips | Test cannot be authored until atomicity protocol is in place |
+
+---
+
+## Updated phase ordering relative to existing Phases A–E
+
+The amend loop does NOT re-order Phases A–E. It appends Phase F as a single block landing **after T150**. Within Phase F, the cluster ordering is documented in [§Phase F ordering vs existing tasks T142–T150](#phase-f-ordering-vs-existing-tasks-t142-t150) above.
+
+**Single-PR coupling constraint** (per Pass 2 Q-P2-03): F-A4 (rego bug-fix) MUST land in the same PR as the broader amend-loop merge — splitting it creates a deployment window where prod could deploy a 2-approver carve-out (the very gap FR-RAG-CV-01 closes). All other Phase F sub-phases MAY land in subsequent PRs in dependency-order.
+
+---
+
+## Cross-references — Phase F appendix
+
+- **Spec amend-loop sessions**: [`spec.md`](./spec.md) Sessions 3–5 (R3 review + Pass 1 + Pass 2; 16 Q&A resolutions; 25 new FRs + 12 amendments).
+- **R3 review memos** (planning input): `personas-input/r3-operational.md`, `r3-sectors-{commonwealth,crosssector,eastern,southern-western,territories}.md`, `r3-technical-{architecture,delivery,quality}.md`, `r3-triage.md`.
+- **R3 amend-loop ADR stubs** (created by `/speckit.plan`): `docs/decisions/036-foundry-rag-grounding/12-cultural-authority-gating.md` through `19-test-coverage-windows.md` (8 stubs; body authored in `/speckit.implement`).
+- **Amend-loop contracts** (created/extended by this run): `contracts/cultural-authority-registry.schema.json`, `contracts/conflict_detection.schema.json`, `contracts/foundry-cv.schema.json`, `contracts/staleness_alert.schema.json`, `contracts/chunk-metadata.schema.json` (all NEW); `contracts/audit-record-llm-call.json` (EXTENDED).
+- **Data-model amend-loop additions**: [`data-model.md` §R3 Amend-Loop Additions](./data-model.md#r3-amend-loop-additions).
+- **Research amend-loop ADRs**: [`research.md` §R-17..R-24](./research.md).
+- **Quickstart amend-loop steps**: [`quickstart.md` §12..§15](./quickstart.md).
+
+*End of Phase F appendix.*

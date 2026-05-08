@@ -314,3 +314,74 @@ Min-fusion (not weighted average) so a low score on any dimension caps confidenc
 - Specific KQL queries for monthly compliance audit (Compliance-memo audit query templates).
 
 **Status: ready for Phase 1 design.** No `NEEDS CLARIFICATION` remain; all open architecture questions from the three persona memos are either decided here or explicitly scoped to `tasks.md`.
+
+---
+
+## R3 Amend-Loop Additions (R-17 .. R-24)
+
+> **Provenance**: Round 3 persona review (Sessions 3–5 in `spec.md`) introduced 12 amendment clusters; eight of them required net-new architecture decisions, captured here as R-17 through R-24 anchored to ADR stubs `12-cultural-authority-gating.md` through `19-test-coverage-windows.md` (created by `/speckit.plan`). Stub bodies are authored in `/speckit.implement` per Pass 2 A11 ADR-lifecycle convention. Each subsection below summarises **Decision / Rationale / Alternatives considered**, mirroring the R-01..R-16 format above.
+
+### R-17 — Cultural-Authority Gating (anchored ADR-12; Cluster A2)
+
+- **Decision**: Place the cultural-authority gate **post-retrieval, in-process** in `apps/agents/common/retrieval_service.py`, between the AI Search round-trip and the Foundry inference call. Gate suppresses chunks whose `cultural_classification != public` unless `culturalAuthorityRegistry` returns a verified, signed, in-scope, unexpired entry for the operator. Fail-closed default for protected chunks on registry-unreachable per Pass 1 Q-P1-01; non-protected chunks remain retrievable so the agent does not silence (Constitution Principle I).
+- **Rationale**: (a) Pre-index-time filtering would create separate indices per operator-cohort, exploding cost and breaking SC-011 replay parity. (b) Foundry-side filtering would leak protected text into the LLM context window, violating Constitution VI-C even before render. (c) UI-layer filtering is unverifiable (Constitution Principle IV requires server-side enforcement). Post-retrieval, pre-inference is the only seam that preserves Principle I (no silencing for non-protected paths) AND Principle IV (server-side enforced + audit-emitted) AND VI-C (no protected-chunk exposure).
+- **Alternatives considered**: Pre-index filtering (rejected: combinatorial cost, replay parity broken); Foundry-side allow-list (rejected: leaks chunk text); UI-layer hide (rejected: unverifiable + Principle IV violation).
+
+### R-18 — Authority Precedence Ranking (anchored ADR-13; Clusters A1+A3)
+
+- **Decision**: Rank retrieved chunks by `precedence_rank` ascending (1=highest), then break ties deterministically by `recency → licence_mode → embedding_model_id → chunk_id` (lex) per Pass 1 Q-P1-02. National-institution chunks default to `precedence_rank=1` for ACT queries; COMDISPLAN activation elevates `authority_level=commonwealth` chunks to `precedence_rank=1` for the activation duration. Tie-breaker trace recorded as `precedence_tiebreak_applied[]` in AuditRecord.
+- **Rationale**: Deterministic ordering is required for SC-011 ≥95% byte-identical replay even when ranks tie. Recency-first tie-break captures the most-recently-published doctrine; licence_mode prefers full-text over metadata-only because full-text is more authoritative; embedding_model_id and chunk_id provide stable secondary/tertiary anchors. Sectors-territories memo + sectors-commonwealth memo both flagged ACT-specific national-institution precedence as essential for Parliament House, Defence estates, embassies queries.
+- **Alternatives considered**: Pure-recency tie-break (rejected: licence_mode ambiguity); RRF (rescheduled to post-launch A/B test per Architecture-memo §AI/ML Engineer); operator-configurable order (rejected: breaks SC-011 determinism).
+
+### R-19 — Approval Workflow Audit Schema (anchored ADR-14; Cluster A5)
+
+- **Decision**: Extend `AuditRecord` with eight nullable fields (`operator_override_rationale`, `approval_workflow_state`, `approval_authority`, `downgrade_justification`, `retrieval_index_name`, `field_coordinator_offline_decision`, `conflict_group_id`, `precedence_tiebreak_applied[]`) via additive-nullable schema-on-read migration. Schema invariants in `contracts/audit-record-llm-call.json` enforce: rag_used → retrieval_index_name; approval_workflow_state ∈ {approved,rejected} → approval_authority; field_coordinator_offline_decision == true → approval_workflow_state == 'pending'.
+- **Rationale**: Cosmos schema-flexible reader tolerates missing fields on legacy rows, eliminating any migration window. Schema-side `if/then` invariants enforce required-when-applicable shape so post-amend-loop emit paths cannot regress. Field-Coordinator offline-decision boundary closes Pass 2 Q-P2-04 reconnect-time IC review gap.
+- **Alternatives considered**: Replay-window migration (rejected: no operational benefit; Cosmos already tolerates missing fields); Single nullable `approval_metadata` JSON blob (rejected: opaque to OPA + audit-replay schema validation); Per-event-type discriminated subtypes (rejected: combinatorial — would require ≥30 distinct shapes).
+
+### R-20 — Federal Compliance Mapping (anchored ADR-15; Cluster A6)
+
+- **Decision**: Author `docs/compliance/ISM-2024-mapping.md` referencing ISM-0468 (TLS 1.2+) and ISM-1552 (audit-log cryptographic integrity). Implement Privacy Act 1988 APP 1/3/5/6/11 surfaces via `GET /api/audit/sar?subject=...` SAR endpoint + PII anonymisation hook + 7-yr retention reuse from spec 030. Implement PSPF audit export at `GET /api/audit/export?format=pspf&...`. Wire COMDISPLAN ranking interlock through F-A3 precedence-ranking mechanism. Federal sign-off (NEMA + AGD + AFP + AIATSIS) is HUMAN-IN-LOOP per Assumption A9.
+- **Rationale**: ISM 2024 is the binding federal control set for cloud-hosted Australian-Government-data systems; ISM-0468 + ISM-1552 are the two controls most directly affected by Foundry + AI Search adoption (transport security + audit integrity). Privacy Act APP surfaces (1/3/5/6/11) are the binding subset for PII handling in incident-response data. PSPF audit-export reuses post-F-A5 audit shape without further schema change. COMDISPLAN routing through the precedence-ranking mechanism preserves single-mechanism design.
+- **Alternatives considered**: Standalone compliance microservice (rejected: explodes ops surface + replicates audit shape); Manual quarterly attestation only (rejected: violates FR-RAG-COMP-01 continuous-attestation requirement); Per-jurisdiction Privacy Act variants (rejected: federal Privacy Act is the binding floor; state variants are additive but not required for go-live).
+
+### R-21 — Blue-Green Atomicity & Rollback (anchored ADR-16; Cluster A7)
+
+- **Decision**: Resolve the `corpus-search` alias to a concrete index name (e.g., `corpus-v3`) at query start; pin that name for the entire query lifecycle (SSE multi-turn sessions pin once at session start). Wire `retrieval_index_name` into every `RetrievalResult` and AuditRecord for replay parity. Rollback is **manual** (Release Manager approval) per Pass 2 Q-P2-08 Manual operator action class; 5-minute SLO timer starts at the `index_rollback` Service Bus event emission per Pass 1 Q-P1-04. Retain previous index 7 days post-flip per FR-RAG-IDX-04.
+- **Rationale**: Auto-rollback on parity-gate failure rejected because spec 029 already establishes Release-Manager-gated rollback as the golden path; auto-rollback would create a circular dependency with the parity gate itself (false positive in parity gate → flap). Pinning the concrete index name at query start is the only way to guarantee SC-011 replay parity across alias flips — replay must hit the exact index the original query hit. 5-min SLO matches spec 029 FR-008.
+- **Alternatives considered**: Auto-rollback on parity-gate failure (rejected: flap risk + breaks Release Manager governance); Re-resolve alias mid-query (rejected: replay parity broken); Per-tenant index aliases (rejected: combinatorial cost; orthogonal to atomicity problem).
+
+### R-22 — Corpus Freshness (anchored ADR-17; Cluster A8)
+
+- **Decision**: Cron schedule `"0 14 * * *"` UTC (= 0100 AEST / 0000 AEDT) for nightly drift detection. Pipeline checks every `source.json.sha256` for drift; if drift → re-run ingest + alias flip per ADR-16; if no drift → log `no_drift_detected` and exit cheaply. UI freshness indicator in `<CitationCard />` derived from `corpus_build_sha.generated_at` (yellow >7d, red >14d). Alert at **global corpus index** scope per Pass 1 Q-P1-05 (NOT per-jurisdiction).
+- **Rationale**: 1 AM AU-Eastern cadence aligns with existing spec-026 reporter cron; minimises peak-hour resource contention. Global-scope alert (not per-jurisdiction) avoids alert storms when an upstream-state pipeline stalls; per-jurisdiction telemetry is still emitted but the SRE on-call page fires once per stale window. UI yellow/red thresholds match spec 029 progressive-delivery freshness convention.
+- **Alternatives considered**: Hourly cron (rejected: 24× ingest cost, no operational benefit); Per-jurisdiction alerting (rejected: alert-storm risk; SRE memo F-SRE-01 explicitly recommended global scope); Push-based corpus updates from upstream agencies (rejected: requires reciprocal API contracts not currently in scope per OOS-7).
+
+### R-23 — Multi-Agent Conflict Detection (anchored ADR-18; Cluster A9)
+
+- **Decision**: Reactive, post-return, deterministic, rule-based detector at the recommendation-aggregation layer (NOT inside any individual agent and NOT real-time-streaming) per Pass 2 Q-P2-06. Four conflict classes: **resource**, **spatial**, **temporal**, **severity** (≥1 AIIMS level delta). AIIMS escalation chain per Pass 1 Q-P1-03: Ops Officer → 5-min unack → IC → Field Coordinator queue if full-AIIMS-unreachable.
+- **Rationale**: Pre-emptive divergence detection rejected because (a) it requires inspecting agent intermediate state which breaks Constitution Principle IV deterministic replay, and (b) it breaks spec 033 MAF agent-isolation model (each agent runs in its own isolated runtime). Post-return reactive detection preserves both invariants. Rule-based four-class taxonomy is deterministic and pre-agreed (no LLM-judge for conflict detection itself, mirroring ADR-04 in spec 030 ground-truth confidence). 5-min Ops Officer unack timeout matches existing SRE on-call SLO.
+- **Alternatives considered**: Pre-emptive monitoring (rejected: agent-isolation + replay-determinism violations); LLM-judge for conflict classification (rejected: non-determinism precluded by Principle IV); Per-pair pessimistic locking (rejected: latency penalty + scale ceiling).
+
+### R-24 — Test Coverage Expansion (anchored ADR-19; Cluster A10)
+
+- **Decision**: Four new test surfaces — (1) Windows compat job in `.github/workflows/ci.yml` mirroring Linux + shared `clean_tmp_path` fixture + `PYTHONIOENCODING=utf-8` (closes F-DEL-01 + F-DEL-08); (2) 50-agent Locust harness (per Pass 1 Q-P1-07 50 distinct `agent_session_id` values, 60s sustained, p95 ≤500ms SHOULD-class; weekly + pre-promotion triggers); (3) Single golden-set fixture at `tests/fixtures/golden-set-v1.json` per Pass 1 Q-P1-08; (4) Blue-green E2E at `tests/e2e/test_blue_green_alias_flip.py` (nightly + pre-release).
+- **Rationale**: Single golden-set fixture (vs. per-agent) avoids drift between agents on shared queries — Pass 1 Q-P1-08 explicitly chose this. 50-agent load matches the SC-012 50-concurrent-session SLO ceiling without overshoot. Windows compat closes the persistent F-DEL-01 finding (open since R1) by introducing the shared fixture. Blue-green E2E asserts the F-A7.1 query-pinning protocol holds across alias flips.
+- **Alternatives considered**: Per-agent golden sets (rejected: drift risk + maintenance multiplier); 100-agent load (rejected: exceeds SC-012 ceiling, false negatives from CI-runner contention); Per-PR blue-green E2E (rejected: 2-3 min runtime is too expensive for per-PR; nightly + pre-release is the right cadence).
+
+### Updated Status table
+
+Append to the original Status table (lines 289–308):
+
+| Decision | Status |
+|---|---|
+| R-17 Cultural-authority gating | **DECIDED → ADR-12 stub ready for /speckit.implement body** |
+| R-18 Authority precedence ranking | **DECIDED → ADR-13 stub ready for /speckit.implement body** |
+| R-19 Approval workflow audit schema | **DECIDED → ADR-14 stub ready for /speckit.implement body** |
+| R-20 Federal compliance mapping | **DECIDED (HUMAN-IN-LOOP sign-off pending) → ADR-15 stub ready for /speckit.implement body** |
+| R-21 Blue-green atomicity & rollback | **DECIDED → ADR-16 stub ready for /speckit.implement body** |
+| R-22 Corpus freshness | **DECIDED → ADR-17 stub ready for /speckit.implement body** |
+| R-23 Multi-agent conflict detection | **DECIDED → ADR-18 stub ready for /speckit.implement body** |
+| R-24 Test coverage expansion | **DECIDED → ADR-19 stub ready for /speckit.implement body** |
+
+**Status: ready for `/speckit.tasks` re-run.** R-17 through R-24 are all DECIDED (with HUMAN-IN-LOOP markers on R-20 + ADR-15); ADR stubs landed by `/speckit.plan` per Pass 2 A11; bodies will be authored by `/speckit.implement` paralleling Phase E ADR-authoring tasks T118–T126.

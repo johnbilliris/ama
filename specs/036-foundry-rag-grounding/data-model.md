@@ -405,4 +405,102 @@ EquivalenceTestResult (1) ─── gates ▶ per-agent Foundry canary flip (FR-
 
 ---
 
+---
+
+## R3 Amend-Loop Additions
+
+> **Provenance**: Round 3 persona review (Sessions 3–5 in `spec.md`) added 25 new FRs across 12 amendment clusters. This section appends the data-model implications: new fields on existing entities, two net-new Cosmos containers, and the migration strategy. Every amend-loop field is marked **bold-italic** (***name***) for visual diff against the original entity tables. Migration strategy per **Pass 2 Q-P2-01**: chunks via blue-green rebuild (no in-place mutation per A10); audit records via additive-nullable schema-on-read (in-place, tolerated by Cosmos schema-flexible reader); two new Cosmos containers provisioned net-new.
+
+### Updated entity catalogue
+
+The following two rows are appended to the entity-catalogue table (originally at lines 12–23):
+
+| Entity | Storage | Mutability | Identifier | Persistence horizon |
+|---|---|---|---|---|
+| **CulturalAuthorityRegistryEntry** *(new — Cluster A2)* | Cosmos DB container `culturalAuthorityRegistry` (Australia East, NN-2 + FR-RAG-CV-04) | Append-only with revocation marker; never hard-deleted | `operator_id` (PK) + `granted_at` (sort key, RFC 3339 UTC) | 7 years (Privacy Act + audit retention parity) |
+| **ConflictDetectionLogEntry** *(new — Cluster A9)* | Cosmos DB container `conflictDetectionLog` (Australia East, NN-2) | Append-only | `conflict_group_id` (PK, UUID v7) | 7 years (audit-replay parity) |
+
+### Chunk — amend-loop field extensions (Cluster A1+A2+A3+A7)
+
+Append to the **Chunk** entity (originally at lines 55–94 of this file). Field discriminator names match `contracts/chunk-metadata.schema.json`. All new fields are required on every `corpus-v{N+1}` document; legacy `corpus-v{N}` documents retain absence per the blue-green-rebuild migration strategy (Pass 2 Q-P2-01 + Assumption A10).
+
+| Field | Type | Required | Anchored by | Notes |
+|---|---|---|---|---|
+| ***agency*** | string | Yes (Cluster A1) | FR-RAG-AG-04 ext | Source-of-truth agency name (`NSW-RFS`, `FRNSW`, `DFES-WA`, `SAMFS`, `MFB-VIC`, `CFA-VIC`, `QFES`, `TFS-TAS`, `NTPFES`, `ACT-ESA`, `NEMA`, `AFP`, `ADF`, ...). Enum maintained in `contracts/chunk-metadata.schema.json`. |
+| ***agency_role*** | string | Yes (Cluster A1) | FR-RAG-AG-04 ext | Functional discriminator: `urban-fire | rural-fire | ses | combined | police | ambulance | marine-rescue | national-security | other`. Resolves multi-agency ambiguity per A1 finding. |
+| ***authority_level*** | string | Yes (Cluster A3) | FR-RAG-AC-01 | `state-territory | commonwealth | national-institution`. Drives precedence ranking per ADR-13. |
+| ***precedence_rank*** | integer | Yes (Cluster A3) | FR-RAG-AC-01 | 1=highest, 3=lowest. Default = 2 (state-territory); 1 reserved for national-institution + COMDISPLAN-active commonwealth doctrine. |
+| ***precedence_tiebreak_applied*** | string[] (audit-side trace; **NOT** stored on Chunk; emitted to AuditRecord on each retrieval) | n/a (chunk-side) | Pass 1 Q-P1-02 | Listed here for cross-reference with [AuditRecord §amend-loop fields](#auditrecord--amend-loop-field-extensions-cluster-a5a7a9). Tie-break order: `recency → licence_mode → embedding_model_id → chunk_id` (lex). |
+| ***cultural_classification*** | string | Yes (Cluster A2) | FR-RAG-CA-01..03 | `public | indigenous-language | sacred-site | land-governance`. Default `public`. Non-default values trigger the cultural-authority gate per ADR-12. |
+| ***cultural_authority_required*** | boolean | Yes (Cluster A2) | FR-RAG-CA-04 | `true` whenever `cultural_classification != public`. Gate evaluates this flag; fail-closed on unverified-or-unreachable. |
+| ***retrieval_index_name*** | string (**NOT** stored on Chunk; resolved per-query and emitted to AuditRecord) | n/a (chunk-side) | FR-RAG-IDX-04a / ADR-16 | Listed here for cross-reference with AuditRecord. Concrete AI Search index name (e.g., `corpus-v3`, NOT the `corpus-search` alias). Pinned for the entire query lifecycle. |
+
+**Migration**: blue-green rebuild only (A10 + Pass 2 Q-P2-01). Legacy `corpus-v{N}` is retained 7 days post-flip per FR-RAG-IDX-04 + ADR-16; once retention window expires, only `corpus-v{N+1}` (with the new fields) remains queryable.
+
+### AuditRecord — amend-loop field extensions (Cluster A5+A7+A9)
+
+Append to the **AuditRecord** entity (originally at lines 167–212 of this file). Field discriminator names match `contracts/audit-record-llm-call.json`. All new fields are **additive-nullable** so legacy rows (pre-amend-loop) replay correctly; new rows MUST carry the field whenever the call-site shape applies (the schema's `if/then` invariants enforce this — see Invariants 6–8 in `contracts/audit-record-llm-call.json`).
+
+| Field | Type | Required | Anchored by | Notes |
+|---|---|---|---|---|
+| ***operator_override_rationale*** | string?  (≤1024 chars) | Required when operator modifies/rejects the LLM recommendation; nullable otherwise and on legacy rows | FR-RAG-AG-02 ext / ADR-14 | Captured in operator-action emit path; null otherwise. |
+| ***approval_workflow_state*** | enum? `pending | approved | rejected` | Required on every public-warning event; nullable otherwise and on legacy rows | FR-RAG-LS-03 / ADR-14 | Tracks PIO/IC approval workflow per Cluster A5. |
+| ***approval_authority*** | string? (≤256 chars) | Required iff `approval_workflow_state ∈ {approved, rejected}`; nullable otherwise | FR-RAG-LS-03 / ADR-14 | Entra ID of the IC/PIO who authored the approval/rejection decision. |
+| ***downgrade_justification*** | string? (≤1024 chars) | Required when IC downgrades incident level; nullable otherwise and on legacy rows | FR-RAG-LS-02 ext / ADR-14 | Captured at AIIMS-level-change emit path. |
+| ***retrieval_index_name*** | string? (concrete index name) | Required iff `rag_used == true`; nullable otherwise and on legacy rows | FR-RAG-IDX-04a / ADR-16 | Concrete AI Search index name (NOT the alias). Pinned per-query; replay-time anchor for blue-green atomicity. |
+| ***field_coordinator_offline_decision*** | boolean? | Required on Field-Coordinator offline path; nullable otherwise | FR-RAG-LS-02 ext / ADR-14 | When `true`, MUST coexist with `approval_workflow_state == "pending"` on emission so reconnect-time IC review is enforced (Invariant 8 in audit-record-llm-call.json). |
+| ***conflict_group_id*** | UUID v7? | Required iff multi-agent conflict detected for this AuditRecord; nullable otherwise | FR-RAG-COORD-01 / ADR-18 | Foreign key to `conflictDetectionLog.conflict_group_id`. Trace-stitching anchor without JOIN. |
+| ***precedence_tiebreak_applied*** | string[]? | Required iff retrieval ranking applied any tie-breaker; empty array when no tie occurred; nullable on legacy rows | FR-RAG-AC-01 / Pass 1 Q-P1-02 | Trace records which tie-breakers fired so SC-011 ≥95% byte-identical replay holds even across rank ties. |
+
+**Migration**: additive-nullable in-place via existing `infra/scripts/migrate-audit-record-036.ps1` (Phase D2 task **T082**); the script gains a Phase F entry-point that adds these 8 fields with nullable defaults. Cosmos schema-on-read tolerates missing fields on legacy rows so no downtime is required.
+
+### CulturalAuthorityRegistryEntry — Cosmos container (Cluster A2 / NEW)
+
+Cosmos DB container `culturalAuthorityRegistry` in Australia East. Schema authority: [`contracts/cultural-authority-registry.schema.json`](./contracts/cultural-authority-registry.schema.json). Provisioned via `infra/modules/cosmos-cultural-authority.bicep` (NEW); container is provisioned **empty** — population is HUMAN-IN-LOOP per FR-RAG-CA-05 + Assumption A9.
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `operator_id` | string (Entra ID GUID) | Yes — **PK** | Operator whose cultural-authority delegation is recorded. |
+| `land_council_id` | string | Yes | Identity of the granting Aboriginal Land Council / Torres Strait Islander Authority. |
+| `granted_at` | RFC 3339 UTC | Yes — **sort key** | When delegation began. |
+| `expires_at` | RFC 3339 UTC | Yes | Hard expiry; gate fail-closes after this timestamp regardless of revocation_reason. |
+| `granted_by_authority` | string | Yes | Free-text identity of the issuing authority (Land Council representative + AIATSIS observer co-signature). |
+| `scope` | enum `cultural_consultation | sacred_site_advisory | language_translation | ceremonial_protocol_advisory | full_cultural_authority` | Yes | Scope of delegation. The retrieval-side gate verifies `chunk.cultural_classification` is permitted by `scope` before unsuppressing. |
+| `signature` | object `{algorithm, value, certificate_chain[]}` | Yes | Detached signature from the granting authority. Mirrors FR-RAG-LS-02 dual-sig pattern; verified at gate-evaluation time. |
+| `revocation_reason` | enum?  `manually_revoked | superseded | authority_terminated | scope_change` | No (null for active rows) | Set when delegation is revoked before `expires_at`. Container is append-only with revocation marker — no hard-delete. |
+
+**Read path**: gate at `apps/agents/common/retrieval_service.py` (post-retrieval, in-process per Pass 2 Q-P2-02) does a single point-read on `(operator_id, granted_at)` per query. Caching: in-process LRU with 5-minute TTL; on miss + Cosmos unavailable, gate fail-closes for protected chunks and emits `cultural_authority_registry_unavailable` audit event per Pass 1 Q-P1-01.
+
+**Write path**: ingestion is HUMAN-IN-LOOP (NEMA + AFAC + Indigenous community sign-off per FR-RAG-CA-05); no auto-write code path exists. SC-014 gates CD on signed-off rows being present.
+
+### ConflictDetectionLogEntry — Cosmos container (Cluster A9 / NEW)
+
+Cosmos DB container `conflictDetectionLog` in Australia East. Schema authority: [`contracts/conflict_detection.schema.json`](./contracts/conflict_detection.schema.json). Provisioned via `infra/modules/cosmos-conflict-detection.bicep` (NEW). Reactive, post-return, deterministic, rule-based detector per Pass 2 Q-P2-06 (NOT pre-emptive — pre-emptive divergence detection rejected because it breaks Constitution Principle IV deterministic replay + spec 033 MAF agent-isolation model).
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `conflict_group_id` | UUID v7 | Yes — **PK** | Sortable by emission time; FK target for AuditRecord.conflict_group_id. |
+| `detected_at` | RFC 3339 UTC | Yes | Detector run timestamp. |
+| `agent_recommendations[]` | object[] (≥2) | Yes | Each: `{agent_session_id, agent_name, audit_record_id, recommendation_summary, hazard_id, resource_id?, geo_bbox?, time_window?, severity_aiims_level?}`. ≥2 entries — singletons are not conflicts. |
+| `conflict_class` | enum `resource | spatial | temporal | severity` | Yes | One of four detector classes per ADR-18. |
+| `conflict_evidence` | object | Yes | Class-specific evidence: resource → `{resource_id, overlap_window}`; spatial → `{geo_bbox_intersection, time_window}`; temporal → `{action_verb, deadline_a, deadline_b}`; severity → `{hazard_id, severity_level_a, severity_level_b, delta}`. |
+| `escalation_state` | enum `routed_ops_officer | escalated_ic | queued_field_coordinator_offline | resolved` | Yes | AIIMS escalation chain per Pass 1 Q-P1-03. Initial state always `routed_ops_officer`. |
+| `escalation_history[]` | object[] | Yes (≥1) | Append-only state-transition log: `{state, transitioned_at, actor_id?, reason}`. |
+| `resolution` | object? `{resolved_at, resolved_by_actor_id, resolution_decision, resolution_audit_record_id}` | No (null until resolved) | Set when `escalation_state == resolved`. |
+
+**Read path**: SRE runbook query for unack-conflict count per 5-minute window; UI surface in Sim Control "Conflicts" panel for Ops Officer + IC personas.
+
+**Write path**: detector at `apps/api/app/services/conflict_detection.py` (NEW) writes an entry per detected conflict pair/set. Detector runs in the recommendation-aggregation layer (NOT inside any individual agent and NOT real-time-streaming, per Pass 2 Q-P2-06).
+
+### Migration strategy summary (Pass 2 Q-P2-01)
+
+| Entity | Migration approach | Rationale | Tooling |
+|---|---|---|---|
+| **Chunk** (Cluster A1+A2+A3+A7 fields) | Blue-green rebuild only — new fields populated from `source.json` per-entry metadata at ingest time; legacy `corpus-v{N}` retained 7 days post-flip | Assumption A10 forbids in-place mutation; preserves SC-011 byte-identical replay parity | Existing `apps/ingest-runner` + ADR-16 atomicity protocol |
+| **AuditRecord** (Cluster A5+A7+A9 fields) | Additive-nullable schema-on-read (in-place) | Cosmos tolerates missing fields on legacy rows; no replay-window required; legacy-row replay returns nulls which are explicitly tolerated by the schema | Existing `infra/scripts/migrate-audit-record-036.ps1` (Phase D2 task **T082**) gains a Phase F entry-point |
+| **CulturalAuthorityRegistryEntry** (Cluster A2 / NEW container) | Net-new container provisioned empty; population HUMAN-IN-LOOP | FR-RAG-CA-05 + A9 — no auto-population code path | `infra/modules/cosmos-cultural-authority.bicep` (NEW) |
+| **ConflictDetectionLogEntry** (Cluster A9 / NEW container) | Net-new container; auto-populated by detector | Reactive post-return write path | `infra/modules/cosmos-conflict-detection.bicep` (NEW) |
+
+---
+
 *End of data-model.md — see [`contracts/`](./contracts/) for the wire shapes.*

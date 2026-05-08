@@ -105,3 +105,53 @@ All items in this checklist were resolved during the Phase E final docs sweep (T
 Items with residual scope (none identified in this pass) would have been flagged inline with `[ ]` + a tracking-issue link rather than auto-ticked.
 
 For the cross-artefact consistency analysis that closes T150, see [`analyze-report.md`](../analyze-report.md).
+
+---
+
+## Post-R3-Amendment Compliance Items (Sessions 3 + 4 + 5)
+
+> **Added**: 2026-05-09 — these items extend the original CHK114–CHK165 constitution / residency / opt-out / index-lifecycle / offline-cache coverage to validate three R3 amend-loop clusters whose subject matter remains rooted in Constitutional / runtime-integrity invariants: **Cluster A4** (OPA carve-out quorum fix), **Cluster A7** (blue-green alias atomicity + 5-min rollback SLO), **Cluster A8** (corpus freshness scheduled drift detection + UI/alert thresholds).
+> Items continue numbering from `migration.md` post-R3 extension (CHK319).
+> Domain checklists for new families that did NOT exist pre-amend live in their own files: `cultural-authority-protocols.md` (Cluster A2), `federal-compliance-mapping.md` (Cluster A6), `audit-and-approval-workflow.md` (Cluster A5), `multi-agent-coordination.md` (Cluster A9), `test-coverage-windows.md` (Cluster A10), `observability.md` (Cluster A11), `accessibility.md` (Cluster A12).
+
+## OPA Carve-out Quorum (R3 Cluster A4)
+
+> **Authority**: User input bullet 1 carve-out registry tightening; FR-RAG-CV-01 environment-aware quorum; SC-016 contract-test cases; Pass 2 Q-P2-03 same-PR coupling.
+
+- [ ] CHK320 Is the **prod ≥3 / dev ≥2** approver-quorum rule defined inside FR-RAG-CV-01 itself (not only inside SC-016 or Pass 2 Q-P2-03 narrative)? [Clarity, Spec §FR-RAG-CV-01]
+- [ ] CHK321 Is the `input.environment` discriminator's enum bounded — does the rego accept only `prod`, `dev`, `staging`, or is an unspecified environment value silently treated as one of those classes? [Coverage, Spec §FR-RAG-CV-01]
+- [ ] CHK322 Is the rego file path (`infra/policy/rego/foundry_carveout.rego` lines 29 + 60) cited in FR-RAG-CV-01 so reviewers can locate the existing rule that the amend-loop tightens? [Traceability, Spec §FR-RAG-CV-01]
+- [ ] CHK323 Is the contract-test path (`tests/contract/test_foundry_carveout.py`) explicit and consistent with the sibling test convention (`tests/contract/test_carveout_registry_entry.py`)? [Consistency, Spec §FR-RAG-CV-01 / §SC-016]
+- [ ] CHK324 Is the **same-PR-coupling** requirement (rego tightening MUST land atomically with the FR-RAG-CV-01 amend-loop merge — no bifurcated rollout window) testable from the PR diff (single PR contains both rego + spec changes)? [Acceptance Criteria, Spec §FR-RAG-CV-01 / §Pass 2 Q-P2-03]
+- [ ] CHK325 Are the three SC-016 contract-test cases (2-approver dev → exit 0; 2-approver prod → exit 1; 3-approver prod → exit 0) consistent between FR-RAG-CV-01 prose and SC-016 enumeration (same exit codes, same approver counts, same environment values)? [Consistency, Spec §FR-RAG-CV-01 vs §SC-016]
+
+## Blue-Green Alias Atomicity (R3 Cluster A7)
+
+> **Authority**: User input bullet 6 blue-green index lifecycle; FR-RAG-IDX-04a (in-flight query atomicity) + FR-RAG-IDX-09 (5-min rollback SLO); SC-019 acceptance shape; Pass 1 Q-P1-04 SLO timer start.
+
+- [ ] CHK326 Is the **in-flight query atomicity rule** (resolve alias to concrete index name at query start; no mid-query alias re-resolution) stated as an enforceable contract in FR-RAG-IDX-04a — not as guidance? [Clarity, Spec §FR-RAG-IDX-04a]
+- [ ] CHK327 Is the `retrieval_index_name` audit field tied back to the AuditRecord schema in FR-RAG-AG-02 with consistent typing (string, non-null when retrieval ran), and is the field explicitly listed in FR-RAG-IDX-04a's "Audit log MUST record" clause? [Consistency, Spec §FR-RAG-IDX-04a vs §FR-RAG-AG-02]
+- [ ] CHK328 Is the **5-minute rollback SLO timer's start trigger** ("emission of the `index_rollback` Service Bus event") tied to a measurable observation point — not a vague "at parity gate failure"? [Measurability, Spec §FR-RAG-IDX-09]
+- [ ] CHK329 Are the four parity-gate failure conditions (decision equivalence <95%, retrieval quality delta >5%, ingest error >1%) each measurable with explicit threshold + measurement window + sample-size? [Measurability, Spec §FR-RAG-IDX-09]
+- [ ] CHK330 Is the rollback record shape (`old_index_name`, `new_index_name`, `parity_gate_failure_reason`, `release_manager_id`, `completed_at`) consistent with the AuditRecord conventions per CHK143's audit-shape stability principle? [Consistency, Spec §FR-RAG-IDX-09 vs §FR-RAG-AG-02]
+- [ ] CHK331 Is the **manual-rollback-decision** requirement (Release Manager approval; not automatic) consistent with Assumption A12's "Manual operator action" reversibility class? [Consistency, Spec §FR-RAG-IDX-09 vs §A12]
+- [ ] CHK332 Is **SC-019**'s "concurrent retrieval queries spanning blue-green alias flip return consistent index name" tied to FR-RAG-IDX-04a's atomicity rule (so SC-019 can be executed against the FR-RAG-IDX-04a contract)? [Traceability, Spec §SC-019 vs §FR-RAG-IDX-04a]
+
+## Corpus Freshness (R3 Cluster A8)
+
+> **Authority**: FR-RAG-IDX-05a (nightly schedule), FR-RAG-FRESH-01 (UI freshness indicator), FR-RAG-FRESH-02 (staleness alert); Pass 1 Q-P1-05 (per-index alert scope); Pass 2 Q-P2-08 (Reversible flag class).
+
+- [ ] CHK333 Is the **nightly schedule (1 AM AU-Eastern)** for FR-RAG-IDX-05a tied to a specific implementation surface (Service Bus timer trigger? `azd` cron? GitHub Actions schedule?) so deploy-time inspection can verify it? [Measurability, Spec §FR-RAG-IDX-05a]
+- [ ] CHK334 Are the two drift signals (any `source.json.sha256` mismatch; any new entry added) defined exhaustively — or could an entry **deletion** silently bypass detection (i.e., is a removed entry caught)? [Coverage, Gap, Spec §FR-RAG-IDX-05a]
+- [ ] CHK335 Is the `no_drift_detected` log shape consistent with the audit conventions (timestamp, prior `corpus_build_sha`, scan duration) so post-mortem can prove the scheduler ran? [Clarity, Spec §FR-RAG-IDX-05a]
+- [ ] CHK336 Are the FR-RAG-FRESH-01 UI thresholds (yellow >7d, red >14d) consistent with FR-RAG-FRESH-02 alert threshold (>14d AND no ingest in 48h) — i.e., does the UI red-state trigger before, after, or coincident with the on-call alert? [Consistency, Spec §FR-RAG-FRESH-01 vs §FR-RAG-FRESH-02]
+- [ ] CHK337 Is the **per-global-index** (NOT per-jurisdiction) alert scope justified inside FR-RAG-FRESH-02 — pointing back to FR-RAG-IDX-08 single-index economics + Assumption A1 + OOS-3 — so a future contributor cannot silently widen to per-partition alerts? [Traceability, Spec §FR-RAG-FRESH-02 vs §FR-RAG-IDX-08 / §A1 / §OOS-3]
+- [ ] CHK338 Is the `corpus_stale` alert routing (on-call + Service Bus) specified with the same field shape as other audit alerts (e.g., `index_rollback`) so on-call dashboards do not need per-alert custom field handling? [Consistency, Spec §FR-RAG-FRESH-02 vs §FR-RAG-IDX-09]
+- [ ] CHK339 Is the `feature.corpus_freshness_alert.enabled` Reversible-class behaviour ("alert suppressed but staleness state still recorded in audit log") testable in CI without flipping the prod flag (e.g., a chaos test that disables the flag in `environment=test` and asserts the audit event still lands)? [Measurability, Spec §FR-RAG-FRESH-02 vs §A12]
+
+## Notes (Post-R3 Amend Loop)
+
+- **Item count (this section)**: 20 items across 3 sections (CHK320–CHK339).
+- **Cross-references**: New items frequently cite FR-RAG-CV-01 (extended), FR-RAG-IDX-04a/05a/08/09 (extended), FR-RAG-FRESH-01/02 (new), FR-RAG-AG-02 (extended), SC-016 + SC-019 (new), Assumptions A1 + A12, OOS-3, `infra/policy/rego/foundry_carveout.rego`, `tests/contract/test_foundry_carveout.py`, and Pass 1 Q-P1-04/05 / Pass 2 Q-P2-03/08.
+- **Why these items live here vs. in new domain checklists**: All three clusters (A4 carve-out quorum, A7 alias atomicity, A8 corpus freshness) are **constitutional / runtime-integrity invariants** whose violations would breach Constitution NN-2 (A4), Principle I no-silencing (A7), or Principle IV provable provenance (A7 + A8). They naturally extend the existing compliance.md scope (carve-out registry, index lifecycle, residency) rather than warranting separate checklist files.
+- **Total checklist surface (post-R3)**: 339 items across 10 files (3 extended + 7 new).
