@@ -75,6 +75,8 @@ class SimulationControllerService:
         event_recorder: Any = None,
         clock_service: Any = None,
         simulation_repository: Any = None,
+        retrieval_service: Any = None,
+        audit_writer: Any = None,
     ) -> None:
         self._sub_agents = sub_agents or default_invoker()
         self._rl = rate_limiter or get_rate_limiter()
@@ -84,6 +86,12 @@ class SimulationControllerService:
         self._sim_repo = simulation_repository
         self._prompt_text = _PROMPT_PATH.read_text(encoding="utf-8")
         self._prompt_hash = hashlib.sha256(self._prompt_text.encode("utf-8")).hexdigest()
+        # Spec 036 FR-RAG-SIM-01..06: optional retrieval client + audit writer.
+        # Both are dependency-injected so tests can stub them; production
+        # wiring lives in the API entrypoint and only activates when
+        # ``AZURE_AI_PROJECT_ENDPOINT`` is set.
+        self._retrieval = retrieval_service
+        self._audit_writer = audit_writer
 
     async def _current_sim_seconds(self, tenant_id: str) -> float:
         """Best-effort lookup of current simulated time for the tenant."""
@@ -304,6 +312,13 @@ class SimulationControllerService:
     async def _stream_offline(
         self, *, turn_id: str, tenant_id: str, simulation_id: str, user_message: str
     ) -> AsyncIterator[ChatEvent]:
+        # Spec 036 — RAG-OPTOUT [FR-RAG-NS-06]: scripted-scenario / offline
+        # streaming path. The deterministic offline backend produces canned
+        # responses by intent — there is no LLM call to ground, so no
+        # retrieval and no citation event is emitted. Audit records for this
+        # path use call_kind=inference, rag_used=false,
+        # rag_optout_reason="scenario-execution",
+        # adr_pointer="docs/decisions/036-foundry-rag-grounding/06-rag-optout-scenario-execution.md".
         assistant_parts: list[str] = []
 
         def _emit_delta(text: str) -> ChatEvent:
@@ -511,6 +526,60 @@ class SimulationControllerService:
         messages.extend(self._load_history_messages(tenant_id))
         messages.append({"role": "user", "content": forwarded_message})
 
+        # Spec 036 FR-RAG-SIM-01: retrieve grounding chunks BEFORE the first
+        # LLM call. The system prompt + tool schemas are NOT modified (OOS-6);
+        # we only enrich the user message with a "Grounding context" preamble
+        # when retrieval returns non-empty results. Empty results emit a
+        # ``citations: []`` SSE event with the operator-verification note
+        # (FR-RAG-SIM-03).
+        retrieved_chunks: list[Any] = []
+        retrieval_result: Any = None
+        sim_corpus_build_sha: str | None = None
+        sim_embedding_model_id: str | None = None
+        if self._retrieval is not None:
+            try:
+                from ama_domain import (  # type: ignore[import-not-found]
+                    RetrievalRequest,
+                )
+
+                # Best-effort jurisdiction inference: simulation runs are tenant-
+                # scoped; the retrieval client expands to ∪ {national, aidr}
+                # server-side (FR-RAG-AG-04). Default to ``national`` so a
+                # tenant without a locked jurisdiction still gets the AIDR
+                # corpus on every turn.
+                req = RetrievalRequest(
+                    agent_name="SimulationController",
+                    jurisdictions=[os.environ.get("AMA_SIM_JURISDICTION", "national")],
+                    hazard_type=None,
+                    query_text=forwarded_message[:4000],
+                    top_k=5,
+                    tenant_id=tenant_id,
+                    correlation_id=turn_id,
+                )
+                retrieval_result = await self._retrieval.retrieve(req)
+                retrieved_chunks = list(getattr(retrieval_result, "chunks", []) or [])
+                sim_corpus_build_sha = getattr(retrieval_result, "corpus_build_sha", None)
+                sim_embedding_model_id = getattr(retrieval_result, "embedding_model_id", None)
+            except Exception as exc:  # noqa: BLE001 — retrieval failure must not abort the turn
+                logger.warning("sim_retrieval_failed turn_id=%s err=%s", turn_id, exc)
+                retrieval_result = None
+
+        # If we have grounding chunks, prepend a short context block to the
+        # user message. This is intentionally minimal — it does NOT reshape
+        # the controller_prompt.md system prompt (OOS-6).
+        if retrieved_chunks:
+            context_lines = [
+                "Grounding context (cite by jurisdiction/topic/page; do not invent sources):",
+            ]
+            for c in retrieved_chunks[:5]:
+                jurisdiction = getattr(c, "jurisdiction", "")
+                jurisdiction = getattr(jurisdiction, "value", jurisdiction)
+                context_lines.append(
+                    f"- [{jurisdiction}/{getattr(c, 'topic', '')}#p{getattr(c, 'page', '')}]"
+                    f" {(getattr(c, 'text', '') or getattr(c, 'summary', '') or '')[:280]}"
+                )
+            messages[-1]["content"] = "\n".join(context_lines) + "\n\n---\n\n" + forwarded_message
+
         collected_all: list[str] = []
 
         # OpenAI tool-calling is a two-step dance: model emits tool_calls (often
@@ -672,6 +741,104 @@ class SimulationControllerService:
             content=assistant_text,
             model=deployment,
         )
+
+        # Spec 036 FR-RAG-SIM-02 / FR-RAG-SIM-03: emit a ``citation`` SSE
+        # event right before ``turn.end``. We synthesise lightweight Citation
+        # dicts directly from the retrieved chunks — the simulation channel
+        # currently surfaces metadata only; full-text licensing is gated on
+        # the recommendation-card path (T086) where the licence_mode is
+        # already enforced.
+        try:
+            from app.services.simulation.citation_sse import (  # noqa: PLC0415
+                format_empty_citations_event,
+            )
+
+            if self._retrieval is not None and not retrieved_chunks:
+                yield ChatEvent(
+                    "citation",
+                    json.loads(
+                        format_empty_citations_event(turn_id=turn_id)
+                        .removeprefix("event: citation\n")
+                        .removeprefix("data: ")
+                        .strip()
+                    ),
+                )
+            elif retrieved_chunks:
+                citation_dicts = []
+                for c in retrieved_chunks[:5]:
+                    licence = getattr(c, "licence_mode", None)
+                    licence = getattr(licence, "value", licence) or "metadata-only"
+                    jurisdiction = getattr(c, "jurisdiction", "")
+                    jurisdiction = getattr(jurisdiction, "value", jurisdiction)
+                    cit = {
+                        "jurisdiction": jurisdiction,
+                        "topic": getattr(c, "topic", ""),
+                        "page": getattr(c, "page", 0),
+                        "source_url": getattr(c, "source_url", ""),
+                        "rendered_url": getattr(c, "rendered_url", ""),
+                        "sha256_of_chunk": getattr(c, "sha256_of_chunk", ""),
+                        "licence_mode": licence,
+                        "confidence": float(getattr(c, "confidence", 0.0) or 0.0),
+                    }
+                    if licence == "full-text":
+                        cit["snippet"] = (getattr(c, "text", "") or "")[:300]
+                    citation_dicts.append(cit)
+                yield ChatEvent(
+                    "citation",
+                    {"turn_id": turn_id, "citations": citation_dicts},
+                )
+
+                # FR-RAG-SIM-04 / R-13: write the extended audit record. The
+                # writer is best-effort — failure must never break the SSE
+                # stream.
+                if self._audit_writer is not None:
+                    try:
+                        from common.audit import (  # noqa: PLC0415
+                            make_inference_record,
+                        )
+
+                        prompt_sha = hashlib.sha256(forwarded_message.encode("utf-8")).hexdigest()
+                        record = make_inference_record(
+                            agent_name="SimulationController",
+                            prompt_sha=prompt_sha,
+                            model_id=deployment,
+                            model_version=os.environ.get("AZURE_AI_PROJECT_MODEL_VERSION", "unknown"),
+                            deployment_alias=deployment,
+                            output_text_hash=_sha256(assistant_text),
+                            output_tokens=len(assistant_text.split()),
+                            tenant_id=tenant_id,
+                            correlation_id=turn_id,
+                            rag_used=True,
+                            embedding_model_id=sim_embedding_model_id or "unknown",
+                            corpus_build_sha=sim_corpus_build_sha or "unknown",
+                            retrieved_chunks=[
+                                {
+                                    "chunk_id": getattr(c, "chunk_id", ""),
+                                    "sha256_of_chunk": getattr(c, "sha256_of_chunk", ""),
+                                    "jurisdiction": (
+                                        getattr(c, "jurisdiction", "").value
+                                        if hasattr(getattr(c, "jurisdiction", ""), "value")
+                                        else getattr(c, "jurisdiction", "")
+                                    ),
+                                    "topic": getattr(c, "topic", ""),
+                                    "page": getattr(c, "page", 0),
+                                    "licence_mode": (
+                                        getattr(c, "licence_mode", "").value
+                                        if hasattr(getattr(c, "licence_mode", ""), "value")
+                                        else getattr(c, "licence_mode", "")
+                                    ),
+                                    "confidence": float(getattr(c, "confidence", 0.0) or 0.0),
+                                }
+                                for c in retrieved_chunks
+                            ],
+                            citations=citation_dicts,
+                        )
+                        await self._audit_writer.write(record)
+                    except Exception as exc:  # noqa: BLE001
+                        logger.warning("sim_audit_write_failed turn_id=%s err=%s", turn_id, exc)
+        except Exception as exc:  # noqa: BLE001 — never break the SSE stream
+            logger.warning("sim_citation_emit_failed turn_id=%s err=%s", turn_id, exc)
+
         yield ChatEvent(
             "turn.end",
             {"turn_id": turn_id, "content_hash": _sha256(assistant_text)},
