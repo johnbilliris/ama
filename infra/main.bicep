@@ -64,7 +64,7 @@ param globalAdministratorPrincipalIds array = []
 @description('Developer IP address to allow through Cosmos DB firewall (for local seed scripts, etc.)')
 param developerIpAddress string = ''
 
-@description('Azure OpenAI model deployment SKU. Use GlobalStandard for dev/staging (draws from global capacity pool) and Standard for production (regional capacity).')
+@description('Spec 036 (T146): kept for parameter-file back-compat; no longer consumed (legacy openAiDeployments module removed).')
 @allowed(['Standard', 'GlobalStandard'])
 param openAiDeploymentSku string = 'GlobalStandard'
 
@@ -828,11 +828,11 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'STORAGE_ACCOUNT_NAME', value: storage.name }
             { name: 'REDIS_HOST', value: redis.properties.hostName }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
-            { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
-            { name: 'AZURE_OPENAI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
-            { name: 'AZURE_OPENAI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
-            { name: 'AZURE_OPENAI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
-            { name: 'AZURE_OPENAI_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
+            // Spec 036 (T146): legacy AOAI endpoint + deployment env vars
+            // are no longer injected from ``modules/azure-openai.bicep``.
+            // Foundry endpoint + deployment map are sourced from azd env
+            // (``AZURE_AI_PROJECT_ENDPOINT`` / ``AZURE_AI_PROJECT_DEPLOYMENTS``)
+            // via the Container App secrets/env-overlay stage.
             { name: 'OTEL_SERVICE_NAME', value: 'api' }
           ]
           probes: [
@@ -903,10 +903,9 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'STORAGE_ACCOUNT_NAME', value: storage.name }
             { name: 'REDIS_HOST', value: redis.properties.hostName }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
-            { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
-            { name: 'AZURE_OPENAI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
-            { name: 'AZURE_OPENAI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
-            { name: 'AZURE_OPENAI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
+            // Spec 036 (T146): legacy AOAI endpoint + deployment env vars
+            // are no longer injected here. Foundry env vars are sourced from
+            // azd env via the Container App env-overlay stage.
             { name: 'API_ENDPOINT', value: 'https://${apiContainerApp.properties.configuration.ingress.fqdn}' }
             { name: 'OTEL_SERVICE_NAME', value: 'agents' }
           ]
@@ -1110,17 +1109,12 @@ resource envDiagnostic 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview
   }
 }
 
-module openAiDeployments './modules/azure-openai.bicep' = {
-  name: 'azure-openai-deployments'
-  params: {
-    openAiAccountName: openAi.name
-    location: location
-    envPrefix: environmentName
-    tags: tags
-    logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsId
-    modelDeploymentSku: openAiDeploymentSku
-  }
-}
+// Spec 036 (T146): the legacy ``module openAiDeployments './modules/azure-openai.bicep'``
+// reference has been removed. The module file is retained as
+// ``infra/modules/legacy/azure-openai.bicep`` for historical reference only;
+// ``azd up`` no longer provisions Azure-OpenAI deployments. Foundry-hosted
+// equivalents are provisioned via ``infra/modules/ai-search-blue-green.bicep``
+// + the Foundry project endpoint output.
 
 // Cognitive Services OpenAI User — Container Apps (separated to break cycle with openAiDeployments)
 var cognitiveServicesOpenAiUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'

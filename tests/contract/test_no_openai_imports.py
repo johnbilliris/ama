@@ -1,15 +1,9 @@
-"""T011 — Skip-marked lint for legacy ``from openai import AzureOpenAI`` (FR-RAG-FM-04, SC-002).
+"""T011 (T146-bound) — Lint for legacy ``from openai import AzureOpenAI`` (FR-RAG-FM-04, SC-002).
 
-This test is intentionally **skip-marked** until the atomic legacy-deletion PR
-(T146 / Phase E1). The ``pytest.mark.skip`` is removed in T146, atomically
-binding the FR-RAG-FM-04 lint at the same moment the legacy client is deleted.
-
-The body is fully implemented so the binding is one-line ``-skip``:
-
-    pytest.mark.skip(reason="binds atomically with E1 / FR-RAG-FM-06")  # ← removed in T146
-
-Until then, every per-agent canary (T093–T097, T145) keeps the legacy import
-path live as a rollback target.
+Spec 036 (T146): the atomic-deletion PR removes the ``pytest.mark.skip`` and
+the three migration-anchor allowlist entries. The lint is now **binding** —
+any new ``from openai import AzureOpenAI`` / ``AsyncAzureOpenAI`` import in
+the ``apps/`` tree (outside ``tests/`` and ``apps/eval-runner/``) fails CI.
 """
 
 from __future__ import annotations
@@ -17,7 +11,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-import pytest
+import pytest  # noqa: F401 — pytest framework import retained for collect compat
 
 ROOT = Path(__file__).resolve().parents[2]
 APPS_DIR = ROOT / "apps"
@@ -31,20 +25,14 @@ FORBIDDEN_PATTERNS: tuple[re.Pattern[str], ...] = (
 )
 
 # Allowlist (per FR-RAG-NS-08 design). Spec/historical refs and tests are exempt;
-# the migration ADR carries documented references; the migration anchor file in
-# apps/agents/common/llm_client.py keeps the legacy path importable behind
-# LEGACY_AZURE_OPENAI=1 for canary backout (T018).
+# the migration ADR carries documented references. Post-T146 the three
+# migration-anchor files are no longer allowlisted — they have been migrated
+# to the Foundry client.
 ALLOWLIST_GLOBS: tuple[str, ...] = (
     # Test fixtures + the exempt fixtures dir.
     "tests/**",
     # Eval-runner historical references (per spec 033 baseline).
     "apps/eval-runner/**",
-    # Migration anchor — kept importable behind LEGACY_AZURE_OPENAI=1 until T146.
-    "apps/agents/common/llm_client.py",
-    # Simulation controller migration anchor — same until T146 / spec 024 rollback.
-    "apps/api/app/services/simulation/controller_service.py",
-    # MAF runtime — same until T146.
-    "apps/agents/maf_runtime/chat_client.py",
 )
 
 
@@ -65,7 +53,6 @@ def _glob_match(rel: str, pattern: str) -> bool:
     return False
 
 
-@pytest.mark.skip(reason="binds atomically with E1 / FR-RAG-FM-06 (removed in T146)")
 def test_no_legacy_openai_imports_in_apps() -> None:
     """No production module under ``apps/`` may carry a legacy AOAI import (FR-RAG-FM-04).
 
@@ -88,7 +75,9 @@ def test_no_legacy_openai_imports_in_apps() -> None:
 
     if offenders:
         formatted = "\n".join(f"  {p.relative_to(ROOT)}:{ln}: {src}" for p, ln, src in offenders)
-        pytest.fail(
+        import pytest as _pt  # noqa: PLC0415
+
+        _pt.fail(
             f"FR-RAG-FM-04 violations — legacy Azure-OpenAI imports detected in apps/ tree:\n{formatted}\n"
             f"Move to common.foundry_chat_client (LiveFoundryChatClient) or add the path to ALLOWLIST_GLOBS "
             f"with an explanatory comment + ADR reference."

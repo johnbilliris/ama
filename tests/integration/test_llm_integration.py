@@ -1,6 +1,11 @@
 """Integration tests: Full LLM call chain with fallback and circuit breaker.
 
-Tests end-to-end flow: config → LLMClient (mocked) → content safety → response.
+Tests end-to-end flow: config → LLMClient (mocked Foundry seam) → content
+safety → response.
+
+Spec 036 (T146): updated to use the constructor-injectable ``chat_complete``
+seam (FR-RAG-FM-07) instead of the legacy ``self._client.chat.completions.create``
+mock surface. The fixture wires ``LLMClient._chat_complete`` directly.
 """
 
 from __future__ import annotations
@@ -15,14 +20,20 @@ from apps.agents.common.llm_mixin import LLMCallMixin
 
 @pytest.fixture
 def llm_mixin() -> LLMCallMixin:
-    """Create an LLMCallMixin with an empty endpoint (no real LLM)."""
+    """Create an LLMCallMixin with no Foundry endpoint (no real LLM)."""
     config = LLMClientConfig(endpoint="", model_tier="drafting")
     return LLMCallMixin(config)
 
 
 @pytest.fixture
 def llm_mixin_with_mock() -> tuple[LLMCallMixin, MagicMock]:
-    """Create an LLMCallMixin with mocked LLM client."""
+    """Create an LLMCallMixin with a mocked Foundry seam (post-T146).
+
+    Returns ``(mixin, mock_seam)`` where ``mock_seam`` is the callable bound
+    to ``mixin._llm_client._chat_complete``. Tests configure
+    ``mock_seam.return_value = <FoundryResponse-shaped mock>`` to stub the
+    chat completion result.
+    """
     config = LLMClientConfig(
         endpoint="https://test.australiaeast.openai.azure.com",
         model_tier="drafting",
@@ -30,9 +41,10 @@ def llm_mixin_with_mock() -> tuple[LLMCallMixin, MagicMock]:
         drafting_deployment="gpt-4o-mini-dev",
     )
     mixin = LLMCallMixin(config)
-    mock_client = MagicMock()
-    mixin._llm_client._client = mock_client
-    return mixin, mock_client
+    mock_seam = MagicMock()
+    # Override the seam directly — bypasses Foundry SDK initialisation.
+    mixin._llm_client._chat_complete = mock_seam
+    return mixin, mock_seam
 
 
 @pytest.mark.integration
@@ -105,22 +117,24 @@ class TestLLMFallbackChain:
         assert gating["requires_human_review"] is True
 
 
+def _foundry_response(content: str, prompt_tokens: int, completion_tokens: int) -> MagicMock:
+    """Build a ``FoundryResponse``-shaped mock with .choices[0].message.content + .usage."""
+    mock_response = MagicMock()
+    mock_response.choices = [MagicMock()]
+    mock_response.choices[0].message.content = content
+    mock_response.usage.prompt_tokens = prompt_tokens
+    mock_response.usage.completion_tokens = completion_tokens
+    return mock_response
+
+
 @pytest.mark.integration
 class TestLLMSuccessPath:
-    """Test successful LLM response paths."""
+    """Test successful LLM response paths via the Foundry seam (T146)."""
 
     def test_successful_llm_response(self, llm_mixin_with_mock: tuple) -> None:
         """Successful LLM response returns llm generation_method."""
-        mixin, mock_client = llm_mixin_with_mock
-
-        # Mock the chat completion response
-        mock_response = MagicMock()
-        mock_response.choices = [MagicMock()]
-        mock_response.choices[0].message.content = "This is a safe test response"
-        mock_response.usage.prompt_tokens = 50
-        mock_response.usage.completion_tokens = 20
-
-        mock_client.chat.completions.create.return_value = mock_response
+        mixin, mock_seam = llm_mixin_with_mock
+        mock_seam.return_value = _foundry_response("This is a safe test response", 50, 20)
 
         result = mixin._generate_with_fallback(
             purpose="drafting",
@@ -135,15 +149,8 @@ class TestLLMSuccessPath:
 
     def test_content_safety_blocks_unsafe_output(self, llm_mixin_with_mock: tuple) -> None:
         """Content safety blocks LLM output with blocked keywords."""
-        mixin, mock_client = llm_mixin_with_mock
-
-        mock_response = MagicMock()
-        mock_response.choices = [MagicMock()]
-        mock_response.choices[0].message.content = "terror threat detected"
-        mock_response.usage.prompt_tokens = 50
-        mock_response.usage.completion_tokens = 10
-
-        mock_client.chat.completions.create.return_value = mock_response
+        mixin, mock_seam = llm_mixin_with_mock
+        mock_seam.return_value = _foundry_response("terror threat detected", 50, 10)
 
         result = mixin._generate_with_fallback(
             purpose="drafting",
@@ -155,15 +162,8 @@ class TestLLMSuccessPath:
 
     def test_token_usage_in_response(self, llm_mixin_with_mock: tuple) -> None:
         """Token usage is included in successful responses."""
-        mixin, mock_client = llm_mixin_with_mock
-
-        mock_response = MagicMock()
-        mock_response.choices = [MagicMock()]
-        mock_response.choices[0].message.content = "Valid response text"
-        mock_response.usage.prompt_tokens = 100
-        mock_response.usage.completion_tokens = 50
-
-        mock_client.chat.completions.create.return_value = mock_response
+        mixin, mock_seam = llm_mixin_with_mock
+        mock_seam.return_value = _foundry_response("Valid response text", 100, 50)
 
         result = mixin._generate_with_fallback(
             purpose="drafting",

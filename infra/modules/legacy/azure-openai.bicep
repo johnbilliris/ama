@@ -1,17 +1,18 @@
 // ────────────────────────────────────────────────────────────────────────────────
-// Azure OpenAI Model Deployments, RBAC, and Diagnostics
+// Azure OpenAI Model Deployments, RBAC, and Diagnostics — **LEGACY (T146 archived)**
 //
-// **DEPRECATED (Spec 036 — T058)** — kept available for the canary fallback
-// path during the Foundry migration window. Deletion is deferred to spec 036
-// task E1 once parity has been demonstrated on three consecutive scheduled
-// audits (FR-RAG-FM-06). New deployments MUST consume the Foundry-hosted
+// **REMOVED FROM PRODUCTION DEPLOY (Spec 036 — T146)** — this file is retained
+// in ``infra/modules/legacy/`` for historical reference only. It is **no longer
+// referenced by ``infra/main.bicep``** post-T146; ``azd up`` does NOT provision
+// Azure OpenAI deployments. New work MUST consume the Foundry-hosted
 // equivalents via ``apps/agents/common/foundry_chat_client.py`` + spec-036
 // ai-search-blue-green wrapper. See specs/036-foundry-rag-grounding/plan.md
-// §Phasing E for the deletion checklist.
+// §Phasing E for the deletion record. To restore, see the spec-032 deprecation
+// procedure (``infra/modules/legacy/`` → undelete pattern).
 // ────────────────────────────────────────────────────────────────────────────────
 
 metadata deprecated = '036-foundry-rag-grounding'
-metadata deprecationReason = 'Replaced by Foundry-hosted models per spec 036; kept for canary fallback (FR-RAG-FM-06). Delete in E1.'
+metadata deprecationReason = 'Replaced by Foundry-hosted models per spec 036 T146 atomic-deletion PR; archive only.'
 metadata replacedBy = 'apps/agents/common/foundry_chat_client.py + infra/modules/ai-search-blue-green.bicep'
 
 @description('Name of the existing Azure OpenAI resource')

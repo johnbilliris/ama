@@ -1,12 +1,12 @@
 """Shared chat-client factory for MAF Agents (T012, ADR-033-01).
 
-Spec 036 (T019, FR-RAG-FM-02): the factory now selects between the legacy
-Azure-OpenAI endpoint and the Foundry project endpoint based on
-``LLMClientConfig.legacy_openai_only`` (driven by ``LEGACY_AZURE_OPENAI=1``).
-The factory **signature is preserved verbatim** — call sites in the five
-named MAF Agents do not change. Authentication remains AAD-only with the
-shared cognitive-services token scope (``_AOAI_TOKEN_SCOPE``); API-key kwargs
-are still forbidden (FR-025, FR-RAG-FM-04).
+Spec 036 (T146, FR-RAG-FM-02 / FR-RAG-FM-04): the legacy Azure-OpenAI escape
+hatch (``LEGACY_AZURE_OPENAI=1``) is removed; the factory always resolves to
+the Foundry project endpoint. The factory **signature is preserved verbatim**
+— call sites in the five named MAF Agents do not change. Authentication
+remains AAD-only with the shared cognitive-services token scope
+(``_AOAI_TOKEN_SCOPE``); API-key kwargs are still forbidden (FR-025,
+FR-RAG-FM-04).
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ def _shared_credential() -> DefaultAzureCredential:
 
 @lru_cache(maxsize=1)
 def _shared_token_provider() -> Any:
-    """Bearer-token callable for the cognitive-services scope (Foundry + Azure OpenAI)."""
+    """Bearer-token callable for the cognitive-services scope (Foundry endpoint)."""
     return get_bearer_token_provider(_shared_credential(), _AOAI_TOKEN_SCOPE)
 
 
@@ -44,28 +44,18 @@ def _resolve_endpoint_and_deployment(
     cfg: LLMClientConfig,
     model_tier: str,
 ) -> tuple[str, str]:
-    """Return ``(endpoint, deployment)`` honouring the spec-036 cutover flag.
+    """Return ``(endpoint, deployment)`` for the Foundry project endpoint.
 
-    - ``LEGACY_AZURE_OPENAI=1`` → legacy Azure-OpenAI endpoint + tier deployment.
-    - Otherwise → Foundry project endpoint (or legacy endpoint as fallback) and
-      the deployment-name resolved from ``AZURE_AI_PROJECT_DEPLOYMENTS``
-      mapped by the Foundry model key.
+    Spec 036 post-T146: the legacy Azure-OpenAI fallback is removed. The
+    factory fails closed if the Foundry endpoint is not configured rather
+    than degrade silently to a synthetic / mock client (Constitution
+    Principle I no-silencing).
     """
-    if cfg.legacy_openai_only:
-        if not cfg.endpoint:
-            raise ValueError(
-                "AZURE_OPENAI_ENDPOINT is not configured but LEGACY_AZURE_OPENAI=1; cannot build legacy chat client."
-            )
-        deployment = cfg.deployment_for(model_tier)
-        if not deployment:
-            raise ValueError(f"AZURE_OPENAI_{model_tier.upper()}_DEPLOYMENT is not configured for tier {model_tier!r}.")
-        return cfg.endpoint, deployment
-
-    foundry_endpoint = cfg.foundry_endpoint or cfg.endpoint
+    foundry_endpoint = cfg.foundry_endpoint
     if not foundry_endpoint:
         raise ValueError(
-            "Neither AZURE_AI_PROJECT_ENDPOINT nor AZURE_OPENAI_ENDPOINT is configured; "
-            "refusing to build an OpenAIChatClient (spec 036 FR-RAG-FM-02)."
+            "AZURE_AI_PROJECT_ENDPOINT is not configured; refusing to build an "
+            "OpenAIChatClient (spec 036 FR-RAG-FM-02 / FR-RAG-FM-04 — Foundry-only)."
         )
 
     model_key = cfg.foundry_model_key_for(model_tier)
@@ -74,8 +64,7 @@ def _resolve_endpoint_and_deployment(
     if not deployment:
         raise ValueError(
             f"No Foundry deployment is mapped for tier {model_tier!r} (model key {model_key!r}). "
-            f"Set AZURE_AI_PROJECT_DEPLOYMENTS='{model_key}=<deployment-name>' or "
-            f"AZURE_OPENAI_{model_tier.upper()}_DEPLOYMENT."
+            f"Set AZURE_AI_PROJECT_DEPLOYMENTS='{model_key}=<deployment-name>'."
         )
     return foundry_endpoint, deployment
 
@@ -114,7 +103,7 @@ def build_azure_openai_chat_client(
             "deployment": deployment,
             "api_version": cfg.api_version,
             "model_tier": model_tier,
-            "via_foundry": not cfg.legacy_openai_only,
+            "via_foundry": True,
         },
     )
     return OpenAIChatClient(
