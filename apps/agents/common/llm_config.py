@@ -23,7 +23,11 @@ class LLMClientConfig:
     read; ``LEGACY_AZURE_OPENAI=1`` forces the legacy path for rollback drills.
     """
 
-    # ───────── Legacy Azure-OpenAI connection (kept until T146 deletes it) ─────────
+    # ───────── Legacy Azure-OpenAI connection (kept for back-compat reads only) ─────────
+    # NOTE: post-T146 these fields are read-only and unused by ``LLMClient``;
+    # they remain available so legacy fixtures (and the SimulationController's
+    # gradual cutover) can still resolve a deployment name during a brief
+    # transitional window. Deletion is tracked in a follow-up PR.
     endpoint: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_ENDPOINT", ""))
     reasoning_deployment: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_REASONING_DEPLOYMENT", ""))
     drafting_deployment: str = field(default_factory=lambda: os.getenv("AZURE_OPENAI_DRAFTING_DEPLOYMENT", ""))
@@ -33,7 +37,6 @@ class LLMClientConfig:
     foundry_endpoint: str = field(default_factory=lambda: os.getenv("AZURE_AI_PROJECT_ENDPOINT", ""))
     foundry_deployments: str = field(default_factory=lambda: os.getenv("AZURE_AI_PROJECT_DEPLOYMENTS", ""))
     foundry_region: str = field(default_factory=lambda: os.getenv("AZURE_AI_PROJECT_REGION", "australiaeast"))
-    legacy_openai_only: bool = field(default_factory=lambda: os.getenv("LEGACY_AZURE_OPENAI", "0") == "1")
 
     # Model parameters
     model_tier: str = field(default_factory=lambda: os.getenv("LLM_MODEL_TIER", "drafting"))

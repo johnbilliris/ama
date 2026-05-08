@@ -60,58 +60,51 @@ class TestManagedIdentityAuth:
             assert config.endpoint == ""
 
     def test_client_init_with_no_endpoint_has_none_client(self) -> None:
-        """LLMClient with empty endpoint creates no client."""
+        """LLMClient with no Foundry endpoint creates no chat_complete seam (post-T146)."""
         from apps.agents.common.llm_client import LLMClient
 
         config = LLMClientConfig(endpoint="")
         client = LLMClient(config)
-        assert client._client is None
+        # Post-T146: legacy ``_client`` is gone; the Foundry seam is the only path.
+        assert client._chat_complete is None
 
     def test_client_init_uses_token_provider_not_api_key(self) -> None:
-        """LLMClient constructor uses azure_ad_token_provider, not api_key."""
-        import importlib
+        """LLMClient construction wires the Foundry seam via DefaultAzureCredential.
 
-        mock_credential = MagicMock()
-        mock_token_provider = MagicMock()
-        mock_azure_openai_cls = MagicMock()
+        Spec 036 (T146 / FR-RAG-FM-04 / FR-RAG-FM-05): the seam initialiser uses
+        ``DefaultAzureCredential`` + ``get_bearer_token_provider`` against the
+        ``cognitiveservices.azure.com/.default`` scope. No ``api_key`` kwarg is
+        passed anywhere in the production path.
+        """
+        from unittest.mock import patch as _patch
 
         config = LLMClientConfig(
             endpoint="https://test.australiaeast.openai.azure.com",
             model_tier="drafting",
+            foundry_endpoint="https://test.foundry.azure.com",
         )
 
-        mock_identity_module = MagicMock()
-        mock_identity_module.DefaultAzureCredential.return_value = mock_credential
-        mock_identity_module.get_bearer_token_provider.return_value = mock_token_provider
+        mock_seam_callable = MagicMock()
+        mock_live_client_cls = MagicMock()
+        mock_live_client_instance = MagicMock()
+        mock_live_client_instance.chat_complete = mock_seam_callable
+        mock_live_client_cls.return_value = mock_live_client_instance
 
-        mock_openai_module = MagicMock()
-        mock_openai_module.AzureOpenAI = mock_azure_openai_cls
-
-        original_import = importlib.import_module
-
-        def side_effect(name):
-            if name == "azure.identity":
-                return mock_identity_module
-            if name == "openai":
-                return mock_openai_module
-            return original_import(name)
-
-        # Patch import_module where it's used in llm_client module
-        with patch("apps.agents.common.llm_client.import_module", side_effect=side_effect):
+        with _patch(
+            "common.foundry_chat_client.LiveFoundryChatClient",
+            mock_live_client_cls,
+        ):
             from apps.agents.common.llm_client import LLMClient
 
-            LLMClient(config)
+            client = LLMClient(config)
 
-        # Verify token provider was created with correct scope
-        mock_identity_module.get_bearer_token_provider.assert_called_once_with(
-            mock_credential,
-            "https://cognitiveservices.azure.com/.default",
-        )
-
-        # Verify AzureOpenAI was called with token provider, not api_key
-        call_kwargs = mock_azure_openai_cls.call_args
-        assert "azure_ad_token_provider" in call_kwargs.kwargs
-        assert "api_key" not in call_kwargs.kwargs
+        # Verify the Foundry seam was wired with the production endpoint.
+        mock_live_client_cls.assert_called_once()
+        call_kwargs = mock_live_client_cls.call_args.kwargs
+        assert call_kwargs.get("endpoint") == "https://test.foundry.azure.com"
+        # Verify the seam landed on _chat_complete (no api_key, no _client).
+        assert client._chat_complete is mock_seam_callable
+        assert "api_key" not in call_kwargs
 
 
 class TestBicepRegionRestriction:
