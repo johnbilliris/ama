@@ -194,18 +194,18 @@ description: "Dependency-ordered task list for spec 036 — Microsoft Foundry-Ba
 
 ### C — Implementation: per-agent canary flips (R-12 sequencing)
 
-- [ ] T092 [P] Author per-agent golden Q&A fixtures under `apps/eval-runner/fixtures/spec036/{monitoring,risk,evacuation,resource,communication,simulation}.jsonl` — keyed by `(corpus_build_sha, embedding_model_id)`; each fixture asserts decision + schema + expected citation. (FR-RAG-FM-06, R-12, FR-RAG-AG-05 prep)
-- [ ] T093 **Canary 1 — Monitoring** (R-12 step 1): flip `foundry_rag_enabled_agents.MonitoringAgent=true` in staging; run `per_agent_canary_gate.py` → assert ≥ 95% decision-equivalence + 100% schema-equivalence; assert spec-014 fallback chain still serves on synthetic Foundry 503; **execute rollback drill** (flip back, assert no audit gap, no operator-visible silencing). Roll out to prod only after staging passes. (FR-RAG-FM-06, R-12, US2)
-- [ ] T094 **Canary 2 — Risk Assessment** (R-12 step 2): same gate + rollback drill. (FR-RAG-FM-06, R-12)
-- [ ] T095 **Canary 3 — Evacuation** (R-12 step 3): same gate + rollback drill. (FR-RAG-FM-06, R-12)
-- [ ] T096 **Canary 4 — Resource Allocation** (R-12 step 4): same gate + rollback drill. (FR-RAG-FM-06, R-12)
-- [ ] T097 **Canary 5 — Communication** (R-12 step 5): same gate + rollback drill; explicit ATSI/CALD/Auslan retrieval-coverage assertion (FR-RAG-AG-06, US8). (FR-RAG-FM-06, FR-RAG-AG-06, R-12)
-- [ ] T098 [P] Bi-weekly parity-tests review per Risk R11 — automated CI report comparing per-agent legacy-path output vs Foundry-path output on the per-agent fixture; review thread in PR. (FR-RAG-FM-06, Risk R11)
-- [ ] T099 [P] Add KQL audit-trail completeness query `tests/audit/audit_trail_completeness.kql` — monthly count of `rag_used` field absent grouped by agent; alert on > 0. Persona-anchor: Compliance Auditor + SRE-memo. (FR-RAG-AG-02, Risk R8)
-- [ ] T100 [P] Citation-fidelity assertion in `apps/eval-runner` — extend per-agent canary gate with `citation_fidelity ≥ 0.7` AND `verbatim-source-match` (Phase E3 binds this; introduced here as a non-blocking signal). (FR-RAG-AG-05, Risk R3, Quality-memo R2)
-- [ ] T101 [P] WAVE + screen-reader pre-GA accessibility audit checklist for `<CitationCard />` and `<DegradedModeBadge />` — gate before T130. (R-14, Accessibility memo §45–69, Risk R13)
-- [ ] T102 [P] Operator persona scenario: NSW DPE Inspector audit-replay in ≤ 60s per recommendation. Persona-anchor: `personas-input/sectors-eastern.md`, `personas-input/operational.md`. (SC-001, SC-011)
-- [ ] T103 [P] Operator persona scenario: TAS SES + WA DFES single-agency edge case — verify `DFES-WA` does not silently conflate with state RFS sub-units. Persona-anchor: `personas-input/sectors-southern-western.md`. (FR-RAG-AG-04, SC-010)
+- [X] T092 [P] Author per-agent golden Q&A fixtures under `apps/eval-runner/fixtures/spec036/{monitoring,risk,evacuation,resource,communication,simulation}.jsonl` — keyed by `(corpus_build_sha, embedding_model_id)`; each fixture asserts decision + schema + expected citation. (FR-RAG-FM-06, R-12, FR-RAG-AG-05 prep)
+- [~] T093 **Canary 1 — Monitoring** (R-12 step 1): flip `foundry_rag_enabled_agents.MonitoringAgent=true` in staging; run `per_agent_canary_gate.py` → assert ≥ 95% decision-equivalence + 100% schema-equivalence; assert spec-014 fallback chain still serves on synthetic Foundry 503; **execute rollback drill** (flip back, assert no audit gap, no operator-visible silencing). Roll out to prod only after staging passes. _Phase C status: code green via `infra/scripts/canary-rollback-drill.ps1` + playbook `docs/canary/036-per-agent-canary.md`; pending live env-var flip in workflow Step 9._ (FR-RAG-FM-06, R-12, US2)
+- [~] T094 **Canary 2 — Risk Assessment** (R-12 step 2): same gate + rollback drill. _Phase C status: code green; pending live flip._ (FR-RAG-FM-06, R-12)
+- [~] T095 **Canary 3 — Evacuation** (R-12 step 3): same gate + rollback drill. _Phase C status: code green; pending live flip._ (FR-RAG-FM-06, R-12)
+- [~] T096 **Canary 4 — Resource Allocation** (R-12 step 4): same gate + rollback drill. _Phase C status: code green; pending live flip._ (FR-RAG-FM-06, R-12)
+- [~] T097 **Canary 5 — Communication** (R-12 step 5): same gate + rollback drill; explicit ATSI/CALD/Auslan retrieval-coverage assertion (FR-RAG-AG-06, US8). _Phase C status: code green; pending live flip._ (FR-RAG-FM-06, FR-RAG-AG-06, R-12)
+- [X] T098 [P] Bi-weekly parity-tests review per Risk R11 — automated CI report comparing per-agent legacy-path output vs Foundry-path output on the per-agent fixture; review thread in PR. (FR-RAG-FM-06, Risk R11)
+- [X] T099 [P] Add KQL audit-trail completeness query `tests/audit/audit_trail_completeness.kql` — monthly count of `rag_used` field absent grouped by agent; alert on > 0. Persona-anchor: Compliance Auditor + SRE-memo. (FR-RAG-AG-02, Risk R8)
+- [X] T100 [P] Citation-fidelity assertion in `apps/eval-runner` — extend per-agent canary gate with `citation_fidelity ≥ 0.7` AND `verbatim-source-match` (Phase E3 binds this; introduced here as a non-blocking signal). (FR-RAG-AG-05, Risk R3, Quality-memo R2)
+- [X] T101 [P] WAVE + screen-reader pre-GA accessibility audit checklist for `<CitationCard />` and `<DegradedModeBadge />` — gate before T130. (R-14, Accessibility memo §45–69, Risk R13)
+- [X] T102 [P] Operator persona scenario: NSW DPE Inspector audit-replay in ≤ 60s per recommendation. Persona-anchor: `personas-input/sectors-eastern.md`, `personas-input/operational.md`. (SC-001, SC-011)
+- [X] T103 [P] Operator persona scenario: TAS SES + WA DFES single-agency edge case — verify `DFES-WA` does not silently conflate with state RFS sub-units. Persona-anchor: `personas-input/sectors-southern-western.md`. (FR-RAG-AG-04, SC-010)
 
 **Checkpoint C**: 5/6 grounded surfaces flipped (Monitoring → Communication); Simulation Controller still on legacy path; FR-023 ≥ 95% on each agent; 0 hallucinated citations on 200-prompt suite.
 
