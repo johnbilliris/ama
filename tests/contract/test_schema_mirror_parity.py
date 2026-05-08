@@ -29,6 +29,7 @@ MIRRORED_SCHEMAS = (
     "chunk-metadata.schema.json",
     "cultural-authority-registry.schema.json",
     "staleness_alert.schema.json",
+    "conflict_detection.schema.json",
 )
 
 
