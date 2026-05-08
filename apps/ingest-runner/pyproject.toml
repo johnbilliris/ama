@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+# Spec 036 — corpus ingest Container Apps Job (FR-RAG-IDX-01..05; R-08).
+# Scaffolded by T002. Lives alongside apps/agents and apps/api in the uv workspace.
+name = "ama-disaster-response-ingest-runner"
+version = "0.1.0"
+description = "Idempotent corpus-ingest Container Apps Job — chunks, embeds, and indexes docs/corpus/** into the blue-green AI Search alias (FR-RAG-IDX-01..05)."
+requires-python = ">=3.12"
+dependencies = [
+  # Core Azure clients
+  "azure-identity>=1.19.0",
+  "azure-search-documents>=11.5.2",         # FR-RAG-IDX-04 — vector + hybrid index, blue-green alias flip.
+  "azure-storage-blob>=12.24.0",            # corpus snapshot tarball + offline-cache bundle storage.
+  "azure-servicebus>=7.13.0",               # topic.corpus-build-complete (FR-RAG-IDX-05).
+  "azure-monitor-opentelemetry>=1.6.0",
+  # Foundry inference seam (mirrors apps/agents)
+  "azure-ai-inference>=1.0.0b9",            # FR-RAG-FM-01..07 — Foundry chat + embeddings.
+  # Document parsing + chunking
+  "pydantic>=2.10.0",
+  "pyyaml>=6.0.2",
+  "tenacity>=9.0.0",                        # 429/503 retries on Foundry embedding calls (R-02).
+  "tiktoken>=0.8.0",                        # 1024-token chunk cap (FR-RAG-IDX-02 / R-04).
+  # Manifest signing prep (cosign keyless invoked via CLI in CI)
+  "cryptography>=46.0.7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "pytest-cov>=6.0",
+  "ruff>=0.8.4",
+  "mypy>=1.13",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ama_ingest"]
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
+testpaths = ["tests"]
+asyncio_mode = "auto"
