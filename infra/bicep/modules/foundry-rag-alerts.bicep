@@ -14,6 +14,9 @@ param appInsightsName string
 @description('Action group resource id to notify on alert.')
 param actionGroupId string
 
+@description('Azure region for the alert resources. Defaults to resource group location.')
+param location string = resourceGroup().location
+
 @description('Tag map applied to alert resources.')
 param tags object = {}
 
@@ -24,7 +27,7 @@ resource ai 'Microsoft.Insights/components@2020-02-02' existing = {
 // 1) Retrieval-only p95 latency alert.
 resource retrievalP95Alert 'Microsoft.Insights/scheduledQueryRules@2023-03-15-preview' = {
   name: 'spec-036-retrieval-p95-degraded'
-  location: ai.location
+  location: location
   tags: tags
   properties: {
     displayName: 'Spec 036 — Retrieval p95 latency >500ms (degraded)'
@@ -59,7 +62,7 @@ resource retrievalP95Alert 'Microsoft.Insights/scheduledQueryRules@2023-03-15-pr
 // 2) Foundry inference latency — independent metric; SC-012 governs threshold.
 resource foundryInferenceP95Alert 'Microsoft.Insights/scheduledQueryRules@2023-03-15-preview' = {
   name: 'spec-036-foundry-inference-p95'
-  location: ai.location
+  location: location
   tags: tags
   properties: {
     displayName: 'Spec 036 — Foundry inference p95 latency exceeded (SC-012)'

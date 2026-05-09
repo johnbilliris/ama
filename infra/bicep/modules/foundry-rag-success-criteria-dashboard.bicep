@@ -17,6 +17,9 @@ param workbookDisplayName string = 'Spec 036 — Success Criteria (SC-001..SC-01
 @description('Workbook ID (GUID); generated from spec-id when not supplied.')
 param workbookId string = guid('spec-036-foundry-rag-success-criteria', appInsightsName)
 
+@description('Azure region for the workbook. Defaults to resource group location.')
+param location string = resourceGroup().location
+
 @description('Tag map for the workbook resource.')
 param tags object = {}
 
@@ -26,7 +29,7 @@ resource ai 'Microsoft.Insights/components@2020-02-02' existing = {
 
 resource workbook 'Microsoft.Insights/workbooks@2023-06-01' = {
   name: workbookId
-  location: ai.location
+  location: location
   kind: 'shared'
   tags: tags
   properties: {
