@@ -741,14 +741,20 @@ resource redis 'Microsoft.Cache/Redis@2024-03-01' = {
 // Azure OpenAI
 // ────────────────────────────────────────────────────────────────────────────────
 
+// Spec 036 / ADR-20 — hard cutover from Azure OpenAI (kind: 'OpenAI') to Microsoft
+// Foundry (kind: 'AIServices'). The endpoint URL is consumed by both
+// AZURE_AI_PROJECT_ENDPOINT (canonical, post-cutover) and AZURE_OPENAI_ENDPOINT
+// (compatibility seam — both env vars point at the same Foundry endpoint until
+// the env-var cleanup PR lands per ADR-20 §Q-P6-03).
 resource openAi 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: take('${abbrs.cognitiveServicesAccounts}${environmentName}-${take(uniqueSuffix, 6)}', 64)
   location: location
   tags: tags
-  kind: 'OpenAI'
+  kind: 'AIServices'
   sku: { name: 'S0' }
+  identity: { type: 'SystemAssigned' }
   properties: {
-    customSubDomainName: '${environmentName}-openai-${take(uniqueSuffix, 6)}'
+    customSubDomainName: '${environmentName}-aif-${take(uniqueSuffix, 6)}'
     publicNetworkAccess: 'Enabled'
     disableLocalAuth: true
   }
@@ -828,6 +834,10 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'STORAGE_ACCOUNT_NAME', value: storage.name }
             { name: 'REDIS_HOST', value: redis.properties.hostName }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
+            // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
+            { name: 'AZURE_AI_PROJECT_ENDPOINT', value: openAi.properties.endpoint }
+            { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: openAiDeployments.outputs.azureAiProjectDeployments }
+            // Compatibility seam — same URL; legacy readers still work until ADR-20 cleanup PR.
             { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'AZURE_OPENAI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
             { name: 'AZURE_OPENAI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
@@ -903,10 +913,21 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'STORAGE_ACCOUNT_NAME', value: storage.name }
             { name: 'REDIS_HOST', value: redis.properties.hostName }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
+            // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
+            { name: 'AZURE_AI_PROJECT_ENDPOINT', value: openAi.properties.endpoint }
+            { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: openAiDeployments.outputs.azureAiProjectDeployments }
+            // Compatibility seam — same URL; legacy readers still work until ADR-20 cleanup PR.
             { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'AZURE_OPENAI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
             { name: 'AZURE_OPENAI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
             { name: 'AZURE_OPENAI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
+            // Spec 036 / ADR-20 §Q-P6-02 — all five named agents land grounded by default.
+            // Disable per-agent grounding mid-incident with `az containerapp update --set-env-vars FEATURE_FOUNDRY_RAG_<AGENT>=0`.
+            { name: 'FEATURE_FOUNDRY_RAG_MONITORING', value: '1' }
+            { name: 'FEATURE_FOUNDRY_RAG_RISK_ASSESSMENT', value: '1' }
+            { name: 'FEATURE_FOUNDRY_RAG_EVACUATION', value: '1' }
+            { name: 'FEATURE_FOUNDRY_RAG_RESOURCE_ALLOCATION', value: '1' }
+            { name: 'FEATURE_FOUNDRY_RAG_COMMUNICATION', value: '1' }
             { name: 'API_ENDPOINT', value: 'https://${apiContainerApp.properties.configuration.ingress.fqdn}' }
             { name: 'OTEL_SERVICE_NAME', value: 'agents' }
           ]
@@ -1155,6 +1176,10 @@ output AZURE_COSMOS_ENDPOINT string = cosmos.properties.documentEndpoint
 output AZURE_COSMOS_DATABASE string = 'disaster-hub'
 output AZURE_STORAGE_ACCOUNT_NAME string = storage.name
 output AZURE_REDIS_HOST string = redis.properties.hostName
+// Spec 036 / ADR-20 — Foundry is the canonical chat plane; AZURE_OPENAI_ENDPOINT
+// remains as a compatibility seam pointing at the same URL until the cleanup PR.
+output AZURE_AI_PROJECT_ENDPOINT string = openAi.properties.endpoint
+output AZURE_AI_PROJECT_DEPLOYMENTS string = openAiDeployments.outputs.azureAiProjectDeployments
 output AZURE_OPENAI_ENDPOINT string = openAi.properties.endpoint
 output AZURE_APP_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
 output SERVICE_API_ENDPOINT_URL string = 'https://${apiContainerApp.properties.configuration.ingress.fqdn}'

@@ -1,18 +1,15 @@
 // ────────────────────────────────────────────────────────────────────────────────
-// Azure OpenAI Model Deployments, RBAC, and Diagnostics
+// Foundry (Microsoft AIServices) Model Deployments, RBAC, and Diagnostics
 //
-// **DEPRECATED (Spec 036 — T058)** — kept available for the canary fallback
-// path during the Foundry migration window. Deletion is deferred to spec 036
-// task E1 once parity has been demonstrated on three consecutive scheduled
-// audits (FR-RAG-FM-06). New deployments MUST consume the Foundry-hosted
-// equivalents via ``apps/agents/common/foundry_chat_client.py`` + spec-036
-// ai-search-blue-green wrapper. See specs/036-foundry-rag-grounding/plan.md
-// §Phasing E for the deletion checklist.
+// Spec 036 / ADR-20 (hard-cutover migration) — this module deploys
+// `Microsoft.CognitiveServices/accounts/deployments` resources on the parent
+// `Microsoft.CognitiveServices/accounts` of kind 'AIServices' (Foundry). The
+// deployment shape is unchanged from the legacy Azure-OpenAI pattern because
+// the deployments resource type is identical across both kinds. The endpoint
+// URL the parent emits is the Foundry endpoint, consumed by callers via the
+// `AZURE_AI_PROJECT_ENDPOINT` env var (and, transitionally, by the legacy
+// `AZURE_OPENAI_ENDPOINT` env var per ADR-20 §Q-P6-03).
 // ────────────────────────────────────────────────────────────────────────────────
-
-metadata deprecated = '036-foundry-rag-grounding'
-metadata deprecationReason = 'Replaced by Foundry-hosted models per spec 036; kept for canary fallback (FR-RAG-FM-06). Delete in E1.'
-metadata replacedBy = 'apps/agents/common/foundry_chat_client.py + infra/modules/ai-search-blue-green.bicep'
 
 @description('Name of the existing Azure OpenAI resource')
 param openAiAccountName string
@@ -267,3 +264,9 @@ output reasoningRaiPolicyName string = reasoningRaiPolicy.name
 output draftingRaiPolicyName string = draftingRaiPolicy.name
 output simulationRaiPolicyName string = simulationRaiPolicy.name
 output openAiEndpoint string = openAiAccount.properties.endpoint
+
+// Spec 036 / ADR-20 — Foundry deployments CSV consumed by `azure-ai-inference`
+// SDK (apps/agents/maf_runtime/chat_client.py + apps/agents/common/llm_client.py +
+// apps/api/app/services/simulation/controller_service.py). Format: per-deployment
+// `<modelId>@<version>=<deploymentName>`, comma-separated.
+output azureAiProjectDeployments string = '${reasoningModelName}@${reasoningModelVersion}=${reasoningDeployment.name},${draftingModelName}@${draftingModelVersion}=${draftingDeployment.name},${simulationModelName}@${simulationModelVersion}=${simulationDeployment.name}'

@@ -107,13 +107,22 @@ def _foundry_rag_flag_name(agent_name: str) -> str:
 def is_foundry_rag_enabled(agent_name: str) -> bool:
     """Return True when spec-036 Foundry-grounded path is enabled for *agent_name*.
 
-    Defaults to ``False`` — the canary cutover (FR-RAG-FM-06) sets the
-    ``FEATURE_FOUNDRY_RAG_<AGENT>`` env var to ``1`` per agent, one at a time,
-    only after the FR-023 equivalence gate (T029) clears ≥95% on the regression
-    suite for that agent.
+    Defaults to ``False`` for the **in-process default** so test environments do
+    not silently activate the grounded path. The deployed-system default is
+    different: per ADR-20 (Session 6 Q-P6-02) the production Bicep
+    (``infra/main.bicep`` agents Container App) sets
+    ``FEATURE_FOUNDRY_RAG_<AGENT>=1`` for all five named agents (Monitoring,
+    RiskAssessment, Evacuation, ResourceAllocation, Communication) on every
+    fresh deploy. The flag is therefore now a per-agent **kill-switch**, not a
+    per-agent activation control. To disable a specific agent's grounding
+    mid-incident, an Operator runs
+    ``az containerapp update --set-env-vars FEATURE_FOUNDRY_RAG_<AGENT>=0``;
+    replicas restart with the new env in <60s. The agent then runs ungrounded
+    but still emits its audit record with ``rag_disabled_reason`` populated
+    (Constitution Principle I no-silencing).
 
     Raises ``ValueError`` for unrecognised values so typos can never silently
-    flip an agent into the grounded path mid-cutover.
+    flip an agent off in production.
     """
     raw = os.environ.get(_foundry_rag_flag_name(agent_name), "0").strip().lower()
     if raw in _TRUE_VALUES:
