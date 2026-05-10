@@ -214,7 +214,7 @@ class FoundryEmbedder:
         # seam (``apps/agents/maf_runtime/chat_client.py``) and use
         # ``openai.AzureOpenAI`` against ``cognitiveservices.azure.com`` so a
         # single Foundry account can serve both chat and embeddings.
-        from openai import AzureOpenAI  # noqa: PLC0415
+        from openai import AzureOpenAI  # AMA-FM04: allow Foundry transport (FR-RAG-FM-01)  # noqa: PLC0415
 
         token_provider = get_bearer_token_provider(cred, AAD_SCOPE)
         api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-10-21")

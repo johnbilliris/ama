@@ -1,14 +1,17 @@
-"""Per-agent equivalence regression gate (Spec 036 T029, FR-RAG-FM-06; extends spec-033 FR-023).
+"""Corpus-rebuild regression gate (Spec 036 T029, FR-RAG-FM-06; extends spec-033 FR-023).
 
 Originally landed as the per-agent canary cutover gate. Following the
-ADR-20 hard cutover (chat plane on Microsoft Foundry, legacy
-``LEGACY_AZURE_OPENAI=1`` rollback flag removed), this CLI is now used
-as a **regression gate** that runs on every corpus / model-deployment
-change to ensure the Foundry-grounded outputs remain decision-equivalent
-to a stable baseline runner. Both ``--legacy`` and ``--foundry`` runner
-flags are kept verbatim so existing fixtures and CI invocations
-continue to work — read ``--legacy`` as "stable baseline" and
-``--foundry`` as "candidate Foundry-grounded run" post-cutover.
+ADR-20 hard cutover (Microsoft Foundry is the canonical chat plane;
+``LEGACY_AZURE_OPENAI=1`` flag removed in the §Q-P6-03 cleanup PR), this
+CLI is repurposed as a **corpus-rebuild regression gate**: it runs on
+every corpus build / embedding-model bump / Foundry deployment change to
+prove the new outputs remain decision-equivalent to a stable baseline.
+
+Both ``--legacy`` and ``--foundry`` runner flags are kept verbatim so
+existing fixtures and CI invocations continue to work — read ``--legacy``
+as "stable baseline" (last green corpus build) and ``--foundry`` as
+"candidate" (corpus_build_sha / embedding_model_id under test). The
+``corpus_build_sha`` + ``embedding_model_id`` are the regression keys.
 
 The CLI compares two runners across a per-agent JSONL fixture of golden
 Q&A cases. It reports three equivalence metrics:
@@ -16,18 +19,17 @@ Q&A cases. It reports three equivalence metrics:
 - ``decision_equivalence``: fraction of cases where both runners produce the
   same ``decision`` field. Default threshold ≥0.95 (spec-033 FR-023; FR-RAG-FM-06).
 - ``schema_equivalence``: fraction of cases where both runners emit the same
-  set of top-level keys (1.0 required to advance the canary).
-- ``citation_fidelity``: placeholder for spec-036 grounded cases — fraction of
-  Foundry responses that include at least one citation when the agent prompt
-  required grounding (1.0 expected once T071 / T091 land; baseline = 1.0 for
-  ungrounded fixtures).
+  set of top-level keys (1.0 required to pass the gate).
+- ``citation_fidelity``: fraction of candidate Foundry responses that include
+  at least one citation when the agent prompt requires grounding (1.0 required
+  for grounded fixtures; baseline = 1.0 for ungrounded fixtures).
 
 Zero-case fixtures **PASS** by convention (matches the spec-033
-``tests/equivalence`` harness baseline so the cutover gate landing this code
-does not flip a green pipeline red).
+``tests/equivalence`` harness baseline so the gate landing this code does
+not flip a green pipeline red).
 
-This module is consumed by the canary cutover tasks (T093–T097, T145). The
-exit code is 0 iff every threshold is met; non-zero blocks canary promotion.
+The exit code is 0 iff every threshold is met; non-zero blocks corpus
+promotion (e.g. blue-green AI Search alias flip per FR-RAG-IDX-04).
 """
 
 from __future__ import annotations

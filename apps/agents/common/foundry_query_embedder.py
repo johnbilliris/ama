@@ -126,7 +126,7 @@ class FoundryQueryEmbedder:
                 "FoundryQueryEmbedder requires AZURE_AI_PROJECT_ENDPOINT to be set"
             )
         from azure.identity import DefaultAzureCredential, get_bearer_token_provider  # noqa: PLC0415
-        from openai import AzureOpenAI  # noqa: PLC0415
+        from openai import AzureOpenAI  # AMA-FM04: allow Foundry transport (FR-RAG-FM-01)  # noqa: PLC0415
 
         cred = self._credential or DefaultAzureCredential()
         token_provider = get_bearer_token_provider(cred, AAD_SCOPE)

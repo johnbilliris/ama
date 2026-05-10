@@ -22,8 +22,6 @@ async def healthcheck() -> dict[str, object]:
         "cosmos": _dependency_status("COSMOS_ENDPOINT"),
         "redis": _dependency_status("REDIS_HOST"),
         # Spec 036 / ADR-20 — Foundry is the canonical chat plane post-cutover.
-        # The legacy ``AZURE_OPENAI_ENDPOINT`` env-var compat seam was removed
-        # along with the rest of the LEGACY_AZURE_OPENAI machinery (cleanup PR).
         "foundry": _dependency_status("AZURE_AI_PROJECT_ENDPOINT"),
     }
 

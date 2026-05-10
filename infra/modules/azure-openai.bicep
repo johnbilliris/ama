@@ -7,8 +7,9 @@
 // deployment shape is unchanged from the legacy Azure-OpenAI pattern because
 // the deployments resource type is identical across both kinds. The endpoint
 // URL the parent emits is the Foundry endpoint, consumed by callers via the
-// `AZURE_AI_PROJECT_ENDPOINT` env var (and, transitionally, by the legacy
-// `AZURE_OPENAI_ENDPOINT` env var per ADR-20 §Q-P6-03).
+// `AZURE_AI_PROJECT_ENDPOINT` env var. The transitional `AZURE_OPENAI_ENDPOINT`
+// compatibility seam was dropped in the post-cutover cleanup PR per
+// ADR-20 §Q-P6-03.
 // ────────────────────────────────────────────────────────────────────────────────
 
 @description('Name of the existing Azure OpenAI resource')

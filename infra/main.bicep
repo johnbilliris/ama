@@ -859,10 +859,10 @@ resource redis 'Microsoft.Cache/Redis@2024-03-01' = {
 // ────────────────────────────────────────────────────────────────────────────────
 
 // Spec 036 / ADR-20 — hard cutover from Azure OpenAI (kind: 'OpenAI') to Microsoft
-// Foundry (kind: 'AIServices'). The endpoint URL is consumed by both
-// AZURE_AI_PROJECT_ENDPOINT (canonical, post-cutover) and AZURE_OPENAI_ENDPOINT
-// (compatibility seam — both env vars point at the same Foundry endpoint until
-// the env-var cleanup PR lands per ADR-20 §Q-P6-03).
+// Foundry (kind: 'AIServices'). The endpoint URL is consumed by callers via the
+// canonical AZURE_AI_PROJECT_ENDPOINT env var; the transitional
+// AZURE_OPENAI_ENDPOINT compatibility seam was dropped in the post-cutover
+// cleanup PR per ADR-20 §Q-P6-03.
 resource openAi 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: take('${abbrs.cognitiveServicesAccounts}${environmentName}-${take(uniqueSuffix, 6)}', 64)
   location: location

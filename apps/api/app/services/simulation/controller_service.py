@@ -8,9 +8,10 @@ Both backends emit the same SSE events defined in contracts/simulation-chat-api.
 
 Spec 036 / ADR-20 hard cutover: the legacy ``AZURE_OPENAI_*`` env-var
 seam and the ``LEGACY_AZURE_OPENAI=1`` rollback flag have been removed
-from this controller. Authentication is AAD-only (FR-RAG-FM-04). When
-``AZURE_SEARCH_ENDPOINT`` is set the controller auto-constructs an
-``AzureSearchRetrievalService`` so simulation chat is grounded in the
+from this controller (ADR-20 §Q-P6-03 post-cutover cleanup). Authentication
+is AAD-only (FR-RAG-FM-04). When ``AZURE_SEARCH_ENDPOINT`` is set the
+controller auto-constructs an ``AzureSearchRetrievalService`` so simulation
+chat is grounded in the
 same corpus as the live agents (FR-RAG-SIM-01..06).
 """
 
@@ -256,11 +257,12 @@ class SimulationControllerService:
     def _resolve_simulation_deployment(self) -> str | None:
         """Resolve the simulation deployment name from the Foundry env vars.
 
-        Spec 036 / ADR-20 hard cutover: the controller reads the Foundry
-        ``AZURE_AI_PROJECT_DEPLOYMENTS`` CSV and matches the simulation /
-        reasoning model key. The ``AZURE_OPENAI_*_DEPLOYMENT`` envs are
-        retained as a hermetic-test fallback when ``AZURE_AI_PROJECT_DEPLOYMENTS``
-        is empty (unit tests that pre-seed legacy vars without a Foundry map).
+        Spec 036 / ADR-20 hard cutover: the controller reads
+        ``AZURE_AI_PROJECT_DEPLOYMENTS`` (CSV of
+        ``modelId@version=deploymentName``) and matches the simulation /
+        reasoning model key. Returns ``None`` when the deployment cannot be
+        resolved — the caller surfaces ``openai_unavailable`` rather than
+        falling back to a legacy env var.
         """
         csv = os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS", "")
         model_key = (
@@ -275,11 +277,7 @@ class SimulationControllerService:
                 key, name = entry.split("=", 1)
                 if key.strip() == model_key:
                     return name.strip()
-        return (
-            os.environ.get("AZURE_OPENAI_DEPLOYMENT")
-            or os.environ.get("AZURE_OPENAI_SIMULATION_DEPLOYMENT")
-            or os.environ.get("AZURE_OPENAI_REASONING_DEPLOYMENT")
-        )
+        return None
 
     async def stream_turn(
         self,
@@ -451,7 +449,7 @@ class SimulationControllerService:
         # the legacy ``AZURE_OPENAI_API_KEY`` path was removed when the
         # cutover completed.
         try:
-            from openai import AsyncAzureOpenAI
+            from openai import AsyncAzureOpenAI  # AMA-FM04: allow Foundry transport (FR-RAG-FM-01)  # noqa: PLC0415
         except Exception:
             yield ChatEvent(
                 "error",
@@ -459,7 +457,7 @@ class SimulationControllerService:
             )
             return
 
-        endpoint = os.environ.get("AZURE_AI_PROJECT_ENDPOINT") or os.environ.get("AZURE_OPENAI_ENDPOINT")
+        endpoint = os.environ.get("AZURE_AI_PROJECT_ENDPOINT")
 
         deployment = self._resolve_simulation_deployment()
         api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
