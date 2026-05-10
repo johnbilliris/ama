@@ -229,6 +229,37 @@ def _expand_jurisdictions(request: Any) -> list[str]:
 # --------------------------------------------------------------------------- #
 
 
+def _reciprocal_rank_fusion_scored(
+    *,
+    vector_hits: list[Any],
+    lexical_hits: list[Any],
+    top_k: int,
+    vector_weight: float = RRF_VECTOR_WEIGHT_DEFAULT,
+    lexical_weight: float = RRF_LEXICAL_WEIGHT_DEFAULT,
+    key_fn: Any = None,
+) -> list[tuple[Any, float]]:
+    """Reciprocal Rank Fusion returning ``(item, fused_score)`` tuples (R-06).
+
+    The production ``retrieve()`` path uses this variant so it can derive a
+    per-chunk ``confidence`` value from the fused score when projecting raw
+    AI Search hits into ``RetrievedChunk`` (FR-RAG-AG-03). The score-less
+    wrapper ``_reciprocal_rank_fusion`` remains for legacy callers / tests.
+    """
+    key = key_fn or (lambda x: getattr(x, "chunk_id", None) or getattr(x, "id", None) or repr(x))
+    scores: dict[Any, float] = {}
+    items: dict[Any, Any] = {}
+    for rank, hit in enumerate(vector_hits, start=1):
+        k = key(hit)
+        scores[k] = scores.get(k, 0.0) + vector_weight / (_RRF_K + rank)
+        items.setdefault(k, hit)
+    for rank, hit in enumerate(lexical_hits, start=1):
+        k = key(hit)
+        scores[k] = scores.get(k, 0.0) + lexical_weight / (_RRF_K + rank)
+        items.setdefault(k, hit)
+    ranked = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)[:top_k]
+    return [(items[k], score) for k, score in ranked]
+
+
 def _reciprocal_rank_fusion(
     *,
     vector_hits: list[Any],
@@ -243,21 +274,67 @@ def _reciprocal_rank_fusion(
     fuse_score = vector_weight / (k + rank_v) + lexical_weight / (k + rank_l)
 
     Returns the top ``top_k`` items by fused score, deduplicated on
-    ``key_fn(item)``.
+    ``key_fn(item)``. Thin wrapper around ``_reciprocal_rank_fusion_scored``
+    that drops the score component (kept for backward compatibility).
     """
-    key = key_fn or (lambda x: getattr(x, "chunk_id", None) or getattr(x, "id", None) or repr(x))
-    scores: dict[Any, float] = {}
-    items: dict[Any, Any] = {}
-    for rank, hit in enumerate(vector_hits, start=1):
-        k = key(hit)
-        scores[k] = scores.get(k, 0.0) + vector_weight / (_RRF_K + rank)
-        items.setdefault(k, hit)
-    for rank, hit in enumerate(lexical_hits, start=1):
-        k = key(hit)
-        scores[k] = scores.get(k, 0.0) + lexical_weight / (_RRF_K + rank)
-        items.setdefault(k, hit)
-    ranked = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)[:top_k]
-    return [items[k] for k, _score in ranked]
+    return [
+        item
+        for item, _score in _reciprocal_rank_fusion_scored(
+            vector_hits=vector_hits,
+            lexical_hits=lexical_hits,
+            top_k=top_k,
+            vector_weight=vector_weight,
+            lexical_weight=lexical_weight,
+            key_fn=key_fn,
+        )
+    ]
+
+
+def _project_to_retrieved_chunk(hit: Any, fused_score: float, max_fused_score: float) -> Any:
+    """Project a raw AI Search hit (dict / ``SearchResult``) into a
+    ``RetrievedChunk`` (FR-RAG-AG-03).
+
+    The live ``azure.search.documents.aio.SearchClient`` returns hits with
+    extra fields (``corpus_entry_id``, ``embedding_model_id``,
+    ``corpus_build_sha``, ``tokens``, ``@search.score`` etc.). The pydantic
+    ``RetrievedChunk`` model is ``extra="forbid"``, so feeding raw hits in
+    triggers validation errors and silently collapses every retrieval to
+    ``chunks=[]``. This projection drops the extras, supplies the required
+    ``confidence`` (derived from the RRF fused score normalised against the
+    batch maximum), and honours the licence-mode / text-vs-summary
+    invariant (R-11). Pass-through if ``hit`` is already a
+    ``RetrievedChunk``.
+    """
+    from ama_domain.retrieval import RetrievedChunk  # noqa: PLC0415
+
+    if isinstance(hit, RetrievedChunk):
+        return hit
+
+    confidence = (fused_score / max_fused_score) if max_fused_score > 0 else 0.0
+    confidence = max(0.0, min(1.0, confidence))
+
+    licence_mode = _chunk_field(hit, "licence_mode", "full-text") or "full-text"
+    text_value = _chunk_field(hit, "text", None)
+    summary_value = _chunk_field(hit, "summary", None)
+    page_value = _chunk_field(hit, "page", 1)
+    try:
+        page_int = int(page_value) if page_value is not None else 1
+    except (TypeError, ValueError):
+        page_int = 1
+
+    return RetrievedChunk(
+        chunk_id=_chunk_field(hit, "chunk_id", "") or "",
+        sha256_of_chunk=_chunk_field(hit, "sha256_of_chunk", "") or "",
+        jurisdiction=_chunk_field(hit, "jurisdiction", "") or "",
+        topic=_chunk_field(hit, "topic", "") or "",
+        page=page_int,
+        licence_mode=licence_mode,
+        confidence=confidence,
+        text=text_value if licence_mode == "full-text" else None,
+        summary=summary_value if licence_mode == "metadata-only" else None,
+        source_url=_chunk_field(hit, "source_url", "") or "",
+        rendered_url=_chunk_field(hit, "rendered_url", "") or "",
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -714,21 +791,35 @@ class AzureSearchRetrievalService:
             vector_hits = []
             lexical_hits = []
 
-        fused = _reciprocal_rank_fusion(
+        fused_with_scores = _reciprocal_rank_fusion_scored(
             vector_hits=vector_hits,
             lexical_hits=lexical_hits,
             top_k=top_k,
             vector_weight=self.vector_weight,
             lexical_weight=self.lexical_weight,
         )
+        max_score = max((s for _, s in fused_with_scores), default=1.0)
         latency_ms = int((time.perf_counter() - start) * 1000)
 
         # Build the RetrievalResult — defer pydantic import to keep this
         # module light at module-load time.
         from ama_domain.retrieval import RetrievalResult  # noqa: PLC0415
 
+        # Project raw AI Search hits into RetrievedChunk: drops extra fields
+        # (corpus_entry_id, embedding_model_id, corpus_build_sha, tokens,
+        # @search.score, …) that would otherwise blow up extra="forbid",
+        # supplies the required confidence from the fused score, and honours
+        # the licence-mode text-vs-summary invariant (R-11). Failures are
+        # logged and skipped so a malformed hit can't sink the whole batch.
+        projected_chunks: list[Any] = []
+        for hit, fused_score in fused_with_scores:
+            try:
+                projected_chunks.append(_project_to_retrieved_chunk(hit, fused_score, max_score))
+            except Exception:  # noqa: BLE001
+                logger.warning("retrieval_chunk_projection_failed; skipping hit", exc_info=True)
+
         result = RetrievalResult(
-            chunks=fused,
+            chunks=projected_chunks,
             retrieval_latency_ms=latency_ms,
             embedding_model_id=self.embedding_model_id,
             corpus_build_sha=self.corpus_build_sha,
@@ -745,11 +836,14 @@ class AzureSearchRetrievalService:
             return []
         # Production wiring uses azure.search.documents.aio.SearchClient.
         # We return whatever the client.search() method yields — the test
-        # stubs preconfigure this.
+        # stubs preconfigure this. The ``kind: "vector"`` discriminator is
+        # REQUIRED by AI Search REST 2024-05-01-preview and later; omitting
+        # it returns 400 ``InvalidVectorQuery: 'kind' parameter is not set``
+        # which silently downgrades retrieval to lexical-only.
         try:
             iterable = client.search(
                 search_text=None,
-                vector_queries=[{"vector": embedding, "k": top, "fields": "embedding"}],
+                vector_queries=[{"kind": "vector", "vector": embedding, "k": top, "fields": "embedding"}],
                 filter=filter_clause,
                 top=top,
             )
