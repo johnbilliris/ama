@@ -84,8 +84,8 @@ param replicaTimeoutSeconds int = 28800
 @description('Initial corpus_build_sha (overridable per run; runner recomputes from git ls-tree)')
 param initialCorpusBuildSha string = ''
 
-@description('Workload profile (default Consumption)')
-param workloadProfileName string = 'Consumption'
+@description('Workload profile name. Empty string = Consumption-only environment (default for legacy CA envs); set to "Consumption" or a custom profile when running in a workload-profiles env.')
+param workloadProfileName string = ''
 
 @description('Application Insights connection string for runner telemetry')
 param appInsightsConnectionString string = ''
@@ -100,24 +100,24 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
       '${userAssignedIdentityId}': {}
     }
   }
-  properties: {
-    environmentId: environmentId
-    workloadProfileName: workloadProfileName
-    configuration: {
-      replicaTimeout: replicaTimeoutSeconds
-      replicaRetryLimit: 1
-      triggerType: 'Manual'
-      registries: [
-        {
-          server: containerRegistryLoginServer
-          identity: userAssignedIdentityId
+  properties: union(
+    {
+      environmentId: environmentId
+      configuration: {
+        replicaTimeout: replicaTimeoutSeconds
+        replicaRetryLimit: 1
+        triggerType: 'Manual'
+        registries: [
+          {
+            server: containerRegistryLoginServer
+            identity: userAssignedIdentityId
+          }
+        ]
+        manualTriggerConfig: {
+          parallelism: 1
+          replicaCompletionCount: 1
         }
-      ]
-      manualTriggerConfig: {
-        parallelism: 1
-        replicaCompletionCount: 1
       }
-    }
     template: {
       containers: [
         {
@@ -204,7 +204,9 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
         }
       ]
     }
-  }
+    },
+    empty(workloadProfileName) ? {} : { workloadProfileName: workloadProfileName }
+  )
 }
 
 // ────────────────────────────────────────────────────────────────────────────────

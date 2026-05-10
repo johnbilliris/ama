@@ -356,6 +356,20 @@ resource spec036SearchRbacAgents 'Microsoft.Authorization/roleAssignments@2022-0
   }
 }
 
+// Ingest-runner needs AcrPull on the registry so the Container Apps Job can
+// pull `ama/ingest-runner:<tag>` via its workload identity (no admin creds).
+var spec036AcrPullRoleId = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
+
+resource spec036AcrPullIngest 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (enableSpec036FoundryRag) {
+  name: guid('spec036-ingest-acr-pull', environmentName)
+  scope: containerRegistry
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036AcrPullRoleId)
+    principalId: spec036IngestIdentity!.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // ────────────────────────────────────────────────────────────────────────────────
 // Azure Maps (Disaster Mapper UI — data sovereignty: Australia East only)
 // ────────────────────────────────────────────────────────────────────────────────
