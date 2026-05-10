@@ -858,6 +858,51 @@ class FakeRetrievalService:
         )
 
 
+# --------------------------------------------------------------------------- #
+# Production builder — wires endpoint + Foundry embedder for runtime callers
+# --------------------------------------------------------------------------- #
+
+
+def build_default_retrieval_service() -> AzureSearchRetrievalService | None:
+    """Auto-construct the production retrieval service, or return ``None``.
+
+    Returns ``None`` when ``AZURE_SEARCH_ENDPOINT`` is unset — disables
+    grounding gracefully so the API / agents containers still boot when
+    the spec-036 cutover flag is off (the Bicep flag controls whether the
+    env var is set).
+
+    When the env var IS set, the service is constructed with:
+
+    * ``endpoint`` from ``AZURE_SEARCH_ENDPOINT``.
+    * ``index_alias`` from ``RETRIEVAL_INDEX_ALIAS`` (default ``"corpus"``).
+    * ``embed_query`` wired to a :class:`FoundryQueryEmbedder` so query
+      vectors match the 3072-dim corpus index. Without this wiring the
+      runtime would fall back to a 32-byte hash and AI Search would 4xx
+      every vector search — silently downgrading every citation.
+
+    Failures during construction are logged and ``None`` is returned so
+    a misconfigured Foundry endpoint doesn't crash the host service —
+    the retrieval path is best-effort by design (R-12).
+    """
+    endpoint = os.environ.get("AZURE_SEARCH_ENDPOINT")
+    if not endpoint:
+        return None
+    try:
+        from common.foundry_query_embedder import build_query_embedder  # noqa: PLC0415
+
+        embed_query = build_query_embedder()
+        return AzureSearchRetrievalService(
+            endpoint=endpoint,
+            index_alias=os.environ.get("RETRIEVAL_INDEX_ALIAS", "corpus"),
+            embed_query=embed_query,
+        )
+    except Exception:  # noqa: BLE001
+        logger.exception(
+            "build_default_retrieval_service_failed; grounding disabled for this process"
+        )
+        return None
+
+
 __all__ = [
     "AzureSearchRetrievalService",
     "ClassificationCeilingError",
@@ -868,6 +913,7 @@ __all__ = [
     "RetrievalService",
     "apply_comdisplan_activation",
     "apply_precedence_tiebreak",
+    "build_default_retrieval_service",
     "filter_by_agency",
     "get_authority_precedence_ranking_enabled",
     "get_national_emergency_active",

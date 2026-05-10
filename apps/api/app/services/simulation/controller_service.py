@@ -75,26 +75,26 @@ _REAL_WORLD_PATTERNS = [
 def _build_default_retrieval_service() -> Any:
     """Auto-construct the production ``AzureSearchRetrievalService`` when wired.
 
-    Returns ``None`` (disabling grounding) unless ``AZURE_SEARCH_ENDPOINT`` is
-    set. Production Bicep sets the env var on the API container app once
-    ``enableSpec036FoundryRag=true`` provisions the AI Search service. Tests
-    that pre-seed the env var get the live class wired automatically; tests
-    that want a stubbed retrieval service inject one via the constructor.
+    Delegates to ``common.retrieval_client.build_default_retrieval_service``
+    so the simulation chat and the agents share a single construction
+    site — both then carry the same Foundry-backed query embedder
+    (3072-dim) that matches the corpus index.
 
-    The lazy import keeps the unit-test path hermetic — no Azure SDK
-    initialisation happens unless the env var is present.
+    Returns ``None`` (disabling grounding) unless ``AZURE_SEARCH_ENDPOINT``
+    is set. Production Bicep sets the env var on the API container app
+    once the spec-036 cutover provisions the AI Search service. Tests
+    that pre-seed the env var get the live class wired automatically;
+    tests that want a stubbed retrieval service inject one via the
+    constructor.
     """
     if not os.environ.get("AZURE_SEARCH_ENDPOINT"):
         return None
     try:
         # Deferred import to avoid pulling apps/agents into the api hot path
         # when the feature is disabled.
-        from common.retrieval_client import AzureSearchRetrievalService  # noqa: PLC0415
+        from common.retrieval_client import build_default_retrieval_service  # noqa: PLC0415
 
-        return AzureSearchRetrievalService(
-            endpoint=os.environ["AZURE_SEARCH_ENDPOINT"],
-            index_alias=os.environ.get("RETRIEVAL_INDEX_ALIAS", "corpus"),
-        )
+        return build_default_retrieval_service()
     except Exception:  # noqa: BLE001
         logger.warning(
             "Failed to build AzureSearchRetrievalService; simulation chat will fall back to ungrounded mode",

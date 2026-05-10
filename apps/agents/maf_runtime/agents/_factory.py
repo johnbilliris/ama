@@ -113,6 +113,30 @@ def build_agent(definition: dict[str, Any]) -> Agent:
     return agent
 
 
+def _maybe_default_retrieval_service() -> Any:
+    """Return a production retrieval service when the env vars indicate live,
+    or ``None`` otherwise.
+
+    Imported lazily inside the helper so unit tests that don't touch
+    grounding never trigger an ``apps/agents/common`` import (keeps the
+    test path hermetic). Failures are swallowed and ``None`` returned —
+    the per-agent grounding flag will then resolve to ``False`` and the
+    legacy non-grounded path runs unchanged (R-12).
+    """
+    if not os.environ.get("AZURE_SEARCH_ENDPOINT"):
+        return None
+    try:
+        from common.retrieval_client import build_default_retrieval_service  # noqa: PLC0415
+
+        return build_default_retrieval_service()
+    except Exception:  # noqa: BLE001
+        logger.warning(
+            "default_retrieval_service_unavailable; agent grounding disabled",
+            exc_info=True,
+        )
+        return None
+
+
 class MafAgentFacade:
     """Thin facade that selects between legacy pipeline, MAF Agent, or shadow mode.
 
@@ -147,6 +171,16 @@ class MafAgentFacade:
         self._definition = load_agent_definition(self.name)
         self._output_schema = _resolve_pydantic_class(self._definition["output_schema"])
         self._maf_agent: Agent | None = None  # built lazily on first MAF call
+        # Spec 036 — when the caller didn't inject a retrieval service AND
+        # the runtime env vars indicate the grounding plane is live, auto-
+        # construct the production ``AzureSearchRetrievalService`` so the
+        # per-agent ``FEATURE_FOUNDRY_RAG_<AGENT>=1`` flag activates the
+        # grounded path in production without bespoke wiring per agent
+        # module. Failures are non-fatal — ``is_grounded_enabled()`` will
+        # return ``False`` and the agent falls back to legacy behaviour
+        # (R-12 canary plan).
+        if retrieval_service is None:
+            retrieval_service = _maybe_default_retrieval_service()
         self._retrieval = retrieval_service
         self._audit_writer = audit_writer
 

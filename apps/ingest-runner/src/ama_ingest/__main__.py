@@ -252,8 +252,17 @@ def _run_inner(
     active_index_name = alias.get_active_index()
     active_embedding_model_id = alias.get_active_embedding_model_id()
 
+    # Bootstrap case: alias does not yet exist. We MUST treat this as a
+    # blue-green flow so the success path creates the alias on completion.
+    # Without this, the very first run writes ``corpus-v1`` but never
+    # registers the ``corpus`` alias — the runtime then has no way to
+    # resolve ``RETRIEVAL_INDEX_ALIAS=corpus`` to a concrete index name.
+    bootstrap_alias = active_index_name is None
+
     blue_green = (
-        bool(active_embedding_model_id and active_embedding_model_id != args.embedding_model) or args.mode == "full"
+        bool(active_embedding_model_id and active_embedding_model_id != args.embedding_model)
+        or args.mode == "full"
+        or bootstrap_alias
     )
 
     if args.target_index:

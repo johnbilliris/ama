@@ -261,7 +261,12 @@ class LiveAzureSearchIndex:
 
     def list_chunk_ids(self) -> list[str]:
         ids: list[str] = []
-        results = self._client.search(search_text="*", select=["chunk_id_original", "chunk_id"], top=1000, include_total_count=False)
+        results = self._client.search(
+            search_text="*",
+            select=["chunk_id_original", "chunk_id"],
+            top=1000,
+            include_total_count=False,
+        )
         for r in results:
             cid = (r.get("chunk_id_original") if isinstance(r, dict) else getattr(r, "chunk_id_original", None)) or (
                 r.get("chunk_id") if isinstance(r, dict) else getattr(r, "chunk_id", None)
