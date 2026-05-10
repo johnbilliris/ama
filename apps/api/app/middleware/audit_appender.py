@@ -79,7 +79,20 @@ class AuditAppenderMiddleware(BaseHTTPMiddleware):
 
         body = await request.body()
 
+        request_received = False
+
         async def _receive() -> dict[str, Any]:
+            # F-A11/T240 — Starlette's BaseHTTPMiddleware framework re-invokes
+            # ``receive`` for client-disconnect detection on streaming
+            # responses (e.g. SSE). If we keep returning the original
+            # ``http.request`` payload, the ASGI router raises
+            # ``RuntimeError: Unexpected message received: http.request`` and
+            # truncates the response. Return the buffered body once, then
+            # signal disconnect on subsequent calls.
+            nonlocal request_received
+            if request_received:
+                return {"type": "http.disconnect"}
+            request_received = True
             return {"type": "http.request", "body": body, "more_body": False}
 
         request._receive = _receive  # type: ignore[attr-defined]
