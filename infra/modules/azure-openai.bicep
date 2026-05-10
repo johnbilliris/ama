@@ -314,3 +314,12 @@ output azureAiProjectDeployments string = '${reasoningModelName}@${reasoningMode
 // ingest-runner CLI. The carve-out preflight splits on `@` and looks up
 // `embeddingModelName` in `infra/parameters/foundry-carveout.yaml`.
 output embeddingModelKey string = '${embeddingModelName}@${embeddingModelVersion}'
+
+// Per-tier deployment model-key outputs — the simulation Controller and
+// agent llm clients pick the deployment by `<modelName>@<version>` from
+// the AZURE_AI_PROJECT_DEPLOYMENTS CSV. Until tiers diverge, all three
+// resolve to the same key (gpt-5.4@2026-03-05) — the CSV lookup picks
+// the first matching entry, which is the reasoning deployment.
+output reasoningDeploymentModelKey string = '${reasoningModelName}@${reasoningModelVersion}'
+output draftingDeploymentModelKey string = '${draftingModelName}@${draftingModelVersion}'
+output simulationDeploymentModelKey string = '${simulationModelName}@${simulationModelVersion}'

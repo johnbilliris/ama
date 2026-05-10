@@ -567,7 +567,7 @@ class SimulationControllerService:
                 req = RetrievalRequest(
                     agent_name="SimulationController",
                     jurisdictions=[os.environ.get("AMA_SIM_JURISDICTION", "national")],
-                    hazard_type=None,
+                    hazard_type=os.environ.get("AMA_SIM_HAZARD_TYPE", "general"),
                     query_text=forwarded_message[:4000],
                     top_k=5,
                     tenant_id=tenant_id,

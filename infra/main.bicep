@@ -954,6 +954,13 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
             { name: 'AZURE_AI_PROJECT_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: openAiDeployments.outputs.azureAiProjectDeployments }
+            // Per-tier deployment keys — the simulation Controller uses
+            // `AZURE_AI_SIMULATION_MODEL_KEY` to pick the right deployment
+            // out of the CSV map; without it the lookup falls back to
+            // ``gpt-4o`` and raises ``openai_unavailable``.
+            { name: 'AZURE_AI_REASONING_MODEL_KEY', value: '${openAiDeployments.outputs.reasoningDeploymentModelKey}' }
+            { name: 'AZURE_AI_DRAFTING_MODEL_KEY', value: '${openAiDeployments.outputs.draftingDeploymentModelKey}' }
+            { name: 'AZURE_AI_SIMULATION_MODEL_KEY', value: '${openAiDeployments.outputs.simulationDeploymentModelKey}' }
             // Spec 036 grounding plane (FR-RAG-IDX-04). Empty string when
             // enableSpec036FoundryRag=false so retrieval auto-wiring stays off
             // for hermetic dev tenants.
@@ -1032,6 +1039,14 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
             { name: 'AZURE_AI_PROJECT_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: openAiDeployments.outputs.azureAiProjectDeployments }
+            // The simulation chat client + agent llm clients pick the deployment
+            // by `<modelName>@<version>` key. All three GPT tiers currently use
+            // the same model+version (gpt-5.4@2026-03-05), so a single key
+            // matches; if tiers diverge, keep the keys aligned with the per-
+            // deployment outputs in `infra/modules/azure-openai.bicep`.
+            { name: 'AZURE_AI_REASONING_MODEL_KEY', value: '${openAiDeployments.outputs.reasoningDeploymentModelKey}' }
+            { name: 'AZURE_AI_DRAFTING_MODEL_KEY', value: '${openAiDeployments.outputs.draftingDeploymentModelKey}' }
+            { name: 'AZURE_AI_SIMULATION_MODEL_KEY', value: '${openAiDeployments.outputs.simulationDeploymentModelKey}' }
             // Spec 036 grounding plane (FR-RAG-IDX-04). Empty string when
             // enableSpec036FoundryRag=false so retrieval auto-wiring stays off
             // for hermetic dev tenants.

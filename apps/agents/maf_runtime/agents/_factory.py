@@ -226,7 +226,7 @@ class MafAgentFacade:
         req = RetrievalRequest(
             agent_name=self.grounded_name,
             jurisdictions=jurisdictions,
-            hazard_type=hazard_type,
+            hazard_type=hazard_type or "general",
             query_text=query_text,
             top_k=top_k,
             tenant_id=tenant_id,
