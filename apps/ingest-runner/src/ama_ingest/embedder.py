@@ -202,16 +202,26 @@ class FoundryEmbedder:
     def _ensure_client(self) -> Any:
         if self._client is not None:
             return self._client
-        from azure.ai.inference import EmbeddingsClient  # noqa: PLC0415
-        from azure.identity import DefaultAzureCredential  # noqa: PLC0415
+        from azure.identity import DefaultAzureCredential, get_bearer_token_provider  # noqa: PLC0415
 
         if not self._endpoint:
             raise EmbedderConfigurationError("AZURE_AI_PROJECT_ENDPOINT is not set")
         cred = self._cred or DefaultAzureCredential()
-        self._client = EmbeddingsClient(
-            endpoint=self._endpoint.rstrip("/"),
-            credential=cred,
-            credential_scopes=[AAD_SCOPE],
+
+        # AIServices / Azure OpenAI accounts expose embeddings via the
+        # ``/openai/deployments/<dep>/embeddings`` Azure OpenAI surface, not the
+        # Foundry Inference SDK's ``/models/embeddings`` route. Mirror the chat
+        # seam (``apps/agents/maf_runtime/chat_client.py``) and use
+        # ``openai.AzureOpenAI`` against ``cognitiveservices.azure.com`` so a
+        # single Foundry account can serve both chat and embeddings.
+        from openai import AzureOpenAI  # noqa: PLC0415
+
+        token_provider = get_bearer_token_provider(cred, AAD_SCOPE)
+        api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-10-21")
+        self._client = AzureOpenAI(
+            azure_endpoint=self._endpoint.rstrip("/"),
+            azure_ad_token_provider=token_provider,
+            api_version=api_version,
         )
         return self._client
 
@@ -283,7 +293,7 @@ class FoundryEmbedder:
         client = self._ensure_client()
         start = time.perf_counter()
         try:
-            response = client.embed(model=deployment, input=list(texts))
+            response = client.embeddings.create(model=deployment, input=list(texts))
         except Exception as exc:  # noqa: BLE001
             status = getattr(exc, "status_code", None) or getattr(exc, "code", None)
             if status in (429, 503):

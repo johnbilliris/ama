@@ -60,6 +60,12 @@ param indexAlias string = 'corpus'
 @description('Embedding deployment name surfaced via Foundry (FR-RAG-IDX-02; R-02)')
 param embeddingDeploymentName string
 
+@description('Embedding model key in `<modelId>@<version>` form (FR-RAG-CV-01 — carveout preflight splits on `@` to look up the registry row)')
+param embeddingModelKey string
+
+@description('CSV map of `<modelId>@<version>=<deploymentName>` entries for every Foundry deployment used (consumed by the embedder via AZURE_AI_PROJECT_DEPLOYMENTS — see apps/ingest-runner/src/ama_ingest/embedder.py:_resolve)')
+param azureAiProjectDeployments string = ''
+
 @description('Foundry / Azure AI project endpoint (e.g. https://<proj>.services.ai.azure.com)')
 param azureAiProjectEndpoint string
 
@@ -144,7 +150,7 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
             '--index-alias'
             indexAlias
             '--embedding-model'
-            embeddingDeploymentName
+            embeddingModelKey
             '--carveout-registry'
             carveoutRegistryPath
             '--mode'
@@ -164,12 +170,16 @@ resource job 'Microsoft.App/jobs@2024-03-01' = {
               value: azureAiProjectEndpoint
             }
             {
+              name: 'AZURE_AI_PROJECT_DEPLOYMENTS'
+              value: azureAiProjectDeployments
+            }
+            {
               name: 'EMBEDDING_DEPLOYMENT'
               value: embeddingDeploymentName
             }
             {
               name: 'EMBEDDING_MODEL'
-              value: embeddingDeploymentName
+              value: embeddingModelKey
             }
             {
               name: 'CARVEOUT_REGISTRY'

@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "15713507501131055070"
+      "templateHash": "12327565110473425642"
     }
   },
   "parameters": {
@@ -169,9 +169,9 @@
     },
     "enableSpec036FoundryRag": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
-        "description": "Spec-036 — Provision the Foundry-RAG blue-green AI Search index + ingest-runner job. Default OFF in dev; flip on per Phase B → C → D rollout."
+        "description": "Spec-036 — Provision the Foundry-RAG blue-green AI Search index + ingest-runner job. Default ON post-cutover (ADR-20 §Q-P6); flip off only for hermetic dev tenants."
       }
     },
     "spec036SearchServiceName": {
@@ -188,25 +188,11 @@
         "description": "Spec-036 — Ingest-runner image tag (azd deploy / cd.yml sets this to the corpus_build_sha)."
       }
     },
-    "spec036FoundryEndpoint": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Spec-036 — Foundry / Azure AI project endpoint URL for the embedding deployment."
-      }
-    },
     "spec036EmbeddingDeploymentName": {
       "type": "string",
       "defaultValue": "text-embedding-3-large",
       "metadata": {
         "description": "Spec-036 — Embedding deployment name (Foundry)."
-      }
-    },
-    "spec036ServiceBusFqdn": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Spec-036 — Service Bus FQDN for the build-complete topic (FR-RAG-IDX-05)."
       }
     }
   },
@@ -250,6 +236,11 @@
     "developerIpRules": "[if(empty(parameters('developerIpAddress')), createArray(), createArray(createObject('ipAddressOrRange', parameters('developerIpAddress'))))]",
     "cosmosIpRules": "[if(parameters('restrictNetworkAccess'), concat(variables('portalAndServiceIpRules'), variables('developerIpRules')), variables('developerIpRules'))]",
     "spec036SearchIndexDataContributorRoleId": "8ebe5a00-799e-43f5-93ac-243d3dce84a7",
+    "spec036SearchIndexDataReaderRoleId": "1407120a-92aa-4202-b7e9-c0e197c71c8f",
+    "spec036SearchServiceContributorRoleId": "7ca78c08-252a-4471-8644-bb5ff32d4ba0",
+    "spec036ServiceBusDataSenderRoleId": "69a216fc-b8fb-44d8-bc22-1f3c2cd27a39",
+    "spec036CognitiveServicesUserRoleId": "a97b65f3-24c7-4388-baec-2e87135dc908",
+    "spec036AcrPullRoleId": "7f951dda-4ed3-4680-a7ca-43fe172d538d",
     "blobContainers": [
       "raw-payloads",
       "binary-assets",
@@ -268,6 +259,53 @@
       "location": "[parameters('location')]",
       "tags": "[variables('tags')]"
     },
+    "spec036ServiceBus": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.ServiceBus/namespaces",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('sb-corpus-{0}-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6))]",
+      "location": "[parameters('location')]",
+      "tags": "[variables('tags')]",
+      "sku": {
+        "name": "Standard",
+        "tier": "Standard"
+      },
+      "properties": {
+        "disableLocalAuth": true,
+        "minimumTlsVersion": "1.2",
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    "spec036CorpusTopic": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}', format('sb-corpus-{0}-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 'topic.corpus-build-complete')]",
+      "properties": {
+        "enablePartitioning": false,
+        "requiresDuplicateDetection": true,
+        "duplicateDetectionHistoryTimeWindow": "PT1H",
+        "defaultMessageTimeToLive": "P14D"
+      },
+      "dependsOn": [
+        "spec036ServiceBus"
+      ]
+    },
+    "spec036CorpusSubscription": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "apiVersion": "2022-10-01-preview",
+      "name": "[format('{0}/{1}/{2}', format('sb-corpus-{0}-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 'topic.corpus-build-complete', 'sub.cd-pipeline')]",
+      "properties": {
+        "deadLetteringOnMessageExpiration": true,
+        "deadLetteringOnFilterEvaluationExceptions": true,
+        "maxDeliveryCount": 10,
+        "lockDuration": "PT1M"
+      },
+      "dependsOn": [
+        "spec036CorpusTopic"
+      ]
+    },
     "spec036SearchRbac": {
       "condition": "[parameters('enableSpec036FoundryRag')]",
       "type": "Microsoft.Authorization/roleAssignments",
@@ -279,6 +317,95 @@
         "principalType": "ServicePrincipal"
       },
       "dependsOn": [
+        "spec036IngestIdentity"
+      ]
+    },
+    "spec036SearchServiceContribRbac": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid('spec036-ingest-search-service-contributor', parameters('environmentName'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('spec036SearchServiceContributorRoleId'))]",
+        "principalId": "[reference('spec036IngestIdentity').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "spec036IngestIdentity"
+      ]
+    },
+    "spec036FoundryRbacIngest": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64))]",
+      "name": "[guid('spec036-ingest-foundry-cogsvc-user', parameters('environmentName'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('spec036CognitiveServicesUserRoleId'))]",
+        "principalId": "[reference('spec036IngestIdentity').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "openAi",
+        "spec036IngestIdentity"
+      ]
+    },
+    "spec036ServiceBusRbacIngest": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid('spec036-ingest-sb-data-sender', parameters('environmentName'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('spec036ServiceBusDataSenderRoleId'))]",
+        "principalId": "[reference('spec036IngestIdentity').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "spec036IngestIdentity",
+        "spec036ServiceBus"
+      ]
+    },
+    "spec036SearchRbacApi": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid('spec036-api-search-data-reader', parameters('environmentName'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('spec036SearchIndexDataReaderRoleId'))]",
+        "principalId": "[reference('apiContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "apiContainerApp"
+      ]
+    },
+    "spec036SearchRbacAgents": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid('spec036-agents-search-data-reader', parameters('environmentName'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('spec036SearchIndexDataReaderRoleId'))]",
+        "principalId": "[reference('agentsContainerApp', '2024-03-01', 'full').identity.principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "agentsContainerApp"
+      ]
+    },
+    "spec036AcrPullIngest": {
+      "condition": "[parameters('enableSpec036FoundryRag')]",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[format('Microsoft.ContainerRegistry/registries/{0}', format('{0}{1}{2}', variables('abbrs').containerRegistryRegistries, replace(parameters('environmentName'), '-', ''), take(variables('uniqueSuffix'), 6)))]",
+      "name": "[guid('spec036-ingest-acr-pull', parameters('environmentName'))]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('spec036AcrPullRoleId'))]",
+        "principalId": "[reference('spec036IngestIdentity').principalId]",
+        "principalType": "ServicePrincipal"
+      },
+      "dependsOn": [
+        "containerRegistry",
         "spec036IngestIdentity"
       ]
     },
@@ -869,12 +996,15 @@
       "name": "[take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64)]",
       "location": "[parameters('location')]",
       "tags": "[variables('tags')]",
-      "kind": "OpenAI",
+      "kind": "AIServices",
       "sku": {
         "name": "S0"
       },
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "properties": {
-        "customSubDomainName": "[format('{0}-openai-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6))]",
+        "customSubDomainName": "[format('{0}-aif-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6))]",
         "publicNetworkAccess": "Enabled",
         "disableLocalAuth": true
       }
@@ -971,24 +1101,20 @@
                   "value": "[reference('monitoring').outputs.appInsightsConnectionString.value]"
                 },
                 {
-                  "name": "AZURE_OPENAI_ENDPOINT",
+                  "name": "AZURE_AI_PROJECT_ENDPOINT",
                   "value": "[reference('openAi').endpoint]"
                 },
                 {
-                  "name": "AZURE_OPENAI_REASONING_DEPLOYMENT",
-                  "value": "[reference('openAiDeployments').outputs.reasoningDeploymentName.value]"
+                  "name": "AZURE_AI_PROJECT_DEPLOYMENTS",
+                  "value": "[reference('openAiDeployments').outputs.azureAiProjectDeployments.value]"
                 },
                 {
-                  "name": "AZURE_OPENAI_DRAFTING_DEPLOYMENT",
-                  "value": "[reference('openAiDeployments').outputs.draftingDeploymentName.value]"
+                  "name": "AZURE_SEARCH_ENDPOINT",
+                  "value": "[if(parameters('enableSpec036FoundryRag'), format('https://{0}.search.windows.net', reference('spec036SearchBlueGreen').outputs.searchServiceName.value), '')]"
                 },
                 {
-                  "name": "AZURE_OPENAI_SIMULATION_DEPLOYMENT",
-                  "value": "[reference('openAiDeployments').outputs.simulationDeploymentName.value]"
-                },
-                {
-                  "name": "AZURE_OPENAI_DEPLOYMENT",
-                  "value": "[reference('openAiDeployments').outputs.simulationDeploymentName.value]"
+                  "name": "RETRIEVAL_INDEX_ALIAS",
+                  "value": "corpus"
                 },
                 {
                   "name": "OTEL_SERVICE_NAME",
@@ -1041,6 +1167,7 @@
         "openAi",
         "openAiDeployments",
         "redis",
+        "spec036SearchBlueGreen",
         "storage"
       ]
     },
@@ -1105,20 +1232,40 @@
                   "value": "[reference('monitoring').outputs.appInsightsConnectionString.value]"
                 },
                 {
-                  "name": "AZURE_OPENAI_ENDPOINT",
+                  "name": "AZURE_AI_PROJECT_ENDPOINT",
                   "value": "[reference('openAi').endpoint]"
                 },
                 {
-                  "name": "AZURE_OPENAI_REASONING_DEPLOYMENT",
-                  "value": "[reference('openAiDeployments').outputs.reasoningDeploymentName.value]"
+                  "name": "AZURE_AI_PROJECT_DEPLOYMENTS",
+                  "value": "[reference('openAiDeployments').outputs.azureAiProjectDeployments.value]"
                 },
                 {
-                  "name": "AZURE_OPENAI_DRAFTING_DEPLOYMENT",
-                  "value": "[reference('openAiDeployments').outputs.draftingDeploymentName.value]"
+                  "name": "AZURE_SEARCH_ENDPOINT",
+                  "value": "[if(parameters('enableSpec036FoundryRag'), format('https://{0}.search.windows.net', reference('spec036SearchBlueGreen').outputs.searchServiceName.value), '')]"
                 },
                 {
-                  "name": "AZURE_OPENAI_SIMULATION_DEPLOYMENT",
-                  "value": "[reference('openAiDeployments').outputs.simulationDeploymentName.value]"
+                  "name": "RETRIEVAL_INDEX_ALIAS",
+                  "value": "corpus"
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_MONITORING",
+                  "value": "1"
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_RISK_ASSESSMENT",
+                  "value": "1"
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_EVACUATION",
+                  "value": "1"
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_RESOURCE_ALLOCATION",
+                  "value": "1"
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_COMMUNICATION",
+                  "value": "1"
                 },
                 {
                   "name": "API_ENDPOINT",
@@ -1146,6 +1293,7 @@
         "openAi",
         "openAiDeployments",
         "redis",
+        "spec036SearchBlueGreen",
         "storage"
       ]
     },
@@ -31893,13 +32041,19 @@
             "value": "corpus"
           },
           "embeddingDeploymentName": {
-            "value": "[parameters('spec036EmbeddingDeploymentName')]"
+            "value": "[reference('openAiDeployments').outputs.embeddingDeploymentName.value]"
+          },
+          "embeddingModelKey": {
+            "value": "[reference('openAiDeployments').outputs.embeddingModelKey.value]"
+          },
+          "azureAiProjectDeployments": {
+            "value": "[reference('openAiDeployments').outputs.azureAiProjectDeployments.value]"
           },
           "azureAiProjectEndpoint": {
-            "value": "[parameters('spec036FoundryEndpoint')]"
+            "value": "[reference('openAi').endpoint]"
           },
           "serviceBusFullyQualifiedNamespace": {
-            "value": "[parameters('spec036ServiceBusFqdn')]"
+            "value": "[format('{0}.servicebus.windows.net', format('sb-corpus-{0}-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6)))]"
           },
           "appInsightsConnectionString": {
             "value": "[reference('monitoring').outputs.appInsightsConnectionString.value]"
@@ -31912,7 +32066,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "914681163536647742"
+              "templateHash": "15501685227489318445"
             }
           },
           "parameters": {
@@ -31988,6 +32142,19 @@
                 "description": "Embedding deployment name surfaced via Foundry (FR-RAG-IDX-02; R-02)"
               }
             },
+            "embeddingModelKey": {
+              "type": "string",
+              "metadata": {
+                "description": "Embedding model key in `<modelId>@<version>` form (FR-RAG-CV-01 — carveout preflight splits on `@` to look up the registry row)"
+              }
+            },
+            "azureAiProjectDeployments": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "CSV map of `<modelId>@<version>=<deploymentName>` entries for every Foundry deployment used (consumed by the embedder via AZURE_AI_PROJECT_DEPLOYMENTS — see apps/ingest-runner/src/ama_ingest/embedder.py:_resolve)"
+              }
+            },
             "azureAiProjectEndpoint": {
               "type": "string",
               "metadata": {
@@ -32044,9 +32211,9 @@
             },
             "workloadProfileName": {
               "type": "string",
-              "defaultValue": "Consumption",
+              "defaultValue": "",
               "metadata": {
-                "description": "Workload profile (default Consumption)"
+                "description": "Workload profile name. Empty string = Consumption-only environment (default for legacy CA envs); set to \"Consumption\" or a custom profile when running in a workload-profiles env."
               }
             },
             "appInsightsConnectionString": {
@@ -32070,106 +32237,7 @@
                   "[format('{0}', parameters('userAssignedIdentityId'))]": {}
                 }
               },
-              "properties": {
-                "environmentId": "[parameters('environmentId')]",
-                "workloadProfileName": "[parameters('workloadProfileName')]",
-                "configuration": {
-                  "replicaTimeout": "[parameters('replicaTimeoutSeconds')]",
-                  "replicaRetryLimit": 1,
-                  "triggerType": "Manual",
-                  "registries": [
-                    {
-                      "server": "[parameters('containerRegistryLoginServer')]",
-                      "identity": "[parameters('userAssignedIdentityId')]"
-                    }
-                  ],
-                  "manualTriggerConfig": {
-                    "parallelism": 1,
-                    "replicaCompletionCount": 1
-                  }
-                },
-                "template": {
-                  "containers": [
-                    {
-                      "name": "ingest-runner",
-                      "image": "[parameters('image')]",
-                      "resources": {
-                        "cpu": "[json(parameters('cpu'))]",
-                        "memory": "[parameters('memory')]"
-                      },
-                      "command": [
-                        "python"
-                      ],
-                      "args": [
-                        "-m",
-                        "ama_ingest",
-                        "--corpus-root",
-                        "docs/corpus",
-                        "--search-endpoint",
-                        "[parameters('searchServiceEndpoint')]",
-                        "--index-alias",
-                        "[parameters('indexAlias')]",
-                        "--embedding-model",
-                        "[parameters('embeddingDeploymentName')]",
-                        "--carveout-registry",
-                        "[parameters('carveoutRegistryPath')]",
-                        "--mode",
-                        "incremental"
-                      ],
-                      "env": [
-                        {
-                          "name": "AZURE_CLIENT_ID",
-                          "value": "[parameters('userAssignedClientId')]"
-                        },
-                        {
-                          "name": "AZURE_SEARCH_ENDPOINT",
-                          "value": "[parameters('searchServiceEndpoint')]"
-                        },
-                        {
-                          "name": "AZURE_AI_PROJECT_ENDPOINT",
-                          "value": "[parameters('azureAiProjectEndpoint')]"
-                        },
-                        {
-                          "name": "EMBEDDING_DEPLOYMENT",
-                          "value": "[parameters('embeddingDeploymentName')]"
-                        },
-                        {
-                          "name": "EMBEDDING_MODEL",
-                          "value": "[parameters('embeddingDeploymentName')]"
-                        },
-                        {
-                          "name": "CARVEOUT_REGISTRY",
-                          "value": "[parameters('carveoutRegistryPath')]"
-                        },
-                        {
-                          "name": "AZURE_AI_PROJECT_REGION",
-                          "value": "[parameters('location')]"
-                        },
-                        {
-                          "name": "CORPUS_BUILD_SHA",
-                          "value": "[parameters('initialCorpusBuildSha')]"
-                        },
-                        {
-                          "name": "SERVICE_BUS_FQDN",
-                          "value": "[parameters('serviceBusFullyQualifiedNamespace')]"
-                        },
-                        {
-                          "name": "SERVICE_BUS_BUILD_COMPLETE_TOPIC",
-                          "value": "[parameters('serviceBusBuildCompleteTopic')]"
-                        },
-                        {
-                          "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
-                          "value": "[parameters('appInsightsConnectionString')]"
-                        },
-                        {
-                          "name": "AMA_REQUIRE_AAD",
-                          "value": "1"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              }
+              "properties": "[union(createObject('environmentId', parameters('environmentId'), 'configuration', createObject('replicaTimeout', parameters('replicaTimeoutSeconds'), 'replicaRetryLimit', 1, 'triggerType', 'Manual', 'registries', createArray(createObject('server', parameters('containerRegistryLoginServer'), 'identity', parameters('userAssignedIdentityId'))), 'manualTriggerConfig', createObject('parallelism', 1, 'replicaCompletionCount', 1)), 'template', createObject('containers', createArray(createObject('name', 'ingest-runner', 'image', parameters('image'), 'resources', createObject('cpu', json(parameters('cpu')), 'memory', parameters('memory')), 'command', createArray('python'), 'args', createArray('-m', 'ama_ingest', '--corpus-root', 'docs/corpus', '--search-endpoint', parameters('searchServiceEndpoint'), '--index-alias', parameters('indexAlias'), '--embedding-model', parameters('embeddingModelKey'), '--carveout-registry', parameters('carveoutRegistryPath'), '--mode', 'incremental'), 'env', createArray(createObject('name', 'AZURE_CLIENT_ID', 'value', parameters('userAssignedClientId')), createObject('name', 'AZURE_SEARCH_ENDPOINT', 'value', parameters('searchServiceEndpoint')), createObject('name', 'AZURE_AI_PROJECT_ENDPOINT', 'value', parameters('azureAiProjectEndpoint')), createObject('name', 'AZURE_AI_PROJECT_DEPLOYMENTS', 'value', parameters('azureAiProjectDeployments')), createObject('name', 'EMBEDDING_DEPLOYMENT', 'value', parameters('embeddingDeploymentName')), createObject('name', 'EMBEDDING_MODEL', 'value', parameters('embeddingModelKey')), createObject('name', 'CARVEOUT_REGISTRY', 'value', parameters('carveoutRegistryPath')), createObject('name', 'AZURE_AI_PROJECT_REGION', 'value', parameters('location')), createObject('name', 'CORPUS_BUILD_SHA', 'value', parameters('initialCorpusBuildSha')), createObject('name', 'SERVICE_BUS_FQDN', 'value', parameters('serviceBusFullyQualifiedNamespace')), createObject('name', 'SERVICE_BUS_BUILD_COMPLETE_TOPIC', 'value', parameters('serviceBusBuildCompleteTopic')), createObject('name', 'APPLICATIONINSIGHTS_CONNECTION_STRING', 'value', parameters('appInsightsConnectionString')), createObject('name', 'AMA_REQUIRE_AAD', 'value', '1')))))), if(empty(parameters('workloadProfileName')), createObject(), createObject('workloadProfileName', parameters('workloadProfileName'))))]"
             }
           ],
           "outputs": {
@@ -32196,8 +32264,11 @@
         "containerRegistry",
         "managedEnvironment",
         "monitoring",
+        "openAi",
+        "openAiDeployments",
         "spec036IngestIdentity",
-        "spec036SearchBlueGreen"
+        "spec036SearchBlueGreen",
+        "spec036ServiceBus"
       ]
     },
     "azureMaps": {
@@ -33437,11 +33508,8 @@
             "_generator": {
               "name": "bicep",
               "version": "0.39.26.7824",
-              "templateHash": "9218557975815398679"
-            },
-            "deprecated": "036-foundry-rag-grounding",
-            "deprecationReason": "Replaced by Foundry-hosted models per spec 036; kept for canary fallback (FR-RAG-FM-06). Delete in E1.",
-            "replacedBy": "apps/agents/common/foundry_chat_client.py + infra/modules/ai-search-blue-green.bicep"
+              "templateHash": "4652717588428899439"
+            }
           },
           "parameters": {
             "openAiAccountName": {
@@ -33536,6 +33604,28 @@
               "minValue": 1,
               "metadata": {
                 "description": "Simulation Controller TPM quota (K). Dev=20, Prod=80. Isolated quota so an exercise cannot starve live agents."
+              }
+            },
+            "embeddingModelName": {
+              "type": "string",
+              "defaultValue": "text-embedding-3-large",
+              "metadata": {
+                "description": "Embedding model name (Spec 036 FR-RAG-IDX-02 — corpus chunks → 3072-dim vectors)."
+              }
+            },
+            "embeddingModelVersion": {
+              "type": "string",
+              "defaultValue": "1",
+              "metadata": {
+                "description": "Embedding model version."
+              }
+            },
+            "embeddingTpmQuota": {
+              "type": "int",
+              "defaultValue": 60,
+              "minValue": 1,
+              "metadata": {
+                "description": "Embedding deployment TPM quota (K). Sized for full corpus rebuild headroom."
               }
             },
             "modelDeploymentSku": {
@@ -33683,6 +33773,25 @@
               ]
             },
             {
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2024-10-01",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('{0}-{1}', parameters('embeddingModelName'), parameters('envPrefix')))]",
+              "sku": {
+                "name": "Standard",
+                "capacity": "[parameters('embeddingTpmQuota')]"
+              },
+              "properties": {
+                "model": {
+                  "format": "OpenAI",
+                  "name": "[parameters('embeddingModelName')]",
+                  "version": "[parameters('embeddingModelVersion')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-sim-{0}', parameters('envPrefix')))]"
+              ]
+            },
+            {
               "copy": {
                 "name": "openAiRoleAssignment",
                 "count": "[length(parameters('agentPrincipalIds'))]"
@@ -33736,6 +33845,10 @@
               "type": "string",
               "value": "[format('gpt-5.4-sim-{0}', parameters('envPrefix'))]"
             },
+            "embeddingDeploymentName": {
+              "type": "string",
+              "value": "[format('{0}-{1}', parameters('embeddingModelName'), parameters('envPrefix'))]"
+            },
             "reasoningRaiPolicyName": {
               "type": "string",
               "value": "[variables('reasoningRaiPolicyName')]"
@@ -33751,6 +33864,14 @@
             "openAiEndpoint": {
               "type": "string",
               "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')), '2024-10-01').endpoint]"
+            },
+            "azureAiProjectDeployments": {
+              "type": "string",
+              "value": "[format('{0}@{1}={2},{3}@{4}={5},{6}@{7}={8},{9}@{10}={11}', parameters('reasoningModelName'), parameters('reasoningModelVersion'), format('gpt-5.4-{0}', parameters('envPrefix')), parameters('draftingModelName'), parameters('draftingModelVersion'), format('gpt-5.4-mini-{0}', parameters('envPrefix')), parameters('simulationModelName'), parameters('simulationModelVersion'), format('gpt-5.4-sim-{0}', parameters('envPrefix')), parameters('embeddingModelName'), parameters('embeddingModelVersion'), format('{0}-{1}', parameters('embeddingModelName'), parameters('envPrefix')))]"
+            },
+            "embeddingModelKey": {
+              "type": "string",
+              "value": "[format('{0}@{1}', parameters('embeddingModelName'), parameters('embeddingModelVersion'))]"
             }
           }
         }
@@ -33786,9 +33907,13 @@
       "type": "string",
       "value": "[reference('redis').hostName]"
     },
-    "AZURE_OPENAI_ENDPOINT": {
+    "AZURE_AI_PROJECT_ENDPOINT": {
       "type": "string",
       "value": "[reference('openAi').endpoint]"
+    },
+    "AZURE_AI_PROJECT_DEPLOYMENTS": {
+      "type": "string",
+      "value": "[reference('openAiDeployments').outputs.azureAiProjectDeployments.value]"
     },
     "AZURE_APP_INSIGHTS_CONNECTION_STRING": {
       "type": "string",

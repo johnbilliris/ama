@@ -287,6 +287,8 @@ module spec036IngestRunnerJob './modules/ingest-runner-job.bicep' = if (enableSp
     searchServiceEndpoint: 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net'
     indexAlias: 'corpus'
     embeddingDeploymentName: openAiDeployments.outputs.embeddingDeploymentName
+    embeddingModelKey: openAiDeployments.outputs.embeddingModelKey
+    azureAiProjectDeployments: openAiDeployments.outputs.azureAiProjectDeployments
     azureAiProjectEndpoint: openAi.properties.endpoint
     serviceBusFullyQualifiedNamespace: '${spec036ServiceBus!.name}.servicebus.windows.net'
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
@@ -297,6 +299,7 @@ module spec036IngestRunnerJob './modules/ingest-runner-job.bicep' = if (enableSp
 // the search service (FR-RAG-IDX-04 write path; FR-S03 AAD-only).
 var spec036SearchIndexDataContributorRoleId = '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
 var spec036SearchIndexDataReaderRoleId = '1407120a-92aa-4202-b7e9-c0e197c71c8f'
+var spec036SearchServiceContributorRoleId = '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
 var spec036ServiceBusDataSenderRoleId = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'
 var spec036CognitiveServicesUserRoleId = 'a97b65f3-24c7-4388-baec-2e87135dc908'
 
@@ -305,6 +308,20 @@ resource spec036SearchRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' 
   scope: resourceGroup()
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036SearchIndexDataContributorRoleId)
+    principalId: spec036IngestIdentity!.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// FR-RAG-IDX-04 — ingest-runner needs Search Service Contributor for index +
+// alias create/update (control plane). Data Contributor above only grants
+// document-level read/write; alias and schema operations require the
+// service-level role.
+resource spec036SearchServiceContribRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (enableSpec036FoundryRag) {
+  name: guid('spec036-ingest-search-service-contributor', environmentName)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036SearchServiceContributorRoleId)
     principalId: spec036IngestIdentity!.properties.principalId
     principalType: 'ServicePrincipal'
   }

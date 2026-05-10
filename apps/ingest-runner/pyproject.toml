@@ -18,6 +18,10 @@ dependencies = [
   "azure-monitor-opentelemetry>=1.6.0",
   # Foundry inference seam (mirrors apps/agents)
   "azure-ai-inference>=1.0.0b9",            # FR-RAG-FM-01..07 — Foundry chat + embeddings.
+  # Azure OpenAI compat surface — the embedder calls the
+  # ``/openai/deployments/<dep>/embeddings`` route on the AIServices/Foundry
+  # endpoint, which the Inference SDK does not expose for AIServices accounts.
+  "openai>=1.59.0",
   # Document parsing + chunking
   "pydantic>=2.10.0",
   "pyyaml>=6.0.2",

@@ -207,6 +207,41 @@ def _run_inner(
         return _failure(EXIT_LINT_FAIL, args, started_at, reason=str(exc))
 
     # ---------------------------------------------------------------- 1. Resolve indexes + alias
+    # Production mode: when ``--search-endpoint`` is set and the caller did
+    # not inject in-memory test stand-ins, build live AI Search clients.
+    # Hermetic tests always pass ``index`` + ``alias`` so this branch is a
+    # no-op for them. Dry-run mode keeps the in-memory stubs to avoid touching
+    # the live service.
+    use_live_clients: bool = (
+        bool(args.search_endpoint)
+        and args.mode != "dry-run"
+        and index is None
+        and alias is None
+    )
+
+    if use_live_clients:
+        try:
+            from . import live_clients as _live  # noqa: PLC0415
+        except Exception as exc:  # noqa: BLE001
+            return _failure(
+                EXIT_CONFIG_ERROR,
+                args,
+                started_at,
+                reason=f"failed to import live AI Search clients: {exc}",
+            )
+        try:
+            alias = _live.LiveAzureSearchAlias(
+                endpoint=args.search_endpoint,
+                alias_name=args.index_alias,
+            )
+        except Exception as exc:  # noqa: BLE001
+            return _failure(
+                EXIT_SEARCH_WRITE_ERROR,
+                args,
+                started_at,
+                reason=f"failed to construct AI Search alias client: {exc}",
+            )
+
     if alias is None:
         # In production the caller wires a live AliasService; tests inject InMemoryAlias.
         alias = indexer.InMemoryAlias(
@@ -227,6 +262,24 @@ def _run_inner(
         target_index_name = indexer.next_index_name(current_index=active_index_name)
     else:
         target_index_name = active_index_name
+
+    if use_live_clients and index is None:
+        try:
+            _live.ensure_index_schema(  # type: ignore[possibly-undefined]
+                endpoint=args.search_endpoint,
+                index_name=target_index_name,
+            )
+            index = _live.LiveAzureSearchIndex(  # type: ignore[possibly-undefined]
+                endpoint=args.search_endpoint,
+                index_name=target_index_name,
+            )
+        except Exception as exc:  # noqa: BLE001
+            return _failure(
+                EXIT_SEARCH_WRITE_ERROR,
+                args,
+                started_at,
+                reason=f"failed to provision live AI Search index {target_index_name!r}: {exc}",
+            )
 
     if index is None:
         # In production this is a SearchClient pointing at ``target_index_name``;
@@ -252,8 +305,15 @@ def _run_inner(
     corpus_build_sha = args.corpus_build_sha or manifest.compute_corpus_build_sha(corpus_root)
 
     # ---------------------------------------------------------------- 3. Chunk + filter + (optionally) embed
+    # Production mode (``--search-endpoint`` + non dry-run): leave ``embed=None``
+    # so ``FoundryEmbedder._call`` lazily constructs a live ``EmbeddingsClient``.
+    # Hermetic tests inject ``embed``; everything else falls through to the
+    # deterministic stub so callers never accidentally hit a live deployment.
+    if embed is None and not use_live_clients:
+        embed = embedder.deterministic_stub_embedder()
+
     embedder_inst = embedder.FoundryEmbedder(
-        embed=embed if embed is not None else embedder.deterministic_stub_embedder(),
+        embed=embed,
         model_key=args.embedding_model,
     )
 

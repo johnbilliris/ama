@@ -303,4 +303,14 @@ output openAiEndpoint string = openAiAccount.properties.endpoint
 // SDK (apps/agents/maf_runtime/chat_client.py + apps/agents/common/llm_client.py +
 // apps/api/app/services/simulation/controller_service.py). Format: per-deployment
 // `<modelId>@<version>=<deploymentName>`, comma-separated.
-output azureAiProjectDeployments string = '${reasoningModelName}@${reasoningModelVersion}=${reasoningDeployment.name},${draftingModelName}@${draftingModelVersion}=${draftingDeployment.name},${simulationModelName}@${simulationModelVersion}=${simulationDeployment.name}'
+//
+// Spec 036 FR-RAG-IDX-02 — embedding deployment is included so the ingest-runner
+// (apps/ingest-runner) and any future retrieval consumer can resolve
+// `<embeddingModelName>@<version>` → live deployment name through the same env
+// var (``AZURE_AI_PROJECT_DEPLOYMENTS``) used by the chat seam.
+output azureAiProjectDeployments string = '${reasoningModelName}@${reasoningModelVersion}=${reasoningDeployment.name},${draftingModelName}@${draftingModelVersion}=${draftingDeployment.name},${simulationModelName}@${simulationModelVersion}=${simulationDeployment.name},${embeddingModelName}@${embeddingModelVersion}=${embeddingDeployment.name}'
+
+// Spec 036 — embedding model key (`<modelId>@<version>`) consumed by the
+// ingest-runner CLI. The carve-out preflight splits on `@` and looks up
+// `embeddingModelName` in `infra/parameters/foundry-carveout.yaml`.
+output embeddingModelKey string = '${embeddingModelName}@${embeddingModelVersion}'
