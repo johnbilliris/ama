@@ -12,6 +12,14 @@ and ``request.state.audit_route`` if present, otherwise defaults are used.
 The middleware NEVER blocks the response on audit-write failure: write errors
 are logged and the response is returned untouched, since the upstream
 ``error_handler`` middleware already owns user-facing error mapping.
+
+Implementation note (036/T240): this is a **pure ASGI** middleware (not
+``BaseHTTPMiddleware``). Starlette's ``BaseHTTPMiddleware`` buffers responses
+and overrides ``request._receive`` in a way that is incompatible with
+streaming responses (e.g. the simulation chat SSE endpoint), causing
+``RuntimeError: Unexpected message received: http.request`` and truncating
+the stream. Pure ASGI avoids both the response buffering and the
+``_receive`` body-replay collision.
 """
 
 from __future__ import annotations
@@ -21,8 +29,8 @@ import logging
 import uuid
 from typing import Any
 
-from fastapi import FastAPI, Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from fastapi import FastAPI, Request
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 logger = logging.getLogger(__name__)
 
@@ -59,11 +67,11 @@ def _default_outcome(status_code: int) -> str:
     return "denied"
 
 
-class AuditAppenderMiddleware(BaseHTTPMiddleware):
+class AuditAppenderMiddleware:
     """Emit one audit row per state-changing call; emit paired rows on impersonation."""
 
-    def __init__(self, app: FastAPI, repository: Any | None = None) -> None:
-        super().__init__(app)
+    def __init__(self, app: ASGIApp, repository: Any | None = None) -> None:
+        self.app = app
         self._repository = repository
 
     def _get_repo(self) -> Any:
@@ -73,49 +81,80 @@ class AuditAppenderMiddleware(BaseHTTPMiddleware):
             self._repository = AuditRepository()
         return self._repository
 
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        if request.method not in _STATE_CHANGING_METHODS:
-            return await call_next(request)
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
 
-        body = await request.body()
+        method = scope.get("method", "")
+        if method not in _STATE_CHANGING_METHODS:
+            await self.app(scope, receive, send)
+            return
 
-        request_received = False
+        body_chunks: list[bytes] = []
+        more_body = True
+        while more_body:
+            message = await receive()
+            if message["type"] == "http.disconnect":
+                # Client disconnected before body finished. Forward the
+                # disconnect to the app and bail out.
+                async def _disconnect_receive(_msg: Message = message) -> Message:
+                    return _msg
 
-        async def _receive() -> dict[str, Any]:
-            # F-A11/T240 — Starlette's BaseHTTPMiddleware framework re-invokes
-            # ``receive`` for client-disconnect detection on streaming
-            # responses (e.g. SSE). If we keep returning the original
-            # ``http.request`` payload, the ASGI router raises
-            # ``RuntimeError: Unexpected message received: http.request`` and
-            # truncates the response. Return the buffered body once, then
-            # signal disconnect on subsequent calls.
-            nonlocal request_received
-            if request_received:
-                return {"type": "http.disconnect"}
-            request_received = True
-            return {"type": "http.request", "body": body, "more_body": False}
+                await self.app(scope, _disconnect_receive, send)
+                return
+            if message["type"] != "http.request":
+                # Unknown message type — pass through unchanged so we don't
+                # mask transport-layer issues.
+                async def _passthrough_receive(_msg: Message = message) -> Message:
+                    return _msg
 
-        request._receive = _receive  # type: ignore[attr-defined]
+                await self.app(scope, _passthrough_receive, send)
+                return
+            body_chunks.append(message.get("body", b"") or b"")
+            more_body = bool(message.get("more_body", False))
 
+        body = b"".join(body_chunks)
+
+        body_replayed = False
+
+        async def replay_receive() -> Message:
+            # Replay the buffered body to the route handler exactly once,
+            # then forward to the underlying transport receive so SSE/WS
+            # disconnect detection still works.
+            nonlocal body_replayed
+            if not body_replayed:
+                body_replayed = True
+                return {"type": "http.request", "body": body, "more_body": False}
+            return await receive()
+
+        status_code: int = 0
+
+        async def send_with_capture(message: Message) -> None:
+            nonlocal status_code
+            if message["type"] == "http.response.start":
+                status_code = int(message.get("status", 0))
+            await send(message)
+
+        request = Request(scope, replay_receive)
         request_hash = _sha256_hex(body) if body else "n/a"
         correlation_id = (
             request.headers.get("X-Correlation-Id") or request.headers.get("X-Request-Id") or str(uuid.uuid4())
         )
         request.state.correlation_id = correlation_id
 
-        response = await call_next(request)
-
         try:
-            await self._emit(request, response, request_hash, correlation_id)
-        except Exception:  # noqa: BLE001
-            logger.exception("audit_appender: failed to emit audit row(s)")
-
-        return response
+            await self.app(scope, replay_receive, send_with_capture)
+        finally:
+            try:
+                await self._emit(request, status_code, request_hash, correlation_id)
+            except Exception:  # noqa: BLE001
+                logger.exception("audit_appender: failed to emit audit row(s)")
 
     async def _emit(
         self,
         request: Request,
-        response: Response,
+        status_code: int,
         request_hash: str,
         correlation_id: str,
     ) -> None:
@@ -128,7 +167,7 @@ class AuditAppenderMiddleware(BaseHTTPMiddleware):
         outcome = getattr(
             request.state,
             "audit_outcome",
-            _default_outcome(response.status_code),
+            _default_outcome(status_code),
         )
         extension_envelope = getattr(request.state, "audit_extension_envelope", None)
         sc_id = getattr(request.state, "audit_sc_id", None)
@@ -184,3 +223,4 @@ __all__ = [
     "AuditAppenderMiddleware",
     "add_audit_appender_middleware",
 ]
+
