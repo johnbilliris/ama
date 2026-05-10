@@ -779,15 +779,20 @@ class AzureSearchRetrievalService:
 
 
 async def _collect(iterable: Any) -> list[Any]:
-    """Collect an async-iterable or sync-iterable of search hits into a list."""
-    if hasattr(iterable, "__aiter__"):
-        out = []
-        async for item in iterable:
-            out.append(item)
-        return out
-    if asyncio.iscoroutine(iterable):
+    """Collect an async-iterable, awaitable, or sync-iterable of search hits into a list.
+
+    Production wiring (``azure.search.documents.aio.SearchClient.search``)
+    returns an ``AsyncSearchItemPaged``. Some SDK versions expose ``__aiter__``
+    as a descriptor that ``hasattr`` cannot detect reliably; we therefore
+    attempt async iteration first and fall back via ``TypeError``. Test stubs
+    pass plain lists or coroutines.
+    """
+    if asyncio.iscoroutine(iterable) or asyncio.isfuture(iterable):
         iterable = await iterable
-    return list(iterable)
+    try:
+        return [item async for item in iterable]
+    except TypeError:
+        return list(iterable)
 
 
 def _stamp_cache_hit(result: Any, *, alias: str, pinned_index_name: str | None = None) -> Any:
