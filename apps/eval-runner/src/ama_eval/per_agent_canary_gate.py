@@ -1,8 +1,17 @@
-"""Per-agent canary gate (Spec 036 T029, FR-RAG-FM-06; extends spec-033 FR-023).
+"""Per-agent equivalence regression gate (Spec 036 T029, FR-RAG-FM-06; extends spec-033 FR-023).
 
-The CLI compares two runners — the legacy Azure-OpenAI path (``--legacy``) and
-the Foundry-grounded path (``--foundry``) — across a per-agent JSONL fixture
-of golden Q&A cases. It reports three equivalence metrics:
+Originally landed as the per-agent canary cutover gate. Following the
+ADR-20 hard cutover (chat plane on Microsoft Foundry, legacy
+``LEGACY_AZURE_OPENAI=1`` rollback flag removed), this CLI is now used
+as a **regression gate** that runs on every corpus / model-deployment
+change to ensure the Foundry-grounded outputs remain decision-equivalent
+to a stable baseline runner. Both ``--legacy`` and ``--foundry`` runner
+flags are kept verbatim so existing fixtures and CI invocations
+continue to work — read ``--legacy`` as "stable baseline" and
+``--foundry`` as "candidate Foundry-grounded run" post-cutover.
+
+The CLI compares two runners across a per-agent JSONL fixture of golden
+Q&A cases. It reports three equivalence metrics:
 
 - ``decision_equivalence``: fraction of cases where both runners produce the
   same ``decision`` field. Default threshold ≥0.95 (spec-033 FR-023; FR-RAG-FM-06).

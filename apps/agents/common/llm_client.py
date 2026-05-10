@@ -1,15 +1,14 @@
 """Production LLM client for the AMA agents.
 
-Spec 036 (T018, FR-RAG-FM-01 / FR-RAG-FM-06): supports a constructor-injected
-``chat_complete`` seam so callers can swap a Foundry-backed implementation
-(``apps.agents.common.foundry_chat_client.LiveFoundryChatClient.chat_complete``)
-in place of the legacy Azure-OpenAI SDK without touching the call sites.
-
-During the per-agent canary cutover, the seam is the **default** path. The
-legacy ``from openai import AzureOpenAI`` path is retained behind the
-``LEGACY_AZURE_OPENAI=1`` env flag so rollback drills (FR-RAG-FM-06) and the
-Constitution §I fallback chain stay intact through Phase E. Atomic deletion of
-the legacy path is task T146 (post-canary completion).
+Spec 036 + ADR-20 hard cutover: the constructor wires the Foundry
+``chat_complete`` seam by default (``apps.agents.common.foundry_chat_client.LiveFoundryChatClient.chat_complete``).
+The ``LEGACY_AZURE_OPENAI=1`` rollback flag has been removed; the
+``AZURE_OPENAI_*`` env-var compat seam is no longer set in production
+Bicep. The legacy SDK initialiser (``_init_legacy_client``) and its
+retry helpers are preserved as a hermetic-test fallback that activates
+ONLY when no chat-complete seam is injected and ``AZURE_AI_PROJECT_ENDPOINT``
+is unset (i.e. unit-test paths that pre-seed ``AZURE_OPENAI_*`` to
+exercise the SDK shape without provisioning Foundry).
 """
 
 from __future__ import annotations
@@ -61,34 +60,27 @@ class LLMClient:
     ) -> None:
         self._config = config or LLMClientConfig()
         self._chat_complete: _ChatCompleteCallable | None = chat_complete
-        # ``_client`` is the legacy Azure-OpenAI client and remains the
-        # back-compat handle injected by existing tests. The Foundry seam
-        # (``_chat_complete``) is preferred when configured.
+        # ``_client`` is the legacy Azure-OpenAI SDK handle, retained as a
+        # hermetic test fallback when no chat-complete seam is configured
+        # AND ``AZURE_AI_PROJECT_ENDPOINT`` is unset. Production NEVER hits
+        # this branch — Bicep sets ``AZURE_AI_PROJECT_ENDPOINT`` and the
+        # Foundry seam is wired below.
         self._client: object | None = None
 
-        # Selection rules (highest priority first):
-        #   1. Caller-injected ``chat_complete`` kwarg → use it.
-        #   2. ``LEGACY_AZURE_OPENAI=1`` → legacy path only.
-        #   3. ``AZURE_AI_PROJECT_ENDPOINT`` configured → Foundry seam.
-        #   4. Default (legacy ``AZURE_OPENAI_ENDPOINT``) → legacy path.
+        # Selection (post-cutover, ADR-20 §Q-P6-03):
+        #   1. Caller-injected ``chat_complete`` kwarg wins (test seam).
+        #   2. ``AZURE_AI_PROJECT_ENDPOINT`` configured → Foundry seam.
+        #   3. Test-only fallback → legacy Azure-OpenAI SDK (only when
+        #      ``AZURE_OPENAI_ENDPOINT`` is set in the test environment).
         if chat_complete is not None:
-            self._init_legacy_client()  # populate _client too for transparent fallback
-            return
-
-        if self._config.legacy_openai_only:
-            self._init_legacy_client()
             return
 
         if self._config.foundry_endpoint:
             self._init_foundry_seam()
-            # Also populate the legacy client for graceful fallback if Foundry
-            # is mid-cutover and the agent's golden-fixture suite is still
-            # exercising the legacy path. The seam wins by precedence in
-            # ``generate_response``.
-            self._init_legacy_client()
             return
 
-        # Default during pre-cutover: legacy only (existing tests rely on this).
+        # Hermetic-test fallback: unit tests can pre-seed ``AZURE_OPENAI_*``
+        # without provisioning Foundry. The legacy SDK is loaded lazily.
         self._init_legacy_client()
 
     # ------------------------------------------------------------------ #
@@ -113,7 +105,12 @@ class LLMClient:
             )
 
     def _init_legacy_client(self) -> None:
-        """Legacy Azure-OpenAI path — kept until atomic-deletion PR T146 (FR-RAG-FM-06)."""
+        """Hermetic test fallback — initialises the Azure-OpenAI SDK directly.
+
+        Only triggered when no chat-complete seam is injected and
+        ``AZURE_AI_PROJECT_ENDPOINT`` is unset. Production never enters this
+        path (Bicep always sets ``AZURE_AI_PROJECT_ENDPOINT``).
+        """
         endpoint = self._config.endpoint
         if not endpoint:
             return
@@ -241,8 +238,10 @@ class LLMClient:
         }
 
     # ------------------------------------------------------------------ #
-    # Legacy retry helpers — preserved verbatim to keep rollback drills
-    # bit-equivalent to pre-cutover behaviour. Removed by T146.
+    # Hermetic-test SDK helpers — only used when ``_init_legacy_client``
+    # populates ``_client`` (i.e. unit tests that pre-seed
+    # ``AZURE_OPENAI_*`` without provisioning Foundry). Production runs
+    # the Foundry chat-complete seam exclusively.
     # ------------------------------------------------------------------ #
 
     @staticmethod
@@ -267,7 +266,7 @@ class LLMClient:
         correlation_id: str,
         temperature: float = 0.0,
     ) -> object:
-        """Legacy Azure-OpenAI call path with retry. Removed by T146."""
+        """Hermetic-test SDK call path with retry. Production uses the Foundry seam."""
         assert self._client is not None  # noqa: S101 — invariant by caller
         return self._client.chat.completions.create(
             model=deployment,
@@ -292,5 +291,5 @@ class LLMClient:
 # Re-export the legacy import sentinel so test_no_openai_imports.py can scan
 # for direct ``from openai import …`` statements at the module top-level. This
 # module never imports openai eagerly — only lazily inside ``_init_legacy_client``
-# (FR-RAG-FM-04 — no top-level legacy imports).
-_ = os  # silence unused import; preserved for rollback-flag visibility
+# (hermetic-test fallback only — production uses the Foundry seam).
+_ = os  # silence unused import; preserved for hermetic-test visibility

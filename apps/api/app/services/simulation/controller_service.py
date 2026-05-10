@@ -1,10 +1,17 @@
 """Simulation Controller service — orchestrates chat with tool-allow-list.
 
 Two backends:
-- **Azure OpenAI** when ``AZURE_OPENAI_ENDPOINT`` + ``AZURE_OPENAI_DEPLOYMENT`` are set.
+- **Foundry** when ``AZURE_AI_PROJECT_ENDPOINT`` (+ ``AZURE_AI_PROJECT_DEPLOYMENTS``) is set.
 - **Offline deterministic** otherwise — used by tests and local dev.
 
 Both backends emit the same SSE events defined in contracts/simulation-chat-api.md.
+
+Spec 036 / ADR-20 hard cutover: the legacy ``AZURE_OPENAI_*`` env-var
+seam and the ``LEGACY_AZURE_OPENAI=1`` rollback flag have been removed
+from this controller. Authentication is AAD-only (FR-RAG-FM-04). When
+``AZURE_SEARCH_ENDPOINT`` is set the controller auto-constructs an
+``AzureSearchRetrievalService`` so simulation chat is grounded in the
+same corpus as the live agents (FR-RAG-SIM-01..06).
 """
 
 from __future__ import annotations
@@ -65,6 +72,37 @@ _REAL_WORLD_PATTERNS = [
 ]
 
 
+def _build_default_retrieval_service() -> Any:
+    """Auto-construct the production ``AzureSearchRetrievalService`` when wired.
+
+    Returns ``None`` (disabling grounding) unless ``AZURE_SEARCH_ENDPOINT`` is
+    set. Production Bicep sets the env var on the API container app once
+    ``enableSpec036FoundryRag=true`` provisions the AI Search service. Tests
+    that pre-seed the env var get the live class wired automatically; tests
+    that want a stubbed retrieval service inject one via the constructor.
+
+    The lazy import keeps the unit-test path hermetic — no Azure SDK
+    initialisation happens unless the env var is present.
+    """
+    if not os.environ.get("AZURE_SEARCH_ENDPOINT"):
+        return None
+    try:
+        # Deferred import to avoid pulling apps/agents into the api hot path
+        # when the feature is disabled.
+        from common.retrieval_client import AzureSearchRetrievalService  # noqa: PLC0415
+
+        return AzureSearchRetrievalService(
+            endpoint=os.environ["AZURE_SEARCH_ENDPOINT"],
+            index_alias=os.environ.get("RETRIEVAL_INDEX_ALIAS", "corpus"),
+        )
+    except Exception:  # noqa: BLE001
+        logger.warning(
+            "Failed to build AzureSearchRetrievalService; simulation chat will fall back to ungrounded mode",
+            exc_info=True,
+        )
+        return None
+
+
 class SimulationControllerService:
     def __init__(
         self,
@@ -88,9 +126,9 @@ class SimulationControllerService:
         self._prompt_hash = hashlib.sha256(self._prompt_text.encode("utf-8")).hexdigest()
         # Spec 036 FR-RAG-SIM-01..06: optional retrieval client + audit writer.
         # Both are dependency-injected so tests can stub them; production
-        # wiring lives in the API entrypoint and only activates when
-        # ``AZURE_AI_PROJECT_ENDPOINT`` is set.
-        self._retrieval = retrieval_service
+        # auto-constructs the retrieval client from ``AZURE_SEARCH_ENDPOINT``
+        # when the caller did not inject one.
+        self._retrieval = retrieval_service or _build_default_retrieval_service()
         self._audit_writer = audit_writer
 
     async def _current_sim_seconds(self, tenant_id: str) -> float:
@@ -215,29 +253,28 @@ class SimulationControllerService:
                 out.append({"role": t.role, "content": t.content})
         return out
 
-    @staticmethod
-    def _resolve_simulation_deployment(*, legacy_only: bool) -> str | None:
-        """Resolve the simulation deployment name across Foundry + legacy envs.
+    def _resolve_simulation_deployment(self) -> str | None:
+        """Resolve the simulation deployment name from the Foundry env vars.
 
-        Spec 036 (T020, FR-RAG-FM-03): when not in legacy-only mode the Foundry
-        deployment_map (``AZURE_AI_PROJECT_DEPLOYMENTS``) is preferred; the
-        legacy ``AZURE_OPENAI_*_DEPLOYMENT`` envs remain as fall-throughs so
-        the controller "just works" during cutover and rollback drills.
+        Spec 036 / ADR-20 hard cutover: the controller reads the Foundry
+        ``AZURE_AI_PROJECT_DEPLOYMENTS`` CSV and matches the simulation /
+        reasoning model key. The ``AZURE_OPENAI_*_DEPLOYMENT`` envs are
+        retained as a hermetic-test fallback when ``AZURE_AI_PROJECT_DEPLOYMENTS``
+        is empty (unit tests that pre-seed legacy vars without a Foundry map).
         """
-        if not legacy_only:
-            csv = os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS", "")
-            model_key = (
-                os.environ.get("AZURE_AI_SIMULATION_MODEL_KEY")
-                or os.environ.get("AZURE_AI_REASONING_MODEL_KEY")
-                or "gpt-4o"
-            )
-            if csv:
-                for entry in (e.strip() for e in csv.split(",") if e.strip()):
-                    if "=" not in entry:
-                        continue
-                    key, name = entry.split("=", 1)
-                    if key.strip() == model_key:
-                        return name.strip()
+        csv = os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS", "")
+        model_key = (
+            os.environ.get("AZURE_AI_SIMULATION_MODEL_KEY")
+            or os.environ.get("AZURE_AI_REASONING_MODEL_KEY")
+            or "gpt-4o"
+        )
+        if csv:
+            for entry in (e.strip() for e in csv.split(",") if e.strip()):
+                if "=" not in entry:
+                    continue
+                key, name = entry.split("=", 1)
+                if key.strip() == model_key:
+                    return name.strip()
         return (
             os.environ.get("AZURE_OPENAI_DEPLOYMENT")
             or os.environ.get("AZURE_OPENAI_SIMULATION_DEPLOYMENT")
@@ -290,9 +327,9 @@ class SimulationControllerService:
 
         backend = (mode or os.getenv("SIM_CONTROLLER_MODE", "")).lower()
         if not backend:
-            backend = "azure" if os.getenv("AZURE_OPENAI_ENDPOINT") else "offline"
+            backend = "foundry" if os.getenv("AZURE_AI_PROJECT_ENDPOINT") else "offline"
 
-        if backend == "azure":
+        if backend in ("foundry", "azure"):
             async for ev in self._stream_from_azure(
                 turn_id=turn_id,
                 tenant_id=tenant_id,
@@ -403,17 +440,16 @@ class SimulationControllerService:
     async def _stream_from_azure(
         self, *, turn_id: str, tenant_id: str, simulation_id: str, user_message: str
     ) -> AsyncIterator[ChatEvent]:  # pragma: no cover
-        # Spec 036 (T020, FR-RAG-FM-03): the simulation controller now backs onto
-        # Foundry by default. Endpoint and deployment are resolved from
-        # AZURE_AI_PROJECT_* with a transparent fall-through to the legacy
-        # AZURE_OPENAI_* envs during the per-agent canary cutover. The
+        # Spec 036 / ADR-20 hard cutover: the simulation controller backs onto
+        # Microsoft Foundry exclusively. The endpoint and deployment are
+        # resolved from ``AZURE_AI_PROJECT_*`` env vars; the
         # ``controller_prompt.md`` system prompt and the ``TOOL_SCHEMAS``
         # tool-calling 3-round loop are preserved verbatim (OOS-6, spec 024).
         #
-        # Authentication is AAD-only (FR-RAG-FM-04). The legacy
-        # ``AZURE_OPENAI_API_KEY`` path is retained **only** when
-        # ``LEGACY_AZURE_OPENAI=1`` so rollback drills (FR-RAG-FM-06) stay
-        # bit-identical to pre-cutover behaviour.
+        # Authentication is AAD-only (FR-RAG-FM-04) — managed identity in
+        # Container Apps, ``az login`` locally. API-key auth is forbidden;
+        # the legacy ``AZURE_OPENAI_API_KEY`` path was removed when the
+        # cutover completed.
         try:
             from openai import AsyncAzureOpenAI
         except Exception:
@@ -423,26 +459,15 @@ class SimulationControllerService:
             )
             return
 
-        legacy_only = os.environ.get("LEGACY_AZURE_OPENAI", "0") == "1"
-        endpoint = (
-            os.environ.get("AZURE_OPENAI_ENDPOINT")
-            if legacy_only
-            else (os.environ.get("AZURE_AI_PROJECT_ENDPOINT") or os.environ.get("AZURE_OPENAI_ENDPOINT"))
-        )
+        endpoint = os.environ.get("AZURE_AI_PROJECT_ENDPOINT") or os.environ.get("AZURE_OPENAI_ENDPOINT")
 
-        # Deployment resolution: Foundry deployment_map first, then legacy envs.
-        deployment = self._resolve_simulation_deployment(legacy_only=legacy_only)
+        deployment = self._resolve_simulation_deployment()
         api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
-        # Spec 036 FR-RAG-FM-04: API-key auth is forbidden on the Foundry path;
-        # only the explicit legacy rollback mode honours AZURE_OPENAI_API_KEY.
-        api_key = os.environ.get("AZURE_OPENAI_API_KEY") if legacy_only else None
         if not (endpoint and deployment):
             missing = (
-                "AZURE_AI_PROJECT_ENDPOINT (or AZURE_OPENAI_ENDPOINT)"
+                "AZURE_AI_PROJECT_ENDPOINT"
                 if not endpoint
-                else "AZURE_AI_PROJECT_DEPLOYMENTS"
-                " (or AZURE_OPENAI_DEPLOYMENT / AZURE_OPENAI_SIMULATION_DEPLOYMENT"
-                " / AZURE_OPENAI_REASONING_DEPLOYMENT)"
+                else "AZURE_AI_PROJECT_DEPLOYMENTS (or AZURE_AI_SIMULATION_MODEL_KEY)"
             )
             yield ChatEvent(
                 "error",
@@ -457,34 +482,30 @@ class SimulationControllerService:
             "azure_endpoint": endpoint,
             "api_version": api_version,
         }
-        if api_key:
-            client_kwargs["api_key"] = api_key
-        else:
-            # No API key — use Microsoft Entra ID (managed identity in Container
-            # Apps; az/azd login locally). Spec 036 hard-binds this scope to the
-            # ``cognitiveservices`` audience to keep tokens compatible with both
-            # Foundry and the legacy AOAI surface during cutover (FR-RAG-FM-05).
-            try:
-                from azure.identity import (
-                    DefaultAzureCredential,
-                    get_bearer_token_provider,
-                )
+        # AAD-only auth (FR-RAG-FM-04). Managed identity in Container Apps;
+        # az/azd login locally. The token scope is the cognitive-services
+        # audience that Foundry accepts.
+        try:
+            from azure.identity import (
+                DefaultAzureCredential,
+                get_bearer_token_provider,
+            )
 
-                credential = DefaultAzureCredential(exclude_interactive_browser_credential=True)
-                client_kwargs["azure_ad_token_provider"] = get_bearer_token_provider(
-                    credential, "https://cognitiveservices.azure.com/.default"
-                )
-            except Exception as exc:
-                yield ChatEvent(
-                    "error",
-                    {
-                        "code": "openai_client_init_failed",
-                        "message": (
-                            f"Foundry credential unavailable. Ensure managed identity or az login is configured: {exc}"
-                        ),
-                    },
-                )
-                return
+            credential = DefaultAzureCredential(exclude_interactive_browser_credential=True)
+            client_kwargs["azure_ad_token_provider"] = get_bearer_token_provider(
+                credential, "https://cognitiveservices.azure.com/.default"
+            )
+        except Exception as exc:
+            yield ChatEvent(
+                "error",
+                {
+                    "code": "openai_client_init_failed",
+                    "message": (
+                        f"Foundry credential unavailable. Ensure managed identity or az login is configured: {exc}"
+                    ),
+                },
+            )
+            return
         try:
             client = AsyncAzureOpenAI(**client_kwargs)
         except Exception as exc:
@@ -501,7 +522,7 @@ class SimulationControllerService:
             from common.model_gateway import apply as gateway_apply  # type: ignore[import-not-found]
         except Exception:
             gateway_apply = None  # type: ignore[assignment]
-        if gateway_apply is not None and not legacy_only:
+        if gateway_apply is not None:
             decision = gateway_apply(text=user_message, deployment_region=deployment_region)
             if decision.gateway_decision == "deny":
                 yield ChatEvent(

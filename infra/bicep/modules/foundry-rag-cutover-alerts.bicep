@@ -10,7 +10,6 @@
 //   - ``customDimensions.citation_count``
 //   - ``customDimensions.deployment_region``
 //   - ``customDimensions.legacy_or_foundry`` (``legacy|foundry``)
-//   - ``customDimensions.decision_equivalence`` (per canary slice)
 //
 // Three alerts:
 //   1. Gateway-deny — any gateway DENY during cutover is high-severity
@@ -18,8 +17,14 @@
 //      silently.
 //   2. Citation drop — grounded calls that emit zero citations breach
 //      Constitution §I.
-//   3. Equivalence regression — per-agent decision_equivalence < 0.95
-//      over a rolling 30-minute window stops the canary (FR-RAG-FM-06).
+//   3. Offline-cache TTL — Field-Coordinator offline cache approaching
+//      14-day fail-closed expiry (FR-RAG-LS-02 / R-07).
+//
+// **History note** (ADR-20 §Q-P6-01): Alert 3 ("equivalence regression") was
+// removed in the post-cutover cleanup PR. The hard-cutover ADR-20 deletes the
+// per-agent canary equivalence telemetry feed; the custom dimension
+// ``decision_equivalence`` is no longer emitted, so the alert query would
+// always evaluate to zero rows.
 
 @description('Existing Application Insights component name.')
 param appInsightsName string
@@ -120,53 +125,14 @@ resource citationDropAlert 'Microsoft.Insights/scheduledQueryRules@2024-01-01-pr
 }
 
 // ────────────────────────────────────────────────────────────────────────── //
-// Alert 3: per-agent decision_equivalence < 0.95 over rolling 30 minutes
-// (FR-RAG-FM-06 — per-agent canary stop signal).
-// ────────────────────────────────────────────────────────────────────────── //
-resource equivalenceRegressionAlert 'Microsoft.Insights/scheduledQueryRules@2024-01-01-preview' = {
-  name: 'foundry-rag-equivalence-regression-${appInsightsName}'
-  location: location
-  tags: tags
-  properties: {
-    enabled: true
-    severity: 2
-    evaluationFrequency: 'PT15M'
-    windowSize: 'PT30M'
-    autoMitigate: true
-    description: 'Spec 036 FR-RAG-FM-06 — per-agent decision-equivalence dropped below 0.95 over 30 minutes. Pause/rollback the canary per cutover runbook.'
-    scopes: [appInsights.id]
-    criteria: {
-      allOf: [
-        {
-          query: '''customEvents
-| where name == "FoundryRAGCutover"
-| extend agent_name = tostring(customDimensions["agent_name"])
-| extend decision_eq = todouble(customDimensions["decision_equivalence"])
-| where isnotnull(decision_eq)
-| summarize avg_eq = avg(decision_eq), n = count() by bin(timestamp, 30m), agent_name
-| where n >= 20 and avg_eq < 0.95'''
-          timeAggregation: 'Count'
-          operator: 'GreaterThan'
-          threshold: 0
-          failingPeriods: {
-            numberOfEvaluationPeriods: 1
-            minFailingPeriodsToAlert: 1
-          }
-        }
-      ]
-    }
-    actions: {
-      actionGroups: [actionGroupId]
-    }
-  }
-}
-
-// ────────────────────────────────────────────────────────────────────────── //
-// Alert 4: offline-cache TTL exhaustion (T132 / FR-RAG-LS-02 / R-07).
+// Alert 3: offline-cache TTL exhaustion (T132 / FR-RAG-LS-02 / R-07).
 // Field-Coordinator offline cache has a 14-day TTL with 11-day stale warning.
 // Any agent reporting `offline_cache_ttl_days_remaining < 3` is approaching
 // the hard-fail-closed window. Page the SRE on call so refresh can be
 // sequenced before the 14-day expiry.
+//
+// Note: this was Alert 4 prior to ADR-20 §Q-P6-01 (which removed the
+// equivalence-regression alert). Renumbered for monotonicity.
 // ────────────────────────────────────────────────────────────────────────── //
 resource offlineCacheTtlAlert 'Microsoft.Insights/scheduledQueryRules@2024-01-01-preview' = {
   name: 'foundry-rag-offline-cache-ttl-${appInsightsName}'
@@ -207,5 +173,4 @@ resource offlineCacheTtlAlert 'Microsoft.Insights/scheduledQueryRules@2024-01-01
 
 output gatewayDenyAlertId string = gatewayDenyAlert.id
 output citationDropAlertId string = citationDropAlert.id
-output equivalenceRegressionAlertId string = equivalenceRegressionAlert.id
 output offlineCacheTtlAlertId string = offlineCacheTtlAlert.id

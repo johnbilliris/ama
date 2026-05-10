@@ -56,6 +56,16 @@ param draftingTpmQuota int = 60
 @minValue(1)
 param simulationTpmQuota int = 20
 
+@description('Embedding model name (Spec 036 FR-RAG-IDX-02 — corpus chunks → 3072-dim vectors).')
+param embeddingModelName string = 'text-embedding-3-large'
+
+@description('Embedding model version.')
+param embeddingModelVersion string = '1'
+
+@description('Embedding deployment TPM quota (K). Sized for full corpus rebuild headroom.')
+@minValue(1)
+param embeddingTpmQuota int = 60
+
 @description('Model deployment SKU — GlobalStandard for dev/staging (draws from global capacity pool), Standard for production (regional capacity)')
 @allowed(['Standard', 'GlobalStandard'])
 param modelDeploymentSku string = 'GlobalStandard'
@@ -122,6 +132,7 @@ var simulationRaiPolicyName = 'sim-em-domain-${envPrefix}'
 //   reasoningRaiPolicy → reasoningDeployment
 //     → draftingRaiPolicy → draftingDeployment
 //     → simulationRaiPolicy → simulationDeployment
+//     → embeddingDeployment (no RAI policy; serialised on simulationDeployment)
 
 resource reasoningRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2024-10-01' = {
   parent: openAiAccount
@@ -213,6 +224,28 @@ resource simulationDeployment 'Microsoft.CognitiveServices/accounts/deployments@
   }
 }
 
+// Spec 036 FR-RAG-IDX-02 — embedding deployment for the corpus ingest pipeline
+// (apps/ingest-runner) and runtime hybrid retrieval (apps/agents/common/retrieval_client.py).
+// Embedding deployments do not require an RAI policy. Serialised behind the simulation
+// deployment so all four child operations on the parent Cognitive Services account
+// run sequentially (ARM rejects concurrent child ops with RequestConflict).
+resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: openAiAccount
+  name: '${embeddingModelName}-${envPrefix}'
+  sku: {
+    name: 'Standard'
+    capacity: embeddingTpmQuota
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: embeddingModelName
+      version: embeddingModelVersion
+    }
+  }
+  dependsOn: [simulationDeployment]
+}
+
 // ────────────────────────────────────────────────────────────────────────────────
 // RBAC: Cognitive Services OpenAI User
 // ────────────────────────────────────────────────────────────────────────────────
@@ -260,6 +293,7 @@ resource openAiDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
 output reasoningDeploymentName string = reasoningDeployment.name
 output draftingDeploymentName string = draftingDeployment.name
 output simulationDeploymentName string = simulationDeployment.name
+output embeddingDeploymentName string = embeddingDeployment.name
 output reasoningRaiPolicyName string = reasoningRaiPolicy.name
 output draftingRaiPolicyName string = draftingRaiPolicy.name
 output simulationRaiPolicyName string = simulationRaiPolicy.name

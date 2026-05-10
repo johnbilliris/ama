@@ -193,8 +193,8 @@ module spec035RecoverySigningKv './modules/recovery-signing-keyvault.bicep' = if
 // so the migration can be staged independently of the existing AIDR-only path.
 // ────────────────────────────────────────────────────────────────────────────────
 
-@description('Spec-036 — Provision the Foundry-RAG blue-green AI Search index + ingest-runner job. Default OFF in dev; flip on per Phase B → C → D rollout.')
-param enableSpec036FoundryRag bool = false
+@description('Spec-036 — Provision the Foundry-RAG blue-green AI Search index + ingest-runner job. Default ON post-cutover (ADR-20 §Q-P6); flip off only for hermetic dev tenants.')
+param enableSpec036FoundryRag bool = true
 
 @description('Spec-036 — AI Search service name (auto-generated when empty).')
 param spec036SearchServiceName string = ''
@@ -202,19 +202,56 @@ param spec036SearchServiceName string = ''
 @description('Spec-036 — Ingest-runner image tag (azd deploy / cd.yml sets this to the corpus_build_sha).')
 param spec036IngestRunnerImageTag string = 'latest'
 
-@description('Spec-036 — Foundry / Azure AI project endpoint URL for the embedding deployment.')
-param spec036FoundryEndpoint string = ''
-
 @description('Spec-036 — Embedding deployment name (Foundry).')
 param spec036EmbeddingDeploymentName string = 'text-embedding-3-large'
-
-@description('Spec-036 — Service Bus FQDN for the build-complete topic (FR-RAG-IDX-05).')
-param spec036ServiceBusFqdn string = ''
 
 resource spec036IngestIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = if (enableSpec036FoundryRag) {
   name: 'id-ingest-runner-${environmentName}'
   location: location
   tags: tags
+}
+
+// Spec 036 FR-RAG-IDX-05 — Service Bus topic where the ingest-runner publishes
+// ``corpus.build.complete`` events for downstream orchestration. Standard SKU
+// is required for topics (Basic supports queues only).
+resource spec036ServiceBus 'Microsoft.ServiceBus/namespaces@2022-10-01-preview' = if (enableSpec036FoundryRag) {
+  name: 'sb-corpus-${environmentName}-${take(uniqueSuffix, 6)}'
+  location: location
+  tags: tags
+  sku: {
+    name: 'Standard'
+    tier: 'Standard'
+  }
+  properties: {
+    disableLocalAuth: true
+    minimumTlsVersion: '1.2'
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
+resource spec036CorpusTopic 'Microsoft.ServiceBus/namespaces/topics@2022-10-01-preview' = if (enableSpec036FoundryRag) {
+  parent: spec036ServiceBus
+  name: 'topic.corpus-build-complete'
+  properties: {
+    enablePartitioning: false
+    requiresDuplicateDetection: true
+    duplicateDetectionHistoryTimeWindow: 'PT1H'
+    defaultMessageTimeToLive: 'P14D'
+  }
+}
+
+// At-least-one subscription is required so consumers (cd.yml, agent containers)
+// can subscribe; ARM treats an orphaned topic as healthy but the consumer SDK
+// requires a subscription to bind a receiver.
+resource spec036CorpusSubscription 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2022-10-01-preview' = if (enableSpec036FoundryRag) {
+  parent: spec036CorpusTopic
+  name: 'sub.cd-pipeline'
+  properties: {
+    deadLetteringOnMessageExpiration: true
+    deadLetteringOnFilterEvaluationExceptions: true
+    maxDeliveryCount: 10
+    lockDuration: 'PT1M'
+  }
 }
 
 module spec036SearchBlueGreen './modules/ai-search-blue-green.bicep' = if (enableSpec036FoundryRag) {
@@ -249,9 +286,9 @@ module spec036IngestRunnerJob './modules/ingest-runner-job.bicep' = if (enableSp
     containerRegistryLoginServer: containerRegistry.properties.loginServer
     searchServiceEndpoint: 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net'
     indexAlias: 'corpus'
-    embeddingDeploymentName: spec036EmbeddingDeploymentName
-    azureAiProjectEndpoint: spec036FoundryEndpoint
-    serviceBusFullyQualifiedNamespace: spec036ServiceBusFqdn
+    embeddingDeploymentName: openAiDeployments.outputs.embeddingDeploymentName
+    azureAiProjectEndpoint: openAi.properties.endpoint
+    serviceBusFullyQualifiedNamespace: '${spec036ServiceBus!.name}.servicebus.windows.net'
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
   }
 }
@@ -259,6 +296,9 @@ module spec036IngestRunnerJob './modules/ingest-runner-job.bicep' = if (enableSp
 // Spec-036 RBAC — grant the ingest-runner UAMI Search Index Data Contributor on
 // the search service (FR-RAG-IDX-04 write path; FR-S03 AAD-only).
 var spec036SearchIndexDataContributorRoleId = '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
+var spec036SearchIndexDataReaderRoleId = '1407120a-92aa-4202-b7e9-c0e197c71c8f'
+var spec036ServiceBusDataSenderRoleId = '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39'
+var spec036CognitiveServicesUserRoleId = 'a97b65f3-24c7-4388-baec-2e87135dc908'
 
 resource spec036SearchRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (enableSpec036FoundryRag) {
   name: guid('spec036-ingest-search-data-contributor', environmentName)
@@ -266,6 +306,52 @@ resource spec036SearchRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' 
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036SearchIndexDataContributorRoleId)
     principalId: spec036IngestIdentity!.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// FR-RAG-IDX-02 — Foundry embedding calls from the ingest-runner; Cognitive
+// Services User is sufficient for `embeddings` operations against Foundry
+// (`AIServices` parent kind shares the role contract with Azure OpenAI).
+resource spec036FoundryRbacIngest 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (enableSpec036FoundryRag) {
+  name: guid('spec036-ingest-foundry-cogsvc-user', environmentName)
+  scope: openAi
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036CognitiveServicesUserRoleId)
+    principalId: spec036IngestIdentity!.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// FR-RAG-IDX-05 — ingest-runner publishes ``corpus.build.complete`` to the SB topic.
+resource spec036ServiceBusRbacIngest 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (enableSpec036FoundryRag) {
+  name: guid('spec036-ingest-sb-data-sender', environmentName)
+  scope: spec036ServiceBus!
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036ServiceBusDataSenderRoleId)
+    principalId: spec036IngestIdentity!.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Runtime grounding — api + agents read the corpus index via hybrid search;
+// data-plane reader is sufficient (no index management).
+resource spec036SearchRbacApi 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (enableSpec036FoundryRag) {
+  name: guid('spec036-api-search-data-reader', environmentName)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036SearchIndexDataReaderRoleId)
+    principalId: apiContainerApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource spec036SearchRbacAgents 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (enableSpec036FoundryRag) {
+  name: guid('spec036-agents-search-data-reader', environmentName)
+  scope: resourceGroup()
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036SearchIndexDataReaderRoleId)
+    principalId: agentsContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
 }
@@ -837,12 +923,11 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
             { name: 'AZURE_AI_PROJECT_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: openAiDeployments.outputs.azureAiProjectDeployments }
-            // Compatibility seam — same URL; legacy readers still work until ADR-20 cleanup PR.
-            { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
-            { name: 'AZURE_OPENAI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
-            { name: 'AZURE_OPENAI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
-            { name: 'AZURE_OPENAI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
-            { name: 'AZURE_OPENAI_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
+            // Spec 036 grounding plane (FR-RAG-IDX-04). Empty string when
+            // enableSpec036FoundryRag=false so retrieval auto-wiring stays off
+            // for hermetic dev tenants.
+            { name: 'AZURE_SEARCH_ENDPOINT', value: enableSpec036FoundryRag ? 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net' : '' }
+            { name: 'RETRIEVAL_INDEX_ALIAS', value: 'corpus' }
             { name: 'OTEL_SERVICE_NAME', value: 'api' }
           ]
           probes: [
@@ -916,11 +1001,11 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
             { name: 'AZURE_AI_PROJECT_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: openAiDeployments.outputs.azureAiProjectDeployments }
-            // Compatibility seam — same URL; legacy readers still work until ADR-20 cleanup PR.
-            { name: 'AZURE_OPENAI_ENDPOINT', value: openAi.properties.endpoint }
-            { name: 'AZURE_OPENAI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
-            { name: 'AZURE_OPENAI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
-            { name: 'AZURE_OPENAI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
+            // Spec 036 grounding plane (FR-RAG-IDX-04). Empty string when
+            // enableSpec036FoundryRag=false so retrieval auto-wiring stays off
+            // for hermetic dev tenants.
+            { name: 'AZURE_SEARCH_ENDPOINT', value: enableSpec036FoundryRag ? 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net' : '' }
+            { name: 'RETRIEVAL_INDEX_ALIAS', value: 'corpus' }
             // Spec 036 / ADR-20 §Q-P6-02 — all five named agents land grounded by default.
             // Disable per-agent grounding mid-incident with `az containerapp update --set-env-vars FEATURE_FOUNDRY_RAG_<AGENT>=0`.
             { name: 'FEATURE_FOUNDRY_RAG_MONITORING', value: '1' }
@@ -1176,11 +1261,9 @@ output AZURE_COSMOS_ENDPOINT string = cosmos.properties.documentEndpoint
 output AZURE_COSMOS_DATABASE string = 'disaster-hub'
 output AZURE_STORAGE_ACCOUNT_NAME string = storage.name
 output AZURE_REDIS_HOST string = redis.properties.hostName
-// Spec 036 / ADR-20 — Foundry is the canonical chat plane; AZURE_OPENAI_ENDPOINT
-// remains as a compatibility seam pointing at the same URL until the cleanup PR.
+// Spec 036 / ADR-20 — Foundry is the canonical chat plane.
 output AZURE_AI_PROJECT_ENDPOINT string = openAi.properties.endpoint
 output AZURE_AI_PROJECT_DEPLOYMENTS string = openAiDeployments.outputs.azureAiProjectDeployments
-output AZURE_OPENAI_ENDPOINT string = openAi.properties.endpoint
 output AZURE_APP_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
 output SERVICE_API_ENDPOINT_URL string = 'https://${apiContainerApp.properties.configuration.ingress.fqdn}'
 output SERVICE_WEB_ENDPOINT_URL string = 'https://${webApp.properties.defaultHostName}'

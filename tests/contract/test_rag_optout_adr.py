@@ -37,11 +37,12 @@ H2_RE = re.compile(r"^##\s+(.+)\s*$", re.MULTILINE)
 FILENAME_RE = re.compile(r"^(0[1-9])-rag-optout-[a-z0-9-]+\.md$")
 # Phase F (Spec 036 amend loop) introduced general-purpose ADRs 12–19 covering
 # cultural-authority gating, authority precedence, blue-green atomicity, etc.
-# Those ADRs do NOT carry the ``rag-optout`` prefix because they are not
-# opt-outs; the ``test_no_unexpected_files_in_adr_dir`` whitelist below
-# accepts both filename styles, but the per-ADR content tests below
-# parametrise only over the rag-optout cohort.
-PHASE_F_ADR_FILENAME_RE = re.compile(r"^1[2-9]-[a-z0-9-]+\.md$")
+# Phase F2 (the hard-cutover decision) added ADR-20 onwards. Those ADRs do NOT
+# carry the ``rag-optout`` prefix because they are not opt-outs; the
+# ``test_no_unexpected_files_in_adr_dir`` whitelist below accepts both filename
+# styles, but the per-ADR content tests below parametrise only over the
+# rag-optout cohort.
+PHASE_F_ADR_FILENAME_RE = re.compile(r"^[1-9][0-9]-[a-z0-9-]+\.md$")
 
 
 def _adr_files() -> list[Path]:
