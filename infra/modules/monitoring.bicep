@@ -169,6 +169,6 @@ resource simulationErrorAlert 'Microsoft.Insights/scheduledQueryRules@2023-03-15
 
 output logAnalyticsId string = logAnalytics.id
 output logAnalyticsCustomerId string = logAnalytics.properties.customerId
-output appInsightsId string = appInsights.id
+output appInsightsName string = appInsights.name
 output appInsightsConnectionString string = appInsights.properties.ConnectionString
 output actionGroupId string = actionGroup.id

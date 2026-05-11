@@ -1,0 +1,25 @@
+# Foundry Agent Registry — Help Assistant (spec-038 T-AA019).
+#
+# Companion to `infra/parameters/foundry-carveout.yaml`. The carve-out
+# registry above tracks *model deployments*; this file tracks *Foundry agent
+# definitions* that consume those models. The Help Assistant reuses the
+# existing in-AU `gpt-4o-mini` deployment and does NOT invoke the §NN-2
+# Foundry carve-out (it operates fully inside the in-AU Foundry footprint).
+
+version: 1
+agents:
+  - name: help_assistant
+    region: australiaeast
+    model_deployment: gpt-4o-mini        # already in carveout registry above
+    foundry_carveout: false              # NN-2 carve-out NOT invoked
+    redaction: required                  # FR-017 model-gateway redaction
+    classification_ceiling: OFFICIAL
+    retrieval:
+      index_alias: help-corpus-active
+      hybrid: true
+      hard_tenant_filter: true           # FR-019 — applied by retrieval_client
+    audit:
+      target: chat_audit_log
+      ttl_days: 2555                     # 7 years (FR-020)
+    notes:
+      - "spec-038 grounded chat assistant; refusal-first prompt; cite-or-refuse semantics."
