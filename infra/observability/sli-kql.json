@@ -1,0 +1,98 @@
+{
+  "$comment": "Spec-036 Wave 4 — T-Z04 KQL templates materialised from contracts/sli-thresholds.md. Loaded by tests/devops/test_sli_kql_smoke.py and tests/e2e/test_staging_promotion_gates.py.",
+  "version": "1.0.0",
+  "spec": "036",
+  "adr": "ADR-036-008",
+  "slis": [
+    {
+      "id": "SLI-Z1",
+      "name": "P95 inject→fan-out latency",
+      "window": "PT5M",
+      "warn_threshold_ms": 1500,
+      "breach_threshold_ms": 2000,
+      "kql": "customEvents | where timestamp > ago(5m) | where name == \"inject_telemetry.fan_out_complete\" | extend latency_ms = todouble(customDimensions[\"fan_out_latency_ms\"]) | extend tenant_id = tostring(customDimensions[\"tenant_id\"]) | summarize p95_latency_ms = percentile(latency_ms, 95) by bin(timestamp, 1m), tenant_id | project timestamp, tenant_id, p95_latency_ms",
+      "dimensions": ["tenant_id"],
+      "sample_rate": 1.0,
+      "fr_refs": ["FR-063", "FR-026"],
+      "sc_refs": ["SC-001"]
+    },
+    {
+      "id": "SLI-Z2",
+      "name": "P99 audit gap-free invariant",
+      "window": "P7D",
+      "target_pct": 99.99,
+      "breach_pct_below": 99.99,
+      "kql": "let window = ago(7d); let counts = AuditEntries_CL | where TimeGenerated > window | summarize maxSeq = max(sequence_number), cnt = count() by simulation_id_g | extend gap = maxSeq - cnt; counts | summarize gappy = countif(gap != 0), total = count() | extend gap_free_pct = 100.0 * (1.0 - todouble(gappy) / total) | project gap_free_pct, gappy_count = gappy, total_simulations = total",
+      "dimensions": [],
+      "sample_rate": 1.0,
+      "fr_refs": ["FR-048", "FR-049"],
+      "sc_refs": []
+    },
+    {
+      "id": "SLI-Z3",
+      "name": "DLQ depth (sequence-uncertainty fail-closed)",
+      "window": "PT1H",
+      "warn_threshold_count": 1,
+      "breach_threshold_count": 1,
+      "kql": "customEvents | where timestamp > ago(1h) | where name == \"audit.sequence.uncertainty\" | summarize dlq_depth = count()",
+      "dimensions": [],
+      "sample_rate": 1.0,
+      "fr_refs": ["FR-048"],
+      "sc_refs": []
+    },
+    {
+      "id": "SLI-Z4",
+      "name": "Cosmos RU consumption headroom",
+      "window": "PT15M",
+      "warn_pct": 70.0,
+      "breach_pct": 90.0,
+      "kql": "AzureDiagnostics | where ResourceProvider == \"MICROSOFT.DOCUMENTDB\" | where Category == \"DataPlaneRequests\" | summarize p95_ru = percentile(todouble(requestCharge_s), 95) by bin(TimeGenerated, 1m)",
+      "dimensions": [],
+      "sample_rate": 1.0,
+      "fr_refs": ["FR-063"],
+      "sc_refs": []
+    },
+    {
+      "id": "SLI-Z5",
+      "name": "Cascade degraded-to-annotation rate (T-Q03 affinity ladder)",
+      "window": "PT1H",
+      "warn_pct": 5.0,
+      "breach_pct": 10.0,
+      "kql": "customEvents | where timestamp > ago(1h) | where name in (\"cascade.degraded_to_annotation\", \"cascade.fan_out_complete\") | summarize degraded_pct = 100.0 * countif(name == \"cascade.degraded_to_annotation\") / count()",
+      "dimensions": [],
+      "sample_rate": 1.0,
+      "fr_refs": ["FR-053"],
+      "sc_refs": ["SC-009"]
+    },
+    {
+      "id": "SLI-Z6",
+      "name": "P95 sub-agent reply latency (per model deployment)",
+      "$comment": "Cycle 2 / T-AA16 / A2-02 — staging-promotion gate per sli-thresholds.md row 6. Trailing 24 h window with 30-sample CLT floor (pass-2 Q4). Thresholds are model-specific: gpt-4o ≤ 4000 ms warn / ≤ 5000 ms breach; gpt-4o-mini ≤ 1500 ms warn / ≤ 2000 ms breach. Cycle 3 / T-AA34 / A3-05 — KQL aligned with contracts/sli-thresholds.md §6a canonical body (28-series cardinality restored via `extend sub_agent` + `summarize ... by sub_agent, model_deployment`; tnt-stg-smoke isolation filter added).",
+      "window": "P1D",
+      "warn_threshold_ms_gpt4o": 4000,
+      "breach_threshold_ms_gpt4o": 5000,
+      "warn_threshold_ms_gpt4omini": 1500,
+      "breach_threshold_ms_gpt4omini": 2000,
+      "kql": "customEvents | where timestamp > ago(24h) | where name == \"sub_agent.invocation.complete\" | extend latency_ms = todouble(customDimensions[\"latency_ms\"]) | extend sub_agent = tostring(customDimensions[\"sub_agent\"]) | extend model_deployment = tostring(customDimensions[\"model_deployment\"]) | extend env = tostring(customDimensions[\"env\"]) | extend tenant_id = tostring(customDimensions[\"tenant_id\"]) | where env == \"staging\" | where tenant_id == \"tnt-stg-smoke\" | summarize p95_latency_ms = percentile(latency_ms, 95), sample_count = count() by sub_agent, model_deployment | project sub_agent, model_deployment, p95_latency_ms, sample_count",
+      "dimensions": ["sub_agent", "model_deployment"],
+      "sample_rate": 1.0,
+      "fr_refs": ["FR-067", "FR-026"],
+      "sc_refs": ["SC-001"]
+    },
+    {
+      "id": "SLI-Z7",
+      "name": "Map-overlay drift error budget (SSE delivery)",
+      "$comment": "Cycle 2 / T-AA16 / A2-02 — staging-promotion gate per sli-thresholds.md row 7. ≥ 99.5 % within 1500 ms over a trailing 24 h window with 30-sample CLT floor. Aligns with SC-013 staging-promotion gate (spec.md L2785-2797). Cycle 3 / T-AA34 / A3-06 — drift dimension corrected to `client_received_ms - server_emit_ms` per spec; breach_pct: 99.5 → 99.0 (distinct warn/breach bands); group `by model_deployment` (per A3-06 alignment with Z6 cardinality); tnt-stg-smoke isolation filter added.",
+      "window": "P1D",
+      "warn_pct": 99.5,
+      "breach_pct": 99.0,
+      "warn_threshold_ms": 1500,
+      "breach_threshold_ms": 1500,
+      "kql": "customEvents | where timestamp > ago(24h) | where name == \"sse.map_overlay.delivered\" | extend client_received_ms = todouble(customDimensions[\"client_received_ms\"]) | extend server_emit_ms = todouble(customDimensions[\"server_emit_ms\"]) | extend drift_ms = client_received_ms - server_emit_ms | extend env = tostring(customDimensions[\"env\"]) | extend tenant_id = tostring(customDimensions[\"tenant_id\"]) | extend model_deployment = tostring(customDimensions[\"model_deployment\"]) | where env == \"staging\" | where tenant_id == \"tnt-stg-smoke\" | summarize within_budget = countif(drift_ms <= 1500), sample_count = count() by model_deployment | extend drift_budget_pct = 100.0 * todouble(within_budget) / sample_count | project model_deployment, drift_budget_pct, sample_count",
+      "dimensions": ["model_deployment"],
+      "sample_rate": 1.0,
+      "fr_refs": ["FR-067"],
+      "sc_refs": ["SC-010"]
+    }
+  ]
+}

@@ -414,11 +414,14 @@ def apply_precedence_tiebreak(chunks: list[Any]) -> tuple[list[Any], list[str]]:
     # We achieve this with a stable sort + composite key where recency is the
     # primary descending dimension; Python's sort is stable so we apply
     # ascending sub-keys first then reverse-sort by recency.
-    ordered = sorted(chunks, key=lambda c: (
-        licence_priority.get(_chunk_field(c, "licence_mode", ""), 99),
-        _chunk_field(c, "embedding_model_id", "") or "",
-        _chunk_field(c, "chunk_id", "") or "",
-    ))
+    ordered = sorted(
+        chunks,
+        key=lambda c: (
+            licence_priority.get(_chunk_field(c, "licence_mode", ""), 99),
+            _chunk_field(c, "embedding_model_id", "") or "",
+            _chunk_field(c, "chunk_id", "") or "",
+        ),
+    )
     ordered = sorted(ordered, key=lambda c: _chunk_field(c, "corpus_build_generated_at", ""), reverse=True)
 
     # Determine which tiers were "needed". A tier is "applied" when it was
@@ -562,11 +565,7 @@ def apply_comdisplan_activation(
     Pass ``national_emergency_active`` explicitly OR rely on the module-level
     flag set via ``set_national_emergency_flag``.
     """
-    flag = (
-        national_emergency_active
-        if national_emergency_active is not None
-        else _NATIONAL_EMERGENCY_ACTIVE
-    )
+    flag = national_emergency_active if national_emergency_active is not None else _NATIONAL_EMERGENCY_ACTIVE
     if not flag:
         return chunks
     out: list[Any] = []
@@ -996,9 +995,7 @@ def build_default_retrieval_service() -> AzureSearchRetrievalService | None:
             embed_query=embed_query,
         )
     except Exception:  # noqa: BLE001
-        logger.exception(
-            "build_default_retrieval_service_failed; grounding disabled for this process"
-        )
+        logger.exception("build_default_retrieval_service_failed; grounding disabled for this process")
         return None
 
 

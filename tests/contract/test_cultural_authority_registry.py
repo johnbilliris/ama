@@ -57,9 +57,9 @@ def test_valid_signature_accepted() -> None:
     out = registry.get_consents("op-1@ama.local")
 
     assert out == (consent,), "valid signature must surface the consent"
-    assert not any(
-        e.get("event_type") == "cultural_authority_signature_invalid" for e in audit_events
-    ), "no signature-invalid audit event when signature is valid"
+    assert not any(e.get("event_type") == "cultural_authority_signature_invalid" for e in audit_events), (
+        "no signature-invalid audit event when signature is valid"
+    )
 
 
 def test_tampered_signature_rejected_and_audit_emitted() -> None:
@@ -75,9 +75,7 @@ def test_tampered_signature_rejected_and_audit_emitted() -> None:
     out = registry.get_consents("op-1@ama.local")
 
     assert out == (), "tampered signature must be filtered out"
-    invalid_events = [
-        e for e in audit_events if e.get("event_type") == "cultural_authority_signature_invalid"
-    ]
+    invalid_events = [e for e in audit_events if e.get("event_type") == "cultural_authority_signature_invalid"]
     assert len(invalid_events) == 1, "exactly one signature-invalid audit event"
     assert invalid_events[0]["operator_id"] == "op-1@ama.local"
     assert invalid_events[0]["land_council_id"] == "central-land-council"
@@ -100,9 +98,9 @@ def test_signature_verifier_exception_treated_as_failure() -> None:
     out = registry.get_consents("op-1@ama.local")
 
     assert out == (), "verifier exception must fail-closed"
-    assert any(
-        e.get("event_type") == "cultural_authority_signature_invalid" for e in audit_events
-    ), "audit event must still emit when verifier raises"
+    assert any(e.get("event_type") == "cultural_authority_signature_invalid" for e in audit_events), (
+        "audit event must still emit when verifier raises"
+    )
 
 
 def test_consent_round_trips_from_schema_example() -> None:

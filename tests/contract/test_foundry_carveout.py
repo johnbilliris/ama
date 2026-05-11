@@ -120,8 +120,7 @@ def _row(*, env: str, approvers: list[str], model: str = "gpt-4o-mini") -> dict:
         "environment": env,
         "purpose": "production" if env == "prod" else "evaluation",
         "business_justification": (
-            "Spec 036 F-A4 contract test fixture — FR-RAG-CV-01 "
-            "environment-aware approver quorum."
+            "Spec 036 F-A4 contract test fixture — FR-RAG-CV-01 environment-aware approver quorum."
         ),
         "approver_identities": approvers,
         "review_date": "2027-04-08",
@@ -165,16 +164,12 @@ def test_two_approver_prod_payload_denied() -> None:
     payload = _payload([_row(env="prod", approvers=["alice", "bob"])])
     deny = _eval_with_opa_or_python(payload)
     assert deny, "expected non-empty deny set for 2-approver prod row (FR-RAG-CV-01)"
-    assert any("FR-RAG-CV-01" in m for m in deny), (
-        f"deny set must reference FR-RAG-CV-01, got {deny!r}"
-    )
+    assert any("FR-RAG-CV-01" in m for m in deny), f"deny set must reference FR-RAG-CV-01, got {deny!r}"
 
 
 def test_three_approver_prod_payload_passes() -> None:
     """Case (c): prod row with 3 approvers → empty deny set, exit 0."""
-    payload = _payload(
-        [_row(env="prod", approvers=["alice", "bob", "compliance-auditor"])]
-    )
+    payload = _payload([_row(env="prod", approvers=["alice", "bob", "compliance-auditor"])])
     deny = _eval_with_opa_or_python(payload)
     assert deny == [], f"expected empty deny set for 3-approver prod row, got {deny!r}"
 

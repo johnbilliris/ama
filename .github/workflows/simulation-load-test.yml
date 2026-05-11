@@ -1,0 +1,70 @@
+name: simulation-load-test
+# T-J09 — on-demand 200-injection Locust load test driver.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_host:
+        description: 'Staging host for the load test (e.g. https://api.staging-westus.example.com)'
+        required: true
+        type: string
+      duration_seconds:
+        description: 'Locust test duration (seconds)'
+        required: false
+        default: '60'
+        type: string
+      users:
+        description: 'Concurrent virtual users (default 200)'
+        required: false
+        default: '200'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  locust-load-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Locust
+        run: |
+          python -m pip install --upgrade pip
+          pip install 'locust>=2.20'
+
+      - name: Run 200-injection Locust load test
+        env:
+          LOCUST_HOST: ${{ inputs.target_host }}
+        run: |
+          locust \
+            -f tests/load/simulation_injection_load.py \
+            --headless \
+            --host "${LOCUST_HOST}" \
+            --users "${{ inputs.users }}" \
+            --spawn-rate 20 \
+            --run-time "${{ inputs.duration_seconds }}s" \
+            --html locust-report.html \
+            --csv locust-report \
+            --logfile locust.log
+
+      - name: Archive Locust HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: locust-load-report
+          path: |
+            locust-report.html
+            locust-report*.csv
+            locust.log
+
+      - name: Assert plan-canonical SLI thresholds
+        run: |
+          python tests/load/assert_locust_thresholds.py locust-report_stats.csv

@@ -115,9 +115,7 @@ def test_no_ties_no_lower_tiers_listed() -> None:
     newer = _mk_chunk(chunk_id="b", generated_at=datetime(2025, 11, 18, tzinfo=UTC))
     _ordered, applied = rank([older, newer])
     # Recency strictly distinguished — no further tie-break needed.
-    assert applied == ["recency"], (
-        f"only recency should be listed when no further ties; got {applied}"
-    )
+    assert applied == ["recency"], f"only recency should be listed when no further ties; got {applied}"
 
 
 def test_full_chain_when_all_tiers_tied_until_chunk_id() -> None:
@@ -131,6 +129,4 @@ def test_full_chain_when_all_tiers_tied_until_chunk_id() -> None:
         "licence_mode",
         "embedding_model_id",
         "chunk_id",
-    ], (
-        f"chain MUST list every tier traversed; got {applied}"
-    )
+    ], f"chain MUST list every tier traversed; got {applied}"

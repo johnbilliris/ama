@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://platform/schemas/signal-envelope.schema.v2.json",
+  "title": "Signal envelope (feature 036 v2 — 9 canonical FR-008 categories)",
+  "description": "Replaces signal-envelope.schema.json v1 ($id …signal-envelope.schema.json). Adds the 9 canonical FR-008 categories (`weather`, `fire-behaviour`, `hydrology`, `geohazard`, `utility`, `transport`, `evacuation`, `resource`, `comms-channel-state`) and the `freshness_window_seconds` field.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "signal_id",
+    "simulation_id",
+    "tenant_id",
+    "category",
+    "observed_at",
+    "freshness_window_seconds",
+    "confidence",
+    "synthetic_signal"
+  ],
+  "properties": {
+    "signal_id": { "type": "string", "format": "uuid" },
+    "simulation_id": { "type": "string", "format": "uuid" },
+    "tenant_id": { "type": "string" },
+    "category": {
+      "type": "string",
+      "enum": [
+        "weather",
+        "fire-behaviour",
+        "hydrology",
+        "geohazard",
+        "utility",
+        "transport",
+        "evacuation",
+        "resource",
+        "comms-channel-state"
+      ]
+    },
+    "parameters": { "type": "object" },
+    "gps": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["lat", "lng"],
+      "properties": {
+        "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+        "lng": { "type": "number", "minimum": -180, "maximum": 180 }
+      }
+    },
+    "jurisdiction_code": { "type": ["string", "null"] },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "written_at": { "type": "string", "format": "date-time" },
+    "freshness_window_seconds": { "type": "integer", "minimum": 0 },
+    "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+    "contradicts": { "type": ["string", "null"], "format": "uuid" },
+    "injection_correlation_id": { "type": ["string", "null"], "format": "uuid" },
+    "origin_cascade_id": { "type": ["string", "null"], "format": "uuid" },
+    "synthetic_signal": { "const": true },
+    "document_type": { "const": "synthetic_signal" }
+  }
+}

@@ -479,9 +479,7 @@ def queue_offline_decision_for_review(
     """
     if is_decision_offline_safe(decision_type):
         # Caller misuse — would dead-letter. Raise so the bug surfaces.
-        raise ValueError(
-            f"decision type {decision_type!r} is offline-safe; do not queue for review"
-        )
+        raise ValueError(f"decision type {decision_type!r} is offline-safe; do not queue for review")
     return QueuedOfflineDecision(
         decision_type=decision_type,
         decision_summary=decision_summary,

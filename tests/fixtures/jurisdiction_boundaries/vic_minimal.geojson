@@ -1,0 +1,21 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "jurisdiction_code": "VIC" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [140.96, -39.16],
+            [148.5, -39.16],
+            [148.5, -33.98],
+            [140.96, -33.98],
+            [140.96, -39.16]
+          ]
+        ]
+      }
+    }
+  ]
+}

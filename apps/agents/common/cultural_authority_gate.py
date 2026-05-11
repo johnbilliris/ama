@@ -99,11 +99,7 @@ def apply_cultural_authority_gate(
         _emit(
             audit_sink,
             {
-                "event_type": (
-                    "cultural_authority_gate_allowed"
-                    if allowed
-                    else "cultural_authority_gate_blocked"
-                ),
+                "event_type": ("cultural_authority_gate_allowed" if allowed else "cultural_authority_gate_blocked"),
                 "chunk_id": _chunk_get(chunk, "chunk_id"),
                 "operator_id": operator_id,
                 "cultural_classification": classification,

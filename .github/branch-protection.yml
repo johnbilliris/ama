@@ -1,0 +1,30 @@
+# Branch-protection rules — declarative configuration for `main`.
+#
+# This file is consumed by the org's branch-protection automation
+# (e.g. `org-policy-bot` or `Probot/setting`). The Status checks listed
+# below MUST all be green for a PR to merge into `main`.
+#
+# Spec-036 / T-J10 — `simulation-stub-sweep` is now a hard required-status-
+# check; a PR that re-introduces the FR-002 trip-wire literal cannot merge.
+#
+# Spec-036 / T-J17 — `[SIMULATION]` prefix gate (SC-008) is also blocking.
+# Spec-036 / T-J03 — `egress-block` contract test (SC-006) is also blocking.
+
+branches:
+  main:
+    protection:
+      required_status_checks:
+        strict: true
+        contexts:
+          - simulation-stub-sweep / sweep        # T-J10 (FR-002)
+          - ci / lint
+          - ci / test
+          - ci / contract                          # includes T-J17 / T-J03
+          - simulation-load-test / locust-load-test  # opt-in via workflow_dispatch
+      enforce_admins: true
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+        require_code_owner_reviews: true
+      restrictions: null
+      allow_force_pushes: false
+      allow_deletions: false

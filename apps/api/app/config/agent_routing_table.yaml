@@ -1,0 +1,51 @@
+"""Agent routing table — combat vs control distinction (T-G04 / FR-022..FR-025).
+
+Encodes the FR-022 combat/control split per state, the FR-023 ACT police
+override (jurisdiction=ACT routes police-coord to AFP, not state police),
+the FR-024 medical-service brand mapping per state, and the FR-025 NSW
+Incident-Controller restriction (only specific roles can be IC).
+"""
+
+# FR-022 — combat agencies (front-line response) and control/coordination
+# agencies, keyed by 2-letter state/territory code.
+combat_agencies:
+  NSW: ["NSW RFS", "NSW SES", "NSW Fire and Rescue"]
+  VIC: ["CFA", "FRV", "VICSES"]
+  QLD: ["QFES Fire", "QFES Rural", "QFES SES"]
+  WA: ["DFES Fire", "DFES SES"]
+  SA: ["CFS", "MFS", "SASES"]
+  TAS: ["Tasmania Fire Service", "TASSES"]
+  NT: ["Bushfires NT", "NTFRS", "NTES"]
+  ACT: ["ACT Rural Fire Service", "ACT Fire and Rescue", "ACT SES"]
+
+control_agencies:
+  NSW: ["NSW Police Force", "Resilience NSW"]
+  VIC: ["Victoria Police", "Emergency Management Victoria"]
+  QLD: ["Queensland Police Service", "QFES Coordination"]
+  WA: ["WA Police", "DFES State Operations"]
+  SA: ["SA Police", "SAFECOM"]
+  TAS: ["Tasmania Police", "SES Tasmania State Operations"]
+  NT: ["NT Police", "NTES Coordination"]
+  # FR-023 — ACT police-coord routes to AFP not state police.
+  ACT: ["Australian Federal Police", "ACT Emergency Services Agency"]
+
+# FR-024 — medical service brand mapping per state. Communication agent
+# uses these names verbatim in receipts and public artefacts.
+medical_brand:
+  NSW: "NSW Ambulance"
+  VIC: "Ambulance Victoria"
+  QLD: "Queensland Ambulance Service"
+  WA: "St John WA"
+  SA: "SA Ambulance Service"
+  TAS: "Ambulance Tasmania"
+  NT: "St John NT"
+  ACT: "ACT Ambulance Service"
+
+# FR-025 — NSW Incident Controller restriction. Only roles in this list
+# may be appointed as IC for an NSW incident; any other appointment is
+# rejected and a tenant_isolation.violation-style audit is emitted.
+nsw_ic_eligible_roles:
+  - "NSW RFS Incident Controller"
+  - "NSW Fire and Rescue Incident Controller"
+  - "NSW SES Incident Controller"
+  - "NSW Police Force Incident Controller"

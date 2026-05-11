@@ -236,9 +236,7 @@ def make_inference_record(
         record["approval_workflow_state"] = approval_workflow_state
         # ADR-14 invariant 7: terminal state requires approval_authority.
         if approval_workflow_state in {"approved", "rejected"} and not approval_authority:
-            raise ValueError(
-                "approval_workflow_state in {approved, rejected} requires approval_authority"
-            )
+            raise ValueError("approval_workflow_state in {approved, rejected} requires approval_authority")
     if approval_authority:
         record["approval_authority"] = approval_authority
     if downgrade_justification:

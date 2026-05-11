@@ -141,4 +141,3 @@ class RetrievalSession(HttpUser):
             )
         except Exception:  # noqa: BLE001 - best-effort instrumentation
             pass
-

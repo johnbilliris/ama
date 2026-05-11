@@ -1,0 +1,14 @@
+# Test fixture — small synthetic jurisdiction boundaries (T-G01).
+#
+# These are NOT the real AU Geoscience polygons; they're a 1-2-polygon
+# sample large enough to exercise the STRtree + lookup contract while
+# staying small enough to commit. The full AU dataset is loaded at
+# runtime via the Bicep deployment of the `jurisdiction-boundaries`
+# Storage container.
+#
+# Format: each pair of non-comment lines is `<jurisdiction_code>` then
+# `<WKT polygon>`.
+ACT
+POLYGON ((148.7 -35.95, 149.4 -35.95, 149.4 -35.1, 148.7 -35.1, 148.7 -35.95))
+NSW
+POLYGON ((149.5 -37.5, 153.7 -37.5, 153.7 -28.0, 149.5 -28.0, 149.5 -37.5))

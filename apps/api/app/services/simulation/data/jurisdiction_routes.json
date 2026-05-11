@@ -1,0 +1,50 @@
+[
+  { "jurisdiction": "NSW", "hazard": "fire", "agencies": ["NSW RFS", "NSW Fire and Rescue"] },
+  { "jurisdiction": "NSW", "hazard": "flood", "agencies": ["NSW SES"] },
+  { "jurisdiction": "NSW", "hazard": "storm", "agencies": ["NSW SES"] },
+  { "jurisdiction": "NSW", "hazard": "police", "agencies": ["NSW Police Force"] },
+  { "jurisdiction": "NSW", "hazard": "medical", "agencies": ["NSW Ambulance"] },
+
+  { "jurisdiction": "VIC", "hazard": "fire", "agencies": ["CFA", "FRV"] },
+  { "jurisdiction": "VIC", "hazard": "flood", "agencies": ["VICSES"] },
+  { "jurisdiction": "VIC", "hazard": "storm", "agencies": ["VICSES"] },
+  { "jurisdiction": "VIC", "hazard": "police", "agencies": ["Victoria Police"] },
+  { "jurisdiction": "VIC", "hazard": "medical", "agencies": ["Ambulance Victoria"] },
+
+  { "jurisdiction": "QLD", "hazard": "fire", "agencies": ["QFD"] },
+  { "jurisdiction": "QLD", "hazard": "flood", "agencies": ["SES Queensland"] },
+  { "jurisdiction": "QLD", "hazard": "storm", "agencies": ["SES Queensland"] },
+  { "jurisdiction": "QLD", "hazard": "police", "agencies": ["Queensland Police Service"] },
+  { "jurisdiction": "QLD", "hazard": "medical", "agencies": ["Queensland Ambulance Service"] },
+
+  { "jurisdiction": "WA", "hazard": "fire", "agencies": ["DFES"] },
+  { "jurisdiction": "WA", "hazard": "flood", "agencies": ["DFES"] },
+  { "jurisdiction": "WA", "hazard": "storm", "agencies": ["DFES"] },
+  { "jurisdiction": "WA", "hazard": "police", "agencies": ["WA Police"] },
+  { "jurisdiction": "WA", "hazard": "medical", "agencies": ["St John WA"] },
+
+  { "jurisdiction": "SA", "hazard": "fire", "agencies": ["SACFS", "SAMFS"] },
+  { "jurisdiction": "SA", "hazard": "flood", "agencies": ["SASES"] },
+  { "jurisdiction": "SA", "hazard": "storm", "agencies": ["SASES"] },
+  { "jurisdiction": "SA", "hazard": "police", "agencies": ["SA Police"] },
+  { "jurisdiction": "SA", "hazard": "medical", "agencies": ["SA Ambulance Service"] },
+
+  { "jurisdiction": "TAS", "hazard": "fire", "agencies": ["Tasmania Fire Service"] },
+  { "jurisdiction": "TAS", "hazard": "flood", "agencies": ["TASSES"] },
+  { "jurisdiction": "TAS", "hazard": "storm", "agencies": ["TASSES"] },
+  { "jurisdiction": "TAS", "hazard": "police", "agencies": ["Tasmania Police"] },
+  { "jurisdiction": "TAS", "hazard": "medical", "agencies": ["Ambulance Tasmania"] },
+
+  { "jurisdiction": "NT", "hazard": "fire", "agencies": ["Bushfires NT", "NTFRS"] },
+  { "jurisdiction": "NT", "hazard": "flood", "agencies": ["NTES"] },
+  { "jurisdiction": "NT", "hazard": "storm", "agencies": ["NTES"] },
+  { "jurisdiction": "NT", "hazard": "cyclone", "agencies": ["NTES"] },
+  { "jurisdiction": "NT", "hazard": "police", "agencies": ["NT Police"] },
+  { "jurisdiction": "NT", "hazard": "medical", "agencies": ["St John NT"] },
+
+  { "jurisdiction": "ACT", "hazard": "fire", "agencies": ["ESA", "ACT Rural Fire Service", "ACT Fire and Rescue"] },
+  { "jurisdiction": "ACT", "hazard": "flood", "agencies": ["ESA", "ACT SES"] },
+  { "jurisdiction": "ACT", "hazard": "storm", "agencies": ["ESA", "ACT SES"] },
+  { "jurisdiction": "ACT", "hazard": "police", "agencies": ["AFP", "ACT Policing"] },
+  { "jurisdiction": "ACT", "hazard": "medical", "agencies": ["ACT Ambulance Service"] }
+]

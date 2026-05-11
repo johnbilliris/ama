@@ -7,12 +7,20 @@
  * so the simulation looks and behaves identically to the disaster-mapper page.
  * Additional simulation-only chrome (scenario chip, status chip, tenant id)
  * is overlaid on top of the map.
+ *
+ * Spec-036 T-I04: also accepts an optional stream of `MapOverlayEvent`s
+ * (16 closed-set layer types per `contracts/sse-map-overlay.md §2`) and
+ * folds them into the rendered feature collection via the typed dispatch
+ * in `lib/sse/map-overlay-dispatch.ts` (which uses an `assertNever`
+ * exhaustiveness guard).
  */
 
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 
 import type { IncidentFeature } from "@/lib/api/incidents-map";
+import { applyMapOverlayEvents } from "@/lib/sse/map-overlay-dispatch";
+import type { MapOverlayEvent } from "@/lib/sse/map-overlay-events";
 
 const DisasterMap = dynamic(
   () =>
@@ -116,6 +124,13 @@ interface SimulationMapProps {
   scenarioCard?: ScenarioCard | null;
   /** Optional extra GeoJSON features to render (for future server-supplied markers). */
   extraFeatures?: IncidentFeature[];
+  /**
+   * Spec-036 T-I04 — closed set of map-overlay SSE events to fold into
+   * the feature collection. Each event is dispatched through
+   * `applyMapOverlayEvents`, which uses `assertNever` to enforce
+   * compile-time exhaustiveness across the 16-entry layer-type union.
+   */
+  overlayEvents?: MapOverlayEvent[];
 }
 
 export function SimulationMap({
@@ -125,6 +140,7 @@ export function SimulationMap({
   status,
   scenarioCard,
   extraFeatures = [],
+  overlayEvents = [],
 }: SimulationMapProps) {
   const features = useMemo<IncidentFeature[]>(() => {
     const now = new Date().toISOString();
@@ -184,6 +200,58 @@ export function SimulationMap({
     return [...derived, ...extraFeatures];
   }, [tenantId, scenarioType, jurisdictions, status, scenarioCard, extraFeatures]);
 
+  // Spec-036 T-I04 — fold overlay SSE events through the typed dispatcher.
+  // Spec-036 T-R04 / T-R07 / T-R08 — Wave 4 amendment: surface
+  // non-Point geometries (LineString, Polygon, MultiPolygon) as
+  // accessible bullets in the screen-reader live region AND as a
+  // visible non-map "overlay summary" panel so coordinators using
+  // assistive technology aren't denied the situational awareness that
+  // sighted users get from the map. Wind-direction markers (T-R07)
+  // emit a structured ``wind-arrow`` row with bearing/speed text so
+  // SR users get the canonical example: "wind direction has changed
+  // → wind direction markers should appear".
+  const overlayResult = useMemo(
+    () => applyMapOverlayEvents([], overlayEvents),
+    [overlayEvents],
+  );
+  const overlayPointFeatures = useMemo<IncidentFeature[]>(() => {
+    return overlayResult
+      .filter((f) => f.geometry.type === "Point")
+      .map<IncidentFeature>((f) => ({
+        type: "Feature",
+        id: f.id,
+        geometry: f.geometry as { type: "Point"; coordinates: [number, number] },
+        properties: {
+          incident_id: f.properties.incident_id,
+          title: f.properties.title,
+          incident_type: f.properties.incident_type,
+          status: f.properties.status,
+          severity: f.properties.severity,
+          severity_tier: f.properties.severity_tier,
+          affected_jurisdiction_ids: [],
+          participating_organisation_ids: [],
+          started_at: f.properties.started_at,
+          pprr_phase: f.properties.pprr_phase,
+          incident_level: f.properties.incident_level,
+        },
+      }));
+  }, [overlayResult]);
+
+  // T-R04 — non-Point overlays grouped for the accessible summary panel.
+  const overlayNonPointFeatures = useMemo(() => {
+    return overlayResult.filter((f) => f.geometry.type !== "Point");
+  }, [overlayResult]);
+
+  // T-R07 — wind direction markers (closed-set ``wind-arrow`` layer).
+  const windDirectionFeatures = useMemo(() => {
+    return overlayResult.filter((f) => f.properties.layer_type === "wind-arrow");
+  }, [overlayResult]);
+
+  const renderedFeatures = useMemo(
+    () => [...features, ...overlayPointFeatures],
+    [features, overlayPointFeatures],
+  );
+
   const focus = useMemo(() => {
     const lng = scenarioCard?.location?.lng;
     const lat = scenarioCard?.location?.lat;
@@ -201,11 +269,18 @@ export function SimulationMap({
     ? scenarioCard.aws_default_level.replace(/_/g, " ")
     : null;
 
+  // Spec-036 T-R05 — Australian Warning System (AWS) three-tier palette
+  // mandated by constitution v1.2.0. The previous draft used green
+  // (#22c55e) for "advice", which conflated low-tier alert with
+  // all-clear semantics; the canonical mapping below restores the
+  // three-tier hue progression (yellow → orange → red) plus an
+  // information-class blue.
   const RISK_COLOURS: Record<string, string> = {
-    "watch and act": "#f59e0b",
-    "advice": "#22c55e",
-    "emergency warning": "#dc2626",
-    "not applicable": "#6b7280",
+    "advice": "#fbbf24",            // yellow
+    "watch and act": "#fb923c",     // orange
+    "emergency warning": "#dc2626", // red
+    "information": "#3b82f6",       // blue
+    "not applicable": "#6b7280",    // grey (no AWS tier)
   };
   const riskColour = riskLevel ? (RISK_COLOURS[riskLevel.toLowerCase()] ?? "#ef4444") : null;
 
@@ -244,12 +319,88 @@ export function SimulationMap({
       </div>
       <div className="sim-map-canvas">
         <DisasterMap
-          features={features}
+          features={renderedFeatures}
           focus={focus}
           viewportKey={`simulation-map-viewport:${tenantId}`}
           saveViewportTrigger={status}
         />
       </div>
+      {/*
+        T-I04 / T-R04 / T-R07 / T-R08 — accessible overlay summary.
+        Splits the SR-only digest into:
+          1. point-overlay count (rendered on the map already);
+          2. non-Point overlay rows (LineString / Polygon — not on the
+             map yet; surfaced here so SR users still get them);
+          3. wind-direction marker rows with bearing + speed text so
+             AT users get the canonical "wind direction changed"
+             callout (the visual layer is provisioned but not yet
+             rendered by Azure Maps in this milestone).
+      */}
+      <section
+        aria-label="Simulation map overlay summary"
+        className="sim-map-overlay-summary"
+        data-testid="sim-overlay-summary"
+      >
+        <div className="sr-only" aria-live="polite" data-testid="sim-overlay-sr-digest">
+          {overlayResult.length === 0
+            ? "No simulation overlays active."
+            : `${overlayResult.length} simulation overlays active: ${Array.from(
+                new Set(overlayResult.map((f) => f.properties.layer_type)),
+              ).join(", ")}.`}
+        </div>
+        {overlayNonPointFeatures.length > 0 && (
+          <div
+            data-testid="sim-overlay-nonpoint-list"
+            className="sim-map-overlay-nonpoint"
+          >
+            <h3 className="sim-map-overlay-heading">
+              Geometric overlays ({overlayNonPointFeatures.length})
+            </h3>
+            <ul aria-label="Non-point geometric overlays">
+              {overlayNonPointFeatures.map((f) => (
+                <li key={f.id} data-layer-type={f.properties.layer_type}>
+                  <span className="sim-map-overlay-kind">
+                    {f.geometry.type}
+                  </span>
+                  {": "}
+                  <span className="sim-map-overlay-name">
+                    {f.properties.title ?? f.properties.layer_type}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {windDirectionFeatures.length > 0 && (
+          <div
+            data-testid="sim-overlay-wind-list"
+            className="sim-map-overlay-wind"
+          >
+            <h3 className="sim-map-overlay-heading">
+              Wind direction markers ({windDirectionFeatures.length})
+            </h3>
+            <ul aria-label="Wind direction markers">
+              {windDirectionFeatures.map((f) => {
+                const bearing =
+                  (f.properties as { bearing_deg?: number }).bearing_deg;
+                const speed =
+                  (f.properties as { speed_kmh?: number }).speed_kmh;
+                return (
+                  <li key={f.id}>
+                    <span className="sim-map-wind-bearing">
+                      Bearing {typeof bearing === "number" ? `${bearing}°` : "—"}
+                    </span>
+                    {", "}
+                    <span className="sim-map-wind-speed">
+                      Speed {typeof speed === "number" ? `${speed} km/h` : "—"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:a11y": "vitest run tests/a11y",
     "test:web-coverage": "playwright test --project=web-coverage-chromium",
     "test:web-coverage:mobile": "playwright test --project=web-coverage-mobile",
     "test:web-coverage:axe": "playwright test --project=web-coverage-axe",

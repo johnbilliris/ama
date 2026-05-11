@@ -29,6 +29,8 @@ COPY apps/agents/communication/ ./communication/
 COPY packages/ ./packages/
 COPY apps/api/app/__init__.py ./app/__init__.py
 COPY apps/api/app/validators/ ./app/validators/
+COPY apps/api/app/services/simulation/ ./app/services/simulation/
+COPY apps/api/app/config/ ./app/config/
 
 ENV PYTHONPATH="/app:/app/packages/domain/src:${PYTHONPATH}"
 

@@ -44,4 +44,3 @@ def clean_tmp_path(tmp_path: Path) -> Path:
         except OSError:
             if attempt == 2:
                 return
-

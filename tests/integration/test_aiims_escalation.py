@@ -129,9 +129,7 @@ def test_field_coordinator_queue_when_both_conditions_met() -> None:
     assert transition is True
     assert detection.escalation_state == "field_coordinator_queued"
     assert detection.current_owner is None  # null when queued for offline review
-    assert detection.extras["field_coordinator_offline_queue"][
-        "reconnect_required_for_resolution"
-    ] is True
+    assert detection.extras["field_coordinator_offline_queue"]["reconnect_required_for_resolution"] is True
     assert any(e["event_type"] == "conflict_field_coordinator_queued" for e in audit)
 
 

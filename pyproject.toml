@@ -36,9 +36,20 @@ load = [
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"
+asyncio_mode = "strict"
 markers = [
   "integration: integration tests requiring mock external services (Cosmos DB, Service Bus)",
   "simulation: extended scenario simulation tests",
+  # Spec-036 staging gates — auto-skipped locally / in CI; run only when the matching
+  # Azure resource is provisioned and the env var below is set to '1'.
+  "azure_staging: requires APIM + Redis live telemetry. Env: AMA_STAGING_AZURE=1.",
+  "azure_foundry_staging: requires Azure OpenAI gpt-4o / gpt-4o-mini deployment. Env: AMA_STAGING_FOUNDRY=1.",
+  "azure_cosmos_staging: requires Azure Cosmos DB w/ ETag concurrency. Env: AMA_STAGING_COSMOS=1.",
+  "azure_speech_staging: requires Azure AI Speech Services. Env: AMA_STAGING_SPEECH=1.",
+  "azure_blob_worm_staging: requires Azure Blob Storage with immutability policy. Env: AMA_STAGING_BLOB_WORM=1.",
+  "locust: load-test scripts intended for Locust runner / workflow_dispatch only.",
+  "measurement_staging: paired-exercise / SC measurement harnesses (long-running, staging only). Env: AMA_STAGING_MEASUREMENT=1.",
+  "axe_a11y: axe-core a11y assertions (delegated to pnpm test:a11y in CI).",
   "unit: fast in-process tests with no external deps (Spec 036 / F-A10 / T223)",
   "contract: contract tests proving schema / API parity (Spec 036 / F-A10 / T223)",
   "e2e: end-to-end tests requiring deployed infra (Spec 036 / F-A10 / T223)",
@@ -105,4 +116,3 @@ forbidden_modules = ["apps"]
 # NOTE: packages/prompts/ is a YAML-asset directory (no Python module), so it
 # has no imports to lint. Re-add a contract here only if Python code is added
 # under packages/prompts/.
-

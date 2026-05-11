@@ -29,7 +29,10 @@ class TestOrganisationMultiJurisdiction:
     def test_single_jurisdiction_returns_results(self, org_service):
         orgs = org_service.list_organisations(["nsw"])
         assert isinstance(orgs, list)
-        assert len(orgs) > 0
+        # T-AA06 — explicit boundary: NSW jurisdiction has at least
+        # 3 mandated organisations (NSW RFS, NSW SES, NSW Police) per
+        # the seed catalogue. Assert ≥3 to detect catalogue truncation.
+        assert len(orgs) >= 3, f"NSW jurisdiction returned only {len(orgs)} orgs; expected ≥3"
 
     def test_multiple_jurisdictions_returns_union(self, org_service):
         nsw_only = org_service.list_organisations(["nsw"])

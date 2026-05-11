@@ -110,22 +110,17 @@ class ApprovalWorkflow:
         """Initial emission for a record: state ``pending``."""
         if record_id in self._states:
             raise ApprovalWorkflowError(
-                f"approval workflow already started for record {record_id!r}: "
-                f"current state={self._states[record_id]!r}"
+                f"approval workflow already started for record {record_id!r}: current state={self._states[record_id]!r}"
             )
         return self._transition(record_id, None, "pending", actor_id="system", note=note)
 
-    def approve(
-        self, record_id: str, *, actor_id: str, note: str | None = None
-    ) -> ApprovalTransition:
+    def approve(self, record_id: str, *, actor_id: str, note: str | None = None) -> ApprovalTransition:
         """Terminal transition to ``approved``. Requires ``actor_id``."""
         if not actor_id:
             raise ApprovalWorkflowError("approve(): actor_id required")
         return self._transition(record_id, self._require(record_id), "approved", actor_id=actor_id, note=note)
 
-    def reject(
-        self, record_id: str, *, actor_id: str, note: str | None = None
-    ) -> ApprovalTransition:
+    def reject(self, record_id: str, *, actor_id: str, note: str | None = None) -> ApprovalTransition:
         """Terminal transition to ``rejected``. Requires ``actor_id``."""
         if not actor_id:
             raise ApprovalWorkflowError("reject(): actor_id required")
@@ -139,10 +134,7 @@ class ApprovalWorkflow:
 
     def _require(self, record_id: str) -> ApprovalState:
         if record_id not in self._states:
-            raise ApprovalWorkflowError(
-                f"approval workflow not started for record {record_id!r}; "
-                f"call start() first"
-            )
+            raise ApprovalWorkflowError(f"approval workflow not started for record {record_id!r}; call start() first")
         return self._states[record_id]
 
     def _transition(
@@ -162,14 +154,10 @@ class ApprovalWorkflow:
             )
         # Forbid pending → pending.
         if old_state == "pending" and new_state == "pending":
-            raise ApprovalWorkflowError(
-                f"forbidden transition: record={record_id!r} pending → pending"
-            )
+            raise ApprovalWorkflowError(f"forbidden transition: record={record_id!r} pending → pending")
         # ADR-14 invariant 7: terminal state requires an actor.
         if new_state in _TERMINAL_STATES and actor_id == "system":
-            raise ApprovalWorkflowError(
-                f"approval_workflow_state={new_state!r} requires a non-system actor_id"
-            )
+            raise ApprovalWorkflowError(f"approval_workflow_state={new_state!r} requires a non-system actor_id")
         self._states[record_id] = new_state
         result = ApprovalTransition(
             record_id=record_id,

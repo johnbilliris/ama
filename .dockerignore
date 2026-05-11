@@ -38,3 +38,5 @@ tests/e2e/web-coverage/output/
 tests/e2e/web-coverage/.artifacts/
 tsconfig.tsbuildinfo
 **/tsconfig.tsbuildinfo
+artifacts/
+**/artifacts/

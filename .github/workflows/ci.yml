@@ -37,9 +37,11 @@ jobs:
       - name: Install Python tooling
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov pytest-asyncio pytest-benchmark ruff mypy import-linter pyyaml
+          pip install pytest pytest-cov pytest-asyncio pytest-benchmark hypothesis ruff mypy import-linter pyyaml
           pip install -e apps/api
           pip install -e apps/agents
+          pip install -e packages/eval-core
+          pip install -e apps/eval-runner
       - name: Install age CLI (spec 036 FR-RAG-LS-02 offline-cache dual-signing)
         run: |
           # `age` is required by ama_ingest.offline_bundle (T047) and the
@@ -88,6 +90,13 @@ jobs:
       # Spec-032 FR-Q02 — import boundaries.
       - name: python-import-boundaries
         run: lint-imports
+
+      # Spec-036 T-R06 — map overlay codegen freshness gate. The
+      # generated TS taxonomy is the single source of truth for the
+      # FR-027 closed set (16 layer types). CI fails if any drift is
+      # detected so an unsynced layer addition cannot land in main.
+      - name: map-overlay-codegen-check
+        run: python scripts/codegen/generate_map_overlay_taxonomy_ts.py --check
 
       - name: python-test
         run: |
@@ -146,9 +155,11 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio ruff
+          pip install pytest pytest-asyncio hypothesis ruff
           pip install -e apps/api
           pip install -e apps/agents
+          pip install -e packages/eval-core
+          pip install -e apps/eval-runner
       - name: ruff check (Windows)
         shell: pwsh
         run: ruff check apps tests packages
@@ -362,4 +373,3 @@ jobs:
       - name: Post status check
         if: success()
         run: echo "::notice title=web-coverage::capstone-ready ✓ all 5 outcomes closed, 68 personas covered, 68/68 depth profiles valid, 0 Open gaps"
-

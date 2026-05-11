@@ -95,16 +95,8 @@ class FoundryQueryEmbedder:
         credential: Any | None = None,
     ) -> None:
         self._endpoint = endpoint or os.environ.get("AZURE_AI_PROJECT_ENDPOINT")
-        self._deployment = (
-            deployment
-            or os.environ.get("EMBEDDING_DEPLOYMENT_NAME")
-            or DEFAULT_EMBEDDING_DEPLOYMENT
-        )
-        self._api_version = (
-            api_version
-            or os.environ.get("AZURE_OPENAI_API_VERSION")
-            or "2024-10-21"
-        )
+        self._deployment = deployment or os.environ.get("EMBEDDING_DEPLOYMENT_NAME") or DEFAULT_EMBEDDING_DEPLOYMENT
+        self._api_version = api_version or os.environ.get("AZURE_OPENAI_API_VERSION") or "2024-10-21"
         self._expected_dims = expected_dims
         self._credential = credential
         self._client: Any | None = None
@@ -122,9 +114,7 @@ class FoundryQueryEmbedder:
         if self._client is not None:
             return self._client
         if not self._endpoint:
-            raise RuntimeError(
-                "FoundryQueryEmbedder requires AZURE_AI_PROJECT_ENDPOINT to be set"
-            )
+            raise RuntimeError("FoundryQueryEmbedder requires AZURE_AI_PROJECT_ENDPOINT to be set")
         from azure.identity import DefaultAzureCredential, get_bearer_token_provider  # noqa: PLC0415
         from openai import AzureOpenAI  # AMA-FM04: allow Foundry transport (FR-RAG-FM-01)  # noqa: PLC0415
 
@@ -148,9 +138,7 @@ class FoundryQueryEmbedder:
             raise RuntimeError("Foundry embedding response contained no data")
         vec = list(getattr(data[0], "embedding", []) or [])
         if len(vec) != self._expected_dims:
-            raise RuntimeError(
-                f"Foundry embedding returned {len(vec)} dims, expected {self._expected_dims}"
-            )
+            raise RuntimeError(f"Foundry embedding returned {len(vec)} dims, expected {self._expected_dims}")
         return vec
 
     async def embed_query(self, query_text: str) -> list[float]:

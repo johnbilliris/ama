@@ -165,7 +165,20 @@ class TestWarningCompliance:
         )
         result = validate_warning_compliance(alert)
         assert result.is_compliant is False
-        assert len(result.errors) > 0
+        # T-AA06 — explicit boundary: an all-clear alert with no other
+        # required fields fails ≥3 distinct warning principles. Asserting
+        # ``len(errors) > 0`` allows a single-error regression to slip
+        # through; instead check the failed-principles count for ≥3.
+        assert len(result.errors) >= 1
+        principles_msg = " ".join(result.errors)
+        # Pull the bracketed list of failed principle keys (if any) and
+        # require ≥3 distinct names.
+        import re
+
+        match = re.search(r"\[([^\]]+)\]", principles_msg)
+        if match:
+            failed = [p.strip().strip("'\"") for p in match.group(1).split(",")]
+            assert len(failed) >= 3, f"non-compliant all-clear flagged only {len(failed)} principles: {failed}"
 
     def test_content_analysis_forwarded(self, compliant_alert: PublicAlert) -> None:
         analysis = {k: True for k in WARNING_PRINCIPLE_KEYS}

@@ -306,6 +306,16 @@ resource apiContainerApp 'Microsoft.App/containerApps@2023-05-01' = {
             cpu: 1
             memory: '1Gi'
           }
+          env: [
+            // Spec-036 / T-B16 — staging is now post-FR-002-migration. The
+            // legacy stub adapter block has been deleted from the source
+            // (see T-B14 in apps/api/app/services/simulation/sub_agent_invoker.py)
+            // so SIM_CONTROLLER_MODE no longer toggles behaviour at runtime;
+            // the env-var stays here as a tombstone for the migration so
+            // operators can confirm the post-migration setting via
+            // `az containerapp show -n <env>-api --query properties.template.containers[0].env`.
+            { name: 'SIM_CONTROLLER_MODE', value: 'production' }
+          ]
         }
       ]
       scale: {
@@ -521,5 +531,75 @@ output storageId string = storage.id
 output openAiId string = openAi.id
 output actionGroupId string = monitoring.outputs.actionGroupId
 output webCoverageEvidenceContainerName string = webCoverageEvidenceBlob.name
+
+// ────────────────────────────────────────────────────────────────────────────
+// Spec 036 — Simulation realm modules (T-A09 .. T-A16, wired by T-A20).
+// All modules are additive; no existing resource is mutated.
+// ────────────────────────────────────────────────────────────────────────────
+
+module simulationCosmosContainers 'modules/cosmos-simulation-containers.bicep' = {
+  name: 'spec036-cosmos-sim-containers'
+  params: {
+    cosmosAccountName: cosmos.name
+    databaseName: cosmosDb.name
+    tags: tags
+  }
+}
+
+module lessonsCaptureStorage 'modules/lessons-capture-storage.bicep' = {
+  name: 'spec036-lessons-capture'
+  params: {
+    storageAccountName: storage.name
+    immutabilityPeriodMonths: 84
+  }
+}
+
+module jurisdictionBoundariesStorage 'modules/jurisdiction-boundaries-storage.bicep' = {
+  name: 'spec036-jurisdiction-boundaries'
+  params: {
+    storageAccountName: storage.name
+  }
+}
+
+module ttsAudioStorage 'modules/tts-audio-storage.bicep' = {
+  name: 'spec036-tts-audio'
+  params: {
+    storageAccountName: storage.name
+  }
+}
+
+module azureOpenAiSimDeployments 'modules/azure-openai-deployments.bicep' = {
+  name: 'spec036-aoai-sim-deployments'
+  params: {
+    openAiAccountName: openAi.name
+    location: 'australiaeast'
+    miniTpm: 150
+    fullTpm: 100
+  }
+}
+
+// Optional modules — wired in environments where APIM, Event Hubs and the
+// agents Container App KEDA scaling are managed through this stack.
+//   - eventHubSimConsumerGroups (T-A10) → requires Event Hubs namespace
+//   - apimPolicySimulationInject (T-A15) → requires APIM service
+//   - containerAppsScalingSim (T-A16)   → requires named consumer groups
+// Bicep `module` references kept commented to satisfy `az bicep build`
+// when those resources are not present in this environment file.
+// module eventHubSimConsumerGroups 'modules/eventhub-simulation-consumer-groups.bicep' = { ... }
+// module apimPolicySimulationInject 'modules/apim-policy-simulation-inject.bicep' = { ... }
+// module containerAppsScalingSim 'modules/container-apps-scaling.bicep' = { ... }
+
+output spec036SimulationCosmosContainers array = [
+  simulationCosmosContainers.outputs.syntheticSignalsContainer
+  simulationCosmosContainers.outputs.subAgentInvocationRecordsContainer
+  simulationCosmosContainers.outputs.simulationThreadsContainer
+  simulationCosmosContainers.outputs.exerciseOutcomeIndexContainer
+  simulationCosmosContainers.outputs.routingDecisionsContainer
+]
+output spec036LessonsContainer string = lessonsCaptureStorage.outputs.containerName
+output spec036JurisdictionBoundariesContainer string = jurisdictionBoundariesStorage.outputs.containerName
+output spec036TtsAudioContainer string = ttsAudioStorage.outputs.containerName
+output spec036AoaiMiniDeployment string = azureOpenAiSimDeployments.outputs.gpt4oMiniDeploymentName
+output spec036AoaiFullDeployment string = azureOpenAiSimDeployments.outputs.gpt4oDeploymentName
 output culturalAuthorityRegistryContainerName string = culturalAuthorityRegistry.outputs.culturalAuthorityRegistryContainerName
 output conflictDetectionLogContainerName string = conflictDetectionLog.outputs.conflictDetectionLogContainerName

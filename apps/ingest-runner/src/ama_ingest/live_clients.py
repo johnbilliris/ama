@@ -346,9 +346,7 @@ class LiveAzureSearchAlias:
         request = HttpRequest("PUT", url, json=body, headers={"Content-Type": "application/json"})
         response = self._mgmt.send_request(request)
         if response.status_code not in (200, 201):
-            raise RuntimeError(
-                f"Alias PUT failed: status={response.status_code} body={response.text()[:500]}"
-            )
+            raise RuntimeError(f"Alias PUT failed: status={response.status_code} body={response.text()[:500]}")
         self.last_flip_latency_s = time.perf_counter() - start
         self._cached_active = target_index
         return self.last_flip_latency_s
@@ -362,9 +360,7 @@ class LiveAzureSearchAlias:
         if response.status_code == 404:
             return None
         if response.status_code != 200:
-            raise RuntimeError(
-                f"Alias GET failed: status={response.status_code} body={response.text()[:500]}"
-            )
+            raise RuntimeError(f"Alias GET failed: status={response.status_code} body={response.text()[:500]}")
         body = response.json()
         targets = list(body.get("indexes") or [])
         return targets[0] if targets else None

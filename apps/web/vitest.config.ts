@@ -6,9 +6,15 @@
  */
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import path from "node:path";
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   test: {
     environment: "jsdom",
     globals: true,
@@ -16,6 +22,7 @@ export default defineConfig({
       "__tests__/**/*.test.{ts,tsx}",
       "tests/unit/**/*.test.{ts,tsx}",
       "tests/integration/**/*.test.{ts,tsx}",
+      "tests/a11y/**/*.test.{ts,tsx}",
       // Spec 036 / F-A12 / T239+T240 — accessibility tests live under a path
       // that mirrors the source layout (tests/web/src/components/...).
       "tests/web/**/*.test.{ts,tsx}",

@@ -166,14 +166,24 @@ def run(
 
     if _ingest_span is None:
         return _run_inner(
-            args=args, index=index, alias=alias, embed=embed,
-            audit_emitter=audit_emitter, parity_inputs_override=parity_inputs_override, today=today,
+            args=args,
+            index=index,
+            alias=alias,
+            embed=embed,
+            audit_emitter=audit_emitter,
+            parity_inputs_override=parity_inputs_override,
+            today=today,
         )
 
     with _ingest_span(pipeline_name="ama-ingest") as _span:
         result = _run_inner(
-            args=args, index=index, alias=alias, embed=embed,
-            audit_emitter=audit_emitter, parity_inputs_override=parity_inputs_override, today=today,
+            args=args,
+            index=index,
+            alias=alias,
+            embed=embed,
+            audit_emitter=audit_emitter,
+            parity_inputs_override=parity_inputs_override,
+            today=today,
         )
         _span.counters["chunks_processed"] = int(getattr(result, "chunks_emitted", 0) or 0)
         _span.counters["embedding_calls"] = int(getattr(result, "embedding_calls", 0) or 0)
@@ -212,12 +222,7 @@ def _run_inner(
     # Hermetic tests always pass ``index`` + ``alias`` so this branch is a
     # no-op for them. Dry-run mode keeps the in-memory stubs to avoid touching
     # the live service.
-    use_live_clients: bool = (
-        bool(args.search_endpoint)
-        and args.mode != "dry-run"
-        and index is None
-        and alias is None
-    )
+    use_live_clients: bool = bool(args.search_endpoint) and args.mode != "dry-run" and index is None and alias is None
 
     if use_live_clients:
         try:

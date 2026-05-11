@@ -31,6 +31,10 @@ dependencies = [
   "azure-keyvault-certificates>=4.9.0",
   "azure-keyvault-keys>=4.10.0",
   "python-jose[cryptography]>=3.3.0",
+  # spec-036 Wave 4 — RFC 8785 JCS canonicalisation for idempotency cache (T-O09).
+  "rfc8785>=0.1.4",
+  # spec-036 Wave 4 — Event Hubs producer for signal pipeline orchestrator (T-L06).
+  "azure-eventhub>=5.11.0",
   # Spec 036 — Foundry RAG grounding (FR-RAG-FM-03, FR-RAG-AG-01, R-01).
   "azure-ai-inference>=1.0.0b9",            # Async Foundry seam used by simulation Controller.
   "azure-search-documents>=11.5.2",         # Shared retrieval client for SSE citation events.

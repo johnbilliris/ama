@@ -1,4 +1,4 @@
-name: Foundry carve-out review (spec-035 T071)
+name: Foundry carve-out review (spec-035 T071 + spec-036 T-K05)
 
 on:
   schedule:
@@ -8,7 +8,10 @@ on:
   pull_request:
     paths:
       - "data/governance/foundry_carveout_registry.json"
+      - "infra/foundry-carve-out-registry.yml"
       - "apps/api/app/repositories/carveout_registry_repository.py"
+      - "packages/eval-dataset/data/telemetry_injection_v1/cases.jsonl"
+      - "packages/eval-core/src/ama_eval_core/telemetry_injection_grader.py"
       - ".github/workflows/foundry-carveout-review.yml"
 
 jobs:
@@ -51,3 +54,53 @@ jobs:
               sys.exit(1)
           print(f"All {len(entries)} carveout entries reviewed within 90 days.")
           PY
+
+  prompt-hash-diff-comment:
+    name: T-K05 — Prompt-hash diff + eval scores PR comment
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Compute prompt-hash diff
+        id: diffhash
+        run: |
+          python tools/foundry_carveout_prompt_hash_diff.py \
+            --base "${{ github.event.pull_request.base.sha }}" \
+            --head "${{ github.event.pull_request.head.sha }}" \
+            --output /tmp/foundry-carveout-diff.md
+
+      - name: Run telemetry-injection eval grader (offline, deterministic)
+        run: |
+          python -m pip install -e packages/eval-core
+          python tools/foundry_carveout_eval_summary.py \
+            --dataset packages/eval-dataset/data/telemetry_injection_v1/cases.jsonl \
+            --output /tmp/foundry-carveout-eval.md
+
+      - name: Compose PR comment
+        run: |
+          {
+            echo "## Foundry carve-out review (T-K05)"
+            echo ""
+            cat /tmp/foundry-carveout-diff.md
+            echo ""
+            cat /tmp/foundry-carveout-eval.md
+          } > /tmp/foundry-carveout-comment.md
+          cat /tmp/foundry-carveout-comment.md
+
+      - name: Post comment on PR
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-file: /tmp/foundry-carveout-comment.md
+

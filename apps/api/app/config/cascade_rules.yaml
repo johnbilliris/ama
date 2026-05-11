@@ -1,0 +1,25 @@
+# Cascade rules (T-D03 / FR-057)
+# ------------------------------
+# Byte-deterministic 5-step affinity ladder per data-model.md:268-288.
+# Loaded by ``apps/api/app/services/simulation/cascade_affinity_ladder.py``;
+# the ordered list of step names below MUST stay in lock-step with the
+# enum used in the ``cascade.degraded_to_annotation`` audit entry.
+
+ladder:
+  - jurisdiction_match
+  - hazard_class_match
+  - cascade_origin_thread
+  - most_recent_mutation
+  - thread_creation_ascending
+
+cap: 5
+
+# Cycle 2 / T-AA20 / A2-03 — `fan_out_rules:` REMOVED.
+#
+# Pass-1 Q3 ruling (spec.md L302-337) made `packages/domain/src/domain/
+# sim_cascade_matrix.py::cascade_targets_for(category)` the SINGLE
+# source of truth for cascade fan-out targets. The matrix also
+# carries the `evacuation` ↔ `evacuation-centre` alias so callers do
+# not have to normalise. The build-time check
+# `tests/contract/test_cascade_yaml_no_fan_out_rules.py` enforces
+# that this block does not reappear.

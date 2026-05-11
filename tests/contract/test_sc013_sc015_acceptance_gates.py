@@ -71,10 +71,7 @@ def test_sc015_act_national_institution_commonwealth_majority(golden_set: dict) 
     (Parliament House, ADF Russell, embassies, AIATSIS) for SC-015 baseline."""
     entries = _by_scenario(golden_set, "authority_precedence")
     act_cwlth = [
-        e
-        for e in entries
-        if e.get("jurisdiction") == "act"
-        and e.get("expected_authority_level") == "commonwealth"
+        e for e in entries if e.get("jurisdiction") == "act" and e.get("expected_authority_level") == "commonwealth"
     ]
     assert len(act_cwlth) >= 6, (
         f"SC-015 baseline: ACT-Commonwealth coverage must be >= 6 anchor "

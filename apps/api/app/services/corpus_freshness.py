@@ -69,9 +69,7 @@ def set_corpus_freshness_alert_flag(
         audit_sink(
             {
                 "event_type": (
-                    "corpus_freshness_alert_disabled"
-                    if not bool(value)
-                    else "corpus_freshness_alert_enabled"
+                    "corpus_freshness_alert_disabled" if not bool(value) else "corpus_freshness_alert_enabled"
                 ),
                 "flag_name": "feature.corpus_freshness_alert.enabled",
                 "old_value": old_value,
@@ -119,10 +117,7 @@ def assess_corpus_staleness(
     else:
         ingest_age_hours = (ts - last_ingest_run_at).total_seconds() / 3600.0
 
-    is_stale = (
-        age_days >= STALE_AGE_THRESHOLD_DAYS
-        and ingest_age_hours >= STALE_INGEST_GAP_THRESHOLD_HOURS
-    )
+    is_stale = age_days >= STALE_AGE_THRESHOLD_DAYS and ingest_age_hours >= STALE_INGEST_GAP_THRESHOLD_HOURS
     if not is_stale:
         severity = "ok"
     elif age_days >= RED_AGE_THRESHOLD_DAYS:
@@ -134,9 +129,7 @@ def assess_corpus_staleness(
         is_stale=is_stale,
         severity=severity,
         corpus_age_days=round(age_days, 1),
-        last_ingest_run_age_hours=(
-            round(ingest_age_hours, 1) if last_ingest_run_at else 999999.0
-        ),
+        last_ingest_run_age_hours=(round(ingest_age_hours, 1) if last_ingest_run_at else 999999.0),
         corpus_build_sha=corpus_build_sha,
         corpus_generated_at=corpus_generated_at,
         last_ingest_run_at=last_ingest_run_at,
@@ -185,9 +178,7 @@ def emit_corpus_stale_alert(
         "corpus_build_sha": assessment.corpus_build_sha,
         "corpus_generated_at": assessment.corpus_generated_at.isoformat(),
         "corpus_age_days": assessment.corpus_age_days,
-        "last_ingest_run_at": (
-            assessment.last_ingest_run_at.isoformat() if assessment.last_ingest_run_at else None
-        ),
+        "last_ingest_run_at": (assessment.last_ingest_run_at.isoformat() if assessment.last_ingest_run_at else None),
         "last_ingest_run_age_hours": assessment.last_ingest_run_age_hours,
         "severity": assessment.severity,
         "feature_flag_state": _flag_state_block(),

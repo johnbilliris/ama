@@ -38,6 +38,32 @@ class RateLimiter:
         tenant_b.tokens -= cost
         return True
 
+    # T-C08 / FR-009 — success-only counting:
+    def can_attempt(self, *, tenant_id: str, user_oid: str, cost: int = 1) -> bool:
+        """Probe whether a parse-attempt is allowed WITHOUT consuming a token.
+
+        Failed parse attempts (which the parse-attempt circuit breaker
+        already tracks) MUST NOT increment the user-facing rate-limit
+        counters. Use :meth:`record_success` after a successful injection.
+        """
+        now = time.monotonic()
+        u_key = (tenant_id, user_oid)
+        user_b = self._user_buckets.get(u_key)
+        if user_b is None:
+            user_b = _Bucket(tokens=self.per_user_per_min, last_refill_ts=now)
+            self._user_buckets[u_key] = user_b
+        self._refill(user_b, now, self.per_user_per_min)
+        tenant_b = self._tenant_buckets.get(tenant_id)
+        if tenant_b is None:
+            tenant_b = _Bucket(tokens=self.per_tenant_per_min, last_refill_ts=now)
+            self._tenant_buckets[tenant_id] = tenant_b
+        self._refill(tenant_b, now, self.per_tenant_per_min)
+        return user_b.tokens >= cost and tenant_b.tokens >= cost
+
+    def record_success(self, *, tenant_id: str, user_oid: str, cost: int = 1) -> bool:
+        """Consume *cost* tokens after a successful injection (T-C08 / FR-009)."""
+        return self.check_and_consume(tenant_id=tenant_id, user_oid=user_oid, cost=cost)
+
     @staticmethod
     def _refill(bucket: _Bucket, now: float, per_min: int) -> None:
         elapsed = now - bucket.last_refill_ts

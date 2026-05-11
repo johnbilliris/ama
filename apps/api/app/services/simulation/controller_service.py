@@ -579,9 +579,9 @@ class SimulationControllerService:
                 # into the audit shape (NOT the alias). Falls back to
                 # ``alias_active_index`` for legacy retrieval clients that
                 # haven't yet been retrofit with alias-pinning.
-                sim_retrieval_index_name = getattr(
-                    retrieval_result, "retrieval_index_name", None
-                ) or getattr(retrieval_result, "alias_active_index", None)
+                sim_retrieval_index_name = getattr(retrieval_result, "retrieval_index_name", None) or getattr(
+                    retrieval_result, "alias_active_index", None
+                )
             except Exception as exc:  # noqa: BLE001 — retrieval failure must not abort the turn
                 logger.warning("sim_retrieval_failed turn_id=%s err=%s", turn_id, exc)
                 retrieval_result = None
