@@ -84,6 +84,16 @@ rule:
     # Log Analytics workspace replication adds material cost for a demo.
     - Azure.Log.Replication
 
+    # AI Search SLA / replica sizing — single replica is the demo footprint
+    # (spec-036 ``srch-{env}-<suffix>``). Standard SKU with 1 replica is what
+    # the single-region AMA demo provisions; multi-replica scale-out (≥2 query,
+    # ≥3 index for the published SLA) is a production-tenant decision and
+    # blocked by cost for the demo. Production overlays would parameterise
+    # ``replicaCount`` per env if/when the demo becomes a true multi-tenant
+    # offering.
+    - Azure.Search.QuerySLA
+    - Azure.Search.IndexSLA
+
 # Bicep build timing — the spec-029 main.bicep + 20 modules expand a large
 # graph. Local `bicep build-params` against `infra/parameters/*.bicepparam`
 # takes ~12s on a warm cache, which trips the default 5s PSRule timeout and
