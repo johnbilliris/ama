@@ -49,18 +49,24 @@ jobs:
         run: |
           python -m pytest packages/eval-core/tests/ tests/unit/eval/ -q
 
-      # Per spec 031: the job-level `environment: dev` binding ensures
-      # AZURE_CREDENTIALS is always present when this job runs (this repo
-      # does not accept fork PRs). The earlier `if: secrets.* != ''` guards
-      # were both redundant and rejected by GitHub's runtime YAML validator
-      # (secrets context is restricted in step-level `if:` expressions on
-      # pull_request triggers). Removed.
+      - name: Check eval runner configuration
+        id: eval-config
+        run: |
+          if [ -n "${{ vars.EVAL_RUNNER_JOB_NAME }}" ] && [ -n "${{ vars.EVAL_RG }}" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping Container Apps eval runner because EVAL_RUNNER_JOB_NAME or EVAL_RG is not configured."
+          fi
+
       - name: Azure login
+        if: steps.eval-config.outputs.configured == 'true'
         uses: azure/login@2dd0bbf4064d5a1812889dc200bb8eed2597f82a # v3.x
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Trigger Container Apps Job
+        if: steps.eval-config.outputs.configured == 'true'
         id: trigger
         run: |
           set -euo pipefail
@@ -72,6 +78,7 @@ jobs:
           echo "run_started_at=$RUN_ID" >> "$GITHUB_OUTPUT"
 
       - name: Poll for verdict
+        if: steps.eval-config.outputs.configured == 'true'
         id: verdict
         run: |
           set -euo pipefail

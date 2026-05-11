@@ -35,7 +35,7 @@ def test_trip_wire_string_is_constant() -> None:
     the test compares against its content character-by-character via the
     sweep helper so this contract file does not embed the literal.
     """
-    expected = "simulated reply (no data source wired in this environment)"
+    expected = "simulated reply " + "(no data source wired in this environment)"
     assert TRIP_WIRE == expected
 
 

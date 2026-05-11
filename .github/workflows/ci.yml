@@ -37,7 +37,7 @@ jobs:
       - name: Install Python tooling
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov pytest-asyncio pytest-benchmark ruff mypy import-linter pyyaml
+          pip install pytest pytest-cov pytest-asyncio pytest-benchmark hypothesis ruff mypy import-linter pyyaml
           pip install -e apps/api
           pip install -e apps/agents
       - name: Install age CLI (spec 036 FR-RAG-LS-02 offline-cache dual-signing)
@@ -369,4 +369,3 @@ jobs:
       - name: Post status check
         if: success()
         run: echo "::notice title=web-coverage::capstone-ready ✓ all 5 outcomes closed, 68 personas covered, 68/68 depth profiles valid, 0 Open gaps"
-
