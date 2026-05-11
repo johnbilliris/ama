@@ -18,7 +18,7 @@ class SupportHandoffRecord(BaseModel):
     channel_kind: ChannelKind
     address: str = Field(..., min_length=1)
     business_hours_window: str = "24x7"
-    incident_mode_channel: "SupportHandoffRecord | None" = None
+    incident_mode_channel: SupportHandoffRecord | None = None
     auto_activate_on_nema_level3: bool = True
     manual_override_active: bool = False
     # FR-023b SLA defaults — 4 h routine, 5 min incident.

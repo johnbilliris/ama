@@ -24,13 +24,11 @@ class KnowledgeCorpusSource(BaseModel):
     indexed_at: datetime
 
     @model_validator(mode="after")
-    def _spec_status_required(self) -> "KnowledgeCorpusSource":
+    def _spec_status_required(self) -> KnowledgeCorpusSource:
         # FR-011 admission gate — only Active|Implemented specs admitted.
         if self.source_kind == "spec":
             if self.spec_status not in {"Active", "Implemented"}:
-                raise ValueError(
-                    "FR-011: spec sources require spec_status ∈ {Active, Implemented}"
-                )
+                raise ValueError("FR-011: spec sources require spec_status ∈ {Active, Implemented}")
         return self
 
 

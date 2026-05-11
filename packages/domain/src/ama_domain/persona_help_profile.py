@@ -26,7 +26,7 @@ class PersonaHelpProfile(BaseModel):
     updated_at: datetime
 
     @model_validator(mode="after")
-    def _authority_matches_registry(self) -> "PersonaHelpProfile":
+    def _authority_matches_registry(self) -> PersonaHelpProfile:
         expected = AUTHORITY_RANK.get(self.id)
         if expected is not None and expected != self.authority_rank:
             raise ValueError(

@@ -316,43 +316,43 @@ description: "Actionable, dependency-ordered task list for spec-038 In-Product H
 
 ### 8a — Contract (pytest)
 
-- [ ] T-AA182 [P] [Gate] `tests/contract/help/test_help_api_openapi.py` — validates every response in `contracts/help-api.openapi.yaml` against the running app. — contract, plan §Tier 1
-- [ ] T-AA183 [P] [Gate] `tests/contract/help/test_chat_audit_schema.py` — every `ChatAuditEntry` round-trips through Pydantic. — FR-020, plan §Tier 1
-- [ ] T-AA184 [P] [Gate] `tests/contract/help/test_snapshot_record_dual_approval.py` — publish endpoint rejects payloads without two distinct approver identities (one help_content_owner + one safety_lead|governance_lead). — FR-011b, CHK065
-- [ ] T-AA185 [P] [Gate] `tests/contract/help/test_lang_attr_lint.py` — `tools/help/lint_lang_attributes.py` passes on valid corpus, fails on missing `lang`. — FR-009a-AMEND, CHK046
-- [ ] T-AA186 [P] [Gate] `tests/contract/help/test_screen_id_hash.py` — hash deterministic across platforms; mismatched anchor set → flag raised. — FR-010a, CHK074
-- [ ] T-AA187 [P] [Gate] `tests/contract/help/test_retrieval_filters_tenant.py` — every retrieval call carries the tenant filter; cannot be overridden by caller. — FR-019, R3, CHK097
-- [ ] T-AA188 [P] [Gate] `tests/contract/help/test_pattern_id_stability.py` — `pattern_id` stable across citation orderings. — FR-022a-AMEND
-- [ ] T-AA189 [P] `tests/contract/help/test_route_smoke.py` — every router returns 200 / 401 / 422 as appropriate. — Phase 3 checkpoint
+- [X] T-AA182 [P] [Gate] `tests/contract/help/test_help_api_openapi.py` — validates every response in `contracts/help-api.openapi.yaml` against the running app. — contract, plan §Tier 1
+- [X] T-AA183 [P] [Gate] `tests/contract/help/test_chat_audit_schema.py` — every `ChatAuditEntry` round-trips through Pydantic. — FR-020, plan §Tier 1
+- [X] T-AA184 [P] [Gate] `tests/contract/help/test_snapshot_record_dual_approval.py` — publish endpoint rejects payloads without two distinct approver identities (one help_content_owner + one safety_lead|governance_lead). — FR-011b, CHK065
+- [X] T-AA185 [P] [Gate] `tests/contract/help/test_lang_attr_lint.py` — `tools/help/lint_lang_attributes.py` passes on valid corpus, fails on missing `lang`. — FR-009a-AMEND, CHK046
+- [X] T-AA186 [P] [Gate] `tests/contract/help/test_screen_id_hash.py` — hash deterministic across platforms; mismatched anchor set → flag raised. — FR-010a, CHK074
+- [X] T-AA187 [P] [Gate] `tests/contract/help/test_retrieval_filters_tenant.py` — every retrieval call carries the tenant filter; cannot be overridden by caller. — FR-019, R3, CHK097
+- [X] T-AA188 [P] [Gate] `tests/contract/help/test_pattern_id_stability.py` — `pattern_id` stable across citation orderings. — FR-022a-AMEND
+- [X] T-AA189 [P] `tests/contract/help/test_route_smoke.py` — every router returns 200 / 401 / 422 as appropriate. — Phase 3 checkpoint
 
 ### 8b — Integration (pytest)
 
-- [ ] T-AA190 [P] [Gate] `tests/integration/help/test_chat_end_to_end.py` — POST /help/chat/ask returns SSE stream with ≥1 citation; refusal path emits `audit.chat_refusal`. — FR-012, FR-013, plan §Tier 2
-- [ ] T-AA191 [P] [Gate] `tests/integration/help/test_snapshot_publish_rollback.py` — publish stamps new index, alias swings; rollback re-binds within 5 min budget. — FR-011a, FR-011c, R6
-- [ ] T-AA192 [P] [Gate] `tests/integration/help/test_pii_redaction_notice.py` — input with AU mobile is redacted; UI notice rendered; audit log carries redacted form only. — FR-017, FR-020, CHK045, CHK046
-- [ ] T-AA193 [P] [Gate] `tests/integration/help/test_tenant_isolation.py` — multi-tenant probe: queries scoped to tenant A never return tenant B docs. — FR-019, SC-004, R3, CHK097-CHK101
-- [ ] T-AA194 [P] [Gate] `tests/integration/help/test_degraded_mode.py` — service-worker cache returns articles offline; chat is disabled with banner; degraded search banner present. — FR-026, FR-026a, FR-026a-AMEND, FR-026b, CHK139-CHK142
-- [ ] T-AA195 [P] [Gate] `tests/integration/help/test_support_handoff_sla.py` — NEMA-Level-3 banner triggers incident-mode channel; SLA breach emits `audit.support_handoff_unack_timeout`. — FR-023a-AMEND, FR-023b, CHK124, CHK125
-- [ ] T-AA196 [P] [Gate] `tests/integration/help/test_persona_resolution.py` — multi-role users see union ordered by authority rank; chat uses only active persona; `persona_source` recorded. — FR-027, FR-028, CHK131-CHK134
-- [ ] T-AA197 [P] [Gate] `tests/integration/help/test_transcript_reconstruction.py` — Observer-Auditor reconstruction renders only inside audit tooling; emits `audit.transcript_reconstructed`; original user history unchanged. — FR-029a, FR-029b, CHK119
-- [ ] T-AA198 [P] [Gate] `tests/integration/help/test_deprecation_notice.py` — deep link to superseded content shows `<DeprecationNotice />`; withdrawn-no-replacement surfaces support handoff. — FR-011d, FR-011d-AMEND, CHK067
-- [ ] T-AA199 [P] [Gate] `tests/integration/help/test_negative_feedback_no_silencing.py` — 4 negative feedbacks on same article+pattern do NOT auto-disable; backlog promotes to `needs_review`. — FR-022a, CHK113
+- [X] T-AA190 [P] [Gate] `tests/integration/help/test_chat_end_to_end.py` — POST /help/chat/ask returns SSE stream with ≥1 citation; refusal path emits `audit.chat_refusal`. — FR-012, FR-013, plan §Tier 2
+- [X] T-AA191 [P] [Gate] `tests/integration/help/test_snapshot_publish_rollback.py` — publish stamps new index, alias swings; rollback re-binds within 5 min budget. — FR-011a, FR-011c, R6
+- [X] T-AA192 [P] [Gate] `tests/integration/help/test_pii_redaction_notice.py` — input with AU mobile is redacted; UI notice rendered; audit log carries redacted form only. — FR-017, FR-020, CHK045, CHK046
+- [X] T-AA193 [P] [Gate] `tests/integration/help/test_tenant_isolation.py` — multi-tenant probe: queries scoped to tenant A never return tenant B docs. — FR-019, SC-004, R3, CHK097-CHK101
+- [X] T-AA194 [P] [Gate] `tests/integration/help/test_degraded_mode.py` — service-worker cache returns articles offline; chat is disabled with banner; degraded search banner present. — FR-026, FR-026a, FR-026a-AMEND, FR-026b, CHK139-CHK142
+- [X] T-AA195 [P] [Gate] `tests/integration/help/test_support_handoff_sla.py` — NEMA-Level-3 banner triggers incident-mode channel; SLA breach emits `audit.support_handoff_unack_timeout`. — FR-023a-AMEND, FR-023b, CHK124, CHK125
+- [X] T-AA196 [P] [Gate] `tests/integration/help/test_persona_resolution.py` — multi-role users see union ordered by authority rank; chat uses only active persona; `persona_source` recorded. — FR-027, FR-028, CHK131-CHK134
+- [X] T-AA197 [P] [Gate] `tests/integration/help/test_transcript_reconstruction.py` — Observer-Auditor reconstruction renders only inside audit tooling; emits `audit.transcript_reconstructed`; original user history unchanged. — FR-029a, FR-029b, CHK119
+- [X] T-AA198 [P] [Gate] `tests/integration/help/test_deprecation_notice.py` — deep link to superseded content shows `<DeprecationNotice />`; withdrawn-no-replacement surfaces support handoff. — FR-011d, FR-011d-AMEND, CHK067
+- [X] T-AA199 [P] [Gate] `tests/integration/help/test_negative_feedback_no_silencing.py` — 4 negative feedbacks on same article+pattern do NOT auto-disable; backlog promotes to `needs_review`. — FR-022a, CHK113
 
 ### 8c — E2E (Playwright + axe-core)
 
-- [ ] T-AA200 [P] [Gate] `apps/web/__tests__/e2e/help/landing.persona.spec.ts` — every persona landing tile loads with first-15-min tour. — FR-002, US1, CHK001-CHK016
-- [ ] T-AA201 [P] [Gate] `apps/web/__tests__/e2e/help/screenshot.theme.spec.ts` — light/dark variants swap with theme; alt text + adjacent keyboard steps present. — FR-007, FR-008, US3
-- [ ] T-AA202 [P] [Gate] `apps/web/__tests__/e2e/help/chat.citations.spec.ts` — every chat answer renders ≥1 `<CitationBadge />` that deep-links to the article anchor. — FR-012, US2
-- [ ] T-AA203 [P] [Gate] `apps/web/__tests__/e2e/help/a11y.wcag22aa.spec.ts` — axe-core on every Help route; zero Level A/AA violations. — FR-009, SC-006, CHK040-CHK048
-- [ ] T-AA204 [P] [Gate] `apps/web/__tests__/e2e/help/keyboard.only.spec.ts` — full Help + chat operable via keyboard; visible focus throughout. — FR-009, CHK040, CHK041
-- [ ] T-AA205 [P] [Gate] `apps/web/__tests__/e2e/help/degraded.offline.spec.ts` — offline-first cache + chat-disabled banner + degraded-search indicator. — FR-026, FR-026a-AMEND, US1 edge case
+- [X] T-AA200 [P] [Gate] `apps/web/__tests__/e2e/help/landing.persona.spec.ts` — every persona landing tile loads with first-15-min tour. — FR-002, US1, CHK001-CHK016
+- [X] T-AA201 [P] [Gate] `apps/web/__tests__/e2e/help/screenshot.theme.spec.ts` — light/dark variants swap with theme; alt text + adjacent keyboard steps present. — FR-007, FR-008, US3
+- [X] T-AA202 [P] [Gate] `apps/web/__tests__/e2e/help/chat.citations.spec.ts` — every chat answer renders ≥1 `<CitationBadge />` that deep-links to the article anchor. — FR-012, US2
+- [X] T-AA203 [P] [Gate] `apps/web/__tests__/e2e/help/a11y.wcag22aa.spec.ts` — axe-core on every Help route; zero Level A/AA violations. — FR-009, SC-006, CHK040-CHK048
+- [X] T-AA204 [P] [Gate] `apps/web/__tests__/e2e/help/keyboard.only.spec.ts` — full Help + chat operable via keyboard; visible focus throughout. — FR-009, CHK040, CHK041
+- [X] T-AA205 [P] [Gate] `apps/web/__tests__/e2e/help/degraded.offline.spec.ts` — offline-first cache + chat-disabled banner + degraded-search indicator. — FR-026, FR-026a-AMEND, US1 edge case
 
 ### 8d — LLM evaluation (spec-030 framework)
 
-- [ ] T-AA206 [P] [Gate] `tests/llm-eval/help/eval_grounded_answers.py` — runs `eval_grounded_answers.jsonl` (≥200 in-scope Q/A); gate ≥90% pass with ≥1 valid citation. — SC-002, plan §Tier 4
-- [ ] T-AA207 [P] [Gate] `tests/llm-eval/help/eval_refusals.py` — out-of-scope set; gate 100% refused. — SC-002, FR-013
-- [ ] T-AA208 [P] [Gate] `tests/llm-eval/help/eval_fabrication_audit.py` — sampled audit script over `chat_audit_log`; fail-closed on any verified fabrication. — SC-003, FR-014, R2
-- [ ] T-AA209 [P] [Gate] `tests/llm-eval/help/eval_persona_tailoring.py` — persona-tagged Q/A; gate that responses cite persona-relevant articles. — FR-015, US2
+- [X] T-AA206 [P] [Gate] `tests/llm-eval/help/eval_grounded_answers.py` — runs `eval_grounded_answers.jsonl` (≥200 in-scope Q/A); gate ≥90% pass with ≥1 valid citation. — SC-002, plan §Tier 4
+- [X] T-AA207 [P] [Gate] `tests/llm-eval/help/eval_refusals.py` — out-of-scope set; gate 100% refused. — SC-002, FR-013
+- [X] T-AA208 [P] [Gate] `tests/llm-eval/help/eval_fabrication_audit.py` — sampled audit script over `chat_audit_log`; fail-closed on any verified fabrication. — SC-003, FR-014, R2
+- [X] T-AA209 [P] [Gate] `tests/llm-eval/help/eval_persona_tailoring.py` — persona-tagged Q/A; gate that responses cite persona-relevant articles. — FR-015, US2
 
 **Checkpoint**: all CI gates green; ready for operational readiness.
 

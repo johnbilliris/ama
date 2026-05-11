@@ -182,8 +182,10 @@ def test_screen_id_hash_callout_order_matters():
     c1 = Callout(number=1, anchor_dom_path="#a", alt_text="a")
     c2 = Callout(number=2, anchor_dom_path="#b", alt_text="b")
     h_normal = compute_screen_id_hash("/route", [c1, c2])
-    h_swapped = compute_screen_id_hash("/route", [Callout(number=1, anchor_dom_path="#b", alt_text="b"),
-                                                  Callout(number=2, anchor_dom_path="#a", alt_text="a")])
+    h_swapped = compute_screen_id_hash(
+        "/route",
+        [Callout(number=1, anchor_dom_path="#b", alt_text="b"), Callout(number=2, anchor_dom_path="#a", alt_text="a")],
+    )
     assert h_normal != h_swapped
     # input list order is irrelevant — only callout.number matters
     assert h_normal == compute_screen_id_hash("/route", [c2, c1])

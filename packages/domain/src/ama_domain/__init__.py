@@ -18,24 +18,9 @@ Schema-mirror parity verified by ``tests/contract/test_schema_mirror_parity.py``
 """
 
 # Re-exports for the public surface (T071–T074 filled).
-from .audit_record import AuditRecord, OperatorAction, RetrievedChunkRef
-from .citation import Citation
-from .equivalence_test_result import EquivalenceTestResult
-from .offline_cache import (
-    OfflineCacheEntry,
-    OfflineCacheManifest,
-    OfflineCacheSignatures,
-)
-from .retrieval import (
-    Jurisdiction,
-    LicenceMode,
-    RetrievalRequest,
-    RetrievalResult,
-    RetrievedChunk,
-)
-
 # spec-038 Help entities — see specs/038-help-docs-chat/data-model.md
 from .annotated_screenshot import AnnotatedScreenshot, Callout
+from .audit_record import AuditRecord, OperatorAction, RetrievedChunkRef
 from .authority_rank_registry import (
     AUTHORITY_RANK,
     authority_rank,
@@ -45,16 +30,30 @@ from .authority_rank_registry import (
 from .chat_audit_entry import AUDIT_TTL_SECONDS, ChatAuditEntry
 from .chat_pattern_id import compute_pattern_id
 from .chat_session import DEFAULT_TTL_SECONDS, ChatSession, ChatTurn, RefusalReason
+from .citation import Citation
 from .content_review_backlog_item import (
     AUTO_PROMOTE_THRESHOLD,
     AUTO_PROMOTE_WINDOW_DAYS,
     ContentReviewBacklogItem,
 )
+from .equivalence_test_result import EquivalenceTestResult
 from .glossary_term import GlossaryTerm
 from .help_article import ArticleDomain, ArticleKind, ArticleStatus, HelpArticle
 from .help_feedback import HelpFeedback
 from .knowledge_corpus_source import KnowledgeCorpusSource
+from .offline_cache import (
+    OfflineCacheEntry,
+    OfflineCacheManifest,
+    OfflineCacheSignatures,
+)
 from .persona_help_profile import PersonaHelpProfile
+from .retrieval import (
+    Jurisdiction,
+    LicenceMode,
+    RetrievalRequest,
+    RetrievalResult,
+    RetrievedChunk,
+)
 from .screen_id_hash import compute_screen_id_hash
 from .snapshot_record import Approver, SnapshotRecord
 from .staleness_flag import StalenessFlag

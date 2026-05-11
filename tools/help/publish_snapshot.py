@@ -9,6 +9,7 @@ Idempotent on ``(snapshot_id, source_id, content_hash)``. Calls the
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import subprocess
 import sys
@@ -42,16 +43,21 @@ def cmd_publish(args: argparse.Namespace) -> int:
 
     snapshot_id = args.snapshot_id or _ts_snapshot_id()
     logger.info("publishing snapshot %s (manifest=%s)", snapshot_id, args.manifest)
-    subprocess.check_call([
-        sys.executable, "-m", "help_snapshot",
-        "--manifest", args.manifest,
-        "--snapshot-id", snapshot_id,
-        *(["--dry-run"] if args.dry_run else []),
-    ])
+    subprocess.check_call(
+        [
+            sys.executable,
+            "-m",
+            "help_snapshot",
+            "--manifest",
+            args.manifest,
+            "--snapshot-id",
+            snapshot_id,
+            *(["--dry-run"] if args.dry_run else []),
+        ]
+    )
     # write SnapshotRecord JSON for downstream verification
     Path("snapshot-record.json").write_text(
-        '{"id": "%s", "approvers": %s, "published_at": "%s"}'
-        % (snapshot_id, str(approvers), datetime.now(UTC).isoformat()),
+        json.dumps({"id": snapshot_id, "approvers": approvers, "published_at": datetime.now(UTC).isoformat()}),
         encoding="utf-8",
     )
     print(snapshot_id)
@@ -62,6 +68,7 @@ def cmd_rollback(args: argparse.Namespace) -> int:
     logger.info("rollback to %s", args.restored_snapshot_id)
     # Re-bind alias via swing_alias helper:
     from help_snapshot.alias_swinger import swing_alias  # type: ignore[import-not-found]
+
     swing_alias(snapshot_id=args.restored_snapshot_id)
     return 0
 

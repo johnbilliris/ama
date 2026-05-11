@@ -36,7 +36,7 @@ class SnapshotRecord(BaseModel):
     rollback_of: str | None = None
 
     @model_validator(mode="after")
-    def _dual_approval(self) -> "SnapshotRecord":
+    def _dual_approval(self) -> SnapshotRecord:
         roles = {a.role for a in self.approvers}
         identities = {a.identity for a in self.approvers}
         if len(identities) < 2:
@@ -44,9 +44,7 @@ class SnapshotRecord(BaseModel):
         if "help_content_owner" not in roles:
             raise ValueError("FR-011b: at least one approver with role help_content_owner required")
         if not (roles & {"safety_lead", "governance_lead"}):
-            raise ValueError(
-                "FR-011b: at least one approver with role safety_lead or governance_lead required"
-            )
+            raise ValueError("FR-011b: at least one approver with role safety_lead or governance_lead required")
         return self
 
 
