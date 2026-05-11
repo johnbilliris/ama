@@ -318,7 +318,12 @@ export function SimulationMap({
         </span>
       </div>
       <div className="sim-map-canvas">
-        <DisasterMap features={renderedFeatures} focus={focus} viewportKey="simulation-map-viewport" />
+        <DisasterMap
+          features={renderedFeatures}
+          focus={focus}
+          viewportKey={`simulation-map-viewport:${tenantId}`}
+          saveViewportTrigger={status}
+        />
       </div>
       {/*
         T-I04 / T-R04 / T-R07 / T-R08 — accessible overlay summary.

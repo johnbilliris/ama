@@ -1,0 +1,26 @@
+// Spec 036 T099 — KQL audit-trail completeness query (FR-RAG-AG-02, Risk R8).
+//
+// Asserts: every grounded LLM call (call_kind == "inference") in the
+// trailing 30 days emits a non-null `rag_used` field. A non-zero count
+// indicates an audit-pipeline regression and MUST page on-call.
+//
+// Run via:
+//   az monitor app-insights query \
+//     --app $APPI_ID \
+//     --analytics-query "$(Get-Content tests/audit/audit_trail_completeness.kql -Raw)"
+//
+// Expected output (healthy):
+//   agent_name | total_calls | missing_rag_used
+//   <none>     | 0           | 0
+//
+// Alert threshold: any row where `missing_rag_used > 0`.
+audit_records
+| where timestamp > ago(30d)
+| where call_kind == "inference"
+| summarize total_calls = count(),
+            missing_rag_used = countif(isnull(rag_used) or rag_used == "")
+            by agent_name
+| where missing_rag_used > 0
+| project agent_name, total_calls, missing_rag_used,
+          completeness_pct = round(100.0 * (total_calls - missing_rag_used) / total_calls, 2)
+| order by missing_rag_used desc

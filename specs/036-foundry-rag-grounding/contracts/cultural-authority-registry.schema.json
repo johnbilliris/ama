@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/johnbilliris/ama/specs/036-foundry-rag-grounding/contracts/cultural-authority-registry.schema.json",
+  "title": "Cultural Authority Registry Entry",
+  "description": "Operator consent record for Sacred Site / Indigenous protocol corpus access (Constitution VI-C non-negotiable + spec 036 FR-RAG-CA-04). Source of truth: Cosmos DB container `culturalAuthorityRegistry` in Australia East (NN-2 + FR-RAG-CV-04). Container is provisioned empty by the amend-loop deploy; population is HUMAN-IN-LOOP per FR-RAG-CA-05 (NEMA + AFAC + Indigenous community sign-off). When the registry is unreachable at retrieval time, the system fails closed for protected chunks and emits `cultural_authority_registry_unavailable` to the audit log per Pass 1 Q-P1-01.",
+  "type": "object",
+  "required": [
+    "operator_id",
+    "land_council_id",
+    "granted_at",
+    "expires_at",
+    "granted_by_authority",
+    "scope",
+    "signature"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "operator_id": {
+      "description": "Entra ID / OID of the operator the consent is granted to. Cosmos DB partition key — co-locates an operator's consents on a single physical partition for low-latency single-operator lookup.",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128
+    },
+    "land_council_id": {
+      "description": "Identifier of the granting Land Council, ALT, APY, AIATSIS-registered authority, or other Indigenous community body. Free-form per Pass 1 Q-P1-01 (registry plumbing is in-scope; population is HUMAN-IN-LOOP per FR-RAG-CA-05).",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 128
+    },
+    "granted_at": {
+      "description": "ISO-8601 UTC timestamp of consent grant.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "description": "ISO-8601 UTC timestamp of consent expiry. MUST be in the future at write time. Retrieval-time gate (ADR-12) treats current_time > expires_at as expired and fails closed for protected chunks.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "granted_by_authority": {
+      "description": "Free-text identifier of the authorising body / signatory (e.g. 'Central Land Council', 'APY Lands Executive', 'AIATSIS Ethics Committee'). Audit-trail anchor per Constitution Principle IV.",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 256
+    },
+    "scope": {
+      "description": "Granular scope of consent. Pass 1 Q-P1-01 enumerates four values; Pass 2 Q-P2-02 places the gate post-retrieval, in-process inside `RetrievalService.retrieve()` so the scope filter applies uniformly across all five grounded agents and the Simulation Controller.",
+      "type": "string",
+      "enum": ["site", "language", "protocol", "all"]
+    },
+    "signature": {
+      "description": "Detached cryptographic signature over `(operator_id, land_council_id, granted_at, expires_at, granted_by_authority, scope)`. Signature scheme MUST match the spec 032 FR-AI09 cosign keyless pattern OR the FR-RAG-LS-02 age-encrypted pattern; verification logic in `apps/agents/common/cultural_authority_registry.py` (planned Phase F-A2).",
+      "type": "string",
+      "minLength": 16,
+      "maxLength": 8192
+    },
+    "revocation_reason": {
+      "description": "Nullable string. Set when consent is revoked (e.g. 'operator role change', 'community-requested revocation', 'expiry past'). Once set, the row remains in the registry as an audit anchor but the gate fails closed on it (revoked rows are equivalent to no row).",
+      "type": ["string", "null"],
+      "maxLength": 512
+    }
+  },
+  "examples": [
+    {
+      "operator_id": "field-coordinator-nt-1@ama.local",
+      "land_council_id": "central-land-council",
+      "granted_at": "2026-04-01T00:00:00Z",
+      "expires_at": "2027-03-31T23:59:59Z",
+      "granted_by_authority": "Central Land Council Cultural Heritage Officer (delegated)",
+      "scope": "site",
+      "signature": "MEYCIQDx...Sigstore-keyless-bundle...CIQDx",
+      "revocation_reason": null
+    },
+    {
+      "operator_id": "incident-controller-wa-3@ama.local",
+      "land_council_id": "kimberley-land-council",
+      "granted_at": "2026-02-15T00:00:00Z",
+      "expires_at": "2026-08-14T23:59:59Z",
+      "granted_by_authority": "Kimberley Land Council CHC + AIATSIS Ethics Committee co-signature",
+      "scope": "protocol",
+      "signature": "-----BEGIN AGE ENCRYPTED FILE-----\\n... ...-----END AGE ENCRYPTED FILE-----",
+      "revocation_reason": null
+    }
+  ]
+}

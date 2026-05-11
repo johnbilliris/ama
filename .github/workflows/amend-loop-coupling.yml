@@ -1,0 +1,79 @@
+name: Amend-loop coupling guard (spec 036 F-A4 / FR-RAG-CV-01)
+
+# Enforces the Pass 2 Q-P2-03 single-PR coupling constraint:
+# Any PR mutating `infra/policy/rego/foundry_carveout.rego` MUST also touch a
+# Phase F implementation file (or vice-versa).
+#
+# See `infra/policy/rego/AMEND_LOOP_COUPLING.md` for rationale and the
+# emergency override trailer format.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - infra/policy/rego/foundry_carveout.rego
+      - infra/parameters/foundry-carveout.schema.json
+      - specs/036-foundry-rag-grounding/tasks.md
+      - specs/036-foundry-rag-grounding/contracts/foundry-cv.schema.json
+      - apps/agents/common/cultural_authority_registry.py
+      - apps/agents/common/retrieval_service.py
+      - apps/api/app/services/approval_workflow.py
+      - apps/api/app/services/conflict_detection.py
+      - apps/api/app/services/index_rollback.py
+      - infra/modules/cosmos-cultural-authority.bicep
+      - infra/modules/cosmos-conflict-detection.bicep
+      - infra/policy/rego/cultural_authority_flag.rego
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  coupling-check:
+    name: Verify rego + Phase F bundling
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine changed files
+        id: changes
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          echo "$CHANGED" > /tmp/changed-files.txt
+          echo "Changed files:"
+          cat /tmp/changed-files.txt
+
+      - name: Check coupling constraint
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          set -euo pipefail
+          CHANGED=$(cat /tmp/changed-files.txt)
+
+          REGO_TOUCHED=$(echo "$CHANGED" | grep -E '^infra/policy/rego/foundry_carveout\.rego$' || true)
+          PHASE_F_TOUCHED=$(echo "$CHANGED" | grep -E '^(specs/036-foundry-rag-grounding/tasks\.md|specs/036-foundry-rag-grounding/contracts/foundry-cv\.schema\.json|apps/agents/common/(cultural_authority_registry|retrieval_service)\.py|apps/api/app/services/(approval_workflow|conflict_detection|index_rollback|aiims_escalation)\.py|infra/modules/cosmos-(cultural-authority|conflict-detection)\.bicep|infra/policy/rego/cultural_authority_flag\.rego|infra/parameters/foundry-carveout\.schema\.json|packages/schemas/spec_036/|docs/decisions/036-foundry-rag-grounding/(12|13|14|15|16|17|18|19)-|tests/(contract|integration|e2e)/test_(foundry_carveout|cultural_authority_|authority_precedence|agency_disambiguation|index_rollback|conflict_detection|aiims_escalation|corpus_staleness|otel_retrieval_span|blue_green_alias_flip|approval_workflow_state_machine|field_coordinator_offline_boundaries|sc017_override_completeness|comdisplan_activation|precedence_tiebreak|ingest_agency_lint|privacy_act_sar|pspf_audit_export|audit_record_amend_loop_fields))' || true)
+
+          if [ -n "$REGO_TOUCHED" ] && [ -z "$PHASE_F_TOUCHED" ]; then
+            # Allow override trailer for emergency rollback PRs.
+            if echo "$PR_BODY" | grep -qE 'amend-loop-coupling-override:\s*"[^"]+"'; then
+              echo "::warning::Coupling waived by override trailer (PR body)."
+              exit 0
+            fi
+            echo "::error::Spec 036 F-A4 coupling violation: foundry_carveout.rego changed but no Phase F implementation files were touched in the same PR."
+            echo "::error::See infra/policy/rego/AMEND_LOOP_COUPLING.md for the constraint and emergency-override trailer format."
+            exit 1
+          fi
+
+          if [ -z "$REGO_TOUCHED" ] && [ -n "$PHASE_F_TOUCHED" ]; then
+            # Phase F change without rego: only flagged if the Phase F task list
+            # explicitly references the rego (T152). The CI step warns; humans
+            # decide whether the coupling is meaningful for THIS PR.
+            echo "::notice::Phase F implementation touched without rego change. Verify manually that the rego patch (T152) does not need to land in this PR."
+          fi
+
+          echo "Coupling check passed."

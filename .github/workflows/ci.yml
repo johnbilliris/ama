@@ -40,11 +40,34 @@ jobs:
           pip install pytest pytest-cov pytest-asyncio pytest-benchmark ruff mypy import-linter pyyaml
           pip install -e apps/api
           pip install -e apps/agents
+      - name: Install age CLI (spec 036 FR-RAG-LS-02 offline-cache dual-signing)
+        run: |
+          # `age` is required by ama_ingest.offline_bundle (T047) and the
+          # offline-cache verifier (T129). Fetch the upstream binary to keep
+          # the CI image hermetic and reproducible across runs.
+          AGE_VERSION=v1.2.1
+          curl -fsSL "https://github.com/FiloSottile/age/releases/download/${AGE_VERSION}/age-${AGE_VERSION}-linux-amd64.tar.gz" \
+            | tar -xz -C /tmp
+          sudo install /tmp/age/age /usr/local/bin/age
+          sudo install /tmp/age/age-keygen /usr/local/bin/age-keygen
+          age --version
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
 
       - name: python-lint
         run: ruff check apps tests packages
+
+      # Spec 036 T055 / T039 — fail CI on docs/corpus/INDEXING-LICENCE-INVENTORY drift.
+      - name: licence-inventory-lint
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python tools/lint/check_licence_inventory.py
+
+      # Spec 036 T128 / FR-RAG-NS-08 — fail CI on RAG-OPTOUT marker ↔ ADR drift.
+      - name: rag-optout-binding-lint
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python tools/lint/check_rag_optout_bindings.py
 
       - name: equivalence-gate
         # Spec 033 / T041 — per-agent FR-023 equivalence harness gate.
@@ -109,6 +132,94 @@ jobs:
           name: coverage-results
           path: coverage.xml
           retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Spec 036 / F-A10 / T218 + T222 — per-PR Windows compatibility job. Runs the
+  # contract + integration sweep on windows-latest so platform-only regressions
+  # are caught before merge (closes F-DEL-01 + F-DEL-08).
+  # ---------------------------------------------------------------------------
+  quality-windows:
+    needs: [quality]
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Install Python tooling
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio ruff
+          pip install -e apps/api
+          pip install -e apps/agents
+      - name: ruff check (Windows)
+        shell: pwsh
+        run: ruff check apps tests packages
+      - name: pytest contract + integration (Windows)
+        shell: pwsh
+        run: |
+          # Spec 036 / F-A10 / T218 — Windows runner mirrors the Linux contract+integration
+          # sweep so packaging regressions surface on PRs (FR-RAG-TEST-01).
+          pytest tests/contract tests/integration -q --tb=line --maxfail=10
+
+  # ---------------------------------------------------------------------------
+  # Spec 036 / F-A10 / T220 + T222 — per-PR golden-set canonicalisation gate.
+  # Asserts that no fixture file other than tests/fixtures/golden-set-v1.json
+  # carries golden-set entries (FR-RAG-TEST-03 / Pass 1 Q-P1-08).
+  # ---------------------------------------------------------------------------
+  golden-set-canonical:
+    needs: [quality]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: golden-set v1 canonicalisation
+        run: |
+          python tools/lint/check_golden_set_canonical.py
+
+  # ---------------------------------------------------------------------------
+  # Spec-036 / F-A12 / T242 — accessibility lane for <CitationCard />.
+  # Marked SHOULD per F-A12.5 — fails the job only on infrastructure errors;
+  # axe violations log as warnings until the baseline at
+  # docs/accessibility/spec-036-citation-card-baseline.md hits zero for two
+  # consecutive PRs, after which the test is flipped to assert
+  # ``violations.toEqual([])`` and this job becomes a required check.
+  # ---------------------------------------------------------------------------
+  accessibility-citation-card:
+    needs: [quality]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true # warn-only per F-A12.5; flip to false post-baseline.
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
+        with:
+          version: 10.6.3
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "24"
+          cache: "pnpm"
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+      - name: Run accessibility tests (CitationCard, vitest + axe-core)
+        working-directory: apps/web
+        run: |
+          pnpm exec vitest run tests/web/src/components/citation \
+            --reporter=default --reporter=junit --outputFile.junit=axe-junit.xml
+      - name: Upload junit report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: spec-036-axe-junit
+          path: apps/web/axe-junit.xml
+          if-no-files-found: ignore
 
   # ---------------------------------------------------------------------------
   # Spec-034 FR-018, FR-019, FR-023(e), SC-001..SC-005 — web coverage suite.

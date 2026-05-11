@@ -29,6 +29,8 @@ build/
 .benchmarks/
 test-results/
 **/test-results/
+artifacts/
+**/artifacts/
 playwright-report/
 **/playwright-report/
 .eval-out/

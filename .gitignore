@@ -61,3 +61,4 @@ test-results/
 !specs/034-webapp-capstone-coverage/known-good.json
 !specs/034-webapp-capstone-coverage/review-log.md
 !specs/034-webapp-capstone-coverage/_evidence/**
+artifacts/

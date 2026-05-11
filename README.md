@@ -285,6 +285,23 @@ These targets are drawn from the [Capstone Brief](capstone.md) and represent the
 - [Project Constitution](.specify/memory/constitution.md) — guiding principles and decision rights
 - [Demo Walkthrough](docs/disaster-response-hub/demo/walkthrough.md) — step-by-step demo scenario
 - [Web coverage suite](specs/034-webapp-capstone-coverage/quickstart.md) — Playwright tribunal that proves every capstone outcome × persona combination
+- [Foundry RAG grounding (spec 036)](specs/036-foundry-rag-grounding/quickstart.md) — Microsoft-Foundry-based retrieval grounding for every agent + simulation chat with citation envelopes, blue-green corpus index, and pipeline-only opt-outs
+
+### Foundry RAG grounding (spec 036)
+
+Spec 036 broadens the AIDR-only RAG path landed by spec 032 to the **whole** `docs/corpus/` tree and migrates the production model plane from Azure OpenAI to Microsoft Foundry across the three remaining call sites. Every recommendation card and Simulation SSE turn carries a `Citation` envelope; nine non-grounded paths are explicitly opted out via `# RAG-OPTOUT [FR-RAG-NS-NN]` comments + matching ADRs.
+
+```pwsh
+# Hermetic dry-run for the final Simulation canary (T145):
+pwsh ./infra/scripts/simulation-final-canary-dry-run.ps1
+
+# Step-9 azd-up smoke-test:
+pwsh ./infra/scripts/azd-up-smoke-test.ps1 -BaseUrl https://prod-ama-api.example.com
+```
+
+Cutover runbooks:
+- Game-day cadence: `docs/runbooks/036-foundry-rag-gameday.md`
+- Step-9 cutover: `docs/runbooks/036-foundry-rag-step9-cutover.md`
 
 ### Web coverage suite (spec 034)
 

@@ -24,7 +24,7 @@ COPY apps/agents/common/ ./apps/agents/common/
 COPY apps/agents/communication/ ./apps/agents/communication/
 COPY apps/agents/evacuation/ ./apps/agents/evacuation/
 
-ENV PYTHONPATH="/app/apps/agents:${PYTHONPATH}"
+ENV PYTHONPATH="/app/apps/agents:/app/packages/domain/src:${PYTHONPATH}"
 
 USER appuser
 EXPOSE 8000

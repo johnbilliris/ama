@@ -480,6 +480,48 @@ resource webCoverageEvidenceBlobContributor 'Microsoft.Authorization/roleAssignm
   }
 }
 
+// Spec 036 / Phase F amend-loop — Cosmos containers + RAG observability wiring.
+// Both containers are EMPTY at deploy time:
+//   * culturalAuthorityRegistry — population is HUMAN-IN-LOOP (T202) per FR-RAG-CA-05.
+//   * conflictDetectionLog — populated at runtime by the conflict-detector (FR-RAG-COORD-01).
+// Database name override: main.bicep provisions `disaster-hub`, modules default to `ama`.
+module culturalAuthorityRegistry './modules/cosmos-cultural-authority.bicep' = {
+  name: 'cosmos-cultural-authority'
+  params: {
+    cosmosAccountName: cosmos.name
+    databaseName: cosmosDb.name
+    tags: tags
+  }
+}
+
+module conflictDetectionLog './modules/cosmos-conflict-detection.bicep' = {
+  name: 'cosmos-conflict-detection'
+  params: {
+    cosmosAccountName: cosmos.name
+    databaseName: cosmosDb.name
+    tags: tags
+  }
+}
+
+module foundryRagAlerts './modules/foundry-rag-alerts.bicep' = {
+  name: 'foundry-rag-alerts'
+  params: {
+    appInsightsName: '${envPrefix}-app-insights'
+    actionGroupId: monitoring.outputs.actionGroupId
+    location: location
+    tags: tags
+  }
+}
+
+module foundryRagSuccessDashboard './modules/foundry-rag-success-criteria-dashboard.bicep' = {
+  name: 'foundry-rag-success-dashboard'
+  params: {
+    appInsightsName: '${envPrefix}-app-insights'
+    location: location
+    tags: tags
+  }
+}
+
 output apiContainerAppId string = apiContainerApp.id
 output agentsContainerAppId string = agentsContainerApp.id
 output ingestionWorkerId string = ingestionWorker.id
@@ -559,3 +601,5 @@ output spec036JurisdictionBoundariesContainer string = jurisdictionBoundariesSto
 output spec036TtsAudioContainer string = ttsAudioStorage.outputs.containerName
 output spec036AoaiMiniDeployment string = azureOpenAiSimDeployments.outputs.gpt4oMiniDeploymentName
 output spec036AoaiFullDeployment string = azureOpenAiSimDeployments.outputs.gpt4oDeploymentName
+output culturalAuthorityRegistryContainerName string = culturalAuthorityRegistry.outputs.culturalAuthorityRegistryContainerName
+output conflictDetectionLogContainerName string = conflictDetectionLog.outputs.conflictDetectionLogContainerName

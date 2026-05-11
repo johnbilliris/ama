@@ -32,6 +32,8 @@ COPY apps/api/app/validators/ ./app/validators/
 COPY apps/api/app/services/simulation/ ./app/services/simulation/
 COPY apps/api/app/config/ ./app/config/
 
+ENV PYTHONPATH="/app:/app/packages/domain/src:${PYTHONPATH}"
+
 USER appuser
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -f http://localhost:8080/health || exit 1
