@@ -62,3 +62,6 @@ test-results/
 !specs/034-webapp-capstone-coverage/review-log.md
 !specs/034-webapp-capstone-coverage/_evidence/**
 artifacts/
+# Spec-038 — bicep-build artefact dir
+/build/
+

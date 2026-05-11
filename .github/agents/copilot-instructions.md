@@ -64,6 +64,8 @@ docs/           # Project documentation
 - Cosmos DB (`disaster-hub` database, account `cosmos-ama-zo6bb5`), (039-test-data-provisioning)
 - Python 3.12 (lint scripts); YAML (CI job definition); Markdown (pages) + Draw.io desktop / drawio-mcp-diagramming skill (diagram authoring); (001-arch-docs-refresh)
 - File system — `docs/architecture/` directory tree; `.diagram-hashes` flat manifest; (001-arch-docs-refresh)
+- Python 3.12 (backend) + TypeScript 5.8 (frontend) + Bicep (IaC) + FastAPI + Pydantic v2 (backend), Next.js 14 + the existing `PersonaWorkspace` shell (frontend), Azure SDK for Python (Cosmos + Blob), `apps/agents/common/llm_client.py` and `…/retrieval_client.py` (LLM-assisted summarisation only — D6) (040-success-criteria, originally 038)
+- Azure Cosmos DB SQL API in `australiaeast` (primary) + `australiasoutheast` (paired DR) — seven evidence-harness containers; Azure Storage Blob (Cool tier, 7-year locked immutability) for audit cold-archive (040-success-criteria)
 
 **Backend**: Python 3.12, FastAPI, Pydantic v2, Azure Cosmos DB SDK, Azure Blob Storage SDK, Azure Identity, Azure OpenAI SDK, tenacity
 **Frontend**: TypeScript 5.8, Next.js 16.2, React 19, Tailwind CSS, @ama/ui component library

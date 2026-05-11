@@ -113,6 +113,20 @@ api_router.include_router(help_screenshots_router)
 api_router.include_router(help_search_router)
 api_router.include_router(help_support_handoff_router)
 
+# Spec-040 — Measurable Success-Criteria Evidence Harness (T-S06).
+# Renumbered from 038 to 040 after collision with merged spec 038-help-docs-chat
+# (PR #90) and renumbered spec 039-test-data-provisioning (PR #97).
+# Mounted at `/api/v1/evidence/*` (router carries `/v1/evidence` prefix);
+# health probe at `/api/healthz/evidence`.
+try:
+    from app.services.evidence.health import router as evidence_health_router  # noqa: E402
+    from app.services.evidence.router import router as evidence_router  # noqa: E402
+
+    api_router.include_router(evidence_router)
+    api_router.include_router(evidence_health_router)
+except Exception:  # pragma: no cover — import-safe; endpoints just won't mount
+    pass
+
 if _EVAL_AVAILABLE:
     api_router.include_router(eval_router)
 

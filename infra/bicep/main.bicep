@@ -31,6 +31,12 @@ param actionGroupWebhook string = 'https://example.com/alerts'
 @description('Developer public IP address for Cosmos DB firewall access')
 param developerIpAddress string = '110.144.204.83'
 
+@description('Spec 038 — enable evidence-harness Cosmos containers + cold-archive Blob.')
+param enableEvidenceHarness bool = true
+
+@description('SLO alert action group resource ID (empty string = no alerts, T-AMD-03).')
+param sloAlertActionGroupId string = ''
+
 module monitoring './monitoring.bicep' = {
   params: {
     location: location
@@ -603,3 +609,27 @@ output spec036AoaiMiniDeployment string = azureOpenAiSimDeployments.outputs.gpt4
 output spec036AoaiFullDeployment string = azureOpenAiSimDeployments.outputs.gpt4oDeploymentName
 output culturalAuthorityRegistryContainerName string = culturalAuthorityRegistry.outputs.culturalAuthorityRegistryContainerName
 output conflictDetectionLogContainerName string = conflictDetectionLog.outputs.conflictDetectionLogContainerName
+
+// ────────────────────────────────────────────────────────────────────────────
+// Spec 038 — Measurable Success-Criteria Evidence Harness (T-S01 / T-S02).
+// Adds 7 Cosmos containers + 1 cold-archive Blob (7-y immutability lock) +
+// 1 App Insights workbook. AU sovereignty enforced (FR-029 / SC-009).
+// ────────────────────────────────────────────────────────────────────────────
+
+module evidenceHarness 'modules/evidence-harness.bicep' = if (enableEvidenceHarness) {
+  name: 'spec038-evidence-harness'
+  params: {
+    cosmosAccountName: cosmos.name
+    auditCosmosAccountName: cosmos.name
+    databaseName: cosmosDb.name
+    storageAccountName: storage.name
+    location: 'australiaeast'
+    pairedRegion: 'australiasoutheast'
+    appInsightsName: ''
+    sloAlertActionGroupId: sloAlertActionGroupId
+    tags: tags
+  }
+}
+
+output spec038EvidenceContainerNames array = enableEvidenceHarness ? evidenceHarness!.outputs.evidenceContainerNames : []
+output spec038EvidenceColdArchiveContainer string = enableEvidenceHarness ? evidenceHarness!.outputs.coldArchiveContainerName : ''
