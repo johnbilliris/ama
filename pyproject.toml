@@ -14,6 +14,10 @@ dependencies = [
   "cryptography>=46.0.7",
   "Pygments>=2.20.0",
   "requests>=2.33.0",
+  # Spec-037 (T002, RES-01, FR-009) — JSON Schema draft 2020-12 validation
+  # for evidence-pack artefacts + YAML loader for the publication-gate config.
+  "jsonschema>=4.21",
+  "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]

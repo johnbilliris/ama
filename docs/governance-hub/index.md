@@ -47,3 +47,15 @@
 - [Cost reporting](../operator-runbooks/cost-reporting.md) *(spec-032 T812)*
 
 > Files marked *(spec-032 T###)* are in scope for spec-032 and may be `[Stub]` until the relevant task lands.
+
+### Capstone Evidence Pack (spec-037)
+
+- [Risk Register](../risk-register/index.md) — Systematic Risk Register (artefact 1, FR-010..FR-014)
+- [Adoption Roadmap](adoption-roadmap/roadmap.md) — phased jurisdictional onboarding (artefact 2, FR-015..FR-018)
+- [Executive KPI Surface](executive-kpi/surface.md) — single-page roll-up against the five capstone success criteria (artefact 3, FR-019..FR-023)
+- [Responsible AI Register](rai-register/responsible-ai-register.md) — per-component AI posture across 4 frameworks × 8 principles (artefact 4, FR-024..FR-029)
+- [Feature-to-Value Ledger](../../specs/shared/feature-value-ledger.md) — inverse of `capstone-metric-trace.md` (artefact 5a, FR-030..FR-034)
+- [Decision/Tradeoff Log](feature-value-ledger/tradeoff-log.md) — paired ADR log (artefact 5b, FR-032 + FR-036)
+- Read-only [Executive page](../../apps/web/src/app/governance/executive/page.tsx) at `/governance/executive`
+- CI publication gate: `evidence-pack-publication-gate` (RES-04, FR-008/009/037/038)
+- ADRs: [ADR-037-01](../aidr/decisions/adr-037-01-text-first-evidence-pack.md), [ADR-037-02](../aidr/decisions/adr-037-02-executive-shell-reuse.md), [ADR-037-03](../aidr/decisions/adr-037-03-manual-evidence-cap.md), [ADR-037-04](../aidr/decisions/adr-037-04-three-layer-append-only.md)

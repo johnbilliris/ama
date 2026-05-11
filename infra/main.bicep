@@ -477,7 +477,7 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01'
   }
 }
 
-var blobContainers = ['raw-payloads', 'binary-assets', 'audit', 'simulation']
+var blobContainers = ['raw-payloads', 'binary-assets', 'audit', 'simulation', 'evidence-pack-archive']
 resource blobContainerResources 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = [
   for name in blobContainers: {
     name: name
@@ -703,6 +703,49 @@ resource coordinationTasksContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDa
       }
     }
     options: { autoscaleSettings: { maxThroughput: 1000 } }
+  }
+}
+
+// Spec-037 (T037, PD-037-06) — Capstone Evidence Pack read-API cache.
+// Single child container of the existing `disaster-hub` Cosmos database; no
+// net-new top-level Azure resources. Partition key `/artefact_id` keeps the
+// five evidence-pack envelopes (`risk_register`, `adoption_roadmap`,
+// `executive_kpi_surface`, `rai_register`, `feature_value_ledger`) on
+// independent logical partitions for sub-200ms p95 read fan-out to the
+// `apps/web/src/app/governance/executive/` page (FR-021, plan.md §
+// Performance Goals). Append-only at the data layer per Constitution NN-1
+// carve-out and the spec-035 precedent.
+resource evidencePackArtefactCacheContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+  name: 'evidence_pack_artefact_cache'
+  parent: cosmosDb
+  properties: {
+    resource: {
+      id: 'evidence_pack_artefact_cache'
+      partitionKey: { paths: ['/artefact_id'], kind: 'Hash' }
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        includedPaths: [ { path: '/*' } ]
+        excludedPaths: [ { path: '/_etag/?' } ]
+      }
+      defaultTtl: -1
+    }
+    options: { autoscaleSettings: { maxThroughput: 1000 } }
+  }
+}
+
+// Spec-037 (T038, PD-037-04) — Blob immutability policy on the new
+// `evidence-pack-archive` container declared above. Time-based retention
+// fulfils FR-005 (per-publish snapshot tagged with `publication_id` is
+// tamper-evident). Retention default 7 years matches the spec-030 audit
+// archive baseline; tighten only via parameter override.
+@description('Spec-037 — Immutable retention period in days for evidence-pack snapshots (FR-005, PD-037-04).')
+param spec037ArchiveRetentionDays int = 2555  // ≈ 7 years
+resource evidencePackArchiveImmutability 'Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies@2023-05-01' = {
+  name: 'default'
+  parent: blobContainerResources[4]  // index 4 == 'evidence-pack-archive'
+  properties: {
+    immutabilityPeriodSinceCreationInDays: spec037ArchiveRetentionDays
+    allowProtectedAppendWrites: true
   }
 }
 

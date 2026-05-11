@@ -1,0 +1,54 @@
+fr_or_sc_id,test_id,test_path,status
+FR-001,test_minimal_valid_risk_register_passes,tests/contract/spec_037/test_risk_register_schema.py,green
+FR-001,test_list_artefacts_returns_five_summaries,apps/api/tests/contract/spec_037/test_route_list_artefacts.py,green
+FR-002,test_link_check (run_gate link-check),tests/contract/spec_037/test_publication_gate_link_check.py,green
+FR-003,test_link_check,tests/contract/spec_037/test_publication_gate_link_check.py,green
+FR-004,T069 constitution-byte-identical,plan.md re-evaluation,manual
+FR-005,test_publish_emits_audit_and_no_pii,tests/integration/spec_037/test_publish_pipeline.py,green
+FR-005,test_get_historical_publication_returns_envelope,apps/api/tests/contract/spec_037/test_route_get_publication.py,green
+FR-006,T050 governance-discovery,scripts/evidence_pack_gate/__main__.py,manual
+FR-007,T006 self-flag in capstone-metric-trace,specs/shared/capstone-metric-trace.md,manual
+FR-008,test_broken_link_in_artefact_md_fails_gate,tests/contract/spec_037/test_publication_gate_link_check.py,green
+FR-009,test_minimal_valid_publication_gate_metadata,tests/contract/spec_037/test_publication_gate_metadata_schema.py,green
+FR-010,test_minimal_valid_risk_register_passes (6 categories),tests/contract/spec_037/test_risk_register_schema.py,green
+FR-011,test_invalid_risk_register_missing_required_field_fails,tests/contract/spec_037/test_risk_register_schema.py,green
+FR-012,index.md preserves RISK-AOAI-001,docs/risk-register/risk-register.json,green
+FR-013,index.md sorted by residual,docs/risk-register/index.md,green
+FR-014,T056 register matches risk-manager.agent.md request,docs/risk-register/index.md,green
+FR-015,test_minimal_valid_adoption_roadmap_passes,tests/contract/spec_037/test_adoption_roadmap_schema.py,green
+FR-016,test_minimal_valid_adoption_roadmap_passes (cadence cite),tests/contract/spec_037/test_adoption_roadmap_schema.py,green
+FR-017,test_invalid_adoption_roadmap_missing_rollback_fails,tests/contract/spec_037/test_adoption_roadmap_schema.py,green
+FR-018,test_minimal_valid_adoption_roadmap_passes (8 jurisdictions + Commonwealth),tests/contract/spec_037/test_adoption_roadmap_schema.py,green
+FR-019,test_minimal_valid_executive_kpi_surface_passes (5 criteria x 2 KPIs),tests/contract/spec_037/test_executive_kpi_surface_schema.py,green
+FR-020,test_minimal_valid_executive_kpi_surface_passes (owner+cadence+target),tests/contract/spec_037/test_executive_kpi_surface_schema.py,green
+FR-021,test_get_artefact_envelope (route registered),apps/api/tests/contract/spec_037/test_route_get_artefact.py,green
+FR-022,T051 deprecation banners,docs/governance-dashboard.md,manual
+FR-023,test_health_returns_summary,apps/api/tests/contract/spec_037/test_route_health.py,green
+FR-024,test_minimal_valid_rai_register_passes,tests/contract/spec_037/test_responsible_ai_register_schema.py,green
+FR-025,test_minimal_valid_rai_register_passes (4 frameworks),tests/contract/spec_037/test_responsible_ai_register_schema.py,green
+FR-026,test_minimal_valid_rai_register_passes (8 principles),tests/contract/spec_037/test_responsible_ai_register_schema.py,green
+FR-027,test_invalid_rai_register_blank_principle_fails,tests/contract/spec_037/test_responsible_ai_register_schema.py,green
+FR-028,T059 rai_register cites spec-030 only (no re-run),docs/governance-hub/rai-register/responsible-ai-register.json,green
+FR-029,test_get_artefact_envelope,apps/api/tests/contract/spec_037/test_route_get_artefact.py,green
+FR-030,test_minimal_valid_feature_value_ledger_passes,tests/contract/spec_037/test_feature_value_ledger_schema.py,green
+FR-031,test_contributing_row_missing_metrics_fails,tests/contract/spec_037/test_feature_value_ledger_schema.py,green
+FR-032,T060 tradeoffs[] populated,specs/shared/feature-value-ledger.json,green
+FR-033,T060 open_followups for non-zero gap,specs/shared/feature-value-ledger.json,green
+FR-034,T060 cross_link_to_metric_trace,specs/shared/feature-value-ledger.json,green
+FR-035,test_publish_emits_audit_and_no_pii,tests/integration/spec_037/test_publish_pipeline.py,green
+FR-036,T060 synthesised_tension column,specs/shared/feature-value-ledger.json,green
+FR-037,test_ratio_recompute_matches_declared,tests/contract/spec_037/test_publication_gate_ratio_recompute.py,green
+FR-037,test_ratio_mismatch_detected,tests/contract/spec_037/test_publication_gate_ratio_recompute.py,green
+FR-038,test_over_cap_missing_signoff_fails_gate,tests/contract/spec_037/test_publication_gate_cap_no_signoff.py,green
+FR-038,test_over_cap_with_signoff_passes_gate,tests/contract/spec_037/test_publication_gate_cap_with_signoff.py,green
+SC-001,manual rehearsal (T067 deferred to step-9),specs/037-capstone-evidence-pack/rehearsal-results.md,deferred
+SC-002,test_broken_link_in_artefact_md_fails_gate,tests/contract/spec_037/test_publication_gate_link_check.py,green
+SC-003,T057 8 jurisdictions + Commonwealth covered,docs/governance-hub/adoption-roadmap/roadmap.json,green
+SC-004,T058 each criterion has leading + lagging,docs/governance-hub/executive-kpi/surface.json,green
+SC-005,T059 8 components × 32 cells = 256 populated,docs/governance-hub/rai-register/responsible-ai-register.json,green
+SC-006,T060 36 spec rows + 15 ADR tradeoffs,specs/shared/feature-value-ledger.json,green
+SC-007,manual review (Step 0 re-review),specs/037-capstone-evidence-pack/rehearsal-results.md,deferred
+SC-008,test_health_returns_summary,apps/api/tests/contract/spec_037/test_route_health.py,green
+SC-009,T063 ps-rule + what-if (deferred to step-9),infra/main.bicep,deferred
+SC-010,T006 self-flag,specs/shared/capstone-metric-trace.md,manual
+SC-011,test_over_cap_missing_signoff_fails_gate,tests/contract/spec_037/test_publication_gate_cap_no_signoff.py,green

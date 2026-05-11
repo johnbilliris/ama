@@ -29,3 +29,10 @@ This file is the single cross-portfolio surface that proves every Asia-framed ca
 | ECONOMIC_LOSS_REDUCTION | JP | Deferred | `specs/015-performance-benchmarks/spec.md` SC-CAP-015-005 (deferred) | HYP-040 (`specs/012-risk-assessment-agent/evidence/HYP-040.md`) | Deferred — preconditions: D-009; JP out-of-sample earthquake corpus prepared (>=10 events) | JP earthquake counterfactual loss modelling (deferred). |
 | ECONOMIC_LOSS_REDUCTION | BD | Deferred | `specs/015-performance-benchmarks/spec.md` SC-CAP-015-005 (deferred) | HYP-041 (`specs/012-risk-assessment-agent/evidence/HYP-041.md`) | Deferred — preconditions: D-009; BD out-of-sample flood corpus prepared (>=10 events) | BD monsoon flood counterfactual loss modelling (deferred). |
 
+
+## Spec-level capstone-criticality flags (per `028-capstone-alignment` FR-020)
+
+| Spec | Capstone-criticality | Source-of-truth | Rationale |
+| --- | --- | --- | --- |
+| `specs/037-capstone-evidence-pack/` | non-capstone-critical-path / delivery-hygiene | `specs/037-capstone-evidence-pack/spec.md` FR-007 + SC-010 | Spec-037 produces evidence artefacts that prove value already shipped by specs 001-036; it does NOT directly contribute a capstone success-criterion metric and MUST be excluded from capstone-metric attribution roll-ups (see `028-capstone-alignment` FR-020 contract).
+

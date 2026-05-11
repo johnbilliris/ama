@@ -1,0 +1,406 @@
+{
+  "artefact_id": "executive_kpi_surface",
+  "schema_version": "1.0.0",
+  "publication_id": "ed610bc5-e39e-5a1e-8ea5-3a41c9558848",
+  "published_at_utc": "2026-05-11T17:30:00Z",
+  "published_by": "spec-037-implementer",
+  "metadata": {
+    "manual_row_count": 10,
+    "total_row_count": 10,
+    "manual_row_ratio": 1.0,
+    "manual_row_ratio_threshold": 0.5,
+    "link_check_status": "passed",
+    "last_gate_run_utc": "2026-05-11T17:30:00Z",
+    "auditor_signoff": {
+      "name": "Capstone Evidence Pack v1 Author",
+      "role": "Spec-037 Implementer",
+      "signoff_date_utc": "2026-05-11T17:30:00Z",
+      "basis": "AIDR M&E Framework + ISO/IEC 42001 §6.1 risk-acceptance pattern (analyser finding I5 + spec-037 FR-038)"
+    }
+  },
+  "rows": [
+    {
+      "kpi_id": "KPI-CAP-001",
+      "capstone_criterion": "lives-saved",
+      "kind": "leading",
+      "name": "Triage signals processed per day",
+      "owner": "Risk Manager",
+      "refresh_cadence": "daily",
+      "target_value": 1000,
+      "target_unit": "signals/day",
+      "threshold_band": {
+        "green": ">=1000",
+        "amber": "500-999",
+        "red": "<500"
+      },
+      "source_of_truth": {
+        "kind": "telemetry_sink",
+        "ref": "appinsights://customMetrics/triage_signals_daily"
+      },
+      "consolidates": [
+        "docs/governance-dashboard.md"
+      ],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/010-monitoring-agent/spec.md"
+        },
+        {
+          "kind": "governance_hub",
+          "ref": "specs/shared/capstone-metric-trace.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Risk Manager",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-015 + spec-021 telemetry",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "kpi_id": "KPI-CAP-002",
+      "capstone_criterion": "lives-saved",
+      "kind": "lagging",
+      "name": "Lives preserved (counterfactual model)",
+      "owner": "Executive Leader",
+      "refresh_cadence": "quarterly",
+      "target_value": 1000,
+      "target_unit": "lives/year",
+      "threshold_band": {
+        "green": ">=1000",
+        "amber": "500-999",
+        "red": "<500"
+      },
+      "source_of_truth": {
+        "kind": "governance_hub",
+        "ref": "docs/governance-hub/executive-kpi/surface.md"
+      },
+      "consolidates": [
+        "docs/governance-dashboard.md"
+      ],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/015-performance-benchmarks/spec.md"
+        },
+        {
+          "kind": "governance_hub",
+          "ref": "specs/shared/capstone-metric-trace.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Executive Leader",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-015 + spec-021 telemetry",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "kpi_id": "KPI-CAP-003",
+      "capstone_criterion": "response-time",
+      "kind": "leading",
+      "name": "Signal-to-alert end-to-end latency p95",
+      "owner": "Operations Officer",
+      "refresh_cadence": "hourly",
+      "target_value": 60,
+      "target_unit": "seconds",
+      "threshold_band": {
+        "green": "<=60",
+        "amber": "61-120",
+        "red": ">120"
+      },
+      "source_of_truth": {
+        "kind": "telemetry_sink",
+        "ref": "appinsights://customMetrics/signal_to_alert_p95"
+      },
+      "consolidates": [
+        "docs/governance-hub/observability/slo.md"
+      ],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/010-monitoring-agent/spec.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "specs/008-communication-agent/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Operations Officer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-015 + spec-021 telemetry",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "kpi_id": "KPI-CAP-004",
+      "capstone_criterion": "response-time",
+      "kind": "lagging",
+      "name": "Coordinated-response time uplift vs. baseline",
+      "owner": "Executive Leader",
+      "refresh_cadence": "quarterly",
+      "target_value": 50,
+      "target_unit": "%",
+      "threshold_band": {
+        "green": ">=50",
+        "amber": "30-49",
+        "red": "<30"
+      },
+      "source_of_truth": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "consolidates": [
+        "docs/governance-dashboard.md"
+      ],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/001-disaster-response-hub/spec.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "specs/015-performance-benchmarks/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Executive Leader",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-015 + spec-021 telemetry",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "kpi_id": "KPI-CAP-005",
+      "capstone_criterion": "evacuation-lead-time",
+      "kind": "leading",
+      "name": "Evacuation recommendation latency",
+      "owner": "Planning Officer",
+      "refresh_cadence": "hourly",
+      "target_value": 30,
+      "target_unit": "minutes",
+      "threshold_band": {
+        "green": "<=30",
+        "amber": "31-60",
+        "red": ">60"
+      },
+      "source_of_truth": {
+        "kind": "telemetry_sink",
+        "ref": "appinsights://customMetrics/evac_recommend_latency_p95"
+      },
+      "consolidates": [],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/009-evacuation-agent/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Planning Officer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-015 + spec-021 telemetry",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "kpi_id": "KPI-CAP-006",
+      "capstone_criterion": "evacuation-lead-time",
+      "kind": "lagging",
+      "name": "Mean warning-to-evac timeline uplift",
+      "owner": "Executive Leader",
+      "refresh_cadence": "quarterly",
+      "target_value": 24,
+      "target_unit": "hours",
+      "threshold_band": {
+        "green": ">=24",
+        "amber": "12-23",
+        "red": "<12"
+      },
+      "source_of_truth": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "consolidates": [],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/001-disaster-response-hub/spec.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "specs/015-performance-benchmarks/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Executive Leader",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-015 + spec-021 telemetry",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "kpi_id": "KPI-CAP-007",
+      "capstone_criterion": "logistics-efficiency",
+      "kind": "leading",
+      "name": "Resource fill-rate within 1 hour",
+      "owner": "Logistics Officer",
+      "refresh_cadence": "hourly",
+      "target_value": 95,
+      "target_unit": "%",
+      "threshold_band": {
+        "green": ">=95",
+        "amber": "85-94",
+        "red": "<85"
+      },
+      "source_of_truth": {
+        "kind": "telemetry_sink",
+        "ref": "appinsights://customMetrics/resource_fill_rate_1h"
+      },
+      "consolidates": [
+        "docs/governance-hub/observability/slo.md"
+      ],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/011-resource-allocation-agent/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Logistics Officer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-015 + spec-021 telemetry",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "kpi_id": "KPI-CAP-008",
+      "capstone_criterion": "logistics-efficiency",
+      "kind": "lagging",
+      "name": "Logistics throughput uplift vs. baseline",
+      "owner": "Executive Leader",
+      "refresh_cadence": "quarterly",
+      "target_value": 30,
+      "target_unit": "%",
+      "threshold_band": {
+        "green": ">=30",
+        "amber": "15-29",
+        "red": "<15"
+      },
+      "source_of_truth": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "consolidates": [],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/011-resource-allocation-agent/spec.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "specs/015-performance-benchmarks/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Executive Leader",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-015 + spec-021 telemetry",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "kpi_id": "KPI-CAP-009",
+      "capstone_criterion": "economic-loss-reduction",
+      "kind": "leading",
+      "name": "Risk-index forecast confidence band width",
+      "owner": "Risk Manager",
+      "refresh_cadence": "daily",
+      "target_value": 0.2,
+      "target_unit": "confidence interval",
+      "threshold_band": {
+        "green": "<=0.20",
+        "amber": "0.21-0.35",
+        "red": ">0.35"
+      },
+      "source_of_truth": {
+        "kind": "telemetry_sink",
+        "ref": "appinsights://customMetrics/risk_index_ci_width"
+      },
+      "consolidates": [],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/012-risk-assessment-agent/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Risk Manager",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-015 + spec-021 telemetry",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "kpi_id": "KPI-CAP-010",
+      "capstone_criterion": "economic-loss-reduction",
+      "kind": "lagging",
+      "name": "Sendai-aligned modelled loss reduction",
+      "owner": "Executive Leader",
+      "refresh_cadence": "quarterly",
+      "target_value": 30,
+      "target_unit": "%",
+      "threshold_band": {
+        "green": ">=30",
+        "amber": "15-29",
+        "red": "<15"
+      },
+      "source_of_truth": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "consolidates": [],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/012-risk-assessment-agent/spec.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "specs/015-performance-benchmarks/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Executive Leader",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-015 + spec-021 telemetry",
+        "evidence_status": "Validated"
+      }
+    }
+  ],
+  "superseded_surfaces": [
+    "docs/governance-dashboard.md (executive-roll-up only)",
+    "docs/governance-hub/observability/slo.md (executive-roll-up only)",
+    "docs/governance-hub/observability/metrics-catalogue.md (executive-roll-up only)"
+  ]
+}

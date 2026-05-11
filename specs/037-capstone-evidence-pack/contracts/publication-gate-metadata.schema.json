@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.example.gov.au/schemas/spec_037/publication-gate-metadata.schema.json",
+  "title": "PublicationGateMetadata",
+  "description": "Metadata block evaluated by the evidence-pack-publication-gate CI job. Honours FR-009 + FR-037 + FR-038.",
+  "type": "object",
+  "required": [
+    "manual_row_count",
+    "total_row_count",
+    "manual_row_ratio",
+    "link_check_status",
+    "last_gate_run_utc"
+  ],
+  "properties": {
+    "manual_row_count": { "type": "integer", "minimum": 0 },
+    "total_row_count": { "type": "integer", "minimum": 1 },
+    "manual_row_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+    "manual_row_ratio_threshold": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0.5,
+      "description": "FR-038 cap. Locked to 0.5 for v1."
+    },
+    "auditor_signoff": { "$ref": "#/$defs/AuditorSignoff" },
+    "link_check_status": {
+      "type": "string",
+      "enum": ["passed", "failed", "pending"]
+    },
+    "last_gate_run_utc": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "manual_row_ratio": { "exclusiveMaximum": 0.5 } }, "required": ["manual_row_ratio"] },
+      "then": { "not": { "required": ["auditor_signoff"] } }
+    },
+    {
+      "if": { "properties": { "manual_row_ratio": { "minimum": 0.5, "exclusiveMinimum": 0.5 } }, "required": ["manual_row_ratio"] },
+      "then": { "required": ["auditor_signoff"] }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "AuditorSignoff": {
+      "type": "object",
+      "required": ["name", "role", "signoff_date_utc", "basis"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "role": { "type": "string", "minLength": 1 },
+        "signoff_date_utc": { "type": "string", "format": "date-time" },
+        "basis": {
+          "type": "string",
+          "minLength": 8,
+          "description": "AIDR / ISO / NIST framework reference authorising the override (FR-038)."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

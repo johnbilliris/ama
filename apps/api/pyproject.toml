@@ -16,7 +16,7 @@ dependencies = [
   "azure-cosmos>=4.9.0",
   "azure-storage-blob>=12.24.0",
   "azure-mgmt-appcontainers>=3.1.0",
-  "azure-monitor-opentelemetry>=1.6.0",
+  "azure-monitor-opentelemetry==1.8.7",
   "openai>=1.68.0",
   "tenacity>=9.0.0",
   "pytest-benchmark>=5.1.0",
@@ -40,8 +40,12 @@ dependencies = [
   "azure-search-documents>=11.5.2",         # Shared retrieval client for SSE citation events.
   "aiohttp>=3.9.0",                         # Async transport for azure.search.documents.aio.SearchClient (FR-RAG-AG-01).
   # Spec 036 / F-A11 / T233 — OTel observability (FR-RAG-OBS-01..03).
-  "opentelemetry-sdk>=1.27,<2",
-  "opentelemetry-exporter-otlp-proto-http>=1.27,<2",
+  # Upper-bounded to <1.41 because azure-monitor-opentelemetry-exporter (transitive
+  # via azure-monitor-opentelemetry==1.8.7 above) imports `LogData` which was
+  # removed in opentelemetry-sdk 1.41.0. See azd-deploy-api log 2026-05-11 (Step 9
+  # spec-037 redeploy) — the container resolved sdk 1.41+ and crashed at startup.
+  "opentelemetry-sdk>=1.27,<1.41",
+  "opentelemetry-exporter-otlp-proto-http>=1.27,<1.41",
 ]
 
 [tool.hatch.build.targets.wheel]

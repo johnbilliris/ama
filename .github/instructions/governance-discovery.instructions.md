@@ -199,3 +199,19 @@ to the Code Generator and review subagent:
 
 See `.github/instructions/bicep-policy-compliance.instructions.md` for the
 full enforcement mandate.
+
+## Spec-037 — Capstone Evidence Pack publication gate (T050)
+
+The CI job `evidence-pack-publication-gate` (defined in `.github/workflows/ci.yml`)
+is a **discoverable governance constraint**: it enforces FR-008 (link check),
+FR-009 (schema validation), FR-037 (manual_row_ratio recompute), and FR-038
+(per-artefact 0.5 cap with named-auditor sign-off override).
+
+- **Job name**: `evidence-pack-publication-gate`
+- **Implementation**: `scripts/evidence_pack_gate/`
+- **Required for branch protection**: yes (blocks merge on failure)
+- **Citations**: `specs/037-capstone-evidence-pack/spec.md` FR-008, FR-009, FR-037, FR-038, SC-002, SC-011
+
+Any future spec that adds a sixth evidence-pack artefact MUST extend this gate
+(register the artefact's JSON Schema and update `_DEFAULT_ARTEFACT_ROOTS`) before
+merge.

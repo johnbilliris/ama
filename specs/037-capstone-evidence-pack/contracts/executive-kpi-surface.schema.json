@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.example.gov.au/schemas/spec_037/executive-kpi-surface.schema.json",
+  "title": "ExecutiveKpiSurfaceArtefact",
+  "description": "Artefact 3 — Executive KPI Surface. Honours FR-019..FR-023.",
+  "type": "object",
+  "required": ["artefact_id", "schema_version", "publication_id", "published_at_utc", "published_by", "metadata", "rows"],
+  "properties": {
+    "artefact_id": { "const": "executive_kpi_surface" },
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "publication_id": { "type": "string", "format": "uuid" },
+    "published_at_utc": { "type": "string", "format": "date-time" },
+    "published_by": { "type": "string" },
+    "metadata": { "$ref": "publication-gate-metadata.schema.json" },
+    "superseded_surfaces": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Pre-existing scattered surfaces that gain a deprecation banner (FR-022)."
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 10,
+      "description": "Minimum 10 rows = 5 capstone criteria × (≥1 leading + ≥1 lagging) (FR-019).",
+      "items": { "$ref": "#/$defs/KpiRow" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "BackCitation": {
+      "type": "object",
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["spec", "adr", "governance_hub", "telemetry_sink", "agent_md"] },
+        "ref": { "type": "string" },
+        "section": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "Provenance": {
+      "type": "object",
+      "required": ["tag", "source", "evidence_status"],
+      "properties": {
+        "tag": { "type": "string", "enum": ["automated", "manual"] },
+        "source": { "type": "string" },
+        "owner": { "type": "string" },
+        "review_cadence": { "type": "string", "enum": ["quarterly", "monthly", "post-incident"] },
+        "automation_target": { "type": "string" },
+        "evidence_status": { "type": "string", "enum": ["Validated", "Deferred", "Unresolved"] }
+      },
+      "additionalProperties": false
+    },
+    "ThresholdBand": {
+      "type": "object",
+      "required": ["green", "amber", "red"],
+      "properties": {
+        "green": { "type": "string" },
+        "amber": { "type": "string" },
+        "red": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "KpiRow": {
+      "type": "object",
+      "required": [
+        "kpi_id", "capstone_criterion", "kind", "name",
+        "owner", "refresh_cadence",
+        "target_value", "target_unit",
+        "threshold_band", "source_of_truth", "consolidates",
+        "back_citations", "provenance"
+      ],
+      "properties": {
+        "kpi_id": { "type": "string", "pattern": "^KPI-CAP-\\d{3}$" },
+        "capstone_criterion": {
+          "type": "string",
+          "enum": ["lives-saved", "response-time", "evacuation-lead-time", "logistics-efficiency", "economic-loss-reduction"]
+        },
+        "kind": { "type": "string", "enum": ["leading", "lagging"] },
+        "name": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "refresh_cadence": {
+          "type": "string",
+          "enum": ["realtime", "hourly", "daily", "weekly", "monthly", "quarterly"]
+        },
+        "target_value": { "type": "number" },
+        "target_unit": { "type": "string", "minLength": 1 },
+        "threshold_band": { "$ref": "#/$defs/ThresholdBand" },
+        "source_of_truth": { "$ref": "#/$defs/BackCitation" },
+        "consolidates": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Pre-existing scattered surfaces this KPI consolidates (FR-020 enumeration)."
+        },
+        "current_value": { "type": "number" },
+        "last_observed_utc": {
+          "type": "string",
+          "format": "date-time",
+          "description": "If absent or older than refresh_cadence, page renders 'stale as of <timestamp>' (FR-023)."
+        },
+        "back_citations": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/BackCitation" }
+        },
+        "provenance": { "$ref": "#/$defs/Provenance" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

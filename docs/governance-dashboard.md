@@ -143,3 +143,6 @@ All 10 AIIMS roles have configured default views and widget sets:
 | Audit trail search | < 1 second |
 | Health score calculation | < 500ms |
 | Export queue acceptance | < 200ms |
+
+> **Spec-037 deprecation banner (T051, FR-022)**: For executive roll-up purposes this surface is consolidated into the [Executive KPI Surface](governance-hub/executive-kpi/surface.md). This file retains its operational governance dashboard role; the executive view is the single source of truth for capstone-criterion KPIs.
+

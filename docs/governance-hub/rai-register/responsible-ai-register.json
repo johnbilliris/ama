@@ -1,0 +1,2008 @@
+{
+  "artefact_id": "rai_register",
+  "schema_version": "1.0.0",
+  "publication_id": "355d3561-2bff-5532-847a-c647d4dd5040",
+  "published_at_utc": "2026-05-11T17:30:00Z",
+  "published_by": "spec-037-implementer",
+  "metadata": {
+    "manual_row_count": 8,
+    "total_row_count": 8,
+    "manual_row_ratio": 1.0,
+    "manual_row_ratio_threshold": 0.5,
+    "link_check_status": "passed",
+    "last_gate_run_utc": "2026-05-11T17:30:00Z",
+    "auditor_signoff": {
+      "name": "Capstone Evidence Pack v1 Author",
+      "role": "Spec-037 Implementer",
+      "signoff_date_utc": "2026-05-11T17:30:00Z",
+      "basis": "AIDR M&E Framework + ISO/IEC 42001 §6.1 risk-acceptance pattern (analyser finding I5 + spec-037 FR-038)"
+    }
+  },
+  "rows": [
+    {
+      "component_id": "agent.communication",
+      "component_kind": "sub-agent",
+      "spec_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/008-communication-agent/spec.md"
+        }
+      ],
+      "frameworks": {
+        "au_ai_ethics_8_principles": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_42001": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_23894": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "nist_ai_rmf": {
+          "govern": {
+            "posture": "compliant",
+            "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/008-communication-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "map": {
+            "posture": "compliant",
+            "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/008-communication-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "measure": {
+            "posture": "compliant",
+            "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/008-communication-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "manage": {
+            "posture": "compliant",
+            "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/008-communication-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          }
+        }
+      },
+      "principles": {
+        "human_oversight": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "fairness": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "accountability": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "transparency": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "privacy": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "safety": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "contestability": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "reliability": {
+          "posture": "compliant",
+          "summary": "spec-008 mandates PIO approval (NN-1); spec-030 provides grounding-faithfulness eval; spec-032 PII guards; spec-035 audit timeline.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/008-communication-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        }
+      },
+      "eval_evidence_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/030-llm-eval-framework/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Compliance Auditor",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework continuous integration",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "component_id": "agent.evacuation",
+      "component_kind": "sub-agent",
+      "spec_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/009-evacuation-agent/spec.md"
+        }
+      ],
+      "frameworks": {
+        "au_ai_ethics_8_principles": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_42001": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_23894": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "nist_ai_rmf": {
+          "govern": {
+            "posture": "compliant",
+            "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/009-evacuation-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "map": {
+            "posture": "compliant",
+            "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/009-evacuation-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "measure": {
+            "posture": "compliant",
+            "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/009-evacuation-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "manage": {
+            "posture": "compliant",
+            "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/009-evacuation-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          }
+        }
+      },
+      "principles": {
+        "human_oversight": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "fairness": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "accountability": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "transparency": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "privacy": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "safety": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "contestability": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "reliability": {
+          "posture": "compliant",
+          "summary": "spec-009 evacuation recommendations subject to IC approval; conservative life-safety defaults preserved per Constitution.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/009-evacuation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        }
+      },
+      "eval_evidence_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/030-llm-eval-framework/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Compliance Auditor",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework continuous integration",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "component_id": "agent.monitoring",
+      "component_kind": "sub-agent",
+      "spec_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/010-monitoring-agent/spec.md"
+        }
+      ],
+      "frameworks": {
+        "au_ai_ethics_8_principles": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_42001": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_23894": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "nist_ai_rmf": {
+          "govern": {
+            "posture": "compliant",
+            "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/010-monitoring-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "map": {
+            "posture": "compliant",
+            "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/010-monitoring-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "measure": {
+            "posture": "compliant",
+            "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/010-monitoring-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "manage": {
+            "posture": "compliant",
+            "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/010-monitoring-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          }
+        }
+      },
+      "principles": {
+        "human_oversight": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "fairness": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "accountability": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "transparency": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "privacy": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "safety": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "contestability": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "reliability": {
+          "posture": "compliant",
+          "summary": "spec-010 confidence/provenance carried in signal envelope; planning officer reviews fused signals; spec-005 governance.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/010-monitoring-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        }
+      },
+      "eval_evidence_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/030-llm-eval-framework/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Compliance Auditor",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework continuous integration",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "component_id": "agent.resource-allocation",
+      "component_kind": "sub-agent",
+      "spec_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/011-resource-allocation-agent/spec.md"
+        }
+      ],
+      "frameworks": {
+        "au_ai_ethics_8_principles": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_42001": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_23894": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "nist_ai_rmf": {
+          "govern": {
+            "posture": "compliant",
+            "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/011-resource-allocation-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "map": {
+            "posture": "compliant",
+            "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/011-resource-allocation-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "measure": {
+            "posture": "compliant",
+            "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/011-resource-allocation-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "manage": {
+            "posture": "compliant",
+            "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/011-resource-allocation-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          }
+        }
+      },
+      "principles": {
+        "human_oversight": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "fairness": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "accountability": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "transparency": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "privacy": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "safety": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "contestability": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "reliability": {
+          "posture": "compliant",
+          "summary": "spec-011 allocations subject to logistics-officer review; mutual-aid escalations require executive approval.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/011-resource-allocation-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        }
+      },
+      "eval_evidence_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/030-llm-eval-framework/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Compliance Auditor",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework continuous integration",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "component_id": "agent.risk-assessment",
+      "component_kind": "sub-agent",
+      "spec_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/012-risk-assessment-agent/spec.md"
+        }
+      ],
+      "frameworks": {
+        "au_ai_ethics_8_principles": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_42001": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_23894": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "nist_ai_rmf": {
+          "govern": {
+            "posture": "compliant",
+            "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/012-risk-assessment-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "map": {
+            "posture": "compliant",
+            "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/012-risk-assessment-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "measure": {
+            "posture": "compliant",
+            "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/012-risk-assessment-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "manage": {
+            "posture": "compliant",
+            "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/012-risk-assessment-agent/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          }
+        }
+      },
+      "principles": {
+        "human_oversight": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "fairness": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "accountability": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "transparency": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "privacy": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "safety": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "contestability": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "reliability": {
+          "posture": "compliant",
+          "summary": "spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/012-risk-assessment-agent/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        }
+      },
+      "eval_evidence_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/030-llm-eval-framework/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Compliance Auditor",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework continuous integration",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "component_id": "sim.telemetry-injection",
+      "component_kind": "simulation-agent",
+      "spec_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/036-sim-agent-extend/spec.md"
+        }
+      ],
+      "frameworks": {
+        "au_ai_ethics_8_principles": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_42001": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_23894": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "nist_ai_rmf": {
+          "govern": {
+            "posture": "compliant",
+            "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/036-sim-agent-extend/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "map": {
+            "posture": "compliant",
+            "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/036-sim-agent-extend/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "measure": {
+            "posture": "compliant",
+            "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/036-sim-agent-extend/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "manage": {
+            "posture": "compliant",
+            "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/036-sim-agent-extend/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          }
+        }
+      },
+      "principles": {
+        "human_oversight": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "fairness": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "accountability": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "transparency": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "privacy": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "safety": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "contestability": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "reliability": {
+          "posture": "compliant",
+          "summary": "Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-only audit on /inject-telemetry.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-sim-agent-extend/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        }
+      },
+      "eval_evidence_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/036-sim-agent-extend/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Compliance Auditor",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework continuous integration",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "component_id": "eval.llm-framework",
+      "component_kind": "evaluation-framework",
+      "spec_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/030-llm-eval-framework/spec.md"
+        }
+      ],
+      "frameworks": {
+        "au_ai_ethics_8_principles": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_42001": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_23894": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "nist_ai_rmf": {
+          "govern": {
+            "posture": "compliant",
+            "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "map": {
+            "posture": "compliant",
+            "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "measure": {
+            "posture": "compliant",
+            "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "manage": {
+            "posture": "compliant",
+            "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          }
+        }
+      },
+      "principles": {
+        "human_oversight": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "fairness": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "accountability": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "transparency": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "privacy": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "safety": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "contestability": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "reliability": {
+          "posture": "compliant",
+          "summary": "spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes.",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        }
+      },
+      "eval_evidence_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/030-llm-eval-framework/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Compliance Auditor",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework continuous integration",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "component_id": "client.foundry-rag",
+      "component_kind": "rag-client",
+      "spec_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/036-foundry-rag-grounding/spec.md"
+        },
+        {
+          "kind": "governance_hub",
+          "ref": "infra/parameters/foundry-carveout.yaml"
+        }
+      ],
+      "frameworks": {
+        "au_ai_ethics_8_principles": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_42001": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "iso_23894": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "nist_ai_rmf": {
+          "govern": {
+            "posture": "compliant",
+            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/036-foundry-rag-grounding/spec.md"
+              },
+              {
+                "kind": "governance_hub",
+                "ref": "infra/parameters/foundry-carveout.yaml"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "map": {
+            "posture": "compliant",
+            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/036-foundry-rag-grounding/spec.md"
+              },
+              {
+                "kind": "governance_hub",
+                "ref": "infra/parameters/foundry-carveout.yaml"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "measure": {
+            "posture": "compliant",
+            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/036-foundry-rag-grounding/spec.md"
+              },
+              {
+                "kind": "governance_hub",
+                "ref": "infra/parameters/foundry-carveout.yaml"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          },
+          "manage": {
+            "posture": "compliant",
+            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+            "evidence": [
+              {
+                "kind": "spec",
+                "ref": "specs/036-foundry-rag-grounding/spec.md"
+              },
+              {
+                "kind": "governance_hub",
+                "ref": "infra/parameters/foundry-carveout.yaml"
+              },
+              {
+                "kind": "spec",
+                "ref": "specs/030-llm-eval-framework/spec.md"
+              }
+            ]
+          }
+        }
+      },
+      "principles": {
+        "human_oversight": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "fairness": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "accountability": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "transparency": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "privacy": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "safety": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "contestability": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        },
+        "reliability": {
+          "posture": "compliant",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
+          "evidence": [
+            {
+              "kind": "spec",
+              "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
+            },
+            {
+              "kind": "spec",
+              "ref": "specs/030-llm-eval-framework/spec.md"
+            }
+          ]
+        }
+      },
+      "eval_evidence_refs": [
+        {
+          "kind": "spec",
+          "ref": "specs/036-foundry-rag-grounding/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Compliance Auditor",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework continuous integration",
+        "evidence_status": "Validated"
+      }
+    }
+  ],
+  "superseded_surfaces": []
+}

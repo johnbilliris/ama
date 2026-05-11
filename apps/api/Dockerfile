@@ -23,6 +23,14 @@ COPY apps/agents/__init__.py ./apps/agents/
 COPY apps/agents/common/ ./apps/agents/common/
 COPY apps/agents/communication/ ./apps/agents/communication/
 COPY apps/agents/evacuation/ ./apps/agents/evacuation/
+# Spec-037 — bundle the 5 evidence-pack artefact JSON files for the read-only
+# /governance/evidence-pack/* routes (FR-021). The runtime cache in Cosmos +
+# immutable archive in Blob (PD-037-04) is a Step-9-deferred enhancement.
+COPY docs/risk-register/ ./docs/risk-register/
+COPY docs/governance-hub/adoption-roadmap/ ./docs/governance-hub/adoption-roadmap/
+COPY docs/governance-hub/executive-kpi/ ./docs/governance-hub/executive-kpi/
+COPY docs/governance-hub/rai-register/ ./docs/governance-hub/rai-register/
+COPY specs/shared/ ./specs/shared/
 
 ENV PYTHONPATH="/app/apps/agents:/app/packages/domain/src:${PYTHONPATH}"
 

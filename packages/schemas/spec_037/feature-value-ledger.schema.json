@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.example.gov.au/schemas/spec_037/feature-value-ledger.schema.json",
+  "title": "FeatureValueLedgerArtefact",
+  "description": "Artefact 5 — Feature-to-Value Ledger + Decision/Tradeoff Log. Honours FR-030..FR-034 + FR-036.",
+  "type": "object",
+  "required": ["artefact_id", "schema_version", "publication_id", "published_at_utc", "published_by", "metadata", "rows", "tradeoffs"],
+  "properties": {
+    "artefact_id": { "const": "feature_value_ledger" },
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "publication_id": { "type": "string", "format": "uuid" },
+    "published_at_utc": { "type": "string", "format": "date-time" },
+    "published_by": { "type": "string" },
+    "metadata": { "$ref": "publication-gate-metadata.schema.json" },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/FeatureValueRow" }
+    },
+    "tradeoffs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/TradeoffRow" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "BackCitation": {
+      "type": "object",
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["spec", "adr", "governance_hub", "telemetry_sink", "agent_md"] },
+        "ref": { "type": "string" },
+        "section": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "Provenance": {
+      "type": "object",
+      "required": ["tag", "source", "evidence_status"],
+      "properties": {
+        "tag": { "type": "string", "enum": ["automated", "manual"] },
+        "source": { "type": "string" },
+        "owner": { "type": "string" },
+        "review_cadence": { "type": "string", "enum": ["quarterly", "monthly", "post-incident"] },
+        "automation_target": { "type": "string" },
+        "evidence_status": { "type": "string", "enum": ["Validated", "Deferred", "Unresolved"] }
+      },
+      "additionalProperties": false
+    },
+    "CapstoneMetricContribution": {
+      "type": "object",
+      "required": ["metric_id", "magnitude", "direction", "residual_gap_to_target"],
+      "properties": {
+        "metric_id": {
+          "type": "string",
+          "enum": ["lives-saved", "response-time", "evacuation-lead-time", "logistics-efficiency", "economic-loss-reduction"]
+        },
+        "magnitude": { "type": "number" },
+        "direction": { "type": "string", "enum": ["+", "-", "+/-"] },
+        "residual_gap_to_target": { "type": "number" }
+      },
+      "additionalProperties": false
+    },
+    "FeatureValueRow": {
+      "type": "object",
+      "required": ["spec_id", "spec_title", "tag", "cross_link_to_metric_trace", "provenance"],
+      "properties": {
+        "spec_id": { "type": "string", "pattern": "^\\d{3}-[a-z0-9-]+$" },
+        "spec_title": { "type": "string", "minLength": 1 },
+        "tag": { "type": "string", "enum": ["capstone-contributing", "delivery-hygiene"] },
+        "capstone_metrics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CapstoneMetricContribution" }
+        },
+        "open_followups": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/BackCitation" }
+        },
+        "cross_link_to_metric_trace": { "$ref": "#/$defs/BackCitation" },
+        "provenance": { "$ref": "#/$defs/Provenance" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "tag": { "const": "capstone-contributing" } }, "required": ["tag"] },
+          "then": { "required": ["capstone_metrics"], "properties": { "capstone_metrics": { "minItems": 1 } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "TradeoffRow": {
+      "type": "object",
+      "required": [
+        "adr_id", "adr_path", "bounding_features",
+        "alternatives_considered", "rationale",
+        "synthesised_tension", "provenance"
+      ],
+      "properties": {
+        "adr_id": { "type": "string", "pattern": "^ADR-\\d{3}.*$" },
+        "adr_path": { "type": "string" },
+        "bounding_features": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^\\d{3}-[a-z0-9-]+$" }
+        },
+        "alternatives_considered": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "rationale": { "type": "string", "minLength": 1 },
+        "synthesised_tension": {
+          "type": "string",
+          "enum": [
+            "speed-vs-legality",
+            "automation-vs-command",
+            "local-vs-cross-jurisdiction",
+            "visibility-vs-privacy",
+            "none"
+          ]
+        },
+        "provenance": { "$ref": "#/$defs/Provenance" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

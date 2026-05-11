@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.example.gov.au/schemas/spec_037/responsible-ai-register.schema.json",
+  "title": "ResponsibleAiRegisterArtefact",
+  "description": "Artefact 4 — Responsible AI Register. Honours FR-024..FR-029. Treats 036-sim-agent-extend as a full production AI component (Clarification 2).",
+  "type": "object",
+  "required": ["artefact_id", "schema_version", "publication_id", "published_at_utc", "published_by", "metadata", "rows"],
+  "properties": {
+    "artefact_id": { "const": "rai_register" },
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "publication_id": { "type": "string", "format": "uuid" },
+    "published_at_utc": { "type": "string", "format": "date-time" },
+    "published_by": { "type": "string" },
+    "metadata": { "$ref": "publication-gate-metadata.schema.json" },
+    "superseded_surfaces": { "type": "array", "items": { "type": "string" } },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/RaiRow" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "BackCitation": {
+      "type": "object",
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["spec", "adr", "governance_hub", "telemetry_sink", "agent_md"] },
+        "ref": { "type": "string" },
+        "section": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "Provenance": {
+      "type": "object",
+      "required": ["tag", "source", "evidence_status"],
+      "properties": {
+        "tag": { "type": "string", "enum": ["automated", "manual"] },
+        "source": { "type": "string" },
+        "owner": { "type": "string" },
+        "review_cadence": { "type": "string", "enum": ["quarterly", "monthly", "post-incident"] },
+        "automation_target": { "type": "string" },
+        "evidence_status": { "type": "string", "enum": ["Validated", "Deferred", "Unresolved"] }
+      },
+      "additionalProperties": false
+    },
+    "RaiCell": {
+      "type": "object",
+      "required": ["posture", "summary", "evidence"],
+      "properties": {
+        "posture": { "type": "string", "enum": ["compliant", "partial", "not-applicable"] },
+        "summary": { "type": "string", "minLength": 1 },
+        "na_justification": { "type": "string" },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/BackCitation" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "posture": { "const": "not-applicable" } }, "required": ["posture"] },
+          "then": { "required": ["na_justification"] }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "NistRmfCells": {
+      "type": "object",
+      "required": ["govern", "map", "measure", "manage"],
+      "properties": {
+        "govern": { "$ref": "#/$defs/RaiCell" },
+        "map": { "$ref": "#/$defs/RaiCell" },
+        "measure": { "$ref": "#/$defs/RaiCell" },
+        "manage": { "$ref": "#/$defs/RaiCell" }
+      },
+      "additionalProperties": false
+    },
+    "Frameworks": {
+      "type": "object",
+      "required": ["au_ai_ethics_8_principles", "iso_42001", "iso_23894", "nist_ai_rmf"],
+      "properties": {
+        "au_ai_ethics_8_principles": { "$ref": "#/$defs/RaiCell" },
+        "iso_42001": { "$ref": "#/$defs/RaiCell" },
+        "iso_23894": { "$ref": "#/$defs/RaiCell" },
+        "nist_ai_rmf": { "$ref": "#/$defs/NistRmfCells" }
+      },
+      "additionalProperties": false
+    },
+    "Principles": {
+      "type": "object",
+      "required": [
+        "human_oversight", "fairness", "accountability", "transparency",
+        "privacy", "safety", "contestability", "reliability"
+      ],
+      "properties": {
+        "human_oversight": { "$ref": "#/$defs/RaiCell" },
+        "fairness": { "$ref": "#/$defs/RaiCell" },
+        "accountability": { "$ref": "#/$defs/RaiCell" },
+        "transparency": { "$ref": "#/$defs/RaiCell" },
+        "privacy": { "$ref": "#/$defs/RaiCell" },
+        "safety": { "$ref": "#/$defs/RaiCell" },
+        "contestability": { "$ref": "#/$defs/RaiCell" },
+        "reliability": { "$ref": "#/$defs/RaiCell" }
+      },
+      "additionalProperties": false
+    },
+    "RaiRow": {
+      "type": "object",
+      "required": [
+        "component_id", "component_kind", "spec_refs",
+        "frameworks", "principles", "eval_evidence_refs", "provenance"
+      ],
+      "properties": {
+        "component_id": { "type": "string", "minLength": 1 },
+        "component_kind": {
+          "type": "string",
+          "enum": ["sub-agent", "simulation-agent", "evaluation-framework", "rag-client"]
+        },
+        "spec_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/BackCitation" }
+        },
+        "frameworks": { "$ref": "#/$defs/Frameworks" },
+        "principles": { "$ref": "#/$defs/Principles" },
+        "eval_evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/BackCitation" },
+          "description": "Cites spec 030 evaluation outputs (FR-028); MUST NOT trigger evaluation."
+        },
+        "provenance": { "$ref": "#/$defs/Provenance" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
