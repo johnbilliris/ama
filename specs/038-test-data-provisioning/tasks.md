@@ -140,31 +140,31 @@ description: "Tasks: Test Data and Resources Provisioning Review (spec 038)"
 
 ### Tests for P3 (write FIRST)
 
-- [ ] T070 [P] [US2] Author `tests/integration/test_simulator_replay_byte_equal.py` running each feed twice with same `(scenario_id, seed)`, capturing canonical NDJSON bytes per feed, asserting SHA-256 digest equality. Verify: `pytest038 …` — FAIL until T080–T093. — FR-022, SC-005, CL-4.
-- [ ] T071 [P] [US2] Author `tests/integration/test_no_outbound_network.py` — monkey-patches `socket.socket` to record connections; runs every feed; asserts zero connections to the forbidden domain regex set. — FR-023, SC-006.
-- [ ] T072 [P] [US2] Author `tests/integration/test_simulator_envelope_required_fields.py` — asserts every emitted record carries the FR-021 envelope. — FR-021.
-- [ ] T073 [P] [US2] Author `tests/integration/test_simulator_clock_isolation.py` — runs two distinct `(scenario_id, seed)` pairs concurrently; asserts no timestamp collision. — FR-026.
-- [ ] T074 [P] [US2] Author `tests/integration/test_simulator_warning_body_marker.py` — every warning-shaped feed includes literal string `"TEST — DO NOT BROADCAST"` in the message body. — FR-046.
-- [ ] T075 [P] [US2] Author `tests/integration/test_synthetic_fallback_used.py` — scenario targeting a no-public-dataset jurisdiction yields `source_shape: synthetic.fallback.v1`. — FR-025.
+- [X] T070 [P] [US2] Author `tests/integration/test_simulator_replay_byte_equal.py` running each feed twice with same `(scenario_id, seed)`, capturing canonical NDJSON bytes per feed, asserting SHA-256 digest equality. Verify: `pytest038 …` — FAIL until T080–T093. — FR-022, SC-005, CL-4.
+- [X] T071 [P] [US2] Author `tests/integration/test_no_outbound_network.py` — monkey-patches `socket.socket` to record connections; runs every feed; asserts zero connections to the forbidden domain regex set. — FR-023, SC-006.
+- [X] T072 [P] [US2] Author `tests/integration/test_simulator_envelope_required_fields.py` — asserts every emitted record carries the FR-021 envelope. — FR-021.
+- [X] T073 [P] [US2] Author `tests/integration/test_simulator_clock_isolation.py` — runs two distinct `(scenario_id, seed)` pairs concurrently; asserts no timestamp collision. — FR-026.
+- [X] T074 [P] [US2] Author `tests/integration/test_simulator_warning_body_marker.py` — every warning-shaped feed includes literal string `"TEST — DO NOT BROADCAST"` in the message body. — FR-046.
+- [X] T075 [P] [US2] Author `tests/integration/test_synthetic_fallback_used.py` — scenario targeting a no-public-dataset jurisdiction yields `source_shape: synthetic.fallback.v1`. — FR-025.
 
 ### Implementation for P3 — feed shapes (one task per feed shape — all [P])
 
-- [ ] T080 [P] [US2] Implement BoM-shaped severe weather warning feed at `apps/api/app/services/simulation/feeds/bom_severe_weather.py` exposing `emit(scenario_id, seed, clock, params) -> Iterator[CanonicalRecord]`; uses `_canonical.encode_ndjson`; envelope includes `source_shape="bom.severe_weather_warning.v1"`. Verify: `pytest038 tests/contract/test_bom_severe_weather_shape.py`. — FR-020 (BoM-shaped), FR-021, FR-022.
-- [ ] T081 [P] [US2] Implement BoM fire-weather/FDI feed at `feeds/bom_fire_weather_fdi.py`. — FR-020.
-- [ ] T082 [P] [US2] Implement BoM flood gauge / flood watch / flood warning feed at `feeds/bom_flood_gauge.py`. — FR-020.
-- [ ] T083 [P] [US2] Implement BoM tropical cyclone track feed at `feeds/bom_cyclone_track.py`. — FR-020.
-- [ ] T084 [P] [US2] Implement GA earthquake event feed at `feeds/ga_earthquake.py` (≥3 events per session per FR-062). — FR-020 (GA-shaped), FR-062.
-- [ ] T085 [P] [US2] Implement GA tsunami threat assessment relay at `feeds/ga_tsunami_threat.py`. — FR-020.
-- [ ] T086 [P] [US2] Implement EPA-shaped PM2.5 / air-quality feed at `feeds/epa_air_quality_pm25.py`. — FR-020.
-- [ ] T087 [P] [US2] Implement traffic / road-closure feed at `feeds/traffic_road_closure.py`. — FR-020 (traffic).
-- [ ] T088 [P] [US2] Implement utility outage feed at `feeds/utility_outage.py` (electricity/gas/water/telecoms). — FR-020.
-- [ ] T089 [P] [US2] Implement ambulance CAD feed at `feeds/ambulance_cad.py`. — FR-020 (ambulance CAD).
-- [ ] T090 [P] [US2] Implement social-media chatter feed (with misinformation markers) at `feeds/social_chatter.py`. — FR-020 (social chatter).
-- [ ] T091 [P] [US2] Implement sensor telemetry feed at `feeds/sensor_telemetry.py`. — FR-020 (sensor telemetry).
-- [ ] T092 [P] [US2] Implement synthetic fallback feed at `feeds/synthetic_fallback.py` with `source_shape="synthetic.fallback.v1"`. — FR-025.
-- [ ] T093 [US2] Implement file-based replay reader/writer at `apps/api/app/services/simulation/replay/ndjson_replay.py` with `write(stream, path)` and `replay(path) -> Iterator[bytes]`; replay re-publishes via existing `event_hub_publisher.publish_simulation_event(...)`. Verify: T070 PASS. — FR-024, CL-2.
-- [ ] T094 [US2] Add a tiny CLI driver `apps/api/app/services/simulation/feeds/cli.py` (used by quickstart + tests) accepting `--scenario`, `--seed`, `--replay-out`, `--replay-in`, `--feed`. Verify: `python -m apps.api.app.services.simulation.feeds.cli --scenario nsw-bushfire-summer --seed 42 --replay-out C:\tmp\foo.ndjson`. — quickstart.md, FR-024.
-- [ ] T095 [US2] Add `feed_version` bump test `tests/contract/test_feed_version_bumps.py` — schema-load `source_shapes.json` and assert any breaking change to a shape requires a new version id. — FR-027.
+- [X] T080 [P] [US2] Implement BoM-shaped severe weather warning feed at `apps/api/app/services/simulation/feeds/bom_severe_weather.py` exposing `emit(scenario_id, seed, clock, params) -> Iterator[CanonicalRecord]`; uses `_canonical.encode_ndjson`; envelope includes `source_shape="bom.severe_weather_warning.v1"`. Verify: `pytest038 tests/contract/test_bom_severe_weather_shape.py`. — FR-020 (BoM-shaped), FR-021, FR-022.
+- [X] T081 [P] [US2] Implement BoM fire-weather/FDI feed at `feeds/bom_fire_weather_fdi.py`. — FR-020.
+- [X] T082 [P] [US2] Implement BoM flood gauge / flood watch / flood warning feed at `feeds/bom_flood_gauge.py`. — FR-020.
+- [X] T083 [P] [US2] Implement BoM tropical cyclone track feed at `feeds/bom_cyclone_track.py`. — FR-020.
+- [X] T084 [P] [US2] Implement GA earthquake event feed at `feeds/ga_earthquake.py` (≥3 events per session per FR-062). — FR-020 (GA-shaped), FR-062.
+- [X] T085 [P] [US2] Implement GA tsunami threat assessment relay at `feeds/ga_tsunami_threat.py`. — FR-020.
+- [X] T086 [P] [US2] Implement EPA-shaped PM2.5 / air-quality feed at `feeds/epa_air_quality_pm25.py`. — FR-020.
+- [X] T087 [P] [US2] Implement traffic / road-closure feed at `feeds/traffic_road_closure.py`. — FR-020 (traffic).
+- [X] T088 [P] [US2] Implement utility outage feed at `feeds/utility_outage.py` (electricity/gas/water/telecoms). — FR-020.
+- [X] T089 [P] [US2] Implement ambulance CAD feed at `feeds/ambulance_cad.py`. — FR-020 (ambulance CAD).
+- [X] T090 [P] [US2] Implement social-media chatter feed (with misinformation markers) at `feeds/social_chatter.py`. — FR-020 (social chatter).
+- [X] T091 [P] [US2] Implement sensor telemetry feed at `feeds/sensor_telemetry.py`. — FR-020 (sensor telemetry).
+- [X] T092 [P] [US2] Implement synthetic fallback feed at `feeds/synthetic_fallback.py` with `source_shape="synthetic.fallback.v1"`. — FR-025.
+- [X] T093 [US2] Implement file-based replay reader/writer at `apps/api/app/services/simulation/replay/ndjson_replay.py` with `write(stream, path)` and `replay(path) -> Iterator[bytes]`; replay re-publishes via existing `event_hub_publisher.publish_simulation_event(...)`. Verify: T070 PASS. — FR-024, CL-2.
+- [X] T094 [US2] Add a tiny CLI driver `apps/api/app/services/simulation/feeds/cli.py` (used by quickstart + tests) accepting `--scenario`, `--seed`, `--replay-out`, `--replay-in`, `--feed`. Verify: `python -m apps.api.app.services.simulation.feeds.cli --scenario nsw-bushfire-summer --seed 42 --replay-out C:\tmp\foo.ndjson`. — quickstart.md, FR-024.
+- [X] T095 [US2] Add `feed_version` bump test `tests/contract/test_feed_version_bumps.py` — schema-load `source_shapes.json` and assert any breaking change to a shape requires a new version id. — FR-027.
 
 **Checkpoint P3**: T070–T075 PASS; SC-005, SC-006 verified; `lint-imports` (from T058) confirms SC-007.
 
@@ -399,3 +399,4 @@ After Phase 2 is green:
 - **Total task count: 117** (Phase 1: 5; Phase 2: 10; Phase 3 / P1: 16; Phase 4 / P2: 18; Phase 5 / P3: 22; Phase 6 / P4: 38; Phase 7: 8).
 - **Parallel group count: 13 in-phase groups + 4 cross-phase opportunities = 17 parallel windows**.
 - **FR coverage**: 41 / 41 enumerated functional requirements = **100%** (the spec uses banded numbering FR-001..003, 010..016, 020..027, 030..035, 040..046, 050..054, 060..062, 070..071 — every band is fully covered above). **SC coverage**: 15 / 15 = **100%**.
+

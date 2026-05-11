@@ -21,10 +21,10 @@ Cross-references:
 ## Summary
 
 - Schema version: `1.0.0`
-- Total entries: **92**
+- Total entries: **105**
 - `alert-template`: 8
 - `generator`: 1
-- `mock`: 20
+- `mock`: 33
 - `simulator-feed-shape`: 13
 - `synthetic`: 50
 
@@ -67,6 +67,19 @@ Cross-references:
 | `data-population-sample-population-json` | `data/population/sample-population.json` | `cross-sector` | planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
 | `data-resource-inventories-sample-inventory-json` | `data/resource-inventories/sample-inventory.json` | `operational` | logistics-officer | `OFFICIAL` | `CC-BY-4.0` | no |
 | `data-road-networks-far-north-qld-sample-json` | `data/road-networks/far-north-qld-sample.json` | `police` | operations-officer, transport | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-ambulance-cad-vic-ndjson` | `fixtures/sim_replays/ambulance_cad_vic.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-bom-cyclone-track-qld-ndjson` | `fixtures/sim_replays/bom_cyclone_track_qld.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-bom-fire-weather-fdi-vic-ndjson` | `fixtures/sim_replays/bom_fire_weather_fdi_vic.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-bom-flood-gauge-nsw-ndjson` | `fixtures/sim_replays/bom_flood_gauge_nsw.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-bom-severe-weather-warning-nsw-ndjson` | `fixtures/sim_replays/bom_severe_weather_warning_nsw.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-epa-pm25-vic-ndjson` | `fixtures/sim_replays/epa_pm25_vic.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-ga-earthquake-event-wa-ndjson` | `fixtures/sim_replays/ga_earthquake_event_wa.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-ga-tsunami-threat-nsw-ndjson` | `fixtures/sim_replays/ga_tsunami_threat_nsw.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-sensor-telemetry-nt-ndjson` | `fixtures/sim_replays/sensor_telemetry_nt.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-social-chatter-au-ndjson` | `fixtures/sim_replays/social_chatter_au.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-synthetic-fallback-au-ndjson` | `fixtures/sim_replays/synthetic_fallback_au.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-traffic-road-closure-nsw-ndjson` | `fixtures/sim_replays/traffic_road_closure_nsw.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-utility-outage-qld-ndjson` | `fixtures/sim_replays/utility_outage_qld.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
 | `tests-fixtures-golden-set-v1-json` | `tests/fixtures/golden-set-v1.json` | `cross-sector` | observer-auditor | `OFFICIAL` | `CC-BY-4.0` | no |
 | `tests-fixtures-jurisdiction-boundaries-au-minimal-wkt` | `tests/fixtures/jurisdiction_boundaries/au_minimal.wkt` | `cross-sector` | observer-auditor, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
 | `tests-fixtures-jurisdiction-boundaries-vic-minimal-geojson` | `tests/fixtures/jurisdiction_boundaries/vic_minimal.geojson` | `cross-sector` | observer-auditor, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
