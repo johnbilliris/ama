@@ -44,8 +44,8 @@ jobs:
 
       - name: Run load smoke pytest tier
         run: |
-          mkdir -p .load-results
-          pytest tests/load -q --tb=line --junitxml=.load-results/junit.xml || true
+          mkdir -p load-results
+          pytest tests/load -q --tb=line --junitxml=load-results/junit.xml || true
         env:
           AMA_LOAD_TARGET: ${{ vars.LOAD_TARGET_URL || 'https://api.disaster-response-hub.example' }}
 
@@ -53,17 +53,16 @@ jobs:
         if: always()
         env:
           APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ secrets.APPLICATIONINSIGHTS_CONNECTION_STRING }}
-        shell: pwsh
+        shell: bash
         run: |
-          if (-not $env:APPLICATIONINSIGHTS_CONNECTION_STRING) {
-            Write-Host "::warning::APPLICATIONINSIGHTS_CONNECTION_STRING not set; skipping telemetry post."
+          if [ -z "${APPLICATIONINSIGHTS_CONNECTION_STRING:-}" ]; then
+            echo "::warning::APPLICATIONINSIGHTS_CONNECTION_STRING not set; skipping telemetry post."
             exit 0
-          }
+          fi
           # Post a single 'loadtest.run_total' counter event so the workbook can
           # show nightly ticks; full load metrics post via the test runner itself.
           python - <<'EOF'
-          import os, datetime, urllib.request, json
-          # Best-effort post; doesn't fail the job.
+          import os
           try:
               from azure.monitor.opentelemetry import configure_azure_monitor
               from opentelemetry import metrics
@@ -71,7 +70,6 @@ jobs:
               meter = metrics.get_meter("ama.loadtest")
               counter = meter.create_counter("loadtest.run_total")
               counter.add(1, {"environment": os.environ.get("TARGET_ENV", "staging"), "outcome": "completed"})
-              # Force flush
               from opentelemetry.sdk.metrics import MeterProvider
               if isinstance(metrics.get_meter_provider(), MeterProvider):
                   metrics.get_meter_provider().force_flush()
@@ -84,7 +82,7 @@ jobs:
         if: always()
         with:
           name: load-results
-          path: .load-results/
+          path: load-results/
           retention-days: 30
 
       - name: Open issue on regression

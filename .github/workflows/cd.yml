@@ -1,10 +1,10 @@
 # .github/workflows/cd.yml — Continuous Deployment pipeline (spec 031)
 #
-# Branch-based deployment model:
+# Branch-based deployment model (1:1 branch → environment):
 #   push to dev        → CI runs → CD deploys to rg-drh-dev
 #   push to staging    → CI runs → CD deploys to rg-drh-staging
 #   push to production → CI runs → CD deploys to rg-drh-production
-#   push to main       → CI runs (no deploy)
+#   push to main       → CI runs (no CD)
 #   PR to main         → CI runs (no deploy)
 #
 # Auth: single AZURE_CREDENTIALS JSON secret per GitHub Environment
@@ -44,6 +44,9 @@ jobs:
     # provisions on existing resources are faster (~5-10 min).
     timeout-minutes: 60
     concurrency:
+      # Branch ↔ environment is 1:1, so grouping by head_branch is equivalent
+      # to grouping by target environment and prevents concurrent deploys to
+      # the same environment.
       group: deploy-${{ github.event.workflow_run.head_branch }}
       cancel-in-progress: false
 
@@ -63,11 +66,17 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
 
       # Step 2 — pin TARGET_ENV from the source branch for downstream steps.
+      # Branch ↔ environment is 1:1: dev/staging/production map to their
+      # respective environments. `main` is excluded by the trigger filter
+      # above, so head_branch is always one of these three here.
       - name: Resolve target environment
+        env:
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
-          echo "TARGET_ENV=${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_ENV"
-          echo "AZURE_ENV_NAME=drh-${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_ENV"
-          echo "RESOURCE_GROUP=rg-drh-${{ github.event.workflow_run.head_branch }}" >> "$GITHUB_ENV"
+          TARGET_ENV="${HEAD_BRANCH}"
+          echo "TARGET_ENV=${TARGET_ENV}" >> "$GITHUB_ENV"
+          echo "AZURE_ENV_NAME=drh-${TARGET_ENV}" >> "$GITHUB_ENV"
+          echo "RESOURCE_GROUP=rg-drh-${TARGET_ENV}" >> "$GITHUB_ENV"
 
       # Step 3 — explicit fail-fast on missing AZURE_CREDENTIALS (FR-016).
       # azure/login also fails on this, but its message does not name the
@@ -167,6 +176,50 @@ jobs:
 
           echo "Resolved $(echo "${global_admin_ids}" | jq 'length') Global Administrator user account(s) for Cosmos DB data-plane reader access."
           azd env set globalAdministratorPrincipalIds "$(echo "${global_admin_ids}" | jq -c '.')"
+
+      # Self-heal soft-deleted Cognitive Services accounts in the target
+      # resource group before provisioning. Bicep generates account names
+      # deterministically from `uniqueString(rg.id)` (infra/main.bicep,
+      # infra/modules/content-safety.bicep), so a soft-deleted predecessor
+      # from a prior destroyed deploy collides on the next `azd provision`
+      # with `FlagMustBeSetForRestore`. Scope: any Cognitive Services kind
+      # (OpenAI, ContentSafety, …) located in this deployment RG. Purge is
+      # idempotent and a no-op when nothing matches; restricting to the
+      # deployment RG keeps it from touching unrelated soft-deleted accounts
+      # elsewhere in the subscription.
+      - name: Purge soft-deleted Cognitive Services accounts (self-heal)
+        run: |
+          set -euo pipefail
+          deleted=$(az cognitiveservices account list-deleted \
+            --query "[?contains(id, '/resourceGroups/${RESOURCE_GROUP}/')].{name:name, location:location, kind:kind}" \
+            -o json)
+          count=$(echo "${deleted}" | jq 'length')
+          echo "Soft-deleted Cognitive Services accounts in ${RESOURCE_GROUP}: ${count}"
+          if [[ "${count}" -gt 0 ]]; then
+            echo "${deleted}" | jq -c '.[]' | while read -r row; do
+              name=$(echo "${row}" | jq -r .name)
+              loc=$(echo "${row}" | jq -r .location)
+              kind=$(echo "${row}" | jq -r .kind)
+              echo "Purging ${kind} account ${name} in ${loc}..."
+              az cognitiveservices account purge \
+                --name "${name}" \
+                --location "${loc}" \
+                --resource-group "${RESOURCE_GROUP}"
+            done
+          fi
+
+      - name: Verify Foundry carve-out registry (spec 036, FR-RAG-CV-01..04)
+        # Spec 036 T026 — block deploy if any Foundry deployment lacks
+        # carve-out approval, has placeholder approvers, an expired or out-of-window
+        # review_date, or sits outside Australian data-residency. Pre-plan-apply
+        # gate runs **before** ``azd provision`` so CD never reaches Bicep with a
+        # non-conformant registry.
+        run: |
+          if ! command -v pwsh >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y --no-install-recommends powershell
+          fi
+          pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/verify-carveout.ps1 \
+            -RegistryPath infra/parameters/foundry-carveout.yaml -Strict
 
       - name: Provision infrastructure
         run: azd provision --no-prompt

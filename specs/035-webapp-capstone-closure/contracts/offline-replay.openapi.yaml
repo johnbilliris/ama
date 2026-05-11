@@ -1,0 +1,168 @@
+openapi: 3.1.0
+info:
+  title: AMA Offline Replay API (spec-035)
+  version: 1.0.0
+  description: |
+    Offline-queue replay endpoint for the spec-035 Service-Worker subsystem.
+    Implements FR-006 (offline-capable for field roles per Constitution NN-5)
+    and Clarifications Q4 + Q7 (Service-Worker + IndexedDB + 500-cap tiered queue).
+servers:
+  - url: https://app-ama-zo6bb5.azurewebsites.net
+paths:
+  /api/offline/replay:
+    post:
+      operationId: replayOfflineQueue
+      summary: Drain a batch of offline-captured operator actions.
+      description: |
+        Service Worker replays queued actions on reconnect. Life-safety tier
+        drains first as a single batch (≤ 50 entries); routine tier in 50-entry
+        batches. Idempotent dedupe by (persona_id, client_correlation_id).
+      security:
+        - EntraBearer: []
+      parameters:
+        - in: header
+          name: X-Persona-Id
+          required: true
+          schema:
+            type: string
+          description: Resolved from the bearer; redundantly carried for APIM rate-limit keying (FR-012 / Q3).
+        - in: header
+          name: X-Impersonate-Persona
+          required: false
+          schema:
+            type: string
+          description: Optional system-administrator impersonation (Q9). Paired audit rows are emitted on replay completion.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchedReplayEnvelope"
+      responses:
+        "200":
+          description: All entries in the batch were processed (each entry has its own per-entry status).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchedReplayResult"
+        "401":
+          description: Bearer invalid/missing.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: AppRole/persona mismatch OR sovereignty_denied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "413":
+          description: Batch exceeds 50-entry SLO size; client must split.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "422":
+          description: Schema invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "429":
+          description: Rate-limited (per-(persona_id, route) bucket exhausted).
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+components:
+  securitySchemes:
+    EntraBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    BatchedReplayEnvelope:
+      type: object
+      required: [tier, entries]
+      properties:
+        tier:
+          type: string
+          enum: [life_safety, routine]
+          description: All entries in a batch share a tier; SW MUST not mix tiers.
+        entries:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/QueueEntryEnvelope"
+    QueueEntryEnvelope:
+      type: object
+      required: [client_correlation_id, captured_ts, route, payload_hash, payload]
+      properties:
+        client_correlation_id:
+          type: string
+          format: uuid
+          description: Stable client-side ID for idempotent dedupe.
+        captured_ts:
+          type: string
+          format: date-time
+          description: Original client-side capture timestamp; preserved on audit append (SC-007).
+        route:
+          type: string
+          description: Origin API route the SW intercepted, e.g., /api/outcomes/sc-001/evaluate.
+        payload_hash:
+          type: string
+          description: sha-256 of canonicalised payload for tamper detection.
+        payload:
+          type: object
+          description: Original request body (POST/PUT/PATCH).
+        was_displaced:
+          type: boolean
+          default: false
+          description: True if this entry was previously displaced by a life-safety insertion (Q7).
+    BatchedReplayResult:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required: [client_correlation_id, status, audit_id]
+            properties:
+              client_correlation_id:
+                type: string
+                format: uuid
+              status:
+                type: string
+                enum: [replayed, deduped, rejected_overflow, rejected_displaced_then_lost, rejected_classifier_deny]
+              audit_id:
+                type: string
+              error:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    ErrorEnvelope:
+      type: object
+      required: [error_code, audit_id, correlation_id]
+      properties:
+        error_code:
+          type: string
+          enum:
+            - unauthorized
+            - forbidden
+            - sovereignty_denied
+            - rate_limited
+            - evaluator_not_routable
+            - schema_invalid
+            - seed_not_ready
+        retry_after_seconds:
+          type: integer
+          nullable: true
+        audit_id:
+          type: string
+        correlation_id:
+          type: string

@@ -28,11 +28,21 @@ dev = [
   "pre-commit>=4.0",
   "pyyaml>=6.0",
 ]
+# Spec 036 / F-A10 / T219 + T224 — load-test extras (FR-RAG-TEST-02).
+load = [
+  "locust>=2.31,<3",
+  "psutil>=6.0,<7",
+]
 
 [tool.pytest.ini_options]
+addopts = "--import-mode=importlib"
 markers = [
   "integration: integration tests requiring mock external services (Cosmos DB, Service Bus)",
   "simulation: extended scenario simulation tests",
+  "unit: fast in-process tests with no external deps (Spec 036 / F-A10 / T223)",
+  "contract: contract tests proving schema / API parity (Spec 036 / F-A10 / T223)",
+  "e2e: end-to-end tests requiring deployed infra (Spec 036 / F-A10 / T223)",
+  "load: load / stress harnesses (Spec 036 / F-A10 / T223)",
 ]
 
 # ────────────────────────────────────────────────────────────────────────────────

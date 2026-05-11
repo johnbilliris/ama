@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/johnbilliris/ama/specs/036-foundry-rag-grounding/contracts/offline-cache-manifest.json",
+  "title": "OfflineCacheManifest",
+  "description": "Manifest for the field-deployable offline corpus cache (FR-RAG-LS-02). Built by `apps/ingest-runner/src/ama_ingest/offline_bundle.py`; consumed by `apps/agents/common/offline_cache.py`. Bounded ≤ 500 MB per device. TTL 14 days; stale-warning at day 11 (R-07). Dual-signed (cosign keyless + age detached) per spec 032 FR-AI09 + R-07 fail-closed.",
+  "type": "object",
+  "required": [
+    "version",
+    "generated_at",
+    "corpus_build_sha",
+    "ttl_days",
+    "stale_warning_days",
+    "embedding_model_id",
+    "entries",
+    "size_bytes_total",
+    "signatures"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Manifest schema version. Bump on breaking change; consumer agents pin major version."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC build time. Used to compute TTL expiry and stale-warning crossover."
+    },
+    "corpus_build_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Pins the bundle to a specific corpus build for replay parity with online AuditRecord entries."
+    },
+    "ttl_days": {
+      "type": "integer",
+      "const": 14,
+      "description": "Hard expiry. After day 14 the agent refuses to use the cache and forces a re-sync (R-07; FR-RAG-LS-02)."
+    },
+    "stale_warning_days": {
+      "type": "integer",
+      "const": 11,
+      "description": "UI 'cache stale' badge surfaces from day 11 (R-07). Allows 3-day re-sync window before hard expiry."
+    },
+    "embedding_model_id": {
+      "type": "string",
+      "description": "MUST equal every entry's underlying chunk embedding_model_id. Bundle is single-model — a model flip triggers a full bundle rebuild (consistent with R-05 single-model invariant)."
+    },
+    "entries": {
+      "type": "array",
+      "description": "Lazy-load index. Each entry references a chunk_id whose text + embedding live in the sibling .bin file (chunk_id-keyed offset table). Selection per FR-RAG-LS-02 + Field Coordinator persona memo: AIDR + national + each jurisdiction's most-cited handbooks (hazard thresholds, AIIMS span-of-control, evacuation centre setup, sector boundaries).",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["chunk_id", "jurisdiction", "topic", "page", "sha256_of_chunk", "licence_mode", "byte_offset", "byte_length"],
+        "properties": {
+          "chunk_id": { "type": "string" },
+          "jurisdiction": { "type": "string", "enum": ["act", "nsw", "nt", "qld", "sa", "tas", "vic", "wa", "national", "aidr"] },
+          "topic": { "type": "string" },
+          "page": { "type": "integer", "minimum": 1 },
+          "sha256_of_chunk": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "licence_mode": { "type": "string", "enum": ["full-text", "metadata-only"] },
+          "byte_offset": { "type": "integer", "minimum": 0, "description": "Offset into the sibling .bin file." },
+          "byte_length": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "size_bytes_total": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 524288000,
+      "description": "Hard cap 500 × 1024 × 1024 = 524288000 bytes. Build fails if exceeded; persona-memo prioritisation must shed lower-priority entries."
+    },
+    "signatures": {
+      "type": "object",
+      "description": "Dual-signed envelope. BOTH signatures MUST be present and valid; verification fails closed (R-07).",
+      "required": ["cosign_keyless", "age_detached"],
+      "additionalProperties": false,
+      "properties": {
+        "cosign_keyless": {
+          "type": "string",
+          "description": "Sigstore + GitHub OIDC keyless signature (spec 032 FR-AI09). Verified online; supplies build-supply-chain provenance."
+        },
+        "age_detached": {
+          "type": "string",
+          "description": "age-encrypted detached signature using the tenant's offline public-key set. Allows Field Coordinators to verify integrity in degraded-connectivity mode without OIDC reachability."
+        },
+        "cosign_signed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "age_recipients": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of age recipient public keys the bundle was signed for; informational."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": 1,
+      "generated_at": "2026-05-08T11:00:00Z",
+      "corpus_build_sha": "f9c3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a26",
+      "ttl_days": 14,
+      "stale_warning_days": 11,
+      "embedding_model_id": "text-embedding-3-large",
+      "entries": [
+        {
+          "chunk_id": "nt-cyclone-doctrine-p12-c0",
+          "jurisdiction": "nt",
+          "topic": "cyclone-doctrine",
+          "page": 12,
+          "sha256_of_chunk": "0a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5",
+          "licence_mode": "full-text",
+          "byte_offset": 0,
+          "byte_length": 8192
+        }
+      ],
+      "size_bytes_total": 487654321,
+      "signatures": {
+        "cosign_keyless": "MEYCIQDx7…",
+        "age_detached": "-----BEGIN AGE ENCRYPTED FILE-----\nYWdlLWVuY3J5cHRpb24ub3JnL3YxCi0...",
+        "cosign_signed_at": "2026-05-08T11:01:43Z"
+      }
+    }
+  ]
+}

@@ -88,12 +88,6 @@ export function OperatingModelAnalyzer({
 
   return (
     <section className="preparedness-shell">
-      {noJurisdictions && (
-        <div className="preparedness-empty-state" role="status">
-          <p>Select one or more jurisdictions above to view the organisation and framework catalogues.</p>
-        </div>
-      )}
-
       {!noJurisdictions && (
         <div className="preparedness-columns">
           <article className="preparedness-panel">

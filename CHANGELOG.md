@@ -4,6 +4,47 @@ All notable changes to this repo are documented here. The format follows [Keep a
 
 ## [Unreleased]
 
+### Added (spec 036 — Microsoft Foundry-Based RAG Grounding)
+- Microsoft-Foundry-based retrieval grounding seam (`apps/agents/common/foundry_chat_client.py`, `apps/agents/maf_runtime/chat_client.py`, `apps/api/app/services/simulation/controller_service.py`) — every prompt-bearing call site retrieves before inference; AAD-only auth via `https://cognitiveservices.azure.com/.default` (FR-RAG-FM-01..07).
+- Carve-out enforcement (`infra/parameters/foundry-carveout.{yaml,schema.json}` + `scripts/verify-carveout.ps1`) — every Foundry deployment is gated through the registry per Constitution §NN-2 Amendment 1.2.0; data-plane resources stay in AU East / AU Southeast (FR-RAG-CV-01..04).
+- Corpus ingest container job (`apps/ingest-runner/`) wired into `azd postprovision` with idempotent re-run skip on unchanged entries (FR-RAG-IDX-01..05, SC-005).
+- Blue-green AI Search index lifecycle (`infra/modules/ai-search-blue-green.bicep` + alias `corpus-search` over `corpus-v{N}` ↔ `corpus-v{N+1}`) with <60 s alias flip (FR-RAG-IDX-04).
+- Shared `RetrievalService` port + `Citation` envelope + `AuditRecord` extensions (`packages/domain/src/ama_domain/`) — citations on every recommendation card and SSE turn; audit carries `retrieved_chunks[]`, `corpus_build_sha`, `embedding_model_id`, `prompt_sha`, `model_id`, `model_version`, `deployment_alias`, `rag_used`, `rag_optout_reason`, `gateway_decision` (FR-RAG-AG-01..06).
+- `EquivalenceTestResult` entity (`packages/domain/src/ama_domain/equivalence_test_result.py`, T143) — extends spec-033 FR-023 shape with `citation_fidelity`, `verbatim_source_match`, `corpus_build_sha`, `embedding_model_id`.
+- Final canary gate (`apps/eval-runner/src/ama_eval/per_agent_canary_gate.run_final_canary_gate`, T142) — decision-equivalence ≥ 95 % AND schema-equivalence == 100 % AND citation-fidelity ≥ 0.7 AND verbatim-source-match ≥ 0.9, keyed by `(corpus_build_sha, embedding_model_id)` (FR-RAG-FM-06, SC-011).
+- Compliance audit byte-replay automation (`tests/audit/audit_replay_fidelity.kql` + `tests/contract/test_audit_replay_fidelity.py`, T144) — sampled SC-011 ≥ 95 % reproduction across one-month rolling window with KQL alert on dip.
+- Dual-signed offline cache bundle for Field-Coordinator-aligned devices (`apps/ingest-runner/src/ama_ingest/offline_bundle.py` + `infra/scripts/verify-offline-cache.ps1`) with cosign keyless + age detached signatures, 14-day TTL, 11-day stale warning, fail-closed signature checks (FR-RAG-LS-02, R-07).
+- Nine RAG-OPTOUT carve-outs (`# RAG-OPTOUT [FR-RAG-NS-NN]` markers + ADR files under `docs/decisions/036-foundry-rag-grounding/`) with CI lint at `tools/lint/check_rag_optout_bindings.py` blocking new opt-outs without ADR (FR-RAG-NS-01..09).
+- 50-query multi-jurisdiction golden set (`apps/eval-runner/fixtures/spec036/multi_jurisdiction.jsonl`) covering ACT/NSW/NT/QLD/SA/TAS/VIC/WA/national/AIDR jurisdiction-disambiguated retrieval.
+- Game-day runbook (`docs/runbooks/036-foundry-rag-gameday.md`) + Step-9 cutover runbook (`docs/runbooks/036-foundry-rag-step9-cutover.md`) + Simulation final-canary dry-run script (`infra/scripts/simulation-final-canary-dry-run.ps1`) + post-`azd up` smoke-test (`infra/scripts/azd-up-smoke-test.ps1`).
+- Application Insights alerts module (`infra/bicep/modules/foundry-rag-cutover-alerts.bicep`) — gateway-deny, citation-drop, offline-cache-TTL (Alert 3 / equivalence-regression retired in ADR-20 §Q-P6-03 cleanup; audit-replay-fidelity covered by `tests/audit/audit_replay_fidelity.kql` outside this module).
+
+### Changed (spec 036)
+- All five decision agents (Monitoring, Risk Assessment, Evacuation, Resource Allocation, Communication) plus Simulation Controller chat (spec 024) migrated from Azure OpenAI to Microsoft Foundry behind the spec-029 progressive-delivery feature flag `FOUNDRY_RAG_ENABLED_AGENTS`.
+- `apps/agents/common/llm_client.py`, `apps/agents/maf_runtime/chat_client.py`, and `apps/api/app/services/simulation/controller_service.py` invoke the Foundry seam exclusively; AAD-only auth (FR-RAG-FM-04). The legacy `AZURE_OPENAI_*` env-var seam is retained only as a hermetic-test fallback and is no longer set by production Bicep (ADR-20 §Q-P6-03).
+- Citation cards on every operator surface (`packages/ui/CitationCard.tsx`) + Simulation SSE stream emits `event: citation` per grounded turn with the `licence_mode`-aware snippet rule (R-11).
+
+### Removed (spec 036, ADR-20 §Q-P6-03 — post-cutover cleanup)
+- `AZURE_OPENAI_ENDPOINT` env-var compatibility seam — `infra/main.bicep`, `infra/modules/communication-agent.bicep`, and root `.env.example` no longer reference the legacy var; Foundry callers consume `AZURE_AI_PROJECT_ENDPOINT` exclusively.
+- `LEGACY_AZURE_OPENAI=1` rollback escape hatch — the flag is removed from all production code paths; `apps/eval-runner/src/ama_eval/per_agent_canary_gate.py` is preserved as the corpus-rebuild regression gate (decision-equivalence ≥ 0.95, schema-equivalence == 1.0, citation-fidelity ≥ 1.0) keyed by `(corpus_build_sha, embedding_model_id)`.
+- Per-agent canary equivalence-regression telemetry — Alert 3 in `infra/bicep/modules/foundry-rag-cutover-alerts.bicep` (`decision_equivalence` custom dimension) was retired; the file now ships three alerts (gateway-deny, citation-drop, offline-cache-TTL).
+- `pytest.mark.skip` on `tests/contract/test_no_openai_imports.py` — the FR-RAG-FM-04 lint is **binding**: any `from openai import AzureOpenAI` / `AsyncAzureOpenAI` in `apps/` (outside the eval-runner allowlist) fails CI unless the import carries an inline `# noqa: AMA-FM04` marker with a spec-reference comment.
+
+### Deprecated (spec 036)
+- Legacy `from openai import AzureOpenAI` / `AsyncAzureOpenAI` import path in `apps/agents/common/llm_client.py` and `apps/agents/maf_runtime/chat_client.py` — fully removed from production code paths; preserved only as a hermetic-test fallback inside `_init_legacy_client` and via `# noqa: AMA-FM04` markers in modules that use the OpenAI SDK as an OpenAI-compatible transport to Foundry embeddings (`apps/agents/common/foundry_query_embedder.py`, `apps/ingest-runner/src/ama_ingest/embedder.py`, `apps/api/app/services/simulation/controller_service.py`). `tests/contract/test_no_openai_imports.py` is now a binding lint.
+- `infra/modules/azure-openai.bicep` — deprecation header added in Phase B; the module continues to provision Foundry (AIServices) model deployments via the unchanged Cognitive Services deployment resource type, no rename pending.
+
+### Added (spec 035 — Webapp capstone closure)
+- 9 operator panels (FR-001..FR-008): IC approval card (T036), AWS warning composer (T037), audit timeline (T038), risk matrix (T039), planning IAP (T042), span-of-control warning (T043), field-coordinator offline (T041), resilience handover-PDF (T044), classifier-mask banner (T046).
+- 13 sector workspaces under `apps/web/src/app/(operations)/sectors/` covering FR-014..FR-024 / FR-029 across SAPOL, SES SA, DFES WA (cultural-safety + iron-ore-haul), AT TAS island isolation, TasPol multilingual, AFP ACT precinct, SES ACT, NTES multilingual, SJA NT tropical, BoM broadcast, NEMA DACC JATWC, and the utility/insurance recovery sector.
+- Cultural-safety subsystem (T053, FR-016, NN-4): elder-routing + 90-second-timeout decision service with closed-set outcomes `cultural_safety_timeout_override` / `cultural_safety_held` and AWS-level allowlist for IC overrides.
+- Language pack registry (T050, NN-4 v1 baseline): Simplified Chinese + 5 ATSI community packs with reviewer-required fallback chain, wired into the PIO composer (T073).
+- Recovery dashboard extension (T063..T065, FR-024 + SC-005): claims-velocity dashboard, FR-024 built/economic recovery environments, Sendai counterfactual ratio + threshold warning, claims-velocity dollars-paid / dollars-lodged timeline.
+- US-3 reusable subsystems (T050..T052): cultural-safety panel, infrastructure overlay (iron-ore haul road, port critical, island logistics, federal precinct), claims-velocity dashboard.
+- Cross-cutting horizontals (US-5): SovereigntyBanner with carve-out badge (T069), Foundry carve-out registry (T070, FR-029) + 90-day CI review gate (T071, `.github/workflows/foundry-carveout-review.yml`), generalised offline subsystem registration via `(operations)/layout.tsx` (T072), multilingual fallback chain wiring (T073).
+- Audit observability (T078): `ama.audit.outcome` OTEL span attribute helper in `apps/api/app/observability/audit_span.py`, emitted by the cultural-safety service so every closed-set outcome is searchable in Application Insights.
+- Architecture diagrams (T079): middleware stack + offline-replay flow in `docs/architecture/spec-035-middleware-and-offline.md`.
+
 ### Added (spec 032 — Rubric Improvements, in progress)
 - 9-step speckit orchestration artefacts under `specs/032-rubric-improvements/` (spec, plan, research, data-model, quickstart, contracts, two checklists, tasks, analysis).
 - `.pre-commit-config.yaml` with ruff/mypy/import-linter/gitleaks/bicep-lint hooks (FR-Q04, T001).

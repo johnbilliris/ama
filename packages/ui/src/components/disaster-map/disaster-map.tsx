@@ -27,6 +27,13 @@ export interface DisasterMapProps {
   focus?: { center: [number, number]; zoom?: number } | null;
   /** Unique key for persisting zoom/center independently per map instance. */
   viewportKey?: string;
+  /**
+   * Optional trigger value. When this changes, the current camera viewport is
+   * persisted immediately (bypassing the 500ms debounce). Use this to force a
+   * save at meaningful transitions (e.g. simulation pause/stop) so the saved
+   * viewport reflects the latest user view even if `moveend` hasn't flushed.
+   */
+  saveViewportTrigger?: string | number | null;
 }
 
 export function DisasterMap({
@@ -36,6 +43,7 @@ export function DisasterMap({
   className,
   focus,
   viewportKey,
+  saveViewportTrigger,
 }: DisasterMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<unknown>(null);
@@ -166,6 +174,28 @@ export function DisasterMap({
   useEffect(() => {
     updateMarkers();
   }, [updateMarkers]);
+
+  // Force-persist current camera viewport when `saveViewportTrigger` changes.
+  // Used by callers (e.g. simulation dashboard) to flush the viewport at known
+  // transitions like pause/stop, bypassing the moveend debounce.
+  useEffect(() => {
+    if (!mapReady || saveViewportTrigger == null) return;
+    const map = mapRef.current as
+      | { getCamera: () => { center?: [number, number]; zoom?: number } }
+      | null;
+    if (!map?.getCamera) return;
+    try {
+      const cam = map.getCamera();
+      if (cam.center && cam.zoom != null) {
+        saveViewport(
+          { zoom: cam.zoom, center: [cam.center[0], cam.center[1]] },
+          { immediate: true },
+        );
+      }
+    } catch {
+      // best-effort — never let a viewport save throw
+    }
+  }, [saveViewportTrigger, mapReady, saveViewport]);
 
   // Pan/zoom to an external focus viewport (e.g. when the simulation
   // controller seeds a scenario at a known location). Only fires when `focus`

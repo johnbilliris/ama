@@ -1,13 +1,25 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "FoundryCarveOutRegistry",
-  "description": "Carve-out registry for non-AU Foundry model deployments. Enforces Constitution Non-Negotiable #2.",
+  "description": "Carve-out registry for non-AU Foundry model deployments. Enforces Constitution Non-Negotiable #2. Spec 036 F-A4 (Pass 2 Q-P2-03 / FR-RAG-CV-01) added the registry-root keys `min_approvers_prod` (default 3) + `min_approvers_dev` (default 2) and the per-row `environment` enum so the OPA rego at `infra/policy/rego/foundry_carveout.rego` can apply an environment-aware approver-count floor. Schema-level `minItems: 2` is retained for backward compatibility with spec-032 registries; the prod 3-approver floor is enforced by OPA at runtime.",
   "type": "object",
   "required": ["version", "last_reviewed", "reviewer_quorum", "deployments"],
   "properties": {
     "version": { "type": "integer", "minimum": 1 },
     "last_reviewed": { "type": "string", "format": "date" },
     "reviewer_quorum": { "type": "integer", "minimum": 2 },
+    "min_approvers_prod": {
+      "description": "Spec 036 F-A4 NEW key. Minimum approver_identities count for `environment == \"prod\"` rows. Default 3 per FR-RAG-CV-01 + Pass 2 Q-P2-03.",
+      "type": "integer",
+      "minimum": 3,
+      "default": 3
+    },
+    "min_approvers_dev": {
+      "description": "Spec 036 F-A4 NEW key. Minimum approver_identities count for `environment in {\"dev\", \"staging\"}` rows. Default 2 (spec-032 behaviour preserved).",
+      "type": "integer",
+      "minimum": 2,
+      "default": 2
+    },
     "deployments": {
       "type": "array",
       "items": {
@@ -25,6 +37,11 @@
         "properties": {
           "model_name": { "type": "string", "minLength": 3 },
           "region": { "type": "string", "minLength": 4 },
+          "environment": {
+            "description": "Spec 036 F-A4 NEW field. Discriminator for the environment-aware quorum rule. Optional for backward compatibility with spec-032 rows; OPA treats a missing value as dev/staging.",
+            "type": "string",
+            "enum": ["prod", "staging", "dev"]
+          },
           "purpose": {
             "type": "string",
             "enum": ["production", "shadow", "evaluation", "research"]

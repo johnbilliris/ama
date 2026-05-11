@@ -1,0 +1,386 @@
+{
+  "$comment": "Spec 036 Phase F (Cluster A10) golden-set v1 fixture. Consolidates the agency-disambiguation, authority-precedence, COMDISPLAN-activation, and tie-break entries used by F-A1+A3 + F-A6 contract tests. Each entry has shape: {id, scenario, query, jurisdiction, expected_agency?, expected_agency_role?, expected_authority_level?, expected_precedence_rank?, comment}. The full body lands in T220; this file is the seed.",
+  "$schemaVersion": "1.0",
+  "feature": "036-foundry-rag-grounding",
+  "phase": "F",
+  "entries": [
+    {
+      "id": "agency-disambig-nsw-rfs-01",
+      "scenario": "agency_disambiguation",
+      "query": "bushfire evacuation triggers in Bega Valley LGA",
+      "jurisdiction": "nsw",
+      "expected_agency": "NSW-RFS",
+      "expected_agency_role": "rural-fire",
+      "comment": "NSW-RFS owns rural-fire bushfire response; FRNSW handles urban interface only. SC-013 ≥95% target."
+    },
+    {
+      "id": "agency-disambig-frnsw-01",
+      "scenario": "agency_disambiguation",
+      "query": "high-rise fire hose-laying procedure in Sydney CBD",
+      "jurisdiction": "nsw",
+      "expected_agency": "FRNSW",
+      "expected_agency_role": "urban-fire",
+      "comment": "FRNSW owns urban-fire response in metropolitan NSW; NSW-RFS does not."
+    },
+    {
+      "id": "agency-disambig-cfa-vic-01",
+      "scenario": "agency_disambiguation",
+      "query": "incendiary lightning strike protocols Wimmera region",
+      "jurisdiction": "vic",
+      "expected_agency": "CFA-VIC",
+      "expected_agency_role": "rural-fire",
+      "comment": "CFA-VIC handles rural fire; FRV handles metropolitan urban fire."
+    },
+    {
+      "id": "agency-disambig-frv-01",
+      "scenario": "agency_disambiguation",
+      "query": "Melbourne CBD high-rise emergency egress",
+      "jurisdiction": "vic",
+      "expected_agency": "FRV",
+      "expected_agency_role": "urban-fire",
+      "comment": "FRV (Fire Rescue Victoria) post-2020 reform handles metro Melbourne."
+    },
+    {
+      "id": "agency-disambig-act-esa-01",
+      "scenario": "agency_disambiguation",
+      "query": "ACT bushfire mitigation in Tidbinbilla Nature Reserve",
+      "jurisdiction": "act",
+      "expected_agency": "ACT-ESA",
+      "expected_agency_role": "combined",
+      "comment": "ACT-ESA is a combined agency (RFS + Fire & Rescue ACT) — must NOT conflate with Commonwealth at non-national-institution sites."
+    },
+    {
+      "id": "agency-disambig-ses-nsw-01",
+      "scenario": "agency_disambiguation",
+      "query": "NSW SES storm sandbagging operations Hawkesbury",
+      "jurisdiction": "nsw",
+      "expected_agency": "NSW-SES",
+      "expected_agency_role": "ses",
+      "comment": "NSW SES owns storm/flood; not RFS or FRNSW."
+    },
+    {
+      "id": "agency-disambig-ses-vic-01",
+      "scenario": "agency_disambiguation",
+      "query": "Victoria SES flood rescue Latrobe Valley",
+      "jurisdiction": "vic",
+      "expected_agency": "VICSES",
+      "expected_agency_role": "ses",
+      "comment": "VICSES (Victoria SES) owns storm/flood response."
+    },
+    {
+      "id": "agency-disambig-ntes-01",
+      "scenario": "agency_disambiguation",
+      "query": "Northern Territory cyclone shelter activation Tiwi Islands",
+      "jurisdiction": "nt",
+      "expected_agency": "NTES",
+      "expected_agency_role": "ses",
+      "comment": "NTES (Northern Territory Emergency Service) — distinct from Bushfires NT."
+    },
+    {
+      "id": "agency-disambig-bushfires-nt-01",
+      "scenario": "agency_disambiguation",
+      "query": "Bushfires NT seasonal mitigation in Top End",
+      "jurisdiction": "nt",
+      "expected_agency": "Bushfires-NT",
+      "expected_agency_role": "rural-fire",
+      "comment": "Bushfires NT is the rural fire authority — distinct from NTES."
+    },
+    {
+      "id": "agency-disambig-samfs-01",
+      "scenario": "agency_disambiguation",
+      "query": "SAMFS metropolitan structural fire response Adelaide",
+      "jurisdiction": "sa",
+      "expected_agency": "SAMFS",
+      "expected_agency_role": "urban-fire",
+      "comment": "SAMFS (SA Metropolitan Fire Service) — urban fire only."
+    },
+    {
+      "id": "agency-disambig-sacfs-01",
+      "scenario": "agency_disambiguation",
+      "query": "SA Country Fire Service grass fire response Mid North",
+      "jurisdiction": "sa",
+      "expected_agency": "SACFS",
+      "expected_agency_role": "rural-fire",
+      "comment": "SACFS handles rural fires; SAMFS handles urban only."
+    },
+    {
+      "id": "agency-disambig-ses-sa-01",
+      "scenario": "agency_disambiguation",
+      "query": "SA SES land search and rescue Flinders Ranges",
+      "jurisdiction": "sa",
+      "expected_agency": "SASES",
+      "expected_agency_role": "ses",
+      "comment": "SASES (SA State Emergency Service)."
+    },
+    {
+      "id": "agency-disambig-dfes-wa-01",
+      "scenario": "agency_disambiguation",
+      "query": "DFES bushfire response Perth Hills",
+      "jurisdiction": "wa",
+      "expected_agency": "DFES-WA",
+      "expected_agency_role": "combined",
+      "comment": "DFES-WA is a combined agency (Fire + Rescue + SES + Marine)."
+    },
+    {
+      "id": "agency-disambig-dfes-marine-01",
+      "scenario": "agency_disambiguation",
+      "query": "WA marine rescue group operations Geographe Bay",
+      "jurisdiction": "wa",
+      "expected_agency": "DFES-WA-Marine",
+      "expected_agency_role": "marine-rescue",
+      "comment": "DFES-WA Marine Rescue arm — distinct from generic combined response."
+    },
+    {
+      "id": "agency-disambig-tfs-01",
+      "scenario": "agency_disambiguation",
+      "query": "Tasmania Fire Service bushfire response Huon Valley",
+      "jurisdiction": "tas",
+      "expected_agency": "TFS",
+      "expected_agency_role": "combined",
+      "comment": "TFS (Tasmania Fire Service) covers both urban and rural."
+    },
+    {
+      "id": "agency-disambig-ses-tas-01",
+      "scenario": "agency_disambiguation",
+      "query": "Tasmania SES storm response Launceston",
+      "jurisdiction": "tas",
+      "expected_agency": "SES-TAS",
+      "expected_agency_role": "ses",
+      "comment": "SES-TAS — distinct from TFS."
+    },
+    {
+      "id": "agency-disambig-qfes-rural-01",
+      "scenario": "agency_disambiguation",
+      "query": "Queensland rural fire response Granite Belt",
+      "jurisdiction": "qld",
+      "expected_agency": "QFES-Rural",
+      "expected_agency_role": "rural-fire",
+      "comment": "QFES Rural Fire Service arm — distinct from QFES Urban Fire."
+    },
+    {
+      "id": "agency-disambig-qfes-urban-01",
+      "scenario": "agency_disambiguation",
+      "query": "Brisbane CBD high-rise fire response",
+      "jurisdiction": "qld",
+      "expected_agency": "QFES-Urban",
+      "expected_agency_role": "urban-fire",
+      "comment": "QFES Urban arm — distinct from QFES Rural."
+    },
+    {
+      "id": "agency-disambig-ses-qld-01",
+      "scenario": "agency_disambiguation",
+      "query": "Queensland SES cyclone response Far North",
+      "jurisdiction": "qld",
+      "expected_agency": "SES-QLD",
+      "expected_agency_role": "ses",
+      "comment": "SES-QLD — distinct from QFES."
+    },
+    {
+      "id": "auth-precedence-parliament-house-01",
+      "scenario": "authority_precedence",
+      "query": "Parliament House evacuation chain of command",
+      "jurisdiction": "act",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "Commonwealth doctrine wins for Parliament House (national institution in ACT). SC-015 ≥95% target."
+    },
+    {
+      "id": "auth-precedence-defence-estate-01",
+      "scenario": "authority_precedence",
+      "query": "Russell defence precinct lockdown procedure",
+      "jurisdiction": "act",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "Commonwealth (Defence) doctrine wins for Russell precinct."
+    },
+    {
+      "id": "auth-precedence-embassy-01",
+      "scenario": "authority_precedence",
+      "query": "diplomatic precinct security threat in Yarralumla",
+      "jurisdiction": "act",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "DFAT + AFP doctrine wins for embassies (national institutions)."
+    },
+    {
+      "id": "auth-precedence-aiatsis-01",
+      "scenario": "authority_precedence",
+      "query": "AIATSIS heritage building emergency response",
+      "jurisdiction": "act",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "AIATSIS is a Commonwealth statutory body."
+    },
+    {
+      "id": "auth-precedence-act-residential-01",
+      "scenario": "authority_precedence",
+      "query": "Belconnen residential evacuation routes",
+      "jurisdiction": "act",
+      "expected_authority_level": "state-territory",
+      "expected_precedence_rank": 2,
+      "comment": "Local-government domain → ACT-ESA wins (Commonwealth defers to state-territory for non-national-institution residential)."
+    },
+    {
+      "id": "auth-precedence-natlib-01",
+      "scenario": "authority_precedence",
+      "query": "National Library of Australia emergency evacuation",
+      "jurisdiction": "act",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "National Library is a Commonwealth-funded national institution."
+    },
+    {
+      "id": "auth-precedence-nma-01",
+      "scenario": "authority_precedence",
+      "query": "National Museum of Australia incident command",
+      "jurisdiction": "act",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "National Museum is a Commonwealth statutory body."
+    },
+    {
+      "id": "auth-precedence-afp-01",
+      "scenario": "authority_precedence",
+      "query": "Australian Federal Police high-profile site protection ACT",
+      "jurisdiction": "act",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "AFP doctrine for VIP / high-profile sites in ACT."
+    },
+    {
+      "id": "auth-precedence-tubbiwood-act-01",
+      "scenario": "authority_precedence",
+      "query": "Tuggeranong residential bushfire evacuation",
+      "jurisdiction": "act",
+      "expected_authority_level": "state-territory",
+      "expected_precedence_rank": 2,
+      "comment": "Suburban Tuggeranong → ACT-ESA wins; not a national institution."
+    },
+    {
+      "id": "auth-precedence-civic-01",
+      "scenario": "authority_precedence",
+      "query": "Civic Centre street protest crowd dispersal",
+      "jurisdiction": "act",
+      "expected_authority_level": "state-territory",
+      "expected_precedence_rank": 2,
+      "comment": "ACT Policing handles routine Civic Centre operations."
+    },
+    {
+      "id": "auth-precedence-high-court-01",
+      "scenario": "authority_precedence",
+      "query": "High Court of Australia security incident",
+      "jurisdiction": "act",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "High Court is a Commonwealth institution."
+    },
+    {
+      "id": "auth-precedence-asio-01",
+      "scenario": "authority_precedence",
+      "query": "ASIO headquarters security threat response",
+      "jurisdiction": "act",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "ASIO HQ — Commonwealth/national security."
+    },
+    {
+      "id": "auth-precedence-anu-01",
+      "scenario": "authority_precedence",
+      "query": "Australian National University campus emergency",
+      "jurisdiction": "act",
+      "expected_authority_level": "state-territory",
+      "expected_precedence_rank": 2,
+      "comment": "ANU is a university — emergency response goes through ACT-ESA, not Commonwealth."
+    },
+    {
+      "id": "auth-precedence-cwlth-aviation-01",
+      "scenario": "authority_precedence",
+      "query": "Australian Maritime Safety Authority oil spill response",
+      "jurisdiction": "national",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "AMSA is Commonwealth — owns offshore oil-spill doctrine nationwide."
+    },
+    {
+      "id": "auth-precedence-cwlth-defence-01",
+      "scenario": "authority_precedence",
+      "query": "ADF Defence Aid to the Civil Community activation",
+      "jurisdiction": "national",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "ADF DACC is Commonwealth — supersedes state EOC during NEMA-coordinated activations."
+    },
+    {
+      "id": "auth-precedence-cwlth-bom-01",
+      "scenario": "authority_precedence",
+      "query": "Bureau of Meteorology severe weather warning issuance",
+      "jurisdiction": "national",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "BoM issues authoritative warnings — Commonwealth doctrine."
+    },
+    {
+      "id": "auth-precedence-cwlth-aushlth-01",
+      "scenario": "authority_precedence",
+      "query": "Australian Health Protection Principal Committee pandemic response",
+      "jurisdiction": "national",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "AHPPC is Commonwealth-led for nationally significant health emergencies."
+    },
+    {
+      "id": "auth-precedence-cwlth-asio-anomaly-01",
+      "scenario": "authority_precedence",
+      "query": "ONI threat assessment for state event security",
+      "jurisdiction": "national",
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "Office of National Intelligence — Commonwealth function for national-level event security."
+    },
+    {
+      "id": "auth-precedence-state-localgov-01",
+      "scenario": "authority_precedence",
+      "query": "Sydney metropolitan local government emergency operations centre activation",
+      "jurisdiction": "nsw",
+      "expected_authority_level": "state-territory",
+      "expected_precedence_rank": 2,
+      "comment": "Local government emergency ops escalate through state EMC, not Commonwealth."
+    },
+    {
+      "id": "auth-precedence-state-electricity-01",
+      "scenario": "authority_precedence",
+      "query": "Victorian electricity grid emergency restoration",
+      "jurisdiction": "vic",
+      "expected_authority_level": "state-territory",
+      "expected_precedence_rank": 2,
+      "comment": "State energy supply — VICEMC + AEMO state-level coordination."
+    },
+    {
+      "id": "agency-disambig-mrnsw-01",
+      "scenario": "agency_disambiguation",
+      "query": "marine rescue boat callout off Port Stephens",
+      "jurisdiction": "nsw",
+      "expected_agency": "MRNSW",
+      "expected_agency_role": "marine-rescue",
+      "comment": "Marine Rescue NSW (MRNSW) is the NSW marine arm — distinct from FRNSW/NSW-RFS/NSW-SES."
+    },
+    {
+      "id": "comdisplan-activation-flood-qld-01",
+      "scenario": "comdisplan_activation",
+      "query": "regional flood response coordination during NEMA activation",
+      "jurisdiction": "qld",
+      "national_emergency_active": true,
+      "expected_authority_level": "commonwealth",
+      "expected_precedence_rank": 1,
+      "comment": "When national_emergency_active=true, ALL commonwealth chunks elevate to rank=1 regardless of jurisdiction. FR-RAG-COMP-04."
+    },
+    {
+      "id": "tiebreak-recency-01",
+      "scenario": "precedence_tiebreak",
+      "query": "Synthesised tie scenario — same authority_level + precedence_rank, distinguished by recency",
+      "jurisdiction": "national",
+      "expected_tiebreak_order": ["recency", "licence_mode", "embedding_model_id", "chunk_id"],
+      "comment": "Pass 1 Q-P1-02 + ADR-13 deterministic tie-break: (1) recency, (2) licence_mode (full-text > metadata-only), (3) embedding_model_id lex, (4) chunk_id lex."
+    }
+  ]
+}

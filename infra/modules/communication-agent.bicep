@@ -31,7 +31,7 @@ param containerImageTag string = 'latest'
 @description('Name of the Azure Container Registry (without .azurecr.io)')
 param containerRegistryName string
 
-@description('Azure OpenAI endpoint URL')
+@description('Foundry (AIServices) endpoint URL — consumed as AZURE_AI_PROJECT_ENDPOINT (ADR-20 §Q-P6-03).')
 param azureOpenAiEndpoint string
 
 @description('Azure OpenAI deployment name')
@@ -187,7 +187,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             memory: '1.0Gi'
           }
           env: [
-            { name: 'AZURE_OPENAI_ENDPOINT', value: azureOpenAiEndpoint }
+            { name: 'AZURE_AI_PROJECT_ENDPOINT', value: azureOpenAiEndpoint }
             { name: 'AZURE_OPENAI_DEPLOYMENT', value: azureOpenAiDeployment }
             { name: 'COSMOS_ENDPOINT', value: cosmosAccount.properties.documentEndpoint }
             { name: 'COSMOS_DATABASE_NAME', value: cosmosDbDatabaseName }
