@@ -44,3 +44,19 @@ See [`docs/chaos/authoring.md`](../docs/chaos/authoring.md) (added by spec 032 S
 ## Traceability
 
 Each spec under `specs/` should ship a requirement → test traceability matrix (FR-T07). Spec 032's matrix lives at `specs/032-rubric-improvements/traceability.md`.
+
+
+---
+
+## Spec-038 convention — Windows pytest base temp
+
+All spec-038 (test-data provisioning) tests on Windows use a fixed pytest
+base temp to keep the long Windows path stable and avoid PathTooLongException
+in fixture trees:
+
+```powershell
+python -m pytest --basetemp=C:\tmp\pytest038 -q tests/contract/spec038/ tests/unit/spec038/
+```
+
+This convention is referenced from `specs/038-test-data-provisioning/tasks.md`
+verification commands (T005).

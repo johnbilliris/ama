@@ -18,6 +18,9 @@ dependencies = [
   # for evidence-pack artefacts + YAML loader for the publication-gate config.
   "jsonschema>=4.21",
   "pyyaml>=6.0",
+  # Spec-038 (T001, FR-022) — RFC 8785 JSON Canonicalisation Scheme for
+  # deterministic byte-identical NDJSON encoding (canonical JSON, sorted keys).
+  "rfc8785>=0.1.4",
 ]
 
 [project.optional-dependencies]
@@ -120,3 +123,42 @@ forbidden_modules = ["apps"]
 # NOTE: packages/prompts/ is a YAML-asset directory (no Python module), so it
 # has no imports to lint. Re-add a contract here only if Python code is added
 # under packages/prompts/.
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Spec-038 / Two-Path Rule (SC-007, plan §"Two-Path Rule").
+# Production code MUST NOT import the simulator package, and runtime code MUST
+# NOT import the seed package directly (seed records flow through the loader).
+# ────────────────────────────────────────────────────────────────────────────────
+
+[[tool.importlinter.contracts]]
+name = "simulator_not_imported_by_production"
+type = "forbidden"
+source_modules = [
+  "apps.api.app.routers",
+  "apps.api.app.services",
+  "apps.agents",
+  "apps.ingestion",
+]
+forbidden_modules = [
+  "apps.api.app.services.simulation.feeds",
+  "apps.api.app.services.simulation.replay",
+  "apps.api.app.services.simulation.generators",
+]
+ignore_imports = [
+  "apps.api.app.services.simulation.feeds -> apps.api.app.services.simulation.feeds.**",
+  "apps.api.app.services.simulation.replay -> apps.api.app.services.simulation.replay.**",
+  "apps.api.app.services.simulation.generators -> apps.api.app.services.simulation.generators.**",
+]
+
+[[tool.importlinter.contracts]]
+name = "seed_not_imported_by_runtime"
+type = "forbidden"
+source_modules = [
+  "apps.api.app.routers",
+  "apps.api.app.services",
+  "apps.agents",
+  "apps.ingestion",
+]
+forbidden_modules = [
+  "packages.domain.src.domain.seed",
+]
