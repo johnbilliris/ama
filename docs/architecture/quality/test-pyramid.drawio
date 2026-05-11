@@ -1,0 +1,38 @@
+<mxfile host="app.diagrams.net" modified="2026-05-11T00:00:00.000Z" agent="spec-001-fallback" version="24.0.0">
+  <diagram name="QUAL-01" id="qual01-fallback">
+    <mxGraphModel dx="1214" dy="686" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+      <mxCell id="0"/>
+      <mxCell id="1" parent="0"/>
+      <!-- Title -->
+      <mxCell id="2" value="QUAL-01 — Test Pyramid" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+        <mxGeometry x="200" y="20" width="600" height="40" as="geometry"/>
+      </mxCell>
+      <!-- E2E tier (top, narrowest) -->
+      <mxCell id="3" value="E2E (~20 tests)&#xa;Tooling: Playwright" style="shape=mxgraph.lean_mapping.electronic_info_flow_edge;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="400" y="100" width="200" height="80" as="geometry"/>
+      </mxCell>
+      <!-- Simulation tier -->
+      <mxCell id="4" value="Simulation (~30 tests)&#xa;Tooling: simulation harness" style="shape=mxgraph.lean_mapping.electronic_info_flow_edge;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="320" y="200" width="360" height="80" as="geometry"/>
+      </mxCell>
+      <!-- Integration tier -->
+      <mxCell id="5" value="Integration (~80 tests)&#xa;Tooling: pytest" style="shape=mxgraph.lean_mapping.electronic_info_flow_edge;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="230" y="300" width="540" height="80" as="geometry"/>
+      </mxCell>
+      <!-- Contract tier -->
+      <mxCell id="6" value="Contract (~50 tests)&#xa;Tooling: pytest" style="shape=mxgraph.lean_mapping.electronic_info_flow_edge;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="140" y="400" width="720" height="80" as="geometry"/>
+      </mxCell>
+      <!-- Unit tier (bottom, widest) -->
+      <mxCell id="7" value="Unit (~159 tests)&#xa;Tooling: pytest" style="shape=mxgraph.lean_mapping.electronic_info_flow_edge;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="50" y="500" width="900" height="80" as="geometry"/>
+      </mxCell>
+      <!-- FR-025 label -->
+      <mxCell id="8" value="FR-025" style="text;html=1;strokeColor=none;fillColor=#fff2cc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+        <mxGeometry x="500" y="620" width="100" height="30" as="geometry"/>
+      </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

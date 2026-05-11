@@ -1,0 +1,76 @@
+<mxfile host="app.diagrams.net" modified="2026-05-11T00:00:00.000Z" agent="spec-001-fallback" version="24.0.0">
+  <diagram name="SECTOR-03" id="sector03-integrations">
+    <mxGraphModel><root>
+      <mxCell id="0"/>
+      <mxCell id="1" parent="0"/>
+      <mxCell id="2" value="BoM weather
+XML / CAP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dbeafe;" vertex="1" parent="1">
+        <mxGeometry x="20" y="70" width="150" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="3" value="GA seismic
+GeoJSON" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dbeafe;" vertex="1" parent="1">
+        <mxGeometry x="20" y="170" width="150" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="4" value="NEMA NCM
+EDXL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dbeafe;" vertex="1" parent="1">
+        <mxGeometry x="20" y="270" width="150" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="5" value="State agencies
+CAP / EDXL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dbeafe;" vertex="1" parent="1">
+        <mxGeometry x="20" y="370" width="150" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="6" value="CAP intake endpoint
+Event Hubs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fee2e2;" vertex="1" parent="1">
+        <mxGeometry x="300" y="70" width="170" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="7" value="Geo ingest endpoint
+Event Hubs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fee2e2;" vertex="1" parent="1">
+        <mxGeometry x="300" y="170" width="170" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="8" value="EDXL intake endpoint
+Service Bus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fee2e2;" vertex="1" parent="1">
+        <mxGeometry x="300" y="270" width="170" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="9" value="Agency intake endpoint
+Event Hubs / Service Bus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fee2e2;" vertex="1" parent="1">
+        <mxGeometry x="300" y="370" width="170" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="10" value="Alerting Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dcfce7;" vertex="1" parent="1">
+        <mxGeometry x="590" y="70" width="170" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="11" value="Impact Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dcfce7;" vertex="1" parent="1">
+        <mxGeometry x="590" y="170" width="170" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="12" value="Coordination Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dcfce7;" vertex="1" parent="1">
+        <mxGeometry x="590" y="270" width="170" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="13" value="Operations / Recovery Agents" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dcfce7;" vertex="1" parent="1">
+        <mxGeometry x="590" y="370" width="170" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="14" value="CAP weather alerts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="2" target="6">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="15" value="seismic features" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="3" target="7">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="16" value="national coordination messages" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="4" target="8">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="17" value="state incident feeds" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="5" target="9">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="18" value="alert decisions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="6" target="10">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="19" value="impact scoring" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="7" target="11">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="20" value="cross-agency coordination" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="8" target="12">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="21" value="jurisdiction operations" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="9" target="13">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+    </root></mxGraphModel>
+  </diagram>
+</mxfile>
