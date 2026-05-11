@@ -11,6 +11,8 @@ const NAV_ITEMS = [
   { href: "/governance/dashboard/readiness", label: "Readiness" },
   { href: "/governance/dashboard/recovery", label: "Recovery" },
   { href: "/governance/dashboard/risk", label: "Risk & Warning" },
+  // Spec-037 (T044, FR-021 Clarification 3) — Executive KPI Surface page.
+  { href: "/governance/executive", label: "Executive KPI Surface" },
 ];
 
 interface DashboardLayoutProps {
