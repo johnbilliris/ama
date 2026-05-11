@@ -288,10 +288,10 @@ description: "Actionable, dependency-ordered task list for spec-038 In-Product H
 - [X] T-AA167 [P] Approver-identity persistence: snapshot publish endpoint records full approver identity + role + ISO timestamp into `SnapshotRecord.approvers[]`. Verify via integration test. — FR-011b, CHK065
 - [X] T-AA168 [P] Rollback flow: `POST /help/snapshots/{id}/rollback` re-binds alias to a prior snapshot; emits `audit.snapshot_rollback` with `previous_snapshot_id`, `restored_snapshot_id`, `actor_id`, `change_reason`. — FR-011c, CHK066
 - [X] T-AA169 [P] Spec-snapshot composition rule: only specs with status ∈ {Active, Implemented} that are listed in the manifest are admitted; draft/experimental excluded. Enforced in `apps/ingest-runner/src/help_snapshot/source_loaders.py`; tested in T-AA185. — FR-011, CHK063
-- [ ] T-AA170 [P] Per-tenant snapshot composition override: manifest may contain `tenants.<id>.exclude` lists. Enforced + tested. — FR-011-AMEND
-- [ ] T-AA171 [P] Snapshot immutability: `snapshot_records` Cosmos role permits insert-only for the publisher identity. Verify via Cosmos role assignment list. — FR-011a
-- [ ] T-AA172 [P] Deprecation-notice pipeline: when a publish supersedes content, the publisher writes a `deprecation_map` JSON enabling `/help/articles/{slug}` to render `<DeprecationNotice />`. Withdrawn-no-replacement entries surface support-handoff. — FR-011d, FR-011d-AMEND, CHK067
-- [ ] T-AA173 [Gate] End-to-end publish→verify→rollback rehearsal in dev env captured under `docs/runbooks/help/snapshot-publish-rollback-rehearsal-{date}.md`. Confirms ≤5 min alias swing. — FR-011c, R6, CHK066
+- [X] T-AA170 [P] Per-tenant snapshot composition override: manifest may contain `tenants.<id>.exclude` lists. Enforced + tested. — FR-011-AMEND
+- [X] T-AA171 [P] Snapshot immutability: `snapshot_records` Cosmos role permits insert-only for the publisher identity. Verify via Cosmos role assignment list. — FR-011a
+- [X] T-AA172 [P] Deprecation-notice pipeline: when a publish supersedes content, the publisher writes a `deprecation_map` JSON enabling `/help/articles/{slug}` to render `<DeprecationNotice />`. Withdrawn-no-replacement entries surface support-handoff. — FR-011d, FR-011d-AMEND, CHK067
+- [X] T-AA173 [Gate] End-to-end publish→verify→rollback rehearsal in dev env captured under `docs/runbooks/help/snapshot-publish-rollback-rehearsal-{date}.md`. Confirms ≤5 min alias swing. — FR-011c, R6, CHK066
 
 ---
 
