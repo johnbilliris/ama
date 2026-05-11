@@ -15,8 +15,6 @@ specs:
 
 This page shows how jurisdiction filters enforce authority boundaries as an incident moves from suppression to recovery and then to community welfare coordination.
 
-> **Note**: This diagram is skill-fallback authored — refine before merge.
-
 ![SECTOR-04: Jurisdiction-Filter Behaviour](jurisdiction-filter.png)
 
 ## Key Elements

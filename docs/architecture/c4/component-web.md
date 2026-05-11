@@ -17,8 +17,6 @@ specs:
 
 ![C4-L3-Web: Web Dashboard Components](component-web.png)
 
-> **Skill-fallback note:** This diagram is skill-fallback authored and the PNG is a placeholder; refine before merge.
-
 ## Related Pages
 
 - [C4 Level 1 — System Context](system.md)

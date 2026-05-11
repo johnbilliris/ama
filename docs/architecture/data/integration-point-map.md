@@ -14,8 +14,6 @@ specs:
 
 This page maps each named external system to its incoming data format, its AMA ingestion endpoint, and the agent that consumes the resulting signal.
 
-> **Note**: This diagram is skill-fallback authored — refine before merge.
-
 ![SECTOR-03: Integration-Point Map](integration-point-map.png)
 
 ## Key Elements

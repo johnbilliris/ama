@@ -14,8 +14,6 @@ specs:
 
 ![QUAL-01: Test Pyramid](test-pyramid.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 <!-- spec-cross-ref: spec-024 -->
 
 This view defines the five-tier test pyramid with relative volumes and tooling for the AMA platform so QA Engineers can scope test investment correctly.

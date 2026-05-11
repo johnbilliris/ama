@@ -15,8 +15,6 @@ specs:
 
 ![SECTOR-05: Cross-Sector Touchpoints](cross-sector-touchpoints.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 <!-- spec-cross-ref: spec-015 -->
 
 This view documents the data exchange protocols and lead-agency designation rules at each cross-sector boundary for Community/NGOs, Health, Local Gov, State Gov, Territory Gov, Transport, Utility, and Volunteer personas.

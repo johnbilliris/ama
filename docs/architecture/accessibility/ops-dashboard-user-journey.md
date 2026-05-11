@@ -14,8 +14,6 @@ specs:
 
 ![EXP-01: Ops Dashboard User Journey](ops-dashboard-user-journey.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 <!-- spec-cross-ref: spec-020 -->
 
 This view documents the Incident Commander's journey through the ops dashboard with WCAG 2.2 AA touchpoint annotations, enabling UX and PO review of accessibility obligations per step.

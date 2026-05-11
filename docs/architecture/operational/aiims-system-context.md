@@ -14,8 +14,6 @@ specs:
 
 ![OPS-01: AIIMS System Context](aiims-system-context.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 This context view maps each named AIIMS role to at least one hub capability so new joiners can see who interacts with which part of the platform.
 
 ## Key Elements

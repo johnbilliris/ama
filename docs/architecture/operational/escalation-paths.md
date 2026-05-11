@@ -14,8 +14,6 @@ specs:
 
 ![OPS-02: Escalation Paths](escalation-paths.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 This escalation view shows how the operating posture changes from L1 to L3, which AIIMS role owns each decision, and what action the system takes when the threshold is met.
 
 ## Escalation Summary

@@ -15,8 +15,6 @@ specs:
 
 ![SEQ-04: Recovery Transition](recovery-transition.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 This transition view shows how AIIMS responsibilities shift as the incident moves from response into recovery and then back to steady-state normalisation.
 
 ## Phase Notes

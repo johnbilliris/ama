@@ -13,8 +13,6 @@ specs:
 
 [→ Architecture index](../README.md)
 
-> **Skill-fallback note**: This diagram source and PNG are skill-fallback authored. Refine before merge.
-
 <!-- spec-cross-ref: spec-001 -->
 <!-- spec-cross-ref: spec-017 -->
 

@@ -30,8 +30,6 @@ specs:
 
 ![C4-L2: Container View](container.png)
 
-> **Skill-fallback note:** This diagram is skill-fallback authored and the PNG is a placeholder; refine before merge.
-
 ```mermaid
 C4Container
   title Container View — Disaster Response Coordination Hub (within Azure AU East)

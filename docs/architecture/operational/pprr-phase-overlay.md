@@ -14,8 +14,6 @@ specs:
 
 ![OPS-03: PPRR Phase Overlay](pprr-phase-overlay.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 <!-- spec-cross-ref: spec-019 -->
 
 This view maps platform capabilities and AIIMS roles to each PPRR phase so Resilience Planners can identify which system functions are active during Prevention, Preparedness, Response, and Recovery.

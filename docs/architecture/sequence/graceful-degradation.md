@@ -14,8 +14,6 @@ specs:
 
 ![SEQ-06: Graceful Degradation Behaviour](graceful-degradation.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 The graceful-degradation sequence documents how the hub stays usable when automation components are impaired and which fallback path operators should expect per subsystem.
 
 ## Subsystem Coverage

@@ -29,8 +29,6 @@ specs:
 
 ![C4-L1: System Context](system.png)
 
-> **Skill-fallback note:** This diagram is skill-fallback authored and the PNG is a placeholder; refine before merge.
-
 ```mermaid
 C4Context
   title System Context — Autonomous Disaster Response Coordination Hub

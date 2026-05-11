@@ -16,8 +16,6 @@ specs:
 
 This page traces external CAP, EDXL, and GeoJSON signals from source systems through the AMA ingestion path to Cosmos DB and agent consumers.
 
-> **Note**: This diagram is skill-fallback authored — refine before merge.
-
 ![SECTOR-02: Ingestion Data-Flow](ingestion-data-flow.png)
 
 ## Key Elements

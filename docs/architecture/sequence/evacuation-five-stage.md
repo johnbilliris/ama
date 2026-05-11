@@ -15,8 +15,6 @@ specs:
 
 ![SEQ-03: Evacuation Five-Stage Flow](evacuation-five-stage.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 This page shows the five-stage AIIMS evacuation flow from preparation through return and highlights where a human decision gates the actuation step.
 
 ## Human Approval Gate

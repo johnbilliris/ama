@@ -12,8 +12,6 @@ specs:
 
 [→ Architecture index](../README.md)
 
-> **Skill-fallback note**: This diagram source and PNG are skill-fallback authored. Refine before merge.
-
 <!-- spec-cross-ref: spec-036 -->
 
 ![SEC-01 — AU Residency and Data Classification](./au-residency-data-classification.png)

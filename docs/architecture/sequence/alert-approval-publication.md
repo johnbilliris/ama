@@ -14,8 +14,6 @@ specs:
 
 ![SEQ-01: Alert Approval Publication](alert-approval-publication.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 This sequence shows that alert drafting, approval, and publication are intentionally separated so publication can only occur after explicit human approval.
 
 ## FR Notes

@@ -17,8 +17,6 @@ specs:
 
 ![GOV-01: WAF Pillar Mapping](waf-pillar-mapping.png)
 
-> **Skill-fallback note:** This diagram is skill-fallback authored and the PNG is a placeholder; refine before merge.
-
 ## WAF Pillar Notes
 
 | Pillar | Architecture focus | Relevant specs | Notes |

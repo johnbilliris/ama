@@ -16,8 +16,6 @@ specs:
 
 ![BUILD-01: Agent Runtime LLM Gateway](agent-runtime-llm-gateway.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 <!-- spec-cross-ref: spec-024 -->
 <!-- spec-cross-ref: spec-025 -->
 <!-- spec-cross-ref: spec-030 -->

@@ -15,8 +15,6 @@ specs:
 
 ![SEQ-02: Cross-Agency Recommendation](cross-agency-recommendation.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 This view captures how a shared recommendation is prepared for partner agencies, reviewed by a human decision-maker, and then released for coordinated execution.
 
 ## FR Notes

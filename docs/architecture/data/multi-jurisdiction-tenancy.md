@@ -15,8 +15,6 @@ specs:
 
 This page shows how AMA isolates each Australian jurisdiction as a separate tenant while keeping Cosmos DB partitioning aligned to `/tenant_id`.
 
-> **Note**: This diagram is skill-fallback authored — refine before merge.
-
 ![SECTOR-01: Multi-Jurisdiction Tenancy](multi-jurisdiction-tenancy.png)
 
 ## Key Elements

@@ -14,8 +14,6 @@ specs:
 
 ![RISK-01: Risk Register Lifecycle](risk-register-lifecycle.png)
 
-> **Note**: skill-fallback authored — refine before merge.
-
 <!-- spec-cross-ref: spec-019 -->
 
 This view traces the end-to-end lifecycle of a risk record from identification through treatment to closure, showing the Risk Manager's decision points and escalation path to the Incident Commander on high-residual-risk treatments.
