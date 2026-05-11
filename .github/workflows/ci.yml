@@ -155,9 +155,11 @@ jobs:
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio ruff
+          pip install pytest pytest-asyncio hypothesis ruff
           pip install -e apps/api
           pip install -e apps/agents
+          pip install -e packages/eval-core
+          pip install -e apps/eval-runner
       - name: ruff check (Windows)
         shell: pwsh
         run: ruff check apps tests packages
