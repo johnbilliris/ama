@@ -28,9 +28,7 @@ from packages.domain.src.domain.sim_cascade_matrix import cascade_targets_for
 logger = logging.getLogger(__name__)
 
 
-_RULES_PATH = (
-    Path(__file__).resolve().parents[2] / "config" / "cascade_rules.yaml"
-)
+_RULES_PATH = Path(__file__).resolve().parents[2] / "config" / "cascade_rules.yaml"
 
 
 # Cycle 2 / T-AA20 — translation of the matrix's PascalCase SubAgent
@@ -81,11 +79,7 @@ def _matrix_targets_for_category(category: str) -> list[str]:
     pascal_targets = cascade_targets_for(category)
     if not pascal_targets:
         return []
-    return sorted(
-        _MATRIX_TO_ROLE[name]
-        for name in pascal_targets
-        if name in _MATRIX_TO_ROLE
-    )
+    return sorted(_MATRIX_TO_ROLE[name] for name in pascal_targets if name in _MATRIX_TO_ROLE)
 
 
 def _parse_yaml(text: str) -> dict[str, Any]:
@@ -279,10 +273,7 @@ async def fan_out(
                         "attempted_signal_id": trigger_signal.signal_id,
                         "originating_cascade_id": parent_origin_cascade_id,
                         "refusal_reason": "depth2_cascade_disallowed",
-                        "chat_reply_text": (
-                            "Depth-2 cascade is not allowed; new top-level "
-                            "correlation issued."
-                        ),
+                        "chat_reply_text": ("Depth-2 cascade is not allowed; new top-level correlation issued."),
                         "new_top_level_correlation_id": new_top_level,
                     },
                 )
@@ -303,9 +294,7 @@ async def fan_out(
     annotation_host: str | None = None
     affinity_step: int | None = None
     if thread_cap_service is not None:
-        result = await thread_cap_service.try_acquire(
-            trigger_signal.simulation_id, thread_kind="hazard"
-        )
+        result = await thread_cap_service.try_acquire(trigger_signal.simulation_id, thread_kind="hazard")
         # Local import to avoid widening the surface API for callers that
         # don't supply a service.
         from apps.api.app.services.simulation.thread_cap_service import (
@@ -342,9 +331,7 @@ async def fan_out(
                                 hazard_class=t.get("hazard_class"),
                                 origin_cascade_id=t.get("origin_cascade_id"),
                                 last_mutated_at=t["last_mutated_at"],
-                                thread_creation_id=t.get(
-                                    "thread_creation_id", t["thread_id"]
-                                ),
+                                thread_creation_id=t.get("thread_creation_id", t["thread_id"]),
                             )
                         )
 
@@ -403,18 +390,12 @@ async def fan_out(
             return CascadeFanOutResult(
                 origin_cascade_id=str(uuid4()),
                 triggered=[],
-                skipped_reason=(
-                    "degraded_to_annotation"
-                    if annotation_host is not None
-                    else "thread_cap_exceeded"
-                ),
+                skipped_reason=("degraded_to_annotation" if annotation_host is not None else "thread_cap_exceeded"),
             )
         if isinstance(result, AcquireGranted):
             acquired_thread_id = result.thread_id
 
-    matching = [
-        r for r in cfg.fan_out_rules if r.trigger_category == trigger_signal.category
-    ]
+    matching = [r for r in cfg.fan_out_rules if r.trigger_category == trigger_signal.category]
     # Cycle 2 / T-AA20 / A2-03 — when no YAML rule matches (the YAML
     # fan_out_rules block has been removed; this is the steady-state
     # path), fall back to the canonical
@@ -430,14 +411,9 @@ async def fan_out(
                 )
             ]
     if not matching:
-        if (
-            thread_cap_service is not None
-            and acquired_thread_id is not None
-        ):
+        if thread_cap_service is not None and acquired_thread_id is not None:
             # No work to do — release the slot we just took.
-            await thread_cap_service.release(
-                trigger_signal.simulation_id, acquired_thread_id
-            )
+            await thread_cap_service.release(trigger_signal.simulation_id, acquired_thread_id)
         return CascadeFanOutResult(
             origin_cascade_id=str(uuid4()),
             triggered=[],

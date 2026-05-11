@@ -62,9 +62,7 @@ class _InMemoryProducer:
     async def send(self, hub_name: str, event: SignalPipelineEvent) -> None:
         self._events[hub_name].append(event)
 
-    async def send_batch(
-        self, hub_name: str, events: list[SignalPipelineEvent]
-    ) -> None:
+    async def send_batch(self, hub_name: str, events: list[SignalPipelineEvent]) -> None:
         self._events[hub_name].extend(events)
 
     def events_for(self, hub_name: str) -> list[SignalPipelineEvent]:
@@ -98,8 +96,7 @@ class EventHubPublisher:
             self._producer = None  # connections are per-hub, lazily opened
         except ImportError:
             logger.warning(
-                "EventHubPublisher: azure-eventhub not installed; falling back "
-                "to in-memory producer for namespace=%s",
+                "EventHubPublisher: azure-eventhub not installed; falling back to in-memory producer for namespace=%s",
                 namespace,
             )
             self._producer = _InMemoryProducer()
@@ -196,9 +193,7 @@ def build_event_hub_publisher() -> EventHubPublisher:
             namespace,
         )
         return EventHubPublisher(namespace=namespace)
-    logger.info(
-        "EventHubPublisher: SIM036_EVENT_HUB_NAMESPACE unset — using in-memory producer"
-    )
+    logger.info("EventHubPublisher: SIM036_EVENT_HUB_NAMESPACE unset — using in-memory producer")
     return EventHubPublisher()
 
 

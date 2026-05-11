@@ -118,15 +118,11 @@ class TriggeredSubAgent(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     sub_agent: SubAgent = Field(
-        description=(
-            "Canonical 9-member PascalCase SubAgent Literal "
-            "(Cycle 2 A2-07 / FR-070)."
-        ),
+        description=("Canonical 9-member PascalCase SubAgent Literal (Cycle 2 A2-07 / FR-070)."),
     )
     trigger_source: TriggerSource = Field(
         description=(
-            "Narrow two-value enum exclusive to the dispatch-failed surface "
-            "(Cycle 2 pass-1 Q4 + data-model §11.5)."
+            "Narrow two-value enum exclusive to the dispatch-failed surface (Cycle 2 pass-1 Q4 + data-model §11.5)."
         ),
     )
     correlation_id: UUID = Field(
@@ -136,10 +132,7 @@ class TriggeredSubAgent(BaseModel):
         ),
     )
     dispatch_status: DispatchStatus = Field(
-        description=(
-            "Three-value transport outcome — acknowledged within 5.0 s, "
-            "failed, or timed_out (pass-2 Q1)."
-        ),
+        description=("Three-value transport outcome — acknowledged within 5.0 s, failed, or timed_out (pass-2 Q1)."),
     )
 
 

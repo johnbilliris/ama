@@ -41,18 +41,16 @@ def test_caller_supplied_sequence_number_is_dropped(caplog) -> None:
     asyncio.run(_run())
 
     # Warning emitted.
-    assert any(
-        "caller_sequence_number_ignored" in rec.message for rec in caplog.records
-    ), "audit.caller_sequence_number_ignored warning MUST be emitted"
+    assert any("caller_sequence_number_ignored" in rec.message for rec in caplog.records), (
+        "audit.caller_sequence_number_ignored warning MUST be emitted"
+    )
 
     # Gap-free allocator-assigned sequence_number is NOT 99999.
     from apps.api.app.services.simulation import audit_writer as _aw
 
     persisted = _aw._memory_store["sim-aa21"]
     assert persisted, "envelope MUST be persisted"
-    assert persisted[0].sequence_number != 99999, (
-        "Allocator MUST overwrite caller-supplied sequence_number."
-    )
+    assert persisted[0].sequence_number != 99999, "Allocator MUST overwrite caller-supplied sequence_number."
 
 
 def test_caller_sequence_number_does_not_break_envelope_validation() -> None:

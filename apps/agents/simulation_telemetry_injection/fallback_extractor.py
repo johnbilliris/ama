@@ -38,9 +38,7 @@ _KEYWORD_TO_CATEGORY: list[tuple[re.Pattern[str], str]] = [
 ]
 
 
-def extract(
-    *, prompt: str, simulation_id: str, tenant_id: str
-) -> SyntheticSignal | None:
+def extract(*, prompt: str, simulation_id: str, tenant_id: str) -> SyntheticSignal | None:
     """Map *prompt* to a :class:`SyntheticSignal` or ``None`` if no rule fires."""
     if not prompt or not prompt.strip():
         return None

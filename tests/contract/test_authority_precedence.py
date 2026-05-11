@@ -54,8 +54,7 @@ def test_authority_level_matches_schema(golden_set: dict, schema: dict) -> None:
     for entry in _precedence_entries(golden_set):
         level = entry["expected_authority_level"]
         assert level in enum_vals, (
-            f"entry {entry['id']!r} expected_authority_level={level!r} "
-            f"not in schema enum {enum_vals}"
+            f"entry {entry['id']!r} expected_authority_level={level!r} not in schema enum {enum_vals}"
         )
 
 
@@ -65,8 +64,7 @@ def test_precedence_rank_within_bounds(golden_set: dict, schema: dict) -> None:
     for entry in _precedence_entries(golden_set):
         rank = entry["expected_precedence_rank"]
         assert minimum <= rank <= maximum, (
-            f"entry {entry['id']!r} precedence_rank={rank} outside "
-            f"[{minimum}, {maximum}]"
+            f"entry {entry['id']!r} precedence_rank={rank} outside [{minimum}, {maximum}]"
         )
 
 
@@ -89,8 +87,7 @@ def test_act_state_territory_contrast_present(golden_set: dict) -> None:
         for e in _precedence_entries(golden_set)
     )
     assert contrast_present, (
-        "missing ACT state-territory entry. Without a contrast case the "
-        "cohort cannot detect false-positive elevation."
+        "missing ACT state-territory entry. Without a contrast case the cohort cannot detect false-positive elevation."
     )
 
 

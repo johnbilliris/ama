@@ -75,6 +75,7 @@ from app.services.simulation.subscriber_registry import (
     SignalKind,
     subscribers_for,
 )
+
 from packages.domain.src.domain.models.aiims_mapping import (
     AGENT_TO_AIIMS,
     SubAgent,
@@ -190,9 +191,7 @@ class DispatchResult:
     #: ATTEMPTED subscriber. The route handler uses this to populate the
     #: ``triggered_sub_agents`` array on both the HTTP 202 response body
     #: and the ``signal_pipeline.dispatch_failed`` audit envelope.
-    subscriber_outcomes: tuple[SubscriberDispatchOutcome, ...] = field(
-        default_factory=tuple
-    )
+    subscriber_outcomes: tuple[SubscriberDispatchOutcome, ...] = field(default_factory=tuple)
     #: Cycle 2 / T-AA14 — convenience flag mirroring
     #: ``any(o.dispatch_status != "acknowledged" for o in subscriber_outcomes)``.
     degraded_dispatch: bool = False
@@ -450,9 +449,7 @@ class SignalPipelineOrchestrator:
     def _payload_hash(signal: SyntheticSignal) -> str:
         """SHA-256 hex digest of the canonical JSON payload (FR-006)."""
 
-        return sha256(
-            signal.model_dump_json().encode("utf-8")
-        ).hexdigest()
+        return sha256(signal.model_dump_json().encode("utf-8")).hexdigest()
 
 
 __all__ = [

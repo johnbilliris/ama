@@ -145,7 +145,10 @@ def test_flag_disabled_returns_empty_without_silencing() -> None:
     """T231 — flag disabled → no detection, but agents still emit (verified by len==2 input)."""
     audit: list[dict[str, Any]] = []
     set_multi_agent_detection_flag(
-        value=False, actor="ops-on-call", audit_sink=audit.append, now_fn=_now,
+        value=False,
+        actor="ops-on-call",
+        audit_sink=audit.append,
+        now_fn=_now,
     )
     a = AgentRecommendation(
         agent_name="EvacuationAgent",
@@ -191,9 +194,7 @@ def test_emit_conflict_event_writes_log_and_audit() -> None:
 
     cosmos: list[dict[str, Any]] = []
     audit: list[dict[str, Any]] = []
-    payload = emit_conflict_event(
-        detections[0], cosmos_writer=cosmos.append, audit_sink=audit.append
-    )
+    payload = emit_conflict_event(detections[0], cosmos_writer=cosmos.append, audit_sink=audit.append)
 
     assert payload["conflict_class"] == "resource"
     assert payload["conflict_group_id"]

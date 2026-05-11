@@ -29,19 +29,13 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Final
 
-DEFAULT_PATH: Final[Path] = (
-    Path(__file__).resolve().parent / "data" / "jurisdiction_locale_priority.json"
-)
+DEFAULT_PATH: Final[Path] = Path(__file__).resolve().parent / "data" / "jurisdiction_locale_priority.json"
 
 #: Closed AU+8 set (federal umbrella + 8 states/territories).
-ALL_JURISDICTIONS: Final[frozenset[str]] = frozenset(
-    {"AU", "NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"}
-)
+ALL_JURISDICTIONS: Final[frozenset[str]] = frozenset({"AU", "NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"})
 
 #: NT/Aboriginal locale floor per FR-039 / Amendment L / CHK018-CHK020.
-NT_ABORIGINAL_LOCALES: Final[frozenset[str]] = frozenset(
-    {"yij", "wbp", "pjt", "aer", "rop", "tcs"}
-)
+NT_ABORIGINAL_LOCALES: Final[frozenset[str]] = frozenset({"yij", "wbp", "pjt", "aer", "rop", "tcs"})
 
 ANCHOR_LOCALE: Final[str] = "en-AU"
 
@@ -57,17 +51,13 @@ def load_priorities(path: Path | None = None) -> dict[str, tuple[str, ...]]:
     target = path or DEFAULT_PATH
     payload = json.loads(target.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
-        raise ValueError(
-            f"jurisdiction_locale_priority.json at {target} must be a JSON object."
-        )
+        raise ValueError(f"jurisdiction_locale_priority.json at {target} must be a JSON object.")
     out: dict[str, tuple[str, ...]] = {}
     for key, value in payload.items():
         if key.startswith("_"):
             continue  # skip _meta etc.
         if not isinstance(value, list) or not value:
-            raise ValueError(
-                f"Priority list for jurisdiction {key!r} must be a non-empty list."
-            )
+            raise ValueError(f"Priority list for jurisdiction {key!r} must be a non-empty list.")
         out[key] = tuple(str(v) for v in value)
     return out
 

@@ -19,12 +19,11 @@ import logging
 from typing import Any
 from uuid import uuid4
 
-from fastapi import HTTPException, Path, Request
-
 from app.api.dependencies.simulation_rbac import (
     CoordinatorPrincipal,
     require_simulation_coordinator,
 )
+from fastapi import HTTPException, Path, Request
 
 logger = logging.getLogger(__name__)
 
@@ -117,12 +116,8 @@ def make_lifecycle_guard(attempted_action: str) -> Any:
         if state in ("active",):
             return principal
 
-        idempotency_key = (
-            request.headers.get("Idempotency-Key") if request else None
-        )
-        request_correlation_id = (
-            request.headers.get("X-Request-Correlation-Id") if request else None
-        ) or str(uuid4())
+        idempotency_key = request.headers.get("Idempotency-Key") if request else None
+        request_correlation_id = (request.headers.get("X-Request-Correlation-Id") if request else None) or str(uuid4())
 
         await _emit_refusal_audit(
             simulation_id=sim_id,
@@ -138,8 +133,7 @@ def make_lifecycle_guard(attempted_action: str) -> Any:
                 type_id="lifecycle-state-conflict",
                 title="Simulation not active",
                 detail=(
-                    f"Cannot {attempted_action!r} while simulation is in "
-                    f"state {state!r}; resume the simulation first."
+                    f"Cannot {attempted_action!r} while simulation is in state {state!r}; resume the simulation first."
                 ),
                 current_state=state,
                 attempted_action=attempted_action,

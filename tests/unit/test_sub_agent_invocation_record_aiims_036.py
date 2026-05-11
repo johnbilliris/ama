@@ -76,9 +76,7 @@ def test_secondary_aiims_tags_auto_derived_for_risk_assessment() -> None:
         ("resource-allocation", "logistics"),
     ],
 )
-def test_aiims_function_for_every_legacy_role(
-    agent_role: str, expected_primary: str
-) -> None:
+def test_aiims_function_for_every_legacy_role(agent_role: str, expected_primary: str) -> None:
     """Every legacy ``SubAgentRole`` maps to a canonical AIIMS function."""
 
     kwargs = _good()

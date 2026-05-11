@@ -43,9 +43,7 @@ def _envelope(prompt_hash_source: str | None) -> AuditEnvelope:
     )
 
 
-@pytest.mark.parametrize(
-    "value", ["raw_user_input", "canonical_llm_prompt", "system_only", None]
-)
+@pytest.mark.parametrize("value", ["raw_user_input", "canonical_llm_prompt", "system_only", None])
 def test_accepts_canonical_values(value: str | None) -> None:
     envelope = _envelope(value)
     assert envelope.prompt_hash_source == value

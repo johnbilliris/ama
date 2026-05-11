@@ -109,9 +109,7 @@ async def test_abort_cancels_in_flight_and_emits_sub_agent_cancel() -> None:
             },
         )
 
-    cancelled = await cancel_scope.cancel_all(
-        simulation_id=sim_id, on_cancel=_record, reason="aborted"
-    )
+    cancelled = await cancel_scope.cancel_all(simulation_id=sim_id, on_cancel=_record, reason="aborted")
     # Drain cancellations
     for t in tasks:
         with pytest.raises(asyncio.CancelledError):

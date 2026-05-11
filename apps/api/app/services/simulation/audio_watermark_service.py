@@ -89,9 +89,7 @@ class AudioWatermarkService:
             fallback = True
             prefix = self.catalog.get(self.default_locale)
             if prefix is None:
-                raise RuntimeError(
-                    "audio_watermark: no audio prefix available; default locale missing"
-                )
+                raise RuntimeError("audio_watermark: no audio prefix available; default locale missing")
             await self._emit_locale_missing(
                 requested=locale,
                 resolved=self.default_locale,

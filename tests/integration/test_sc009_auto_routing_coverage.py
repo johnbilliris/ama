@@ -49,15 +49,11 @@ JURISDICTIONS: tuple[str, ...] = (
 
 @pytest.mark.parametrize("category", FR008_CATEGORIES)
 @pytest.mark.parametrize("jurisdiction", JURISDICTIONS)
-def test_sc009_routing_is_deterministic_per_category_jurisdiction(
-    category: str, jurisdiction: str
-) -> None:
+def test_sc009_routing_is_deterministic_per_category_jurisdiction(category: str, jurisdiction: str) -> None:
     """Every (category, jurisdiction) combo MUST resolve to a non-empty agent assignment."""
     ladder_input = LadderInput(explicit_jurisdiction_code=jurisdiction)
     ladder = resolve(request=ladder_input)
-    assert ladder.jurisdiction_code == jurisdiction, (
-        f"SC-009 ladder mismatch for {category}/{jurisdiction}"
-    )
+    assert ladder.jurisdiction_code == jurisdiction, f"SC-009 ladder mismatch for {category}/{jurisdiction}"
     combat = combat_for(jurisdiction)
     control = control_for(jurisdiction)
     assert combat, f"SC-009 no combat agency for {jurisdiction}"

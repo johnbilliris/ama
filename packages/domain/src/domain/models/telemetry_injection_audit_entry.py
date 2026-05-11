@@ -396,11 +396,14 @@ class AuditRbacUnauthorizedAttemptDetails(BaseModel):
     sim_id: str | None = None
     request_correlation_id: str
     prompt_hash: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
-    prompt_hash_source: Literal[
-        "raw_user_input",
-        "canonical_llm_prompt",
-        "system_only",
-    ] | None = None
+    prompt_hash_source: (
+        Literal[
+            "raw_user_input",
+            "canonical_llm_prompt",
+            "system_only",
+        ]
+        | None
+    ) = None
 
 
 class SyntheticDeliveryDetails(BaseModel):
@@ -482,10 +485,7 @@ class SignalPipelineDispatchFailedDetails(BaseModel):
     exception_class: str = Field(max_length=200)
     exception_message: str = Field(
         max_length=1000,
-        description=(
-            "PII-scrubbed truncated message body (≤1000 chars per "
-            "audit-envelope.md §3.25)."
-        ),
+        description=("PII-scrubbed truncated message body (≤1000 chars per audit-envelope.md §3.25)."),
     )
     triggered_sub_agents: list[dict[str, Any]] = Field(
         description=(
@@ -503,20 +503,16 @@ class SignalPipelineDispatchFailedDetails(BaseModel):
     )
     failed_subscriber_list: list[str] = Field(
         description=(
-            "Derived view — PascalCase sub_agent names whose dispatch "
-            "raised or timed out (forensic-export ergonomic)."
+            "Derived view — PascalCase sub_agent names whose dispatch raised or timed out (forensic-export ergonomic)."
         ),
     )
     prompt_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
-    prompt_hash_source: Literal[
-        "raw_user_input", "canonical_llm_prompt", "system_only"
-    ]
+    prompt_hash_source: Literal["raw_user_input", "canonical_llm_prompt", "system_only"]
     degraded_dispatch_flag: Literal[True] = True
     dispatch_ack_timeout_seconds: float = Field(
         default=5.0,
         description=(
-            "Cycle 2 pass-2 Q1 — DISPATCH_ACK_TIMEOUT_SECONDS = 5.0 captured "
-            "for forensic-replay determinism."
+            "Cycle 2 pass-2 Q1 — DISPATCH_ACK_TIMEOUT_SECONDS = 5.0 captured for forensic-replay determinism."
         ),
     )
     idempotency_key: str | None = None
@@ -571,10 +567,7 @@ class StagingPromotionRefusedDetails(BaseModel):
     refused_at: datetime
     gate_helper_version: str = Field(
         pattern=r"^[a-f0-9]{64}$",
-        description=(
-            "SHA-256 of `tests/staging_gates.py` at run time, captured for "
-            "forensic-replay determinism."
-        ),
+        description=("SHA-256 of `tests/staging_gates.py` at run time, captured for forensic-replay determinism."),
     )
 
 
@@ -614,10 +607,7 @@ class AuditEnvelope(BaseModel):
     secondary_aiims_tags: list[AiimsFunction] | None = Field(
         default=None,
         max_length=2,
-        description=(
-            "≤2 secondary AIIMS tags (constitution v1.2.0). Disjoint from "
-            "``aiims_function``."
-        ),
+        description=("≤2 secondary AIIMS tags (constitution v1.2.0). Disjoint from ``aiims_function``."),
     )
 
     # ---- T-A06 residual envelope fields (T-O07; FR-065 / FR-066) --------

@@ -22,12 +22,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-_WORKFLOW_PATH = (
-    Path(__file__).resolve().parents[2]
-    / ".github"
-    / "workflows"
-    / "staging-promotion.yml"
-)
+_WORKFLOW_PATH = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "staging-promotion.yml"
 
 
 @pytest.fixture(scope="module")
@@ -68,8 +63,7 @@ def test_promote_depends_on_smoke_injection(workflow: dict) -> None:
 
 def test_smoke_injection_uses_isolated_test_tenant(workflow_text: str) -> None:
     assert "tnt-stg-smoke" in workflow_text, (
-        "Cycle 2 / T-AA19 — smoke-injection MUST run in tnt-stg-smoke "
-        "to prevent production-tenant SLI pollution."
+        "Cycle 2 / T-AA19 — smoke-injection MUST run in tnt-stg-smoke to prevent production-tenant SLI pollution."
     )
 
 

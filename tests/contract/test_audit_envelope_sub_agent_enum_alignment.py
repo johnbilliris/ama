@@ -38,8 +38,7 @@ def test_canonical_sub_agent_enum_is_9_pascal_case() -> None:
         "Risk",
     }
     assert set(ALL_SUB_AGENTS) == expected, (
-        f"ALL_SUB_AGENTS MUST be the 9-name PascalCase canonical set "
-        f"(got {set(ALL_SUB_AGENTS)})."
+        f"ALL_SUB_AGENTS MUST be the 9-name PascalCase canonical set (got {set(ALL_SUB_AGENTS)})."
     )
 
 
@@ -63,8 +62,7 @@ def test_kebab_to_pascal_table_is_complete() -> None:
     # Every mapped value MUST be a canonical PascalCase name.
     for kebab, pascal in _KEBAB_TO_PASCAL.items():
         assert pascal in ALL_SUB_AGENTS, (
-            f"_KEBAB_TO_PASCAL[{kebab!r}] = {pascal!r} is not in canonical "
-            f"PascalCase set ALL_SUB_AGENTS."
+            f"_KEBAB_TO_PASCAL[{kebab!r}] = {pascal!r} is not in canonical PascalCase set ALL_SUB_AGENTS."
         )
 
 

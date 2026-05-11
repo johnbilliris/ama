@@ -47,6 +47,7 @@ except Exception:  # pragma: no cover — Locust optional in lint envs
     def task(weight: int = 1):  # type: ignore[no-redef]
         def deco(f):
             return f
+
         return deco
 
 
@@ -178,12 +179,8 @@ def report_p95_thresholds(environment: Environment, **_: Any) -> None:  # pragma
 
 def test_locust_thresholds_match_plan_canonical_sli() -> None:
     """Thresholds in this file mirror plan.md SLI table — guard against drift."""
-    assert P95_PARSE_TO_PIPELINE_MS == 5_000, (
-        "plan.md SLI 1 — parse-to-pipeline ≤ 5 s p95"
-    )
-    assert P95_RISK_FANOUT_MS == 15_000, (
-        "plan.md SLI 2 — risk-fan-out ≤ 15 s p95 (replaces prior <2 s target)"
-    )
+    assert P95_PARSE_TO_PIPELINE_MS == 5_000, "plan.md SLI 1 — parse-to-pipeline ≤ 5 s p95"
+    assert P95_RISK_FANOUT_MS == 15_000, "plan.md SLI 2 — risk-fan-out ≤ 15 s p95 (replaces prior <2 s target)"
     assert P95_HAZARD_OVERLAY_MS == 15_000
     assert P95_WEATHER_OVERLAY_MS == 10_000
     assert ERROR_RATE_THRESHOLD == 0.01

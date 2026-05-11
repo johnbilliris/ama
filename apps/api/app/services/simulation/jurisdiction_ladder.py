@@ -97,9 +97,7 @@ def resolve(
         and request.viewport_centroid_lng is not None
         and polygon_lookup is not None
     ):
-        server = polygon_lookup(
-            request.viewport_centroid_lat, request.viewport_centroid_lng
-        )
+        server = polygon_lookup(request.viewport_centroid_lat, request.viewport_centroid_lng)
         viewport_match = server == request.client_jurisdiction_hint
         if viewport_match:
             return LadderResult(
@@ -109,18 +107,11 @@ def resolve(
                 steps_attempted=tuple(attempted),
                 viewport_hint_match=True,
             )
-        notes.append(
-            f"viewport_hint_mismatch client={request.client_jurisdiction_hint!r} "
-            f"server={server!r}"
-        )
+        notes.append(f"viewport_hint_mismatch client={request.client_jurisdiction_hint!r} server={server!r}")
 
     # Step 4 — STRtree polygon lookup at the signal coordinates.
     attempted.append("strtree_polygon")
-    if (
-        request.signal_lat is not None
-        and request.signal_lng is not None
-        and polygon_lookup is not None
-    ):
+    if request.signal_lat is not None and request.signal_lng is not None and polygon_lookup is not None:
         code = polygon_lookup(request.signal_lat, request.signal_lng)
         if code:
             return LadderResult(
@@ -134,11 +125,7 @@ def resolve(
 
     # Step 5 — ABS SA4 fallback.
     attempted.append("abs_sa4_fallback")
-    if (
-        request.signal_lat is not None
-        and request.signal_lng is not None
-        and sa4_lookup is not None
-    ):
+    if request.signal_lat is not None and request.signal_lng is not None and sa4_lookup is not None:
         code = sa4_lookup(request.signal_lat, request.signal_lng)
         if code:
             return LadderResult(

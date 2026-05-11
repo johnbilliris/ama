@@ -69,6 +69,7 @@ async def test_fan_out_dispatches_per_target() -> None:
 
 async def test_fan_out_skips_when_no_rule_matches() -> None:
     """An orchestrator-injected signal whose category is not in the rules table is skipped."""
+
     async def dispatcher(*_args: object) -> None:
         raise AssertionError("dispatcher must not be called")
 

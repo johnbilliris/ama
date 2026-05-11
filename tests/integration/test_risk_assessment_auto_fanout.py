@@ -51,9 +51,7 @@ async def test_handler_skips_non_hazard_categories() -> None:
     def runner(env: SignalEnvelope) -> dict[str, Any]:
         raise AssertionError("pipeline MUST not run for non-hazard categories")
 
-    reply = await handle_signal_event(
-        _envelope(category="resource-allocation"), pipeline_runner=runner
-    )
+    reply = await handle_signal_event(_envelope(category="resource-allocation"), pipeline_runner=runner)
     assert reply.accepted is False
     assert reply.duplicate is False
 
@@ -91,9 +89,7 @@ async def test_handler_meets_15s_p95_for_synchronous_runner() -> None:
     samples: list[float] = []
     for i in range(20):
         reset_dedup_for_tests()
-        reply = await handle_signal_event(
-            _envelope(signal_id=f"sig-bench-{i}"), pipeline_runner=runner
-        )
+        reply = await handle_signal_event(_envelope(signal_id=f"sig-bench-{i}"), pipeline_runner=runner)
         samples.append(reply.elapsed_seconds)
     samples.sort()
     p95 = samples[int(0.95 * len(samples)) - 1]

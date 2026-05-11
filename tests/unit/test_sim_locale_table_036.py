@@ -33,18 +33,14 @@ LOCALE_TABLE_PATH = (
 
 @pytest.fixture(scope="module")
 def locale_table() -> list[dict]:
-    assert LOCALE_TABLE_PATH.is_file(), (
-        f"sim_locale_table.json missing at {LOCALE_TABLE_PATH}"
-    )
+    assert LOCALE_TABLE_PATH.is_file(), f"sim_locale_table.json missing at {LOCALE_TABLE_PATH}"
     payload = json.loads(LOCALE_TABLE_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, list), "Locale table must be a JSON array."
     return payload
 
 
 def test_locale_table_has_at_least_30_entries(locale_table: list[dict]) -> None:
-    assert len(locale_table) >= 30, (
-        f"FR-039 / Amendment L requires ≥30 locales; got {len(locale_table)}."
-    )
+    assert len(locale_table) >= 30, f"FR-039 / Amendment L requires ≥30 locales; got {len(locale_table)}."
 
 
 def test_every_entry_has_required_fields(locale_table: list[dict]) -> None:
@@ -63,12 +59,8 @@ def test_bcp47_codes_are_unique(locale_table: list[dict]) -> None:
 def test_every_fallback_chain_terminates_in_en_au(locale_table: list[dict]) -> None:
     for row in locale_table:
         chain = row["fallback_chain"]
-        assert isinstance(chain, list) and chain, (
-            f"{row['bcp47']!r}: fallback_chain must be a non-empty list."
-        )
-        assert chain[-1] == "en-AU", (
-            f"{row['bcp47']!r}: fallback_chain must end in 'en-AU'; got {chain[-1]!r}"
-        )
+        assert isinstance(chain, list) and chain, f"{row['bcp47']!r}: fallback_chain must be a non-empty list."
+        assert chain[-1] == "en-AU", f"{row['bcp47']!r}: fallback_chain must end in 'en-AU'; got {chain[-1]!r}"
 
 
 def test_nt_aboriginal_locales_present(locale_table: list[dict]) -> None:
@@ -115,9 +107,7 @@ def test_jurisdictions_field_uses_known_codes(locale_table: list[dict]) -> None:
     allowed = {"AU", "NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"}
     for row in locale_table:
         for j in row["jurisdictions"]:
-            assert j in allowed, (
-                f"{row['bcp47']!r}: unknown jurisdiction code {j!r} (allowed={allowed!r})"
-            )
+            assert j in allowed, f"{row['bcp47']!r}: unknown jurisdiction code {j!r} (allowed={allowed!r})"
 
 
 def test_en_au_is_anchor_locale(locale_table: list[dict]) -> None:
@@ -125,6 +115,4 @@ def test_en_au_is_anchor_locale(locale_table: list[dict]) -> None:
 
     en_au = next((row for row in locale_table if row["bcp47"] == "en-AU"), None)
     assert en_au is not None, "en-AU anchor locale missing from table."
-    assert en_au["fallback_chain"] == ["en-AU"], (
-        "en-AU's fallback chain must be self-contained."
-    )
+    assert en_au["fallback_chain"] == ["en-AU"], "en-AU's fallback chain must be self-contained."

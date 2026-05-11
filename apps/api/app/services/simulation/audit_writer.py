@@ -51,13 +51,13 @@ from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
 import rfc8785
-
 from app.repositories.simulation_sequence_repository import (
     DLQ_SEQUENCE_NUMBER,
     SequenceAllocationExhausted,
     SimulationSequenceRepository,
     get_sequence_repository,
 )
+
 from packages.domain.src.domain.models.aiims_mapping import (
     ALL_SUB_AGENTS,
 )
@@ -117,8 +117,7 @@ def kebab_to_pascal_sub_agent(value: str) -> str:
     pascal = _KEBAB_TO_PASCAL.get(value)
     if pascal is None:
         raise ValueError(
-            f"audit.unknown_sub_agent {value!r} — not in PascalCase canonical "
-            "set or the kebab-case migration table"
+            f"audit.unknown_sub_agent {value!r} — not in PascalCase canonical set or the kebab-case migration table"
         )
     logger.debug(
         "audit.kebab_legacy_read kebab=%s pascal=%s",
@@ -342,9 +341,7 @@ class AuditWriter:
         )
 
         details_cls = DetailsByEntry.get(str(entry_type))
-        if details_cls is not None and "sequence_number" in getattr(
-            details_cls, "model_fields", {}
-        ):
+        if details_cls is not None and "sequence_number" in getattr(details_cls, "model_fields", {}):
             details_dict["sequence_number"] = seq
 
         try:
@@ -426,11 +423,7 @@ class AuditWriter:
             turn_id=turn_id,
             actor=actor,
             aiims_function=aiims_function,
-            secondary_aiims_tags=(
-                list(secondary_aiims_tags)
-                if secondary_aiims_tags is not None
-                else None
-            ),
+            secondary_aiims_tags=(list(secondary_aiims_tags) if secondary_aiims_tags is not None else None),
         )
         _dlq_buffer.append(entry)
 
@@ -487,16 +480,8 @@ async def write_dispatch_failed(
     """
 
     canonical = canonicalise_triggered_sub_agents(triggered_sub_agents)
-    successful = [
-        item["sub_agent"]
-        for item in canonical
-        if item["dispatch_status"] == "acknowledged"
-    ]
-    failed = [
-        item["sub_agent"]
-        for item in canonical
-        if item["dispatch_status"] in ("failed", "timed_out")
-    ]
+    successful = [item["sub_agent"] for item in canonical if item["dispatch_status"] == "acknowledged"]
+    failed = [item["sub_agent"] for item in canonical if item["dispatch_status"] in ("failed", "timed_out")]
 
     # PII-scrub + truncate per audit-envelope.md §3.25 (1000-char cap).
     if len(exception_message) > 1000:
@@ -548,9 +533,7 @@ def get_audit_writer() -> AuditWriter:
 
                 cosmos_container = get_simulation_audit_container()
             except Exception as exc:
-                logger.warning(
-                    "audit.cosmos_unavailable falling back to memory: %s", exc
-                )
+                logger.warning("audit.cosmos_unavailable falling back to memory: %s", exc)
         _default_writer = AuditWriter(cosmos_container=cosmos_container)
     return _default_writer
 

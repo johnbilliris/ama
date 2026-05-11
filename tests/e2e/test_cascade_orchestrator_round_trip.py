@@ -58,8 +58,7 @@ def test_round_trip_targets_equal_canonical_set(category: str) -> None:
     canonical_pascal = cascade_targets_for(category)
     assert canonical_pascal, f"matrix has no entry for {category}"
     assert len(actual_kebab) == len(canonical_pascal), (
-        f"{category}: orchestrator returned {len(actual_kebab)} targets "
-        f"but matrix declares {len(canonical_pascal)}"
+        f"{category}: orchestrator returned {len(actual_kebab)} targets but matrix declares {len(canonical_pascal)}"
     )
 
 

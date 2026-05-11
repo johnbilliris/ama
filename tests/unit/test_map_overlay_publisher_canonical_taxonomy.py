@@ -82,9 +82,7 @@ def test_publisher_does_not_re_emit_legacy_categories() -> None:
     canonical_set = set(PUBLISHER_LAYER_TYPES)
     legacy_set = set(LEGACY_CATEGORY_STRINGS)
     intersection = canonical_set & legacy_set
-    assert intersection == set(), (
-        f"Publisher LAYER_TYPES still leaks legacy categories: {intersection!r}"
-    )
+    assert intersection == set(), f"Publisher LAYER_TYPES still leaks legacy categories: {intersection!r}"
 
 
 def test_publisher_layer_types_count_is_16() -> None:

@@ -61,9 +61,7 @@ async def test_audio_handler_applies_locale_correct_prefix() -> None:
 
 @pytest.mark.asyncio
 async def test_audio_handler_falls_back_for_unknown_locale() -> None:
-    catalog = AudioPrefixCatalog(
-        prefixes={"en-AU": AudioPrefix("en-AU", "abc", b"PREFIX_AU__")}
-    )
+    catalog = AudioPrefixCatalog(prefixes={"en-AU": AudioPrefix("en-AU", "abc", b"PREFIX_AU__")})
     ctx = WatermarkContext(locale="ar", simulation_id="sim-2")
     result = await apply_audio_watermark(b"BODY", context=ctx, catalog=catalog)
     assert result.prefix_applied is True

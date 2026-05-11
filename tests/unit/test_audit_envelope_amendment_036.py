@@ -105,17 +105,13 @@ def _envelope_kwargs(**overrides: object) -> dict[str, object]:
 
 
 def test_envelope_accepts_optional_prompt_hash_source() -> None:
-    env = AuditEnvelope.model_validate(
-        _envelope_kwargs(prompt_hash_source="canonical_llm_prompt")
-    )
+    env = AuditEnvelope.model_validate(_envelope_kwargs(prompt_hash_source="canonical_llm_prompt"))
     assert env.prompt_hash_source == "canonical_llm_prompt"
 
 
 def test_envelope_rejects_invalid_prompt_hash_source() -> None:
     with pytest.raises(Exception):
-        AuditEnvelope.model_validate(
-            _envelope_kwargs(prompt_hash_source="not-a-canonical-source")
-        )
+        AuditEnvelope.model_validate(_envelope_kwargs(prompt_hash_source="not-a-canonical-source"))
 
 
 def test_envelope_accepts_idempotency_key_and_correlation() -> None:
@@ -130,15 +126,9 @@ def test_envelope_accepts_idempotency_key_and_correlation() -> None:
 
 
 def test_envelope_accepts_delivery_channel_enum() -> None:
-    env_audio = AuditEnvelope.model_validate(
-        _envelope_kwargs(delivery_channel="audio")
-    )
-    env_text = AuditEnvelope.model_validate(
-        _envelope_kwargs(delivery_channel="text-live-log")
-    )
-    env_both = AuditEnvelope.model_validate(
-        _envelope_kwargs(delivery_channel="both")
-    )
+    env_audio = AuditEnvelope.model_validate(_envelope_kwargs(delivery_channel="audio"))
+    env_text = AuditEnvelope.model_validate(_envelope_kwargs(delivery_channel="text-live-log"))
+    env_both = AuditEnvelope.model_validate(_envelope_kwargs(delivery_channel="both"))
     assert env_audio.delivery_channel == "audio"
     assert env_text.delivery_channel == "text-live-log"
     assert env_both.delivery_channel == "both"

@@ -46,9 +46,7 @@ def test_step_2_collapses_whitespace_and_preserves_pipe_newline() -> None:
     result = canonicalise_kql(raw)
     # Each pipe is on its own line.
     pipes_on_newline = [ln for ln in result.split("\n") if ln.lstrip().startswith("|")]
-    assert len(pipes_on_newline) == 2, (
-        f"expected 2 pipe-prefixed clause lines, got {pipes_on_newline!r}"
-    )
+    assert len(pipes_on_newline) == 2, f"expected 2 pipe-prefixed clause lines, got {pipes_on_newline!r}"
     # No double-space runs survive within a clause.
     assert "  " not in result
 
@@ -110,16 +108,10 @@ def test_step_4_sorts_by_clause_columns() -> None:
 
 
 def test_step_5_sorts_summarize_aliases() -> None:
-    raw = (
-        "AppMetrics | summarize p99 = percentile(x, 99), avg_x = avg(x), "
-        "p50 = percentile(x, 50) by sub_agent"
-    )
+    raw = "AppMetrics | summarize p99 = percentile(x, 99), avg_x = avg(x), p50 = percentile(x, 50) by sub_agent"
     result = canonicalise_kql(raw)
     # Aliases sorted: avg_x < p50 < p99 (a < p, then numeric).
-    assert (
-        "summarize avg_x = avg(x), p50 = percentile(x, 50), p99 = percentile(x, 99) by sub_agent"
-        in result
-    )
+    assert "summarize avg_x = avg(x), p50 = percentile(x, 50), p99 = percentile(x, 99) by sub_agent" in result
 
 
 def test_step_5_summarize_sort_is_stable_across_input_orderings() -> None:
@@ -169,9 +161,7 @@ def test_canonicalise_kql_is_idempotent() -> None:
     """
     once = canonicalise_kql(raw)
     twice = canonicalise_kql(once)
-    assert once == twice, (
-        "canonicalise_kql must be idempotent (PD-C3-01 invariant)"
-    )
+    assert once == twice, "canonicalise_kql must be idempotent (PD-C3-01 invariant)"
 
 
 # --------------------------------------------------------------------------
@@ -180,15 +170,9 @@ def test_canonicalise_kql_is_idempotent() -> None:
 
 
 def test_canonicalise_kql_is_deterministic_across_10_runs() -> None:
-    raw = (
-        "T | where x == 1 | summarize "
-        "z = sum(z), a = avg(a), m = max(m) "
-        "by gamma, alpha, beta"
-    )
+    raw = "T | where x == 1 | summarize z = sum(z), a = avg(a), m = max(m) by gamma, alpha, beta"
     results = {canonicalise_kql(raw) for _ in range(10)}
-    assert len(results) == 1, (
-        f"canonicalise_kql must be deterministic; got {len(results)} distinct results"
-    )
+    assert len(results) == 1, f"canonicalise_kql must be deterministic; got {len(results)} distinct results"
 
 
 # --------------------------------------------------------------------------

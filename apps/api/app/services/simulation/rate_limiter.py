@@ -60,13 +60,9 @@ class RateLimiter:
         self._refill(tenant_b, now, self.per_tenant_per_min)
         return user_b.tokens >= cost and tenant_b.tokens >= cost
 
-    def record_success(
-        self, *, tenant_id: str, user_oid: str, cost: int = 1
-    ) -> bool:
+    def record_success(self, *, tenant_id: str, user_oid: str, cost: int = 1) -> bool:
         """Consume *cost* tokens after a successful injection (T-C08 / FR-009)."""
-        return self.check_and_consume(
-            tenant_id=tenant_id, user_oid=user_oid, cost=cost
-        )
+        return self.check_and_consume(tenant_id=tenant_id, user_oid=user_oid, cost=cost)
 
     @staticmethod
     def _refill(bucket: _Bucket, now: float, per_min: int) -> None:

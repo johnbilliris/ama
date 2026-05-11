@@ -14,14 +14,7 @@ from pathlib import Path
 
 import pytest
 
-_YAML_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "apps"
-    / "api"
-    / "app"
-    / "config"
-    / "cascade_rules.yaml"
-)
+_YAML_PATH = Path(__file__).resolve().parents[2] / "apps" / "api" / "app" / "config" / "cascade_rules.yaml"
 
 
 @pytest.fixture(scope="module")
@@ -32,10 +25,7 @@ def yaml_text() -> str:
 def test_yaml_does_not_declare_fan_out_rules(yaml_text: str) -> None:
     """Cycle 2 / T-AA20 / A2-03 — `fan_out_rules:` MUST be absent."""
 
-    forbidden_lines = [
-        line.strip() for line in yaml_text.splitlines()
-        if line.strip().startswith("fan_out_rules:")
-    ]
+    forbidden_lines = [line.strip() for line in yaml_text.splitlines() if line.strip().startswith("fan_out_rules:")]
     assert not forbidden_lines, (
         "cascade_rules.yaml MUST NOT declare `fan_out_rules:` — the "
         "matrix in `packages/domain/src/domain/sim_cascade_matrix.py` "

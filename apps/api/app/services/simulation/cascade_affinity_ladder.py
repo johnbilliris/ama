@@ -88,9 +88,7 @@ def select(
 
     # Step 3 — cascade-origin-thread preference.
     if trigger.origin_cascade_id is not None:
-        step3 = [
-            c for c in candidates if c.origin_cascade_id == trigger.origin_cascade_id
-        ]
+        step3 = [c for c in candidates if c.origin_cascade_id == trigger.origin_cascade_id]
         if len(step3) == 1:
             return LadderResult(step3[0], step=3)
         if step3:

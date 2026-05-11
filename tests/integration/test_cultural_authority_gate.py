@@ -134,10 +134,7 @@ def test_case_c_registry_unreachable_fail_closed_for_protected_only() -> None:
 
     # Constitution Principle I: public chunks are NEVER suppressed by the gate.
     assert {c["chunk_id"] for c in out} == {"public-1"}
-    blocked = [
-        e for e in audit
-        if e["event_type"] == "cultural_authority_registry_unavailable_blocked"
-    ]
+    blocked = [e for e in audit if e["event_type"] == "cultural_authority_registry_unavailable_blocked"]
     assert len(blocked) == 1, "registry-unavailable audit must emit for protected chunk"
     assert blocked[0]["decision"] == "blocked_fail_closed"
 

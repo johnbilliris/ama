@@ -78,22 +78,12 @@ async def test_us1_scenario_5_single_audit_envelope() -> None:
     assert {entry["turn_id"] for entry in audit_log} == {"turn-us1-5"}
 
     # (b) injection.success precedes substantive sub_agent.* by sequence_number.
-    inj_seqs = [
-        e["sequence_number"] for e in audit_log if e["entry_type"] == "injection.success"
-    ]
-    sub_seqs = [
-        e["sequence_number"]
-        for e in audit_log
-        if e["entry_type"] == "sub_agent.dispatched"
-    ]
+    inj_seqs = [e["sequence_number"] for e in audit_log if e["entry_type"] == "injection.success"]
+    sub_seqs = [e["sequence_number"] for e in audit_log if e["entry_type"] == "sub_agent.dispatched"]
     assert max(inj_seqs) < min(sub_seqs)
 
     # (c) + (d) Cosmos session token propagated; substantive sub-agents saw it.
-    assert all(
-        e["saw_injected_signal"]
-        for e in audit_log
-        if e["entry_type"] == "sub_agent.dispatched"
-    )
+    assert all(e["saw_injected_signal"] for e in audit_log if e["entry_type"] == "sub_agent.dispatched")
 
     # Programmatic helper agrees.
     assert_audit_envelope_invariants(result)

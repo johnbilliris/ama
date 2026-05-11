@@ -178,10 +178,7 @@ class TestWarningCompliance:
         match = re.search(r"\[([^\]]+)\]", principles_msg)
         if match:
             failed = [p.strip().strip("'\"") for p in match.group(1).split(",")]
-            assert len(failed) >= 3, (
-                f"non-compliant all-clear flagged only {len(failed)} "
-                f"principles: {failed}"
-            )
+            assert len(failed) >= 3, f"non-compliant all-clear flagged only {len(failed)} principles: {failed}"
 
     def test_content_analysis_forwarded(self, compliant_alert: PublicAlert) -> None:
         analysis = {k: True for k in WARNING_PRINCIPLE_KEYS}

@@ -82,9 +82,7 @@ class JurisdictionBoundaryService:
             polygons.append(JurisdictionPolygon(code=code, geometry=shape(geom)))
         self._set_polygons(polygons, dataset_version=dataset_version)
 
-    def _set_polygons(
-        self, polygons: list[JurisdictionPolygon], *, dataset_version: str
-    ) -> None:
+    def _set_polygons(self, polygons: list[JurisdictionPolygon], *, dataset_version: str) -> None:
         self._polygons = list(polygons)
         if self._polygons:
             self._tree = STRtree([p.geometry for p in self._polygons])

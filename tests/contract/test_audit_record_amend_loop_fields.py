@@ -58,9 +58,7 @@ def test_spec_and_mirror_byte_equal() -> None:
 @pytest.mark.parametrize("field_name", NEW_FIELDS)
 def test_new_field_present_in_schema(schema: dict, field_name: str) -> None:
     """Each F-A5 NEW field MUST appear in the schema's properties block."""
-    assert field_name in schema["properties"], (
-        f"FR-RAG-AG-02 ext — schema missing F-A5 field {field_name!r}"
-    )
+    assert field_name in schema["properties"], f"FR-RAG-AG-02 ext — schema missing F-A5 field {field_name!r}"
 
 
 @pytest.mark.parametrize("field_name", NEW_FIELDS)
@@ -74,9 +72,7 @@ def test_new_field_is_nullable(schema: dict, field_name: str) -> None:
         # Array fields are 'nullable' by virtue of being absent (not required).
         assert types == "array", f"{field_name!r} expected array type, got {types!r}"
     else:
-        assert types == "array" or "null" in (types or ""), (
-            f"{field_name!r} expected nullable type, got {types!r}"
-        )
+        assert types == "array" or "null" in (types or ""), f"{field_name!r} expected nullable type, got {types!r}"
 
 
 def test_no_new_field_in_required_block(schema: dict) -> None:
@@ -105,10 +101,9 @@ def test_invariant_retrieval_index_name_required_when_rag_used(schema: dict) -> 
     invariants = schema.get("allOf") or []
     found = False
     for inv in invariants:
-        if (
-            inv.get("if", {}).get("properties", {}).get("rag_used", {}).get("const") is True
-            and "retrieval_index_name" in (inv.get("then", {}).get("required") or [])
-        ):
+        if inv.get("if", {}).get("properties", {}).get("rag_used", {}).get(
+            "const"
+        ) is True and "retrieval_index_name" in (inv.get("then", {}).get("required") or []):
             found = True
             break
     assert found, "ADR-16 invariant: rag_used → retrieval_index_name required, missing from allOf"

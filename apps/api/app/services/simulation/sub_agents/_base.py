@@ -7,7 +7,6 @@ import os
 from typing import Any
 
 import httpx
-
 from app.services.simulation.sub_agent_invoker import SubAgentReply
 from app.services.simulation.sub_agents.citation_filter import (
     filter_citations,

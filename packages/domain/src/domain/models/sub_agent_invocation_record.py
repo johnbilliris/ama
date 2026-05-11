@@ -153,10 +153,7 @@ class SubAgentInvocationRecord(BaseModel):
 
     @model_validator(mode="after")
     def _validate_aiims_disjointness(self) -> "SubAgentInvocationRecord":
-        if (
-            self.aiims_function is not None
-            and self.aiims_function in self.secondary_aiims_tags
-        ):
+        if self.aiims_function is not None and self.aiims_function in self.secondary_aiims_tags:
             raise ValueError(
                 f"secondary_aiims_tags {self.secondary_aiims_tags!r} must not "
                 f"include the primary aiims_function {self.aiims_function!r} "
@@ -175,4 +172,3 @@ __all__ = [
     "SubAgentOutcome",
     "SubAgentRole",
 ]
-

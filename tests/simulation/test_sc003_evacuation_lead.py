@@ -21,9 +21,7 @@ from tests.staging_gates import measurement_staging_enabled
 
 def test_sc003_long_horizon_pairs_evacuate_24h_earlier() -> None:
     """Pairs whose duration ≥24 h MUST issue evac ≥24 h earlier on treatment."""
-    long_scenarios = [
-        s for s in make_scenarios(num_pairs=30) if s.duration_hours >= 24
-    ]
+    long_scenarios = [s for s in make_scenarios(num_pairs=30) if s.duration_hours >= 24]
     if not long_scenarios:
         # If the seed-window doesn't include a long scenario, run an
         # explicit 24h+ pair so we still cover the SC-003 invariant.
@@ -41,9 +39,7 @@ def test_sc003_long_horizon_pairs_evacuate_24h_earlier() -> None:
     pairs = [run_pair(s) for s in long_scenarios]
     for p in pairs:
         delta_s = p.evacuation_lead_delta  # negative when treatment is earlier
-        assert -delta_s >= 24 * 3600, (
-            f"SC-003 missed for {p.pair_id}: lead_delta={-delta_s/3600:.1f}h, need ≥24 h"
-        )
+        assert -delta_s >= 24 * 3600, f"SC-003 missed for {p.pair_id}: lead_delta={-delta_s / 3600:.1f}h, need ≥24 h"
 
 
 def test_sc003_short_horizon_pairs_evacuate_meaningfully_earlier() -> None:

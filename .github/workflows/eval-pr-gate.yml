@@ -38,6 +38,7 @@ jobs:
         run: |
           pip install -e packages/eval-core
           pip install -e apps/eval-runner
+          pip install -e apps/api
           pip install pytest ruff
 
       - name: Lint

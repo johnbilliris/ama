@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Spec 036 idempotency-cache contract documents an opaque Idempotency-Key header example, not a credential."
+regexTarget = "match"
+paths = ['''^specs/036-sim-agent-extend/contracts/idempotency-cache\.md$''']
+regexes = ['''Idempotency-Key:\s+[A-Za-z0-9._:-]+''']

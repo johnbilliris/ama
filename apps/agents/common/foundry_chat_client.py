@@ -45,6 +45,7 @@ def _uuid_hex() -> str:
     """Spec 036 / F-A11 / T235 — fallback correlation id when caller omits one."""
     return uuid.uuid4().hex
 
+
 logger = logging.getLogger(__name__)
 
 # --------------------------------------------------------------------------- #
@@ -366,9 +367,7 @@ class LiveFoundryChatClient:
                     raise FoundryConfigurationError(
                         f"Foundry deployment {deployment!r} returned {status}: {exc}"
                     ) from exc
-                raise FoundryTransportError(
-                    f"Foundry transport error after {latency_ms}ms: {exc}"
-                ) from exc
+                raise FoundryTransportError(f"Foundry transport error after {latency_ms}ms: {exc}") from exc
 
             latency_ms = int((time.perf_counter() - start) * 1000)
         choice = result.choices[0]

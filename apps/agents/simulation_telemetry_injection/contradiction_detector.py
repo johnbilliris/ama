@@ -30,18 +30,14 @@ OPPOSING_DIRECTIONS: dict[str, str] = {
 }
 
 
-def _is_within_window(
-    candidate: SyntheticSignal, prior: SyntheticSignal, *, now: datetime
-) -> bool:
+def _is_within_window(candidate: SyntheticSignal, prior: SyntheticSignal, *, now: datetime) -> bool:
     if prior.category != candidate.category:
         return False
     age = now - prior.observed_at
     return age <= timedelta(seconds=candidate.freshness_window_seconds)
 
 
-def _detect_direction_conflict(
-    candidate: SyntheticSignal, prior: SyntheticSignal
-) -> bool:
+def _detect_direction_conflict(candidate: SyntheticSignal, prior: SyntheticSignal) -> bool:
     cand_dir = str(candidate.parameters.get("direction", "")).lower()
     prior_dir = str(prior.parameters.get("direction", "")).lower()
     if not cand_dir or not prior_dir:
@@ -49,9 +45,7 @@ def _detect_direction_conflict(
     return OPPOSING_DIRECTIONS.get(cand_dir) == prior_dir
 
 
-def _detect_value_conflict(
-    candidate: SyntheticSignal, prior: SyntheticSignal
-) -> bool:
+def _detect_value_conflict(candidate: SyntheticSignal, prior: SyntheticSignal) -> bool:
     try:
         c_val = float(candidate.parameters.get("value"))
         p_val = float(prior.parameters.get("value"))
@@ -76,8 +70,6 @@ def detect(
             continue
         if not _is_within_window(candidate, prior, now=when):
             continue
-        if _detect_direction_conflict(
-            candidate, prior
-        ) or _detect_value_conflict(candidate, prior):
+        if _detect_direction_conflict(candidate, prior) or _detect_value_conflict(candidate, prior):
             contradicts.append(prior.signal_id)
     return contradicts

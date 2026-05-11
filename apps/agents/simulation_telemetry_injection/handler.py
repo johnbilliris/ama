@@ -99,9 +99,7 @@ async def handle(
                 user_prompt=scrubbed.text,
             )
         except ParseFailure as exc:
-            logger.warning(
-                "telemetry_injection.llm_parse_failed user=%s err=%s", user_id, exc
-            )
+            logger.warning("telemetry_injection.llm_parse_failed user=%s err=%s", user_id, exc)
             use_fallback = True
 
     if candidate is None:
@@ -126,16 +124,16 @@ async def handle(
 
     # Force the candidate's simulation_id / tenant_id to the caller's so the
     # LLM can't write across tenants.
-    candidate = candidate.model_copy(update={
-        "simulation_id": simulation_id,
-        "tenant_id": tenant_id,
-        "signal_id": candidate.signal_id or str(uuid4()),
-    })
+    candidate = candidate.model_copy(
+        update={
+            "simulation_id": simulation_id,
+            "tenant_id": tenant_id,
+            "signal_id": candidate.signal_id or str(uuid4()),
+        }
+    )
 
     # 3. Contradiction detection.
-    contradicts = contradiction_detector.detect(
-        candidate=candidate, recent_signals=recent_signals
-    )
+    contradicts = contradiction_detector.detect(candidate=candidate, recent_signals=recent_signals)
 
     return InjectionOutcome(
         accepted=True,

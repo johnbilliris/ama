@@ -92,9 +92,7 @@ async def test_audit_writer_fail_closed_writes_dlq_on_exhaustion() -> None:
     repo = SimulationSequenceRepository()
 
     async def _always_exhausted(simulation_id: str) -> int:
-        raise SequenceAllocationExhausted(
-            f"forced exhaustion for {simulation_id}"
-        )
+        raise SequenceAllocationExhausted(f"forced exhaustion for {simulation_id}")
 
     repo.allocate = _always_exhausted  # type: ignore[method-assign]
     writer = AuditWriter(sequence_repository=repo)

@@ -14,11 +14,7 @@ from pathlib import Path
 import pytest
 
 _BICEP_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "infra"
-    / "bicep"
-    / "modules"
-    / "observability-workbook-sim-slis.bicep"
+    Path(__file__).resolve().parents[2] / "infra" / "bicep" / "modules" / "observability-workbook-sim-slis.bicep"
 )
 
 

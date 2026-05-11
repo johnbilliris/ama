@@ -46,11 +46,7 @@ __all__ = ["canonicalise_kql", "canonical_kql_for_sli"]
 # Mirrors the established `_SLI_PATH` pattern at
 # tests/contract/test_sli_kql_schema_v2.py:25.
 _THRESHOLDS_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "specs"
-    / "036-sim-agent-extend"
-    / "contracts"
-    / "sli-thresholds.md"
+    Path(__file__).resolve().parents[2] / "specs" / "036-sim-agent-extend" / "contracts" / "sli-thresholds.md"
 )
 
 # Kusto reserved keywords lowered in step 3. We deliberately limit the
@@ -281,9 +277,7 @@ def canonicalise_kql(text: str) -> str:
     """
 
     if not isinstance(text, str):
-        raise TypeError(
-            f"canonicalise_kql expected str, got {type(text).__name__!r}"
-        )
+        raise TypeError(f"canonicalise_kql expected str, got {type(text).__name__!r}")
     return _canonicalise_kql_string(text)
 
 
@@ -321,10 +315,7 @@ def canonical_kql_for_sli(
 
     path = thresholds_path if thresholds_path is not None else _THRESHOLDS_PATH
     if not path.is_file():
-        raise ValueError(
-            f"Failed to extract canonical KQL for {sli_id!r}: "
-            f"thresholds file not found at {path!s}"
-        )
+        raise ValueError(f"Failed to extract canonical KQL for {sli_id!r}: thresholds file not found at {path!s}")
     text = path.read_text(encoding="utf-8")
 
     # Map Cycle 1 SLI ids whose contract heading uses an unprefixed
@@ -337,7 +328,7 @@ def canonical_kql_for_sli(
         # Map Z1 → 1, Z2 → 2 so the section heading "## 2. SLI-1 — …"
         # matches the ``SLI-Z1`` lookup. The numeric stem in the heading
         # is the (Z<N>) → (N) digit substitution.
-        n = sli_id[len("SLI-Z"):]
+        n = sli_id[len("SLI-Z") :]
         section_anchors = (f"SLI-{n}",)
     else:
         section_anchors = (sli_id,)
@@ -374,9 +365,6 @@ def canonical_kql_for_sli(
     # Extract the FIRST ``` ```kql ``` ``` fenced block in the section.
     fence_match = re.search(r"```kql\s*\n(?P<body>.*?)```", section, flags=re.DOTALL)
     if fence_match is None:
-        raise ValueError(
-            f"Failed to extract canonical KQL for {sli_id!r}: "
-            "no ```kql fenced block in matched section"
-        )
+        raise ValueError(f"Failed to extract canonical KQL for {sli_id!r}: no ```kql fenced block in matched section")
 
     return _canonicalise_kql_string(fence_match.group("body"))

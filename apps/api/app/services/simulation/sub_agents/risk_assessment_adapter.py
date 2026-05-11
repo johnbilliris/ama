@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import httpx
-
 from app.services.simulation.sub_agent_invoker import SubAgentReply
 from app.services.simulation.sub_agents._base import call_agent
 

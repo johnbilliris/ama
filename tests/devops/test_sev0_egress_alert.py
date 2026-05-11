@@ -35,9 +35,7 @@ def test_sev0_egress_alert_is_severity_0(bicep_text: str) -> None:
 
 def test_sev0_egress_alert_does_not_auto_mitigate(bicep_text: str) -> None:
     egress_chunk = _egress_chunk(bicep_text)
-    assert "autoMitigate: false" in egress_chunk, (
-        "SC-006 SEV-0 alert MUST NOT auto-mitigate — humans acknowledge."
-    )
+    assert "autoMitigate: false" in egress_chunk, "SC-006 SEV-0 alert MUST NOT auto-mitigate — humans acknowledge."
 
 
 def test_sev0_egress_alert_pages_pagerduty(bicep_text: str) -> None:

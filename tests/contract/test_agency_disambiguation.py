@@ -60,10 +60,7 @@ def test_role_values_match_schema_enum(golden_set: dict, schema: dict) -> None:
     role_enum = schema["properties"]["agency_role"]["enum"]
     for entry in _agency_disambig_entries(golden_set):
         role = entry["expected_agency_role"]
-        assert role in role_enum, (
-            f"entry {entry['id']!r} expected_agency_role={role!r} not in "
-            f"schema enum {role_enum}"
-        )
+        assert role in role_enum, f"entry {entry['id']!r} expected_agency_role={role!r} not in schema enum {role_enum}"
 
 
 def test_no_dup_agency_role_within_jurisdiction(golden_set: dict) -> None:

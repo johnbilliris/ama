@@ -61,9 +61,7 @@ def test_registry_seed_has_version_and_empty_carveouts(registry: dict) -> None:
     assert registry["carveouts"] == []
 
 
-def test_registry_seed_validates_against_schema(
-    schema: dict, registry: dict
-) -> None:
+def test_registry_seed_validates_against_schema(schema: dict, registry: dict) -> None:
     """The empty seed satisfies the schema (T-U02 acceptance)."""
 
     jsonschema.validate(instance=registry, schema=schema)
@@ -105,8 +103,7 @@ def test_schema_carveout_required_fields(schema: dict) -> None:
         "sli_impact",
     }
     assert expected <= set(item_schema["required"]), (
-        f"Carve-out item schema missing required fields: "
-        f"{expected - set(item_schema['required'])}"
+        f"Carve-out item schema missing required fields: {expected - set(item_schema['required'])}"
     )
 
 

@@ -124,8 +124,7 @@ class SimulationSequenceRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "SimulationSequenceRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "SimulationSequenceRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -172,9 +171,7 @@ class SimulationSequenceRepository:
             try:
                 await self._replace_with_etag(simulation_id, next_value, etag)
             except Exception as exc:
-                status_code = getattr(exc, "status_code", None) or getattr(
-                    exc, "http_status", None
-                )
+                status_code = getattr(exc, "status_code", None) or getattr(exc, "http_status", None)
                 if status_code != 412:
                     raise
                 last_exc = exc
@@ -259,9 +256,7 @@ class SimulationSequenceRepository:
             )
             return str(replaced.get("_etag", ""))
 
-        record = self._in_memory.setdefault(
-            simulation_id, {"value": 0, "_etag": str(uuid4())}
-        )
+        record = self._in_memory.setdefault(simulation_id, {"value": 0, "_etag": str(uuid4())})
         new_etag = str(uuid4())
         record["value"] = value
         record["_etag"] = new_etag

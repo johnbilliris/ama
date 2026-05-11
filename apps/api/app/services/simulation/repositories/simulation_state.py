@@ -67,9 +67,7 @@ def _build_cosmos_client() -> Any:
 class SimulationStateRepository:
     """Lifecycle-state persistence with ETag-conditional updates."""
 
-    def __init__(
-        self, cosmos_client: Any = None, database_name: str = "disaster-hub"
-    ) -> None:
+    def __init__(self, cosmos_client: Any = None, database_name: str = "disaster-hub") -> None:
         self._db_name = database_name
         self._container_name = "simulation"
         self._in_memory: dict[str, dict[str, Any]] = {}
@@ -81,8 +79,7 @@ class SimulationStateRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "SimulationStateRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "SimulationStateRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -98,10 +95,7 @@ class SimulationStateRepository:
     @staticmethod
     def _validate_state(new_state: object) -> LifecycleState:
         if new_state not in _VALID_STATES:
-            raise ValueError(
-                f"Unknown lifecycle state {new_state!r}; expected one of "
-                f"{_VALID_STATES!r}"
-            )
+            raise ValueError(f"Unknown lifecycle state {new_state!r}; expected one of {_VALID_STATES!r}")
         return new_state  # type: ignore[return-value]
 
     async def bootstrap(self, simulation_id: str) -> SimulationLifecycleState:
@@ -127,9 +121,7 @@ class SimulationStateRepository:
             "state": "active",
             "_etag": etag,
         }
-        return SimulationLifecycleState(
-            simulation_id=simulation_id, state="active", etag=etag
-        )
+        return SimulationLifecycleState(simulation_id=simulation_id, state="active", etag=etag)
 
     async def read(self, simulation_id: str) -> SimulationLifecycleState:
         container = self._get_container()
@@ -151,9 +143,7 @@ class SimulationStateRepository:
 
         record = self._in_memory.get(simulation_id)
         if record is None:
-            raise UnknownSimulationError(
-                f"No lifecycle-state document for simulation_id={simulation_id!r}"
-            )
+            raise UnknownSimulationError(f"No lifecycle-state document for simulation_id={simulation_id!r}")
         return SimulationLifecycleState(
             simulation_id=simulation_id,
             state=record["state"],
@@ -201,9 +191,7 @@ class SimulationStateRepository:
                     if_match=expected_etag,
                 )
             except Exception as exc:  # noqa: BLE001
-                raise ETagConflictError(
-                    f"Cosmos replace_item rejected the conditional update: {exc}"
-                ) from exc
+                raise ETagConflictError(f"Cosmos replace_item rejected the conditional update: {exc}") from exc
             return SimulationLifecycleState(
                 simulation_id=simulation_id,
                 state=target,
@@ -215,9 +203,7 @@ class SimulationStateRepository:
             "state": target,
             "_etag": new_etag,
         }
-        return SimulationLifecycleState(
-            simulation_id=simulation_id, state=target, etag=new_etag
-        )
+        return SimulationLifecycleState(simulation_id=simulation_id, state=target, etag=new_etag)
 
 
 __all__ = [

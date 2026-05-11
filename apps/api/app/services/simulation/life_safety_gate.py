@@ -134,7 +134,5 @@ async def evaluate(
             # low-confidence evacuation prompts MUST be refused. Other
             # categories pass through with ``confidence: low``.
             if parsed_category == "evacuation":
-                return GateDecision(
-                    refused=True, reason="life_safety_low_confidence"
-                )
+                return GateDecision(refused=True, reason="life_safety_low_confidence")
     return GateDecision(refused=False)

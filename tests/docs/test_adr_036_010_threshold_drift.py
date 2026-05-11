@@ -26,13 +26,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ADR_PATH = (
-    REPO_ROOT
-    / "docs"
-    / "aidr"
-    / "decisions"
-    / "ADR-036-010-cycle-2-amendment-cycle.md"
-)
+ADR_PATH = REPO_ROOT / "docs" / "aidr" / "decisions" / "ADR-036-010-cycle-2-amendment-cycle.md"
 CHANGELOG_PATH = REPO_ROOT / "CHANGELOG.md"
 SLI_PATH = REPO_ROOT / "infra" / "observability" / "sli-kql.json"
 
@@ -116,8 +110,7 @@ def test_no_stale_2500_or_1800_in_z6_paragraphs() -> None:
     adr_z6_block = adr_match.group(0)
     for stale in ("2500 ms", "1800 ms"):
         assert stale not in adr_z6_block, (
-            f"ADR §A2-02 still carries stale Z6 threshold {stale!r} — "
-            "Cycle 3 / A3-04 mandates removal."
+            f"ADR §A2-02 still carries stale Z6 threshold {stale!r} — Cycle 3 / A3-04 mandates removal."
         )
 
     # CHANGELOG Z6 line — recognised by the "Z6 SLI" prefix.
@@ -125,6 +118,4 @@ def test_no_stale_2500_or_1800_in_z6_paragraphs() -> None:
     assert z6_lines, "Cannot locate CHANGELOG Z6 entry"
     for ln in z6_lines:
         for stale in ("2 500 ms", "1 800 ms", "2500 ms", "1800 ms"):
-            assert stale not in ln, (
-                f"CHANGELOG Z6 line still carries stale threshold {stale!r}: {ln!r}"
-            )
+            assert stale not in ln, f"CHANGELOG Z6 line still carries stale threshold {stale!r}: {ln!r}"

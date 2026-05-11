@@ -129,7 +129,10 @@ def test_disabled_flag_suppresses_pagerduty_but_audits_state() -> None:
     """T216 — flag-disabled suppresses on-call page; state still audited."""
     audit: list[dict[str, Any]] = []
     set_corpus_freshness_alert_flag(
-        value=False, actor="ops-on-call", audit_sink=audit.append, now_fn=_now,
+        value=False,
+        actor="ops-on-call",
+        audit_sink=audit.append,
+        now_fn=_now,
     )
 
     asmt = assess_corpus_staleness(
@@ -154,9 +157,7 @@ def test_disabled_flag_suppresses_pagerduty_but_audits_state() -> None:
     assert len(sb_events) == 1, "Service Bus emission is unconditional"
     assert len(pd_events) == 0, "PagerDuty MUST be suppressed when flag is disabled"
     # Audit must include both the flag-flip event and the freshness-state event
-    assert any(e["event_type"] == "corpus_freshness_alert_disabled" for e in audit), (
-        "flag-flip emits audit event"
-    )
+    assert any(e["event_type"] == "corpus_freshness_alert_disabled" for e in audit), "flag-flip emits audit event"
 
 
 def test_no_ingest_history_emits_red_with_sentinel_age() -> None:

@@ -34,9 +34,6 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Request, status
-from pydantic import BaseModel, ConfigDict, Field
-
 from app.api.dependencies.lifecycle_guard import make_lifecycle_guard
 from app.api.dependencies.simulation_rbac import (
     CoordinatorPrincipal,
@@ -45,6 +42,8 @@ from app.api.dependencies.simulation_rbac import (
 from app.services.simulation.dispatch_status import (
     TriggeredSubAgent,
 )
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, status
+from pydantic import BaseModel, ConfigDict, Field
 
 logger = logging.getLogger(__name__)
 
@@ -60,12 +59,7 @@ def _load_telemetry_injection_prompt() -> str:
     if _TELEMETRY_INJECTION_PROMPT_CACHE is None:
         from pathlib import Path as _Path
 
-        prompt_path = (
-            _Path(__file__).resolve().parents[4]
-            / "agents"
-            / "simulation_telemetry_injection"
-            / "prompt.md"
-        )
+        prompt_path = _Path(__file__).resolve().parents[4] / "agents" / "simulation_telemetry_injection" / "prompt.md"
         try:
             _TELEMETRY_INJECTION_PROMPT_CACHE = prompt_path.read_text(encoding="utf-8")
         except OSError:
@@ -210,7 +204,6 @@ async def inject_telemetry(
     """
     import hashlib
 
-    from apps.agents.simulation_telemetry_injection import handler as ti_handler
     from app.api.dependencies.lifecycle_guard import _read_state_safely
     from app.repositories.synthetic_signals_repository import (
         get_synthetic_signals_repository,
@@ -223,15 +216,15 @@ async def inject_telemetry(
         get_signal_pipeline_orchestrator,
     )
 
+    from apps.agents.simulation_telemetry_injection import handler as ti_handler
+
     _validate_sim_id(sim_id)
 
     # T-P02 — refuse while paused / aborted (HTTP 409 + audit).
     state = await _read_state_safely(sim_id)
     if state != "active":
         idempotency_key = request.headers.get("Idempotency-Key")
-        request_correlation_id = (
-            request.headers.get("X-Request-Correlation-Id") or str(uuid4())
-        )
+        request_correlation_id = request.headers.get("X-Request-Correlation-Id") or str(uuid4())
         try:
             await get_audit_writer().write(
                 "lifecycle.refused_while_paused",
@@ -248,9 +241,7 @@ async def inject_telemetry(
                 },
             )
         except Exception:
-            logger.exception(
-                "lifecycle.refused_audit_failed sim=%s state=%s", sim_id, state
-            )
+            logger.exception("lifecycle.refused_audit_failed sim=%s state=%s", sim_id, state)
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={
@@ -282,19 +273,13 @@ async def inject_telemetry(
                 "user_id": user_id,
                 "original_text_hash": text_hash,
                 "parse_started_at": parse_started_at,
-                "viewport_centroid_lat": body.viewport_hint.centroid_lat
-                if body.viewport_hint
-                else None,
-                "viewport_centroid_lng": body.viewport_hint.centroid_lng
-                if body.viewport_hint
-                else None,
+                "viewport_centroid_lat": body.viewport_hint.centroid_lat if body.viewport_hint else None,
+                "viewport_centroid_lng": body.viewport_hint.centroid_lng if body.viewport_hint else None,
                 "pii_redactions": 0,
             },
         )
     except Exception:
-        logger.exception(
-            "telemetry-injection: audit.attempted failed sim=%s", sim_id
-        )
+        logger.exception("telemetry-injection: audit.attempted failed sim=%s", sim_id)
 
     # Locate optional LLM call wired into app.state at startup.
     llm_call = getattr(request.app.state, "telemetry_injection_llm_call", None)
@@ -361,9 +346,7 @@ async def inject_telemetry(
     dispatch_exception_message: str | None = None
     try:
         orchestrator = get_signal_pipeline_orchestrator()
-        dispatch = await orchestrator.dispatch(
-            outcome.signal, correlation_id=correlation_id
-        )
+        dispatch = await orchestrator.dispatch(outcome.signal, correlation_id=correlation_id)
         # Cycle 2 / T-AA14 — orchestrator now surfaces per-subscriber
         # outcomes via ``subscriber_outcomes`` (one entry per ATTEMPTED
         # subscriber) so the route handler can build the byte-equal
@@ -381,36 +364,25 @@ async def inject_telemetry(
                         dispatch_status=outcome_entry.dispatch_status,
                     )
                 )
-            degraded_dispatch = bool(
-                getattr(dispatch, "degraded_dispatch", False)
-            )
+            degraded_dispatch = bool(getattr(dispatch, "degraded_dispatch", False))
             if degraded_dispatch:
                 # Surface the FIRST failed subscriber's exception details
                 # for the dispatch_failed envelope. Per-subscriber detail
                 # is preserved in `triggered_sub_agents` so audit consumers
                 # can reconstruct.
                 first_failure = next(
-                    (
-                        o
-                        for o in subscriber_outcomes
-                        if o.dispatch_status != "acknowledged"
-                    ),
+                    (o for o in subscriber_outcomes if o.dispatch_status != "acknowledged"),
                     None,
                 )
                 if first_failure is not None:
-                    dispatch_exception_class = (
-                        first_failure.exception_class or "DispatchError"
-                    )
+                    dispatch_exception_class = first_failure.exception_class or "DispatchError"
                     dispatch_exception_message = (
-                        first_failure.exception_message
-                        or f"{first_failure.dispatch_status} during dispatch"
+                        first_failure.exception_message or f"{first_failure.dispatch_status} during dispatch"
                     )
         else:
             # Backward-compat (Cycle 1 dispatch result without per-subscriber
             # outcomes) — wrap acknowledged subscribers only.
-            per_subscriber_correlations = getattr(
-                dispatch, "per_subscriber_correlations", None
-            )
+            per_subscriber_correlations = getattr(dispatch, "per_subscriber_correlations", None)
             for subscriber in dispatch.fanned_out_to:
                 sub_corr = (
                     per_subscriber_correlations.get(subscriber)
@@ -461,16 +433,12 @@ async def inject_telemetry(
                 prompt_hash=text_hash,
                 prompt_hash_source="raw_user_input",
                 idempotency_key=request.headers.get("Idempotency-Key"),
-                request_correlation_id=request.headers.get(
-                    "X-Request-Correlation-Id"
-                )
-                or correlation_id,
+                request_correlation_id=request.headers.get("X-Request-Correlation-Id") or correlation_id,
                 dispatch_ack_timeout_seconds=DISPATCH_ACK_TIMEOUT_SECONDS,
             )
         except Exception:
             logger.exception(
-                "signal_pipeline.dispatch_failed audit write failed sim=%s "
-                "correlation=%s",
+                "signal_pipeline.dispatch_failed audit write failed sim=%s correlation=%s",
                 sim_id,
                 correlation_id,
             )
@@ -480,9 +448,7 @@ async def inject_telemetry(
     # fully-failed dispatch (zero acknowledged subscribers — only the
     # dispatch_failed envelope is written then, per spec.md L131 + audit-
     # envelope.md §3.25 acceptance bullet).
-    fully_failed = degraded_dispatch and not any(
-        e.dispatch_status == "acknowledged" for e in triggered_sub_agents
-    )
+    fully_failed = degraded_dispatch and not any(e.dispatch_status == "acknowledged" for e in triggered_sub_agents)
     if not fully_failed:
         from app.services.simulation.audit_writer import (
             canonicalise_triggered_sub_agents,
@@ -498,9 +464,7 @@ async def inject_telemetry(
                 "signal_ids": [outcome.signal.signal_id],
                 "categories": [outcome.signal.category],
                 "confidences": [outcome.signal.confidence],
-                "triggered_sub_agents": canonicalise_triggered_sub_agents(
-                    triggered_sub_agents
-                ),
+                "triggered_sub_agents": canonicalise_triggered_sub_agents(triggered_sub_agents),
             },
         )
 
@@ -598,9 +562,7 @@ async def abort_simulation_036(
             current = await state_repo.read(sim_id)
             await state_repo.update_state(sim_id, "aborted", current.etag)
         except ETagConflictError:
-            logger.warning(
-                "abort.state_etag_conflict sim=%s — concurrent transition", sim_id
-            )
+            logger.warning("abort.state_etag_conflict sim=%s — concurrent transition", sim_id)
         except ValueError:
             # Already aborted — idempotent; just continue.
             pass
@@ -663,9 +625,7 @@ async def pause_simulation_036(
             await state_repo.update_state(sim_id, "paused", current.etag)
         except ETagConflictError as exc:
             # T-P03 — surface 412 → 409 conflict per error-responses.md.
-            logger.warning(
-                "pause.state_etag_conflict sim=%s — concurrent transition", sim_id
-            )
+            logger.warning("pause.state_etag_conflict sim=%s — concurrent transition", sim_id)
             raise HTTPException(
                 status_code=409,
                 detail={
@@ -743,9 +703,7 @@ async def resume_simulation_036(
         except UnknownSimulationError:
             await state_repo.bootstrap(sim_id)
         except ETagConflictError as exc:
-            logger.warning(
-                "resume.state_etag_conflict sim=%s — concurrent transition", sim_id
-            )
+            logger.warning("resume.state_etag_conflict sim=%s — concurrent transition", sim_id)
             raise HTTPException(
                 status_code=409,
                 detail={

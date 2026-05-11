@@ -36,9 +36,7 @@ from tests.staging_gates import (
 )
 
 _SHA256_HEX_RE = re.compile(r"^[a-f0-9]{64}$")
-_UUID4_RE = re.compile(
-    r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
-)
+_UUID4_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
 
 
 def _capturing_sink() -> tuple[list[dict], callable]:
@@ -102,9 +100,7 @@ def test_envelope_written_before_raise_z6_breach() -> None:
             envelope_sink=sink,
             build_label="v0.36.3-rc.1",
         )
-    assert len(captured) == 1, (
-        f"expected exactly one envelope on refused invocation; got {len(captured)}"
-    )
+    assert len(captured) == 1, f"expected exactly one envelope on refused invocation; got {len(captured)}"
 
 
 def test_envelope_carries_all_eight_details_fields() -> None:
@@ -153,8 +149,7 @@ def test_envelope_correlation_ids_match_top_and_nested() -> None:
         "details.staging_promotion_correlation_id (single-stream JOIN)"
     )
     assert _UUID4_RE.match(envelope["correlation_id"]), (
-        f"correlation_id MUST be a UUID4 lowercase hex string; "
-        f"got {envelope['correlation_id']!r}"
+        f"correlation_id MUST be a UUID4 lowercase hex string; got {envelope['correlation_id']!r}"
     )
 
 
@@ -171,12 +166,8 @@ def test_envelope_breached_slis_lex_sorted() -> None:
             envelope_sink=sink,
         )
     breached = captured[0]["details"]["breached_slis"]
-    assert breached == sorted(breached), (
-        f"breached_slis MUST be lex-sorted; got {breached!r}"
-    )
-    assert breached == ["SLI-Z6", "SLI-Z7"], (
-        f"both SLIs MUST appear in a single envelope; got {breached!r}"
-    )
+    assert breached == sorted(breached), f"breached_slis MUST be lex-sorted; got {breached!r}"
+    assert breached == ["SLI-Z6", "SLI-Z7"], f"both SLIs MUST appear in a single envelope; got {breached!r}"
 
 
 def test_envelope_sample_floor_underages_carry_observed_lt_required() -> None:
@@ -208,10 +199,7 @@ def test_envelope_gate_helper_version_is_sha256_hex() -> None:
             build_label="v0.36.3-rc.4",
         )
     digest = captured[0]["details"]["gate_helper_version"]
-    assert _SHA256_HEX_RE.match(digest), (
-        f"gate_helper_version MUST be a 64-char SHA-256 hex digest; "
-        f"got {digest!r}"
-    )
+    assert _SHA256_HEX_RE.match(digest), f"gate_helper_version MUST be a 64-char SHA-256 hex digest; got {digest!r}"
 
 
 def test_no_envelope_on_green_path() -> None:
@@ -241,13 +229,9 @@ def test_two_concurrent_invocations_yield_distinct_uuids() -> None:
     captured_a, sink_a = _capturing_sink()
     captured_b, sink_b = _capturing_sink()
     with pytest.raises(StagingPromotionRefused):
-        assert_sli_thresholds(
-            sli_results=_z6_breach_results(), envelope_sink=sink_a, build_label="v1"
-        )
+        assert_sli_thresholds(sli_results=_z6_breach_results(), envelope_sink=sink_a, build_label="v1")
     with pytest.raises(StagingPromotionRefused):
-        assert_sli_thresholds(
-            sli_results=_z6_breach_results(), envelope_sink=sink_b, build_label="v1"
-        )
+        assert_sli_thresholds(sli_results=_z6_breach_results(), envelope_sink=sink_b, build_label="v1")
     uuid_a = captured_a[0]["details"]["staging_promotion_correlation_id"]
     uuid_b = captured_b[0]["details"]["staging_promotion_correlation_id"]
     assert uuid_a != uuid_b, (
@@ -266,9 +250,7 @@ def test_build_refused_envelope_helper_idempotent_shape() -> None:
     )
     env_b = _build_refused_envelope(
         breached_slis=["SLI-Z7", "SLI-Z6"],
-        sample_floor_underages=[
-            {"sli_id": "SLI-Z7", "observed_samples": 5, "required_samples": 30}
-        ],
+        sample_floor_underages=[{"sli_id": "SLI-Z7", "observed_samples": 5, "required_samples": 30}],
         build_label="vY",
     )
     # Shape parity (same keys); content varies.

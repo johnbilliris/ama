@@ -66,29 +66,21 @@ def _generate_synthetic_fixture() -> Path:
 def _load_latencies() -> list[dict[str, float]]:
     if not FIXTURE_FILE.exists():
         _generate_synthetic_fixture()
-    return [
-        json.loads(line)
-        for line in FIXTURE_FILE.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
+    return [json.loads(line) for line in FIXTURE_FILE.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
 def test_sc010_hazard_overlay_p95_meets_slo() -> None:
     rows = _load_latencies()
     hazard = [float(r["latency_ms"]) for r in rows if r["overlay_type"] == "hazard"]
     p95 = _percentile(hazard, 95)
-    assert p95 <= P95_HAZARD_OVERLAY_MS, (
-        f"SC-010 hazard overlay p95={p95:.0f}ms > {P95_HAZARD_OVERLAY_MS}ms"
-    )
+    assert p95 <= P95_HAZARD_OVERLAY_MS, f"SC-010 hazard overlay p95={p95:.0f}ms > {P95_HAZARD_OVERLAY_MS}ms"
 
 
 def test_sc010_weather_overlay_p95_meets_slo() -> None:
     rows = _load_latencies()
     weather = [float(r["latency_ms"]) for r in rows if r["overlay_type"] == "weather"]
     p95 = _percentile(weather, 95)
-    assert p95 <= P95_WEATHER_OVERLAY_MS, (
-        f"SC-010 weather overlay p95={p95:.0f}ms > {P95_WEATHER_OVERLAY_MS}ms"
-    )
+    assert p95 <= P95_WEATHER_OVERLAY_MS, f"SC-010 weather overlay p95={p95:.0f}ms > {P95_WEATHER_OVERLAY_MS}ms"
 
 
 def test_sc010_threshold_constants_match_plan() -> None:

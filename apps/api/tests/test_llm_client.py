@@ -35,9 +35,7 @@ async def test_happy_path_returns_signal() -> None:
     async def fake_llm(*_args, **_kw) -> str:
         return _good_json()
 
-    sig = await parse_to_signal(
-        llm_call=fake_llm, system_prompt="sys", user_prompt="t"
-    )
+    sig = await parse_to_signal(llm_call=fake_llm, system_prompt="sys", user_prompt="t")
     assert sig.category == "weather"
     assert sig.synthetic_signal is True
 
@@ -48,9 +46,7 @@ async def test_invalid_json_raises_parse_failure() -> None:
         return "not json at all"
 
     with pytest.raises(ParseFailure):
-        await parse_to_signal(
-            llm_call=fake_llm, system_prompt="sys", user_prompt="t"
-        )
+        await parse_to_signal(llm_call=fake_llm, system_prompt="sys", user_prompt="t")
 
 
 @pytest.mark.asyncio
@@ -59,6 +55,4 @@ async def test_schema_violation_raises_parse_failure() -> None:
         return json.dumps({"signal_id": "x"})  # missing required fields
 
     with pytest.raises(ParseFailure):
-        await parse_to_signal(
-            llm_call=fake_llm, system_prompt="sys", user_prompt="t"
-        )
+        await parse_to_signal(llm_call=fake_llm, system_prompt="sys", user_prompt="t")

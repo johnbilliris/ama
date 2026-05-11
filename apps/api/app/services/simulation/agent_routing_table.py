@@ -19,9 +19,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-DEFAULT_PATH = (
-    Path(__file__).resolve().parents[2] / "config" / "agent_routing_table.yaml"
-)
+DEFAULT_PATH = Path(__file__).resolve().parents[2] / "config" / "agent_routing_table.yaml"
 
 
 @dataclass(frozen=True)
@@ -34,9 +32,7 @@ class RoutingTable:
 
 def _strip_quotes(value: str) -> str:
     v = value.strip()
-    if (v.startswith('"') and v.endswith('"')) or (
-        v.startswith("'") and v.endswith("'")
-    ):
+    if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
         return v[1:-1]
     return v
 
@@ -111,12 +107,7 @@ def _parse(text: str) -> dict[str, Any]:
             last_list = []
             continue
 
-        if (
-            indent > 0
-            and stripped.startswith("- ")
-            and section is not None
-            and last_list_key is None
-        ):
+        if indent > 0 and stripped.startswith("- ") and section is not None and last_list_key is None:
             # Top-level list under section.
             section_kind = "list"
             section_list.append(_strip_quotes(stripped[2:]))
@@ -140,12 +131,7 @@ def _parse(text: str) -> dict[str, Any]:
                 section_dict[key] = _strip_quotes(value)
             continue
 
-        if (
-            indent > 0
-            and stripped.startswith("- ")
-            and section is not None
-            and last_list_key is not None
-        ):
+        if indent > 0 and stripped.startswith("- ") and section is not None and last_list_key is not None:
             last_list.append(_strip_quotes(stripped[2:]))
             continue
 

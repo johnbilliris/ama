@@ -25,9 +25,7 @@ import pytest
 from tools.simulation_stub_sweep import TRIP_WIRE
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-INVOKER_PATH = (
-    REPO_ROOT / "apps" / "api" / "app" / "services" / "simulation" / "sub_agent_invoker.py"
-)
+INVOKER_PATH = REPO_ROOT / "apps" / "api" / "app" / "services" / "simulation" / "sub_agent_invoker.py"
 
 
 def test_trip_wire_string_is_constant() -> None:
@@ -37,10 +35,7 @@ def test_trip_wire_string_is_constant() -> None:
     the test compares against its content character-by-character via the
     sweep helper so this contract file does not embed the literal.
     """
-    expected = (
-        "simulated reply"
-        " (no data source wired in this environment)"
-    )
+    expected = "simulated reply (no data source wired in this environment)"
     assert TRIP_WIRE == expected
 
 
@@ -72,4 +67,3 @@ def test_no_stray_trip_wire_in_production_code(scope_dir: str) -> None:
             f"Stray trip-wire string found in {path.relative_to(REPO_ROOT).as_posix()} — "
             "T-B14 deleted the stub adapter block; no production file may contain it."
         )
-

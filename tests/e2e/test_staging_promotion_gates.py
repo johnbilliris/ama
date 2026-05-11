@@ -39,13 +39,7 @@ from tests.staging_gates import (  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SLI_JSON = REPO_ROOT / "infra" / "observability" / "sli-kql.json"
-ALERTS_BICEP = (
-    REPO_ROOT
-    / "infra"
-    / "bicep"
-    / "modules"
-    / "simulation-app-insights-alerts.bicep"
-)
+ALERTS_BICEP = REPO_ROOT / "infra" / "bicep" / "modules" / "simulation-app-insights-alerts.bicep"
 
 
 CANONICAL_IDS = [
@@ -70,8 +64,7 @@ def test_sli_json_exists() -> None:
 
 def test_sli_count_is_five(sli_doc: dict) -> None:
     assert len(sli_doc["slis"]) == 7, (
-        "Cycle 2 / T-AA16 — exactly 7 SLIs (Z1..Z5 from ADR-036-008 + Z6/Z7 "
-        "for staging promotion gates per A2-02)"
+        "Cycle 2 / T-AA16 — exactly 7 SLIs (Z1..Z5 from ADR-036-008 + Z6/Z7 for staging promotion gates per A2-02)"
     )
 
 
@@ -164,8 +157,7 @@ def test_promotion_gate_blocks_on_any_sli_breach(sli_doc: dict) -> None:
     for s in sli_doc["slis"]:
         sample = fabricated_breaches[s["id"]]
         assert _is_breach(s, sample), (
-            f"SLI {s['id']} did not detect breach for fabricated value {sample}; "
-            f"check sli-kql.json thresholds"
+            f"SLI {s['id']} did not detect breach for fabricated value {sample}; check sli-kql.json thresholds"
         )
 
 
@@ -308,22 +300,15 @@ def test_synthetic_canary_refused_red_sli_row(shape_name: str) -> None:
         )
 
     # ── invariant (iv) — exactly one envelope, with expected content ──────
-    assert len(captured) == 1, (
-        f"shape {shape_name!r} — expected exactly one envelope; got {len(captured)}"
-    )
+    assert len(captured) == 1, f"shape {shape_name!r} — expected exactly one envelope; got {len(captured)}"
     envelope = captured[0]
     details = envelope["details"]
     assert details["build_label"] == build_label
-    assert sorted(details["breached_slis"]) == sorted(
-        shape["expected_breached_slis"]
-    )
+    assert sorted(details["breached_slis"]) == sorted(shape["expected_breached_slis"])
     if "expected_underages" in shape:
-        underage_ids = sorted(
-            row["sli_id"] for row in details["sample_floor_underages"]
-        )
+        underage_ids = sorted(row["sli_id"] for row in details["sample_floor_underages"])
         assert underage_ids == sorted(shape["expected_underages"]), (
-            f"shape {shape_name!r} — expected underages {shape['expected_underages']}; "
-            f"got {underage_ids}"
+            f"shape {shape_name!r} — expected underages {shape['expected_underages']}; got {underage_ids}"
         )
 
     # ── invariant (ii) — subprocess invocation exits non-zero ─────────────
@@ -362,11 +347,7 @@ def test_synthetic_canary_refused_red_sli_row(shape_name: str) -> None:
         check=False,
         cwd=repo_root,
     )
-    assert tag_check.returncode == 0, (
-        f"git tag --list failed: stderr={tag_check.stderr!r}"
-    )
+    assert tag_check.returncode == 0, f"git tag --list failed: stderr={tag_check.stderr!r}"
     assert tag_check.stdout.strip() == "", (
-        f"shape {shape_name!r} — refused canary unexpectedly produced tag "
-        f"promote/{build_label}: {tag_check.stdout!r}"
+        f"shape {shape_name!r} — refused canary unexpectedly produced tag promote/{build_label}: {tag_check.stdout!r}"
     )
-

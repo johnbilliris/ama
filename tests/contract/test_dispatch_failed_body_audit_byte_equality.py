@@ -74,8 +74,7 @@ def test_canonicaliser_is_input_order_invariant() -> None:
         canonical = canonicalise_triggered_sub_agents(list(permuted))
         permuted_bytes = json.dumps(canonical, sort_keys=True)
         assert permuted_bytes == base_bytes, (
-            "canonicalise_triggered_sub_agents MUST be input-order invariant "
-            "to honour CHK135 byte-equality."
+            "canonicalise_triggered_sub_agents MUST be input-order invariant to honour CHK135 byte-equality."
         )
 
 

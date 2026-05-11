@@ -7,13 +7,7 @@ from pathlib import Path
 
 import pytest
 
-BICEP_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "infra"
-    / "bicep"
-    / "modules"
-    / "observability-alerts.bicep"
-)
+BICEP_PATH = Path(__file__).resolve().parents[2] / "infra" / "bicep" / "modules" / "observability-alerts.bicep"
 
 
 @pytest.fixture(scope="module")

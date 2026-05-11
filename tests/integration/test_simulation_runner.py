@@ -84,8 +84,7 @@ class TestSimulationRunner:
         # configured event phase in the run plan.
         expected_min = max(1, len(run.event_phases))
         assert len(signals) >= expected_min, (
-            f"runner emitted {len(signals)} signals for {expected_min} phases; "
-            f"expected ≥ phase count"
+            f"runner emitted {len(signals)} signals for {expected_min} phases; expected ≥ phase count"
         )
         # Every signal must be tagged with simulation provenance.
         for signal in signals:

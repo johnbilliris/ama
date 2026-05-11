@@ -93,9 +93,7 @@ class AzureOutcomeSignedUrlProvider:
 
     async def read(self, simulation_id: str) -> OutcomeReadResult:
         try:
-            doc = await self.cosmos_container.read_item(
-                item=simulation_id, partition_key=simulation_id
-            )
+            doc = await self.cosmos_container.read_item(item=simulation_id, partition_key=simulation_id)
         except Exception as exc:  # noqa: BLE001
             status_code = getattr(exc, "status_code", None)
             if status_code == 404:

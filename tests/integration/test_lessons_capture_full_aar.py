@@ -199,9 +199,7 @@ def test_full_aar_aiims_attributions_populated() -> None:
 
     assert draft.sub_agent_responses
     for row in draft.sub_agent_responses:
-        assert row.get("aiims_function"), (
-            f"row missing aiims_function: {row!r}"
-        )
+        assert row.get("aiims_function"), f"row missing aiims_function: {row!r}"
 
 
 def test_aidr_section_ordering_invariant() -> None:
@@ -238,6 +236,4 @@ def test_aidr_section_ordering_invariant() -> None:
         "identified_gaps",
         "lessons_identified",
     ]
-    assert field_names == expected_order, (
-        f"AIDR section ordering drift: expected {expected_order}, got {field_names}"
-    )
+    assert field_names == expected_order, f"AIDR section ordering drift: expected {expected_order}, got {field_names}"

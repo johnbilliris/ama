@@ -46,9 +46,7 @@ def _clear_route_cache():
 @pytest.mark.parametrize("hazard", ["fire", "flood", "storm"])
 def test_chk003_wa_single_route_via_dfes(hazard):
     decision = route("WA", hazard)
-    assert decision.agencies == ("DFES",), (
-        f"WA {hazard} MUST route to DFES alone (CHK003); got {decision.agencies}"
-    )
+    assert decision.agencies == ("DFES",), f"WA {hazard} MUST route to DFES alone (CHK003); got {decision.agencies}"
 
 
 # --- QLD QFD naming (CHK004) -----------------------------------------------
@@ -56,12 +54,8 @@ def test_chk003_wa_single_route_via_dfes(hazard):
 
 def test_chk004_qld_fire_uses_qfd_name():
     decision = route("QLD", "fire")
-    assert "QFD" in decision.agencies, (
-        f"QLD fire MUST use QFD name (CHK004); got {decision.agencies}"
-    )
-    assert "QFES" not in decision.agencies, (
-        "QFES is the legacy name and must not appear in the routing tuple."
-    )
+    assert "QFD" in decision.agencies, f"QLD fire MUST use QFD name (CHK004); got {decision.agencies}"
+    assert "QFES" not in decision.agencies, "QFES is the legacy name and must not appear in the routing tuple."
 
 
 # --- VIC CFA + FRV split (CHK005) -------------------------------------------
@@ -120,9 +114,7 @@ def test_chk009_nt_cyclone_routes_to_ntes():
 
 def test_chk010_act_fire_addresses_esa_first():
     decision = route("ACT", "fire")
-    assert decision.agencies[0] == "ESA", (
-        f"CHK010: ACT fire MUST list ESA first (umbrella); got {decision.agencies}"
-    )
+    assert decision.agencies[0] == "ESA", f"CHK010: ACT fire MUST list ESA first (umbrella); got {decision.agencies}"
 
 
 # --- ACT police split (CHK011) ---------------------------------------------
@@ -165,8 +157,7 @@ def test_chk011_act_police_agency_hint_disambiguates(hint, expected):
 def test_chk012_medical_brand_per_jurisdiction(jurisdiction, expected_agency):
     decision = route(jurisdiction, "medical")
     assert expected_agency in decision.agencies, (
-        f"CHK012: {jurisdiction} medical MUST include {expected_agency!r}; "
-        f"got {decision.agencies}"
+        f"CHK012: {jurisdiction} medical MUST include {expected_agency!r}; got {decision.agencies}"
     )
 
 
@@ -179,10 +170,7 @@ def test_chk013_ses_lead_flood_storm_in_eastern_states(jurisdiction, hazard):
     decision = route(jurisdiction, hazard)
     # Each of these uses an SES variant; assert at least one agency contains "SES".
     has_ses = any("SES" in a for a in decision.agencies)
-    assert has_ses, (
-        f"CHK013: {jurisdiction} {hazard} MUST include an SES variant; "
-        f"got {decision.agencies}"
-    )
+    assert has_ses, f"CHK013: {jurisdiction} {hazard} MUST include an SES variant; got {decision.agencies}"
 
 
 # --- CHK014 negative: unknown jurisdiction OR unknown hazard raises --------
@@ -201,12 +189,8 @@ def test_chk014_unknown_hazard_raises():
 # --- Smoke: every jurisdiction routes for the canonical hazard set ---------
 
 
-@pytest.mark.parametrize(
-    "jurisdiction", ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"]
-)
+@pytest.mark.parametrize("jurisdiction", ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"])
 @pytest.mark.parametrize("hazard", ["fire", "flood", "storm", "police", "medical"])
 def test_every_jurisdiction_resolves_canonical_hazards(jurisdiction, hazard):
     decision = route(jurisdiction, hazard)
-    assert decision.agencies, (
-        f"({jurisdiction}, {hazard}) MUST resolve to ≥1 agency"
-    )
+    assert decision.agencies, f"({jurisdiction}, {hazard}) MUST resolve to ≥1 agency"

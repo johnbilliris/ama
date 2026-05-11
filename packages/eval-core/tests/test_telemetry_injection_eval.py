@@ -24,6 +24,7 @@ def _azure_foundry_staging_enabled() -> bool:
 
     return os.getenv("AMA_STAGING_FOUNDRY") == "1"
 
+
 DATASET = (
     Path(__file__).resolve().parents[3]
     / "packages"

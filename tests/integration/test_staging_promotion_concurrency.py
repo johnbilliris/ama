@@ -29,9 +29,7 @@ from tests.staging_gates import (
     assert_sli_thresholds,
 )
 
-_UUID4_RE = re.compile(
-    r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
-)
+_UUID4_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
 
 
 def _red_results() -> dict:
@@ -100,14 +98,8 @@ def test_two_concurrent_invocations_produce_distinct_envelopes() -> None:
     assert _UUID4_RE.match(uuid_b)
 
     # Top-level / nested correlation_id parity per §3.26.
-    assert (
-        captured_a[0]["correlation_id"]
-        == captured_a[0]["details"]["staging_promotion_correlation_id"]
-    )
-    assert (
-        captured_b[0]["correlation_id"]
-        == captured_b[0]["details"]["staging_promotion_correlation_id"]
-    )
+    assert captured_a[0]["correlation_id"] == captured_a[0]["details"]["staging_promotion_correlation_id"]
+    assert captured_b[0]["correlation_id"] == captured_b[0]["details"]["staging_promotion_correlation_id"]
 
 
 def _subprocess_script() -> str:
@@ -174,11 +166,10 @@ def test_two_concurrent_subprocesses_yield_two_non_zero_exits() -> None:
     # but the implicit-namespace-package machinery picks it up when the
     # repo root is on ``sys.path``.
     import os as _os
+
     env = _os.environ.copy()
     existing_path = env.get("PYTHONPATH", "")
-    env["PYTHONPATH"] = (
-        repo_root + (_os.pathsep + existing_path if existing_path else "")
-    )
+    env["PYTHONPATH"] = repo_root + (_os.pathsep + existing_path if existing_path else "")
 
     def run_one() -> tuple[int, dict]:
         proc = subprocess.run(  # noqa: S603 — controlled stdin script, no shell
@@ -216,7 +207,4 @@ def test_two_concurrent_subprocesses_yield_two_non_zero_exits() -> None:
     assert payload_b["refused"] is True, f"payload_b={payload_b!r}"
     uuid_a = payload_a["envelopes"][0]["details"]["staging_promotion_correlation_id"]
     uuid_b = payload_b["envelopes"][0]["details"]["staging_promotion_correlation_id"]
-    assert uuid_a != uuid_b, (
-        "subprocess concurrency — distinct correlation_ids required; "
-        f"got {uuid_a!r} == {uuid_b!r}"
-    )
+    assert uuid_a != uuid_b, f"subprocess concurrency — distinct correlation_ids required; got {uuid_a!r} == {uuid_b!r}"

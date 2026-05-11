@@ -59,9 +59,7 @@ async def test_concurrent_allocate_is_gap_free_and_unique() -> None:
     """100 concurrent allocations → set(values) == range(1, 101)."""
 
     repo = SimulationSequenceRepository()
-    results = await asyncio.gather(
-        *(repo.allocate("sim-conc") for _ in range(100))
-    )
+    results = await asyncio.gather(*(repo.allocate("sim-conc") for _ in range(100)))
     assert sorted(results) == list(range(1, 101))
     assert len(set(results)) == 100
 

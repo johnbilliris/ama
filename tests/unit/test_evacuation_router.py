@@ -32,9 +32,7 @@ class TestDijkstraShortestPath:
         # T-AA06 — replace ``len(...) > 0`` with explicit invariant:
         # a road network with no assembly areas is unusable for the
         # evacuation router, so the loader MUST provide ≥1.
-        assert len(aa_node_ids) >= 1, (
-            "loaded network has zero assembly-area nodes — router cannot run"
-        )
+        assert len(aa_node_ids) >= 1, "loaded network has zero assembly-area nodes — router cannot run"
 
         # Pick a non-assembly-area node as origin
         all_nodes = loaded_network.get_all_nodes()

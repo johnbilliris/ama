@@ -67,16 +67,12 @@ def test_total_valid_tuples_is_81() -> None:
     sentinels = 1  # map.overlay.batch
     total = cartesian + sentinels
     assert cartesian == 80
-    assert total == 81, (
-        f"Expected 81 valid (event_type, layer_type) tuples per spec; got {total}."
-    )
+    assert total == 81, f"Expected 81 valid (event_type, layer_type) tuples per spec; got {total}."
 
 
 @pytest.mark.parametrize("event_type", PER_OVERLAY_EVENT_TYPES)
 @pytest.mark.parametrize("layer_type", LAYER_TYPES)
-def test_event_layer_tuple_serialises_cleanly(
-    event_type: str, layer_type: str
-) -> None:
+def test_event_layer_tuple_serialises_cleanly(event_type: str, layer_type: str) -> None:
     """Round-trip JSON serialisation is stable for every valid tuple."""
     payload = {
         "overlay_id": "ov-1",

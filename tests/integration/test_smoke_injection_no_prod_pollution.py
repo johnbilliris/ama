@@ -13,12 +13,7 @@ from pathlib import Path
 
 import pytest
 
-_WORKFLOW_PATH = (
-    Path(__file__).resolve().parents[2]
-    / ".github"
-    / "workflows"
-    / "staging-promotion.yml"
-)
+_WORKFLOW_PATH = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "staging-promotion.yml"
 
 
 @pytest.fixture(scope="module")
@@ -48,6 +43,4 @@ def test_smoke_does_not_reference_prod_tenant_literals(workflow_text: str) -> No
         "SMOKE_TENANT_ID: tnt-au-",
     )
     for literal in forbidden_literals:
-        assert literal not in workflow_text, (
-            f"smoke-injection MUST NOT reference {literal!r}"
-        )
+        assert literal not in workflow_text, f"smoke-injection MUST NOT reference {literal!r}"

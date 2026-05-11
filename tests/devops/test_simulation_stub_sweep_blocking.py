@@ -22,9 +22,7 @@ def branch_protection_text() -> str:
 
 
 def test_simulation_stub_sweep_uses_enforce_flag(workflow_text: str) -> None:
-    assert "--enforce" in workflow_text, (
-        "T-J10 — `simulation-stub-sweep.yml` MUST run the tool with `--enforce`."
-    )
+    assert "--enforce" in workflow_text, "T-J10 — `simulation-stub-sweep.yml` MUST run the tool with `--enforce`."
 
 
 def test_simulation_stub_sweep_does_not_run_in_informational_mode(workflow_text: str) -> None:

@@ -146,9 +146,7 @@ def foundry_inference_span(
         yield span
     except Exception as exc:  # noqa: BLE001
         span.error = repr(exc)
-        span.counters["foundry_inference_error_rate"] = (
-            span.counters.get("foundry_inference_error_rate", 0) + 1
-        )
+        span.counters["foundry_inference_error_rate"] = span.counters.get("foundry_inference_error_rate", 0) + 1
         raise
     finally:
         elapsed_ms = (time.perf_counter() - started) * 1000.0

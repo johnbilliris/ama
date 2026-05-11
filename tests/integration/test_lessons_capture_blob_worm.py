@@ -92,9 +92,7 @@ async def test_azure_uploader_factory_calls_worm_apis() -> None:
 @pytest.mark.asyncio
 async def test_azure_uploader_swallows_blob_already_exists() -> None:
     blob_client = MagicMock()
-    blob_client.upload_blob = AsyncMock(
-        side_effect=RuntimeError("BlobAlreadyExists: 409")
-    )
+    blob_client.upload_blob = AsyncMock(side_effect=RuntimeError("BlobAlreadyExists: 409"))
     blob_client.set_legal_hold = AsyncMock()
     blob_client.set_immutability_policy = AsyncMock()
 

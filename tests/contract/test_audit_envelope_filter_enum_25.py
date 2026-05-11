@@ -25,23 +25,18 @@ from packages.domain.src.domain.models.telemetry_injection_audit_entry import (
 def test_entry_type_literal_size_is_26() -> None:
     members = set(get_args(EntryType))
     assert len(members) == 26, (
-        f"EntryType Literal MUST have exactly 26 members "
-        f"(got {len(members)}: {sorted(members)})."
+        f"EntryType Literal MUST have exactly 26 members (got {len(members)}: {sorted(members)})."
     )
 
 
 def test_all_entry_types_tuple_matches_literal() -> None:
-    assert set(ALL_ENTRY_TYPES) == set(get_args(EntryType)), (
-        "ALL_ENTRY_TYPES MUST match the EntryType Literal members."
-    )
+    assert set(ALL_ENTRY_TYPES) == set(get_args(EntryType)), "ALL_ENTRY_TYPES MUST match the EntryType Literal members."
 
 
 def test_every_entry_type_has_a_dispatch_class() -> None:
     """No entry_type may exist without a typed Pydantic dispatch class."""
 
-    missing = sorted(
-        e for e in ALL_ENTRY_TYPES if e not in DetailsByEntry
-    )
+    missing = sorted(e for e in ALL_ENTRY_TYPES if e not in DetailsByEntry)
     assert not missing, (
         f"Entry types MISSING from DetailsByEntry: {missing}. "
         "Every audit entry_type MUST have a typed Pydantic dispatch class."

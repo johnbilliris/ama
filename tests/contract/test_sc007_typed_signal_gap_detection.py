@@ -41,11 +41,7 @@ def _build_audit_log(
             out.append({"turn_id": turn_id, "event_type": "injection.attempted"})
             roll = rng.random()
             outcome = (
-                "injection.success"
-                if roll < 0.85
-                else "injection.refused"
-                if roll < 0.97
-                else "injection.circuit_open"
+                "injection.success" if roll < 0.85 else "injection.refused" if roll < 0.97 else "injection.circuit_open"
             )
             if not (induce_gap and turn_idx % 173 == 0):
                 out.append({"turn_id": turn_id, "event_type": outcome})
@@ -64,9 +60,7 @@ def detect_gaps(audit_log: list[dict[str, str]]) -> list[str]:
     by_turn: dict[str, dict[str, int]] = {}
     for evt in audit_log:
         turn = evt["turn_id"]
-        by_turn.setdefault(turn, {})[evt["event_type"]] = (
-            by_turn.setdefault(turn, {}).get(evt["event_type"], 0) + 1
-        )
+        by_turn.setdefault(turn, {})[evt["event_type"]] = by_turn.setdefault(turn, {}).get(evt["event_type"], 0) + 1
     gaps: list[str] = []
     for turn, counts in by_turn.items():
         if counts.get("injection.attempted", 0) == 0:
@@ -104,9 +98,7 @@ def test_sc007_duplicate_outcomes_are_also_flagged() -> None:
     assert gaps == ["t-001"]
 
 
-@pytest.mark.parametrize(
-    "outcome", ["injection.success", "injection.refused", "injection.circuit_open"]
-)
+@pytest.mark.parametrize("outcome", ["injection.success", "injection.refused", "injection.circuit_open"])
 def test_sc007_each_terminal_outcome_passes(outcome: str) -> None:
     audit = [
         {"turn_id": "t-001", "event_type": "injection.attempted"},

@@ -108,11 +108,7 @@ async def run_turn_barrier(
 
     # All injections audited BEFORE we begin dispatch. Verify the
     # invariant explicitly so a test can prove the barrier holds.
-    last_injection_seq = (
-        out.injection_results[-1].audit_sequence_number
-        if out.injection_results
-        else 0
-    )
+    last_injection_seq = out.injection_results[-1].audit_sequence_number if out.injection_results else 0
 
     for role in substantive_roles:
         dispatch = await sub_agent_dispatcher(role, latest_token)
@@ -139,9 +135,7 @@ def assert_audit_envelope_invariants(result: TurnBarrierResult) -> None:
     """Programmatic assertion of the FR-008 / FR-015 envelope invariants."""
     if not result.injection_results and not result.dispatch_results:
         return
-    last_inj = max(
-        (r.audit_sequence_number for r in result.injection_results), default=0
-    )
+    last_inj = max((r.audit_sequence_number for r in result.injection_results), default=0)
     if result.dispatch_results:
         first_dispatch = min(d.audit_sequence_number for d in result.dispatch_results)
         if first_dispatch <= last_inj:

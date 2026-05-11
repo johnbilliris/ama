@@ -25,14 +25,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-MAP_FILE = (
-    REPO_ROOT
-    / "apps"
-    / "web"
-    / "src"
-    / "components"
-    / "simulation-map.tsx"
-)
+MAP_FILE = REPO_ROOT / "apps" / "web" / "src" / "components" / "simulation-map.tsx"
 
 
 @pytest.fixture(scope="module")
@@ -44,8 +37,7 @@ def test_advice_is_yellow(map_text: str) -> None:
     """AWS Advice MUST render as ``#fbbf24`` (yellow), not green."""
 
     assert '"#fbbf24"' in map_text, (
-        "AWS Advice colour must be #fbbf24 (yellow) per constitution v1.2.0; "
-        f"file: {MAP_FILE.relative_to(REPO_ROOT)}"
+        f"AWS Advice colour must be #fbbf24 (yellow) per constitution v1.2.0; file: {MAP_FILE.relative_to(REPO_ROOT)}"
     )
     # The legacy green hex MUST not appear *as a value* for the ``advice``
     # mapping key — explanatory comments mentioning the historical
@@ -56,35 +48,27 @@ def test_advice_is_yellow(map_text: str) -> None:
         if stripped.startswith("//") or stripped.startswith("/*") or stripped.startswith("*"):
             continue
         if '"advice":' in line:
-            assert "#22c55e" not in line, (
-                "AWS Advice line still references the legacy green #22c55e: "
-                f"{line!r}"
-            )
+            assert "#22c55e" not in line, f"AWS Advice line still references the legacy green #22c55e: {line!r}"
 
 
 def test_watch_and_act_is_orange(map_text: str) -> None:
     """AWS Watch & Act MUST render as ``#fb923c`` (orange)."""
 
     assert '"#fb923c"' in map_text, (
-        "AWS Watch & Act colour must be #fb923c (orange) per constitution "
-        "v1.2.0 three-tier palette."
+        "AWS Watch & Act colour must be #fb923c (orange) per constitution v1.2.0 three-tier palette."
     )
 
 
 def test_emergency_warning_is_red(map_text: str) -> None:
     """AWS Emergency Warning MUST render as ``#dc2626`` (red)."""
 
-    assert '"#dc2626"' in map_text, (
-        "AWS Emergency Warning colour must be #dc2626 (red)."
-    )
+    assert '"#dc2626"' in map_text, "AWS Emergency Warning colour must be #dc2626 (red)."
 
 
 def test_information_is_blue(map_text: str) -> None:
     """Information tier MUST render as ``#3b82f6`` (blue) — task T-R05 spec."""
 
-    assert '"#3b82f6"' in map_text, (
-        "Information tier colour must be #3b82f6 (blue) per T-R05 acceptance."
-    )
+    assert '"#3b82f6"' in map_text, "Information tier colour must be #3b82f6 (blue) per T-R05 acceptance."
 
 
 def test_full_palette_present_in_one_object(map_text: str) -> None:
@@ -97,9 +81,7 @@ def test_full_palette_present_in_one_object(map_text: str) -> None:
 
     palette = ("#fbbf24", "#fb923c", "#dc2626", "#3b82f6")
     indices = [map_text.find(hex_) for hex_ in palette]
-    assert all(idx >= 0 for idx in indices), (
-        f"Missing palette entry; indices={indices} for palette={palette}"
-    )
+    assert all(idx >= 0 for idx in indices), f"Missing palette entry; indices={indices} for palette={palette}"
     span = max(indices) - min(indices)
     assert span <= 400, (
         "Expected all four AWS palette hexes to live within a single "

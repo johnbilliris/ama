@@ -15,9 +15,7 @@ FIXTURE_ROOT = Path(__file__).resolve().parents[1] / "fixtures" / "jurisdiction_
 def _fixture_service() -> JurisdictionBoundaryService:
     svc = JurisdictionBoundaryService()
     svc.load_from_directory(FIXTURE_ROOT, dataset_version="fixture-v1")
-    assert svc.metrics.polygons_loaded >= 2, (
-        "Fixture must commit at least 2 polygons (ACT + NSW + VIC)"
-    )
+    assert svc.metrics.polygons_loaded >= 2, "Fixture must commit at least 2 polygons (ACT + NSW + VIC)"
     return svc
 
 

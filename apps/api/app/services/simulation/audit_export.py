@@ -59,9 +59,7 @@ def _to_export_dict(env: AuditEnvelope) -> dict[str, Any]:
         model_deployment = details.get("model_deployment")
     if not _is_au_deployment(model_deployment):
         raw["carve_out_review_required"] = True
-        raw["carve_out_reason"] = (
-            f"non-AU model_deployment={model_deployment!r}"
-        )
+        raw["carve_out_reason"] = f"non-AU model_deployment={model_deployment!r}"
     return raw
 
 
@@ -85,10 +83,7 @@ def build_export(
 
     matched.sort(key=lambda e: e.sequence_number)
 
-    lines = [
-        json.dumps(_to_export_dict(e), default=str, separators=(",", ":"))
-        for e in matched
-    ]
+    lines = [json.dumps(_to_export_dict(e), default=str, separators=(",", ":")) for e in matched]
     ndjson = "\n".join(lines).encode("utf-8")
     body = gzip.compress(ndjson)
     digest = hashlib.sha256(body).hexdigest()

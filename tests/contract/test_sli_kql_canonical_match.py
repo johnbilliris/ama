@@ -25,12 +25,7 @@ from tests.contract._kql_canonicaliser import (
 
 # Mirrors the established `_SLI_PATH` pattern at
 # tests/contract/test_sli_kql_schema_v2.py:25.
-_SLI_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "infra"
-    / "observability"
-    / "sli-kql.json"
-)
+_SLI_PATH = Path(__file__).resolve().parents[2] / "infra" / "observability" / "sli-kql.json"
 _SLI_DOC = json.loads(_SLI_PATH.read_text(encoding="utf-8"))
 
 

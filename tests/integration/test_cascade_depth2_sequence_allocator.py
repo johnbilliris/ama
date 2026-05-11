@@ -56,9 +56,7 @@ async def test_depth2_refused_sequence_numbers_are_gap_free() -> None:
     from apps.api.app.services.simulation import audit_writer as _aw
 
     persisted = _aw._memory_store["sim-depth2-gap-free"]
-    depth2_envs = [
-        e for e in persisted if e.entry_type == "cascade.depth2_refused"
-    ]
+    depth2_envs = [e for e in persisted if e.entry_type == "cascade.depth2_refused"]
     assert len(depth2_envs) == 100
     seq_numbers = sorted(e.sequence_number for e in depth2_envs)
     # Gap-free invariant: max - min + 1 == len.
@@ -68,6 +66,4 @@ async def test_depth2_refused_sequence_numbers_are_gap_free() -> None:
     # No envelope carries the legacy `1` placeholder.
     for env in depth2_envs:
         assert env.sequence_number != 1 or seq_numbers[0] == 1
-        assert "sequence_number" not in env.details or (
-            env.details["sequence_number"] == env.sequence_number
-        )
+        assert "sequence_number" not in env.details or (env.details["sequence_number"] == env.sequence_number)

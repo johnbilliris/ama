@@ -38,20 +38,12 @@ import pytest
 
 # Mirror the Cycle 1 / Cycle 2 contract-test path pattern — repo-root
 # anchored at ``parents[2]`` from this file.
-_BICEP_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "infra"
-    / "bicep"
-    / "modules"
-    / "cosmos-simulation-containers.bicep"
-)
+_BICEP_PATH = Path(__file__).resolve().parents[2] / "infra" / "bicep" / "modules" / "cosmos-simulation-containers.bicep"
 
 
 @pytest.fixture(scope="module")
 def bicep_text() -> str:
-    assert _BICEP_PATH.is_file(), (
-        f"Bicep module not found at {_BICEP_PATH!s}; T-AA38 must land first."
-    )
+    assert _BICEP_PATH.is_file(), f"Bicep module not found at {_BICEP_PATH!s}; T-AA38 must land first."
     return _BICEP_PATH.read_text(encoding="utf-8")
 
 
@@ -63,8 +55,7 @@ def test_smoke_role_assignment_resource_present(bicep_text: str) -> None:
     )
     matches = pattern.findall(bicep_text)
     assert len(matches) == 1, (
-        f"PD-C3-03 isolation guarantee (v) — expected exactly ONE "
-        f"sqlRoleAssignments resource; got {len(matches)}."
+        f"PD-C3-03 isolation guarantee (v) — expected exactly ONE sqlRoleAssignments resource; got {len(matches)}."
     )
 
 
@@ -164,8 +155,7 @@ def test_no_production_tenant_role_assignment_for_coordinator(
     assert role_block_match is not None
     role_block = role_block_match.group(0)
     assert "tnt-prod" not in role_block.lower(), (
-        "Role assignment block MUST NOT reference a production tenant "
-        "scope — PD-C3-03 isolation guarantee (v)."
+        "Role assignment block MUST NOT reference a production tenant scope — PD-C3-03 isolation guarantee (v)."
     )
 
 
@@ -232,17 +222,11 @@ def _extract_role_assignment_block(bicep_text: str) -> str:
         r"resource\s+smokeCoordinatorRoleAssignment\s+",
         bicep_text,
     )
-    assert start_match is not None, (
-        "Could not locate `resource smokeCoordinatorRoleAssignment` "
-        "in the Bicep source."
-    )
+    assert start_match is not None, "Could not locate `resource smokeCoordinatorRoleAssignment` in the Bicep source."
 
     start = start_match.start()
     end_match = re.search(r"^\}\s*$", bicep_text[start:], flags=re.MULTILINE)
-    assert end_match is not None, (
-        "Could not locate the closing `}` of the role-assignment "
-        "resource block."
-    )
+    assert end_match is not None, "Could not locate the closing `}` of the role-assignment resource block."
     end = start + end_match.end()
     return bicep_text[start:end]
 

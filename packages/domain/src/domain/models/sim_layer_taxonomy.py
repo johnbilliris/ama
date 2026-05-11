@@ -65,9 +65,7 @@ class SimLayerTaxonomy(StrEnum):
 ALL_LAYER_TYPES: Final[tuple[str, ...]] = tuple(member.value for member in SimLayerTaxonomy)
 
 # Closed-set guard — the spec is normative on the cardinality.
-assert len(ALL_LAYER_TYPES) == 16, (
-    f"FR-027 requires exactly 16 layer types; got {len(ALL_LAYER_TYPES)}"
-)
+assert len(ALL_LAYER_TYPES) == 16, f"FR-027 requires exactly 16 layer types; got {len(ALL_LAYER_TYPES)}"
 
 
 def layer_taxonomy_json_schema() -> dict[str, Any]:

@@ -44,12 +44,7 @@ from tests.simulation.paired_exercise_harness import (
 from tests.staging_gates import measurement_staging_enabled
 
 NDJSON_PATH = Path(__file__).parent / "sc005_economic_loss.ndjson"
-SUMMARY_DIR = (
-    Path(__file__).resolve().parents[2]
-    / "docs"
-    / "aidr"
-    / "exercise-summaries"
-)
+SUMMARY_DIR = Path(__file__).resolve().parents[2] / "docs" / "aidr" / "exercise-summaries"
 
 
 def _write_ndjson(records: list[dict[str, object]], path: Path = NDJSON_PATH) -> None:
@@ -73,14 +68,14 @@ def _write_markdown_summary(
     rows = "\n".join(
         f"| {r['pair_id']} | {r['scenario_hazard']} | "
         f"{r['treatment_loss_m']:.2f} | {r['control_loss_m']:.2f} | "
-        f"{r['delta_loss_m']:.2f} | {r['delta_pct']*100:.1f} % |"
+        f"{r['delta_loss_m']:.2f} | {r['delta_pct'] * 100:.1f} % |"
         for r in records
     )
     body = f"""# Exercise Summary — {exercise_id}
 
 **Paired-exercises**: {pairs_count}
-**Mean economic-loss reduction**: {mean_pct*100:.2f} %
-**95 % CI**: [{ci_low*100:.2f} %, {ci_high*100:.2f} %]
+**Mean economic-loss reduction**: {mean_pct * 100:.2f} %
+**95 % CI**: [{ci_low * 100:.2f} %, {ci_high * 100:.2f} %]
 **SC-005 trip-wire**: ≥30 % required
 
 ## Per-pair breakdown

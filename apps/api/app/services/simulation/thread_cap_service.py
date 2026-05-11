@@ -190,9 +190,7 @@ class ThreadCapService:
         async with await self._lock(sim_id):
             count = len(self._snapshot(sim_id).active_threads)
         if added:
-            return AcquireGranted(
-                new_count=count, cap=THREAD_CAP, thread_id=thread_id
-            )
+            return AcquireGranted(new_count=count, cap=THREAD_CAP, thread_id=thread_id)
         return AcquireDenied(current_count=count, cap=THREAD_CAP)
 
     async def release(self, sim_id: str, thread_id: str | None = None) -> bool:

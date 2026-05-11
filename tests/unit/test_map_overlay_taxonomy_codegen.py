@@ -54,9 +54,7 @@ def test_render_block_includes_each_canonical_layer_type() -> None:
 
     block = render_layer_types_block(list(ALL_LAYER_TYPES))
     for name in ALL_LAYER_TYPES:
-        assert f'"{name}"' in block, (
-            f"Codegen output is missing {name!r}; canonical={ALL_LAYER_TYPES!r}"
-        )
+        assert f'"{name}"' in block, f"Codegen output is missing {name!r}; canonical={ALL_LAYER_TYPES!r}"
 
 
 def test_render_block_starts_and_ends_with_sentinels() -> None:
@@ -108,10 +106,7 @@ def test_codegen_check_mode_passes() -> None:
     """``--check`` exits 0 — the TS file is already in sync."""
 
     rc = codegen_main(["--check"])
-    assert rc == 0, (
-        "Codegen --check reports drift; the TS file is out of sync with the "
-        "canonical Python taxonomy."
-    )
+    assert rc == 0, "Codegen --check reports drift; the TS file is out of sync with the canonical Python taxonomy."
 
 
 def test_layer_taxonomy_json_schema_round_trip() -> None:

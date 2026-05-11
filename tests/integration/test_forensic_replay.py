@@ -95,7 +95,6 @@ def test_forensic_replay_envelope_in_memory_readable() -> None:
     persisted = _aw._memory_store[sim_id]
     assert any(
         e.entry_type == "signal_pipeline.dispatch_failed"
-        and e.details["injection_correlation_id"]
-        == envelope.details["injection_correlation_id"]
+        and e.details["injection_correlation_id"] == envelope.details["injection_correlation_id"]
         for e in persisted
     )

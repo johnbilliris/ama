@@ -40,9 +40,7 @@ async def test_hook_dispatches_within_200ms() -> None:
         timeout_seconds=0.05,
     )
     elapsed = time.perf_counter() - start
-    assert elapsed < 0.2, (
-        f"post-turn hook MUST return inside the 200 ms barrier; got {elapsed:.3f}s"
-    )
+    assert elapsed < 0.2, f"post-turn hook MUST return inside the 200 ms barrier; got {elapsed:.3f}s"
     assert isinstance(results, list)
 
 

@@ -14,9 +14,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ADR = REPO_ROOT / "docs" / "aidr" / "decisions" / "ADR-036-010-cycle-2-amendment-cycle.md"
-OPENAPI_CHANGELOG = (
-    REPO_ROOT / "specs" / "036-sim-agent-extend" / "contracts" / "openapi-changelog.md"
-)
+OPENAPI_CHANGELOG = REPO_ROOT / "specs" / "036-sim-agent-extend" / "contracts" / "openapi-changelog.md"
 
 
 def test_adr_file_exists() -> None:

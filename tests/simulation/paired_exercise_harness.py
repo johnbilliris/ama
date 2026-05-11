@@ -97,9 +97,8 @@ class ExercisePair:
         if self.control.reallocations_count == 0:
             return 0.0
         return (
-            (self.control.reallocations_count - self.treatment.reallocations_count)
-            / self.control.reallocations_count
-        )
+            self.control.reallocations_count - self.treatment.reallocations_count
+        ) / self.control.reallocations_count
 
     @property
     def economic_loss_delta_m(self) -> float:
@@ -114,9 +113,7 @@ class ExercisePair:
 
 def _pair_id(scenario: ExerciseScenario) -> str:
     """Stable pair_id from the scenario seed + hazard."""
-    h = hashlib.sha256(
-        f"{scenario.hazard}|{scenario.jurisdiction}|{scenario.seed}".encode()
-    ).hexdigest()
+    h = hashlib.sha256(f"{scenario.hazard}|{scenario.jurisdiction}|{scenario.seed}".encode()).hexdigest()
     return f"pair-{h[:12]}"
 
 
@@ -217,9 +214,7 @@ def _simulate_treatment(
     )
 
 
-def _simulate_arm(
-    scenario: ExerciseScenario, *, auto_fan_out_enabled: bool, started_at: datetime
-) -> ExerciseRun:
+def _simulate_arm(scenario: ExerciseScenario, *, auto_fan_out_enabled: bool, started_at: datetime) -> ExerciseRun:
     """Backwards-compat wrapper retained for callers; delegates to control/treatment helpers."""
     if not auto_fan_out_enabled:
         return _simulate_control(scenario, started_at=started_at)

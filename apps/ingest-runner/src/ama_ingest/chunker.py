@@ -462,9 +462,7 @@ _AGENCY_ROLE_ENUM: frozenset[str] = frozenset(
         "other",
     }
 )
-_AUTHORITY_LEVEL_ENUM: frozenset[str] = frozenset(
-    {"state-territory", "commonwealth", "national-institution"}
-)
+_AUTHORITY_LEVEL_ENUM: frozenset[str] = frozenset({"state-territory", "commonwealth", "national-institution"})
 _CULTURAL_CLASSIFICATION_ENUM: frozenset[str] = frozenset(
     {"public", "indigenous-language", "sacred-site", "land-governance"}
 )
@@ -524,10 +522,7 @@ def validate_chunk_metadata(
                 )
             # Spec contract chunk-metadata.schema.json allOf invariant 3:
             # cultural_classification != 'public' → cultural_authority_required MUST be true.
-            if (
-                chunk.cultural_classification != "public"
-                and not chunk.cultural_authority_required
-            ):
+            if chunk.cultural_classification != "public" and not chunk.cultural_authority_required:
                 raise ChunkMetadataError(
                     f"chunk_cultural_invariant_violation: chunk_id={chunk.chunk_id} "
                     f"cultural_classification={chunk.cultural_classification!r} requires "

@@ -232,9 +232,7 @@ class AuditRecord(BaseModel):
         # 7 (F-A5; ADR-14): approval_workflow_state ∈ {approved, rejected} →
         # approval_authority required.
         if self.approval_workflow_state in {"approved", "rejected"} and not self.approval_authority:
-            raise ValueError(
-                "approval_workflow_state in {approved, rejected} requires approval_authority"
-            )
+            raise ValueError("approval_workflow_state in {approved, rejected} requires approval_authority")
         return self
 
 

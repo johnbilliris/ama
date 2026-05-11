@@ -146,9 +146,7 @@ class IndexRollbackOrchestrator:
         # 2. Manual Release Manager approval (Pass 2 Q-P2-08).
         release_manager_id = await self._approval(request)
         if not release_manager_id:
-            raise IndexRollbackError(
-                f"index rollback for {request.correlation_id!r} not approved"
-            )
+            raise IndexRollbackError(f"index rollback for {request.correlation_id!r} not approved")
         approved = IndexRollbackEvent(
             correlation_id=request.correlation_id,
             old_index_name=request.old_index_name,

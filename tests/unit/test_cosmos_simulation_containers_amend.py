@@ -27,13 +27,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-BICEP_FILE = (
-    REPO_ROOT
-    / "infra"
-    / "bicep"
-    / "modules"
-    / "cosmos-simulation-containers.bicep"
-)
+BICEP_FILE = REPO_ROOT / "infra" / "bicep" / "modules" / "cosmos-simulation-containers.bicep"
 
 
 @pytest.fixture(scope="module")
@@ -71,8 +65,7 @@ def test_amend_container_present(bicep_text: str, container_name: str) -> None:
     """Each new container is declared in the module."""
 
     assert f"name: '{container_name}'" in bicep_text, (
-        f"Expected resource declaration for {container_name!r} "
-        f"in {BICEP_FILE.relative_to(REPO_ROOT)}"
+        f"Expected resource declaration for {container_name!r} in {BICEP_FILE.relative_to(REPO_ROOT)}"
     )
 
 
@@ -84,15 +77,12 @@ def test_amend_container_present(bicep_text: str, container_name: str) -> None:
         "simulation_audit_dlq",
     ],
 )
-def test_amend_container_partition_key_simulation_id(
-    bicep_text: str, container_name: str
-) -> None:
+def test_amend_container_partition_key_simulation_id(bicep_text: str, container_name: str) -> None:
     """Partition key is ``/simulation_id`` (snake-case per ADR-036-007/009)."""
 
     block = _resource_block(bicep_text, container_name)
     assert "/simulation_id" in block, (
-        f"{container_name!r} must use partition key '/simulation_id' "
-        f"(amendment cycle ADR-036-007/009)"
+        f"{container_name!r} must use partition key '/simulation_id' (amendment cycle ADR-036-007/009)"
     )
 
 
@@ -101,8 +91,7 @@ def test_idempotency_cache_has_24h_ttl(bicep_text: str) -> None:
 
     block = _resource_block(bicep_text, "simulation_idempotency_cache")
     assert "defaultTtl: 86400" in block, (
-        "ADR-036-009 mandates 24h TTL anchored on `_ts` for the "
-        "idempotency cache; expected `defaultTtl: 86400`."
+        "ADR-036-009 mandates 24h TTL anchored on `_ts` for the idempotency cache; expected `defaultTtl: 86400`."
     )
 
 
@@ -114,8 +103,7 @@ def test_idempotency_cache_uses_autoscale(bicep_text: str) -> None:
     # `autoscaleSettings` (autoscale) or `throughput` (manual). Idempotency
     # cache must be autoscale per ADR-036-009.
     assert "autoscaleSettings" in block, (
-        "Expected `autoscaleSettings` for simulation_idempotency_cache "
-        "(ADR-036-009 specifies 400-4000 autoscale)."
+        "Expected `autoscaleSettings` for simulation_idempotency_cache (ADR-036-009 specifies 400-4000 autoscale)."
     )
     assert "maxThroughput: 4000" in block
 
@@ -127,18 +115,12 @@ def test_idempotency_cache_uses_autoscale(bicep_text: str) -> None:
         "simulation_audit_dlq",
     ],
 )
-def test_manual_400_throughput_for_counters_and_dlq(
-    bicep_text: str, container_name: str
-) -> None:
+def test_manual_400_throughput_for_counters_and_dlq(bicep_text: str, container_name: str) -> None:
     """Sequence counters and DLQ use 400 RU/s manual throughput."""
 
     block = _resource_block(bicep_text, container_name)
-    assert "throughput: 400" in block, (
-        f"{container_name!r} must declare `throughput: 400` per ADR-036-007."
-    )
-    assert "autoscaleSettings" not in block, (
-        f"{container_name!r} uses manual throughput, not autoscale."
-    )
+    assert "throughput: 400" in block, f"{container_name!r} must declare `throughput: 400` per ADR-036-007."
+    assert "autoscaleSettings" not in block, f"{container_name!r} uses manual throughput, not autoscale."
 
 
 def test_module_outputs_new_container_names(bicep_text: str) -> None:
@@ -163,7 +145,5 @@ def test_main_bicep_module_call_is_unbroken() -> None:
     new outputs in this amendment, not new params.
     """
 
-    main_text = (REPO_ROOT / "infra" / "bicep" / "main.bicep").read_text(
-        encoding="utf-8"
-    )
+    main_text = (REPO_ROOT / "infra" / "bicep" / "main.bicep").read_text(encoding="utf-8")
     assert "modules/cosmos-simulation-containers.bicep" in main_text

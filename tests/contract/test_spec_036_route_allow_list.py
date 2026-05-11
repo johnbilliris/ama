@@ -24,9 +24,7 @@ from apps.api.app.middleware.spec_036_routes import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ROUTE_FILE = (
-    REPO_ROOT / "apps" / "api" / "app" / "api" / "routes" / "simulations_036.py"
-)
+ROUTE_FILE = REPO_ROOT / "apps" / "api" / "app" / "api" / "routes" / "simulations_036.py"
 
 
 def test_allow_list_canonical_contents() -> None:
@@ -66,9 +64,7 @@ def test_route_file_routes_are_in_allow_list() -> None:
 
     # Match @router.<verb>("/path", ...) patterns. Tolerate single OR double
     # quotes; verb is one of get/post/put/patch/delete.
-    pattern = re.compile(
-        r'@router\.(?:get|post|put|patch|delete)\(\s*["\']([^"\']+)["\']'
-    )
+    pattern = re.compile(r'@router\.(?:get|post|put|patch|delete)\(\s*["\']([^"\']+)["\']')
     declared_paths = pattern.findall(text)
     if not declared_paths:
         pytest.skip("no @router declarations found in simulations_036.py")
@@ -77,9 +73,7 @@ def test_route_file_routes_are_in_allow_list() -> None:
     # that the middleware should NOT problem-json (e.g. additive auxiliary
     # endpoints in the future) MUST be explicitly carved out below; the
     # current Cycle 2 baseline expects ALL of them to be in the allow-list.
-    declared_full = {
-        api_prefix + module_prefix + path for path in declared_paths
-    }
+    declared_full = {api_prefix + module_prefix + path for path in declared_paths}
     missing = declared_full - set(SPEC_036_PROBLEM_JSON_ROUTES)
     assert not missing, (
         f"Drift detected — routes declared in simulations_036.py NOT in "
@@ -102,6 +96,4 @@ def test_helper_returns_false_for_legacy_route() -> None:
 
 def test_helper_returns_true_for_each_allow_listed_route() -> None:
     for route in SPEC_036_PROBLEM_JSON_ROUTES:
-        assert is_problem_json_route(route) is True, (
-            f"is_problem_json_route({route!r}) MUST be True (allow-listed)."
-        )
+        assert is_problem_json_route(route) is True, f"is_problem_json_route({route!r}) MUST be True (allow-listed)."

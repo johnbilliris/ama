@@ -39,8 +39,7 @@ def _build_app(handler_path: str = "/test/exhaust") -> FastAPI:
     @app.post(handler_path)
     async def _raise() -> dict[str, str]:  # pragma: no cover - exercised via TestClient
         raise SequenceAllocationExhausted(
-            "Failed to allocate sequence number for simulation_id='sim-X' "
-            "after 5 ETag conflict retries"
+            "Failed to allocate sequence number for simulation_id='sim-X' after 5 ETag conflict retries"
         )
 
     return app

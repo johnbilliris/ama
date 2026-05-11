@@ -59,9 +59,7 @@ def test_content_hash_is_deterministic() -> None:
 
 
 def test_content_hash_distinguishes_locale() -> None:
-    assert _content_hash("[SIMULATION]", "en-AU", "v") != _content_hash(
-        "[SIMULATION]", "zh-Hans", "v"
-    )
+    assert _content_hash("[SIMULATION]", "en-AU", "v") != _content_hash("[SIMULATION]", "zh-Hans", "v")
 
 
 def test_resolve_voice_falls_back_to_en_au() -> None:
@@ -110,9 +108,7 @@ def test_build_artefacts_renders_at_least_mvp_minimum(tmp_path: Path) -> None:
     from apps.api.app.services.simulation.watermark_text_loader import _load_table
 
     table = dict(_load_table())
-    assert len(table) >= 10, (
-        f"Watermark table has {len(table)} locales — must be ≥10 for FR-058 MVP."
-    )
+    assert len(table) >= 10, f"Watermark table has {len(table)} locales — must be ≥10 for FR-058 MVP."
 
     def stub(text: str, locale: str, voice: str) -> bytes:
         return b"\x00" * 32

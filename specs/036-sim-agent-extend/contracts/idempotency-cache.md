@@ -18,7 +18,7 @@ This contract pins the wire shape, conflict-detection algorithm, and TTL semanti
 POST /api/simulations/{simId}/pause HTTP/1.1
 Authorization: Bearer <Entra JWT>
 Content-Type: application/json
-Idempotency-Key: 3f3e3afd-99c9-4f0c-bb55-0a2fcb2b6bca
+Idempotency-Key: example-idempotency-token
 
 { "reason": "Coordinator pause for cohort review" }
 ```

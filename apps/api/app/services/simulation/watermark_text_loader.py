@@ -15,9 +15,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
-DEFAULT_PATH = (
-    Path(__file__).resolve().parents[2] / "config" / "watermark_text.yaml"
-)
+DEFAULT_PATH = Path(__file__).resolve().parents[2] / "config" / "watermark_text.yaml"
 
 DEFAULT_LOCALE = "en-AU"
 
@@ -45,9 +43,7 @@ def _parse(text: str) -> dict[str, dict[str, str]]:
         if indent > 0 and current is not None and ":" in stripped:
             key, _, value = stripped.partition(":")
             v = value.strip()
-            if (v.startswith('"') and v.endswith('"')) or (
-                v.startswith("'") and v.endswith("'")
-            ):
+            if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
                 v = v[1:-1]
             out[current][key.strip()] = v
     return out
@@ -56,10 +52,12 @@ def _parse(text: str) -> dict[str, dict[str, str]]:
 @lru_cache(maxsize=1)
 def _load_table() -> Mapping[str, WatermarkTexts]:
     if not DEFAULT_PATH.exists():
-        return {DEFAULT_LOCALE: WatermarkTexts(
-            chat_receipt_prefix="[SIMULATION]",
-            public_warning_watermark="SIMULATION — DO NOT DISTRIBUTE",
-        )}
+        return {
+            DEFAULT_LOCALE: WatermarkTexts(
+                chat_receipt_prefix="[SIMULATION]",
+                public_warning_watermark="SIMULATION — DO NOT DISTRIBUTE",
+            )
+        }
     raw = _parse(DEFAULT_PATH.read_text(encoding="utf-8"))
     out: dict[str, WatermarkTexts] = {}
     for locale, fields in raw.items():

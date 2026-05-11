@@ -103,9 +103,7 @@ async def parse_to_signal(
             text = await llm_call(system_prompt, user_prompt, rf)
         except Exception as exc:
             last_error = exc
-            logger.warning(
-                "telemetry_injection.llm_call_failed attempt=%d err=%s", attempt + 1, exc
-            )
+            logger.warning("telemetry_injection.llm_call_failed attempt=%d err=%s", attempt + 1, exc)
             continue
         try:
             data = json.loads(text)

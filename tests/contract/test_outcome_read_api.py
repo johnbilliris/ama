@@ -54,9 +54,9 @@ def test_outcome_read_returns_signed_url_and_short_ttl(client: TestClient) -> No
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=UTC)
     delta = expires_at - datetime.now(UTC)
-    assert (
-        timedelta(seconds=0) < delta <= timedelta(seconds=DEFAULT_SIGNED_URL_TTL_SECONDS + 5)
-    ), f"signed URL TTL must be ≤ {DEFAULT_SIGNED_URL_TTL_SECONDS} s — got {delta}"
+    assert timedelta(seconds=0) < delta <= timedelta(seconds=DEFAULT_SIGNED_URL_TTL_SECONDS + 5), (
+        f"signed URL TTL must be ≤ {DEFAULT_SIGNED_URL_TTL_SECONDS} s — got {delta}"
+    )
 
 
 def test_outcome_read_404_when_missing(client: TestClient) -> None:

@@ -29,8 +29,7 @@ def test_main_bicep_pins_sim_controller_mode_production() -> None:
     )
     # The post-T-B14 stance: production-only.
     assert "{ name: 'SIM_CONTROLLER_MODE', value: 'production' }" in text, (
-        "T-B16 — staging Container App MUST set SIM_CONTROLLER_MODE=production "
-        "after the T-B14 stub-deletion."
+        "T-B16 — staging Container App MUST set SIM_CONTROLLER_MODE=production after the T-B14 stub-deletion."
     )
 
 

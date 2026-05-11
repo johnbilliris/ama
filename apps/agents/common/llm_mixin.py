@@ -271,7 +271,5 @@ def compute_prompt_hash(
         "user": user_payload,
         "tools": tool_schemas or [],
     }
-    canonical = _json.dumps(
-        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-    )
+    canonical = _json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return _hashlib.sha256(canonical.encode("utf-8")).hexdigest()

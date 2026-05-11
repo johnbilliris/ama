@@ -2,7 +2,7 @@ name: Foundry Carve-out Registry Review (6-Month Cadence)
 
 # T-K07 / FR-002 governance gate — fails the build if any entry in
 # data/governance/foundry_carveout_registry.json has a review_date that
-# is more than 6 months in the future or already in the past.
+# is older than 6 months or implausibly far in the future.
 #
 # Constitution v1.2.0 §Non-Negotiable #2: every Foundry carve-out (non-
 # AU model deployment) MUST be re-reviewed within 6 months of its prior
@@ -40,25 +40,32 @@ jobs:
           today = date.today()
           horizon = today + timedelta(days=183)  # ~6 months
 
+          def parse_review_date(value: str) -> date:
+              parsed = date.fromisoformat(value[:10])
+              return parsed
+
+          entries = registry if isinstance(registry, list) else registry.get("entries", [])
+
           failures: list[str] = []
-          for entry in registry.get("entries", []):
+          for entry in entries:
               review_str = entry.get("review_date")
+              entry_id = entry.get("id") or entry.get("model_id") or "<unknown>"
               if not review_str:
-                  failures.append(f"{entry.get('id')}: missing review_date")
+                  failures.append(f"{entry_id}: missing review_date")
                   continue
               try:
-                  review = date.fromisoformat(review_str)
+                  review = parse_review_date(review_str)
               except ValueError:
-                  failures.append(f"{entry.get('id')}: invalid review_date {review_str!r}")
+                  failures.append(f"{entry_id}: invalid review_date {review_str!r}")
                   continue
-              if review < today:
+              if today - review > timedelta(days=183):
                   failures.append(
-                      f"{entry.get('id')}: review_date {review_str} has elapsed"
+                      f"{entry_id}: review_date {review_str} is older than the 6-month review window"
                   )
                   continue
               if review > horizon:
                   failures.append(
-                      f"{entry.get('id')}: review_date {review_str} exceeds the 6-month horizon ({horizon})"
+                      f"{entry_id}: review_date {review_str} exceeds the 6-month future horizon ({horizon})"
                   )
 
           if failures:

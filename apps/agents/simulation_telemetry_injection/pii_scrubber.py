@@ -74,9 +74,7 @@ def scrub(
             analyzer = AnalyzerEngine()
             findings = analyzer.analyze(text=out, language="en")
             for r in sorted(findings, key=lambda r: r.start, reverse=True):
-                out = (
-                    out[: r.start] + f"[REDACTED:{r.entity_type.lower()}]" + out[r.end :]
-                )
+                out = out[: r.start] + f"[REDACTED:{r.entity_type.lower()}]" + out[r.end :]
                 counts[r.entity_type.lower()] = counts.get(r.entity_type.lower(), 0) + 1
         except Exception:  # pragma: no cover - presidio missing in test env
             logger.debug("presidio_not_installed")

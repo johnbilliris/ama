@@ -34,13 +34,7 @@ from apps.api.app.services.simulation.dispatch_status import (
 from packages.domain.src.domain.models.aiims_mapping import ALL_SUB_AGENTS
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-OPENAPI_PATH = (
-    REPO_ROOT
-    / "specs"
-    / "036-sim-agent-extend"
-    / "contracts"
-    / "openapi-simulation.yaml"
-)
+OPENAPI_PATH = REPO_ROOT / "specs" / "036-sim-agent-extend" / "contracts" / "openapi-simulation.yaml"
 
 
 @pytest.fixture(scope="module")
@@ -60,9 +54,7 @@ def test_openapi_schema_loads_with_schemathesis_loader() -> None:
     assert schema is not None
     # The schema reports v0.3.0 — confirms the loader path-resolution works.
     raw = schema.raw_schema if hasattr(schema, "raw_schema") else schema
-    info = (
-        raw.get("info") if isinstance(raw, dict) else getattr(raw, "info", None)
-    )
+    info = raw.get("info") if isinstance(raw, dict) else getattr(raw, "info", None)
     if isinstance(info, dict):
         assert info.get("version") == "0.3.0"
 

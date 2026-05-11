@@ -36,8 +36,7 @@ from packages.domain.src.domain.sim_cascade_matrix import (
 )
 def test_cascade_matrix_per_rule(category: str, expected: set[str]) -> None:
     assert cascade_targets_for(category) == expected, (
-        f"Cascade matrix for {category!r} expected {expected}, got "
-        f"{cascade_targets_for(category)}"
+        f"Cascade matrix for {category!r} expected {expected}, got {cascade_targets_for(category)}"
     )
 
 
@@ -47,9 +46,7 @@ def test_cascade_matrix_targets_subset_of_canonical_subagents() -> None:
     canonical = set(ALL_SUB_AGENTS)
     for cat, targets in CASCADE_MATRIX.items():
         for t in targets:
-            assert t in canonical, (
-                f"Cascade target {t!r} for {cat!r} is not in canonical SubAgent set"
-            )
+            assert t in canonical, f"Cascade target {t!r} for {cat!r} is not in canonical SubAgent set"
 
 
 def test_cascade_matrix_aiims_function_attribution() -> None:
@@ -58,9 +55,7 @@ def test_cascade_matrix_aiims_function_attribution() -> None:
 
     for cat, targets in CASCADE_MATRIX.items():
         for t in targets:
-            assert t in AGENT_TO_AIIMS, (
-                f"Cascade target {t!r} for {cat!r} has no AIIMS attribution"
-            )
+            assert t in AGENT_TO_AIIMS, f"Cascade target {t!r} for {cat!r} has no AIIMS attribution"
 
 
 def test_cascade_matrix_categories_count() -> None:

@@ -30,9 +30,7 @@ def controller_mode() -> ControllerMode:
 
     raw = os.environ.get(ENV_VAR, DEFAULT_MODE).strip().lower()
     if raw not in ("stub", "production"):
-        raise ValueError(
-            f"{ENV_VAR}={raw!r} must be 'stub' or 'production'."
-        )
+        raise ValueError(f"{ENV_VAR}={raw!r} must be 'stub' or 'production'.")
     return raw  # type: ignore[return-value]
 
 

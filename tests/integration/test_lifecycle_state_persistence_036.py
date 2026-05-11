@@ -67,15 +67,9 @@ def test_lifecycle_verb_idempotency_namespaces_are_distinct() -> None:
     cache documents (per Q7)."""
 
     cache_id = IdempotencyCacheRepository._cache_id  # noqa: SLF001 - test access
-    pause_id = cache_id(
-        SIM_ID, "pause", f"/api/simulations/{SIM_ID}/pause", key="same-key"
-    )
-    resume_id = cache_id(
-        SIM_ID, "resume", f"/api/simulations/{SIM_ID}/resume", key="same-key"
-    )
-    abort_id = cache_id(
-        SIM_ID, "abort", f"/api/simulations/{SIM_ID}/abort", key="same-key"
-    )
+    pause_id = cache_id(SIM_ID, "pause", f"/api/simulations/{SIM_ID}/pause", key="same-key")
+    resume_id = cache_id(SIM_ID, "resume", f"/api/simulations/{SIM_ID}/resume", key="same-key")
+    abort_id = cache_id(SIM_ID, "abort", f"/api/simulations/{SIM_ID}/abort", key="same-key")
     inject_id = cache_id(
         SIM_ID,
         "inject-telemetry",
@@ -104,9 +98,7 @@ class _FakeRepoEtagConflict(SimulationStateRepository):
     async def update_state(  # type: ignore[override]
         self, simulation_id, new_state, expected_etag
     ):
-        raise ETagConflictError(
-            f"ETag mismatch on {simulation_id}: expected {expected_etag}"
-        )
+        raise ETagConflictError(f"ETag mismatch on {simulation_id}: expected {expected_etag}")
 
 
 def test_pause_412_etag_mapped_to_409_lifecycle_conflict(monkeypatch) -> None:
@@ -130,9 +122,7 @@ def test_pause_412_etag_mapped_to_409_lifecycle_conflict(monkeypatch) -> None:
     # )`, so monkeypatching the source module is the surface that matters.
     import apps.api.app.services.simulation.repositories.simulation_state as state_mod
 
-    monkeypatch.setattr(
-        state_mod, "get_simulation_state_repository", lambda: fake_repo
-    )
+    monkeypatch.setattr(state_mod, "get_simulation_state_repository", lambda: fake_repo)
 
     client = _client()
     response = client.post(f"/api/simulations/{SIM_ID}/pause")

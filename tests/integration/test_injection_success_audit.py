@@ -62,14 +62,10 @@ def test_happy_path_all_acknowledged() -> None:
         event_hub_publisher=pub,
         audit_writer=audit,
     )
-    result = asyncio.run(
-        orch.dispatch(_build_signal(), correlation_id=str(uuid4()))
-    )
+    result = asyncio.run(orch.dispatch(_build_signal(), correlation_id=str(uuid4())))
     assert result.degraded_dispatch is False
     assert all(o.dispatch_status == "acknowledged" for o in result.subscriber_outcomes)
-    assert set(result.fanned_out_to) == {
-        o.sub_agent for o in result.subscriber_outcomes
-    }
+    assert set(result.fanned_out_to) == {o.sub_agent for o in result.subscriber_outcomes}
 
 
 def test_canonicaliser_byte_equal_for_injection_success() -> None:
@@ -91,6 +87,4 @@ def test_canonicaliser_byte_equal_for_injection_success() -> None:
     ]
     body_canonical = canonicalise_triggered_sub_agents(entries)
     audit_canonical = canonicalise_triggered_sub_agents(entries)
-    assert json.dumps(body_canonical, sort_keys=True) == json.dumps(
-        audit_canonical, sort_keys=True
-    )
+    assert json.dumps(body_canonical, sort_keys=True) == json.dumps(audit_canonical, sort_keys=True)

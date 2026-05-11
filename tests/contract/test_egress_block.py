@@ -51,12 +51,9 @@ def test_safety_policy_declares_sim_egress_block() -> None:
     # signal partitioning. Together these are the deterministic layer that
     # backs the network-policy egress block.
     assert "simulation_inject" in body, (
-        f"{SAFETY_POLICY} missing simulation_inject rules — SC-006 requires "
-        "the policy to gate sim writes."
+        f"{SAFETY_POLICY} missing simulation_inject rules — SC-006 requires the policy to gate sim writes."
     )
-    assert "[SIMULATION]" in body, (
-        f"{SAFETY_POLICY} missing [SIMULATION] watermark guard — FR-035."
-    )
+    assert "[SIMULATION]" in body, f"{SAFETY_POLICY} missing [SIMULATION] watermark guard — FR-035."
     assert "Cross-tenant signal injection denied" in body, (
         f"{SAFETY_POLICY} missing cross-tenant signal block — FR-007/FR-016/FR-050."
     )
@@ -64,8 +61,7 @@ def test_safety_policy_declares_sim_egress_block() -> None:
 
 def test_tenant_isolation_policy_exists() -> None:
     assert TENANT_ISOLATION_POLICY.is_file(), (
-        f"{TENANT_ISOLATION_POLICY} missing — required for SC-006 cross-tenant "
-        "isolation enforcement."
+        f"{TENANT_ISOLATION_POLICY} missing — required for SC-006 cross-tenant isolation enforcement."
     )
 
 
@@ -93,13 +89,7 @@ def test_sim_tenant_cannot_reach_public_internet(sentinel: str) -> None:
 
 def test_imds_block_documented_in_audit_envelope() -> None:
     """The audit envelope contract MUST list the egress-block reason."""
-    contract = (
-        REPO_ROOT
-        / "specs"
-        / "036-sim-agent-extend"
-        / "contracts"
-        / "audit-envelope.md"
-    )
+    contract = REPO_ROOT / "specs" / "036-sim-agent-extend" / "contracts" / "audit-envelope.md"
     body = contract.read_text(encoding="utf-8")
     assert "simulation_tenant_egress_blocked" in body, (
         "audit-envelope.md missing the canonical "

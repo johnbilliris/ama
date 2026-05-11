@@ -27,9 +27,7 @@ pytestmark = pytest.mark.simulation
 def test_sc011_zero_thread_collapse_on_treatment_across_30_pairs() -> None:
     pairs = run_paired_exercises(num_pairs=30)
     total_collapses = sum(p.treatment.thread_collapse_events for p in pairs)
-    assert total_collapses == 0, (
-        f"SC-011 broken: {total_collapses} treatment thread collapses across 30 pairs"
-    )
+    assert total_collapses == 0, f"SC-011 broken: {total_collapses} treatment thread collapses across 30 pairs"
 
 
 def test_sc011_replay_is_byte_deterministic() -> None:

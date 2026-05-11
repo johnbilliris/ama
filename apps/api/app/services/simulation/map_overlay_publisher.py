@@ -37,13 +37,13 @@ from collections.abc import Awaitable, Callable, Iterable
 from datetime import UTC, datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
 from app.config.signal_freshness import (
     FRESHNESS_WINDOW_SECONDS,
     is_signal_stale,
 )
 from app.services.simulation.sse_sub_agent_events import format_sse_event
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
 from packages.domain.src.domain.models.sim_layer_taxonomy import (
     ALL_LAYER_TYPES,
     SimLayerTaxonomy,
@@ -185,9 +185,7 @@ async def publish_changes(
                 "overlay_id": change.overlay_id,
                 "layer_type": change.layer_type,
                 "observed_at": change.observed_at.isoformat(),
-                "freshness_window_seconds": FRESHNESS_WINDOW_SECONDS.get(
-                    change.category or "", None
-                ),
+                "freshness_window_seconds": FRESHNESS_WINDOW_SECONDS.get(change.category or "", None),
             }
             await sink(format_sse_event("map.overlay.stale", stale_payload))
             counters["map.overlay.stale"] += 1
@@ -210,4 +208,3 @@ __all__ = [
     "is_stale",
     "publish_changes",
 ]
-

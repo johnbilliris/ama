@@ -41,9 +41,7 @@ def subscribers_for(kind: SignalKind) -> set[SubAgent]:
     try:
         return set(_REGISTRY[kind])
     except KeyError as exc:
-        raise ValueError(
-            f"Unknown signal kind {kind!r}; expected one of {sorted(_REGISTRY)!r}."
-        ) from exc
+        raise ValueError(f"Unknown signal kind {kind!r}; expected one of {sorted(_REGISTRY)!r}.") from exc
 
 
 __all__ = ["SignalKind", "subscribers_for"]

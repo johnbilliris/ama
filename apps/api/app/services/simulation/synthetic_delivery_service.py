@@ -72,9 +72,7 @@ class SyntheticDeliveryService:
                 get_audit_writer,
             )
 
-            block_reason_audit = _AUDIT_BLOCK_REASON_BY_KEY.get(
-                block_reason, "simulation_tenant_egress_blocked"
-            )
+            block_reason_audit = _AUDIT_BLOCK_REASON_BY_KEY.get(block_reason, "simulation_tenant_egress_blocked")
             details: dict[str, object] = {
                 "channel": channel,
                 "audience": audience,

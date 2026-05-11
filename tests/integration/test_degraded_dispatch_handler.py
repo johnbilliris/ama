@@ -89,9 +89,7 @@ def test_full_failure_sets_degraded_and_no_acknowledged() -> None:
         audit_writer=audit,
     )
     parent_corr = str(uuid4())
-    result = asyncio.run(
-        orch.dispatch(_build_signal(), correlation_id=parent_corr)
-    )
+    result = asyncio.run(orch.dispatch(_build_signal(), correlation_id=parent_corr))
     assert result.degraded_dispatch is True
     assert result.fanned_out_to == ()
     # ONE outcome per ATTEMPTED subscriber (full attempt set).
@@ -119,9 +117,7 @@ def test_partial_failure_surfaces_per_subscriber_status() -> None:
         event_hub_publisher=pub,
         audit_writer=audit,
     )
-    result = asyncio.run(
-        orch.dispatch(_build_signal(), correlation_id=str(uuid4()))
-    )
+    result = asyncio.run(orch.dispatch(_build_signal(), correlation_id=str(uuid4())))
     assert result.degraded_dispatch is True
     statuses = {o.sub_agent: o.dispatch_status for o in result.subscriber_outcomes}
     assert statuses[failing] == "failed"
@@ -172,6 +168,4 @@ def test_byte_equality_body_audit_after_jcs() -> None:
         )
     )
     audit_canonical = envelope.details["triggered_sub_agents"]
-    assert json.dumps(body_canonical, sort_keys=True) == json.dumps(
-        audit_canonical, sort_keys=True
-    )
+    assert json.dumps(body_canonical, sort_keys=True) == json.dumps(audit_canonical, sort_keys=True)

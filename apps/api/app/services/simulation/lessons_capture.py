@@ -91,9 +91,7 @@ _GAP_ENTRIES: Final[frozenset[str]] = frozenset(
 )
 
 #: Stable ordinal map for AIIMS functions — drives ``_canonical_sort``.
-_AIIMS_ORDINAL: Final[dict[str, int]] = {
-    func: idx for idx, func in enumerate(ALL_AIIMS_FUNCTIONS)
-}
+_AIIMS_ORDINAL: Final[dict[str, int]] = {func: idx for idx, func in enumerate(ALL_AIIMS_FUNCTIONS)}
 
 
 @dataclass
@@ -205,8 +203,7 @@ def _build_timeline(
                 "source": "sub_agent",
                 "label": f"sub_agent.{canonical}",
                 "correlation_id": inv.correlation_id,
-                "aiims_function": inv.aiims_function
-                or AGENT_TO_AIIMS.get(canonical),
+                "aiims_function": inv.aiims_function or AGENT_TO_AIIMS.get(canonical),
                 "invocation_id": inv.invocation_id,
             }
         )
@@ -224,8 +221,7 @@ def _build_sub_agent_responses(
                 "invocation_id": inv.invocation_id,
                 "agent_role": inv.agent_role,
                 "sub_agent": canonical,
-                "aiims_function": inv.aiims_function
-                or AGENT_TO_AIIMS.get(canonical),
+                "aiims_function": inv.aiims_function or AGENT_TO_AIIMS.get(canonical),
                 "correlation_id": inv.correlation_id,
                 "latency_ms": inv.latency_ms,
                 "outcome": inv.outcome,
@@ -235,9 +231,7 @@ def _build_sub_agent_responses(
             }
         )
     # Stable ordering: started_at asc, then invocation_id asc.
-    return sorted(
-        rows, key=lambda r: (r["started_at"], r["invocation_id"])
-    )
+    return sorted(rows, key=lambda r: (r["started_at"], r["invocation_id"]))
 
 
 def _build_ic_decisions(
@@ -292,16 +286,10 @@ def _build_lessons_identified(
 
     audits = list(audit_entries)
     invocations = list(sub_agent_invocations)
-    degraded = sum(
-        1 for e in audits if e.entry_type == "cascade.degraded_to_annotation"
-    )
+    degraded = sum(1 for e in audits if e.entry_type == "cascade.degraded_to_annotation")
     refused = sum(1 for e in audits if e.entry_type == "injection.refused")
-    sub_agent_timeouts = sum(
-        1 for e in audits if e.entry_type == "sub_agent.timeout"
-    )
-    successful_injections = sum(
-        1 for e in audits if e.entry_type == "injection.success"
-    )
+    sub_agent_timeouts = sum(1 for e in audits if e.entry_type == "sub_agent.timeout")
+    successful_injections = sum(1 for e in audits if e.entry_type == "injection.success")
 
     parts: list[str] = [
         f"The exercise concluded with end_reason={end_reason!r}.",
@@ -310,8 +298,7 @@ def _build_lessons_identified(
     ]
     if invocations:
         parts.append(
-            f"{len(invocations)} sub-agent invocation(s) ran across "
-            f"{len({i.agent_role for i in invocations})} role(s)."
+            f"{len(invocations)} sub-agent invocation(s) ran across {len({i.agent_role for i in invocations})} role(s)."
         )
     if degraded:
         parts.append(
@@ -321,13 +308,9 @@ def _build_lessons_identified(
         )
     if sub_agent_timeouts:
         parts.append(
-            f"{sub_agent_timeouts} sub-agent timeout(s) were observed; "
-            "operators should consider warm-pool tuning."
+            f"{sub_agent_timeouts} sub-agent timeout(s) were observed; operators should consider warm-pool tuning."
         )
-    parts.append(
-        "Lessons identified should be reviewed against AIDR v2.1 §3 "
-        "before the after-action board."
-    )
+    parts.append("Lessons identified should be reviewed against AIDR v2.1 §3 before the after-action board.")
     return " ".join(parts)
 
 
@@ -364,9 +347,7 @@ def build_draft(
         participant_summary=summary,
         generated_at=datetime.now(UTC),
     )
-    timeline = _build_timeline(
-        audit_entries=audit_list, sub_agent_invocations=inv_list
-    )
+    timeline = _build_timeline(audit_entries=audit_list, sub_agent_invocations=inv_list)
     return LessonsDraft(
         record=record,
         timeline=timeline,
@@ -411,9 +392,7 @@ async def generate(
         try:
             blob_uri = await blob_uploader(record.record_id, payload)
         except Exception:  # pragma: no cover - defensive
-            logger.exception(
-                "lessons_capture.blob_upload_failed sim=%s", simulation_id
-            )
+            logger.exception("lessons_capture.blob_upload_failed sim=%s", simulation_id)
 
     index_written = False
     if index_writer is not None and blob_uri is not None:
@@ -432,13 +411,9 @@ async def generate(
             )
             index_written = True
         except Exception:  # pragma: no cover - defensive
-            logger.exception(
-                "lessons_capture.index_write_failed sim=%s", simulation_id
-            )
+            logger.exception("lessons_capture.index_write_failed sim=%s", simulation_id)
 
-    return LessonsCaptureResult(
-        record=record, blob_uri=blob_uri, index_written=index_written
-    )
+    return LessonsCaptureResult(record=record, blob_uri=blob_uri, index_written=index_written)
 
 
 __all__ = [

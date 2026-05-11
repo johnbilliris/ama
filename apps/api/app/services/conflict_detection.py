@@ -78,9 +78,7 @@ def set_multi_agent_detection_flag(
         audit_sink(
             {
                 "event_type": (
-                    "multi_agent_coordination_disabled"
-                    if not bool(value)
-                    else "multi_agent_coordination_enabled"
+                    "multi_agent_coordination_disabled" if not bool(value) else "multi_agent_coordination_enabled"
                 ),
                 "flag_name": "feature.multi_agent_conflict_detection.enabled",
                 "old_value": old_value,
@@ -126,16 +124,12 @@ class ConflictDetection:
             "conflict_group_id": self.conflict_group_id,
             "detected_at": self.detected_at.isoformat(),
             "conflict_class": self.conflict_class,
-            "agent_recommendations": [
-                _rec_to_dict(r, self.conflict_class) for r in self.agent_recommendations
-            ],
+            "agent_recommendations": [_rec_to_dict(r, self.conflict_class) for r in self.agent_recommendations],
             "escalation_state": self.escalation_state,
             "current_owner": self.current_owner,
             "escalated_to_ic_at": self.extras.get("escalated_to_ic_at"),
             "resolution": self.extras.get("resolution"),
-            "field_coordinator_offline_queue": self.extras.get(
-                "field_coordinator_offline_queue"
-            ),
+            "field_coordinator_offline_queue": self.extras.get("field_coordinator_offline_queue"),
         }
 
 
@@ -163,17 +157,13 @@ def _rec_to_dict(r: AgentRecommendation, conflict_class: str) -> dict[str, Any]:
     return out
 
 
-def _windows_overlap(
-    a: AgentRecommendation, b: AgentRecommendation
-) -> bool:
+def _windows_overlap(a: AgentRecommendation, b: AgentRecommendation) -> bool:
     if not (a.time_window_start and a.time_window_end and b.time_window_start and b.time_window_end):
         return False
     return a.time_window_start < b.time_window_end and b.time_window_start < a.time_window_end
 
 
-def _bboxes_overlap(
-    a: tuple[float, float, float, float], b: tuple[float, float, float, float]
-) -> bool:
+def _bboxes_overlap(a: tuple[float, float, float, float], b: tuple[float, float, float, float]) -> bool:
     """WGS84 bbox overlap test on `[west, south, east, north]`."""
     aw, asou, ae, an = a
     bw, bsou, be, bn = b

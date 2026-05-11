@@ -29,9 +29,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Final
 
-DEFAULT_MANIFEST_PATH: Final[Path] = (
-    Path(__file__).resolve().parent / "data" / "speech_prerender_catalog.json"
-)
+DEFAULT_MANIFEST_PATH: Final[Path] = Path(__file__).resolve().parent / "data" / "speech_prerender_catalog.json"
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,15 +51,11 @@ def load_catalog(path: Path | None = None) -> dict[str, CatalogEntry]:
         return {}
     payload = json.loads(target.read_text(encoding="utf-8"))
     if not isinstance(payload, list):
-        raise ValueError(
-            f"speech_prerender_catalog.json at {target} must be a JSON array."
-        )
+        raise ValueError(f"speech_prerender_catalog.json at {target} must be a JSON array.")
     out: dict[str, CatalogEntry] = {}
     for raw in payload:
         if not isinstance(raw, dict):
-            raise ValueError(
-                f"Invalid catalog row in {target}: expected object, got {type(raw).__name__}"
-            )
+            raise ValueError(f"Invalid catalog row in {target}: expected object, got {type(raw).__name__}")
         out[raw["bcp47"]] = CatalogEntry(
             bcp47=raw["bcp47"],
             mp3_pointer=raw.get("mp3_pointer"),

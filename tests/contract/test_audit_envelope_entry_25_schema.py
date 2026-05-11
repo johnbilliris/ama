@@ -35,9 +35,7 @@ from packages.domain.src.domain.models.telemetry_injection_audit_entry import (
 
 
 def test_entry_25_registered_in_all_entry_types() -> None:
-    assert "signal_pipeline.dispatch_failed" in ALL_ENTRY_TYPES, (
-        "Cycle 2 entry-25 MUST be in ALL_ENTRY_TYPES."
-    )
+    assert "signal_pipeline.dispatch_failed" in ALL_ENTRY_TYPES, "Cycle 2 entry-25 MUST be in ALL_ENTRY_TYPES."
     # Cycle 3 / T-AA26 / FR-071 — the typed-entry counter advances to 26
     # with the addition of `staging_promotion.refused`. Cycle 2's
     # entry-25 (`signal_pipeline.dispatch_failed`) remains registered
@@ -52,8 +50,7 @@ def test_entry_25_registered_in_all_entry_types() -> None:
 def test_entry_25_registered_in_dispatch_table() -> None:
     cls = DetailsByEntry.get("signal_pipeline.dispatch_failed")
     assert cls is SignalPipelineDispatchFailedDetails, (
-        "DetailsByEntry MUST map `signal_pipeline.dispatch_failed` -> "
-        "`SignalPipelineDispatchFailedDetails`."
+        "DetailsByEntry MUST map `signal_pipeline.dispatch_failed` -> `SignalPipelineDispatchFailedDetails`."
     )
 
 
@@ -186,9 +183,7 @@ def test_write_dispatch_failed_byte_equality_canonical_with_body() -> None:
     )
 
     audit_canonical = envelope.details["triggered_sub_agents"]
-    assert json.dumps(body_canonical, sort_keys=True) == json.dumps(
-        audit_canonical, sort_keys=True
-    ), (
+    assert json.dumps(body_canonical, sort_keys=True) == json.dumps(audit_canonical, sort_keys=True), (
         "CHK135 — HTTP 202 body's triggered_sub_agents MUST be byte-equal "
         "(after RFC 8785 JCS canonicalisation) to the audit envelope's array."
     )

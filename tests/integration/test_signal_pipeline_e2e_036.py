@@ -99,9 +99,7 @@ def test_e2e_inject_signal_persists_publishes_audits_and_lists() -> None:
     # Step 3 — audit envelope set must contain at least one delivery audit
     # per resolved subscriber. The hazard category fans out to 4 sub-agents.
     audit_entries = AuditWriter.memory_for_test(SIM_ID)
-    delivery = [
-        e for e in audit_entries if e.entry_type == "synthetic-delivery"
-    ]
+    delivery = [e for e in audit_entries if e.entry_type == "synthetic-delivery"]
     assert delivery, [e.entry_type for e in audit_entries]
 
 
@@ -111,9 +109,7 @@ def test_e2e_recent_signals_window_validation() -> None:
     client = _client()
     bad = client.get(f"/api/simulations/{SIM_ID}/recent-signals?window_seconds=0")
     assert bad.status_code == 400
-    bad2 = client.get(
-        f"/api/simulations/{SIM_ID}/recent-signals?window_seconds=86401"
-    )
+    bad2 = client.get(f"/api/simulations/{SIM_ID}/recent-signals?window_seconds=86401")
     assert bad2.status_code == 400
 
 

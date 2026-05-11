@@ -64,6 +64,4 @@ def test_every_subscriber_is_a_canonical_sub_agent() -> None:
     canonical = set(ALL_SUB_AGENTS)
     for kind in ("hazard", "resource", "channel-state"):
         for subscriber in subscribers_for(kind):
-            assert subscriber in canonical, (
-                f"{subscriber!r} (in {kind!r} fan-out) is not a canonical SubAgent"
-            )
+            assert subscriber in canonical, f"{subscriber!r} (in {kind!r} fan-out) is not a canonical SubAgent"

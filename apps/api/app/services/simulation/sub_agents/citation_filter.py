@@ -58,9 +58,7 @@ def is_sim_tenant_citation(citation: str, tenant_id: str) -> bool:
     )
 
 
-def filter_citations(
-    citations: Iterable[str], *, tenant_id: str
-) -> tuple[list[str], list[str]]:
+def filter_citations(citations: Iterable[str], *, tenant_id: str) -> tuple[list[str], list[str]]:
     """Split *citations* into ``(safe, blocked)`` lists.
 
     The returned ``blocked`` list is what the caller must report via

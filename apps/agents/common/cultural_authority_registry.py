@@ -113,9 +113,7 @@ class CulturalAuthorityRegistry:
     cache_ttl_seconds: float = CACHE_TTL_SECONDS
     """5-min TTL per Plan §F-A2.3."""
 
-    now_fn: Callable[[], datetime] = field(
-        default_factory=lambda: lambda: datetime.now(tz=UTC)
-    )
+    now_fn: Callable[[], datetime] = field(default_factory=lambda: lambda: datetime.now(tz=UTC))
 
     _cache: dict[str, _CacheEntry] = field(default_factory=dict)
     _cache_lock: threading.RLock = field(default_factory=threading.RLock)
@@ -171,9 +169,7 @@ class CulturalAuthorityRegistry:
 
         consents_tuple = tuple(verified)
         with self._cache_lock:
-            self._cache[operator_id] = _CacheEntry(
-                consents=consents_tuple, fetched_at=time.monotonic()
-            )
+            self._cache[operator_id] = _CacheEntry(consents=consents_tuple, fetched_at=time.monotonic())
         return consents_tuple
 
     def is_consent_current(
@@ -240,16 +236,12 @@ def _cosmos_fetch_consents(operator_id: str) -> tuple[CulturalAuthorityConsent, 
 
     endpoint = os.environ.get("COSMOS_ENDPOINT")
     if not endpoint:
-        raise CulturalAuthorityRegistryUnavailableError(
-            "COSMOS_ENDPOINT not set — registry client cannot connect"
-        )
+        raise CulturalAuthorityRegistryUnavailableError("COSMOS_ENDPOINT not set — registry client cannot connect")
     try:
         from azure.cosmos import CosmosClient  # noqa: PLC0415
         from azure.identity import DefaultAzureCredential  # noqa: PLC0415
     except ImportError as exc:
-        raise CulturalAuthorityRegistryUnavailableError(
-            f"azure-cosmos / azure-identity not installed: {exc}"
-        ) from exc
+        raise CulturalAuthorityRegistryUnavailableError(f"azure-cosmos / azure-identity not installed: {exc}") from exc
 
     credential = DefaultAzureCredential()
     client = CosmosClient(endpoint, credential=credential)

@@ -73,9 +73,7 @@ class InMemoryIndexWriter:
         existing = self.documents.get(rid)
         if existing is not None and existing != doc:
             # Idempotency violation — surface so tests can assert.
-            raise RuntimeError(
-                f"exercise_outcome_index: {rid} already stored with different body"
-            )
+            raise RuntimeError(f"exercise_outcome_index: {rid} already stored with different body")
         self.documents[rid] = dict(doc)
 
 

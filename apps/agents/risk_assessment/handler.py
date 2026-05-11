@@ -113,9 +113,7 @@ async def handle_signal_event(
             envelope.signal_id,
             envelope.category,
         )
-        return RiskAssessmentReply(
-            signal_id=envelope.signal_id, accepted=False, duplicate=False
-        )
+        return RiskAssessmentReply(signal_id=envelope.signal_id, accepted=False, duplicate=False)
 
     dedup_key = f"{envelope.simulation_id}::{envelope.signal_id}"
     if not _DEDUP.add_if_new(dedup_key):
@@ -124,9 +122,7 @@ async def handle_signal_event(
             envelope.signal_id,
             envelope.simulation_id,
         )
-        return RiskAssessmentReply(
-            signal_id=envelope.signal_id, accepted=False, duplicate=True
-        )
+        return RiskAssessmentReply(signal_id=envelope.signal_id, accepted=False, duplicate=True)
 
     start = time.perf_counter()
     try:
@@ -137,9 +133,7 @@ async def handle_signal_event(
             envelope.signal_id,
             envelope.simulation_id,
         )
-        return RiskAssessmentReply(
-            signal_id=envelope.signal_id, accepted=False, duplicate=False
-        )
+        return RiskAssessmentReply(signal_id=envelope.signal_id, accepted=False, duplicate=False)
     elapsed = time.perf_counter() - start
     return RiskAssessmentReply(
         signal_id=envelope.signal_id,

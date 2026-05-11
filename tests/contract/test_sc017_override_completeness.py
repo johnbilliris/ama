@@ -59,8 +59,7 @@ def _make_override_event(idx: int) -> dict[str, Any]:
         ],
         retrieval_index_name="corpus-v3",
         operator_override_rationale=(
-            "Operator IC overrode shelter-in-place to evacuate based on local "
-            f"weather observations (case {idx})."
+            f"Operator IC overrode shelter-in-place to evacuate based on local weather observations (case {idx})."
         ),
     )
 
@@ -113,9 +112,7 @@ def test_override_completeness_100pct() -> None:
     """Sample 100 override events and assert every record carries
     ``operator_override_rationale`` (SC-017)."""
     events = [_make_override_event(i) for i in range(100)]
-    missing = [
-        i for i, ev in enumerate(events) if not ev.get("operator_override_rationale")
-    ]
+    missing = [i for i, ev in enumerate(events) if not ev.get("operator_override_rationale")]
     assert not missing, (
         f"SC-017 violation: {len(missing)}/100 override events missing "
         f"operator_override_rationale. Indices: {missing[:5]}..."
@@ -136,14 +133,7 @@ def test_public_warning_completeness_100pct() -> None:
 def test_terminal_states_have_approval_authority() -> None:
     """ADR-14 invariant 7: every approved/rejected record carries approval_authority."""
     events = [_make_public_warning_event(i) for i in range(50)]
-    terminal = [
-        ev for ev in events if ev.get("approval_workflow_state") in {"approved", "rejected"}
-    ]
+    terminal = [ev for ev in events if ev.get("approval_workflow_state") in {"approved", "rejected"}]
     assert terminal, "fixture must produce some terminal-state events"
-    missing = [
-        ev["correlation_id"] for ev in terminal if not ev.get("approval_authority")
-    ]
-    assert not missing, (
-        f"ADR-14 violation: terminal-state events missing approval_authority: "
-        f"{missing[:5]}..."
-    )
+    missing = [ev["correlation_id"] for ev in terminal if not ev.get("approval_authority")]
+    assert not missing, f"ADR-14 violation: terminal-state events missing approval_authority: {missing[:5]}..."

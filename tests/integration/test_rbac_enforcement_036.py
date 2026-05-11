@@ -177,9 +177,7 @@ def test_tenant_mismatch_rejected_403() -> None:
 
 
 def test_coordinator_can_pause() -> None:
-    principal = CoordinatorPrincipal(
-        user_id="coord-1", tenant_id="tenant-1", roles=("simulation.coordinator",)
-    )
+    principal = CoordinatorPrincipal(user_id="coord-1", tenant_id="tenant-1", roles=("simulation.coordinator",))
     client = _client_with_principal(principal)
     response = client.post(f"/api/simulations/{SIM_ID}/pause")
     assert response.status_code == 200, response.text
@@ -187,9 +185,7 @@ def test_coordinator_can_pause() -> None:
 
 
 def test_coordinator_can_resume() -> None:
-    principal = CoordinatorPrincipal(
-        user_id="coord-2", tenant_id="tenant-1", roles=("simulation.coordinator",)
-    )
+    principal = CoordinatorPrincipal(user_id="coord-2", tenant_id="tenant-1", roles=("simulation.coordinator",))
     client = _client_with_principal(principal)
     response = client.post(f"/api/simulations/{SIM_ID}/resume")
     assert response.status_code == 200
@@ -197,9 +193,7 @@ def test_coordinator_can_resume() -> None:
 
 
 def test_coordinator_can_abort() -> None:
-    principal = CoordinatorPrincipal(
-        user_id="coord-3", tenant_id="tenant-1", roles=("simulation.coordinator",)
-    )
+    principal = CoordinatorPrincipal(user_id="coord-3", tenant_id="tenant-1", roles=("simulation.coordinator",))
     client = _client_with_principal(principal)
     response = client.post(
         f"/api/simulations/{SIM_ID}/abort",
@@ -211,9 +205,7 @@ def test_coordinator_can_abort() -> None:
 
 
 def test_coordinator_can_inject_benign() -> None:
-    principal = CoordinatorPrincipal(
-        user_id="coord-4", tenant_id="tenant-1", roles=("simulation.coordinator",)
-    )
+    principal = CoordinatorPrincipal(user_id="coord-4", tenant_id="tenant-1", roles=("simulation.coordinator",))
     client = _client_with_principal(principal)
     response = client.post(
         f"/api/simulations/{SIM_ID}/inject-telemetry",

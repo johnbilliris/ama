@@ -62,9 +62,7 @@ DEFAULT_TTL_SECONDS: Final[int] = 86_400
 
 #: Routes whose verb is part of the lifecycle state machine. The
 #: state-machine table in §3 of the contract applies only to these.
-LIFECYCLE_VERBS: Final[frozenset[str]] = frozenset(
-    {"pause", "resume", "abort"}
-)
+LIFECYCLE_VERBS: Final[frozenset[str]] = frozenset({"pause", "resume", "abort"})
 
 #: Lifecycle states tracked by the cache.
 LifecycleState = Literal["active", "paused", "aborted", "ended"]
@@ -215,9 +213,7 @@ def _verb_from_route(route: str) -> str:
     return parts[-1] if parts else ""
 
 
-def _lifecycle_compatible(
-    cached_verb: str, current_state: LifecycleState
-) -> bool:
+def _lifecycle_compatible(cached_verb: str, current_state: LifecycleState) -> bool:
     return (cached_verb, current_state) in _REPLAY_OK
 
 
@@ -228,9 +224,7 @@ _VERB_TO_POST_EFFECT_STATE: Final[dict[str, LifecycleState]] = {
 }
 
 
-def _derive_post_effect_state(
-    verb_route: str, current_state: LifecycleState
-) -> LifecycleState:
+def _derive_post_effect_state(verb_route: str, current_state: LifecycleState) -> LifecycleState:
     """Return the lifecycle state that the cached verb is expected to produce.
 
     For lifecycle verbs (``pause`` / ``resume`` / ``abort``) the post-effect
@@ -269,8 +263,7 @@ class IdempotencyCacheRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "IdempotencyCacheRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "IdempotencyCacheRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -332,9 +325,7 @@ class IdempotencyCacheRepository:
                 response_status=response_status,
                 response_body=response_body,
                 rbac_subject_id=rbac_subject_id,
-                lifecycle_state_at_write=_derive_post_effect_state(
-                    cached_verb, current_state
-                ),
+                lifecycle_state_at_write=_derive_post_effect_state(cached_verb, current_state),
                 request_correlation_id=request_correlation_id,
                 response_headers_subset=dict(response_headers_subset or {}),
             )
@@ -379,15 +370,11 @@ class IdempotencyCacheRepository:
         db = self._client.get_database_client(self._db_name)
         return db.get_container_client(self._container_name)
 
-    async def _read(
-        self, sim_id: str, cache_doc_id: str
-    ) -> IdempotencyCacheEntry | None:
+    async def _read(self, sim_id: str, cache_doc_id: str) -> IdempotencyCacheEntry | None:
         container = self._get_container()
         if container is not None:
             try:
-                doc = container.read_item(
-                    item=cache_doc_id, partition_key=sim_id
-                )
+                doc = container.read_item(item=cache_doc_id, partition_key=sim_id)
             except Exception as exc:
                 # T-O08 — distinguish "not found" (azure.cosmos.exceptions
                 # CosmosResourceNotFoundError) from genuine transport
@@ -403,9 +390,7 @@ class IdempotencyCacheRepository:
                     cache_doc_id,
                     exc,
                 )
-                raise IdempotencyCacheUnavailable(
-                    f"Cosmos read failed for {cache_doc_id!r}: {exc}"
-                ) from exc
+                raise IdempotencyCacheUnavailable(f"Cosmos read failed for {cache_doc_id!r}: {exc}") from exc
             return _entry_from_doc(doc)
         return self._in_memory.get(cache_doc_id)
 
@@ -420,9 +405,7 @@ class IdempotencyCacheRepository:
                     entry.cache_doc_id,
                     exc,
                 )
-                raise IdempotencyCacheUnavailable(
-                    f"Cosmos upsert failed for {entry.cache_doc_id!r}: {exc}"
-                ) from exc
+                raise IdempotencyCacheUnavailable(f"Cosmos upsert failed for {entry.cache_doc_id!r}: {exc}") from exc
             return
         self._in_memory[entry.cache_doc_id] = entry
 

@@ -61,27 +61,21 @@ def _clear_caches():
 
 
 def test_locale_table_meets_thirty_floor(locale_table):
-    assert len(locale_table) >= 30, (
-        f"FR-039 requires ≥30 locales; got {len(locale_table)}"
-    )
+    assert len(locale_table) >= 30, f"FR-039 requires ≥30 locales; got {len(locale_table)}"
 
 
 def test_every_locale_chain_terminates_in_en_au(locale_table):
     for row in locale_table:
         chain = row["fallback_chain"]
         assert chain, f"Locale {row['bcp47']!r} has empty fallback chain"
-        assert chain[-1] == "en-AU", (
-            f"Locale {row['bcp47']!r} fallback chain MUST end in en-AU; got {chain!r}"
-        )
+        assert chain[-1] == "en-AU", f"Locale {row['bcp47']!r} fallback chain MUST end in en-AU; got {chain!r}"
 
 
 def test_nt_aboriginal_locales_present_in_table(locale_table):
     """CHK018-CHK020: Yolŋu, Warlpiri, Pitjantjatjara, Arrernte, Kriol, Torres Strait Creole."""
     table_locales = {row["bcp47"] for row in locale_table}
     for required in NT_ABORIGINAL_LOCALES:
-        assert required in table_locales, (
-            f"NT/Aboriginal locale {required!r} missing from sim_locale_table.json"
-        )
+        assert required in table_locales, f"NT/Aboriginal locale {required!r} missing from sim_locale_table.json"
 
 
 def test_every_locale_has_reachable_mp3_or_fallback(locale_table):
@@ -92,21 +86,16 @@ def test_every_locale_has_reachable_mp3_or_fallback(locale_table):
         pointer, source = reachable(bcp47, fallback_chain=chain)
         # en-AU is in every chain and MUST always have an MP3.
         assert pointer is not None, (
-            f"Locale {bcp47!r} cannot reach any MP3 via chain {chain!r}; "
-            f"FR-058 requires audio-prefix coverage."
+            f"Locale {bcp47!r} cannot reach any MP3 via chain {chain!r}; FR-058 requires audio-prefix coverage."
         )
-        assert source in {bcp47, *chain}, (
-            f"Reachable source {source!r} not in chain for {bcp47!r}"
-        )
+        assert source in {bcp47, *chain}, f"Reachable source {source!r} not in chain for {bcp47!r}"
 
 
 def test_nt_aboriginal_backlog_flagged_chk023():
     """CHK023: each NT/Aboriginal locale must be present in the catalog with explicit blocker flag."""
     catalog = load_catalog()
     for locale in NT_ABORIGINAL_LOCALES:
-        assert locale in catalog, (
-            f"NT/Aboriginal locale {locale!r} missing from speech_prerender_catalog.json"
-        )
+        assert locale in catalog, f"NT/Aboriginal locale {locale!r} missing from speech_prerender_catalog.json"
         # When a backlog locale lacks an MP3 it MUST be flagged so promotion is gated.
         entry = catalog[locale]
         if entry.mp3_pointer is None:

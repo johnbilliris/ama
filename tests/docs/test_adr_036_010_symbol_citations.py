@@ -24,21 +24,13 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ADR_PATH = (
-    REPO_ROOT
-    / "docs"
-    / "aidr"
-    / "decisions"
-    / "ADR-036-010-cycle-2-amendment-cycle.md"
-)
+ADR_PATH = REPO_ROOT / "docs" / "aidr" / "decisions" / "ADR-036-010-cycle-2-amendment-cycle.md"
 CHANGELOG_PATH = REPO_ROOT / "CHANGELOG.md"
 
 # Match `path/to/file.py::symbol_name` references inside (or outside)
 # backticks. Symbol names may include trailing parentheses in the prose
 # (e.g. ``module.py::func()``) — strip them before importlib resolution.
-_CITATION_RE = re.compile(
-    r"`?([a-zA-Z_][a-zA-Z0-9_./-]*\.py)::([a-zA-Z_][a-zA-Z0-9_]*)\(?\)?`?"
-)
+_CITATION_RE = re.compile(r"`?([a-zA-Z_][a-zA-Z0-9_./-]*\.py)::([a-zA-Z_][a-zA-Z0-9_]*)\(?\)?`?")
 
 
 def _module_for_path(py_path: str) -> str:
@@ -62,9 +54,7 @@ def _extract_citations(text: str) -> list[tuple[str, str]]:
     return pairs
 
 
-@pytest.mark.parametrize(
-    "doc_path", [pytest.param(ADR_PATH, id="adr"), pytest.param(CHANGELOG_PATH, id="changelog")]
-)
+@pytest.mark.parametrize("doc_path", [pytest.param(ADR_PATH, id="adr"), pytest.param(CHANGELOG_PATH, id="changelog")])
 def test_cited_python_symbols_resolve_via_importlib(doc_path: Path) -> None:
     """Every ``path/to/module.py::symbol`` citation must resolve."""
 
@@ -86,8 +76,7 @@ def test_cited_python_symbols_resolve_via_importlib(doc_path: Path) -> None:
             # already filtered to ``.py`` extensions, but a path that
             # imports cleanly is the only one we strictly verify.
             failures.append(
-                f"{doc_path.name}: cannot import module {module_name!r} "
-                f"(path {py_path!r}, symbol {symbol!r})."
+                f"{doc_path.name}: cannot import module {module_name!r} (path {py_path!r}, symbol {symbol!r})."
             )
             continue
         if not hasattr(module, symbol):

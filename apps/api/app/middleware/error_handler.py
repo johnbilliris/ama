@@ -1,11 +1,10 @@
 import uuid
 from typing import Any
 
+from app.middleware.spec_036_routes import is_problem_json_route
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-
-from app.middleware.spec_036_routes import is_problem_json_route
 
 _ERROR_CATEGORY_BY_STATUS = {
     400: "validation_error",
@@ -190,12 +189,8 @@ def add_error_handler_middleware(app: FastAPI) -> None:
     )
 
     @app.exception_handler(SequenceAllocationExhausted)
-    async def handle_sequence_exhausted(
-        request: Request, error: SequenceAllocationExhausted
-    ) -> JSONResponse:
-        correlation_id = request.headers.get(
-            "X-Correlation-ID", str(uuid.uuid4())
-        )
+    async def handle_sequence_exhausted(request: Request, error: SequenceAllocationExhausted) -> JSONResponse:
+        correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
         body: dict[str, Any] = {
             "type": "https://aidr.gov.au/problems/sequence-allocator-unavailable",
             "title": "Sequence allocator unavailable",

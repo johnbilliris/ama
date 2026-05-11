@@ -56,9 +56,7 @@ async def test_soft_ack_callback_fires() -> None:
     async def cb(name: str) -> None:
         fired.append(name)
 
-    inv = SubAgentInvoker(
-        soft_ack_callback=cb, soft_ack_seconds=0.02, hard_timeout_seconds=2.0
-    )
+    inv = SubAgentInvoker(soft_ack_callback=cb, soft_ack_seconds=0.02, hard_timeout_seconds=2.0)
 
     async def slow(_t: str, _q: str) -> SubAgentReply:
         await asyncio.sleep(0.1)
@@ -68,4 +66,3 @@ async def test_soft_ack_callback_fires() -> None:
     reply = await inv.invoke("x", "q", tenant_id="sim-tenant-a")
     assert reply.degraded is False
     assert fired == ["x"]
-

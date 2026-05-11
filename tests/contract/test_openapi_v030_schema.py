@@ -25,13 +25,7 @@ import pytest
 import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OPENAPI_PATH = (
-    REPO_ROOT
-    / "specs"
-    / "036-sim-agent-extend"
-    / "contracts"
-    / "openapi-simulation.yaml"
-)
+OPENAPI_PATH = REPO_ROOT / "specs" / "036-sim-agent-extend" / "contracts" / "openapi-simulation.yaml"
 
 
 @pytest.fixture(scope="module")
@@ -44,8 +38,7 @@ def test_v030_version_bump(openapi_doc: dict) -> None:
     """Cycle 2 / Amendment A2-01 — BREAKING bump from 0.2.0 to 0.3.0."""
 
     assert openapi_doc["info"]["version"] == "0.3.0", (
-        "openapi-simulation.yaml info.version MUST be 0.3.0 (Cycle 2 / "
-        "Amendment A2-01 / FR-067 BREAKING bump)."
+        "openapi-simulation.yaml info.version MUST be 0.3.0 (Cycle 2 / Amendment A2-01 / FR-067 BREAKING bump)."
     )
 
 
@@ -56,8 +49,7 @@ def test_v030_telemetry_injection_ack_required_includes_degraded_dispatch(
 
     ack = openapi_doc["components"]["schemas"]["TelemetryInjectionAck"]
     assert "degraded_dispatch" in ack["required"], (
-        "TelemetryInjectionAck.required MUST include `degraded_dispatch` "
-        "(Cycle 2 pass 2 Q2)."
+        "TelemetryInjectionAck.required MUST include `degraded_dispatch` (Cycle 2 pass 2 Q2)."
     )
 
 
@@ -79,8 +71,7 @@ def test_v030_triggered_sub_agent_schema_invariants(openapi_doc: dict) -> None:
 
     tsa = openapi_doc["components"]["schemas"]["TriggeredSubAgent"]
     assert tsa["additionalProperties"] is False, (
-        "TriggeredSubAgent MUST set additionalProperties: false to enforce "
-        "the CHK135 byte-equality invariant."
+        "TriggeredSubAgent MUST set additionalProperties: false to enforce the CHK135 byte-equality invariant."
     )
     assert set(tsa["required"]) == {
         "sub_agent",
@@ -111,9 +102,7 @@ def test_v030_signal_pipeline_dispatch_failed_audit_details_schema(
 ) -> None:
     """Cycle 2 / Amendment A2-04 — entry-25 audit-envelope component schema."""
 
-    spdf = openapi_doc["components"]["schemas"][
-        "SignalPipelineDispatchFailedAuditDetails"
-    ]
+    spdf = openapi_doc["components"]["schemas"]["SignalPipelineDispatchFailedAuditDetails"]
     expected_required = {
         "injection_correlation_id",
         "exception_class",

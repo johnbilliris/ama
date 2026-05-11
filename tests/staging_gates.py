@@ -54,12 +54,7 @@ _TRUTHY = {"1", "true", "yes", "on", "y"}
 #: drift class identified in the Cycle 3 analyze pass (Step 8aa). Mirrors
 #: the established ``_SLI_PATH`` pattern at
 #: ``tests/contract/test_sli_kql_schema_v2.py:25``.
-_SLI_PATH: Final[Path] = (
-    Path(__file__).resolve().parent.parent
-    / "infra"
-    / "observability"
-    / "sli-kql.json"
-)
+_SLI_PATH: Final[Path] = Path(__file__).resolve().parent.parent / "infra" / "observability" / "sli-kql.json"
 
 
 @functools.lru_cache(maxsize=1)
@@ -81,6 +76,7 @@ def _sli_entry(sli_id: str) -> Mapping[str, Any]:
         if entry["id"] == sli_id:
             return entry
     raise KeyError(f"{sli_id} not found in {_SLI_PATH!s}")
+
 
 #: Cycle 2 / T-AA17 / pass-2 Q4 — minimum sample count per SLI evaluated
 #: over a 24 h trailing window. Below this the staging-promotion gate
@@ -201,15 +197,11 @@ def _build_refused_envelope(
 
     correlation_id = str(uuid.uuid4())
     resolved_build_label = (
-        build_label
-        if build_label is not None
-        else os.environ.get("BUILD_LABEL", "unknown-build-label")
+        build_label if build_label is not None else os.environ.get("BUILD_LABEL", "unknown-build-label")
     )
     triggering_run_id = int(os.environ.get("GITHUB_RUN_ID", "1"))
     triggering_actor = os.environ.get("GITHUB_ACTOR", "unknown")
-    gate_helper_version = hashlib.sha256(
-        Path(__file__).read_bytes()
-    ).hexdigest()
+    gate_helper_version = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
     details: dict[str, Any] = {
         "staging_promotion_correlation_id": correlation_id,
@@ -275,8 +267,7 @@ def assert_sli_thresholds(
         result = sli_results.get(sli_id)
         if result is None:
             failure_messages.append(
-                f"{sli_id} missing from sli_results — "
-                "Cycle 2 staging-promotion gate requires Z6 + Z7."
+                f"{sli_id} missing from sli_results — Cycle 2 staging-promotion gate requires Z6 + Z7."
             )
             breached_slis.append(sli_id)
             continue
@@ -308,19 +299,14 @@ def assert_sli_thresholds(
             for deployment, metrics in per_model.items():
                 p95 = metrics.get("p95_latency_ms")
                 if p95 is None:
-                    failure_messages.append(
-                        f"SLI-Z6 missing p95_latency_ms for {deployment}"
-                    )
+                    failure_messages.append(f"SLI-Z6 missing p95_latency_ms for {deployment}")
                     if "SLI-Z6" not in breached_slis:
                         breached_slis.append("SLI-Z6")
                     continue
-                breach = (
-                    5000 if "gpt-4o" in deployment and "mini" not in deployment else 2000
-                )
+                breach = 5000 if "gpt-4o" in deployment and "mini" not in deployment else 2000
                 if p95 > breach:
                     failure_messages.append(
-                        f"SLI-Z6 BREACH ({deployment}): p95={p95} ms > "
-                        f"{breach} ms (sli-thresholds.md row 6)."
+                        f"SLI-Z6 BREACH ({deployment}): p95={p95} ms > {breach} ms (sli-thresholds.md row 6)."
                     )
                     if "SLI-Z6" not in breached_slis:
                         breached_slis.append("SLI-Z6")
@@ -340,8 +326,7 @@ def assert_sli_thresholds(
             z7_breach_pct = float(_sli_entry("SLI-Z7")["breach_pct"])
             if drift_pct < z7_breach_pct:
                 failure_messages.append(
-                    f"SLI-Z7 BREACH: drift_budget_pct={drift_pct} < "
-                    f"{z7_breach_pct} (sli-thresholds.md row 7)."
+                    f"SLI-Z7 BREACH: drift_budget_pct={drift_pct} < {z7_breach_pct} (sli-thresholds.md row 7)."
                 )
                 breached_slis.append("SLI-Z7")
 
@@ -364,11 +349,7 @@ def assert_sli_thresholds(
     # Cycle 2 callers that pattern-match on ``StagingPromotionRefused``
     # message text); the full breach + underage set is carried in the
     # audit envelope for forensic reconstruction.
-    raise StagingPromotionRefused(
-        failure_messages[0]
-        if failure_messages
-        else "staging promotion refused"
-    )
+    raise StagingPromotionRefused(failure_messages[0] if failure_messages else "staging promotion refused")
 
 
 __all__ = [

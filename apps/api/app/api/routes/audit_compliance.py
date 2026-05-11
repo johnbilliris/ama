@@ -52,8 +52,7 @@ _APP_SURFACES: dict[str, str] = {
         "audit-record-llm-call.json; no incidental personal information."
     ),
     "APP5": (
-        "Notification of collection. Operators are notified at sign-in and via "
-        "the in-app privacy notice surface."
+        "Notification of collection. Operators are notified at sign-in and via the in-app privacy notice surface."
     ),
     "APP6": (
         "Use & disclosure. Audit events may be used for incident review, "
@@ -189,9 +188,7 @@ async def get_pspf_audit_export(
         content=csv_body,
         media_type="text/csv",
         headers={
-            "Content-Disposition": (
-                f'attachment; filename="pspf-audit-export-{start_dt.date()}-{end_dt.date()}.csv"'
-            )
+            "Content-Disposition": (f'attachment; filename="pspf-audit-export-{start_dt.date()}-{end_dt.date()}.csv"')
         },
     )
 

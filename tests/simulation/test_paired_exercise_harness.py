@@ -49,9 +49,7 @@ def test_treatment_arm_response_time_at_least_halves() -> None:
     # Mean treatment response time must be ≤50 % of control mean.
     mean_treat = sum(p.treatment.response_time_seconds for p in pairs) / len(pairs)
     mean_ctrl = sum(p.control.response_time_seconds for p in pairs) / len(pairs)
-    assert mean_treat <= 0.5 * mean_ctrl, (
-        f"SC-002 broken: mean treatment={mean_treat:.1f}s vs control={mean_ctrl:.1f}s"
-    )
+    assert mean_treat <= 0.5 * mean_ctrl, f"SC-002 broken: mean treatment={mean_treat:.1f}s vs control={mean_ctrl:.1f}s"
 
 
 def test_treatment_arm_zero_thread_collapses() -> None:
@@ -66,9 +64,7 @@ def test_treatment_arm_realises_30pct_economic_loss_reduction() -> None:
     pairs = run_paired_exercises(num_pairs=30)
     deltas_pct = [p.economic_loss_delta_pct for p in pairs]
     mean, lo, _hi = mean_and_95ci(deltas_pct)
-    assert mean >= 0.30, (
-        f"SC-005 broken: mean economic-loss reduction={mean:.3f} < 0.30"
-    )
+    assert mean >= 0.30, f"SC-005 broken: mean economic-loss reduction={mean:.3f} < 0.30"
     # Two-sided 95 % CI excludes 0 (i.e. signed reduction is strictly positive).
     assert lo > 0, f"SC-005 95 % CI low={lo:.3f} not > 0"
 

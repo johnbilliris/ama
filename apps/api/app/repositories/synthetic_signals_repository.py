@@ -59,8 +59,7 @@ class SyntheticSignalsRepository:
                 self._client = _build_cosmos_client()
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "SyntheticSignalsRepository: Cosmos init failed (%s); "
-                    "falling back to in-memory store",
+                    "SyntheticSignalsRepository: Cosmos init failed (%s); falling back to in-memory store",
                     exc,
                 )
                 self._client = None
@@ -89,9 +88,7 @@ class SyntheticSignalsRepository:
             self._in_memory[(signal.simulation_id, signal.signal_id)] = signal
         return signal
 
-    async def list_recent(
-        self, simulation_id: str, window_seconds: int
-    ) -> list[SyntheticSignal]:
+    async def list_recent(self, simulation_id: str, window_seconds: int) -> list[SyntheticSignal]:
         """Return signals for ``simulation_id`` whose ``observed_at`` is
         within ``window_seconds`` of now.
 
@@ -105,9 +102,7 @@ class SyntheticSignalsRepository:
         container = self._get_container()
         if container is not None:
             query = (
-                "SELECT * FROM c "
-                "WHERE c.simulation_id = @sim AND c.observed_at >= @cutoff "
-                "ORDER BY c.observed_at DESC"
+                "SELECT * FROM c WHERE c.simulation_id = @sim AND c.observed_at >= @cutoff ORDER BY c.observed_at DESC"
             )
             params = [
                 {"name": "@sim", "value": simulation_id},
@@ -123,9 +118,7 @@ class SyntheticSignalsRepository:
             return [SyntheticSignal.model_validate(item) for item in items]
 
         return [
-            sig
-            for (sim, _sid), sig in self._in_memory.items()
-            if sim == simulation_id and sig.observed_at >= cutoff
+            sig for (sim, _sid), sig in self._in_memory.items() if sim == simulation_id and sig.observed_at >= cutoff
         ]
 
 

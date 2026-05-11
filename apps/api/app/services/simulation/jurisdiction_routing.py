@@ -28,9 +28,7 @@ from typing import Final
 
 from pydantic import BaseModel, ConfigDict, Field
 
-DEFAULT_PATH: Final[Path] = (
-    Path(__file__).resolve().parent / "data" / "jurisdiction_routes.json"
-)
+DEFAULT_PATH: Final[Path] = Path(__file__).resolve().parent / "data" / "jurisdiction_routes.json"
 
 
 class UnknownRouteError(LookupError):
@@ -64,9 +62,7 @@ def load_routes(path: Path | None = None) -> tuple[_RouteEntry, ...]:
     target = path or DEFAULT_PATH
     payload = json.loads(target.read_text(encoding="utf-8"))
     if not isinstance(payload, list):
-        raise ValueError(
-            f"jurisdiction_routes.json at {target} must be a JSON array."
-        )
+        raise ValueError(f"jurisdiction_routes.json at {target} must be a JSON array.")
     return tuple(_RouteEntry.model_validate(entry) for entry in payload)
 
 
@@ -84,15 +80,9 @@ def route(
     caller treats the hint as advisory).
     """
 
-    candidates = [
-        e
-        for e in load_routes()
-        if e.jurisdiction == jurisdiction and e.hazard == hazard
-    ]
+    candidates = [e for e in load_routes() if e.jurisdiction == jurisdiction and e.hazard == hazard]
     if not candidates:
-        raise UnknownRouteError(
-            f"No routing tuple for jurisdiction={jurisdiction!r}, hazard={hazard!r}"
-        )
+        raise UnknownRouteError(f"No routing tuple for jurisdiction={jurisdiction!r}, hazard={hazard!r}")
 
     # The fixture is single-row per (jurisdiction, hazard) today; future
     # tasks T-X02..X07 may introduce splits, so we guard against duplicates.

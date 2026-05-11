@@ -67,14 +67,10 @@ def guarded_public(
             simulation_id = kwargs.get("simulation_id") or kwargs.get("sim_id")
             rbac_subject = kwargs.get("rbac_subject")
             if simulation_id is None:
-                raise TypeError(
-                    "@guarded_public requires keyword arg simulation_id "
-                    "(or sim_id) on the route handler"
-                )
+                raise TypeError("@guarded_public requires keyword arg simulation_id (or sim_id) on the route handler")
             if rbac_subject is None:
                 raise TypeError(
-                    "@guarded_public requires keyword arg rbac_subject "
-                    "(use Depends(require_simulation_coordinator))"
+                    "@guarded_public requires keyword arg rbac_subject (use Depends(require_simulation_coordinator))"
                 )
 
             # Best-effort allow audit (failure must NOT block the route).

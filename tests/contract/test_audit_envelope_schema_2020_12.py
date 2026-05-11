@@ -22,13 +22,7 @@ from packages.domain.src.domain.models.telemetry_injection_audit_entry import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-OPENAPI_PATH = (
-    REPO_ROOT
-    / "specs"
-    / "036-sim-agent-extend"
-    / "contracts"
-    / "openapi-simulation.yaml"
-)
+OPENAPI_PATH = REPO_ROOT / "specs" / "036-sim-agent-extend" / "contracts" / "openapi-simulation.yaml"
 
 
 @pytest.fixture(scope="module")
@@ -52,9 +46,7 @@ def test_signal_pipeline_dispatch_failed_audit_details_jsonschema_2020_12(
 ) -> None:
     """Validate the OpenAPI component schema as JSON-Schema Draft 2020-12."""
 
-    schema = openapi_doc["components"]["schemas"][
-        "SignalPipelineDispatchFailedAuditDetails"
-    ]
+    schema = openapi_doc["components"]["schemas"]["SignalPipelineDispatchFailedAuditDetails"]
     # Self-validate the schema (meta-schema check).
     Draft202012Validator.check_schema(schema)
 
@@ -95,12 +87,8 @@ def test_signal_pipeline_dispatch_failed_pydantic_round_trip(
     # resolve cross-document references (the Pydantic round-trip already
     # exercises the typed shape, and ``test_v030_*`` separately asserts
     # that the OpenAPI component schemas exist and are well-formed).
-    schema = openapi_doc["components"]["schemas"][
-        "SignalPipelineDispatchFailedAuditDetails"
-    ]
-    triggered_sub_agent_schema = openapi_doc["components"]["schemas"][
-        "TriggeredSubAgent"
-    ]
+    schema = openapi_doc["components"]["schemas"]["SignalPipelineDispatchFailedAuditDetails"]
+    triggered_sub_agent_schema = openapi_doc["components"]["schemas"]["TriggeredSubAgent"]
     inlined = {
         **schema,
         "properties": {

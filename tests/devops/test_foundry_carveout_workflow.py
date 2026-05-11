@@ -7,12 +7,7 @@ from pathlib import Path
 from tools.foundry_carveout_eval_summary import main as eval_main
 from tools.foundry_carveout_prompt_hash_diff import _format_diff, _index_by_model_id
 
-WORKFLOW = (
-    Path(__file__).resolve().parents[2]
-    / ".github"
-    / "workflows"
-    / "foundry-carveout-review.yml"
-)
+WORKFLOW = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "foundry-carveout-review.yml"
 
 
 def test_workflow_invokes_prompt_hash_diff_and_eval_summary() -> None:

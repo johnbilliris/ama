@@ -158,9 +158,7 @@ async def require_simulation_coordinator(
     fires (audit-envelope.md §6.3 cross-references).
     """
 
-    request_correlation_id = (
-        request.headers.get("X-Request-Correlation-Id") if request else None
-    ) or str(uuid4())
+    request_correlation_id = (request.headers.get("X-Request-Correlation-Id") if request else None) or str(uuid4())
 
     claims = _claims_from_request(request)
     if not claims:
@@ -183,10 +181,7 @@ async def require_simulation_coordinator(
                 status=403,
                 type_id="forbidden-role",
                 title="Coordinator role required",
-                detail=(
-                    "The simulation.coordinator role is required for this "
-                    "route; no claims were presented."
-                ),
+                detail=("The simulation.coordinator role is required for this route; no claims were presented."),
                 requested_role="coordinator",
             ),
         )

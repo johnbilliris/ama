@@ -64,9 +64,7 @@ async def revalidate_viewport_hint(
             server_computed=server_computed,
             viewport_centroid_lat=hint.centroid_lat,
             viewport_centroid_lng=hint.centroid_lng,
-            jurisdiction_dataset_version=(
-                boundary_service.metrics.dataset_version
-            ),
+            jurisdiction_dataset_version=(boundary_service.metrics.dataset_version),
         )
         audit_emitted = True
         logger.info(

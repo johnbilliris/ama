@@ -28,9 +28,7 @@ from packages.domain.src.domain.models.sim_layer_taxonomy import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TS_TAXONOMY_FILE = (
-    REPO_ROOT / "apps" / "web" / "src" / "lib" / "sse" / "map-overlay-events.ts"
-)
+TS_TAXONOMY_FILE = REPO_ROOT / "apps" / "web" / "src" / "lib" / "sse" / "map-overlay-events.ts"
 
 
 def _ts_layer_types() -> list[str]:
@@ -47,9 +45,7 @@ def _ts_layer_types() -> list[str]:
         text,
         flags=re.DOTALL,
     )
-    assert block_match is not None, (
-        "Could not find MAP_OVERLAY_LAYER_TYPES literal in TS file"
-    )
+    assert block_match is not None, "Could not find MAP_OVERLAY_LAYER_TYPES literal in TS file"
     return re.findall(r'"([^"]+)"', block_match.group(1))
 
 
@@ -66,9 +62,7 @@ def test_taxonomy_members_match_typescript_source() -> None:
     ts_types = _ts_layer_types()
     py_types = [member.value for member in SimLayerTaxonomy]
     assert py_types == ts_types, (
-        "Python ↔ TypeScript taxonomy drift detected:\n"
-        f"  python: {py_types}\n"
-        f"  typescript: {ts_types}"
+        f"Python ↔ TypeScript taxonomy drift detected:\n  python: {py_types}\n  typescript: {ts_types}"
     )
 
 

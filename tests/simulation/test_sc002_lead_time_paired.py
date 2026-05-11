@@ -33,10 +33,7 @@ def test_sc002_response_time_at_least_halves_across_30_pairs() -> None:
 def test_sc002_per_pair_dominance() -> None:
     """In ≥80 % of pairs the treatment arm beats control (no flips)."""
     pairs = run_paired_exercises(num_pairs=30)
-    wins = sum(
-        1 for p in pairs
-        if p.treatment.response_time_seconds < p.control.response_time_seconds
-    )
+    wins = sum(1 for p in pairs if p.treatment.response_time_seconds < p.control.response_time_seconds)
     assert wins >= 24, f"SC-002 per-pair dominance broken: wins={wins}/30"
 
 

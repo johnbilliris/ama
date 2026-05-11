@@ -55,9 +55,7 @@ class WormBlobConfig:
 
 
 class _BlobClientProtocol(Protocol):  # pragma: no cover - typing only
-    async def upload_blob(
-        self, data: bytes, *, overwrite: bool = ..., content_settings: Any = ...
-    ) -> Any: ...
+    async def upload_blob(self, data: bytes, *, overwrite: bool = ..., content_settings: Any = ...) -> Any: ...
     async def set_legal_hold(self, legal_hold: bool) -> Any: ...
     async def set_immutability_policy(self, immutability_policy: Any) -> Any: ...
 
@@ -101,9 +99,7 @@ def make_azure_blob_uploader(
         except Exception as exc:  # noqa: BLE001
             # Idempotency: a re-run with the same record_id MUST be a no-op.
             if "BlobAlreadyExists" in str(exc) or getattr(exc, "status_code", None) == 409:
-                logger.info(
-                    "lessons_capture.blob_upload_idempotent record_id=%s", record_id
-                )
+                logger.info("lessons_capture.blob_upload_idempotent record_id=%s", record_id)
             else:
                 raise
 
@@ -117,16 +113,12 @@ def make_azure_blob_uploader(
         try:
             await client.set_immutability_policy(
                 immutability_policy={
-                    "expiry_time": (
-                        datetime.now(UTC) + timedelta(days=config.legal_hold_days)
-                    ),
+                    "expiry_time": (datetime.now(UTC) + timedelta(days=config.legal_hold_days)),
                     "policy_mode": "Locked",
                 }
             )
         except Exception:  # noqa: BLE001
-            logger.exception(
-                "lessons_capture.immutability_policy_failed record_id=%s", record_id
-            )
+            logger.exception("lessons_capture.immutability_policy_failed record_id=%s", record_id)
 
         if config.account_url:
             return f"{config.account_url.rstrip('/')}/{config.container_name}/{blob_name}"
@@ -156,9 +148,7 @@ class InMemoryBlobUploader:
             # Idempotent — same payload allowed; mismatched payload is illegal under WORM.
             existing = self.store[blob_name]
             if existing.payload != payload:
-                raise RuntimeError(
-                    f"WORM violation: blob {blob_name} already stored with different payload"
-                )
+                raise RuntimeError(f"WORM violation: blob {blob_name} already stored with different payload")
             return f"memory://{self.container_name}/{blob_name}"
         self.store[blob_name] = _StoredBlob(
             payload=payload,

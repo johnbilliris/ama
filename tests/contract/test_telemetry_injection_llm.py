@@ -40,12 +40,7 @@ from apps.agents.simulation_telemetry_injection.llm_client import (
 from packages.domain.src.domain.models.synthetic_signal import SyntheticSignal
 from tests.staging_gates import foundry_staging_enabled
 
-CASSETTE_DIR = (
-    Path(__file__).resolve().parents[1]
-    / "fixtures"
-    / "llm_cassettes"
-    / "telemetry_injection"
-)
+CASSETTE_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "llm_cassettes" / "telemetry_injection"
 
 FIXTURE_PROMPTS: tuple[tuple[str, dict[str, Any]], ...] = (
     (
@@ -131,9 +126,7 @@ def _make_offline_llm(prompt_to_response: dict[str, str]):
 
 
 @pytest.mark.parametrize("prompt,hint", FIXTURE_PROMPTS)
-def test_offline_cassette_yields_valid_synthetic_signal(
-    prompt: str, hint: dict[str, Any]
-) -> None:
+def test_offline_cassette_yields_valid_synthetic_signal(prompt: str, hint: dict[str, Any]) -> None:
     cassette_payload = _ensure_cassette(prompt, hint)
     response_json = json.dumps(cassette_payload)
     llm_call = _make_offline_llm({prompt: response_json})

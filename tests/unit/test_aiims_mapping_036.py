@@ -54,9 +54,7 @@ def test_every_sub_agent_has_primary_mapping() -> None:
     for sa in ALL_SUB_AGENTS:
         assert sa in AGENT_TO_AIIMS, f"sub-agent {sa!r} missing AIIMS primary"
         primary = AGENT_TO_AIIMS[sa]
-        assert primary in ALL_AIIMS_FUNCTIONS, (
-            f"sub-agent {sa!r} maps to non-AIIMS function {primary!r}"
-        )
+        assert primary in ALL_AIIMS_FUNCTIONS, f"sub-agent {sa!r} maps to non-AIIMS function {primary!r}"
 
 
 #: AIIMS doctrine: the Control function is held by the human Incident
@@ -88,12 +86,10 @@ def test_no_sub_agent_assumes_control_function() -> None:
     for sa in ALL_SUB_AGENTS:
         primary = AGENT_TO_AIIMS[sa]
         assert primary != "control", (
-            f"sub-agent {sa!r} cannot have AIIMS Control as primary — "
-            f"that role belongs to the human IC"
+            f"sub-agent {sa!r} cannot have AIIMS Control as primary — that role belongs to the human IC"
         )
         assert "control" not in secondary_aiims_tags(sa), (
-            f"sub-agent {sa!r} cannot tag AIIMS Control as secondary — "
-            f"that role belongs to the human IC"
+            f"sub-agent {sa!r} cannot tag AIIMS Control as secondary — that role belongs to the human IC"
         )
 
 
@@ -104,9 +100,7 @@ def test_secondary_tags_subset_of_aiims_enum() -> None:
         tags = secondary_aiims_tags(sa)
         assert isinstance(tags, list), "secondary_aiims_tags must return a list"
         for tag in tags:
-            assert tag in ALL_AIIMS_FUNCTIONS, (
-                f"sub-agent {sa!r} has invalid secondary tag {tag!r}"
-            )
+            assert tag in ALL_AIIMS_FUNCTIONS, f"sub-agent {sa!r} has invalid secondary tag {tag!r}"
 
 
 def test_secondary_tags_capped_at_two_per_constitution() -> None:
@@ -115,8 +109,7 @@ def test_secondary_tags_capped_at_two_per_constitution() -> None:
     for sa in ALL_SUB_AGENTS:
         tags = secondary_aiims_tags(sa)
         assert len(tags) <= 2, (
-            f"sub-agent {sa!r} exceeds constitution v1.2.0 cap of 2 secondary tags "
-            f"(actual: {len(tags)} -> {tags})"
+            f"sub-agent {sa!r} exceeds constitution v1.2.0 cap of 2 secondary tags (actual: {len(tags)} -> {tags})"
         )
 
 
@@ -126,9 +119,7 @@ def test_secondary_tags_exclude_primary() -> None:
     for sa in ALL_SUB_AGENTS:
         primary = AGENT_TO_AIIMS[sa]
         tags = secondary_aiims_tags(sa)
-        assert primary not in tags, (
-            f"sub-agent {sa!r} duplicates primary {primary!r} in secondary tags"
-        )
+        assert primary not in tags, f"sub-agent {sa!r} duplicates primary {primary!r} in secondary tags"
 
 
 def test_secondary_tags_unique_per_sub_agent() -> None:
@@ -136,9 +127,7 @@ def test_secondary_tags_unique_per_sub_agent() -> None:
 
     for sa in ALL_SUB_AGENTS:
         tags = secondary_aiims_tags(sa)
-        assert len(tags) == len(set(tags)), (
-            f"sub-agent {sa!r} has duplicate secondary tags: {tags}"
-        )
+        assert len(tags) == len(set(tags)), f"sub-agent {sa!r} has duplicate secondary tags: {tags}"
 
 
 def test_secondary_aiims_tags_unknown_sub_agent_returns_empty() -> None:
