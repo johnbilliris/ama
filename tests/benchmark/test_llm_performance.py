@@ -27,6 +27,7 @@ def mock_llm_client() -> LLMClient:
     )
     client = LLMClient.__new__(LLMClient)
     client._config = config
+    client._chat_complete = None
 
     # Build a mock response matching Azure OpenAI shape
     mock_response = MagicMock()
