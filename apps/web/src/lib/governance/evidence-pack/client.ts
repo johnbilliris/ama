@@ -4,6 +4,11 @@
  * Uses the existing MSAL token interceptor pattern (apps/web/src/lib/api/).
  * Read-only — these helpers never POST/PUT/DELETE.
  *
+ * Server-side (Server Components, Route Handlers) bypasses the Next.js /api
+ * proxy and reads from API_PROXY_UPSTREAM directly because relative URLs have
+ * no origin during SSR. Client-side reads from NEXT_PUBLIC_API_BASE (which is
+ * "/api" relative so the browser hits the same-origin proxy rewrite).
+ *
  * Citations: FR-021, RES-03.
  */
 import type {
@@ -13,7 +18,16 @@ import type {
   EvidencePackHealth,
 } from './types';
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE ?? '';
+function _resolveBase(): string {
+  if (typeof window === 'undefined') {
+    return (
+      process.env.API_PROXY_UPSTREAM ??
+      process.env.NEXT_PUBLIC_API_BASE ??
+      'http://localhost:8000/api'
+    );
+  }
+  return process.env.NEXT_PUBLIC_API_BASE ?? '/api';
+}
 
 async function _fetch<T>(path: string, init?: RequestInit): Promise<T> {
   // Next.js extends RequestInit with a `next` field for revalidation; cast to
@@ -23,7 +37,7 @@ async function _fetch<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { Accept: 'application/json', ...(init?.headers ?? {}) },
     next: { revalidate: 60 },
   } as RequestInit;
-  const res = await fetch(`${BASE}${path}`, nextInit);
+  const res = await fetch(`${_resolveBase()}${path}`, nextInit);
   if (!res.ok) {
     throw new Error(`Evidence-pack API ${res.status}: ${path}`);
   }
@@ -31,11 +45,11 @@ async function _fetch<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export function listArtefacts(): Promise<ArtefactSummary[]> {
-  return _fetch('/api/governance/evidence-pack/artefacts');
+  return _fetch('/governance/evidence-pack/artefacts');
 }
 
 export function getArtefact(artefactId: ArtefactId): Promise<EvidencePackArtefact> {
-  return _fetch(`/api/governance/evidence-pack/artefacts/${artefactId}`);
+  return _fetch(`/governance/evidence-pack/artefacts/${artefactId}`);
 }
 
 export function getHistoricalPublication(
@@ -43,10 +57,10 @@ export function getHistoricalPublication(
   publicationId: string,
 ): Promise<EvidencePackArtefact> {
   return _fetch(
-    `/api/governance/evidence-pack/artefacts/${artefactId}/publications/${publicationId}`,
+    `/governance/evidence-pack/artefacts/${artefactId}/publications/${publicationId}`,
   );
 }
 
 export function getHealth(): Promise<EvidencePackHealth> {
-  return _fetch('/api/governance/evidence-pack/health');
+  return _fetch('/governance/evidence-pack/health');
 }
