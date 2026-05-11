@@ -1,0 +1,90 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "licence": "CC-BY-4.0",
+    "residency": "AU",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "domain_group": "ses",
+      "fictitious": true,
+      "id": "persona-roster-ses-act-esa",
+      "licence": "CC-BY-4.0",
+      "persona_id": "act-esa",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding act-esa into ses"
+    },
+    {
+      "domain_group": "ses",
+      "fictitious": true,
+      "id": "persona-roster-ses-ntes",
+      "licence": "CC-BY-4.0",
+      "persona_id": "ntes",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding ntes into ses"
+    },
+    {
+      "domain_group": "ses",
+      "fictitious": true,
+      "id": "persona-roster-ses-ses-act",
+      "licence": "CC-BY-4.0",
+      "persona_id": "ses-act",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding ses-act into ses"
+    },
+    {
+      "domain_group": "ses",
+      "fictitious": true,
+      "id": "persona-roster-ses-ses-nsw",
+      "licence": "CC-BY-4.0",
+      "persona_id": "ses-nsw",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding ses-nsw into ses"
+    },
+    {
+      "domain_group": "ses",
+      "fictitious": true,
+      "id": "persona-roster-ses-ses-qld",
+      "licence": "CC-BY-4.0",
+      "persona_id": "ses-qld",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding ses-qld into ses"
+    },
+    {
+      "domain_group": "ses",
+      "fictitious": true,
+      "id": "persona-roster-ses-ses-sa",
+      "licence": "CC-BY-4.0",
+      "persona_id": "ses-sa",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding ses-sa into ses"
+    },
+    {
+      "domain_group": "ses",
+      "fictitious": true,
+      "id": "persona-roster-ses-ses-tas",
+      "licence": "CC-BY-4.0",
+      "persona_id": "ses-tas",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding ses-tas into ses"
+    },
+    {
+      "domain_group": "ses",
+      "fictitious": true,
+      "id": "persona-roster-ses-ses-vic",
+      "licence": "CC-BY-4.0",
+      "persona_id": "ses-vic",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding ses-vic into ses"
+    }
+  ]
+}

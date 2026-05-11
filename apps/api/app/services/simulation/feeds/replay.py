@@ -41,7 +41,7 @@ from scripts.generators._seed_contract import resolve_seed  # noqa: E402
 
 from ._canonical import SimulatedClock  # noqa: E402
 
-# Map scenario id -> (module_name, jurisdiction).
+# Map single-feed scenario id -> (module_name, jurisdiction).
 SCENARIOS: dict[str, tuple[str, str]] = {
     "bom_severe_weather_warning_nsw": ("bom_severe_weather_warning", "nsw"),
     "bom_cyclone_track_qld": ("bom_cyclone_track", "qld"),
@@ -58,15 +58,35 @@ SCENARIOS: dict[str, tuple[str, str]] = {
     "synthetic_fallback_au": ("synthetic_fallback", "au"),
 }
 
+# Spec-038 Phase 6 demo scenarios (T130-T137). Each maps the snake-case
+# CLI id to the corresponding ``feeds.scenarios.*`` module name.
+DEMO_SCENARIOS: dict[str, str] = {
+    "demo_operational_v1": "operational_demo",
+    "demo_fire_v1": "fire_demo",
+    "demo_police_v1": "police_demo",
+    "demo_ambulance_v1": "ambulance_demo",
+    "demo_ses_v1": "ses_demo",
+    "demo_marine_aviation_v1": "marine_aviation_demo",
+    "demo_commonwealth_v1": "commonwealth_demo",
+    "demo_cross_sector_v1": "cross_sector_demo",
+}
+
 
 def _default_out_dir() -> Path:
     return _REPO / "fixtures" / "sim_replays"
 
 
 def _emit_records(scenario: str, seed: int, count: int):
+    if scenario in DEMO_SCENARIOS:
+        # Demo scenario — orchestrator decides record count; ``count`` ignored.
+        mod = importlib.import_module(
+            f"apps.api.app.services.simulation.feeds.scenarios.{DEMO_SCENARIOS[scenario]}"
+        )
+        return list(mod.emit(seed))
     if scenario not in SCENARIOS:
         raise SystemExit(
-            f"unknown scenario {scenario!r}; known: {sorted(SCENARIOS)}"
+            f"unknown scenario {scenario!r}; "
+            f"known feeds: {sorted(SCENARIOS)}; demos: {sorted(DEMO_SCENARIOS)}"
         )
     module_name, jurisdiction = SCENARIOS[scenario]
     mod = importlib.import_module(
@@ -83,7 +103,8 @@ def _emit_records(scenario: str, seed: int, count: int):
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--scenario", required=True, choices=sorted(SCENARIOS))
+    p.add_argument("--scenario", required=True,
+                   choices=sorted(set(SCENARIOS) | set(DEMO_SCENARIOS)))
     p.add_argument("--seed", type=int, default=None,
                    help="64-bit unsigned seed; falls back to AMA_TEST_SEED then 0.")
     p.add_argument("--count", type=int, default=8,

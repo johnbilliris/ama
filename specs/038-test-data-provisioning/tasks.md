@@ -178,56 +178,56 @@ description: "Tasks: Test Data and Resources Provisioning Review (spec 038)"
 
 ### Tests for P4 (write FIRST)
 
-- [ ] T100 [P] [US4] Author `tests/integration/test_generator_byte_identical.py` parametrised across all 14 generators; asserts byte-equality with same seed. — FR-051, FR-052.
-- [ ] T101 [P] [US4] Author `tests/integration/test_volume_coverage.py` reading manifest `record_count` + `volume_tier` and asserting per-persona lower bounds (≥10 hospital capacity, ≥20 vulnerable categories, ≥30 volunteer registrations, ≥5 alert variants per locale, ≥3 quake events per sim session). — FR-062, SC-012.
-- [ ] T102 [P] [US4] Author `tests/integration/test_xlarge_not_committed.py` — fails if any committed `*.ndjson`/`*.json` under `fixtures/` or seed dirs has > 1000 records. — Edge "Large-volume load fixtures", CL-3, plan R7.
-- [ ] T103 [P] [US4] Author `tests/integration/test_demo_scenarios_persona_count.py` — every demo scenario in `feeds/scenarios/` lists ≥3 personas in its `participating_personas` and runs end-to-end. — FR-061, SC-008.
-- [ ] T104 [P] [US4] Author `tests/integration/test_persona_coverage_zero_unbacked.py` — manifest-derived report shows 68/68 personas with ≥1 entry. — FR-060, SC-001.
+- [X] T100 [P] [US4] Author `tests/integration/test_generator_byte_identical.py` parametrised across all 14 generators; asserts byte-equality with same seed. — FR-051, FR-052.
+- [X] T101 [P] [US4] Author `tests/integration/test_volume_coverage.py` reading manifest `record_count` + `volume_tier` and asserting per-persona lower bounds (≥10 hospital capacity, ≥20 vulnerable categories, ≥30 volunteer registrations, ≥5 alert variants per locale, ≥3 quake events per sim session). — FR-062, SC-012.
+- [X] T102 [P] [US4] Author `tests/integration/test_xlarge_not_committed.py` — fails if any committed `*.ndjson`/`*.json` under `fixtures/` or seed dirs has > 1000 records. — Edge "Large-volume load fixtures", CL-3, plan R7.
+- [X] T103 [P] [US4] Author `tests/integration/test_demo_scenarios_persona_count.py` — every demo scenario in `feeds/scenarios/` lists ≥3 personas in its `participating_personas` and runs end-to-end. — FR-061, SC-008.
+- [X] T104 [P] [US4] Author `tests/integration/test_persona_coverage_zero_unbacked.py` — manifest-derived report shows 68/68 personas with ≥1 entry. — FR-060, SC-001.
 
 ### Implementation for P4 — generators (one task per module — all [P])
 
-- [ ] T110 [P] [US4] Implement `scripts/generators/incidents.py` — multi-hazard synthetic incidents; uses `_seed_contract.resolve_seed`; tags every record `fictitious=true`, `generator_id`, `generator_version`. — FR-050, FR-052, CL-8.
-- [ ] T111 [P] [US4] Implement `scripts/generators/coordination_tasks.py`. — FR-050.
-- [ ] T112 [P] [US4] Implement `scripts/generators/signals.py` (with provenance metadata per Constitution Principle III). — FR-050, NN-IV.
-- [ ] T113 [P] [US4] Implement `scripts/generators/audit_entries.py` (append-only, includes deliberate compliance-gap examples). — FR-050.
-- [ ] T114 [P] [US4] Implement `scripts/generators/risk_register.py` aligned to AIDR NERAG categories. — FR-050.
-- [ ] T115 [P] [US4] Implement `scripts/generators/public_alerts.py`. — FR-050, FR-070.
-- [ ] T116 [P] [US4] Implement `scripts/generators/evacuee_registrations.py`. — FR-050, NN-VI.
-- [ ] T117 [P] [US4] Implement `scripts/generators/missing_persons.py` (synthetic only). — FR-050, FR-041.
-- [ ] T118 [P] [US4] Implement `scripts/generators/triage_records.py` (START categories, no PII). — FR-050, FR-045.
-- [ ] T119 [P] [US4] Implement `scripts/generators/volunteer_registrations.py` (≥30 records via `--volume medium`). — FR-050, FR-062.
-- [ ] T120 [P] [US4] Implement `scripts/generators/vulnerable_categories.py` (≥20 records). — FR-050, FR-062.
-- [ ] T121 [P] [US4] Implement `scripts/generators/hospital_capacity.py` (≥10 records per state). — FR-050, FR-062.
-- [ ] T122 [P] [US4] Implement `scripts/generators/transport_assets.py`. — FR-050.
-- [ ] T123 [P] [US4] Implement `scripts/generators/utility_outages.py`. — FR-050.
-- [ ] T124 [US4] Add streaming xlarge generator harness `scripts/generators/_xlarge_stream.py` — generates 10 000 records in deterministic order without materialising in memory (asserted by `tracemalloc` peak ≤ 50 MB). Verify: `pytest038 tests/integration/test_xlarge_stream_memory.py`. — Edge "Large-volume load fixtures", CL-3, plan §"Performance Goals".
+- [X] T110 [P] [US4] Implement `scripts/generators/incidents.py` — multi-hazard synthetic incidents; uses `_seed_contract.resolve_seed`; tags every record `fictitious=true`, `generator_id`, `generator_version`. — FR-050, FR-052, CL-8.
+- [X] T111 [P] [US4] Implement `scripts/generators/coordination_tasks.py`. — FR-050.
+- [X] T112 [P] [US4] Implement `scripts/generators/signals.py` (with provenance metadata per Constitution Principle III). — FR-050, NN-IV.
+- [X] T113 [P] [US4] Implement `scripts/generators/audit_entries.py` (append-only, includes deliberate compliance-gap examples). — FR-050.
+- [X] T114 [P] [US4] Implement `scripts/generators/risk_register.py` aligned to AIDR NERAG categories. — FR-050.
+- [X] T115 [P] [US4] Implement `scripts/generators/public_alerts.py`. — FR-050, FR-070.
+- [X] T116 [P] [US4] Implement `scripts/generators/evacuee_registrations.py`. — FR-050, NN-VI.
+- [X] T117 [P] [US4] Implement `scripts/generators/missing_persons.py` (synthetic only). — FR-050, FR-041.
+- [X] T118 [P] [US4] Implement `scripts/generators/triage_records.py` (START categories, no PII). — FR-050, FR-045.
+- [X] T119 [P] [US4] Implement `scripts/generators/volunteer_registrations.py` (≥30 records via `--volume medium`). — FR-050, FR-062.
+- [X] T120 [P] [US4] Implement `scripts/generators/vulnerable_categories.py` (≥20 records). — FR-050, FR-062.
+- [X] T121 [P] [US4] Implement `scripts/generators/hospital_capacity.py` (≥10 records per state). — FR-050, FR-062.
+- [X] T122 [P] [US4] Implement `scripts/generators/transport_assets.py`. — FR-050.
+- [X] T123 [P] [US4] Implement `scripts/generators/utility_outages.py`. — FR-050.
+- [X] T124 [US4] Add streaming xlarge generator harness `scripts/generators/_xlarge_stream.py` — generates 10 000 records in deterministic order without materialising in memory (asserted by `tracemalloc` peak ≤ 50 MB). Verify: `pytest038 tests/integration/test_xlarge_stream_memory.py`. — Edge "Large-volume load fixtures", CL-3, plan §"Performance Goals".
 
 ### Implementation for P4 — demo scenarios (one per domain group — all [P])
 
-- [ ] T130 [P] [US4] Author `apps/api/app/services/simulation/feeds/scenarios/operational_demo.py` exercising ≥3 operational personas (e.g. SCC duty officer, EMC, JFMC). Records `default_seed`, `participating_personas`, `participating_feeds`. Commit canonical replay at `fixtures/sim_replays/operational-demo.ndjson` + `.sha256` sidecar. — FR-061 (operational), SC-008.
-- [ ] T131 [P] [US4] Author `feeds/scenarios/fire_demo.py` ("NSW bushfire — Black Summer-shaped progression") + replay fixture. — FR-061 (fire), SC-008.
-- [ ] T132 [P] [US4] Author `feeds/scenarios/police_demo.py` (cross-jurisdictional public-order or evac compliance) + replay. — FR-061 (police), SC-008.
-- [ ] T133 [P] [US4] Author `feeds/scenarios/ambulance_demo.py` (mass-casualty triage with CAD feed) + replay. — FR-061 (ambulance), SC-008.
-- [ ] T134 [P] [US4] Author `feeds/scenarios/ses_demo.py` (VIC riverine flood, multi-LGA) + replay. — FR-061 (SES), SC-008.
-- [ ] T135 [P] [US4] Author `feeds/scenarios/marine_aviation_demo.py` (RFDS aeromedical retrieval + surf life saving + AMSA — covers user-flagged silent gap personas) + replay. — FR-061 (marine/aviation), SC-008, US4 motivation.
-- [ ] T136 [P] [US4] Author `feeds/scenarios/commonwealth_demo.py` (NEMA + ADF DACC + BoM) + replay. — FR-061 (commonwealth), SC-008.
-- [ ] T137 [P] [US4] Author `feeds/scenarios/cross_sector_demo.py` (NSW request → VIC fulfilment cross-state resource sharing) + replay. — FR-061 (cross-sector), SC-008, Edge "Cross-jurisdictional resource sharing".
+- [X] T130 [P] [US4] Author `apps/api/app/services/simulation/feeds/scenarios/operational_demo.py` exercising ≥3 operational personas (e.g. SCC duty officer, EMC, JFMC). Records `default_seed`, `participating_personas`, `participating_feeds`. Commit canonical replay at `fixtures/sim_replays/operational-demo.ndjson` + `.sha256` sidecar. — FR-061 (operational), SC-008.
+- [X] T131 [P] [US4] Author `feeds/scenarios/fire_demo.py` ("NSW bushfire — Black Summer-shaped progression") + replay fixture. — FR-061 (fire), SC-008.
+- [X] T132 [P] [US4] Author `feeds/scenarios/police_demo.py` (cross-jurisdictional public-order or evac compliance) + replay. — FR-061 (police), SC-008.
+- [X] T133 [P] [US4] Author `feeds/scenarios/ambulance_demo.py` (mass-casualty triage with CAD feed) + replay. — FR-061 (ambulance), SC-008.
+- [X] T134 [P] [US4] Author `feeds/scenarios/ses_demo.py` (VIC riverine flood, multi-LGA) + replay. — FR-061 (SES), SC-008.
+- [X] T135 [P] [US4] Author `feeds/scenarios/marine_aviation_demo.py` (RFDS aeromedical retrieval + surf life saving + AMSA — covers user-flagged silent gap personas) + replay. — FR-061 (marine/aviation), SC-008, US4 motivation.
+- [X] T136 [P] [US4] Author `feeds/scenarios/commonwealth_demo.py` (NEMA + ADF DACC + BoM) + replay. — FR-061 (commonwealth), SC-008.
+- [X] T137 [P] [US4] Author `feeds/scenarios/cross_sector_demo.py` (NSW request → VIC fulfilment cross-state resource sharing) + replay. — FR-061 (cross-sector), SC-008, Edge "Cross-jurisdictional resource sharing".
 
 ### Manifest population for all 8 persona groups (one task per group — all [P])
 
-- [ ] T140 [P] [US4] Add `docs/test-data/manifest.json` entries for all 10 **operational** personas; each persona resolves to ≥1 entry via `persona_bindings`. Verify: `persona_coverage_report.py --filter operational --strict`. — FR-060, FR-031, SC-001.
-- [ ] T141 [P] [US4] Add manifest entries for all **fire** personas (NSW RFS, CFA, QFES, DFES, TFS, SAFCS, NTFRS, ACTRFS, AFAC). — FR-060.
-- [ ] T142 [P] [US4] Add manifest entries for all **police** personas (8 jurisdictions + AFP). — FR-060.
-- [ ] T143 [P] [US4] Add manifest entries for all **ambulance** personas (state ambulance services + RFDS aeromedical). — FR-060.
-- [ ] T144 [P] [US4] Add manifest entries for all **SES** personas (NSW SES, VIC SES, QFES SES, SES SA, SES TAS, NTES, ACTES). — FR-060.
-- [ ] T145 [P] [US4] Add manifest entries for all **marine/aviation** personas (AMSA, MarSafe, RFDS, surf life saving, BoM aviation, port authorities). — FR-060.
-- [ ] T146 [P] [US4] Add manifest entries for all 11 **commonwealth** personas (NEMA, ADF DACC, BoM, GA, ABS, AIDR, DFAT, DoH, DSS, DAFF, AGD). — FR-060.
-- [ ] T147 [P] [US4] Add manifest entries for all 8 **cross-sector** personas (telcos, energy distributors, water utilities, transport operators, broadcasters, NGOs, supermarkets, banks). — FR-060.
+- [X] T140 [P] [US4] Add `docs/test-data/manifest.json` entries for all 10 **operational** personas; each persona resolves to ≥1 entry via `persona_bindings`. Verify: `persona_coverage_report.py --filter operational --strict`. — FR-060, FR-031, SC-001.
+- [X] T141 [P] [US4] Add manifest entries for all **fire** personas (NSW RFS, CFA, QFES, DFES, TFS, SAFCS, NTFRS, ACTRFS, AFAC). — FR-060.
+- [X] T142 [P] [US4] Add manifest entries for all **police** personas (8 jurisdictions + AFP). — FR-060.
+- [X] T143 [P] [US4] Add manifest entries for all **ambulance** personas (state ambulance services + RFDS aeromedical). — FR-060.
+- [X] T144 [P] [US4] Add manifest entries for all **SES** personas (NSW SES, VIC SES, QFES SES, SES SA, SES TAS, NTES, ACTES). — FR-060.
+- [X] T145 [P] [US4] Add manifest entries for all **marine/aviation** personas (AMSA, MarSafe, RFDS, surf life saving, BoM aviation, port authorities). — FR-060.
+- [X] T146 [P] [US4] Add manifest entries for all 11 **commonwealth** personas (NEMA, ADF DACC, BoM, GA, ABS, AIDR, DFAT, DoH, DSS, DAFF, AGD). — FR-060.
+- [X] T147 [P] [US4] Add manifest entries for all 8 **cross-sector** personas (telcos, energy distributors, water utilities, transport operators, broadcasters, NGOs, supermarkets, banks). — FR-060.
 
 ### Multilingual fixture parity (parallel to manifest)
 
-- [ ] T150 [P] [US4] Generate the parity matrix `docs/test-data/MULTILINGUAL-PARITY.md` listing every alert-template id × every locale; flag missing translations as `placeholder=true`. Verify: `pytest038 tests/integration/test_multilingual_parity.py`. — FR-070, SC-014.
-- [ ] T151 [P] [US4] Add WCAG 2.1 AA verification test `tests/integration/test_alert_template_wcag.py` (plain-language readability score, audio-description placeholder presence). — FR-071.
+- [X] T150 [P] [US4] Generate the parity matrix `docs/test-data/MULTILINGUAL-PARITY.md` listing every alert-template id × every locale; flag missing translations as `placeholder=true`. Verify: `pytest038 tests/integration/test_multilingual_parity.py`. — FR-070, SC-014.
+- [X] T151 [P] [US4] Add WCAG 2.1 AA verification test `tests/integration/test_alert_template_wcag.py` (plain-language readability score, audio-description placeholder presence). — FR-071.
 
 **Checkpoint P4**: T100–T104 PASS; SC-008, SC-012, SC-013 verified; `persona_coverage_report.py --strict` exits 0.
 

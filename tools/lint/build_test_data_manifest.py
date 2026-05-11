@@ -135,6 +135,19 @@ SOURCE_ROOTS: list[tuple[str, str, str, str, list[str], str, str]] = [
         "static",
         "small",
     ),
+    # PATH 1 — persona-rosters: per-domain-group roster files added in
+    # Phase 6 (T140-T147). Each file's persona_bindings is overridden in
+    # ``_apply_phase6_overrides`` to enumerate the full roster for its
+    # group so the manifest reaches 68/68 persona coverage (FR-060).
+    (
+        "packages/domain/src/domain/seed/persona-rosters",
+        "*.json",
+        "synthetic",
+        "operational",
+        ["incident-commander"],
+        "static",
+        "small",
+    ),
     # PATH 2 — simulator data + feeds
     (
         "apps/api/app/services/simulation/data",
@@ -279,7 +292,12 @@ SOURCE_ROOTS: list[tuple[str, str, str, str, list[str], str, str]] = [
 ]
 
 # Files we explicitly skip (control / build artefacts).
-SKIP_NAMES = {".gitkeep", "__init__.py", "_fixture_marker.py"}
+SKIP_NAMES = {
+    ".gitkeep", "__init__.py", "_fixture_marker.py",
+    # Phase 6 generator helpers (kept out of the generator-entry catalogue
+    # so the manifest enumerates the 14 actual generators T110-T123 only).
+    "_seed_contract.py", "_generator_base.py", "_xlarge_stream.py",
+}
 SKIP_SUBSTR = ("/__pycache__/",)
 
 # Per-state persona augmentation for state-coded seed files.
@@ -660,8 +678,107 @@ def discover_entries(repo_root: Path) -> list[dict[str, Any]]:
                 )
             )
     entries.extend(_shape_entries(repo_root))
+    _apply_phase6_overrides(entries)
     entries.sort(key=lambda e: e["id"])
     return entries
+
+
+# ---------------------------------------------------------------------------
+# Phase 6 overrides — persona-coverage + demo-scenario routing
+# ---------------------------------------------------------------------------
+
+# Canonical 68-persona inventory (10 operational + 58 sector). Source:
+# ``.github/agents/AGENTS.md``. Used by the persona-roster + demo-scenario
+# manifest overrides so every persona resolves to ≥1 entry (FR-060, SC-001).
+PERSONA_ROSTERS: dict[str, list[str]] = {
+    "operational": [
+        "executive-leader", "field-coordinator", "incident-commander",
+        "logistics-officer", "observer-auditor", "operations-officer",
+        "planning-officer", "public-information-officer", "resilience-planner",
+        "risk-manager",
+    ],
+    "fire": [
+        "act-fr", "act-rfs", "bushfires-nt", "cfa-vic", "dfes-wa",
+        "frnsw", "frv", "nsw-rfs", "ntfrs", "qfd", "sacfs", "samfs", "tfs",
+    ],
+    "police": [
+        "act-policing", "afp-act", "afp-commonwealth", "nswpf", "ntpf",
+        "qps", "sapol", "taspol", "vicpol", "wapol",
+    ],
+    "ambulance": [
+        "act-ambulance", "at", "av", "nsw-ambulance", "qas",
+        "rfds", "saas", "sja-national", "sja-nt", "sja-wa",
+    ],
+    "ses": [
+        "act-esa", "ntes", "ses-act", "ses-nsw", "ses-qld", "ses-sa",
+        "ses-tas", "ses-vic",
+    ],
+    "marine-aviation": ["abf", "asa", "mrnsw", "surf-lifesaving"],
+    "commonwealth": ["adf", "arc", "bom-national", "ga-national", "nema"],
+    "cross-sector": [
+        "community-ngos", "health", "local-government", "state-government",
+        "territory-government", "transport", "utility", "volunteer",
+    ],
+}
+
+# Demo scenarios (T130-T137) — each replay file is committed under
+# ``fixtures/sim_replays/demo_<group>_v1.ndjson`` and the manifest entry's
+# domain_group + persona_bindings are overridden to match the scenario
+# orchestrator (FR-061, SC-008).
+DEMO_SCENARIO_OVERRIDES: dict[str, tuple[str, list[str]]] = {
+    "fixtures/sim_replays/demo_operational_v1.ndjson": (
+        "operational",
+        ["incident-commander", "operations-officer", "planning-officer",
+         "logistics-officer", "executive-leader"],
+    ),
+    "fixtures/sim_replays/demo_fire_v1.ndjson": (
+        "fire",
+        ["nsw-rfs", "frnsw", "cfa-vic", "incident-commander", "operations-officer"],
+    ),
+    "fixtures/sim_replays/demo_police_v1.ndjson": (
+        "police",
+        ["nswpf", "vicpol", "afp-commonwealth", "operations-officer", "incident-commander"],
+    ),
+    "fixtures/sim_replays/demo_ambulance_v1.ndjson": (
+        "ambulance",
+        ["av", "nsw-ambulance", "rfds", "saas", "incident-commander"],
+    ),
+    "fixtures/sim_replays/demo_ses_v1.ndjson": (
+        "ses",
+        ["ses-vic", "ses-nsw", "ses-qld", "operations-officer", "logistics-officer"],
+    ),
+    "fixtures/sim_replays/demo_marine_aviation_v1.ndjson": (
+        "marine-aviation",
+        ["rfds", "surf-lifesaving", "mrnsw", "abf", "asa"],
+    ),
+    "fixtures/sim_replays/demo_commonwealth_v1.ndjson": (
+        "commonwealth",
+        ["nema", "adf", "bom-national", "ga-national", "arc"],
+    ),
+    "fixtures/sim_replays/demo_cross_sector_v1.ndjson": (
+        "cross-sector",
+        ["state-government", "transport", "utility", "community-ngos", "local-government"],
+    ),
+}
+
+
+def _apply_phase6_overrides(entries: list[dict[str, Any]]) -> None:
+    """In-place: bind persona-rosters and demo scenarios to canonical personas."""
+    roster_prefix = "packages/domain/src/domain/seed/persona-rosters/"
+    for e in entries:
+        path = e.get("path") or ""
+        # Persona-roster files: bind to the full group roster.
+        if path.startswith(roster_prefix) and path.endswith(".json"):
+            stem = path.rsplit("/", 1)[-1].removesuffix(".json")
+            if stem in PERSONA_ROSTERS:
+                e["persona_bindings"] = sorted(PERSONA_ROSTERS[stem])
+                e["domain_group"] = stem
+                continue
+        # Demo scenario replays.
+        if path in DEMO_SCENARIO_OVERRIDES:
+            group, personas = DEMO_SCENARIO_OVERRIDES[path]
+            e["persona_bindings"] = sorted(personas)
+            e["domain_group"] = group
 
 
 def build_manifest(repo_root: Path) -> dict[str, Any]:

@@ -1,0 +1,50 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "licence": "CC-BY-4.0",
+    "residency": "AU",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "domain_group": "marine-aviation",
+      "fictitious": true,
+      "id": "persona-roster-marine-aviation-abf",
+      "licence": "CC-BY-4.0",
+      "persona_id": "abf",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding abf into marine-aviation"
+    },
+    {
+      "domain_group": "marine-aviation",
+      "fictitious": true,
+      "id": "persona-roster-marine-aviation-asa",
+      "licence": "CC-BY-4.0",
+      "persona_id": "asa",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding asa into marine-aviation"
+    },
+    {
+      "domain_group": "marine-aviation",
+      "fictitious": true,
+      "id": "persona-roster-marine-aviation-mrnsw",
+      "licence": "CC-BY-4.0",
+      "persona_id": "mrnsw",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding mrnsw into marine-aviation"
+    },
+    {
+      "domain_group": "marine-aviation",
+      "fictitious": true,
+      "id": "persona-roster-marine-aviation-surf-lifesaving",
+      "licence": "CC-BY-4.0",
+      "persona_id": "surf-lifesaving",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding surf-lifesaving into marine-aviation"
+    }
+  ]
+}

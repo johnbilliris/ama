@@ -1,0 +1,90 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "licence": "CC-BY-4.0",
+    "residency": "AU",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "domain_group": "cross-sector",
+      "fictitious": true,
+      "id": "persona-roster-cross-sector-community-ngos",
+      "licence": "CC-BY-4.0",
+      "persona_id": "community-ngos",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding community-ngos into cross-sector"
+    },
+    {
+      "domain_group": "cross-sector",
+      "fictitious": true,
+      "id": "persona-roster-cross-sector-health",
+      "licence": "CC-BY-4.0",
+      "persona_id": "health",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding health into cross-sector"
+    },
+    {
+      "domain_group": "cross-sector",
+      "fictitious": true,
+      "id": "persona-roster-cross-sector-local-government",
+      "licence": "CC-BY-4.0",
+      "persona_id": "local-government",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding local-government into cross-sector"
+    },
+    {
+      "domain_group": "cross-sector",
+      "fictitious": true,
+      "id": "persona-roster-cross-sector-state-government",
+      "licence": "CC-BY-4.0",
+      "persona_id": "state-government",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding state-government into cross-sector"
+    },
+    {
+      "domain_group": "cross-sector",
+      "fictitious": true,
+      "id": "persona-roster-cross-sector-territory-government",
+      "licence": "CC-BY-4.0",
+      "persona_id": "territory-government",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding territory-government into cross-sector"
+    },
+    {
+      "domain_group": "cross-sector",
+      "fictitious": true,
+      "id": "persona-roster-cross-sector-transport",
+      "licence": "CC-BY-4.0",
+      "persona_id": "transport",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding transport into cross-sector"
+    },
+    {
+      "domain_group": "cross-sector",
+      "fictitious": true,
+      "id": "persona-roster-cross-sector-utility",
+      "licence": "CC-BY-4.0",
+      "persona_id": "utility",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding utility into cross-sector"
+    },
+    {
+      "domain_group": "cross-sector",
+      "fictitious": true,
+      "id": "persona-roster-cross-sector-volunteer",
+      "licence": "CC-BY-4.0",
+      "persona_id": "volunteer",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding volunteer into cross-sector"
+    }
+  ]
+}

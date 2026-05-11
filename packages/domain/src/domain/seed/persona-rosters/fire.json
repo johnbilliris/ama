@@ -1,0 +1,140 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "licence": "CC-BY-4.0",
+    "residency": "AU",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-act-fr",
+      "licence": "CC-BY-4.0",
+      "persona_id": "act-fr",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding act-fr into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-act-rfs",
+      "licence": "CC-BY-4.0",
+      "persona_id": "act-rfs",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding act-rfs into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-bushfires-nt",
+      "licence": "CC-BY-4.0",
+      "persona_id": "bushfires-nt",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding bushfires-nt into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-cfa-vic",
+      "licence": "CC-BY-4.0",
+      "persona_id": "cfa-vic",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding cfa-vic into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-dfes-wa",
+      "licence": "CC-BY-4.0",
+      "persona_id": "dfes-wa",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding dfes-wa into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-frnsw",
+      "licence": "CC-BY-4.0",
+      "persona_id": "frnsw",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding frnsw into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-frv",
+      "licence": "CC-BY-4.0",
+      "persona_id": "frv",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding frv into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-nsw-rfs",
+      "licence": "CC-BY-4.0",
+      "persona_id": "nsw-rfs",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding nsw-rfs into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-ntfrs",
+      "licence": "CC-BY-4.0",
+      "persona_id": "ntfrs",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding ntfrs into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-qfd",
+      "licence": "CC-BY-4.0",
+      "persona_id": "qfd",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding qfd into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-sacfs",
+      "licence": "CC-BY-4.0",
+      "persona_id": "sacfs",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding sacfs into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-samfs",
+      "licence": "CC-BY-4.0",
+      "persona_id": "samfs",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding samfs into fire"
+    },
+    {
+      "domain_group": "fire",
+      "fictitious": true,
+      "id": "persona-roster-fire-tfs",
+      "licence": "CC-BY-4.0",
+      "persona_id": "tfs",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding tfs into fire"
+    }
+  ]
+}
