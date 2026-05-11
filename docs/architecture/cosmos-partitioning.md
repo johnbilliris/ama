@@ -1,11 +1,25 @@
+---
+purpose: Cosmos DB partitioning and RU budget documentation — legacy root copy; forward-authoritative page is deployment/cosmos-partitioning.md.
+personas:
+  - Technical-Build
+diagrams: []
+specs:
+  - spec-001
+  - spec-035
+---
+
 # Cosmos DB Tenant Partitioning + RU Budget
+
+[→ Architecture index](README.md)
+
+> **Redirect**: This is a legacy copy. The forward-authoritative page is [`deployment/cosmos-partitioning.md`](deployment/cosmos-partitioning.md). See known-gaps entry `COSM-MIG-01`.
 
 **Purpose**: quantify per-tenant + per-jurisdiction RU/s budgets and partitioning strategy. Closes FR-A02.
 
 ## Partitioning strategy
 
 | Container | Partition key | Rationale |
-|---|---|---|
+| --- | --- | --- |
 | `signals` | `/tenant_id` | Tenant-scoped read/write |
 | `incidents` | `/tenant_id` | Tenant-scoped |
 | `recommendations` | `/incident_id` | Recommendations cluster around incidents |
@@ -23,7 +37,7 @@
 Targeted at 9 jurisdictions concurrently active, average incident throughput per jurisdiction.
 
 | Container | Provisioned RU/s | Autoscale max RU/s (FR-R04) | Per-tenant share | Notes |
-|---|---:|---:|---|---|
+| --- | ---: | ---: | --- | --- |
 | `signals` | 1,000 | 8,000 | ~111 baseline | Bursty during severe weather |
 | `incidents` | 400 | 2,000 | ~44 | Low write rate, high read |
 | `recommendations` | 1,000 | 8,000 | ~111 | Spikes during multi-agent coordination |
@@ -44,7 +58,7 @@ Targeted at 9 jurisdictions concurrently active, average incident throughput per
 ## Per-tenant projections (peak severe weather event, single jurisdiction)
 
 | Workload | Peak RU/s estimate | How |
-|---|---:|---|
+| --- | ---: | --- |
 | Signal ingestion (BoM+GA+state CAD storms) | 1,200 | 100 signals/s × ~12 RU/write |
 | Recommendation generation | 800 | 20 recs/s × ~40 RU/write incl. provenance fields |
 | Timeline event burst | 2,000 | 200 events/s × ~10 RU/write |

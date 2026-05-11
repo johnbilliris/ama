@@ -1,7 +1,34 @@
+---
+purpose: C4 Level 2 Container view showing all deployed containers and backing services within the Disaster Response Coordination Hub.
+personas:
+  - Technical-Architecture
+  - Technical-Build
+diagrams:
+  - C4-L2
+specs:
+  - spec-001
+  - spec-002
+  - spec-003
+  - spec-004
+  - spec-005
+  - spec-006
+  - spec-007
+  - spec-008
+  - spec-009
+---
+
+<!-- markdownlint-disable-file MD041 -->
+
+[→ Architecture index](../README.md)
+
 # C4 Model — Container View
 
 **Notation**: [C4 Model](https://c4model.com/) — Container.
 **Audience**: developers, infra, SRE, security.
+
+## Diagram
+
+![C4-L2: Container View](container.png)
 
 ```mermaid
 C4Container

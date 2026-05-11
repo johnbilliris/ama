@@ -1,4 +1,15 @@
+---
+purpose: Multi-agent monitoring-to-risk-to-communication sequence showing signal ingestion through public alert publication, including human approval gate.
+personas:
+  - Operational
+diagrams: []
+specs:
+  - spec-010
+---
+
 # Sequence — Monitoring → Risk Assessment → Communication
+
+[→ Architecture index](../README.md)
 
 **Purpose**: capture the multi-agent flow from signal ingestion through public alert publication, including dead-letter and recovery cycles. Closes FR-A04.
 
@@ -96,7 +107,7 @@ The sequence above is the happy path. The platform handles five distinct failure
 Every transition appends a typed event to `timeline_events` (Cosmos PK `/incident_id`):
 
 | Event kind | Producer | Used for |
-|---|---|---|
+| --- | --- | --- |
 | `signal_triaged` | monitoring agent | reconstruction |
 | `recommendation_proposed` | risk-assessment agent | provenance trail |
 | `alert_drafted` | communication agent | alert audit |

@@ -407,3 +407,86 @@ jobs:
         # Step 9 azd-up redeploy; see spec.md § "Step 8 Cohort Review Amendment Log").
         if: always()
         run: echo "::notice title=evidence-pack-publication-gate::completed (telemetry export deferred to Step 9 per spec.md amendment log R2)"
+
+  # ---------------------------------------------------------------------------
+  # Spec 001 / FR-021, FR-022, FR-023 — Architecture documentation validation.
+  # Runs in parallel with the quality job (no needs: dependency).
+  # No path filter: spec cross-reference correctness is checked on every PR.
+  # ---------------------------------------------------------------------------
+  docs-arch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "24"
+
+      - name: Install lychee (link checker)
+        run: |
+          LYCHEE_VERSION=v0.15.1
+          curl -fsSL "https://github.com/lycheeverse/lychee/releases/download/${LYCHEE_VERSION}/lychee-${LYCHEE_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar -xz -C /tmp
+          sudo install /tmp/lychee /usr/local/bin/lychee
+          lychee --version
+
+      # FR-022: Markdown lint
+      - name: markdownlint
+        run: npx --yes markdownlint-cli2 "docs/architecture/**/*.md"
+
+      # FR-021b: Internal link check (scoped to docs/architecture/)
+      - name: link-check
+        run: |
+          lychee \
+            --base docs/architecture \
+            --include 'docs/architecture' \
+            --max-retries 2 \
+            --timeout 30 \
+            --no-progress \
+            "docs/architecture/**/*.md"
+
+      # FR-021a: PNG ↔ .drawio pairing
+      - name: png-drawio-pairing
+        run: |
+          FAIL=0
+
+          # Every .png must have a sibling .drawio
+          while IFS= read -r png; do
+            base="${png%.png}"
+            if [ ! -f "${base}.drawio" ]; then
+              echo "FAIL: PNG without .drawio sibling: $png"
+              FAIL=1
+            fi
+          done < <(find docs/architecture -name '*.png')
+
+          # Every .drawio must have a sibling .png
+          while IFS= read -r drawio; do
+            base="${drawio%.drawio}"
+            if [ ! -f "${base}.png" ]; then
+              echo "FAIL: .drawio without .png sibling: $drawio"
+              FAIL=1
+            fi
+          done < <(find docs/architecture -name '*.drawio')
+
+          [ "$FAIL" -eq 0 ] || exit 1
+          echo "PNG ↔ .drawio pairing: OK"
+
+      # FR-021d: SHA256 hash manifest check
+      - name: hash-manifest-check
+        working-directory: docs/architecture
+        run: |
+          sha256sum --check .diagram-hashes
+          echo "Hash manifest: all $(wc -l < .diagram-hashes) entries matched."
+
+      # FR-021c, FR-011: Spec cross-reference coverage (001–037)
+      - name: spec-cross-ref-check
+        run: python tools/lint/check_spec_cross_refs.py
+
+      # FR-023, SC-008: Known-gaps registry completeness
+      - name: known-gaps-check
+        run: python tools/lint/check_known_gaps.py
