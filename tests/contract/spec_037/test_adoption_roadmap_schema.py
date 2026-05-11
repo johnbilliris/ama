@@ -5,8 +5,6 @@ Citations: FR-009, FR-015, FR-016, FR-017, FR-018, CHK020.
 
 from __future__ import annotations
 
-import pytest
-
 
 def _wave(wave_id: str, jurisdictions, cohort: str = "state-lead"):
     return {
@@ -20,17 +18,13 @@ def _wave(wave_id: str, jurisdictions, cohort: str = "state-lead"):
             "cite": [{"kind": "spec", "ref": "specs/024-simulation-control-chat/spec.md"}],
         },
         "change_management_artefacts": ["Comms plan"],
-        "decommission_rollback_criteria": [
-            "Preserve life-safety defaults; degrade to manual without data loss"
-        ],
+        "decommission_rollback_criteria": ["Preserve life-safety defaults; degrade to manual without data loss"],
         "back_citations": [{"kind": "spec", "ref": "specs/037-capstone-evidence-pack/spec.md"}],
         "provenance": {"tag": "automated", "source": "test", "evidence_status": "Validated"},
     }
 
 
-def test_minimal_valid_adoption_roadmap_passes(
-    adoption_roadmap_schema, base_metadata, validator_factory
-):
+def test_minimal_valid_adoption_roadmap_passes(adoption_roadmap_schema, base_metadata, validator_factory):
     waves = [
         _wave("WAVE-01", ["NSW", "VIC", "QLD"]),
         _wave("WAVE-02", ["WA", "SA", "TAS"]),
@@ -52,9 +46,7 @@ def test_minimal_valid_adoption_roadmap_passes(
     assert not errors, f"Unexpected schema errors: {errors}"
 
 
-def test_invalid_adoption_roadmap_missing_rollback_fails(
-    adoption_roadmap_schema, base_metadata, validator_factory
-):
+def test_invalid_adoption_roadmap_missing_rollback_fails(adoption_roadmap_schema, base_metadata, validator_factory):
     wave = _wave("WAVE-01", ["NSW"])
     wave.pop("decommission_rollback_criteria")
     artefact = {

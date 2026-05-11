@@ -13,10 +13,9 @@ def api_client():
     """
     pytest.importorskip("fastapi")
     try:
+        from app.api.routes.governance import evidence_pack as evidence_pack_router  # type: ignore
         from fastapi import FastAPI
         from fastapi.testclient import TestClient
-
-        from app.api.routes.governance import evidence_pack as evidence_pack_router  # type: ignore
     except ImportError:
         pytest.skip("evidence_pack router not yet wired (T036)")
         return None

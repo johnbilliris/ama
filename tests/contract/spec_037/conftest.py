@@ -98,6 +98,7 @@ def _resolver(schema: dict[str, Any]):
 @pytest.fixture
 def validator_factory():
     """Factory: given a schema dict, return a jsonschema validator with cross-refs resolved."""
+
     def _make(schema: dict[str, Any]):
         from jsonschema import Draft202012Validator
 

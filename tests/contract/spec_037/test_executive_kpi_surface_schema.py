@@ -5,7 +5,6 @@ Citations: FR-009, FR-019, FR-020, FR-021, CHK030.
 
 from __future__ import annotations
 
-
 CRITERIA = [
     "lives-saved",
     "response-time",
@@ -33,9 +32,7 @@ def _kpi(kpi_id: str, criterion: str, kind: str):
     }
 
 
-def test_minimal_valid_executive_kpi_surface_passes(
-    executive_kpi_schema, base_metadata, validator_factory
-):
+def test_minimal_valid_executive_kpi_surface_passes(executive_kpi_schema, base_metadata, validator_factory):
     rows = []
     idx = 1
     for crit in CRITERIA:
@@ -58,9 +55,7 @@ def test_minimal_valid_executive_kpi_surface_passes(
     assert not errors, f"Unexpected: {errors}"
 
 
-def test_invalid_kpi_surface_too_few_rows_fails(
-    executive_kpi_schema, base_metadata, validator_factory
-):
+def test_invalid_kpi_surface_too_few_rows_fails(executive_kpi_schema, base_metadata, validator_factory):
     artefact = {
         "artefact_id": "executive_kpi_surface",
         "schema_version": "1.0.0",

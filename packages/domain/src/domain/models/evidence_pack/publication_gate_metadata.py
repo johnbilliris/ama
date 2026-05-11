@@ -31,7 +31,7 @@ class PublicationGateMetadata(BaseModel):
     last_gate_run_utc: str
 
     @model_validator(mode="after")
-    def _ratio_consistent(self) -> "PublicationGateMetadata":
+    def _ratio_consistent(self) -> PublicationGateMetadata:
         if self.total_row_count > 0:
             expected = self.manual_row_count / self.total_row_count
             if abs(expected - self.manual_row_ratio) > 1e-9:
@@ -42,7 +42,7 @@ class PublicationGateMetadata(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def _signoff_required_when_over_cap(self) -> "PublicationGateMetadata":
+    def _signoff_required_when_over_cap(self) -> PublicationGateMetadata:
         if self.manual_row_ratio > self.manual_row_ratio_threshold and self.auditor_signoff is None:
             raise ValueError(
                 f"auditor_signoff required when manual_row_ratio "

@@ -10,9 +10,7 @@ def _cell(posture: str = "compliant"):
     cell = {
         "posture": posture,
         "summary": "Test summary",
-        "evidence": [
-            {"kind": "spec", "ref": "specs/030-llm-eval-framework/spec.md"}
-        ],
+        "evidence": [{"kind": "spec", "ref": "specs/030-llm-eval-framework/spec.md"}],
     }
     if posture == "not-applicable":
         cell["na_justification"] = "Genuinely not applicable for this component"
@@ -56,12 +54,15 @@ def _row():
         "spec_refs": [{"kind": "spec", "ref": "specs/008-communication-agent/spec.md"}],
         "frameworks": _frameworks(),
         "principles": _principles(),
-        "eval_evidence_refs": [
-            {"kind": "spec", "ref": "specs/030-llm-eval-framework/spec.md"}
-        ],
-        "provenance": {"tag": "manual", "source": "review", "evidence_status": "Validated",
-                       "owner": "Compliance Auditor", "review_cadence": "quarterly",
-                       "automation_target": "none"},
+        "eval_evidence_refs": [{"kind": "spec", "ref": "specs/030-llm-eval-framework/spec.md"}],
+        "provenance": {
+            "tag": "manual",
+            "source": "review",
+            "evidence_status": "Validated",
+            "owner": "Compliance Auditor",
+            "review_cadence": "quarterly",
+            "automation_target": "none",
+        },
     }
 
 
@@ -80,9 +81,7 @@ def test_minimal_valid_rai_register_passes(rai_register_schema, base_metadata, v
     assert not errors, f"Unexpected: {errors}"
 
 
-def test_invalid_rai_register_blank_principle_fails(
-    rai_register_schema, base_metadata, validator_factory
-):
+def test_invalid_rai_register_blank_principle_fails(rai_register_schema, base_metadata, validator_factory):
     row = _row()
     del row["principles"]["fairness"]  # required field
     artefact = {

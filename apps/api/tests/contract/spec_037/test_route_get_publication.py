@@ -8,8 +8,7 @@ from __future__ import annotations
 
 def test_get_historical_publication_returns_envelope(api_client):
     resp = api_client.get(
-        "/api/governance/evidence-pack/artefacts/risk_register/publications/"
-        "00000000-0000-0000-0000-000000000001"
+        "/api/governance/evidence-pack/artefacts/risk_register/publications/00000000-0000-0000-0000-000000000001"
     )
     # Either 200 (snapshot found) or 404 (test fixture has no snapshot).
     # We assert the route is wired and returns a defined contract response.

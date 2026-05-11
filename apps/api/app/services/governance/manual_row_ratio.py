@@ -31,9 +31,7 @@ def compute_ratio(rows: list[dict[str, Any]]) -> RatioResult:
     manual = sum(
         1
         for r in rows
-        if isinstance(r, dict)
-        and isinstance(r.get("provenance"), dict)
-        and r["provenance"].get("tag") == "manual"
+        if isinstance(r, dict) and isinstance(r.get("provenance"), dict) and r["provenance"].get("tag") == "manual"
     )
     ratio = (manual / total) if total else 0.0
     return RatioResult(manual_row_count=manual, total_row_count=total, manual_row_ratio=ratio)

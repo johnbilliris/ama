@@ -21,7 +21,7 @@ class RaiCell(BaseModel):
     evidence: list[BackCitation] = Field(min_length=1)
 
     @model_validator(mode="after")
-    def _na_requires_justification(self) -> "RaiCell":
+    def _na_requires_justification(self) -> RaiCell:
         if self.posture == "not-applicable" and not self.na_justification:
             raise ValueError("not-applicable cells require na_justification (FR-027)")
         return self

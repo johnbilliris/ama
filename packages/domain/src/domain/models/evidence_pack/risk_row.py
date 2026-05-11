@@ -43,7 +43,7 @@ class RiskRow(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def _scores_consistent(self) -> "RiskRow":
+    def _scores_consistent(self) -> RiskRow:
         if self.inherent_score != self.likelihood * self.consequence:
             raise ValueError("inherent_score must equal likelihood × consequence")
         if self.residual_score != self.residual_likelihood * self.residual_consequence:

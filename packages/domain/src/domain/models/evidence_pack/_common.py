@@ -26,13 +26,9 @@ class Provenance(BaseModel):
     evidence_status: Literal["Validated", "Deferred", "Unresolved"]
 
     @model_validator(mode="after")
-    def _manual_requires_owner(self) -> "Provenance":
+    def _manual_requires_owner(self) -> Provenance:
         if self.tag == "manual":
-            missing = [
-                f for f in ("owner", "review_cadence", "automation_target") if getattr(self, f) is None
-            ]
+            missing = [f for f in ("owner", "review_cadence", "automation_target") if getattr(self, f) is None]
             if missing:
-                raise ValueError(
-                    f"manual provenance requires {missing}; see FR-037"
-                )
+                raise ValueError(f"manual provenance requires {missing}; see FR-037")
         return self

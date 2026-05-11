@@ -49,7 +49,7 @@ class FeatureValueRow(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def _contributing_requires_metrics(self) -> "FeatureValueRow":
+    def _contributing_requires_metrics(self) -> FeatureValueRow:
         if self.tag == "capstone-contributing" and not self.capstone_metrics:
             raise ValueError("capstone-contributing rows require ≥1 capstone_metrics entry (FR-031)")
         return self

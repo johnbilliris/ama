@@ -7,8 +7,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import pytest
-
 
 def _row(category: str, idx: int, manual: bool = False) -> dict[str, Any]:
     return {
@@ -30,18 +28,12 @@ def _row(category: str, idx: int, manual: bool = False) -> dict[str, Any]:
             "tag": "manual" if manual else "automated",
             "source": "test",
             "evidence_status": "Validated",
-            **(
-                {"owner": "Test Owner", "review_cadence": "quarterly", "automation_target": "none"}
-                if manual
-                else {}
-            ),
+            **({"owner": "Test Owner", "review_cadence": "quarterly", "automation_target": "none"} if manual else {}),
         },
     }
 
 
-def test_minimal_valid_risk_register_passes(
-    risk_register_schema, base_metadata, validator_factory
-):
+def test_minimal_valid_risk_register_passes(risk_register_schema, base_metadata, validator_factory):
     """All 6 categories represented, all schema constraints satisfied."""
     categories = ["Platform", "AI", "Operational", "Jurisdictional", "Data", "Supply-chain"]
     rows = [_row(cat, i + 1) for i, cat in enumerate(categories)]
@@ -60,9 +52,7 @@ def test_minimal_valid_risk_register_passes(
     assert not errors, f"Unexpected schema errors: {errors}"
 
 
-def test_invalid_risk_register_missing_required_field_fails(
-    risk_register_schema, base_metadata, validator_factory
-):
+def test_invalid_risk_register_missing_required_field_fails(risk_register_schema, base_metadata, validator_factory):
     row = _row("Platform", 1)
     row.pop("treatment")  # required
     artefact = {

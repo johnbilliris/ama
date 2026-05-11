@@ -27,9 +27,7 @@ class AdoptionWave(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     wave_id: str
-    cohort: Literal[
-        "state-lead", "local-government", "utilities", "transport", "volunteer-ngo", "commonwealth"
-    ]
+    cohort: Literal["state-lead", "local-government", "utilities", "transport", "volunteer-ngo", "commonwealth"]
     jurisdictions: list[str] = Field(min_length=1)
     lead_agency: dict[str, str]
     readiness_gates: list[str] = Field(min_length=1)
