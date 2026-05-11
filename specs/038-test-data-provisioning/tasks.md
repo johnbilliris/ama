@@ -235,14 +235,14 @@ description: "Tasks: Test Data and Resources Provisioning Review (spec 038)"
 
 ## Phase 7 — Polish, End-to-End Verification, and Walkthrough
 
-- [ ] T160 [P] Run quickstart.md walkthrough end-to-end on a clean Windows dev box and update with any drift. Verify: time-to-demo-ready ≤ 30 minutes (SC-010). — SC-010, SC-013.
-- [ ] T161 [P] Capture SHA-256 stream digests for every committed replay under `fixtures/sim_replays/*.ndjson`, store sidecar `*.sha256`, and add CI step in the existing `quality:` job that re-runs the simulator and diffs digests. — FR-022, plan R3, SC-005.
-- [ ] T162 [P] Add `tests/integration/test_two_path_rule_full.py` — combines (a) `lint-imports` clean, (b) `check_simulator_isolation.py` clean, (c) manifest category↔path cross-check clean. — Two-Path Rule, SC-007.
-- [ ] T163 [P] Run `ruff check .` and `ruff format --check .` across all new modules; fix drift. Verify: clean exit. — repo convention.
-- [ ] T164 Add `tests/integration/test_acknowledgements_attribution.py` — for every `category=public` manifest entry, the AMA platform "Acknowledgements" surface (`apps/web/src/app/acknowledgements/page.tsx` or equivalent) renders the `attribution_string`. Verify: `pnpm --filter @ama/web test`. — FR-034.
-- [ ] T165 Add a deliberate negative test `tests/integration/test_seed_loader_rejects_pspf_and_pii_combined.py` re-asserting SC-002 in CI as a permanent regression guard. — FR-015, FR-040, FR-043, FR-045, SC-002.
-- [ ] T166 Update `docs/test-data/MANIFEST.md` (regenerate via `--render`) and update `CHANGELOG.md` with the spec-038 delivery summary. — FR-030, repo convention.
-- [ ] T167 Final persona-coverage gate: run `python tools/lint/persona_coverage_report.py --strict` and confirm 68/68 personas covered, ≥1 demo scenario per of the 8 domain groups, zero `unbacked`. — SC-001, SC-008.
+- [X] T160 [P] Run quickstart.md walkthrough end-to-end on a clean Windows dev box and update with any drift. Verify: time-to-demo-ready ≤ 30 minutes (SC-010). — SC-010, SC-013.
+- [X] T161 [P] Capture SHA-256 stream digests for every committed replay under `fixtures/sim_replays/*.ndjson`, store sidecar `*.sha256`, and add CI step in the existing `quality:` job that re-runs the simulator and diffs digests. — FR-022, plan R3, SC-005.
+- [X] T162 [P] Add `tests/integration/test_two_path_rule_full.py` — combines (a) `lint-imports` clean, (b) `check_simulator_isolation.py` clean, (c) manifest category↔path cross-check clean. — Two-Path Rule, SC-007.
+- [X] T163 [P] Run `ruff check .` and `ruff format --check .` across all new modules; fix drift. Verify: clean exit. — repo convention.
+- [X] T164 Add `tests/integration/test_acknowledgements_attribution.py` — for every `category=public` manifest entry, the AMA platform "Acknowledgements" surface (`apps/web/src/app/acknowledgements/page.tsx` or equivalent) renders the `attribution_string`. Verify: `pnpm --filter @ama/web test`. — FR-034.
+- [X] T165 Add a deliberate negative test `tests/integration/test_seed_loader_rejects_pspf_and_pii_combined.py` re-asserting SC-002 in CI as a permanent regression guard. — FR-015, FR-040, FR-043, FR-045, SC-002.
+- [X] T166 Update `docs/test-data/MANIFEST.md` (regenerate via `--render`) and update `CHANGELOG.md` with the spec-038 delivery summary. — FR-030, repo convention.
+- [X] T167 Final persona-coverage gate: run `python tools/lint/persona_coverage_report.py --strict` and confirm 68/68 personas covered, ≥1 demo scenario per of the 8 domain groups, zero `unbacked`. — SC-001, SC-008.
 
 ---
 

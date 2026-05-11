@@ -1,6 +1,13 @@
 # Quickstart — Extending Test Data and Resources
 
-Spec: [spec.md](./spec.md) · Plan: [plan.md](./plan.md)
+> **Verified end-to-end on 2026-05-11** (spec-038 Phase 7, T160). All
+> commands below were exercised against branch
+> `038-test-data-provisioning` on a clean Windows + Python 3.12 dev
+> box; no documented step required correction.
+
+Spec: [spec.md](./spec.md) · Plan: [plan.md](./plan.md) ·
+Verification matrix: [verification.md](./verification.md) ·
+Lessons: [lessons.md](./lessons.md)
 
 Audience: a developer who wants to **add a new test-data artefact** —
 seed catalogue entry, generator, simulator feed shape, demo scenario, or

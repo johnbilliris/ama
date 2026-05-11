@@ -293,3 +293,12 @@ The following informed defaults have been adopted in lieu of explicit clarificat
   **A:** **All three, with explicit precedence: function argument `seed: int` > CLI flag `--seed <int>` > env var `AMA_TEST_SEED` > deterministic default `0` (with a warning).** Seeds are 64-bit unsigned integers. The generator's primary callable accepts the function argument; an invocation script under `scripts/generators/<name>.py` exposes the CLI flag; `AMA_TEST_SEED` is read only when neither is supplied.  
   **Source justification:** `scripts/seed_loader.py` (verified to exist) follows the CLI + env pattern; Faker fixtures under `tests/fixtures/` use the function-argument pattern. Combining all three with a clear precedence honours all existing call sites without breaking either pattern, and the explicit default-with-warning ensures sandboxed CI never produces silent non-determinism.  
   **Spec touch-points:** FR-051 (rewritten), A-20 (added).
+
+### Session 2026-05-11 (Pass 3 — implementation closure)
+
+- **Note:** Implementation verified — see
+  [`verification.md`](./verification.md). All 15 success criteria and
+  all 41 banded functional requirements (FR-001..FR-071) map to a
+  concrete test, lint, manifest entry, or CI step. No further
+  clarifications added in Pass 3; this entry records closure only.
+  Companion artefact: [`lessons.md`](./lessons.md).
