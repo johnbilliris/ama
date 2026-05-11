@@ -16,3 +16,6 @@ export * from "./app-role.js";
 export * from "./offline-queue-tier.js";
 export * from "./persona-id.js";
 export * from "./extension-envelope.js";
+
+// spec-038 Help domain twins
+export * as Help from "./help/index.js";

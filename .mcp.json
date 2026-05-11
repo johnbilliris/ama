@@ -6,6 +6,10 @@
       "args": [
         "@playwright/mcp@latest"
       ]
+    },
+    "drawio": {
+      "type": "http",
+      "url": "https://mcp.draw.io/mcp"
     }
   }
 }

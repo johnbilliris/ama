@@ -1,7 +1,33 @@
+---
+purpose: C4 Level 1 System Context showing the Disaster Response Coordination Hub and all external actors and systems.
+personas:
+  - Technical-Architecture
+diagrams:
+  - C4-L1
+specs:
+  - spec-001
+  - spec-002
+  - spec-003
+  - spec-004
+  - spec-005
+  - spec-006
+  - spec-007
+  - spec-008
+  - spec-009
+---
+
+<!-- markdownlint-disable-file MD041 -->
+
+[→ Architecture index](../README.md)
+
 # C4 Model — System Context
 
 **Notation**: [C4 Model](https://c4model.com/) — System Context.
 **Audience**: cross-agency reviewers (operational, technical, executive). Pairs with the Container view in `container.md`.
+
+## Diagram
+
+![C4-L1: System Context](system.png)
 
 ```mermaid
 C4Context
@@ -73,7 +99,7 @@ Cross-tenant isolation is enforced at every boundary by tenant-scoped middleware
 ## Constitution mapping
 
 | Constitution clause | How honoured in this view |
-|---|---|
+| --- | --- |
 | I. Primacy of life | Operator-in-the-loop approval gates all life-safety publication; degraded-mode fallback never blocks publication. |
 | II. AIIMS | All five business agents map to AIIMS functions via the typed registry (FR-P05). |
 | III. Multi-hazard / multi-agency | Tenant boundary per jurisdiction; jurisdiction policy drives autonomy + language priorities. |

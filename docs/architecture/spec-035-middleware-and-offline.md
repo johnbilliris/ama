@@ -1,4 +1,19 @@
+---
+purpose: Middleware stack and offline-replay flow documentation for spec-035 — kept at root pending migration (MDW-MIG-01).
+personas:
+  - Technical-Architecture
+diagrams: []
+specs:
+  - spec-035
+---
+
 # spec-035 — Middleware stack & offline-replay flow
+
+[→ Architecture index](README.md)
+
+> **Migration**: This file is pending migration to a named view-type subdirectory. See known-gaps entry `MDW-MIG-01`.
+
+<!-- spec-cross-ref: spec-035 -->
 
 > Spec-035 T079. Captures the production-reachable middleware order and the
 > offline reconnect-replay sequence so reviewers can audit precedence + the
@@ -36,7 +51,7 @@ flowchart LR
 ### Middleware ordering rationale
 
 | Stage | Why this order |
-|------|----------------|
+| --- | --- |
 | AuthZ first | All downstream stages assume an authenticated principal; spec-035 NN-1 / NN-2 closed-set role identity. |
 | Audit second | Every request that reaches handlers must produce an audit row; positioning Audit before mutating logic guarantees the audit row exists *before* the closed-set outcome is finalised. T078 enriches the active OTEL span with `ama.audit.outcome` at this stage. |
 | Classifier third | T046 mask runs *after* audit so the masked-field count is captured in the audit row. |

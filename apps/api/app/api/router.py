@@ -98,6 +98,21 @@ api_router.include_router(i18n_router)
 api_router.include_router(agents_router)
 api_router.include_router(audit_router)
 
+# spec-038 — In-Product Help docs + grounded chat assistant.
+from app.api.routes.help_articles import router as help_articles_router  # noqa: E402
+from app.api.routes.help_chat import router as help_chat_router  # noqa: E402
+from app.api.routes.help_screenshots import router as help_screenshots_router  # noqa: E402
+from app.api.routes.help_search import router as help_search_router  # noqa: E402
+from app.api.routes.help_snapshots import router as help_snapshots_router  # noqa: E402
+from app.api.routes.help_support_handoff import router as help_support_handoff_router  # noqa: E402
+
+api_router.include_router(help_chat_router)
+api_router.include_router(help_articles_router)
+api_router.include_router(help_snapshots_router)
+api_router.include_router(help_screenshots_router)
+api_router.include_router(help_search_router)
+api_router.include_router(help_support_handoff_router)
+
 if _EVAL_AVAILABLE:
     api_router.include_router(eval_router)
 

@@ -25,9 +25,7 @@ REGISTRY_RELATIVE = Path("data/governance/foundry_carveout_registry.json")
 
 def _load_at_revision(rev: str, path: Path) -> list[dict[str, Any]]:
     try:
-        out = subprocess.check_output(
-            ["git", "show", f"{rev}:{path.as_posix()}"], text=True
-        )
+        out = subprocess.check_output(["git", "show", f"{rev}:{path.as_posix()}"], text=True)
     except subprocess.CalledProcessError:
         return []
     try:
@@ -71,9 +69,7 @@ def _format_diff(
             entry = base[model_id]
             lines.append(f"- ➖ `{model_id}` (prompt_hash={entry.get('prompt_hash', 'n/a')!s})")
 
-    mutated = [
-        model_id for model_id in common if base[model_id] != head[model_id]
-    ]
+    mutated = [model_id for model_id in common if base[model_id] != head[model_id]]
     if mutated:
         lines.append("### Mutated carve-outs (prompt_hash drift)")
         for model_id in mutated:

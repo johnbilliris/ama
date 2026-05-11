@@ -62,6 +62,8 @@ docs/           # Project documentation
 - spec-037 — Pydantic v2 evidence-pack models under `packages/domain/src/domain/models/evidence_pack/`; JSON Schema draft 2020-12 mirrors under `packages/schemas/spec_037/` (six artefacts: risk-register, adoption-roadmap, executive-kpi-surface, responsible-ai-register, feature-value-ledger, publication-gate-metadata); read-only Executive KPI page at `apps/web/src/app/governance/executive/` composed from spec-035 `PersonaWorkspace` primitives (no new chart libraries); publication-gate semantics (`manual_row_ratio ≤ 0.5` cap, named-auditor sign-off override per FR-038); two App Insights custom metrics `evidence_pack.publication.duration_seconds` + `evidence_pack.manual_row_ratio`; CI job `evidence-pack-publication-gate` extends `.github/workflows/ci.yml`. Zero net-new top-level Azure resources (PD-037-06). (037-capstone-evidence-pack)
 - Python 3.12 (apps/api, apps/agents, scripts, tools/lint), + FastAPI, Pydantic v2, `azure.eventhub`, (039-test-data-provisioning)
 - Cosmos DB (`disaster-hub` database, account `cosmos-ama-zo6bb5`), (039-test-data-provisioning)
+- Python 3.12 (lint scripts); YAML (CI job definition); Markdown (pages) + Draw.io desktop / drawio-mcp-diagramming skill (diagram authoring); (001-arch-docs-refresh)
+- File system — `docs/architecture/` directory tree; `.diagram-hashes` flat manifest; (001-arch-docs-refresh)
 
 **Backend**: Python 3.12, FastAPI, Pydantic v2, Azure Cosmos DB SDK, Azure Blob Storage SDK, Azure Identity, Azure OpenAI SDK, tenacity
 **Frontend**: TypeScript 5.8, Next.js 16.2, React 19, Tailwind CSS, @ama/ui component library

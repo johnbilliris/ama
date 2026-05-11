@@ -1,0 +1,28 @@
+name: help_assistant
+region: australiaeast
+# spec-038 T-AA018 — Foundry agent definition (FR-018, FR-011).
+# Region MUST be australiaeast (Constitution NN-2). Tools are retrieval-only
+# against the alias `help-corpus-active`; never invoke external tools.
+agent_kind: chat
+tools:
+  - kind: retrieval
+    target: ai_search
+    index_alias: help-corpus-active
+    hybrid: true        # BM25 + vector + RRF via apps/agents/common/retrieval_client.py
+inference:
+  temperature: 0.0      # FR-014 — no fabrication tolerance
+  top_p: 0.1
+  max_output_tokens: 1500
+  model: gpt-4o-mini    # production model pinned at deployment
+prompts:
+  system: apps/agents/help_assistant/prompts/system.md
+  refusal: apps/agents/help_assistant/prompts/refusal.md
+  deprecation_notice: apps/agents/help_assistant/prompts/deprecation_notice.md
+classification_ceiling: OFFICIAL
+# §NN-2 carve-out registration — explicit NOT invoked for the Help assistant.
+foundry_carveout: false
+redaction: required
+audit:
+  emit_per_turn: true
+  log_target: chat_audit_log
+  ttl_seconds: 220752000   # 7 years (FR-020)

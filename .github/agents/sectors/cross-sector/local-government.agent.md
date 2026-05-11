@@ -36,8 +36,8 @@ While states and territories set the legislative framework and designate lead co
 This agent covers local government emergency management responsibilities. It does **NOT** cover:
 
 - **State-level coordination**: Handoff to the **state-government** agent — state coordination centres, state legislation, and lead agency designation are state responsibilities
-- **Commonwealth-level coordination**: Handoff to the **commonwealth-government** agent — COMDISPLAN and national coordination
-- **Combat agency operations**: Handoff to the relevant combat agency agent (**fire-services**, **ses**, **police**) — councils do not conduct firefighting, rescue, or law enforcement operations
+- **Commonwealth-level coordination**: Handoff to the **nema** agent (or relevant commonwealth-specific agent: **adf**, **bom-national**, **arc**, **ga-national**, etc.) — COMDISPLAN and national coordination. The legacy generic `commonwealth-government` agent is archived; always route to **nema** as the canonical national coordinator (see `.github/agents/AGENTS.md` Archived section).
+- **Combat agency operations**: Handoff to the relevant jurisdiction-specific combat agency (e.g. **frnsw**/**nsw-rfs**/**ses-nsw** for NSW; **frv**/**cfa-vic**/**ses-vic** for VIC; **vicpol**/**nswpf**/**qps**/**sapol**/**wapol**/**taspol**/**ntpf**/**act-policing** for police) — councils do not conduct firefighting, rescue, or law enforcement operations. The legacy generic `fire-services`, `ses`, and `police` agents are archived (see `.github/agents/AGENTS.md` Archived section); always route to the live jurisdiction-specific agent for the council's state/territory.
 - **Health and medical response**: Handoff to the **health** agent — public health emergencies and hospital management
 - **NGO service delivery**: Handoff to the **community-ngos** agent — Red Cross and Salvation Army manage their own service delivery within evacuation centres
 

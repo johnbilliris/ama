@@ -101,10 +101,7 @@ def diff(inventory_rows: Iterable[dict[str, str]], sources: Iterable[dict[str, A
         src = src_index[key]
         # Mode parity: source.json defaults to ``full-text`` when absent.
         if inv["mode"] != src["mode"]:
-            issues.append(
-                f"mode-mismatch: {key[0]}/{key[1]} inventory={inv['mode']!r} "
-                f"source={src['mode']!r}"
-            )
+            issues.append(f"mode-mismatch: {key[0]}/{key[1]} inventory={inv['mode']!r} source={src['mode']!r}")
     return issues
 
 
@@ -133,10 +130,7 @@ def main(argv: list[str] | None = None) -> int:
         for issue in issues:
             print(f"  - {issue}")
         return 1
-    print(
-        f"INDEXING-LICENCE-INVENTORY clean — {len(sources)} source.json <-> "
-        f"{len(inventory_rows)} inventory rows."
-    )
+    print(f"INDEXING-LICENCE-INVENTORY clean — {len(sources)} source.json <-> {len(inventory_rows)} inventory rows.")
     return 0
 
 
