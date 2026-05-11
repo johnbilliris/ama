@@ -35,6 +35,7 @@ from app.api.routes.signals import router as signals_router
 from app.api.routes.simulation_chat import router as simulation_chat_router
 from app.api.routes.simulation_playback import router as simulation_playback_router
 from app.api.routes.simulations import router as simulations_router
+from app.api.routes.simulations_036 import router as simulations_036_router
 from app.api.routes.tasks import router as tasks_router
 from app.api.routes.warning_chain import router as warning_chain_router
 from app.api.routes.workflow_runs import router as workflow_runs_router
@@ -64,6 +65,7 @@ api_router.include_router(frameworks_router)
 api_router.include_router(jurisdictions_router)
 api_router.include_router(scenarios_router)
 api_router.include_router(simulations_router)
+api_router.include_router(simulations_036_router)
 api_router.include_router(simulation_playback_router)
 api_router.include_router(simulation_chat_router)
 api_router.include_router(handoffs_router)

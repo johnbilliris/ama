@@ -1,5 +1,8 @@
+import hashlib as _hashlib
+import json as _json
 import logging
 import time
+from typing import Any as _Any
 
 from common.circuit_breaker import CircuitBreaker
 from common.content_safety import ContentSafetyValidator
@@ -241,3 +244,34 @@ class LLMCallMixin:
             "confidence": adjusted,
             "requires_human_review": requires_review,
         }
+
+
+# ---------------------------------------------------------------------------
+# T-B01: Canonical prompt-hash for sub-agent invocation records (FR-060)
+# ---------------------------------------------------------------------------
+
+
+def compute_prompt_hash(
+    system_prompt: str,
+    user_payload: _Any,
+    tool_schemas: list[dict[str, _Any]] | None = None,
+) -> str:
+    """Return a deterministic SHA-256 hex digest for a prompt envelope.
+
+    Per ``contracts/sub-agent-adapter.md`` Section 8 the hash is over a JSON
+    object serialised with ``sort_keys=True`` and ``separators=(",", ":")``
+    so that *identical inputs produce identical digests across machines*.
+
+    The hash is recorded in every ``SubAgentInvocationRecord`` (FR-060) and
+    on every ``injection.success`` audit envelope so auditors can later
+    re-derive the prompt independently.
+    """
+    payload = {
+        "system": system_prompt,
+        "user": user_payload,
+        "tools": tool_schemas or [],
+    }
+    canonical = _json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    )
+    return _hashlib.sha256(canonical.encode("utf-8")).hexdigest()

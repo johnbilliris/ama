@@ -79,7 +79,15 @@ class TestSimulationRunner:
         )
 
         signals = asyncio.run(runner.start(run))
-        assert len(signals) > 0
+        # T-AA06 — replace ``len(signals) > 0`` with explicit boundary
+        # assertion: the runner MUST emit at least one signal per
+        # configured event phase in the run plan.
+        expected_min = max(1, len(run.event_phases))
+        assert len(signals) >= expected_min, (
+            f"runner emitted {len(signals)} signals for {expected_min} phases; "
+            f"expected ≥ phase count"
+        )
+        # Every signal must be tagged with simulation provenance.
         for signal in signals:
             assert signal["provenance"]["collectionMethod"] == "simulation"
             assert signal["provenance"]["simulationRunId"] == run.run_id

@@ -1,0 +1,644 @@
+openapi: 3.1.0
+info:
+  title: Simulation API — Feature 036 extensions
+  description: |
+    Extends the spec 024 simulation chat API with the new `inject_telemetry` tool,
+    the direct-REST lifecycle verbs (`abort`, plus `pause`/`resume` parity),
+    SSE map-overlay event types, and **RFC 9457** Problem Details for injection,
+    lifecycle, idempotency, and sequence-uncertainty refusals. (Step 8 amendment
+    cycle: bumped from RFC 7807 to its successor RFC 9457; canonical type-URI
+    catalogue at `contracts/error-responses.md`.)
+
+    This file is a delta over `packages/schemas/openapi.yaml`. Land it via PR by
+    merging the new operations and components into the master OpenAPI document.
+
+    **Step 8 amendment cycle additions**:
+    - `Idempotency-Key` request header on lifecycle verbs and inject-telemetry (FR-066 / pass 2 Q7; see `contracts/idempotency-cache.md`).
+    - 409 `lifecycle-state-conflict` and 422 `idempotency-key-conflict` and 503 `evidence-integrity-warning` (sequence-uncertainty) problem types (see `contracts/error-responses.md`).
+    - `TelemetryInjectionAck.triggered_sub_agents[].trigger_source` enum (Amendment C / pass 1 Q1).
+    - Explicit `Simulation.Coordinator` security scoping on every write/lifecycle path.
+
+    **Cycle 2 amendment cycle (v0.3.0 — BREAKING)**:
+    - `TelemetryInjectionAck.triggered_sub_agents[]` BREAKING reshape — items are now
+      a `TriggeredSubAgent` object (`{sub_agent, trigger_source, correlation_id, dispatch_status}`)
+      replacing the prior loose object. The `dispatch_status` enum
+      (`acknowledged|failed|timed_out`) is required (Amendment A2-01 / pass 2 Q1).
+    - `TelemetryInjectionAck.degraded_dispatch` boolean (always present; default `false`)
+      surfaces partial / total dispatch failure per Amendment A2-01 / pass 2 Q2.
+    - `sub_agent` enum aligned to canonical 9-name PascalCase set
+      (`Comms|Evac|Health|Intel|Logistics|Operations|Planning|Resource|Risk`) per
+      Amendment A2-07 / FR-070; the prior 7-name kebab-case enum is gone.
+    - NEW `SignalPipelineDispatchFailedAuditDetails` component documents the entry-25
+      audit envelope payload (Amendment A2-04 / FR-067 / FR-069 byte-equality with
+      response body's `triggered_sub_agents` array per pass 1 Q1 / CHK135).
+  version: 0.3.0
+  contact:
+    name: Simulation Platform Team
+servers:
+  - url: https://api.platform.example.gov.au
+    description: Australia East production
+security:
+  - aadJwt: []
+tags:
+  - name: simulation
+    description: Simulation lifecycle and telemetry injection
+  - name: simulation-controller-tools
+    description: Controller LLM tool surface (server-side allow-list)
+paths:
+  /api/simulations/{simId}/abort:
+    post:
+      operationId: abortSimulation
+      tags: [simulation]
+      summary: |
+        Direct-REST abort surface (FR-059, ADR-036-002). Bypasses the LLM tool-loop
+        for safety-criticality. Cancels in-flight sub-agent invocations, transitions
+        the sim to `ended` with `end_reason: aborted`, and triggers FR-054
+        lessons-capture automatically.
+      description: |
+        Constitution Principle I (primacy of life) requires this surface to be
+        unambiguous and immune to LLM jailbreak or confusion. Direct REST endpoint
+        bypasses the LLM tool-loop. Requires `Simulation.Coordinator` Entra app role.
+      security:
+        - aadJwt: [Simulation.Coordinator]
+      parameters:
+        - in: path
+          name: simId
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, maxLength: 500 }
+      responses:
+        '200':
+          description: Abort succeeded; lessons-capture initiated.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [aborted, cancelled_invocations, lessons_capture_started, abort_audit_id]
+                properties:
+                  aborted: { const: true }
+                  cancelled_invocations: { type: integer, minimum: 0, description: Count of in-flight sub-agent invocations cancelled }
+                  lessons_capture_started: { const: true }
+                  abort_audit_id: { type: string, format: uuid }
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Simulation not in a cancellable state OR cached idempotency replay against a now-conflicting lifecycle state (see `contracts/error-responses.md` § lifecycle-state-conflict).
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/LifecycleStateConflictProblem' }
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyConflict'
+        '503':
+          $ref: '#/components/responses/EvidenceIntegrityWarning'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/simulations/{simId}/pause:
+    post:
+      operationId: pauseSimulation
+      tags: [simulation]
+      summary: |
+        Direct-REST pause surface (FR-059). Mirrors the `pause` Controller tool;
+        either path produces identical server-side behaviour. Requires
+        `Simulation.Coordinator` role.
+      security:
+        - aadJwt: [Simulation.Coordinator]
+      parameters:
+        - in: path
+          name: simId
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Sim transitioned to `paused`.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [state]
+                properties:
+                  state: { const: paused }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: Sim not in `active` state OR cached idempotency replay against a now-conflicting lifecycle state.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/LifecycleStateConflictProblem' }
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyConflict'
+        '503':
+          $ref: '#/components/responses/EvidenceIntegrityWarning'
+
+  /api/simulations/{simId}/resume:
+    post:
+      operationId: resumeSimulation
+      tags: [simulation]
+      summary: Direct-REST resume surface (FR-059). Returns sim to `active`. Deferred cascade hops are NOT auto-replayed (per A12 / FR-057).
+      security:
+        - aadJwt: [Simulation.Coordinator]
+      parameters:
+        - in: path
+          name: simId
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Sim transitioned to `active`.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [state]
+                properties:
+                  state: { const: active }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: Sim not in `paused` state OR cached idempotency replay against a now-conflicting lifecycle state.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/LifecycleStateConflictProblem' }
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyConflict'
+        '503':
+          $ref: '#/components/responses/EvidenceIntegrityWarning'
+
+  /api/simulations/{simId}/inject-telemetry:
+    post:
+      operationId: injectTelemetry
+      tags: [simulation]
+      summary: |
+        Server-side direct-REST entry point for telemetry injection. Most coordinator
+        injections are routed via the chat-turn pipeline (Controller invokes the
+        `inject_telemetry` tool against the `simulation-telemetry-injection` agent).
+        This direct endpoint exists for testing and for non-chat clients.
+      description: |
+        Note: even direct-REST injections traverse the same server-side pipeline as
+        chat-driven injections — the FR-009 success-budget, the FR-009 parse-attempt
+        circuit-breaker, FR-010 hybrid life-safety gate, and the FR-007 citation
+        tenant-isolation policies all apply.
+
+        Per Step 8 Amendment C / pass 1 Q1, the response `triggered_sub_agents[]`
+        carries a `trigger_source` enum so audit consumers can deduplicate fan-outs
+        that arrived via subscriber routing vs Controller-intent invocation vs
+        cascade vs lifecycle. Per pass 2 Q7, `Idempotency-Key` is honoured on the
+        24-h FR-066 cache; refused-while-paused 409s are NOT cached.
+      security:
+        - aadJwt: [Simulation.Coordinator]
+      parameters:
+        - in: path
+          name: simId
+          required: true
+          schema: { type: string, format: uuid }
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TelemetryInjectionRequest' }
+      responses:
+        '200':
+          description: Injection accepted (one or more signals).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TelemetryInjectionAck' }
+        '400':
+          description: Refused — see `reason` in the Problem Details extension.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/InjectionRefusalProblem' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: Refused while sim is `paused` (FR-066 / pass 2 Q7); the refusal is NOT cached.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/LifecycleStateConflictProblem' }
+        '422':
+          $ref: '#/components/responses/IdempotencyKeyConflict'
+        '429':
+          description: Rate-limited (success budget) or circuit-breaker tripped.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/InjectionRefusalProblem' }
+        '503':
+          $ref: '#/components/responses/EvidenceIntegrityWarning'
+
+  /api/simulations/{simId}/events:
+    get:
+      operationId: streamSimulationEvents
+      tags: [simulation]
+      summary: |
+        Server-Sent Events stream for the simulation. Emits chat deltas (existing
+        spec 024) plus the new `map.overlay.*` event types (this feature). See
+        contracts/sse-map-overlay.md for the full closed set of event types.
+      security:
+        - aadJwt: [Simulation.Coordinator, Simulation.Observer]
+      parameters:
+        - in: path
+          name: simId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: SSE stream (`text/event-stream`).
+          content:
+            text/event-stream:
+              schema: { type: string, description: See contracts/sse-map-overlay.md for typed event definitions }
+
+components:
+  securitySchemes:
+    aadJwt:
+      type: oauth2
+      description: |
+        Microsoft Entra ID JWT. Required app roles per operation:
+        `Simulation.Coordinator` for write/lifecycle paths; `Simulation.Observer`
+        for read paths. AAD-only — no API key, no service principal secret in
+        request paths.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/v2.0/authorize
+          tokenUrl: https://login.microsoftonline.com/common/oauth2/v2.0/token
+          scopes:
+            Simulation.Coordinator: Inject telemetry, invoke sub-agents via chat, lifecycle verbs.
+            Simulation.Observer: Read chat transcript, telemetry timeline, map overlays.
+
+  schemas:
+    TelemetryInjectionRequest:
+      type: object
+      required: [chat_text]
+      properties:
+        chat_text:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          description: |
+            Free-text coordinator input. Pre-LLM PII scrubber (Azure AI Content
+            Safety) runs server-side before any LLM call.
+        viewport_hint:
+          type: object
+          description: |
+            Advisory only. Server re-runs centroid → jurisdiction lookup against
+            the authoritative jurisdiction-boundary dataset; mismatches produce
+            a `routing.viewport_hint_mismatch` audit entry per FR-021 step 3.
+          properties:
+            centroid_lat: { type: number, minimum: -90, maximum: 90 }
+            centroid_lng: { type: number, minimum: -180, maximum: 180 }
+            client_jurisdiction: { type: string }
+
+    TelemetryInjectionAck:
+      type: object
+      required: [injection_correlation_id, signals, refusals, degraded_dispatch]
+      description: |
+        Cycle 2 (v0.3.0) BREAKING reshape — `triggered_sub_agents[]` items now
+        carry a typed `dispatch_status` discriminator (Amendment A2-01 / pass 2
+        Q1) and the always-present `degraded_dispatch` flag (pass 2 Q2). The
+        array is **byte-equal** (after RFC 8785 JCS canonicalisation) to the
+        `triggered_sub_agents` array on the corresponding `injection.success`
+        OR `signal_pipeline.dispatch_failed` audit envelope (pass 1 Q1 /
+        CHK135). Lexicographic ordering by `sub_agent` PascalCase name is
+        REQUIRED (pass 1 Q4) for the byte-equality invariant.
+      properties:
+        injection_correlation_id: { type: string, format: uuid }
+        signals:
+          type: array
+          description: Successfully written signals (count toward FR-009 30/min budget).
+          items:
+            type: object
+            required: [signal_id, category, confidence]
+            properties:
+              signal_id: { type: string, format: uuid }
+              category:
+                type: string
+                enum: [weather, fire-behaviour, hydrology, geohazard, utility, transport, evacuation, resource, comms-channel-state]
+              confidence: { type: string, enum: [high, medium, low] }
+              parameters: { type: object }
+              gps:
+                type: object
+                properties:
+                  lat: { type: number }
+                  lng: { type: number }
+              contradicts: { type: string, format: uuid }
+        refusals:
+          type: array
+          description: Per-signal refusals within the same chat turn (FR-010 hybrid gate, unknown category, etc.).
+          items: { $ref: '#/components/schemas/InjectionRefusal' }
+        triggered_sub_agents:
+          type: array
+          description: |
+            Auto-routing fan-out (FR-026 + auto-routing). Cycle 2 / Amendment
+            A2-01 / FR-067 — one entry per ATTEMPTED subscriber (not just
+            successful ones). Each entry carries a `dispatch_status` per
+            pass 2 Q1 (`acknowledged|failed|timed_out`) so the response body
+            and audit envelope share a single byte-equal source of truth
+            (CHK135). See `data-model.md` §11 + `contracts/audit-envelope.md`
+            §3.25 for the canonical schema; ordering is lexicographic by
+            `sub_agent` PascalCase enum value.
+          items:
+            $ref: '#/components/schemas/TriggeredSubAgent'
+        degraded_dispatch:
+          type: boolean
+          default: false
+          description: |
+            Cycle 2 / Amendment A2-01 / pass 2 Q2 — always present (default
+            `false`). Set to `true` when at least one subscriber failed or
+            timed out during fan-out; the response body's
+            `triggered_sub_agents[]` will contain entries with non-
+            `acknowledged` `dispatch_status` AND a corresponding
+            `signal_pipeline.dispatch_failed` audit envelope (entry-25)
+            will be persisted.
+
+    TriggeredSubAgent:
+      type: object
+      description: |
+        Cycle 2 / Amendment A2-01 — single per-subscriber dispatch outcome.
+        `extra="forbid"` (additionalProperties false) and field order is
+        FIXED at `{correlation_id, dispatch_status, sub_agent, trigger_source}`
+        after RFC 8785 JCS canonicalisation per pass 1 Q1. New writes use
+        the 9-name PascalCase `sub_agent` enum (Amendment A2-07 / FR-070);
+        historic kebab-case rows remain readable via the `_KEBAB_TO_PASCAL`
+        shim in `audit_writer.py`.
+      additionalProperties: false
+      required: [sub_agent, trigger_source, correlation_id, dispatch_status]
+      properties:
+        sub_agent:
+          type: string
+          enum: [Comms, Evac, Health, Intel, Logistics, Operations, Planning, Resource, Risk]
+          description: |
+            Cycle 2 / Amendment A2-07 / FR-070 — canonical PascalCase 9-name
+            set replacing the prior 7-name kebab-case enum. Read-time
+            tolerance for historic kebab-case rows is provided by the
+            `_KEBAB_TO_PASCAL` shim in `audit_writer.py`.
+        trigger_source:
+          type: string
+          enum: [subscriber, controller_intent, cascade, lifecycle, primary]
+          description: |
+            - `primary` — Cycle 2 narrowing (data-model §11) for the
+              dispatch_failed envelope. Reflects the original
+              telemetry-injection chat turn (no cascade hop).
+            - `cascade` — sub-agent invoked as part of an FR-057 cascade
+              depth-1 (single-hop) propagation; deeper hops MUST be refused
+              with the `cascade.depth2_refused` audit entry.
+            - `subscriber` / `controller_intent` / `lifecycle` — retained
+              from Cycle 1 for the `injection.success` envelope only.
+        correlation_id:
+          type: string
+          format: uuid
+          description: |
+            Per-subscriber correlation_id (pass 1 Q4) — distinct from the
+            injection-level `injection_correlation_id`. Surfaced as the OTel
+            child span_id (pass 2 Q3) and in audit `customDimensions.correlation_id`.
+        dispatch_status:
+          type: string
+          enum: [acknowledged, failed, timed_out]
+          description: |
+            Cycle 2 / pass 2 Q1 / FR-067 —
+            - `acknowledged` — subscriber returned within
+              `dispatch_ack_timeout_seconds` (5 s);
+            - `failed` — subscriber raised an exception;
+            - `timed_out` — subscriber did not acknowledge within 5 s.
+            Ordered by audit-envelope.md §3.25 — `acknowledged` rows are
+            mirrored into `injection.success`; `failed`/`timed_out` rows
+            trigger a `signal_pipeline.dispatch_failed` envelope (entry-25).
+
+    SignalPipelineDispatchFailedAuditDetails:
+      type: object
+      description: |
+        Cycle 2 / Amendment A2-01 / A2-08 / FR-067 — typed payload of the
+        25th audit envelope `entry_type=signal_pipeline.dispatch_failed`.
+        See `contracts/audit-envelope.md` §3.25 for the binding contract.
+        The `triggered_sub_agents` array is byte-equal (after RFC 8785 JCS
+        canonicalisation) to the HTTP 202 response body's array per pass 1
+        Q1 (CHK135). The `degraded_dispatch_flag` is `true` and
+        `dispatch_ack_timeout_seconds` is `5.0` per pass 2 Q1/Q2 invariants.
+      additionalProperties: false
+      required:
+        - injection_correlation_id
+        - exception_class
+        - exception_message
+        - triggered_sub_agents
+        - partial_successful_subset
+        - failed_subscriber_list
+        - prompt_hash
+        - prompt_hash_source
+        - degraded_dispatch_flag
+        - dispatch_ack_timeout_seconds
+        - request_correlation_id
+      properties:
+        injection_correlation_id: { type: string, format: uuid }
+        exception_class: { type: string, maxLength: 200 }
+        exception_message:
+          type: string
+          maxLength: 1000
+          description: |
+            PII-scrubbed truncated message body (≤1000 chars per
+            audit-envelope.md §3.25).
+        triggered_sub_agents:
+          type: array
+          description: |
+            Cycle 2 / pass 1 Q1 — byte-equal (after RFC 8785 JCS) to the
+            HTTP 202 response body's `triggered_sub_agents` array.
+            Lexicographically ordered by `sub_agent` PascalCase. ONE entry
+            per attempted subscriber.
+          items: { $ref: '#/components/schemas/TriggeredSubAgent' }
+        partial_successful_subset:
+          type: array
+          description: |
+            Derived view — PascalCase `sub_agent` names that acknowledged
+            within `dispatch_ack_timeout_seconds` (forensic-export
+            ergonomic). Source of truth remains the byte-equal
+            `triggered_sub_agents` array.
+          items:
+            type: string
+            enum: [Comms, Evac, Health, Intel, Logistics, Operations, Planning, Resource, Risk]
+        failed_subscriber_list:
+          type: array
+          description: |
+            Derived view — PascalCase `sub_agent` names whose dispatch
+            raised or timed out (forensic-export ergonomic).
+          items:
+            type: string
+            enum: [Comms, Evac, Health, Intel, Logistics, Operations, Planning, Resource, Risk]
+        prompt_hash: { type: string, pattern: '^[a-f0-9]{64}$' }
+        prompt_hash_source:
+          type: string
+          enum: [raw_user_input, canonical_llm_prompt, system_only]
+        degraded_dispatch_flag:
+          type: boolean
+          enum: [true]
+          description: |
+            Always `true` for entry-25 — captures the pass 2 Q2 invariant
+            that any `signal_pipeline.dispatch_failed` envelope reflects a
+            degraded dispatch.
+        dispatch_ack_timeout_seconds:
+          type: number
+          enum: [5.0]
+          description: |
+            Cycle 2 / pass 2 Q1 — `DISPATCH_ACK_TIMEOUT_SECONDS = 5.0`
+            captured for forensic-replay determinism.
+        idempotency_key:
+          type: [string, "null"]
+        request_correlation_id:
+          type: string
+          format: uuid
+
+    InjectionRefusal:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          enum:
+            - life_safety_low_confidence
+            - missing_provenance
+            - unknown_category
+            - malformed_input
+            - pii_detected
+            - thread_cap_exceeded
+            - cascade_depth_exceeded
+            - circuit_open
+        original_text_hash: { type: string, pattern: '^[a-f0-9]{64}$' }
+        parsed_category: { type: string }
+        inferred_confidence: { type: string, enum: [high, medium, low] }
+        clarification_question: { type: string, description: Surfaced to the coordinator UI as the `InjectionRefusalCard` body }
+
+    InjectionRefusalProblem:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetails'
+        - type: object
+          properties:
+            reason: { type: string, enum: [life_safety_low_confidence, missing_provenance, unknown_category, malformed_input, pii_detected, thread_cap_exceeded, cascade_depth_exceeded, circuit_open] }
+            category: { type: string }
+            confidence: { type: string }
+
+    ProblemDetails:
+      type: object
+      description: |
+        RFC 9457 Problem Details for HTTP APIs (successor to RFC 7807, published July
+        2024). Step 8 amendment cycle: bumped from RFC 7807 to RFC 9457 — wire shape
+        is fully backward-compatible; the `type` URI now follows the canonical
+        catalogue at `https://api.platform.example.gov.au/problems/<error-name>`
+        documented in `contracts/error-responses.md`.
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string, description: chat_turn_id or correlation_id }
+
+    LifecycleStateConflictProblem:
+      description: |
+        RFC 9457 problem detail for lifecycle-state conflicts (HTTP 409). Emitted on
+        pause/resume/abort attempts that conflict with the current sim state, AND on
+        injection attempts while paused (which are NOT cached per pass 2 Q7). See
+        `contracts/error-responses.md` § lifecycle-state-conflict.
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetails'
+        - type: object
+          required: [current_state, attempted_action]
+          properties:
+            type:
+              type: string
+              const: 'https://api.platform.example.gov.au/problems/lifecycle-state-conflict'
+            current_state: { type: string, enum: [active, paused, ended] }
+            attempted_action: { type: string, enum: [pause, resume, abort, inject_telemetry, sub_agent_invocation, chat_turn] }
+            idempotency_key: { type: [string, 'null'] }
+            request_correlation_id: { type: string, format: uuid }
+
+    IdempotencyKeyConflictProblem:
+      description: |
+        RFC 9457 problem detail for idempotency body-hash conflicts (HTTP 422). Emitted
+        when an Idempotency-Key was previously used with a DIFFERENT canonicalised body
+        (RFC 8785 JCS). See `contracts/error-responses.md` § idempotency-key-conflict
+        and `contracts/idempotency-cache.md` § conflict-detection.
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetails'
+        - type: object
+          required: [idempotency_key, cached_body_hash, request_body_hash]
+          properties:
+            type:
+              type: string
+              const: 'https://api.platform.example.gov.au/problems/idempotency-key-conflict'
+            idempotency_key: { type: string }
+            cached_body_hash: { type: string, pattern: '^[a-f0-9]{64}$' }
+            request_body_hash: { type: string, pattern: '^[a-f0-9]{64}$' }
+            cached_at: { type: string, format: date-time }
+
+    EvidenceIntegrityWarningProblem:
+      description: |
+        RFC 9457 problem detail for FR-048 sequence-uncertainty fail-closed responses
+        (HTTP 503 + `Retry-After: 5`). The originating request was NOT processed; an
+        `audit.sequence.uncertainty` DLQ entry is queued for operator review per
+        ADR-036-007 § 4. See `contracts/error-responses.md` § evidence-integrity-warning.
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetails'
+        - type: object
+          required: [uncertainty_reason, dlq_correlation_id]
+          properties:
+            type:
+              type: string
+              const: 'https://api.platform.example.gov.au/problems/evidence-integrity-warning'
+            status: { const: 503 }
+            uncertainty_reason: { type: string, enum: [etag_exhausted, counter_unreachable, replica_partition] }
+            dlq_correlation_id: { type: string, format: uuid }
+            retry_after_seconds: { type: integer, const: 5 }
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: |
+        Optional FR-066 / pass 2 Q7 idempotency token. Server caches the response
+        for 24 h keyed on `(sim_id, verb, route, idempotency_key)`. Replays with the
+        SAME canonicalised body return the cached response with header
+        `Idempotency-Replay: true`. Replays with a DIFFERENT canonicalised body
+        produce HTTP 422 `idempotency-key-conflict`. Lifecycle-state-conflict 409
+        responses are NOT cached so a fresh request body is serviced cleanly on
+        resume. See `contracts/idempotency-cache.md`.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 256
+        pattern: '^[A-Za-z0-9_\-:.]+$'
+
+  responses:
+    Forbidden:
+      description: Caller lacks the required Entra app role for this surface.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    NotFound:
+      description: Simulation not found or caller is not a member of its tenant.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    IdempotencyKeyConflict:
+      description: |
+        Idempotency-Key body-hash conflict (HTTP 422). The same key was previously
+        used with a different canonicalised body. See
+        `contracts/idempotency-cache.md` § conflict-detection.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/IdempotencyKeyConflictProblem' }
+    EvidenceIntegrityWarning:
+      description: |
+        FR-048 sequence-uncertainty fail-closed response (HTTP 503 + Retry-After: 5).
+        The originating request was NOT processed; an `audit.sequence.uncertainty`
+        DLQ entry is queued for operator review per ADR-036-007.
+      headers:
+        Retry-After:
+          schema: { type: integer, const: 5 }
+          description: Per ADR-036-007 § 4 — caller should retry once after 5 s.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/EvidenceIntegrityWarningProblem' }

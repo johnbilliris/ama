@@ -20,6 +20,7 @@ def test_tool_allow_list_is_closed():
     assert not is_allowed("send_real_sms")
     assert not is_allowed("drop_database")
     assert ALLOW_LIST == {
+        # Spec-024 base set
         "seed_scenario",
         "query_sub_agent",
         "draft_warning_sim",
@@ -28,6 +29,10 @@ def test_tool_allow_list_is_closed():
         "resume",
         "stop",
         "list_participants",
+        # Spec-036 lifecycle additions (FR-059) — pause/resume/inject_telemetry
+        "pause_simulation",
+        "resume_simulation",
+        "inject_telemetry",
     }
 
 

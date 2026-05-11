@@ -1,0 +1,16 @@
+{
+  "_meta": {
+    "spec": "036",
+    "task": "T-W02",
+    "purpose": "Map AU jurisdiction → ordered priority locale list, used by the FR-058 + FR-064 3-step fallback (request_locale → jurisdiction_priority_locale → en-AU). Each list MUST be non-empty and SHOULD list the jurisdiction's most-spoken-CALD locales after en-AU. NT MUST include at least one NT/Aboriginal locale per CHK020."
+  },
+  "AU": ["en-AU", "vi", "zh-Hans", "ar", "el", "it", "tl"],
+  "NSW": ["en-AU", "zh-Hans", "ar", "vi", "el", "ko", "yue"],
+  "VIC": ["en-AU", "zh-Hans", "vi", "el", "it", "ar", "yue"],
+  "QLD": ["en-AU", "zh-Hans", "vi", "tl", "ko", "pa"],
+  "WA": ["en-AU", "zh-Hans", "vi", "ar", "tl", "it"],
+  "SA": ["en-AU", "el", "it", "vi", "zh-Hans", "ar"],
+  "TAS": ["en-AU", "zh-Hans", "vi", "de", "tl"],
+  "NT": ["en-AU", "rop", "yij", "wbp", "pjt", "tcs", "tl"],
+  "ACT": ["en-AU", "zh-Hans", "hi", "vi", "ko", "ar"]
+}

@@ -1,0 +1,224 @@
+[
+  {
+    "bcp47": "en-AU",
+    "display_name": "English (Australia)",
+    "fallback_chain": ["en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"]
+  },
+  {
+    "bcp47": "en",
+    "display_name": "English",
+    "fallback_chain": ["en", "en-AU"],
+    "jurisdictions": ["AU"]
+  },
+  {
+    "bcp47": "vi",
+    "display_name": "Vietnamese",
+    "fallback_chain": ["vi", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC", "QLD"]
+  },
+  {
+    "bcp47": "zh-Hans",
+    "display_name": "Chinese (Simplified)",
+    "fallback_chain": ["zh-Hans", "zh", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC", "QLD", "WA"]
+  },
+  {
+    "bcp47": "zh-Hant",
+    "display_name": "Chinese (Traditional)",
+    "fallback_chain": ["zh-Hant", "zh", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC"]
+  },
+  {
+    "bcp47": "yue",
+    "display_name": "Cantonese",
+    "fallback_chain": ["yue", "zh-Hant", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC"]
+  },
+  {
+    "bcp47": "ar",
+    "display_name": "Arabic",
+    "fallback_chain": ["ar", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC", "WA"]
+  },
+  {
+    "bcp47": "hi",
+    "display_name": "Hindi",
+    "fallback_chain": ["hi", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC", "ACT"]
+  },
+  {
+    "bcp47": "pa",
+    "display_name": "Punjabi",
+    "fallback_chain": ["pa", "hi", "en-AU"],
+    "jurisdictions": ["AU", "VIC", "NSW", "QLD"]
+  },
+  {
+    "bcp47": "bn",
+    "display_name": "Bengali",
+    "fallback_chain": ["bn", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC"]
+  },
+  {
+    "bcp47": "ur",
+    "display_name": "Urdu",
+    "fallback_chain": ["ur", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC"]
+  },
+  {
+    "bcp47": "ta",
+    "display_name": "Tamil",
+    "fallback_chain": ["ta", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC"]
+  },
+  {
+    "bcp47": "el",
+    "display_name": "Greek",
+    "fallback_chain": ["el", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC", "SA"]
+  },
+  {
+    "bcp47": "it",
+    "display_name": "Italian",
+    "fallback_chain": ["it", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC", "SA"]
+  },
+  {
+    "bcp47": "es",
+    "display_name": "Spanish",
+    "fallback_chain": ["es", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC", "QLD"]
+  },
+  {
+    "bcp47": "pt",
+    "display_name": "Portuguese",
+    "fallback_chain": ["pt", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC"]
+  },
+  {
+    "bcp47": "fr",
+    "display_name": "French",
+    "fallback_chain": ["fr", "en-AU"],
+    "jurisdictions": ["AU"]
+  },
+  {
+    "bcp47": "de",
+    "display_name": "German",
+    "fallback_chain": ["de", "en-AU"],
+    "jurisdictions": ["AU"]
+  },
+  {
+    "bcp47": "tl",
+    "display_name": "Tagalog (Filipino)",
+    "fallback_chain": ["tl", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC", "QLD"]
+  },
+  {
+    "bcp47": "id",
+    "display_name": "Indonesian",
+    "fallback_chain": ["id", "en-AU"],
+    "jurisdictions": ["AU", "NT", "WA"]
+  },
+  {
+    "bcp47": "ms",
+    "display_name": "Malay",
+    "fallback_chain": ["ms", "id", "en-AU"],
+    "jurisdictions": ["AU", "WA"]
+  },
+  {
+    "bcp47": "th",
+    "display_name": "Thai",
+    "fallback_chain": ["th", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC"]
+  },
+  {
+    "bcp47": "km",
+    "display_name": "Khmer",
+    "fallback_chain": ["km", "en-AU"],
+    "jurisdictions": ["AU", "VIC", "NSW"]
+  },
+  {
+    "bcp47": "lo",
+    "display_name": "Lao",
+    "fallback_chain": ["lo", "th", "en-AU"],
+    "jurisdictions": ["AU", "VIC", "NSW"]
+  },
+  {
+    "bcp47": "ko",
+    "display_name": "Korean",
+    "fallback_chain": ["ko", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC", "QLD"]
+  },
+  {
+    "bcp47": "ja",
+    "display_name": "Japanese",
+    "fallback_chain": ["ja", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "QLD"]
+  },
+  {
+    "bcp47": "tr",
+    "display_name": "Turkish",
+    "fallback_chain": ["tr", "en-AU"],
+    "jurisdictions": ["AU", "VIC", "NSW"]
+  },
+  {
+    "bcp47": "fa",
+    "display_name": "Persian (Farsi)",
+    "fallback_chain": ["fa", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC"]
+  },
+  {
+    "bcp47": "prs",
+    "display_name": "Dari",
+    "fallback_chain": ["prs", "fa", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC"]
+  },
+  {
+    "bcp47": "ps",
+    "display_name": "Pashto",
+    "fallback_chain": ["ps", "en-AU"],
+    "jurisdictions": ["AU", "NSW", "VIC"]
+  },
+  {
+    "bcp47": "so",
+    "display_name": "Somali",
+    "fallback_chain": ["so", "en-AU"],
+    "jurisdictions": ["AU", "VIC", "NSW"]
+  },
+  {
+    "bcp47": "rop",
+    "display_name": "Kriol (Roper River)",
+    "fallback_chain": ["rop", "en-AU"],
+    "jurisdictions": ["AU", "NT", "WA", "QLD"]
+  },
+  {
+    "bcp47": "yij",
+    "display_name": "Yolŋu Matha",
+    "fallback_chain": ["yij", "rop", "en-AU"],
+    "jurisdictions": ["AU", "NT"]
+  },
+  {
+    "bcp47": "wbp",
+    "display_name": "Warlpiri",
+    "fallback_chain": ["wbp", "rop", "en-AU"],
+    "jurisdictions": ["AU", "NT"]
+  },
+  {
+    "bcp47": "pjt",
+    "display_name": "Pitjantjatjara",
+    "fallback_chain": ["pjt", "en-AU"],
+    "jurisdictions": ["AU", "NT", "SA", "WA"]
+  },
+  {
+    "bcp47": "aer",
+    "display_name": "Arrernte (Eastern)",
+    "fallback_chain": ["aer", "en-AU"],
+    "jurisdictions": ["AU", "NT"]
+  },
+  {
+    "bcp47": "tcs",
+    "display_name": "Torres Strait Creole",
+    "fallback_chain": ["tcs", "en-AU"],
+    "jurisdictions": ["AU", "QLD"]
+  }
+]

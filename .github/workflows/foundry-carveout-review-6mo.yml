@@ -1,0 +1,70 @@
+name: Foundry Carve-out Registry Review (6-Month Cadence)
+
+# T-K07 / FR-002 governance gate — fails the build if any entry in
+# data/governance/foundry_carveout_registry.json has a review_date that
+# is more than 6 months in the future or already in the past.
+#
+# Constitution v1.2.0 §Non-Negotiable #2: every Foundry carve-out (non-
+# AU model deployment) MUST be re-reviewed within 6 months of its prior
+# review. The registry is the single source of truth.
+
+on:
+  schedule:
+    - cron: "0 0 1 * *"  # midnight on the 1st of every month
+  pull_request:
+    paths:
+      - "data/governance/foundry_carveout_registry.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  review-window:
+    name: Review window check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify carve-out registry review dates
+        shell: bash
+        run: |
+          python <<'PYEOF'
+          import json, sys
+          from datetime import date, timedelta
+
+          REGISTRY = "data/governance/foundry_carveout_registry.json"
+          with open(REGISTRY, encoding="utf-8") as f:
+              registry = json.load(f)
+
+          today = date.today()
+          horizon = today + timedelta(days=183)  # ~6 months
+
+          failures: list[str] = []
+          for entry in registry.get("entries", []):
+              review_str = entry.get("review_date")
+              if not review_str:
+                  failures.append(f"{entry.get('id')}: missing review_date")
+                  continue
+              try:
+                  review = date.fromisoformat(review_str)
+              except ValueError:
+                  failures.append(f"{entry.get('id')}: invalid review_date {review_str!r}")
+                  continue
+              if review < today:
+                  failures.append(
+                      f"{entry.get('id')}: review_date {review_str} has elapsed"
+                  )
+                  continue
+              if review > horizon:
+                  failures.append(
+                      f"{entry.get('id')}: review_date {review_str} exceeds the 6-month horizon ({horizon})"
+                  )
+
+          if failures:
+              print("Carve-out registry review failures:")
+              for fail in failures:
+                  print(f"  - {fail}")
+              sys.exit(1)
+          print("All carve-out review_date entries are within the 6-month window.")
+          PYEOF

@@ -15,5 +15,32 @@
       "platform-architect@ama.local"
     ],
     "notes": "Used by ingestion + RAG pipeline. Re-confirmed at spec-035 capstone closure (PR #75) on 2026-05-07."
+  },
+  {
+    "model_id": "azure-openai-gpt-4o-mini-2024-07-18-australiaeast",
+    "review_date": "2026-05-08T00:00:00+00:00",
+    "approver_identities": [
+      "platform-architect@ama.local",
+      "chief-data-officer@ama.local"
+    ],
+    "notes": "Spec 036 telemetry-injection prompt template (apps/agents/simulation_telemetry_injection/prompt.md) plus comm/plan/res/mon adapter prompts. AU East, 150K TPM, plan-decision #11/12. Constitution v1.2.0 §NN-2 honoured; T-K07 enforces 6-month review cadence."
+  },
+  {
+    "model_id": "azure-openai-gpt-4o-2024-11-20-eastus2-fallback",
+    "review_date": "2026-05-08T00:00:00+00:00",
+    "approver_identities": [
+      "platform-architect@ama.local",
+      "security-architect@ama.local"
+    ],
+    "notes": "Carve-out: eastus2 fallback for gpt-4o (risk_assessment + evacuation) when AU East TPM is exhausted. Activated only via `controller_service.foundry_failover()`; emits `sub_agent.degraded` audit on every call. Constitution NN-2 carve-out documented in ADR-036-003."
+  },
+  {
+    "model_id": "spec-036-prompt-hash-invariants",
+    "review_date": "2026-05-08T00:00:00+00:00",
+    "approver_identities": [
+      "platform-architect@ama.local"
+    ],
+    "notes": "Sentinel entry: pins the canonical-JSON serialization rules (sort_keys=True, separators=(',', ':')) used by `apps/agents/common/llm_mixin.compute_prompt_hash`. Any change to the hashing algorithm requires regenerating every existing prompt_hash and updating this entry."
   }
 ]
+

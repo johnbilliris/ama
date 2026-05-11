@@ -1,0 +1,63 @@
+# Watermark text + chat-receipt prefix table (T-F01 / FR-039 / FR-035 / Constitution NN-5)
+# ----------------------------------------------------------------------------
+# This YAML table defines two distinct strings per locale:
+#   1. ``chat_receipt_prefix`` — the [SIMULATION] prefix attached to chat
+#      receipts and communication-agent replies (FR-035 / FR-040).
+#   2. ``public_warning_watermark`` — the SIMULATION — DO NOT DISTRIBUTE
+#      watermark embedded in every public-warning artefact (FR-039).
+#
+# The MVP minimum delivered set covers en-AU + zh-Hans + ar + vi + hi + el +
+# it + tl + zh-Hant + tr + id (per spec Assumption A11). The remaining ~30
+# CALD locales are tracked in docs/runbooks/cald-locale-backlog.md and a
+# missing-locale lookup falls back to en-AU with a typed
+# audit.watermark.locale_missing entry per T-F05 / audit-envelope §3.14.
+#
+# Locale codes are validated against IANA BCP-47 — `id` resolves to
+# Indonesian and `tr` to Turkish; the previous draft cross-pollinated the
+# two, which is corrected here.
+
+en-AU:
+  chat_receipt_prefix: "[SIMULATION]"
+  public_warning_watermark: "SIMULATION — DO NOT DISTRIBUTE"
+
+zh-Hans:
+  chat_receipt_prefix: "[模拟]"
+  public_warning_watermark: "模拟 — 不得分发"
+
+zh-Hant:
+  chat_receipt_prefix: "[模擬]"
+  public_warning_watermark: "模擬 — 不得分發"
+
+ar:
+  chat_receipt_prefix: "[محاكاة]"
+  public_warning_watermark: "محاكاة — لا يجوز التوزيع"
+
+vi:
+  chat_receipt_prefix: "[MÔ PHỎNG]"
+  public_warning_watermark: "MÔ PHỎNG — KHÔNG PHÂN PHỐI"
+
+hi:
+  chat_receipt_prefix: "[सिमुलेशन]"
+  public_warning_watermark: "सिमुलेशन — वितरण न करें"
+
+el:
+  chat_receipt_prefix: "[ΠΡΟΣΟΜΟΙΩΣΗ]"
+  public_warning_watermark: "ΠΡΟΣΟΜΟΙΩΣΗ — ΜΗ ΔΙΑΝΕΜΕΤΑΙ"
+
+it:
+  chat_receipt_prefix: "[SIMULAZIONE]"
+  public_warning_watermark: "SIMULAZIONE — NON DISTRIBUIRE"
+
+tl:
+  chat_receipt_prefix: "[SIMULASYON]"
+  public_warning_watermark: "SIMULASYON — HUWAG IPAMAHAGI"
+
+# Turkish — independent locale; do NOT conflate with id (Indonesian).
+tr:
+  chat_receipt_prefix: "[SİMÜLASYON]"
+  public_warning_watermark: "SİMÜLASYON — DAĞITMAYIN"
+
+# Indonesian — independent locale.
+id:
+  chat_receipt_prefix: "[SIMULASI]"
+  public_warning_watermark: "SIMULASI — TIDAK UNTUK DISEBARKAN"

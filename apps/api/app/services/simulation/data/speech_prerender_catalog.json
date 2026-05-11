@@ -1,0 +1,194 @@
+[
+  {
+    "bcp47": "en-AU",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/en-AU/simulation_watermark.mp3",
+    "staging_promotion_blocker": false,
+    "notes": "Anchor locale — always available."
+  },
+  {
+    "bcp47": "en",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/en/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "vi",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/vi/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "zh-Hans",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/zh-Hans/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "zh-Hant",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/zh-Hant/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "yue",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/yue/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "ar",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/ar/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "hi",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/hi/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "pa",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/pa/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "bn",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/bn/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "ur",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/ur/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "ta",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/ta/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "el",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/el/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "it",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/it/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "es",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/es/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "pt",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/pt/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "fr",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/fr/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "de",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/de/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "tl",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/tl/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "id",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/id/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "ms",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/ms/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "th",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/th/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "km",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/km/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "lo",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/lo/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "ko",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/ko/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "ja",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/ja/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "tr",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/tr/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "fa",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/fa/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "prs",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/prs/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "ps",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/ps/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "so",
+    "mp3_pointer": "https://amasimstg.blob.core.windows.net/speech-prerender/so/simulation_watermark.mp3",
+    "staging_promotion_blocker": false
+  },
+  {
+    "bcp47": "rop",
+    "mp3_pointer": null,
+    "staging_promotion_blocker": true,
+    "notes": "Kriol — NT/Aboriginal expansion backlog; CALD-listener pathway falls back to en-AU per CHK023."
+  },
+  {
+    "bcp47": "yij",
+    "mp3_pointer": null,
+    "staging_promotion_blocker": true,
+    "notes": "Yolŋu Matha — NT/Aboriginal expansion backlog; CHK023."
+  },
+  {
+    "bcp47": "wbp",
+    "mp3_pointer": null,
+    "staging_promotion_blocker": true,
+    "notes": "Warlpiri — NT/Aboriginal expansion backlog; CHK023."
+  },
+  {
+    "bcp47": "pjt",
+    "mp3_pointer": null,
+    "staging_promotion_blocker": true,
+    "notes": "Pitjantjatjara — NT/Aboriginal expansion backlog; CHK023."
+  },
+  {
+    "bcp47": "aer",
+    "mp3_pointer": null,
+    "staging_promotion_blocker": true,
+    "notes": "Arrernte (Eastern) — NT/Aboriginal expansion backlog; CHK023."
+  },
+  {
+    "bcp47": "tcs",
+    "mp3_pointer": null,
+    "staging_promotion_blocker": true,
+    "notes": "Torres Strait Creole — Aboriginal expansion backlog; CHK023."
+  }
+]

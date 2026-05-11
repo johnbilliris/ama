@@ -113,5 +113,9 @@ class TestReproducibility:
     def test_input_snapshot_captures_inventory_hash(self):
         pipeline = _make_pipeline(_make_inventory())
         plan = pipeline.process_handoff(_make_handoff())
-        assert plan.input_snapshot.inventory_snapshot_hash != ""
-        assert len(plan.input_snapshot.inventory_snapshot_hash) > 0
+        # T-AA06 — replace ``len(...) > 0`` with explicit SHA-256
+        # contract: must be 64 hex chars (canonical hash length).
+        h = plan.input_snapshot.inventory_snapshot_hash
+        assert h != ""
+        assert len(h) == 64, f"expected 64-char SHA-256 hex, got {len(h)}"
+        assert all(c in "0123456789abcdef" for c in h.lower())

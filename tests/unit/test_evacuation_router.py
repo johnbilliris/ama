@@ -29,7 +29,12 @@ class TestDijkstraShortestPath:
         """Should find at least one route from a zone node to an assembly area."""
         # Find an assembly area node
         aa_node_ids = loaded_network.get_assembly_area_node_ids()
-        assert len(aa_node_ids) > 0
+        # T-AA06 — replace ``len(...) > 0`` with explicit invariant:
+        # a road network with no assembly areas is unusable for the
+        # evacuation router, so the loader MUST provide ≥1.
+        assert len(aa_node_ids) >= 1, (
+            "loaded network has zero assembly-area nodes — router cannot run"
+        )
 
         # Pick a non-assembly-area node as origin
         all_nodes = loaded_network.get_all_nodes()
@@ -46,7 +51,10 @@ class TestDijkstraShortestPath:
             population=1000,
             hazard_type="bushfire",
         )
-        assert len(routes) > 0
+        # T-AA06 — explicit boundary: at least one route must exist OR
+        # the test fixture is broken. Carry origin id in the assertion
+        # message for diagnostics.
+        assert len(routes) >= 1, f"no routes computed from origin {origin}"
 
     def test_route_has_positive_distance(self, loaded_network, route_computer):
         aa_node_ids = loaded_network.get_assembly_area_node_ids()

@@ -65,3 +65,30 @@ deny contains msg if {
     not startswith(input.event.channel, input.principal.tenant_scope)
     msg := "Event channel must be scoped to the tenant."
 }
+
+# ── Spec 036 — Simulation Cosmos containers whitelist (FR-016, FR-050) ──
+#
+# These containers are tenant-scoped via `/simulationId` partition keys; their
+# names appear here so cross-container reads/writes that miss the partition
+# check fall through to the standard tenant-isolation deny rules.
+
+simulation_cosmos_containers := {
+    "simulation_synthetic_signals",
+    "sub_agent_invocation_records",
+    "simulation_threads",
+    "exercise_outcome_index",
+    "routing_decisions",
+    "simulation_audit_entries",
+    "simulation_audit_max_seq",
+}
+
+deny contains msg if {
+    input.action in {"read", "write"}
+    input.storage.container in simulation_cosmos_containers
+    input.storage.partition_key
+    input.storage.partition_key != input.principal.simulation_id
+    msg := sprintf(
+        "Simulation container '%s' partition key must equal principal.simulation_id (got '%s' vs '%s').",
+        [input.storage.container, input.storage.partition_key, input.principal.simulation_id],
+    )
+}

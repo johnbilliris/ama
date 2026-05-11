@@ -9,8 +9,13 @@ import {
   type ChatEvent,
   type SimChatTurn,
 } from "@/lib/api/simulation_chat";
+import type {
+  SubAgentReplyEvent,
+  SubAgentRole,
+} from "@/lib/sse";
+import { SimBadge } from "@/components/SimBadge";
 
-type Role = "user" | "assistant";
+type Role = "user" | "assistant" | "sub_agent";
 
 interface ChatMessage {
   id: string;
@@ -19,6 +24,10 @@ interface ChatMessage {
   toolCalls?: { name: string; arguments: Record<string, unknown> }[];
   card?: Record<string, unknown>;
   refused?: boolean;
+  /** Spec-036 T-I01 — sub-agent role pill (FR-026). */
+  subAgentRole?: SubAgentRole;
+  /** Spec-036 T-I01 — prompt-hash badge (governance). */
+  promptHash?: string;
 }
 
 export function SimulationChatPane({
@@ -249,6 +258,7 @@ export function SimulationChatPane({
 
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
+  const isSubAgent = message.role === "sub_agent";
   // iMessage-style alignment: the operator's own messages hug the RIGHT
   // edge (outgoing blue bubbles), assistant replies hug the LEFT edge
   // (incoming grey bubbles). We set text-align both via utility class AND
@@ -265,19 +275,42 @@ function MessageBubble({ message }: { message: ChatMessage }) {
     "inline-block max-w-[85%] rounded-lg px-3 py-2 text-left " +
     (isUser
       ? "whitespace-pre-wrap bg-blue-600 text-white"
-      : message.refused
-        ? "whitespace-pre-wrap bg-amber-100 text-amber-900"
-        : "sim-chat-markdown bg-gray-100 text-gray-900");
+      : isSubAgent
+        ? "sim-chat-markdown bg-violet-50 text-violet-900 ring-1 ring-violet-200"
+        : message.refused
+          ? "whitespace-pre-wrap bg-amber-100 text-amber-900"
+          : "sim-chat-markdown bg-gray-100 text-gray-900");
   return (
-    <div className={alignClass} style={alignStyle}>
+    <div className={alignClass} style={alignStyle} data-testid={isSubAgent ? "sub-agent-message" : undefined}>
+      {isSubAgent && message.subAgentRole && (
+        <div className="mb-1 flex items-center gap-1.5">
+          <SimBadge size="sm" />
+          <span
+            role="img"
+            aria-label={`Sub-agent role: ${message.subAgentRole}`}
+            data-testid="sub-agent-role-pill"
+            className="rounded-full bg-violet-200 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-900"
+          >
+            {message.subAgentRole}
+          </span>
+          {message.promptHash && (
+            <span
+              data-testid="sub-agent-prompt-hash"
+              aria-label={`Prompt hash: ${message.promptHash}`}
+              className="rounded bg-violet-100 px-1.5 py-0.5 font-mono text-[10px] text-violet-700"
+              title={`Prompt hash: ${message.promptHash}`}
+            >
+              {message.promptHash.slice(0, 8)}
+            </span>
+          )}
+        </div>
+      )}
       <div className={bubbleClass} style={{ textAlign: "left" }}>
         {message.content ? (
           isUser ? (
             message.content
           ) : (
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {message.content}
-            </ReactMarkdown>
+            <SimulationMarkdown markdown={message.content} />
           )
         ) : (
           <span className="text-gray-400">…</span>
@@ -300,6 +333,38 @@ function MessageBubble({ message }: { message: ChatMessage }) {
           </span>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Spec-036 T-I01 — Markdown renderer that highlights every `[SIMULATION] `
+ * prefix in red bold so operators can never mistake an exercise reply for
+ * a real-world action. Splits on the literal token, leaving the rest of
+ * the message to the existing ReactMarkdown pipeline.
+ */
+function SimulationMarkdown({ markdown }: { markdown: string }) {
+  const PREFIX = "[SIMULATION] ";
+  if (!markdown.includes(PREFIX)) {
+    return (
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        {markdown}
+      </ReactMarkdown>
+    );
+  }
+  // Strip the prefix from the markdown body and surface it as a styled
+  // pill so it can't be lost under aggressive markdown formatting.
+  const stripped = markdown.replaceAll(PREFIX, "");
+  return (
+    <div data-testid="simulation-markdown">
+      <span
+        data-testid="simulation-prefix-emphasis"
+        className="mr-1 font-bold uppercase tracking-wide text-red-700"
+        aria-label="Simulation watermark"
+      >
+        {PREFIX.trim()}
+      </span>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{stripped}</ReactMarkdown>
     </div>
   );
 }
@@ -371,6 +436,29 @@ function applyEvent(
     setMessages((prev) =>
       prev.map((m) => (m.id === assistantId ? { ...m, card: ev.data } : m)),
     );
+  } else if (
+    // Spec-036 T-I01 — sub_agent.* SSE event surface (FR-005 / FR-026).
+    // The event name is conveyed via the SSE `event:` field but `streamChat`
+    // currently types it as a closed string union; we widen the comparison
+    // against the runtime string so newly-introduced event names route here
+    // without requiring a redeploy of `simulation_chat.ts`.
+    (ev.event as string) === "sub_agent.reply"
+  ) {
+    const data = ev.data as Partial<SubAgentReplyEvent>;
+    const id = String(data.thread_id ?? `sub-agent-${Date.now()}`);
+    const content = String(data.reply_markdown ?? "");
+    const role = String(data.role ?? "decision-support") as SubAgentRole;
+    const promptHash = data.prompt_hash ? String(data.prompt_hash) : undefined;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id,
+        role: "sub_agent",
+        content,
+        subAgentRole: role,
+        promptHash,
+      },
+    ]);
   } else if (ev.event === "turn.end") {
     if (ev.data.refused) {
       setMessages((prev) =>
@@ -390,6 +478,16 @@ function applyEvent(
     );
   }
 }
+
+/**
+ * Test-only export — lets unit tests drive `applyEvent` against a stub
+ * `setMessages` reducer without spinning up the full streaming pipeline.
+ */
+export const __testables = {
+  applyEvent,
+  SimulationMarkdown,
+  MessageBubble,
+};
 
 // Friendly copy shown to coordinators in staging/production. The raw technical
 // payload (Azure OpenAI JSON, stack traces) is only useful while developing and

@@ -1,0 +1,323 @@
+openapi: 3.1.0
+info:
+  title: Simulation API — Feature 036 extensions
+  description: |
+    Extends the spec 024 simulation chat API with the new `inject_telemetry` tool,
+    the direct-REST lifecycle verbs (`abort`, plus `pause`/`resume` parity),
+    SSE map-overlay event types, and RFC 7807 Problem Details for injection refusals.
+
+    This file is a delta over `packages/schemas/openapi.yaml`. Land it via PR by
+    merging the new operations and components into the master OpenAPI document.
+  version: 0.1.0
+  contact:
+    name: Simulation Platform Team
+servers:
+  - url: https://api.platform.example.gov.au
+    description: Australia East production
+security:
+  - aadJwt: []
+tags:
+  - name: simulation
+    description: Simulation lifecycle and telemetry injection
+  - name: simulation-controller-tools
+    description: Controller LLM tool surface (server-side allow-list)
+paths:
+  /api/simulations/{simId}/abort:
+    post:
+      operationId: abortSimulation
+      tags: [simulation]
+      summary: |
+        Direct-REST abort surface (FR-059, ADR-036-002). Bypasses the LLM tool-loop
+        for safety-criticality. Cancels in-flight sub-agent invocations, transitions
+        the sim to `ended` with `end_reason: aborted`, and triggers FR-054
+        lessons-capture automatically.
+      description: |
+        Constitution Principle I (primacy of life) requires this surface to be
+        unambiguous and immune to LLM jailbreak or confusion. Direct REST endpoint
+        bypasses the LLM tool-loop. Requires `Simulation.Coordinator` Entra app role.
+      security:
+        - aadJwt: [Simulation.Coordinator]
+      parameters:
+        - in: path
+          name: simId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, maxLength: 500 }
+      responses:
+        '200':
+          description: Abort succeeded; lessons-capture initiated.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [aborted, cancelled_invocations, lessons_capture_started, abort_audit_id]
+                properties:
+                  aborted: { const: true }
+                  cancelled_invocations: { type: integer, minimum: 0, description: Count of in-flight sub-agent invocations cancelled }
+                  lessons_capture_started: { const: true }
+                  abort_audit_id: { type: string, format: uuid }
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Simulation not in a cancellable state.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/simulations/{simId}/pause:
+    post:
+      operationId: pauseSimulation
+      tags: [simulation]
+      summary: |
+        Direct-REST pause surface (FR-059). Mirrors the `pause` Controller tool;
+        either path produces identical server-side behaviour. Requires
+        `Simulation.Coordinator` role.
+      security:
+        - aadJwt: [Simulation.Coordinator]
+      parameters:
+        - in: path
+          name: simId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Sim transitioned to `paused`.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [state]
+                properties:
+                  state: { const: paused }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: Sim not in `active` state.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+
+  /api/simulations/{simId}/resume:
+    post:
+      operationId: resumeSimulation
+      tags: [simulation]
+      summary: Direct-REST resume surface (FR-059). Returns sim to `active`. Deferred cascade hops are NOT auto-replayed (per A12 / FR-057).
+      security:
+        - aadJwt: [Simulation.Coordinator]
+      parameters:
+        - in: path
+          name: simId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Sim transitioned to `active`.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [state]
+                properties:
+                  state: { const: active }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: Sim not in `paused` state.
+
+  /api/simulations/{simId}/inject-telemetry:
+    post:
+      operationId: injectTelemetry
+      tags: [simulation]
+      summary: |
+        Server-side direct-REST entry point for telemetry injection. Most coordinator
+        injections are routed via the chat-turn pipeline (Controller invokes the
+        `inject_telemetry` tool against the `simulation-telemetry-injection` agent).
+        This direct endpoint exists for testing and for non-chat clients.
+      description: |
+        Note: even direct-REST injections traverse the same server-side pipeline as
+        chat-driven injections — the FR-009 success-budget, the FR-009 parse-attempt
+        circuit-breaker, FR-010 hybrid life-safety gate, and the FR-007 citation
+        tenant-isolation policies all apply.
+      security:
+        - aadJwt: [Simulation.Coordinator]
+      parameters:
+        - in: path
+          name: simId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TelemetryInjectionRequest' }
+      responses:
+        '200':
+          description: Injection accepted (one or more signals).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TelemetryInjectionAck' }
+        '400':
+          description: Refused — see `reason` in the Problem Details extension.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/InjectionRefusalProblem' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '429':
+          description: Rate-limited (success budget) or circuit-breaker tripped.
+          content:
+            application/problem+json:
+              schema: { $ref: '#/components/schemas/InjectionRefusalProblem' }
+
+  /api/simulations/{simId}/events:
+    get:
+      operationId: streamSimulationEvents
+      tags: [simulation]
+      summary: |
+        Server-Sent Events stream for the simulation. Emits chat deltas (existing
+        spec 024) plus the new `map.overlay.*` event types (this feature). See
+        contracts/sse-map-overlay.md for the full closed set of event types.
+      security:
+        - aadJwt: [Simulation.Coordinator, Simulation.Observer]
+      parameters:
+        - in: path
+          name: simId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: SSE stream (`text/event-stream`).
+          content:
+            text/event-stream:
+              schema: { type: string, description: See contracts/sse-map-overlay.md for typed event definitions }
+
+components:
+  securitySchemes:
+    aadJwt:
+      type: oauth2
+      description: |
+        Microsoft Entra ID JWT. Required app roles per operation:
+        `Simulation.Coordinator` for write/lifecycle paths; `Simulation.Observer`
+        for read paths. AAD-only — no API key, no service principal secret in
+        request paths.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://login.microsoftonline.com/common/oauth2/v2.0/authorize
+          tokenUrl: https://login.microsoftonline.com/common/oauth2/v2.0/token
+          scopes:
+            Simulation.Coordinator: Inject telemetry, invoke sub-agents via chat, lifecycle verbs.
+            Simulation.Observer: Read chat transcript, telemetry timeline, map overlays.
+
+  schemas:
+    TelemetryInjectionRequest:
+      type: object
+      required: [chat_text]
+      properties:
+        chat_text:
+          type: string
+          minLength: 1
+          maxLength: 4000
+          description: |
+            Free-text coordinator input. Pre-LLM PII scrubber (Azure AI Content
+            Safety) runs server-side before any LLM call.
+        viewport_hint:
+          type: object
+          description: |
+            Advisory only. Server re-runs centroid → jurisdiction lookup against
+            the authoritative jurisdiction-boundary dataset; mismatches produce
+            a `routing.viewport_hint_mismatch` audit entry per FR-021 step 3.
+          properties:
+            centroid_lat: { type: number, minimum: -90, maximum: 90 }
+            centroid_lng: { type: number, minimum: -180, maximum: 180 }
+            client_jurisdiction: { type: string }
+
+    TelemetryInjectionAck:
+      type: object
+      required: [injection_correlation_id, signals, refusals]
+      properties:
+        injection_correlation_id: { type: string, format: uuid }
+        signals:
+          type: array
+          description: Successfully written signals (count toward FR-009 30/min budget).
+          items:
+            type: object
+            required: [signal_id, category, confidence]
+            properties:
+              signal_id: { type: string, format: uuid }
+              category:
+                type: string
+                enum: [weather, fire-behaviour, hydrology, geohazard, utility, transport, evacuation, resource, comms-channel-state]
+              confidence: { type: string, enum: [high, medium, low] }
+              parameters: { type: object }
+              gps:
+                type: object
+                properties:
+                  lat: { type: number }
+                  lng: { type: number }
+              contradicts: { type: string, format: uuid }
+        refusals:
+          type: array
+          description: Per-signal refusals within the same chat turn (FR-010 hybrid gate, unknown category, etc.).
+          items: { $ref: '#/components/schemas/InjectionRefusal' }
+        triggered_sub_agents:
+          type: array
+          description: Auto-routing fan-out (FR-026 + auto-routing).
+          items: { type: string }
+
+    InjectionRefusal:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          enum:
+            - life_safety_low_confidence
+            - missing_provenance
+            - unknown_category
+            - malformed_input
+            - pii_detected
+            - thread_cap_exceeded
+            - cascade_depth_exceeded
+            - circuit_open
+        original_text_hash: { type: string, pattern: '^[a-f0-9]{64}$' }
+        parsed_category: { type: string }
+        inferred_confidence: { type: string, enum: [high, medium, low] }
+        clarification_question: { type: string, description: Surfaced to the coordinator UI as the `InjectionRefusalCard` body }
+
+    InjectionRefusalProblem:
+      allOf:
+        - $ref: '#/components/schemas/ProblemDetails'
+        - type: object
+          properties:
+            reason: { type: string, enum: [life_safety_low_confidence, missing_provenance, unknown_category, malformed_input, pii_detected, thread_cap_exceeded, cascade_depth_exceeded, circuit_open] }
+            category: { type: string }
+            confidence: { type: string }
+
+    ProblemDetails:
+      type: object
+      description: RFC 7807 Problem Details object.
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string, description: chat_turn_id or correlation_id }
+
+  responses:
+    Forbidden:
+      description: Caller lacks the required Entra app role.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    NotFound:
+      description: Simulation not found.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }

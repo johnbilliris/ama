@@ -1,0 +1,14 @@
+{
+  "category": "utility",
+  "confidence": "medium",
+  "freshness_window_seconds": 600,
+  "observed_at": "2026-01-01T00:00:00+00:00",
+  "parameters": {
+    "affected_dwellings": 35000,
+    "location_text": "Townsville"
+  },
+  "signal_id": "sig-bb8b3657a0accaac52e8e80e",
+  "simulation_id": "sim-c12",
+  "synthetic_signal": true,
+  "tenant_id": "sim-tenant-c12"
+}

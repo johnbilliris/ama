@@ -137,6 +137,54 @@ TOOL_SCHEMAS: list[dict[str, Any]] = [
             "parameters": {"type": "object", "properties": {}},
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "pause_simulation",
+            "description": (
+                "Spec-036 lifecycle tool — pause the active simulation (FR-059). "
+                "Equivalent to POST /api/simulations/{simId}/pause; in-flight "
+                "invocations complete normally and replies are written under "
+                "lifecycle.paused. Resume does NOT replay them."
+            ),
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "resume_simulation",
+            "description": (
+                "Spec-036 lifecycle tool — resume a paused simulation (FR-059). "
+                "Equivalent to POST /api/simulations/{simId}/resume."
+            ),
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "inject_telemetry",
+            "description": (
+                "Inject a synthetic telemetry observation into the active simulation. "
+                "The tool routes the prompt through the Telemetry-Injection Agent, "
+                "which (a) PII-scrubs, (b) checks the life-safety gate, (c) parses to "
+                "a SyntheticSignal via Azure OpenAI strict-mode JSON schema, and "
+                "(d) tags any contradictions against recent signals within the "
+                "per-category freshness window. NEVER use this for real-world action."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "prompt": {
+                        "type": "string",
+                        "description": "Operator's natural-language description of the synthetic observation.",
+                    },
+                },
+                "required": ["prompt"],
+            },
+        },
+    },
 ]
 
 ALLOW_LIST = frozenset(t["function"]["name"] for t in TOOL_SCHEMAS)

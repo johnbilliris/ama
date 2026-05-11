@@ -48,7 +48,13 @@ class TestRoleWidgetConfig:
     def test_single_role_resolution(self):
         widgets, view = _resolve_widget_layout(["incident_controller"])
         assert view == "executive_summary"
-        assert len(widgets) > 0
+        # T-AA06 — explicit boundary: the incident_controller role MUST
+        # surface at least its 4 mandated panels (situation, resources,
+        # public-warnings, action-board) per plan.md §3.2.
+        assert len(widgets) >= 4, (
+            f"incident_controller resolved to only {len(widgets)} widgets; "
+            f"expected ≥4"
+        )
 
     def test_multi_role_merge(self):
         """Multi-role produces union of widgets ordered by highest authority."""

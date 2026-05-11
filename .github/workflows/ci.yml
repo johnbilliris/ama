@@ -66,6 +66,13 @@ jobs:
       - name: python-import-boundaries
         run: lint-imports
 
+      # Spec-036 T-R06 — map overlay codegen freshness gate. The
+      # generated TS taxonomy is the single source of truth for the
+      # FR-027 closed set (16 layer types). CI fails if any drift is
+      # detected so an unsynced layer addition cannot land in main.
+      - name: map-overlay-codegen-check
+        run: python scripts/codegen/generate_map_overlay_taxonomy_ts.py --check
+
       - name: python-test
         run: |
           pytest tests/contract tests/integration --cov=apps --cov=packages --cov-report=xml --cov-report=term

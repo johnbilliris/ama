@@ -42,6 +42,8 @@ infra/**/*.json
 !infra/main.parameters.*.json
 !infra/modules/workbooks/*.json
 !infra/parameters/foundry-carveout.schema.json
+!infra/foundry/carveout-registry.json
+!infra/foundry/carveout-registry.schema.json
 
 # Web coverage suite — local artefacts only; canonical evidence is committed under specs/034-webapp-capstone-coverage/
 tests/e2e/web-coverage/_artifacts/

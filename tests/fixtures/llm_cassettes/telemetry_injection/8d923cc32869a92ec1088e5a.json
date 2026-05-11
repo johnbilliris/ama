@@ -1,0 +1,14 @@
+{
+  "category": "weather",
+  "confidence": "medium",
+  "freshness_window_seconds": 600,
+  "observed_at": "2026-01-01T00:00:00+00:00",
+  "parameters": {
+    "category": 4,
+    "name": "Veronica"
+  },
+  "signal_id": "sig-8d923cc32869a92ec1088e5a",
+  "simulation_id": "sim-c12",
+  "synthetic_signal": true,
+  "tenant_id": "sim-tenant-c12"
+}
