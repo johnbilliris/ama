@@ -362,15 +362,15 @@ description: "Actionable, dependency-ordered task list for spec-038 In-Product H
 
 **Depends on**: Phases 1, 6, 8. **Goal**: on-call SRE can operate Help; SC-009 baseline is captured.
 
-- [ ] T-AA210 [P] [Gate] Author `docs/runbooks/help/on-call.md` — chat outage, snapshot publish failure, rollback procedure, alias-bind issues, AI Search throttling, redaction recogniser failure. — Constitution III, R1, R6, CHK128
-- [ ] T-AA211 [P] [Gate] Author `docs/runbooks/help/snapshot-publish-rollback.md` — step-by-step including the dual-approval gate, the 5-min SLO, audit-event verification. — FR-011a, FR-011b, FR-011c
-- [ ] T-AA212 [P] Author `docs/runbooks/help/screenshot-staleness.md` — bulk re-baseline workflow + grace period guidance. — FR-010a-AMEND, FR-010b, CHK076
-- [ ] T-AA213 [P] [Gate] Author `docs/configuration/help-support-handoff.md` — per-tenant `SupportHandoffRecord` configuration, channel kinds, business-hours window, incident-mode auto-activation, SLAs. — FR-023a, FR-023a-AMEND, FR-023b, CHK122-CHK125
-- [ ] T-AA214 [P] [Gate] **SC-009-AMEND baseline capture**: produce `specs/038-help-docs-chat/baselines/pre-launch-support.md` from a 2-week observation window immediately preceding launch — support-ticket volume tagged navigation/help-related, persona breakdown, median time-to-resolution. Without this baseline, SC-009 is unmeasurable. — SC-009-AMEND, CHK176, CHK183
-- [ ] T-AA215 [P] Configure App Insights workbook `help-slis` and pin to dashboards used by SRE. — SC-007, plan §Telemetry
-- [ ] T-AA216 [P] Configure metric alerts (per T-AA023): chat first-byte p95, snapshot publish duration, staleness backlog age, support-handoff SLA breach event count. Verify alert action group routes to on-call.
-- [ ] T-AA217 [P] [Gate] Author quarterly chaos drill plan `docs/runbooks/help/chaos-drill-snapshot-rollback.md` — kill alias mid-publish; verify rollback completes within FR-011c 5-min SLO and audit event emitted. — R6, FR-011c
-- [ ] T-AA218 [P] AU-residency attestation per release: invoke T-AA029 script and store output under `docs/attestations/help-{release}.json`. — FR-018, SC-011, CHK128, CHK181
+- [X] T-AA210 [P] [Gate] Author `docs/runbooks/help/on-call.md` — chat outage, snapshot publish failure, rollback procedure, alias-bind issues, AI Search throttling, redaction recogniser failure. — Constitution III, R1, R6, CHK128
+- [X] T-AA211 [P] [Gate] Author `docs/runbooks/help/snapshot-publish-rollback.md` — step-by-step including the dual-approval gate, the 5-min SLO, audit-event verification. — FR-011a, FR-011b, FR-011c
+- [X] T-AA212 [P] Author `docs/runbooks/help/screenshot-staleness.md` — bulk re-baseline workflow + grace period guidance. — FR-010a-AMEND, FR-010b, CHK076
+- [X] T-AA213 [P] [Gate] Author `docs/configuration/help-support-handoff.md` — per-tenant `SupportHandoffRecord` configuration, channel kinds, business-hours window, incident-mode auto-activation, SLAs. — FR-023a, FR-023a-AMEND, FR-023b, CHK122-CHK125
+- [X] T-AA214 [P] [Gate] **SC-009-AMEND baseline capture**: produce `specs/038-help-docs-chat/baselines/pre-launch-support.md` from a 2-week observation window immediately preceding launch — support-ticket volume tagged navigation/help-related, persona breakdown, median time-to-resolution. Without this baseline, SC-009 is unmeasurable. — SC-009-AMEND, CHK176, CHK183
+- [X] T-AA215 [P] Configure App Insights workbook `help-slis` and pin to dashboards used by SRE. — SC-007, plan §Telemetry
+- [X] T-AA216 [P] Configure metric alerts (per T-AA023): chat first-byte p95, snapshot publish duration, staleness backlog age, support-handoff SLA breach event count. Verify alert action group routes to on-call.
+- [X] T-AA217 [P] [Gate] Author quarterly chaos drill plan `docs/runbooks/help/chaos-drill-snapshot-rollback.md` — kill alias mid-publish; verify rollback completes within FR-011c 5-min SLO and audit event emitted. — R6, FR-011c
+- [X] T-AA218 [P] AU-residency attestation per release: invoke T-AA029 script and store output under `docs/attestations/help-{release}.json`. — FR-018, SC-011, CHK128, CHK181
 
 ---
 
