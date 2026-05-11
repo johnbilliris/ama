@@ -19,8 +19,11 @@ same way:
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[3]
 API_ROOT = ROOT / "apps" / "api"
@@ -30,3 +33,12 @@ for path in (ROOT, API_ROOT, AGENTS_ROOT):
     path_text = str(path)
     if path_text not in sys.path:
         sys.path.insert(0, path_text)
+
+
+@pytest.fixture(autouse=True)
+def enable_test_mode():
+    """Set AMA_TEST_MODE=1 for all tests to bypass Azure config requirement (T-AMD-08)."""
+    os.environ["AMA_TEST_MODE"] = "1"
+    yield
+    os.environ.pop("AMA_TEST_MODE", None)
+

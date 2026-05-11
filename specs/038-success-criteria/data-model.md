@@ -109,9 +109,19 @@ class IndicatorDefinition(BaseModel):
     provenance: Provenance
     confidence_band_rule: ConfidenceBandRule
 
-    # FR-004 — risk-adjusted twin (optional only if matrix not yet supplied;
-    # render-time refusal handled per spec Edge Case #5).
-    risk_adjustment: RiskAdjustment | None = None
+    # FR-004 + FR-041 (Cycle 2 / D15+D... see research.md). Required from
+    # Cycle 2 onward; when no matching row exists in the spec-037 risk
+    # register the service materialises a graceful default of
+    # `RiskAdjustment(likelihood=3, consequence=3)` AND sets `provenance`
+    # to "manual" so the row counts toward the FR-028 / SC-010 ≤50 %
+    # per-artefact manual cap (CHK089). Back-compat: documents written
+    # before Cycle 2 with `risk_adjustment is None` are read-time
+    # promoted to the `(3,3)` default + `manual` provenance on the next
+    # ladder fetch and re-persisted as a new versioned document
+    # (preserves FR-005 versioning invariant).
+    risk_adjustment: RiskAdjustment = Field(
+        default_factory=lambda: RiskAdjustment(likelihood=3, consequence=3)
+    )
 
     created_at: AwareDatetime
     created_by: str  # actor sub / role
@@ -129,8 +139,13 @@ class IndicatorDefinition(BaseModel):
 - `provenance == "manual"` rows are counted per artefact; service
   refuses publication when manual share > 50 % unless a named-auditor
   sign-off entry exists in `evidence_audit` (FR-028 / SC-010).
-- `risk_adjustment is None` → `GET ?include_risk_adjusted=true` returns
-  HTTP 409 with the Edge Case #5 message.
+- `risk_adjustment` is non-optional from Cycle 2 onward (FR-041). When
+  the spec-037 risk register has no matching row the service
+  materialises `(L=3, C=3)` with `provenance="manual"` (CHK087..CHK089).
+- `risk_adjustment is None` (legacy pre-Cycle-2 documents) → on the
+  next read the service promotes the row to the `(3,3)` default,
+  flips `provenance` to `manual`, writes a new version, and includes
+  the row in the FR-028 manual-cap arithmetic.
 
 **State transitions**: `draft → published → superseded`. Only `published`
 documents appear in the ladder view; `superseded` remain retrievable
@@ -289,23 +304,43 @@ point to an existing file.
 **Container**: `benchmark_register`  **Partition key**: `/kpi_id`
 
 ```python
+class CitationRef(BaseModel):
+    """FR-049 — `source_citation` is a structured 4-tuple from Cycle 2.
+    All four sub-fields are mandatory (CHK137); free-text-only
+    citations are no longer accepted at write time. Back-compat:
+    legacy string citations are split on best-effort by the seed
+    loader; rows that cannot be split are tagged `provenance: manual`
+    so they fall under the FR-028 ≤50 % manual cap (CHK138)."""
+    organisation: str
+    document: str
+    year: Annotated[int, Field(ge=1900, le=2100)]
+    url: str  # http(s) URL — validated as AnyHttpUrl in the Pydantic model
+
+
 class BenchmarkEntry(BaseModel):
     id: str
     kpi_id: str  # partition key
     jurisdiction: str  # e.g. "NSW Ambulance", "VIC FRV", "AU"
     kind: Literal["external_benchmark", "prototype_baseline"]  # FR-021
     source_name: str  # e.g. "AFAC FDI/FFDI", "BoM hazard warning lead-time"
-    source_citation: str  # URL or doc ref
+    source_citation: CitationRef  # FR-049 mandatory 4-tuple (Cycle 2)
     target_value: condecimal(max_digits=18, decimal_places=4) | None  # nullable for "not available"
     target_unit: str
     not_available: bool = False  # FR-022
+    provenance: Provenance = "auto"  # FR-049 — manual when citation un-sourceable
     created_at: AwareDatetime
 ```
 
-**Validation rules** (SC-007): for every `kpi_id` in `kpi_ladder`, the
-register MUST contain ≥1 entry. If no recognised external benchmark
-exists for a jurisdiction, the entry MUST have `not_available = True`
-and a sibling `prototype_baseline` entry MUST be present.
+**Validation rules** (SC-007 + FR-049 / SC-022(c)): for every `kpi_id`
+in `kpi_ladder`, the register MUST contain ≥1 entry. If no recognised
+external benchmark exists for a jurisdiction, the entry MUST have
+`not_available = True` and a sibling `prototype_baseline` entry MUST
+be present. **Seed coverage (Cycle 2)**: ≥32 jurisdictional rows
+(8 jurisdictions × ≥4 categories: primary fire, ambulance, SES,
+police) PLUS ≥5 cross-sector rows (BoM warning lead-time per warning
+class, NEMA COMDISPLAN activation-to-deployment, ICAO ARFF response
+targets via Airservices Australia, SAIDI/SAIFI for utilities, AIIMS
+span-of-control 3–7).
 
 ---
 
@@ -327,11 +362,16 @@ AuditKind = Literal[
     "degraded_mode_entered",       # FR-027, FR-032
     "small_sample_labelled",       # FR-008 / FR-010
     "divergence_flagged",          # FR-016, Edge Case #4
+    "audit_mutation_attempted",    # FR-040 / SC-016 — PATCH/DELETE rejected (Cycle 2)
+    "language_fallback_used",      # FR-048 / SC-022(b) — PI render fallback (Cycle 2)
 ]
 
 
 class AuditEntry(BaseModel):
-    """FR-025 — append-only. Service rejects PATCH/DELETE."""
+    """FR-025 — append-only. Service rejects PATCH/DELETE.
+    Note: previously typed `AuditEntry` and used as the persistence row
+    shape; equivalent name `AuditRow` is exported as an alias for the
+    Cycle 2 PATCH/DELETE rejection contract test (CHK073..CHK078)."""
     id: str  # ULID
     audit_id: str  # partition key — typically equals the value_id (KPI value being traced)
     value_id: str  # the kpi value / scorecard / signal id this entry pertains to
@@ -343,6 +383,19 @@ class AuditEntry(BaseModel):
     correlation_id: str
     region: Literal["australiaeast", "australiasoutheast"]  # FR-029
     archived_to_blob: bool = False  # set True after change-feed mirror at age 90d
+
+    # FR-048 / SC-022(b) — Cycle 2. Populated only on PI-render audit
+    # rows where the language-pack lookup chain fell back from the
+    # requested language to a default. Format: "<from_code>→<to_code>"
+    # using the U+2192 RIGHTWARDS ARROW (CHK131). Absent (None) when no
+    # fallback occurred so consumers can distinguish positive vs
+    # negative cases per CHK134.
+    language_fallback_used: str | None = None
+
+
+# Backward-compatible alias used by the Cycle 2 immutability contract
+# tests (`tests/contract/test_evidence_audit_immutability.py`).
+AuditRow = AuditEntry
 ```
 
 **Validation rules**
@@ -377,3 +430,54 @@ class AuditEntry(BaseModel):
   (see `plan.md` §"Capstone-trace tagging step").
 - **Append-only audit (FR-025)**: enforced at the Manager tier; Cosmos
   change-feed mirrors to immutable Blob (D3) for ≥7-year retention.
+
+---
+
+## Cycle 2 amendments — invariants delta
+
+The following invariants are added by AMD-01..AMD-13 and apply to all
+Pydantic v2 evidence models from Cycle 2 onward. They do not displace
+any prior invariant in this document.
+
+- **Schema closure (FR-047 / SC-022(a))**: every model under
+  `apps/api/app/services/evidence/models/*.py` MUST set
+  `model_config = ConfigDict(extra="forbid")`. Unknown fields are
+  rejected at the API boundary with HTTP `422` (CHK125..CHK126).
+  The TS twin under `packages/domain/src/evidence/*.ts` remains
+  **type-only** (no Zod, no class-validator); parity is asserted by
+  an OpenAPI-driven contract test against
+  `specs/038-success-criteria/contracts/openapi.evidence-harness.yaml`
+  (CHK127..CHK129, R2-Q1).
+- **Audit immutability (FR-038 / FR-040)**: PATCH/DELETE attempts on
+  `evidence_audit` are rejected at the persistence boundary with HTTP
+  `409 Conflict` and a `ProblemDetails` body whose `title` is
+  `"audit-record-immutable"`. The same transaction appends an audit
+  row of `kind="audit_mutation_attempted"` (CHK073..CHK078). The
+  cold-archive Blob immutability policy MUST be `state=Locked` /
+  `immutabilityPeriodSinceCreationInDays=2555` at deployment time
+  (CHK069..CHK072).
+- **AU-refusal durability (FR-044 / D21)**: the audit write that
+  precedes any AU-refusal HTTP response uses Cosmos SDK request-options
+  override `consistency_level=Strong` (per-operation; the account-level
+  default `Session` remains for non-audit containers). A bounded
+  3-attempt exponential backoff (250 ms / 1 s / 4 s) is applied to
+  transient 5xx / 429; on exhaustion the API returns HTTP `503` with a
+  `ProblemDetails` body referencing FR-044 (CHK101..CHK108). The
+  total retry budget (≤ ~5.5 s) is bounded below the FR-046 ≤60 s
+  freshness SLO (CHK107).
+- **Risk-adjusted manual-cap contagion (FR-041)**: defaulted-neutral
+  `(L=3, C=3)` rows are tagged `provenance: manual` and counted toward
+  the FR-028 / SC-010 ≤50 % per-artefact manual cap. Publication is
+  blocked when the cap is exceeded; unblocking paths are (a) replace
+  with risk-register-sourced weights or (b) named-auditor sign-off per
+  spec 037 FR-037.
+- **Public Information language fallback disclosure (FR-048)**: when
+  the language-pack lookup chain falls back, the API response field
+  `language_fallback_used: "<from_code>→<to_code>"` is set (U+2192
+  arrow), and the audit trail records a `language_fallback_used` row.
+  Silent downgrade is forbidden (CHK131..CHK134).
+- **Benchmark seed coverage (FR-049 / SC-022(c))**: the seeded
+  `benchmark_register` MUST contain ≥32 jurisdictional rows + ≥5
+  cross-sector rows; each `source_citation` is a 4-tuple
+  (organisation + document + year + URL). Unsourced rows are tagged
+  `provenance: manual` and counted toward the FR-028 cap.

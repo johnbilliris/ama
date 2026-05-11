@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 AuRegion = Literal["australiaeast", "australiasoutheast"]
 
@@ -19,12 +19,15 @@ AuditKind = Literal[
     "degraded_mode_entered",
     "small_sample_labelled",
     "divergence_flagged",
+    "language_fallback_used",
 ]
 
 CHAIN_STEPS = ("signal", "model_output", "recommendation", "human_decision", "outcome")
 
 
 class AuditEntry(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     id: str
     audit_id: str
     value_id: str
@@ -36,9 +39,12 @@ class AuditEntry(BaseModel):
     correlation_id: str = ""
     region: AuRegion
     archived_to_blob: bool = False
+    language_fallback_used: str | None = None
 
 
 class AuditTrace(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     value_id: str
     entries: list[AuditEntry] = Field(min_length=1)
     chain_complete: bool

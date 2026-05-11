@@ -43,7 +43,7 @@ def _make(
     cadence: str = "PT15M",
     baseline: str = "spec-015 prototype baseline",
     provenance: Provenance = "auto",
-    risk: tuple[int, int] | None = (3, 4),
+    risk: tuple[int, int] | None = None,
     owner: str = "RiskManager",
 ) -> IndicatorDefinition:
     return IndicatorDefinition(
@@ -65,7 +65,18 @@ def _make(
         baseline_source=baseline,
         provenance=provenance,
         confidence_band_rule=ConfidenceBandRule(),
-        risk_adjustment=RiskAdjustment(likelihood=risk[0], consequence=risk[1]) if risk else None,
+        risk_adjustment=(
+            RiskAdjustment(
+                likelihood=risk[0],
+                consequence=risk[1],
+                provenance="auto" if risk else "manual",
+                auditor_signoff_required=False,
+            )
+            if risk
+            else RiskAdjustment(
+                likelihood=3, consequence=3, provenance="manual", auditor_signoff_required=True
+            )
+        ),
         created_at=datetime.now(UTC),
         created_by="seed",
     )

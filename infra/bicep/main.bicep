@@ -34,6 +34,9 @@ param developerIpAddress string = '110.144.204.83'
 @description('Spec 038 — enable evidence-harness Cosmos containers + cold-archive Blob.')
 param enableEvidenceHarness bool = true
 
+@description('SLO alert action group resource ID (empty string = no alerts, T-AMD-03).')
+param sloAlertActionGroupId string = ''
+
 module monitoring './monitoring.bicep' = {
   params: {
     location: location
@@ -617,11 +620,13 @@ module evidenceHarness 'modules/evidence-harness.bicep' = if (enableEvidenceHarn
   name: 'spec038-evidence-harness'
   params: {
     cosmosAccountName: cosmos.name
+    auditCosmosAccountName: cosmos.name
     databaseName: cosmosDb.name
     storageAccountName: storage.name
     location: 'australiaeast'
     pairedRegion: 'australiasoutheast'
     appInsightsName: ''
+    sloAlertActionGroupId: sloAlertActionGroupId
     tags: tags
   }
 }

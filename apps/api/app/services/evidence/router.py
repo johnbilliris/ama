@@ -43,5 +43,10 @@ def _wire() -> None:
 
     router.include_router(instrumentation_router)
 
+    # Public Information (T-AMD-14, FR-039)
+    from .public_information_router import router as pi_router
+
+    router.include_router(pi_router)
+
 
 _wire()

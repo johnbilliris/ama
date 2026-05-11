@@ -294,3 +294,278 @@ spec FR / SC and the prior code/spec it reuses.
 None. All clarifications resolved in spec; all technical decisions
 above cite either the spec, the constitution, or a concrete reuse
 target in the existing codebase.
+
+---
+
+## Cycle 2 Decisions
+
+The following decisions cover AMD-01..AMD-13 and the Cycle 2 R1+R2
+clarifications. Numbering continues from D14. None of D1..D14 are
+re-opened.
+
+### D15. Audit cold-archive immutability period and lock state (AMD-01 / FR-038 / SC-014)
+
+- **Decision**: Bicep deploys the cold-archive Blob immutability
+  policy with `immutabilityPeriodSinceCreationInDays = 2555` (= 7 ×
+  365) AND `state = 'Locked'` at deployment time. Operator follow-up
+  to lock is forbidden. Any deploy producing an unlocked or shorter
+  policy fails the `az deployment group what-if` gate.
+- **Rationale**: Removes the post-deploy "unlocked window" that would
+  otherwise let an operator weaken the FR-025 append-only invariant.
+  2,555 d is the exact arithmetic of the spec's ≥7-year requirement,
+  not "≈84 months", which would silently round.
+- **Alternatives considered**: 30-day-multiple periods (rejected — not
+  the constitutional requirement); deploy-then-lock workflow (rejected
+  — leaves a tampering window).
+
+### D16. Audit-mutation rejection contract: `409 Conflict` + ProblemDetails (AMD-03 / FR-040 / SC-016)
+
+- **Decision**: PATCH and DELETE against `evidence_audit` documents
+  are rejected at the persistence boundary (Cosmos server-side
+  stored procedure or change-feed processor invariant). HTTP layer
+  surfaces `409 Conflict` with a `ProblemDetails` body whose `type`
+  URI references FR-040 and whose `title` is exactly
+  `"audit-record-immutable"`. Each rejection appends a tampering-
+  attempt audit row of `kind="audit_mutation_attempted"` in the same
+  transaction.
+- **Rationale**: RFC 9110 §15.5.10 is the closest semantic fit
+  ("conflict with the current state of the target resource" — the
+  locked immutability policy IS the target state). `403` would
+  mis-signal an authorisation issue; `405` would imply the verb is
+  globally unsupported.
+- **Alternatives considered**: `403 Forbidden` (rejected — not an
+  authorisation failure); `405 Method Not Allowed` (rejected —
+  PATCH/DELETE ARE supported on other endpoints, just not on locked
+  audit rows).
+
+### D17. Auslan deferred-permitted with visible badge (AMD-02 / FR-039 / R1-Q3)
+
+- **Decision**: Auslan media + transcript are mandatory only for
+  cyclone, bushfire, and flood scenarios in this cycle. The other
+  four scenarios (urban_fire, mass_casualty, hazmat, marine_sar) are
+  deferred-permitted but MUST render a visible
+  `auslan-asset-missing` badge AND tag the row `provenance: manual`
+  so it counts toward the FR-028 / SC-010 ≤50 % manual-row cap.
+- **Rationale**: Aligns with constitution V-A (AWS hazard-icon
+  expectation strongest for the three highest-frequency hazards)
+  while avoiding silent omission, which would breach the Ten Warning
+  Principles #3 and #8 (trusted, clearly communicated).
+- **Alternatives considered**: Mandatory Auslan for all 7 (rejected
+  this cycle — production-grade Auslan asset pipeline not yet in
+  scope); silent omission (rejected — violates V-B principle 3).
+
+### D18. Defaulted `(L=3, C=3)` weights count toward FR-028 manual cap (AMD-04 / FR-041 / R1-Q4)
+
+- **Decision**: When the spec-037 risk register has no matching row
+  the `risk_adjustment` field defaults to `(L=3, C=3)` AND the row's
+  `provenance` is set to `manual`. These rows count toward the
+  FR-028 / SC-010 ≤50 % per-artefact manual-row cap. Publication is
+  blocked when the cap is breached; unblocking paths are (a) replace
+  with risk-register-sourced weights or (b) named-auditor sign-off
+  per spec 037 FR-037.
+- **Rationale**: Treating defaulted neutrals as "auto" would let a
+  ladder ship 100 % placeholder weights and defeat the manual-cap
+  invariant. Tagging them `manual` makes the placeholder visible in
+  the audit trail and the UI.
+- **Alternatives considered**: Tag as `auto` with a side-channel
+  flag (rejected — fragments the manual-cap arithmetic across two
+  fields); refuse to publish any ladder with defaulted rows
+  (rejected — too brittle for the prototype tier and not what the
+  spec requires).
+
+### D19. `AMA_TEST_MODE=1` sentinel for in-memory client fallback (AMD-05 / FR-042 / SC-018)
+
+- **Decision**: The in-memory client registry in
+  `apps/api/app/services/evidence/_clients.py` activates **only**
+  when `AMA_TEST_MODE=1` (or a pytest-detected equivalent) is set in
+  the environment. In any other environment, missing Azure
+  credentials cause the FastAPI app to fail fast on startup with an
+  error message that names BOTH FR-029 (AU sovereignty) and FR-042
+  (production-mode requirement).
+- **Rationale**: A startup-time failure is the cheapest and most
+  observable enforcement point; lazy / first-request failure would
+  let pods enter the rotation in a permanently broken state and
+  silently violate FR-029.
+- **Alternatives considered**: Health-check probe failure (rejected —
+  too late, already in rotation); pytest-only env var (rejected —
+  doesn't cover dev-loop reproduction outside pytest).
+
+### D20. Bicep `existing.location` deploy-time AU assertion (AMD-06 / FR-043 / SC-019)
+
+- **Decision**: `infra/bicep/modules/evidence-harness.bicep` reads
+  the `location` of every bound existing Cosmos / Storage /
+  Application Insights / Log Analytics resource via `existing` and
+  asserts `location ∈ {'australiaeast', 'australiasoutheast'}`.
+  `@allowed` parameter constraints alone are NOT sufficient — they
+  constrain what the operator may pass, not what is actually bound.
+- **Rationale**: Deploy-time assertion against the real bound
+  resource closes the gap where an operator wires a non-AU resource
+  into an AU-allowed parameter slot and the deploy succeeds. Mirrors
+  the precedent in existing portfolio modules.
+- **Alternatives considered**: Azure Policy at subscription scope
+  (rejected — not a module-level guarantee, may be missing in dev
+  subscriptions); post-deploy validation script (rejected —
+  validates after the breach).
+
+### D21. Per-operation `Strong` consistency + bounded 3-retry backoff (AMD-07 / FR-044 / R2-Q2)
+
+- **Decision**: The audit write that precedes every AU-refusal HTTP
+  response uses Cosmos SDK request-options override
+  `consistency_level=Strong` on `create_item` (per-operation; the
+  account-level default `Session` remains for non-audit containers
+  per `eval-platform.bicep` precedent). Transient 5xx / 429 are
+  retried 3 times with 250 ms / 1 s / 4 s exponential backoff. On
+  retry exhaustion the API returns HTTP `503` with a `ProblemDetails`
+  body referencing FR-044. The audit Cosmos account is single-region
+  (`australiaeast`) so per-op `Strong` is compatible (multi-region
+  Strong is forbidden by Cosmos).
+- **Rationale**: Per-op Strong gives the durable-before-respond
+  guarantee the spec requires while preserving Session consistency
+  for the rest of the harness (FR-034 reuse invariant). The retry
+  budget (~5.25 s worst case) is bounded well below the FR-046 ≤60 s
+  freshness SLO so the retry policy cannot independently breach the
+  SLO budget (CHK107).
+- **Alternatives considered**: Account-level Strong (rejected —
+  breaks portfolio-wide Session default and forbids the
+  australiasoutheast paired DR); silent retry forever (rejected —
+  unbounded blocking); fail-fast with no retry (rejected — too
+  brittle for transient 429).
+
+### D22. `/healthz/evidence` critical vs non-critical banding (AMD-08 / FR-045 / SC-020(b) / R1-Q1)
+
+- **Decision**: The probe partitions stores into:
+  - **Critical (failure ⇒ 503)**: every Cosmos container in the
+    evidence DB (`kpi_ladder`, `indicator_definition`,
+    `measurement_method`, `scenario_run`, `delta_scorecard`,
+    `causal_chain`, `benchmark`, `signal`, `evidence_audit`), the
+    Blob immutable cold-archive container, and the Cosmos
+    change-feed → Blob mirror processor (FR-040).
+  - **Non-critical (failure ⇒ 200 + `degraded:true`)**: Application
+    Insights ingestion endpoint and any read-only reporting/cache
+    layer.
+  The hardcoded `evidence-audit-cold=True` shortcut is removed.
+- **Rationale**: Critical stores sit on the FR-025 / FR-029 / FR-040
+  AU-sovereignty + append-only audit invariant path, where silent
+  degradation is forbidden. App Insights is observability-only and
+  graceful degradation is acceptable per FR-032.
+- **Alternatives considered**: Single threshold "any failure ⇒ 503"
+  (rejected — would page on App Insights blip and violate FR-032);
+  no banding (rejected — would let an audit-store outage hide behind
+  a `200 + degraded:true` and breach FR-025).
+
+### D23. SLO horizon = 30 d, burn windows = 1 h, action group mandatory (AMD-09 / FR-046 / R1-Q5)
+
+- **Decision**: Bicep deploys the `evidence-harness-slo` workbook
+  with availability ≥99.5 %, replay success ≥98 %, and freshness
+  ≤60 s SLO targets evaluated against a **rolling 30-day** SLO
+  horizon. Burn-rate alerts at 2 %/h and 5 %/h are evaluated over a
+  rolling **1-hour** window (Google SRE Workbook Ch 5 fast-burn
+  convention). The Bicep module accepts a required parameter
+  `sloAlertActionGroupId`; deployment fails when this is empty in any
+  non-test environment (FR-042 fail-fast precedent). None of the
+  workbook, SLO targets, burn-rate alerts, or action-group binding
+  may be deferred to "operator follow-up".
+- **Rationale**: 1 h is the smallest window that yields statistically
+  meaningful burn against a 30-day budget while still firing within
+  an actionable response time. Mandating the action-group ID at
+  deploy time prevents the common failure mode of alerts that fire
+  into a void.
+- **Alternatives considered**: 6 h / 24 h burn windows (rejected —
+  too slow to fire against a 30-d budget); optional action group
+  (rejected — observed to ship as default-empty).
+
+### D24. Sev1 / Sev2 burn-rate alert routing (R2-Q3 / FR-046)
+
+- **Decision**: 5 %/h fast-burn alert ⇒ `severity: 1` (paging tier).
+  2 %/h slow-burn alert ⇒ `severity: 2` (ticketing tier).
+  `severity: 0` is forbidden for these alerts (reserved for total-
+  outage signals per `observability-alerts.bicep` precedent).
+- **Rationale**: Mirrors the existing AMA SRE severity ladder; Sev0
+  reservation prevents the workbook from clashing with the
+  total-outage rule set.
+- **Alternatives considered**: Both at Sev1 (rejected — paging
+  fatigue on slow burn); both at Sev2 (rejected — fast-burn would
+  miss the 24×7 page).
+
+### D25. TS twin parity asserted by OpenAPI contract test, no Zod (AMD-10 / FR-047 / SC-022(a) / R2-Q1)
+
+- **Decision**: Pydantic v2 models under
+  `apps/api/app/services/evidence/models/*.py` set
+  `model_config = ConfigDict(extra="forbid")`; unknown fields are
+  rejected with HTTP `422`. The TS twin under
+  `packages/domain/src/evidence/*.ts` remains type-only — no Zod, no
+  class-validator, no runtime `extra=forbid`. Schema parity is
+  asserted by an OpenAPI-driven contract test against
+  `specs/038-success-criteria/contracts/openapi.evidence-harness.yaml`,
+  not by ad-hoc TS unit tests. Convention precedent:
+  `packages/domain/src/app-role.ts`.
+- **Rationale**: Adding Zod/class-validator would violate the FR-034
+  "no new domain-validation primitives" invariant. The OpenAPI is
+  already the source of truth for the API boundary, so the contract
+  test is the natural parity check.
+- **Alternatives considered**: Zod runtime validation in the TS twin
+  (rejected — new primitive, violates FR-034); duplicated TS unit
+  tests (rejected — drifts from the OpenAPI source of truth).
+
+### D26. PI render `language_fallback_used` response field (AMD-11 / FR-048 / SC-022(b))
+
+- **Decision**: The Public Information render endpoint
+  (`GET /api/v1/evidence/public-information/{scenario_id}`) returns
+  a `language_fallback_used: "<from_code>→<to_code>"` field on each
+  channel render where the language-pack lookup chain fell back. The
+  separator is the U+2192 RIGHTWARDS ARROW (`→`), not `->`. The
+  field is **omitted** entirely when no fallback occurred so
+  consumers can distinguish positive vs negative cases. The UI
+  renders a visible "fallback used" badge near the affected content;
+  silent downgrade is forbidden.
+- **Rationale**: A nullable field would force consumers to
+  distinguish `null` from "absent" inconsistently across language
+  channels; field-omit is the cleaner contract. The U+2192 arrow
+  matches the human-readable rendering and avoids ASCII collision
+  with the `->` operator commonly seen in logs.
+- **Alternatives considered**: Boolean `fallback_used` (rejected —
+  loses the `<from>→<to>` provenance); global toast (rejected —
+  CHK132 requires a per-content badge).
+
+### D27. Per-jurisdiction benchmark seed coverage ≥32 + cross-sector ≥5 (AMD-12 / FR-049 / SC-022(c))
+
+- **Decision**: The seeded `benchmark_register` MUST contain ≥32
+  jurisdictional rows (8 jurisdictions × ≥4 categories: primary
+  fire, ambulance, SES, police) PLUS ≥5 cross-sector rows (BoM
+  warning lead-time per warning class, NEMA COMDISPLAN
+  activation-to-deployment, ICAO ARFF response targets via
+  Airservices Australia, SAIDI/SAIFI for utilities, AIIMS span-of-
+  control 3–7). Each row carries a structured `source_citation`
+  4-tuple (organisation + document + year + URL). Unsourced rows
+  are tagged `provenance: manual` and counted toward the FR-028
+  ≤50 % per-artefact manual-row cap. Citations only — external
+  benchmark data is not republished (Assumption #7).
+- **Rationale**: An aggregate floor would let one heavily-seeded
+  jurisdiction satisfy SC-022(c) while leaving others empty. The
+  split assertion (≥32 + ≥5) makes each leg independently
+  verifiable.
+- **Alternatives considered**: Single aggregate ≥37 (rejected —
+  hides per-jurisdiction gaps); free-text citations (rejected —
+  precludes machine-checkable provenance).
+
+### D28. Governance/evidence tabs fetch live data on mount (AMD-13 / FR-050 / SC-022(d))
+
+- **Decision**: Each tab in `apps/web/src/app/governance/evidence/`
+  (KPI Ladder, Measurement Method, Replay Scorecard, Causal Chains,
+  Benchmarks, Audit Trace, Public Information) MUST fetch live data
+  from its corresponding `/api/v1/evidence/*` endpoint **on mount**
+  (not lazy / manual-refresh / deferred-until-tab-focus). Tabs MUST
+  surface all four state badges — `degraded`, `small-sample`,
+  `manual`, `reduced-fidelity` — explicitly. Stub or placeholder
+  content (e.g., "populated by Phase 4") is forbidden in any merged
+  build.
+- **Rationale**: On-mount fetch is the user-observable contract that
+  matches the SC-005 audit-walk and SC-002 measurement-method
+  lookup latency targets. Explicit state badges are the operator's
+  only signal that a value is not at full fidelity (FR-027 / FR-032
+  / FR-028 invariants).
+- **Alternatives considered**: Lazy fetch on first interaction
+  (rejected — defeats the "live data on mount" contract);
+  conditional badge rendering only when a state is set (already the
+  behaviour — but absence MUST also be testable, hence the
+  explicit-surfacing requirement).

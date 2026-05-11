@@ -4,12 +4,14 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel, Field, condecimal, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, condecimal, model_validator
 
 AuRegion = Literal["australiaeast", "australiasoutheast"]
 
 
 class ConfidenceScore(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     value: condecimal(ge=0, le=1, decimal_places=2)
 
     @property
@@ -23,6 +25,8 @@ class ConfidenceScore(BaseModel):
 
 
 class CanonicalEventChain(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     call_received_at: AwareDatetime | None = None
     dispatched_at: AwareDatetime | None = None
     arrived_at: AwareDatetime | None = None
@@ -32,6 +36,8 @@ class CanonicalEventChain(BaseModel):
 
 
 class Signal(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     id: str
     scenario_id: str
     seed: str

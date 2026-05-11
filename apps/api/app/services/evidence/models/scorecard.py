@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel, Field, condecimal, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, condecimal, model_validator
 
 DEFAULT_TOL_REL_PCT = 2.0
 DEFAULT_TOL_ABS_UNIT = 1.0
 
 
 class KpiDelta(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     kpi_id: str
     baseline_value: condecimal(max_digits=18, decimal_places=4)
     ama_assisted_value: condecimal(max_digits=18, decimal_places=4)
@@ -25,6 +27,8 @@ class KpiDelta(BaseModel):
 
 
 class DeterminismCheck(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     repetition_count: int = Field(ge=1)
     within_tolerance_count: int = Field(ge=0)
     diverged: bool
@@ -39,6 +43,8 @@ class DeterminismCheck(BaseModel):
 
 
 class DeltaScorecard(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     id: str
     scenario_id: str
     seed: str

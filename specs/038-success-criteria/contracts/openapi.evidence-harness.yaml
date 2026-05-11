@@ -66,6 +66,10 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
 
   /api/v1/evidence/measurement-method:
     get:
@@ -96,6 +100,10 @@ paths:
               schema: { $ref: '#/components/schemas/MeasurementMethod' }
             text/markdown:
               schema: { type: string }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
 
   /api/v1/evidence/scenarios/{scenario_id}/replay:
     post:
@@ -129,10 +137,15 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/DeltaScorecard' }
         '422':
-          description: Required input signal source unavailable AND degraded-mode disabled in request
+          description: |
+            FR-047 / SC-022(a). Required input signal source unavailable
+            AND degraded-mode disabled in request, OR Pydantic v2
+            `extra="forbid"` rejected an unknown request-body field.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
 
   /api/v1/evidence/causal-chains/{capability_id}:
     get:
@@ -162,6 +175,10 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
 
   /api/v1/evidence/benchmarks/{kpi_id}:
     get:
@@ -193,6 +210,10 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/BenchmarkEntry' }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
 
   /api/v1/evidence/audit/{value_id}:
     get:
@@ -223,20 +244,152 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+    patch:
+      tags: [evidence-audit]
+      summary: Rejected — `evidence_audit` is append-only (FR-040 / SC-016)
+      description: |
+        Cycle 2 (AMD-03). Any PATCH against an audit document MUST be
+        rejected at the persistence boundary with HTTP `409 Conflict`
+        (RFC 9110 §15.5.10 — the request conflicts with the locked
+        immutability policy). The rejection itself appends a new
+        audit row with `kind="audit_mutation_attempted"` (CHK077).
+      operationId: rejectAuditPatch
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: value_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '409':
+          description: Audit record immutable (FR-040)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemDetails'
+                  - type: object
+                    properties:
+                      title: { type: string, enum: ["audit-record-immutable"] }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+    delete:
+      tags: [evidence-audit]
+      summary: Rejected — `evidence_audit` is append-only (FR-040 / SC-016)
+      description: |
+        Cycle 2 (AMD-03). Any DELETE against an audit document MUST be
+        rejected with HTTP `409 Conflict` and a `ProblemDetails` body
+        whose `title` is `"audit-record-immutable"`. Each rejection
+        also appends a tampering-attempt audit row (CHK073..CHK078).
+      operationId: rejectAuditDelete
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: value_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '409':
+          description: Audit record immutable (FR-040)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemDetails'
+                  - type: object
+                    properties:
+                      title: { type: string, enum: ["audit-record-immutable"] }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+
+  /api/v1/evidence/public-information/{scenario_id}:
+    get:
+      tags: [evidence-measurement]
+      summary: Render Public Information KPI artefact for a canonical scenario
+      description: |
+        Cycle 2 (AMD-02 + AMD-11 + AMD-13). Renders the multilingual
+        Public Information artefact for the requested canonical scenario
+        across the eight FR-037 language channels, surfacing the
+        `language_fallback_used` field whenever the language-pack
+        lookup chain falls back from the requested language to a
+        default (FR-048 / SC-022(b)). For the four "deferred-permitted"
+        scenarios (urban_fire, mass_casualty, hazmat, marine_sar) the
+        Auslan media + transcript fields may be absent and the
+        response carries an `auslan-asset-missing` badge per FR-039.
+      operationId: getPublicInformationForScenario
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [bushfire, flood, cyclone, urban_fire, mass_casualty, hazmat, marine_sar]
+        - name: lang
+          in: query
+          required: false
+          description: BCP-47 language code (FR-037 channel set).
+          schema: { type: string, default: en-AU }
+      responses:
+        '200':
+          description: Public Information render (8-language)
+          headers:
+            x-ama-correlation-id: { $ref: '#/components/headers/CorrelationIdHeader' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicInformationRender' }
+        '404':
+          description: Unknown scenario_id
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
 
   /healthz/evidence:
     get:
       tags: [evidence-audit]
       summary: Liveness/readiness probe for the evidence harness
+      description: |
+        Cycle 2 (AMD-08 / FR-045). Probes are partitioned into:
+
+          * **Critical** stores (failure ⇒ HTTP 503): every Cosmos
+            container in the evidence database (`kpi_ladder`,
+            `indicator_definition`, `measurement_method`,
+            `scenario_run`, `delta_scorecard`, `causal_chain`,
+            `benchmark`, `signal`, `evidence_audit`), the Blob
+            immutable cold-archive container, and the Cosmos
+            change-feed → Blob mirror processor.
+          * **Non-critical** stores (failure ⇒ HTTP 200 + `degraded:true`):
+            Application Insights ingestion endpoint and any read-only
+            reporting/cache layer.
+
+        The hardcoded `evidence-audit-cold=True` shortcut MUST be
+        removed (CHK111). Response states are mutually exclusive and
+        exhaustive — `503` (any critical down) | `200 + degraded:true`
+        (one+ non-critical degraded) | `200 + degraded:false`
+        (all healthy).
       operationId: healthzEvidence
       responses:
         '200':
-          description: All Cosmos containers + cold-archive Blob reachable
+          description: All critical stores reachable; `degraded` flags any non-critical issue
           content:
             application/json:
               schema: { $ref: '#/components/schemas/HealthReport' }
         '503':
-          description: At least one backing store unavailable
+          description: |
+            FR-045 / SC-020(b) — at least one **critical** backing
+            store is unavailable. The `checks` map identifies which.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/HealthReport' }
@@ -254,6 +407,25 @@ components:
     CorrelationIdHeader:
       schema: { type: string }
       description: Server-assigned correlation ID (echo of inbound, or freshly minted).
+
+  responses:
+    UnknownFieldRejected:
+      description: |
+        FR-047 / SC-022(a) — Pydantic v2 `extra="forbid"` rejected an
+        unknown request-body or query-parameter field. Applies to every
+        endpoint in this contract.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    AuditWriteFailed:
+      description: |
+        FR-044 / SC-020(a) — the durable audit write that must precede
+        any AU-refusal (or other audit-bearing) response failed after
+        the 3-attempt exponential-backoff (250 ms / 1 s / 4 s) retry
+        budget was exhausted. ProblemDetails.type references FR-044.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
 
   schemas:
     ProblemDetails:
@@ -290,7 +462,7 @@ components:
       required:
         [id, kpi_id, version, capstone_sc_id, name, kind, aiims_function, incident_level,
          life_safety_tier, formula, unit, owner_role, refresh_cadence, target_value,
-         alert_threshold, baseline_source, provenance, confidence_band_rule]
+         alert_threshold, baseline_source, provenance, confidence_band_rule, risk_adjustment]
       properties:
         id: { type: string }
         kpi_id: { type: string }
@@ -315,9 +487,13 @@ components:
         provenance: { type: string, enum: [auto, manual] }
         confidence_band_rule: { $ref: '#/components/schemas/ConfidenceBandRule' }
         risk_adjustment:
-          oneOf:
-            - { $ref: '#/components/schemas/RiskAdjustment' }
-            - { type: 'null' }
+          $ref: '#/components/schemas/RiskAdjustment'
+          description: |
+            FR-041 (Cycle 2) — required. When the spec-037 risk
+            register has no matching row the service materialises a
+            graceful default of `(L=3, C=3)` and sets `provenance`
+            to `manual` so the row counts toward the FR-028 / SC-010
+            ≤50 % per-artefact manual-row cap.
         created_at: { type: string, format: date-time }
 
     KpiLadderGroup:
@@ -474,6 +650,19 @@ components:
           type: string
           pattern: '^specs/'
 
+    CitationRef:
+      type: object
+      required: [organisation, document, year, url]
+      description: |
+        FR-049 (Cycle 2) — every benchmark row carries a structured
+        4-tuple citation. Free-text-only citations are no longer
+        accepted at write time (CHK137).
+      properties:
+        organisation: { type: string }
+        document: { type: string }
+        year: { type: integer, minimum: 1900, maximum: 2100 }
+        url: { type: string, format: uri }
+
     BenchmarkEntry:
       type: object
       required: [id, kpi_id, jurisdiction, kind, source_name, source_citation, target_unit, not_available]
@@ -483,13 +672,21 @@ components:
         jurisdiction: { type: string }
         kind: { type: string, enum: [external_benchmark, prototype_baseline] }
         source_name: { type: string }
-        source_citation: { type: string }
+        source_citation: { $ref: '#/components/schemas/CitationRef' }
         target_value:
           oneOf:
             - { type: number }
             - { type: 'null' }
         target_unit: { type: string }
         not_available: { type: boolean, default: false }
+        provenance:
+          type: string
+          enum: [auto, manual]
+          default: auto
+          description: |
+            FR-049 — `manual` when the citation cannot be sourced from
+            a published Australian standard; counted toward the
+            FR-028 ≤50 % per-artefact manual-row cap.
 
     AuditEntry:
       type: object
@@ -511,6 +708,8 @@ components:
             - degraded_mode_entered
             - small_sample_labelled
             - divergence_flagged
+            - audit_mutation_attempted
+            - language_fallback_used
         actor: { type: string }
         occurred_at: { type: string, format: date-time }
         references:
@@ -520,6 +719,14 @@ components:
         correlation_id: { type: string }
         region: { type: string, enum: [australiaeast, australiasoutheast] }
         archived_to_blob: { type: boolean, default: false }
+        language_fallback_used:
+          type: string
+          pattern: '^[A-Za-z\-]+→[A-Za-z\-]+$'
+          description: |
+            FR-048 / SC-022(b) — populated only on PI-render audit
+            rows where the language-pack lookup chain fell back.
+            Format `<from_code>→<to_code>` (U+2192 RIGHTWARDS ARROW).
+            Absent when no fallback occurred (CHK134 negative case).
 
     AuditTrace:
       type: object
@@ -541,9 +748,81 @@ components:
 
     HealthReport:
       type: object
-      required: [status, checks]
+      required: [status, checks, degraded]
       properties:
         status: { type: string, enum: [ok, degraded, down] }
+        degraded:
+          type: boolean
+          description: |
+            FR-045 — `false` only when every critical AND every
+            non-critical store is healthy. `true` when one or more
+            **non-critical** stores are degraded (response is 200).
+            When any **critical** store is unavailable the response is
+            HTTP 503 and `status="down"`.
         checks:
           type: object
           additionalProperties: { type: boolean }
+          description: |
+            Per-store pass/fail map. Critical stores: `kpi_ladder`,
+            `indicator_definition`, `measurement_method`,
+            `scenario_run`, `delta_scorecard`, `causal_chain`,
+            `benchmark`, `signal`, `evidence_audit`,
+            `evidence_audit_cold_blob`, `audit_change_feed_mirror`.
+            Non-critical stores: `app_insights_ingestion`,
+            `read_only_cache`.
+
+    PublicInformationRender:
+      type: object
+      required: [scenario_id, generated_at, channels, advisory_only]
+      description: |
+        FR-039 / FR-048 / SC-022(b) — multilingual Public Information
+        artefact for one canonical scenario.
+      properties:
+        scenario_id:
+          type: string
+          enum: [bushfire, flood, cyclone, urban_fire, mass_casualty, hazmat, marine_sar]
+        generated_at: { type: string, format: date-time }
+        channels:
+          type: array
+          minItems: 8
+          description: One render per FR-037 language channel (8 channels).
+          items:
+            type: object
+            required: [language_code, body, fk_grade]
+            properties:
+              language_code: { type: string, description: BCP-47 }
+              body: { type: string }
+              fk_grade:
+                type: number
+                description: |
+                  Flesch-Kincaid grade level for the English variant
+                  (FR-039 — MUST be ≤ 8). For non-English variants the
+                  field MAY be null.
+                nullable: true
+              language_fallback_used:
+                type: string
+                pattern: '^[A-Za-z\-]+→[A-Za-z\-]+$'
+                description: |
+                  FR-048 / SC-022(b) — present ONLY when the
+                  language-pack lookup chain fell back. Format
+                  `<from>→<to>` using the U+2192 RIGHTWARDS ARROW.
+                  Absent (field omitted entirely) when no fallback
+                  occurred (CHK134 — negative case asserted).
+        auslan:
+          type: object
+          description: |
+            FR-039 — required for cyclone, bushfire, flood. For the
+            other four scenarios this object MAY be omitted; its
+            absence MUST be paired with `auslan_asset_missing=true`.
+          properties:
+            video_url: { type: string, format: uri }
+            transcript: { type: string }
+            captioned_image_url: { type: string, format: uri }
+        auslan_asset_missing:
+          type: boolean
+          default: false
+          description: |
+            FR-039 deferred-permitted badge. When `true` the UI MUST
+            render a visible `auslan-asset-missing` badge near the
+            content; silent omission is forbidden.
+        advisory_only: { type: boolean, default: true }

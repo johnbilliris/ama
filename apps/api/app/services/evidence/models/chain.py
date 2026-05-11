@@ -4,20 +4,26 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel, Field, condecimal, field_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, condecimal, field_validator
 
 
 class Assumption(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     text: str
     resolved: bool = False  # FR-019
 
 
 class ThreatToValidity(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     text: str
     severity: Literal["low", "medium", "high"]
 
 
 class CausalChain(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     id: str
     capability_id: str
     capability_name: str

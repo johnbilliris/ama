@@ -109,6 +109,15 @@ def get_registry() -> EvidenceClientRegistry:
     global _registry
     with _registry_lock:
         if _registry is None:
+            _is_test_mode = os.environ.get("AMA_TEST_MODE") == "1"
+            _has_azure_config = bool(
+                os.environ.get("AMA_EVIDENCE_COSMOS_ENDPOINT") or os.environ.get("AZURE_COSMOS_ENDPOINT")
+            )
+            if not _is_test_mode and not _has_azure_config:
+                raise RuntimeError(
+                    "FR-042: Azure Cosmos / Blob / App Insights configuration missing"
+                    " — refusing to start with in-memory fallback"
+                )
             _registry = EvidenceClientRegistry()
         return _registry
 
