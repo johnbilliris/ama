@@ -1,0 +1,138 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "lemp-nsw-template",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "template_kind": "LEMP",
+      "sections": [
+        "governance",
+        "prevention",
+        "preparedness",
+        "response",
+        "recovery"
+      ]
+    },
+    {
+      "id": "lemp-vic-template",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "template_kind": "MEMP",
+      "sections": [
+        "governance",
+        "prevention",
+        "preparedness",
+        "response",
+        "recovery"
+      ]
+    },
+    {
+      "id": "lemp-qld-template",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "template_kind": "LEMP",
+      "sections": [
+        "governance",
+        "prevention",
+        "preparedness",
+        "response",
+        "recovery"
+      ]
+    },
+    {
+      "id": "lemp-wa-template",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "template_kind": "MEMP",
+      "sections": [
+        "governance",
+        "prevention",
+        "preparedness",
+        "response",
+        "recovery"
+      ]
+    },
+    {
+      "id": "lemp-sa-template",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "template_kind": "LEMP",
+      "sections": [
+        "governance",
+        "prevention",
+        "preparedness",
+        "response",
+        "recovery"
+      ]
+    },
+    {
+      "id": "lemp-tas-template",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "TAS",
+      "template_kind": "MEMP",
+      "sections": [
+        "governance",
+        "prevention",
+        "preparedness",
+        "response",
+        "recovery"
+      ]
+    },
+    {
+      "id": "lemp-nt-template",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "template_kind": "LEMP",
+      "sections": [
+        "governance",
+        "prevention",
+        "preparedness",
+        "response",
+        "recovery"
+      ]
+    },
+    {
+      "id": "lemp-act-template",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "ACT",
+      "template_kind": "MEMP",
+      "sections": [
+        "governance",
+        "prevention",
+        "preparedness",
+        "response",
+        "recovery"
+      ]
+    }
+  ]
+}

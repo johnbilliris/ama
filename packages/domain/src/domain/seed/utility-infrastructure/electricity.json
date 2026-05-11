@@ -1,0 +1,130 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "util-electricity-001",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "electricity",
+      "asset_class": "substation",
+      "capacity_units": "MVA",
+      "capacity_value": 101,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-electricity-002",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "electricity",
+      "asset_class": "substation",
+      "capacity_units": "MVA",
+      "capacity_value": 102,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-electricity-003",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "electricity",
+      "asset_class": "substation",
+      "capacity_units": "MVA",
+      "capacity_value": 103,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-electricity-004",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "electricity",
+      "asset_class": "substation",
+      "capacity_units": "MVA",
+      "capacity_value": 104,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-electricity-005",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "electricity",
+      "asset_class": "substation",
+      "capacity_units": "MVA",
+      "capacity_value": 105,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-electricity-006",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "electricity",
+      "asset_class": "substation",
+      "capacity_units": "MVA",
+      "capacity_value": 106,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-electricity-007",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "electricity",
+      "asset_class": "substation",
+      "capacity_units": "MVA",
+      "capacity_value": 107,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-electricity-008",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "electricity",
+      "asset_class": "substation",
+      "capacity_units": "MVA",
+      "capacity_value": 108,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-electricity-009",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "electricity",
+      "asset_class": "substation",
+      "capacity_units": "MVA",
+      "capacity_value": 109,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-electricity-010",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "electricity",
+      "asset_class": "substation",
+      "capacity_units": "MVA",
+      "capacity_value": 110,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    }
+  ]
+}

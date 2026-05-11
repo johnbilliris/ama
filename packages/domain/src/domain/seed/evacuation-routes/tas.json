@@ -1,0 +1,58 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "evac-tas-01",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "TAS",
+      "route_name": "Test Evacuation Corridor TAS-01",
+      "from_zone": "tas-zone-01",
+      "to_safe_assembly": "tas-assembly-01",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-tas-02",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "TAS",
+      "route_name": "Test Evacuation Corridor TAS-02",
+      "from_zone": "tas-zone-02",
+      "to_safe_assembly": "tas-assembly-02",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-tas-03",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "TAS",
+      "route_name": "Test Evacuation Corridor TAS-03",
+      "from_zone": "tas-zone-03",
+      "to_safe_assembly": "tas-assembly-03",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-tas-04",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "TAS",
+      "route_name": "Test Evacuation Corridor TAS-04",
+      "from_zone": "tas-zone-04",
+      "to_safe_assembly": "tas-assembly-04",
+      "primary_path": "generic"
+    }
+  ]
+}

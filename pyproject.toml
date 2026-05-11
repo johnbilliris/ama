@@ -18,6 +18,9 @@ dependencies = [
   # for evidence-pack artefacts + YAML loader for the publication-gate config.
   "jsonschema>=4.21",
   "pyyaml>=6.0",
+  # Spec-039 (T001, FR-022) — RFC 8785 JSON Canonicalisation Scheme for
+  # deterministic byte-identical NDJSON encoding (canonical JSON, sorted keys).
+  "rfc8785>=0.1.4",
 ]
 
 [project.optional-dependencies]
@@ -120,3 +123,63 @@ forbidden_modules = ["apps"]
 # NOTE: packages/prompts/ is a YAML-asset directory (no Python module), so it
 # has no imports to lint. Re-add a contract here only if Python code is added
 # under packages/prompts/.
+
+# ────────────────────────────────────────────────────────────────────────────────
+# Spec-039 / Two-Path Rule (SC-007, plan §"Two-Path Rule").
+# Production code MUST NOT import the simulator package, and runtime code MUST
+# NOT import the seed package directly (seed records flow through the loader).
+# ────────────────────────────────────────────────────────────────────────────────
+
+[[tool.importlinter.contracts]]
+name = "simulator_not_imported_by_production"
+type = "forbidden"
+# Enumerate production source modules sibling-wise so the forbidden
+# simulator subtree is NOT itself a descendant of the source set
+# (otherwise import-linter aborts with "Modules have shared descendants").
+# Only modules with a real ``__init__.py`` are listed (import-linter
+# refuses unknown modules).
+source_modules = [
+  "apps.api.app.auth",
+  "apps.api.app.clients",
+  "apps.api.app.domain",
+  "apps.api.app.models",
+  "apps.api.app.observability",
+  "apps.api.app.repositories",
+  "apps.api.app.schemas",
+  "apps.api.app.validators",
+  "apps.api.app.services.eval",
+  "apps.api.app.services.governance",
+  "apps.agents",
+]
+forbidden_modules = [
+  "apps.api.app.services.simulation.feeds",
+  "apps.api.app.services.simulation.replay",
+  "apps.api.app.services.simulation.generators",
+]
+# ``ignore_imports`` is intentionally omitted — the feeds/replay/generators
+# sub-packages do not yet contain inter-module imports, so an unused-ignore
+# entry would itself cause ``lint-imports`` to fail with
+# "No matches for ignored import …". Re-add per-edge ignores here only when
+# such imports legitimately exist (Phase 5+).
+
+[[tool.importlinter.contracts]]
+name = "seed_not_imported_by_runtime"
+type = "forbidden"
+source_modules = [
+  "apps.api",
+  "apps.agents",
+]
+forbidden_modules = [
+  "packages.domain.src.domain.seed",
+]
+# Pre-existing reference-data bootstrap services that intentionally import
+# ``packages.domain.src.domain.seed.bootstrap`` for one-shot in-process
+# warm-up. These were merged before spec-039 and are NOT regressions to
+# fix here; track via plan §"Two-Path Rule — known acceptable callers".
+ignore_imports = [
+  "apps.api.app.services.governance_registry -> packages.domain.src.domain.seed.bootstrap",
+  "apps.api.app.services.organisation_intelligence_service -> packages.domain.src.domain.seed.bootstrap",
+  "apps.api.app.services.outcome_evaluator_service -> packages.domain.src.domain.seed.bootstrap",
+  "apps.api.app.services.preparedness_analysis_service -> packages.domain.src.domain.seed.bootstrap",
+  "apps.api.app.services.seed_service -> packages.domain.src.domain.seed.bootstrap",
+]

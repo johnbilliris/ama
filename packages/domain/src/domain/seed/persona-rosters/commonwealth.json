@@ -1,0 +1,60 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "licence": "CC-BY-4.0",
+    "residency": "AU",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "domain_group": "commonwealth",
+      "fictitious": true,
+      "id": "persona-roster-commonwealth-adf",
+      "licence": "CC-BY-4.0",
+      "persona_id": "adf",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding adf into commonwealth"
+    },
+    {
+      "domain_group": "commonwealth",
+      "fictitious": true,
+      "id": "persona-roster-commonwealth-arc",
+      "licence": "CC-BY-4.0",
+      "persona_id": "arc",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding arc into commonwealth"
+    },
+    {
+      "domain_group": "commonwealth",
+      "fictitious": true,
+      "id": "persona-roster-commonwealth-bom-national",
+      "licence": "CC-BY-4.0",
+      "persona_id": "bom-national",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding bom-national into commonwealth"
+    },
+    {
+      "domain_group": "commonwealth",
+      "fictitious": true,
+      "id": "persona-roster-commonwealth-ga-national",
+      "licence": "CC-BY-4.0",
+      "persona_id": "ga-national",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding ga-national into commonwealth"
+    },
+    {
+      "domain_group": "commonwealth",
+      "fictitious": true,
+      "id": "persona-roster-commonwealth-nema",
+      "licence": "CC-BY-4.0",
+      "persona_id": "nema",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding nema into commonwealth"
+    }
+  ]
+}

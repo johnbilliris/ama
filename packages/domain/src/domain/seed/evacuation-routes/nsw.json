@@ -1,0 +1,58 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "evac-nsw-01",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "route_name": "Test Evacuation Corridor NSW-01",
+      "from_zone": "nsw-zone-01",
+      "to_safe_assembly": "nsw-assembly-01",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-nsw-02",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "route_name": "Test Evacuation Corridor NSW-02",
+      "from_zone": "nsw-zone-02",
+      "to_safe_assembly": "nsw-assembly-02",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-nsw-03",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "route_name": "Test Evacuation Corridor NSW-03",
+      "from_zone": "nsw-zone-03",
+      "to_safe_assembly": "nsw-assembly-03",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-nsw-04",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "route_name": "Test Evacuation Corridor NSW-04",
+      "from_zone": "nsw-zone-04",
+      "to_safe_assembly": "nsw-assembly-04",
+      "primary_path": "generic"
+    }
+  ]
+}

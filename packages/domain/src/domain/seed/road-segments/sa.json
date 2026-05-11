@@ -1,0 +1,230 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "road-sa-001",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-001",
+      "functional_class": "sub-arterial",
+      "length_km": 0.75
+    },
+    {
+      "id": "road-sa-002",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-002",
+      "functional_class": "local",
+      "length_km": 1.0
+    },
+    {
+      "id": "road-sa-003",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-003",
+      "functional_class": "collector",
+      "length_km": 1.25
+    },
+    {
+      "id": "road-sa-004",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-004",
+      "functional_class": "arterial",
+      "length_km": 1.5
+    },
+    {
+      "id": "road-sa-005",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-005",
+      "functional_class": "sub-arterial",
+      "length_km": 1.75
+    },
+    {
+      "id": "road-sa-006",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-006",
+      "functional_class": "local",
+      "length_km": 2.0
+    },
+    {
+      "id": "road-sa-007",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-007",
+      "functional_class": "collector",
+      "length_km": 2.25
+    },
+    {
+      "id": "road-sa-008",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-008",
+      "functional_class": "arterial",
+      "length_km": 2.5
+    },
+    {
+      "id": "road-sa-009",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-009",
+      "functional_class": "sub-arterial",
+      "length_km": 2.75
+    },
+    {
+      "id": "road-sa-010",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-010",
+      "functional_class": "local",
+      "length_km": 3.0
+    },
+    {
+      "id": "road-sa-011",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-011",
+      "functional_class": "collector",
+      "length_km": 3.25
+    },
+    {
+      "id": "road-sa-012",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-012",
+      "functional_class": "arterial",
+      "length_km": 3.5
+    },
+    {
+      "id": "road-sa-013",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-013",
+      "functional_class": "sub-arterial",
+      "length_km": 3.75
+    },
+    {
+      "id": "road-sa-014",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-014",
+      "functional_class": "local",
+      "length_km": 4.0
+    },
+    {
+      "id": "road-sa-015",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-015",
+      "functional_class": "collector",
+      "length_km": 4.25
+    },
+    {
+      "id": "road-sa-016",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-016",
+      "functional_class": "arterial",
+      "length_km": 4.5
+    },
+    {
+      "id": "road-sa-017",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-017",
+      "functional_class": "sub-arterial",
+      "length_km": 4.75
+    },
+    {
+      "id": "road-sa-018",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-018",
+      "functional_class": "local",
+      "length_km": 5.0
+    },
+    {
+      "id": "road-sa-019",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-019",
+      "functional_class": "collector",
+      "length_km": 5.25
+    },
+    {
+      "id": "road-sa-020",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "segment_id": "SEG-SA-020",
+      "functional_class": "arterial",
+      "length_km": 5.5
+    }
+  ]
+}

@@ -1,0 +1,230 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "road-qld-001",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-001",
+      "functional_class": "sub-arterial",
+      "length_km": 0.75
+    },
+    {
+      "id": "road-qld-002",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-002",
+      "functional_class": "local",
+      "length_km": 1.0
+    },
+    {
+      "id": "road-qld-003",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-003",
+      "functional_class": "collector",
+      "length_km": 1.25
+    },
+    {
+      "id": "road-qld-004",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-004",
+      "functional_class": "arterial",
+      "length_km": 1.5
+    },
+    {
+      "id": "road-qld-005",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-005",
+      "functional_class": "sub-arterial",
+      "length_km": 1.75
+    },
+    {
+      "id": "road-qld-006",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-006",
+      "functional_class": "local",
+      "length_km": 2.0
+    },
+    {
+      "id": "road-qld-007",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-007",
+      "functional_class": "collector",
+      "length_km": 2.25
+    },
+    {
+      "id": "road-qld-008",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-008",
+      "functional_class": "arterial",
+      "length_km": 2.5
+    },
+    {
+      "id": "road-qld-009",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-009",
+      "functional_class": "sub-arterial",
+      "length_km": 2.75
+    },
+    {
+      "id": "road-qld-010",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-010",
+      "functional_class": "local",
+      "length_km": 3.0
+    },
+    {
+      "id": "road-qld-011",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-011",
+      "functional_class": "collector",
+      "length_km": 3.25
+    },
+    {
+      "id": "road-qld-012",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-012",
+      "functional_class": "arterial",
+      "length_km": 3.5
+    },
+    {
+      "id": "road-qld-013",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-013",
+      "functional_class": "sub-arterial",
+      "length_km": 3.75
+    },
+    {
+      "id": "road-qld-014",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-014",
+      "functional_class": "local",
+      "length_km": 4.0
+    },
+    {
+      "id": "road-qld-015",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-015",
+      "functional_class": "collector",
+      "length_km": 4.25
+    },
+    {
+      "id": "road-qld-016",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-016",
+      "functional_class": "arterial",
+      "length_km": 4.5
+    },
+    {
+      "id": "road-qld-017",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-017",
+      "functional_class": "sub-arterial",
+      "length_km": 4.75
+    },
+    {
+      "id": "road-qld-018",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-018",
+      "functional_class": "local",
+      "length_km": 5.0
+    },
+    {
+      "id": "road-qld-019",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-019",
+      "functional_class": "collector",
+      "length_km": 5.25
+    },
+    {
+      "id": "road-qld-020",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "segment_id": "SEG-QLD-020",
+      "functional_class": "arterial",
+      "length_km": 5.5
+    }
+  ]
+}

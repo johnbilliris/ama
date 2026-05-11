@@ -1,0 +1,205 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "hosp-wa-01",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "facility_id": "FACILITY-WA-01",
+      "facility_name": "Test Hospital WA #01",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics"
+      ],
+      "beds_total": 75
+    },
+    {
+      "id": "hosp-wa-02",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "facility_id": "FACILITY-WA-02",
+      "facility_name": "Test Hospital WA #02",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult"
+      ],
+      "beds_total": 100
+    },
+    {
+      "id": "hosp-wa-03",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "facility_id": "FACILITY-WA-03",
+      "facility_name": "Test Hospital WA #03",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds"
+      ],
+      "beds_total": 125
+    },
+    {
+      "id": "hosp-wa-04",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "facility_id": "FACILITY-WA-04",
+      "facility_name": "Test Hospital WA #04",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke"
+      ],
+      "beds_total": 150
+    },
+    {
+      "id": "hosp-wa-05",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "facility_id": "FACILITY-WA-05",
+      "facility_name": "Test Hospital WA #05",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke",
+        "cath-lab"
+      ],
+      "beds_total": 175
+    },
+    {
+      "id": "hosp-wa-06",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "facility_id": "FACILITY-WA-06",
+      "facility_name": "Test Hospital WA #06",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2"
+      ],
+      "beds_total": 200
+    },
+    {
+      "id": "hosp-wa-07",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "facility_id": "FACILITY-WA-07",
+      "facility_name": "Test Hospital WA #07",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics"
+      ],
+      "beds_total": 225
+    },
+    {
+      "id": "hosp-wa-08",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "facility_id": "FACILITY-WA-08",
+      "facility_name": "Test Hospital WA #08",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult"
+      ],
+      "beds_total": 250
+    },
+    {
+      "id": "hosp-wa-09",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "facility_id": "FACILITY-WA-09",
+      "facility_name": "Test Hospital WA #09",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds"
+      ],
+      "beds_total": 275
+    },
+    {
+      "id": "hosp-wa-10",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "WA",
+      "facility_id": "FACILITY-WA-10",
+      "facility_name": "Test Hospital WA #10",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke"
+      ],
+      "beds_total": 300
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "alert-bushfire-warning-zh-Hans",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "template_id": "bushfire-warning",
+      "locale": "zh-Hans",
+      "body": "[zh-Hans] TEST \u2014 DO NOT BROADCAST: Bushfire warning. Take action now.",
+      "placeholder": false,
+      "wcag_audio_description": "placeholder"
+    },
+    {
+      "id": "alert-flood-evac-zh-Hans",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "template_id": "flood-evac",
+      "locale": "zh-Hans",
+      "body": "[zh-Hans] TEST \u2014 DO NOT BROADCAST: Flood \u2014 evacuate to higher ground.",
+      "placeholder": false,
+      "wcag_audio_description": "placeholder"
+    },
+    {
+      "id": "alert-cyclone-watch-zh-Hans",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "template_id": "cyclone-watch",
+      "locale": "zh-Hans",
+      "body": "[zh-Hans] TEST \u2014 DO NOT BROADCAST: Tropical cyclone watch in effect.",
+      "placeholder": false,
+      "wcag_audio_description": "placeholder"
+    },
+    {
+      "id": "alert-earthquake-aftershock-zh-Hans",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "template_id": "earthquake-aftershock",
+      "locale": "zh-Hans",
+      "body": "[zh-Hans] TEST \u2014 DO NOT BROADCAST: Aftershock advisory \u2014 drop, cover, hold.",
+      "placeholder": false,
+      "wcag_audio_description": "placeholder"
+    },
+    {
+      "id": "alert-heatwave-advisory-zh-Hans",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "template_id": "heatwave-advisory",
+      "locale": "zh-Hans",
+      "body": "[zh-Hans] TEST \u2014 DO NOT BROADCAST: Heatwave advisory \u2014 check on neighbours.",
+      "placeholder": false,
+      "wcag_audio_description": "placeholder"
+    }
+  ]
+}

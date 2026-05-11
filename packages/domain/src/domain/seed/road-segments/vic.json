@@ -1,0 +1,230 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "road-vic-001",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-001",
+      "functional_class": "sub-arterial",
+      "length_km": 0.75
+    },
+    {
+      "id": "road-vic-002",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-002",
+      "functional_class": "local",
+      "length_km": 1.0
+    },
+    {
+      "id": "road-vic-003",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-003",
+      "functional_class": "collector",
+      "length_km": 1.25
+    },
+    {
+      "id": "road-vic-004",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-004",
+      "functional_class": "arterial",
+      "length_km": 1.5
+    },
+    {
+      "id": "road-vic-005",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-005",
+      "functional_class": "sub-arterial",
+      "length_km": 1.75
+    },
+    {
+      "id": "road-vic-006",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-006",
+      "functional_class": "local",
+      "length_km": 2.0
+    },
+    {
+      "id": "road-vic-007",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-007",
+      "functional_class": "collector",
+      "length_km": 2.25
+    },
+    {
+      "id": "road-vic-008",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-008",
+      "functional_class": "arterial",
+      "length_km": 2.5
+    },
+    {
+      "id": "road-vic-009",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-009",
+      "functional_class": "sub-arterial",
+      "length_km": 2.75
+    },
+    {
+      "id": "road-vic-010",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-010",
+      "functional_class": "local",
+      "length_km": 3.0
+    },
+    {
+      "id": "road-vic-011",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-011",
+      "functional_class": "collector",
+      "length_km": 3.25
+    },
+    {
+      "id": "road-vic-012",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-012",
+      "functional_class": "arterial",
+      "length_km": 3.5
+    },
+    {
+      "id": "road-vic-013",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-013",
+      "functional_class": "sub-arterial",
+      "length_km": 3.75
+    },
+    {
+      "id": "road-vic-014",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-014",
+      "functional_class": "local",
+      "length_km": 4.0
+    },
+    {
+      "id": "road-vic-015",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-015",
+      "functional_class": "collector",
+      "length_km": 4.25
+    },
+    {
+      "id": "road-vic-016",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-016",
+      "functional_class": "arterial",
+      "length_km": 4.5
+    },
+    {
+      "id": "road-vic-017",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-017",
+      "functional_class": "sub-arterial",
+      "length_km": 4.75
+    },
+    {
+      "id": "road-vic-018",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-018",
+      "functional_class": "local",
+      "length_km": 5.0
+    },
+    {
+      "id": "road-vic-019",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-019",
+      "functional_class": "collector",
+      "length_km": 5.25
+    },
+    {
+      "id": "road-vic-020",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "segment_id": "SEG-VIC-020",
+      "functional_class": "arterial",
+      "length_km": 5.5
+    }
+  ]
+}

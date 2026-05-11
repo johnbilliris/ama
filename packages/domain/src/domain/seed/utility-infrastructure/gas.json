@@ -1,0 +1,130 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "util-gas-001",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "gas",
+      "asset_class": "city-gate",
+      "capacity_units": "PJ",
+      "capacity_value": 101,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-gas-002",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "gas",
+      "asset_class": "city-gate",
+      "capacity_units": "PJ",
+      "capacity_value": 102,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-gas-003",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "gas",
+      "asset_class": "city-gate",
+      "capacity_units": "PJ",
+      "capacity_value": 103,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-gas-004",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "gas",
+      "asset_class": "city-gate",
+      "capacity_units": "PJ",
+      "capacity_value": 104,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-gas-005",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "gas",
+      "asset_class": "city-gate",
+      "capacity_units": "PJ",
+      "capacity_value": 105,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-gas-006",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "gas",
+      "asset_class": "city-gate",
+      "capacity_units": "PJ",
+      "capacity_value": 106,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-gas-007",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "gas",
+      "asset_class": "city-gate",
+      "capacity_units": "PJ",
+      "capacity_value": 107,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-gas-008",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "gas",
+      "asset_class": "city-gate",
+      "capacity_units": "PJ",
+      "capacity_value": 108,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-gas-009",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "gas",
+      "asset_class": "city-gate",
+      "capacity_units": "PJ",
+      "capacity_value": 109,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-gas-010",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "gas",
+      "asset_class": "city-gate",
+      "capacity_units": "PJ",
+      "capacity_value": 110,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    }
+  ]
+}

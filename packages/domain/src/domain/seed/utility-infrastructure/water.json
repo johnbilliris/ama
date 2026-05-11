@@ -1,0 +1,130 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "util-water-001",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "water",
+      "asset_class": "reservoir",
+      "capacity_units": "ML",
+      "capacity_value": 101,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-water-002",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "water",
+      "asset_class": "reservoir",
+      "capacity_units": "ML",
+      "capacity_value": 102,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-water-003",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "water",
+      "asset_class": "reservoir",
+      "capacity_units": "ML",
+      "capacity_value": 103,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-water-004",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "water",
+      "asset_class": "reservoir",
+      "capacity_units": "ML",
+      "capacity_value": 104,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-water-005",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "water",
+      "asset_class": "reservoir",
+      "capacity_units": "ML",
+      "capacity_value": 105,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-water-006",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "water",
+      "asset_class": "reservoir",
+      "capacity_units": "ML",
+      "capacity_value": 106,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-water-007",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "water",
+      "asset_class": "reservoir",
+      "capacity_units": "ML",
+      "capacity_value": 107,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-water-008",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "water",
+      "asset_class": "reservoir",
+      "capacity_units": "ML",
+      "capacity_value": 108,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-water-009",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "water",
+      "asset_class": "reservoir",
+      "capacity_units": "ML",
+      "capacity_value": 109,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-water-010",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "water",
+      "asset_class": "reservoir",
+      "capacity_units": "ML",
+      "capacity_value": 110,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    }
+  ]
+}

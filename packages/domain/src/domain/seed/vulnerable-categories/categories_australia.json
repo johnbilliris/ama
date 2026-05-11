@@ -1,0 +1,250 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "vc-elderly-living-alone",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "elderly-living-alone",
+      "description": "Generic vulnerability category: elderly living alone.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-mobility-impaired",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "mobility-impaired",
+      "description": "Generic vulnerability category: mobility impaired.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-blind-or-low-vision",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "blind-or-low-vision",
+      "description": "Generic vulnerability category: blind or low vision.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-deaf-or-hard-of-hearing",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "deaf-or-hard-of-hearing",
+      "description": "Generic vulnerability category: deaf or hard of hearing.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-cognitive-impairment",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "cognitive-impairment",
+      "description": "Generic vulnerability category: cognitive impairment.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-mental-health-support-needs",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "mental-health-support-needs",
+      "description": "Generic vulnerability category: mental health support needs.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-non-english-speaking-background",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "non-english-speaking-background",
+      "description": "Generic vulnerability category: non english speaking background.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-newly-arrived-migrant",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "newly-arrived-migrant",
+      "description": "Generic vulnerability category: newly arrived migrant.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-international-student",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "international-student",
+      "description": "Generic vulnerability category: international student.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-tourist-visitor",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "tourist-visitor",
+      "description": "Generic vulnerability category: tourist visitor.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-unaccompanied-minor",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "unaccompanied-minor",
+      "description": "Generic vulnerability category: unaccompanied minor.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-pregnant-or-recent-birth",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "pregnant-or-recent-birth",
+      "description": "Generic vulnerability category: pregnant or recent birth.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-infant-and-toddler",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "infant-and-toddler",
+      "description": "Generic vulnerability category: infant and toddler.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-chronic-illness-equipment-dependent",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "chronic-illness-equipment-dependent",
+      "description": "Generic vulnerability category: chronic illness equipment dependent.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-dialysis-dependent",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "dialysis-dependent",
+      "description": "Generic vulnerability category: dialysis dependent.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-palliative-care",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "palliative-care",
+      "description": "Generic vulnerability category: palliative care.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-homelessness",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "homelessness",
+      "description": "Generic vulnerability category: homelessness.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-rough-sleeper",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "rough-sleeper",
+      "description": "Generic vulnerability category: rough sleeper.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-supported-accommodation",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "supported-accommodation",
+      "description": "Generic vulnerability category: supported accommodation.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-domestic-violence-shelter-resident",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "domestic-violence-shelter-resident",
+      "description": "Generic vulnerability category: domestic violence shelter resident.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-correctional-facility-resident",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "correctional-facility-resident",
+      "description": "Generic vulnerability category: correctional facility resident.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-remote-isolated-community",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "remote-isolated-community",
+      "description": "Generic vulnerability category: remote isolated community.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-off-grid-property",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "off-grid-property",
+      "description": "Generic vulnerability category: off grid property.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    },
+    {
+      "id": "vc-caravan-park-long-term-resident",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "category_code": "caravan-park-long-term-resident",
+      "description": "Generic vulnerability category: caravan park long term resident.",
+      "notes": "Category-only \u2014 no individual identifiers permitted (FR-045)."
+    }
+  ]
+}
