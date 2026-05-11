@@ -55,13 +55,18 @@ def test_articles_etag(client: TestClient) -> None:
 
 
 def test_chat_sse_stream(client: TestClient) -> None:
+    """Without live Foundry (HELP_FOUNDRY_LIVE!=1), the route MUST emit an honest
+    refusal stream — never fake citations (FR-014, Constitution Principle I).
+    Contract: meta is first, done is last, refusal appears between when no
+    grounded chunks are available."""
     with client.stream("POST", "/help/chat/ask", json={"message": "hello"}, headers=HDR) as r:
         body = b"".join(r.iter_bytes()).decode("utf-8")
     assert r.status_code == 200
     assert "event: meta" in body
-    assert "event: delta" in body
-    assert "event: citation" in body
+    assert "event: refusal" in body
     assert "event: done" in body
+    # Honest behaviour — never fabricated citations when corpus support is missing.
+    assert "event: citation" not in body
 
 
 def test_chat_feedback(client: TestClient) -> None:

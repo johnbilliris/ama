@@ -33,7 +33,10 @@ targetScope = 'resourceGroup'
 @description('Name of the environment — used as a prefix for all resources')
 param environmentName string
 
-@description('Primary location for all resources')
+@description('Primary location for all resources — Australian residency is non-negotiable (Constitution NN-2; spec-038 FR-018). Paired DR (australiasoutheast) is selected per-module on its own parameter, not through this primary location.')
+@allowed([
+  'australiaeast'
+])
 param location string
 
 @description('Alert email recipient')
