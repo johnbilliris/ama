@@ -147,7 +147,11 @@ def append_snapshot_record(row: dict[str, Any]) -> dict[str, Any]:
 CrossTenantPolicy = Literal["deny", "allow_global"]
 
 
-def assert_tenant_scope(rows: Iterable[dict[str, Any]], tenant_id: str, policy: CrossTenantPolicy = "allow_global") -> None:
+def assert_tenant_scope(
+    rows: Iterable[dict[str, Any]],
+    tenant_id: str,
+    policy: CrossTenantPolicy = "allow_global",
+) -> None:
     """Defence-in-depth: every returned row must match ``tenant_id`` or be global."""
     for r in rows:
         rt = r.get("tenant_id")
@@ -156,6 +160,103 @@ def assert_tenant_scope(rows: Iterable[dict[str, Any]], tenant_id: str, policy: 
         if policy == "allow_global" and rt == "__global__":
             continue
         raise PermissionError(f"cross-tenant leak detected: row tenant {rt!r} ≠ {tenant_id!r}")
+
+
+# ---------- High-level facade used by FastAPI routes ----------
+
+
+class HelpRepositories:
+    """Tenant-aware facade over the Cosmos containers used by Phase 3 routes."""
+
+    def active_snapshot_id(self, tenant_id: str) -> str | None:
+        rows = query(SNAPSHOT_RECORDS, tenant_id, where={"status": "active"})
+        if rows:
+            return rows[0].get("id")
+        # fallback: any global active snapshot
+        global_rows = query(SNAPSHOT_RECORDS, "__global__", where={"status": "active"})
+        return global_rows[0]["id"] if global_rows else None
+
+    def list_snapshots(self, tenant_id: str) -> list[dict[str, Any]]:
+        return query(SNAPSHOT_RECORDS, tenant_id) + query(SNAPSHOT_RECORDS, "__global__")
+
+    def get_chat_session(self, *, tenant_id: str, session_id: str, user_id: str) -> dict[str, Any] | None:
+        row = get(CHAT_SESSIONS, tenant_id, session_id)
+        if not row:
+            return None
+        if row.get("user_id") != user_id:
+            return None
+        return row
+
+    def upsert_chat_session(self, row: dict[str, Any]) -> dict[str, Any]:
+        return upsert(CHAT_SESSIONS, row["tenant_id"], row)
+
+    def enqueue_feedback(
+        self,
+        *,
+        tenant_id: str,
+        user_id: str,
+        target_kind: str,
+        target_id: str,
+        rating: str,
+        comment: str | None,
+        backlog_id: str,
+    ) -> dict[str, Any]:
+        row = {
+            "id": backlog_id,
+            "tenant_id": tenant_id,
+            "user_id": user_id,
+            "target_kind": target_kind,
+            "target_id": target_id,
+            "rating": rating,
+            "comment": comment,
+            "status": "pending",
+        }
+        return upsert(CONTENT_REVIEW_BACKLOG, tenant_id, row)
+
+    def list_articles(
+        self,
+        *,
+        tenant_id: str,
+        persona: str | None = None,
+        surface: str | None = None,
+        kind: str | None = None,
+        limit: int = 50,
+    ) -> list[dict[str, Any]]:
+        rows = query(HELP_ARTICLES, tenant_id) + query(HELP_ARTICLES, "__global__")
+        if persona:
+            rows = [r for r in rows if persona in (r.get("personas") or [])]
+        if surface:
+            rows = [r for r in rows if surface in (r.get("surfaces") or [])]
+        if kind:
+            rows = [r for r in rows if r.get("kind") == kind]
+        return rows[:limit]
+
+    def get_article(self, *, tenant_id: str, slug: str) -> dict[str, Any] | None:
+        for src in (tenant_id, "__global__"):
+            rows = query(HELP_ARTICLES, src, where={"slug": slug})
+            if rows:
+                return rows[0]
+        return None
+
+    def list_staleness_flags(self, tenant_id: str) -> list[dict[str, Any]]:
+        return query("staleness_flags", tenant_id, where={"status": "open"})
+
+    def upsert_staleness_flag(self, row: dict[str, Any]) -> dict[str, Any]:
+        return upsert("staleness_flags", row["tenant_id"], row)
+
+    def get_support_handoff(self, tenant_id: str) -> dict[str, Any] | None:
+        rows = query(SUPPORT_HANDOFF_CONFIG, tenant_id)
+        return rows[0] if rows else None
+
+    def put_support_handoff(self, row: dict[str, Any]) -> dict[str, Any]:
+        return upsert(SUPPORT_HANDOFF_CONFIG, row["tenant_id"], row)
+
+
+_REPOS = HelpRepositories()
+
+
+def get_help_repositories() -> HelpRepositories:
+    return _REPOS
 
 
 def reset_in_memory_store() -> None:
@@ -170,6 +271,7 @@ __all__ = [
     "CHAT_SESSIONS",
     "CONTENT_REVIEW_BACKLOG",
     "HELP_ARTICLES",
+    "HelpRepositories",
     "SCREENSHOT_REGISTRY",
     "SNAPSHOT_RECORDS",
     "SUPPORT_HANDOFF_CONFIG",
@@ -177,6 +279,7 @@ __all__ = [
     "append_snapshot_record",
     "assert_tenant_scope",
     "get",
+    "get_help_repositories",
     "query",
     "reset_in_memory_store",
     "upsert",
