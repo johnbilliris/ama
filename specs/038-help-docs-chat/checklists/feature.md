@@ -13,27 +13,27 @@
 
 For each operational role, confirm: (a) persona landing page exists, (b) "first 15 minutes" tour, (c) screen-by-screen guides for the role's surfaces, (d) annotated screenshots present, (e) chat persona-context wiring (FR-015/FR-027) returns persona-tailored retrieval. **[Spec §Personas Operational, FR-002, FR-004, FR-027, FR-028]**
 
-- [ ] CHK001 **[Gate]** Incident Commander — landing page, 15-min tour, AIIMS Controller workflow, public-alert-approval guide, cross-jurisdiction escalation guide, span-of-control warnings, audit traceability, screenshots, persona-context wiring verified
-- [ ] CHK002 **[Gate]** Operations Officer — landing page, 15-min tour, tactical task assignment/reassignment, multi-sector coordination, staging strategy, agent-recommendations review, escalation-up guide, screenshots, persona-context wiring verified
-- [ ] CHK003 **[Gate]** Planning Officer — landing page, 15-min tour, situation reporting, intelligence aggregation, resource forecasting, action-plan templates, map overlays, confidence/provenance reading, screenshots, persona-context wiring verified
-- [ ] CHK004 **[Gate]** Logistics Officer — landing page, 15-min tour, supply-chain dashboards, transport coordination, forward-staging requests, consumption tracking, supplier directory, screenshots, persona-context wiring verified
-- [ ] CHK005 **[Gate]** Public Information Officer — landing page, 15-min tour, multilingual alert composer, accessibility checker, channel selection, IC-approval submission, social monitoring, Principle V coverage, screenshots, persona-context wiring verified
-- [ ] CHK006 **[Gate]** Field Coordinator — landing page, 15-min tour, mobile/field workflows, degraded-connectivity behaviour, local situation reporting, forward-staging accountability, life-safety defaults, screenshots, persona-context wiring verified
-- [ ] CHK007 **[Gate]** Resilience Planner — landing page, 15-min tour, scenario design, simulation config & warp playback, gap-analysis exports, lessons-learned ingestion, screenshots, persona-context wiring verified
-- [ ] CHK008 **[Gate]** Executive Leader — landing page, 15-min tour, strategic dashboards, cross-jurisdiction status, escalations, policy decision logs, briefing exports, screenshots, persona-context wiring verified
-- [ ] CHK009 **[Gate]** Observer-Auditor — landing page, 15-min tour, read-only audit timeline navigation, framework-deviation review, append-only integrity verification, lessons-learned export, screenshots, **chat MUST NOT instruct state-changing actions** (FR-025) verified
-- [ ] CHK010 **[Gate]** Risk Manager — landing page, 15-min tour, hazard assessment, risk levels, consequence analysis, decision support, Risk Assessment Agent integration, screenshots, persona-context wiring verified
+- [x] CHK001 **[Gate]** Incident Commander — landing page, 15-min tour, AIIMS Controller workflow, public-alert-approval guide, cross-jurisdiction escalation guide, span-of-control warnings, audit traceability, screenshots, persona-context wiring verified
+- [x] CHK002 **[Gate]** Operations Officer — landing page, 15-min tour, tactical task assignment/reassignment, multi-sector coordination, staging strategy, agent-recommendations review, escalation-up guide, screenshots, persona-context wiring verified
+- [x] CHK003 **[Gate]** Planning Officer — landing page, 15-min tour, situation reporting, intelligence aggregation, resource forecasting, action-plan templates, map overlays, confidence/provenance reading, screenshots, persona-context wiring verified
+- [x] CHK004 **[Gate]** Logistics Officer — landing page, 15-min tour, supply-chain dashboards, transport coordination, forward-staging requests, consumption tracking, supplier directory, screenshots, persona-context wiring verified
+- [x] CHK005 **[Gate]** Public Information Officer — landing page, 15-min tour, multilingual alert composer, accessibility checker, channel selection, IC-approval submission, social monitoring, Principle V coverage, screenshots, persona-context wiring verified
+- [x] CHK006 **[Gate]** Field Coordinator — landing page, 15-min tour, mobile/field workflows, degraded-connectivity behaviour, local situation reporting, forward-staging accountability, life-safety defaults, screenshots, persona-context wiring verified
+- [x] CHK007 **[Gate]** Resilience Planner — landing page, 15-min tour, scenario design, simulation config & warp playback, gap-analysis exports, lessons-learned ingestion, screenshots, persona-context wiring verified
+- [x] CHK008 **[Gate]** Executive Leader — landing page, 15-min tour, strategic dashboards, cross-jurisdiction status, escalations, policy decision logs, briefing exports, screenshots, persona-context wiring verified
+- [x] CHK009 **[Gate]** Observer-Auditor — landing page, 15-min tour, read-only audit timeline navigation, framework-deviation review, append-only integrity verification, lessons-learned export, screenshots, **chat MUST NOT instruct state-changing actions** (FR-025) verified
+- [x] CHK010 **[Gate]** Risk Manager — landing page, 15-min tour, hazard assessment, risk levels, consequence analysis, decision support, Risk Assessment Agent integration, screenshots, persona-context wiring verified
 
 ## 2. Persona Coverage — Sector Clusters (6)
 
 For each sector cluster, confirm: landing page, cluster-specific workflow guide, jurisdictional theming visible in screenshots, chat persona-context biases retrieval to cluster scope. **[Spec §Personas Sector clusters, FR-002]**
 
-- [ ] CHK011 **[Gate]** `frontline-fire` (NSW RFS, FRNSW, CFA-VIC, FRV, SAMFS, SACFS, QFD, DFES-WA, TFS, NTFRS, ACT-FR, ACT-RFS, surf-lifesaving, bushfires-NT, ASA) — incident intake, jurisdictional theming, resource availability, tasking ack, mutual-aid handoffs; NSW-jurisdiction screenshot variant present (Acceptance Scenario US1 #3)
-- [ ] CHK012 **[Gate]** `frontline-medical` (AV, NSW Ambulance, QAS, SAAS, SJA family, AT, ACT Ambulance, RFDS) — patient-load reporting, hospital availability, medical supply requests, retrieval coordination
-- [ ] CHK013 **[Gate]** `frontline-police` (VicPol, NSWPF, QPS, SAPOL, WAPOL, TasPol, NTPF, ACT Policing, AFP, ABF) — perimeter coordination, traffic management, evacuation enforcement, multi-agency liaison
-- [ ] CHK014 **[Gate]** `frontline-ses & marine` (SES VIC/NSW/QLD/SA/TAS/ACT, NTES, MRNSW) — storm/flood/marine workflows, volunteer activation, rescue tasking, water-domain SA
-- [ ] CHK015 **[Gate]** `commonwealth` (NEMA, ADF, BoM-national, Geoscience Australia, Australian Red Cross) — national coordination dashboards, RFA flows, weather/geo data interpretation, recovery hand-off
-- [ ] CHK016 **[Gate]** `cross-sector` (community NGOs, health, local/state/territory government, transport, utility, volunteer) — partner intake, jurisdictional context, recovery coordination, volunteer activation, infrastructure status
+- [x] CHK011 **[Gate]** `frontline-fire` (NSW RFS, FRNSW, CFA-VIC, FRV, SAMFS, SACFS, QFD, DFES-WA, TFS, NTFRS, ACT-FR, ACT-RFS, surf-lifesaving, bushfires-NT, ASA) — incident intake, jurisdictional theming, resource availability, tasking ack, mutual-aid handoffs; NSW-jurisdiction screenshot variant present (Acceptance Scenario US1 #3)
+- [x] CHK012 **[Gate]** `frontline-medical` (AV, NSW Ambulance, QAS, SAAS, SJA family, AT, ACT Ambulance, RFDS) — patient-load reporting, hospital availability, medical supply requests, retrieval coordination
+- [x] CHK013 **[Gate]** `frontline-police` (VicPol, NSWPF, QPS, SAPOL, WAPOL, TasPol, NTPF, ACT Policing, AFP, ABF) — perimeter coordination, traffic management, evacuation enforcement, multi-agency liaison
+- [x] CHK014 **[Gate]** `frontline-ses & marine` (SES VIC/NSW/QLD/SA/TAS/ACT, NTES, MRNSW) — storm/flood/marine workflows, volunteer activation, rescue tasking, water-domain SA
+- [x] CHK015 **[Gate]** `commonwealth` (NEMA, ADF, BoM-national, Geoscience Australia, Australian Red Cross) — national coordination dashboards, RFA flows, weather/geo data interpretation, recovery hand-off
+- [x] CHK016 **[Gate]** `cross-sector` (community NGOs, health, local/state/territory government, transport, utility, volunteer) — partner intake, jurisdictional context, recovery coordination, volunteer activation, infrastructure status
 
 ## 3. Help Content Domains (FR-003, Spec §Help Content Domains 1–9)
 
@@ -66,18 +66,18 @@ For each sector cluster, confirm: landing page, cluster-specific workflow guide,
 - [ ] CHK037 **[Gate]** Chat retrieval **never** resolves live `HEAD` of `specs/**`; resolves only the active Help-approved snapshot (FR-011, FR-011a) — verified by inspecting retrieval pipeline + integration test
 - [ ] CHK038 **[Gate]** Only specs in `Active`/`Implemented` status that passed Help-approval review are admitted to the snapshot; draft/experimental/archived/unreviewed are excluded — snapshot manifest review evidence
 - [ ] CHK039 **[Gate]** Snapshot record persists: `snapshot_id`, included `spec_id+version` list, approver identities (both), approval timestamp (FR-011a)
-- [ ] CHK040 **[Gate]** Snapshots are **immutable**; no in-place edit path exists (FR-011c) — verified by attempting an edit and observing rejection
-- [ ] CHK041 **[Gate]** Dual sign-off enforced: Help-content owner **AND** safety/governance lead required to publish (FR-011b, mirrors spec-005 FR-015)
-- [ ] CHK042 **[Gate]** Approver identities + timestamps surfaced in chat audit log (FR-011b)
-- [ ] CHK043 **[Gate]** Rollback completes within **5 minutes** by re-publishing prior immutable snapshot id via configuration flip (no code redeploy) (FR-011c, mirrors spec-029 FR-008) — timed rehearsal evidence
-- [ ] CHK044 **[Gate]** Rollback emits `audit.snapshot_rollback` event with `previous_snapshot_id`, `restored_snapshot_id`, `actor_id`, `change_reason`
-- [ ] CHK045 **[Gate]** Deep links into superseded content render deprecation notice with old snapshot id, replacement date, new snapshot id, **and** citation to current equivalent — never silently substituted (FR-011d, Principle IV)
-- [ ] CHK046 Snapshot refresh cadence is at minimum once per release; out-of-cycle refresh path uses the same approval gate
+- [x] CHK040 **[Gate]** Snapshots are **immutable**; no in-place edit path exists (FR-011c) — verified by attempting an edit and observing rejection
+- [x] CHK041 **[Gate]** Dual sign-off enforced: Help-content owner **AND** safety/governance lead required to publish (FR-011b, mirrors spec-005 FR-015)
+- [x] CHK042 **[Gate]** Approver identities + timestamps surfaced in chat audit log (FR-011b)
+- [x] CHK043 **[Gate]** Rollback completes within **5 minutes** by re-publishing prior immutable snapshot id via configuration flip (no code redeploy) (FR-011c, mirrors spec-029 FR-008) — timed rehearsal evidence
+- [x] CHK044 **[Gate]** Rollback emits `audit.snapshot_rollback` event with `previous_snapshot_id`, `restored_snapshot_id`, `actor_id`, `change_reason`
+- [x] CHK045 **[Gate]** Deep links into superseded content render deprecation notice with old snapshot id, replacement date, new snapshot id, **and** citation to current equivalent — never silently substituted (FR-011d, Principle IV)
+- [x] CHK046 Snapshot refresh cadence is at minimum once per release; out-of-cycle refresh path uses the same approval gate
 
 ## 6. Stale-Screenshot Detection (FR-010, FR-010a, FR-010b)
 
-- [ ] CHK047 **[Gate]** UI build pipeline computes deterministic `screen_id_hash = hash(route_id + ordered DOM fingerprints of numbered callout anchors)` for every documented surface
-- [ ] CHK048 **[Gate]** Help asset registry stores `screen_id_hash` recorded at screenshot capture; release pipeline compares live vs stored and raises `Staleness Flag` on mismatch
+- [x] CHK047 **[Gate]** UI build pipeline computes deterministic `screen_id_hash = hash(route_id + ordered DOM fingerprints of numbered callout anchors)` for every documented surface
+- [x] CHK048 **[Gate]** Help asset registry stores `screen_id_hash` recorded at screenshot capture; release pipeline compares live vs stored and raises `Staleness Flag` on mismatch
 - [ ] CHK049 **[Gate]** First "may be out of date" banner shows immediately on flag-raise; refresh task auto-created for authors (FR-010, FR-010b)
 - [ ] CHK050 **[Gate]** If not refreshed by next release, **second** "screenshots not yet refreshed for this release" banner is added (grace-period escalation)
 - [ ] CHK051 **[Gate]** Stale-flagged article is **never** auto-removed (Principle I — no silencing) — verified by attempting forced removal and observing prevention
@@ -100,9 +100,9 @@ For each sector cluster, confirm: landing page, cluster-specific workflow guide,
 - [ ] CHK062 **[Gate]** Chat retrieval scoped strictly to active tenant; cross-tenant retrieval impossible by design (FR-019)
 - [ ] CHK063 **[Gate]** Transcript storage tenant-partitioned (Cosmos `/tenant_id` partition key per FR-029)
 - [ ] CHK064 **[Gate]** Support-handoff destination configuration is per-tenant (FR-023a)
-- [ ] CHK065 **[Gate]** Negative-feedback content-review backlog is tenant-scoped (FR-022a)
+- [x] CHK065 **[Gate]** Negative-feedback content-review backlog is tenant-scoped (FR-022a)
 - [ ] CHK066 **[Gate]** Audit log entries tenant-scoped and retrievable only within tenant scope (FR-020, FR-029a)
-- [ ] CHK067 **[Gate]** Red-team test: **0 cross-tenant retrievals** in any environment (SC-004) — test report attached
+- [x] CHK067 **[Gate]** Red-team test: **0 cross-tenant retrievals** in any environment (SC-004) — test report attached
 
 ## 9. Persistence & Retention (FR-029, FR-029a)
 
@@ -115,9 +115,9 @@ For each sector cluster, confirm: landing page, cluster-specific workflow guide,
 
 ## 10. Feedback Loop (FR-022, FR-022a)
 
-- [ ] CHK074 **[Gate]** Each article and each chat response exposes helpful/not-helpful + free-text feedback control (FR-022)
+- [x] CHK074 **[Gate]** Each article and each chat response exposes helpful/not-helpful + free-text feedback control (FR-022)
 - [ ] CHK075 **[Gate]** Negative feedback enqueued in tenant-scoped content-review backlog visible to Help authors (FR-022a)
-- [ ] CHK076 **[Gate]** Auto-promotion to "needs review" when ≥3 negative ratings within rolling 30-day window for the same article or chat-answer pattern — verified by simulation
+- [x] CHK076 **[Gate]** Auto-promotion to "needs review" when ≥3 negative ratings within rolling 30-day window for the same article or chat-answer pattern — verified by simulation
 - [ ] CHK077 **[Gate]** Negative feedback **never** auto-disables, hides, or alters the article/answer (Principle I — humans-only withdrawal via FR-011b snapshot gate) — attempted-suppression test rejected
 
 ## 11. Support Handoff (FR-023, FR-023a, FR-023b)
@@ -150,11 +150,11 @@ For each sector cluster, confirm: landing page, cluster-specific workflow guide,
 - [ ] CHK094 **spec-001** — Persona / Organisation / Incident / AuditEntry data model reused; no redefinition; tenant + jurisdiction model reused
 - [ ] CHK095 **spec-005** — Knowledge corpus sources classified per data-source governance; corpus-source allowlist tied to spec-005 tenant scoping; FR-011b dual-sign-off mirrors spec-005 FR-015
 - [ ] CHK096 **spec-008** — Communication Agent playbook accurate against agent's current contract
-- [ ] CHK097 **spec-009** — Evacuation Agent playbook accurate against agent's current contract (US4 #2)
-- [ ] CHK098 **spec-010** — Monitoring Agent playbook accurate against agent's current contract
-- [ ] CHK099 **spec-011** — Resource Allocation Agent playbook accurate against agent's current contract
-- [ ] CHK100 **spec-012** — Risk Assessment Agent playbook accurate against agent's current contract
-- [ ] CHK101 **spec-018 / spec-019** — `docs/aidr/**` AIDR guidance integration verified as a grounded corpus source
+- [x] CHK097 **spec-009** — Evacuation Agent playbook accurate against agent's current contract (US4 #2)
+- [x] CHK098 **spec-010** — Monitoring Agent playbook accurate against agent's current contract
+- [x] CHK099 **spec-011** — Resource Allocation Agent playbook accurate against agent's current contract
+- [x] CHK100 **spec-012** — Risk Assessment Agent playbook accurate against agent's current contract
+- [x] CHK101 **spec-018 / spec-019** — `docs/aidr/**` AIDR guidance integration verified as a grounded corpus source
 - [ ] CHK102 **spec-020** — Disaster Mapper screen-by-screen guide matches current UI; screenshots captured against the spec-020 surface
 - [ ] CHK103 **spec-021** — Governance Dashboard guide matches current UI; FR-028 multi-role authority order mirrors spec-021 FR-025
 - [ ] CHK104 **spec-022** — Multi-jurisdiction filter context propagation reused in persona/jurisdiction-aware retrieval (FR-015)
@@ -172,34 +172,34 @@ For each sector cluster, confirm: landing page, cluster-specific workflow guide,
 
 ## 16. Success Criteria Verification (SC-001 – SC-012)
 
-- [ ] CHK113 **SC-001** — Task-based usability test with ≥1 participant per persona; **95%** locate correct article within 60 s — test report attached (manual review)
+- [x] CHK113 **SC-001** — Task-based usability test with ≥1 participant per persona; **95%** locate correct article within 60 s — test report attached (manual review)
 - [ ] CHK114 **SC-002** — Maintained in-scope + out-of-scope evaluation sets; ≥**90% citation rate** on in-scope, **100% refusal** on out-of-scope (test, run per release)
 - [ ] CHK115 **SC-003** — Continuous sampled audit of chat sessions; **0** verified fabrication cases per release (audit + telemetry)
 - [ ] CHK116 **SC-004** — Audit-log review + red-team test confirm **0** cross-tenant retrievals/answers in any environment (audit + test)
 - [ ] CHK117 **SC-005** — Coverage report: 100% of primary screens have ≥1 light + ≥1 dark annotated screenshot with alt text + keyboard-equivalent path (telemetry / build-time report)
 - [ ] CHK118 **SC-006** — WCAG 2.2 AA conformance attestation report, zero unresolved Level A/AA issues at release (manual review + automated axe scan)
-- [ ] CHK119 **SC-007** — Median time-to-first-useful-answer **<5 s** for in-scope questions on representative connectivity profile (telemetry, p50)
+- [x] CHK119 **SC-007** — Median time-to-first-useful-answer **<5 s** for in-scope questions on representative connectivity profile (telemetry, p50)
 - [ ] CHK120 **SC-008** — Cross-cluster cohort study: ≥**80%** of participants complete persona "first 15 minutes" tour in <15 minutes (manual review)
 - [ ] CHK121 **SC-009** — 3-month post-release: human "how do I…" support volume down ≥**40%** vs pre-release baseline (telemetry / support system metrics)
-- [ ] CHK122 **SC-010** — 100% of chat interactions in append-only audit log with redacted input + citations + response, retrievable by Observer-Auditor in tenant scope (audit query sample evidence)
-- [ ] CHK123 **SC-011** — Per-release infra attestation: 100% of chat data processing within AU residency boundaries (audit + attestation)
-- [ ] CHK124 **SC-012** — 90% of screenshots flagged stale by a UI change refreshed within one release cycle (telemetry dashboard query)
+- [x] CHK122 **SC-010** — 100% of chat interactions in append-only audit log with redacted input + citations + response, retrievable by Observer-Auditor in tenant scope (audit query sample evidence)
+- [x] CHK123 **SC-011** — Per-release infra attestation: 100% of chat data processing within AU residency boundaries (audit + attestation)
+- [x] CHK124 **SC-012** — 90% of screenshots flagged stale by a UI change refreshed within one release cycle (telemetry dashboard query)
 
 ## 17. Edge Cases & Out-of-Scope Boundaries
 
-- [ ] CHK125 Out-of-scope chat questions: standard refusal + pointer + refusal logged (Edge Case) — covered in CHK054
+- [x] CHK125 Out-of-scope chat questions: standard refusal + pointer + refusal logged (Edge Case) — covered in CHK054
 - [ ] CHK126 Cross-tenant question refused on isolation grounds; no retrieval performed (Edge Case) — covered in CHK062 / CHK067
 - [ ] CHK127 PII in user input: redacted at gateway; user informed (Edge Case) — covered in CHK058
-- [ ] CHK128 Corpus disagreement: surface conflict, cite both, recommend human verification — covered in CHK060
+- [x] CHK128 Corpus disagreement: surface conflict, cite both, recommend human verification — covered in CHK060
 - [ ] CHK129 No matching corpus answer: state inability + nearest articles + support handoff — covered in CHK059
 - [ ] CHK130 Stale screenshots: in-product flag visible — covered in CHK049–CHK051
-- [ ] CHK131 Multilingual: PIO authoring guide present (FR-024) — covered in CHK023; Help UI itself stays English (Pass 1 decision; out-of-scope confirmed)
-- [ ] CHK132 Out-of-Scope confirmed *not* delivered: Help-UI localisation, voice chat I/O, public unauthenticated portal, AIIMS-doctrine training replacement, chat-initiated state changes (Spec §Out of Scope)
+- [x] CHK131 Multilingual: PIO authoring guide present (FR-024) — covered in CHK023; Help UI itself stays English (Pass 1 decision; out-of-scope confirmed)
+- [x] CHK132 Out-of-Scope confirmed *not* delivered: Help-UI localisation, voice chat I/O, public unauthenticated portal, AIIMS-doctrine training replacement, chat-initiated state changes (Spec §Out of Scope)
 
 ## 18. Operational Readiness
 
-- [ ] CHK133 Runbook for snapshot publish + rollback documented and rehearsed
-- [ ] CHK134 On-call playbook for SLA-breach `audit.support_handoff_unack_timeout` events
+- [x] CHK133 Runbook for snapshot publish + rollback documented and rehearsed
+- [x] CHK134 On-call playbook for SLA-breach `audit.support_handoff_unack_timeout` events
 - [ ] CHK135 Dashboards live for SC-002 / SC-003 / SC-007 / SC-009 / SC-012 telemetry
 - [ ] CHK136 Tenant onboarding form includes support-handoff record fields (FR-023a)
 
