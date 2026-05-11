@@ -1,0 +1,58 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "evac-nt-01",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "route_name": "Test Evacuation Corridor NT-01",
+      "from_zone": "nt-zone-01",
+      "to_safe_assembly": "nt-assembly-01",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-nt-02",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "route_name": "Test Evacuation Corridor NT-02",
+      "from_zone": "nt-zone-02",
+      "to_safe_assembly": "nt-assembly-02",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-nt-03",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "route_name": "Test Evacuation Corridor NT-03",
+      "from_zone": "nt-zone-03",
+      "to_safe_assembly": "nt-assembly-03",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-nt-04",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "route_name": "Test Evacuation Corridor NT-04",
+      "from_zone": "nt-zone-04",
+      "to_safe_assembly": "nt-assembly-04",
+      "primary_path": "generic"
+    }
+  ]
+}

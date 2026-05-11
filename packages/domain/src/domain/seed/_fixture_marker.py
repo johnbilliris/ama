@@ -18,7 +18,8 @@ This module is the single source of truth for those rules. ``scripts/seed_loader
 
 from __future__ import annotations
 
-from typing import Any, Final, Mapping
+from collections.abc import Mapping
+from typing import Any, Final
 
 # Constants the rest of the codebase imports.
 FIXTURE_WRAPPER_KEY: Final[str] = "_fixture"

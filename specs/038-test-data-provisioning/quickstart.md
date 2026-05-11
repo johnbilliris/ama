@@ -272,3 +272,27 @@ pushing.
 | Replay byte-equality fails | Generator uses wall-clock or unseeded RNG | Replace `time.time()`/`datetime.now()`/`random.random()` with `clock.tick(...)` and `random.Random(seed)` |
 | `indigenous-placeholder-lint` fails | Region tag in `persona_bindings` matches a context zone but `cultural_review_required=false` | Set `cultural_review_required=true` and add a `cultural_review_notes` value |
 | Loader rejects a record | Missing `_fixture` wrapper or missing record-level `fictitious=true` | Add the wrapper (CL-5) |
+
+## Spec-038 — postprovision hook chain (T034)
+
+The hook chain is:
+
+```
+azure.yaml: hooks.postprovision
+  └── scripts/seed-database.ps1   (Windows / PowerShell)
+  └── scripts/seed-database.sh    (Linux / bash)
+        └── python scripts/seed_loader.py …
+              ├── (existing) jurisdictions / frameworks / etc. catalogues
+              ├── (existing) recovery-catalogue
+              ├── (existing) coordination_tasks
+              └── (spec-038, T032) seed_spec038_subdirectories(client, db)
+                    ├── alert-templates / evacuation-routes / vulnerable-categories
+                    ├── hospital-capability / road-segments / utility-infrastructure
+                    └── volunteer-credentials / lemp-memp-templates / inter-government-agreements
+```
+
+The spec-038 subdirectory loader applies the four-scope fictitious marker
+validator (packages/domain/src/domain/seed/_fixture_marker.py), the
+PSPF cap of OFFICIAL: SENSITIVE, the PII detector
+(scripts/_pii_detector.py, FR-045), and content-hash idempotency
+(SC-004) before any upsert.

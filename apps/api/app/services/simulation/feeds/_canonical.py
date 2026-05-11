@@ -36,7 +36,7 @@ def encode_ndjson(record: Any) -> bytes:
 
 def _hmac_seed_bytes(scenario_id: str, seed: int) -> bytes:
     """Stable per-(scenario, seed) HMAC key used by the clock and correlation IDs."""
-    msg = f"{scenario_id}|{int(seed)}".encode("utf-8")
+    msg = f"{scenario_id}|{int(seed)}".encode()
     return hmac.new(b"ama-spec038", msg, hashlib.sha256).digest()
 
 

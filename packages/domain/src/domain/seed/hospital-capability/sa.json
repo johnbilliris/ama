@@ -1,0 +1,205 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "hosp-sa-01",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "facility_id": "FACILITY-SA-01",
+      "facility_name": "Test Hospital SA #01",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics"
+      ],
+      "beds_total": 75
+    },
+    {
+      "id": "hosp-sa-02",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "facility_id": "FACILITY-SA-02",
+      "facility_name": "Test Hospital SA #02",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult"
+      ],
+      "beds_total": 100
+    },
+    {
+      "id": "hosp-sa-03",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "facility_id": "FACILITY-SA-03",
+      "facility_name": "Test Hospital SA #03",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds"
+      ],
+      "beds_total": 125
+    },
+    {
+      "id": "hosp-sa-04",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "facility_id": "FACILITY-SA-04",
+      "facility_name": "Test Hospital SA #04",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke"
+      ],
+      "beds_total": 150
+    },
+    {
+      "id": "hosp-sa-05",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "facility_id": "FACILITY-SA-05",
+      "facility_name": "Test Hospital SA #05",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke",
+        "cath-lab"
+      ],
+      "beds_total": 175
+    },
+    {
+      "id": "hosp-sa-06",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "facility_id": "FACILITY-SA-06",
+      "facility_name": "Test Hospital SA #06",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2"
+      ],
+      "beds_total": 200
+    },
+    {
+      "id": "hosp-sa-07",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "facility_id": "FACILITY-SA-07",
+      "facility_name": "Test Hospital SA #07",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics"
+      ],
+      "beds_total": 225
+    },
+    {
+      "id": "hosp-sa-08",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "facility_id": "FACILITY-SA-08",
+      "facility_name": "Test Hospital SA #08",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult"
+      ],
+      "beds_total": 250
+    },
+    {
+      "id": "hosp-sa-09",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "facility_id": "FACILITY-SA-09",
+      "facility_name": "Test Hospital SA #09",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds"
+      ],
+      "beds_total": 275
+    },
+    {
+      "id": "hosp-sa-10",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "SA",
+      "facility_id": "FACILITY-SA-10",
+      "facility_name": "Test Hospital SA #10",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke"
+      ],
+      "beds_total": 300
+    }
+  ]
+}

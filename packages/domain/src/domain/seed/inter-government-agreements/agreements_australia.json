@@ -1,0 +1,114 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "iga-nsw-vic",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "parties": [
+        "NSW",
+        "VIC"
+      ],
+      "agreement_class": "mutual-aid",
+      "summary": "Generic mutual-aid template between NSW and VIC."
+    },
+    {
+      "id": "iga-nsw-qld",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "parties": [
+        "NSW",
+        "QLD"
+      ],
+      "agreement_class": "mutual-aid",
+      "summary": "Generic mutual-aid template between NSW and QLD."
+    },
+    {
+      "id": "iga-vic-sa",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "parties": [
+        "VIC",
+        "SA"
+      ],
+      "agreement_class": "mutual-aid",
+      "summary": "Generic mutual-aid template between VIC and SA."
+    },
+    {
+      "id": "iga-wa-sa",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "parties": [
+        "WA",
+        "SA"
+      ],
+      "agreement_class": "mutual-aid",
+      "summary": "Generic mutual-aid template between WA and SA."
+    },
+    {
+      "id": "iga-nt-wa",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "parties": [
+        "NT",
+        "WA"
+      ],
+      "agreement_class": "mutual-aid",
+      "summary": "Generic mutual-aid template between NT and WA."
+    },
+    {
+      "id": "iga-qld-nt",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "parties": [
+        "QLD",
+        "NT"
+      ],
+      "agreement_class": "mutual-aid",
+      "summary": "Generic mutual-aid template between QLD and NT."
+    },
+    {
+      "id": "iga-tas-vic",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "parties": [
+        "TAS",
+        "VIC"
+      ],
+      "agreement_class": "mutual-aid",
+      "summary": "Generic mutual-aid template between TAS and VIC."
+    },
+    {
+      "id": "iga-act-nsw",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "parties": [
+        "ACT",
+        "NSW"
+      ],
+      "agreement_class": "mutual-aid",
+      "summary": "Generic mutual-aid template between ACT and NSW."
+    }
+  ]
+}
