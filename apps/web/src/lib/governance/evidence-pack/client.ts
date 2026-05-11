@@ -16,11 +16,14 @@ import type {
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? '';
 
 async function _fetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  // Next.js extends RequestInit with a `next` field for revalidation; cast to
+  // satisfy stock lib.dom.d.ts types without pulling in next-types globally.
+  const nextInit = {
     ...init,
     headers: { Accept: 'application/json', ...(init?.headers ?? {}) },
     next: { revalidate: 60 },
-  });
+  } as RequestInit;
+  const res = await fetch(`${BASE}${path}`, nextInit);
   if (!res.ok) {
     throw new Error(`Evidence-pack API ${res.status}: ${path}`);
   }

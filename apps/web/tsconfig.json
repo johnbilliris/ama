@@ -57,6 +57,7 @@
     "../../tests/e2e/web-coverage/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "src/**/__tests__/**"
   ]
 }
