@@ -93,9 +93,7 @@ def execute(search_service: str, snapshot_id: str) -> None:  # pragma: no cover 
             VectorSearchProfile,
         )
     except Exception as exc:
-        raise RuntimeError(
-            "azure-search-documents not installed; run `uv sync` and retry"
-        ) from exc
+        raise RuntimeError("azure-search-documents not installed; run `uv sync` and retry") from exc
 
     cred = DefaultAzureCredential()
     endpoint = f"https://{search_service}.search.windows.net"
@@ -103,12 +101,15 @@ def execute(search_service: str, snapshot_id: str) -> None:  # pragma: no cover 
 
     index_name = f"help-corpus-{snapshot_id}"
     fields = [
-        SimpleField(name=f["name"], type=SearchFieldDataType(f["type"]),
-                    key=bool(f.get("key", False)),
-                    filterable=bool(f.get("filterable", False)),
-                    facetable=bool(f.get("facetable", False)),
-                    sortable=bool(f.get("sortable", False)),
-                    searchable=bool(f.get("searchable", False)))
+        SimpleField(
+            name=f["name"],
+            type=SearchFieldDataType(f["type"]),
+            key=bool(f.get("key", False)),
+            filterable=bool(f.get("filterable", False)),
+            facetable=bool(f.get("facetable", False)),
+            sortable=bool(f.get("sortable", False)),
+            searchable=bool(f.get("searchable", False)),
+        )
         for f in INDEX_FIELDS
         if f["name"] != "body_vector"
     ]

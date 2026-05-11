@@ -36,11 +36,7 @@ RESOURCE_KIND_FILTERS = (
 def _is_help_resource(resource: dict) -> bool:
     name = resource.get("name", "").lower()
     tags = resource.get("tags") or {}
-    return (
-        "help" in name
-        or tags.get("spec") == "spec-038"
-        or tags.get("purpose", "").startswith("help-")
-    )
+    return "help" in name or tags.get("spec") == "spec-038" or tags.get("purpose", "").startswith("help-")
 
 
 def build_attestation(resources: list[dict]) -> dict:

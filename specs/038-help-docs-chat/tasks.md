@@ -299,14 +299,14 @@ description: "Actionable, dependency-ordered task list for spec-038 In-Product H
 
 **Depends on**: Phases 0, 4. **Goal**: build pipeline catches stale screenshots, missing `lang` attributes, dead deep links.
 
-- [ ] T-AA174 [Gate] Implement `tools/help/check_screenshot_freshness.py` — recomputes `screen_id_hash` from current build (using `tools/help/route_registry.py`), compares with stored value in `screenshot_registry`, raises `StalenessFlag` on mismatch; supports `--register-only` mode. — FR-010a, FR-010a-AMEND, FR-010b, CHK074, CHK075
-- [ ] T-AA175 [Gate] Implement `tools/help/lint_lang_attributes.py` — scans built static HTML for declared glossary terms missing `lang`; fails build on violation. CI gate. — FR-009a, FR-009a-AMEND, CHK046, CHK047
-- [ ] T-AA176 [Gate] Implement `tools/help/capture_screenshots.ts` — Playwright-driven capture of light + dark variants per route id; computes `screen_id_hash`; uploads to `help-screenshots` blob container; updates `screenshot_registry`. — FR-006, FR-007, FR-010a, plan §D, CHK051-CHK053
-- [ ] T-AA177 [Gate] Implement `tools/help/route_registry.py` — single source of truth for `route_id` ↔ Next.js path; supports `previous_route_id` for bulk re-baseline. — FR-010a-AMEND, CHK076
-- [ ] T-AA178 [Gate] Implement `tools/help/link_checker.py` — build-time link checker for MDX articles; verifies every internal deep-link resolves to a known slug; verifies every citation deep-link resolves to a heading anchor. Fails build on broken link. — FR-005, FR-012, CHK089
-- [ ] T-AA179 [P] Implement `tools/help/rehype-lang-attr.ts` (move from stub T-AA007) — at authoring time, rejects MDX commit if a glossary-tagged non-English fragment lacks a `lang` attribute. — FR-009a-AMEND, plan §G
-- [ ] T-AA180 [P] Implement `tools/help/bulk_rebaseline.py` — invoked when `route_registry.previous_route_id` changes; raises grouped staleness flag with `bulk_baseline_id`. — FR-010a-AMEND, CHK076
-- [ ] T-AA181 [P] CI wiring: extend `.github/workflows/ci.yml` to invoke each tool above on every PR. Verify CI yaml lint passes. — quickstart §6
+- [X] T-AA174 [Gate] Implement `tools/help/check_screenshot_freshness.py` — recomputes `screen_id_hash` from current build (using `tools/help/route_registry.py`), compares with stored value in `screenshot_registry`, raises `StalenessFlag` on mismatch; supports `--register-only` mode. — FR-010a, FR-010a-AMEND, FR-010b, CHK074, CHK075
+- [X] T-AA175 [Gate] Implement `tools/help/lint_lang_attributes.py` — scans built static HTML for declared glossary terms missing `lang`; fails build on violation. CI gate. — FR-009a, FR-009a-AMEND, CHK046, CHK047
+- [X] T-AA176 [Gate] Implement `tools/help/capture_screenshots.ts` — Playwright-driven capture of light + dark variants per route id; computes `screen_id_hash`; uploads to `help-screenshots` blob container; updates `screenshot_registry`. — FR-006, FR-007, FR-010a, plan §D, CHK051-CHK053
+- [X] T-AA177 [Gate] Implement `tools/help/route_registry.py` — single source of truth for `route_id` ↔ Next.js path; supports `previous_route_id` for bulk re-baseline. — FR-010a-AMEND, CHK076
+- [X] T-AA178 [Gate] Implement `tools/help/link_checker.py` — build-time link checker for MDX articles; verifies every internal deep-link resolves to a known slug; verifies every citation deep-link resolves to a heading anchor. Fails build on broken link. — FR-005, FR-012, CHK089
+- [X] T-AA179 [P] Implement `tools/help/rehype-lang-attr.ts` (move from stub T-AA007) — at authoring time, rejects MDX commit if a glossary-tagged non-English fragment lacks a `lang` attribute. — FR-009a-AMEND, plan §G
+- [X] T-AA180 [P] Implement `tools/help/bulk_rebaseline.py` — invoked when `route_registry.previous_route_id` changes; raises grouped staleness flag with `bulk_baseline_id`. — FR-010a-AMEND, CHK076
+- [X] T-AA181 [P] CI wiring: extend `.github/workflows/ci.yml` to invoke each tool above on every PR. Verify CI yaml lint passes. — quickstart §6
 
 ---
 

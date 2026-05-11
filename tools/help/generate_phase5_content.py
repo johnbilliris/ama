@@ -18,15 +18,55 @@ from textwrap import dedent
 ROOT = Path(__file__).resolve().parents[2] / "apps/web/src/content/help"
 
 PERSONAS = [
-    ("incident-commander", "Incident Commander", "operational", "AIIMS Controller authority; cross-jurisdiction escalation; public-alert approval."),
-    ("operations-officer", "Operations Officer", "operational", "Tactical task assignment; multi-sector coordination; agent recommendation review."),
-    ("planning-officer", "Planning Officer", "operational", "Situation reports; resource forecasting; intelligence cycle."),
+    (
+        "incident-commander",
+        "Incident Commander",
+        "operational",
+        "AIIMS Controller authority; cross-jurisdiction escalation; public-alert approval.",
+    ),
+    (
+        "operations-officer",
+        "Operations Officer",
+        "operational",
+        "Tactical task assignment; multi-sector coordination; agent recommendation review.",
+    ),
+    (
+        "planning-officer",
+        "Planning Officer",
+        "operational",
+        "Situation reports; resource forecasting; intelligence cycle.",
+    ),
     ("logistics-officer", "Logistics Officer", "operational", "Supply chain; staging areas; equipment dispatch."),
-    ("public-information-officer", "Public Information Officer", "operational", "Multilingual alert composer; accessibility check; Principle V coverage."),
-    ("field-coordinator", "Field Coordinator", "operational", "Forward-edge coordination; degraded connectivity behaviour."),
-    ("resilience-planner", "Resilience Planner", "operational", "Scenario design; capability gap analysis; pre-event exercises."),
-    ("executive-leader", "Executive Leader", "operational", "Strategic overview; board-level reporting; resourcing decisions."),
-    ("observer-auditor", "Observer / Auditor", "operational", "Read-only timeline navigation; framework-deviation review; transcript reconstruction."),
+    (
+        "public-information-officer",
+        "Public Information Officer",
+        "operational",
+        "Multilingual alert composer; accessibility check; Principle V coverage.",
+    ),
+    (
+        "field-coordinator",
+        "Field Coordinator",
+        "operational",
+        "Forward-edge coordination; degraded connectivity behaviour.",
+    ),
+    (
+        "resilience-planner",
+        "Resilience Planner",
+        "operational",
+        "Scenario design; capability gap analysis; pre-event exercises.",
+    ),
+    (
+        "executive-leader",
+        "Executive Leader",
+        "operational",
+        "Strategic overview; board-level reporting; resourcing decisions.",
+    ),
+    (
+        "observer-auditor",
+        "Observer / Auditor",
+        "operational",
+        "Read-only timeline navigation; framework-deviation review; transcript reconstruction.",
+    ),
     ("risk-manager", "Risk Manager", "operational", "Pre-event risk registers; mitigation tracking; lessons-learned."),
     ("frontline-fire", "Frontline — Fire", "sector", "NSW jurisdiction variant; bushfire-specific protocols."),
     ("frontline-medical", "Frontline — Medical", "sector", "Patient triage workflows; hospital bed-state."),
@@ -37,20 +77,49 @@ PERSONAS = [
 ]
 
 SCREENS = [
-    "disaster-mapper", "governance-dashboard", "multi-jurisdiction-filter",
-    "simulation-control", "alert-composer",
-    "agent-communication", "agent-evacuation", "agent-monitoring",
-    "agent-risk-assessment", "agent-resource-allocation",
-    "audit-observer-view", "persona-switcher", "settings", "login",
+    "disaster-mapper",
+    "governance-dashboard",
+    "multi-jurisdiction-filter",
+    "simulation-control",
+    "alert-composer",
+    "agent-communication",
+    "agent-evacuation",
+    "agent-monitoring",
+    "agent-risk-assessment",
+    "agent-resource-allocation",
+    "audit-observer-view",
+    "persona-switcher",
+    "settings",
+    "login",
 ]
 
 PLAYBOOKS = [
-    ("simulation", "Simulation Playbook", "scenario configuration, warp/playback, multi-jurisdiction scenarios, observation export"),
-    ("agent-communication", "Agent Playbook — Communication", "translation, drafting, accessibility checks, citation review"),
-    ("agent-evacuation", "Agent Playbook — Evacuation", "route planning, vulnerable-population handling, throughput calc, escalation"),
+    (
+        "simulation",
+        "Simulation Playbook",
+        "scenario configuration, warp/playback, multi-jurisdiction scenarios, observation export",
+    ),
+    (
+        "agent-communication",
+        "Agent Playbook — Communication",
+        "translation, drafting, accessibility checks, citation review",
+    ),
+    (
+        "agent-evacuation",
+        "Agent Playbook — Evacuation",
+        "route planning, vulnerable-population handling, throughput calc, escalation",
+    ),
     ("agent-monitoring", "Agent Playbook — Monitoring", "sensor fusion, signal triage, anomaly review"),
-    ("agent-risk-assessment", "Agent Playbook — Risk Assessment", "hazard scoring, mitigation tracking, lessons-learned"),
-    ("agent-resource-allocation", "Agent Playbook — Resource Allocation", "supply-demand matching, contested resource arbitration, provenance"),
+    (
+        "agent-risk-assessment",
+        "Agent Playbook — Risk Assessment",
+        "hazard scoring, mitigation tracking, lessons-learned",
+    ),
+    (
+        "agent-resource-allocation",
+        "Agent Playbook — Resource Allocation",
+        "supply-demand matching, contested resource arbitration, provenance",
+    ),
 ]
 
 
@@ -121,8 +190,7 @@ def persona_mdx(slug: str, title: str, cluster: str, scope: str) -> str:
         ---
 
         _Maintained by the AMA Help content team. Last reviewed at snapshot publish._
-        """
-    )
+        """)
 
 
 def screen_mdx(slug: str) -> str:
@@ -158,8 +226,7 @@ def screen_mdx(slug: str) -> str:
         ## 5. Related
         - [Glossary](/help/glossary)
         - [Help chat](/help/chat)
-        """
-    )
+        """)
 
 
 def playbook_mdx(slug: str, title: str, intro: str) -> str:
@@ -194,8 +261,7 @@ def playbook_mdx(slug: str, title: str, intro: str) -> str:
         ## 5. References
         - AIDR Handbook
         - AIIMS doctrine
-        """
-    )
+        """)
 
 
 DOMAIN_ARTICLES = {
@@ -439,7 +505,10 @@ def main() -> None:
     cul = Path(__file__).resolve().parents[2] / "docs/cultural-authority/help"
     cul.mkdir(parents=True, exist_ok=True)
     (cul / "INDEX.md").write_text(CULTURAL_AUTHORITY_INDEX, encoding="utf-8")
-    print(f"wrote {len(PERSONAS)} personas, {len(SCREENS)} screens, {len(PLAYBOOKS)} playbooks, {len(DOMAIN_ARTICLES)} domain articles")
+    print(
+        f"wrote {len(PERSONAS)} personas, {len(SCREENS)} screens, "
+        f"{len(PLAYBOOKS)} playbooks, {len(DOMAIN_ARTICLES)} domain articles"
+    )
 
 
 if __name__ == "__main__":
