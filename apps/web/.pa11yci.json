@@ -1,0 +1,15 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "chromeLaunchConfig": { "args": ["--no-sandbox"] },
+    "timeout": 60000,
+    "wait": 1500
+  },
+  "urls": [
+    "http://127.0.0.1:3000/help",
+    "http://127.0.0.1:3000/help/articles/getting-started",
+    "http://127.0.0.1:3000/help/chat",
+    "http://127.0.0.1:3000/help/glossary/aiims-controller",
+    "http://127.0.0.1:3000/help/search?q=evacuation"
+  ]
+}
