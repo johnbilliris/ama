@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/johnbilliris/ama/specs/036-foundry-rag-grounding/contracts/conflict_detection.schema.json",
+  "title": "Conflict Detection Log Entry",
+  "description": "Audit-grade record of a multi-agent recommendation conflict detected by the post-return, deterministic, rule-based detector defined in ADR-18 / FR-RAG-COORD-01. Source of truth: Cosmos DB container `conflictDetectionLog` in Australia East (NN-2 + FR-RAG-CV-04). One row per conflict event; the same `conflict_group_id` is also written to every implicated `AuditRecord.conflict_group_id` so trace stitching works without a JOIN. Detection is reactive (post-return) — Pass 2 Q-P2-06 explicitly rejects pre-emptive divergence detection because it breaks Constitution Principle IV deterministic replay.",
+  "type": "object",
+  "required": [
+    "conflict_group_id",
+    "detected_at",
+    "conflict_class",
+    "agent_recommendations",
+    "escalation_state",
+    "current_owner"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "conflict_group_id": {
+      "description": "UUID v7 (time-ordered) used to link this conflict log entry to every implicated `AuditRecord.conflict_group_id`. Cosmos DB partition key.",
+      "type": "string",
+      "format": "uuid"
+    },
+    "detected_at": {
+      "description": "ISO-8601 UTC timestamp of detection. Detector runs in the recommendation-aggregation layer after both agents return, NOT during inference (Pass 2 Q-P2-06).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "conflict_class": {
+      "description": "One of the four deterministic conflict classes defined in ADR-18: resource (same `resource_id` claimed in overlapping time windows), spatial (incompatible recommendations covering overlapping `(geo_bbox, time_window)`), temporal (action verbs with mutually exclusive deadlines), severity (hazard severity buckets with delta ≥1 AIIMS incident level for the same hazard).",
+      "type": "string",
+      "enum": ["resource", "spatial", "temporal", "severity"]
+    },
+    "agent_recommendations": {
+      "description": "The pair (or set) of agent recommendations that triggered the detector. Each item points back to its `AuditRecord.call_id` so the audit trail is fully reconstructible.",
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["agent_name", "audit_call_id", "recommendation_summary"],
+        "additionalProperties": false,
+        "properties": {
+          "agent_name": {
+            "type": "string",
+            "enum": [
+              "MonitoringAgent",
+              "RiskAssessmentAgent",
+              "EvacuationAgent",
+              "ResourceAllocationAgent",
+              "CommunicationAgent",
+              "SimulationController"
+            ]
+          },
+          "audit_call_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Foreign key to `AuditRecord.call_id` for this agent's recommendation."
+          },
+          "recommendation_summary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "Free-text summary of the recommendation as seen by the detector. Used by Ops Officer / IC to triage without re-reading the audit log."
+          },
+          "resource_id": {
+            "type": ["string", "null"],
+            "description": "Required for `conflict_class == 'resource'`. The contested resource (e.g. helicopter tail number, evacuation centre id)."
+          },
+          "geo_bbox": {
+            "type": ["array", "null"],
+            "description": "Required for `conflict_class == 'spatial'`. WGS84 bounding box `[west, south, east, north]`.",
+            "items": {"type": "number"},
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "time_window": {
+            "type": ["object", "null"],
+            "description": "Required for `conflict_class in ('resource', 'spatial', 'temporal')`. ISO-8601 UTC window.",
+            "required": ["start_time", "end_time"],
+            "properties": {
+              "start_time": {"type": "string", "format": "date-time"},
+              "end_time": {"type": "string", "format": "date-time"}
+            }
+          },
+          "severity_aiims_level": {
+            "type": ["integer", "null"],
+            "description": "Required for `conflict_class == 'severity'`. AIIMS incident level (1=low, 2=medium, 3=major).",
+            "minimum": 1,
+            "maximum": 3
+          }
+        }
+      }
+    },
+    "escalation_state": {
+      "description": "AIIMS escalation chain state (Pass 1 Q-P1-03). Initial value `awaiting_ops_officer`; on 5-min unack timeout transitions to `escalated_to_ic`; on full-AIIMS-unreachable + degraded-connectivity transitions to `field_coordinator_queued`.",
+      "type": "string",
+      "enum": [
+        "awaiting_ops_officer",
+        "escalated_to_ic",
+        "field_coordinator_queued",
+        "resolved",
+        "stale_unresolved"
+      ]
+    },
+    "current_owner": {
+      "description": "Identity of the AIIMS role currently responsible for resolution (Ops Officer Entra ID at first detection; transitions to IC on 5-min unack per Pass 1 Q-P1-03; null when queued for offline review).",
+      "type": ["string", "null"],
+      "minLength": 0,
+      "maxLength": 256
+    },
+    "escalated_to_ic_at": {
+      "description": "ISO-8601 UTC. Set when escalation_state transitions to `escalated_to_ic` (i.e., 5 minutes after detection without Ops Officer ack). Recorded for `escalation_unack_timeout` audit metric.",
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "resolution": {
+      "description": "Set when escalation_state transitions to `resolved`. Captures which recommendation was accepted/rejected and by whom (FR-RAG-COORD-02).",
+      "type": ["object", "null"],
+      "required": ["resolved_at", "resolver_id", "accepted_audit_call_id", "resolution_note"],
+      "additionalProperties": false,
+      "properties": {
+        "resolved_at": {"type": "string", "format": "date-time"},
+        "resolver_id": {"type": "string", "minLength": 3, "maxLength": 256},
+        "accepted_audit_call_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Which agent's recommendation was accepted (or null if neither — the resolver issued an independent action)."
+        },
+        "rejected_audit_call_ids": {
+          "type": "array",
+          "items": {"type": "string", "format": "uuid"}
+        },
+        "resolution_note": {"type": "string", "minLength": 1, "maxLength": 1024}
+      }
+    },
+    "field_coordinator_offline_queue": {
+      "description": "Set when escalation_state == 'field_coordinator_queued' (Pass 1 Q-P1-03 offline branch). Field Coordinator MUST NOT auto-resolve cross-agent conflicts; this is a queue marker, not a resolution.",
+      "type": ["object", "null"],
+      "required": ["queued_at", "field_coordinator_id", "reconnect_required_for_resolution"],
+      "additionalProperties": false,
+      "properties": {
+        "queued_at": {"type": "string", "format": "date-time"},
+        "field_coordinator_id": {"type": "string"},
+        "reconnect_required_for_resolution": {"type": "boolean", "const": true}
+      }
+    }
+  },
+  "examples": [
+    {
+      "conflict_group_id": "01910f6c-4a23-72e3-9e1f-0aa11ac6f8b0",
+      "detected_at": "2026-05-15T03:42:30Z",
+      "conflict_class": "spatial",
+      "agent_recommendations": [
+        {
+          "agent_name": "EvacuationAgent",
+          "audit_call_id": "f3e2d1c0-a9b8-7c6d-5e4f-3a2b1c0d9e8f",
+          "recommendation_summary": "Evacuate Bega Valley LGA south of Princes Hwy effective immediately.",
+          "geo_bbox": [149.6, -36.9, 150.1, -36.5],
+          "time_window": {"start_time": "2026-05-15T04:00:00Z", "end_time": "2026-05-15T16:00:00Z"}
+        },
+        {
+          "agent_name": "RiskAssessmentAgent",
+          "audit_call_id": "11223344-5566-7788-99aa-bbccddeeff00",
+          "recommendation_summary": "Shelter-in-place recommended for Bega Valley LGA south of Princes Hwy due to road network compromise.",
+          "geo_bbox": [149.6, -36.9, 150.1, -36.5],
+          "time_window": {"start_time": "2026-05-15T04:00:00Z", "end_time": "2026-05-15T16:00:00Z"}
+        }
+      ],
+      "escalation_state": "awaiting_ops_officer",
+      "current_owner": "ops-officer-nsw-1@ama.local",
+      "escalated_to_ic_at": null,
+      "resolution": null,
+      "field_coordinator_offline_queue": null
+    }
+  ]
+}

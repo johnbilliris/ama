@@ -1,0 +1,34 @@
+// Spec 036 T144 — Compliance audit byte-replay KQL alert (SC-011, FR-RAG-AG-02).
+//
+// Asserts: ≥ 95% of inference audit records in the trailing 30 days carry the
+// full SC-011 replay key (corpus_build_sha + prompt_sha + model_version +
+// retrieved_chunks[].sha256_of_chunk). A drop below 95% indicates the audit
+// pipeline is shedding the replay key and MUST page on-call (Compliance-memo
+// Top-3).
+//
+// Run via:
+//   az monitor app-insights query \
+//     --app $APPI_ID \
+//     --analytics-query "$(Get-Content tests/audit/audit_replay_fidelity.kql -Raw)"
+//
+// Expected output (healthy):
+//   total_calls | replayable_calls | replay_fidelity_pct
+//   ≥ N         | ≥ 0.95 * N       | ≥ 95.00
+//
+// Alert threshold: any window where replay_fidelity_pct < 95.0 over 24h.
+audit_records
+| where timestamp > ago(30d)
+| where call_kind == "inference"
+| where rag_used == "true"
+| extend has_corpus_sha = isnotempty(corpus_build_sha)
+| extend has_prompt_sha = isnotempty(prompt_sha)
+| extend has_model_version = isnotempty(model_version)
+| extend has_chunks = array_length(retrieved_chunks) > 0
+| extend has_chunk_shas = array_length(parse_json(extract_json(@"$..sha256_of_chunk", tostring(retrieved_chunks)))) > 0
+| extend is_replayable = (has_corpus_sha and has_prompt_sha and has_model_version and has_chunks and has_chunk_shas)
+| summarize total_calls = count(),
+            replayable_calls = countif(is_replayable)
+            by bin(timestamp, 1d), agent_name
+| extend replay_fidelity_pct = round(100.0 * replayable_calls / total_calls, 2)
+| where replay_fidelity_pct < 95.0
+| order by timestamp desc, replay_fidelity_pct asc

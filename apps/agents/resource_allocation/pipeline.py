@@ -773,6 +773,7 @@ class AllocationProcessingPipeline:
             )
 
         # Try LLM generation
+        # RAG-OPTOUT [FR-RAG-NS-05]: Transactional dispatch — decision was already grounded upstream; this LLM call only formats the directive. ADR: docs/decisions/036-foundry-rag-grounding/05-rag-optout-logistics-transactional.md  # noqa: E501
         if self._llm_generate_fn is not None:
             try:
                 prompt = (

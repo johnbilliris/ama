@@ -77,6 +77,7 @@ class SignalProcessingPipeline:
     # ------------------------------------------------------------------
 
     def _validate(self, raw: dict, signal_id: str, tenant_id: str) -> SignalEnvelope | None:
+        # RAG-OPTOUT [FR-RAG-NS-02]: BoM live-feed signals are authoritative; doctrine grounding lives on the downstream escalation call. ADR: docs/decisions/036-foundry-rag-grounding/02-rag-optout-bom-live.md  # noqa: E501
         """Stage 1: Validate incoming signal via Pydantic."""
         try:
             envelope = SignalEnvelope.model_validate(raw)

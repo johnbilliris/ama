@@ -1,5 +1,15 @@
 // ────────────────────────────────────────────────────────────────────────────────
-// Azure OpenAI Model Deployments, RBAC, and Diagnostics
+// Foundry (Microsoft AIServices) Model Deployments, RBAC, and Diagnostics
+//
+// Spec 036 / ADR-20 (hard-cutover migration) — this module deploys
+// `Microsoft.CognitiveServices/accounts/deployments` resources on the parent
+// `Microsoft.CognitiveServices/accounts` of kind 'AIServices' (Foundry). The
+// deployment shape is unchanged from the legacy Azure-OpenAI pattern because
+// the deployments resource type is identical across both kinds. The endpoint
+// URL the parent emits is the Foundry endpoint, consumed by callers via the
+// `AZURE_AI_PROJECT_ENDPOINT` env var. The transitional `AZURE_OPENAI_ENDPOINT`
+// compatibility seam was dropped in the post-cutover cleanup PR per
+// ADR-20 §Q-P6-03.
 // ────────────────────────────────────────────────────────────────────────────────
 
 @description('Name of the existing Azure OpenAI resource')
@@ -46,6 +56,16 @@ param draftingTpmQuota int = 60
 @description('Simulation Controller TPM quota (K). Dev=20, Prod=80. Isolated quota so an exercise cannot starve live agents.')
 @minValue(1)
 param simulationTpmQuota int = 20
+
+@description('Embedding model name (Spec 036 FR-RAG-IDX-02 — corpus chunks → 3072-dim vectors).')
+param embeddingModelName string = 'text-embedding-3-large'
+
+@description('Embedding model version.')
+param embeddingModelVersion string = '1'
+
+@description('Embedding deployment TPM quota (K). Sized for full corpus rebuild headroom.')
+@minValue(1)
+param embeddingTpmQuota int = 60
 
 @description('Model deployment SKU — GlobalStandard for dev/staging (draws from global capacity pool), Standard for production (regional capacity)')
 @allowed(['Standard', 'GlobalStandard'])
@@ -113,6 +133,7 @@ var simulationRaiPolicyName = 'sim-em-domain-${envPrefix}'
 //   reasoningRaiPolicy → reasoningDeployment
 //     → draftingRaiPolicy → draftingDeployment
 //     → simulationRaiPolicy → simulationDeployment
+//     → embeddingDeployment (no RAI policy; serialised on simulationDeployment)
 
 resource reasoningRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2024-10-01' = {
   parent: openAiAccount
@@ -204,6 +225,28 @@ resource simulationDeployment 'Microsoft.CognitiveServices/accounts/deployments@
   }
 }
 
+// Spec 036 FR-RAG-IDX-02 — embedding deployment for the corpus ingest pipeline
+// (apps/ingest-runner) and runtime hybrid retrieval (apps/agents/common/retrieval_client.py).
+// Embedding deployments do not require an RAI policy. Serialised behind the simulation
+// deployment so all four child operations on the parent Cognitive Services account
+// run sequentially (ARM rejects concurrent child ops with RequestConflict).
+resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: openAiAccount
+  name: '${embeddingModelName}-${envPrefix}'
+  sku: {
+    name: 'Standard'
+    capacity: embeddingTpmQuota
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: embeddingModelName
+      version: embeddingModelVersion
+    }
+  }
+  dependsOn: [simulationDeployment]
+}
+
 // ────────────────────────────────────────────────────────────────────────────────
 // RBAC: Cognitive Services OpenAI User
 // ────────────────────────────────────────────────────────────────────────────────
@@ -251,7 +294,33 @@ resource openAiDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
 output reasoningDeploymentName string = reasoningDeployment.name
 output draftingDeploymentName string = draftingDeployment.name
 output simulationDeploymentName string = simulationDeployment.name
+output embeddingDeploymentName string = embeddingDeployment.name
 output reasoningRaiPolicyName string = reasoningRaiPolicy.name
 output draftingRaiPolicyName string = draftingRaiPolicy.name
 output simulationRaiPolicyName string = simulationRaiPolicy.name
 output openAiEndpoint string = openAiAccount.properties.endpoint
+
+// Spec 036 / ADR-20 — Foundry deployments CSV consumed by `azure-ai-inference`
+// SDK (apps/agents/maf_runtime/chat_client.py + apps/agents/common/llm_client.py +
+// apps/api/app/services/simulation/controller_service.py). Format: per-deployment
+// `<modelId>@<version>=<deploymentName>`, comma-separated.
+//
+// Spec 036 FR-RAG-IDX-02 — embedding deployment is included so the ingest-runner
+// (apps/ingest-runner) and any future retrieval consumer can resolve
+// `<embeddingModelName>@<version>` → live deployment name through the same env
+// var (``AZURE_AI_PROJECT_DEPLOYMENTS``) used by the chat seam.
+output azureAiProjectDeployments string = '${reasoningModelName}@${reasoningModelVersion}=${reasoningDeployment.name},${draftingModelName}@${draftingModelVersion}=${draftingDeployment.name},${simulationModelName}@${simulationModelVersion}=${simulationDeployment.name},${embeddingModelName}@${embeddingModelVersion}=${embeddingDeployment.name}'
+
+// Spec 036 — embedding model key (`<modelId>@<version>`) consumed by the
+// ingest-runner CLI. The carve-out preflight splits on `@` and looks up
+// `embeddingModelName` in `infra/parameters/foundry-carveout.yaml`.
+output embeddingModelKey string = '${embeddingModelName}@${embeddingModelVersion}'
+
+// Per-tier deployment model-key outputs — the simulation Controller and
+// agent llm clients pick the deployment by `<modelName>@<version>` from
+// the AZURE_AI_PROJECT_DEPLOYMENTS CSV. Until tiers diverge, all three
+// resolve to the same key (gpt-5.4@2026-03-05) — the CSV lookup picks
+// the first matching entry, which is the reasoning deployment.
+output reasoningDeploymentModelKey string = '${reasoningModelName}@${reasoningModelVersion}'
+output draftingDeploymentModelKey string = '${draftingModelName}@${draftingModelVersion}'
+output simulationDeploymentModelKey string = '${simulationModelName}@${simulationModelVersion}'

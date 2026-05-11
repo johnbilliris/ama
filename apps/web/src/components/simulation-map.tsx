@@ -243,7 +243,12 @@ export function SimulationMap({
         </span>
       </div>
       <div className="sim-map-canvas">
-        <DisasterMap features={features} focus={focus} viewportKey="simulation-map-viewport" />
+        <DisasterMap
+          features={features}
+          focus={focus}
+          viewportKey={`simulation-map-viewport:${tenantId}`}
+          saveViewportTrigger={status}
+        />
       </div>
     </div>
   );

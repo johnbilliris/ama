@@ -21,7 +21,8 @@ async def healthcheck() -> dict[str, object]:
     dependencies = {
         "cosmos": _dependency_status("COSMOS_ENDPOINT"),
         "redis": _dependency_status("REDIS_HOST"),
-        "openai": _dependency_status("AZURE_OPENAI_ENDPOINT"),
+        # Spec 036 / ADR-20 — Foundry is the canonical chat plane post-cutover.
+        "foundry": _dependency_status("AZURE_AI_PROJECT_ENDPOINT"),
     }
 
     # Determine overall status based on dependency health

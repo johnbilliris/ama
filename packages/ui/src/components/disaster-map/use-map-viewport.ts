@@ -39,16 +39,25 @@ export function useMapViewport(storageKey: string = DEFAULT_STORAGE_KEY) {
     }
   }, [storageKey]);
 
-  const saveViewport = useCallback((viewport: MapViewport) => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      try {
-        sessionStorage.setItem(storageKey, JSON.stringify(viewport));
-      } catch {
-        // Graceful degradation — sessionStorage may be unavailable
+  const saveViewport = useCallback(
+    (viewport: MapViewport, options?: { immediate?: boolean }) => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      const persist = () => {
+        try {
+          sessionStorage.setItem(storageKey, JSON.stringify(viewport));
+        } catch {
+          // Graceful degradation — sessionStorage may be unavailable
+        }
+      };
+      if (options?.immediate) {
+        timerRef.current = null;
+        persist();
+      } else {
+        timerRef.current = setTimeout(persist, 500);
       }
-    }, 500);
-  }, [storageKey]);
+    },
+    [storageKey],
+  );
 
   return { getSavedViewport, saveViewport };
 }

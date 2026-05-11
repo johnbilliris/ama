@@ -1,0 +1,391 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/johnbilliris/ama/specs/036-foundry-rag-grounding/contracts/audit-record-llm-call.json",
+  "title": "AuditRecord (LLM-call)",
+  "description": "Append-only audit record emitted on every LLM call (inference or embedding) by every agent and the simulation Controller. Spec 036 EXTENDS the existing audit shape (spec 014/030/032) with the bold rows from data-model.md §AuditRecord. R3 amend-loop (Sessions 3+4+5) ADDS the additive-nullable fields: operator_override_rationale, approval_workflow_state, approval_authority, downgrade_justification, retrieval_index_name, field_coordinator_offline_decision, conflict_group_id, precedence_tiebreak_applied. Discriminator: call_kind. Source of truth for retrieval+inference equivalence replay (SC-011), FR-RAG-NS-01..09 carve-out enforcement, FR-RAG-AG-02 amend-loop audit-shape extension, FR-RAG-COORD-01/02 conflict trace stitching, and FR-RAG-IDX-04a in-flight-query-atomicity replay. Migration strategy per Pass 2 Q-P2-01: additive, in-place, schema-on-read via existing `infra/scripts/migrate-audit-record-036.ps1` (Phase D2 task T082).",
+  "type": "object",
+  "required": [
+    "call_id",
+    "timestamp_utc",
+    "agent_name",
+    "call_kind",
+    "model_id",
+    "model_version",
+    "deployment_alias",
+    "rag_used",
+    "gateway_decision",
+    "hallucinated_citation_count",
+    "output_tokens",
+    "output_text_hash",
+    "tenant_id",
+    "correlation_id"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "call_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Primary key. Cosmos /id."
+    },
+    "timestamp_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC. For offline-replayed entries (FR-RAG-LS-02 reconnect) MUST preserve original on-device timestamp."
+    },
+    "agent_name": {
+      "type": "string",
+      "enum": [
+        "MonitoringAgent",
+        "RiskAssessmentAgent",
+        "EvacuationAgent",
+        "ResourceAllocationAgent",
+        "DependencyNotifierAgent",
+        "CommunicationAgent",
+        "SimulationController",
+        "ObserverAuditor"
+      ]
+    },
+    "chat_turn_index": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Set for SimulationController chat turns; null otherwise."
+    },
+    "call_kind": {
+      "type": "string",
+      "enum": ["inference", "embedding"],
+      "description": "R-13. Discriminator. `embedding` calls have no prompt and no retrieved chunks."
+    },
+    "prompt_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 of the rendered prompt. Required iff call_kind == 'inference'. Replay invariant SC-011."
+    },
+    "model_id": {
+      "type": "string",
+      "description": "E.g. 'gpt-4o-mini', 'text-embedding-3-large'. Resolved from the deployment map at call time."
+    },
+    "model_version": {
+      "type": "string",
+      "description": "Model semver as reported by the Foundry deployment — captures drift-of-the-month."
+    },
+    "deployment_alias": {
+      "type": "string",
+      "description": "Foundry deployment name (the value side of AZURE_AI_PROJECT_DEPLOYMENTS map). Required for replay parity."
+    },
+    "embedding_model_id": {
+      "type": "string",
+      "description": "Required iff call_kind == 'embedding' OR rag_used == true. Used to verify retrieval was issued against the alias-active index."
+    },
+    "corpus_build_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "Required iff rag_used == true. Pins replay to a specific corpus build."
+    },
+    "retrieved_chunks": {
+      "type": "array",
+      "description": "Required iff rag_used == true and non-empty. Empty array forbidden when rag_used == true (FR-RAG-AG-05 — no chunks → no grounding claim).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["chunk_id", "sha256_of_chunk", "jurisdiction", "topic", "page", "licence_mode", "confidence"],
+        "properties": {
+          "chunk_id": { "type": "string" },
+          "sha256_of_chunk": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "jurisdiction": { "type": "string", "enum": ["act", "nsw", "nt", "qld", "sa", "tas", "vic", "wa", "national", "aidr"] },
+          "topic": { "type": "string" },
+          "page": { "type": "integer", "minimum": 1 },
+          "licence_mode": { "type": "string", "enum": ["full-text", "metadata-only"] },
+          "confidence": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+        }
+      }
+    },
+    "citations": {
+      "type": "array",
+      "description": "Required iff rag_used == true. Each element MUST conform to citation-envelope.json. Every citation.sha256_of_chunk MUST also appear in retrieved_chunks[].sha256_of_chunk; mismatches increment hallucinated_citation_count and emit a separate `hallucinated_citation` event.",
+      "items": { "$ref": "./citation-envelope.json" }
+    },
+    "rag_used": {
+      "type": "boolean",
+      "description": "false for FR-RAG-NS-01..09 paths and for call_kind == 'embedding'."
+    },
+    "rag_optout_reason": {
+      "type": "string",
+      "enum": [
+        "structured-signal-pipeline",
+        "bom-live-feed",
+        "ga-live-feed",
+        "planning-collection",
+        "logistics-transactional",
+        "scenario-execution",
+        "classified-content",
+        "lint-required-marker",
+        "observer-auditor-replay"
+      ],
+      "description": "Required iff rag_used == false AND call_kind == 'inference'. Maps 1:1 to FR-RAG-NS-01..09."
+    },
+    "adr_pointer": {
+      "type": "string",
+      "pattern": "^docs/decisions/036-foundry-rag-grounding/0[1-9]-rag-optout-[a-z-]+\\.md$",
+      "description": "Required iff rag_used == false. Points at the named ADR (FR-RAG-NS-08 lint enforces existence)."
+    },
+    "gateway_decision": {
+      "type": "string",
+      "enum": ["allow", "deny", "redact"],
+      "description": "Model gateway decision on the prompt + response (FR-RAG-CV-03). 'deny' aborts the call; 'redact' rewrites the payload."
+    },
+    "gateway_deny_reason": {
+      "type": "string",
+      "enum": ["pii", "pspf-marking", "sensitive-operational-content", "classification-above-official", "carveout-not-registered"],
+      "description": "Required iff gateway_decision == 'deny'."
+    },
+    "hallucinated_citation_count": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "0 for non-grounded paths; ≥0 for grounded. Above the R-10 threshold the agent downgrades confidence."
+    },
+    "output_tokens": { "type": "integer", "minimum": 0 },
+    "output_text_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 of the model output text. Replay-comparable."
+    },
+    "operator_actions": {
+      "type": "array",
+      "description": "Downstream operator decisions: approval, edit, dismiss, escalate. Append-only; populated post-call.",
+      "items": {
+        "type": "object",
+        "required": ["action", "actor_id", "timestamp_utc"],
+        "properties": {
+          "action": { "type": "string", "enum": ["approve", "edit", "dismiss", "escalate"] },
+          "actor_id": { "type": "string" },
+          "timestamp_utc": { "type": "string", "format": "date-time" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "operator_override_rationale": {
+      "type": ["string", "null"],
+      "maxLength": 1024,
+      "description": "Spec-036 amend-loop NEW field (Cluster A5 / ADR-14). Captured when operator modifies or rejects the LLM recommendation. Nullable on legacy rows per the additive-in-place migration strategy (Pass 2 Q-P2-01)."
+    },
+    "approval_workflow_state": {
+      "type": ["string", "null"],
+      "enum": ["pending", "approved", "rejected", null],
+      "description": "Spec-036 amend-loop NEW field (Cluster A5 / ADR-14). Tracks PIO/IC approval workflow for public-facing outputs (FR-RAG-LS-03). Nullable on legacy rows."
+    },
+    "approval_authority": {
+      "type": ["string", "null"],
+      "maxLength": 256,
+      "description": "Spec-036 amend-loop NEW field (Cluster A5 / ADR-14). Identity (Entra ID) of the approving IC/PIO when approval_workflow_state transitions to approved or rejected. Required iff approval_workflow_state in (approved, rejected); null otherwise and on legacy rows."
+    },
+    "downgrade_justification": {
+      "type": ["string", "null"],
+      "maxLength": 1024,
+      "description": "Spec-036 amend-loop NEW field (Cluster A5 / ADR-14). Captured when IC downgrades the incident level. Nullable on legacy rows."
+    },
+    "retrieval_index_name": {
+      "type": ["string", "null"],
+      "description": "Spec-036 amend-loop NEW field (Cluster A7 / ADR-16). Concrete AI Search index name (NOT the alias) resolved at query start by the retrieval client per FR-RAG-IDX-04a. Pinned for the entire query lifecycle to guarantee in-flight atomicity across blue-green alias flips. Required iff rag_used == true; null otherwise and on legacy rows."
+    },
+    "field_coordinator_offline_decision": {
+      "type": ["boolean", "null"],
+      "description": "Spec-036 amend-loop NEW field (Cluster A5 / ADR-14). True when the decision was made by Field Coordinator while offline using cached doctrine (FR-RAG-LS-02 offline boundaries). Decisions tagged true MUST queue for IC review on reconnect with approval_workflow_state == 'pending'."
+    },
+    "conflict_group_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Spec-036 amend-loop NEW field (Cluster A9 / ADR-18). UUID v7 emitted by the multi-agent conflict detector (FR-RAG-COORD-01) when this AuditRecord is part of a conflicting recommendation pair/set. Foreign key to `conflictDetectionLog.conflict_group_id`. Null when no conflict; null on legacy rows."
+    },
+    "precedence_tiebreak_applied": {
+      "type": ["array", "null"],
+      "items": {"type": "string", "enum": ["recency", "licence_mode", "embedding_model_id", "chunk_id"]},
+      "description": "Spec-036 amend-loop NEW field (Cluster A1+A3 / ADR-13 / Pass 1 Q-P1-02). Trace of which deterministic tie-breakers were applied during precedence ranking when chunks shared `precedence_rank`. Empty array when no tie occurred; null on legacy rows. Recorded so SC-011 ≥95% byte-identical replay holds even when ranks tie."
+    },
+    "tenant_id": {
+      "type": "string",
+      "description": "Tenant isolation; matches the existing spec-029 tenant model."
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Trace correlation across retrieval → inference → audit → SSE."
+    },
+    "operator_override_rationale": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 2048,
+      "description": "Spec 036 F-A5 NEW field (Cluster A5; Pass 2 Q-P2-01 additive-nullable). Free-text rationale captured when an operator modifies or rejects an agent recommendation. Required by SC-017 on every override event; nullable for legacy rows + non-override paths."
+    },
+    "approval_workflow_state": {
+      "type": ["string", "null"],
+      "enum": ["pending", "approved", "rejected", null],
+      "description": "Spec 036 F-A5 NEW field. State of the approval state machine for public-warning events and other queued-for-review actions. Transitions: pending → approved | rejected (terminal). Approval state machine implementation lives at apps/api/app/services/approval_workflow.py."
+    },
+    "approval_authority": {
+      "type": ["string", "null"],
+      "minLength": 3,
+      "maxLength": 256,
+      "description": "Spec 036 F-A5 NEW field. Identity of the actor who transitioned approval_workflow_state to approved or rejected (Entra ID / OID). Required iff approval_workflow_state in {approved, rejected}; nullable otherwise."
+    },
+    "downgrade_justification": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 2048,
+      "description": "Spec 036 F-A5 NEW field. Free-text justification when an agent or operator downgrades a recommendation from grounded → opt-out (FR-RAG-NS-01..09) for an explicit operational reason rather than a routine carve-out path."
+    },
+    "retrieval_index_name": {
+      "type": ["string", "null"],
+      "pattern": "^corpus-(v[0-9]+|test-[a-z0-9-]+)$",
+      "description": "Spec 036 F-A5 NEW field (Cluster A7). Concrete AI Search index name (e.g. corpus-v3) NOT the alias (corpus-search). Pinned at query start by the alias-pinning protocol (FR-RAG-IDX-04a / ADR-16). Required iff rag_used == true so audit replay can target the exact index version even after the alias has flipped."
+    },
+    "field_coordinator_offline_decision": {
+      "type": ["string", "null"],
+      "minLength": 1,
+      "maxLength": 1024,
+      "description": "Spec 036 F-A5 NEW field. Summary of an offline Field Coordinator decision queued during disconnected operation (FR-RAG-LS-02 ext). Set on reconnect when the offline decision is reconciled to the audit trail; null otherwise."
+    },
+    "conflict_group_id": {
+      "type": ["string", "null"],
+      "format": "uuid",
+      "description": "Spec 036 F-A5 NEW field (Cluster A9). UUID v7 (time-ordered) linking this audit record to a row in the conflictDetectionLog Cosmos container. Set by the multi-agent conflict detector (FR-RAG-COORD-01) on every record involved in a detected conflict; null otherwise."
+    },
+    "precedence_tiebreak_applied": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["recency", "licence_mode", "embedding_model_id", "chunk_id"]
+      },
+      "description": "Spec 036 F-A5 NEW field (Cluster A3). Trace of which deterministic tie-break tiers were applied during retrieval ranking when two chunks shared `precedence_rank` (FR-RAG-AC-01; Pass 1 Q-P1-02). Empty list when no tie occurred. Order matches the Pass 1 Q-P1-02 sequence: (1) recency, (2) licence_mode, (3) embedding_model_id, (4) chunk_id."
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "Invariant 1: rag_used == true → retrieved_chunks non-empty AND corpus_build_sha present AND embedding_model_id present.",
+      "if": { "properties": { "rag_used": { "const": true } }, "required": ["rag_used"] },
+      "then": {
+        "required": ["retrieved_chunks", "corpus_build_sha", "embedding_model_id", "citations"],
+        "properties": {
+          "retrieved_chunks": { "minItems": 1 }
+        }
+      }
+    },
+    {
+      "$comment": "Invariant 2: rag_used == false → rag_optout_reason AND adr_pointer required (for inference); retrieved_chunks empty.",
+      "if": {
+        "properties": {
+          "rag_used": { "const": false },
+          "call_kind": { "const": "inference" }
+        },
+        "required": ["rag_used", "call_kind"]
+      },
+      "then": {
+        "required": ["rag_optout_reason", "adr_pointer"],
+        "properties": {
+          "retrieved_chunks": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "$comment": "Invariant 3: call_kind == 'embedding' → no prompt_sha, no retrieved_chunks, rag_used == false, embedding_model_id required.",
+      "if": { "properties": { "call_kind": { "const": "embedding" } }, "required": ["call_kind"] },
+      "then": {
+        "required": ["embedding_model_id"],
+        "properties": {
+          "rag_used": { "const": false }
+        },
+        "not": { "required": ["prompt_sha"] }
+      }
+    },
+    {
+      "$comment": "Invariant 4: call_kind == 'inference' → prompt_sha required.",
+      "if": { "properties": { "call_kind": { "const": "inference" } }, "required": ["call_kind"] },
+      "then": { "required": ["prompt_sha"] }
+    },
+    {
+      "$comment": "Invariant 5: gateway_decision == 'deny' → gateway_deny_reason required.",
+      "if": { "properties": { "gateway_decision": { "const": "deny" } }, "required": ["gateway_decision"] },
+      "then": { "required": ["gateway_deny_reason"] }
+    },
+    {
+      "$comment": "Invariant 6 (R3 amend-loop ADR-16): rag_used == true → retrieval_index_name MUST be a concrete AI-Search index name (not the alias) so audit replay can pin to the exact index version even after the alias has flipped.",
+      "if": { "properties": { "rag_used": { "const": true } }, "required": ["rag_used"] },
+      "then": { "required": ["retrieval_index_name"], "properties": {"retrieval_index_name": {"type": "string", "minLength": 1}} }
+    },
+    {
+      "$comment": "Invariant 7 (R3 amend-loop ADR-14): approval_workflow_state in (approved, rejected) → approval_authority required (Entra ID of the approving IC/PIO).",
+      "if": { "properties": { "approval_workflow_state": { "enum": ["approved", "rejected"] } }, "required": ["approval_workflow_state"] },
+      "then": { "required": ["approval_authority"], "properties": {"approval_authority": {"type": "string", "minLength": 3}} }
+    },
+    {
+      "$comment": "Invariant 8 (R3 amend-loop ADR-14): field_coordinator_offline_decision == true → approval_workflow_state MUST be 'pending' on emission so reconnect-time IC review is enforced.",
+      "if": { "properties": { "field_coordinator_offline_decision": { "const": true } }, "required": ["field_coordinator_offline_decision"] },
+      "then": { "properties": { "approval_workflow_state": { "const": "pending" } }, "required": ["approval_workflow_state"] }
+    }
+  ],
+  "examples": [
+    {
+      "call_id": "f3e2d1c0-a9b8-7c6d-5e4f-3a2b1c0d9e8f",
+      "timestamp_utc": "2026-05-15T03:42:11Z",
+      "agent_name": "RiskAssessmentAgent",
+      "chat_turn_index": null,
+      "call_kind": "inference",
+      "prompt_sha": "9c1f3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a2",
+      "model_id": "gpt-4o-mini",
+      "model_version": "2024-07-18",
+      "deployment_alias": "ama-prod-gpt-4o-mini-v1",
+      "embedding_model_id": "text-embedding-3-large",
+      "corpus_build_sha": "f9c3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a26",
+      "retrieved_chunks": [
+        {
+          "chunk_id": "abc-123",
+          "sha256_of_chunk": "f9c3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a26",
+          "jurisdiction": "nsw",
+          "topic": "evacuation-planning",
+          "page": 47,
+          "licence_mode": "full-text",
+          "confidence": 0.84
+        }
+      ],
+      "citations": [
+        {
+          "jurisdiction": "nsw",
+          "topic": "evacuation-planning",
+          "page": 47,
+          "source_url": "https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0009/evac-plan.pdf",
+          "rendered_url": "/docs/corpus/nsw/evacuation-planning/handbook.md#page-47",
+          "sha256_of_chunk": "f9c3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a26",
+          "licence_mode": "full-text",
+          "confidence": 0.84,
+          "snippet": "When the area is deemed safe, the Incident Controller authorises return of evacuees…"
+        }
+      ],
+      "rag_used": true,
+      "gateway_decision": "allow",
+      "hallucinated_citation_count": 0,
+      "output_tokens": 412,
+      "output_text_hash": "1a2b3c4d5e6f70819203a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5",
+      "tenant_id": "agency-nsw-rfs",
+      "correlation_id": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "call_id": "11223344-5566-7788-99aa-bbccddeeff00",
+      "timestamp_utc": "2026-05-15T03:43:00Z",
+      "agent_name": "DependencyNotifierAgent",
+      "call_kind": "inference",
+      "prompt_sha": "0000000000000000000000000000000000000000000000000000000000000000",
+      "model_id": "gpt-4o-mini",
+      "model_version": "2024-07-18",
+      "deployment_alias": "ama-prod-gpt-4o-mini-v1",
+      "rag_used": false,
+      "rag_optout_reason": "structured-signal-pipeline",
+      "adr_pointer": "docs/decisions/036-foundry-rag-grounding/01-rag-optout-dependency-notifier.md",
+      "retrieved_chunks": [],
+      "gateway_decision": "allow",
+      "hallucinated_citation_count": 0,
+      "output_tokens": 86,
+      "output_text_hash": "deadbeef00000000000000000000000000000000000000000000000000000000",
+      "tenant_id": "agency-nsw-rfs",
+      "correlation_id": "550e8400-e29b-41d4-a716-446655440001"
+    }
+  ]
+}

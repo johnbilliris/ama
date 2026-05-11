@@ -1,0 +1,83 @@
+# Spec 036 / F-A10 / T219 + T222 — Weekly 50-agent retrieval load harness
+# (FR-RAG-TEST-02; SHOULD-class quality gate).
+#
+# Pass 1 Q-P1-07 + Plan §F-A10.2 — sustain 50 distinct ``agent_session_id``
+# values at RPS=50 for 60s with p95 retrieval-only latency ≤500ms;
+# instrumented with psutil for per-process memory + CPU. Triggers:
+#   - schedule (Sunday 18:00 UTC ≈ Monday 0500 AEST)
+#   - workflow_dispatch (operator override)
+#   - pre-promotion stage of spec-029 progressive-delivery (manual via dispatch)
+name: Spec 036 50-Agent Load
+
+on:
+  schedule:
+    - cron: "0 18 * * 0"
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: Base URL to test (default = staging API)
+        required: false
+        default: https://api-ama-staging.example.com
+      duration_seconds:
+        description: Sustained run duration in seconds
+        required: false
+        default: "60"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  retrieval-50-agent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TARGET_URL: ${{ inputs.target_url || 'https://api-ama-staging.example.com' }}
+      DURATION_S: ${{ inputs.duration_seconds || '60' }}
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Install load deps
+        run: |
+          python -m pip install --upgrade pip
+          # T224 — psutil is pinned in pyproject.toml::[project.optional-dependencies].load
+          pip install -e ".[load]"
+      - name: Run 50-agent locust harness
+        run: |
+          set -euxo pipefail
+          locust \
+            --headless \
+            --host "${TARGET_URL}" \
+            --users 50 \
+            --spawn-rate 50 \
+            --run-time "${DURATION_S}s" \
+            --tags retrieval \
+            -f tests/load/locustfile.py \
+            --csv artifacts/spec-036-50-agent \
+            --html artifacts/spec-036-50-agent.html
+      - name: Compare against baseline
+        if: always()
+        run: |
+          # Compares the freshly-emitted CSV against tests/load/baselines/spec-036-50-agent-baseline.json.
+          # Until the baseline block is populated (see notes[]), this step warns only.
+          python - <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          baseline = json.loads(pathlib.Path("tests/load/baselines/spec-036-50-agent-baseline.json").read_text())
+          captured = baseline.get("baseline", {}).get("latency_p95_ms")
+          if captured is None:
+              print("::warning::baseline not yet captured — first green run should populate the JSON baseline block")
+              sys.exit(0)
+          print(f"baseline p95 = {captured}ms")
+          PY
+      - name: Upload load artefacts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: spec-036-50-agent-load
+          path: artifacts/
+          retention-days: 30

@@ -113,20 +113,130 @@ def build_agent(definition: dict[str, Any]) -> Agent:
     return agent
 
 
+def _maybe_default_retrieval_service() -> Any:
+    """Return a production retrieval service when the env vars indicate live,
+    or ``None`` otherwise.
+
+    Imported lazily inside the helper so unit tests that don't touch
+    grounding never trigger an ``apps/agents/common`` import (keeps the
+    test path hermetic). Failures are swallowed and ``None`` returned —
+    the per-agent grounding flag will then resolve to ``False`` and the
+    legacy non-grounded path runs unchanged (R-12).
+    """
+    if not os.environ.get("AZURE_SEARCH_ENDPOINT"):
+        return None
+    try:
+        from common.retrieval_client import build_default_retrieval_service  # noqa: PLC0415
+
+        return build_default_retrieval_service()
+    except Exception:  # noqa: BLE001
+        logger.warning(
+            "default_retrieval_service_unavailable; agent grounding disabled",
+            exc_info=True,
+        )
+        return None
+
+
 class MafAgentFacade:
     """Thin facade that selects between legacy pipeline, MAF Agent, or shadow mode.
 
     Each named agent module subclasses this with a per-agent legacy-pipeline
     delegate. In production cutover, the FEATURE_MAF_RUNTIME_<AGENT> env var
     flips between ``legacy`` (default), ``maf``, and ``shadow``.
+
+    Spec 036 — optional grounding seam:
+      ``retrieval_service``, ``audit_writer``, and ``citation_filter`` are
+      dependency-injected. When the per-agent flag
+      ``FEATURE_FOUNDRY_RAG_<AGENT_UPPER>=1`` is set AND
+      ``AZURE_AI_PROJECT_ENDPOINT`` is configured, ``retrieve()`` returns a
+      grounded ``RetrievalResult``; otherwise it returns ``None`` and the
+      agent falls back to legacy behaviour. This honours the canary plan
+      (R-12) — code is always present, but the path activates only when the
+      operator flips the flag.
     """
 
     name: str = ""
 
-    def __init__(self) -> None:
+    # Canonical agent name used in audit records / RetrievalRequest. Defaults
+    # to ``<self.name>.title().replace("_", "") + "Agent"`` so a YAML name of
+    # ``risk_assessment`` becomes ``RiskAssessmentAgent``.
+    grounded_agent_name: str = ""
+
+    def __init__(
+        self,
+        *,
+        retrieval_service: Any = None,
+        audit_writer: Any = None,
+    ) -> None:
         self._definition = load_agent_definition(self.name)
         self._output_schema = _resolve_pydantic_class(self._definition["output_schema"])
         self._maf_agent: Agent | None = None  # built lazily on first MAF call
+        # Spec 036 — when the caller didn't inject a retrieval service AND
+        # the runtime env vars indicate the grounding plane is live, auto-
+        # construct the production ``AzureSearchRetrievalService`` so the
+        # per-agent ``FEATURE_FOUNDRY_RAG_<AGENT>=1`` flag activates the
+        # grounded path in production without bespoke wiring per agent
+        # module. Failures are non-fatal — ``is_grounded_enabled()`` will
+        # return ``False`` and the agent falls back to legacy behaviour
+        # (R-12 canary plan).
+        if retrieval_service is None:
+            retrieval_service = _maybe_default_retrieval_service()
+        self._retrieval = retrieval_service
+        self._audit_writer = audit_writer
+
+    @property
+    def grounded_name(self) -> str:
+        if self.grounded_agent_name:
+            return self.grounded_agent_name
+        camel = "".join(part.title() for part in self.name.split("_"))
+        return f"{camel}Agent"
+
+    def is_grounded_enabled(self) -> bool:
+        """Return True iff this agent's Foundry-RAG flag is set AND retrieval is wired."""
+        flag_var = f"FEATURE_FOUNDRY_RAG_{self.name.upper()}"
+        flag = os.environ.get(flag_var, "").strip().lower() in ("1", "true", "yes", "on")
+        endpoint = os.environ.get("AZURE_AI_PROJECT_ENDPOINT", "")
+        return bool(flag and endpoint and self._retrieval is not None)
+
+    async def retrieve(
+        self,
+        *,
+        jurisdictions: list[str],
+        query_text: str,
+        hazard_type: str | None = None,
+        tenant_id: str = "default",
+        correlation_id: str = "",
+        top_k: int = 5,
+    ) -> Any:
+        """Issue a retrieval request scoped to this agent.
+
+        Returns ``None`` when the per-agent flag is off (legacy fall-through);
+        a ``RetrievalResult`` otherwise. The grounded-fact filter and the
+        audit writer are the caller's responsibility — keeping the seam
+        narrow lets each agent compose retrieval into its existing prompt
+        construction without dictating shape.
+        """
+        if not self.is_grounded_enabled():
+            return None
+        try:
+            from ama_domain import RetrievalRequest  # type: ignore[import-not-found]
+        except ImportError:
+            logger.warning("ama_domain not importable; retrieval disabled")
+            return None
+        req = RetrievalRequest(
+            agent_name=self.grounded_name,
+            jurisdictions=jurisdictions,
+            hazard_type=hazard_type or "general",
+            query_text=query_text,
+            top_k=top_k,
+            tenant_id=tenant_id,
+            correlation_id=correlation_id or "unknown",
+        )
+        try:
+            return await self._retrieval.retrieve(req)
+        except Exception as exc:  # noqa: BLE001 — retrieval must never crash the agent
+            logger.warning("agent_retrieval_failed agent=%s err=%s", self.grounded_name, exc)
+            return None
 
     @property
     def definition(self) -> dict[str, Any]:
