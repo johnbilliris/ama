@@ -231,48 +231,48 @@ description: "Actionable, dependency-ordered task list for spec-038 In-Product H
 
 ### 5a — Persona landings (10 ops + 6 sectors)
 
-- [ ] T-AA128 [P] [Gate] Author `apps/web/src/content/help/personas/incident-commander/landing.mdx` (+ first-15-min tour, AIIMS Controller workflow, public-alert approval, cross-jurisdiction escalation, span-of-control warnings, audit traceability links). — FR-002, FR-004, CHK001
-- [ ] T-AA129 [P] [Gate] Author `apps/web/src/content/help/personas/operations-officer/landing.mdx` + tour + tactical task assignment, multi-sector coordination, staging strategy, agent-recommendations review, escalation-up. — CHK002
-- [ ] T-AA130 [P] [Gate] Author `apps/web/src/content/help/personas/planning-officer/landing.mdx` + content per CHK003. — CHK003
-- [ ] T-AA131 [P] [Gate] Author `apps/web/src/content/help/personas/logistics-officer/landing.mdx` + content per CHK004. — CHK004
-- [ ] T-AA132 [P] [Gate] Author `apps/web/src/content/help/personas/public-information-officer/landing.mdx` + multilingual alert composer guide + accessibility checker + Principle V coverage. — CHK005, FR-024
-- [ ] T-AA133 [P] [Gate] Author `apps/web/src/content/help/personas/field-coordinator/landing.mdx` + degraded-connectivity behaviour. — CHK006
-- [ ] T-AA134 [P] [Gate] Author `apps/web/src/content/help/personas/resilience-planner/landing.mdx` + scenario design. — CHK007
-- [ ] T-AA135 [P] [Gate] Author `apps/web/src/content/help/personas/executive-leader/landing.mdx`. — CHK008
-- [ ] T-AA136 [P] [Gate] Author `apps/web/src/content/help/personas/observer-auditor/landing.mdx` — observation/audit-only language; chat starter prompts must NOT instruct state-changing actions. — CHK009, FR-025
-- [ ] T-AA137 [P] [Gate] Author `apps/web/src/content/help/personas/risk-manager/landing.mdx`. — CHK010
-- [ ] T-AA138 [P] [Gate] Author `apps/web/src/content/help/personas/frontline-fire/landing.mdx` + NSW-jurisdiction screenshot variant. — CHK011, US1#3
-- [ ] T-AA139 [P] [Gate] Author `apps/web/src/content/help/personas/frontline-medical/landing.mdx`. — CHK012
-- [ ] T-AA140 [P] [Gate] Author `apps/web/src/content/help/personas/frontline-police/landing.mdx`. — CHK013
-- [ ] T-AA141 [P] [Gate] Author `apps/web/src/content/help/personas/frontline-ses-marine/landing.mdx`. — CHK014
-- [ ] T-AA142 [P] [Gate] Author `apps/web/src/content/help/personas/commonwealth/landing.mdx`. — CHK015
-- [ ] T-AA143 [P] [Gate] Author `apps/web/src/content/help/personas/cross-sector/landing.mdx`. — CHK016
+- [X] T-AA128 [P] [Gate] Author `apps/web/src/content/help/personas/incident-commander/landing.mdx` (+ first-15-min tour, AIIMS Controller workflow, public-alert approval, cross-jurisdiction escalation, span-of-control warnings, audit traceability links). — FR-002, FR-004, CHK001
+- [X] T-AA129 [P] [Gate] Author `apps/web/src/content/help/personas/operations-officer/landing.mdx` + tour + tactical task assignment, multi-sector coordination, staging strategy, agent-recommendations review, escalation-up. — CHK002
+- [X] T-AA130 [P] [Gate] Author `apps/web/src/content/help/personas/planning-officer/landing.mdx` + content per CHK003. — CHK003
+- [X] T-AA131 [P] [Gate] Author `apps/web/src/content/help/personas/logistics-officer/landing.mdx` + content per CHK004. — CHK004
+- [X] T-AA132 [P] [Gate] Author `apps/web/src/content/help/personas/public-information-officer/landing.mdx` + multilingual alert composer guide + accessibility checker + Principle V coverage. — CHK005, FR-024
+- [X] T-AA133 [P] [Gate] Author `apps/web/src/content/help/personas/field-coordinator/landing.mdx` + degraded-connectivity behaviour. — CHK006
+- [X] T-AA134 [P] [Gate] Author `apps/web/src/content/help/personas/resilience-planner/landing.mdx` + scenario design. — CHK007
+- [X] T-AA135 [P] [Gate] Author `apps/web/src/content/help/personas/executive-leader/landing.mdx`. — CHK008
+- [X] T-AA136 [P] [Gate] Author `apps/web/src/content/help/personas/observer-auditor/landing.mdx` — observation/audit-only language; chat starter prompts must NOT instruct state-changing actions. — CHK009, FR-025
+- [X] T-AA137 [P] [Gate] Author `apps/web/src/content/help/personas/risk-manager/landing.mdx`. — CHK010
+- [X] T-AA138 [P] [Gate] Author `apps/web/src/content/help/personas/frontline-fire/landing.mdx` + NSW-jurisdiction screenshot variant. — CHK011, US1#3
+- [X] T-AA139 [P] [Gate] Author `apps/web/src/content/help/personas/frontline-medical/landing.mdx`. — CHK012
+- [X] T-AA140 [P] [Gate] Author `apps/web/src/content/help/personas/frontline-police/landing.mdx`. — CHK013
+- [X] T-AA141 [P] [Gate] Author `apps/web/src/content/help/personas/frontline-ses-marine/landing.mdx`. — CHK014
+- [X] T-AA142 [P] [Gate] Author `apps/web/src/content/help/personas/commonwealth/landing.mdx`. — CHK015
+- [X] T-AA143 [P] [Gate] Author `apps/web/src/content/help/personas/cross-sector/landing.mdx`. — CHK016
 
 ### 5b — Screen-by-screen guides (every primary surface)
 
-- [ ] T-AA144 [P] [Gate] Author screen-by-screen articles for: Disaster Mapper, Governance Dashboard, Multi-Jurisdiction Filter, Simulation Control, Alert Composer, Agent surfaces (Communication / Evacuation / Monitoring / Risk Assessment / Resource Allocation), Audit/Observer view, Persona switcher, Settings, Login under `apps/web/src/content/help/articles/screen-by-screen/*.mdx`. Each MUST embed `<AnnotatedScreenshot />` + `<KeyboardSteps />`. — FR-006, FR-007, FR-008, CHK019, CHK051-CHK055
-- [ ] T-AA145 [P] [Gate] Capture light + dark screenshots for every primary surface via `tools/help/capture_screenshots.ts` (T-AA176); commit manifests to `screenshot_registry`. — FR-006, FR-007, SC-005, CHK051, CHK052, CHK053
-- [ ] T-AA146 [P] [Gate] Author alt-text JSON sidecars `<screen_id>.alt.json` per callout + keyboard-equivalent steps. — FR-008, CHK054, CHK078
+- [X] T-AA144 [P] [Gate] Author screen-by-screen articles for: Disaster Mapper, Governance Dashboard, Multi-Jurisdiction Filter, Simulation Control, Alert Composer, Agent surfaces (Communication / Evacuation / Monitoring / Risk Assessment / Resource Allocation), Audit/Observer view, Persona switcher, Settings, Login under `apps/web/src/content/help/articles/screen-by-screen/*.mdx`. Each MUST embed `<AnnotatedScreenshot />` + `<KeyboardSteps />`. — FR-006, FR-007, FR-008, CHK019, CHK051-CHK055
+- [X] T-AA145 [P] [Gate] Capture light + dark screenshots for every primary surface via `tools/help/capture_screenshots.ts` (T-AA176); commit manifests to `screenshot_registry`. — FR-006, FR-007, SC-005, CHK051, CHK052, CHK053
+- [X] T-AA146 [P] [Gate] Author alt-text JSON sidecars `<screen_id>.alt.json` per callout + keyboard-equivalent steps. — FR-008, CHK054, CHK078
 
 ### 5c — Domain content
 
-- [ ] T-AA147 [P] [Gate] Author "Getting started" article(s) — Hub overview, sign-in, persona switcher, jurisdiction filter, theme/accessibility settings. — FR-003 D1, CHK017
-- [ ] T-AA148 [P] [Gate] Author Simulation Playbook (`apps/web/src/content/help/articles/playbooks/simulation.mdx`) — scenario configuration, warp/playback, multi-jurisdiction scenarios, observation export. — CHK020, US4#1
-- [ ] T-AA149 [P] [Gate] Author Agent Playbooks (5 articles): Communication, Evacuation, Monitoring, Risk Assessment, Resource Allocation — each with provenance, confidence, human-approval steps. — CHK021, US4#2
-- [ ] T-AA150 [P] [Gate] Author Audit/Observer mode guide — append-only timeline navigation, framework-deviation review, lessons-learned export. — CHK022, US4#3
-- [ ] T-AA151 [P] [Gate] Author Accessibility how-tos — keyboard navigation, screen-reader use, contrast/theme; multilingual authoring guide for PIO. — CHK023, FR-024
-- [ ] T-AA152 [P] [Gate] Author Troubleshooting/FAQ — login, persona switching, jurisdiction filter, degraded mode, alert approval failures, simulation reset, chat refusals. — CHK024, FR-021
-- [ ] T-AA153 [P] [Gate] Author Glossary — AIIMS, AIDR, jurisdictional, Hub-specific terms in `apps/web/src/content/help/glossary/*.yaml` with correct `lang` attributes for non-English fragments. — CHK025, FR-009a, FR-021
-- [ ] T-AA154 [P] Author "Help on this screen" mapping config `apps/web/src/content/help/surfaceMap.yaml` mapping `route_id → article_slug`. — FR-005, CHK027
-- [ ] T-AA155 [P] Author chat starter prompts per persona in each landing MDX (consumed by `<ChatPanel />`). — US2, FR-002
-- [ ] T-AA156 [P] Author Constitution Principle V coverage article (referenced by PIO landing). — FR-024, CHK132
-- [ ] T-AA157 [P] Author "What does the amber confidence badge mean?" article (US2 example). — US2 acceptance scenarios
-- [ ] T-AA158 [P] Author "Cross-border bushfire escalation to NEMA" article (US2 example). — US2 acceptance scenarios
-- [ ] T-AA159 [P] Author multilingual content authoring guide for PIO (community languages + Aboriginal & Torres Strait Islander considerations; cultural-authority registry references). — FR-024, plan §G
-- [ ] T-AA160 [P] [Gate] Cultural-authority registry consultation: for any article referencing Aboriginal & Torres Strait Islander language items, file consultation evidence under `docs/cultural-authority/help/` with ID linking back to the article. — plan §G, CHK132
-- [ ] T-AA161 [P] [Gate] Verify every glossary term has `related_article_ids` and every persona has at least one workflow article cross-link. — FR-021
-- [ ] T-AA162 [P] Add `apps/web/src/content/help/articles/observer-mode-guide.mdx` aligned with FR-025 read-only constraint. — CHK009, FR-025
-- [ ] T-AA163 [P] [Gate] Editorial review: dual-approval PR for the bootstrap content set; record `SnapshotRecord` approver identities. — FR-011b
+- [X] T-AA147 [P] [Gate] Author "Getting started" article(s) — Hub overview, sign-in, persona switcher, jurisdiction filter, theme/accessibility settings. — FR-003 D1, CHK017
+- [X] T-AA148 [P] [Gate] Author Simulation Playbook (`apps/web/src/content/help/articles/playbooks/simulation.mdx`) — scenario configuration, warp/playback, multi-jurisdiction scenarios, observation export. — CHK020, US4#1
+- [X] T-AA149 [P] [Gate] Author Agent Playbooks (5 articles): Communication, Evacuation, Monitoring, Risk Assessment, Resource Allocation — each with provenance, confidence, human-approval steps. — CHK021, US4#2
+- [X] T-AA150 [P] [Gate] Author Audit/Observer mode guide — append-only timeline navigation, framework-deviation review, lessons-learned export. — CHK022, US4#3
+- [X] T-AA151 [P] [Gate] Author Accessibility how-tos — keyboard navigation, screen-reader use, contrast/theme; multilingual authoring guide for PIO. — CHK023, FR-024
+- [X] T-AA152 [P] [Gate] Author Troubleshooting/FAQ — login, persona switching, jurisdiction filter, degraded mode, alert approval failures, simulation reset, chat refusals. — CHK024, FR-021
+- [X] T-AA153 [P] [Gate] Author Glossary — AIIMS, AIDR, jurisdictional, Hub-specific terms in `apps/web/src/content/help/glossary/*.yaml` with correct `lang` attributes for non-English fragments. — CHK025, FR-009a, FR-021
+- [X] T-AA154 [P] Author "Help on this screen" mapping config `apps/web/src/content/help/surfaceMap.yaml` mapping `route_id → article_slug`. — FR-005, CHK027
+- [X] T-AA155 [P] Author chat starter prompts per persona in each landing MDX (consumed by `<ChatPanel />`). — US2, FR-002
+- [X] T-AA156 [P] Author Constitution Principle V coverage article (referenced by PIO landing). — FR-024, CHK132
+- [X] T-AA157 [P] Author "What does the amber confidence badge mean?" article (US2 example). — US2 acceptance scenarios
+- [X] T-AA158 [P] Author "Cross-border bushfire escalation to NEMA" article (US2 example). — US2 acceptance scenarios
+- [X] T-AA159 [P] Author multilingual content authoring guide for PIO (community languages + Aboriginal & Torres Strait Islander considerations; cultural-authority registry references). — FR-024, plan §G
+- [X] T-AA160 [P] [Gate] Cultural-authority registry consultation: for any article referencing Aboriginal & Torres Strait Islander language items, file consultation evidence under `docs/cultural-authority/help/` with ID linking back to the article. — plan §G, CHK132
+- [X] T-AA161 [P] [Gate] Verify every glossary term has `related_article_ids` and every persona has at least one workflow article cross-link. — FR-021
+- [X] T-AA162 [P] Add `apps/web/src/content/help/articles/observer-mode-guide.mdx` aligned with FR-025 read-only constraint. — CHK009, FR-025
+- [X] T-AA163 [P] [Gate] Editorial review: dual-approval PR for the bootstrap content set; record `SnapshotRecord` approver identities. — FR-011b
 
 **Checkpoint**: corpus is publishable; Phase 6 can run.
 
@@ -282,12 +282,12 @@ description: "Actionable, dependency-ordered task list for spec-038 In-Product H
 
 **Depends on**: Phases 1, 3, 5, 7. **Goal**: a merged PR auto-publishes a new immutable snapshot, dual-approval gated; rollback works via alias swap within ≤5 min.
 
-- [ ] T-AA164 [Gate] Author GitHub Actions workflow `.github/workflows/help-snapshot.yml` — triggers on `main` merge touching `apps/web/src/content/help/**` OR `specs/**` snapshot manifest; runs `python tools/help/publish_snapshot.py` with merged approver identities; publishes to dev → test → prod via stack environments. — FR-011a, FR-011b, FR-011c, CHK064, CHK065, CHK066
-- [ ] T-AA165 [Gate] Implement `tools/help/publish_snapshot.py` — local + CI publisher; idempotent on `(snapshot_id, source_id, content_hash)`; calls `apps/ingest-runner --mode help-snapshot`; swings alias; emits `audit.snapshot_published`. Supports `rollback --restored-snapshot-id` subcommand within 5 min budget. — FR-011a, FR-011c, CHK064, CHK068
-- [ ] T-AA166 [Gate] CODEOWNERS gate enforcement test `tests/contract/help/test_codeowners_dual_approval.py` — uses `gh codeowners` to confirm both teams required on `apps/web/src/content/help/**` and snapshot manifest. — FR-011b, CHK065
-- [ ] T-AA167 [P] Approver-identity persistence: snapshot publish endpoint records full approver identity + role + ISO timestamp into `SnapshotRecord.approvers[]`. Verify via integration test. — FR-011b, CHK065
-- [ ] T-AA168 [P] Rollback flow: `POST /help/snapshots/{id}/rollback` re-binds alias to a prior snapshot; emits `audit.snapshot_rollback` with `previous_snapshot_id`, `restored_snapshot_id`, `actor_id`, `change_reason`. — FR-011c, CHK066
-- [ ] T-AA169 [P] Spec-snapshot composition rule: only specs with status ∈ {Active, Implemented} that are listed in the manifest are admitted; draft/experimental excluded. Enforced in `apps/ingest-runner/src/help_snapshot/source_loaders.py`; tested in T-AA185. — FR-011, CHK063
+- [X] T-AA164 [Gate] Author GitHub Actions workflow `.github/workflows/help-snapshot.yml` — triggers on `main` merge touching `apps/web/src/content/help/**` OR `specs/**` snapshot manifest; runs `python tools/help/publish_snapshot.py` with merged approver identities; publishes to dev → test → prod via stack environments. — FR-011a, FR-011b, FR-011c, CHK064, CHK065, CHK066
+- [X] T-AA165 [Gate] Implement `tools/help/publish_snapshot.py` — local + CI publisher; idempotent on `(snapshot_id, source_id, content_hash)`; calls `apps/ingest-runner --mode help-snapshot`; swings alias; emits `audit.snapshot_published`. Supports `rollback --restored-snapshot-id` subcommand within 5 min budget. — FR-011a, FR-011c, CHK064, CHK068
+- [X] T-AA166 [Gate] CODEOWNERS gate enforcement test `tests/contract/help/test_codeowners_dual_approval.py` — uses `gh codeowners` to confirm both teams required on `apps/web/src/content/help/**` and snapshot manifest. — FR-011b, CHK065
+- [X] T-AA167 [P] Approver-identity persistence: snapshot publish endpoint records full approver identity + role + ISO timestamp into `SnapshotRecord.approvers[]`. Verify via integration test. — FR-011b, CHK065
+- [X] T-AA168 [P] Rollback flow: `POST /help/snapshots/{id}/rollback` re-binds alias to a prior snapshot; emits `audit.snapshot_rollback` with `previous_snapshot_id`, `restored_snapshot_id`, `actor_id`, `change_reason`. — FR-011c, CHK066
+- [X] T-AA169 [P] Spec-snapshot composition rule: only specs with status ∈ {Active, Implemented} that are listed in the manifest are admitted; draft/experimental excluded. Enforced in `apps/ingest-runner/src/help_snapshot/source_loaders.py`; tested in T-AA185. — FR-011, CHK063
 - [ ] T-AA170 [P] Per-tenant snapshot composition override: manifest may contain `tenants.<id>.exclude` lists. Enforced + tested. — FR-011-AMEND
 - [ ] T-AA171 [P] Snapshot immutability: `snapshot_records` Cosmos role permits insert-only for the publisher identity. Verify via Cosmos role assignment list. — FR-011a
 - [ ] T-AA172 [P] Deprecation-notice pipeline: when a publish supersedes content, the publisher writes a `deprecation_map` JSON enabling `/help/articles/{slug}` to render `<DeprecationNotice />`. Withdrawn-no-replacement entries surface support-handoff. — FR-011d, FR-011d-AMEND, CHK067
