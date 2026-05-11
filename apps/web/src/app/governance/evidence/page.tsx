@@ -12,7 +12,7 @@ import ImpactTab from "./_tabs/ImpactTab";
 import BenchmarkTab from "./_tabs/BenchmarkTab";
 import AuditTab from "./_tabs/AuditTab";
 
-export const TABS = [
+const TABS = [
   { id: "kpi-ladder", label: "KPI Ladder", Component: KpiLadderTab },
   { id: "measurement", label: "Measurement Method", Component: MeasurementTab },
   { id: "replay", label: "Replay Scorecard", Component: ReplayTab },
