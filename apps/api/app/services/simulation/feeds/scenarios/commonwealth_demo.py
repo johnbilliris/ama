@@ -1,4 +1,4 @@
-"""Spec-038 T136 — commonwealth demo scenario (FR-061, SC-008).
+"""Spec-039 T136 — commonwealth demo scenario (FR-061, SC-008).
 
 NEMA + ADF DACC + BoM cyclone-track composition. Drives the national
 coordination hand-off.

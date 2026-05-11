@@ -1,4 +1,4 @@
-"""Spec-038 T132 — police demo scenario (FR-061, SC-008).
+"""Spec-039 T132 — police demo scenario (FR-061, SC-008).
 
 Cross-jurisdictional public-order / evac-compliance scenario combining
 traffic road closures with social-chatter signal and severe-weather

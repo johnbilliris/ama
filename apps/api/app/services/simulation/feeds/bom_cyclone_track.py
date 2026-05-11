@@ -1,4 +1,4 @@
-"""Spec-038 T081: BoM-shaped tropical cyclone track feed (FR-020, FR-046).
+"""Spec-039 T081: BoM-shaped tropical cyclone track feed (FR-020, FR-046).
 
 Fictitious emulation of BoM IDQ-format cyclone track points. NEVER touches
 ``*.bom.gov.au``. Warning-class — every record embeds the FR-046 marker.

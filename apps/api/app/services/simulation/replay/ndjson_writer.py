@@ -1,4 +1,4 @@
-"""Spec-038 T076: canonical-NDJSON writer + mandatory ``.sha256`` sidecar.
+"""Spec-039 T076: canonical-NDJSON writer + mandatory ``.sha256`` sidecar.
 
 The writer is the only blessed way for Phase 5 to materialise an NDJSON
 replay file. It guarantees:

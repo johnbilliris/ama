@@ -1,4 +1,4 @@
-"""Spec-038 T078: replay CLI for the simulator feed shapes.
+"""Spec-039 T078: replay CLI for the simulator feed shapes.
 
 Run a deterministic end-to-end replay::
 
@@ -58,7 +58,7 @@ SCENARIOS: dict[str, tuple[str, str]] = {
     "synthetic_fallback_au": ("synthetic_fallback", "au"),
 }
 
-# Spec-038 Phase 6 demo scenarios (T130-T137). Each maps the snake-case
+# Spec-039 Phase 6 demo scenarios (T130-T137). Each maps the snake-case
 # CLI id to the corresponding ``feeds.scenarios.*`` module name.
 DEMO_SCENARIOS: dict[str, str] = {
     "demo_operational_v1": "operational_demo",

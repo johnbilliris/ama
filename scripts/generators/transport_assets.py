@@ -1,4 +1,4 @@
-"""Spec-038 T122 — transport assets generator (FR-050)."""
+"""Spec-039 T122 — transport assets generator (FR-050)."""
 
 from __future__ import annotations
 

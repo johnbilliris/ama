@@ -1,4 +1,4 @@
-"""Spec-038 / T045 — Manifest builder for ``docs/test-data/manifest.json``.
+"""Spec-039 / T045 — Manifest builder for ``docs/test-data/manifest.json``.
 
 Walks the catalogued directories of the repository and emits a canonical,
 schema-valid manifest enumerating every test-data artefact (seed, simulator

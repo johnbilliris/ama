@@ -1,4 +1,4 @@
-"""Spec-038 T102 — committed fixtures must not exceed 1000 records (CL-3, R7).
+"""Spec-039 T102 — committed fixtures must not exceed 1000 records (CL-3, R7).
 
 Walks ``fixtures/`` and the seed catalogue dirs and fails if any committed
 ``*.ndjson`` / ``*.json`` carries > 1000 records. xlarge volumes are

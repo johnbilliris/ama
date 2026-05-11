@@ -1,4 +1,4 @@
-"""Spec-038 T161 — Phase-7 regression lock for replay digest sidecars.
+"""Spec-039 T161 — Phase-7 regression lock for replay digest sidecars.
 
 Walks every committed ``fixtures/sim_replays/*.ndjson`` and asserts that:
 

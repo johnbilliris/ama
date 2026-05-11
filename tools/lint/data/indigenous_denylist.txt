@@ -1,4 +1,4 @@
-# AMA Spec-038 / T018 — Indigenous Placeholder Denylist (FR-044, CL-6)
+# AMA Spec-039 / T018 — Indigenous Placeholder Denylist (FR-044, CL-6)
 #
 # This file is the single source of truth for tokens that the
 # tools/lint/check_indigenous_placeholders.py gate (T054) refuses to allow

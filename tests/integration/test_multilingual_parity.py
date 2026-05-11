@@ -1,4 +1,4 @@
-"""Spec-038 T150 — multilingual alert-template parity (FR-070, SC-014).
+"""Spec-039 T150 — multilingual alert-template parity (FR-070, SC-014).
 
 Asserts every locale file under
 ``packages/domain/src/domain/seed/alert-templates/`` exposes the same

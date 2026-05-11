@@ -60,8 +60,8 @@ docs/           # Project documentation
 - Python 3.13 (apps/api, apps/agents, apps/eval-runner, apps/ingestion, new apps/ingest-runner) on FastAPI + Pydantic v2; TypeScript 5.8 / React 19 / Next.js 16.2 (apps/web) for citation-card rendering; uv-managed virtualenvs. + `azure-ai-inference` (NEW — Foundry inference SDK; replaces `openai.AzureOpenAI` at the three migration anchors), `azure-identity` (existing — `DefaultAzureCredential`, scope `https://cognitiveservices.azure.com/.default`), `azure-search-documents` (existing per spec 032 — vector + hybrid query), `azure-storage-blob` (existing — corpus snapshot + audit archive), `tenacity` (existing — retry on 429/503), `cosign` (existing — spec 032 FR-AI09 keyless signing), `age` CLI (NEW — additional offline-cache detached signature per FR-RAG-LS-02). MAF stays on `agent_framework_openai.OpenAIChatClient` factory signature but rewires its credential plumbing to Foundry (`apps/agents/maf_runtime/chat_client.py`). (036-foundry-rag-grounding)
 - Azure AI Search Standard S1 (AU East, Private-Endpoint-only — extends `infra/modules/ai-search.bicep`); Cosmos DB SQL API (existing AU East containers — `audit_records` extended with `retrieved_chunks[]`, `corpus_build_sha`, `embedding_model_id`, `rag_used`, `rag_optout_reason`); Azure Blob Storage (existing AU East — append-only `corpus-snapshots/` container holding the immutable `corpus_build_sha`-tagged tarball read by ingest, plus `offline-cache-bundles/` for Field Coordinator manifests). Microsoft Foundry inference endpoint deployed under the §NN-2 carve-out, AU-region first; non-AU deployments only via registry entry. (036-foundry-rag-grounding)
 - spec-037 — Pydantic v2 evidence-pack models under `packages/domain/src/domain/models/evidence_pack/`; JSON Schema draft 2020-12 mirrors under `packages/schemas/spec_037/` (six artefacts: risk-register, adoption-roadmap, executive-kpi-surface, responsible-ai-register, feature-value-ledger, publication-gate-metadata); read-only Executive KPI page at `apps/web/src/app/governance/executive/` composed from spec-035 `PersonaWorkspace` primitives (no new chart libraries); publication-gate semantics (`manual_row_ratio ≤ 0.5` cap, named-auditor sign-off override per FR-038); two App Insights custom metrics `evidence_pack.publication.duration_seconds` + `evidence_pack.manual_row_ratio`; CI job `evidence-pack-publication-gate` extends `.github/workflows/ci.yml`. Zero net-new top-level Azure resources (PD-037-06). (037-capstone-evidence-pack)
-- Python 3.12 (apps/api, apps/agents, scripts, tools/lint), + FastAPI, Pydantic v2, `azure.eventhub`, (038-test-data-provisioning)
-- Cosmos DB (`disaster-hub` database, account `cosmos-ama-zo6bb5`), (038-test-data-provisioning)
+- Python 3.12 (apps/api, apps/agents, scripts, tools/lint), + FastAPI, Pydantic v2, `azure.eventhub`, (039-test-data-provisioning)
+- Cosmos DB (`disaster-hub` database, account `cosmos-ama-zo6bb5`), (039-test-data-provisioning)
 
 **Backend**: Python 3.12, FastAPI, Pydantic v2, Azure Cosmos DB SDK, Azure Blob Storage SDK, Azure Identity, Azure OpenAI SDK, tenacity
 **Frontend**: TypeScript 5.8, Next.js 16.2, React 19, Tailwind CSS, @ama/ui component library
@@ -109,7 +109,7 @@ bicep lint infra/main.bicep
 
 <!-- MANUAL ADDITIONS START -->
 
-## Test data (Spec 038) — Two-Path Rule
+## Test data (Spec 039) — Two-Path Rule
 
 - **Path 1 (static reference data)**: `packages/domain/src/domain/seed/` loaded
   by `scripts/seed_loader.py` via the `azd postprovision` hook. Generators

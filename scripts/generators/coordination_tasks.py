@@ -1,4 +1,4 @@
-"""Spec-038 T111 — coordination tasks generator (FR-050)."""
+"""Spec-039 T111 — coordination tasks generator (FR-050)."""
 
 from __future__ import annotations
 

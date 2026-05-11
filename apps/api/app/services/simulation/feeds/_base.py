@@ -1,11 +1,11 @@
-"""Spec-038 Phase 5: shared helpers for the 13 feed shape modules.
+"""Spec-039 Phase 5: shared helpers for the 13 feed shape modules.
 
 Provides:
 
   * ``JURISDICTIONS`` — the canonical set we permit on the ``--jurisdiction``
     CLI flag (8 states/territories + ``au`` for nationwide synthetic feeds).
   * :func:`build_record` — assembles a :class:`CanonicalRecord` with the
-    spec-038 envelope filled in (``simulated``/``fictitious``/``residency``
+    spec-039 envelope filled in (``simulated``/``fictitious``/``residency``
     are constants; warning-class ``test_marker`` is enforced separately by
     the JSON schema).
   * :data:`WARNING_TEST_MARKER` — the literal FR-046 / F-001 string that
@@ -35,7 +35,7 @@ def build_record(
     ordinal: int,
     body: dict[str, Any],
 ) -> CanonicalRecord:
-    """Assemble the spec-038 envelope around a feed-specific ``body``."""
+    """Assemble the spec-039 envelope around a feed-specific ``body``."""
     return CanonicalRecord(
         simulated=True,
         fictitious=True,

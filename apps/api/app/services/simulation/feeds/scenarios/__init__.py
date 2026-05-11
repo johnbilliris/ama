@@ -1,4 +1,4 @@
-"""Spec-038 Phase 6 — demo scenarios package (T130-T137).
+"""Spec-039 Phase 6 — demo scenarios package (T130-T137).
 
 Each module here defines a thin orchestrator that composes the feed-shape
 modules under :mod:`apps.api.app.services.simulation.feeds` to emit a

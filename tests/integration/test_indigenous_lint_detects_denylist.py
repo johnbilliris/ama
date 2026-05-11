@@ -1,4 +1,4 @@
-"""Spec-038 T042: ``check_indigenous_placeholders.py`` MUST fail when a
+"""Spec-039 T042: ``check_indigenous_placeholders.py`` MUST fail when a
 denylisted token from ``[NAMES]`` (etc.) appears in a fixture file.
 
 FR-044, CL-6.

@@ -1,4 +1,4 @@
-"""Spec-038 T043: ``check_indigenous_placeholders.py`` MUST fail when a
+"""Spec-039 T043: ``check_indigenous_placeholders.py`` MUST fail when a
 manifest entry references a ``[CONTEXT_ZONES]`` region but
 ``cultural_review_required=false``.
 

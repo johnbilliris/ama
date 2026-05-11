@@ -1,4 +1,4 @@
-"""Spec-038 T131 — fire demo scenario (FR-061, SC-008).
+"""Spec-039 T131 — fire demo scenario (FR-061, SC-008).
 
 NSW Black-Summer-shaped bushfire progression: BoM fire weather + severe
 weather warning + sensor telemetry chain. Fictitious — no live BoM

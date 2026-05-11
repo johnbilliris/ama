@@ -1,8 +1,8 @@
-"""Spec-038 Phase 6 — emit the 8 persona-roster seed files (T140-T147).
+"""Spec-039 Phase 6 — emit the 8 persona-roster seed files (T140-T147).
 
 This is a tiny build helper (NOT a runtime path) used by the Phase 6
 implementation to materialise ``packages/domain/src/domain/seed/persona-rosters/<group>.json``
-for each of the 8 spec-038 domain groups. Each file enumerates the personas
+for each of the 8 spec-039 domain groups. Each file enumerates the personas
 in that group and binds them into the manifest via ``persona_bindings`` so
 the persona-coverage lint reports 68/68 (FR-060, SC-001).
 

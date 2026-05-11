@@ -1,4 +1,4 @@
-"""Spec-038 T162 — combined Two-Path Rule gate.
+"""Spec-039 T162 — combined Two-Path Rule gate.
 
 Defence-in-depth composite test that asserts all three Two-Path Rule
 enforcement layers are simultaneously green:

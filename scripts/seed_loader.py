@@ -25,7 +25,7 @@ import os
 import sys
 from pathlib import Path
 
-# Spec-038 (T032): make `packages.*` importable when this script is run as
+# Spec-039 (T032): make `packages.*` importable when this script is run as
 # `python scripts/seed_loader.py` from the repo root (the azd postprovision
 # entrypoint). The parent of the scripts/ directory is the repo root.
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -52,7 +52,7 @@ class SeedRejectedError(RuntimeError):
 
 
 SEED_ROOT = Path(__file__).resolve().parent.parent / "packages" / "domain" / "src" / "domain" / "seed"
-# Spec-038 T032: parent of the nine new subdirectory catalogues. Tests
+# Spec-039 T032: parent of the nine new subdirectory catalogues. Tests
 # monkeypatch this attribute to a tmp_path so the loader walks a fixture
 # tree rather than the committed seed catalogue.
 SPEC038_SEED_ROOT = SEED_ROOT
@@ -395,10 +395,10 @@ def _existing_hash(container, doc_id: str) -> str | None:
     return existing.get("_content_hash") if isinstance(existing, dict) else None
 
 
-def seed_spec038_subdirectories(
+def seed_spec039_subdirectories(
     cosmos_client, database_name: str
 ) -> dict[str, dict[str, int]]:
-    """Spec-038 T032 — load the nine new subdirectory catalogues with full
+    """Spec-039 T032 — load the nine new subdirectory catalogues with full
     fictitious-marker / PSPF / PII enforcement and content-hash idempotency.
 
     Args:
@@ -464,7 +464,7 @@ def seed_spec038_subdirectories(
                 counters["already-current"] += 1
         summary[subdir] = counters
         print(
-            f"  Spec-038 [{subdir}]: "
+            f"  Spec-039 [{subdir}]: "
             f"{counters['inserts']} inserts, "
             f"{counters['updates']} updates, "
             f"{counters['already-current']} already-current"
@@ -504,10 +504,10 @@ def main() -> None:
             seed_coordination_tasks(
                 args.cosmos_endpoint, args.cosmos_database, coordination_tasks
             )
-        # Spec-038 T032/T034: load the new subdirectory catalogues with
+        # Spec-039 T032/T034: load the new subdirectory catalogues with
         # marker / PSPF / PII enforcement and content-hash idempotency.
         client = _build_cosmos_client(args.cosmos_endpoint)
-        seed_spec038_subdirectories(client, args.cosmos_database)
+        seed_spec039_subdirectories(client, args.cosmos_database)
 
     if args.storage_account:
         seed_blob_containers(args.storage_account)

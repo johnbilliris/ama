@@ -1,4 +1,4 @@
-"""Spec-038 T123 — utility outages generator (FR-050)."""
+"""Spec-039 T123 — utility outages generator (FR-050)."""
 
 from __future__ import annotations
 

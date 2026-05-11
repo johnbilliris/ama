@@ -1,4 +1,4 @@
-"""Spec-038 T082: BoM-shaped Fire Danger Index (FDI) feed (FR-020).
+"""Spec-039 T082: BoM-shaped Fire Danger Index (FDI) feed (FR-020).
 
 Fictitious hourly Forest Fire Danger Index observations.
 NEVER touches ``*.bom.gov.au``. Index-class — no warning marker required.

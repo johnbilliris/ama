@@ -1,4 +1,4 @@
-"""Spec-038 T103 — every demo scenario participates ≥3 personas, ≥2 feeds.
+"""Spec-039 T103 — every demo scenario participates ≥3 personas, ≥2 feeds.
 
 Imports each scenario module and asserts the contract surface plus a
 live ``emit()`` call returns at least one record per feed shape.

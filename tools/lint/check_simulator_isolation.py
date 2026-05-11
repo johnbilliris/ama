@@ -1,4 +1,4 @@
-"""Spec-038 / T055 — Simulator isolation lint (SC-007, R2).
+"""Spec-039 / T055 — Simulator isolation lint (SC-007, R2).
 
 Defence-in-depth complement to the ``import-linter`` contracts declared in
 ``pyproject.toml`` (``simulator_not_imported_by_production``,

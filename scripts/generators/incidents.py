@@ -1,4 +1,4 @@
-"""Spec-038 T110 — multi-hazard incidents generator (FR-050, FR-052, CL-8)."""
+"""Spec-039 T110 — multi-hazard incidents generator (FR-050, FR-052, CL-8)."""
 
 from __future__ import annotations
 

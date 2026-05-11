@@ -1,4 +1,4 @@
-"""Spec-038 / T053 — Validate ``docs/test-data/manifest.json``.
+"""Spec-039 / T053 — Validate ``docs/test-data/manifest.json``.
 
 Checks performed (FR-032, FR-033, FR-042, FR-043, CL-7):
 

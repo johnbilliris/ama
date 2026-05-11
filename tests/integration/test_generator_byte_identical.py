@@ -1,4 +1,4 @@
-"""Spec-038 T100 — every generator is byte-identical for the same seed.
+"""Spec-039 T100 — every generator is byte-identical for the same seed.
 
 Parametrises across all 14 deterministic generators under
 ``scripts/generators/`` and asserts that calling each one twice with the

@@ -18,7 +18,7 @@ dependencies = [
   # for evidence-pack artefacts + YAML loader for the publication-gate config.
   "jsonschema>=4.21",
   "pyyaml>=6.0",
-  # Spec-038 (T001, FR-022) — RFC 8785 JSON Canonicalisation Scheme for
+  # Spec-039 (T001, FR-022) — RFC 8785 JSON Canonicalisation Scheme for
   # deterministic byte-identical NDJSON encoding (canonical JSON, sorted keys).
   "rfc8785>=0.1.4",
 ]
@@ -125,7 +125,7 @@ forbidden_modules = ["apps"]
 # under packages/prompts/.
 
 # ────────────────────────────────────────────────────────────────────────────────
-# Spec-038 / Two-Path Rule (SC-007, plan §"Two-Path Rule").
+# Spec-039 / Two-Path Rule (SC-007, plan §"Two-Path Rule").
 # Production code MUST NOT import the simulator package, and runtime code MUST
 # NOT import the seed package directly (seed records flow through the loader).
 # ────────────────────────────────────────────────────────────────────────────────
@@ -174,7 +174,7 @@ forbidden_modules = [
 ]
 # Pre-existing reference-data bootstrap services that intentionally import
 # ``packages.domain.src.domain.seed.bootstrap`` for one-shot in-process
-# warm-up. These were merged before spec-038 and are NOT regressions to
+# warm-up. These were merged before spec-039 and are NOT regressions to
 # fix here; track via plan §"Two-Path Rule — known acceptable callers".
 ignore_imports = [
   "apps.api.app.services.governance_registry -> packages.domain.src.domain.seed.bootstrap",

@@ -1,4 +1,4 @@
-# Test-Data Manifest (Spec 038)
+# Test-Data Manifest (Spec 039)
 
 > **Auto-generated** from `docs/test-data/manifest.json` by
 > `tools/lint/render_test_data_manifest_md.py`.

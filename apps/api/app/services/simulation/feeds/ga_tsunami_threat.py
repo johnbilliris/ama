@@ -1,4 +1,4 @@
-"""Spec-038 T085: Geoscience Australia-shaped tsunami threat advisory feed.
+"""Spec-039 T085: Geoscience Australia-shaped tsunami threat advisory feed.
 
 Warning-class — every record MUST embed FR-046 / F-001 ``test_marker``.
 NEVER touches ``*.ga.gov.au`` or the Joint Australian Tsunami Warning Centre.

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ama.example.org/specs/038/contracts/manifest.schema.json",
-  "title": "AMA Test-Data Manifest (Spec 038)",
-  "description": "Canonical machine-readable manifest at docs/test-data/manifest.json. Validated by tools/lint/check_test_data_manifest.py in the existing `quality` job of .github/workflows/ci.yml (CL-7). Source-of-truth Pydantic models live in specs/038-test-data-provisioning/data-model.md.",
+  "title": "AMA Test-Data Manifest (Spec 039)",
+  "description": "Canonical machine-readable manifest at docs/test-data/manifest.json. Validated by tools/lint/check_test_data_manifest.py in the existing `quality` job of .github/workflows/ci.yml (CL-7). Source-of-truth Pydantic models live in specs/039-test-data-provisioning/data-model.md.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "generated_at", "entries"],

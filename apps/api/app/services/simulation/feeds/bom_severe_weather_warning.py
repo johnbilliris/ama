@@ -1,4 +1,4 @@
-"""Spec-038 T080: BoM-shaped severe weather warning feed (FR-020, FR-046).
+"""Spec-039 T080: BoM-shaped severe weather warning feed (FR-020, FR-046).
 
 Fictitious emulation of the Bureau of Meteorology severe weather warning
 shape (cyclone, storm, fire weather). NEVER touches ``*.bom.gov.au``.

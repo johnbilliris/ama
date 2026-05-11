@@ -1,4 +1,4 @@
-"""Spec-038 T071: event_hub_publisher integration in deterministic-replay mode.
+"""Spec-039 T071: event_hub_publisher integration in deterministic-replay mode.
 
 Replays a committed NDJSON fixture and asserts that:
   * Every record is republished through the in-memory EventHubPublisher

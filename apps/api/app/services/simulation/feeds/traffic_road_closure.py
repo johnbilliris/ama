@@ -1,4 +1,4 @@
-"""Spec-038 T087: traffic / road-closure feed shape (FR-020).
+"""Spec-039 T087: traffic / road-closure feed shape (FR-020).
 
 Fictitious VicRoads / Live Traffic NSW-shaped road closure events. NEVER
 touches a real traffic authority endpoint.

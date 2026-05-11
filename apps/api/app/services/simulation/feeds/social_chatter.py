@@ -1,4 +1,4 @@
-"""Spec-038 T090: social-media chatter feed (FR-020).
+"""Spec-039 T090: social-media chatter feed (FR-020).
 
 Fictitious social-media-shaped chatter — synthetic handles only,
 no real users, no real platforms. Includes optional misinformation flags

@@ -1,4 +1,4 @@
-"""Spec-038 T118 — START triage records generator (FR-050, FR-045)."""
+"""Spec-039 T118 — START triage records generator (FR-050, FR-045)."""
 
 from __future__ import annotations
 

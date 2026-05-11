@@ -1,4 +1,4 @@
-"""Spec-038 Phase 5 — feed package public surface.
+"""Spec-039 Phase 5 — feed package public surface.
 
 Each feed shape is its own module under this package and exposes:
 

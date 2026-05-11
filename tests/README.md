@@ -48,15 +48,15 @@ Each spec under `specs/` should ship a requirement → test traceability matrix 
 
 ---
 
-## Spec-038 convention — Windows pytest base temp
+## Spec-039 convention — Windows pytest base temp
 
-All spec-038 (test-data provisioning) tests on Windows use a fixed pytest
+All spec-039 (test-data provisioning) tests on Windows use a fixed pytest
 base temp to keep the long Windows path stable and avoid PathTooLongException
 in fixture trees:
 
 ```powershell
-python -m pytest --basetemp=C:\tmp\pytest038 -q tests/contract/spec038/ tests/unit/spec038/
+python -m pytest --basetemp=C:\tmp\pytest039 -q tests/contract/spec039/ tests/unit/spec039/
 ```
 
-This convention is referenced from `specs/038-test-data-provisioning/tasks.md`
+This convention is referenced from `specs/039-test-data-provisioning/tasks.md`
 verification commands (T005).

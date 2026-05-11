@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://ama.example.org/specs/038/contracts/simulator_feed.schema.json",
-  "title": "AMA Simulator Feed NDJSON Record Envelope (Spec 038, FR-021..FR-027)",
+  "title": "AMA Simulator Feed NDJSON Record Envelope (Spec 039, FR-021..FR-027)",
   "description": "Every line of fixtures/sim_replays/*.ndjson and every message published via apps/api/app/services/simulation/event_hub_publisher.py from a simulator feed module MUST validate against this schema. The first line of each NDJSON file is the _fixture_header (CL-5), separately defined.",
   "oneOf": [
     { "$ref": "#/$defs/FixtureHeader" },

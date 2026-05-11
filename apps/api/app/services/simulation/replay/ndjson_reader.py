@@ -1,4 +1,4 @@
-"""Spec-038 T075: NDJSON replay reader.
+"""Spec-039 T075: NDJSON replay reader.
 
 Yields one Python ``dict`` per non-empty NDJSON line. Raises
 :class:`ReplayParseError` on the first malformed line so corruption is

@@ -1,4 +1,4 @@
-"""Spec-038 A002 — committed MANIFEST.md is in sync with manifest.json.
+"""Spec-039 A002 — committed MANIFEST.md is in sync with manifest.json.
 
 OBJ-001 root-cause regression test (105 vs 134 entries pre-A007).
 Refs: FR-036, SC-016, CL-9. Satisfies CHK016.

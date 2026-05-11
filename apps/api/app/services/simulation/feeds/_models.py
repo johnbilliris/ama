@@ -1,4 +1,4 @@
-"""Spec-038 T019: Pydantic v2 models aligned with data-model.md.
+"""Spec-039 T019: Pydantic v2 models aligned with data-model.md.
 
 Three models:
 

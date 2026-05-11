@@ -1,4 +1,4 @@
-"""Spec-038 / T046 — Render ``docs/test-data/MANIFEST.md`` from manifest.json.
+"""Spec-039 / T046 — Render ``docs/test-data/MANIFEST.md`` from manifest.json.
 
 Deterministic markdown output (LF terminators, sorted by category then id).
 Run::
@@ -15,7 +15,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-HEADER = """# Test-Data Manifest (Spec 038)
+HEADER = """# Test-Data Manifest (Spec 039)
 
 > **Auto-generated** from `docs/test-data/manifest.json` by
 > `tools/lint/render_test_data_manifest_md.py`.
@@ -76,7 +76,7 @@ def main(argv: list[str] | None = None) -> int:
         "--check",
         action="store_true",
         help=(
-            "Spec-038 FR-036 / CL-9 freshness gate: re-render in memory, "
+            "Spec-039 FR-036 / CL-9 freshness gate: re-render in memory, "
             "byte-compare against the committed MANIFEST.md (after CRLF→LF "
             "normalisation), exit 0 on parity, exit 1 with unified diff + "
             "remediation command on drift, exit 0 with stderr skip notice "

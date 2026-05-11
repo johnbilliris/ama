@@ -1,4 +1,4 @@
-"""Spec-038 T120 — vulnerable categories generator (FR-050, FR-062).
+"""Spec-039 T120 — vulnerable categories generator (FR-050, FR-062).
 
 Default ``count=20`` to satisfy SC-012 lower bound (≥20 categories).
 """

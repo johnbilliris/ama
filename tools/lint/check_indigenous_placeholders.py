@@ -1,4 +1,4 @@
-"""Spec-038 / T054 — Indigenous placeholder lint (FR-044, CL-6).
+"""Spec-039 / T054 — Indigenous placeholder lint (FR-044, CL-6).
 
 Two-layer enforcement (plan §"Indigenous Placeholder Lint Design"):
 

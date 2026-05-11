@@ -1,4 +1,4 @@
-"""Spec-038 T021: loader rejects records missing fictitious/licence markers (FR-015)."""
+"""Spec-039 T021: loader rejects records missing fictitious/licence markers (FR-015)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from tests.integration.spec038_fakes import FakeCosmosClient  # noqa: E402
+from tests.integration.spec039_fakes import FakeCosmosClient  # noqa: E402
 
 from scripts import seed_loader  # noqa: E402
 from packages.domain.src.domain.seed._fixture_marker import FixtureMarkerError  # noqa: E402
@@ -38,7 +38,7 @@ def bad_seed_root(tmp_path: Path, monkeypatch):
 def test_loader_rejects_unmarked_wrapper(bad_seed_root):
     client = FakeCosmosClient()
     with pytest.raises(FixtureMarkerError) as exc:
-        seed_loader.seed_spec038_subdirectories(client, "disaster-hub")
+        seed_loader.seed_spec039_subdirectories(client, "disaster-hub")
     assert exc.value.field == "licence"
     container = client.db.get_container_client("seed")
     assert container.upsert_calls == 0  # no commits
@@ -61,5 +61,5 @@ def test_loader_rejects_record_missing_fictitious(tmp_path: Path, monkeypatch):
 
     client = FakeCosmosClient()
     with pytest.raises(FixtureMarkerError) as exc:
-        seed_loader.seed_spec038_subdirectories(client, "disaster-hub")
+        seed_loader.seed_spec039_subdirectories(client, "disaster-hub")
     assert exc.value.field == "fictitious"

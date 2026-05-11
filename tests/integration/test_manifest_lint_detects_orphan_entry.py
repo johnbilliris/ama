@@ -1,4 +1,4 @@
-"""Spec-038 T041: ``check_test_data_manifest.py`` MUST fail when a manifest
+"""Spec-039 T041: ``check_test_data_manifest.py`` MUST fail when a manifest
 entry references a path that does not exist on disk.
 
 FR-032.

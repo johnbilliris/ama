@@ -1,4 +1,4 @@
-"""Spec-038 T133 — ambulance demo scenario (FR-061, SC-008).
+"""Spec-039 T133 — ambulance demo scenario (FR-061, SC-008).
 
 Mass-casualty triage with CAD feed, EPA air quality alerts and severe
 weather context — exercises Ambulance VIC, NSW Ambulance and RFDS.

@@ -1,4 +1,4 @@
-"""Spec-038 T137 — cross-sector demo scenario (FR-061, SC-008).
+"""Spec-039 T137 — cross-sector demo scenario (FR-061, SC-008).
 
 NSW request → VIC fulfilment cross-state resource sharing — exercises
 state government, transport sector and utility sector hand-offs.

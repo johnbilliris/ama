@@ -65,7 +65,7 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: python tools/lint/check_licence_inventory.py
 
-      # Spec 038 FR-032 / CL-7 — manifest ↔ artefact ↔ schema parity.
+      # Spec 039 FR-032 / CL-7 — manifest ↔ artefact ↔ schema parity.
       - name: test-data-manifest-lint
         env:
           PYTHONIOENCODING: utf-8
@@ -73,13 +73,13 @@ jobs:
           python tools/lint/check_test_data_manifest.py
           python -c "import jsonschema, json; jsonschema.Draft202012Validator(json.load(open('docs/test-data/manifest.schema.json'))).validate(json.load(open('docs/test-data/manifest.json')))"
 
-      # Spec 038 FR-044 / CL-6 — Indigenous placeholder denylist + cultural review gate.
+      # Spec 039 FR-044 / CL-6 — Indigenous placeholder denylist + cultural review gate.
       - name: indigenous-placeholder-lint
         env:
           PYTHONIOENCODING: utf-8
         run: python tools/lint/check_indigenous_placeholders.py
 
-      # Spec 038 SC-007 — production code paths MUST NOT import simulator feeds/replay/generators.
+      # Spec 039 SC-007 — production code paths MUST NOT import simulator feeds/replay/generators.
       - name: simulator-isolation-lint
         env:
           PYTHONIOENCODING: utf-8
@@ -87,7 +87,7 @@ jobs:
           python tools/lint/check_simulator_isolation.py
           lint-imports --config pyproject.toml
 
-      # Spec 038 FR-036 / SC-016 / CL-9 — Amendment Cycle 1 freshness gate:
+      # Spec 039 FR-036 / SC-016 / CL-9 — Amendment Cycle 1 freshness gate:
       # docs/test-data/MANIFEST.md must byte-equal the LF-normalised
       # re-render of docs/test-data/manifest.json on every PR.
       - name: manifest-md-freshness-lint

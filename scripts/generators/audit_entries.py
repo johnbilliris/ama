@@ -1,4 +1,4 @@
-"""Spec-038 T113 — append-only audit entries generator (FR-050).
+"""Spec-039 T113 — append-only audit entries generator (FR-050).
 
 Includes deliberate compliance-gap rows so downstream audit-replay tests
 have something interesting to enforce against.

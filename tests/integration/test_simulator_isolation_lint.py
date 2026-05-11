@@ -1,4 +1,4 @@
-"""Spec-038 T044: ``check_simulator_isolation.py`` MUST fail when a production
+"""Spec-039 T044: ``check_simulator_isolation.py`` MUST fail when a production
 module string-references the simulator package.
 
 SC-007.

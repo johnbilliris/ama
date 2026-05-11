@@ -1,4 +1,4 @@
-"""Spec-038 T114 — risk register generator aligned to AIDR NERAG (FR-050)."""
+"""Spec-039 T114 — risk register generator aligned to AIDR NERAG (FR-050)."""
 
 from __future__ import annotations
 

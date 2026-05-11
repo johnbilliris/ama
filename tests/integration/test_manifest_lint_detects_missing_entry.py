@@ -1,4 +1,4 @@
-"""Spec-038 T040: ``check_test_data_manifest.py`` MUST fail when a catalogued
+"""Spec-039 T040: ``check_test_data_manifest.py`` MUST fail when a catalogued
 file is missing from ``docs/test-data/manifest.json``.
 
 FR-032, SC-003.

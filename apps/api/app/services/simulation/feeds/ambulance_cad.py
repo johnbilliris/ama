@@ -1,4 +1,4 @@
-"""Spec-038 T089: ambulance Computer-Aided Dispatch (CAD) feed (FR-020).
+"""Spec-039 T089: ambulance Computer-Aided Dispatch (CAD) feed (FR-020).
 
 Fictitious ambulance CAD job events. Categories aligned to standard
 CAD priority codes (P1..P5) but with no real callers, no real addresses,

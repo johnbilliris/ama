@@ -1,4 +1,4 @@
-"""Spec-038 T112 — signals generator with provenance metadata (FR-050, NN-IV)."""
+"""Spec-039 T112 — signals generator with provenance metadata (FR-050, NN-IV)."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Spec-038 T035: assert every persona class with static reference data
+"""Spec-039 T035: assert every persona class with static reference data
 resolves to ≥1 seeded record after a postprovision-equivalent run.
 
 This is the partial coverage gate for FR-060 / SC-001. Full 68/68 persona
@@ -18,7 +18,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from tests.integration.spec038_fakes import FakeCosmosClient  # noqa: E402
+from tests.integration.spec039_fakes import FakeCosmosClient  # noqa: E402
 from scripts import seed_loader  # noqa: E402
 
 # Persona-class → expected presence in at least one of these subdirs.
@@ -37,9 +37,9 @@ PERSONA_CLASSES = {
 
 @pytest.fixture()
 def loader_summary() -> dict[str, dict[str, int]]:
-    """Run the spec-038 subdirectory loader against the committed catalogue."""
+    """Run the spec-039 subdirectory loader against the committed catalogue."""
     client = FakeCosmosClient()
-    return seed_loader.seed_spec038_subdirectories(client, "disaster-hub")
+    return seed_loader.seed_spec039_subdirectories(client, "disaster-hub")
 
 
 @pytest.mark.parametrize("persona,subdirs", PERSONA_CLASSES.items())

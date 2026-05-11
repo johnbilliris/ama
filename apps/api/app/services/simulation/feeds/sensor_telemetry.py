@@ -1,4 +1,4 @@
-"""Spec-038 T091: IoT sensor telemetry feed (FR-020).
+"""Spec-039 T091: IoT sensor telemetry feed (FR-020).
 
 Generic IoT sensor telemetry envelope — smoke, temperature, water level
 sensors at fictitious deployment sites. NEVER touches a real telemetry

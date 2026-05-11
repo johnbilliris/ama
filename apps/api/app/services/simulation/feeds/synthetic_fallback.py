@@ -1,4 +1,4 @@
-"""Spec-038 T092: synthetic fallback feed (FR-025).
+"""Spec-039 T092: synthetic fallback feed (FR-025).
 
 Generic fallback shape used when a persona has no public-data analogue.
 Emits a clearly-labelled synthetic envelope so downstream consumers can

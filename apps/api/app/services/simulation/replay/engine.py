@@ -1,4 +1,4 @@
-"""Spec-038 T071: replay engine — feed canonical NDJSON into existing
+"""Spec-039 T071: replay engine — feed canonical NDJSON into existing
 :class:`event_hub_publisher.EventHubPublisher`.
 
 This is the *only* in-process delivery path mandated by CL-2 (no new HTTP

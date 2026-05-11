@@ -1,4 +1,4 @@
-"""Spec-038 T130 — operational demo scenario (FR-061, SC-008).
+"""Spec-039 T130 — operational demo scenario (FR-061, SC-008).
 
 Composes BoM severe weather + Geoscience earthquake + sensor telemetry
 to drive a generic operational rehearsal exercising the SCC duty officer,

@@ -1,4 +1,4 @@
-"""Spec-038 T115 — public alerts generator (FR-050, FR-070)."""
+"""Spec-039 T115 — public alerts generator (FR-050, FR-070)."""
 
 from __future__ import annotations
 

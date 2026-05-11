@@ -1,4 +1,4 @@
-"""Spec-038 T083: BoM-shaped river / flood gauge readings (FR-020).
+"""Spec-039 T083: BoM-shaped river / flood gauge readings (FR-020).
 
 Fictitious river-gauge readings. NEVER touches ``*.bom.gov.au``.
 Sensor-class — no warning marker required.

@@ -1,4 +1,4 @@
-"""Spec-038 T015: deterministic-seed contract for generators (FR-051, CL-8).
+"""Spec-039 T015: deterministic-seed contract for generators (FR-051, CL-8).
 
 Resolves the 64-bit unsigned random seed for a generator according to the
 documented precedence rule:

@@ -1,4 +1,4 @@
-"""Spec-038 T119 — volunteer registrations generator (FR-050, FR-062).
+"""Spec-039 T119 — volunteer registrations generator (FR-050, FR-062).
 
 ``--volume medium`` (default ``count=30``) emits ≥30 records to satisfy
 SC-012 lower bound.

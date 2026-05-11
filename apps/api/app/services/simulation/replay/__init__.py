@@ -1,4 +1,4 @@
-"""Spec-038 Phase 5 — replay package.
+"""Spec-039 Phase 5 — replay package.
 
 * :mod:`ndjson_writer` — canonical-NDJSON writer with mandatory
   ``.sha256`` sidecar (T076, T077).

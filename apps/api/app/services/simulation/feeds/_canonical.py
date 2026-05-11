@@ -1,4 +1,4 @@
-"""Spec-038 T016: canonical NDJSON encoder, SimulatedClock, correlation IDs.
+"""Spec-039 T016: canonical NDJSON encoder, SimulatedClock, correlation IDs.
 
 CL-4 / FR-022 / FR-026: every byte we emit is deterministic given
 ``(scenario_id, seed)``.
@@ -37,7 +37,7 @@ def encode_ndjson(record: Any) -> bytes:
 def _hmac_seed_bytes(scenario_id: str, seed: int) -> bytes:
     """Stable per-(scenario, seed) HMAC key used by the clock and correlation IDs."""
     msg = f"{scenario_id}|{int(seed)}".encode()
-    return hmac.new(b"ama-spec038", msg, hashlib.sha256).digest()
+    return hmac.new(b"ama-spec039", msg, hashlib.sha256).digest()
 
 
 class SimulatedClock:

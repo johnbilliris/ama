@@ -1,4 +1,4 @@
-"""Spec-038 T151 — WCAG 2.1 AA verification for alert templates (FR-071).
+"""Spec-039 T151 — WCAG 2.1 AA verification for alert templates (FR-071).
 
 Plain-language readability + audio-description placeholder presence.
 """

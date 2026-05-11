@@ -1,4 +1,4 @@
-"""Spec-038 T104 — every persona appears in the manifest (FR-060, SC-001).
+"""Spec-039 T104 — every persona appears in the manifest (FR-060, SC-001).
 
 Reads the canonical 68-persona inventory from
 ``tools.lint.build_test_data_manifest.PERSONA_ROSTERS`` and asserts every

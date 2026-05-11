@@ -1,4 +1,4 @@
-"""Spec-038 T020: loader idempotency — second run = 0 inserts/updates (FR-012, SC-004)."""
+"""Spec-039 T020: loader idempotency — second run = 0 inserts/updates (FR-012, SC-004)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from tests.integration.spec038_fakes import FakeCosmosClient  # noqa: E402
+from tests.integration.spec039_fakes import FakeCosmosClient  # noqa: E402
 
 # Import after sys.path setup.
 from scripts import seed_loader  # noqa: E402
@@ -65,12 +65,12 @@ def fake_seed_root(tmp_path: Path, monkeypatch):
 
 def test_idempotent_upsert(fake_seed_root):
     client = FakeCosmosClient()
-    summary1 = seed_loader.seed_spec038_subdirectories(client, "disaster-hub")
+    summary1 = seed_loader.seed_spec039_subdirectories(client, "disaster-hub")
     assert summary1["alert-templates"]["inserts"] == 2
     assert summary1["alert-templates"]["updates"] == 0
     assert summary1["alert-templates"]["already-current"] == 0
 
-    summary2 = seed_loader.seed_spec038_subdirectories(client, "disaster-hub")
+    summary2 = seed_loader.seed_spec039_subdirectories(client, "disaster-hub")
     assert summary2["alert-templates"]["inserts"] == 0
     assert summary2["alert-templates"]["updates"] == 0
     assert summary2["alert-templates"]["already-current"] == 2

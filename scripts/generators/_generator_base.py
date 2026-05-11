@@ -1,4 +1,4 @@
-"""Spec-038 T110-T123 — shared base for the 14 deterministic generators.
+"""Spec-039 T110-T123 — shared base for the 14 deterministic generators.
 
 Provides the boilerplate every generator module shares so each individual
 module stays small and auditable:
@@ -8,7 +8,7 @@ module stays small and auditable:
   not collide.
 * :func:`tag_record` — stamps the standard provenance + compliance fields
   (FR-040, FR-050, FR-052, CL-8).
-* :func:`build_wrapper` — wraps a record list with the spec-038 ``_fixture``
+* :func:`build_wrapper` — wraps a record list with the spec-039 ``_fixture``
   marker and writes a sorted-keys, RFC-8785-canonicalised JSON document.
 * :func:`build_ndjson_header` — first-line ``_fixture_header`` for NDJSON.
 * :func:`run_cli` — small argparse wrapper so each generator's ``main()``
@@ -61,7 +61,7 @@ def tag_record(
     generator_version: str,
     record_id: str,
 ) -> dict[str, Any]:
-    """Stamp a generator-record with the four spec-038 markers + provenance."""
+    """Stamp a generator-record with the four spec-039 markers + provenance."""
     out: dict[str, Any] = dict(body)
     out["id"] = record_id
     out["fictitious"] = True
@@ -74,7 +74,7 @@ def tag_record(
 
 
 def build_wrapper(records: list[dict[str, Any]]) -> dict[str, Any]:
-    """Return a dict with the spec-038 ``_fixture`` wrapper (validate-able)."""
+    """Return a dict with the spec-039 ``_fixture`` wrapper (validate-able)."""
     return {
         "_fixture": {
             "fictitious": True,
@@ -149,7 +149,7 @@ def run_cli(
 
     ``generate(seed, count)`` MUST return a list of fully-tagged record dicts.
     """
-    p = argparse.ArgumentParser(description=f"Spec-038 generator: {generator_id}")
+    p = argparse.ArgumentParser(description=f"Spec-039 generator: {generator_id}")
     p.add_argument("--seed", type=int, default=None,
                    help="64-bit unsigned seed; precedence per CL-8.")
     p.add_argument("--count", type=int, default=default_count)

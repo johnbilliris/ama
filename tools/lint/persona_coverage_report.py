@@ -1,4 +1,4 @@
-"""Spec-038 T163 (Phase 7) — persona-coverage report CLI.
+"""Spec-039 T163 (Phase 7) — persona-coverage report CLI.
 
 Thin wrapper around the same logic as
 ``tests/integration/test_persona_coverage_zero_unbacked.py`` (FR-060,
@@ -45,7 +45,7 @@ def _load_manifest_bindings() -> tuple[dict[str, int], set[str]]:
 
 
 def _emit_table(counts: dict[str, int], groups: set[str]) -> tuple[int, int, list[str], list[str]]:
-    print("persona-coverage-report — spec 038", file=sys.stderr)
+    print("persona-coverage-report — spec 039", file=sys.stderr)
     print("=" * 60, file=sys.stderr)
     total_personas = 0
     covered = 0

@@ -1,4 +1,4 @@
-"""Spec-038 T117 — synthetic missing persons generator (FR-050, FR-041).
+"""Spec-039 T117 — synthetic missing persons generator (FR-050, FR-041).
 
 NO real persons. Every ``synthetic_party_id`` is a deterministic 16-char
 hash; no name/dob/contact field exists.

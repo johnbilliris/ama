@@ -1,4 +1,4 @@
-"""Spec-038 T088: utility outage feed shape (FR-020).
+"""Spec-039 T088: utility outage feed shape (FR-020).
 
 Fictitious electricity / water / gas / telecoms outage notifications.
 NEVER touches a real utility provider endpoint.

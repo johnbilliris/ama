@@ -1,4 +1,4 @@
-"""Spec-038 Phase 6 — deterministic generators package (Path 1).
+"""Spec-039 Phase 6 — deterministic generators package (Path 1).
 
 Each module here MUST:
 

@@ -1,4 +1,4 @@
-"""Spec-038 T023: loader rejects records that look like real PII (FR-045)."""
+"""Spec-039 T023: loader rejects records that look like real PII (FR-045)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from tests.integration.spec038_fakes import FakeCosmosClient  # noqa: E402
+from tests.integration.spec039_fakes import FakeCosmosClient  # noqa: E402
 from scripts import seed_loader  # noqa: E402
 
 
@@ -47,5 +47,5 @@ def pii_seed_root(tmp_path: Path, monkeypatch):
 def test_pii_record_rejected(pii_seed_root):
     client = FakeCosmosClient()
     with pytest.raises(seed_loader.SeedRejectedError) as exc:
-        seed_loader.seed_spec038_subdirectories(client, "disaster-hub")
+        seed_loader.seed_spec039_subdirectories(client, "disaster-hub")
     assert "PII" in str(exc.value) or "pii" in str(exc.value).lower()

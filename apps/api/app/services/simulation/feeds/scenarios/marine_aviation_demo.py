@@ -1,4 +1,4 @@
-"""Spec-038 T135 — marine/aviation demo scenario (FR-061, SC-008, US4).
+"""Spec-039 T135 — marine/aviation demo scenario (FR-061, SC-008, US4).
 
 RFDS aeromedical retrieval + Surf Life Saving + AMSA tsunami threat —
 deliberately covers the user-flagged silent-gap personas.

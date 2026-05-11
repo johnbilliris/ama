@@ -1,4 +1,4 @@
-# Spec-038 Multilingual Parity Matrix (FR-070, SC-014, T150)
+# Spec-039 Multilingual Parity Matrix (FR-070, SC-014, T150)
 
 > Generated audit of `packages/domain/src/domain/seed/alert-templates/` —
 > every `template_id` × `locale` combination MUST have a row, with

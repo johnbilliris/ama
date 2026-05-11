@@ -1,4 +1,4 @@
-"""Spec-038 T086: EPA-shaped PM2.5 air-quality feed (FR-020).
+"""Spec-039 T086: EPA-shaped PM2.5 air-quality feed (FR-020).
 
 Fictitious PM2.5 readings shaped like a state EPA jurisdiction feed.
 NEVER touches a real EPA endpoint. Sensor-class — no warning marker.

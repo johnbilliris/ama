@@ -1,4 +1,4 @@
-"""Spec-038 Phase 5: deterministic per-feed RNG.
+"""Spec-039 Phase 5: deterministic per-feed RNG.
 
 The :func:`seeded_rng` helper returns a :class:`random.Random` whose state
 is fully derived from ``(scenario_id, seed, source_shape)`` so every feed

@@ -1,4 +1,4 @@
-"""Spec-038 T134 — SES demo scenario (FR-061, SC-008).
+"""Spec-039 T134 — SES demo scenario (FR-061, SC-008).
 
 VIC riverine flood, multi-LGA progression: BoM flood gauge + severe
 weather warning + utility outages. Exercises VIC SES, NSW SES (mutual

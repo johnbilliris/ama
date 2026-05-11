@@ -1,4 +1,4 @@
-"""Spec-038 T124 — streaming xlarge generator harness (Edge "Large-volume").
+"""Spec-039 T124 — streaming xlarge generator harness (Edge "Large-volume").
 
 Generates 10 000 records in deterministic order WITHOUT materialising the
 full list in memory. Used by the load-test pathway (FR-062) when CI needs

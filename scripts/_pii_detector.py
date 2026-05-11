@@ -1,4 +1,4 @@
-"""Spec-038 T033: PII detector for the seed loader (FR-045, NN-3).
+"""Spec-039 T033: PII detector for the seed loader (FR-045, NN-3).
 
 Five detector classes:
 

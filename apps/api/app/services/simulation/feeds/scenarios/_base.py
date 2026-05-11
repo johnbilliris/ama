@@ -1,9 +1,9 @@
-"""Spec-038 Phase 6 — shared base for demo scenarios (T130-T137).
+"""Spec-039 Phase 6 — shared base for demo scenarios (T130-T137).
 
 A scenario composes ≥2 feed-shape modules and exposes a uniform contract:
 
 * ``SCENARIO_ID`` — kebab-case id (matches replay sidecar name).
-* ``DOMAIN_GROUP`` — one of the 8 spec-038 groups.
+* ``DOMAIN_GROUP`` — one of the 8 spec-039 groups.
 * ``PARTICIPATING_PERSONAS`` — tuple of ≥3 persona-ids covered.
 * ``PARTICIPATING_FEEDS`` — tuple of ≥2 source-shape ids exercised.
 * ``DEFAULT_SEED`` — pinned seed used to commit the replay sidecar.

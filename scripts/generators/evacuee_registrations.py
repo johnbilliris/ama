@@ -1,4 +1,4 @@
-"""Spec-038 T116 — evacuee registrations generator (FR-050, NN-VI).
+"""Spec-039 T116 — evacuee registrations generator (FR-050, NN-VI).
 
 NO real PII — every name/contact field is a fictitious slot, and the
 ``identifier`` is a synthetic short-hash so downstream tests can join

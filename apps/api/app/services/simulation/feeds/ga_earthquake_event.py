@@ -1,4 +1,4 @@
-"""Spec-038 T084: Geoscience Australia-shaped earthquake event feed (FR-020).
+"""Spec-039 T084: Geoscience Australia-shaped earthquake event feed (FR-020).
 
 Fictitious GA earthquake event-shape. NEVER touches ``*.ga.gov.au``.
 Event-class — no warning marker.

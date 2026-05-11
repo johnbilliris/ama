@@ -136,7 +136,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "43f75f3b460e8d5f1e8e4435f5d5062711a75726f470f671a7e66afbf29825be",
+      "content_hash": "f81eb5fb955876579112ba6348d46189b52f88dd28445c9fa4410b3609b4e7f0",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -162,7 +162,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "73c91521ce2d0abdadb07285b3720c9039b77d9caa31bd7d0fe97a7de2da2448",
+      "content_hash": "36fd33e5799075aa264f559e1988a71142bb8d3bb2bc7beab49f2a58815f67c9",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -582,7 +582,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "52cb88bac0be4bb6df7f9c450c4171a9210cebe51037045e6d4f56abee87509f",
+      "content_hash": "a605952ef88d4e59040d37a5469bc90e75d60752566e1f5866d230a6e14ecab7",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -607,7 +607,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "9240c763427b94390d34d9734b08c3626e0f260db50d796e883cc4f63498a1bb",
+      "content_hash": "459c77dc1bf2afb6b6a27553af0676e660b5b89d376d6a1b2256a84697b3c96a",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -632,7 +632,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "5f5defb7b0b036f7af85e1f4f2c96d1d685743cccd84b8843e12b0b8e0111760",
+      "content_hash": "0784b3338c2441ce4c56f6bf7e8e59e2189ebbac7982909fbdbf6887116c8933",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -657,7 +657,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "86418cf59d468383cf7e7c22c35e4458edfd892be194887c10558b8871c5823c",
+      "content_hash": "733f05d357e5b0e80183f0dac12e093c6dadda546a6be82a35f7573c64451127",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -682,7 +682,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "69bbf1ea134cd892efeeceaf73cbcbb39b9ea6409540712867e3315f08d96948",
+      "content_hash": "0ea0e81002acac2499eab5bb1b09b589588b5ff135a2f81d97e2e2eb73911a80",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -707,7 +707,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "94a748599635049b50b1684594143126e61c303a8699fa5d3394a993a5bacbad",
+      "content_hash": "c355d82a79d691ac39659de602b19d09baa024383efcd73d9dae349d4ca20eca",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -736,7 +736,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "109e46226d4e5a0919d5badee0e5e88f67d4113b2a6578c2320cbe1f0e86cfc1",
+      "content_hash": "40d6b7000600afdbc14e1a1af5f750399ea08dbeb479e361f0852015a499dcf6",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -765,7 +765,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "4528046fa52e7a807174baf1bc49dee346bba55ae2b314dec1684358f6b65ce8",
+      "content_hash": "a4638851c199135b6c8c2210d8c488cdb104c0cc6775c88203eeaaa2eb9188d0",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -794,7 +794,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "52596eb7e8a64be732874f13493074b9cdeca373178262eea282554017c9b829",
+      "content_hash": "e409308e647ee99d1369a4c5f389129f173a4ad84d88a09a5cec839405ba8359",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -823,7 +823,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "c4a02dc466cfa74eb39a455fc0c8d7a52187925c9dcbbf384541a22160a4092d",
+      "content_hash": "e7327c0384f321939eef449396f2364176de8bbc3b7054307d6711a3f6bf1c5a",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -852,7 +852,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "d6b21dfeb305d3acca0c6c549f9c677aed861d09870f2f31ffa8392a303177a7",
+      "content_hash": "0857b8ed919bca721689db90433e024b18f3e5fe8f3fe652c1f9cd618e924244",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -881,7 +881,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "2466b5d3dbdbf84b50fa77db1730a12ce180077c2718739e3c265cf5a4ba5264",
+      "content_hash": "ddca1a4b8ea6a08cfe30d696f8dbf917d22c70fd888b62ba79420fb1500372f4",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -910,7 +910,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "7331c8d79c4cd34406baee4497470e1e13c244990866c8acbdbdc5ee92cd49b8",
+      "content_hash": "fb8a36364994eca7a67bd7d2345df31b6ce792de075b00eda8c821b67de0ab35",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -939,7 +939,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "db727a71c7a01e7fd4f4c6146e0f225469e1efc11a785290e7c9f1c55d89441a",
+      "content_hash": "33623e47ce2d9347f1228a3e28a026bed5d66b88d243d14cb084a038b4784584",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -964,7 +964,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "3c3d2d1458e9c669998967050db7c77afca74b484c51ae3b8d3fcd8695b729aa",
+      "content_hash": "bfc04e414668480df3d214db6729a22c4c401d011eeb9dad4be56ca4d4949257",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -989,7 +989,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "5158da455961baed2bd3f49cc4a7f15067bbf0988d69758b2974e6ffb16db64d",
+      "content_hash": "0aff474690c7d4cfcf5ad7a68e7eb87f52761218bed788470a0b8f33a7e92744",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -1014,7 +1014,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "30a83b73a9cda629b38d525b4987058e472b8c1e427e89ed22bc4123a8293bd5",
+      "content_hash": "98e0bf317ed88b2400d0cbb902acbd9029590e62de57e29ea2bc8ffa1bfe51cb",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -1039,7 +1039,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "d1f85d868dadfb22708ba411be95448da95b1e06d069de6af8e50798744e9d4e",
+      "content_hash": "7f11794ccaf580da3ef27e2186f7c466608b073981e0267b2dc515485cf3ae1f",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -1064,7 +1064,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "e0bbfdf2e3bbf953f04d038ccc2ae7a2d7c416c99741923a4058f3c36197d754",
+      "content_hash": "17f235fb6211106f69c10780f0fbcdc433a1156ea30c070c40cab9dd4504e95f",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -1089,7 +1089,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "d5fb259954e6a25eda738317da9525579bd689981800ac8bd9ee27eeae86b7c0",
+      "content_hash": "3c5ce7c3d8ce480ec45ef9bf7adde854e8e2ad451ba0b0caee5ff7bdced8c4ed",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -1114,7 +1114,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "bb74d92a96abb9cac53a314a763480c0723a2428f93413fdf4faeb45ae4da32e",
+      "content_hash": "e27c94a8a60548e436dce2b62ddeb968e547b1a4def160f81b8d9c2429b3f7d7",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3015,7 +3015,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "32720815671c07e2283f2ce94ec3fb467ffe913171e081af305530f4e672c3f9",
+      "content_hash": "f101402ae6ef1480fe3c5ae65c5fee3020a91e85cb85866a90b1f609375cc786",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3041,7 +3041,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "0dc52458e162f9b7942961c672e0acbe5488f144fd0c42af0e6e6325cd83c3d0",
+      "content_hash": "1393fcfbe5e0d30d170548bedfee35ab5293eb3c25b65d76a36f50d98ec2a331",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3067,7 +3067,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "086ced0d4c047462f540a663e4652cacb419c96f3b2bb66e58fbe45532778e0f",
+      "content_hash": "87c8e1fc20aab692a69049f1d35495a7f3655bf3055084a82e968b117dc4c246",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3093,7 +3093,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "ddb7fbab490b1d77e5df09e41cfb52ba8e5cf5e51e48fed53e851ca5c0095f6c",
+      "content_hash": "f61ff3d121556f19b73affdef6991d03d492bf9e0a5381200df21542f463f916",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3119,7 +3119,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "2189d3e57f62a6b9952283f9993876a0c62fb80adf30e7915029e8e9a5c02761",
+      "content_hash": "984800ccc630e2ee25f23dc06e2eedc5fef62db7ab9f1830e68c3b8e6d3cc0f4",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3145,7 +3145,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "e059be29540897a25347e29b684445800d232f063129e1426e42b715a0e05b2b",
+      "content_hash": "db4fe087a9b13e24d08787ec065a458f26e7e1aff5d665c57d93523b040f8f16",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3171,7 +3171,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "e1cf01db838a956087c67c327c3c6822b91f75ccb1d84303405803a7ee19de3b",
+      "content_hash": "5010a913758921d9b2a19384467c58074d362bc6c0823e3800265b1b7d169859",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3197,7 +3197,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "b6fe968d9eb542e729ed793ad16b23e61e0799c1a2ba613e42332dfb47e3d153",
+      "content_hash": "6cd8656fd148ef5845c9eb348b1b567fb0cb4c5eb443a22c850210bde3b08fea",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3223,7 +3223,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "4c148a4a3ab1021a14f4dc798f90040f70ca54d77b6f80769edf8810fa2adaf6",
+      "content_hash": "7c2ed729d2c075647da2c66532e21430e8c2d9ed209d0eebb321ae0139abc45e",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3249,7 +3249,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "284919a45a412b43e226599f133dba8519171c4a893b203ff3437139c314947b",
+      "content_hash": "3667fa4584bacd6227018c777a24916e06ff487dbeecb7ba7105452694e2a2e9",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3275,7 +3275,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "cca26806ceb3769a036d3b88dfc8d7a63fbe226ddaf8ece1c0adda7cd9232d96",
+      "content_hash": "761d349f5bece4cbd6021dcf04ce1359dc2d160b8e42f9cc856a8f3504057250",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3301,7 +3301,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "d0f00cea2b8060b05e85630e92aee7948bdcd57295e31a2d5dcc8dfa7e002b72",
+      "content_hash": "07add049dadc938569ff1fc077cc7a513d485e5c82f5d59307463cf360c8125f",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3327,7 +3327,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "c765c70d603b09d426687650c087a65c75fc0ca414290465c2552a45e1abd949",
+      "content_hash": "bcb842d4a61fb36bffdf6b537a5dc5708ad28f345389ab0782594dd51561ad99",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3353,7 +3353,7 @@
     },
     {
       "category": "generator",
-      "content_hash": "7d531fef7fe786728115d74d2b0b7860bdbc8dff6b96d491f13c10930099510c",
+      "content_hash": "0dff13bfcc0e7894b17ecccb1af202638167a79002747dc30caa2d7539c04414",
       "created_or_updated": "2026-05-11",
       "cultural_review_required": false,
       "dataset_version": "n/a",
@@ -3537,7 +3537,7 @@
     },
     {
       "category": "mock",
-      "content_hash": "1fcdb7841c12146ba51235d66d84f9cc7087b66a8ed838a56d1be7d027897979",
+      "content_hash": "7bff17cf7b0c997430358df5769f24343c475793921b275fdef662f5215d8fa0",
       "created_or_updated": "2026-05-11",
       "cultural_review_notes": "Path matches cultural-context heuristic; cultural-authority review required before content changes (CL-6, FR-044).",
       "cultural_review_required": true,

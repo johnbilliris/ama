@@ -1,4 +1,4 @@
-"""Spec-038 T121 — hospital capacity generator (FR-050, FR-062).
+"""Spec-039 T121 — hospital capacity generator (FR-050, FR-062).
 
 Default ``count=80`` (≥10 records per state × 8 states/territories) to
 satisfy SC-012 lower bound.

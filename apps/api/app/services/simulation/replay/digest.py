@@ -1,4 +1,4 @@
-"""Spec-038 T077: replay digest sidecar verification.
+"""Spec-039 T077: replay digest sidecar verification.
 
 Each canonical NDJSON file under ``fixtures/sim_replays/`` is paired with
 a ``<file>.sha256`` sidecar (BSD ``shasum`` format: ``<hex>  <basename>``).

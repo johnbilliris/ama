@@ -1,5 +1,5 @@
 {
-  "$comment": "Spec-038 T017: registry of all simulator feed source shapes (FR-020, FR-027). Versioned IDs match the simulator_feed.schema.json source_shape pattern '^[a-z0-9_.-]+\\.v\\d+$'.",
+  "$comment": "Spec-039 T017: registry of all simulator feed source shapes (FR-020, FR-027). Versioned IDs match the simulator_feed.schema.json source_shape pattern '^[a-z0-9_.-]+\\.v\\d+$'.",
   "schema_version": "1.0.0",
   "shapes": [
     {

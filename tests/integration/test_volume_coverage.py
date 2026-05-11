@@ -1,4 +1,4 @@
-"""Spec-038 T101 — manifest-driven volume coverage assertions (FR-062, SC-012).
+"""Spec-039 T101 — manifest-driven volume coverage assertions (FR-062, SC-012).
 
 Reads the canonical manifest and asserts the per-persona / per-category
 lower bounds documented in the spec for hospital capacity, vulnerable

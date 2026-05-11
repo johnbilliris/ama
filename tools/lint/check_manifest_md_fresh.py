@@ -1,7 +1,7 @@
-"""Spec-038 FR-036 / CL-9 — thin wrapper over ``render_test_data_manifest_md --check``.
+"""Spec-039 FR-036 / CL-9 — thin wrapper over ``render_test_data_manifest_md --check``.
 
 Naming-symmetry shim so CI invokes the freshness gate by the same
-``check_*.py`` convention as the other spec-038 lints. All real logic lives
+``check_*.py`` convention as the other spec-039 lints. All real logic lives
 in ``tools/lint/render_test_data_manifest_md.py::main``.
 """
 

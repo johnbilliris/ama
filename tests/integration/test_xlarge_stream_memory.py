@@ -1,4 +1,4 @@
-"""Spec-038 T124 — xlarge stream peak memory ≤ 50 MB (Edge "Large-volume").
+"""Spec-039 T124 — xlarge stream peak memory ≤ 50 MB (Edge "Large-volume").
 
 Verifies the streaming xlarge generator produces 10 000 records without
 materialising them — peak ``tracemalloc`` allocation MUST stay under
