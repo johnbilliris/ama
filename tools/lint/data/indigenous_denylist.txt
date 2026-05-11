@@ -1,0 +1,42 @@
+# AMA Spec-038 / T018 — Indigenous Placeholder Denylist (FR-044, CL-6)
+#
+# This file is the single source of truth for tokens that the
+# tools/lint/check_indigenous_placeholders.py gate (T054) refuses to allow
+# inside any test-data artefact (seed file, generator output, simulator
+# replay) without an explicit cultural-authority sign-off recorded in the
+# manifest entry's `cultural_review_required=true` field plus
+# `cultural_review_notes`.
+#
+# IMPORTANT: this file ITSELF is referenced from docs/test-data/manifest.json
+# as a `category=mock` entry (T052) so that any change to it goes through
+# the same review path as a fixture change. DO NOT edit without a
+# cultural-authority co-signoff comment in the PR body.
+#
+# Sections — only `[NAMES]`, `[COMMUNITIES]`, `[SACRED_COORDS]`,
+# `[CONTEXT_ZONES]` are recognised by the lint. Lines that are blank or
+# begin with `#` are ignored. Tokens are case-insensitive, exact-match.
+
+[NAMES]
+# Personal / family names of First Nations individuals must NEVER appear
+# in fictitious test data. Population happens via a separately-curated
+# private list maintained by the cultural-authority working group; the
+# version committed here is intentionally the placeholder set used by
+# the lint tests (T042).
+placeholder-name-do-not-use
+
+[COMMUNITIES]
+# Specific community / clan / language-group names that must not appear
+# in synthetic data without authority sign-off.
+placeholder-community-do-not-use
+
+[SACRED_COORDS]
+# Coordinate boxes of culturally-sensitive sites are kept out of seed
+# data. Lint checks a coarse bounding-box list; populated via cultural
+# authority pull request only.
+placeholder-coords-do-not-use
+
+[CONTEXT_ZONES]
+# Geographic zones that, when referenced in any artefact, automatically
+# trigger the manifest cultural_review_required=true requirement (SC-015).
+nt-central-desert-zone
+wa-kimberley-zone

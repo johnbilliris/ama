@@ -1,0 +1,84 @@
+{
+  "$comment": "Spec-038 T017: registry of all simulator feed source shapes (FR-020, FR-027). Versioned IDs match the simulator_feed.schema.json source_shape pattern '^[a-z0-9_.-]+\\.v\\d+$'.",
+  "schema_version": "1.0.0",
+  "shapes": [
+    {
+      "id": "bom.severe_weather_warning.v1",
+      "family": "bom",
+      "kind": "warning",
+      "description": "Bureau of Meteorology severe weather warning shape (warning-class — must include test_marker)."
+    },
+    {
+      "id": "bom.fire_weather_fdi.v1",
+      "family": "bom",
+      "kind": "index",
+      "description": "BoM fire weather Forest Fire Danger Index update."
+    },
+    {
+      "id": "bom.flood_gauge.v1",
+      "family": "bom",
+      "kind": "sensor",
+      "description": "BoM river / flood gauge reading."
+    },
+    {
+      "id": "bom.cyclone_track.v1",
+      "family": "bom",
+      "kind": "warning",
+      "description": "BoM tropical cyclone track / forecast cone (warning-class)."
+    },
+    {
+      "id": "ga.earthquake_event.v1",
+      "family": "ga",
+      "kind": "event",
+      "description": "Geoscience Australia earthquake event notification."
+    },
+    {
+      "id": "ga.tsunami_threat.v1",
+      "family": "ga",
+      "kind": "warning",
+      "description": "Geoscience Australia tsunami threat assessment (warning-class)."
+    },
+    {
+      "id": "epa.pm25.v1",
+      "family": "epa",
+      "kind": "sensor",
+      "description": "Environmental Protection Authority PM2.5 air-quality reading."
+    },
+    {
+      "id": "traffic.road_closure.v1",
+      "family": "traffic",
+      "kind": "event",
+      "description": "Road closure / detour notification (state road authority shape)."
+    },
+    {
+      "id": "utility.outage.v1",
+      "family": "utility",
+      "kind": "event",
+      "description": "Power / water / gas utility outage notification."
+    },
+    {
+      "id": "ambulance.cad.v1",
+      "family": "ambulance",
+      "kind": "event",
+      "description": "Ambulance computer-aided dispatch (CAD) job event."
+    },
+    {
+      "id": "social.chatter.v1",
+      "family": "social",
+      "kind": "stream",
+      "description": "Synthetic social-media chatter classifier input."
+    },
+    {
+      "id": "sensor.telemetry.v1",
+      "family": "sensor",
+      "kind": "sensor",
+      "description": "Generic IoT sensor telemetry envelope (e.g. weather station, water level)."
+    },
+    {
+      "id": "synthetic.fallback.v1",
+      "family": "synthetic",
+      "kind": "fallback",
+      "description": "Synthetic-fallback shape used when no other shape applies (FR-025)."
+    }
+  ]
+}

@@ -70,13 +70,13 @@
         "residency": { "const": "AU" },
         "licence": { "type": "string", "minLength": 1, "maxLength": 128 },
         "source_url": {
-          "oneOf": [{ "type": "string", "format": "uri" }, { "const": "n/a" }]
+          "anyOf": [{ "type": "string", "format": "uri" }, { "const": "n/a" }]
         },
         "snapshot_date": {
-          "oneOf": [{ "type": "string", "format": "date" }, { "const": "n/a" }]
+          "anyOf": [{ "type": "string", "format": "date" }, { "const": "n/a" }]
         },
         "dataset_version": {
-          "oneOf": [{ "type": "string", "minLength": 1, "maxLength": 64 }, { "const": "n/a" }]
+          "anyOf": [{ "type": "string", "minLength": 1, "maxLength": 64 }, { "const": "n/a" }]
         },
         "refresh_policy": { "$ref": "#/$defs/RefreshPolicy" },
         "volume_tier": { "$ref": "#/$defs/VolumeTier" },
