@@ -16,21 +16,40 @@ def client():
     return TestClient(app)
 
 
-def test_indicator_definition_rejects_extra_fields(client):
-    """POST with extra fields returns 422 validation error (T-AMD-19)."""
-    payload = {
-        "id": "test-id",
-        "kpi_id": "test-kpi",
-        "version": 1,
-        "capstone_sc_id": "SC-CAP-015-001",
-        "name": "Test Indicator",
-        "kind": "leading",
-        "extra_field_should_be_rejected": "this should fail",
-    }
-    resp = client.post("/api/v1/evidence/kpi-ladder", json=payload)
-    assert resp.status_code == 422, f"Expected 422, got {resp.status_code}: {resp.text}"
-    errors = resp.json().get("detail", [])
-    assert any("extra_field" in str(e).lower() for e in errors), "Expected extra field validation error"
+def test_indicator_definition_rejects_extra_fields():
+    """IndicatorDefinition Pydantic model rejects extra fields (T-AMD-19)."""
+    from apps.api.app.services.evidence.models.kpi import IndicatorDefinition, RiskAdjustment, ConfidenceBandRule
+    from datetime import datetime, UTC
+    from decimal import Decimal
+    from pydantic import ValidationError
+
+    with pytest.raises(ValidationError) as exc_info:
+        IndicatorDefinition(
+            id="test-id",
+            kpi_id="test-kpi",
+            version=1,
+            capstone_sc_id="SC-CAP-015-001",
+            name="Test Indicator",
+            kind="leading",
+            aiims_function="Operations",
+            incident_level=2,
+            life_safety_tier="life_safety",
+            formula="value",
+            unit="pct",
+            owner_role="RiskManager",
+            refresh_cadence="PT15M",
+            target_value=Decimal("100"),
+            alert_threshold=Decimal("80"),
+            baseline_source="test",
+            provenance="auto",
+            confidence_band_rule=ConfidenceBandRule(),
+            risk_adjustment=RiskAdjustment(likelihood=3, consequence=3),
+            created_at=datetime.now(UTC),
+            created_by="test",
+            extra_field_should_be_rejected="this should fail",
+        )
+
+    assert "extra_field_should_be_rejected" in str(exc_info.value).lower()
 
 
 def test_signal_rejects_extra_fields(client):

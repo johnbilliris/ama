@@ -1,4 +1,4 @@
-// Spec-038 evidence-harness TypeScript domain twins (T-S05).
+// Spec-038 evidence-harness TypeScript domain twins (T-S05, T-AMD-10).
 //
 // Hand-mirrored to the Pydantic models at
 // `apps/api/app/services/evidence/models/`. Schema parity is asserted by
@@ -26,12 +26,15 @@ export type CapstoneScId =
 export interface ConfidenceBandRule {
   method: "bootstrap_p2_5_p97_5" | "stddev_pm1";
   min_resamples: number;
-  fallback_label?: "small-sample";
+  fallback_label: "small-sample";
 }
 
+/** FR-004 — 5×5 risk matrix (T-AMD-10). provenance/auditor_signoff_required added in Cycle 2. */
 export interface RiskAdjustment {
   likelihood: number; // 1..5
   consequence: number; // 1..5
+  provenance: Provenance;
+  auditor_signoff_required: boolean;
 }
 
 export interface IndicatorDefinition {
@@ -53,7 +56,8 @@ export interface IndicatorDefinition {
   baseline_source: string;
   provenance: Provenance;
   confidence_band_rule: ConfidenceBandRule;
-  risk_adjustment?: RiskAdjustment | null;
+  /** Required in Cycle 2 — defaults to (L=3,C=3) manual if not supplied (T-AMD-11). */
+  risk_adjustment: RiskAdjustment;
   created_at: string;
   created_by: string;
   superseded_by?: string | null;
@@ -101,9 +105,11 @@ export interface DeltaScorecard {
   run_pair_id: string;
   kpi_deltas: KpiDelta[];
   determinism?: DeterminismCheck | null;
-  advisory_only?: boolean;
-  reduced_fidelity?: boolean;
+  advisory_only: boolean;
+  reduced_fidelity: boolean;
   created_at: string;
+  created_by: string;
+  correlation_id: string;
 }
 
 export interface Assumption {
@@ -127,6 +133,16 @@ export interface CausalChain {
   assumptions: Assumption[];
   threats_to_validity: ThreatToValidity[];
   originating_spec_path: string;
+  created_at: string;
+  superseded_by?: string | null;
+}
+
+/** CitationRef — mandatory for non-manual benchmark rows (T-AMD-12). */
+export interface CitationRef {
+  org: string;
+  document: string;
+  year: number;
+  url: string;
 }
 
 export interface BenchmarkEntry {
@@ -135,10 +151,12 @@ export interface BenchmarkEntry {
   jurisdiction: string;
   kind: "external_benchmark" | "prototype_baseline";
   source_name: string;
-  source_citation: string;
+  source_citation: CitationRef | null;
+  provenance: Provenance;
   target_value?: number | null;
   target_unit: string;
-  not_available?: boolean;
+  not_available: boolean;
+  created_at: string;
 }
 
 export type AuditKind =
@@ -151,7 +169,8 @@ export type AuditKind =
   | "kpi_amendment_recorded"
   | "degraded_mode_entered"
   | "small_sample_labelled"
-  | "divergence_flagged";
+  | "divergence_flagged"
+  | "language_fallback_used";
 
 export interface AuditEntry {
   id: string;
@@ -161,15 +180,34 @@ export interface AuditEntry {
   actor: string;
   occurred_at: string;
   references: Record<string, string>;
-  payload?: Record<string, unknown>;
-  correlation_id?: string;
+  payload: Record<string, unknown>;
+  correlation_id: string;
   region: "australiaeast" | "australiasoutheast";
-  archived_to_blob?: boolean;
+  archived_to_blob: boolean;
+  /** Populated on PI render replay rows when language fallback occurs (T-AMD-13). */
+  language_fallback_used?: string | null;
 }
 
 export interface AuditTrace {
   value_id: string;
   entries: AuditEntry[];
   chain_complete: boolean;
-  served_from_cold_archive?: boolean;
+  served_from_cold_archive: boolean;
+}
+
+/** Public Information channel (T-AMD-14, FR-039). */
+export interface PublicInformationChannel {
+  language_code: string;
+  content: string;
+  auslan_asset_status?: "available" | "auslan-asset-missing" | null;
+}
+
+/** Public Information render response (T-AMD-14, FR-039). */
+export interface PublicInformationRender {
+  scenario_id: string;
+  generated_at: string;
+  channels: PublicInformationChannel[];
+  advisory_only: boolean;
+  auslan_asset_status: "available" | "auslan-asset-missing";
+  language_fallback_used: string | null;
 }

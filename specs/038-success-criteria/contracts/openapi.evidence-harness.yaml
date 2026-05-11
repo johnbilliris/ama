@@ -652,13 +652,13 @@ components:
 
     CitationRef:
       type: object
-      required: [organisation, document, year, url]
+      required: [org, document, year, url]
       description: |
         FR-049 (Cycle 2) — every benchmark row carries a structured
         4-tuple citation. Free-text-only citations are no longer
         accepted at write time (CHK137).
       properties:
-        organisation: { type: string }
+        org: { type: string }
         document: { type: string }
         year: { type: integer, minimum: 1900, maximum: 2100 }
         url: { type: string, format: uri }

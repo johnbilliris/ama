@@ -187,6 +187,188 @@ CROSS_SECTOR_SEEDS: list[dict] = [
     },
 ]
 
+# ────────────── Legacy ladder-covering entries (preserved for SC-007) ──────────────
+# These entries map to the KPI IDs in the default KPI ladder so every ladder
+# KPI has ≥1 benchmark row (required by test_benchmark_register_coverage.py).
+
+LEGACY_SEEDS: list[dict] = [
+    *[
+        {
+            "kpi_id": "response_time_p1",
+            "jurisdiction": j,
+            "kind": "external_benchmark",
+            "source_name": f"{j} Ambulance Pri-1 median",
+            "citation": None,
+            "target": Decimal("480.0000"),
+            "unit": "seconds",
+            "provenance": "auto",
+        }
+        for j in JURISDICTIONS
+    ],
+    {
+        "kpi_id": "response_time_p1",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("600.0000"),
+        "unit": "seconds",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "evac_lead_lagging",
+        "jurisdiction": "AU",
+        "kind": "external_benchmark",
+        "source_name": "BoM hazard warning lead-time",
+        "citation": None,
+        "target": Decimal("18.0000"),
+        "unit": "hours",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "evac_lead_lagging",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("12.0000"),
+        "unit": "hours",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "logistics_efficiency",
+        "jurisdiction": "AU",
+        "kind": "external_benchmark",
+        "source_name": "AIIMS span-of-control 1:5..1:7",
+        "citation": None,
+        "target": None,
+        "unit": "ratio",
+        "provenance": "auto",
+        "not_available": True,
+    },
+    {
+        "kpi_id": "logistics_efficiency",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("10.0000"),
+        "unit": "pct",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "lives_saved_lagging",
+        "jurisdiction": "AU",
+        "kind": "external_benchmark",
+        "source_name": "AFAC FDI/FFDI severity index",
+        "citation": None,
+        "target": None,
+        "unit": "lives",
+        "provenance": "auto",
+        "not_available": True,
+    },
+    {
+        "kpi_id": "lives_saved_lagging",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("50.0000"),
+        "unit": "lives",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "econ_loss_lagging",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("10.0000"),
+        "unit": "AUDm",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "lives_saved_leading",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("80.0000"),
+        "unit": "pct",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "response_time_p1_leading",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("120.0000"),
+        "unit": "seconds",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "evac_warning_leading",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("18.0000"),
+        "unit": "hours",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "logistics_route_leading",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("70.0000"),
+        "unit": "pct",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "econ_loss_leading",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("15.0000"),
+        "unit": "pct",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "public_info_alert_reach",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("85.0000"),
+        "unit": "pct",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "public_info_behavioural_impact",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("60.0000"),
+        "unit": "pct",
+        "provenance": "auto",
+    },
+    {
+        "kpi_id": "public_info_multilingual_coverage",
+        "jurisdiction": "AU",
+        "kind": "prototype_baseline",
+        "source_name": "spec-015 prototype baseline",
+        "citation": None,
+        "target": Decimal("8.0000"),
+        "unit": "languages",
+        "provenance": "auto",
+    },
+]
+
 # Manual-provenance rows for testing the ≤50% manual share constraint
 MANUAL_PROVENANCE_SEEDS: list[dict] = [
     {
@@ -211,7 +393,7 @@ MANUAL_PROVENANCE_SEEDS: list[dict] = [
     },
 ]
 
-ALL_SEEDS = JURISDICTIONAL_SEEDS + CROSS_SECTOR_SEEDS + MANUAL_PROVENANCE_SEEDS
+ALL_SEEDS = JURISDICTIONAL_SEEDS + CROSS_SECTOR_SEEDS + LEGACY_SEEDS + MANUAL_PROVENANCE_SEEDS
 
 
 def seed_register() -> list[BenchmarkEntry]:
@@ -228,7 +410,7 @@ def seed_register() -> list[BenchmarkEntry]:
                 source_citation=s["citation"],
                 target_value=s["target"],
                 target_unit=s["unit"],
-                not_available=False,
+                not_available=s.get("not_available", False),
                 provenance=s["provenance"],
                 created_at=datetime.now(UTC),
             )
