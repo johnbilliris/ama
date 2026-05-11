@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-OPENAPI_PATH = Path("specs/038-success-criteria/contracts/openapi.evidence-harness.yaml")
+OPENAPI_PATH = Path("specs/040-success-criteria/contracts/openapi.evidence-harness.yaml")
 TS_TWIN_PATH = Path("packages/domain/src/evidence/index.ts")
 
 

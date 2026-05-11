@@ -1,0 +1,623 @@
+openapi: 3.1.0
+info:
+  title: AMA Help Centre & Grounded Chat API
+  version: 0.1.0
+  description: |
+    FastAPI surface for spec-038 (In-Product Help Documentation & Grounded Chat Assistant).
+    All routes mount under `/api/v1/help`. Authentication uses the existing platform IdP
+    bearer token; the user's tenant id and persona claims are derived from the token.
+    All processing is pinned to Australian regions per Constitution Non-Negotiable #2.
+servers:
+  - url: https://api.ama.gov.au/api/v1
+    description: Production (AU East)
+  - url: http://127.0.0.1:8000/api/v1
+    description: Local
+
+tags:
+  - name: chat
+  - name: articles
+  - name: snapshots
+  - name: screenshots
+  - name: search
+  - name: support-handoff
+  - name: feedback
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  /help/chat/ask:
+    post:
+      tags: [chat]
+      summary: Ask the grounded Help chat assistant (SSE stream).
+      description: |
+        Streams the answer as Server-Sent Events. Every factual claim carries at least
+        one citation (FR-012). Refuses out-of-scope questions (FR-013). PII in user input
+        is redacted via the spec-036 model gateway before retrieval/inference (FR-017);
+        when redaction occurs, the first SSE event includes `meta.redaction_notice = true`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChatAskRequest' }
+      responses:
+        '200':
+          description: SSE stream of answer chunks + citations + final audit-id.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Sequence of SSE events: `meta`, `delta` (×N), `citation` (×N), `done`,
+                  optional `refusal`. Each event payload is JSON.
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorised' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '503':
+          description: Chat unavailable (degraded mode, snapshot republishing, gateway DENY).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /help/chat/feedback:
+    post:
+      tags: [chat, feedback]
+      summary: Submit helpfulness feedback for a chat turn (FR-022, FR-022a).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HelpFeedbackRequest' }
+      responses:
+        '202':
+          description: Enqueued in content-review backlog. Never auto-disables content.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FeedbackAck' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorised' }
+
+  /help/chat/sessions/{sessionId}:
+    get:
+      tags: [chat]
+      summary: Retrieve the user's own chat-session transcript (visible 30 days; FR-029).
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Session transcript.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChatSession' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /help/articles:
+    get:
+      tags: [articles]
+      summary: List published Help articles.
+      parameters:
+        - in: query
+          name: persona
+          schema: { type: string }
+          description: Persona id filter; defaults to caller's active persona.
+        - in: query
+          name: surface
+          schema: { type: string }
+          description: Surface/route id ("Help on this screen").
+        - in: query
+          name: kind
+          schema: { type: string, enum: [article, playbook, faq, glossary, persona] }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50, maximum: 200 }
+        - in: query
+          name: continuation
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paged listing.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HelpArticlePage' }
+
+  /help/articles/{slug}:
+    get:
+      tags: [articles]
+      summary: Read a single published article.
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+        - in: header
+          name: If-None-Match
+          schema: { type: string }
+      responses:
+        '200':
+          description: Article (metadata + signed body URL).
+          headers:
+            ETag: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HelpArticle' }
+        '304':
+          description: Not modified.
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /help/snapshots:
+    get:
+      tags: [snapshots]
+      summary: List Help-corpus snapshots for the active tenant.
+      responses:
+        '200':
+          description: Snapshot list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SnapshotRecord' }
+
+  /help/snapshots/publish:
+    post:
+      tags: [snapshots]
+      summary: Publish a new Help-corpus snapshot. Requires dual sign-off (FR-011b).
+      description: |
+        The request body MUST list the source set and TWO distinct approvers — at least
+        one Help-content owner and one safety/governance lead — otherwise the request is
+        rejected with 422. On success, an immutable `help-corpus-{snapshot_id}` AI Search
+        index is stamped and alias `help-corpus-active` is swung atomically (≤5 min,
+        FR-011c). Emits `audit.snapshot_published`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SnapshotPublishRequest' }
+      responses:
+        '201':
+          description: Snapshot published.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SnapshotRecord' }
+        '422':
+          description: Approval gate failed (missing dual sign-off, or invalid sources).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /help/snapshots/{snapshotId}/rollback:
+    post:
+      tags: [snapshots]
+      summary: Rollback by re-binding alias to a prior snapshot (FR-011c, ≤5 min SLO).
+      parameters:
+        - in: path
+          name: snapshotId
+          required: true
+          schema: { type: string }
+          description: The previously-approved snapshot id to restore.
+      responses:
+        '200':
+          description: Alias re-bound; emits `audit.snapshot_rollback`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SnapshotRollbackResult' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /help/screenshots/staleness:
+    get:
+      tags: [screenshots]
+      summary: List currently-raised staleness flags (FR-010 / FR-010a).
+      responses:
+        '200':
+          description: Open staleness flags.
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/StalenessFlag' }
+    post:
+      tags: [screenshots]
+      summary: Manually raise or clear a staleness flag (author or build pipeline).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StalenessFlagWriteRequest' }
+      responses:
+        '202':
+          description: Accepted.
+
+  /help/screenshots/staleness/{flagId}/clear:
+    post:
+      tags: [screenshots]
+      summary: Clear a previously-raised staleness flag (author-only; FR-010b after refresh).
+      parameters:
+        - in: path
+          name: flagId
+          required: true
+          schema: { type: string }
+      responses:
+        '202':
+          description: Cleared; emits `audit.staleness_flag_cleared`.
+        '404': { $ref: '#/components/responses/NotFound' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /help/screenshots/{screenId}/url:
+    get:
+      tags: [screenshots]
+      summary: Issue a short-lived signed URL for a screenshot variant (theme-aware).
+      description: |
+        Returns a signed Blob URL for the requested theme variant of the screenshot.
+        The active theme is honoured by the UI when rendering `<AnnotatedScreenshot />`
+        (FR-007). Signed URLs expire within 5 minutes.
+      parameters:
+        - in: path
+          name: screenId
+          required: true
+          schema: { type: string }
+        - in: query
+          name: theme
+          required: true
+          schema: { type: string, enum: [light, dark] }
+      responses:
+        '200':
+          description: Signed URL envelope.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [url, expires_at, theme]
+                properties:
+                  url: { type: string, format: uri }
+                  expires_at: { type: string, format: date-time }
+                  theme: { type: string, enum: [light, dark] }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /help/search:
+    get:
+      tags: [search]
+      summary: Full-text search across Help articles + glossary (FR-021).
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema: { type: string, minLength: 1 }
+        - in: query
+          name: persona
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20, maximum: 100 }
+      responses:
+        '200':
+          description: Ranked results; glossary hit returned first when query matches a term.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SearchResultsPage' }
+
+  /help/support-handoff:
+    get:
+      tags: [support-handoff]
+      summary: Read the active tenant's support-handoff configuration (FR-023a).
+      responses:
+        '200':
+          description: Handoff record.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SupportHandoffRecord' }
+    put:
+      tags: [support-handoff]
+      summary: Replace the active tenant's support-handoff configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SupportHandoffRecord' }
+      responses:
+        '200':
+          description: Updated.
+        '422':
+          description: Validation failed.
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorised:
+      description: Missing or invalid bearer token.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Caller not entitled (e.g., persona override to a non-entitled role; cross-tenant request).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not found.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, description: stable machine-readable code }
+        message: { type: string }
+        details: { type: object, additionalProperties: true }
+
+    ChatAskRequest:
+      type: object
+      required: [message]
+      additionalProperties: false
+      properties:
+        message: { type: string, minLength: 1, maxLength: 4000 }
+        session_id:
+          type: string
+          description: Existing session to continue; if omitted, a new session is started.
+        persona_id:
+          type: string
+          description: Override the IdP-default persona (must be entitled — FR-027 / FR-028).
+        surface_id:
+          type: string
+          description: Originating route id (improves persona-aware retrieval).
+        jurisdiction_codes:
+          type: array
+          items: { type: string }
+
+    ChatSession:
+      type: object
+      additionalProperties: false
+      required: [id, tenant_id, user_id, persona_id, snapshot_id_at_open, turns, started_at, last_turn_at]
+      properties:
+        id: { type: string }
+        tenant_id: { type: string }
+        user_id: { type: string }
+        persona_id: { type: string }
+        persona_source: { type: string, enum: [idp_default, user_override] }
+        jurisdiction_codes: { type: array, items: { type: string } }
+        snapshot_id_at_open: { type: string }
+        turns:
+          type: array
+          items: { $ref: '#/components/schemas/ChatTurn' }
+        started_at: { type: string, format: date-time }
+        last_turn_at: { type: string, format: date-time }
+
+    ChatTurn:
+      type: object
+      additionalProperties: false
+      required: [turn_index, user_input_redacted, redaction_occurred, answer_text, citations, pattern_id, audit_entry_id, created_at]
+      properties:
+        turn_index: { type: integer, minimum: 0 }
+        user_input_redacted: { type: string }
+        redaction_occurred: { type: boolean }
+        answer_text: { type: string }
+        citations:
+          type: array
+          items: { $ref: '#/components/schemas/Citation' }
+        refusal_reason:
+          type: string
+          enum: [out_of_scope, cross_tenant, no_corpus_match, pii_blocked, above_official_classification, deprecated_no_replacement]
+        pattern_id: { type: string }
+        feedback_id: { type: string, nullable: true }
+        audit_entry_id: { type: string }
+        created_at: { type: string, format: date-time }
+
+    Citation:
+      type: object
+      additionalProperties: false
+      required: [source_id, source_title, anchor]
+      properties:
+        source_id: { type: string }
+        source_title: { type: string }
+        anchor: { type: string }
+        snippet: { type: string }
+        deep_link: { type: string, format: uri }
+
+    HelpFeedbackRequest:
+      type: object
+      additionalProperties: false
+      required: [target_kind, target_id, rating]
+      properties:
+        target_kind: { type: string, enum: [article, chat_turn] }
+        target_id: { type: string }
+        rating: { type: string, enum: [helpful, not_helpful] }
+        comment: { type: string, maxLength: 2000 }
+
+    FeedbackAck:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status: { type: string, enum: [enqueued] }
+        backlog_item_id: { type: string }
+        promoted_to_needs_review: { type: boolean }
+
+    HelpArticle:
+      type: object
+      additionalProperties: false
+      required: [id, tenant_id, kind, title, slug, snapshot_id, version, status, last_reviewed_at, body_uri]
+      properties:
+        id: { type: string }
+        tenant_id: { type: string }
+        kind: { type: string, enum: [article, playbook, faq, glossary, persona] }
+        title: { type: string }
+        slug: { type: string }
+        persona_tags: { type: array, items: { type: string } }
+        sector_tags: { type: array, items: { type: string } }
+        surface_tags: { type: array, items: { type: string } }
+        jurisdiction_tags: { type: array, items: { type: string } }
+        domain:
+          type: string
+          enum: [getting-started, persona-workflow, screen-by-screen, simulation-playbook, agent-playbook, audit-observer, accessibility, troubleshooting, glossary]
+        body_uri: { type: string }
+        screenshot_ids: { type: array, items: { type: string } }
+        snapshot_id: { type: string }
+        version: { type: integer, minimum: 1 }
+        status: { type: string, enum: [draft, published, withdrawn] }
+        staleness_flag_id: { type: string, nullable: true }
+        last_reviewed_at: { type: string, format: date-time }
+        etag: { type: string, nullable: true }
+
+    HelpArticlePage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/HelpArticle' }
+        continuation:
+          type: string
+          nullable: true
+
+    SnapshotRecord:
+      type: object
+      additionalProperties: false
+      required: [id, tenant_id, sources, ai_search_index_name, approvers, published_at, published_by]
+      properties:
+        id: { type: string }
+        tenant_id: { type: string }
+        sources:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeCorpusSource' }
+        ai_search_index_name: { type: string }
+        approvers:
+          type: array
+          minItems: 2
+          items: { $ref: '#/components/schemas/Approver' }
+        published_at: { type: string, format: date-time }
+        published_by: { type: string }
+        rollback_of: { type: string, nullable: true }
+
+    Approver:
+      type: object
+      additionalProperties: false
+      required: [identity, role, approved_at]
+      properties:
+        identity: { type: string }
+        role: { type: string, enum: [help_content_owner, safety_lead, governance_lead] }
+        approved_at: { type: string, format: date-time }
+
+    KnowledgeCorpusSource:
+      type: object
+      additionalProperties: false
+      required: [id, source_kind, source_path, content_hash, scope, indexed_at]
+      properties:
+        id: { type: string }
+        source_kind: { type: string, enum: [help_article, docs_corpus, docs_aidr, spec] }
+        source_path: { type: string }
+        spec_id: { type: string, nullable: true }
+        spec_version: { type: string, nullable: true }
+        spec_status: { type: string, enum: [Active, Implemented], nullable: true }
+        content_hash: { type: string }
+        classification: { type: string, enum: ['OFFICIAL'] }
+        scope: { type: string, enum: [tenant, global] }
+        indexed_at: { type: string, format: date-time }
+
+    SnapshotPublishRequest:
+      type: object
+      additionalProperties: false
+      required: [snapshot_id, sources, approvers]
+      properties:
+        snapshot_id: { type: string, pattern: '^[0-9]{4}\.[0-9]{2}\.[0-9]{2}-[0-9]{2}$' }
+        sources:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/KnowledgeCorpusSource' }
+        approvers:
+          type: array
+          minItems: 2
+          items: { $ref: '#/components/schemas/Approver' }
+        change_reason: { type: string }
+
+    SnapshotRollbackResult:
+      type: object
+      additionalProperties: false
+      required: [restored_snapshot_id, previous_snapshot_id, alias_swung_at]
+      properties:
+        restored_snapshot_id: { type: string }
+        previous_snapshot_id: { type: string }
+        alias_swung_at: { type: string, format: date-time }
+        duration_seconds: { type: number }
+
+    StalenessFlag:
+      type: object
+      additionalProperties: false
+      required: [id, tenant_id, target_kind, target_id, raised_reason, raised_at, grace_release_id]
+      properties:
+        id: { type: string }
+        tenant_id: { type: string }
+        target_kind: { type: string, enum: [screenshot, article] }
+        target_id: { type: string }
+        raised_reason: { type: string, enum: [screen_id_hash_mismatch, route_renamed, manual] }
+        raised_at: { type: string, format: date-time }
+        grace_release_id: { type: string }
+        cleared_at: { type: string, format: date-time, nullable: true }
+        cleared_by: { type: string, nullable: true }
+        bulk_baseline_id: { type: string, nullable: true }
+
+    StalenessFlagWriteRequest:
+      type: object
+      additionalProperties: false
+      required: [target_kind, target_id, action]
+      properties:
+        target_kind: { type: string, enum: [screenshot, article] }
+        target_id: { type: string }
+        action: { type: string, enum: [raise, clear] }
+        raised_reason: { type: string, enum: [screen_id_hash_mismatch, route_renamed, manual] }
+        bulk_baseline_id: { type: string }
+
+    SearchResultsPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [kind, id, title, snippet, deep_link, score]
+            properties:
+              kind: { type: string, enum: [glossary, article] }
+              id: { type: string }
+              title: { type: string }
+              snippet: { type: string }
+              deep_link: { type: string, format: uri }
+              score: { type: number }
+
+    SupportHandoffRecord:
+      type: object
+      additionalProperties: false
+      required: [id, tenant_id, channel_kind, address, business_hours_window, sla_routine_business_hours, sla_incident_minutes]
+      properties:
+        id: { type: string }
+        tenant_id: { type: string }
+        channel_kind: { type: string, enum: [email, shared_mailbox, on_call_rotation, chat_link] }
+        address: { type: string }
+        business_hours_window: { type: string }
+        incident_mode_channel:
+          $ref: '#/components/schemas/SupportHandoffRecord'
+          nullable: true
+        auto_activate_on_nema_level3: { type: boolean }
+        manual_override_active: { type: boolean }
+        sla_routine_business_hours: { type: integer, minimum: 1 }
+        sla_incident_minutes: { type: integer, minimum: 1, default: 5 }

@@ -1,4 +1,4 @@
-"""Spec 038 — Measurable Success-Criteria Evidence Harness service module.
+"""spec 040 (originally Spec 038) — Measurable Success-Criteria Evidence Harness service module.
 
 Public surface:
     apps.api.app.services.evidence.router.router      — FastAPI APIRouter (prefix /v1/evidence)

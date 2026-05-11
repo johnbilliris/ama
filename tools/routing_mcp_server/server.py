@@ -30,7 +30,7 @@ def compute_route(
         2,
     )
     return {
-        "route_id": f"route-{int(distance_km*100)}",
+        "route_id": f"route-{int(distance_km * 100)}",
         "distance_km": distance_km,
         "estimated_minutes": round(distance_km * 1.5, 1),
         "polyline": [origin, destination],

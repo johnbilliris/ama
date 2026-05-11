@@ -2,7 +2,7 @@
 //
 // Hand-mirrored to the Pydantic models at
 // `apps/api/app/services/evidence/models/`. Schema parity is asserted by
-// the contract tests against `specs/038-success-criteria/contracts/openapi.evidence-harness.yaml`.
+// the contract tests against `specs/040-success-criteria/contracts/openapi.evidence-harness.yaml`.
 
 export type AiimsFunction =
   | "Control"

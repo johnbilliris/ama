@@ -1,5 +1,5 @@
 /**
- * Spec 038 — Playwright + axe-core E2E for the evidence harness (T-A09 / T-A10 / T-AMD-15 / T-AMD-18).
+ * spec 040 (originally Spec 038) — Playwright + axe-core E2E for the evidence harness (T-A09 / T-A10 / T-AMD-15 / T-AMD-18).
  *
  * Verifies:
  *   - 6 tabs render with the required test-ids.

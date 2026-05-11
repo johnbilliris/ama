@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Idempotent CLI for local Cosmos-emulator seeding of the 7 spec-038 containers.
+"""Idempotent CLI for local Cosmos-emulator seeding of the 7 spec-040 (originally Spec-038) containers.
 
 Quickstart §1. Reuses the in-memory registry as a no-op against the local
 emulator when `--account` is not supplied; otherwise calls Cosmos SDK to

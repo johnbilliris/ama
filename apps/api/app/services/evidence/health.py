@@ -7,7 +7,7 @@ import os
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from ._clients import blob_endpoint, cosmos_endpoint, get_registry
+from ._clients import blob_endpoint, get_registry
 
 router = APIRouter(tags=["evidence-health"])
 

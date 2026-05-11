@@ -71,10 +71,7 @@ def main() -> int:
 
     for tag, floor in TAG_FLOORS.items():
         if tag_counts[tag] < floor:
-            errors.append(
-                f"tag '{tag}' has {tag_counts[tag]} entries; floor is {floor} "
-                "(SC-013 / SC-015)"
-            )
+            errors.append(f"tag '{tag}' has {tag_counts[tag]} entries; floor is {floor} (SC-013 / SC-015)")
 
     return _emit(errors)
 

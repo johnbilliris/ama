@@ -1,0 +1,230 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "road-nsw-001",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-001",
+      "functional_class": "sub-arterial",
+      "length_km": 0.75
+    },
+    {
+      "id": "road-nsw-002",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-002",
+      "functional_class": "local",
+      "length_km": 1.0
+    },
+    {
+      "id": "road-nsw-003",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-003",
+      "functional_class": "collector",
+      "length_km": 1.25
+    },
+    {
+      "id": "road-nsw-004",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-004",
+      "functional_class": "arterial",
+      "length_km": 1.5
+    },
+    {
+      "id": "road-nsw-005",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-005",
+      "functional_class": "sub-arterial",
+      "length_km": 1.75
+    },
+    {
+      "id": "road-nsw-006",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-006",
+      "functional_class": "local",
+      "length_km": 2.0
+    },
+    {
+      "id": "road-nsw-007",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-007",
+      "functional_class": "collector",
+      "length_km": 2.25
+    },
+    {
+      "id": "road-nsw-008",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-008",
+      "functional_class": "arterial",
+      "length_km": 2.5
+    },
+    {
+      "id": "road-nsw-009",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-009",
+      "functional_class": "sub-arterial",
+      "length_km": 2.75
+    },
+    {
+      "id": "road-nsw-010",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-010",
+      "functional_class": "local",
+      "length_km": 3.0
+    },
+    {
+      "id": "road-nsw-011",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-011",
+      "functional_class": "collector",
+      "length_km": 3.25
+    },
+    {
+      "id": "road-nsw-012",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-012",
+      "functional_class": "arterial",
+      "length_km": 3.5
+    },
+    {
+      "id": "road-nsw-013",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-013",
+      "functional_class": "sub-arterial",
+      "length_km": 3.75
+    },
+    {
+      "id": "road-nsw-014",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-014",
+      "functional_class": "local",
+      "length_km": 4.0
+    },
+    {
+      "id": "road-nsw-015",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-015",
+      "functional_class": "collector",
+      "length_km": 4.25
+    },
+    {
+      "id": "road-nsw-016",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-016",
+      "functional_class": "arterial",
+      "length_km": 4.5
+    },
+    {
+      "id": "road-nsw-017",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-017",
+      "functional_class": "sub-arterial",
+      "length_km": 4.75
+    },
+    {
+      "id": "road-nsw-018",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-018",
+      "functional_class": "local",
+      "length_km": 5.0
+    },
+    {
+      "id": "road-nsw-019",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-019",
+      "functional_class": "collector",
+      "length_km": 5.25
+    },
+    {
+      "id": "road-nsw-020",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "segment_id": "SEG-NSW-020",
+      "functional_class": "arterial",
+      "length_km": 5.5
+    }
+  ]
+}

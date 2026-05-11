@@ -6,7 +6,7 @@
 ## Pre-conditions
 
 - Local Cosmos emulator + Azurite running (see
-  `specs/038-success-criteria/quickstart.md` §1).
+  `specs/040-success-criteria/quickstart.md` §1).
 - `evidence-harness-slo` workbook importable in App Insights.
 - 2 %/h burn-rate alerts enabled (informational); 5 %/h alerts armed (page-out).
 

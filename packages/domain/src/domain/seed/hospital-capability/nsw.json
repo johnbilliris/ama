@@ -1,0 +1,205 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "hosp-nsw-01",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "facility_id": "FACILITY-NSW-01",
+      "facility_name": "Test Hospital NSW #01",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics"
+      ],
+      "beds_total": 75
+    },
+    {
+      "id": "hosp-nsw-02",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "facility_id": "FACILITY-NSW-02",
+      "facility_name": "Test Hospital NSW #02",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult"
+      ],
+      "beds_total": 100
+    },
+    {
+      "id": "hosp-nsw-03",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "facility_id": "FACILITY-NSW-03",
+      "facility_name": "Test Hospital NSW #03",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds"
+      ],
+      "beds_total": 125
+    },
+    {
+      "id": "hosp-nsw-04",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "facility_id": "FACILITY-NSW-04",
+      "facility_name": "Test Hospital NSW #04",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke"
+      ],
+      "beds_total": 150
+    },
+    {
+      "id": "hosp-nsw-05",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "facility_id": "FACILITY-NSW-05",
+      "facility_name": "Test Hospital NSW #05",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke",
+        "cath-lab"
+      ],
+      "beds_total": 175
+    },
+    {
+      "id": "hosp-nsw-06",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "facility_id": "FACILITY-NSW-06",
+      "facility_name": "Test Hospital NSW #06",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2"
+      ],
+      "beds_total": 200
+    },
+    {
+      "id": "hosp-nsw-07",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "facility_id": "FACILITY-NSW-07",
+      "facility_name": "Test Hospital NSW #07",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics"
+      ],
+      "beds_total": 225
+    },
+    {
+      "id": "hosp-nsw-08",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "facility_id": "FACILITY-NSW-08",
+      "facility_name": "Test Hospital NSW #08",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult"
+      ],
+      "beds_total": 250
+    },
+    {
+      "id": "hosp-nsw-09",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "facility_id": "FACILITY-NSW-09",
+      "facility_name": "Test Hospital NSW #09",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds"
+      ],
+      "beds_total": 275
+    },
+    {
+      "id": "hosp-nsw-10",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NSW",
+      "facility_id": "FACILITY-NSW-10",
+      "facility_name": "Test Hospital NSW #10",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke"
+      ],
+      "beds_total": 300
+    }
+  ]
+}

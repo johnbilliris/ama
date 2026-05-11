@@ -10,5 +10,5 @@ Terraform parity stream lands. Until then, deployments use Bicep
 exclusively (`infra/bicep/main.bicep` `enableEvidenceHarness=true`).
 
 > See `infra/bicep/modules/evidence-harness.bicep` for the reference
-> implementation and `specs/038-success-criteria/research.md` D10 for the
+> implementation and `specs/040-success-criteria/research.md` D10 for the
 > parity decision rationale.

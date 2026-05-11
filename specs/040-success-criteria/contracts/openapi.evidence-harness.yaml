@@ -1,0 +1,828 @@
+openapi: 3.1.0
+info:
+  title: AMA Measurable Success-Criteria Evidence Harness API
+  version: 0.1.0
+  description: |
+    Six-pillar evidence harness for AMA capstone success criteria
+    (spec 040 (originally Spec 038)). All endpoints are AU-region only (FR-029); all KPI
+    values are advisory-only (FR-030); all responses carry an
+    `x-ama-correlation-id` header propagated to App Insights.
+
+    Pillars:
+      A. KPI Model           → /evidence/kpi-ladder
+      B. Measurement Method  → /evidence/measurement-method
+      C. Simulation Logic    → /evidence/scenarios/{scenario_id}/replay
+      D. Expected Impact     → /evidence/causal-chains/{capability_id}
+      E. Benchmark Register  → /evidence/benchmarks/{kpi_id}
+      F. Instrumentation     → /evidence/audit/{value_id}
+
+servers:
+  - url: https://api.ama.gov.au
+    description: Production (AU East)
+
+tags:
+  - name: evidence-kpi-ladder
+  - name: evidence-measurement
+  - name: evidence-replay
+  - name: evidence-impact
+  - name: evidence-benchmarks
+  - name: evidence-audit
+
+paths:
+  /api/v1/evidence/kpi-ladder:
+    get:
+      tags: [evidence-kpi-ladder]
+      summary: Retrieve the published KPI ladder (latest published version per indicator)
+      description: |
+        Returns the projected KPI ladder grouped by capstone success
+        criterion (SC-CAP-015-001..005). Implements FR-001..FR-006 and
+        SC-001 / SC-012.
+      operationId: getKpiLadder
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: include_risk_adjusted
+          in: query
+          required: false
+          schema: { type: boolean, default: true }
+          description: |
+            FR-004. If `true` and an indicator has no risk-adjustment
+            matrix, the response returns HTTP 409 (Edge Case #5).
+        - name: capstone_sc_id
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [SC-CAP-015-001, SC-CAP-015-002, SC-CAP-015-003, SC-CAP-015-004, SC-CAP-015-005]
+      responses:
+        '200':
+          description: KPI ladder
+          headers:
+            x-ama-correlation-id: { $ref: '#/components/headers/CorrelationIdHeader' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/KpiLadderView' }
+        '409':
+          description: Risk-adjusted variant requested but matrix missing (FR-004 / Edge Case #5)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+
+  /api/v1/evidence/measurement-method:
+    get:
+      tags: [evidence-measurement]
+      summary: Retrieve the Measurement Method document
+      description: |
+        Plain-language definitions per FR-007/FR-008/FR-009/FR-010.
+        Document is materialised deterministically from `kpi_ladder`
+        plus the bootstrap-CI helper config. SC-002 verifies the
+        reader can locate any capstone definition in <2 minutes.
+      operationId: getMeasurementMethod
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: format
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [json, markdown]
+            default: json
+      responses:
+        '200':
+          description: Measurement Method document
+          headers:
+            x-ama-correlation-id: { $ref: '#/components/headers/CorrelationIdHeader' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeasurementMethod' }
+            text/markdown:
+              schema: { type: string }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+
+  /api/v1/evidence/scenarios/{scenario_id}/replay:
+    post:
+      tags: [evidence-replay]
+      summary: Run baseline + AMA-assisted replay and return Delta Scorecard
+      description: |
+        Orchestrates the existing simulation engine (specs 007/024/026)
+        in deterministic seeded mode for both modes and returns the
+        per-KPI Delta Scorecard. Implements FR-011..FR-016 and
+        SC-003 / SC-004.
+      operationId: replayScenario
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [bushfire, flood, cyclone, urban_fire, mass_casualty, hazmat, marine_sar]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReplayRequest' }
+      responses:
+        '200':
+          description: Delta scorecard
+          headers:
+            x-ama-correlation-id: { $ref: '#/components/headers/CorrelationIdHeader' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DeltaScorecard' }
+        '422':
+          description: |
+            FR-047 / SC-022(a). Required input signal source unavailable
+            AND degraded-mode disabled in request, OR Pydantic v2
+            `extra="forbid"` rejected an unknown request-body field.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+
+  /api/v1/evidence/causal-chains/{capability_id}:
+    get:
+      tags: [evidence-impact]
+      summary: Retrieve the published causal chain for an AMA capability
+      description: |
+        Implements FR-017..FR-019 and SC-006. capability_id values
+        cover specs 008–012 (agents), spec 036 (Foundry-RAG client),
+        and spec 036-sim-agent-extend (telemetry-injection agent).
+      operationId: getCausalChain
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: capability_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Causal chain
+          headers:
+            x-ama-correlation-id: { $ref: '#/components/headers/CorrelationIdHeader' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CausalChain' }
+        '404':
+          description: No published chain for the requested capability
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+
+  /api/v1/evidence/benchmarks/{kpi_id}:
+    get:
+      tags: [evidence-benchmarks]
+      summary: Retrieve benchmark register entries for a KPI
+      description: |
+        Implements FR-020..FR-022 and SC-007. Returns one or more
+        `external_benchmark` entries (e.g. AFAC FDI, BoM warning
+        lead-time, NSW Pri-1 ambulance) plus a `prototype_baseline`
+        entry per jurisdiction.
+      operationId: getBenchmarksForKpi
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: kpi_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: jurisdiction
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        '200':
+          description: Benchmark register entries
+          headers:
+            x-ama-correlation-id: { $ref: '#/components/headers/CorrelationIdHeader' }
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/BenchmarkEntry' }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+
+  /api/v1/evidence/audit/{value_id}:
+    get:
+      tags: [evidence-audit]
+      summary: Retrieve the append-only audit trail for any KPI value
+      description: |
+        Implements FR-023..FR-028 and SC-005 / SC-008 / SC-009 / SC-010.
+        Returns the full chain signal → model → recommendation →
+        human decision → outcome. Records older than 90 days are
+        served from the cold-archive Blob (transparent to caller).
+      operationId: getAuditTraceForValue
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: value_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Audit trail
+          headers:
+            x-ama-correlation-id: { $ref: '#/components/headers/CorrelationIdHeader' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditTrace' }
+        '404':
+          description: value_id not found in hot Cosmos OR cold Blob archive
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+    patch:
+      tags: [evidence-audit]
+      summary: Rejected — `evidence_audit` is append-only (FR-040 / SC-016)
+      description: |
+        Cycle 2 (AMD-03). Any PATCH against an audit document MUST be
+        rejected at the persistence boundary with HTTP `409 Conflict`
+        (RFC 9110 §15.5.10 — the request conflicts with the locked
+        immutability policy). The rejection itself appends a new
+        audit row with `kind="audit_mutation_attempted"` (CHK077).
+      operationId: rejectAuditPatch
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: value_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '409':
+          description: Audit record immutable (FR-040)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemDetails'
+                  - type: object
+                    properties:
+                      title: { type: string, enum: ["audit-record-immutable"] }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+    delete:
+      tags: [evidence-audit]
+      summary: Rejected — `evidence_audit` is append-only (FR-040 / SC-016)
+      description: |
+        Cycle 2 (AMD-03). Any DELETE against an audit document MUST be
+        rejected with HTTP `409 Conflict` and a `ProblemDetails` body
+        whose `title` is `"audit-record-immutable"`. Each rejection
+        also appends a tampering-attempt audit row (CHK073..CHK078).
+      operationId: rejectAuditDelete
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: value_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '409':
+          description: Audit record immutable (FR-040)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ProblemDetails'
+                  - type: object
+                    properties:
+                      title: { type: string, enum: ["audit-record-immutable"] }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+
+  /api/v1/evidence/public-information/{scenario_id}:
+    get:
+      tags: [evidence-measurement]
+      summary: Render Public Information KPI artefact for a canonical scenario
+      description: |
+        Cycle 2 (AMD-02 + AMD-11 + AMD-13). Renders the multilingual
+        Public Information artefact for the requested canonical scenario
+        across the eight FR-037 language channels, surfacing the
+        `language_fallback_used` field whenever the language-pack
+        lookup chain falls back from the requested language to a
+        default (FR-048 / SC-022(b)). For the four "deferred-permitted"
+        scenarios (urban_fire, mass_casualty, hazmat, marine_sar) the
+        Auslan media + transcript fields may be absent and the
+        response carries an `auslan-asset-missing` badge per FR-039.
+      operationId: getPublicInformationForScenario
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+        - name: scenario_id
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [bushfire, flood, cyclone, urban_fire, mass_casualty, hazmat, marine_sar]
+        - name: lang
+          in: query
+          required: false
+          description: BCP-47 language code (FR-037 channel set).
+          schema: { type: string, default: en-AU }
+      responses:
+        '200':
+          description: Public Information render (8-language)
+          headers:
+            x-ama-correlation-id: { $ref: '#/components/headers/CorrelationIdHeader' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicInformationRender' }
+        '404':
+          description: Unknown scenario_id
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ProblemDetails' }
+        '422':
+          $ref: '#/components/responses/UnknownFieldRejected'
+        '503':
+          $ref: '#/components/responses/AuditWriteFailed'
+
+  /healthz/evidence:
+    get:
+      tags: [evidence-audit]
+      summary: Liveness/readiness probe for the evidence harness
+      description: |
+        Cycle 2 (AMD-08 / FR-045). Probes are partitioned into:
+
+          * **Critical** stores (failure ⇒ HTTP 503): every Cosmos
+            container in the evidence database (`kpi_ladder`,
+            `indicator_definition`, `measurement_method`,
+            `scenario_run`, `delta_scorecard`, `causal_chain`,
+            `benchmark`, `signal`, `evidence_audit`), the Blob
+            immutable cold-archive container, and the Cosmos
+            change-feed → Blob mirror processor.
+          * **Non-critical** stores (failure ⇒ HTTP 200 + `degraded:true`):
+            Application Insights ingestion endpoint and any read-only
+            reporting/cache layer.
+
+        The hardcoded `evidence-audit-cold=True` shortcut MUST be
+        removed (CHK111). Response states are mutually exclusive and
+        exhaustive — `503` (any critical down) | `200 + degraded:true`
+        (one+ non-critical degraded) | `200 + degraded:false`
+        (all healthy).
+      operationId: healthzEvidence
+      responses:
+        '200':
+          description: All critical stores reachable; `degraded` flags any non-critical issue
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthReport' }
+        '503':
+          description: |
+            FR-045 / SC-020(b) — at least one **critical** backing
+            store is unavailable. The `checks` map identifies which.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthReport' }
+
+components:
+  parameters:
+    CorrelationId:
+      name: x-ama-correlation-id
+      in: header
+      required: false
+      schema: { type: string }
+      description: Optional client-supplied correlation ID. Echoed in response and propagated to App Insights.
+
+  headers:
+    CorrelationIdHeader:
+      schema: { type: string }
+      description: Server-assigned correlation ID (echo of inbound, or freshly minted).
+
+  responses:
+    UnknownFieldRejected:
+      description: |
+        FR-047 / SC-022(a) — Pydantic v2 `extra="forbid"` rejected an
+        unknown request-body or query-parameter field. Applies to every
+        endpoint in this contract.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    AuditWriteFailed:
+      description: |
+        FR-044 / SC-020(a) — the durable audit write that must precede
+        any AU-refusal (or other audit-bearing) response failed after
+        the 3-attempt exponential-backoff (250 ms / 1 s / 4 s) retry
+        budget was exhausted. ProblemDetails.type references FR-044.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+
+  schemas:
+    ProblemDetails:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+        ama_advisory_only: { type: boolean, default: true, description: FR-030 }
+
+    ConfidenceBandRule:
+      type: object
+      required: [method, min_resamples]
+      properties:
+        method:
+          type: string
+          enum: [bootstrap_p2_5_p97_5, stddev_pm1]
+        min_resamples: { type: integer, minimum: 1, default: 1000 }
+        fallback_label: { type: string, enum: [small-sample] }
+
+    RiskAdjustment:
+      type: object
+      required: [likelihood, consequence]
+      description: FR-004 — 5x5 likelihood × consequence (AS/NZS ISO 31000).
+      properties:
+        likelihood: { type: integer, minimum: 1, maximum: 5 }
+        consequence: { type: integer, minimum: 1, maximum: 5 }
+
+    IndicatorDefinition:
+      type: object
+      required:
+        [id, kpi_id, version, capstone_sc_id, name, kind, aiims_function, incident_level,
+         life_safety_tier, formula, unit, owner_role, refresh_cadence, target_value,
+         alert_threshold, baseline_source, provenance, confidence_band_rule, risk_adjustment]
+      properties:
+        id: { type: string }
+        kpi_id: { type: string }
+        version: { type: integer, minimum: 1 }
+        capstone_sc_id:
+          type: string
+          enum: [SC-CAP-015-001, SC-CAP-015-002, SC-CAP-015-003, SC-CAP-015-004, SC-CAP-015-005]
+        name: { type: string }
+        kind: { type: string, enum: [leading, lagging] }
+        aiims_function:
+          type: string
+          enum: [Control, Intelligence, Planning, Operations, Logistics, PublicInformation]
+        incident_level: { type: integer, enum: [1, 2, 3] }
+        life_safety_tier: { type: string, enum: [life_safety, efficiency] }
+        formula: { type: string }
+        unit: { type: string }
+        owner_role: { type: string }
+        refresh_cadence: { type: string, description: ISO-8601 duration }
+        target_value: { type: number }
+        alert_threshold: { type: number }
+        baseline_source: { type: string }
+        provenance: { type: string, enum: [auto, manual] }
+        confidence_band_rule: { $ref: '#/components/schemas/ConfidenceBandRule' }
+        risk_adjustment:
+          $ref: '#/components/schemas/RiskAdjustment'
+          description: |
+            FR-041 (Cycle 2) — required. When the spec-037 risk
+            register has no matching row the service materialises a
+            graceful default of `(L=3, C=3)` and sets `provenance`
+            to `manual` so the row counts toward the FR-028 / SC-010
+            ≤50 % per-artefact manual-row cap.
+        created_at: { type: string, format: date-time }
+
+    KpiLadderGroup:
+      type: object
+      required: [capstone_sc_id, leading, lagging]
+      properties:
+        capstone_sc_id: { type: string }
+        leading:
+          type: array
+          items: { $ref: '#/components/schemas/IndicatorDefinition' }
+          minItems: 1
+        lagging:
+          type: array
+          items: { $ref: '#/components/schemas/IndicatorDefinition' }
+          minItems: 1
+
+    KpiLadderView:
+      type: object
+      required: [version, generated_at, groups]
+      properties:
+        version: { type: string }
+        generated_at: { type: string, format: date-time }
+        groups:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items: { $ref: '#/components/schemas/KpiLadderGroup' }
+
+    MeasurementMethodDefinition:
+      type: object
+      required: [capstone_sc_id, plain_language_definition, start_signal, end_signal,
+                 missing_timestamp_rule, calibration_method, confidence_band_rule]
+      properties:
+        capstone_sc_id: { type: string }
+        plain_language_definition: { type: string }
+        start_signal: { type: string }
+        end_signal: { type: string }
+        missing_timestamp_rule: { type: string }
+        calibration_method: { type: string }
+        confidence_band_rule: { $ref: '#/components/schemas/ConfidenceBandRule' }
+
+    MeasurementMethod:
+      type: object
+      required: [version, generated_at, definitions]
+      properties:
+        version: { type: string }
+        generated_at: { type: string, format: date-time }
+        definitions:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items: { $ref: '#/components/schemas/MeasurementMethodDefinition' }
+
+    ReplayRequest:
+      type: object
+      required: [seed, run_pair_id]
+      properties:
+        seed: { type: string, description: FR-014 deterministic seed }
+        run_pair_id: { type: string }
+        repetitions: { type: integer, minimum: 1, default: 1, description: ≥2 enables FR-016 determinism check }
+        allow_degraded_mode: { type: boolean, default: true, description: FR-027 / FR-032 }
+
+    KpiDelta:
+      type: object
+      required: [kpi_id, baseline_value, ama_assisted_value, absolute_delta,
+                 percent_delta, confidence_band_low, confidence_band_high,
+                 confidence_method, meets_target]
+      properties:
+        kpi_id: { type: string }
+        baseline_value: { type: number }
+        ama_assisted_value: { type: number }
+        absolute_delta: { type: number }
+        percent_delta: { type: number }
+        confidence_band_low: { type: number }
+        confidence_band_high: { type: number }
+        confidence_method:
+          type: string
+          enum: [bootstrap_p2_5_p97_5, stddev_pm1]
+        meets_target: { type: boolean }
+        small_sample: { type: boolean, default: false }
+        reduced_fidelity: { type: boolean, default: false }
+
+    DeterminismCheck:
+      type: object
+      required: [repetition_count, within_tolerance_count, diverged]
+      properties:
+        repetition_count: { type: integer, minimum: 1 }
+        within_tolerance_count: { type: integer, minimum: 0 }
+        diverged: { type: boolean }
+        reproduction_rate: { type: number, minimum: 0, maximum: 1 }
+        tolerance_relative_pct: { type: number, default: 2.0, description: FR-016 ±2 % }
+        tolerance_absolute_units: { type: number, default: 1.0, description: FR-016 ±1 unit }
+
+    DeltaScorecard:
+      type: object
+      required: [id, scenario_id, seed, run_pair_id, kpi_deltas, created_at]
+      properties:
+        id: { type: string }
+        scenario_id: { type: string }
+        seed: { type: string }
+        run_pair_id: { type: string }
+        kpi_deltas:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items: { $ref: '#/components/schemas/KpiDelta' }
+        determinism:
+          oneOf:
+            - { $ref: '#/components/schemas/DeterminismCheck' }
+            - { type: 'null' }
+        advisory_only: { type: boolean, default: true, description: FR-030 banner }
+        reduced_fidelity: { type: boolean, default: false }
+        created_at: { type: string, format: date-time }
+
+    Assumption:
+      type: object
+      required: [text, resolved]
+      properties:
+        text: { type: string }
+        resolved: { type: boolean, default: false }
+
+    ThreatToValidity:
+      type: object
+      required: [text, severity]
+      properties:
+        text: { type: string }
+        severity: { type: string, enum: [low, medium, high] }
+
+    CausalChain:
+      type: object
+      required: [id, capability_id, capability_name, version, kpis_moved,
+                 expected_magnitude_value, expected_magnitude_unit,
+                 assumptions, threats_to_validity, originating_spec_path]
+      properties:
+        id: { type: string }
+        capability_id: { type: string }
+        capability_name: { type: string }
+        version: { type: integer, minimum: 1 }
+        kpis_moved:
+          type: array
+          minItems: 1
+          items: { type: string }
+        expected_magnitude_value: { type: number }
+        expected_magnitude_unit: { type: string }
+        assumptions:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/Assumption' }
+        threats_to_validity:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/ThreatToValidity' }
+        originating_spec_path:
+          type: string
+          pattern: '^specs/'
+
+    CitationRef:
+      type: object
+      required: [org, document, year, url]
+      description: |
+        FR-049 (Cycle 2) — every benchmark row carries a structured
+        4-tuple citation. Free-text-only citations are no longer
+        accepted at write time (CHK137).
+      properties:
+        org: { type: string }
+        document: { type: string }
+        year: { type: integer, minimum: 1900, maximum: 2100 }
+        url: { type: string, format: uri }
+
+    BenchmarkEntry:
+      type: object
+      required: [id, kpi_id, jurisdiction, kind, source_name, source_citation, target_unit, not_available]
+      properties:
+        id: { type: string }
+        kpi_id: { type: string }
+        jurisdiction: { type: string }
+        kind: { type: string, enum: [external_benchmark, prototype_baseline] }
+        source_name: { type: string }
+        source_citation: { $ref: '#/components/schemas/CitationRef' }
+        target_value:
+          oneOf:
+            - { type: number }
+            - { type: 'null' }
+        target_unit: { type: string }
+        not_available: { type: boolean, default: false }
+        provenance:
+          type: string
+          enum: [auto, manual]
+          default: auto
+          description: |
+            FR-049 — `manual` when the citation cannot be sourced from
+            a published Australian standard; counted toward the
+            FR-028 ≤50 % per-artefact manual-row cap.
+
+    AuditEntry:
+      type: object
+      required: [id, audit_id, value_id, kind, actor, occurred_at, references, region]
+      properties:
+        id: { type: string }
+        audit_id: { type: string }
+        value_id: { type: string }
+        kind:
+          type: string
+          enum:
+            - signal_ingested
+            - scorecard_published
+            - ladder_version_published
+            - non_au_signal_refused
+            - manual_share_blocked
+            - auditor_signoff_recorded
+            - kpi_amendment_recorded
+            - degraded_mode_entered
+            - small_sample_labelled
+            - divergence_flagged
+            - audit_mutation_attempted
+            - language_fallback_used
+        actor: { type: string }
+        occurred_at: { type: string, format: date-time }
+        references:
+          type: object
+          additionalProperties: { type: string }
+        payload: { type: object, additionalProperties: true }
+        correlation_id: { type: string }
+        region: { type: string, enum: [australiaeast, australiasoutheast] }
+        archived_to_blob: { type: boolean, default: false }
+        language_fallback_used:
+          type: string
+          pattern: '^[A-Za-z\-]+→[A-Za-z\-]+$'
+          description: |
+            FR-048 / SC-022(b) — populated only on PI-render audit
+            rows where the language-pack lookup chain fell back.
+            Format `<from_code>→<to_code>` (U+2192 RIGHTWARDS ARROW).
+            Absent when no fallback occurred (CHK134 negative case).
+
+    AuditTrace:
+      type: object
+      required: [value_id, entries, chain_complete]
+      properties:
+        value_id: { type: string }
+        entries:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/AuditEntry' }
+        chain_complete:
+          type: boolean
+          description: |
+            True when entries.references covers all five steps:
+            signal → model → recommendation → human decision → outcome
+            (SC-005). False values MUST coexist with at least one
+            `degraded_mode_entered` entry (FR-027 / FR-032).
+        served_from_cold_archive: { type: boolean, default: false }
+
+    HealthReport:
+      type: object
+      required: [status, checks, degraded]
+      properties:
+        status: { type: string, enum: [ok, degraded, down] }
+        degraded:
+          type: boolean
+          description: |
+            FR-045 — `false` only when every critical AND every
+            non-critical store is healthy. `true` when one or more
+            **non-critical** stores are degraded (response is 200).
+            When any **critical** store is unavailable the response is
+            HTTP 503 and `status="down"`.
+        checks:
+          type: object
+          additionalProperties: { type: boolean }
+          description: |
+            Per-store pass/fail map. Critical stores: `kpi_ladder`,
+            `indicator_definition`, `measurement_method`,
+            `scenario_run`, `delta_scorecard`, `causal_chain`,
+            `benchmark`, `signal`, `evidence_audit`,
+            `evidence_audit_cold_blob`, `audit_change_feed_mirror`.
+            Non-critical stores: `app_insights_ingestion`,
+            `read_only_cache`.
+
+    PublicInformationRender:
+      type: object
+      required: [scenario_id, generated_at, channels, advisory_only]
+      description: |
+        FR-039 / FR-048 / SC-022(b) — multilingual Public Information
+        artefact for one canonical scenario.
+      properties:
+        scenario_id:
+          type: string
+          enum: [bushfire, flood, cyclone, urban_fire, mass_casualty, hazmat, marine_sar]
+        generated_at: { type: string, format: date-time }
+        channels:
+          type: array
+          minItems: 8
+          description: One render per FR-037 language channel (8 channels).
+          items:
+            type: object
+            required: [language_code, body, fk_grade]
+            properties:
+              language_code: { type: string, description: BCP-47 }
+              body: { type: string }
+              fk_grade:
+                type: number
+                description: |
+                  Flesch-Kincaid grade level for the English variant
+                  (FR-039 — MUST be ≤ 8). For non-English variants the
+                  field MAY be null.
+                nullable: true
+              language_fallback_used:
+                type: string
+                pattern: '^[A-Za-z\-]+→[A-Za-z\-]+$'
+                description: |
+                  FR-048 / SC-022(b) — present ONLY when the
+                  language-pack lookup chain fell back. Format
+                  `<from>→<to>` using the U+2192 RIGHTWARDS ARROW.
+                  Absent (field omitted entirely) when no fallback
+                  occurred (CHK134 — negative case asserted).
+        auslan:
+          type: object
+          description: |
+            FR-039 — required for cyclone, bushfire, flood. For the
+            other four scenarios this object MAY be omitted; its
+            absence MUST be paired with `auslan_asset_missing=true`.
+          properties:
+            video_url: { type: string, format: uri }
+            transcript: { type: string }
+            captioned_image_url: { type: string, format: uri }
+        auslan_asset_missing:
+          type: boolean
+          default: false
+          description: |
+            FR-039 deferred-permitted badge. When `true` the UI MUST
+            render a visible `auslan-asset-missing` badge near the
+            content; silent omission is forbidden.
+        advisory_only: { type: boolean, default: true }

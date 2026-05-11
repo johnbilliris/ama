@@ -1,5 +1,5 @@
 /**
- * Spec 038 evidence-harness route stub (T-S07).
+ * spec 040 (originally Spec 038) evidence-harness route stub (T-S07).
  *
  * Mounts the existing PersonaWorkspace shell with six tab slots (KPI Ladder,
  * Measurement Method, Replay Scorecard, Impact Chains, Benchmarks, Audit
@@ -28,7 +28,7 @@ export default function EvidencePage() {
         <p className="workspace-kicker">Governance · Evidence</p>
         <h1 className="workspace-title">Measurable Success-Criteria Evidence Harness</h1>
         <p className="workspace-org">
-          Advisory-only · AU sovereignty · Append-only audit (spec 038)
+          Advisory-only · AU sovereignty · Append-only audit (spec 040 (originally Spec 038))
         </p>
       </header>
       <nav aria-label="Evidence tabs" className="workspace-tabs">

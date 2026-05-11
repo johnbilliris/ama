@@ -33,7 +33,10 @@ targetScope = 'resourceGroup'
 @description('Name of the environment — used as a prefix for all resources')
 param environmentName string
 
-@description('Primary location for all resources')
+@description('Primary location for all resources — Australian residency is non-negotiable (Constitution NN-2; spec-038 FR-018). Paired DR (australiasoutheast) is selected per-module on its own parameter, not through this primary location.')
+@allowed([
+  'australiaeast'
+])
 param location string
 
 @description('Alert email recipient')
@@ -1362,3 +1365,55 @@ output AZURE_SUBSCRIPTION_TOPOLOGY string = subscriptionTopology
 
 @description('Spec 029 — target subscription id for this deployment.')
 output AZURE_TARGET_SUBSCRIPTION_ID string = subscriptionId
+
+// ────────────────────────────────────────────────────────────────────────────────
+// spec-038 — In-Product Help Documentation & Grounded Chat Assistant (T-AA017)
+//
+// Wires the four spec-038 modules into the platform deployment, gated by the
+// `enableSpec038Help` feature flag so the surface can be staged independently.
+// All resources stay in `australiaeast` (Constitution NN-2).
+// ────────────────────────────────────────────────────────────────────────────────
+
+@description('Spec-038 — toggle the Help corpus + grounded-chat surface.')
+param enableSpec038Help bool = true
+
+@description('Spec-038 — autoscale max RU/s per Help Cosmos container (default 4000).')
+param spec038CosmosAutoscaleMaxRu int = 4000
+
+@description('Spec-038 — immutability window for help-screenshots blob container (days).')
+param spec038ScreenshotImmutabilityDays int = 30
+
+module helpCosmos './bicep/modules/cosmos-help-containers.bicep' = if (enableSpec038Help) {
+  name: 'spec038-help-cosmos'
+  params: {
+    cosmosAccountName: cosmos.name
+    databaseName: 'disaster-hub'
+    tags: tags
+    autoscaleMaxRu: spec038CosmosAutoscaleMaxRu
+  }
+}
+
+module helpScreenshotsStorage './bicep/modules/help-screenshots-storage.bicep' = if (enableSpec038Help) {
+  name: 'spec038-help-screenshots'
+  params: {
+    storageAccountName: storage.name
+    immutabilityDays: spec038ScreenshotImmutabilityDays
+    tags: tags
+  }
+}
+
+module helpDashboard './bicep/modules/help-app-insights-dashboard.bicep' = if (enableSpec038Help) {
+  name: 'spec038-help-dashboard'
+  params: {
+    appInsightsName: monitoring.outputs.appInsightsName
+    tags: tags
+  }
+}
+
+// Note: `helpSearch` (./bicep/modules/help-search-index-pair.bicep) is invoked
+// per-publish by `tools/help/publish_snapshot.py`, not at static infra time —
+// each snapshot stamps a new immutable index and re-binds the alias. The
+// module is built but parameterised at runtime by the CI workflow
+// (.github/workflows/help-snapshot.yml).
+
+output AZURE_SPEC038_HELP_ENABLED bool = enableSpec038Help

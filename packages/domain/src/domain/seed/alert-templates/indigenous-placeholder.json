@@ -1,0 +1,70 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "alert-bushfire-warning-indigenous-placeholder",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "template_id": "bushfire-warning",
+      "locale": "indigenous-placeholder",
+      "body": "[indigenous-placeholder] TEST \u2014 DO NOT BROADCAST: Bushfire warning. Take action now.",
+      "placeholder": true,
+      "wcag_audio_description": "placeholder"
+    },
+    {
+      "id": "alert-flood-evac-indigenous-placeholder",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "template_id": "flood-evac",
+      "locale": "indigenous-placeholder",
+      "body": "[indigenous-placeholder] TEST \u2014 DO NOT BROADCAST: Flood \u2014 evacuate to higher ground.",
+      "placeholder": true,
+      "wcag_audio_description": "placeholder"
+    },
+    {
+      "id": "alert-cyclone-watch-indigenous-placeholder",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "template_id": "cyclone-watch",
+      "locale": "indigenous-placeholder",
+      "body": "[indigenous-placeholder] TEST \u2014 DO NOT BROADCAST: Tropical cyclone watch in effect.",
+      "placeholder": true,
+      "wcag_audio_description": "placeholder"
+    },
+    {
+      "id": "alert-earthquake-aftershock-indigenous-placeholder",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "template_id": "earthquake-aftershock",
+      "locale": "indigenous-placeholder",
+      "body": "[indigenous-placeholder] TEST \u2014 DO NOT BROADCAST: Aftershock advisory \u2014 drop, cover, hold.",
+      "placeholder": true,
+      "wcag_audio_description": "placeholder"
+    },
+    {
+      "id": "alert-heatwave-advisory-indigenous-placeholder",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "template_id": "heatwave-advisory",
+      "locale": "indigenous-placeholder",
+      "body": "[indigenous-placeholder] TEST \u2014 DO NOT BROADCAST: Heatwave advisory \u2014 check on neighbours.",
+      "placeholder": true,
+      "wcag_audio_description": "placeholder"
+    }
+  ]
+}

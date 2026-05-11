@@ -19,11 +19,55 @@ Auth:
 """
 
 import argparse
+import hashlib
 import json
 import os
+import sys
 from pathlib import Path
 
+# Spec-039 (T032): make `packages.*` importable when this script is run as
+# `python scripts/seed_loader.py` from the repo root (the azd postprovision
+# entrypoint). The parent of the scripts/ directory is the repo root.
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+# Hardened loader path for the new subdirectory catalogues. Imports are kept
+# local-friendly so this script remains importable from tests without
+# requiring azure-cosmos at import time.
+from packages.domain.src.domain.seed._fixture_marker import (  # noqa: E402
+    validate_record,
+    validate_wrapper,
+)
+
+try:  # PII detector is optional at import time; tests inject it via subdir flow.
+    from scripts._pii_detector import detect as _pii_detect
+except Exception:  # pragma: no cover
+    _pii_detect = None  # type: ignore[assignment]
+
+
+class SeedRejectedError(RuntimeError):
+    """Raised when a record is rejected for a non-marker compliance reason
+    (PSPF over-classification, PII-shaped values, etc.)."""
+
+
 SEED_ROOT = Path(__file__).resolve().parent.parent / "packages" / "domain" / "src" / "domain" / "seed"
+# Spec-039 T032: parent of the nine new subdirectory catalogues. Tests
+# monkeypatch this attribute to a tmp_path so the loader walks a fixture
+# tree rather than the committed seed catalogue.
+SPEC038_SEED_ROOT = SEED_ROOT
+SPEC038_SUBDIRS = (
+    "alert-templates",
+    "evacuation-routes",
+    "vulnerable-categories",
+    "hospital-capability",
+    "road-segments",
+    "utility-infrastructure",
+    "volunteer-credentials",
+    "lemp-memp-templates",
+    "inter-government-agreements",
+)
+SPEC038_PSPF_ALLOWED = {"OFFICIAL", "OFFICIAL: SENSITIVE"}
 
 SEED_FILES = {
     "jurisdictions": "jurisdictions_australia.json",
@@ -332,6 +376,102 @@ def seed_coordination_tasks(endpoint: str, database: str, records: list[dict]) -
         )
 
 
+def _content_hash(record: dict) -> str:
+    """Stable SHA-256 over the canonical JSON of the record (sorted keys)."""
+    blob = json.dumps(record, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(blob).hexdigest()
+
+
+def _existing_hash(container, doc_id: str) -> str | None:
+    """Return the ``_content_hash`` field of an existing item, or None."""
+    try:
+        existing = container.read_item(item=doc_id, partition_key=doc_id)
+    except Exception:
+        # Test fakes use plain dicts via .items
+        items = getattr(container, "items", None)
+        if isinstance(items, dict) and doc_id in items:
+            return items[doc_id].get("_content_hash")
+        return None
+    return existing.get("_content_hash") if isinstance(existing, dict) else None
+
+
+def seed_spec039_subdirectories(
+    cosmos_client, database_name: str
+) -> dict[str, dict[str, int]]:
+    """Spec-039 T032 — load the nine new subdirectory catalogues with full
+    fictitious-marker / PSPF / PII enforcement and content-hash idempotency.
+
+    Args:
+        cosmos_client: object exposing ``get_database_client(name).get_container_client(name)``.
+            Production passes a real ``CosmosClient``; tests pass an in-memory fake.
+        database_name: Cosmos database name (e.g. ``disaster-hub``).
+
+    Returns:
+        Per-catalogue counters: ``{"<subdir>": {"inserts", "updates", "already-current"}}``.
+
+    Raises:
+        FixtureMarkerError: if any wrapper / record is missing fictitious markers.
+        SeedRejectedError: if a record carries an over-classified PSPF marking
+            or matches the PII detector.
+    """
+    db = cosmos_client.get_database_client(database_name)
+    summary: dict[str, dict[str, int]] = {}
+
+    for subdir in SPEC038_SUBDIRS:
+        sub_path = Path(SPEC038_SEED_ROOT) / subdir
+        if not sub_path.exists():
+            continue
+        counters = {"inserts": 0, "updates": 0, "already-current": 0}
+        # Load + validate every file in the subdir BEFORE writing anything,
+        # so a single bad record fails the whole subdir without partial commits.
+        loaded_records: list[dict] = []
+        for json_path in sorted(sub_path.glob("*.json")):
+            doc = json.loads(json_path.read_text(encoding="utf-8"))
+            validate_wrapper(doc)  # raises FixtureMarkerError
+            for record in doc.get("records", []):
+                validate_record(record)  # raises FixtureMarkerError
+                pspf = record.get("pspf", "OFFICIAL")
+                if pspf not in SPEC038_PSPF_ALLOWED:
+                    raise SeedRejectedError(
+                        f"{json_path.name}: record {record.get('id')!r} has PSPF "
+                        f"{pspf!r} above the OFFICIAL: SENSITIVE cap (FR-043)"
+                    )
+                if _pii_detect is not None:
+                    hits = _pii_detect(record)
+                    if hits:
+                        detectors = sorted({h.detector for h in hits})
+                        raise SeedRejectedError(
+                            f"{json_path.name}: record {record.get('id')!r} "
+                            f"matched PII detectors {detectors} (FR-045)"
+                        )
+                loaded_records.append(record)
+
+        # Now upsert with content-hash idempotency.
+        container = db.get_container_client("seed")
+        for record in loaded_records:
+            doc_id = record["id"]
+            new_hash = _content_hash(record)
+            existing = _existing_hash(container, doc_id)
+            if existing is None:
+                doc = {**record, "_content_hash": new_hash}
+                container.upsert_item(doc)
+                counters["inserts"] += 1
+            elif existing != new_hash:
+                doc = {**record, "_content_hash": new_hash}
+                container.upsert_item(doc)
+                counters["updates"] += 1
+            else:
+                counters["already-current"] += 1
+        summary[subdir] = counters
+        print(
+            f"  Spec-039 [{subdir}]: "
+            f"{counters['inserts']} inserts, "
+            f"{counters['updates']} updates, "
+            f"{counters['already-current']} already-current"
+        )
+    return summary
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Seed disaster-response-hub databases")
     parser.add_argument("--cosmos-endpoint", default="", help="Cosmos DB endpoint URL")
@@ -364,6 +504,10 @@ def main() -> None:
             seed_coordination_tasks(
                 args.cosmos_endpoint, args.cosmos_database, coordination_tasks
             )
+        # Spec-039 T032/T034: load the new subdirectory catalogues with
+        # marker / PSPF / PII enforcement and content-hash idempotency.
+        client = _build_cosmos_client(args.cosmos_endpoint)
+        seed_spec039_subdirectories(client, args.cosmos_database)
 
     if args.storage_account:
         seed_blob_containers(args.storage_account)

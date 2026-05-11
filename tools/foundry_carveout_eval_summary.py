@@ -41,7 +41,7 @@ def _synthesize_response(case: dict[str, Any]) -> dict[str, Any]:
         "jurisdiction": expected.get("jurisdiction"),
         "severity": expected.get("severity"),
         "action": expected.get("action"),
-        "text": prefix + case.get("prompt", "")[: 80],
+        "text": prefix + case.get("prompt", "")[:80],
     }
 
 
@@ -78,8 +78,7 @@ def main(argv: list[str] | None = None) -> int:
         f"- Pass rate (≥0.95 threshold): **{pass_rate:.1f}%**",
         f"- Mean score: **{mean:.3f}**",
         "",
-        "_Synthetic-response grader; live-LLM regrade gated behind "
-        "`@pytest.mark.azure_foundry_staging`._",
+        "_Synthetic-response grader; live-LLM regrade gated behind `@pytest.mark.azure_foundry_staging`._",
     ]
     md = "\n".join(md_lines)
     args.output.write_text(md + "\n", encoding="utf-8")

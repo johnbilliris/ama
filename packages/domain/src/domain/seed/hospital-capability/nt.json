@@ -1,0 +1,205 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "hosp-nt-01",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "facility_id": "FACILITY-NT-01",
+      "facility_name": "Test Hospital NT #01",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics"
+      ],
+      "beds_total": 75
+    },
+    {
+      "id": "hosp-nt-02",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "facility_id": "FACILITY-NT-02",
+      "facility_name": "Test Hospital NT #02",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult"
+      ],
+      "beds_total": 100
+    },
+    {
+      "id": "hosp-nt-03",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "facility_id": "FACILITY-NT-03",
+      "facility_name": "Test Hospital NT #03",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds"
+      ],
+      "beds_total": 125
+    },
+    {
+      "id": "hosp-nt-04",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "facility_id": "FACILITY-NT-04",
+      "facility_name": "Test Hospital NT #04",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke"
+      ],
+      "beds_total": 150
+    },
+    {
+      "id": "hosp-nt-05",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "facility_id": "FACILITY-NT-05",
+      "facility_name": "Test Hospital NT #05",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke",
+        "cath-lab"
+      ],
+      "beds_total": 175
+    },
+    {
+      "id": "hosp-nt-06",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "facility_id": "FACILITY-NT-06",
+      "facility_name": "Test Hospital NT #06",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2"
+      ],
+      "beds_total": 200
+    },
+    {
+      "id": "hosp-nt-07",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "facility_id": "FACILITY-NT-07",
+      "facility_name": "Test Hospital NT #07",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics"
+      ],
+      "beds_total": 225
+    },
+    {
+      "id": "hosp-nt-08",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "facility_id": "FACILITY-NT-08",
+      "facility_name": "Test Hospital NT #08",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult"
+      ],
+      "beds_total": 250
+    },
+    {
+      "id": "hosp-nt-09",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "facility_id": "FACILITY-NT-09",
+      "facility_name": "Test Hospital NT #09",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds"
+      ],
+      "beds_total": 275
+    },
+    {
+      "id": "hosp-nt-10",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "NT",
+      "facility_id": "FACILITY-NT-10",
+      "facility_name": "Test Hospital NT #10",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke"
+      ],
+      "beds_total": 300
+    }
+  ]
+}

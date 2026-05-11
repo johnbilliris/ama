@@ -1,0 +1,58 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "evac-qld-01",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "route_name": "Test Evacuation Corridor QLD-01",
+      "from_zone": "qld-zone-01",
+      "to_safe_assembly": "qld-assembly-01",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-qld-02",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "route_name": "Test Evacuation Corridor QLD-02",
+      "from_zone": "qld-zone-02",
+      "to_safe_assembly": "qld-assembly-02",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-qld-03",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "route_name": "Test Evacuation Corridor QLD-03",
+      "from_zone": "qld-zone-03",
+      "to_safe_assembly": "qld-assembly-03",
+      "primary_path": "generic"
+    },
+    {
+      "id": "evac-qld-04",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "QLD",
+      "route_name": "Test Evacuation Corridor QLD-04",
+      "from_zone": "qld-zone-04",
+      "to_safe_assembly": "qld-assembly-04",
+      "primary_path": "generic"
+    }
+  ]
+}

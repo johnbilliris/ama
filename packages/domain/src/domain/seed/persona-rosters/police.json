@@ -1,0 +1,110 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "licence": "CC-BY-4.0",
+    "residency": "AU",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "domain_group": "police",
+      "fictitious": true,
+      "id": "persona-roster-police-act-policing",
+      "licence": "CC-BY-4.0",
+      "persona_id": "act-policing",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding act-policing into police"
+    },
+    {
+      "domain_group": "police",
+      "fictitious": true,
+      "id": "persona-roster-police-afp-act",
+      "licence": "CC-BY-4.0",
+      "persona_id": "afp-act",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding afp-act into police"
+    },
+    {
+      "domain_group": "police",
+      "fictitious": true,
+      "id": "persona-roster-police-afp-commonwealth",
+      "licence": "CC-BY-4.0",
+      "persona_id": "afp-commonwealth",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding afp-commonwealth into police"
+    },
+    {
+      "domain_group": "police",
+      "fictitious": true,
+      "id": "persona-roster-police-nswpf",
+      "licence": "CC-BY-4.0",
+      "persona_id": "nswpf",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding nswpf into police"
+    },
+    {
+      "domain_group": "police",
+      "fictitious": true,
+      "id": "persona-roster-police-ntpf",
+      "licence": "CC-BY-4.0",
+      "persona_id": "ntpf",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding ntpf into police"
+    },
+    {
+      "domain_group": "police",
+      "fictitious": true,
+      "id": "persona-roster-police-qps",
+      "licence": "CC-BY-4.0",
+      "persona_id": "qps",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding qps into police"
+    },
+    {
+      "domain_group": "police",
+      "fictitious": true,
+      "id": "persona-roster-police-sapol",
+      "licence": "CC-BY-4.0",
+      "persona_id": "sapol",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding sapol into police"
+    },
+    {
+      "domain_group": "police",
+      "fictitious": true,
+      "id": "persona-roster-police-taspol",
+      "licence": "CC-BY-4.0",
+      "persona_id": "taspol",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding taspol into police"
+    },
+    {
+      "domain_group": "police",
+      "fictitious": true,
+      "id": "persona-roster-police-vicpol",
+      "licence": "CC-BY-4.0",
+      "persona_id": "vicpol",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding vicpol into police"
+    },
+    {
+      "domain_group": "police",
+      "fictitious": true,
+      "id": "persona-roster-police-wapol",
+      "licence": "CC-BY-4.0",
+      "persona_id": "wapol",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding wapol into police"
+    }
+  ]
+}

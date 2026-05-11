@@ -1,4 +1,4 @@
-"""Pydantic v2 models for the spec-038 evidence harness."""
+"""Pydantic v2 models for the spec-040 (originally Spec 038) evidence harness."""
 
 from .audit import AuditEntry, AuditKind, AuditTrace
 from .benchmark import BenchmarkEntry

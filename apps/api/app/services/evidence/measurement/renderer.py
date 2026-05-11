@@ -89,7 +89,7 @@ def render(format: Literal["json", "markdown"] = "json") -> dict | str:
     }
     if format == "json":
         return payload
-    blocks = ["# Measurement Method (spec 038)\n"]
+    blocks = ["# Measurement Method (spec 040 (originally Spec 038))\n"]
     for d in defs:
         sc = d["capstone_sc_id"]
         info = CAPSTONE_DEFINITIONS[sc]

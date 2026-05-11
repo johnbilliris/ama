@@ -1,11 +1,25 @@
+---
+purpose: Capacity model documenting production baseline throughput, resource sizing, and SLO linkage for the Disaster Response Coordination Hub.
+personas:
+  - Technical-Build
+  - Technical-Quality
+diagrams: []
+specs:
+  - spec-032
+---
+
 # Capacity Model — Disaster Response Coordination Hub
+
+[→ Architecture index](README.md)
+
+> **Migration**: This file is at the repository root of `docs/architecture/`. See known-gaps entry `CAP-MIG-01` for the follow-up migration to `deployment/` or `governance/`.
 
 **Purpose**: published capacity numbers tied to FR-O06 SLOs and FR-A02 partitioning math. Closes spec-032 FR-R03.
 
 ## Headline numbers (production baseline)
 
 | Workload | Sustained throughput | Peak throughput | Constraint |
-|---|---:|---:|---|
+| --- | ---: | ---: | --- |
 | Signals ingested | 200 / s | 1,000 / s (15 min) | Event Hubs partition count + ingestion Container Apps replicas |
 | Recommendations generated | 30 / s | 200 / s (15 min) | Azure OpenAI TPM quota + agent runtime CPU |
 | Public alerts published | 15 / s | 100 / s (5 min) | Communication channels + Content Safety throughput |
@@ -16,7 +30,7 @@
 ## Resource sizing baseline
 
 | Resource | Baseline SKU | Scale-out trigger | Max RU/s or replicas |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Container Apps — apps/api | min 2 / max 10 | HTTP concurrent > 30 | 10 replicas |
 | Container Apps — apps/agents/monitoring | min 1 / max 8 | Service Bus queue > 50 | 8 replicas |
 | Container Apps — apps/agents/risk_assessment | min 1 / max 6 | Service Bus queue > 30 | 6 replicas |
@@ -45,7 +59,7 @@ Per spec-032 FR-A02 + `cosmos-partitioning.md`:
 ## SLO linkage
 
 | SLO | Capacity dependency |
-|---|---|
+| --- | --- |
 | SLO-1 signal ingestion P95 ≤ 60 s | Event Hubs partition count ≥ 4; ingestion replicas ≥ baseline |
 | SLO-2 handoff success ≥ 99.5% | Service Bus throughput units; dead-letter queue depth alarms |
 | SLO-3 alert publish P95 ≤ 90 s | Content Safety throughput; channel broker rate limits |

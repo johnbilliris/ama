@@ -1,4 +1,4 @@
-"""FastAPI router scaffold for the spec-038 evidence harness (T-S06).
+"""FastAPI router scaffold for the spec-040 (originally Spec 038) evidence harness (T-S06).
 
 Mounts prefix `/v1/evidence` (final path `/api/v1/evidence/*`).
 Each pillar registers its router via `register(...)` so the assembly

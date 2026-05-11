@@ -1,6 +1,6 @@
 // infra/bicep/modules/evidence-harness.bicep
 //
-// Spec 038 — Measurable Success-Criteria Evidence Harness (T-S01).
+// spec 040 (originally Spec 038) — Measurable Success-Criteria Evidence Harness (T-S01).
 //
 // Adds the evidence-harness backing stores:
 //   - 7 Cosmos SQL containers (kpi_ladder, kpi_signals, delta_scorecards,
@@ -45,7 +45,7 @@ param sloAlertActionGroupId string
 
 @description('Tags applied to every resource.')
 param tags object = {
-  feature: '038-success-criteria'
+  feature: '040-success-criteria'
   workload: 'ama-evidence-harness'
   'managed-by': 'bicep'
   'au-sovereignty': 'australiaeast-primary-australiasoutheast-dr'
@@ -119,7 +119,7 @@ resource coldArchive 'Microsoft.Storage/storageAccounts/blobServices/containers@
   properties: {
     publicAccess: 'None'
     metadata: {
-      purpose: 'spec-038-evidence-audit-cold-archive'
+      purpose: 'spec-040 (originally Spec 038)-evidence-audit-cold-archive'
       retentionYears: '7'
     }
   }

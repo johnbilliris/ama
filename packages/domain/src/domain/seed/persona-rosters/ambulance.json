@@ -1,0 +1,110 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "licence": "CC-BY-4.0",
+    "residency": "AU",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "domain_group": "ambulance",
+      "fictitious": true,
+      "id": "persona-roster-ambulance-act-ambulance",
+      "licence": "CC-BY-4.0",
+      "persona_id": "act-ambulance",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding act-ambulance into ambulance"
+    },
+    {
+      "domain_group": "ambulance",
+      "fictitious": true,
+      "id": "persona-roster-ambulance-at",
+      "licence": "CC-BY-4.0",
+      "persona_id": "at",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding at into ambulance"
+    },
+    {
+      "domain_group": "ambulance",
+      "fictitious": true,
+      "id": "persona-roster-ambulance-av",
+      "licence": "CC-BY-4.0",
+      "persona_id": "av",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding av into ambulance"
+    },
+    {
+      "domain_group": "ambulance",
+      "fictitious": true,
+      "id": "persona-roster-ambulance-nsw-ambulance",
+      "licence": "CC-BY-4.0",
+      "persona_id": "nsw-ambulance",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding nsw-ambulance into ambulance"
+    },
+    {
+      "domain_group": "ambulance",
+      "fictitious": true,
+      "id": "persona-roster-ambulance-qas",
+      "licence": "CC-BY-4.0",
+      "persona_id": "qas",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding qas into ambulance"
+    },
+    {
+      "domain_group": "ambulance",
+      "fictitious": true,
+      "id": "persona-roster-ambulance-rfds",
+      "licence": "CC-BY-4.0",
+      "persona_id": "rfds",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding rfds into ambulance"
+    },
+    {
+      "domain_group": "ambulance",
+      "fictitious": true,
+      "id": "persona-roster-ambulance-saas",
+      "licence": "CC-BY-4.0",
+      "persona_id": "saas",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding saas into ambulance"
+    },
+    {
+      "domain_group": "ambulance",
+      "fictitious": true,
+      "id": "persona-roster-ambulance-sja-national",
+      "licence": "CC-BY-4.0",
+      "persona_id": "sja-national",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding sja-national into ambulance"
+    },
+    {
+      "domain_group": "ambulance",
+      "fictitious": true,
+      "id": "persona-roster-ambulance-sja-nt",
+      "licence": "CC-BY-4.0",
+      "persona_id": "sja-nt",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding sja-nt into ambulance"
+    },
+    {
+      "domain_group": "ambulance",
+      "fictitious": true,
+      "id": "persona-roster-ambulance-sja-wa",
+      "licence": "CC-BY-4.0",
+      "persona_id": "sja-wa",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding sja-wa into ambulance"
+    }
+  ]
+}

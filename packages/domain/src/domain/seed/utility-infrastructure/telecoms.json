@@ -1,0 +1,130 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "util-telecoms-001",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "telecoms",
+      "asset_class": "exchange",
+      "capacity_units": "channels",
+      "capacity_value": 101,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-telecoms-002",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "telecoms",
+      "asset_class": "exchange",
+      "capacity_units": "channels",
+      "capacity_value": 102,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-telecoms-003",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "telecoms",
+      "asset_class": "exchange",
+      "capacity_units": "channels",
+      "capacity_value": 103,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-telecoms-004",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "telecoms",
+      "asset_class": "exchange",
+      "capacity_units": "channels",
+      "capacity_value": 104,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-telecoms-005",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "telecoms",
+      "asset_class": "exchange",
+      "capacity_units": "channels",
+      "capacity_value": 105,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-telecoms-006",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "telecoms",
+      "asset_class": "exchange",
+      "capacity_units": "channels",
+      "capacity_value": 106,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-telecoms-007",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "telecoms",
+      "asset_class": "exchange",
+      "capacity_units": "channels",
+      "capacity_value": 107,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-telecoms-008",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "telecoms",
+      "asset_class": "exchange",
+      "capacity_units": "channels",
+      "capacity_value": 108,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-telecoms-009",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "telecoms",
+      "asset_class": "exchange",
+      "capacity_units": "channels",
+      "capacity_value": 109,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    },
+    {
+      "id": "util-telecoms-010",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "utility_kind": "telecoms",
+      "asset_class": "exchange",
+      "capacity_units": "channels",
+      "capacity_value": 110,
+      "notes": "Generic infrastructure record \u2014 no real asset identifiers."
+    }
+  ]
+}

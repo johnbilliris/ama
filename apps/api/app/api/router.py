@@ -98,12 +98,29 @@ api_router.include_router(i18n_router)
 api_router.include_router(agents_router)
 api_router.include_router(audit_router)
 
-# Spec-038 — Measurable Success-Criteria Evidence Harness (T-S06).
+# spec-038 — In-Product Help docs + grounded chat assistant.
+from app.api.routes.help_articles import router as help_articles_router  # noqa: E402
+from app.api.routes.help_chat import router as help_chat_router  # noqa: E402
+from app.api.routes.help_screenshots import router as help_screenshots_router  # noqa: E402
+from app.api.routes.help_search import router as help_search_router  # noqa: E402
+from app.api.routes.help_snapshots import router as help_snapshots_router  # noqa: E402
+from app.api.routes.help_support_handoff import router as help_support_handoff_router  # noqa: E402
+
+api_router.include_router(help_chat_router)
+api_router.include_router(help_articles_router)
+api_router.include_router(help_snapshots_router)
+api_router.include_router(help_screenshots_router)
+api_router.include_router(help_search_router)
+api_router.include_router(help_support_handoff_router)
+
+# Spec-040 — Measurable Success-Criteria Evidence Harness (T-S06).
+# Renumbered from 038 to 040 after collision with merged spec 038-help-docs-chat
+# (PR #90) and renumbered spec 039-test-data-provisioning (PR #97).
 # Mounted at `/api/v1/evidence/*` (router carries `/v1/evidence` prefix);
 # health probe at `/api/healthz/evidence`.
 try:
-    from app.services.evidence.health import router as evidence_health_router
-    from app.services.evidence.router import router as evidence_router
+    from app.services.evidence.health import router as evidence_health_router  # noqa: E402
+    from app.services.evidence.router import router as evidence_router  # noqa: E402
 
     api_router.include_router(evidence_router)
     api_router.include_router(evidence_health_router)

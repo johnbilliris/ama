@@ -1,0 +1,50 @@
+<mxfile host="app.diagrams.net" modified="2026-05-11T00:00:00.000Z" agent="spec-001-fallback" version="24.0.0">
+  <diagram name="SECTOR-04" id="sector04-filter">
+    <mxGraphModel><root>
+      <mxCell id="0"/>
+      <mxCell id="1" parent="0"/>
+      <mxCell id="2" value="spec-022 basis
+Jurisdiction filter rules" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dbeafe;strokeColor=#2563eb;" vertex="1" parent="1">
+        <mxGeometry x="290" y="20" width="220" height="50" as="geometry"/>
+      </mxCell>
+      <mxCell id="3" value="NSW RFS suppression
+lead authority for active fireground" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fee2e2;" vertex="1" parent="1">
+        <mxGeometry x="20" y="140" width="180" height="90" as="geometry"/>
+      </mxCell>
+      <mxCell id="4" value="Authority boundary
+share recovery-safe fields only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fef3c7;" vertex="1" parent="1">
+        <mxGeometry x="240" y="140" width="150" height="90" as="geometry"/>
+      </mxCell>
+      <mxCell id="5" value="SES recovery coordination
+receives approved recovery view" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dcfce7;" vertex="1" parent="1">
+        <mxGeometry x="430" y="140" width="180" height="90" as="geometry"/>
+      </mxCell>
+      <mxCell id="6" value="Authority boundary
+local welfare sees citizen support subset" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fef3c7;" vertex="1" parent="1">
+        <mxGeometry x="650" y="140" width="130" height="90" as="geometry"/>
+      </mxCell>
+      <mxCell id="7" value="Local-government welfare
+housing, relief, outreach" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#ede9fe;strokeColor=#7c3aed;" vertex="1" parent="1">
+        <mxGeometry x="600" y="300" width="180" height="90" as="geometry"/>
+      </mxCell>
+      <mxCell id="8" value="Filter rules:
+incident owner writes full record
+receiving agency reads scoped fields
+audit trail logs each hand-off" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#f3f4f6;" vertex="1" parent="1">
+        <mxGeometry x="220" y="320" width="280" height="110" as="geometry"/>
+      </mxCell>
+      <mxCell id="9" value="suppression data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="3" target="4">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="10" value="recovery subset" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="4" target="5">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="11" value="welfare-ready data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="5" target="6">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="12" value="community support view" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="6" target="7">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+    </root></mxGraphModel>
+  </diagram>
+</mxfile>

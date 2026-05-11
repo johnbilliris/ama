@@ -46,7 +46,7 @@ def test_schema_matches_openapi():
     """Assert the response keys match the OpenAPI operationId getPublicInformationForScenario schema (T-AMD-10)."""
     from pathlib import Path
 
-    spec_path = Path("specs/038-success-criteria/contracts/openapi.evidence-harness.yaml")
+    spec_path = Path("specs/040-success-criteria/contracts/openapi.evidence-harness.yaml")
     if not spec_path.exists():
         pytest.skip("OpenAPI spec not found")
 

@@ -1,0 +1,110 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "licence": "CC-BY-4.0",
+    "residency": "AU",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "persona-roster-operational-executive-leader",
+      "licence": "CC-BY-4.0",
+      "persona_id": "executive-leader",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding executive-leader into operational"
+    },
+    {
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "persona-roster-operational-field-coordinator",
+      "licence": "CC-BY-4.0",
+      "persona_id": "field-coordinator",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding field-coordinator into operational"
+    },
+    {
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "persona-roster-operational-incident-commander",
+      "licence": "CC-BY-4.0",
+      "persona_id": "incident-commander",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding incident-commander into operational"
+    },
+    {
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "persona-roster-operational-logistics-officer",
+      "licence": "CC-BY-4.0",
+      "persona_id": "logistics-officer",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding logistics-officer into operational"
+    },
+    {
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "persona-roster-operational-observer-auditor",
+      "licence": "CC-BY-4.0",
+      "persona_id": "observer-auditor",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding observer-auditor into operational"
+    },
+    {
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "persona-roster-operational-operations-officer",
+      "licence": "CC-BY-4.0",
+      "persona_id": "operations-officer",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding operations-officer into operational"
+    },
+    {
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "persona-roster-operational-planning-officer",
+      "licence": "CC-BY-4.0",
+      "persona_id": "planning-officer",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding planning-officer into operational"
+    },
+    {
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "persona-roster-operational-public-information-officer",
+      "licence": "CC-BY-4.0",
+      "persona_id": "public-information-officer",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding public-information-officer into operational"
+    },
+    {
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "persona-roster-operational-resilience-planner",
+      "licence": "CC-BY-4.0",
+      "persona_id": "resilience-planner",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding resilience-planner into operational"
+    },
+    {
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "persona-roster-operational-risk-manager",
+      "licence": "CC-BY-4.0",
+      "persona_id": "risk-manager",
+      "pspf": "OFFICIAL",
+      "residency": "AU",
+      "summary": "Persona-coverage placeholder binding risk-manager into operational"
+    }
+  ]
+}

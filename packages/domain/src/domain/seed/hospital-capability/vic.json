@@ -1,0 +1,205 @@
+{
+  "_fixture": {
+    "fictitious": true,
+    "residency": "AU",
+    "licence": "CC-BY-4.0",
+    "schema_version": "1"
+  },
+  "records": [
+    {
+      "id": "hosp-vic-01",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "facility_id": "FACILITY-VIC-01",
+      "facility_name": "Test Hospital VIC #01",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics"
+      ],
+      "beds_total": 75
+    },
+    {
+      "id": "hosp-vic-02",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "facility_id": "FACILITY-VIC-02",
+      "facility_name": "Test Hospital VIC #02",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult"
+      ],
+      "beds_total": 100
+    },
+    {
+      "id": "hosp-vic-03",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "facility_id": "FACILITY-VIC-03",
+      "facility_name": "Test Hospital VIC #03",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds"
+      ],
+      "beds_total": 125
+    },
+    {
+      "id": "hosp-vic-04",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "facility_id": "FACILITY-VIC-04",
+      "facility_name": "Test Hospital VIC #04",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke"
+      ],
+      "beds_total": 150
+    },
+    {
+      "id": "hosp-vic-05",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "facility_id": "FACILITY-VIC-05",
+      "facility_name": "Test Hospital VIC #05",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke",
+        "cath-lab"
+      ],
+      "beds_total": 175
+    },
+    {
+      "id": "hosp-vic-06",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "facility_id": "FACILITY-VIC-06",
+      "facility_name": "Test Hospital VIC #06",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2"
+      ],
+      "beds_total": 200
+    },
+    {
+      "id": "hosp-vic-07",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "facility_id": "FACILITY-VIC-07",
+      "facility_name": "Test Hospital VIC #07",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics"
+      ],
+      "beds_total": 225
+    },
+    {
+      "id": "hosp-vic-08",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "facility_id": "FACILITY-VIC-08",
+      "facility_name": "Test Hospital VIC #08",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult"
+      ],
+      "beds_total": 250
+    },
+    {
+      "id": "hosp-vic-09",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "facility_id": "FACILITY-VIC-09",
+      "facility_name": "Test Hospital VIC #09",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds"
+      ],
+      "beds_total": 275
+    },
+    {
+      "id": "hosp-vic-10",
+      "fictitious": true,
+      "residency": "AU",
+      "pspf": "OFFICIAL",
+      "licence": "CC-BY-4.0",
+      "jurisdiction": "VIC",
+      "facility_id": "FACILITY-VIC-10",
+      "facility_name": "Test Hospital VIC #10",
+      "capabilities": [
+        "ed-major",
+        "ed-paediatric",
+        "trauma-l1",
+        "trauma-l2",
+        "obstetrics",
+        "icu-adult",
+        "icu-paeds",
+        "stroke"
+      ],
+      "beds_total": 300
+    }
+  ]
+}

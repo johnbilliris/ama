@@ -1,0 +1,68 @@
+<mxfile host="app.diagrams.net" modified="2026-05-11T00:00:00.000Z" agent="spec-001-fallback" version="24.0.0">
+  <diagram name="SECTOR-05" id="sector05-fallback">
+    <mxGraphModel dx="1214" dy="686" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+      <mxCell id="0"/>
+      <mxCell id="1" parent="0"/>
+      <!-- Central hub -->
+      <mxCell id="2" value="AMA Platform Hub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+        <mxGeometry x="460" y="340" width="200" height="80" as="geometry"/>
+      </mxCell>
+      <!-- 8 sector nodes around the hub -->
+      <mxCell id="3" value="Community/NGOs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="50" y="100" width="140" height="50" as="geometry"/>
+      </mxCell>
+      <mxCell id="4" value="Health" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="260" y="50" width="140" height="50" as="geometry"/>
+      </mxCell>
+      <mxCell id="5" value="Local Gov" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="490" y="50" width="140" height="50" as="geometry"/>
+      </mxCell>
+      <mxCell id="6" value="State Gov" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="730" y="100" width="140" height="50" as="geometry"/>
+      </mxCell>
+      <mxCell id="7" value="Territory Gov" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="900" y="280" width="140" height="50" as="geometry"/>
+      </mxCell>
+      <mxCell id="8" value="Transport" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="730" y="560" width="140" height="50" as="geometry"/>
+      </mxCell>
+      <mxCell id="9" value="Utility" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="490" y="650" width="140" height="50" as="geometry"/>
+      </mxCell>
+      <mxCell id="10" value="Volunteer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="50" y="560" width="140" height="50" as="geometry"/>
+      </mxCell>
+      <!-- Connection edges with protocol labels -->
+      <mxCell id="11" value="REST/GeoJSON" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="3" target="2">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="12" value="EDXL/REST" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="4" target="2">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="13" value="REST/GeoJSON" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="5" target="2">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="14" value="CAP/EDXL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="6" target="2">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="15" value="CAP/EDXL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="7" target="2">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="16" value="REST/GeoJSON" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="8" target="2">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="17" value="REST/EDXL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="9" target="2">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="18" value="REST/GeoJSON" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="10" target="2">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <!-- FR-015 label -->
+      <mxCell id="19" value="FR-015" style="text;html=1;strokeColor=none;fillColor=#fff2cc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+        <mxGeometry x="500" y="770" width="120" height="30" as="geometry"/>
+      </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
