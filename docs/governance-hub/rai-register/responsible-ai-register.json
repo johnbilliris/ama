@@ -1706,16 +1706,24 @@
         {
           "kind": "spec",
           "ref": "specs/036-foundry-rag-grounding/spec.md"
+        },
+        {
+          "kind": "governance_hub",
+          "ref": "infra/parameters/foundry-carveout.yaml"
         }
       ],
       "frameworks": {
         "au_ai_ethics_8_principles": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",
@@ -1725,11 +1733,15 @@
         },
         "iso_42001": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",
@@ -1739,11 +1751,15 @@
         },
         "iso_23894": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",
@@ -1754,11 +1770,15 @@
         "nist_ai_rmf": {
           "govern": {
             "posture": "compliant",
-            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
             "evidence": [
               {
                 "kind": "spec",
                 "ref": "specs/036-foundry-rag-grounding/spec.md"
+              },
+              {
+                "kind": "governance_hub",
+                "ref": "infra/parameters/foundry-carveout.yaml"
               },
               {
                 "kind": "spec",
@@ -1768,11 +1788,15 @@
           },
           "map": {
             "posture": "compliant",
-            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
             "evidence": [
               {
                 "kind": "spec",
                 "ref": "specs/036-foundry-rag-grounding/spec.md"
+              },
+              {
+                "kind": "governance_hub",
+                "ref": "infra/parameters/foundry-carveout.yaml"
               },
               {
                 "kind": "spec",
@@ -1782,11 +1806,15 @@
           },
           "measure": {
             "posture": "compliant",
-            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
             "evidence": [
               {
                 "kind": "spec",
                 "ref": "specs/036-foundry-rag-grounding/spec.md"
+              },
+              {
+                "kind": "governance_hub",
+                "ref": "infra/parameters/foundry-carveout.yaml"
               },
               {
                 "kind": "spec",
@@ -1796,11 +1824,15 @@
           },
           "manage": {
             "posture": "compliant",
-            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+            "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
             "evidence": [
               {
                 "kind": "spec",
                 "ref": "specs/036-foundry-rag-grounding/spec.md"
+              },
+              {
+                "kind": "governance_hub",
+                "ref": "infra/parameters/foundry-carveout.yaml"
               },
               {
                 "kind": "spec",
@@ -1813,11 +1845,15 @@
       "principles": {
         "human_oversight": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",
@@ -1827,11 +1863,15 @@
         },
         "fairness": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",
@@ -1841,11 +1881,15 @@
         },
         "accountability": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",
@@ -1855,11 +1899,15 @@
         },
         "transparency": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",
@@ -1869,11 +1917,15 @@
         },
         "privacy": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",
@@ -1883,11 +1935,15 @@
         },
         "safety": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",
@@ -1897,11 +1953,15 @@
         },
         "contestability": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",
@@ -1911,11 +1971,15 @@
         },
         "reliability": {
           "posture": "compliant",
-          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+          "summary": "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
           "evidence": [
             {
               "kind": "spec",
               "ref": "specs/036-foundry-rag-grounding/spec.md"
+            },
+            {
+              "kind": "governance_hub",
+              "ref": "infra/parameters/foundry-carveout.yaml"
             },
             {
               "kind": "spec",

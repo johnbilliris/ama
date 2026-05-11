@@ -31,7 +31,7 @@ Total cells populated: 256 (= rows × 32).
 | `agent.risk-assessment` | sub-agent | 012-risk-assessment-agent | spec-012 confidence-band threshold 0.7; quarterly re-calibration via spec-030; risk-manager review of treatments. |
 | `sim.telemetry-injection` | simulation-agent | 036-sim-agent-extend | Per spec-037 PD-037-05 + Clarification 2: full production AI component (simulation watermark does NOT reduce RAI obligations); spec-036-sim-agent-extend FR-066 production-grade idempotency; append-onl… |
 | `eval.llm-framework` | evaluation-framework | 030-llm-eval-framework | spec-030 itself: dataset versioning in Cosmos eval_datasets; 7-year immutability on eval_audit; spec-030 SC-CAP-030 measurable outcomes. |
-| `client.foundry-rag` | rag-client | 036-foundry-rag-grounding | spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infr… |
+| `client.foundry-rag` | rag-client | 036-foundry-rag-grounding, parameters | spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carv… |
 
 ## Schema
 

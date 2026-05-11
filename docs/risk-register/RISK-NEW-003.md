@@ -18,3 +18,4 @@ Foundry inference endpoint outage breaks RAG-grounded sub-agent responses.
 
 - `specs/036-foundry-rag-grounding/spec.md` (spec)
 - `infra/parameters/foundry-carveout.yaml` (governance_hub)
+- `docs/aidr/decisions/adr-033-phi-shadow-boundary.md` (adr)

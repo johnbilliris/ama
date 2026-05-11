@@ -198,6 +198,10 @@
         {
           "kind": "governance_hub",
           "ref": "infra/parameters/foundry-carveout.yaml"
+        },
+        {
+          "kind": "adr",
+          "ref": "docs/aidr/decisions/adr-033-phi-shadow-boundary.md"
         }
       ],
       "provenance": {

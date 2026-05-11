@@ -191,7 +191,8 @@ def build_risk_register() -> dict:
              "Fallback to non-RAG path with explicit `rag_used:false` flag; spec-036 FR-RAG-LS-02 offline-cache bundles for Field Coordinator; chaos drill quarterly.",
              "Solution Architect", 1, 3, "2026-08-11",
              [("spec", "specs/036-foundry-rag-grounding/spec.md"),
-              ("governance_hub", "infra/parameters/foundry-carveout.yaml")]),
+              ("governance_hub", "infra/parameters/foundry-carveout.yaml"),
+              ("adr", "docs/aidr/decisions/adr-033-phi-shadow-boundary.md")]),
     ])
 
     # AI (3 more rows beyond AOAI-001)
@@ -637,8 +638,9 @@ def build_rai_register() -> dict:
         ),
         _component_row(
             "client.foundry-rag", "rag-client",
-            [("spec", "specs/036-foundry-rag-grounding/spec.md")],
-            "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 (AU-region first; non-AU only via registry entry in infra/parameters/foundry-carveout.yaml).",
+            [("spec", "specs/036-foundry-rag-grounding/spec.md"),
+             ("governance_hub", "infra/parameters/foundry-carveout.yaml")],
+            "spec-036 RAG citations envelope; corpus_build_sha tagging; offline-cache bundles for Field Coordinator; Foundry carve-out per Constitution NN-1 — see infra/parameters/foundry-carveout.yaml as the carve-out authority (AU-region first; non-AU only via registry entry).",
             [("spec", "specs/036-foundry-rag-grounding/spec.md")],
         ),
     ]
