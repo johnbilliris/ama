@@ -1,0 +1,21 @@
+# spec-038 — help glossary terms. lang-attribute aware (FR-009a-AMEND).
+- term: AIIMS
+  lang: en
+  definition: Australasian Inter-service Incident Management System.
+  related_article_ids: [getting-started, observer-mode-guide]
+- term: AIDR
+  lang: en
+  definition: Australian Institute for Disaster Resilience.
+  related_article_ids: [getting-started]
+- term: NEMA
+  lang: en
+  definition: National Emergency Management Agency.
+  related_article_ids: [cross-border-bushfire-nema]
+- term: PPRR
+  lang: en
+  definition: Prevention, Preparedness, Response, Recovery.
+  related_article_ids: [getting-started]
+- term: PSPF
+  lang: en
+  definition: Australian Government Protective Security Policy Framework.
+  related_article_ids: [troubleshooting]

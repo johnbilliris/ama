@@ -1,5 +1,14 @@
 line-length = 120
 target-version = "py312"
 
+# spec-038 — explicitly include new Help modules so ruff scans them when
+# CI runs `ruff check` from the repo root.
+include = [
+  "apps/**/*.py",
+  "packages/**/*.py",
+  "tools/**/*.py",
+  "tests/**/*.py",
+]
+
 [lint]
 select = ["E", "F", "I", "UP"]

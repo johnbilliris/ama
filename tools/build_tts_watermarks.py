@@ -134,9 +134,7 @@ def build_artefacts(
         "version": 1,
         "artefacts": [a.manifest_entry for a in artefacts],
     }
-    (out_dir / "manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8"
-    )
+    (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
     return artefacts
 
 
@@ -180,23 +178,17 @@ def _make_azure_synthesizer(*, key: str, region: str) -> SpeechSynthesisClient:
         try:
             import azure.cognitiveservices.speech as speech_sdk  # type: ignore[import-untyped]
         except ImportError as exc:
-            raise RuntimeError(
-                "azure-cognitiveservices-speech is required for live TTS rendering"
-            ) from exc
+            raise RuntimeError("azure-cognitiveservices-speech is required for live TTS rendering") from exc
 
         config = speech_sdk.SpeechConfig(subscription=key, region=region)
-        config.set_speech_synthesis_output_format(
-            speech_sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3
-        )
+        config.set_speech_synthesis_output_format(speech_sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3)
         config.speech_synthesis_language = locale
         config.speech_synthesis_voice_name = voice
 
         synthesizer = speech_sdk.SpeechSynthesizer(speech_config=config, audio_config=None)
         result = synthesizer.speak_text_async(text).get()
         if result.reason != speech_sdk.ResultReason.SynthesizingAudioCompleted:
-            raise RuntimeError(
-                f"Azure Speech synthesis failed for locale={locale}: {result.reason}"
-            )
+            raise RuntimeError(f"Azure Speech synthesis failed for locale={locale}: {result.reason}")
         return bytes(result.audio_data)
 
     return _synth

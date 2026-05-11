@@ -31,9 +31,7 @@ import sys
 from pathlib import Path
 
 #: Canonical marker form (FR-RAG-NS-08).
-MARKER_RE = re.compile(
-    r"#\s*RAG-OPTOUT\s*\[FR-RAG-NS-(0[1-9])\]\s*:?\s*(?P<reason>.*)"
-)
+MARKER_RE = re.compile(r"#\s*RAG-OPTOUT\s*\[FR-RAG-NS-(0[1-9])\]\s*:?\s*(?P<reason>.*)")
 
 #: Strict canonical form (anchored to line start).
 CANONICAL_RE = re.compile(
@@ -114,18 +112,12 @@ def check(root: Path) -> tuple[bool, list[str]]:
     # 1. FR coverage.
     missing_adrs = [o for o in ALL_FR_ORDINALS if o not in adrs]
     if missing_adrs:
-        errors.append(
-            "[fr-coverage] missing ADR(s): "
-            + ", ".join(f"FR-RAG-NS-{o}" for o in missing_adrs)
-        )
+        errors.append("[fr-coverage] missing ADR(s): " + ", ".join(f"FR-RAG-NS-{o}" for o in missing_adrs))
 
     # 2. Marker → ADR.
     for path, lineno, ordinal, _reason in markers:
         if ordinal not in adrs:
-            errors.append(
-                f"[orphan-marker] {path.relative_to(root)}:{lineno} "
-                f"→ FR-RAG-NS-{ordinal} has no ADR file"
-            )
+            errors.append(f"[orphan-marker] {path.relative_to(root)}:{lineno} → FR-RAG-NS-{ordinal} has no ADR file")
 
     # 3. Canonical form.
     for path, lineno, _ordinal, _reason in markers:
@@ -134,10 +126,7 @@ def check(root: Path) -> tuple[bool, list[str]]:
         except (OSError, IndexError):
             continue
         if not CANONICAL_RE.search(line):
-            errors.append(
-                f"[non-canonical] {path.relative_to(root)}:{lineno} "
-                f"→ {line.strip()!r}"
-            )
+            errors.append(f"[non-canonical] {path.relative_to(root)}:{lineno} → {line.strip()!r}")
 
     # 4. ADR → marker (with marker-optional escape hatch + meta-ADR exemption).
     referenced = {ordinal for _, _, ordinal, _ in markers}
@@ -179,10 +168,7 @@ def main(argv: list[str] | None = None) -> int:
 
     ok, errors = check(root)
     if ok:
-        sys.stdout.write(
-            "[rag-optout-lint] OK — every marker, every ADR, every "
-            "FR-RAG-NS-NN binding is consistent.\n"
-        )
+        sys.stdout.write("[rag-optout-lint] OK — every marker, every ADR, every FR-RAG-NS-NN binding is consistent.\n")
         return 0
 
     sys.stdout.write(f"[rag-optout-lint] FAILED with {len(errors)} error(s):\n")

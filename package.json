@@ -4,7 +4,8 @@
   "packageManager": "pnpm@10.6.3",
   "scripts": {
     "lint:web": "corepack pnpm --filter @ama/web lint",
-    "test:e2e": "corepack pnpm --filter @ama/web test:e2e"
+    "test:e2e": "corepack pnpm --filter @ama/web test:e2e",
+    "test:help": "echo \"spec-038 help suite\" && pytest tests/contract/help tests/integration/help tests/unit/help -q --tb=line && corepack pnpm --filter @ama/web test -- --run help"
   },
   "pnpm": {
     "overrides": {

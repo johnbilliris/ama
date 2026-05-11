@@ -37,3 +37,15 @@ specs/shared/                     @johnbilliris/ama-spec-maintainers
 apps/api/app/api/routes/incident*         @johnbilliris
 apps/agents/incident*                     @johnbilliris
 apps/web/src/app/incidents/**             @johnbilliris
+
+# ---------------------------------------------------------------------------
+# spec-038 In-Product Help Documentation & Grounded Chat Assistant
+# Dual-approval gate (FR-011b / T-AA008) — every Help-content + snapshot
+# manifest PR requires sign-off from BOTH a help-content owner AND a
+# safety-or-governance lead. Path globs cover authored content, the spec
+# directory + immutable snapshots, and the ingest-runner manifest.
+# ---------------------------------------------------------------------------
+apps/web/src/content/help/**                       @johnbilliris/ama-help-content-owners @johnbilliris/ama-safety-or-governance-leads
+specs/038-help-docs-chat/**                        @johnbilliris/ama-help-content-owners @johnbilliris/ama-safety-or-governance-leads
+specs/038-help-docs-chat/snapshots/**              @johnbilliris/ama-help-content-owners @johnbilliris/ama-safety-or-governance-leads
+apps/ingest-runner/manifests/help-snapshot.yaml    @johnbilliris/ama-help-content-owners @johnbilliris/ama-safety-or-governance-leads

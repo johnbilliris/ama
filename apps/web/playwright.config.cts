@@ -66,6 +66,12 @@ export default defineConfig({
       testIgnore: /_support\//,
       grep: /@a11y/,
       use: { ...devices["Desktop Chrome"] }
+    },
+    // spec-038 T-AA006 — Help E2E project (Playwright + axe-core).
+    {
+      name: "help",
+      testDir: "./__tests__/e2e/help",
+      use: { ...devices["Desktop Chrome"] }
     }
   ]
 });

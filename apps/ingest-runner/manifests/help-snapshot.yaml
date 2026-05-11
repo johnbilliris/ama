@@ -1,0 +1,25 @@
+# Help snapshot ingestion manifest (spec-038 / T-AA009).
+# Lists the four corpus globs admitted into a Help snapshot. Only specs with
+# status ∈ {Active, Implemented} are admitted (FR-011). Per-tenant overrides
+# may exclude particular sources (FR-011-AMEND).
+version: 1
+snapshot_kind: help
+admission:
+  spec_status_allowed: [Active, Implemented]
+sources:
+  - kind: help_article
+    glob: apps/web/src/content/help/**
+    scope: global
+  - kind: docs_aidr
+    glob: docs/aidr/**
+    scope: global
+  - kind: docs_corpus
+    glob: docs/corpus/**
+    scope: global
+  - kind: spec
+    glob: specs/**/spec.md
+    scope: global
+    filter:
+      front_matter:
+        status: [Active, Implemented]
+tenants: {}
