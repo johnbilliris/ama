@@ -13,6 +13,7 @@ from app.api.routes.dead_letters import router as dead_letters_mgmt_router
 from app.api.routes.emergency_plans import router as emergency_plans_router
 from app.api.routes.evacuation import router as evacuation_router
 from app.api.routes.frameworks import router as frameworks_router
+from app.api.routes.governance.evidence_pack import router as evidence_pack_router
 from app.api.routes.governance_dashboard import router as governance_dashboard_router
 from app.api.routes.health import router as aidr_health_router
 from app.api.routes.i18n import router as i18n_router
@@ -88,6 +89,8 @@ api_router.include_router(recovery_catalogue_router)
 api_router.include_router(ai_analysis_router)
 api_router.include_router(aidr_health_router)
 api_router.include_router(governance_dashboard_router)
+# Spec-037 — Capstone Evidence Pack read-only API (FR-021).
+api_router.include_router(evidence_pack_router)
 api_router.include_router(dead_letters_mgmt_router)
 api_router.include_router(radius_lookup_router)
 api_router.include_router(workflow_runs_router)
