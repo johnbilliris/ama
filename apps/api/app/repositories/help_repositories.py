@@ -83,6 +83,10 @@ def upsert(container: str, tenant_id: str, row: dict[str, Any]) -> dict[str, Any
     Append-only containers (``chat_audit_log``, ``snapshot_records``) reject
     overwrites at the application layer; Cosmos RBAC custom-role denies
     UPDATE/DELETE at the platform layer (T-AA020).
+
+    Falls back to the in-memory store when the live Cosmos container is missing
+    (e.g., ``azd provision`` has not yet created the spec-038 containers) so
+    Help-Centre endpoints stay readable rather than 5xx-ing.
     """
     if "tenant_id" not in row:
         raise ValueError("row missing tenant_id — required as partition key")
@@ -90,12 +94,19 @@ def upsert(container: str, tenant_id: str, row: dict[str, Any]) -> dict[str, Any
         raise ValueError("row.tenant_id ≠ partition tenant_id")
     if not _cosmos_enabled():
         return _STORE.upsert(container, tenant_id, row)
-    c = _container(container)
-    if container in APPEND_ONLY:
-        c.create_item(body=row)  # 409 on duplicate id
-    else:
-        c.upsert_item(body=row)
-    return row
+    try:
+        c = _container(container)
+        if container in APPEND_ONLY:
+            c.create_item(body=row)
+        else:
+            c.upsert_item(body=row)
+        return row
+    except Exception as exc:  # noqa: BLE001
+        from azure.cosmos.exceptions import CosmosResourceNotFoundError  # type: ignore[import-not-found]
+
+        if isinstance(exc, CosmosResourceNotFoundError):
+            return _STORE.upsert(container, tenant_id, row)
+        raise
 
 
 def get(container: str, tenant_id: str, item_id: str) -> dict[str, Any] | None:
@@ -120,13 +131,24 @@ def query(
 
 
 def _live_query(container: str, tenant_id: str) -> list[dict[str, Any]]:
-    c = _container(container)
-    items = c.query_items(
-        query="SELECT * FROM c WHERE c.tenant_id = @tid",
-        parameters=[{"name": "@tid", "value": tenant_id}],
-        partition_key=tenant_id,
-    )
-    return list(items)
+    """Query the live Cosmos container; return [] if the container does not yet
+    exist (graceful degradation while ``azd provision`` has not created the
+    spec-038 help containers — Constitution Principle I forbids hard-failing the
+    Help Centre when a non-incident-critical resource is missing)."""
+    try:
+        c = _container(container)
+        items = c.query_items(
+            query="SELECT * FROM c WHERE c.tenant_id = @tid",
+            parameters=[{"name": "@tid", "value": tenant_id}],
+            partition_key=tenant_id,
+        )
+        return list(items)
+    except Exception as exc:  # noqa: BLE001
+        from azure.cosmos.exceptions import CosmosResourceNotFoundError  # type: ignore[import-not-found]
+
+        if isinstance(exc, CosmosResourceNotFoundError):
+            return []
+        raise
 
 
 # ---------- Append-only helpers (no update/delete) ----------
