@@ -239,3 +239,35 @@ All three queued `[NEEDS CLARIFICATION]` markers from `/speckit.specify` were re
 - **C1 / SC-009**: "Zero net-new infrastructure components" is interpreted as **zero net-new top-level Azure resources**. Child resources of accounts already in `rg-ama` (the 1 Cosmos container `evidence_pack_artefact_cache` and the 1 Blob container `evidence-pack-archive`) and App Insights custom metrics emitted via the existing OpenTelemetry pipeline are explicitly permitted per PD-037-06 + Complexity Tracking.
 
 No open clarifications remain at this time; the spec is ready for `/speckit.implement` after `/speckit.analyze` sign-off.
+
+## Step 8 Cohort Review Amendment Log (2026-05-11)
+
+This log records the amendments applied to spec.md following the **Step 8 cross-cohort
+review** (synthetic canvas of 85 personas: 10 operational + 58 sectors + 17 technical)
+which returned **ENDORSE-WITH-RESERVATIONS** with **0 CRITICAL / 2 HIGH / 4 MEDIUM / 3 LOW**
+findings. Aggregate verdict by cohort: 65 ENDORSE/NIT, 17 ENDORSE-WITH-RESERVATIONS,
+2 OBJECT (technical: api-architect, sre-engineer). The full validated triage is preserved at
+`<session>/files/step8-review-triage.md`.
+
+### Triage outcome
+
+| Finding | Severity | Cohort | Disposition |
+|---|---|---|---|
+| **R1**: API routes raise plain `HTTPException` instead of RFC 7807 Problem Details | HIGH | api-architect (technical) | **APPLIED** — `evidence_pack.py` 404 path now returns `application/problem+json` per RFC 7807; convention bound by api-architect.agent.md and the spec-037 OpenAPI contract. |
+| **R2**: CI gate App Insights metric emission is a placeholder `echo` step | HIGH | sre-engineer (technical) | **DEFERRED** — partial-merit: the gate logic itself executes (`python -m evidence_pack_gate` on line 399 of `ci.yml`); only the App Insights telemetry export is placeholder pending `AMA_GATE_AI_CONNECTION_STRING` secret wiring. This deferral was pre-authorised by the orchestrator at implementation time and is bound to **Step 9 (`azd up` redeploy)** when the secret lands in branch-protected scope. CI comment tightened to make the deferral explicit. |
+| **R3**: Adoption Roadmap LGA waves under-cover MEMP / evac-centre / vulnerable-persons workflows | MEDIUM | local-government / volunteer / community-ngos (sectors) | **DEFERRED** — minor content polish; queued for v1.1 of the Adoption Roadmap artefact. Does not block v1 publication (artefact still validates against schema). |
+| **R4**: Wave-03 omits explicit "federal responder coordination" appendix | MEDIUM | nema (commonwealth) | **DEFERRED** — same as R3. |
+| **R5**: One Executive KPI lagging row's source-of-truth is self-referential to the surface | LOW | incident-commander / executive-leader / observer-auditor (operational) | **DEFERRED** — wording polish for v1.1. |
+| **R6**: Playwright e2e missing for `/governance/executive` route | MEDIUM | qa-test-engineer (technical) | **REJECTED** — `apps/web/tests/e2e/spec-037/governance-executive.spec.ts` exists; reviewer false-positive (searched in `_components/__tests__/` only). |
+| **R7**: axe-core page scan + 400% zoom + high-contrast missing | MEDIUM | accessibility-tester (technical) | **REJECTED** — `apps/web/tests/e2e/spec-037/axe.setup.ts` exists alongside the e2e spec. Same false-positive as R6. |
+| **R8**: Executive page severity grouping not explicit | LOW | ux-designer (technical) | **DEFERRED** — v1.1 polish. |
+| **R9**: CI gate has no explicit kill-switch / hotfix bypass | LOW | chaos-engineer (technical) | **DEFERRED** — v1.1 polish; current gate is fail-fast which is intentional for v1. |
+
+**No new functional requirements (FR-039+) or success criteria (SC-012+) introduced.**
+The single APPLIED finding (R1) is an implementation-quality fix to honour an
+**already-existing convention** stated in `api-architect.agent.md` and the spec-037
+OpenAPI contract — it does NOT change spec requirements, so the orchestrator skipped
+the full clarify→checklist→plan→tasks loop and applied the fix directly per the
+"amendment is implementation polish" pragmatic rule. R2 documentation tightening is
+likewise non-requirements-altering. Cohort review CYCLE-1 is **complete**; no further
+loops triggered.

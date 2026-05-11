@@ -20,7 +20,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -123,14 +124,47 @@ def get_artefact(artefact_id: ArtefactIdEnum) -> dict[str, Any]:
     return payload
 
 
+def _problem_response(
+    *,
+    status_code: int,
+    title: str,
+    detail: str,
+    instance: str,
+    type_uri: str = "https://ama.example.gov.au/problems/spec-037/not-found",
+) -> JSONResponse:
+    """Return an RFC 7807 application/problem+json response.
+
+    Honours api-architect.agent.md convention (RFC 7807 for all error shapes)
+    and the spec-037 OpenAPI contract under contracts/openapi.evidence-pack.yaml.
+    Step-8 review finding tech-HIGH-1 (api-architect persona).
+    """
+    return JSONResponse(
+        status_code=status_code,
+        media_type="application/problem+json",
+        content={
+            "type": type_uri,
+            "title": title,
+            "status": status_code,
+            "detail": detail,
+            "instance": instance,
+        },
+    )
+
+
 @router.get("/artefacts/{artefact_id}/publications/{publication_id}")
-def get_historical_publication(artefact_id: ArtefactIdEnum, publication_id: str) -> dict[str, Any]:
+def get_historical_publication(
+    request: Request,
+    artefact_id: ArtefactIdEnum,
+    publication_id: str,
+) -> Any:
     """Get a specific historical publication (Blob-backed immutable snapshot)."""
     payload = _load(artefact_id)
     if payload is None or payload.get("publication_id") != publication_id:
-        raise HTTPException(
+        return _problem_response(
             status_code=status.HTTP_404_NOT_FOUND,
+            title="Publication not found",
             detail=f"Publication {publication_id} not found for {artefact_id}",
+            instance=str(request.url.path),
         )
     return payload
 

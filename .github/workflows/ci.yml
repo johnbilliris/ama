@@ -398,7 +398,12 @@ jobs:
         run: |
           python -m evidence_pack_gate
       - name: Emit App Insights gate metrics (placeholder)
-        # T048 — actual emission via OpenTelemetry exporter once
-        # AMA_GATE_AI_CONNECTION_STRING is wired into branch-protected secrets.
+        # T048 + Step 8 review finding tech-HIGH-2 (sre-engineer):
+        # gate logic above DOES execute and the gate itself emits OpenTelemetry
+        # counters from the application code (see manual_row_ratio.py and
+        # evidence_pack_writer.py). The CI-job-level export to App Insights is
+        # the only deferred piece, pending AMA_GATE_AI_CONNECTION_STRING secret
+        # lands in branch-protected scope (orchestrator-authorised deferral to
+        # Step 9 azd-up redeploy; see spec.md § "Step 8 Cohort Review Amendment Log").
         if: always()
-        run: echo "::notice title=evidence-pack-publication-gate::completed"
+        run: echo "::notice title=evidence-pack-publication-gate::completed (telemetry export deferred to Step 9 per spec.md amendment log R2)"
