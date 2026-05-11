@@ -98,6 +98,18 @@ api_router.include_router(i18n_router)
 api_router.include_router(agents_router)
 api_router.include_router(audit_router)
 
+# Spec-038 — Measurable Success-Criteria Evidence Harness (T-S06).
+# Mounted at `/api/v1/evidence/*` (router carries `/v1/evidence` prefix);
+# health probe at `/api/healthz/evidence`.
+try:
+    from app.services.evidence.health import router as evidence_health_router
+    from app.services.evidence.router import router as evidence_router
+
+    api_router.include_router(evidence_router)
+    api_router.include_router(evidence_health_router)
+except Exception:  # pragma: no cover — import-safe; endpoints just won't mount
+    pass
+
 if _EVAL_AVAILABLE:
     api_router.include_router(eval_router)
 

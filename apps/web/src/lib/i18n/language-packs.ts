@@ -12,6 +12,11 @@
 export type LanguagePackId =
   | "en"
   | "zh-Hans"
+  | "ar"
+  | "vi"
+  | "yue"
+  | "pa"
+  | "auslan"
   | "kimberley_pilbara"
   | "palawa"
   | "yolngu_matha"
@@ -45,6 +50,49 @@ export const LANGUAGE_PACKS: Readonly<Record<LanguagePackId, LanguagePack>> =
       jurisdictions: ["AU"],
       fallback_chain: ["en"],
       reviewer_required: false,
+    },
+    // Spec-038 US7 (FR-037 / SC-013) — additional ABS-Census language channels
+    // for the Public Information KPI 8-language render. Reuses the same registry
+    // — no new i18n catalogue introduced.
+    ar: {
+      id: "ar",
+      display_name: "\u0627\u0644\u0639\u0631\u0628\u064a\u0629 (Arabic)",
+      community_label: "Arabic",
+      jurisdictions: ["AU"],
+      fallback_chain: ["en"],
+      reviewer_required: false,
+    },
+    vi: {
+      id: "vi",
+      display_name: "Ti\u1ebfng Vi\u1ec7t (Vietnamese)",
+      community_label: "Vietnamese",
+      jurisdictions: ["AU"],
+      fallback_chain: ["en"],
+      reviewer_required: false,
+    },
+    yue: {
+      id: "yue",
+      display_name: "\u7cb5\u8a9e (Cantonese)",
+      community_label: "Cantonese",
+      jurisdictions: ["AU"],
+      fallback_chain: ["zh-Hans", "en"],
+      reviewer_required: false,
+    },
+    pa: {
+      id: "pa",
+      display_name: "\u0a2a\u0a70\u0a1c\u0a3e\u0a2c\u0a40 (Punjabi)",
+      community_label: "Punjabi",
+      jurisdictions: ["AU"],
+      fallback_chain: ["en"],
+      reviewer_required: false,
+    },
+    auslan: {
+      id: "auslan",
+      display_name: "Auslan (Australian Sign Language)",
+      community_label: "Auslan",
+      jurisdictions: ["AU"],
+      fallback_chain: ["en"],
+      reviewer_required: true,
     },
     kimberley_pilbara: {
       id: "kimberley_pilbara",
