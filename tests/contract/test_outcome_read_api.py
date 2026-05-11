@@ -5,15 +5,14 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
-from apps.api.app.api.routes.simulations_036 import router
-from apps.api.app.services.simulation.outcome_signed_url import (
+from app.api.routes.simulations_036 import router
+from app.services.simulation.outcome_signed_url import (
     DEFAULT_SIGNED_URL_TTL_SECONDS,
     InMemoryOutcomeSignedUrlProvider,
     set_outcome_signed_url_provider,
 )
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture

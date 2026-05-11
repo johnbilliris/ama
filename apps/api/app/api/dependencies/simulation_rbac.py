@@ -112,7 +112,7 @@ async def _emit_rbac_denial_audit(
     """Write the ``audit.rbac.unauthorized_attempt`` envelope (T-M03)."""
 
     # Imported lazily to avoid a circular import via audit_writer → repos.
-    from apps.api.app.services.simulation.audit_writer import get_audit_writer
+    from app.services.simulation.audit_writer import get_audit_writer
 
     audit = get_audit_writer()
     try:

@@ -17,22 +17,21 @@ Verifies that:
 from __future__ import annotations
 
 import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
-from apps.api.app.api.dependencies.simulation_rbac import (
+from app.api.dependencies.simulation_rbac import (
     CoordinatorPrincipal,
     require_simulation_coordinator,
 )
-from apps.api.app.api.routes.simulations_036 import router
-from apps.api.app.services.simulation import cancellation as cancel_scope
-from apps.api.app.services.simulation.audit_writer import (
+from app.api.routes.simulations_036 import router
+from app.services.simulation import cancellation as cancel_scope
+from app.services.simulation.audit_writer import (
     AuditWriter,
     reset_audit_writer_for_tests,
 )
-from apps.api.app.services.simulation.repositories.simulation_state import (
+from app.services.simulation.repositories.simulation_state import (
     reset_simulation_state_repository_for_tests,
 )
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 SIM_ID = "11111111-2222-3333-4444-555555555555"
 

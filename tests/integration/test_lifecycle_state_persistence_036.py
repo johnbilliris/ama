@@ -11,26 +11,25 @@ Covers:
 from __future__ import annotations
 
 import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
-from apps.api.app.api.dependencies.simulation_rbac import (
+from app.api.dependencies.simulation_rbac import (
     CoordinatorPrincipal,
     require_simulation_coordinator,
 )
-from apps.api.app.api.routes.simulations_036 import router
-from apps.api.app.repositories.simulation_idempotency_repository import (
+from app.api.routes.simulations_036 import router
+from app.repositories.simulation_idempotency_repository import (
     IdempotencyCacheRepository,
 )
-from apps.api.app.services.simulation.audit_writer import (
+from app.services.simulation.audit_writer import (
     AuditWriter,
     reset_audit_writer_for_tests,
 )
-from apps.api.app.services.simulation.repositories.simulation_state import (
+from app.services.simulation.repositories.simulation_state import (
     ETagConflictError,
     SimulationStateRepository,
     reset_simulation_state_repository_for_tests,
 )
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 SIM_ID = "11111111-2222-3333-4444-cccccccccccc"
 
@@ -112,15 +111,15 @@ def test_pause_412_etag_mapped_to_409_lifecycle_conflict(monkeypatch) -> None:
     asyncio.new_event_loop().run_until_complete(fake_repo.bootstrap(SIM_ID))
 
     monkeypatch.setattr(
-        "apps.api.app.api.routes.simulations_036.get_simulation_state_repository",
+        "app.api.routes.simulations_036.get_simulation_state_repository",
         lambda: fake_repo,
         raising=False,
     )
     # The route handler imports the helper lazily via
-    # `from apps.api.app...repositories.simulation_state import (
+    # `from app...repositories.simulation_state import (
     #     get_simulation_state_repository,
     # )`, so monkeypatching the source module is the surface that matters.
-    import apps.api.app.services.simulation.repositories.simulation_state as state_mod
+    import app.services.simulation.repositories.simulation_state as state_mod
 
     monkeypatch.setattr(state_mod, "get_simulation_state_repository", lambda: fake_repo)
 

@@ -21,8 +21,7 @@ from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
-
-from apps.api.app.services.simulation.public_warning_watermark_guard import (
+from app.services.simulation.public_warning_watermark_guard import (
     WatermarkAuditResult,
     embed_with_audit,
 )
@@ -43,7 +42,7 @@ def test_embed_with_audit_emits_canonical_envelope(channel: str) -> None:
 
     async def _run() -> WatermarkAuditResult:
         with patch(
-            "apps.api.app.services.simulation.audit_writer.get_audit_writer",
+            "app.services.simulation.audit_writer.get_audit_writer",
             return_value=fake_writer,
         ):
             return await embed_with_audit(
@@ -79,7 +78,7 @@ def test_embed_with_audit_records_locale_fallback() -> None:
 
     async def _run() -> WatermarkAuditResult:
         with patch(
-            "apps.api.app.services.simulation.audit_writer.get_audit_writer",
+            "app.services.simulation.audit_writer.get_audit_writer",
             return_value=fake_writer,
         ):
             return await embed_with_audit(
@@ -107,7 +106,7 @@ def test_embed_with_audit_does_not_block_on_audit_failure() -> None:
 
     async def _run() -> WatermarkAuditResult:
         with patch(
-            "apps.api.app.services.simulation.audit_writer.get_audit_writer",
+            "app.services.simulation.audit_writer.get_audit_writer",
             return_value=fake_writer,
         ):
             return await embed_with_audit(
