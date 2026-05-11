@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.example.gov.au/schemas/spec_037/adoption-roadmap.schema.json",
+  "title": "AdoptionRoadmapArtefact",
+  "description": "Artefact 2 — Adoption Roadmap. Honours FR-015..FR-018.",
+  "type": "object",
+  "required": ["artefact_id", "schema_version", "publication_id", "published_at_utc", "published_by", "metadata", "rows"],
+  "properties": {
+    "artefact_id": { "const": "adoption_roadmap" },
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "publication_id": { "type": "string", "format": "uuid" },
+    "published_at_utc": { "type": "string", "format": "date-time" },
+    "published_by": { "type": "string" },
+    "metadata": { "$ref": "publication-gate-metadata.schema.json" },
+    "superseded_surfaces": { "type": "array", "items": { "type": "string" } },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/AdoptionWave" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "BackCitation": {
+      "type": "object",
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["spec", "adr", "governance_hub", "telemetry_sink", "agent_md"] },
+        "ref": { "type": "string" },
+        "section": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "Provenance": {
+      "type": "object",
+      "required": ["tag", "source", "evidence_status"],
+      "properties": {
+        "tag": { "type": "string", "enum": ["automated", "manual"] },
+        "source": { "type": "string" },
+        "owner": { "type": "string" },
+        "review_cadence": { "type": "string", "enum": ["quarterly", "monthly", "post-incident"] },
+        "automation_target": { "type": "string" },
+        "evidence_status": { "type": "string", "enum": ["Validated", "Deferred", "Unresolved"] }
+      },
+      "additionalProperties": false
+    },
+    "TrainingExerciseCadence": {
+      "type": "object",
+      "required": ["frequency", "cite"],
+      "properties": {
+        "frequency": { "type": "string", "enum": ["monthly", "quarterly", "biannual", "annual", "per-wave"] },
+        "cite": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/BackCitation" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "AdoptionWave": {
+      "type": "object",
+      "required": [
+        "wave_id", "cohort", "jurisdictions", "lead_agency",
+        "readiness_gates", "training_exercise_cadence",
+        "change_management_artefacts", "decommission_rollback_criteria",
+        "back_citations", "provenance"
+      ],
+      "properties": {
+        "wave_id": { "type": "string", "pattern": "^WAVE-\\d{2}$" },
+        "cohort": {
+          "type": "string",
+          "enum": ["state-lead", "local-government", "utilities", "transport", "volunteer-ngo", "commonwealth"]
+        },
+        "jurisdictions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT", "Commonwealth"]
+          },
+          "uniqueItems": true
+        },
+        "lead_agency": {
+          "type": "object",
+          "description": "Map of jurisdiction code -> named lead agency.",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        },
+        "readiness_gates": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "training_exercise_cadence": { "$ref": "#/$defs/TrainingExerciseCadence" },
+        "change_management_artefacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "decommission_rollback_criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "MUST preserve life-safety defaults and degrade to manual operations without data loss (FR-017)."
+        },
+        "back_citations": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/BackCitation" }
+        },
+        "provenance": { "$ref": "#/$defs/Provenance" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,193 @@
+openapi: 3.1.0
+info:
+  title: Capstone Evidence Pack — Read-only API
+  version: 1.0.0
+  description: |
+    Read-only surface for the five Capstone Evidence Pack artefacts.
+    All endpoints require an Entra bearer token validated by the existing
+    JWT/AppRole middleware in `apps/api/app/` (10 AIIMS AppRoles +
+    `system-administrator` from spec-035 Q1). Reads append a tenant-scoped
+    audit row via the existing `audit_writer` pattern.
+
+    Servers run in AU-East: existing Container App `ca-api-ama` in
+    `rg-ama`. No data leaves Australia (Constitution NN-1).
+servers:
+  - url: https://ca-api-ama.azurecontainerapps.io
+    description: Production AU-East
+tags:
+  - name: evidence-pack
+    description: Read-only access to the five durable evidence-pack artefacts.
+paths:
+  /api/governance/evidence-pack/artefacts:
+    get:
+      operationId: listArtefacts
+      tags: [evidence-pack]
+      summary: List the five evidence-pack artefacts with latest publication metadata
+      responses:
+        '200':
+          description: List of artefacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArtefactSummary'
+        '401': { $ref: '#/components/responses/Unauthorised' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /api/governance/evidence-pack/artefacts/{artefact_id}:
+    get:
+      operationId: getLatestArtefact
+      tags: [evidence-pack]
+      summary: Get the latest published version of an artefact
+      parameters:
+        - $ref: '#/components/parameters/ArtefactId'
+      responses:
+        '200':
+          description: Latest published artefact envelope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidencePackArtefact'
+        '401': { $ref: '#/components/responses/Unauthorised' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '503': { $ref: '#/components/responses/Degraded' }
+  /api/governance/evidence-pack/artefacts/{artefact_id}/publications/{publication_id}:
+    get:
+      operationId: getHistoricalPublication
+      tags: [evidence-pack]
+      summary: Get a specific historical publication (Blob-backed immutable snapshot)
+      parameters:
+        - $ref: '#/components/parameters/ArtefactId'
+        - name: publication_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Historical artefact envelope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidencePackArtefact'
+        '401': { $ref: '#/components/responses/Unauthorised' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/governance/evidence-pack/health:
+    get:
+      operationId: getEvidencePackHealth
+      tags: [evidence-pack]
+      summary: Publication-gate status + last successful publish per artefact
+      responses:
+        '200':
+          description: Health summary
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [overall_status, artefacts]
+                properties:
+                  overall_status:
+                    type: string
+                    enum: [healthy, degraded, unhealthy]
+                  artefacts:
+                    type: array
+                    items:
+                      type: object
+                      required: [artefact_id, last_publication_utc, manual_row_ratio, gate_status]
+                      properties:
+                        artefact_id:
+                          $ref: '#/components/schemas/ArtefactIdEnum'
+                        last_publication_utc:
+                          type: string
+                          format: date-time
+                        manual_row_ratio:
+                          type: number
+                          minimum: 0
+                          maximum: 1
+                        gate_status:
+                          type: string
+                          enum: [passed, failed, pending]
+components:
+  parameters:
+    ArtefactId:
+      name: artefact_id
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/ArtefactIdEnum'
+  schemas:
+    ArtefactIdEnum:
+      type: string
+      enum:
+        - risk_register
+        - adoption_roadmap
+        - executive_kpi_surface
+        - rai_register
+        - feature_value_ledger
+    ArtefactSummary:
+      type: object
+      required: [artefact_id, publication_id, published_at_utc, manual_row_ratio, total_row_count]
+      properties:
+        artefact_id: { $ref: '#/components/schemas/ArtefactIdEnum' }
+        publication_id: { type: string, format: uuid }
+        published_at_utc: { type: string, format: date-time }
+        manual_row_ratio: { type: number, minimum: 0, maximum: 1 }
+        total_row_count: { type: integer, minimum: 1 }
+        auditor_signoff_present: { type: boolean }
+    EvidencePackArtefact:
+      description: Cross-artefact envelope; row contents validated by the per-artefact JSON Schema in `packages/schemas/spec_037/`.
+      type: object
+      required: [artefact_id, schema_version, publication_id, published_at_utc, published_by, metadata, rows]
+      properties:
+        artefact_id: { $ref: '#/components/schemas/ArtefactIdEnum' }
+        schema_version: { type: string }
+        publication_id: { type: string, format: uuid }
+        published_at_utc: { type: string, format: date-time }
+        published_by: { type: string }
+        metadata: { $ref: 'publication-gate-metadata.schema.json' }
+        rows:
+          type: array
+          minItems: 1
+          items: { type: object }
+        superseded_surfaces:
+          type: array
+          items: { type: string }
+    Problem:
+      type: object
+      description: RFC 7807 problem details
+      required: [type, title, status]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+  responses:
+    Unauthorised:
+      description: Missing or invalid bearer token
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Forbidden:
+      description: Caller lacks required AppRole
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: Artefact or publication not found
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Degraded:
+      description: Upstream telemetry unavailable; FR-023 graceful-degradation response
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  securitySchemes:
+    EntraBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - EntraBearer: []
