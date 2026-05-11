@@ -1,0 +1,211 @@
+[
+  {
+    "task_id": "task-ic-001",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Maintain incident command and span-of-control discipline",
+    "assigned_persona_id": "incident-commander",
+    "assigned_organisation_id": "org-nema",
+    "status": "in_progress",
+    "priority": "critical",
+    "dependency_task_ids": [],
+    "approval_requirement": "self"
+  },
+  {
+    "task_id": "task-ic-002",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Authorise public bulletin escalation Advice \u2192 Watch and Act",
+    "assigned_persona_id": "incident-commander",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "high",
+    "dependency_task_ids": ["task-pio-001"],
+    "approval_requirement": "ic"
+  },
+  {
+    "task_id": "task-ic-003",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Approve IAP for the next operational period",
+    "assigned_persona_id": "incident-commander",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "high",
+    "dependency_task_ids": ["task-plan-001"],
+    "approval_requirement": "ic"
+  },
+  {
+    "task_id": "task-ops-001",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Confirm resource dispatch posture against current incident map",
+    "assigned_persona_id": "operations-officer",
+    "assigned_organisation_id": "org-nema",
+    "status": "in_progress",
+    "priority": "high",
+    "dependency_task_ids": [],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-ops-002",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Confirm span-of-control under 7 direct reports per supervisor",
+    "assigned_persona_id": "operations-officer",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "medium",
+    "dependency_task_ids": [],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-plan-001",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Draft Incident Action Plan for the next operational period",
+    "assigned_persona_id": "planning-officer",
+    "assigned_organisation_id": "org-nema",
+    "status": "in_progress",
+    "priority": "high",
+    "dependency_task_ids": ["task-risk-001"],
+    "approval_requirement": "ic"
+  },
+  {
+    "task_id": "task-plan-002",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Capture lessons-learned indicators against the AIIMS log",
+    "assigned_persona_id": "planning-officer",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "medium",
+    "dependency_task_ids": [],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-pio-001",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Draft Australian Warning System bulletin (en + zh-Hans)",
+    "assigned_persona_id": "public-information-officer",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "high",
+    "dependency_task_ids": [],
+    "approval_requirement": "ic"
+  },
+  {
+    "task_id": "task-pio-002",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Verify community-language reviewer signatures before publish",
+    "assigned_persona_id": "public-information-officer",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "medium",
+    "dependency_task_ids": ["task-pio-001"],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-obs-001",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Spot-check audit chain integrity for the operational period",
+    "assigned_persona_id": "observer-auditor",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "medium",
+    "dependency_task_ids": [],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-obs-002",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Review denied-mutation events for append-only policy violations",
+    "assigned_persona_id": "observer-auditor",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "medium",
+    "dependency_task_ids": [],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-risk-001",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Reassess risk matrix against current scenario telemetry",
+    "assigned_persona_id": "risk-manager",
+    "assigned_organisation_id": "org-nema",
+    "status": "in_progress",
+    "priority": "high",
+    "dependency_task_ids": [],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-risk-002",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Verify recommended controls are tracked with owners and due dates",
+    "assigned_persona_id": "risk-manager",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "medium",
+    "dependency_task_ids": ["task-risk-001"],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-field-001",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Capture field survey forms while connectivity is degraded",
+    "assigned_persona_id": "field-coordinator",
+    "assigned_organisation_id": "org-nema",
+    "status": "in_progress",
+    "priority": "high",
+    "dependency_task_ids": [],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-field-002",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Replay offline-queued submissions on reconnection",
+    "assigned_persona_id": "field-coordinator",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "medium",
+    "dependency_task_ids": ["task-ops-001"],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-resil-001",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Prepare recovery handover dossier for the impacted communities",
+    "assigned_persona_id": "resilience-planner",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "medium",
+    "dependency_task_ids": [],
+    "approval_requirement": "ic"
+  },
+  {
+    "task_id": "task-resil-002",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Track environment recovery indicators against the catalogue",
+    "assigned_persona_id": "resilience-planner",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "low",
+    "dependency_task_ids": ["task-resil-001"],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-log-001",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Confirm logistics resourcing for the next operational period",
+    "assigned_persona_id": "logistics-officer",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "medium",
+    "dependency_task_ids": [],
+    "approval_requirement": null
+  },
+  {
+    "task_id": "task-liaison-001",
+    "incident_id": "inc-au-multi-hazard-2026",
+    "title": "Coordinate cross-agency information sharing per AIIMS",
+    "assigned_persona_id": "liaison-officer",
+    "assigned_organisation_id": "org-nema",
+    "status": "queued",
+    "priority": "medium",
+    "dependency_task_ids": [],
+    "approval_requirement": null
+  }
+]

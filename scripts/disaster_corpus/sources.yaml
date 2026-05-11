@@ -1,0 +1,1528 @@
+# sources.yaml — curated catalogue for the AU disaster-management corpus.
+#
+# Each entry produces docs/<jurisdiction>/<topic>/<filename>.pdf and a
+# matching handbook.md (page-by-page) + images/ folder.
+#
+# Fields:
+#   jurisdiction: national | nsw | vic | qld | sa | wa | tas | nt | act | aidr
+#   topic:        kebab-case folder slug (must be unique within jurisdiction)
+#   title:        H1 used in the markdown front matter
+#   publisher:    publisher name as appearing on the cover
+#   url:          stable PDF URL on the publisher's domain (must be in fetch.py allow-list)
+#   edition:      "2018", "v2", "2024-25" — appended to title
+#   licence:      "CC BY 4.0", "Crown copyright; practitioner use", etc.
+#   mode:         full-text | metadata-only | excluded
+#                 (default: full-text once licence has been verified)
+#   filename:     optional override for the local filename
+#   notes:        optional free-text
+#
+# IMPORTANT: any new host must also be added to DEFAULT_ALLOW_HOSTS in fetch.py.
+# This is a deliberate guardrail: a typo in a URL cannot exfiltrate the
+# fetcher to an unintended domain.
+#
+# Default licence stance: Most Australian Government publications are released
+# under Creative Commons Attribution 4.0 International (CC BY 4.0). Where the
+# publication carries a different licence we record it explicitly. Where the
+# publication is Crown copyright "all rights reserved" but the agency has
+# made the artifact publicly available for emergency-management practitioners
+# to use, we ingest in `metadata-only` mode and downgrade to citation-only.
+
+sources:
+
+  # =========================================================================
+  # TIER 1 — National / Commonwealth doctrine
+  # =========================================================================
+
+  - jurisdiction: national
+    topic: ndrr-framework
+    title: National Disaster Risk Reduction Framework
+    publisher: Australian Government — National Emergency Management Agency (NEMA) / Department of Home Affairs
+    url: https://nema.gov.au/sites/default/files/2024-08/national-disaster-risk-reduction-framework.pdf
+    edition: "2018"
+    licence: CC BY 4.0
+    mode: full-text
+    filename: national-disaster-risk-reduction-framework.pdf
+    notes: Foundation framework guiding national risk-reduction priorities.
+
+  - jurisdiction: national
+    topic: national-strategy-disaster-resilience
+    title: National Strategy for Disaster Resilience — Building the Resilience of Our Nation to Disasters
+    publisher: Council of Australian Governments (COAG)
+    url: https://nema.gov.au/sites/default/files/2024-08/national-strategy-disaster-resilience.pdf
+    edition: "2011"
+    licence: CC BY 4.0
+    mode: full-text
+    filename: national-strategy-disaster-resilience.pdf
+
+  - jurisdiction: national
+    topic: australian-disaster-recovery-framework
+    title: Australian Disaster Recovery Framework
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-10/ADRF%20Framework%20Final%20October%202022.PDF
+    edition: "2022"
+    licence: CC BY 4.0
+    mode: full-text
+    filename: australian-disaster-recovery-framework-2022.pdf
+
+  - jurisdiction: national
+    topic: sendai-action-plan-1
+    title: First National Action Plan to Implement the National Disaster Risk Reduction Framework
+    publisher: Australian Government — Department of Home Affairs
+    url: https://nema.gov.au/sites/default/files/2024-08/first-national-action-plan.pdf
+    edition: "2020"
+    licence: CC BY 4.0
+    mode: full-text
+    filename: first-national-action-plan.pdf
+
+  - jurisdiction: national
+    topic: sendai-action-plan-2
+    title: Second National Action Plan to Implement the National Disaster Risk Reduction Framework
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-08/28605%20NEMA%20Second%20Action%20Plan_V10_A_1.pdf
+    edition: "2023"
+    licence: CC BY 4.0
+    mode: full-text
+    filename: second-national-action-plan.pdf
+
+  - jurisdiction: national
+    topic: sendai-mid-term-review
+    title: Australia's National Midterm Review of the Sendai Framework for Disaster Risk Reduction 2015–2030
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-08/Australia%27s%20National%20Midterm%20Review%20of%20the%20Sendai%20Framework%20for%20Disaster%20Risk%20Reduction%202015-2030%20Report.pdf
+    edition: "2023"
+    licence: CC BY 4.0
+    mode: full-text
+    filename: sendai-mid-term-review-australia.pdf
+
+  - jurisdiction: national
+    topic: recovery-needs-assessment-guidelines
+    title: National Disaster Recovery Needs Assessment Guidelines
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-08/nat-rec-needs-assess-guidelines.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: national-disaster-recovery-needs-assessment-guidelines.pdf
+
+  - jurisdiction: national
+    topic: journey-to-recovery
+    title: Journey to Recovery — A national framework for disaster recovery
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-08/journey%20to%20recovery_0.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: journey-to-recovery.pdf
+
+  - jurisdiction: national
+    topic: ahmppi
+    title: Australian Health Management Plan for Pandemic Influenza (AHMPPI)
+    publisher: Australian Government — Department of Health and Aged Care
+    url: https://www.health.gov.au/sites/default/files/documents/2022/05/australian-health-management-plan-for-pandemic-influenza-ahmppi.pdf
+    edition: "2019, 2022 reissue"
+    licence: CC BY 4.0
+    mode: full-text
+    filename: ahmppi.pdf
+
+  - jurisdiction: national
+    topic: redcross-rediplan-comprehensive
+    title: REDiPlan — Australian Red Cross Household Preparedness Guide (Comprehensive)
+    publisher: Australian Red Cross
+    url: https://www.redcross.org.au/contentassets/cdd5b2675ae944d8852aba02397fc8ee/rediplan-comprehensive.pdf
+    licence: Australian Red Cross — practitioner & community use; cite source
+    mode: full-text
+    filename: rediplan-comprehensive.pdf
+
+  - jurisdiction: national
+    topic: redcross-rediplan-lite
+    title: REDiPlan — Australian Red Cross Household Preparedness Guide (Lite)
+    publisher: Australian Red Cross
+    url: https://www.redcross.org.au/contentassets/cdd5b2675ae944d8852aba02397fc8ee/rediplan-lite.pdf
+    licence: Australian Red Cross — practitioner & community use; cite source
+    mode: full-text
+    filename: rediplan-lite.pdf
+
+  # --- Crisis appreciation & national-coordination doctrine ---
+
+  - jurisdiction: national
+    topic: casp-guidebook
+    title: Crisis Appreciation and Strategic Planning (CASP) Guidebook
+    publisher: Australian Government — Department of Home Affairs / NEMA
+    url: https://www.homeaffairs.gov.au/emergency/files/casp-guidebook.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: casp-guidebook.pdf
+    notes: National method for crisis appreciation and strategic planning, used by NEMA's National Situation Room and supporting agencies.
+
+  - jurisdiction: national
+    topic: australian-disaster-preparedness-framework
+    title: Australian Disaster Preparedness Framework
+    publisher: Australian Government — Department of Home Affairs / NEMA
+    url: https://www.homeaffairs.gov.au/emergency/files/australian-disaster-preparedness-framework.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: australian-disaster-preparedness-framework.pdf
+    notes: National framework for catastrophic preparedness covering nationally significant disasters.
+
+  # --- Disaster Recovery Funding Arrangements (DRFA) — practitioner-essential ---
+
+  - jurisdiction: national
+    topic: drfa-2018
+    title: Disaster Recovery Funding Arrangements 2018
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-08/disaster-recovery-funding-arrangements-2018.pdf
+    edition: "2018"
+    licence: CC BY 4.0
+    mode: full-text
+    filename: disaster-recovery-funding-arrangements-2018.pdf
+
+  - jurisdiction: national
+    topic: drfa-guideline-1-essential-public-asset
+    title: DRFA Guideline 1 — An essential public asset
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-08/drfa-2018-guideline-1-an-essential-public-asset.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: drfa-2018-guideline-1-essential-public-asset.pdf
+
+  - jurisdiction: national
+    topic: drfa-guideline-2-counter-disaster-operations
+    title: DRFA Guideline 2 — Counter Disaster Operations
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-08/drfa-2018-guideline-2-counter-disaster-operations.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: drfa-2018-guideline-2-counter-disaster-operations.pdf
+
+  - jurisdiction: national
+    topic: drfa-guideline-3-category-c-assessment
+    title: DRFA Guideline 3 — Category C Assessment Framework
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-08/drfa-2018-guideline-3-category-c-assessment-framework.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: drfa-2018-guideline-3-category-c-assessment-framework.pdf
+
+  - jurisdiction: national
+    topic: drfa-guideline-4-insurance-arrangements
+    title: DRFA Guideline 4 — Insurance Arrangements
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-08/drfa-2018-guideline-4-insurance-arrangements.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: drfa-2018-guideline-4-insurance-arrangements.pdf
+
+  - jurisdiction: national
+    topic: drfa-guideline-5-terrorist-act
+    title: DRFA Guideline 5 — Process for determining a terrorist act is an eligible disaster
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2024-08/drfa-2018-guideline-5-process-for-determining-terrorist-act.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: drfa-2018-guideline-5-process-for-determining-terrorist-act.pdf
+
+  # --- DRFA national advisories (2025) ---
+
+  - jurisdiction: national
+    topic: drfa-advisory-resilient-infrastructure
+    title: DRFA National Advisory — How the DRFA can be used to deliver resilient infrastructure
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2025-02/DRFA%20national%20advisory%20-%20How%20the%20DRFA%20can%20be%20used%20to%20deliver%20resilient%20infrastructure.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: drfa-national-advisory-resilient-infrastructure.pdf
+
+  - jurisdiction: national
+    topic: drfa-advisory-emergency-temporary-accommodation
+    title: DRFA National Advisory — Emergency and temporary accommodation
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2025-02/DRFA%20national%20advisory%20-%20Emergency%20and%20temporary%20accommodation.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: drfa-national-advisory-emergency-temporary-accommodation.pdf
+
+  - jurisdiction: national
+    topic: drfa-advisory-cleanup-debris
+    title: DRFA National Advisory — Clean-up and debris removal
+    publisher: Australian Government — National Emergency Management Agency (NEMA)
+    url: https://nema.gov.au/sites/default/files/2025-02/DRFA%20national%20advisory%20-%20Clean-up%20and%20debris%20removal.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: drfa-national-advisory-cleanup-debris.pdf
+
+  # --- ANZ Emergency Response Guide (transport-incident & hazmat) ---
+
+  - jurisdiction: national
+    topic: anz-erg-2021
+    title: Australian and New Zealand Emergency Response Guide Book (ANZ-ERG2021)
+    publisher: National Transport Commission (Australia) / NZ Ministry of Transport
+    url: https://www.ntc.gov.au/sites/default/files/assets/files/D-21-0128224%20-%20JC003412_ANZ-ERG2021%20-%20WEB.pdf
+    edition: "2021"
+    licence: CC BY 4.0 (NTC publication)
+    mode: full-text
+    filename: anz-erg-2021.pdf
+    notes: Quick-reference guide for first responders to dangerous-goods transport incidents.
+
+  # =========================================================================
+  # TIER 2/3 — NSW (NSW SES + NSW RFS public doctrine)
+  # =========================================================================
+
+  # --- NSW peak recovery plan ---
+
+  - jurisdiction: nsw
+    topic: nsw-recovery-plan-2023
+    title: NSW Recovery Plan
+    publisher: NSW Reconstruction Authority
+    url: https://www.nsw.gov.au/sites/default/files/noindex/2024-04/23923%20NSWRA%20NSW%20Recovery%20Plan%202023%20V12_ACCESSIBILITY.pdf
+    edition: "2023"
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-recovery-plan-2023.pdf
+
+  # --- NSW SES — household & community guides ---
+
+  - jurisdiction: nsw
+    topic: nsw-ses-storm-guide
+    title: NSW SES Storm Guide
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/document/storm-guide_0.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-storm-guide.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-ses-flash-flood-guide
+    title: NSW SES Flash Flood Guide
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/2024-06/Flash-flood-guide.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-flash-flood-guide.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-ses-tsunami-guide
+    title: NSW SES Tsunami Guide
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/document/tsunami-guide.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-tsunami-guide.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-ses-tsunami-sydney-eastern-beaches
+    title: NSW SES Tsunami Guide — Sydney Eastern Beaches
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/2024-02/2023-sydney-eastern-beaches-tsunami-guide-online.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-tsunami-sydney-eastern-beaches.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-ses-tsunami-ballina-lennox
+    title: NSW SES Tsunami Guide — Ballina and Lennox Head
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/2024-02/tsunamisafe-ballina-lennox-6p-print.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-tsunami-ballina-lennox.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-ses-tsunami-recreational-boaters
+    title: NSW SES — Tsunami information for recreational boaters
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/2024-06/brochure-tsunami-information-for-recreational-boaters_hi-res.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-tsunami-recreational-boaters.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-ses-rural-properties-flood-safe
+    title: NSW SES — Flood Safe Guide for Rural Properties
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/2024-02/rural-properties-fsg.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-rural-properties-flood-safe.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-ses-caravan-park-plan-template
+    title: NSW SES — Flood Emergency Plan Template for Caravan Parks
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/document/caravan-park-plan-generic.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-caravan-park-plan-template.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-ses-emergency-plan-template
+    title: NSW SES — Household Emergency Plan Template
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/document/nsw-ses-emergency-plan-template-v2.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-emergency-plan-template.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-ses-emergency-kit-checklist
+    title: NSW SES — Emergency Kit Checklist
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/2024-06/NSW-SES_Emergency-Kit-Checklist.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-emergency-kit-checklist.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-ses-pets-emergency-plan
+    title: NSW SES — Pets Emergency Plan
+    publisher: NSW State Emergency Service (SES)
+    url: https://www.ses.nsw.gov.au/sites/default/files/document/pets-emergency-plan-x-grab-go-a4-factsheet-digital-1.pdf
+    licence: CC BY 4.0
+    mode: full-text
+    filename: nsw-ses-pets-emergency-plan.pdf
+
+  # --- NSW RFS — Bush Fire Coordinating Committee + Service Standards + Operational Procedures ---
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-bfmc-handbook-2024
+    title: NSW RFS Bush Fire Management Committee (BFMC) Handbook
+    publisher: NSW Rural Fire Service / Bush Fire Coordinating Committee
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0009/268893/BFMC-Handbook-24.pdf
+    edition: "2024"
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-bfmc-handbook-2024.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-bfmc-charter
+    title: NSW RFS Bush Fire Management Committee Charter
+    publisher: NSW Rural Fire Service / Bush Fire Coordinating Committee
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0007/176695/Bush-Fire-Management-Committee-Charter.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-bfmc-charter.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-bfcc-policy-register
+    title: NSW RFS Bush Fire Coordinating Committee (BFCC) Policy Register
+    publisher: NSW Rural Fire Service / Bush Fire Coordinating Committee
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0004/9526/Bush-Fire-Coordinating-Committee-BFCC-Policy-Register.PDF
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-bfcc-policy-register.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-ss-1-3-2-powers-of-officers
+    title: NSW RFS Service Standard 1.3.2 — Powers of Officers
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0020/8804/1.3.2-Powers-of-Officers.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-ss-1-3-2-powers-of-officers.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-ss-1-4-8-media
+    title: NSW RFS Service Standard 1.4.8 — Media
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0020/8705/1.4.8-Media.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-ss-1-4-8-media.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-ss-1-5-6-lessons-management
+    title: NSW RFS Service Standard 1.5.6 — Lessons Management Framework
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0020/204464/1.5.6-Lessons-Management-Framework.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-ss-1-5-6-lessons-management.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-ss-5-1-9-breathing-apparatus
+    title: NSW RFS Service Standard 5.1.9 — Breathing Apparatus
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0010/8992/5.1.9-Breathing-Apparatus.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-ss-5-1-9-breathing-apparatus.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-op-1-1-2-remote-area-firefighting
+    title: NSW RFS Operational Protocol 1.1.2 — Remote Area Firefighting (RAF)
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0015/42306/OP-1.1.2-Remote-Area-Firefighting-RAF-1.4.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-op-1-1-2-remote-area-firefighting.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-op-1-2-14-prescribed-burning
+    title: NSW RFS Operational Protocol 1.2.14 — Prescribed Burning
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0007/245851/RFS-OPG-Prescribed-Burning.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-op-1-2-14-prescribed-burning.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-op-1-2-17-rapid-aerial-firefighting
+    title: NSW RFS Operational Protocol 1.2.17 — Rapid Aerial Fire Fighting Teams
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0010/174556/O.P-1.2.17-Rapid-Aerial-Fire-Fighting-Teams.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-op-1-2-17-rapid-aerial-firefighting.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-op-1-2-20-backburning
+    title: NSW RFS Operational Protocol 1.2.20 — Backburning
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0006/189402/OP-1.2.20-Backburning.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-op-1-2-20-backburning.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-op-1-2-3-rail-corridor
+    title: NSW RFS Operational Protocol 1.2.3 — Working in the Rail Corridor
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0018/42282/OP-1.2.3-Working-in-the-Rail-Corridor.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-op-1-2-3-rail-corridor.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-op-1-2-7-working-on-roofs
+    title: NSW RFS Operational Protocol 1.2.7 — Working on Roofs
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0019/42283/OP-1.2.7-Working-on-Roofs.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-op-1-2-7-working-on-roofs.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-op-1-2-22-photovoltaic-arrays
+    title: NSW RFS Operational Protocol 1.2.22 — Photovoltaic Arrays
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0004/247891/OP-1.2.22-Photovoltaic-Arrays.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-op-1-2-22-photovoltaic-arrays.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-op-1-4-4-fatigue-management
+    title: NSW RFS Operational Protocol 1.4.4 — Fatigue Management
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0011/42302/OP-1.4.4-Fatigue-Management.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-op-1-4-4-fatigue-management.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-op-1-4-7-trail-bikes
+    title: NSW RFS Operational Protocol 1.4.7 — Trail Bikes Operations
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0020/246233/OP-1.4.7.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-op-1-4-7-trail-bikes.pdf
+
+  - jurisdiction: nsw
+    topic: nsw-rfs-op-1-4-9-helicopter-search-rescue
+    title: NSW RFS Operational Protocol 1.4.9 — Helicopter Search and Rescue
+    publisher: NSW Rural Fire Service
+    url: https://www.rfs.nsw.gov.au/__data/assets/pdf_file/0005/174569/OP-1.4.9-Helicopter-Search-and-Rescue.pdf
+    licence: Crown copyright NSW; practitioner and public-information use
+    mode: full-text
+    filename: nsw-rfs-op-1-4-9-helicopter-search-rescue.pdf
+
+  # =========================================================================
+  # TIER 2 — Victoria
+  # =========================================================================
+
+  - jurisdiction: vic
+    topic: vic-semp-2024
+    title: Victorian State Emergency Management Plan (SEMP)
+    publisher: Emergency Management Victoria (EMV)
+    url: https://files.emv.vic.gov.au/2024-10/2024%20SEMP%20-%20functional%20and%20interactive%20PDF.pdf
+    edition: "October 2024"
+    licence: CC BY 4.0
+    mode: full-text
+    filename: vic-semp-2024.pdf
+    notes: Apex Victorian state-level emergency management plan; mandates roles, responsibilities, coordination across agencies.
+
+  # =========================================================================
+  # TIER 2/3 — Tasmania (Tasmania Fire Service)
+  # =========================================================================
+
+  - jurisdiction: tas
+    topic: tas-dpfem-future-focus-2025-2028
+    title: Department of Police, Fire and Emergency Management (DPFEM) Future Focus 2025–2028
+    publisher: Tasmanian Department of Police, Fire and Emergency Management (DPFEM)
+    url: https://www.fire.tas.gov.au/userfiles/publications/DPFEMFutureFocus2025-2028.pdf
+    edition: "2025–2028"
+    licence: Crown copyright Tasmania; practitioner and public-information use
+    mode: full-text
+    filename: tas-dpfem-future-focus-2025-2028.pdf
+
+  - jurisdiction: tas
+    topic: tas-tfs-ministerial-charter
+    title: Ministerial Charter for the State Fire Commission
+    publisher: Tasmania Fire Service / State Fire Commission
+    url: https://www.fire.tas.gov.au/userfiles/AFAC/Ministerial_Charter_for_the_State_Fire_Commission.pdf
+    licence: Crown copyright Tasmania; practitioner and public-information use
+    mode: full-text
+    filename: tas-tfs-ministerial-charter.pdf
+
+  - jurisdiction: tas
+    topic: tas-tfs-building-for-bushfire-booklet
+    title: TFS Building for Bushfire — A Property Owner's Guide
+    publisher: Tasmania Fire Service
+    url: https://www.fire.tas.gov.au/userfiles/madisons/file/20200903%20-%20Building%20for%20Bushfire%20Booklet%209/200233%20TFS%20Building%20for%20Bushfire%20booklet_9%20June.pdf
+    licence: Crown copyright Tasmania; practitioner and public-information use
+    mode: full-text
+    filename: tas-tfs-building-for-bushfire-booklet.pdf
+
+  - jurisdiction: tas
+    topic: tas-tfs-state-bushfire-safety-policy
+    title: TFS State Bushfire Safety Policy (SFC 04/14)
+    publisher: Tasmania Fire Service / State Fire Commission
+    url: https://www.fire.tas.gov.au/userfiles/stuartp/file/Miscellaneous/SFC_04_14_StateBushfireSafetyPolicy.pdf
+    edition: "2014"
+    licence: Crown copyright Tasmania; practitioner and public-information use
+    mode: full-text
+    filename: tas-tfs-state-bushfire-safety-policy.pdf
+
+  - jurisdiction: tas
+    topic: tas-tfs-water-additives-bushfires
+    title: Use of Water Additives in Controlling Bushfires — Information Guide
+    publisher: Tasmania Fire Service
+    url: https://www.fire.tas.gov.au/userfiles/publications/Use_of_Water_Additives_in_Controlling_Bushfires_Information_Guide_FINAL.pdf
+    licence: Crown copyright Tasmania; practitioner and public-information use
+    mode: full-text
+    filename: tas-tfs-water-additives-bushfires.pdf
+
+  - jurisdiction: tas
+    topic: tas-tfs-reducing-harvester-fire-risk
+    title: TFS — Reducing Harvester Fire Risk
+    publisher: Tasmania Fire Service
+    url: https://www.fire.tas.gov.au/userfiles/stuartp/file/Publications/ReducingHarvesterFire%20Risk.pdf
+    licence: Crown copyright Tasmania; practitioner and public-information use
+    mode: full-text
+    filename: tas-tfs-reducing-harvester-fire-risk.pdf
+
+  - jurisdiction: tas
+    topic: tas-tfs-machinery-operation
+    title: TFS — Machinery Operation Brochure
+    publisher: Tasmania Fire Service
+    url: https://www.fire.tas.gov.au/userfiles/jessm/file/200211TFSMachineryOperationBrochureupdateMay2021.pdf
+    licence: Crown copyright Tasmania; practitioner and public-information use
+    mode: full-text
+    filename: tas-tfs-machinery-operation-brochure.pdf
+
+  - jurisdiction: tas
+    topic: tas-tfs-bushfires-preparing-a4
+    title: TFS — Preparing for Bushfires (A4 poster)
+    publisher: Tasmania Fire Service
+    url: https://www.fire.tas.gov.au/userfiles/tym/file/publications/posters/151012-TFS-Bushfires-Preparing-for-Bushfires-A4.pdf
+    licence: Crown copyright Tasmania; practitioner and public-information use
+    mode: full-text
+    filename: tas-tfs-bushfires-preparing-a4.pdf
+
+  - jurisdiction: tas
+    topic: tas-tfs-using-fires-outdoors
+    title: TFS — Using Fires Outdoors
+    publisher: Tasmania Fire Service
+    url: https://www.fire.tas.gov.au/userfiles/alarm/180562_TFS_Using_Fires_Outdoors.pdf
+    licence: Crown copyright Tasmania; practitioner and public-information use
+    mode: full-text
+    filename: tas-tfs-using-fires-outdoors.pdf
+
+  # =========================================================================
+  # TIER 4 — Animal disease emergency response (Animal Health Australia AusVetPlan)
+  # =========================================================================
+
+  - jurisdiction: national
+    topic: ausvetplan-hendra-virus
+    title: AUSVETPLAN — Hendra Virus Response Strategy
+    publisher: Animal Health Australia (on behalf of National Biosecurity Committee)
+    url: https://animalhealthaustralia.com.au/ausvetplan/download/5621
+    licence: Animal Health Australia AUSVETPLAN — practitioner & jurisdictional use
+    mode: full-text
+    filename: ausvetplan-hendra-virus.pdf
+    notes: Nationally agreed approach for the response to a Hendra virus emergency in Australia.
+
+
+
+  # =========================================================================
+  # NEW (2025 expansion) — NATIONAL
+  # =========================================================================
+  - jurisdiction: national
+    topic: "amsa-natsar-manual-2025-vol1"
+    title: "National Search and Rescue (NATSAR) Manual — Volume 1: Search and Rescue Administration"
+    publisher: AMSA
+    url: "https://www.amsa.gov.au/sites/default/files/natsar-manual-february-2025-volume-1.pdf"
+    edition: February 2025
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-natsar-manual-2025-vol1.pdf"
+
+  - jurisdiction: national
+    topic: "amsa-natsar-manual-2025-vol2"
+    title: "National Search and Rescue (NATSAR) Manual — Volume 2: Search and Rescue Operations"
+    publisher: AMSA
+    url: "https://www.amsa.gov.au/sites/default/files/natsar-manual-february-2025-volume-2.pdf"
+    edition: February 2025
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-natsar-manual-2025-vol2.pdf"
+
+  - jurisdiction: national
+    topic: "amsa-natsar-manual-2025-final"
+    title: National Search and Rescue (NATSAR) Manual — Master
+    publisher: AMSA
+    url: "https://www.amsa.gov.au/sites/default/files/natsar-manual-february-2025-final-v2.pdf"
+    edition: February 2025
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-natsar-manual-2025-final.pdf"
+
+  - jurisdiction: national
+    topic: "amsa-natsar-manual-2025-appendices"
+    title: National Search and Rescue (NATSAR) Manual — Appendices
+    publisher: AMSA
+    url: "https://www.amsa.gov.au/sites/default/files/natsar-manual-february-2025-appendices.pdf"
+    edition: February 2025
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-natsar-manual-2025-appendices.pdf"
+
+  - jurisdiction: national
+    topic: "amsa-natsar-manual-2025-preliminaries"
+    title: National Search and Rescue (NATSAR) Manual — Preliminaries
+    publisher: AMSA
+    url: "https://www.amsa.gov.au/sites/default/files/natsar-manual-february-2025-preliminaries.pdf"
+    edition: February 2025
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-natsar-manual-2025-preliminaries.pdf"
+
+  - jurisdiction: national
+    topic: "amsa-national-plan-maritime-environmental-emergencies-2020"
+    title: National Plan for Maritime Environmental Emergencies
+    publisher: AMSA
+    url: "https://www.amsa.gov.au/sites/default/files/national-plan-maritime-envrironmental-emergencies-2020.pdf"
+    edition: 2020
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-national-plan-maritime-env-emergencies-2020.pdf"
+
+  - jurisdiction: national
+    topic: "amsa-complex-maritime-emergencies-handbook"
+    title: Complex Maritime Emergencies Handbook
+    publisher: AMSA
+    url: "https://www.amsa.gov.au/sites/default/files/complex-maritime-emergencies-handbook-v2.0-03-feb-2022-foreword-signed-by-ceo.pdf"
+    edition: v2.0 (3 February 2022)
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-complex-maritime-emergencies-handbook-v2.pdf"
+
+  - jurisdiction: national
+    topic: "amsa-rotary-wing-rescue-procedures-manual"
+    title: Rotary Wing Rescue Standards and Procedures Manual
+    publisher: AMSA
+    url: "https://www.amsa.gov.au/sites/default/files/rotary-wing-rescue-standards-and-procedures-manual-v8.pdf"
+    edition: v8
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-rotary-wing-rescue-procedures-manual-v8.pdf"
+
+  - jurisdiction: national
+    topic: "amsa-national-land-search-operations-manual"
+    title: National Land Search Operations Manual
+    publisher: AMSA
+    url: "https://natsar.amsa.gov.au/documents/Land-Operations/NationalLandSearchOperationsManual_Feb2017.pdf"
+    fetch_url: "https://web.archive.org/web/20200309052310id_/https://natsar.amsa.gov.au/documents/Land-Operations/NationalLandSearchOperationsManual_Feb2017.pdf"
+    edition: February 2017
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-national-land-search-operations-manual-2017.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20200309052310 (id_ identity URL).
+
+  - jurisdiction: national
+    topic: "amsa-natsar-search-rescue-admin-2023"
+    title: NATSAR — Search and Rescue Administration
+    publisher: AMSA
+    url: "https://www.amsa.gov.au/sites/default/files/2023-10/natsar-search-and-rescue-admin-february-2023.pdf"
+    edition: February 2023
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-natsar-search-rescue-admin-2023.pdf"
+
+  - jurisdiction: national
+    topic: "amsa-natsar-search-rescue-ops-2023"
+    title: NATSAR — Search and Rescue Operations
+    publisher: AMSA
+    url: "https://www.amsa.gov.au/sites/default/files/2023-10/natsar-search-and-rescue-ops-february-2023.pdf"
+    edition: February 2023
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "amsa-natsar-search-rescue-ops-2023.pdf"
+
+  - jurisdiction: national
+    topic: "ausvetplan-overview"
+    title: AUSVETPLAN — Overview
+    publisher: Animal Health Australia
+    url: "https://animalhealthaustralia.com.au//wp-content/uploads/dlm_uploads/2018/07/AUSVETPLAN-Overview-5.1.pdf"
+    edition: v5.1 (2018)
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "ausvetplan-overview-5.1.pdf"
+
+  - jurisdiction: national
+    topic: "ausvetplan-foot-mouth-disease"
+    title: "AUSVETPLAN — Foot-and-Mouth Disease (FMD) Response Manual"
+    publisher: Animal Health Australia
+    url: "https://animalhealthaustralia.com.au//wp-content/uploads/dlm_uploads/2015/11/AUSVETPLAN-Manuals_Response_Foot-and-mouth-disease___.pdf"
+    fetch_url: "https://web.archive.org/web/20230616010648id_/https://animalhealthaustralia.com.au//wp-content/uploads/dlm_uploads/2015/11/AUSVETPLAN-Manuals_Response_Foot-and-mouth-disease___.pdf"
+    edition: v5
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "ausvetplan-fmd-response.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20230616010648 (id_ identity URL).
+
+  - jurisdiction: national
+    topic: "ausvetplan-avian-influenza"
+    title: AUSVETPLAN — Avian Influenza Response Strategy
+    publisher: Animal Health Australia
+    url: "https://animalhealthaustralia.com.au//wp-content/uploads/2023/10/AUSVETPLAN_ResponseStrategy_AvianInfluenza_5.2.pdf"
+    edition: v5.2 (2023)
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "ausvetplan-avian-influenza-5.2.pdf"
+
+  - jurisdiction: national
+    topic: "ausvetplan-african-swine-fever"
+    title: AUSVETPLAN — African Swine Fever Response Strategy
+    publisher: Animal Health Australia
+    url: "https://animalhealthaustralia.com.au//wp-content/uploads/2023/05/AUSVETPLAN-Response-strategy-African-swine-fever.pdf"
+    fetch_url: "https://web.archive.org/web/20240720222441id_/https://animalhealthaustralia.com.au//wp-content/uploads/2023/05/AUSVETPLAN-Response-strategy-African-swine-fever.pdf"
+    edition: v5.3 (2026)
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "ausvetplan-african-swine-fever.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20240720222441 (id_ identity URL).
+
+  - jurisdiction: national
+    topic: "ausvetplan-lumpy-skin-disease"
+    title: AUSVETPLAN — Lumpy Skin Disease Response Manual
+    publisher: Animal Health Australia
+    url: "https://animalhealthaustralia.com.au//wp-content/uploads/2023/05/AHAA1904-AUSVETPLAN-Manuals_Response_Lumpy-skin-disease_FA3_digital.pdf"
+    fetch_url: "https://web.archive.org/web/20240419113953id_/https://animalhealthaustralia.com.au//wp-content/uploads/2023/05/AHAA1904-AUSVETPLAN-Manuals_Response_Lumpy-skin-disease_FA3_digital.pdf"
+    edition: FA3 (2023)
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "ausvetplan-lumpy-skin-disease.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20240419113953 (id_ identity URL).
+
+  - jurisdiction: national
+    topic: "ausvetplan-decontamination"
+    title: "AUSVETPLAN — Operational Manual: Decontamination"
+    publisher: Animal Health Australia
+    url: "https://animalhealthaustralia.com.au//wp-content/uploads/2023/05/AUSVETPLAN-Operational-manual-Decontamination.pdf"
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "ausvetplan-operational-decontamination.pdf"
+
+  - jurisdiction: national
+    topic: "ausvetplan-laboratory-preparedness"
+    title: "AUSVETPLAN — Management Manual: Laboratory Preparedness"
+    publisher: Animal Health Australia
+    url: "https://animalhealthaustralia.com.au//wp-content/uploads/2024/05/AUSVETPLAN-Management-Laboratory-Preparedness.pdf"
+    edition: 2024
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "ausvetplan-laboratory-preparedness.pdf"
+
+  - jurisdiction: national
+    topic: "ausvetplan-valuation-compensation"
+    title: "AUSVETPLAN — Operational Manual: Valuation and Compensation"
+    publisher: Animal Health Australia
+    url: "https://animalhealthaustralia.com.au//wp-content/uploads/2022/12/AUSVETPLAN-Manuals_Operational_Valuation-and-compensation.pdf"
+    edition: 2022
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "ausvetplan-valuation-compensation.pdf"
+
+  - jurisdiction: national
+    topic: "ausvetplan-african-horse-sickness"
+    title: AUSVETPLAN — African Horse Sickness Response Manual
+    publisher: Animal Health Australia
+    url: "https://animalhealthaustralia.com.au//wp-content/uploads/2022/11/AUSVETPLAN-Manuals_Response_African-horse-sickness_.pdf"
+    edition: 2022
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "ausvetplan-african-horse-sickness.pdf"
+
+  - jurisdiction: national
+    topic: "ausvetplan-bse"
+    title: AUSVETPLAN — Bovine Spongiform Encephalopathy (BSE) Response Strategy
+    publisher: Animal Health Australia
+    url: "https://animalhealthaustralia.com.au//wp-content/uploads/dlm_uploads/2015/11/AUSVETPLANResponseStrategy_BSE_V5.pdf"
+    fetch_url: "https://web.archive.org/web/20250327081244id_/https://animalhealthaustralia.com.au//wp-content/uploads/dlm_uploads/2015/11/AUSVETPLANResponseStrategy_BSE_V5.pdf"
+    edition: v5
+    licence: Crown / publisher copyright; practitioner reference
+    mode: full-text
+    filename: "ausvetplan-bse-response-v5.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20250327081244 (id_ identity URL).
+
+  # =========================================================================
+  # NEW (2025 expansion) — VIC
+  # =========================================================================
+  - jurisdiction: vic
+    topic: "vic-preparedness-framework"
+    title: Victorian Preparedness Framework
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2024-12/Victorian%20Preparedness%20Framework_updated.pdf"
+    edition: December 2024 update
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-preparedness-framework-updated.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-semp-tsunami-sub-plan"
+    title: "State Emergency Management Plan — Tsunami Sub-Plan"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2023-11/SEMP%20Tsunami%20Sub-Plan%20Edition%203.0.PDF"
+    edition: Edition 3.0 (November 2023)
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-semp-tsunami-sub-plan-edition-3.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-semp-earthquake-sub-plan"
+    title: "State Emergency Management Plan — Earthquake Sub-Plan"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2023-05/SEMP%20Earthquake%20Sub-plan%20Edition%202.0.pdf"
+    edition: Edition 2.0 (May 2023)
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-semp-earthquake-sub-plan-edition-2.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-semp-bushfire-sub-plan"
+    title: "State Emergency Management Plan — Bushfire Sub-Plan"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2023-12/Attachment%20A%20-%20Final%20SEMP%20Bushfire%20Sub-Plan.pdf"
+    edition: December 2023
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-semp-bushfire-sub-plan.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-semp-radiation-sub-plan"
+    title: "State Emergency Management Plan — Radiation Sub-Plan"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2023-11/SEMP%20Radiation%20Sub%20Plan%20-%20final%2020%20Novemeber%202023.pdf"
+    edition: November 2023
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-semp-radiation-sub-plan-2023.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-semp-cyber-security-sub-plan"
+    title: "State Emergency Management Plan — Cyber Security Sub-Plan"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2024-03/SEMP%20Cyber%20Security%20Sub-Plan%20-%20March%202024%20-%20Published%20version.pdf"
+    edition: March 2024
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-semp-cyber-security-sub-plan-2024.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-semp-energy-sub-plan"
+    title: "State Emergency Management Plan — Energy Sub-Plan"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2023-06/SEMP%20-%20Energy%20Sub-Plan%20-%202023.pdf"
+    edition: 2023
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-semp-energy-sub-plan-2023.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-semp-maritime-emergencies-sub-plan"
+    title: "State Emergency Management Plan — Maritime Emergencies Sub-Plan"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2024-10/SEMP_Maritime_Emergencies_Sub-plan_Edition-3_October%202024.pdf"
+    edition: Edition 3 (October 2024)
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-semp-maritime-emergencies-sub-plan-edition-3.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-semp-public-transport-disruption-sub-plan"
+    title: "State Emergency Management Plan — Public Transport Disruption Sub-Plan"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2024-11/DTP%20SEMP_Public_Transport_Disruption_Sub-plan%20%28accessible%20document%29.pdf"
+    edition: November 2024
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-semp-public-transport-disruption-sub-plan.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-semp-biosecurity-sub-plan"
+    title: "State Emergency Management Plan — Animal, Plant, Marine and Environmental Biosecurity Sub-Plan"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2024-08/SEMP%20Animal%2C%20Plant%2C%20Marine%20and%20Environmental%20Biosecurity%20Sub-Plan.pdf"
+    edition: August 2024
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-semp-biosecurity-sub-plan.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-emp-guidelines"
+    title: "Guidelines for Preparing State, Regional and Municipal Emergency Management Plans"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2024-11/Guidelines%20for%20preparing%20State%20Regional%20and%20Municipal%20Emergency%20Management%20Plans%20V4.pdf"
+    edition: Version 4 (November 2024)
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-emp-guidelines-v4.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-resilient-recovery-strategy"
+    title: "Victoria's Resilient Recovery Strategy"
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2021-08/Resilient%20Recovery%20Strategy.pdf"
+    edition: August 2021
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-resilient-recovery-strategy.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-emergency-operations-handbook-2020"
+    title: Victorian Emergency Operations Handbook
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2021-05/Victorian%20Emergency%20Operations%20Handbook%20Edition%203%20December%202020.pdf"
+    edition: Edition 3 (December 2020)
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-emergency-operations-handbook-edition-3.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-community-resilience-framework"
+    title: Community Resilience Framework for Emergency Management
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2021-08/Community%20Reslience%20Framework%20for%20Emergency%20Management.pdf"
+    edition: 2021
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-community-resilience-framework.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-critical-infrastructure-resilience-guidelines"
+    title: Ministerial Guidelines for Critical Infrastructure Resilience
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2024-02/Ministerial%20Guidelines%20for%20Critical%20Infrastructure%20Resilience%20-%20February%202024.pdf"
+    edition: February 2024
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-critical-infrastructure-resilience-guidelines-2024.pdf"
+
+  - jurisdiction: vic
+    topic: "vic-drfa-guideline-1"
+    title: Victorian DRFA Guideline 1 — Claims and Eligibility for Essential Public Assets
+    publisher: Emergency Management Victoria
+    url: "https://files.emv.vic.gov.au/2024-04/Victorian%20DRFA%20Guideline%201%20Claims%20and%20eligibility%20for%20essential%20public%20assets%20-%20April%202024.pdf"
+    edition: April 2024
+    licence: "© State of Victoria; emergency-management practitioner reference"
+    mode: full-text
+    filename: "vic-drfa-guideline-1-essential-public-assets.pdf"
+
+  # =========================================================================
+  # NEW (2025 expansion) — QLD
+  # =========================================================================
+  - jurisdiction: qld
+    topic: "qra-qld-strategy-disaster-resilience-2022"
+    title: Queensland Strategy for Disaster Resilience 2022–27
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2022-09/queensland_strategy_for_disaster_resilience_low_res_web_l-r.pdf"
+    edition: 2022
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-qld-strategy-disaster-resilience-2022.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-disaster-resilience-mitigation-framework-2019"
+    title: Queensland Disaster Resilience and Mitigation Investment Framework
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2019-01/queensland_disaster_resilience_mitigation_framework_-_february_2019.pdf"
+    edition: February 2019
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-disaster-resilience-mitigation-framework-2019.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-qld-flood-risk-management-framework-2021"
+    title: Queensland Flood Risk Management Framework (QFRMF)
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2021-06/queensland_flood_risk_management_framework_2021_qfrmf_0.pdf"
+    edition: 2021
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-qfrmf-2021.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-strategic-policy-riverine-flood-risk"
+    title: Strategic Policy Framework for Riverine Flood Risk Management
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2018-11/strategic_policy_framework_for_riverine_flood_risk_management.pdf"
+    edition: 2018
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-strategic-policy-riverine-flood-risk.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-cyclone-resilience-building-guidelines"
+    title: Queensland Cyclone Resilience Building Guidelines
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2021-11/0321_cyclone_resilience_building_guidelines_v8_web.pdf"
+    edition: v8 (2021)
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-cyclone-resilience-building-guidelines.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-storm-tide-resilience-building-guidelines"
+    title: Queensland Storm Tide Resilience Building Guidelines
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2019-12/storm_tide_resilience_building_guidelines_-_dec19.pdf"
+    edition: December 2019
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-storm-tide-resilience-building-guidelines.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-csiro-bushfire-guideline-2024"
+    title: QRA / CSIRO Queensland Bushfire Resilience Building Guideline
+    publisher: Queensland Reconstruction Authority / CSIRO
+    url: "https://www.qra.qld.gov.au/sites/default/files/2024-02/0873_QRA%20CSIRO%20Bushfire%20Guideline%20%28updated%20February%202024%29.pdf"
+    edition: Updated February 2024
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-csiro-bushfire-guideline-2024.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-state-guideline-flood-evacuation-route"
+    title: State Guideline — Flood Evacuation Route Improvements
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2021-07/state_guideline_flood_evacuation_route_improvements_may_2021_-_double_page.pdf"
+    edition: May 2021
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-state-guideline-flood-evacuation-route.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-economic-assessment-flood-management-projects"
+    title: Economic Assessment Framework of Flood Management Projects
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2021-05/economic_assessment_framework_of_flood_management_projects_2021_0.pdf"
+    edition: 2021
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-economic-assessment-flood-management-projects.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-regional-guideline-flood-awareness-mapping"
+    title: Regional Guideline for Flood Awareness Mapping and Communication
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2021-01/regional_guideline_for_flood_awareness_mapping_and_communication_2021.pdf"
+    edition: 2021
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-regional-guideline-flood-awareness-mapping.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-qld-disaster-funding-guidelines-2024"
+    title: Queensland Disaster Funding Guidelines (QDFG)
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2024-12/DOC_23_77361_Attachment_3_WEB_QDFG_Queensland_Disaster_Funding_Guidelines_Version_3_December_2024.pdf"
+    edition: "Version 3, December 2024"
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-qdfg-2024.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-framework-for-betterment-2017"
+    title: Queensland Betterment Framework
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2018-10/2017_framework_for_betterment_0.pdf"
+    edition: 2017
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-framework-for-betterment-2017.pdf"
+
+  - jurisdiction: qld
+    topic: "qra-recovery-sub-plan-template"
+    title: "Recovery Sub-Plan Contents Example (Template)"
+    publisher: Queensland Reconstruction Authority
+    url: "https://www.qra.qld.gov.au/sites/default/files/2020-03/Recovery-Sub-Plan-Contents-Example.pdf"
+    licence: "© State of Queensland; emergency-management practitioner reference"
+    mode: full-text
+    filename: "qra-recovery-sub-plan-template.pdf"
+
+  # =========================================================================
+  # NEW (2025 expansion) — SA
+  # =========================================================================
+  - jurisdiction: sa
+    topic: "sa-disaster-strategy"
+    title: "South Australia's Disaster Strategy"
+    publisher: Government of South Australia
+    url: "https://resources-production.safecom.sa.gov.au/current/docs/SA%27s%20Disaster%20Strategy%20FINAL%20CABINET%20VERSION.pdf"
+    licence: "© Government of South Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "sa-disaster-strategy.pdf"
+
+  - jurisdiction: sa
+    topic: "sa-handbook-farm-fire-units"
+    title: Handbook for Farm Fire Units (SA)
+    publisher: SA SAFECOM
+    url: "https://resources-production.safecom.sa.gov.au/current/docs/handbook_for_farm_fire_units.pdf"
+    licence: "© Government of South Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "sa-handbook-farm-fire-units.pdf"
+
+  - jurisdiction: sa
+    topic: "sa-handbook-bmaps"
+    title: Handbook for Bushfire Management Area Plans (BMAPs)
+    publisher: SA SAFECOM
+    url: "https://resources-production.safecom.sa.gov.au/current/docs/Handbook%2520for%2520BMAPs%2520-%2520Final%2520version%25202%2520Feb%25202018%2520%2528updated%2520hyperlinks%2520May%25202021%2529.pdf"
+    edition: "Version 2 (Feb 2018, May 2021 hyperlink update)"
+    licence: "© Government of South Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "sa-handbook-bmaps.pdf"
+
+  - jurisdiction: sa
+    topic: "sa-emergency-services-fatigue-guideline"
+    title: Emergency Services Guideline for Risk Managing Fatigue
+    publisher: SA SAFECOM
+    url: "https://resources-production.safecom.sa.gov.au/current/docs/emergency_services_guideline_for_risk_managing_fatigue.pdf"
+    licence: "© Government of South Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "sa-emergency-services-fatigue-guideline.pdf"
+
+  - jurisdiction: sa
+    topic: "sa-ses-community-engagement-strategy"
+    title: SA SES Community Engagement Strategy
+    publisher: SA SES
+    url: "https://resources-production.safecom.sa.gov.au/current/docs/sa_ses_community_engagement_strategy_2018.pdf"
+    edition: 2018
+    licence: "© Government of South Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "sa-ses-community-engagement-strategy-2018.pdf"
+
+  - jurisdiction: sa
+    topic: "sa-preparedness-operations-charter"
+    title: Preparedness Operations Charter (SA Emergency Services)
+    publisher: SA SAFECOM
+    url: "https://resources-production.safecom.sa.gov.au/current/docs/Preparedness-Operations-Charter.pdf"
+    licence: "© Government of South Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "sa-preparedness-operations-charter.pdf"
+
+  - jurisdiction: sa
+    topic: "sa-em-comms-engagement-framework"
+    title: "South Australia's Emergency Management Communication and Engagement Framework"
+    publisher: SA SAFECOM
+    url: "https://resources-production.safecom.sa.gov.au/current/docs/South%20Australia%27s%20Emergency%20Management%20Communication%20and%20Engagement%20Framework%20%28A1426446%29.pdf"
+    licence: "© Government of South Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "sa-em-comms-engagement-framework.pdf"
+
+  - jurisdiction: sa
+    topic: "sa-es-sector-strategic-framework"
+    title: South Australian Emergency Services Sector Strategic Framework
+    publisher: SA SAFECOM
+    url: "https://resources-production.safecom.sa.gov.au/current/docs/south_australian_emergency_services_sector_strategic_framework.pdf"
+    licence: "© Government of South Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "sa-es-sector-strategic-framework.pdf"
+
+  - jurisdiction: sa
+    topic: "sa-sbcc-bmc-guidelines-2018"
+    title: State Bushfire Coordination Committee and Bushfire Management Committees — Guidelines
+    publisher: SA SAFECOM
+    url: "https://resources-production.safecom.sa.gov.au/current/docs/sbcc_and_bmc_guidelines_january_2018.pdf"
+    edition: January 2018
+    licence: "© Government of South Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "sa-sbcc-bmc-guidelines-2018.pdf"
+
+  # =========================================================================
+  # NEW (2025 expansion) — WA
+  # =========================================================================
+  - jurisdiction: wa
+    topic: "wa-state-hazard-plan-tsunami"
+    title: Western Australia State Hazard Plan — Tsunami
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/StateHazardPlans/StateHazardPlanTsunami.pdf"
+    fetch_url: "https://web.archive.org/web/20190315115759id_/https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/StateHazardPlans/StateHazardPlanTsunami.pdf"
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-state-hazard-plan-tsunami.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20190315115759 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-state-hazard-plan-animal-plant-biosecurity"
+    title: Western Australia State Hazard Plan — Animal and Plant Biosecurity
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/emergency-management/plans/state-hazard-plans/Documents/StateHazardPlanAnimalAndPlantBiosecurity.pdf"
+    fetch_url: "https://web.archive.org/web/20220311171203id_/https://semc.wa.gov.au/emergency-management/plans/state-hazard-plans/Documents/StateHazardPlanAnimalandPlantBiosecurity.pdf"
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-shp-animal-plant-biosecurity.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20220311171203 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-state-hazard-plan-human-biosecurity"
+    title: Western Australia State Hazard Plan — Human Biosecurity
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/emergency-management/plans/state-hazard-plans/Documents/StateHazardPlanHumanBiosecurity.pdf"
+    fetch_url: "https://web.archive.org/web/20220311171919id_/https://semc.wa.gov.au/emergency-management/plans/state-hazard-plans/Documents/StateHazardPlanHumanBiosecurity.pdf"
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-shp-human-biosecurity.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20220311171919 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-westplan-collapse-2016"
+    title: Westplan — Collapse
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanCollapseSEMCapproved24052016.pdf"
+    fetch_url: "https://web.archive.org/web/20190315115616id_/https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanCollapseSEMCapproved24052016.pdf"
+    edition: SEMC approved 24 May 2016
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-westplan-collapse-2016.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20190315115616 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-westplan-cyclone-2016"
+    title: Westplan — Cyclone
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanCycloneSEMCapproved24052016.pdf"
+    fetch_url: "https://web.archive.org/web/20190315115712id_/https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanCycloneSEMCapproved24052016.pdf"
+    edition: SEMC approved 24 May 2016
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-westplan-cyclone-2016.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20190315115712 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-westplan-earthquake-2016"
+    title: Westplan — Earthquake
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanEarthquakeSEMCapproved%2002082016.pdf"
+    fetch_url: "https://web.archive.org/web/20190315115745id_/https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanEarthquakeSEMCapproved%2002082016.pdf"
+    edition: SEMC approved 2 August 2016
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-westplan-earthquake-2016.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20190315115745 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-westplan-flood-2016"
+    title: Westplan — Flood
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanFloodSEMCapproved24052016.pdf"
+    fetch_url: "https://web.archive.org/web/20190315115842id_/https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanFloodSEMCapproved24052016.pdf"
+    edition: SEMC approved 24 May 2016
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-westplan-flood-2016.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20190315115842 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-westplan-human-epidemic-2016"
+    title: Westplan — Human Epidemic
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanHumanEpidemicSEMCapproved24052016.pdf"
+    fetch_url: "https://web.archive.org/web/20190315115603id_/https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanHumanEpidemicSEMCapproved24052016.pdf"
+    edition: SEMC approved 24 May 2016
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-westplan-human-epidemic-2016.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20190315115603 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-westplan-storm-2016"
+    title: Westplan — Storm
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanStormSEMCapproved24052016.pdf"
+    fetch_url: "https://web.archive.org/web/20190315115727id_/https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Plans/Westplans2016/WestplanStormSEMCapproved24052016.pdf"
+    edition: SEMC approved 24 May 2016
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-westplan-storm-2016.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20190315115727 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-local-recovery-guideline"
+    title: Local Recovery Guideline (WA)
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Guidelines/LocalRecoveryGuideline.pdf"
+    fetch_url: "https://web.archive.org/web/20190310115327id_/https://semc.wa.gov.au/Documents/Resources/LegislationPolicyPlansProcedureandGuidelines/Guidelines/LocalRecoveryGuideline.pdf"
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-local-recovery-guideline.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20190310115327 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-communicating-in-recovery-guidelines"
+    title: Communicating in Recovery — Guidelines (WA)
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/Documents/Resources/EMTools/CommunicatingInRecoveryGuidelines.pdf"
+    fetch_url: "https://web.archive.org/web/20190310115733id_/https://semc.wa.gov.au/Documents/Resources/EMTools/CommunicatingInRecoveryGuidelines.pdf"
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-communicating-in-recovery-guidelines.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20190310115733 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-natural-hazards-risk-profile-2017"
+    title: Western Australia Natural Hazards Risk Profile
+    publisher: WA SEMC
+    url: "https://semc.wa.gov.au/capability-and-preparedness/reports-and-reviews/Documents/WesternAustraliaNaturalHazardsRiskProfile2017.pdf"
+    fetch_url: "https://web.archive.org/web/20220710065525id_/https://semc.wa.gov.au/capability-and-preparedness/reports-and-reviews/Documents/WesternAustraliaNaturalHazardsRiskProfile2017.pdf"
+    edition: 2017
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-natural-hazards-risk-profile-2017.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20220710065525 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-dfes-bushfire-risk-mgmt-plan-guidelines-2020"
+    title: Guidelines for Preparing a Bushfire Risk Management Plan (BRMP)
+    publisher: WA DFES
+    url: "https://dfes.wa.gov.au/documents/Guidelines-for-Preparing-a-Bushfire-Risk-Management-Plan-2020.pdf"
+    fetch_url: "https://web.archive.org/web/20240318212729id_/https://dfes.wa.gov.au/documents/Guidelines-for-Preparing-a-Bushfire-Risk-Management-Plan-2020.pdf"
+    edition: 2020
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-dfes-bfrmp-guidelines-2020.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20240318212729 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-dfes-tropical-cyclone-preparedness-guide"
+    title: Tropical Cyclone Preparedness Guide (WA)
+    publisher: WA DFES
+    url: "https://dfes.wa.gov.au/site/cyclone/documents/tropical-cyclone-preparedness-guide.pdf"
+    fetch_url: "https://web.archive.org/web/20220308060704id_/https://dfes.wa.gov.au/site/cyclone/documents/tropical-cyclone-preparedness-guide.pdf"
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-dfes-tropical-cyclone-preparedness-guide.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20220308060704 (id_ identity URL).
+
+  - jurisdiction: wa
+    topic: "wa-reframing-rural-fire-management-waroona"
+    title: Reframing Rural Fire Management — Report of the Special Inquiry into the January 2016 Waroona Fire (Ferguson Report)
+    publisher: WA SEMC / Ferguson
+    url: "https://semc.wa.gov.au/capability-and-preparedness/reports-and-reviews/Documents/WaroonaBushfireSpecialInquiry/ReframingRuralFireManagement-ReportoftheSpecialInquiryintotheJanuary2016WaroonaFire.pdf"
+    fetch_url: "https://web.archive.org/web/20220313162538id_/https://semc.wa.gov.au/capability-and-preparedness/reports-and-reviews/Documents/WaroonaBushfireSpecialInquiry/ReframingRuralFireManagement-ReportoftheSpecialInquiryintotheJanuary2016WaroonaFire.pdf"
+    edition: 2016
+    licence: "© Government of Western Australia; emergency-management practitioner reference"
+    mode: full-text
+    filename: "wa-reframing-rural-fire-management-waroona-2016.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20220313162538 (id_ identity URL).
+
+  # =========================================================================
+  # NEW (2025 expansion) — NT
+  # =========================================================================
+  - jurisdiction: nt
+    topic: "nt-temc-strategy"
+    title: Territory Emergency Management Council (TEMC) Strategy
+    publisher: "NT Police, Fire and Emergency Services"
+    url: "https://pfes.nt.gov.au/sites/default/files/uploads/files/2019/TEMC%20Strategy.pdf"
+    licence: "© Northern Territory Government; emergency-management practitioner reference"
+    mode: full-text
+    filename: "nt-temc-strategy.pdf"
+
+  - jurisdiction: nt
+    topic: "nt-pfes-ten-year-strategy-2020"
+    title: "Northern Territory Police, Fire and Emergency Services — Ten Year Strategy 2020–2030"
+    publisher: "NT Police, Fire and Emergency Services"
+    url: "https://pfes.nt.gov.au/sites/default/files/uploads/files/2020/NTPFES_TEN_YEAR_STRATEGY_2020.pdf"
+    edition: 2020
+    licence: "© Northern Territory Government; emergency-management practitioner reference"
+    mode: full-text
+    filename: "nt-pfes-ten-year-strategy-2020.pdf"
+
+  - jurisdiction: nt
+    topic: "nt-saltwater-crocodile-risk-mgmt-framework"
+    title: Northern Territory Saltwater Crocodile Risk Management Framework 2021–26
+    publisher: NT Government
+    url: "https://nt.gov.au/__data/assets/pdf_file/0005/1018913/northern-territory-saltwater-crocodile-risk-management-framework-2021-26.pdf"
+    edition: 2021–26
+    licence: "© Northern Territory Government; emergency-management practitioner reference"
+    mode: full-text
+    filename: "nt-saltwater-crocodile-risk-mgmt-framework-2021-26.pdf"
+
+  - jurisdiction: nt
+    topic: "nt-disaster-ready-fund-guidelines-2025"
+    title: "Northern Territory Disaster Ready Fund Round Three 2025-26 Guidelines"
+    publisher: NT PFES / Disaster Ready Fund
+    url: "https://pfes.nt.gov.au/sites/default/files/uploads/files/2025/Disaster%20Ready%20Fund%20Round%20Three%202025-26%20Guidelines_v1.1_Final.pdf"
+    edition: v1.1 (2025)
+    licence: "© Northern Territory Government; emergency-management practitioner reference"
+    mode: full-text
+    filename: "nt-disaster-ready-fund-r3-guidelines-2025-26.pdf"
+
+  # =========================================================================
+  # NEW (2025 expansion) — ACT
+  # =========================================================================
+  - jurisdiction: act
+    topic: "act-strategic-bushfire-mgmt-plan-v3"
+    title: ACT Strategic Bushfire Management Plan
+    publisher: ACT ESA
+    url: "https://esa.act.gov.au/sites/default/files/wp-content/uploads/Strategic-Bushfire-Management-Plan-v3-formatted.pdf"
+    edition: Version 3
+    licence: "© ACT Government; emergency-management practitioner reference"
+    mode: full-text
+    filename: "act-strategic-bushfire-mgmt-plan-v3.pdf"
+
+  - jurisdiction: act
+    topic: "act-fire-management-standards-sbmpv31"
+    title: ACT Fire Management Standards (SBMP v3.1)
+    publisher: ACT ESA
+    url: "https://esa.act.gov.au/sites/default/files/2019-06/Fire-Managment-Standards-ACT-SBMPv31.pdf"
+    fetch_url: "https://web.archive.org/web/20230304004138id_/https://esa.act.gov.au/sites/default/files/2019-06/Fire-Managment-Standards-ACT-SBMPv31.pdf"
+    licence: "© ACT Government; emergency-management practitioner reference"
+    mode: full-text
+    filename: "act-fire-management-standards-sbmpv31.pdf"
+    notes: Live publisher URL no longer resolves; archived copy fetched from the Internet Archive Wayback Machine snapshot 20230304004138 (id_ identity URL).
+
+  - jurisdiction: act
+    topic: "act-bushfire-survival-plan"
+    title: ACT Bushfire Survival Plan
+    publisher: ACT ESA
+    url: "https://esa.act.gov.au/sites/default/files/wp-content/uploads/bushfire-survival-plan.pdf"
+    licence: "© ACT Government; emergency-management practitioner reference"
+    mode: full-text
+    filename: "act-bushfire-survival-plan.pdf"
+
+  - jurisdiction: act
+    topic: "act-regional-fire-management-plans"
+    title: ACT Regional Fire Management Plans
+    publisher: ACT ESA
+    url: "https://esa.act.gov.au/sites/default/files/wp-content/uploads/1-24-Regional-Fire-Management-Plans.pdf"
+    licence: "© ACT Government; emergency-management practitioner reference"
+    mode: full-text
+    filename: "act-regional-fire-management-plans.pdf"
+
+  - jurisdiction: act
+    topic: "act-bushfire-operational-plans"
+    title: ACT Bushfire Operational Plans
+    publisher: ACT ESA
+    url: "https://esa.act.gov.au/sites/default/files/wp-content/uploads/1-25-Bushfire-Operational-Plans.pdf"
+    licence: "© ACT Government; emergency-management practitioner reference"
+    mode: full-text
+    filename: "act-bushfire-operational-plans.pdf"
+

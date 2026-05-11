@@ -5,6 +5,8 @@ import { useState } from "react";
 
 const NAV_LINKS = [
   { href: "/", label: "Disaster Map", icon: "🗺️" },
+  { href: "/workspaces", label: "Workspaces", icon: "👥" },
+  { href: "/sectors", label: "Sectors", icon: "🏛️" },
   { href: "/governance", label: "Governance", icon: "🛡️" },
   { href: "/simulations", label: "Simulations", icon: "🔬" },
   { href: "/preparedness", label: "Preparedness", icon: "📋" },

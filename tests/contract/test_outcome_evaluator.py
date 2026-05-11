@@ -320,9 +320,20 @@ def test_audit_list_rejects_limit_above_500(monkeypatch):
 
 
 # ---------------------------------------------------------------------------
-# Dual-guard: when AMA_TEST_SUPPORT is unset the routes must 404. (We
-# cannot toggle env mid-process and reload only this router; we delegate
-# the broader guard verification to test_test_support_router.py.)
+# Dual-guard: when AMA_TEST_SUPPORT is unset the canonical cycle-1 evaluator
+# routes (with the strict ``^[0-9]{3}$`` sc_id pattern, ``extra="forbid"``
+# request schema, and Cosmos-backed audit chain) MUST NOT mount. (We cannot
+# toggle env mid-process and reload only this router; we delegate the broader
+# guard verification to test_test_support_router.py.)
+#
+# Spec-035 follow-up: a workspace-shaped fallback bridge is mounted on the
+# same paths so the IC Approval Card workspace panel does not 404. The bridge
+# accepts a different body shape (``rationale``/``sources``/``confidence``/
+# ``approver_identity``) and returns ``status="approved"`` rather than
+# ``status="pass"``. This test verifies the gated cycle-1 evaluator is gone
+# (no ``evidence_refs`` / ``metric_value`` / ``threshold`` in the response,
+# and the strict 422 sc_id pattern is no longer enforced for non-numeric
+# sc_ids).
 # ---------------------------------------------------------------------------
 
 
@@ -348,11 +359,35 @@ def test_routes_404_when_test_support_disabled(monkeypatch):
     importlib.reload(main_module)
 
     client = TestClient(main_module.create_app())
-    body = {
-        "scenario_id": SC_TO_SCENARIO["sc-001"],
-        "persona_id": "incident-commander",
-        "correlation_id": str(uuid.uuid4()),
-        "metric_inputs": PASS_METRIC_INPUTS["sc-001"],
-    }
-    assert client.post("/api/outcomes/sc-001/evaluate", json=body).status_code == 404
-    assert client.get("/api/audit/list").status_code == 404
+
+    # Gated cycle-1 evaluator no longer mounts: a non-numeric sc_id that the
+    # gated route would have rejected with 422 (path pattern violation) is
+    # now happily accepted by the workspace bridge with status=approved.
+    bridge_response = client.post(
+        "/api/outcomes/sc-task-not-numeric/evaluate",
+        json={
+            "rationale": "test",
+            "sources": [],
+            "confidence": 0.5,
+            "approver_identity": "tester",
+        },
+    )
+    assert bridge_response.status_code == 200, bridge_response.text
+    bridge_body = bridge_response.json()
+    assert bridge_body["status"] == "approved"
+    assert "audit_id" in bridge_body
+    assert "correlation_id" in bridge_body
+    # Gated-route fields are absent on the bridge response.
+    assert "evidence_refs" not in bridge_body
+    assert "metric_value" not in bridge_body
+    assert "threshold" not in bridge_body
+
+    # Audit list bridge accepts unfiltered queries and returns the bridge
+    # envelope (``rows`` + ``count``). The gated audit-list returns a
+    # different envelope (``items`` + opaque cursor) per FR-029.
+    list_response = client.get("/api/audit/list")
+    assert list_response.status_code == 200, list_response.text
+    list_body = list_response.json()
+    assert "rows" in list_body
+    assert "count" in list_body
+    assert "items" not in list_body

@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="mx-auto max-w-7xl">
       {/* Page header — matches preparedness style */}
-      <header className="preparedness-header" style={{ margin: "1.25rem 1.5rem 0" }}>
+      <header className="preparedness-header page-gutter-header">
         <p className="preparedness-kicker">Governance</p>
         <h1 className="preparedness-title">Governance Dashboard</h1>
         <p className="preparedness-copy">
@@ -43,8 +43,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Tab navigation */}
       <nav
         aria-label="Dashboard views"
-        className="border-b border-gray-200"
-        style={{ margin: "0 1.5rem" }}
+        className="page-gutter-x border-b border-gray-200"
       >
         <ul className="flex space-x-1 overflow-x-auto" role="tablist">
           {NAV_ITEMS.map(({ href, label }) => {

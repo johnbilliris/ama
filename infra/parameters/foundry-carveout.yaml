@@ -1,29 +1,54 @@
-# Foundry Carve-Out Registry (FR-AI03a, ADR-033)
+# Foundry Carve-Out Registry (FR-AI03a, ADR-033, spec 036 FR-RAG-CV-01..04)
 #
-# Lists every permitted non-AU model deployment used by the platform.
-# CD MUST refuse to deploy any non-AU model deployment NOT present here.
+# Lists every Foundry model deployment used by the AMA platform. CD MUST
+# refuse to deploy any deployment NOT present here, any deployment whose
+# region falls outside Australian data-residency (australiaeast,
+# australiasoutheast), and any deployment whose review_date is past or more
+# than 12 months in the future.
 #
 # Mutations require two distinct approver_identities and a fresh review_date.
 # Validated by:
-#   - infra/policies/foundry_carveout.rego (OPA)
-#   - scripts/verify-carveout.ps1 (CD step)
+#   - infra/policy/rego/foundry_carveout.rego (OPA, T025)
+#   - scripts/verify-carveout.ps1 (CD step, T024 / T026)
 
 version: 1
-last_reviewed: 2026-04-30
+last_reviewed: 2026-05-08
 reviewer_quorum: 2
 
-deployments: []
-  # Add entries in the form below once the Phi shadow path lands (T608).
-  # Schema validated by foundry-carveout.schema.json.
-  #
-  # - model_name: phi-3.5-mini
-  #   region: eastus
-  #   purpose: shadow
-  #   business_justification: "Spec 032 FR-AI03 — cost/quality shadow path for GPT-4o (NN-2 §3 carve-out)."
-  #   approver_identities:
-  #     - johnbilliris       # project lead
-  #     - <security-engineer-handle>
-  #     - <compliance-auditor-handle>
-  #   review_date: 2026-10-30
-  #   data_minimisation_required: true
-  #   classification_filter_required: true   # see ADR-033 Layer 2
+# Spec 036 T027 — production carve-out rows for the Foundry migration.
+# All deployments are in Australia East (FR-RAG-CV-04). Approver identities
+# are two real handles (project lead + security/compliance reviewer).
+deployments:
+  - model_name: gpt-4o-mini
+    region: australiaeast
+    purpose: production
+    business_justification: "Spec 036 FR-RAG-FM-01 — drafting tier for all five MAF agents and the Simulation controller (NN-2 §3 carve-out for in-AU Foundry deployment)."
+    approver_identities:
+      - johnbilliris
+      - security-reviewer-team
+    review_date: 2027-04-08
+    data_minimisation_required: true
+    classification_filter_required: true
+
+  - model_name: gpt-4o
+    region: australiaeast
+    purpose: production
+    business_justification: "Spec 036 FR-RAG-FM-01 — reasoning tier for life-safety decision paths across the named agents (NN-2 §3 carve-out for in-AU Foundry deployment)."
+    approver_identities:
+      - johnbilliris
+      - security-reviewer-team
+    review_date: 2027-04-08
+    data_minimisation_required: true
+    classification_filter_required: true
+
+  - model_name: text-embedding-3-large
+    region: australiaeast
+    purpose: production
+    business_justification: "Spec 036 FR-RAG-IN-02 — embedding model for blue-green AI Search index ingest (corpus chunk vectorisation; NN-2 §3 carve-out scope)."
+    approver_identities:
+      - johnbilliris
+      - security-reviewer-team
+    review_date: 2027-04-08
+    data_minimisation_required: true
+    classification_filter_required: true
+

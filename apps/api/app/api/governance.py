@@ -61,6 +61,36 @@ _service = GovernanceRegistryService()
 _cache = GovernanceCacheService()
 
 
+def _ensure_seed_loaded() -> None:
+    """Import the seed data-source catalogue into the live registry once.
+
+    Without this, the in-memory repository starts empty and per-source
+    compliance endpoints return 404 for sources that exist in seed data
+    (e.g. ``bom-warnings``).
+    """
+    if getattr(_service, "_seed_imported", False):
+        return
+    try:
+        from pathlib import Path
+
+        from packages.domain.src.domain.seed import bootstrap as _seed_mod
+
+        seed_root = Path(_seed_mod.__file__).resolve().parent
+        _service.import_seed_catalogue(seed_root)
+    except Exception:  # pragma: no cover — best-effort bootstrap
+        import logging
+
+        logging.getLogger(__name__).warning(
+            "Failed to import seed catalogue into governance registry",
+            exc_info=True,
+        )
+    finally:
+        _service._seed_imported = True
+
+
+_ensure_seed_loaded()
+
+
 # --- Compliance endpoints (US2) ---
 
 
@@ -275,3 +305,18 @@ async def get_audit_trail(
     to_datetime = datetime.fromisoformat(to_dt) if to_dt else None
     entries = _service.get_audit_trail(data_source_id, action, from_datetime, to_datetime)
     return [e.model_dump(mode="json") for e in entries]
+
+
+# --- Foundry carveout registry (spec-035 T070) ---
+
+
+@router.get("/governance/carveout-registry")
+async def get_carveout_registry() -> dict:
+    """List Foundry carve-out models with their review cadence (FR-029)."""
+
+    from app.repositories.carveout_registry_repository import (
+        get_carveout_registry_repository,
+    )
+
+    repository = get_carveout_registry_repository()
+    return {"entries": repository.list_entries()}

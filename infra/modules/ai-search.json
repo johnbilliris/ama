@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "13082317278977421365"
+      "templateHash": "12451602234271562045"
     }
   },
   "parameters": {
@@ -72,6 +72,66 @@
       "defaultValue": true,
       "metadata": {
         "description": "Disable public network access (must be true in production)"
+      }
+    },
+    "vectorDimensions": {
+      "type": "int",
+      "defaultValue": 3072,
+      "minValue": 256,
+      "maxValue": 3072,
+      "metadata": {
+        "description": "Embedding vector dimension (R-02 — text-embedding-3-large = 3072)"
+      }
+    },
+    "jurisdictionValues": {
+      "type": "array",
+      "defaultValue": [
+        "act",
+        "nsw",
+        "nt",
+        "qld",
+        "sa",
+        "tas",
+        "vic",
+        "wa",
+        "national",
+        "aidr"
+      ],
+      "metadata": {
+        "description": "Allowed jurisdiction filter values for the corpus index (FR-RAG-IDX-08)"
+      }
+    },
+    "licenceModeValues": {
+      "type": "array",
+      "defaultValue": [
+        "full-text",
+        "metadata-only"
+      ],
+      "metadata": {
+        "description": "Allowed licence_mode index filter values (FR-RAG-IDX-02). Excluded never reaches the index."
+      }
+    },
+    "capacityAlertThresholdPercent": {
+      "type": "int",
+      "defaultValue": 70,
+      "minValue": 50,
+      "maxValue": 95,
+      "metadata": {
+        "description": "AI Search storage utilisation threshold (percent) at which the capacity alert fires (R-10; default 70)"
+      }
+    },
+    "capacityActionGroupId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional Action Group resource id for the capacity alert (defaults to empty = no notification action)"
+      }
+    },
+    "enableCapacityAlert": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Whether to deploy the spec-036 capacity alert (FR-RAG-IDX-08 / R-10). Defaults to true; flip off for dev/staging."
       }
     }
   },
@@ -146,6 +206,43 @@
       "dependsOn": [
         "[resourceId('Microsoft.Network/privateEndpoints', format('{0}-pe', parameters('name')))]"
       ]
+    },
+    {
+      "condition": "[parameters('enableCapacityAlert')]",
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "[take(format('alert-search-capacity-{0}', parameters('name')), 260)]",
+      "location": "global",
+      "tags": "[parameters('tags')]",
+      "properties": {
+        "description": "[format('Spec 036 FR-RAG-IDX-08: AI Search storage utilisation crossed {0}% — schedule scale-out before R-10 fires.', parameters('capacityAlertThresholdPercent'))]",
+        "severity": 2,
+        "scopes": [
+          "[resourceId('Microsoft.Search/searchServices', parameters('name'))]"
+        ],
+        "evaluationFrequency": "PT5M",
+        "windowSize": "PT15M",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "name": "StorageUtilisation",
+              "metricName": "SearchLatency",
+              "metricNamespace": "Microsoft.Search/searchServices",
+              "operator": "GreaterThan",
+              "threshold": "[parameters('capacityAlertThresholdPercent')]",
+              "timeAggregation": "Average",
+              "criterionType": "StaticThresholdCriterion"
+            }
+          ]
+        },
+        "enabled": true,
+        "autoMitigate": true,
+        "actions": "[if(empty(parameters('capacityActionGroupId')), createArray(), createArray(createObject('actionGroupId', parameters('capacityActionGroupId'))))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Search/searchServices', parameters('name'))]"
+      ]
     }
   ],
   "outputs": {
@@ -160,6 +257,22 @@
     "principalId": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Search/searchServices', parameters('name')), '2024-06-01-preview', 'full').identity.principalId]"
+    },
+    "vectorDimensions": {
+      "type": "int",
+      "value": "[parameters('vectorDimensions')]"
+    },
+    "jurisdictionValues": {
+      "type": "array",
+      "value": "[parameters('jurisdictionValues')]"
+    },
+    "licenceModeValues": {
+      "type": "array",
+      "value": "[parameters('licenceModeValues')]"
+    },
+    "capacityAlertThresholdPercent": {
+      "type": "int",
+      "value": "[parameters('capacityAlertThresholdPercent')]"
     }
   }
 }

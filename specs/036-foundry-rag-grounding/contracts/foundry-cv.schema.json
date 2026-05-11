@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/johnbilliris/ama/specs/036-foundry-rag-grounding/contracts/foundry-cv.schema.json",
+  "title": "Foundry Carve-Out Registry — Spec 036 amend-loop schema",
+  "description": "Spec-036 amend-loop EXTENSION of the spec-032 carve-out registry schema at `infra/parameters/foundry-carveout.schema.json`. This file is the spec-036 contract anchor for the environment-aware quorum rule introduced in R3 Cluster A4 / Pass 2 Q-P2-03. It MUST be kept in sync with `infra/parameters/foundry-carveout.schema.json` (which is the runtime authority for CD enforcement). Differences from the spec-032 schema: (a) `environment` enum added at registry-row level; (b) `min_approvers_prod` (default 3) and `min_approvers_dev` (default 2) added at registry-root level; (c) the OPA rego at `infra/policy/rego/foundry_carveout.rego` MUST gain a matching `input.environment` discriminator (planned amend-loop bug-fix in Phase F-A4 — line 29 currently uses `< 2` which violates FR-RAG-CV-01 prod 3-approver requirement).",
+  "type": "object",
+  "required": ["version", "last_reviewed", "reviewer_quorum", "deployments"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "description": "Registry schema version. Spec-036 amend-loop is `v >= 2`.",
+      "type": "integer",
+      "minimum": 2
+    },
+    "last_reviewed": {
+      "description": "ISO-8601 date of the last governance review of the registry as a whole (independent of per-row `review_date`).",
+      "type": "string",
+      "format": "date"
+    },
+    "reviewer_quorum": {
+      "description": "Minimum reviewer count for any registry mutation. Spec 032 baseline: 2. Spec-036 amend-loop tightens this to environment-aware via `min_approvers_prod` / `min_approvers_dev` below; existing `reviewer_quorum >= 2` retained as the lower bound.",
+      "type": "integer",
+      "minimum": 2
+    },
+    "min_approvers_prod": {
+      "description": "Minimum `approver_identities[]` count required when `environment == 'prod'`. Spec-036 R3 Cluster A4 / Pass 2 Q-P2-03: MUST be `>= 3`. The OPA rego at `infra/policy/rego/foundry_carveout.rego` enforces this via the `input.environment` discriminator (planned bug-fix at line 29).",
+      "type": "integer",
+      "minimum": 3,
+      "default": 3
+    },
+    "min_approvers_dev": {
+      "description": "Minimum `approver_identities[]` count required when `environment in ('dev', 'staging')`. Spec-036 R3 Cluster A4: `>= 2` (existing spec-032 behaviour, preserved).",
+      "type": "integer",
+      "minimum": 2,
+      "default": 2
+    },
+    "deployments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "model_name",
+          "region",
+          "environment",
+          "purpose",
+          "business_justification",
+          "approver_identities",
+          "review_date",
+          "data_minimisation_required",
+          "classification_filter_required"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "model_name": {"type": "string", "minLength": 3},
+          "region": {"type": "string", "minLength": 4},
+          "environment": {
+            "description": "Spec-036 amend-loop NEW field. Discriminator for the environment-aware quorum rule. MUST match the target deployment environment so the OPA rego can apply the correct `min_approvers_*` floor.",
+            "type": "string",
+            "enum": ["prod", "staging", "dev"]
+          },
+          "purpose": {
+            "type": "string",
+            "enum": ["production", "shadow", "evaluation", "research"]
+          },
+          "business_justification": {"type": "string", "minLength": 30},
+          "approver_identities": {
+            "description": "Non-placeholder Entra IDs. The minItems floor is environment-aware: prod >= min_approvers_prod (default 3); dev/staging >= min_approvers_dev (default 2). Schema-level lower bound is 2 for backward compat with spec-032; OPA enforces the environment-aware floor at runtime.",
+            "type": "array",
+            "minItems": 2,
+            "items": {"type": "string", "minLength": 3}
+          },
+          "review_date": {
+            "description": "ISO-8601 date. MUST be ≤ 12 months from CD apply (FR-RAG-CV-01); `scripts/verify-carveout.ps1` enforces (FR-RAG-CV-02).",
+            "type": "string",
+            "format": "date"
+          },
+          "data_minimisation_required": {"type": "boolean", "const": true},
+          "classification_filter_required": {"type": "boolean", "const": true}
+        },
+        "allOf": [
+          {
+            "$comment": "Environment-aware approver-count rule. Schema cannot conditionally enforce minItems via if/then on a sibling property in JSON-Schema 2020-12 portable across all validators, so the OPA rego at `infra/policy/rego/foundry_carveout.rego` carries the binding rule. This allOf documents the intent for downstream tooling.",
+            "if": {"properties": {"environment": {"const": "prod"}}, "required": ["environment"]},
+            "then": {"properties": {"approver_identities": {"minItems": 3}}}
+          }
+        ]
+      }
+    }
+  },
+  "examples": [
+    {
+      "version": 2,
+      "last_reviewed": "2026-05-08",
+      "reviewer_quorum": 2,
+      "min_approvers_prod": 3,
+      "min_approvers_dev": 2,
+      "deployments": [
+        {
+          "model_name": "gpt-4o-mini",
+          "region": "australiaeast",
+          "environment": "prod",
+          "purpose": "production",
+          "business_justification": "Spec 036 FR-RAG-FM-01 — production inference for all agents and simulation chat (NN-2 §3 carve-out scope).",
+          "approver_identities": ["johnbilliris", "<security-engineer-handle>", "<compliance-auditor-handle>"],
+          "review_date": "2027-05-08",
+          "data_minimisation_required": true,
+          "classification_filter_required": true
+        },
+        {
+          "model_name": "gpt-4o-mini",
+          "region": "australiaeast",
+          "environment": "dev",
+          "purpose": "evaluation",
+          "business_justification": "Spec 036 dev-environment evaluation runs for the eval-runner equivalence-gate harness.",
+          "approver_identities": ["johnbilliris", "<dev-eng-handle>"],
+          "review_date": "2027-05-08",
+          "data_minimisation_required": true,
+          "classification_filter_required": true
+        }
+      ]
+    }
+  ]
+}

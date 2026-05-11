@@ -1,10 +1,18 @@
 """Simulation Controller service — orchestrates chat with tool-allow-list.
 
 Two backends:
-- **Azure OpenAI** when ``AZURE_OPENAI_ENDPOINT`` + ``AZURE_OPENAI_DEPLOYMENT`` are set.
+- **Foundry** when ``AZURE_AI_PROJECT_ENDPOINT`` (+ ``AZURE_AI_PROJECT_DEPLOYMENTS``) is set.
 - **Offline deterministic** otherwise — used by tests and local dev.
 
 Both backends emit the same SSE events defined in contracts/simulation-chat-api.md.
+
+Spec 036 / ADR-20 hard cutover: the legacy ``AZURE_OPENAI_*`` env-var
+seam and the ``LEGACY_AZURE_OPENAI=1`` rollback flag have been removed
+from this controller (ADR-20 §Q-P6-03 post-cutover cleanup). Authentication
+is AAD-only (FR-RAG-FM-04). When ``AZURE_SEARCH_ENDPOINT`` is set the
+controller auto-constructs an ``AzureSearchRetrievalService`` so simulation
+chat is grounded in the
+same corpus as the live agents (FR-RAG-SIM-01..06).
 """
 
 from __future__ import annotations
@@ -65,6 +73,37 @@ _REAL_WORLD_PATTERNS = [
 ]
 
 
+def _build_default_retrieval_service() -> Any:
+    """Auto-construct the production ``AzureSearchRetrievalService`` when wired.
+
+    Delegates to ``common.retrieval_client.build_default_retrieval_service``
+    so the simulation chat and the agents share a single construction
+    site — both then carry the same Foundry-backed query embedder
+    (3072-dim) that matches the corpus index.
+
+    Returns ``None`` (disabling grounding) unless ``AZURE_SEARCH_ENDPOINT``
+    is set. Production Bicep sets the env var on the API container app
+    once the spec-036 cutover provisions the AI Search service. Tests
+    that pre-seed the env var get the live class wired automatically;
+    tests that want a stubbed retrieval service inject one via the
+    constructor.
+    """
+    if not os.environ.get("AZURE_SEARCH_ENDPOINT"):
+        return None
+    try:
+        # Deferred import to avoid pulling apps/agents into the api hot path
+        # when the feature is disabled.
+        from common.retrieval_client import build_default_retrieval_service  # noqa: PLC0415
+
+        return build_default_retrieval_service()
+    except Exception:  # noqa: BLE001
+        logger.warning(
+            "Failed to build AzureSearchRetrievalService; simulation chat will fall back to ungrounded mode",
+            exc_info=True,
+        )
+        return None
+
+
 class SimulationControllerService:
     def __init__(
         self,
@@ -75,6 +114,8 @@ class SimulationControllerService:
         event_recorder: Any = None,
         clock_service: Any = None,
         simulation_repository: Any = None,
+        retrieval_service: Any = None,
+        audit_writer: Any = None,
     ) -> None:
         self._sub_agents = sub_agents or default_invoker()
         self._rl = rate_limiter or get_rate_limiter()
@@ -84,6 +125,12 @@ class SimulationControllerService:
         self._sim_repo = simulation_repository
         self._prompt_text = _PROMPT_PATH.read_text(encoding="utf-8")
         self._prompt_hash = hashlib.sha256(self._prompt_text.encode("utf-8")).hexdigest()
+        # Spec 036 FR-RAG-SIM-01..06: optional retrieval client + audit writer.
+        # Both are dependency-injected so tests can stub them; production
+        # auto-constructs the retrieval client from ``AZURE_SEARCH_ENDPOINT``
+        # when the caller did not inject one.
+        self._retrieval = retrieval_service or _build_default_retrieval_service()
+        self._audit_writer = audit_writer
 
     async def _current_sim_seconds(self, tenant_id: str) -> float:
         """Best-effort lookup of current simulated time for the tenant."""
@@ -207,6 +254,31 @@ class SimulationControllerService:
                 out.append({"role": t.role, "content": t.content})
         return out
 
+    def _resolve_simulation_deployment(self) -> str | None:
+        """Resolve the simulation deployment name from the Foundry env vars.
+
+        Spec 036 / ADR-20 hard cutover: the controller reads
+        ``AZURE_AI_PROJECT_DEPLOYMENTS`` (CSV of
+        ``modelId@version=deploymentName``) and matches the simulation /
+        reasoning model key. Returns ``None`` when the deployment cannot be
+        resolved — the caller surfaces ``openai_unavailable`` rather than
+        falling back to a legacy env var.
+        """
+        csv = os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS", "")
+        model_key = (
+            os.environ.get("AZURE_AI_SIMULATION_MODEL_KEY")
+            or os.environ.get("AZURE_AI_REASONING_MODEL_KEY")
+            or "gpt-4o"
+        )
+        if csv:
+            for entry in (e.strip() for e in csv.split(",") if e.strip()):
+                if "=" not in entry:
+                    continue
+                key, name = entry.split("=", 1)
+                if key.strip() == model_key:
+                    return name.strip()
+        return None
+
     async def stream_turn(
         self,
         *,
@@ -253,9 +325,9 @@ class SimulationControllerService:
 
         backend = (mode or os.getenv("SIM_CONTROLLER_MODE", "")).lower()
         if not backend:
-            backend = "azure" if os.getenv("AZURE_OPENAI_ENDPOINT") else "offline"
+            backend = "foundry" if os.getenv("AZURE_AI_PROJECT_ENDPOINT") else "offline"
 
-        if backend == "azure":
+        if backend in ("foundry", "azure"):
             async for ev in self._stream_from_azure(
                 turn_id=turn_id,
                 tenant_id=tenant_id,
@@ -275,6 +347,8 @@ class SimulationControllerService:
     async def _stream_offline(
         self, *, turn_id: str, tenant_id: str, simulation_id: str, user_message: str
     ) -> AsyncIterator[ChatEvent]:
+        # RAG-OPTOUT [FR-RAG-NS-06]: scripted-scenario / offline streaming path; canned responses by intent — no LLM call to ground. ADR: docs/decisions/036-foundry-rag-grounding/06-rag-optout-scenario-execution.md  # noqa: E501
+        # Audit records: call_kind=inference, rag_used=false, rag_optout_reason="scenario-execution".
         assistant_parts: list[str] = []
 
         def _emit_delta(text: str) -> ChatEvent:
@@ -364,8 +438,18 @@ class SimulationControllerService:
     async def _stream_from_azure(
         self, *, turn_id: str, tenant_id: str, simulation_id: str, user_message: str
     ) -> AsyncIterator[ChatEvent]:  # pragma: no cover
+        # Spec 036 / ADR-20 hard cutover: the simulation controller backs onto
+        # Microsoft Foundry exclusively. The endpoint and deployment are
+        # resolved from ``AZURE_AI_PROJECT_*`` env vars; the
+        # ``controller_prompt.md`` system prompt and the ``TOOL_SCHEMAS``
+        # tool-calling 3-round loop are preserved verbatim (OOS-6, spec 024).
+        #
+        # Authentication is AAD-only (FR-RAG-FM-04) — managed identity in
+        # Container Apps, ``az login`` locally. API-key auth is forbidden;
+        # the legacy ``AZURE_OPENAI_API_KEY`` path was removed when the
+        # cutover completed.
         try:
-            from openai import AsyncAzureOpenAI
+            from openai import AsyncAzureOpenAI  # AMA-FM04: allow Foundry transport (FR-RAG-FM-01)  # noqa: PLC0415
         except Exception:
             yield ChatEvent(
                 "error",
@@ -373,30 +457,21 @@ class SimulationControllerService:
             )
             return
 
-        endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
-        # Look for a deployment name in priority order so the controller "just works"
-        # whether the operator wired a dedicated simulation deployment, the canonical
-        # AZURE_OPENAI_DEPLOYMENT, or only the reasoning-tier deployment.
-        deployment = (
-            os.environ.get("AZURE_OPENAI_DEPLOYMENT")
-            or os.environ.get("AZURE_OPENAI_SIMULATION_DEPLOYMENT")
-            or os.environ.get("AZURE_OPENAI_REASONING_DEPLOYMENT")
-        )
+        endpoint = os.environ.get("AZURE_AI_PROJECT_ENDPOINT")
+
+        deployment = self._resolve_simulation_deployment()
         api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
-        api_key = os.environ.get("AZURE_OPENAI_API_KEY")
         if not (endpoint and deployment):
             missing = (
-                "AZURE_OPENAI_ENDPOINT"
+                "AZURE_AI_PROJECT_ENDPOINT"
                 if not endpoint
-                else "AZURE_OPENAI_DEPLOYMENT"
-                " (or AZURE_OPENAI_SIMULATION_DEPLOYMENT"
-                " / AZURE_OPENAI_REASONING_DEPLOYMENT)"
+                else "AZURE_AI_PROJECT_DEPLOYMENTS (or AZURE_AI_SIMULATION_MODEL_KEY)"
             )
             yield ChatEvent(
                 "error",
                 {
                     "code": "openai_unavailable",
-                    "message": f"Azure OpenAI is not fully configured (missing {missing}).",
+                    "message": f"Foundry chat endpoint is not fully configured (missing {missing}).",
                 },
             )
             return
@@ -405,46 +480,127 @@ class SimulationControllerService:
             "azure_endpoint": endpoint,
             "api_version": api_version,
         }
-        if api_key:
-            client_kwargs["api_key"] = api_key
-        else:
-            # No API key set — use Microsoft Entra ID.
-            # Container Apps -> managed identity; local dev -> az/azd login.
-            try:
-                from azure.identity import (
-                    DefaultAzureCredential,
-                    get_bearer_token_provider,
-                )
+        # AAD-only auth (FR-RAG-FM-04). Managed identity in Container Apps;
+        # az/azd login locally. The token scope is the cognitive-services
+        # audience that Foundry accepts.
+        try:
+            from azure.identity import (
+                DefaultAzureCredential,
+                get_bearer_token_provider,
+            )
 
-                credential = DefaultAzureCredential(exclude_interactive_browser_credential=True)
-                client_kwargs["azure_ad_token_provider"] = get_bearer_token_provider(
-                    credential, "https://cognitiveservices.azure.com/.default"
-                )
-            except Exception as exc:
-                yield ChatEvent(
-                    "error",
-                    {
-                        "code": "openai_client_init_failed",
-                        "message": (
-                            "Azure OpenAI credential unavailable. Set AZURE_OPENAI_API_KEY "
-                            "or ensure managed identity / az login is configured: "
-                            f"{exc}"
-                        ),
-                    },
-                )
-                return
+            credential = DefaultAzureCredential(exclude_interactive_browser_credential=True)
+            client_kwargs["azure_ad_token_provider"] = get_bearer_token_provider(
+                credential, "https://cognitiveservices.azure.com/.default"
+            )
+        except Exception as exc:
+            yield ChatEvent(
+                "error",
+                {
+                    "code": "openai_client_init_failed",
+                    "message": (
+                        f"Foundry credential unavailable. Ensure managed identity or az login is configured: {exc}"
+                    ),
+                },
+            )
+            return
         try:
             client = AsyncAzureOpenAI(**client_kwargs)
         except Exception as exc:
             yield ChatEvent("error", {"code": "openai_client_init_failed", "message": str(exc)})
             return
 
+        # Spec 036 FR-RAG-CV-03: data-minimisation gateway for non-AU
+        # deployments. AU deployments bypass redaction (data residency holds);
+        # non-AU deployments redact PII / deny PSPF-marked / sensitive
+        # operational content **before** the message hits Foundry.
+        deployment_region = os.environ.get("AZURE_AI_PROJECT_REGION", "australiaeast").lower()
+        forwarded_message = user_message
+        try:
+            from common.model_gateway import apply as gateway_apply  # type: ignore[import-not-found]
+        except Exception:
+            gateway_apply = None  # type: ignore[assignment]
+        if gateway_apply is not None:
+            decision = gateway_apply(text=user_message, deployment_region=deployment_region)
+            if decision.gateway_decision == "deny":
+                yield ChatEvent(
+                    "error",
+                    {
+                        "code": "gateway_denied",
+                        "message": f"Data-minimisation gateway denied the request: {decision.reason}",
+                    },
+                )
+                return
+            forwarded_message = decision.transmitted_text
+
         # Replay the rolling window of prior turns so the model has conversational
         # memory across requests. Ordering is [system, ...prior turns (oldest
         # first), current user message].
         messages: list[dict[str, Any]] = [{"role": "system", "content": self._prompt_text}]
         messages.extend(self._load_history_messages(tenant_id))
-        messages.append({"role": "user", "content": user_message})
+        messages.append({"role": "user", "content": forwarded_message})
+
+        # Spec 036 FR-RAG-SIM-01: retrieve grounding chunks BEFORE the first
+        # LLM call. The system prompt + tool schemas are NOT modified (OOS-6);
+        # we only enrich the user message with a "Grounding context" preamble
+        # when retrieval returns non-empty results. Empty results emit a
+        # ``citations: []`` SSE event with the operator-verification note
+        # (FR-RAG-SIM-03).
+        retrieved_chunks: list[Any] = []
+        retrieval_result: Any = None
+        sim_corpus_build_sha: str | None = None
+        sim_embedding_model_id: str | None = None
+        sim_retrieval_index_name: str | None = None
+        if self._retrieval is not None:
+            try:
+                from ama_domain import (  # type: ignore[import-not-found]
+                    RetrievalRequest,
+                )
+
+                # Best-effort jurisdiction inference: simulation runs are tenant-
+                # scoped; the retrieval client expands to ∪ {national, aidr}
+                # server-side (FR-RAG-AG-04). Default to ``national`` so a
+                # tenant without a locked jurisdiction still gets the AIDR
+                # corpus on every turn.
+                req = RetrievalRequest(
+                    agent_name="SimulationController",
+                    jurisdictions=[os.environ.get("AMA_SIM_JURISDICTION", "national")],
+                    hazard_type=os.environ.get("AMA_SIM_HAZARD_TYPE", "general"),
+                    query_text=forwarded_message[:4000],
+                    top_k=5,
+                    tenant_id=tenant_id,
+                    correlation_id=turn_id,
+                )
+                retrieval_result = await self._retrieval.retrieve(req)
+                retrieved_chunks = list(getattr(retrieval_result, "chunks", []) or [])
+                sim_corpus_build_sha = getattr(retrieval_result, "corpus_build_sha", None)
+                sim_embedding_model_id = getattr(retrieval_result, "embedding_model_id", None)
+                # F-A7 / ADR-16 — propagate the pinned concrete index name
+                # into the audit shape (NOT the alias). Falls back to
+                # ``alias_active_index`` for legacy retrieval clients that
+                # haven't yet been retrofit with alias-pinning.
+                sim_retrieval_index_name = getattr(
+                    retrieval_result, "retrieval_index_name", None
+                ) or getattr(retrieval_result, "alias_active_index", None)
+            except Exception as exc:  # noqa: BLE001 — retrieval failure must not abort the turn
+                logger.warning("sim_retrieval_failed turn_id=%s err=%s", turn_id, exc)
+                retrieval_result = None
+
+        # If we have grounding chunks, prepend a short context block to the
+        # user message. This is intentionally minimal — it does NOT reshape
+        # the controller_prompt.md system prompt (OOS-6).
+        if retrieved_chunks:
+            context_lines = [
+                "Grounding context (cite by jurisdiction/topic/page; do not invent sources):",
+            ]
+            for c in retrieved_chunks[:5]:
+                jurisdiction = getattr(c, "jurisdiction", "")
+                jurisdiction = getattr(jurisdiction, "value", jurisdiction)
+                context_lines.append(
+                    f"- [{jurisdiction}/{getattr(c, 'topic', '')}#p{getattr(c, 'page', '')}]"
+                    f" {(getattr(c, 'text', '') or getattr(c, 'summary', '') or '')[:280]}"
+                )
+            messages[-1]["content"] = "\n".join(context_lines) + "\n\n---\n\n" + forwarded_message
 
         collected_all: list[str] = []
 
@@ -607,6 +763,105 @@ class SimulationControllerService:
             content=assistant_text,
             model=deployment,
         )
+
+        # Spec 036 FR-RAG-SIM-02 / FR-RAG-SIM-03: emit a ``citation`` SSE
+        # event right before ``turn.end``. We synthesise lightweight Citation
+        # dicts directly from the retrieved chunks — the simulation channel
+        # currently surfaces metadata only; full-text licensing is gated on
+        # the recommendation-card path (T086) where the licence_mode is
+        # already enforced.
+        try:
+            from app.services.simulation.citation_sse import (  # noqa: PLC0415
+                format_empty_citations_event,
+            )
+
+            if self._retrieval is not None and not retrieved_chunks:
+                yield ChatEvent(
+                    "citation",
+                    json.loads(
+                        format_empty_citations_event(turn_id=turn_id)
+                        .removeprefix("event: citation\n")
+                        .removeprefix("data: ")
+                        .strip()
+                    ),
+                )
+            elif retrieved_chunks:
+                citation_dicts = []
+                for c in retrieved_chunks[:5]:
+                    licence = getattr(c, "licence_mode", None)
+                    licence = getattr(licence, "value", licence) or "metadata-only"
+                    jurisdiction = getattr(c, "jurisdiction", "")
+                    jurisdiction = getattr(jurisdiction, "value", jurisdiction)
+                    cit = {
+                        "jurisdiction": jurisdiction,
+                        "topic": getattr(c, "topic", ""),
+                        "page": getattr(c, "page", 0),
+                        "source_url": getattr(c, "source_url", ""),
+                        "rendered_url": getattr(c, "rendered_url", ""),
+                        "sha256_of_chunk": getattr(c, "sha256_of_chunk", ""),
+                        "licence_mode": licence,
+                        "confidence": float(getattr(c, "confidence", 0.0) or 0.0),
+                    }
+                    if licence == "full-text":
+                        cit["snippet"] = (getattr(c, "text", "") or "")[:300]
+                    citation_dicts.append(cit)
+                yield ChatEvent(
+                    "citation",
+                    {"turn_id": turn_id, "citations": citation_dicts},
+                )
+
+                # FR-RAG-SIM-04 / R-13: write the extended audit record. The
+                # writer is best-effort — failure must never break the SSE
+                # stream.
+                if self._audit_writer is not None:
+                    try:
+                        from common.audit import (  # noqa: PLC0415
+                            make_inference_record,
+                        )
+
+                        prompt_sha = hashlib.sha256(forwarded_message.encode("utf-8")).hexdigest()
+                        record = make_inference_record(
+                            agent_name="SimulationController",
+                            prompt_sha=prompt_sha,
+                            model_id=deployment,
+                            model_version=os.environ.get("AZURE_AI_PROJECT_MODEL_VERSION", "unknown"),
+                            deployment_alias=deployment,
+                            output_text_hash=_sha256(assistant_text),
+                            output_tokens=len(assistant_text.split()),
+                            tenant_id=tenant_id,
+                            correlation_id=turn_id,
+                            rag_used=True,
+                            embedding_model_id=sim_embedding_model_id or "unknown",
+                            corpus_build_sha=sim_corpus_build_sha or "unknown",
+                            retrieved_chunks=[
+                                {
+                                    "chunk_id": getattr(c, "chunk_id", ""),
+                                    "sha256_of_chunk": getattr(c, "sha256_of_chunk", ""),
+                                    "jurisdiction": (
+                                        getattr(c, "jurisdiction", "").value
+                                        if hasattr(getattr(c, "jurisdiction", ""), "value")
+                                        else getattr(c, "jurisdiction", "")
+                                    ),
+                                    "topic": getattr(c, "topic", ""),
+                                    "page": getattr(c, "page", 0),
+                                    "licence_mode": (
+                                        getattr(c, "licence_mode", "").value
+                                        if hasattr(getattr(c, "licence_mode", ""), "value")
+                                        else getattr(c, "licence_mode", "")
+                                    ),
+                                    "confidence": float(getattr(c, "confidence", 0.0) or 0.0),
+                                }
+                                for c in retrieved_chunks
+                            ],
+                            citations=citation_dicts,
+                            retrieval_index_name=sim_retrieval_index_name,
+                        )
+                        await self._audit_writer.write(record)
+                    except Exception as exc:  # noqa: BLE001
+                        logger.warning("sim_audit_write_failed turn_id=%s err=%s", turn_id, exc)
+        except Exception as exc:  # noqa: BLE001 — never break the SSE stream
+            logger.warning("sim_citation_emit_failed turn_id=%s err=%s", turn_id, exc)
+
         yield ChatEvent(
             "turn.end",
             {"turn_id": turn_id, "content_hash": _sha256(assistant_text)},

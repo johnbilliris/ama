@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/johnbilliris/ama/specs/036-foundry-rag-grounding/contracts/staleness_alert.schema.json",
+  "title": "Corpus Staleness Alert (FR-RAG-FRESH-02)",
+  "description": "Wire format for the `corpus_stale` alert emitted to on-call + Service Bus when the corpus has gone stale (per ADR-17 + FR-RAG-FRESH-02). Scope is the global corpus index (single signal per Pass 1 Q-P1-05) — NOT per-jurisdiction or per-topic partition. One alert per `corpus_build_sha` age threshold breach. Disable path is `feature.corpus_freshness_alert.enabled` (Reversible class per A12); when disabled, alert is suppressed but underlying staleness state is still recorded in the audit log.",
+  "type": "object",
+  "required": [
+    "alert_id",
+    "alert_type",
+    "emitted_at",
+    "corpus_build_sha",
+    "corpus_generated_at",
+    "corpus_age_days",
+    "last_ingest_run_at",
+    "last_ingest_run_age_hours",
+    "severity",
+    "feature_flag_state"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "alert_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "UUID v7 (time-ordered). Used by on-call + downstream incident management to deduplicate."
+    },
+    "alert_type": {
+      "type": "string",
+      "const": "corpus_stale",
+      "description": "Discriminator. Always `corpus_stale` for FR-RAG-FRESH-02. Distinct from FR-RAG-FRESH-01 in-UI freshness indicator (which is a UI signal, not an alert)."
+    },
+    "emitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp of alert emission."
+    },
+    "corpus_build_sha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 of the current corpus build manifest; same value as `AuditRecord.corpus_build_sha`."
+    },
+    "corpus_generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC `generated_at` from the corpus manifest. Drives the age computation."
+    },
+    "corpus_age_days": {
+      "type": "number",
+      "minimum": 14,
+      "description": "Age in days = (emitted_at - corpus_generated_at). MUST be >=14 per FR-RAG-FRESH-02 trigger."
+    },
+    "last_ingest_run_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp of the last successful ingest job execution (per FR-RAG-IDX-05a nightly schedule). Null if no ingest has ever run."
+    },
+    "last_ingest_run_age_hours": {
+      "type": "number",
+      "minimum": 48,
+      "description": "Hours since the last successful ingest run. MUST be >=48 per FR-RAG-FRESH-02 trigger (the 48-hour grace prevents transient alert noise during in-flight rebuilds). If `last_ingest_run_at` is null, set to a sentinel large value (e.g. 999999) and on-call treats it as 'no ingest history'."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["yellow", "red"],
+      "description": "UI/operational severity. Both severities only fire when FR-RAG-FRESH-02 trigger is met (corpus_age_days >=14 AND last_ingest_run_age_hours >=48). `yellow` = corpus_age_days in [14, 17) (lower-band SOFT-warn for reactive teams that opt into early signals while drift remediation is in flight); `red` = corpus_age_days >=17 (hard alert; on-call paging escalates). The FR-RAG-FRESH-01 in-UI freshness indicator (yellow at >7 days, red at >14 days) is a separate UI signal — NOT this alert. The yellow→red boundary at 17 days is chosen so that even a same-week drift-remediation cycle has 3 days to turn the alert red before paging escalation."
+    },
+    "feature_flag_state": {
+      "type": "object",
+      "required": ["flag_name", "enabled"],
+      "additionalProperties": false,
+      "description": "State of the disable path per Pass 2 Q-P2-08. When `enabled == false`, the alert is suppressed but the underlying state is still recorded in the audit log; this object is included so downstream consumers know the alert was generated under the disabled-path semantics.",
+      "properties": {
+        "flag_name": {
+          "type": "string",
+          "const": "feature.corpus_freshness_alert.enabled"
+        },
+        "enabled": {"type": "boolean"},
+        "actor_id": {
+          "type": ["string", "null"],
+          "description": "Last actor who flipped the flag (null if never flipped)."
+        },
+        "changed_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "remediation_link": {
+      "type": "string",
+      "format": "uri",
+      "description": "Optional. Pointer to the runbook step for remediation (e.g. `https://github.com/johnbilliris/ama/blob/main/docs/runbooks/036-foundry-rag-corpus-stale.md`)."
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Trace correlation across alert -> Service Bus -> on-call paging."
+    }
+  },
+  "examples": [
+    {
+      "alert_id": "01910f6c-4a23-72e3-9e1f-0aa11ac6f8b0",
+      "alert_type": "corpus_stale",
+      "emitted_at": "2026-05-23T01:00:30Z",
+      "corpus_build_sha": "f9c3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a26",
+      "corpus_generated_at": "2026-05-08T11:00:00Z",
+      "corpus_age_days": 14.5,
+      "last_ingest_run_at": "2026-05-21T01:00:00Z",
+      "last_ingest_run_age_hours": 48,
+      "severity": "yellow",
+      "feature_flag_state": {
+        "flag_name": "feature.corpus_freshness_alert.enabled",
+        "enabled": true,
+        "actor_id": null,
+        "changed_at": null
+      },
+      "remediation_link": "https://github.com/johnbilliris/ama/blob/main/docs/runbooks/036-foundry-rag-corpus-stale.md",
+      "correlation_id": "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      "alert_id": "01910f6c-4a23-72e3-9e1f-0aa11ac6f8b1",
+      "alert_type": "corpus_stale",
+      "emitted_at": "2026-05-25T01:00:30Z",
+      "corpus_build_sha": "f9c3a8b27da4e9f1c8b93726c4e1a9bc15e3a4d8f9c7b62e5a1d3c8f7e9b4a26",
+      "corpus_generated_at": "2026-05-08T11:00:00Z",
+      "corpus_age_days": 16.6,
+      "last_ingest_run_at": null,
+      "last_ingest_run_age_hours": 999999,
+      "severity": "red",
+      "feature_flag_state": {
+        "flag_name": "feature.corpus_freshness_alert.enabled",
+        "enabled": true,
+        "actor_id": null,
+        "changed_at": null
+      },
+      "correlation_id": "550e8400-e29b-41d4-a716-446655440001"
+    }
+  ]
+}
