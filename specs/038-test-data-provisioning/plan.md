@@ -673,3 +673,157 @@ plan addresses it. Personas and their guidance files live at
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
 *N/A — no Constitution violations.*
+
+---
+
+## Amendment Cycle 1 — Manifest MD Freshness Gate
+
+> **Scope discipline:** This amendment ONLY adds the FR-036 / SC-016 freshness
+> gate (and its CL-9..CL-12 refinements). It changes **zero** entries in the
+> manifest, introduces **zero** new Azure resources, **zero** new GitHub
+> workflow files, and does **not** touch FR-001..FR-035, FR-040..FR-071, or
+> SC-001..SC-015 — those remain authoritative as written in `spec.md`. The
+> companion checklist `checklists/manifest-md-freshness.md` (21 binary items)
+> is the requirements-quality gate for this cycle.
+
+### A.1 Components
+
+**`tools/lint/render_test_data_manifest_md.py` (existing — Phase 4 / T046)**:
+The renderer already exists and already honours the deterministic contract
+locked in by FR-036 — confirmed by reading the source: `render()` sorts entries
+via `sorted(doc.get("entries", []), key=lambda e: (e["category"], e["id"]))`,
+emits a 7-column subset (`id`, `path`/`source_shape`, `domain_group`,
+`persona_bindings`, `pspf`, `licence`, `cultural_review_required`) per category
+section, writes `\n`-joined output, and `main()` calls
+`out.write_bytes(render(doc).replace("\r\n", "\n").encode("utf-8"))` so the
+on-disk file is guaranteed LF + UTF-8. The amendment adds a `--check` flag:
+when set, the renderer re-renders to an in-memory buffer, reads the committed
+file's bytes, applies `\r\n`→`\n` normalisation to the committed bytes, and
+exits `0` on byte-exact equality, `1` on divergence (printing a unified diff
+truncated to a sensible line budget plus the exact remediation command
+`python tools/lint/build_test_data_manifest.py && python tools/lint/render_test_data_manifest_md.py`),
+and `0` with a stderr skip notice if `manifest.json` is missing (CL-10
+N/A-on-pre-Phase-1-branches behaviour).
+
+**`tools/lint/check_manifest_md_fresh.py` (new — thin wrapper)**:
+A 10–20 LOC wrapper that imports `render_test_data_manifest_md` and invokes
+its `--check` mode. We add this script even though the `--check` flag alone is
+sufficient, because it preserves naming symmetry with the four existing
+`tools/lint/check_*.py` scripts (`check_test_data_manifest.py`,
+`check_indigenous_placeholders.py`, `check_simulator_isolation.py`,
+`check_licence_inventory.py`, `check_rag_optout_bindings.py`,
+`check_golden_set_canonical.py`) — every CI lint step today invokes a script
+named `check_*.py`, and adding a `render_*.py --check` invocation would break
+that convention. **Decision: implement BOTH** the `--check` flag (because the
+amendment text in `spec.md` references the renderer directly) AND the wrapper
+(because CI invokes `check_*.py` scripts).
+
+### A.2 CI wiring (single new step in existing `quality:` job)
+
+`.github/workflows/ci.yml` currently has the `quality:` job at line 15 with
+`simulator-isolation-lint` at line 83. The amendment adds **exactly one** new
+step named `manifest-md-freshness-lint` immediately after
+`simulator-isolation-lint`, so the four spec-038 lint steps sit consecutively
+in the job (test-data manifest schema → indigenous placeholders → simulator
+isolation → manifest MD freshness). Step body:
+`python tools/lint/check_manifest_md_fresh.py`. **No new workflow file is
+created** (FR-036 explicit prohibition; CL-9 confirmation; Constitution
+Principle VIII — additive-only infra discipline).
+
+### A.3 TDD tests (failing-first)
+
+- **`tests/contract/spec038/test_manifest_md_freshness_lint.py`** — the
+  spec-038 contract test for the lint script. Four sub-tests:
+  (a) **green path** — given a fresh `manifest.json` and a freshly-rendered
+  `MANIFEST.md` in a tmp repo root, the lint exits `0` with no diff output;
+  (b) **drift detection** — when the committed `MANIFEST.md` is mutated
+  (entry removed, row reordered, or field changed), the lint exits non-zero
+  AND its stdout contains both the unified diff and the exact remediation
+  command from FR-036;
+  (c) **missing-manifest skip (CL-10)** — when `docs/test-data/manifest.json`
+  is absent, the lint exits `0` and writes a skip notice to stderr;
+  (d) **CRLF tolerance** — when the committed `MANIFEST.md` is rewritten with
+  `\r\n` line endings (simulating a Windows `core.autocrlf=true` checkout)
+  but is otherwise byte-equal to the renderer output after LF normalisation,
+  the lint exits `0`.
+
+- **`tests/integration/test_manifest_md_committed_in_sync.py`** — a
+  whole-repo integration test that runs the lint against the actual
+  `docs/test-data/manifest.json` and `docs/test-data/MANIFEST.md` on the
+  current commit and asserts exit `0`. This is the regression test for
+  OBJ-001 itself — without this test, the 105-vs-134 drift could re-emerge
+  silently between runs of the lint in CI.
+
+### A.4 Renderer determinism guarantees (lock-in test)
+
+**`tests/unit/spec038/test_renderer_determinism.py`** — fixture-based
+golden test: load a small fixed `manifest.json` (≤10 entries spanning ≥3
+categories) committed under `tests/unit/spec038/fixtures/`, call
+`render_test_data_manifest_md.render(doc)` twice, assert the two outputs
+are byte-equal AND assert `sha256(output) == <committed_golden_sha>`. This
+catches any inadvertent change to sort order, header text, column set,
+spacing, or trailing newline policy. If a future contributor legitimately
+needs to evolve the renderer's contract, they must update the golden hash
+AND FR-036 in the same PR — the test failure will force the conversation.
+
+### A.5 Risks and mitigations
+
+| Risk | Mitigation |
+|---|---|
+| Contributor regenerates `manifest.json` but forgets `MANIFEST.md` | FR-036 lint in CI fails the PR with the exact remediation command (A.2 + A.3a/b) |
+| Line-ending drift on Windows checkouts (`core.autocrlf=true`) produces false positives | Lint applies `\r\n`→`\n` normalisation to the committed file before byte compare; covered by A.3d |
+| Renderer change inadvertently alters output format (header text, spacing, column order) | Golden-hash determinism test (A.4) + FR-036 contract clause requiring co-update |
+| `--check` flag and wrapper drift apart over time | Wrapper is a 1-line dispatch into the renderer's `main()` with `--check` injected; no parallel implementation |
+| Pre-Phase-1 branches without `manifest.json` would otherwise fail CI | CL-10 N/A skip — lint exits `0` with stderr notice (covered by A.3c) |
+
+### A.6 F-004 enumeration re-run
+
+Phase 6 of the original plan absorbed F-004 (in-process mock enumeration
+into the manifest). The amendment **adds zero new manifest entries** — it
+adds only a CI lint and its tests. The F-004 enumeration completed in the
+original plan therefore remains valid as-is; no re-run is required. (The
+forthcoming MANIFEST.md regeneration in task A5 below brings the rendered
+artefact back into sync with the existing 134-entry manifest — it does
+not enumerate new entries.)
+
+### A.7 Phasing — Phase A (single phase, 6 tasks)
+
+| Task | Description | TDD posture |
+|---|---|---|
+| **A1** | Author `tests/contract/spec038/test_manifest_md_freshness_lint.py`, `tests/integration/test_manifest_md_committed_in_sync.py`, and `tests/unit/spec038/test_renderer_determinism.py` (with fixture + golden SHA) — all four sub-tests + integration + determinism failing | RED |
+| **A2** | Add `--check` flag to `tools/lint/render_test_data_manifest_md.py` (re-render, normalise CRLF on committed file, byte-compare, unified diff + remediation on diff, exit-0 skip on missing manifest) | GREEN for A1 contract sub-tests |
+| **A3** | Add `tools/lint/check_manifest_md_fresh.py` thin wrapper (delegates to renderer `main()` with `--check`) | GREEN for naming-symmetry path |
+| **A4** | Add one new step `manifest-md-freshness-lint` to the existing `quality:` job in `.github/workflows/ci.yml`, immediately after `simulator-isolation-lint` | wiring only |
+| **A5** | Run `python tools/lint/build_test_data_manifest.py && python tools/lint/render_test_data_manifest_md.py` to regenerate `docs/test-data/MANIFEST.md` (105 → 134 entries) and commit the regenerated file — closes the OBJ-001 root-cause drift | GREEN for A.3-integration test |
+| **A6** | Verification sweep: `pytest tests/contract/spec038 tests/integration/test_manifest_md_committed_in_sync.py tests/unit/spec038`, full `tools/lint/check_*.py` lint sweep, `lint-imports` (import-linter), and the spec-038 verification harness from `verification.md` — all green | verification |
+
+### A.8 Constitution check (post-amendment)
+
+- **Principle I (Two-Path Rule)** — unaffected; no agent/AI behaviour change.
+- **Principle II (AU residency)** — unaffected; no data movement, no new
+  resources, no region-bound artefact changes.
+- **Principle III (PSPF / OFFICIAL marking)** — unaffected; renderer already
+  emits the `pspf` column; the amendment doesn't alter marking semantics.
+- **Principle IV (auditability)** — **strengthened**. `MANIFEST.md` is the
+  human-readable audit artefact auditors use for SC-010's <30-min walkthrough;
+  FR-036 / SC-016 closes the silent-drift gap that OBJ-001 identified.
+- **Principle V (cultural-safety / Indigenous placeholders)** — unaffected;
+  separate `check_indigenous_placeholders.py` lint remains authoritative.
+- **Principle VI (TDD)** — honoured: A1 lands failing tests before any
+  implementation in A2/A3 (RED → GREEN ordering preserved).
+- **Principle VII (no new external deps)** — honoured; the lint uses only
+  `argparse`, `json`, `difflib`, `pathlib`, `hashlib` from the stdlib.
+- **Principle VIII (additive infra only — no new workflows / no new Azure
+  resources)** — honoured: ONE new step in the EXISTING `quality:` job; no
+  new `.github/workflows/*.yml` file; zero Azure resources.
+
+**Constitution check status: PASS.**
+
+### A.9 Open technical questions
+
+None. The renderer already exists with the locked deterministic contract;
+the schema already requires `domain_group`; `data-model.md` already declares
+`domain_group: DomainGroup` on PersonaBinding (lines 89, 264, 285) so CL-12
+is already reflected in the entity schema. No `research.md` addendum is
+required for this cycle.
+

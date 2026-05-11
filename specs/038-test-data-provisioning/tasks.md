@@ -400,3 +400,105 @@ After Phase 2 is green:
 - **Parallel group count: 13 in-phase groups + 4 cross-phase opportunities = 17 parallel windows**.
 - **FR coverage**: 41 / 41 enumerated functional requirements = **100%** (the spec uses banded numbering FR-001..003, 010..016, 020..027, 030..035, 040..046, 050..054, 060..062, 070..071 — every band is fully covered above). **SC coverage**: 15 / 15 = **100%**.
 
+
+
+---
+
+## Amendment Cycle 1 — Phase A (MANIFEST.md Freshness Gate)
+
+**Driver**: Step-8 all-agents review OBJ-001 (MANIFEST.md reported 105 entries while manifest.json contained 134; CI did not enforce parity). Spec amended with **FR-036** (CI freshness gate), **SC-016** (per-PR freshness contract), **FR-031** refinement (CL-11 summary-view + CL-12 `domain_group`). Plan amended with Phase A (§A.1–A.8).
+
+**Scope discipline**: Phase A adds **zero** new manifest entries, **zero** new Azure resources, **zero** new GitHub workflow files. The existing `quality:` job in `.github/workflows/ci.yml` gains exactly one new step. Touches FR-036 / SC-016 / FR-031 / CL-9 / CL-10 / CL-11 / CL-12 only.
+
+**TDD posture**: A001–A003 land RED (failing tests); A004–A005 turn the contract sub-tests + naming-symmetry path GREEN; A006 wires CI; A007 regenerates `MANIFEST.md` and turns the integration test GREEN; A008 is the full verification sweep.
+
+**Format**: same as the original tasks.md — `- [ ] [TaskID] [P?] [Story?] Description with file path — refs`. No `[Story]` label is used in Phase A (the freshness gate is shared infrastructure, not a user-story increment).
+
+**Verification command shorthand** (same as the header of this file): `pytest038` = `pytest --basetemp=C:\tmp\pytest038 -q`; `lint-imports` = `lint-imports --config pyproject.toml`.
+
+### Phase A Tasks (RED → GREEN → Verify)
+
+- [X] A001 Author **failing contract test** `tests/contract/spec038/test_manifest_md_freshness_lint.py` covering all four sub-cases from plan §A.3: (a) **clean state** — when `manifest.json` and `MANIFEST.md` are in sync, `python tools/lint/check_manifest_md_fresh.py` exits `0` with no diff; (b) **drift state** — when `MANIFEST.md` is mutated (one row deleted, one column reordered, header text altered — three independent fixture variants), the lint exits non-zero AND prints both a unified `diff --unified` AND the exact remediation command `python tools/lint/build_test_data_manifest.py && python tools/lint/render_test_data_manifest_md.py`; (c) **missing-manifest skip (CL-10)** — when `docs/test-data/manifest.json` is absent (simulated via `tmp_path` fixture overriding the manifest path), the lint exits `0` AND writes a visible skip notice to stderr; (d) **CRLF tolerance** — when the committed `MANIFEST.md` is rewritten with `\r\n` line endings (simulating Windows `core.autocrlf=true`), the lint still exits `0` against an LF-rendered output. Use `pytest038`-compatible `tmp_path` and `monkeypatch` only — do NOT mutate the real `docs/test-data/MANIFEST.md`. Verify (expect FAIL pre-A004/A005): `pytest --basetemp=C:\tmp\pytest038 -q tests/contract/spec038/test_manifest_md_freshness_lint.py`. — FR-036, SC-016, CL-9, CL-10; satisfies CHK005, CHK006, CHK007, CHK010, CHK011, CHK013, CHK014, CHK015, CHK017, CHK018.
+
+- [X] A002 Author **failing integration test** `tests/integration/test_manifest_md_committed_in_sync.py` that, against the **real** `docs/test-data/manifest.json` and `docs/test-data/MANIFEST.md` checked into the repo, invokes `tools/lint/render_test_data_manifest_md.py` programmatically (importing `render()`), normalises both buffers via `.replace(b"\r\n", b"\n")`, asserts byte-equality, AND asserts entry-count parity (count of `- ` rows in MANIFEST.md per category equals `len(entries)` per category in `manifest.json`). This is the OBJ-001 root-cause regression test (105 vs 134). No `tmp_path` — touches the real artefacts (read-only). Verify (expect FAIL pre-A007 because the committed MANIFEST.md is at 105 entries while manifest.json is at 134): `pytest --basetemp=C:\tmp\pytest038 -q tests/integration/test_manifest_md_committed_in_sync.py`. — FR-036, SC-016, CL-9; satisfies CHK016 (failure taxonomy: entry-count mismatch). Closes OBJ-001 root cause.
+
+- [X] A003 Author **failing unit-determinism test** `tests/unit/spec038/test_renderer_determinism.py` containing (i) a **fixed in-memory manifest fixture** with 4 entries spanning 3 categories (covering sort-key edge cases: same category different ids, same id-prefix different categories), (ii) an assertion that two back-to-back invocations of `render(fixture)` produce **byte-identical** output, (iii) an assertion that `sha256(render(fixture)).hexdigest()` equals a **committed golden hash** (compute the expected hash once from the current renderer and embed it as a module constant `GOLDEN_SHA256 = "<64-hex>"`), (iv) explicit assertions that the output (a) ends with a single LF (`output.endswith(b"\n") and not output.endswith(b"\n\n")`), (b) contains no `\r` bytes, (c) decodes cleanly as UTF-8, (d) emits exactly the 7 columns named in CL-11 (`id`, `path`/`source_shape`, `domain_group`, `persona_bindings`, `pspf`, `licence`, `cultural_review_required`) per category. Any future change to the renderer's sort key, header text, column set, spacing, or trailing-newline policy MUST force an update to BOTH this golden hash AND FR-036 in the same PR. Verify (expect FAIL until A004 lands and the golden hash is computed): `pytest --basetemp=C:\tmp\pytest038 -q tests/unit/spec038/test_renderer_determinism.py`. — FR-036, FR-031, CL-11, CL-12; satisfies CHK001, CHK002, CHK003, CHK004, CHK019, CHK020, CHK021.
+
+- [X] A004 Add **`--check` flag** to `tools/lint/render_test_data_manifest_md.py`: extend `argparse` with `--check` (mutually exclusive with the default re-write behaviour); when `--check` is set, the `main()` function MUST (1) load `docs/test-data/manifest.json` (configurable via `--manifest`, default `docs/test-data/manifest.json`); (2) if the manifest file does not exist, print `[skip] docs/test-data/manifest.json not present — freshness gate N/A on this branch (CL-10)` to **stderr** and `sys.exit(0)`; (3) otherwise call `render(doc)` to produce LF-only UTF-8 bytes; (4) read the committed `docs/test-data/MANIFEST.md` as bytes and apply `.replace(b"\r\n", b"\n")`; (5) byte-compare; (6) on equal, `sys.exit(0)` silently; (7) on diverge, print a `difflib.unified_diff` truncated to a sensible budget (default 200 lines; settable via `--max-diff-lines`) AND on the final stderr line print the exact remediation command `python tools/lint/build_test_data_manifest.py && python tools/lint/render_test_data_manifest_md.py`, then `sys.exit(1)`. Implementation MUST use only stdlib (`argparse`, `json`, `difflib`, `pathlib`, `hashlib`, `sys`) — no new third-party dependency (Constitution Principle VII). Verify: `pytest --basetemp=C:\tmp\pytest038 -q tests/contract/spec038/test_manifest_md_freshness_lint.py tests/unit/spec038/test_renderer_determinism.py` — A001 sub-cases (a)/(b)/(c)/(d) and A003 all turn GREEN. — FR-036, SC-016, CL-9, CL-10; satisfies CHK008 (still required at the wrapper layer for A006), CHK010, CHK011, CHK012, CHK013, CHK014, CHK017, CHK018.
+
+- [X] A005 Add **thin wrapper script** `tools/lint/check_manifest_md_fresh.py` whose entire body is `from tools.lint.render_test_data_manifest_md import main; import sys; sys.exit(main(["--check", *sys.argv[1:]]))` (or equivalent — a single dispatch into the renderer's `main()` with `--check` injected, no parallel implementation, no duplicated logic). The wrapper exists solely so the CI step name and the local invocation match the FR-036 / CL-9 naming convention (`check_manifest_md_fresh.py`). Add a 1-line module docstring referencing FR-036 and pointing to the renderer for the actual logic. Verify: `python tools/lint/check_manifest_md_fresh.py` exits `0` against the (still drifted) repo state ONLY in its skip path; against the real (post-A007) state it exits `0` cleanly; `pytest --basetemp=C:\tmp\pytest038 -q tests/contract/spec038/test_manifest_md_freshness_lint.py` — naming-symmetry assertions GREEN. — FR-036, CL-9; satisfies CHK008 (wrapper is the script CI invokes by name).
+
+- [X] A006 Wire the freshness gate into CI: add **exactly one new step** named `manifest-md-freshness-lint` to the existing `quality:` job in `.github/workflows/ci.yml`, positioned **immediately after the `simulator-isolation-lint` step** (per plan §A.7). Step body: `run: python tools/lint/check_manifest_md_fresh.py`. **No new workflow file** (FR-036 explicit prohibition; CL-9 confirmation; Constitution Principle VIII). Verify locally with `actionlint .github/workflows/ci.yml` (if installed) and by visual inspection that (a) no new top-level workflow file appeared (`Get-ChildItem .github/workflows/*.yml | Measure-Object` count unchanged); (b) the new step is inside the `quality:` job; (c) it follows `simulator-isolation-lint`. — FR-036, SC-016, CL-9; satisfies CHK008, CHK009.
+
+- [X] A007 **Regenerate `docs/test-data/MANIFEST.md` and commit** — run `python tools/lint/build_test_data_manifest.py && python tools/lint/render_test_data_manifest_md.py` from the repo root to bring the rendered Markdown back into sync with the existing 134-entry `manifest.json` (closes the OBJ-001 root-cause drift, 105 → 134 entries). This task adds **zero new manifest entries** (per plan §A.6 — F-004 enumeration is unchanged); it only re-renders the existing JSON source of truth into the executive-summary view. Stage and commit the regenerated `docs/test-data/MANIFEST.md` (and only that file — the build script is idempotent against an already-current `manifest.json`). Verify: (a) `git diff --stat docs/test-data/MANIFEST.md` shows the expected churn; (b) `pytest --basetemp=C:\tmp\pytest038 -q tests/integration/test_manifest_md_committed_in_sync.py` — A002 turns GREEN; (c) `python tools/lint/check_manifest_md_fresh.py` exits `0`. — FR-036, SC-016, FR-031, CL-11, CL-12; satisfies CHK016, CHK019, CHK020, CHK021. Closes OBJ-001.
+
+- [X] A008 **Full Phase-A verification sweep** — run the complete cross-cutting verification before declaring Amendment Cycle 1 closed: (1) `pytest --basetemp=C:\tmp\pytest038 -q tests/contract/spec038 tests/integration/test_manifest_md_committed_in_sync.py tests/unit/spec038` — all Phase-A tests GREEN; (2) `python tools/lint/check_test_data_manifest.py && python tools/lint/check_simulator_isolation.py && python tools/lint/check_indigenous_placeholders.py && python tools/lint/check_manifest_md_fresh.py` — full lint sweep exits `0`; (3) `lint-imports --config pyproject.toml --no-cache` — import-linter contracts still GREEN; (4) execute the spec-038 verification harness from `specs/038-test-data-provisioning/verification.md` end-to-end; (5) confirm `Get-ChildItem .github/workflows/*.yml` count unchanged from pre-amendment baseline (no new workflow file); (6) confirm `git diff --stat HEAD~N -- docs/test-data/manifest.json` shows **zero** changes to the manifest itself (only `MANIFEST.md` re-rendered); (7) re-tick all 21 boxes in `specs/038-test-data-provisioning/checklists/manifest-md-freshness.md` (CHK001–CHK021) confirming each is satisfied by an A00x task. Verify: paste the seven command outputs into the PR description. — FR-036, SC-016, FR-031, CL-9, CL-10, CL-11, CL-12; satisfies CHK001–CHK021 (omnibus).
+
+### Phase A Dependency Graph
+
+```text
+A001 ─┐
+A002 ─┼── (RED, parallel-safe in principle but kept linear for review clarity)
+A003 ─┘
+        ↓
+A004 ── (turns A001 sub-cases a/b/c/d + A003 GREEN)
+        ↓
+A005 ── (turns A001 naming-symmetry path GREEN; depends on A004's main())
+        ↓
+A006 ── (CI wiring; depends on A005 existing as the named entry point)
+        ↓
+A007 ── (turns A002 GREEN by re-rendering 105→134 entries; depends on A004's --check being available so the integration test can compare correctly)
+        ↓
+A008 ── (omnibus verification; depends on A001–A007)
+```
+
+**Parallelism**: None marked `[P]` — Phase A is intentionally a small linear sequence (8 tasks, single contributor, single PR). A001/A002/A003 could in principle be authored in parallel (different test files), but keeping them sequential preserves a clean RED commit history that auditors can replay one test at a time.
+
+### Phase A Verification Matrix
+
+| Spec ref / Checklist item | Satisfied by task(s) |
+|---|---|
+| **FR-036** (freshness gate, byte/LF/UTF-8 diff, remediation contract, CI step inside `quality:`) | A001, A002, A003, A004, A005, A006, A007, A008 |
+| **SC-016** (100% PR enforcement, exit codes, skip-on-missing-manifest, entry-count parity at every commit) | A001, A002, A004, A005, A006, A007, A008 |
+| **FR-031** (refined: 7-column summary-view enumeration + `domain_group`) | A003, A007, A008 |
+| **CL-9** (CI freshness gate, no new workflow files, `quality:` job step) | A001, A005, A006, A008 |
+| **CL-10** (byte-exact + LF/UTF-8 normalisation, CRLF tolerance, unified diff, remediation command, N/A skip with stderr notice) | A001, A004, A008 |
+| **CL-11** (MANIFEST.md is intentional summary view; 7-column subset; manifest.json is authoritative) | A003, A007, A008 |
+| **CL-12** (`domain_group` added to FR-031 enumerated field list; cross-ref to PersonaBinding taxonomy) | A003, A007, A008 |
+| CHK001 (sort key `(category, id)` named as part of locked contract) | A003 |
+| CHK002 (LF terminator named as part of locked contract) | A003 |
+| CHK003 (UTF-8 named as part of locked contract) | A003 |
+| CHK004 (renderer-contract change forces FR-036 update) | A003 (golden-hash mechanism), A008 |
+| CHK005 (success exit code `0`) | A001, A004 |
+| CHK006 (divergence exit non-zero) | A001, A004 |
+| CHK007 (N/A skip exits `0`) | A001, A004 |
+| CHK008 (lint runs as step inside existing `quality:` job) | A005, A006 |
+| CHK009 (no new GitHub workflow file) | A006, A008 |
+| CHK010 (unified diff on failure) | A001, A004 |
+| CHK011 (exact remediation command on failure) | A001, A004 |
+| CHK012 (sensible-line-budget truncation) | A004 (`--max-diff-lines`) |
+| CHK013 (byte-exact comparison method) | A001, A004 |
+| CHK014 (`\r\n`→`\n` applied to both sides) | A001, A004 |
+| CHK015 (Windows `core.autocrlf=true` motivating case preserved) | A001 (CRLF fixture sub-case d), A004 |
+| CHK016 (failure taxonomy: entry-count / missing-rows / field drift / ordering / formatting) | A001 (drift fixtures), A002 (entry-count), A008 |
+| CHK017 (N/A skip condition: `manifest.json` does not yet exist) | A001 (sub-case c), A004 |
+| CHK018 (visible skip notice on stderr, not silent success) | A001 (sub-case c), A004 |
+| CHK019 (MANIFEST.md is intentional summary view; `manifest.json` is authoritative) | A003, A007 |
+| CHK020 (FR-031 enumerates 7-column subset surfaced by renderer) | A003, A007 |
+| CHK021 (`domain_group` added to FR-031 with cross-ref to PersonaBinding) | A003, A007 |
+
+### Phase A Summary
+
+- **Total Phase-A task count: 8** (A001, A002, A003, A004, A005, A006, A007, A008)
+- **Parallel tasks**: 0 (intentional — small linear RED → GREEN → Verify sequence in a single PR)
+- **New files created**: 4 (`tests/contract/spec038/test_manifest_md_freshness_lint.py`, `tests/integration/test_manifest_md_committed_in_sync.py`, `tests/unit/spec038/test_renderer_determinism.py`, `tools/lint/check_manifest_md_fresh.py`)
+- **Files modified**: 3 (`tools/lint/render_test_data_manifest_md.py` — `--check` flag; `.github/workflows/ci.yml` — one new step in existing `quality:` job; `docs/test-data/MANIFEST.md` — regenerated 105 → 134 entries)
+- **Files NOT touched**: `docs/test-data/manifest.json` (zero new entries; OBJ-001 was a renderer-freshness gap, not a manifest-content gap), `docs/test-data/manifest.schema.json`, any other workflow file, any infra file, any Bicep/Terraform.
+- **Spec FR coverage delta**: +1 (FR-036). **Spec SC coverage delta**: +1 (SC-016). **FR-031** refined (CL-11 summary-view clause + CL-12 `domain_group`). **Checklist (manifest-md-freshness.md) coverage**: 21/21 = 100%.
+- **Constitution check**: Principles I–V unaffected; VI (TDD) honoured (A001–A003 land RED before A004–A005); VII (no new external deps) honoured (stdlib only); VIII (additive infra only — no new workflow / no new Azure resource) honoured.
+
+### Phase A Implementation Strategy
+
+1. **One PR for Phase A.** All 8 tasks land together — Phase A is too small to split and the RED/GREEN ordering is most auditable when reviewed as a single commit history (one commit per task, 8 commits total).
+2. **MVP ordering**: A001 → A002 → A003 (RED) → A004 (most contract sub-tests GREEN) → A005 (naming GREEN) → A006 (CI wired) → A007 (integration GREEN; OBJ-001 closed) → A008 (omnibus verification).
+3. **Rollback safety**: each step is independently revertible. A007 in particular is a pure re-render — if a downstream consumer of `MANIFEST.md` regresses, `git revert` on the A007 commit alone restores the prior text.

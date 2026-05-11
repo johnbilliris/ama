@@ -1,8 +1,9 @@
 # Specification Quality Checklist: Test Data and Resources Provisioning Review
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-05-11
-**Feature**: [spec.md](../spec.md)
+- **Created**: 2026-05-11
+- **Last amended**: 2026-05-11 (Amendment cycle 1 — added FR-036 + SC-016 to close OBJ-001 from Step-8 all-agents review)
+- **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
 
@@ -57,4 +58,5 @@
 
 - Items marked incomplete require spec updates before `/speckit.clarify` or `/speckit.plan`.
 - All 3 first-pass clarifications (CL-1, CL-2, CL-3) resolved on 2026-05-11; **5 second-pass clarifications (CL-4, CL-5, CL-6, CL-7, CL-8) resolved on 2026-05-11 (Pass 2)** by `/speckit.clarify` (auto-answered against constitution, prior specs, corpus prior art, and verified repo files). See "Resolved Clarifications" section in `spec.md`. Spec is ready for `/speckit.plan`.
+- **Amendment cycle 1 (2026-05-11, Pass 4):** Added **FR-036** (CI freshness gate for `docs/test-data/MANIFEST.md` vs `manifest.json`) and **SC-016** (100% PR-level enforcement of MANIFEST.md regeneration) to close **OBJ-001** from the Step-8 all-agents review (105 vs 134 entry drift). Updated **SC-010** to reference the SC-016/FR-036 freshness gate. Added edge case "Manifest renderer skipped or forgotten". CL-9 resolved in Pass 4 of "Resolved Clarifications". Zero new `[NEEDS CLARIFICATION]` markers introduced. All checklist items above re-validated and remain ✓.
 - The spec deliberately mentions a small number of existing system paths (`scripts/seed_loader.py`, `packages/domain/src/domain/seed/`, `apps/api/app/services/simulation/`, `docs/corpus/`) because the user's input explicitly mandated respecting and extending these existing anchors and forbade redesigning them. These references are existing-state facts, not new implementation choices.

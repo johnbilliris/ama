@@ -21,12 +21,12 @@ Cross-references:
 ## Summary
 
 - Schema version: `1.0.0`
-- Total entries: **105**
+- Total entries: **134**
 - `alert-template`: 8
-- `generator`: 1
-- `mock`: 33
+- `generator`: 14
+- `mock`: 41
 - `simulator-feed-shape`: 13
-- `synthetic`: 50
+- `synthetic`: 58
 
 ## Category: `alert-template`
 
@@ -45,7 +45,20 @@ Cross-references:
 
 | id | path / source_shape | domain_group | personas | pspf | licence | cultural_review |
 |---|---|---|---|---|---|---|
-| `scripts-generators-seed-contract-py` | `scripts/generators/_seed_contract.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-audit-entries-py` | `scripts/generators/audit_entries.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-coordination-tasks-py` | `scripts/generators/coordination_tasks.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-evacuee-registrations-py` | `scripts/generators/evacuee_registrations.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-hospital-capacity-py` | `scripts/generators/hospital_capacity.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-incidents-py` | `scripts/generators/incidents.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-missing-persons-py` | `scripts/generators/missing_persons.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-public-alerts-py` | `scripts/generators/public_alerts.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-risk-register-py` | `scripts/generators/risk_register.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-signals-py` | `scripts/generators/signals.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-transport-assets-py` | `scripts/generators/transport_assets.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-triage-records-py` | `scripts/generators/triage_records.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-utility-outages-py` | `scripts/generators/utility_outages.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-volunteer-registrations-py` | `scripts/generators/volunteer_registrations.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
+| `scripts-generators-vulnerable-categories-py` | `scripts/generators/vulnerable_categories.py` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `proprietary-fictitious-internal` | no |
 
 ## Category: `mock`
 
@@ -72,6 +85,14 @@ Cross-references:
 | `fixtures-sim-replays-bom-fire-weather-fdi-vic-ndjson` | `fixtures/sim_replays/bom_fire_weather_fdi_vic.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
 | `fixtures-sim-replays-bom-flood-gauge-nsw-ndjson` | `fixtures/sim_replays/bom_flood_gauge_nsw.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
 | `fixtures-sim-replays-bom-severe-weather-warning-nsw-ndjson` | `fixtures/sim_replays/bom_severe_weather_warning_nsw.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-demo-ambulance-v1-ndjson` | `fixtures/sim_replays/demo_ambulance_v1.ndjson` | `ambulance` | av, incident-commander, nsw-ambulance, rfds, saas | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-demo-commonwealth-v1-ndjson` | `fixtures/sim_replays/demo_commonwealth_v1.ndjson` | `commonwealth` | adf, arc, bom-national, ga-national, nema | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-demo-cross-sector-v1-ndjson` | `fixtures/sim_replays/demo_cross_sector_v1.ndjson` | `cross-sector` | community-ngos, local-government, state-government, transport, utility | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-demo-fire-v1-ndjson` | `fixtures/sim_replays/demo_fire_v1.ndjson` | `fire` | cfa-vic, frnsw, incident-commander, nsw-rfs, operations-officer | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-demo-marine-aviation-v1-ndjson` | `fixtures/sim_replays/demo_marine_aviation_v1.ndjson` | `marine-aviation` | abf, asa, mrnsw, rfds, surf-lifesaving | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-demo-operational-v1-ndjson` | `fixtures/sim_replays/demo_operational_v1.ndjson` | `operational` | executive-leader, incident-commander, logistics-officer, operations-officer, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-demo-police-v1-ndjson` | `fixtures/sim_replays/demo_police_v1.ndjson` | `police` | afp-commonwealth, incident-commander, nswpf, operations-officer, vicpol | `OFFICIAL` | `CC-BY-4.0` | no |
+| `fixtures-sim-replays-demo-ses-v1-ndjson` | `fixtures/sim_replays/demo_ses_v1.ndjson` | `ses` | logistics-officer, operations-officer, ses-nsw, ses-qld, ses-vic | `OFFICIAL` | `CC-BY-4.0` | no |
 | `fixtures-sim-replays-epa-pm25-vic-ndjson` | `fixtures/sim_replays/epa_pm25_vic.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
 | `fixtures-sim-replays-ga-earthquake-event-wa-ndjson` | `fixtures/sim_replays/ga_earthquake_event_wa.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
 | `fixtures-sim-replays-ga-tsunami-threat-nsw-ndjson` | `fixtures/sim_replays/ga_tsunami_threat_nsw.ndjson` | `operational` | incident-commander | `OFFICIAL` | `CC-BY-4.0` | no |
@@ -135,6 +156,14 @@ Cross-references:
 | `packages-domain-src-domain-seed-jurisdictions-australia-json` | `packages/domain/src/domain/seed/jurisdictions_australia.json` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
 | `packages-domain-src-domain-seed-lemp-memp-templates-templates-australia-json` | `packages/domain/src/domain/seed/lemp-memp-templates/templates_australia.json` | `operational` | local-government, state-government | `OFFICIAL` | `CC-BY-4.0` | no |
 | `packages-domain-src-domain-seed-organisations-australia-json` | `packages/domain/src/domain/seed/organisations_australia.json` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
+| `packages-domain-src-domain-seed-persona-rosters-ambulance-json` | `packages/domain/src/domain/seed/persona-rosters/ambulance.json` | `ambulance` | act-ambulance, at, av, nsw-ambulance, qas, rfds, saas, sja-national, sja-nt, sja-wa | `OFFICIAL` | `CC-BY-4.0` | no |
+| `packages-domain-src-domain-seed-persona-rosters-commonwealth-json` | `packages/domain/src/domain/seed/persona-rosters/commonwealth.json` | `commonwealth` | adf, arc, bom-national, ga-national, nema | `OFFICIAL` | `CC-BY-4.0` | no |
+| `packages-domain-src-domain-seed-persona-rosters-cross-sector-json` | `packages/domain/src/domain/seed/persona-rosters/cross-sector.json` | `cross-sector` | community-ngos, health, local-government, state-government, territory-government, transport, utility, volunteer | `OFFICIAL` | `CC-BY-4.0` | no |
+| `packages-domain-src-domain-seed-persona-rosters-fire-json` | `packages/domain/src/domain/seed/persona-rosters/fire.json` | `fire` | act-fr, act-rfs, bushfires-nt, cfa-vic, dfes-wa, frnsw, frv, nsw-rfs, ntfrs, qfd, sacfs, samfs, tfs | `OFFICIAL` | `CC-BY-4.0` | no |
+| `packages-domain-src-domain-seed-persona-rosters-marine-aviation-json` | `packages/domain/src/domain/seed/persona-rosters/marine-aviation.json` | `marine-aviation` | abf, asa, mrnsw, surf-lifesaving | `OFFICIAL` | `CC-BY-4.0` | no |
+| `packages-domain-src-domain-seed-persona-rosters-operational-json` | `packages/domain/src/domain/seed/persona-rosters/operational.json` | `operational` | executive-leader, field-coordinator, incident-commander, logistics-officer, observer-auditor, operations-officer, planning-officer, public-information-officer, resilience-planner, risk-manager | `OFFICIAL` | `CC-BY-4.0` | no |
+| `packages-domain-src-domain-seed-persona-rosters-police-json` | `packages/domain/src/domain/seed/persona-rosters/police.json` | `police` | act-policing, afp-act, afp-commonwealth, nswpf, ntpf, qps, sapol, taspol, vicpol, wapol | `OFFICIAL` | `CC-BY-4.0` | no |
+| `packages-domain-src-domain-seed-persona-rosters-ses-json` | `packages/domain/src/domain/seed/persona-rosters/ses.json` | `ses` | act-esa, ntes, ses-act, ses-nsw, ses-qld, ses-sa, ses-tas, ses-vic | `OFFICIAL` | `CC-BY-4.0` | no |
 | `packages-domain-src-domain-seed-recovery-catalogue-built-json` | `packages/domain/src/domain/seed/recovery-catalogue/built.json` | `cross-sector` | executive-leader, resilience-planner | `OFFICIAL` | `CC-BY-4.0` | no |
 | `packages-domain-src-domain-seed-recovery-catalogue-economic-json` | `packages/domain/src/domain/seed/recovery-catalogue/economic.json` | `cross-sector` | executive-leader, resilience-planner | `OFFICIAL` | `CC-BY-4.0` | no |
 | `packages-domain-src-domain-seed-recovery-catalogue-evaluation-questions-json` | `packages/domain/src/domain/seed/recovery-catalogue/evaluation-questions.json` | `cross-sector` | executive-leader, resilience-planner | `OFFICIAL` | `CC-BY-4.0` | no |

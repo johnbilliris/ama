@@ -87,6 +87,14 @@ jobs:
           python tools/lint/check_simulator_isolation.py
           lint-imports --config pyproject.toml
 
+      # Spec 038 FR-036 / SC-016 / CL-9 — Amendment Cycle 1 freshness gate:
+      # docs/test-data/MANIFEST.md must byte-equal the LF-normalised
+      # re-render of docs/test-data/manifest.json on every PR.
+      - name: manifest-md-freshness-lint
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python tools/lint/check_manifest_md_fresh.py
+
       # Spec 036 T128 / FR-RAG-NS-08 — fail CI on RAG-OPTOUT marker ↔ ADR drift.
       - name: rag-optout-binding-lint
         env:
