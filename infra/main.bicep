@@ -287,7 +287,7 @@ module spec036IngestRunnerJob './modules/ingest-runner-job.bicep' = if (enableSp
     searchServiceEndpoint: 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net'
     indexAlias: 'corpus'
     embeddingDeploymentName: openAiDeployments.outputs.embeddingDeploymentName
-    embeddingModelKey: openAiDeployments.outputs.embeddingModelKey
+    embeddingModelCoordinate: openAiDeployments.outputs.embeddingModelKey
     azureAiProjectDeployments: openAiDeployments.outputs.azureAiProjectDeployments
     azureAiProjectEndpoint: openAi.properties.endpoint
     serviceBusFullyQualifiedNamespace: '${spec036ServiceBus!.name}.servicebus.windows.net'
