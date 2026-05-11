@@ -65,6 +65,28 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: python tools/lint/check_licence_inventory.py
 
+      # Spec 038 FR-032 / CL-7 — manifest ↔ artefact ↔ schema parity.
+      - name: test-data-manifest-lint
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          python tools/lint/check_test_data_manifest.py
+          python -c "import jsonschema, json; jsonschema.Draft202012Validator(json.load(open('docs/test-data/manifest.schema.json'))).validate(json.load(open('docs/test-data/manifest.json')))"
+
+      # Spec 038 FR-044 / CL-6 — Indigenous placeholder denylist + cultural review gate.
+      - name: indigenous-placeholder-lint
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python tools/lint/check_indigenous_placeholders.py
+
+      # Spec 038 SC-007 — production code paths MUST NOT import simulator feeds/replay/generators.
+      - name: simulator-isolation-lint
+        env:
+          PYTHONIOENCODING: utf-8
+        run: |
+          python tools/lint/check_simulator_isolation.py
+          lint-imports --config pyproject.toml
+
       # Spec 036 T128 / FR-RAG-NS-08 — fail CI on RAG-OPTOUT marker ↔ ADR drift.
       - name: rag-optout-binding-lint
         env:

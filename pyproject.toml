@@ -134,30 +134,26 @@ forbidden_modules = ["apps"]
 name = "simulator_not_imported_by_production"
 type = "forbidden"
 source_modules = [
-  "apps.api.app.routers",
-  "apps.api.app.services",
+  "apps.api",
   "apps.agents",
-  "apps.ingestion",
 ]
 forbidden_modules = [
   "apps.api.app.services.simulation.feeds",
   "apps.api.app.services.simulation.replay",
   "apps.api.app.services.simulation.generators",
 ]
-ignore_imports = [
-  "apps.api.app.services.simulation.feeds -> apps.api.app.services.simulation.feeds.**",
-  "apps.api.app.services.simulation.replay -> apps.api.app.services.simulation.replay.**",
-  "apps.api.app.services.simulation.generators -> apps.api.app.services.simulation.generators.**",
-]
+# ``ignore_imports`` is intentionally omitted — the feeds/replay/generators
+# sub-packages do not yet contain inter-module imports, so an unused-ignore
+# entry would itself cause ``lint-imports`` to fail with
+# "No matches for ignored import …". Re-add per-edge ignores here only when
+# such imports legitimately exist (Phase 5+).
 
 [[tool.importlinter.contracts]]
 name = "seed_not_imported_by_runtime"
 type = "forbidden"
 source_modules = [
-  "apps.api.app.routers",
-  "apps.api.app.services",
+  "apps.api",
   "apps.agents",
-  "apps.ingestion",
 ]
 forbidden_modules = [
   "packages.domain.src.domain.seed",
