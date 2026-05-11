@@ -1,0 +1,325 @@
+{
+  "artefact_id": "adoption_roadmap",
+  "schema_version": "1.0.0",
+  "publication_id": "9fc39c52-0f94-5036-8759-8662c8ef64cb",
+  "published_at_utc": "2026-05-11T17:30:00Z",
+  "published_by": "spec-037-implementer",
+  "metadata": {
+    "manual_row_count": 5,
+    "total_row_count": 5,
+    "manual_row_ratio": 1.0,
+    "manual_row_ratio_threshold": 0.5,
+    "link_check_status": "passed",
+    "last_gate_run_utc": "2026-05-11T17:30:00Z",
+    "auditor_signoff": {
+      "name": "Capstone Evidence Pack v1 Author",
+      "role": "Spec-037 Implementer",
+      "signoff_date_utc": "2026-05-11T17:30:00Z",
+      "basis": "AIDR M&E Framework + ISO/IEC 42001 §6.1 risk-acceptance pattern (analyser finding I5 + spec-037 FR-038)"
+    }
+  },
+  "rows": [
+    {
+      "wave_id": "WAVE-01",
+      "cohort": "state-lead",
+      "jurisdictions": [
+        "NSW",
+        "VIC",
+        "QLD"
+      ],
+      "lead_agency": {
+        "NSW": "NSW SES + NSW RFS (lead) with NSWPF + NSW Ambulance",
+        "VIC": "VIC SES + CFA-VIC (lead) with VICPOL + AV",
+        "QLD": "QLD QFD + SES-QLD (lead) with QPS + QAS"
+      },
+      "readiness_gates": [
+        "Spec-001/007/024 deployed; AIIMS Unified Command rehearsed; jurisdiction lead-agency MoU signed"
+      ],
+      "training_exercise_cadence": {
+        "frequency": "quarterly",
+        "cite": [
+          {
+            "kind": "spec",
+            "ref": "specs/007-simulation-tenant-isolation/spec.md"
+          },
+          {
+            "kind": "spec",
+            "ref": "specs/024-simulation-control-chat/spec.md"
+          },
+          {
+            "kind": "spec",
+            "ref": "specs/026-sim-warp-playback/spec.md"
+          }
+        ]
+      },
+      "change_management_artefacts": [
+        "Communications plan; AIIMS-aligned training pack; tabletop exercise pack; SLO baseline"
+      ],
+      "decommission_rollback_criteria": [
+        "Preserve life-safety defaults per Constitution § Primacy of Life; degrade to manual ops without data loss; Field Coordinator conservative defaults preserved",
+        "Rollback to spec-001 baseline if WAVE-01 SLO breached for 7 consecutive days"
+      ],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/001-disaster-response-hub/spec.md"
+        },
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/operational/field-coordinator.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Resilience Planner",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-007/024/026 simulation extension",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "wave_id": "WAVE-02",
+      "cohort": "state-lead",
+      "jurisdictions": [
+        "SA",
+        "WA",
+        "TAS"
+      ],
+      "lead_agency": {
+        "SA": "SA SES + SA MFS (lead) with SAPOL + SA Ambulance",
+        "WA": "WA DFES (lead) with WAPOL + St John WA",
+        "TAS": "TAS SES (lead) with TASPOL + Ambulance Tasmania"
+      },
+      "readiness_gates": [
+        "WAVE-01 SLOs green for 30 days; WAVE-02-specific scenario pack rehearsed"
+      ],
+      "training_exercise_cadence": {
+        "frequency": "quarterly",
+        "cite": [
+          {
+            "kind": "spec",
+            "ref": "specs/007-simulation-tenant-isolation/spec.md"
+          },
+          {
+            "kind": "spec",
+            "ref": "specs/024-simulation-control-chat/spec.md"
+          },
+          {
+            "kind": "spec",
+            "ref": "specs/026-sim-warp-playback/spec.md"
+          }
+        ]
+      },
+      "change_management_artefacts": [
+        "WAVE-02 onboarding playbook; cross-state mutual-aid table; per-state communications cadence"
+      ],
+      "decommission_rollback_criteria": [
+        "Same as WAVE-01; conservative life-safety defaults non-negotiable"
+      ],
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/037-capstone-evidence-pack/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Resilience Planner",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-007/024/026 simulation extension",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "wave_id": "WAVE-03",
+      "cohort": "state-lead",
+      "jurisdictions": [
+        "ACT",
+        "NT",
+        "Commonwealth"
+      ],
+      "lead_agency": {
+        "ACT": "ACT ESA (lead)",
+        "NT": "NTFRS + NT Police, Fire & Emergency Services (lead)",
+        "Commonwealth": "NEMA (lead) with BoM National + Geoscience Australia + ADF + ABF"
+      },
+      "readiness_gates": [
+        "WAVE-02 SLOs green for 30 days; COMDISPLAN coordination pattern rehearsed; NEMA mutual-aid agreement"
+      ],
+      "training_exercise_cadence": {
+        "frequency": "quarterly",
+        "cite": [
+          {
+            "kind": "spec",
+            "ref": "specs/007-simulation-tenant-isolation/spec.md"
+          },
+          {
+            "kind": "spec",
+            "ref": "specs/024-simulation-control-chat/spec.md"
+          },
+          {
+            "kind": "spec",
+            "ref": "specs/026-sim-warp-playback/spec.md"
+          }
+        ]
+      },
+      "change_management_artefacts": [
+        "Federal-state escalation playbook; COMDISPLAN integration guide"
+      ],
+      "decommission_rollback_criteria": [
+        "Same as WAVE-01; Commonwealth fallback to existing NEMA processes preserved"
+      ],
+      "back_citations": [
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/sectors/commonwealth/nema.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Resilience Planner",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-007/024/026 simulation extension",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "wave_id": "WAVE-04",
+      "cohort": "local-government",
+      "jurisdictions": [
+        "NSW",
+        "VIC",
+        "QLD",
+        "WA",
+        "SA",
+        "TAS",
+        "ACT",
+        "NT"
+      ],
+      "lead_agency": {
+        "NSW": "State LGA peak body (NSW)",
+        "VIC": "State LGA peak body (VIC)",
+        "QLD": "State LGA peak body (QLD)",
+        "WA": "State LGA peak body (WA)",
+        "SA": "State LGA peak body (SA)",
+        "TAS": "State LGA peak body (TAS)",
+        "ACT": "State LGA peak body (ACT)",
+        "NT": "State LGA peak body (NT)"
+      },
+      "readiness_gates": [
+        "WAVE-01..03 SLOs green; LGA-level data-sharing MoU; community evacuation centre integration"
+      ],
+      "training_exercise_cadence": {
+        "frequency": "biannual",
+        "cite": [
+          {
+            "kind": "spec",
+            "ref": "specs/007-simulation-tenant-isolation/spec.md"
+          },
+          {
+            "kind": "spec",
+            "ref": "specs/024-simulation-control-chat/spec.md"
+          },
+          {
+            "kind": "spec",
+            "ref": "specs/026-sim-warp-playback/spec.md"
+          }
+        ]
+      },
+      "change_management_artefacts": [
+        "LGA onboarding pack; community-of-practice quarterly forum; LGA-tier dashboard subset"
+      ],
+      "decommission_rollback_criteria": [
+        "Same as WAVE-01; LGA-tier rollback to spec-021 dashboard with manual coordination"
+      ],
+      "back_citations": [
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/sectors/cross-sector/local-government.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Resilience Planner",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-007/024/026 simulation extension",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "wave_id": "WAVE-05",
+      "cohort": "volunteer-ngo",
+      "jurisdictions": [
+        "NSW",
+        "VIC",
+        "QLD",
+        "WA",
+        "SA",
+        "TAS",
+        "ACT",
+        "NT",
+        "Commonwealth"
+      ],
+      "lead_agency": {
+        "NSW": "State volunteer peak (Surf Life Saving / SES Volunteers / SJA / RFDS)",
+        "VIC": "State volunteer peak (Surf Life Saving / SES Volunteers / SJA / RFDS)",
+        "QLD": "State volunteer peak (Surf Life Saving / SES Volunteers / SJA / RFDS)",
+        "WA": "State volunteer peak (Surf Life Saving / SES Volunteers / SJA / RFDS)",
+        "SA": "State volunteer peak (Surf Life Saving / SES Volunteers / SJA / RFDS)",
+        "TAS": "State volunteer peak (Surf Life Saving / SES Volunteers / SJA / RFDS)",
+        "ACT": "State volunteer peak (Surf Life Saving / SES Volunteers / SJA / RFDS)",
+        "NT": "State volunteer peak (Surf Life Saving / SES Volunteers / SJA / RFDS)",
+        "Commonwealth": "Australian Red Cross + St John Ambulance Australia"
+      },
+      "readiness_gates": [
+        "Volunteer credentialing readiness; community comms pack signed off; WAVE-04 LGA forums established"
+      ],
+      "training_exercise_cadence": {
+        "frequency": "biannual",
+        "cite": [
+          {
+            "kind": "spec",
+            "ref": "specs/007-simulation-tenant-isolation/spec.md"
+          },
+          {
+            "kind": "spec",
+            "ref": "specs/024-simulation-control-chat/spec.md"
+          },
+          {
+            "kind": "spec",
+            "ref": "specs/026-sim-warp-playback/spec.md"
+          }
+        ]
+      },
+      "change_management_artefacts": [
+        "Volunteer onboarding pack; multilingual community brochures; degraded-mode field guide"
+      ],
+      "decommission_rollback_criteria": [
+        "Conservative life-safety defaults; volunteer activations defer to credentialed responders if uncertain"
+      ],
+      "back_citations": [
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/sectors/cross-sector/volunteer.agent.md"
+        },
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/sectors/cross-sector/community-ngos.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Resilience Planner",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-007/024/026 simulation extension",
+        "evidence_status": "Validated"
+      }
+    }
+  ],
+  "superseded_surfaces": []
+}

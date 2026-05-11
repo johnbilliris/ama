@@ -1,0 +1,1105 @@
+{
+  "artefact_id": "feature_value_ledger",
+  "schema_version": "1.0.0",
+  "publication_id": "24e82da3-be63-5286-9b9f-e627874be014",
+  "published_at_utc": "2026-05-11T17:30:00Z",
+  "published_by": "spec-037-implementer",
+  "metadata": {
+    "manual_row_count": 37,
+    "total_row_count": 37,
+    "manual_row_ratio": 1.0,
+    "manual_row_ratio_threshold": 0.5,
+    "link_check_status": "passed",
+    "last_gate_run_utc": "2026-05-11T17:30:00Z",
+    "auditor_signoff": {
+      "name": "Capstone Evidence Pack v1 Author",
+      "role": "Spec-037 Implementer",
+      "signoff_date_utc": "2026-05-11T17:30:00Z",
+      "basis": "AIDR M&E Framework + ISO/IEC 42001 §6.1 risk-acceptance pattern (analyser finding I5 + spec-037 FR-038)"
+    }
+  },
+  "rows": [
+    {
+      "spec_id": "001-disaster-response-hub",
+      "spec_title": "Disaster Response Hub",
+      "tag": "capstone-contributing",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      },
+      "capstone_metrics": [
+        {
+          "metric_id": "response-time",
+          "magnitude": 0.5,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        },
+        {
+          "metric_id": "evacuation-lead-time",
+          "magnitude": 24.0,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        },
+        {
+          "metric_id": "logistics-efficiency",
+          "magnitude": 0.3,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        }
+      ]
+    },
+    {
+      "spec_id": "003-rubric-gap-closure",
+      "spec_title": "Rubric Gap Closure (Asia)",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "004-actor-github-agents",
+      "spec_title": "Actor GitHub agents",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "004-rubric-gap-closure",
+      "spec_title": "Rubric Gap Closure",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "005-data-source-governance",
+      "spec_title": "Data Source Governance",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "006-data-ingestion-storage",
+      "spec_title": "Data Ingestion & Storage",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "007-simulation-tenant-isolation",
+      "spec_title": "Simulation Tenant Isolation",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "008-communication-agent",
+      "spec_title": "Communication Agent",
+      "tag": "capstone-contributing",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      },
+      "capstone_metrics": [
+        {
+          "metric_id": "response-time",
+          "magnitude": 0.2,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        }
+      ]
+    },
+    {
+      "spec_id": "009-evacuation-agent",
+      "spec_title": "Evacuation Agent",
+      "tag": "capstone-contributing",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      },
+      "capstone_metrics": [
+        {
+          "metric_id": "evacuation-lead-time",
+          "magnitude": 12.0,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        }
+      ]
+    },
+    {
+      "spec_id": "010-monitoring-agent",
+      "spec_title": "Monitoring Agent",
+      "tag": "capstone-contributing",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      },
+      "capstone_metrics": [
+        {
+          "metric_id": "response-time",
+          "magnitude": 0.15,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        },
+        {
+          "metric_id": "lives-saved",
+          "magnitude": 0.05,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        }
+      ]
+    },
+    {
+      "spec_id": "011-resource-allocation-agent",
+      "spec_title": "Resource Allocation Agent",
+      "tag": "capstone-contributing",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      },
+      "capstone_metrics": [
+        {
+          "metric_id": "logistics-efficiency",
+          "magnitude": 0.25,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        }
+      ]
+    },
+    {
+      "spec_id": "012-risk-assessment-agent",
+      "spec_title": "Risk Assessment Agent",
+      "tag": "capstone-contributing",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      },
+      "capstone_metrics": [
+        {
+          "metric_id": "economic-loss-reduction",
+          "magnitude": 0.2,
+          "direction": "+",
+          "residual_gap_to_target": 0.05
+        },
+        {
+          "metric_id": "lives-saved",
+          "magnitude": 0.05,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        }
+      ],
+      "open_followups": [
+        {
+          "kind": "spec",
+          "ref": "specs/037-capstone-evidence-pack/spec.md",
+          "section": "Adoption Roadmap waves WAVE-04 / WAVE-05 (LGA + volunteer)"
+        }
+      ]
+    },
+    {
+      "spec_id": "013-root-readme",
+      "spec_title": "Root README",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "014-azure-openai-integration",
+      "spec_title": "Azure OpenAI Integration",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "015-performance-benchmarks",
+      "spec_title": "Performance Benchmarks (SC-CAP-015)",
+      "tag": "capstone-contributing",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      },
+      "capstone_metrics": [
+        {
+          "metric_id": "lives-saved",
+          "magnitude": 0.0,
+          "direction": "+/-",
+          "residual_gap_to_target": 0.1
+        }
+      ],
+      "open_followups": [
+        {
+          "kind": "spec",
+          "ref": "specs/037-capstone-evidence-pack/spec.md",
+          "section": "Adoption Roadmap waves WAVE-04 / WAVE-05 (LGA + volunteer)"
+        }
+      ]
+    },
+    {
+      "spec_id": "016-automated-demo-script",
+      "spec_title": "Automated Demo Script (excluded by spec-037)",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "017-cd-pipeline",
+      "spec_title": "CD Pipeline",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "018-aidr-guidance-integration",
+      "spec_title": "AIDR Guidance Integration",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "019-aidr-additional-guidances",
+      "spec_title": "AIDR Additional Guidances",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "020-disaster-mapper-ui",
+      "spec_title": "Disaster Mapper UI",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "021-governance-dashboard",
+      "spec_title": "Governance Dashboard",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "022-multi-jurisdiction-filter",
+      "spec_title": "Multi-Jurisdiction Filter",
+      "tag": "capstone-contributing",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      },
+      "capstone_metrics": [
+        {
+          "metric_id": "response-time",
+          "magnitude": 0.05,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        }
+      ]
+    },
+    {
+      "spec_id": "023-dashboard-real-data",
+      "spec_title": "Dashboard Real Data",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "024-simulation-control-chat",
+      "spec_title": "Simulation Control Chat",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "025-agent-spec-compliance",
+      "spec_title": "Agent Spec Compliance",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "026-sim-warp-playback",
+      "spec_title": "Simulation Warp Playback",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "027-spec-hardening",
+      "spec_title": "Spec Hardening",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "028-capstone-alignment",
+      "spec_title": "Capstone Alignment",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "029-progressive-delivery-pipeline",
+      "spec_title": "Progressive Delivery Pipeline",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "030-llm-eval-framework",
+      "spec_title": "LLM Evaluation Framework",
+      "tag": "capstone-contributing",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      },
+      "capstone_metrics": [
+        {
+          "metric_id": "lives-saved",
+          "magnitude": 0.0,
+          "direction": "+/-",
+          "residual_gap_to_target": 0.0
+        }
+      ]
+    },
+    {
+      "spec_id": "031-simplify-cicd-pipeline",
+      "spec_title": "Simplify CI/CD Pipeline",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "032-rubric-improvements",
+      "spec_title": "Rubric Improvements",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "033-maf-adoption",
+      "spec_title": "MAF Adoption",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "034-webapp-capstone-coverage",
+      "spec_title": "Webapp Capstone Coverage",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "035-webapp-capstone-closure",
+      "spec_title": "Webapp Capstone Closure",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "036-foundry-rag-grounding",
+      "spec_title": "Foundry RAG Grounding",
+      "tag": "capstone-contributing",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      },
+      "capstone_metrics": [
+        {
+          "metric_id": "lives-saved",
+          "magnitude": 0.05,
+          "direction": "+",
+          "residual_gap_to_target": 0.0
+        }
+      ]
+    },
+    {
+      "spec_id": "036-sim-agent-extend",
+      "spec_title": "Simulation Agent Extend",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
+        "evidence_status": "Validated"
+      }
+    }
+  ],
+  "tradeoffs": [
+    {
+      "adr_id": "ADR-036-001",
+      "adr_path": "docs/aidr/decisions/ADR-036-001-real-sub-agent-invocation.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding"
+      ],
+      "alternatives_considered": [
+        "Direct API stubs",
+        "MAF agent registry",
+        "Real sub-agent invocation via MAF"
+      ],
+      "rationale": "Real invocation preserves spec-008..012 behaviour while migrating to Foundry SDK.",
+      "synthesised_tension": "automation-vs-command",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-036-002",
+      "adr_path": "docs/aidr/decisions/ADR-036-002-direct-rest-lifecycle.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding"
+      ],
+      "alternatives_considered": [
+        "SDK-only",
+        "Hybrid SDK + REST",
+        "Direct REST lifecycle for migration anchors"
+      ],
+      "rationale": "Direct REST gives explicit control over the three migration anchor signatures.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-036-003",
+      "adr_path": "docs/aidr/decisions/ADR-036-003-cosmos-session-consistency.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding"
+      ],
+      "alternatives_considered": [
+        "Strong",
+        "Eventual",
+        "Session"
+      ],
+      "rationale": "Session consistency balances RAG-citation freshness with cross-region throughput.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-036-004",
+      "adr_path": "docs/aidr/decisions/ADR-036-004-apim-token-bucket-circuit-breaker.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding"
+      ],
+      "alternatives_considered": [
+        "Token-bucket only",
+        "Circuit breaker only",
+        "Combined"
+      ],
+      "rationale": "Combined gives both rate-limit smoothing and fast-fail under sustained outage.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-036-005",
+      "adr_path": "docs/aidr/decisions/ADR-036-005-cascade-etag-optimistic-concurrency.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding"
+      ],
+      "alternatives_considered": [
+        "Pessimistic locks",
+        "Last-writer-wins",
+        "Cascade-ETag"
+      ],
+      "rationale": "Cascade-ETag honours append-only audit while avoiding distributed locks.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-036-006",
+      "adr_path": "docs/aidr/decisions/ADR-036-006-lessons-capture-blob-worm.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding"
+      ],
+      "alternatives_considered": [
+        "Cosmos only",
+        "Blob WORM"
+      ],
+      "rationale": "Blob WORM matches the spec-030 audit-archive 7-year immutability precedent.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-036-007",
+      "adr_path": "docs/aidr/decisions/ADR-036-007-distributed-sequence-allocator.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding"
+      ],
+      "alternatives_considered": [
+        "DB sequence",
+        "ULID",
+        "Distributed allocator"
+      ],
+      "rationale": "Allocator avoids hot-partition writes during simulation surges.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-036-008",
+      "adr_path": "docs/aidr/decisions/ADR-036-008-sli-thresholds-rationale.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding"
+      ],
+      "alternatives_considered": [
+        "Per-spec SLOs",
+        "Single global SLO",
+        "Tiered SLI thresholds"
+      ],
+      "rationale": "Tiered thresholds map to capstone criteria via spec-015.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-036-009",
+      "adr_path": "docs/aidr/decisions/ADR-036-009-idempotency-cache-design.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding",
+        "036-sim-agent-extend"
+      ],
+      "alternatives_considered": [
+        "No idempotency",
+        "Server-side dedup",
+        "Cache TTL 24h"
+      ],
+      "rationale": "24h TTL matches the longest sustained simulation activation pattern.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-036-010",
+      "adr_path": "docs/aidr/decisions/ADR-036-010-cycle-2-amendment-cycle.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding"
+      ],
+      "alternatives_considered": [
+        "No amendment cycle",
+        "Annual",
+        "Per-deployment"
+      ],
+      "rationale": "Per-deployment review with explicit amendment cycle preserves QG-3 lessons capture.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-036-011",
+      "adr_path": "docs/aidr/decisions/ADR-036-011-cycle-3-amendment-cycle.md",
+      "bounding_features": [
+        "036-foundry-rag-grounding"
+      ],
+      "alternatives_considered": [
+        "Cycle 2 only",
+        "Cycle 3 expansion"
+      ],
+      "rationale": "Cycle 3 extends the amendment cycle with cross-spec coupling enforcement.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-037-01-text-first-evidence-pack",
+      "adr_path": "docs/aidr/decisions/adr-037-01-text-first-evidence-pack.md",
+      "bounding_features": [
+        "037-capstone-evidence-pack"
+      ],
+      "alternatives_considered": [
+        "OpenAPI-first contract",
+        "YAML-only artefacts",
+        "Bespoke per-artefact schemas",
+        "Markdown + JSON sidecar (chosen)"
+      ],
+      "rationale": "Text-first matches the 'evidence in git' principle and reuses existing JSON Schema tooling.",
+      "synthesised_tension": "none",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-037-02-executive-shell-reuse",
+      "adr_path": "docs/aidr/decisions/adr-037-02-executive-shell-reuse.md",
+      "bounding_features": [
+        "037-capstone-evidence-pack"
+      ],
+      "alternatives_considered": [
+        "Standalone micro-frontend",
+        "Embed in dashboard sub-route",
+        "New sibling route reusing PersonaWorkspace (chosen)"
+      ],
+      "rationale": "Honours Clarification 3 + SC-009 (zero net-new dashboards / chart libraries).",
+      "synthesised_tension": "automation-vs-command",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-037-03-manual-evidence-cap",
+      "adr_path": "docs/aidr/decisions/adr-037-03-manual-evidence-cap.md",
+      "bounding_features": [
+        "037-capstone-evidence-pack"
+      ],
+      "alternatives_considered": [
+        "No cap",
+        "Fleet-wide cap",
+        "Hard cap with no override",
+        "Per-artefact ≤0.5 with named-auditor override (chosen)"
+      ],
+      "rationale": "Preserves NN-1 human-in-the-loop without disabling judgement-heavy RAI Register.",
+      "synthesised_tension": "speed-vs-legality",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "adr_id": "ADR-037-04-three-layer-append-only",
+      "adr_path": "docs/aidr/decisions/adr-037-04-three-layer-append-only.md",
+      "bounding_features": [
+        "037-capstone-evidence-pack"
+      ],
+      "alternatives_considered": [
+        "Git only",
+        "Cosmos only",
+        "Blob only",
+        "Three-layer (chosen)",
+        "Four-layer with KV signing"
+      ],
+      "rationale": "Three-layer gives tamper-evidence auditors can verify independently without the cost of a fourth signing layer.",
+      "synthesised_tension": "visibility-vs-privacy",
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-037 ADR consolidation",
+        "evidence_status": "Validated"
+      }
+    }
+  ]
+}

@@ -1,0 +1,693 @@
+{
+  "artefact_id": "risk_register",
+  "schema_version": "1.0.0",
+  "publication_id": "fe3ace7c-a2c5-5ced-aa98-529590aa33b9",
+  "published_at_utc": "2026-05-11T17:30:00Z",
+  "published_by": "spec-037-implementer",
+  "metadata": {
+    "manual_row_count": 21,
+    "total_row_count": 21,
+    "manual_row_ratio": 1.0,
+    "manual_row_ratio_threshold": 0.5,
+    "link_check_status": "passed",
+    "last_gate_run_utc": "2026-05-11T17:30:00Z",
+    "auditor_signoff": {
+      "name": "Capstone Evidence Pack v1 Author",
+      "role": "Spec-037 Implementer",
+      "signoff_date_utc": "2026-05-11T17:30:00Z",
+      "basis": "AIDR M&E Framework + ISO/IEC 42001 §6.1 risk-acceptance pattern (analyser finding I5 + spec-037 FR-038)"
+    }
+  },
+  "rows": [
+    {
+      "id": "RISK-AOAI-001",
+      "title": "AI Model Unavailability During Disaster Operations",
+      "category": "AI",
+      "description": "Azure OpenAI outages during peak disaster load degrade agent output quality.",
+      "likelihood": 3,
+      "consequence": 4,
+      "inherent_score": 12,
+      "treatment": "Template fallback for all 5 agents; circuit breaker (3-failure / 30s); manual failover to AU Southeast; confidence threshold 0.7.",
+      "owner": "Platform Operations Lead",
+      "residual_likelihood": 2,
+      "residual_consequence": 2,
+      "residual_score": 4,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/014-azure-openai-integration/spec.md"
+        },
+        {
+          "kind": "governance_hub",
+          "ref": "docs/risk-register/RISK-AOAI-001.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Platform Operations Lead",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-AOAI-002",
+      "title": "Token Quota Exhaustion Under Sustained Disaster Load",
+      "category": "AI",
+      "description": "Concurrent multi-agent usage during prolonged disaster causes HTTP 429 throttling.",
+      "likelihood": 2,
+      "consequence": 3,
+      "inherent_score": 6,
+      "treatment": "Per-agent monthly budget tracking; two-tier model routing; tenacity retry with backoff.",
+      "owner": "Platform Operations Lead",
+      "residual_likelihood": 1,
+      "residual_consequence": 2,
+      "residual_score": 2,
+      "next_review_date": "2026-06-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/014-azure-openai-integration/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Platform Operations Lead",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-AOAI-003",
+      "title": "Managed Identity Credential Propagation Delays",
+      "category": "Operational",
+      "description": "Entra ID role assignment propagation can take up to 10 minutes during deployments.",
+      "likelihood": 1,
+      "consequence": 3,
+      "inherent_score": 3,
+      "treatment": "Graceful degradation to template fallback; Bicep RBAC dependsOn sequencing; pre-traffic health checks.",
+      "owner": "Platform Operations Lead",
+      "residual_likelihood": 1,
+      "residual_consequence": 2,
+      "residual_score": 2,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/014-azure-openai-integration/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Platform Operations Lead",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-001",
+      "title": "Container Apps revision saturation",
+      "category": "Platform",
+      "description": "Concurrent disaster activations could exceed Container Apps autoscale ceiling.",
+      "likelihood": 3,
+      "consequence": 4,
+      "inherent_score": 12,
+      "treatment": "HPA tuned in infra/main.bicep; load tests in tests/load/; KEDA scale-to-zero rejected for hot-path.",
+      "owner": "Infrastructure/DevOps Lead",
+      "residual_likelihood": 2,
+      "residual_consequence": 3,
+      "residual_score": 6,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/032-rubric-improvements/spec.md"
+        },
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/technical/sre-engineer.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Infrastructure/DevOps Lead",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-002",
+      "title": "Cosmos partition hotspot under cross-jurisdiction surge",
+      "category": "Platform",
+      "description": "A multi-jurisdiction incident may concentrate writes on a single partition (audit-timeline /tenant_id).",
+      "likelihood": 2,
+      "consequence": 4,
+      "inherent_score": 8,
+      "treatment": "Partitioning math documented in docs/architecture/cosmos-partitioning.md; autoscale 1000 RU/s; capacity model in docs/governance-hub/architecture/capacity-model.md.",
+      "owner": "Data Engineer",
+      "residual_likelihood": 1,
+      "residual_consequence": 3,
+      "residual_score": 3,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "governance_hub",
+          "ref": "docs/governance-hub/architecture/cosmos-partitioning.md"
+        },
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/technical/data-engineer.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Data Engineer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-003",
+      "title": "Foundry RAG carve-out endpoint unavailability",
+      "category": "Platform",
+      "description": "Foundry inference endpoint outage breaks RAG-grounded sub-agent responses.",
+      "likelihood": 2,
+      "consequence": 3,
+      "inherent_score": 6,
+      "treatment": "Fallback to non-RAG path with explicit `rag_used:false` flag; spec-036 FR-RAG-LS-02 offline-cache bundles for Field Coordinator; chaos drill quarterly.",
+      "owner": "Solution Architect",
+      "residual_likelihood": 1,
+      "residual_consequence": 3,
+      "residual_score": 3,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/036-foundry-rag-grounding/spec.md"
+        },
+        {
+          "kind": "governance_hub",
+          "ref": "infra/parameters/foundry-carveout.yaml"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Solution Architect",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-004",
+      "title": "LLM hallucination in Communication Agent public alerts",
+      "category": "AI",
+      "description": "A grounded but hallucinated alert text could be approved if the human-in-the-loop fails.",
+      "likelihood": 3,
+      "consequence": 5,
+      "inherent_score": 15,
+      "treatment": "spec-008 FR-072 NN-1 mandatory PIO approval; spec-030 grounding-faithfulness eval gate; misinformation watchlist.",
+      "owner": "Public Information Officer",
+      "residual_likelihood": 1,
+      "residual_consequence": 4,
+      "residual_score": 4,
+      "next_review_date": "2026-06-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/008-communication-agent/spec.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "specs/030-llm-eval-framework/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Public Information Officer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-005",
+      "title": "Sim-agent idempotency replay under simulated disaster load",
+      "category": "AI",
+      "description": "spec-036-sim-agent-extend telemetry-injection agent could double-fire under retries if idempotency cache fails.",
+      "likelihood": 2,
+      "consequence": 3,
+      "inherent_score": 6,
+      "treatment": "spec-036 ADR-036-009 idempotency-cache design (24h TTL); production-grade idempotency on /inject-telemetry per spec-036-sim-agent-extend FR-066; integration test in tests/integration/spec_036/.",
+      "owner": "AI/ML Engineer",
+      "residual_likelihood": 1,
+      "residual_consequence": 2,
+      "residual_score": 2,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/036-sim-agent-extend/spec.md"
+        },
+        {
+          "kind": "adr",
+          "ref": "docs/aidr/decisions/ADR-036-009-idempotency-cache-design.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "AI/ML Engineer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-006",
+      "title": "Confidence-threshold drift in Risk Assessment Agent",
+      "category": "AI",
+      "description": "Model retraining changes the confidence-distribution; existing 0.7 threshold may be miscalibrated.",
+      "likelihood": 2,
+      "consequence": 4,
+      "inherent_score": 8,
+      "treatment": "Quarterly re-calibration via spec-030 LLM-eval framework; canary deployment with confidence histogram diff; spec-012 FR-024 explicit confidence band.",
+      "owner": "AI/ML Engineer",
+      "residual_likelihood": 1,
+      "residual_consequence": 3,
+      "residual_score": 3,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/012-risk-assessment-agent/spec.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "specs/030-llm-eval-framework/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "AI/ML Engineer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-007",
+      "title": "Cross-jurisdiction span-of-control breach",
+      "category": "Operational",
+      "description": "Multi-jurisdiction incident exceeds single Incident Commander's AIIMS span-of-control.",
+      "likelihood": 3,
+      "consequence": 4,
+      "inherent_score": 12,
+      "treatment": "spec-001 + spec-022 multi-jurisdiction filter triggers Unified Command; span-of-control warnings in Incident Commander dashboard.",
+      "owner": "Incident Commander",
+      "residual_likelihood": 2,
+      "residual_consequence": 3,
+      "residual_score": 6,
+      "next_review_date": "2026-06-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/001-disaster-response-hub/spec.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "specs/022-multi-jurisdiction-filter/spec.md"
+        },
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/operational/incident-commander.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Incident Commander",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-008",
+      "title": "Field connectivity loss during evacuation",
+      "category": "Operational",
+      "description": "Field Coordinator without connectivity makes locally-cached decisions that may diverge from HQ.",
+      "likelihood": 3,
+      "consequence": 4,
+      "inherent_score": 12,
+      "treatment": "spec-036 FR-RAG-LS-02 offline-cache manifest; conservative life-safety default; local audit log replays on reconnect (spec-027).",
+      "owner": "Field Coordinator",
+      "residual_likelihood": 2,
+      "residual_consequence": 3,
+      "residual_score": 6,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/036-foundry-rag-grounding/spec.md"
+        },
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/operational/field-coordinator.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Field Coordinator",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-009",
+      "title": "Resource scarcity under concurrent disaster activations",
+      "category": "Operational",
+      "description": "Logistics Officer cannot satisfy demand when multiple jurisdictions activate simultaneously.",
+      "likelihood": 3,
+      "consequence": 4,
+      "inherent_score": 12,
+      "treatment": "spec-011 resource governor; mutual-aid escalation path via spec-001; Executive Leader policy authority for above-delegated commitments.",
+      "owner": "Logistics Officer",
+      "residual_likelihood": 2,
+      "residual_consequence": 3,
+      "residual_score": 6,
+      "next_review_date": "2026-06-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/011-resource-allocation-agent/spec.md"
+        },
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/operational/logistics-officer.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Logistics Officer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-010",
+      "title": "Conflicting jurisdiction lead-agency claims",
+      "category": "Jurisdictional",
+      "description": "Two state lead agencies may both claim primary authority during a cross-border incident.",
+      "likelihood": 2,
+      "consequence": 4,
+      "inherent_score": 8,
+      "treatment": "Adoption Roadmap (spec-037 artefact 2) wave readiness gates require lead-agency consensus; AIIMS Unified Command pattern.",
+      "owner": "Executive Leader",
+      "residual_likelihood": 1,
+      "residual_consequence": 3,
+      "residual_score": 3,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/037-capstone-evidence-pack/spec.md"
+        },
+        {
+          "kind": "governance_hub",
+          "ref": "docs/governance-hub/adoption-roadmap/roadmap.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Executive Leader",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-011",
+      "title": "Commonwealth COMDISPLAN activation lag",
+      "category": "Jurisdictional",
+      "description": "Federal coordination via NEMA may lag state response by hours during initial declaration.",
+      "likelihood": 2,
+      "consequence": 3,
+      "inherent_score": 6,
+      "treatment": "Pre-positioned mutual-aid agreements; spec-022 jurisdiction filter highlights activation status; Commonwealth wave 4 of Adoption Roadmap.",
+      "owner": "Executive Leader",
+      "residual_likelihood": 2,
+      "residual_consequence": 2,
+      "residual_score": 4,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/sectors/commonwealth/nema.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Executive Leader",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-012",
+      "title": "PH/JP/BD baseline data-sharing MoU not signed",
+      "category": "Jurisdictional",
+      "description": "Asia capstone metrics deferred until D-009 + national MoUs are signed (PH NDRRMC, JP Cabinet Office, BD DDM).",
+      "likelihood": 4,
+      "consequence": 3,
+      "inherent_score": 12,
+      "treatment": "specs/shared/capstone-metric-trace.md tracks Deferred status; AU-v1 metrics validated independently.",
+      "owner": "Capstone Reviewer",
+      "residual_likelihood": 4,
+      "residual_consequence": 2,
+      "residual_score": 8,
+      "next_review_date": "2026-11-11",
+      "back_citations": [
+        {
+          "kind": "governance_hub",
+          "ref": "specs/shared/capstone-metric-trace.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-013",
+      "title": "Signal envelope schema drift breaks ingest contract",
+      "category": "Data",
+      "description": "Unversioned changes to signal-envelope schema would break downstream consumers.",
+      "likelihood": 2,
+      "consequence": 4,
+      "inherent_score": 8,
+      "treatment": "Contract test in tests/contract/spec_006/; signal-envelope.schema.v2.json with backwards-compat layer; spec-005 data-source governance.",
+      "owner": "Data Engineer",
+      "residual_likelihood": 1,
+      "residual_consequence": 3,
+      "residual_score": 3,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/006-data-ingestion-storage/spec.md"
+        },
+        {
+          "kind": "spec",
+          "ref": "specs/005-data-source-governance/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Data Engineer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-014",
+      "title": "PII leakage in audit log payloads",
+      "category": "Data",
+      "description": "Audit-writer could inadvertently persist PII (NN-2 violation).",
+      "likelihood": 2,
+      "consequence": 5,
+      "inherent_score": 10,
+      "treatment": "Presidio anonymizer in spec-030 + spec-032 PII guards; integration test in tests/integration/spec_037/test_publish_pipeline.py asserts no email/phone patterns.",
+      "owner": "Compliance Auditor",
+      "residual_likelihood": 1,
+      "residual_consequence": 4,
+      "residual_score": 4,
+      "next_review_date": "2026-06-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/032-rubric-improvements/spec.md"
+        },
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/technical/security-engineer.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Compliance Auditor",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-015",
+      "title": "Corpus snapshot drift in Foundry RAG retrievals",
+      "category": "Data",
+      "description": "Mismatched corpus_build_sha between ingest snapshot and live index returns stale citations.",
+      "likelihood": 2,
+      "consequence": 3,
+      "inherent_score": 6,
+      "treatment": "spec-036 FR-RAG-G3 corpus-build-sha tagging; staleness_alert.schema.json; quarterly corpus refresh cadence.",
+      "owner": "Data Engineer",
+      "residual_likelihood": 1,
+      "residual_consequence": 2,
+      "residual_score": 2,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/036-foundry-rag-grounding/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Data Engineer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-016",
+      "title": "Container image dependency CVE",
+      "category": "Supply-chain",
+      "description": "Critical CVE in a transitive dependency of the api/agents container images.",
+      "likelihood": 3,
+      "consequence": 4,
+      "inherent_score": 12,
+      "treatment": "Cosign keyless signing (spec-032 FR-AI09); CodeQL + security-scan workflows; Defender for Cloud alerts; SBOM generated at build.",
+      "owner": "Security Engineer",
+      "residual_likelihood": 2,
+      "residual_consequence": 3,
+      "residual_score": 6,
+      "next_review_date": "2026-06-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/032-rubric-improvements/spec.md"
+        },
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/technical/security-engineer.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Security Engineer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-017",
+      "title": "Foundry SDK breaking change at carve-out boundary",
+      "category": "Supply-chain",
+      "description": "azure-ai-inference SDK major version bump may break the spec-036 migration anchors.",
+      "likelihood": 2,
+      "consequence": 3,
+      "inherent_score": 6,
+      "treatment": "Pinned SDK version; spec-036 FR-RAG-EX-04 migration anchor tests; foundry-carveout-review.yml 6-monthly review workflow.",
+      "owner": "AI/ML Engineer",
+      "residual_likelihood": 1,
+      "residual_consequence": 2,
+      "residual_score": 2,
+      "next_review_date": "2026-11-11",
+      "back_citations": [
+        {
+          "kind": "spec",
+          "ref": "specs/036-foundry-rag-grounding/spec.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "AI/ML Engineer",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    },
+    {
+      "id": "RISK-NEW-018",
+      "title": "Volunteer credentialing channel dependency",
+      "category": "Supply-chain",
+      "description": "External volunteer credentialing systems (state-managed) may be unavailable or out of sync.",
+      "likelihood": 3,
+      "consequence": 3,
+      "inherent_score": 9,
+      "treatment": "Adoption Roadmap wave 5 includes volunteer credentialing readiness gate; manual override with executive sign-off; cached credential snapshots.",
+      "owner": "Resilience Planner",
+      "residual_likelihood": 2,
+      "residual_consequence": 2,
+      "residual_score": 4,
+      "next_review_date": "2026-08-11",
+      "back_citations": [
+        {
+          "kind": "agent_md",
+          "ref": ".github/agents/sectors/cross-sector/volunteer.agent.md"
+        }
+      ],
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-037 author review",
+        "owner": "Resilience Planner",
+        "review_cadence": "quarterly",
+        "automation_target": "spec-030 evaluation framework",
+        "evidence_status": "Validated"
+      }
+    }
+  ],
+  "superseded_surfaces": []
+}
