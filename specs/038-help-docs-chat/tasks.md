@@ -179,47 +179,47 @@ description: "Actionable, dependency-ordered task list for spec-038 In-Product H
 
 ### 4a — Library / shell
 
-- [ ] T-AA093 [P] Implement `apps/web/src/lib/help/telemetry.ts` — typed wrappers around Application Insights `trackEvent` for the 10 events in contract §3. — contract §3, FR-020
-- [ ] T-AA094 [P] Implement `apps/web/src/lib/help/deepLinkParser.ts` — parses `?help=open&surface=...`, `?persona=...`, validates entitlement claim. — FR-005, contract §1
-- [ ] T-AA095 [P] Implement `apps/web/src/lib/help/offlineCache.ts` — `idb`-backed cache binding to `apps/agents/common/offline_cache` envelope (≤500 MB / 14-day TTL); records on each viewed article + glossary + curated FAQ topics; emits "may be stale" once past TTL. — FR-026, FR-026a, FR-026b, CHK139, CHK140
-- [ ] T-AA096 [P] Implement `apps/web/src/lib/help/sseClient.ts` — typed SSE consumer for `/help/chat/ask` with reconnect + cancel. — contract §2 ChatPanel
-- [ ] T-AA097 [P] Implement `apps/web/src/lib/help/personaContext.ts` — client hook resolving `personaId` + `personaSource` (mirrors backend T-AA058). — FR-027, FR-028
-- [ ] T-AA098 [P] Implement `apps/web/src/lib/help/degradedModeDetector.ts` — listens for `navigator.connection` + service-worker offline event + 503 from `/help/chat/ask`; toggles degraded UI. — FR-026, FR-026a-AMEND, CHK141, CHK142
+- [X] T-AA093 [P] Implement `apps/web/src/lib/help/telemetry.ts` — typed wrappers around Application Insights `trackEvent` for the 10 events in contract §3. — contract §3, FR-020
+- [X] T-AA094 [P] Implement `apps/web/src/lib/help/deepLinkParser.ts` — parses `?help=open&surface=...`, `?persona=...`, validates entitlement claim. — FR-005, contract §1
+- [X] T-AA095 [P] Implement `apps/web/src/lib/help/offlineCache.ts` — `idb`-backed cache binding to `apps/agents/common/offline_cache` envelope (≤500 MB / 14-day TTL); records on each viewed article + glossary + curated FAQ topics; emits "may be stale" once past TTL. — FR-026, FR-026a, FR-026b, CHK139, CHK140
+- [X] T-AA096 [P] Implement `apps/web/src/lib/help/sseClient.ts` — typed SSE consumer for `/help/chat/ask` with reconnect + cancel. — contract §2 ChatPanel
+- [X] T-AA097 [P] Implement `apps/web/src/lib/help/personaContext.ts` — client hook resolving `personaId` + `personaSource` (mirrors backend T-AA058). — FR-027, FR-028
+- [X] T-AA098 [P] Implement `apps/web/src/lib/help/degradedModeDetector.ts` — listens for `navigator.connection` + service-worker offline event + 503 from `/help/chat/ask`; toggles degraded UI. — FR-026, FR-026a-AMEND, CHK141, CHK142
 
 ### 4b — Layout + routes
 
-- [ ] T-AA099 [Gate] `apps/web/src/app/help/layout.tsx` — persistent Help shell, persona switcher (reuses spec-021 multi-role widget), telemetry mount. — contract §1, FR-001, CHK026
-- [ ] T-AA100 [Gate] `apps/web/src/app/help/page.tsx` — persona-aware landing; renders `<PersonaTile />` union for multi-role users ordered by `authority_rank` desc; tour shortcut. — FR-002, FR-027, FR-028, CHK001-CHK016
-- [ ] T-AA101 [Gate] `apps/web/src/app/help/search/page.tsx` — full-text search via `/help/search`; glossary-first ordering visible. — FR-021, CHK025, CHK030
-- [ ] T-AA102 [Gate] `apps/web/src/app/help/chat/page.tsx` — full-page chat surface; mounts `<ChatPanel />`; mirrors side-panel state. — FR-012, FR-013, FR-014, FR-017, contract §1
-- [ ] T-AA103 [Gate] `apps/web/src/app/help/articles/[slug]/page.tsx` — MDX render; embeds `<AnnotatedScreenshot />` + `<KeyboardSteps />`. — FR-005, FR-006, FR-008, CHK027
-- [ ] T-AA104 [Gate] `apps/web/src/app/help/glossary/[term]/page.tsx` — glossary entry + cross-links; honours `lang` attribute on non-English fragments. — FR-009a, FR-021, CHK025, CHK132
-- [ ] T-AA105 [Gate] `apps/web/src/app/help/playbooks/[id]/page.tsx` — long-form playbook layout (simulation/agent/observer). — FR-003, CHK020-CHK022
+- [X] T-AA099 [Gate] `apps/web/src/app/help/layout.tsx` — persistent Help shell, persona switcher (reuses spec-021 multi-role widget), telemetry mount. — contract §1, FR-001, CHK026
+- [X] T-AA100 [Gate] `apps/web/src/app/help/page.tsx` — persona-aware landing; renders `<PersonaTile />` union for multi-role users ordered by `authority_rank` desc; tour shortcut. — FR-002, FR-027, FR-028, CHK001-CHK016
+- [X] T-AA101 [Gate] `apps/web/src/app/help/search/page.tsx` — full-text search via `/help/search`; glossary-first ordering visible. — FR-021, CHK025, CHK030
+- [X] T-AA102 [Gate] `apps/web/src/app/help/chat/page.tsx` — full-page chat surface; mounts `<ChatPanel />`; mirrors side-panel state. — FR-012, FR-013, FR-014, FR-017, contract §1
+- [X] T-AA103 [Gate] `apps/web/src/app/help/articles/[slug]/page.tsx` — MDX render; embeds `<AnnotatedScreenshot />` + `<KeyboardSteps />`. — FR-005, FR-006, FR-008, CHK027
+- [X] T-AA104 [Gate] `apps/web/src/app/help/glossary/[term]/page.tsx` — glossary entry + cross-links; honours `lang` attribute on non-English fragments. — FR-009a, FR-021, CHK025, CHK132
+- [X] T-AA105 [Gate] `apps/web/src/app/help/playbooks/[id]/page.tsx` — long-form playbook layout (simulation/agent/observer). — FR-003, CHK020-CHK022
 
 ### 4c — Components
 
-- [ ] T-AA106 [Gate] `apps/web/src/components/help/HelpAffordance.tsx` — global header `?` button + `Ctrl+/`/`⌘+/` shortcut; opens side panel; `aria-label`, `aria-keyshortcuts`. Mounted in `apps/web/src/app/layout.tsx`. — FR-001, contract §2, CHK026, CHK040
-- [ ] T-AA107 [Gate] `apps/web/src/components/help/ChatPanel.tsx` — SSE consumer; renders `<RefusalCard />`, `<DeprecationNotice />`, `<CitationBadge />`; degraded banner; `role="log" aria-live="polite"`. — FR-012, FR-013, FR-026, contract §2, CHK087-CHK090, CHK140
-- [ ] T-AA108 [Gate] `apps/web/src/components/help/AnnotatedScreenshot.tsx` — `<picture>` light/dark variants; numbered callouts as list with `aria-describedby`; staleness banner integration. — FR-006, FR-007, FR-008, FR-010, contract §2, CHK051-CHK055, CHK078
-- [ ] T-AA109 [Gate] `apps/web/src/components/help/CitationBadge.tsx` — inline anchor with `aria-label`; popover on focus/hover. — FR-012, contract §2, CHK089
-- [ ] T-AA110 [Gate] `apps/web/src/components/help/StalenessBanner.tsx` — `role="status"`; downgraded variant after grace expires. — FR-010, FR-010b, contract §2, CHK078, CHK080
-- [ ] T-AA111 [Gate] `apps/web/src/components/help/DeprecationNotice.tsx` — replacement-or-handoff variants; surfaces tenant `SupportHandoffRecord` when no replacement. — FR-011d, FR-011d-AMEND, contract §2, CHK067
-- [ ] T-AA112 [Gate] `apps/web/src/components/help/RefusalCard.tsx` — non-judgmental wording per refusal reason; suggested surface + handoff. — FR-013, FR-014, FR-023, contract §2, CHK088
-- [ ] T-AA113 [Gate] `apps/web/src/components/help/FeedbackBar.tsx` — POSTs to `/help/chat/feedback`; toast confirmation; never alters rated content. — FR-022, FR-022a, contract §2, CHK112, CHK113
-- [ ] T-AA114 [Gate] `apps/web/src/components/help/PersonaTile.tsx` — used in landing union; visually highlights active. — FR-002, FR-028, contract §2
-- [ ] T-AA115 [Gate] `apps/web/src/components/help/KeyboardSteps.tsx` — `<ol>` with `aria-labelledby` paired with screenshot caption. — FR-008, contract §2, CHK054
-- [ ] T-AA116 [P] `apps/web/src/components/help/ConflictNotice.tsx` — surfaced when chat backend reports source disagreement. — FR-016, CHK090
-- [ ] T-AA117 [P] `apps/web/src/components/help/RedactionNotice.tsx` — inline banner shown when `meta.redaction_notice = true`. — FR-017, CHK045
-- [ ] T-AA118 [P] `apps/web/src/components/help/DegradedSearchBanner.tsx` — persistent "Showing cached results only — full search unavailable offline" indicator. — FR-026a-AMEND, CHK142
-- [ ] T-AA119 [P] `apps/web/src/components/help/SupportHandoffButton.tsx` — one-click handoff using tenant `SupportHandoffRecord`. — FR-023, FR-023a, CHK122
-- [ ] T-AA120 [P] `apps/web/src/components/help/FirstFifteenMinutesTour.tsx` — persona-driven tour overlay used by landing. — US1, FR-002, CHK001-CHK010
-- [ ] T-AA121 [P] Theme-aware screenshot serving — extend Tailwind/CSS theme tokens so `<AnnotatedScreenshot />` swaps automatically with `prefers-color-scheme`. — FR-007, CHK052
-- [ ] T-AA122 [P] Add `apps/web/src/app/help/loading.tsx` and `error.tsx` shells for resilience. — Constitution III
-- [ ] T-AA123 [P] Add `apps/web/src/app/help/sitemap.ts` so `pa11y-ci --sitemap` works. — quickstart §6
-- [ ] T-AA124 [P] Implement service-worker registration `apps/web/src/lib/help/sw-register.ts` for offline cache persistence. — FR-026
-- [ ] T-AA125 [P] Add `aria-keyshortcuts` registration to global keyboard map; visible-focus CSS verified ≥3:1 contrast. — FR-009, contract §4, CHK040, CHK041
-- [ ] T-AA126 [P] Add reduced-motion handling for any animations in Help (chat-typing indicator, toast). — contract §4
-- [ ] T-AA127 [Gate] `pnpm --filter @ama/web build` succeeds; `pnpm --filter @ama/web start` and smoke-test `/help` route renders. — checkpoint
+- [X] T-AA106 [Gate] `apps/web/src/components/help/HelpAffordance.tsx` — global header `?` button + `Ctrl+/`/`⌘+/` shortcut; opens side panel; `aria-label`, `aria-keyshortcuts`. Mounted in `apps/web/src/app/layout.tsx`. — FR-001, contract §2, CHK026, CHK040
+- [X] T-AA107 [Gate] `apps/web/src/components/help/ChatPanel.tsx` — SSE consumer; renders `<RefusalCard />`, `<DeprecationNotice />`, `<CitationBadge />`; degraded banner; `role="log" aria-live="polite"`. — FR-012, FR-013, FR-026, contract §2, CHK087-CHK090, CHK140
+- [X] T-AA108 [Gate] `apps/web/src/components/help/AnnotatedScreenshot.tsx` — `<picture>` light/dark variants; numbered callouts as list with `aria-describedby`; staleness banner integration. — FR-006, FR-007, FR-008, FR-010, contract §2, CHK051-CHK055, CHK078
+- [X] T-AA109 [Gate] `apps/web/src/components/help/CitationBadge.tsx` — inline anchor with `aria-label`; popover on focus/hover. — FR-012, contract §2, CHK089
+- [X] T-AA110 [Gate] `apps/web/src/components/help/StalenessBanner.tsx` — `role="status"`; downgraded variant after grace expires. — FR-010, FR-010b, contract §2, CHK078, CHK080
+- [X] T-AA111 [Gate] `apps/web/src/components/help/DeprecationNotice.tsx` — replacement-or-handoff variants; surfaces tenant `SupportHandoffRecord` when no replacement. — FR-011d, FR-011d-AMEND, contract §2, CHK067
+- [X] T-AA112 [Gate] `apps/web/src/components/help/RefusalCard.tsx` — non-judgmental wording per refusal reason; suggested surface + handoff. — FR-013, FR-014, FR-023, contract §2, CHK088
+- [X] T-AA113 [Gate] `apps/web/src/components/help/FeedbackBar.tsx` — POSTs to `/help/chat/feedback`; toast confirmation; never alters rated content. — FR-022, FR-022a, contract §2, CHK112, CHK113
+- [X] T-AA114 [Gate] `apps/web/src/components/help/PersonaTile.tsx` — used in landing union; visually highlights active. — FR-002, FR-028, contract §2
+- [X] T-AA115 [Gate] `apps/web/src/components/help/KeyboardSteps.tsx` — `<ol>` with `aria-labelledby` paired with screenshot caption. — FR-008, contract §2, CHK054
+- [X] T-AA116 [P] `apps/web/src/components/help/ConflictNotice.tsx` — surfaced when chat backend reports source disagreement. — FR-016, CHK090
+- [X] T-AA117 [P] `apps/web/src/components/help/RedactionNotice.tsx` — inline banner shown when `meta.redaction_notice = true`. — FR-017, CHK045
+- [X] T-AA118 [P] `apps/web/src/components/help/DegradedSearchBanner.tsx` — persistent "Showing cached results only — full search unavailable offline" indicator. — FR-026a-AMEND, CHK142
+- [X] T-AA119 [P] `apps/web/src/components/help/SupportHandoffButton.tsx` — one-click handoff using tenant `SupportHandoffRecord`. — FR-023, FR-023a, CHK122
+- [X] T-AA120 [P] `apps/web/src/components/help/FirstFifteenMinutesTour.tsx` — persona-driven tour overlay used by landing. — US1, FR-002, CHK001-CHK010
+- [X] T-AA121 [P] Theme-aware screenshot serving — extend Tailwind/CSS theme tokens so `<AnnotatedScreenshot />` swaps automatically with `prefers-color-scheme`. — FR-007, CHK052
+- [X] T-AA122 [P] Add `apps/web/src/app/help/loading.tsx` and `error.tsx` shells for resilience. — Constitution III
+- [X] T-AA123 [P] Add `apps/web/src/app/help/sitemap.ts` so `pa11y-ci --sitemap` works. — quickstart §6
+- [X] T-AA124 [P] Implement service-worker registration `apps/web/src/lib/help/sw-register.ts` for offline cache persistence. — FR-026
+- [X] T-AA125 [P] Add `aria-keyshortcuts` registration to global keyboard map; visible-focus CSS verified ≥3:1 contrast. — FR-009, contract §4, CHK040, CHK041
+- [X] T-AA126 [P] Add reduced-motion handling for any animations in Help (chat-typing indicator, toast). — contract §4
+- [X] T-AA127 [Gate] `pnpm --filter @ama/web build` succeeds; `pnpm --filter @ama/web start` and smoke-test `/help` route renders. — checkpoint
 
 **Checkpoint**: UI shell functional; ready for content authoring.
 
