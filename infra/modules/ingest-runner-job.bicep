@@ -94,6 +94,7 @@ param initialCorpusBuildSha string = ''
 param workloadProfileName string = ''
 
 @description('Application Insights connection string for runner telemetry')
+@secure()
 param appInsightsConnectionString string = ''
 
 resource job 'Microsoft.App/jobs@2024-03-01' = {
