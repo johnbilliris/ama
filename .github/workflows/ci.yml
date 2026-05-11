@@ -40,6 +40,7 @@ jobs:
           pip install pytest pytest-cov pytest-asyncio pytest-benchmark hypothesis ruff mypy import-linter pyyaml
           pip install -e apps/api
           pip install -e apps/agents
+          pip install -e packages/eval-core
           pip install -e apps/eval-runner
       - name: Install age CLI (spec 036 FR-RAG-LS-02 offline-cache dual-signing)
         run: |

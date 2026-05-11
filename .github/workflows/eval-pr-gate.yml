@@ -100,6 +100,7 @@ jobs:
 
       - name: Comment PR with scorecard summary
         if: always()
+        continue-on-error: true
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.x
         with:
           script: |
