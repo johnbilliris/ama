@@ -26,7 +26,7 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/governance/evidence-pack", tags=["evidence-pack"])
+router = APIRouter(prefix="/governance/evidence-pack", tags=["evidence-pack"])
 
 ArtefactIdEnum = Literal[
     "risk_register",
@@ -37,7 +37,26 @@ ArtefactIdEnum = Literal[
 ]
 
 
-_REPO_ROOT = Path(__file__).resolve().parents[5]
+# Resolve artefact root: in the deployed container, docs/ and specs/shared/
+# are bundled at /app/docs and /app/specs (see Dockerfile COPY). In the repo
+# checkout, walk up to find the repo root containing docs/ + specs/.
+_HERE = Path(__file__).resolve()
+
+
+def _find_artefact_root() -> Path:
+    # Container layout: /app/docs, /app/specs (bundled by Dockerfile).
+    container_root = Path("/app")
+    if (container_root / "docs" / "risk-register").is_dir():
+        return container_root
+    # Repo layout: walk up from this file until we hit the repo root.
+    for parent in _HERE.parents:
+        if (parent / "docs" / "risk-register").is_dir() and (parent / "specs").is_dir():
+            return parent
+    # Last-resort fallback (will surface as 404 / degraded health).
+    return _HERE.parents[5]
+
+
+_REPO_ROOT = _find_artefact_root()
 _ARTEFACT_PATHS: dict[str, Path] = {
     "risk_register": _REPO_ROOT / "docs" / "risk-register" / "risk-register.json",
     "adoption_roadmap": _REPO_ROOT / "docs" / "governance-hub" / "adoption-roadmap" / "roadmap.json",

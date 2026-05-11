@@ -22,5 +22,5 @@ def api_client():
         return None
 
     app = FastAPI()
-    app.include_router(evidence_pack_router.router)
+    app.include_router(evidence_pack_router.router, prefix="/api")
     return TestClient(app)
