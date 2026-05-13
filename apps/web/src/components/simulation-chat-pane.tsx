@@ -314,7 +314,7 @@ export function SimulationChatPane({
         ) : (
           <button
             type="button"
-            onClick={send}
+            onClick={() => send()}
             disabled={!input.trim()}
             className="rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white disabled:opacity-40"
           >
