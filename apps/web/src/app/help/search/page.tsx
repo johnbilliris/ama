@@ -11,11 +11,25 @@ interface SearchResult {
   summary?: string;
 }
 
+// Server components run in Node, so `fetch` requires an absolute URL — the
+// browser proxy at `/api/help/...` isn't reachable during SSR. Call upstream
+// directly with the same default identity headers the proxy injects.
+const UPSTREAM =
+  process.env.API_PROXY_UPSTREAM ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://localhost:8000/api";
+
 async function fetchResults(q: string): Promise<{ items: SearchResult[] }> {
   if (!q) return { items: [] };
   try {
-    const r = await fetch(`${process.env.NEXT_PUBLIC_API_BASE ?? ""}/api/help/search?q=${encodeURIComponent(q)}`, {
+    const r = await fetch(`${UPSTREAM}/help/search?q=${encodeURIComponent(q)}`, {
       cache: "no-store",
+      headers: {
+        "X-Tenant-Id": "live",
+        "X-User-Id": "anonymous",
+        "X-Persona-Id": "operational-default",
+        "X-Persona-Source": "idp_default",
+      },
     });
     if (!r.ok) return { items: [] };
     return (await r.json()) as { items: SearchResult[] };

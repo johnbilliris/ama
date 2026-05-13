@@ -21,13 +21,28 @@ interface Article {
   updated_at?: string;
 }
 
+// Server components run in Node, so `fetch` requires an absolute URL. The
+// browser-facing `/api/help/...` proxy is unreachable during SSR, so call the
+// upstream API directly using the same env var the rewrite/proxy uses, and
+// inject the same default tenant/persona headers the proxy injects so
+// `help_deps.get_caller` doesn't 401 the request.
+const UPSTREAM =
+  process.env.API_PROXY_UPSTREAM ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://localhost:8000/api";
+
 async function fetchArticle(slugSegments: string[]): Promise<Article | null> {
   const slugPath = slugSegments.map(encodeURIComponent).join("/");
   try {
-    const r = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE ?? ""}/api/help/articles/${slugPath}`,
-      { cache: "no-store" },
-    );
+    const r = await fetch(`${UPSTREAM}/help/articles/${slugPath}`, {
+      cache: "no-store",
+      headers: {
+        "X-Tenant-Id": "live",
+        "X-User-Id": "anonymous",
+        "X-Persona-Id": "operational-default",
+        "X-Persona-Source": "idp_default",
+      },
+    });
     if (!r.ok) return null;
     return (await r.json()) as Article;
   } catch {
@@ -44,13 +59,21 @@ export default async function ArticlePage({
   const segments = Array.isArray(p.slug) ? p.slug : [p.slug];
   const article = await fetchArticle(segments);
   if (!article) notFound();
+  // Seeded markdown bodies typically open with a `# Title` heading that
+  // duplicates `article.title`. Strip a single leading h1 so the page header
+  // is rendered exactly once.
+  const body = article.body_md ? stripLeadingH1(article.body_md) : undefined;
   return (
-    <article className="prose mx-auto max-w-3xl p-6">
-      <h1>{article.title}</h1>
-      {article.body_md ? (
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.body_md}</ReactMarkdown>
+    <article className="prose mx-auto max-w-3xl px-6 pb-6 pt-2">
+      <h1 className="mt-0">{article.title}</h1>
+      {body ? (
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
       ) : null}
       <FeedbackBar targetKind="article" targetId={article.id} />
     </article>
   );
+}
+
+function stripLeadingH1(md: string): string {
+  return md.replace(/^\s*#\s+[^\n]*\n+/, "");
 }

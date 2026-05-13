@@ -32,7 +32,7 @@ async def list_articles(
     return {"items": items, "continuation": None}
 
 
-@router.get("/articles/{slug}")
+@router.get("/articles/{slug:path}")
 async def get_article(
     slug: str,
     caller: CallerDep,

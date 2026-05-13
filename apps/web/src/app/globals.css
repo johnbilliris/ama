@@ -3891,6 +3891,42 @@ table tbody tr:hover {
   flex: 1;
   min-height: 0;
   padding: 0.5rem;
+  display: flex;
+}
+
+/* Force ChatPanel root into a flex-filling grid whose messages row scrolls.
+   Mirrors `.sim-right-chat > *` so the floating dock and the help-shell
+   right rail have consistent transcript scrolling behaviour. */
+.help-dock-panel-body > * {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+  overflow: hidden;
+}
+
+.help-dock-panel-body > * > :nth-child(2) {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+.help-dock-panel-body ::-webkit-scrollbar {
+  width: 10px;
+}
+
+.help-dock-panel-body ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.55);
+  border-radius: 5px;
+}
+
+.help-dock-panel-body ::-webkit-scrollbar-track {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.help-dock-panel-body * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.55) rgba(148, 163, 184, 0.12);
 }
 
 @media (max-width: 640px) {
