@@ -173,9 +173,6 @@ function HelpRow({ link }: { link: HelpLink }) {
             {link.label}
           </Link>
         )}
-        <span className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--ama-color-ocean)]">
-          {ctaLabel} <span aria-hidden="true">{arrow}</span>
-        </span>
       </div>
     </div>
   );

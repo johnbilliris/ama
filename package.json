@@ -13,7 +13,14 @@
       "picomatch": ">=4.0.4",
       "brace-expansion": ">=5.0.5",
       "@eslint/plugin-kit": ">=0.7.1",
-      "protobufjs": ">=7.5.5"
+      "protobufjs": ">=8.0.2",
+      "@protobufjs/utf8": ">=1.1.1",
+      "@opentelemetry/sdk-node": ">=0.217.0",
+      "@opentelemetry/exporter-prometheus": ">=0.217.0",
+      "fast-uri": ">=3.1.2",
+      "vite": ">=6.4.2",
+      "esbuild": ">=0.25.0",
+      "postcss": ">=8.5.10"
     }
   }
 }

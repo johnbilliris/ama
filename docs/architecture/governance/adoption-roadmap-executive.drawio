@@ -1,0 +1,100 @@
+<mxfile host="Electron" agent="capstone-deck-slide-29-executive">
+  <diagram name="GOV-02b-AdoptionRoadmap-Exec" id="gov-02b-adoption-roadmap-exec">
+    <mxGraphModel dx="1544" dy="1161" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="380" width="360" x="60" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-num" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#82b366;strokeColor=#5b8a44;fontColor=#ffffff;fontSize=36;fontStyle=1;" value="1" vertex="1">
+          <mxGeometry height="120" width="120" x="180" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-when" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#5b8a44;" value="Weeks 1–12" vertex="1">
+          <mxGeometry height="24" width="360" x="60" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-name" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;" value="Validate the harness" vertex="1">
+          <mxGeometry height="32" width="360" x="60" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-desc" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=13;spacingTop=8;" value="Single state, single hazard, simulation only.&#xa;Replay historical Black Summer data.&#xa;No live alerts." vertex="1">
+          <mxGeometry height="100" width="320" x="80" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="p1-tag" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#82b366;strokeColor=#5b8a44;fontColor=#ffffff;fontSize=12;fontStyle=1;align=center;" value="Production risk: ZERO" vertex="1">
+          <mxGeometry height="32" width="280" x="100" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="380" width="360" x="440" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-num" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#3d6da3;fontColor=#ffffff;fontSize=36;fontStyle=1;" value="2" vertex="1">
+          <mxGeometry height="120" width="120" x="560" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-when" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#3d6da3;" value="Months 4–9" vertex="1">
+          <mxGeometry height="24" width="360" x="440" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-name" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;" value="Shadow-mode live" vertex="1">
+          <mxGeometry height="32" width="360" x="440" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-desc" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=13;spacingTop=8;" value="One state service, live signal feeds.&#xa;AMA scored alongside human decisions.&#xa;Measure delta — never act on AMA output." vertex="1">
+          <mxGeometry height="100" width="320" x="460" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="p2-tag" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#3d6da3;fontColor=#ffffff;fontSize=12;fontStyle=1;align=center;" value="Production risk: BOUNDED" vertex="1">
+          <mxGeometry height="32" width="280" x="480" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="380" width="360" x="820" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-num" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d79b00;strokeColor=#a06f00;fontColor=#ffffff;fontSize=36;fontStyle=1;" value="3" vertex="1">
+          <mxGeometry height="120" width="120" x="940" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-when" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#a06f00;" value="Months 10–12" vertex="1">
+          <mxGeometry height="24" width="360" x="820" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-name" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;" value="Named-incident live" vertex="1">
+          <mxGeometry height="32" width="360" x="820" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-desc" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=13;spacingTop=8;" value="Live operations under approved MoU.&#xa;Named human approves every alert.&#xa;Human-in-the-loop is non-negotiable." vertex="1">
+          <mxGeometry height="100" width="320" x="840" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="p3-tag" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d79b00;strokeColor=#a06f00;fontColor=#ffffff;fontSize=12;fontStyle=1;align=center;" value="Production risk: HUMAN-GATED" vertex="1">
+          <mxGeometry height="32" width="280" x="860" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=3;" value="" vertex="1">
+          <mxGeometry height="380" width="360" x="1200" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-num" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#b85450;strokeColor=#8b3a36;fontColor=#ffffff;fontSize=36;fontStyle=1;" value="4" vertex="1">
+          <mxGeometry height="120" width="120" x="1320" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-when" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#8b3a36;" value="Year 2 (Months 13–24)" vertex="1">
+          <mxGeometry height="24" width="360" x="1200" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-name" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;" value="National reach" vertex="1">
+          <mxGeometry height="32" width="360" x="1200" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-desc" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;fontSize=13;spacingTop=8;" value="Cross-jurisdiction expansion.&#xa;NEMA / NJCOP integration.&#xa;Published as a national reference architecture." vertex="1">
+          <mxGeometry height="100" width="320" x="1220" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="p4-tag" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b85450;strokeColor=#8b3a36;fontColor=#ffffff;fontSize=12;fontStyle=1;align=center;" value="Production risk: FEDERATED" vertex="1">
+          <mxGeometry height="32" width="280" x="1240" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow-1to2" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeColor=#666666;strokeWidth=4;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="420" y="430" as="sourcePoint" />
+            <mxPoint x="440" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-2to3" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeColor=#666666;strokeWidth=4;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="800" y="430" as="sourcePoint" />
+            <mxPoint x="820" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-3to4" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;strokeColor=#666666;strokeWidth=4;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1180" y="430" as="sourcePoint" />
+            <mxPoint x="1200" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

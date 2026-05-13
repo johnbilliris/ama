@@ -1,6 +1,9 @@
 import type { PropsWithChildren } from "react";
 import { AppShell } from "@ama/ui/components/layout/app-shell";
 
+import { HelpAssistantDock } from "@/components/help/HelpAssistantDock";
+import { HelpChatProvider } from "@/lib/help/chatStore";
+
 import "./globals.css";
 
 export const metadata = {
@@ -23,7 +26,10 @@ export default function RootLayout({ children }: PropsWithChildren) {
         />
       </head>
       <body>
-        <AppShell>{children}</AppShell>
+        <HelpChatProvider>
+          <AppShell>{children}</AppShell>
+          <HelpAssistantDock />
+        </HelpChatProvider>
       </body>
     </html>
   );

@@ -3779,6 +3779,130 @@ table tbody tr:hover {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   Help Assistant — global floating dock.
+   Persists across route changes by being mounted in the root layout
+   alongside HelpChatProvider, so the conversation survives navigation.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.help-dock-launcher {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid var(--ama-border-subtle);
+  background: var(--ama-color-ocean);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.help-dock-launcher:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.help-dock-launcher:focus-visible {
+  outline: 2px solid var(--ama-color-ocean);
+  outline-offset: 3px;
+}
+
+.help-dock-launcher-label {
+  letter-spacing: 0.02em;
+}
+
+.help-dock-launcher-badge {
+  display: inline-flex;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.35rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: white;
+  color: var(--ama-color-ocean);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.help-dock-panel {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 4.75rem;
+  z-index: 60;
+  width: min(420px, calc(100vw - 2rem));
+  height: min(640px, calc(100vh - 7rem));
+  display: flex;
+  flex-direction: column;
+  background: var(--ama-surface-elevated);
+  border: 1px solid var(--ama-border-subtle);
+  border-radius: var(--ama-radius-panel);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+.help-dock-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid var(--ama-border-subtle);
+  background: var(--ama-surface-subtle, #f8fafc);
+}
+
+.help-dock-panel-kicker {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ama-color-ink, #0f172a);
+}
+
+.help-dock-panel-sub {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  color: var(--ama-color-ink-soft);
+}
+
+.help-dock-panel-close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--ama-color-ink-soft);
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+.help-dock-panel-close:hover {
+  color: var(--ama-color-ink, #0f172a);
+}
+
+.help-dock-panel-body {
+  flex: 1;
+  min-height: 0;
+  padding: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .help-dock-panel {
+    right: 0.5rem;
+    left: 0.5rem;
+    bottom: 4.25rem;
+    width: auto;
+    height: min(70vh, 560px);
+  }
+}
+
 
 /* ═══════════════════════════════════════════════════════════════════════
    Simulation banner — mirrors .preparedness-header visual language

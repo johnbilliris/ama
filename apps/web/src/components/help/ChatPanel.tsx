@@ -2,35 +2,18 @@
 /**
  * spec-038 T-AA107 — Help ChatPanel.
  *
- * Visual language mirrors `simulation-chat-pane.tsx`: header bar, scrollable
- * iMessage-style bubbles (operator right/blue, assistant left/grey), quick
- * actions row, multi-line textarea with Enter-to-send + Cancel/Send buttons.
- * Help-specific affordances (citations, refusal cards, redaction notices)
- * are layered into assistant bubbles instead of replacing them.
+ * View component for the grounded help assistant. State (messages, input,
+ * in-flight stream) is owned by `HelpChatProvider` so multiple ChatPanel
+ * mount points (help layout right rail, /help/chat page, global dock)
+ * share one conversation that survives cross-route navigation.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
-import { streamChatAsk, type ChatSseEvent } from "@/lib/help/sseClient";
+import { useEffect, useRef } from "react";
+
+import { useHelpChat, type HelpChatMessage } from "@/lib/help/chatStore";
+
 import { CitationBadge } from "./CitationBadge";
-import { RefusalCard } from "./RefusalCard";
 import { RedactionNotice } from "./RedactionNotice";
-
-type Role = "user" | "assistant";
-
-interface Citation {
-  source_id: string;
-  source_title: string;
-  anchor: string;
-  snippet?: string;
-}
-
-interface ChatMessage {
-  id: string;
-  role: Role;
-  content: string;
-  citations?: Citation[];
-  refusalReason?: string;
-  redacted?: boolean;
-}
+import { RefusalCard } from "./RefusalCard";
 
 const QUICK_ACTIONS = [
   { label: "🚦 Get started", prompt: "How do I get started with the AMA Hub for my persona?" },
@@ -41,75 +24,14 @@ const QUICK_ACTIONS = [
 ];
 
 export function ChatPanel({ persona }: { persona: string }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
-  const [isStreaming, setStreaming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  const { messages, input, isStreaming, error, setInput, send, cancel } = useHelpChat();
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll on new content, mirroring sim chat behaviour.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
   }, [messages, isStreaming]);
-
-  const send = useCallback(async () => {
-    if (!input.trim() || isStreaming) return;
-    const prompt = input.trim();
-    const userMsg: ChatMessage = { id: crypto.randomUUID(), role: "user", content: prompt };
-    const assistantId = crypto.randomUUID();
-    setMessages((prev) => [
-      ...prev,
-      userMsg,
-      { id: assistantId, role: "assistant", content: "", citations: [] },
-    ]);
-    setInput("");
-    setStreaming(true);
-    setError(null);
-
-    const ctrl = new AbortController();
-    abortRef.current = ctrl;
-
-    try {
-      await streamChatAsk(
-        { message: prompt, persona_id: persona },
-        {
-          onEvent: (e: ChatSseEvent) => {
-            setMessages((prev) =>
-              prev.map((m) => {
-                if (m.id !== assistantId) return m;
-                if (e.kind === "meta") return { ...m, redacted: e.payload.redaction_notice };
-                if (e.kind === "delta") return { ...m, content: m.content + e.payload.text };
-                if (e.kind === "citation")
-                  return { ...m, citations: [...(m.citations ?? []), e.payload] };
-                if (e.kind === "refusal") return { ...m, refusalReason: e.payload.reason };
-                return m;
-              }),
-            );
-          },
-          onClose: () => setStreaming(false),
-          onError: (err) => {
-            setError(err.message);
-            setStreaming(false);
-          },
-        },
-        { signal: ctrl.signal },
-      );
-    } finally {
-      setStreaming(false);
-      abortRef.current = null;
-    }
-  }, [input, isStreaming, persona]);
-
-  const cancel = useCallback(() => {
-    abortRef.current?.abort();
-  }, []);
-
-  const injectQuickAction = useCallback((prompt: string) => {
-    setInput(prompt);
-  }, []);
 
   return (
     <div
@@ -146,7 +68,7 @@ export function ChatPanel({ persona }: { persona: string }) {
             key={qa.label}
             type="button"
             className="sim-quick-btn"
-            onClick={() => injectQuickAction(qa.prompt)}
+            onClick={() => setInput(qa.prompt)}
             disabled={isStreaming}
             title={qa.prompt}
           >
@@ -165,7 +87,7 @@ export function ChatPanel({ persona }: { persona: string }) {
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              void send();
+              void send(persona);
             }
           }}
           placeholder="Ask the help assistant…"
@@ -182,7 +104,7 @@ export function ChatPanel({ persona }: { persona: string }) {
         ) : (
           <button
             type="button"
-            onClick={() => void send()}
+            onClick={() => void send(persona)}
             disabled={!input.trim()}
             className="rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white disabled:opacity-40"
           >
@@ -194,7 +116,7 @@ export function ChatPanel({ persona }: { persona: string }) {
   );
 }
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+function MessageBubble({ message }: { message: HelpChatMessage }) {
   const isUser = message.role === "user";
   const alignClass = isUser ? "text-right" : "text-left";
   const alignStyle: React.CSSProperties = { textAlign: isUser ? "right" : "left" };
