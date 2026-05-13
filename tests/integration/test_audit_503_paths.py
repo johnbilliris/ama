@@ -6,7 +6,6 @@ Covers:
 """
 from __future__ import annotations
 
-import os
 import unittest.mock as mock
 
 import pytest
@@ -20,6 +19,7 @@ def set_test_mode(monkeypatch):
 @pytest.fixture
 def client():
     from fastapi.testclient import TestClient
+
     from apps.api.app.main import app
     return TestClient(app)
 
@@ -28,10 +28,11 @@ def test_healthz_returns_503_when_cosmos_critical_store_offline(monkeypatch):
     """healthz/evidence → 503 when a critical Cosmos container is unavailable (T-AMD-21b, FR-045)."""
     monkeypatch.setenv("AMA_TEST_MODE", "1")
 
-    from fastapi.testclient import TestClient
-    from apps.api.app.main import app
     # Use the same import path as the app itself
-    from app.services.evidence._clients import reset_registry, get_registry  # type: ignore[import]
+    from app.services.evidence._clients import get_registry, reset_registry  # type: ignore[import]
+    from fastapi.testclient import TestClient
+
+    from apps.api.app.main import app
     reset_registry()
     registry = get_registry()
 
@@ -61,6 +62,7 @@ def test_healthz_returns_200_degraded_when_only_appinsights_offline(monkeypatch)
     reset_registry()
 
     from fastapi.testclient import TestClient
+
     from apps.api.app.main import app
     c = TestClient(app)
     resp = c.get("/api/healthz/evidence")
@@ -74,8 +76,9 @@ def test_audit_write_failure_raises_503(monkeypatch):
     monkeypatch.setenv("AMA_TEST_MODE", "1")
 
     import asyncio
-    from apps.api.app.services.evidence.audit_writer import write_audit_entry, AuditWriteUnavailableError
-    from apps.api.app.services.evidence._clients import reset_registry, get_registry
+
+    from apps.api.app.services.evidence._clients import get_registry, reset_registry
+    from apps.api.app.services.evidence.audit_writer import AuditWriteUnavailableError, write_audit_entry
 
     reset_registry()
     registry = get_registry()
@@ -102,8 +105,8 @@ def test_au_region_refusal_still_returns_response_on_audit_write_success(monkeyp
     """AU-region guard: non-AU signal raises, audit row written before error (T-AMD-21a, FR-044)."""
     monkeypatch.setenv("AMA_TEST_MODE", "1")
 
-    from apps.api.app.services.evidence._clients import reset_registry, get_registry
-    from apps.api.app.services.evidence._guards import assert_au_region, NonAuRegionError
+    from apps.api.app.services.evidence._clients import get_registry, reset_registry
+    from apps.api.app.services.evidence._guards import NonAuRegionError, assert_au_region
     reset_registry()
     registry = get_registry()
 

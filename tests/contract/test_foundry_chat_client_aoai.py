@@ -29,12 +29,10 @@ This test pins:
 from __future__ import annotations
 
 import pytest
-
 from common.foundry_chat_client import (
     LiveFoundryChatClient,
     _parse_deployment_map,
 )
-
 
 # ---------------------------------------------------------------- AOAI shape
 

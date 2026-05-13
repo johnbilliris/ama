@@ -11,8 +11,8 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from tests.integration.spec039_fakes import FakeCosmosClient  # noqa: E402
 from scripts import seed_loader  # noqa: E402
+from tests.integration.spec039_fakes import FakeCosmosClient  # noqa: E402
 
 
 @pytest.fixture()

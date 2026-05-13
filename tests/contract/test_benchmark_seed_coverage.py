@@ -1,8 +1,6 @@
 """Contract test: Benchmark seed coverage (T-AMD-22, T-AMD-12)."""
 from __future__ import annotations
 
-import pytest
-
 
 def test_benchmark_seed_has_32_plus_jurisdictional_rows():
     """Benchmark seed includes ≥32 jurisdictional rows (8 × 4) (T-AMD-22, T-AMD-12)."""

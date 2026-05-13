@@ -30,7 +30,8 @@ def test_wrapper_missing_key_raises():
 
 
 def test_wrapper_missing_fictitious_raises():
-    bad = dict(GOOD_PAYLOAD); del bad["fictitious"]
+    bad = dict(GOOD_PAYLOAD)
+    del bad["fictitious"]
     with pytest.raises(FixtureMarkerError) as exc:
         validate_wrapper({"_fixture": bad})
     assert exc.value.field == "fictitious"
@@ -44,14 +45,16 @@ def test_wrapper_wrong_residency_raises():
 
 
 def test_wrapper_missing_licence_raises():
-    bad = dict(GOOD_PAYLOAD); del bad["licence"]
+    bad = dict(GOOD_PAYLOAD)
+    del bad["licence"]
     with pytest.raises(FixtureMarkerError) as exc:
         validate_wrapper({"_fixture": bad})
     assert exc.value.field == "licence"
 
 
 def test_wrapper_missing_schema_version_raises():
-    bad = dict(GOOD_PAYLOAD); del bad["schema_version"]
+    bad = dict(GOOD_PAYLOAD)
+    del bad["schema_version"]
     with pytest.raises(FixtureMarkerError) as exc:
         validate_wrapper({"_fixture": bad})
     assert exc.value.field == "schema_version"

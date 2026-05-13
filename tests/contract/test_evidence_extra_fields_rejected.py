@@ -18,10 +18,12 @@ def client():
 
 def test_indicator_definition_rejects_extra_fields():
     """IndicatorDefinition Pydantic model rejects extra fields (T-AMD-19)."""
-    from apps.api.app.services.evidence.models.kpi import IndicatorDefinition, RiskAdjustment, ConfidenceBandRule
-    from datetime import datetime, UTC
+    from datetime import UTC, datetime
     from decimal import Decimal
+
     from pydantic import ValidationError
+
+    from apps.api.app.services.evidence.models.kpi import ConfidenceBandRule, IndicatorDefinition, RiskAdjustment
 
     with pytest.raises(ValidationError) as exc_info:
         IndicatorDefinition(
@@ -69,9 +71,11 @@ def test_signal_rejects_extra_fields(client):
 
 def test_audit_entry_rejects_extra_fields():
     """AuditEntry model rejects extra fields at instantiation (T-AMD-19)."""
-    from apps.api.app.services.evidence.models.audit import AuditEntry
-    from datetime import datetime, UTC
+    from datetime import UTC, datetime
+
     from pydantic import ValidationError
+
+    from apps.api.app.services.evidence.models.audit import AuditEntry
 
     with pytest.raises(ValidationError) as exc_info:
         AuditEntry(

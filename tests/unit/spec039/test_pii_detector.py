@@ -68,9 +68,7 @@ def _medicare_make():
     out = []
     for prefix in ("2123", "3456", "4567", "5678", "6789",
                    "2222", "3333", "4444", "5555", "6666"):
-        base8 = prefix + "12345"[: 8 - len(prefix)]  # not used, but keep var
         # Construct first 8 digits then check digit, then position 10 (issue#).
-        s = "23456789"  # 8 digits
         s = (prefix + "1111")[:8]
         check = sum(int(d) * w for d, w in zip(s, weights)) % 10
         out.append(s + str(check) + "1")  # +issue# = 10 displayed

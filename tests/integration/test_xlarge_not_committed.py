@@ -8,7 +8,6 @@ generator-produced at runtime and never committed.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 
 _REPO = Path(__file__).resolve().parents[2]

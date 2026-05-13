@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import pytest
-from pydantic import ValidationError
-
 from app.services.simulation.feeds._models import (
     CanonicalRecord,
     FeedParams,
     ScenarioDefinition,
 )
+from pydantic import ValidationError
 
 GOOD_RECORD = {
     "simulated": True,

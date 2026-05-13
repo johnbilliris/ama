@@ -21,7 +21,8 @@ if str(_API) not in sys.path:
     sys.path.insert(0, str(_API))
 
 from apps.api.app.services.simulation.feeds.replay import (  # noqa: E402
-    DEMO_SCENARIOS, _emit_records,
+    DEMO_SCENARIOS,
+    _emit_records,
 )
 from apps.api.app.services.simulation.replay.digest import compute_sha256  # noqa: E402
 from apps.api.app.services.simulation.replay.ndjson_writer import write_ndjson  # noqa: E402

@@ -11,10 +11,9 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from tests.integration.spec039_fakes import FakeCosmosClient  # noqa: E402
-
 # Import after sys.path setup.
 from scripts import seed_loader  # noqa: E402
+from tests.integration.spec039_fakes import FakeCosmosClient  # noqa: E402
 
 
 def _good_file(tmp_dir: Path, name: str, records: list[dict]) -> Path:

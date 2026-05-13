@@ -9,7 +9,6 @@ from __future__ import annotations
 import os
 
 import uvicorn
-
 from dispatcher.agent import app
 
 if __name__ == "__main__":

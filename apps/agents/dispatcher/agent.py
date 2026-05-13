@@ -115,9 +115,10 @@ def _resolve_deployment() -> str | None:
          ``AZURE_AI_REASONING_MODEL_KEY`` (first-write-wins).
       3. First non-embedding entry in the CSV.
 
-    Mirrors ``apps/api/app/services/simulation/controller_service.SimulationControllerService._resolve_simulation_deployment``
-    so the dispatcher targets the same model + RAI policy bucket as the
-    Controller.
+    Mirrors
+    ``apps/api/app/services/simulation/controller_service.SimulationControllerService``
+    ``._resolve_simulation_deployment`` so the dispatcher targets the same
+    model + RAI policy bucket as the Controller.
     """
     explicit = os.getenv("AZURE_AI_SIMULATION_DEPLOYMENT") or os.getenv("AZURE_AI_REASONING_DEPLOYMENT")
     if explicit:
