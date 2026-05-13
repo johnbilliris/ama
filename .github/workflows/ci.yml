@@ -510,10 +510,9 @@ jobs:
 
       # FR-021d: SHA256 hash manifest check
       - name: hash-manifest-check
-        working-directory: docs/architecture
         run: |
-          sha256sum --check .diagram-hashes
-          echo "Hash manifest: all $(wc -l < .diagram-hashes) entries matched."
+          sha256sum --check docs/architecture/.diagram-hashes
+          echo "Hash manifest: all $(wc -l < docs/architecture/.diagram-hashes) entries matched."
 
       # FR-021c, FR-011: Spec cross-reference coverage (001–037)
       - name: spec-cross-ref-check

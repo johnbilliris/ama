@@ -30,10 +30,7 @@ def test_schema_file_exists():
 
 def test_schema_is_valid_2020_12(schema):
     # Must declare itself as 2020-12.
-    assert (
-        schema.get("$schema")
-        == "https://json-schema.org/draft/2020-12/schema"
-    )
+    assert schema.get("$schema") == "https://json-schema.org/draft/2020-12/schema"
     # Validator metaschema check.
     jsonschema.Draft202012Validator.check_schema(schema)
 
@@ -41,8 +38,7 @@ def test_schema_is_valid_2020_12(schema):
 def test_cultural_review_required_is_required(schema):
     entry = schema["$defs"]["ManifestEntry"]
     assert "cultural_review_required" in entry["required"], (
-        "FR-044/CL-6: cultural_review_required must be a required property "
-        "on every ManifestEntry."
+        "FR-044/CL-6: cultural_review_required must be a required property on every ManifestEntry."
     )
 
 
@@ -53,17 +49,13 @@ def test_public_source_url_cross_check_encoded_as_if_then(schema):
     for clause in all_of:
         if "if" not in clause or "then" not in clause:
             continue
-        if_props = (clause["if"].get("properties") or {})
-        if (
-            if_props.get("category", {}).get("const") == "public"
-            and "source_url" in (clause["then"].get("properties") or {})
+        if_props = clause["if"].get("properties") or {}
+        if if_props.get("category", {}).get("const") == "public" and "source_url" in (
+            clause["then"].get("properties") or {}
         ):
             found = True
             break
-    assert found, (
-        "FR-031/CL-6: category=public must require source_url != 'n/a' "
-        "via an if/then clause in the schema."
-    )
+    assert found, "FR-031/CL-6: category=public must require source_url != 'n/a' via an if/then clause in the schema."
 
 
 def test_minimal_valid_manifest_validates(schema):

@@ -69,4 +69,3 @@ def reject_audit_delete(value_id: str = Path(...)) -> JSONResponse:
             type="https://ama.example/errors/audit-record-immutable",
         ).model_dump(),
     )
-

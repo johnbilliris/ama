@@ -45,14 +45,14 @@ def test_address_pair_positive(rec):
 # ── (a) negative: address alone OR contact alone ─────────────────────────────
 ADDR_PAIR_NEGATIVE = [
     {"address": "12 George Street, Sydney NSW 2000"},  # address only
-    {"phone": "+61412345678"},                          # phone only
-    {"email": "test@example.com"},                      # email only
-    {"description": "Take the highway out of town."},   # no PII
-    {"facility": "Test Hospital NSW #01"},              # generic
+    {"phone": "+61412345678"},  # phone only
+    {"email": "test@example.com"},  # email only
+    {"description": "Take the highway out of town."},  # no PII
+    {"facility": "Test Hospital NSW #01"},  # generic
     {"jurisdiction": "NSW"},
     {"id": "x", "fictitious": True, "residency": "AU"},
-    {"text": "Sydney is a city in NSW."},               # no street number
-    {"address": "PO Box 123, Sydney NSW 2000"},         # PO box, no contact
+    {"text": "Sydney is a city in NSW."},  # no street number
+    {"address": "PO Box 123, Sydney NSW 2000"},  # PO box, no contact
     {"phone": "0412345678", "address": "Building B, Level 2"},  # address shape weak
 ]
 
@@ -66,8 +66,7 @@ def test_address_pair_negative(rec):
 def _medicare_make():
     weights = (1, 3, 7, 9, 1, 3, 7, 9)
     out = []
-    for prefix in ("2123", "3456", "4567", "5678", "6789",
-                   "2222", "3333", "4444", "5555", "6666"):
+    for prefix in ("2123", "3456", "4567", "5678", "6789", "2222", "3333", "4444", "5555", "6666"):
         # Construct first 8 digits then check digit, then position 10 (issue#).
         s = (prefix + "1111")[:8]
         check = sum(int(d) * w for d, w in zip(s, weights)) % 10
@@ -84,11 +83,11 @@ def test_medicare_positive(num):
 
 
 MEDICARE_NEGATIVE = [
-    "1234567890",   # leading 1 — invalid prefix range
-    "9999999999",   # leading 9 — invalid
-    "0000000000",   # all zeros
+    "1234567890",  # leading 1 — invalid prefix range
+    "9999999999",  # leading 9 — invalid
+    "0000000000",  # all zeros
     "abcdefghij",
-    "23456789",     # too short
+    "23456789",  # too short
     "23456789012",  # 11 digits
     "20000000000",  # 11 digits start with 2
     "this is not a number",
@@ -110,14 +109,14 @@ def test_medicare_negative(num):
 LUHN_POSITIVE = [
     "4111111111111111",  # classic test Visa
     "4012888888881881",
-    "4222222222222",     # 13-digit Visa
+    "4222222222222",  # 13-digit Visa
     "5555555555554444",  # MasterCard test
     "5105105105105100",
-    "378282246310005",   # Amex
+    "378282246310005",  # Amex
     "371449635398431",
     "6011111111111117",  # Discover
     "6011000990139424",
-    "30569309025904",    # Diners
+    "30569309025904",  # Diners
 ]
 
 
@@ -131,7 +130,7 @@ LUHN_NEGATIVE = [
     "1234567890123",
     "0000000000000",
     "9999999999999",
-    "12345678",        # too short
+    "12345678",  # too short
     "abcdefghijklmnop",
     "phone +61412345678",
     "12 34 56 78 90 12 34",  # weighted, not Luhn
@@ -148,16 +147,16 @@ def test_luhn_negative(num):
 
 # ── (d) Driver licence — field-name guarded ──────────────────────────────────
 DL_POSITIVE = [
-    ({"driver_licence": "ABC1234"}, "NSW"),       # 7 alphanumeric
-    ({"driving_licence": "AB123456"}, "NSW"),     # 8 alphanumeric
-    ({"dl_number": "12345678"}, "VIC"),           # VIC 8 digits
-    ({"dl": "1234567890"}, "VIC"),                # VIC 10 digits
-    ({"driver_licence": "123456789"}, "QLD"),     # QLD 9 digits
-    ({"driver_licence": "1234567"}, "WA"),        # WA 7 digits
-    ({"driver_licence": "S123456"}, "SA"),        # SA prefix letter
-    ({"driver_licence": "AB123456"}, "TAS"),      # TAS two letters
-    ({"dl_no": "1234567"}, "NT"),                 # NT 7 digits
-    ({"driving_no": "12345678"}, "ACT"),          # ACT 8 digits
+    ({"driver_licence": "ABC1234"}, "NSW"),  # 7 alphanumeric
+    ({"driving_licence": "AB123456"}, "NSW"),  # 8 alphanumeric
+    ({"dl_number": "12345678"}, "VIC"),  # VIC 8 digits
+    ({"dl": "1234567890"}, "VIC"),  # VIC 10 digits
+    ({"driver_licence": "123456789"}, "QLD"),  # QLD 9 digits
+    ({"driver_licence": "1234567"}, "WA"),  # WA 7 digits
+    ({"driver_licence": "S123456"}, "SA"),  # SA prefix letter
+    ({"driver_licence": "AB123456"}, "TAS"),  # TAS two letters
+    ({"dl_no": "1234567"}, "NT"),  # NT 7 digits
+    ({"driving_no": "12345678"}, "ACT"),  # ACT 8 digits
 ]
 
 
@@ -168,9 +167,9 @@ def test_dl_positive(rec, jurisdiction):
 
 
 DL_NEGATIVE = [
-    {"name": "ABC1234"},           # not a DL field name
-    {"facility_id": "12345678"},   # not a DL field
-    {"driver_licence": "X"},        # too short
+    {"name": "ABC1234"},  # not a DL field name
+    {"facility_id": "12345678"},  # not a DL field
+    {"driver_licence": "X"},  # too short
     {"driver_licence": "1234567890ABCDEF"},  # too long
     {"driver_licence": ""},
     {"id": "ABC1234", "kind": "facility"},
@@ -208,14 +207,14 @@ def test_police_positive(rec):
 
 
 POLICE_NEGATIVE = [
-    {"v": "EX12345678"},        # extra letter
-    {"v": "E1234567"},          # 7 digits not 8
-    {"v": "CAS-1234567"},       # 7 digits not 8
-    {"v": "QP123456"},          # 6 digits not 7
-    {"v": "IR1234567"},         # 7 digits not 8
+    {"v": "EX12345678"},  # extra letter
+    {"v": "E1234567"},  # 7 digits not 8
+    {"v": "CAS-1234567"},  # 7 digits not 8
+    {"v": "QP123456"},  # 6 digits not 7
+    {"v": "IR1234567"},  # 7 digits not 8
     {"v": "evac-nsw-01"},
     {"v": "case number not present"},
-    {"v": "E12345678901"},      # 11 digits
+    {"v": "E12345678901"},  # 11 digits
     {"v": "rfc-1234"},
     {"id": "x", "fictitious": True},
 ]

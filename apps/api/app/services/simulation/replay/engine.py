@@ -71,9 +71,7 @@ async def replay_to_publisher(
     return sent
 
 
-async def _send_via_publisher(
-    publisher: EventHubPublisher, ev: SignalPipelineEvent
-) -> None:
+async def _send_via_publisher(publisher: EventHubPublisher, ev: SignalPipelineEvent) -> None:
     """Use the canonical async ``publish`` method on the publisher."""
     await publisher.publish(ev)
 

@@ -29,9 +29,7 @@ def isolated_repo(tmp_path: Path) -> Path:
         "[NAMES]\n[COMMUNITIES]\n[SACRED_COORDS]\n[CONTEXT_ZONES]\n",
         encoding="utf-8",
     )
-    docs.joinpath("manifest.schema.json").write_text(
-        SCHEMA.read_text(encoding="utf-8"), encoding="utf-8"
-    )
+    docs.joinpath("manifest.schema.json").write_text(SCHEMA.read_text(encoding="utf-8"), encoding="utf-8")
     return tmp_path
 
 

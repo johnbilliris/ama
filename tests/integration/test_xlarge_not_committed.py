@@ -54,6 +54,4 @@ def test_no_committed_fixture_over_1000_records() -> None:
             n = _record_count(p)
             if n > LIMIT:
                 offenders.append((p.relative_to(_REPO).as_posix(), n))
-    assert not offenders, (
-        f"committed fixtures exceed {LIMIT} records (CL-3): {offenders}"
-    )
+    assert not offenders, f"committed fixtures exceed {LIMIT} records (CL-3): {offenders}"

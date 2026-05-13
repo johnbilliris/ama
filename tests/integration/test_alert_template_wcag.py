@@ -44,8 +44,7 @@ def test_body_word_count_bounded() -> None:
             if len(words) > MAX_WORDS_PER_SENTENCE:
                 offenders.append((loc, r["id"], len(words)))
     assert not offenders, (
-        f"alert template body sentences exceed {MAX_WORDS_PER_SENTENCE} "
-        f"words (WCAG plain-language): {offenders}"
+        f"alert template body sentences exceed {MAX_WORDS_PER_SENTENCE} words (WCAG plain-language): {offenders}"
     )
 
 

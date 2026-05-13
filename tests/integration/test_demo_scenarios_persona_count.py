@@ -20,29 +20,35 @@ if str(_API) not in sys.path:
     sys.path.insert(0, str(_API))
 
 DEMO_SCENARIOS = [
-    "operational_demo", "fire_demo", "police_demo", "ambulance_demo",
-    "ses_demo", "marine_aviation_demo", "commonwealth_demo", "cross_sector_demo",
+    "operational_demo",
+    "fire_demo",
+    "police_demo",
+    "ambulance_demo",
+    "ses_demo",
+    "marine_aviation_demo",
+    "commonwealth_demo",
+    "cross_sector_demo",
 ]
 
 
 @pytest.mark.parametrize("name", DEMO_SCENARIOS)
 def test_demo_scenario_contract(name: str) -> None:
-    mod = importlib.import_module(
-        f"apps.api.app.services.simulation.feeds.scenarios.{name}"
-    )
+    mod = importlib.import_module(f"apps.api.app.services.simulation.feeds.scenarios.{name}")
     assert isinstance(mod.SCENARIO_ID, str) and mod.SCENARIO_ID.startswith("demo-")
     assert mod.DOMAIN_GROUP in {
-        "operational", "fire", "police", "ambulance", "ses",
-        "marine-aviation", "commonwealth", "cross-sector",
+        "operational",
+        "fire",
+        "police",
+        "ambulance",
+        "ses",
+        "marine-aviation",
+        "commonwealth",
+        "cross-sector",
     }
     assert isinstance(mod.PARTICIPATING_PERSONAS, tuple)
-    assert len(mod.PARTICIPATING_PERSONAS) >= 3, (
-        f"{name}: needs ≥3 participating personas (FR-061)"
-    )
+    assert len(mod.PARTICIPATING_PERSONAS) >= 3, f"{name}: needs ≥3 participating personas (FR-061)"
     assert isinstance(mod.PARTICIPATING_FEEDS, tuple)
-    assert len(mod.PARTICIPATING_FEEDS) >= 2, (
-        f"{name}: needs ≥2 distinct feed shapes"
-    )
+    assert len(mod.PARTICIPATING_FEEDS) >= 2, f"{name}: needs ≥2 distinct feed shapes"
     # Live emit must be deterministic and yield records from every feed.
     records = list(mod.emit(seed=42))
     assert records, f"{name}: emit produced no records"

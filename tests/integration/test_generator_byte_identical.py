@@ -19,10 +19,19 @@ if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
 
 GENERATOR_NAMES = [
-    "incidents", "coordination_tasks", "signals", "audit_entries",
-    "risk_register", "public_alerts", "evacuee_registrations",
-    "missing_persons", "triage_records", "volunteer_registrations",
-    "vulnerable_categories", "hospital_capacity", "transport_assets",
+    "incidents",
+    "coordination_tasks",
+    "signals",
+    "audit_entries",
+    "risk_register",
+    "public_alerts",
+    "evacuee_registrations",
+    "missing_persons",
+    "triage_records",
+    "volunteer_registrations",
+    "vulnerable_categories",
+    "hospital_capacity",
+    "transport_assets",
     "utility_outages",
 ]
 
@@ -57,6 +66,4 @@ def test_all_14_generators_present() -> None:
     gen_dir = _REPO / "scripts" / "generators"
     on_disk = {p.stem for p in gen_dir.glob("*.py") if not p.name.startswith("_")}
     on_disk.discard("__init__")
-    assert on_disk == set(GENERATOR_NAMES), (
-        f"generators on disk={on_disk}, expected={set(GENERATOR_NAMES)}"
-    )
+    assert on_disk == set(GENERATOR_NAMES), f"generators on disk={on_disk}, expected={set(GENERATOR_NAMES)}"

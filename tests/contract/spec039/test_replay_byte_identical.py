@@ -47,9 +47,7 @@ def _emit_to_bytes(emit_fn, scenario_id: str, seed: int, **kwargs) -> bytes:
 def test_feed_replay_byte_identical(module_name: str) -> None:
     import importlib
 
-    mod = importlib.import_module(
-        f"app.services.simulation.feeds.{module_name}"
-    )
+    mod = importlib.import_module(f"app.services.simulation.feeds.{module_name}")
     a = _emit_to_bytes(mod.emit, "nsw-bushfire-summer", 42, count=4)
     b = _emit_to_bytes(mod.emit, "nsw-bushfire-summer", 42, count=4)
     assert a == b, f"{module_name}: replay not byte-identical"

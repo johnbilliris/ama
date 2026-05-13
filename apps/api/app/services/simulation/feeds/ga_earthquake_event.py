@@ -20,9 +20,15 @@ FEED_VERSION: Final[str] = "v1"
 # Approximate centroids (deg) for synthetic event placement only — NOT a
 # real seismic catalogue.
 _J_CENTROID: Final[dict[str, tuple[float, float]]] = {
-    "nsw": (-32.5, 147.5), "vic": (-37.0, 144.5), "qld": (-22.0, 145.0),
-    "wa": (-26.0, 121.0), "sa": (-32.0, 135.0), "tas": (-42.0, 146.5),
-    "nt": (-19.0, 134.0), "act": (-35.5, 149.0), "au": (-25.0, 134.0),
+    "nsw": (-32.5, 147.5),
+    "vic": (-37.0, 144.5),
+    "qld": (-22.0, 145.0),
+    "wa": (-26.0, 121.0),
+    "sa": (-32.0, 135.0),
+    "tas": (-42.0, 146.5),
+    "nt": (-19.0, 134.0),
+    "act": (-35.5, 149.0),
+    "au": (-25.0, 134.0),
 }
 
 

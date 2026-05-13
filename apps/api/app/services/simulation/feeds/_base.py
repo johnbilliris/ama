@@ -19,9 +19,7 @@ from typing import Any, Final
 from ._canonical import SimulatedClock, correlation_id
 from ._models import CanonicalRecord
 
-JURISDICTIONS: Final[tuple[str, ...]] = (
-    "nsw", "vic", "qld", "wa", "sa", "tas", "nt", "act", "au"
-)
+JURISDICTIONS: Final[tuple[str, ...]] = ("nsw", "vic", "qld", "wa", "sa", "tas", "nt", "act", "au")
 WARNING_TEST_MARKER: Final[str] = "TEST — DO NOT BROADCAST"
 
 
@@ -57,9 +55,7 @@ def ensure_clock(clock: SimulatedClock | None, scenario_id: str, seed: int) -> S
 def validate_jurisdiction(jurisdiction: str) -> str:
     j = jurisdiction.lower()
     if j not in JURISDICTIONS:
-        raise ValueError(
-            f"jurisdiction {jurisdiction!r} not in {JURISDICTIONS}"
-        )
+        raise ValueError(f"jurisdiction {jurisdiction!r} not in {JURISDICTIONS}")
     return j
 
 

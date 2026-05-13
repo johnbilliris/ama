@@ -7,9 +7,7 @@ import re
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-REGISTRY = (
-    REPO_ROOT / "apps" / "api" / "app" / "services" / "simulation" / "feeds" / "source_shapes.json"
-)
+REGISTRY = REPO_ROOT / "apps" / "api" / "app" / "services" / "simulation" / "feeds" / "source_shapes.json"
 SHAPE_ID_RE = re.compile(r"^[a-z0-9_.-]+\.v\d+$")
 EXPECTED_FAMILIES = {
     "bom",

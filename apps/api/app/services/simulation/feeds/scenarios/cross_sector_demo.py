@@ -16,8 +16,11 @@ SCENARIO_ID = "demo-cross-sector-v1"
 DOMAIN_GROUP = "cross-sector"
 DEFAULT_SEED = 42
 PARTICIPATING_PERSONAS = (
-    "state-government", "transport", "utility",
-    "community-ngos", "local-government",
+    "state-government",
+    "transport",
+    "utility",
+    "community-ngos",
+    "local-government",
 )
 PARTICIPATING_FEEDS = (
     traffic_road_closure.SOURCE_SHAPE,
@@ -28,7 +31,8 @@ PARTICIPATING_FEEDS = (
 
 def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     return compose(
-        SCENARIO_ID, seed,
+        SCENARIO_ID,
+        seed,
         feed_calls=[
             (traffic_road_closure.emit, {"jurisdiction": "nsw", "count": 4}),
             (utility_outage.emit, {"jurisdiction": "vic", "count": 4}),
@@ -37,5 +41,4 @@ def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     )
 
 
-__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS",
-           "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]
+__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS", "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]

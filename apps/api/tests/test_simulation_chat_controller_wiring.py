@@ -38,6 +38,5 @@ def test_simulation_chat_controller_has_all_sub_agents_wired() -> None:
     expected_aliases = {"risk_assessment", "resource_allocation"}
     missing_aliases = expected_aliases - available
     assert not missing_aliases, (
-        f"Controller missing snake-case aliases (LLM tool schema uses snake_case): "
-        f"{sorted(missing_aliases)}"
+        f"Controller missing snake-case aliases (LLM tool schema uses snake_case): {sorted(missing_aliases)}"
     )

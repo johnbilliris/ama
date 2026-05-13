@@ -25,10 +25,18 @@ FEED_VERSION: Final[str] = "v1"
 
 def _ficticious_name(rng) -> str:
     # Synthetic cyclone names — clearly fictional, no real Australian list.
-    return rng.choice([
-        "Aurelia-X", "Bramble-X", "Currong-X", "Dalwood-X",
-        "Eldoris-X", "Fjordan-X", "Galangal-X", "Hesperion-X",
-    ])
+    return rng.choice(
+        [
+            "Aurelia-X",
+            "Bramble-X",
+            "Currong-X",
+            "Dalwood-X",
+            "Eldoris-X",
+            "Fjordan-X",
+            "Galangal-X",
+            "Hesperion-X",
+        ]
+    )
 
 
 def emit(

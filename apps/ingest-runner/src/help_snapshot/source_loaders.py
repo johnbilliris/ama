@@ -40,17 +40,13 @@ def load_sources(manifest_path: str) -> list[dict[str, Any]]:
     manifest = yaml.safe_load(Path(manifest_path).read_text(encoding="utf-8"))
     admission = manifest.get("admission") or {}
     allow_status = set(
-        manifest.get("allowed_status")
-        or admission.get("spec_status_allowed")
-        or ["Active", "Implemented"]
+        manifest.get("allowed_status") or admission.get("spec_status_allowed") or ["Active", "Implemented"]
     )
     root = Path(manifest.get("root", ".")).resolve()
 
     flat_globs: list[str] = list(manifest.get("globs", []) or [])
     nested_sources: list[dict[str, Any]] = list(manifest.get("sources", []) or [])
-    nested_globs: list[str] = [
-        s["glob"] for s in nested_sources if isinstance(s, dict) and s.get("glob")
-    ]
+    nested_globs: list[str] = [s["glob"] for s in nested_sources if isinstance(s, dict) and s.get("glob")]
     patterns = flat_globs + nested_globs
     if not patterns:
         logger.warning(

@@ -1,4 +1,5 @@
 """Public Information render service (T-AMD-14, FR-039)."""
+
 from __future__ import annotations
 
 from typing import Literal
@@ -22,9 +23,7 @@ LANGUAGE_CHANNELS = [
 
 def render_public_information(scenario_id: str) -> dict:
     """Render public information channels for a scenario (T-AMD-14, FR-039)."""
-    auslan_status: AuslanStatus = (
-        "available" if scenario_id in MANDATORY_AUSLAN_SCENARIOS else "auslan-asset-missing"
-    )
+    auslan_status: AuslanStatus = "available" if scenario_id in MANDATORY_AUSLAN_SCENARIOS else "auslan-asset-missing"
     channels = []
     for lang in LANGUAGE_CHANNELS:
         channels.append(

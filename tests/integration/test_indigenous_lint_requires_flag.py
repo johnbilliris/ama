@@ -28,17 +28,11 @@ def isolated_repo(tmp_path: Path) -> Path:
     (tmp_path / "fixtures" / "sim_replays").mkdir(parents=True)
     docs = tmp_path / "docs" / "test-data"
     docs.mkdir(parents=True)
-    docs.joinpath("manifest.schema.json").write_text(
-        SCHEMA.read_text(encoding="utf-8"), encoding="utf-8"
-    )
+    docs.joinpath("manifest.schema.json").write_text(SCHEMA.read_text(encoding="utf-8"), encoding="utf-8")
     denylist = tmp_path / "tools" / "lint" / "data" / "indigenous_denylist.txt"
     denylist.parent.mkdir(parents=True)
     denylist.write_text(
-        "[NAMES]\n"
-        "[COMMUNITIES]\n"
-        "[SACRED_COORDS]\n"
-        "[CONTEXT_ZONES]\n"
-        "nt-central-desert-zone\n",
+        "[NAMES]\n[COMMUNITIES]\n[SACRED_COORDS]\n[CONTEXT_ZONES]\nnt-central-desert-zone\n",
         encoding="utf-8",
     )
 
@@ -97,7 +91,6 @@ def test_context_zone_without_review_flag_fails(isolated_repo: Path) -> None:
         cwd=str(isolated_repo),
     )
     assert result.returncode != 0, (
-        f"lint should require cultural_review_required=true.\n"
-        f"stdout={result.stdout}\nstderr={result.stderr}"
+        f"lint should require cultural_review_required=true.\nstdout={result.stdout}\nstderr={result.stderr}"
     )
     assert "cultural_review_required" in (result.stdout + result.stderr)

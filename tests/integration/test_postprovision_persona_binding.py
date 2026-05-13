@@ -45,7 +45,4 @@ def loader_summary() -> dict[str, dict[str, int]]:
 @pytest.mark.parametrize("persona,subdirs", PERSONA_CLASSES.items())
 def test_persona_class_has_at_least_one_record(persona, subdirs, loader_summary):
     inserts = sum(loader_summary.get(s, {}).get("inserts", 0) for s in subdirs)
-    assert inserts >= 1, (
-        f"FR-060 / SC-001: persona class {persona!r} has zero static reference "
-        f"records in {subdirs}"
-    )
+    assert inserts >= 1, f"FR-060 / SC-001: persona class {persona!r} has zero static reference records in {subdirs}"

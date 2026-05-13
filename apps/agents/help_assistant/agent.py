@@ -374,15 +374,8 @@ async def run_chat_turn_cosmos_grounded(
             yield HelpChatStreamEvent(kind="refusal", payload={"reason": refusal_reason})
         else:
             verb = "is" if len(top) == 1 else "are"
-            label = (
-                "most relevant article"
-                if len(top) == 1
-                else f"top {len(top)} relevant articles"
-            )
-            preface = (
-                f"From the help corpus, here {verb} the {label} "
-                "for your question:\n\n"
-            )
+            label = "most relevant article" if len(top) == 1 else f"top {len(top)} relevant articles"
+            preface = f"From the help corpus, here {verb} the {label} for your question:\n\n"
             for chunk in _stream_chunks(preface):
                 response_chunks.append(chunk)
                 yield HelpChatStreamEvent(kind="delta", payload={"text": chunk})

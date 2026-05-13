@@ -33,9 +33,7 @@ def isolated_repo(tmp_path: Path) -> Path:
         encoding="utf-8",
     )
     # Copy the real schema so jsonschema validation works.
-    docs.joinpath("manifest.schema.json").write_text(
-        SCHEMA.read_text(encoding="utf-8"), encoding="utf-8"
-    )
+    docs.joinpath("manifest.schema.json").write_text(SCHEMA.read_text(encoding="utf-8"), encoding="utf-8")
     return tmp_path
 
 
@@ -103,7 +101,6 @@ def test_missing_entry_fails(isolated_repo: Path) -> None:
         cwd=str(isolated_repo),
     )
     assert result.returncode != 0, (
-        f"lint should fail when a catalogued file is unenumerated.\n"
-        f"stdout={result.stdout}\nstderr={result.stderr}"
+        f"lint should fail when a catalogued file is unenumerated.\nstdout={result.stdout}\nstderr={result.stderr}"
     )
     assert "rogue_catalogue.json" in (result.stdout + result.stderr)

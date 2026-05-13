@@ -13,9 +13,7 @@ import jsonschema
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SCHEMA_PATH = (
-    REPO_ROOT / "packages" / "domain" / "src" / "domain" / "seed" / "seed_record.schema.json"
-)
+SCHEMA_PATH = REPO_ROOT / "packages" / "domain" / "src" / "domain" / "seed" / "seed_record.schema.json"
 
 
 @pytest.fixture(scope="module")

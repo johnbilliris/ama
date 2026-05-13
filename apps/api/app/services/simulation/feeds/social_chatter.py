@@ -19,8 +19,14 @@ SOURCE_SHAPE: Final[str] = "social.chatter.v1"
 FEED_VERSION: Final[str] = "v1"
 
 _TOPICS: Final[tuple[str, ...]] = (
-    "bushfire", "flood", "storm", "evacuation", "road_closure",
-    "power_outage", "donation_drive", "rescue_request"
+    "bushfire",
+    "flood",
+    "storm",
+    "evacuation",
+    "road_closure",
+    "power_outage",
+    "donation_drive",
+    "rescue_request",
 )
 
 
@@ -43,16 +49,12 @@ def emit(
         body = {
             "post_id": f"fict-post-{j}-{i:08d}",
             "synthetic_handle": f"@fict_user_{rng.randint(1000, 99999):05d}",
-            "platform": rng.choice([
-                "fictitious-microblog", "fictitious-photoshare",
-                "fictitious-shortvid", "fictitious-forum"
-            ]),
+            "platform": rng.choice(
+                ["fictitious-microblog", "fictitious-photoshare", "fictitious-shortvid", "fictitious-forum"]
+            ),
             "posted_at": ts,
             "topic": topic,
-            "text": (
-                f"FICTITIOUS post about {topic.replace('_', ' ')} — "
-                "synthetic test data, do not redistribute."
-            ),
+            "text": (f"FICTITIOUS post about {topic.replace('_', ' ')} — synthetic test data, do not redistribute."),
             "language": rng.choice(["en-AU", "ar", "el", "it", "vi", "zh-Hans"]),
             "engagement": {
                 "likes": rng.randint(0, 5_000),

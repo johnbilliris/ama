@@ -16,7 +16,11 @@ SCENARIO_ID = "demo-commonwealth-v1"
 DOMAIN_GROUP = "commonwealth"
 DEFAULT_SEED = 42
 PARTICIPATING_PERSONAS = (
-    "nema", "adf", "bom-national", "ga-national", "arc",
+    "nema",
+    "adf",
+    "bom-national",
+    "ga-national",
+    "arc",
 )
 PARTICIPATING_FEEDS = (
     bom_cyclone_track.SOURCE_SHAPE,
@@ -27,7 +31,8 @@ PARTICIPATING_FEEDS = (
 
 def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     return compose(
-        SCENARIO_ID, seed,
+        SCENARIO_ID,
+        seed,
         feed_calls=[
             (bom_cyclone_track.emit, {"jurisdiction": "qld", "count": 5}),
             (bom_severe_weather_warning.emit, {"jurisdiction": "qld", "count": 3}),
@@ -36,5 +41,4 @@ def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     )
 
 
-__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS",
-           "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]
+__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS", "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]

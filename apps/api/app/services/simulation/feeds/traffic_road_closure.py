@@ -36,13 +36,8 @@ def emit(
             "incident_id": f"FICT-{j.upper()}-RC-{i:05d}",
             "road_name": f"Fictitious {j.upper()} Highway {rng.randint(1, 99)}",
             "segment_ref": f"{j}-segment-{rng.randint(1000, 9999)}",
-            "closure_type": rng.choice([
-                "full_closure", "lane_closure", "diversion", "speed_restriction"
-            ]),
-            "cause": rng.choice([
-                "flooding", "bushfire", "crash", "fallen_tree",
-                "structural_damage", "planned_event"
-            ]),
+            "closure_type": rng.choice(["full_closure", "lane_closure", "diversion", "speed_restriction"]),
+            "cause": rng.choice(["flooding", "bushfire", "crash", "fallen_tree", "structural_damage", "planned_event"]),
             "estimated_clearance": ts,
             "advice": "Use alternative route — fictitious test data.",
             "jurisdiction": j,

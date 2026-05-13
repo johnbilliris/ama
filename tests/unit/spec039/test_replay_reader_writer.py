@@ -87,6 +87,6 @@ def test_reader_rejects_nonjson_line(tmp_path: Path) -> None:
     )
 
     p = tmp_path / "broken.ndjson"
-    p.write_bytes(b"{\"a\":1}\nnot-json\n")
+    p.write_bytes(b'{"a":1}\nnot-json\n')
     with pytest.raises(ReplayParseError):
         list(read_ndjson(p))

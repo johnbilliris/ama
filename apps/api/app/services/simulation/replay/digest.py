@@ -26,9 +26,7 @@ def _read_sidecar_digest(sidecar: Path) -> str:
     head = raw.splitlines()[0].strip()
     digest = head.split()[0]
     if len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
-        raise DigestMismatchError(
-            f"{sidecar}: sidecar does not contain a 64-char lowercase hex digest"
-        )
+        raise DigestMismatchError(f"{sidecar}: sidecar does not contain a 64-char lowercase hex digest")
     return digest
 
 
@@ -54,9 +52,7 @@ def verify_sidecar(path: str | Path) -> str:
     expected = _read_sidecar_digest(sidecar)
     actual = compute_sha256(p)
     if expected != actual:
-        raise DigestMismatchError(
-            f"{p}: sha256 mismatch — expected {expected}, got {actual}"
-        )
+        raise DigestMismatchError(f"{p}: sha256 mismatch — expected {expected}, got {actual}")
     return actual
 
 

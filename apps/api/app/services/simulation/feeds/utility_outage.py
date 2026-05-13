@@ -38,13 +38,10 @@ def emit(
             "utility_type": utility,
             "provider": f"Fictitious {j.upper()} {utility.title()} Co.",
             "affected_customers_estimate": rng.randint(50, 25_000),
-            "affected_postcodes": [
-                f"{rng.randint(2000, 7999):04d}" for _ in range(rng.randint(1, 4))
-            ],
-            "cause": rng.choice([
-                "storm_damage", "bushfire_damage", "planned_maintenance",
-                "equipment_failure", "third_party_dig_in"
-            ]),
+            "affected_postcodes": [f"{rng.randint(2000, 7999):04d}" for _ in range(rng.randint(1, 4))],
+            "cause": rng.choice(
+                ["storm_damage", "bushfire_damage", "planned_maintenance", "equipment_failure", "third_party_dig_in"]
+            ),
             "etr": ts,
             "jurisdiction": j,
         }

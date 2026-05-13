@@ -422,4 +422,3 @@ def seed_register() -> list[BenchmarkEntry]:
     assert manual_share <= 0.50, f"Manual share {manual_share:.1%} exceeds 50% cap (T-AMD-12)"
 
     return out
-

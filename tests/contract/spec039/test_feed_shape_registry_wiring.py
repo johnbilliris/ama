@@ -14,9 +14,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[3]
-REGISTRY = (
-    REPO / "apps" / "api" / "app" / "services" / "simulation" / "feeds" / "source_shapes.json"
-)
+REGISTRY = REPO / "apps" / "api" / "app" / "services" / "simulation" / "feeds" / "source_shapes.json"
 
 # Map shape id -> module name (the import side of the wiring contract).
 SHAPE_TO_MODULE = {
@@ -50,13 +48,9 @@ def test_every_registry_id_has_module_mapping() -> None:
 
 @pytest.mark.parametrize("shape_id,module_name", sorted(SHAPE_TO_MODULE.items()))
 def test_module_emit_envelope_matches_registry(shape_id: str, module_name: str) -> None:
-    mod = importlib.import_module(
-        f"app.services.simulation.feeds.{module_name}"
-    )
+    mod = importlib.import_module(f"app.services.simulation.feeds.{module_name}")
     assert hasattr(mod, "emit"), f"{module_name} missing emit()"
-    assert getattr(mod, "SOURCE_SHAPE", None) == shape_id, (
-        f"{module_name}.SOURCE_SHAPE != {shape_id!r}"
-    )
+    assert getattr(mod, "SOURCE_SHAPE", None) == shape_id, f"{module_name}.SOURCE_SHAPE != {shape_id!r}"
     # Smoke: emit a single record and check envelope.
     rec = next(iter(mod.emit("nsw-bushfire-summer", 1, count=1)))
     payload = rec.model_dump()

@@ -1,4 +1,5 @@
 """Contract test: Pydantic extra fields rejection (T-AMD-19, T-AMD-09)."""
+
 from __future__ import annotations
 
 import os

@@ -1,4 +1,5 @@
 """Unit test: Client fail-fast on missing Azure config (T-AMD-23, T-AMD-08, FR-042)."""
+
 from __future__ import annotations
 
 import os

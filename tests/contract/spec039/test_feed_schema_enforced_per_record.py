@@ -14,9 +14,7 @@ import jsonschema
 import pytest
 
 REPO = Path(__file__).resolve().parents[3]
-SCHEMA = (
-    REPO / "apps" / "api" / "app" / "services" / "simulation" / "feeds" / "simulator_feed.schema.json"
-)
+SCHEMA = REPO / "apps" / "api" / "app" / "services" / "simulation" / "feeds" / "simulator_feed.schema.json"
 
 ALL_MODULES = [
     "bom_severe_weather_warning",

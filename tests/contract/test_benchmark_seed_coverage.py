@@ -1,4 +1,5 @@
 """Contract test: Benchmark seed coverage (T-AMD-22, T-AMD-12)."""
+
 from __future__ import annotations
 
 

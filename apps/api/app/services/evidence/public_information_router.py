@@ -1,4 +1,5 @@
 """Public Information router (T-AMD-14, FR-039)."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Path

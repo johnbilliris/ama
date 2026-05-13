@@ -38,9 +38,7 @@ def test_demo_replay_matches_committed_sidecar(scenario: str, tmp_path: Path) ->
     committed = REPLAY_DIR / f"{scenario}.ndjson"
     assert committed.exists(), committed
     committed_digest = compute_sha256(committed)
-    assert digest == committed_digest, (
-        f"{scenario}: replay byte drift recomputed={digest} committed={committed_digest}"
-    )
+    assert digest == committed_digest, f"{scenario}: replay byte drift recomputed={digest} committed={committed_digest}"
     sidecar = REPLAY_DIR / f"{scenario}.ndjson.sha256"
     assert sidecar.exists(), sidecar
     assert sidecar.read_text(encoding="utf-8").startswith(committed_digest)

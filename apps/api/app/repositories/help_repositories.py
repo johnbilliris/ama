@@ -251,6 +251,7 @@ class HelpRepositories:
             def _matches(r: dict[str, Any]) -> bool:
                 tags = r.get("personas") or r.get("persona_tags") or []
                 return persona in tags or "all-personas" in tags
+
             rows = [r for r in rows if _matches(r)]
         if surface:
             rows = [r for r in rows if surface in (r.get("surfaces") or r.get("surface_tags") or [])]

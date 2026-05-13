@@ -70,14 +70,10 @@ def test_replay_cli_check_reproduces_digest(ndjson: Path) -> None:
         encoding="utf-8",
         errors="replace",
     )
-    assert proc.returncode == 0, (
-        f"replay --check failed for {scenario}\n"
-        f"stdout={proc.stdout}\nstderr={proc.stderr}"
-    )
+    assert proc.returncode == 0, f"replay --check failed for {scenario}\nstdout={proc.stdout}\nstderr={proc.stderr}"
     # The CLI prints "OK <scenario> sha256=<digest> ..." on success.
     assert committed_digest in proc.stdout, (
-        f"expected digest {committed_digest} in CLI stdout for {scenario}\n"
-        f"stdout={proc.stdout}"
+        f"expected digest {committed_digest} in CLI stdout for {scenario}\nstdout={proc.stdout}"
     )
 
 
@@ -85,6 +81,5 @@ def test_at_least_21_replays_present() -> None:
     """13 simulator-feed scenarios + 8 demo scenarios = 21 fixtures (Phase 5/6)."""
     files = _replay_files()
     assert len(files) >= 21, (
-        f"expected ≥21 replay fixtures (13 feeds + 8 demos), got {len(files)}: "
-        f"{[p.name for p in files]}"
+        f"expected ≥21 replay fixtures (13 feeds + 8 demos), got {len(files)}: {[p.name for p in files]}"
     )

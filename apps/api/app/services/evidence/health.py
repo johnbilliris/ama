@@ -73,4 +73,3 @@ def healthz_evidence() -> JSONResponse:
     if degraded:
         return JSONResponse(status_code=200, content={"status": "ok", "checks": checks, "degraded": True})
     return JSONResponse(status_code=200, content={"status": "ok", "checks": checks, "degraded": False})
-

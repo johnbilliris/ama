@@ -30,9 +30,7 @@ def _to_dict(rec: Any) -> dict[str, Any]:
         return rec.model_dump()
     if isinstance(rec, dict):
         return rec
-    raise TypeError(
-        f"replay writer only accepts dicts or pydantic models, got {type(rec).__name__}"
-    )
+    raise TypeError(f"replay writer only accepts dicts or pydantic models, got {type(rec).__name__}")
 
 
 def write_ndjson(records: Iterable[Any], path: str | Path) -> str:

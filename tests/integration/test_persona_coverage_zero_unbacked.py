@@ -37,9 +37,7 @@ def test_every_persona_appears_in_manifest() -> None:
     for ps in PERSONA_ROSTERS.values():
         canonical.update(ps)
     missing = sorted(canonical - bound)
-    assert not missing, (
-        f"{len(missing)} personas have zero manifest entries: {missing}"
-    )
+    assert not missing, f"{len(missing)} personas have zero manifest entries: {missing}"
 
 
 def test_every_domain_group_has_entries() -> None:

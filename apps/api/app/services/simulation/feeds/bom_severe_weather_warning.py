@@ -23,12 +23,17 @@ from ._seeded_random import seeded_rng
 SOURCE_SHAPE: Final[str] = "bom.severe_weather_warning.v1"
 FEED_VERSION: Final[str] = "v1"
 
-_HAZARD_TYPES: Final[tuple[str, ...]] = (
-    "cyclone", "severe_storm", "fire_weather", "heatwave", "damaging_wind"
-)
+_HAZARD_TYPES: Final[tuple[str, ...]] = ("cyclone", "severe_storm", "fire_weather", "heatwave", "damaging_wind")
 _PRODUCT_PREFIX: Final[dict[str, str]] = {
-    "nsw": "IDN", "vic": "IDV", "qld": "IDQ", "wa": "IDW",
-    "sa": "IDS", "tas": "IDT", "nt": "IDD", "act": "IDA", "au": "IDZ",
+    "nsw": "IDN",
+    "vic": "IDV",
+    "qld": "IDQ",
+    "wa": "IDW",
+    "sa": "IDS",
+    "tas": "IDT",
+    "nt": "IDD",
+    "act": "IDA",
+    "au": "IDZ",
 }
 
 

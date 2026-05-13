@@ -16,7 +16,10 @@ SCENARIO_ID = "demo-ambulance-v1"
 DOMAIN_GROUP = "ambulance"
 DEFAULT_SEED = 42
 PARTICIPATING_PERSONAS = (
-    "av", "nsw-ambulance", "rfds", "saas",
+    "av",
+    "nsw-ambulance",
+    "rfds",
+    "saas",
     "incident-commander",
 )
 PARTICIPATING_FEEDS = (
@@ -28,7 +31,8 @@ PARTICIPATING_FEEDS = (
 
 def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     return compose(
-        SCENARIO_ID, seed,
+        SCENARIO_ID,
+        seed,
         feed_calls=[
             (ambulance_cad.emit, {"jurisdiction": "vic", "count": 5}),
             (epa_pm25.emit, {"jurisdiction": "vic", "count": 3}),
@@ -37,5 +41,4 @@ def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     )
 
 
-__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS",
-           "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]
+__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS", "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]

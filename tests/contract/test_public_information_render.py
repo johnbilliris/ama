@@ -1,4 +1,5 @@
 """Contract test: getPublicInformationForScenario (T-AMD-14)."""
+
 from __future__ import annotations
 
 import os

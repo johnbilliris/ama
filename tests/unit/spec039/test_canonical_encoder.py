@@ -45,9 +45,7 @@ def test_simulated_clock_is_monotone():
 def test_simulated_clock_iso_format():
     clk = SimulatedClock("s", 1)
     t = clk.tick(1)
-    assert re.match(
-        r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$", t
-    ), f"unexpected ISO format: {t}"
+    assert re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$", t), f"unexpected ISO format: {t}"
 
 
 def test_simulated_clock_different_seeds_do_not_overlap():

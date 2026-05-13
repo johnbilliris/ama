@@ -50,7 +50,6 @@ def test_simulator_isolation_string_grep_fails(repo_with_violation: Path) -> Non
         cwd=str(repo_with_violation),
     )
     assert result.returncode != 0, (
-        f"lint should detect production import of simulator.\n"
-        f"stdout={result.stdout}\nstderr={result.stderr}"
+        f"lint should detect production import of simulator.\nstdout={result.stdout}\nstderr={result.stderr}"
     )
     assert "rogue_router.py" in (result.stdout + result.stderr)

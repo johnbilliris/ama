@@ -10,10 +10,7 @@ from scripts.generators._seed_contract import UINT64_MAX, resolve_seed
 
 
 def test_fn_arg_wins_over_all():
-    assert (
-        resolve_seed(fn_arg=10, cli_arg=20, env={"AMA_TEST_SEED": "30"}, default=40)
-        == 10
-    )
+    assert resolve_seed(fn_arg=10, cli_arg=20, env={"AMA_TEST_SEED": "30"}, default=40) == 10
 
 
 def test_cli_arg_wins_over_env_and_default():

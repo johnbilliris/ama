@@ -1,4 +1,5 @@
 """Integration test: Audit immutability 409 (T-AMD-20, T-AMD-06)."""
+
 from __future__ import annotations
 
 import os

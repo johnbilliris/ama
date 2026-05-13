@@ -3,6 +3,7 @@
 Asserts that every TypeScript interface in packages/domain/src/evidence/index.ts
 mirrors the corresponding OpenAPI schema — no extra optional fields permitted.
 """
+
 from __future__ import annotations
 
 import re
@@ -69,7 +70,7 @@ def test_key_interfaces_present_in_ts_twin():
 @pytest.mark.skipif(not TS_TWIN_PATH.exists(), reason="TS twin not found")
 def test_openapi_required_fields_present_in_ts_twin():
     """All OpenAPI-required fields for key schemas must be present in the TS twin (D25).
-    
+
     Direction: OpenAPI required fields ⊆ TS fields.
     The TS twin may have additional internal/computed fields not in the OpenAPI contract
     (e.g. created_by, correlation_id) — that is acceptable per the reuse-only constraint.
@@ -86,9 +87,7 @@ def test_openapi_required_fields_present_in_ts_twin():
         ts_fields = ts_interfaces[schema_name]
         missing_required = required_fields - ts_fields
         if missing_required:
-            mismatches.append(
-                f"{schema_name}: required OpenAPI fields absent from TS: {sorted(missing_required)}"
-            )
+            mismatches.append(f"{schema_name}: required OpenAPI fields absent from TS: {sorted(missing_required)}")
 
     assert not mismatches, "\n".join(mismatches)
 

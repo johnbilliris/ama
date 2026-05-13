@@ -73,9 +73,7 @@ def _make(
                 auditor_signoff_required=False,
             )
             if risk
-            else RiskAdjustment(
-                likelihood=3, consequence=3, provenance="manual", auditor_signoff_required=True
-            )
+            else RiskAdjustment(likelihood=3, consequence=3, provenance="manual", auditor_signoff_required=True)
         ),
         created_at=datetime.now(UTC),
         created_by="seed",

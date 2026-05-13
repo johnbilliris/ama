@@ -30,4 +30,3 @@ class BenchmarkEntry(BaseModel):
     target_unit: str
     not_available: bool = False
     created_at: AwareDatetime
-

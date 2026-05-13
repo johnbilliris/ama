@@ -79,40 +79,32 @@ def _default_out_dir() -> Path:
 def _emit_records(scenario: str, seed: int, count: int):
     if scenario in DEMO_SCENARIOS:
         # Demo scenario — orchestrator decides record count; ``count`` ignored.
-        mod = importlib.import_module(
-            f"apps.api.app.services.simulation.feeds.scenarios.{DEMO_SCENARIOS[scenario]}"
-        )
+        mod = importlib.import_module(f"apps.api.app.services.simulation.feeds.scenarios.{DEMO_SCENARIOS[scenario]}")
         return list(mod.emit(seed))
     if scenario not in SCENARIOS:
         raise SystemExit(
-            f"unknown scenario {scenario!r}; "
-            f"known feeds: {sorted(SCENARIOS)}; demos: {sorted(DEMO_SCENARIOS)}"
+            f"unknown scenario {scenario!r}; known feeds: {sorted(SCENARIOS)}; demos: {sorted(DEMO_SCENARIOS)}"
         )
     module_name, jurisdiction = SCENARIOS[scenario]
-    mod = importlib.import_module(
-        f"apps.api.app.services.simulation.feeds.{module_name}"
-    )
+    mod = importlib.import_module(f"apps.api.app.services.simulation.feeds.{module_name}")
     # Schema requires kebab-case scenario_id; the CLI uses snake_case for
     # consistency with the underlying module filename.
     scenario_id = scenario.replace("_", "-")
     clk = SimulatedClock(scenario_id, seed)
-    return list(
-        mod.emit(scenario_id, seed, jurisdiction=jurisdiction, count=count, clock=clk)
-    )
+    return list(mod.emit(scenario_id, seed, jurisdiction=jurisdiction, count=count, clock=clk))
 
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--scenario", required=True,
-                   choices=sorted(set(SCENARIOS) | set(DEMO_SCENARIOS)))
-    p.add_argument("--seed", type=int, default=None,
-                   help="64-bit unsigned seed; falls back to AMA_TEST_SEED then 0.")
-    p.add_argument("--count", type=int, default=8,
-                   help="Records to emit (default: 8).")
-    p.add_argument("--out", type=Path, default=None,
-                   help="Output ndjson path (default: fixtures/sim_replays/<scenario>.ndjson).")
-    p.add_argument("--check", action="store_true",
-                   help="Re-encode and verify against committed sidecar; do not overwrite.")
+    p.add_argument("--scenario", required=True, choices=sorted(set(SCENARIOS) | set(DEMO_SCENARIOS)))
+    p.add_argument("--seed", type=int, default=None, help="64-bit unsigned seed; falls back to AMA_TEST_SEED then 0.")
+    p.add_argument("--count", type=int, default=8, help="Records to emit (default: 8).")
+    p.add_argument(
+        "--out", type=Path, default=None, help="Output ndjson path (default: fixtures/sim_replays/<scenario>.ndjson)."
+    )
+    p.add_argument(
+        "--check", action="store_true", help="Re-encode and verify against committed sidecar; do not overwrite."
+    )
     args = p.parse_args(argv)
 
     seed = resolve_seed(fn_arg=None, cli_arg=args.seed)
@@ -125,23 +117,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.check:
         # Re-encode to a temp path, then verify against committed sidecar.
         import tempfile
+
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td) / f"{args.scenario}.ndjson"
             digest = write_ndjson(records, tmp)
-            committed = (
-                _default_out_dir() / f"{args.scenario}.ndjson"
-                if args.out is None
-                else args.out
-            )
+            committed = _default_out_dir() / f"{args.scenario}.ndjson" if args.out is None else args.out
             if not committed.exists():
-                print(f"FAIL {args.scenario}: committed fixture missing at {committed}",
-                      file=sys.stderr)
+                print(f"FAIL {args.scenario}: committed fixture missing at {committed}", file=sys.stderr)
                 return 2
             committed_digest = compute_sha256(committed)
             if digest != committed_digest:
                 print(
-                    f"FAIL {args.scenario}: digest drift — "
-                    f"recomputed={digest} committed={committed_digest}",
+                    f"FAIL {args.scenario}: digest drift — recomputed={digest} committed={committed_digest}",
                     file=sys.stderr,
                 )
                 return 1

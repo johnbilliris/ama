@@ -35,7 +35,7 @@ def test_template_ids_match_across_locales() -> None:
         if loc == "en-AU":
             continue
         ids = {r["template_id"] for r in _records(loc)}
-        assert ids == base_ids, f"{loc} template_ids drift: missing={base_ids-ids} extra={ids-base_ids}"
+        assert ids == base_ids, f"{loc} template_ids drift: missing={base_ids - ids} extra={ids - base_ids}"
 
 
 def test_placeholder_locales_marked() -> None:
@@ -50,9 +50,7 @@ def test_every_record_has_audio_description_field() -> None:
     """T151 — WCAG 2.1 AA placeholder presence (FR-071)."""
     for loc in MUST_LOCALES + PLACEHOLDER_LOCALES:
         for r in _records(loc):
-            assert "wcag_audio_description" in r, (
-                f"{loc} record {r.get('id')} missing wcag_audio_description (FR-071)"
-            )
+            assert "wcag_audio_description" in r, f"{loc} record {r.get('id')} missing wcag_audio_description (FR-071)"
 
 
 def test_parity_matrix_doc_present() -> None:

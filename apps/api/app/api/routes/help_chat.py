@@ -61,9 +61,7 @@ async def chat_ask(
     snapshot_id = repos.active_snapshot_id(caller.tenant_id) or "snapshot-bootstrap"
     persona_id = body.persona_id or caller.persona_id
     persona_source = (
-        "user_override"
-        if body.persona_id and body.persona_id != caller.persona_id
-        else caller.persona_source
+        "user_override" if body.persona_id and body.persona_id != caller.persona_id else caller.persona_source
     )
 
     # FR-017: PII / PSPF / sensitive-operational gateway BEFORE any retrieval or LLM call.

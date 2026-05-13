@@ -36,17 +36,14 @@ def emit(
         body = {
             "job_id": f"FICT-{j.upper()}-CAD-{i:06d}",
             "priority": rng.choice(["P1", "P2", "P3", "P4", "P5"]),
-            "incident_type": rng.choice([
-                "trauma", "cardiac", "respiratory", "obstetric",
-                "psychiatric", "mass_casualty", "transport"
-            ]),
+            "incident_type": rng.choice(
+                ["trauma", "cardiac", "respiratory", "obstetric", "psychiatric", "mass_casualty", "transport"]
+            ),
             "dispatch_time": ts,
             "vehicle_callsign": f"FICT-{j.upper()}-{rng.randint(100, 999)}",
             "destination_facility_ref": f"fictitious-{j}-hospital-{rng.randint(1, 20)}",
             "patient_count": rng.randint(1, 8),
-            "patient_demographics": {"age_band": rng.choice([
-                "0-4", "5-12", "13-17", "18-39", "40-64", "65+"
-            ])},
+            "patient_demographics": {"age_band": rng.choice(["0-4", "5-12", "13-17", "18-39", "40-64", "65+"])},
             "jurisdiction": j,
         }
         yield build_record(

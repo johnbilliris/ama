@@ -66,9 +66,7 @@ class SimulatedClock:
         self.seed = int(seed)
         # Per-(scenario, seed) deterministic offset of up to ~2.4 hours, in µs,
         # so different seeds occupy disjoint time bands (FR-026).
-        offset_us = int.from_bytes(
-            _hmac_seed_bytes(scenario_id, seed)[:5], "big", signed=False
-        )
+        offset_us = int.from_bytes(_hmac_seed_bytes(scenario_id, seed)[:5], "big", signed=False)
         base = datetime.fromisoformat(start_iso)
         if base.tzinfo is None:
             base = base.replace(tzinfo=UTC)

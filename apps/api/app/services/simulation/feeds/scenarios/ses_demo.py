@@ -17,8 +17,11 @@ SCENARIO_ID = "demo-ses-v1"
 DOMAIN_GROUP = "ses"
 DEFAULT_SEED = 42
 PARTICIPATING_PERSONAS = (
-    "ses-vic", "ses-nsw", "ses-qld",
-    "operations-officer", "logistics-officer",
+    "ses-vic",
+    "ses-nsw",
+    "ses-qld",
+    "operations-officer",
+    "logistics-officer",
 )
 PARTICIPATING_FEEDS = (
     bom_flood_gauge.SOURCE_SHAPE,
@@ -29,7 +32,8 @@ PARTICIPATING_FEEDS = (
 
 def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     return compose(
-        SCENARIO_ID, seed,
+        SCENARIO_ID,
+        seed,
         feed_calls=[
             (bom_flood_gauge.emit, {"jurisdiction": "vic", "count": 5}),
             (bom_severe_weather_warning.emit, {"jurisdiction": "vic", "count": 3}),
@@ -38,5 +42,4 @@ def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     )
 
 
-__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS",
-           "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]
+__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS", "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]

@@ -17,8 +17,11 @@ SCENARIO_ID = "demo-police-v1"
 DOMAIN_GROUP = "police"
 DEFAULT_SEED = 42
 PARTICIPATING_PERSONAS = (
-    "nswpf", "vicpol", "afp-commonwealth",
-    "operations-officer", "incident-commander",
+    "nswpf",
+    "vicpol",
+    "afp-commonwealth",
+    "operations-officer",
+    "incident-commander",
 )
 PARTICIPATING_FEEDS = (
     traffic_road_closure.SOURCE_SHAPE,
@@ -29,7 +32,8 @@ PARTICIPATING_FEEDS = (
 
 def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     return compose(
-        SCENARIO_ID, seed,
+        SCENARIO_ID,
+        seed,
         feed_calls=[
             (traffic_road_closure.emit, {"jurisdiction": "nsw", "count": 5}),
             (social_chatter.emit, {"jurisdiction": "au", "count": 4}),
@@ -38,5 +42,4 @@ def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     )
 
 
-__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS",
-           "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]
+__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS", "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]

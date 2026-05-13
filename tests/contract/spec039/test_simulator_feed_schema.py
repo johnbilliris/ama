@@ -13,16 +13,7 @@ import jsonschema
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-SCHEMA_PATH = (
-    REPO_ROOT
-    / "apps"
-    / "api"
-    / "app"
-    / "services"
-    / "simulation"
-    / "feeds"
-    / "simulator_feed.schema.json"
-)
+SCHEMA_PATH = REPO_ROOT / "apps" / "api" / "app" / "services" / "simulation" / "feeds" / "simulator_feed.schema.json"
 
 
 @pytest.fixture(scope="module")

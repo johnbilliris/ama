@@ -54,9 +54,7 @@ def emit(
             "observed_at": ts,
             "pm25_ug_m3": pm,
             "aqi_band": _aqi_band(pm),
-            "source_attribution": rng.choice([
-                "bushfire_smoke", "industrial", "transport", "background"
-            ]),
+            "source_attribution": rng.choice(["bushfire_smoke", "industrial", "transport", "background"]),
             "jurisdiction": j,
         }
         yield build_record(

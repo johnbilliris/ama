@@ -40,9 +40,7 @@ def emit(
         body = {
             "test_marker": WARNING_TEST_MARKER,
             "advisory_id": f"FICT-JATWC-{j.upper()}-{i:05d}",
-            "threat_level": rng.choice([
-                "no_threat", "marine_threat", "land_threat", "major_land_threat"
-            ]),
+            "threat_level": rng.choice(["no_threat", "marine_threat", "land_threat", "major_land_threat"]),
             "trigger_event": {
                 "magnitude": round(rng.uniform(6.5, 9.2), 1),
                 "depth_km": round(rng.uniform(5.0, 60.0), 1),

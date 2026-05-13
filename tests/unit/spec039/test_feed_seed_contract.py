@@ -41,17 +41,13 @@ def _digest(emit_fn, scenario_id: str, seed: int) -> str:
 @pytest.mark.parametrize("module_name", ALL_MODULES)
 def test_same_seed_same_digest(module_name: str) -> None:
     mod = importlib.import_module(f"app.services.simulation.feeds.{module_name}")
-    assert _digest(mod.emit, "nsw-bushfire-summer", 42) == _digest(
-        mod.emit, "nsw-bushfire-summer", 42
-    )
+    assert _digest(mod.emit, "nsw-bushfire-summer", 42) == _digest(mod.emit, "nsw-bushfire-summer", 42)
 
 
 @pytest.mark.parametrize("module_name", ALL_MODULES)
 def test_different_seed_different_digest(module_name: str) -> None:
     mod = importlib.import_module(f"app.services.simulation.feeds.{module_name}")
-    assert _digest(mod.emit, "nsw-bushfire-summer", 42) != _digest(
-        mod.emit, "nsw-bushfire-summer", 43
-    )
+    assert _digest(mod.emit, "nsw-bushfire-summer", 42) != _digest(mod.emit, "nsw-bushfire-summer", 43)
 
 
 def test_seed_zero_emits_userwarning_via_resolve_seed() -> None:

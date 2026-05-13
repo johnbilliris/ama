@@ -1,4 +1,5 @@
 """Audit write wrapper with Strong consistency + exponential backoff (T-AMD-05, FR-044)."""
+
 from __future__ import annotations
 
 import asyncio

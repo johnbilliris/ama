@@ -41,4 +41,3 @@ def enable_test_mode():
     os.environ["AMA_TEST_MODE"] = "1"
     yield
     os.environ.pop("AMA_TEST_MODE", None)
-

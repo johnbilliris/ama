@@ -16,7 +16,11 @@ SCENARIO_ID = "demo-marine-aviation-v1"
 DOMAIN_GROUP = "marine-aviation"
 DEFAULT_SEED = 42
 PARTICIPATING_PERSONAS = (
-    "rfds", "surf-lifesaving", "mrnsw", "abf", "asa",
+    "rfds",
+    "surf-lifesaving",
+    "mrnsw",
+    "abf",
+    "asa",
 )
 PARTICIPATING_FEEDS = (
     ga_tsunami_threat.SOURCE_SHAPE,
@@ -27,7 +31,8 @@ PARTICIPATING_FEEDS = (
 
 def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     return compose(
-        SCENARIO_ID, seed,
+        SCENARIO_ID,
+        seed,
         feed_calls=[
             (ga_tsunami_threat.emit, {"jurisdiction": "nsw", "count": 4}),
             (ambulance_cad.emit, {"jurisdiction": "nsw", "count": 3}),
@@ -36,5 +41,4 @@ def emit(seed: int = DEFAULT_SEED) -> Iterator[CanonicalRecord]:
     )
 
 
-__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS",
-           "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]
+__all__ = ["DEFAULT_SEED", "DOMAIN_GROUP", "PARTICIPATING_FEEDS", "PARTICIPATING_PERSONAS", "SCENARIO_ID", "emit"]

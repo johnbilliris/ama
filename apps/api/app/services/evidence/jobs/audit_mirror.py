@@ -1,4 +1,5 @@
 """Change-feed → Blob cold-archive mirror job (T-AMD-04, FR-040)."""
+
 from __future__ import annotations
 
 import asyncio

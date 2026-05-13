@@ -27,13 +27,9 @@ def read_ndjson(path: str | Path) -> Iterator[dict[str, Any]]:
             try:
                 obj = json.loads(line)
             except json.JSONDecodeError as exc:
-                raise ReplayParseError(
-                    f"{p}:{lineno}: invalid NDJSON line: {exc.msg}"
-                ) from exc
+                raise ReplayParseError(f"{p}:{lineno}: invalid NDJSON line: {exc.msg}") from exc
             if not isinstance(obj, dict):
-                raise ReplayParseError(
-                    f"{p}:{lineno}: NDJSON line must be a JSON object"
-                )
+                raise ReplayParseError(f"{p}:{lineno}: NDJSON line must be a JSON object")
             yield obj
 
 

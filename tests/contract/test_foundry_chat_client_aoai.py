@@ -36,6 +36,7 @@ from common.foundry_chat_client import (
 
 # ---------------------------------------------------------------- AOAI shape
 
+
 @pytest.mark.parametrize(
     "endpoint,expected",
     [
@@ -79,6 +80,7 @@ def test_endpoint_for_does_not_double_append_when_already_per_deployment() -> No
 
 # ---------------------------------------------------------------- Tier env vars
 
+
 def test_resolve_honours_simulation_tier_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AZURE_AI_SIMULATION_DEPLOYMENT", "gpt-5.4-sim-ama")
     client = LiveFoundryChatClient(
@@ -98,6 +100,7 @@ def test_resolve_falls_back_to_csv_when_tier_env_var_unset(monkeypatch: pytest.M
 
 
 # ---------------------------------------------------------------- CSV parser
+
 
 def test_parse_deployment_map_first_write_wins() -> None:
     """Three tiers may share a key; the first entry MUST win, deterministically."""

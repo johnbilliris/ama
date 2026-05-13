@@ -36,19 +36,20 @@ def emit(
         body = {
             "synthetic_id": f"fict-fallback-{j}-{i:06d}",
             "kind": "synthetic_fallback",
-            "category_hint": rng.choice([
-                "operational", "logistics", "communications",
-                "welfare", "intelligence", "policy"
-            ]),
+            "category_hint": rng.choice(
+                ["operational", "logistics", "communications", "welfare", "intelligence", "policy"]
+            ),
             "summary": (
                 "Fictitious synthetic-fallback record (FR-025) — used when "
                 "no public-dataset analogue exists for the target persona."
             ),
             "value_score": round(rng.uniform(0, 1), 4),
-            "tags": sorted({rng.choice([
-                "low-frequency", "exploratory", "edge-case",
-                "no-public-analogue", "internal-only"
-            ]) for _ in range(rng.randint(1, 3))}),
+            "tags": sorted(
+                {
+                    rng.choice(["low-frequency", "exploratory", "edge-case", "no-public-analogue", "internal-only"])
+                    for _ in range(rng.randint(1, 3))
+                }
+            ),
             "observed_at": ts,
             "jurisdiction": j,
         }
