@@ -181,6 +181,29 @@ class SimulationEventRecorder:
             {"old_speed": old_speed, "new_speed": new_speed},
         )
 
+    def record_ui_log(
+        self,
+        tenant_id: str,
+        sim_time: float,
+        *,
+        text: str,
+        author_oid: str | None = None,
+        category: str | None = None,
+    ) -> SimulationEvent | None:
+        """Persist a free-form Event-Log line emitted by the dashboard UI.
+
+        Used so optimistic client-side entries (Deploy / SITREP / sub-agent
+        replies / scenario seeds / etc.) survive a page refresh by landing
+        in the durable ``sim-events`` Cosmos container instead of being
+        pruned once polling overlaps them.
+        """
+        payload: dict[str, Any] = {"text": text[:500]}
+        if author_oid:
+            payload["author_oid"] = author_oid
+        if category:
+            payload["category"] = category
+        return self.record_event(tenant_id, "ui_log", sim_time, payload)
+
     # ------------------------------------------------------------------
     # snapshots
     # ------------------------------------------------------------------

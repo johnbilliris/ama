@@ -33,7 +33,7 @@ COPY docs/governance-hub/executive-kpi/ ./docs/governance-hub/executive-kpi/
 COPY docs/governance-hub/rai-register/ ./docs/governance-hub/rai-register/
 COPY specs/shared/ ./specs/shared/
 
-ENV PYTHONPATH="/app/apps/agents:/app/packages/domain/src:${PYTHONPATH}"
+ENV PYTHONPATH="/app/apps/agents:/app/packages/domain/src"
 
 USER appuser
 EXPOSE 8000

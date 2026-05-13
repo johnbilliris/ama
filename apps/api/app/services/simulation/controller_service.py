@@ -144,6 +144,36 @@ class SimulationControllerService:
         except Exception:  # pragma: no cover — defensive
             return 0.0
 
+    def _maybe_record_tool_invocation(
+        self,
+        *,
+        tenant_id: str,
+        sim_seconds: float,
+        tool_name: str,
+        outcome: str,
+        latency_ms: int = 0,
+    ) -> None:
+        """Best-effort — record a tool round-trip as a SimulationEvent.
+
+        Without this the right-hand Event Log only ever shows lifecycle
+        events + chat turns; tool-driven activity (sub-agent replies that
+        produce coordination tasks via the Deploy quick-action, etc.) would
+        appear locally then get pruned by the polling refresh because no
+        durable counterpart ever lands in the ``sim-events`` container.
+        """
+        if self._event_recorder is None:
+            return
+        try:
+            self._event_recorder.record_tool_invocation(
+                tenant_id=tenant_id,
+                sim_time=sim_seconds,
+                tool_name=tool_name,
+                outcome=outcome,
+                latency_ms=latency_ms,
+            )
+        except Exception as exc:  # pragma: no cover
+            logger.warning("sim_event_record_tool_invocation_failed: %s", exc)
+
     def _maybe_record_chat_turn(
         self,
         *,
@@ -408,6 +438,12 @@ class SimulationControllerService:
                     "outcome": "ok" if not reply.degraded else "error",
                     "result": {"summary": reply.summary, "citations": reply.citations},
                 },
+            )
+            self._maybe_record_tool_invocation(
+                tenant_id=tenant_id,
+                sim_seconds=await self._current_sim_seconds(tenant_id),
+                tool_name=f"query_sub_agent:{intent['sub_agent']}",
+                outcome="ok" if not reply.degraded else "error",
             )
             # Audit trail: persist the tool round-trip as a tool-role turn so
             # operators can reconstruct which sub-agent informed the response.
@@ -758,6 +794,15 @@ class SimulationControllerService:
                         "outcome": result.get("outcome", "ok"),
                         "result": result,
                     },
+                )
+                tool_label = name
+                if name == "query_sub_agent" and isinstance(args.get("sub_agent"), str):
+                    tool_label = f"query_sub_agent:{args['sub_agent']}"
+                self._maybe_record_tool_invocation(
+                    tenant_id=tenant_id,
+                    sim_seconds=await self._current_sim_seconds(tenant_id),
+                    tool_name=tool_label,
+                    outcome=str(result.get("outcome", "ok")),
                 )
                 messages.append(
                     {

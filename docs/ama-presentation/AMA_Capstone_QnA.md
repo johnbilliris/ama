@@ -7,7 +7,7 @@
 
 ---
 
-## Section A — 20 Expected Questions
+## Section A — 21 Expected Questions
 
 ### A1. *(BDM)* What is the actual business problem in one sentence?
 **30s answer:** In Australian disasters, coordination latency — not detection, not capability — is the dominant driver of lives lost and dollars destroyed; we cut that latency by ≥50% with an AIIMS-aligned multi-agent platform.
@@ -88,6 +88,18 @@
 ### A20. *(SSP-M)* Where does this go after the capstone?
 **30s answer:** Two paths. (1) Production: a state-services pilot with NSW RFS or EMV as foundation customer. (2) Reference architecture: published as an Australian Government Architecture pattern, becoming the pattern allied nations (NZ, Pacific Island Forum) adopt. Microsoft positions as the platform of choice for sovereign multi-agent emergency management.
 **Depth:** Constitution v1.2.0 explicitly names ANZEMC governance and NCM integration as forward-roadmap. Reference-architecture portability is a design property, not a marketing claim — the metric-trace artefact (`specs/shared/capstone-metric-trace.md`) names every AU-only assumption and what would change for a regional deployment.
+
+### A21. *(CSA)* What is your AI governance framework — how do you control the agents themselves, not just the platform around them?
+**30s answer:** Six layers, all enforceable in CI: (1) the human-authored **Constitution v1.2.0** as the policy spine, (2) **Foundry-managed model controls** (Content Safety, Prompt Shields, RAG with mandatory citations), (3) the **reflection guardrail** between Risk and Communication agents, (4) a **`safety-guardrails` Rego policy bundle** that fails any PR weakening agent rails, (5) an **append-only evaluation harness** (spec 040) that reports KPI deltas with bootstrap 95% CIs and a determinism tolerance of ±2% / ±1 absolute, and (6) **named-human approval** before any irreversible public action. Mapped end-to-end to **ISO/IEC 42001 (AI Management Systems)**, **Australia's Voluntary AI Safety Standard (DISR, Sept 2024) — all 10 guardrails**, and the **NIST AI RMF Govern/Map/Measure/Manage** functions.
+**Depth:**
+- **Policy spine.** The Constitution is human-authored, version-controlled, and amendable only by ADR. Six non-negotiables — HITL, AU sovereignty, Privacy by Design, standards interop, graceful degradation, append-only audit — are encoded as Rego policies (`au_region`, `cross_env`, `identity_consistency`, `posture`, `secret_hygiene`, `safety-guardrails`, `tenant-isolation`) and run on every PR. A PR that lowers a guardrail fails the pipeline at What-If.
+- **Model-layer controls.** Foundry's Azure AI Content Safety (hate, violence, self-harm, sexual + jailbreak/prompt-injection shields) is on by default. RAG grounding against the AIDR handbook collection is mandatory and citations are emitted into every response — uncited model output is rejected by the gateway. The model gateway also enforces token budgets, **prompt-shield**, **PII-minimisation** (Privacy Act 1988 + jurisdiction policies), and the **AU-residency carve-out allowlist** (auto-revoking on AU GA).
+- **Inter-agent guardrail.** The **reflection guardrail** sits between the Risk and Communication agents and critiques every recommendation against the **ten Warning Principles** (AIDR Public Information & Warnings Handbook 2021) before any draft alert can leave Risk. Failed reflections produce a structured rejection with reason codes that feed back into eval datasets.
+- **Trust-tiered ingest.** Every signal carries one of **7 trust tiers** (Tier 1 authoritative-government → Tier 7 derived/computed). Tier 6 (social-unverified) is **advisory-only** and cannot solo-trigger a public alert; cross-tier corroboration plus confidence banding (≥0.80 high · 0.50–0.79 medium · <0.50 low) gate publication (FR-024 / FR-027).
+- **Evaluation & drift.** Spec 040's Evidence Harness runs **baseline-vs-AMA-assisted** scoring across **seven canonical scenarios** (bushfire, flood, cyclone, urban-fire, mass-casualty, hazmat, marine SAR), reports each KPI with **bootstrap 95% CIs over ≥1,000 resamples**, holds **determinism within ±2% / ±1 absolute** (Round 1 Q1), and refuses to publish a KPI value that depends on >50% manual rows (FR-038). Drift on grounding sources, model latency, refusal rate, and reflection-failure rate are first-class observability signals with **2%/h and 5%/h burn-rate alerts** on a 30-day horizon.
+- **Provenance & accountability.** Every signal → fusion → recommendation → approval → publish step writes an immutable **`audit-event.schema.json`** row to a Cosmos `Strong`-consistency container, mirrored to a 7-year **Locked Blob**. Tampering attempts return **409 Conflict** *and* write a tampering-attempt audit row themselves. The **Governance Dashboard (spec 021, 13 endpoints)** publishes the same data to operators, executives, and (with redaction) the public. **No anonymous AI action exists in this system.**
+- **Human-in-the-loop is structural.** Constitutional Non-Negotiable #1: no irreversible action without named human authorisation. The Communication-agent approval surface presents signal provenance, recommendation rationale, AWS-level justification, and a per-language preview — a structured decision interface, not a rubber-stamp button. The KPI **manual-row share ≤50%** trips an SLO if humans are doing too much of the work, because that means the AI is degrading invisibly.
+- **External alignment.** Cross-walked in `docs/compliance/`: **ISO/IEC 42001:2023** (AI management system clauses 4–10), **Australia's Voluntary AI Safety Standard 2024** (10 guardrails — accountability, risk management, data governance, testing, HITL, transparency, contestability, supply-chain, records, stakeholder engagement), **NIST AI RMF 1.0** (Govern/Map/Measure/Manage), and the upcoming **Australian Mandatory Guardrails for High-Risk AI** (DISR consultation Sept 2024 — emergency management is explicitly named as a likely high-risk setting). The platform is designed to be **audit-ready on day one** of any of those becoming mandatory.
 
 ---
 
@@ -193,6 +205,7 @@
 | 90-day pilot | Slide 34 (the ask) |
 | Roadmap to national | Slide 29 + slide 30 |
 | Recovery phase | Constitution §VII; spec `018-aidr-guidance-integration` |
+| AI governance framework | Constitution v1.2.0 (six non-negotiables); Rego bundle `safety-guardrails`/`tenant-isolation`; spec 040 Evidence Harness; ISO/IEC 42001 + AU Voluntary AI Safety Standard 2024 + NIST AI RMF crosswalk in `docs/compliance/` |
 
 ## Survival rules (to mentally rehearse)
 

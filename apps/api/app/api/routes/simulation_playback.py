@@ -12,7 +12,7 @@ Exposes read-only endpoints for after-action review:
 from __future__ import annotations
 
 from app.api.dependencies.rbac import require_simulation_role
-from app.api.routes.simulations import _event_repo, _repo
+from app.api.routes.simulations import _event_repo, _recorder, _repo
 from app.core.auth import extract_principal_from_claims
 from app.services.annotation_service import AnnotationService
 from app.services.playback_service import PlaybackService
@@ -84,6 +84,49 @@ async def list_playback_snapshots(
         )
     except (LookupError, PermissionError) as exc:
         raise _access_error_to_http(exc) from exc
+
+
+# ── annotations (US5) ─────────────────────────────────────────────────
+
+
+class CreateLogEntryRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=500)
+    sim_time_offset: float | None = Field(default=None, ge=0)
+    category: str | None = Field(default=None, max_length=64)
+
+
+@router.post("/log-entries", status_code=201)
+async def create_log_entry(
+    tenant_id: str,
+    body: CreateLogEntryRequest,
+    request: Request,
+) -> dict:
+    """Persist a UI-emitted Event Log line to the ``sim-events`` container.
+
+    The right-hand Event Log on the simulation dashboard previously held
+    optimistic, in-memory only entries (Deploy / SITREP commands, sub-agent
+    reply previews, scenario-seed banners) which vanished on refresh and
+    were pruned by the polling reconciler the moment a newer durable event
+    arrived. This endpoint gives the client a permanent home for those
+    lines so post-exercise review reflects exactly what controllers saw.
+    """
+    user_oid = _principal(request)
+    tenant = await _repo.get_by_tenant_id(tenant_id)
+    if tenant is None:
+        raise HTTPException(status_code=404, detail="simulation_not_found")
+    if not (tenant.created_by == user_oid or user_oid in tenant.participants):
+        raise HTTPException(status_code=403, detail="log_entry_access_denied")
+    sim_time = body.sim_time_offset if body.sim_time_offset is not None else 0.0
+    event = _recorder.record_ui_log(
+        tenant_id,
+        sim_time,
+        text=body.text,
+        author_oid=user_oid,
+        category=body.category,
+    )
+    if event is None:
+        raise HTTPException(status_code=503, detail="event_recorder_unhealthy")
+    return event.model_dump(mode="json")
 
 
 # ── annotations (US5) ─────────────────────────────────────────────────

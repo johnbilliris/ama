@@ -11,7 +11,7 @@ import {
   type SimulationDetail,
   type SimulationClockResponse,
 } from "@/lib/api/simulations";
-import { getPlaybackEvents, type PlaybackEvent } from "@/lib/api/simulation-playback";
+import { getPlaybackEvents, recordEventLogEntry, type PlaybackEvent } from "@/lib/api/simulation-playback";
 import { SimulationBanner } from "@/components/simulation-banner";
 import { SimulationChatPane } from "@/components/simulation-chat-pane";
 import { SimulationMap, type ScenarioCard } from "@/components/simulation-map";
@@ -87,6 +87,8 @@ function describePlaybackEvent(ev: PlaybackEvent): string {
     }
     case "annotation":
       return `Annotation: ${String(p.text ?? "").slice(0, 80)}`;
+    case "ui_log":
+      return String(p.text ?? "").slice(0, 200);
     default:
       return ev.event_type.replaceAll("_", " ");
   }
@@ -108,12 +110,22 @@ export default function SimulationDashboardPage() {
   // whole stream every tick.
   const lastSeqRef = useRef<number>(0);
 
-  const logEvent = useCallback((text: string) => {
-    setEventLog((prev) => [
-      ...prev,
-      { id: `local-${Date.now()}-${prev.length}`, ts: new Date().toISOString(), text, persisted: false },
-    ]);
-  }, []);
+  const logEvent = useCallback(
+    (text: string, category?: string) => {
+      setEventLog((prev) => [
+        ...prev,
+        { id: `local-${Date.now()}-${prev.length}`, ts: new Date().toISOString(), text, persisted: false },
+      ]);
+      // Permanent fix: mirror every UI-emitted line into the durable
+      // ``sim-events`` Cosmos container so a refresh (or post-exercise
+      // review) shows the full history, not just whatever happens to be
+      // captured by the back-end's typed event recorders.
+      if (tenantId) {
+        void recordEventLogEntry(tenantId, text, category);
+      }
+    },
+    [tenantId],
+  );
 
   const refreshPersistedEvents = useCallback(async () => {
     if (!tenantId) return;

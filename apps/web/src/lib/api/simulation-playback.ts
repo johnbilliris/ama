@@ -123,3 +123,26 @@ export async function deleteAnnotation(
     { method: "DELETE" },
   );
 }
+
+/**
+ * Persist a free-form Event Log line to the durable `sim-events` Cosmos
+ * container. Fire-and-forget — failures are logged to the console rather
+ * than thrown so a flaky API request never breaks the dashboard UI.
+ */
+export async function recordEventLogEntry(
+  tenantId: string,
+  text: string,
+  category?: string,
+): Promise<void> {
+  try {
+    await apiFetch(
+      `/simulations/${encodeURIComponent(tenantId)}/playback/log-entries`,
+      {
+        method: "POST",
+        body: JSON.stringify({ text, category }),
+      },
+    );
+  } catch (err) {
+    console.warn("recordEventLogEntry failed", err);
+  }
+}

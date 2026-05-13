@@ -34,7 +34,7 @@ COPY apps/api/app/validators/ ./app/validators/
 COPY apps/api/app/services/simulation/ ./app/services/simulation/
 COPY apps/api/app/config/ ./app/config/
 
-ENV PYTHONPATH="/app:/app/packages/domain/src:${PYTHONPATH}"
+ENV PYTHONPATH="/app:/app/packages/domain/src"
 
 USER appuser
 EXPOSE 8080

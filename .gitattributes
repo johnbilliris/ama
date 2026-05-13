@@ -1,0 +1,8 @@
+# Cross-platform fixture integrity (spec-039 byte-identical replay tests).
+# Mark NDJSON replay fixtures + their sidecars as binary so git never
+# performs CRLF↔LF normalisation on Windows checkouts. The sha256 digests
+# committed alongside them are computed against the on-disk bytes.
+fixtures/sim_replays/*.ndjson         binary
+fixtures/sim_replays/*.ndjson.sha256  binary
+docs/test-data/**/*.ndjson            binary
+docs/test-data/**/*.ndjson.sha256     binary

@@ -6,7 +6,11 @@
  * route navigation. Hides itself on `/help/*` routes because the help shell
  * already pins ChatPanel into its right rail (state is shared via
  * `useHelpChat`, so opening the global dock from a non-help page and then
- * navigating to `/help` shows the same conversation in the rail).
+ * navigating to `/help` shows the same conversation in the rail). Also
+ * hidden on `/simulations/*` exercise pages — those have their own
+ * full-height Simulation Controller chat in the right rail and a second
+ * floating chat bubble both crowds the UI and risks operators issuing
+ * help-assistant chatter into what looks like the simulation pane.
  */
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
@@ -17,7 +21,10 @@ import { useHelpChat } from "@/lib/help/chatStore";
 export function HelpAssistantDock({ persona = "operational-default" }: { persona?: string }) {
   const pathname = usePathname() ?? "/";
   const { isOpen, setOpen, toggleOpen, messages } = useHelpChat();
-  const hidden = pathname === "/help" || pathname.startsWith("/help/");
+  const hidden =
+    pathname === "/help" ||
+    pathname.startsWith("/help/") ||
+    pathname.startsWith("/simulations/");
 
   useEffect(() => {
     if (!isOpen) return;

@@ -22,6 +22,7 @@ SimulationEventType = Literal[
     "state_change",
     "warp_speed_change",
     "annotation",
+    "ui_log",
 ]
 
 
