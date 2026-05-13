@@ -38,7 +38,7 @@ dev = [
 # Spec 036 / F-A10 / T219 + T224 — load-test extras (FR-RAG-TEST-02).
 load = [
   "locust>=2.31,<3",
-  "psutil>=6.0,<7",
+  "psutil>=6.0,<8",
 ]
 
 [tool.pytest.ini_options]

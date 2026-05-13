@@ -28,8 +28,8 @@
     "idb": "^8.0.3",
     "next": "16.2.6",
     "pdf-lib": "^1.17.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1"
   },
@@ -42,9 +42,9 @@
     "@testing-library/react": "^16.1.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "@types/react-dom": "19.0.4",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "axe-core": "^4.11.4",
@@ -54,6 +54,6 @@
     "js-yaml": "^4.1.0",
     "jsdom": "^25.0.1",
     "typescript": "6.0.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.6"
   }
 }

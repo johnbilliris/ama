@@ -135,11 +135,13 @@ describe("SimulationLiveLog locale rendering (T-V02)", () => {
 describe("SimulationLiveLog SSE wiring (T-V03)", () => {
   it("subscribes to the supplied SSE URL on mount and unsubscribes on unmount", () => {
     const close = vi.fn();
-    const ctorSpy = vi.fn(() => ({
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      close,
-    }));
+    const ctorSpy = vi.fn(function (this: object) {
+      Object.assign(this, {
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        close,
+      });
+    });
     // Stub global EventSource so tests can introspect.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (globalThis as any).EventSource = ctorSpy as unknown as typeof EventSource;
