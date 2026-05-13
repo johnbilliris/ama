@@ -56,6 +56,13 @@ def test_publish_emits_audit_and_no_pii(tmp_path: Path):
     assert audit_calls[0]["event_type"] == "evidence_pack.publish"
 
     # NN-2: no PII pattern (email or phone) in any audit payload.
+    # Strip UUIDs (publication_id, etc.) before the digit-sequence check —
+    # UUIDs are not PII but their hex segments can match `\d{8,}` by chance.
     serialised = json.dumps(audit_calls)
+    scrubbed = re.sub(
+        r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+        "UUID",
+        serialised,
+    ).replace("00000000", "X")
     assert not re.search(r"[\w.-]+@[\w.-]+\.\w+", serialised), "audit must not contain emails"
-    assert not re.search(r"\+?\d{8,}", serialised.replace("00000000", "X")), "audit must not contain phone numbers"
+    assert not re.search(r"\+?\d{8,}", scrubbed), "audit must not contain phone numbers"
