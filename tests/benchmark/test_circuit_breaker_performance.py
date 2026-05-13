@@ -22,7 +22,15 @@ def test_cb_closed_to_open(benchmark) -> None:
     """Measure time for 3 consecutive failures to trigger CLOSED → OPEN."""
 
     def closed_to_open():
-        cb = CircuitBreaker(failure_threshold=3, recovery_timeout=RECOVERY_TIMEOUT)
+        # Inject a stopped clock so a slow CI runner cannot let the 100 ms
+        # recovery_timeout elapse between record_failure() and the state
+        # check (would flake to HALF_OPEN). Mirrors the other CB benchmarks.
+        now = [0.0]
+
+        def clock():
+            return now[0]
+
+        cb = CircuitBreaker(failure_threshold=3, recovery_timeout=RECOVERY_TIMEOUT, clock=clock)
         for _ in range(3):
             cb.record_failure()
         assert cb.state == CircuitState.OPEN
