@@ -167,7 +167,7 @@ def _build_openai_client() -> Any:
         return None
     try:
         from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-        from openai import AzureOpenAI
+        from openai import AzureOpenAI  # AMA-FM04: allow — OpenAI-compatible transport for Azure-OpenAI deployments (see docstring above).
 
         token_provider = get_bearer_token_provider(
             DefaultAzureCredential(),

@@ -117,3 +117,6 @@ Use the [architecture quickstart](../../specs/001-arch-docs-refresh/quickstart.m
 <!-- spec-cross-ref: spec-035 -->
 <!-- spec-cross-ref: spec-036 -->
 <!-- spec-cross-ref: spec-037 -->
+<!-- spec-cross-ref: spec-038 -->
+<!-- spec-cross-ref: spec-039 -->
+<!-- spec-cross-ref: spec-040 -->
