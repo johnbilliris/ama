@@ -11,7 +11,12 @@ COPY apps/agents/resource_allocation/ ./apps/agents/resource_allocation/
 COPY apps/agents/communication/ ./apps/agents/communication/
 COPY packages/ ./packages/
 RUN pip install --no-cache-dir --upgrade pip && \
-    cd apps/agents && pip install --no-cache-dir .
+    cd apps/agents && pip install --no-cache-dir . && \
+    # Dependabot GHSA mem0ai (Improper Input Validation, patched 2.0.0b2).
+    # agent-framework-mem0 1.0.0b260507 still pins mem0ai<2 upstream, so
+    # overlay the patched build with --no-deps. mem0 is unused at runtime
+    # (verified — no `import mem0*` in apps/, packages/, tests/).
+    pip install --no-cache-dir --no-deps --upgrade "mem0ai>=2.0.0b2"
 
 FROM python:3.12-slim AS runtime
 
