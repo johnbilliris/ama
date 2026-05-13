@@ -1,65 +1,225 @@
 ---
 slug: personas/incident-commander
-title: "Incident Commander — Getting Started"
+title: "Incident Commander — getting started"
 persona: incident-commander
 cluster: operational
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 11 min
 ---
 
-# Incident Commander — Getting Started
+# Incident Commander — getting started
 
-This guide gets a **Incident Commander** productive in the AMA Hub in 15 minutes.
-Scope: AIIMS Controller authority; cross-jurisdiction escalation; public-alert approval.
+The **Incident Commander (IC)** holds AIIMS Controller authority
+for an incident or set of related incidents within their claimed
+jurisdictions. In the AMA Hub the IC's decision-rights envelope
+is the broadest of any operating persona: warning approval,
+cross-jurisdiction escalation, evacuation envelope confirmation,
+amber co-sign authority for every other operating persona, and
+NEMA acknowledgement initiation. With the breadth comes the
+audit weight — every IC decision becomes part of the post-event
+record.
 
-## 1. What you can do
+This article gets a brand-new IC productive in fifteen minutes,
+documents the decision-rights envelope in detail, walks through
+the typical-shift activity arc, names the most common pitfalls,
+and indexes the IC-relevant articles across the help corpus.
 
-As a Incident Commander, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Approve** public warnings (final co-sign on the chain;
+  PIO drafts, you approve, the alert publishes).
+- **Confirm** evacuation envelopes (Field Coordinator declares;
+  you confirm cross-jurisdictional and large-population
+  envelopes).
+- **Co-sign** any operating persona's amber-band action
+  (Operations Officer warning, Logistics Officer transfer, PIO
+  alert when amber).
+- **Initiate** NEMA acknowledgement for cross-jurisdictional
+  effects.
+- **Escalate** to the constitutional steward for doctrinal
+  exceptions.
+- **Switch** persona (if your IdP claim grants others) but not
+  mid-exercise.
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Bypass the audit trail.
+- Tune confidence-band thresholds (Risk Manager's role).
+- Author or edit help articles (content authoring is separate).
+- Take an action whose effect lies outside your claimed
+  jurisdictions without NEMA acknowledgement.
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Incident Commander** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=incident-commander-landing theme=light -->
-<!-- screenshot:placeholder route_id=incident-commander-landing theme=dark -->
+1. **Sign in** via your IdP. Land at the Disaster Map.
+2. **Glance the AU-region banner** — must read *"Hosted in
+   Australia"*.
+3. **Open the Governance Dashboard** (`g g`) — read the ten
+   constitutional gates. Any amber or red? If so, that
+   shapes your shift.
+4. **Open the Audit timeline** (`g a`) — read the last hour's
+   actions. Get a sense of the operational tempo.
+5. **Return to the Disaster Map**. Take in the operating
+   picture. Note any signals or warnings you don't recognise
+   from prior briefings.
+6. **Open your inbox** (workspace tile) — pending co-sign
+   requests should be cleared first.
+7. **Open the Monitoring agent workspace** (`g w`, `m`). Read
+   the top three recommendations.
+8. **Verbal handover** with the outgoing IC (face-to-face if
+   possible; phone otherwise). Confirm in-flight decisions
+   and outstanding co-signs.
 
-## 3. Decision rights & boundaries
+## 3. Your typical shift arc
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Incident Commander** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+The IC's day is shaped by the operating tempo. In quiet
+periods, you are reviewing posture and preparing. In active
+events, you are co-signing under time pressure.
 
-## 4. Working with the Help Assistant
+- **Quiet** — calibration health, exercise design, mutual-aid
+  agreement freshness, persona claim audits, evidence-pack
+  reviews from prior incidents.
+- **Watch and act** — increased monitoring queue depth, more
+  Risk Manager promotions to consider, more co-sign requests
+  arriving. Pace settles into reading-and-deciding.
+- **Emergency warning** — co-sign chain dominates your time.
+  Expect interruptions every few minutes. Plan for
+  hot-debrief moments to maintain situational awareness.
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+## 4. Co-signing well
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Incident Commander?"
+Co-signing is the IC's largest single workload during active
+events. Doctrine for co-signing well:
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+- **Read the originating evidence.** Don't co-sign on faith;
+  the audit trail records you as a peer of the originating
+  persona, and reviewers will look at what you saw.
+- **Verify the negative-evidence acknowledgements**. The
+  originating persona has clicked through; you should have a
+  view on whether their click-throughs were considered.
+- **Check the snapshot in force**. The doctrinal interpretation
+  is bound to the snapshot; mid-action snapshot publications
+  invalidate drafts.
+- **Prefer hand-off to delay**. If you're unable to give a
+  decision proper attention, hand off to a peer IC or
+  escalate to NEMA — don't sit on it.
 
-## 5. Where to next
+## 5. Cross-jurisdictional decisions
 
-- Browse all articles tagged `incident-commander` via the [search page](/help/search?q=incident-commander).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+Cross-jurisdictional effects (warnings whose envelope spans
+borders, resource transfers across borders, evacuations
+across borders) trigger the NEMA acknowledgement workflow.
+See [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+for the full playbook. Your two choices:
+
+- **Notify NEMA and proceed** — the action commits with the
+  Commonwealth notified asynchronously. Use for actions whose
+  doctrinal authority clearly rests in your jurisdiction
+  (e.g., a state-level evacuation that incidentally crosses a
+  border).
+- **Hand off to NEMA** — the action queues for a Commonwealth
+  controller. Use for actions whose character is genuinely
+  federal (e.g., a multi-state resource coordination).
+
+The choice is doctrinal; both are audit-logged.
+
+## 6. Refusals and exceptions
+
+You will refuse actions. Each refusal is a constitutional
+artefact:
+
+- The originating persona is told *why* you refused.
+- The remediation (hand off, gather more evidence, defer) is
+  named.
+- The audit row records actor, action, originating evidence,
+  refusal reason.
+
+Refuse decisively when the evidence doesn't support the
+action; refuse compassionately when the originating persona
+is over-reaching from genuine concern. Both refusals deserve
+a verbal follow-up.
+
+For doctrinal exceptions — situations the doctrine doesn't
+contemplate — escalate to the constitutional steward. The
+steward records an *exception ledger* entry visible to all
+stewards and tenants; the precedent feeds back into doctrinal
+review.
+
+## 7. The chat assistant
+
+The Help Assistant is grounded against this corpus. As IC,
+common prompts:
+- *"What does the amber co-sign chain look like for a PIO
+  alert publication?"*
+- *"What is the NEMA acknowledgement window for a
+  cross-border resource transfer?"*
+- *"What's the audit DLQ remediation playbook?"*
+- *"What's the difference between *Notify and proceed* and
+  *Hand off to NEMA*?"*
+
+The assistant cites every claim. When the cited article is
+amber-confidence (rare for help corpus, but possible if
+freshly authored), the assistant prepends a *"verify with
+primary source"* caveat.
+
+The assistant does not see live operational data. For *"is
+the Khancoban substation up?"* — open the Disaster Map's
+infrastructure layer. For *"what is the IC playbook for an
+upstream substation outage during evacuation"* — ask the
+assistant.
+
+## 8. Common pitfalls
+
+### 8.1 Co-signing without reading
+The audit trail records you as a peer; reviewers will see
+what you co-signed and at what tempo. A burst of co-signs
+under one minute each invites scrutiny in the post-event
+review.
+
+### 8.2 Hand-off as deflection
+Hand-off is a doctrinal tool, not an avoidance tool. Don't
+hand off to NEMA to avoid making the call; hand off when the
+action's character is genuinely federal.
+
+### 8.3 Persona mixing
+You may hold multiple persona claims (IC + Operations
+Officer is common). Don't switch personas mid-action; the
+draft is bound to the originating persona and the receiving
+persona has its own envelope.
+
+### 8.4 Skipping the Governance Dashboard
+The dashboard is your constitutional posture. A red gate that
+you didn't see at shift start can blindside you mid-event.
+
+### 8.5 Calibration drift blindness
+Stale calibration silently downgrades every confidence band.
+If you don't watch calibration, you act on artefacts whose
+band you trust at face value but whose actual hit rate has
+drifted.
+
+## 9. The Help corpus you'll use most
+
+- [`screen-by-screen/disaster-mapper`](/help/articles/screen-by-screen/disaster-mapper)
+- [`screen-by-screen/alert-composer`](/help/articles/screen-by-screen/alert-composer)
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+- [`screen-by-screen/audit-observer-view`](/help/articles/screen-by-screen/audit-observer-view)
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+- [`audit-observer-mode`](/help/articles/audit-observer-mode)
+- [`troubleshooting`](/help/articles/troubleshooting)
+- [`constitution-principle-v`](/help/articles/constitution-principle-v)
+
+## 10. Where to next
+
+- Take the **First Fifteen Minutes Tour** from the landing
+  page if you haven't.
+- Browse all articles tagged `incident-commander` via the
+  search page.
+- Open an exercise (`g s`) and run a tabletop solo to
+  rehearse co-signing chains under warp.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the IC working group and AFAC AIIMS-2017 Doctrine._

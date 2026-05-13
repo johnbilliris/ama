@@ -1,30 +1,186 @@
 ---
 slug: playbooks/agent-monitoring
-title: "Agent Playbook — Monitoring"
-kind: playbook
+title: "Playbook: working with the monitoring agent"
 status: Active
 classification: OFFICIAL
+audience: incident-commander, operations-officer, planning-officer, observer-auditor, risk-manager
+estimated_reading_time: 9 min
 ---
 
-# Agent Playbook — Monitoring
+# Playbook: working with the monitoring agent
 
-## 1. Overview
-sensor fusion, signal triage, anomaly review
+This playbook is the operator's companion to the
+[Monitoring agent workspace](/help/articles/screen-by-screen/agent-monitoring).
+It covers how to triage a busy queue, when to acknowledge vs
+escalate vs dismiss, how to read the reasoning trace, and how
+the agent should and should not influence your situational
+awareness.
 
-## 2. Pre-flight
-- Confirm persona + jurisdiction
-- Verify the active snapshot id
+The monitoring agent is the **first responder to data** in the
+Hub. It is reading every signal feed continuously; you are not.
+Your job is to verify the agent's interpretation against your
+operational judgement, not to replace it.
 
-## 3. Workflow
-1. Open the relevant workspace
-2. Review agent recommendation with provenance + citations
-3. Approve / amend with audit trail entry
-4. Hand off to next persona
+## 1. The first sixty seconds on shift
 
-## 4. Edge cases
-- Degraded mode: fall back to cached doctrine
-- Cross-jurisdiction: escalate via the Commonwealth persona
+When you take a shift, your first sixty seconds in the
+monitoring workspace should be:
 
-## 5. References
-- AIDR Handbook
-- AIIMS doctrine
+1. Glance the *Last ingestion* timestamp. If > 2 minutes stale,
+   raise the feed health concern in the workspace's *Feed
+   health* drill-in.
+2. Glance the recommendation queue depth. If > 20, you are
+   inheriting a triage backlog; plan accordingly.
+3. Sort the queue by *recency × severity × confidence* (the
+   default).
+4. Read the top three recommendations end-to-end including the
+   reasoning trace. Form a baseline mental model of what the
+   agent currently believes.
+5. Move to the operating picture and verify with two or three
+   independent signal sources (the agent's drivers plus one
+   you choose at random).
+
+If the agent's mental model and your forming-up mental model
+disagree at this point, *don't act on the agent yet*. Build
+your own understanding first.
+
+## 2. Triaging the queue
+
+For each recommendation:
+
+- Read the **subject artefact**. If you don't know the
+  geography, look at the operating picture.
+- Read the **reasoning trace**. Pay attention to the cited
+  signals' confidence bands. Amber drivers in a green
+  recommendation deserve a second look.
+- Decide:
+  - **Acknowledge** if the recommendation is sound but no
+    immediate action is needed (the agent is asking you to
+    *watch* something).
+  - **Escalate** if the recommendation needs another persona's
+    envelope to action (e.g., a *prepare-evacuation*
+    recommendation needs Field Coordinator attention; an
+    *escalate-to-risk* needs Risk Manager).
+  - **Dismiss** if the recommendation is unsound *and you can
+    articulate why*. Always provide rationale; the rationale
+    trains the agent's relevance model and the audit trail
+    captures it.
+
+Do **not** sit on recommendations indefinitely. An
+unacknowledged amber recommendation aged > 30 minutes is a
+small audit-row red flag; > 2 hours is a larger one.
+
+## 3. When the agent disagrees with you
+
+The agent and the operator will disagree often. Doctrine:
+
+- The agent is reading *more data faster* than you can. Trust
+  it on volume.
+- You are reading *context the agent does not have* (an old-
+  timer's anecdote about the prevailing wind on Sunday
+  afternoons in this valley; a known anomaly in the BoM
+  station at this site). Trust yourself on context.
+- When you disagree, **dismiss with rationale**. The rationale
+  goes into the agent's training signal; over time the agent
+  learns the contextual exceptions.
+- If you find yourself dismissing the same kind of
+  recommendation repeatedly, raise it with Risk Manager —
+  systematic disagreement may indicate a calibration drift.
+
+## 4. When the agent is silent
+
+The absence of a recommendation is itself information. If you
+expect the agent to be flagging something (e.g., the BoM
+forecast you read this morning predicted Severe fire weather)
+and the agent's queue is empty, two possibilities:
+
+- The agent's interpretation is correct and your prior
+  expectation was overly cautious.
+- The agent has missed something — feed offline, signal
+  upstream gap, model failure mode.
+
+Distinguish via the operating picture: open the relevant
+hazard layer, look at the underlying signals. If the signals
+show the situation but the agent isn't recommending, raise
+with Risk Manager.
+
+## 5. Cross-jurisdictional triage
+
+Monitoring agent recommendations are scoped to your active
+jurisdiction filter (see
+[`screen-by-screen/multi-jurisdiction-filter`](/help/articles/screen-by-screen/multi-jurisdiction-filter)).
+For cross-border situational awareness:
+
+- Widen your filter to include adjacent jurisdictions for the
+  shift if doctrinally allowed (your IdP claim must include
+  them).
+- Watch for cross-border markers on recommendations
+  (the cross-border ribbon on the subject artefact).
+- For genuine cross-border events, expect the
+  Incident Commander or Operations Officer to coordinate via
+  the cross-sector chat in addition to the Hub.
+
+## 6. Calibration health awareness
+
+Check the calibration timestamp at shift start (Governance
+Dashboard's calibration panel, or the agent workspace's header
+if exposed). If calibration is > 50 days old (approaching the
+60-day floor), expect more amber recommendations and
+co-sign-required actions; plan accordingly. If > 60 days,
+raise with Risk Manager.
+
+## 7. The agent in degraded states
+
+If the agent is *Paused*: existing recommendations remain;
+no new emissions. Operating picture continues to update from
+feeds; you are still responsible for situational awareness.
+Pause is usually an Operations Officer choice during
+controlled testing or when a known model defect is being
+patched.
+
+If the agent is *Failed*: existing recommendations remain;
+no new emissions; the *Last ingestion* may still be recent
+(monitoring continues; only the recommendation engine has
+failed). Treat as a partial outage; coordinate with Risk
+Manager.
+
+## 8. Audit hygiene
+
+Every action you take in the workspace audit-logs. The audit
+trail captures *what* you did but not *why* unless you provide
+a rationale. Best practice:
+- *Dismiss* always with rationale.
+- *Acknowledge* with rationale when the recommendation is
+  on something you've decided to monitor under your own
+  attention rather than escalating to another persona.
+- *Escalate* with rationale when the receiving persona may
+  not understand why the escalation arrived (e.g., novel
+  cross-sector escalation).
+
+## 9. Handover
+
+At end of shift:
+- Acknowledge or dismiss any aged recommendations rather than
+  leaving them as inheritance.
+- Brief the incoming operator verbally (out-of-Hub) on:
+  - The current operating-picture posture.
+  - Any agent recommendations you've been actively watching.
+  - Any agent-disagreement you've noted.
+- Optionally export an evidence pack of the shift's audit rows
+  for your own records.
+
+## 10. Related
+
+- [`screen-by-screen/agent-monitoring`](/help/articles/screen-by-screen/agent-monitoring)
+  — the surface reference.
+- [`screen-by-screen/agent-risk-assessment`](/help/articles/screen-by-screen/agent-risk-assessment)
+  — the natural escalation target.
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+  — for confidence-band doctrine.
+- [`audit-observer-mode`](/help/articles/audit-observer-mode) —
+  for the audit-trail data model.
+
+---
+
+_Maintained by the AMA Help content team in partnership with
+the agents and operations working groups._

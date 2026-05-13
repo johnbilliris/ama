@@ -207,15 +207,26 @@ class LLMClient:
             raise RuntimeError("Azure OpenAI client is not configured")
 
         elapsed_ms = round((time.perf_counter() - start) * 1000, 2)
-        usage = getattr(response, "usage", None)
-        choices = getattr(response, "choices", []) or []
-        content = ""
-        if choices:
-            message = getattr(choices[0], "message", None)
-            content = getattr(message, "content", "") if message is not None else ""
 
-        input_tokens = int(getattr(usage, "prompt_tokens", 0) or 0)
-        output_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
+        # Extract text + usage. The Foundry seam returns a frozen
+        # ``FoundryResponse`` dataclass (``.text``,
+        # ``.usage_prompt_tokens`` / ``.usage_completion_tokens``); the
+        # legacy Azure-OpenAI SDK returns a ``ChatCompletion`` (``.choices``
+        # + ``.usage``). Handle both shapes so this method stays usable
+        # whichever path produced the ``response``.
+        if hasattr(response, "text") and not hasattr(response, "choices"):
+            content = getattr(response, "text", "") or ""
+            input_tokens = int(getattr(response, "usage_prompt_tokens", 0) or 0)
+            output_tokens = int(getattr(response, "usage_completion_tokens", 0) or 0)
+        else:
+            usage = getattr(response, "usage", None)
+            choices = getattr(response, "choices", []) or []
+            content = ""
+            if choices:
+                message = getattr(choices[0], "message", None)
+                content = getattr(message, "content", "") if message is not None else ""
+            input_tokens = int(getattr(usage, "prompt_tokens", 0) or 0)
+            output_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
 
         logger.info(
             "llm_call correlation_id=%s deployment_id=%s latency_ms=%s input_tokens=%s output_tokens=%s",

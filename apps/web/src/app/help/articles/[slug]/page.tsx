@@ -13,7 +13,7 @@ interface Article {
 
 async function fetchArticle(slug: string): Promise<Article | null> {
   try {
-    const r = await fetch(`${process.env.NEXT_PUBLIC_API_BASE ?? ""}/api/v1/help/articles/${encodeURIComponent(slug)}`, {
+    const r = await fetch(`${process.env.NEXT_PUBLIC_API_BASE ?? ""}/api/help/articles/${encodeURIComponent(slug)}`, {
       cache: "no-store",
     });
     if (!r.ok) return null;

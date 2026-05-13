@@ -1,69 +1,54 @@
-<mxfile host="app.diagrams.net" modified="2026-05-11T00:00:00.000Z" agent="spec-001-fallback" version="24.0.0">
+<mxfile host="Electron" agent="spec-001-fallback">
   <diagram name="BUILD-01" id="build01-fallback">
-    <mxGraphModel dx="1214" dy="686" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1158" dy="871" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
-      <mxCell id="0"/>
-      <mxCell id="1" parent="0"/>
-      <!-- Agent Runtime Container boundary -->
-      <mxCell id="2" value="Agent Runtime Container" style="swimlane;startSize=30;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" vertex="1" parent="1">
-        <mxGeometry x="20" y="80" width="250" height="560" as="geometry"/>
-      </mxCell>
-      <!-- 5 named agents inside runtime -->
-      <mxCell id="3" value="communication-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="2">
-        <mxGeometry x="20" y="50" width="200" height="40" as="geometry"/>
-      </mxCell>
-      <mxCell id="4" value="evacuation-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="2">
-        <mxGeometry x="20" y="110" width="200" height="40" as="geometry"/>
-      </mxCell>
-      <mxCell id="5" value="monitoring-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="2">
-        <mxGeometry x="20" y="170" width="200" height="40" as="geometry"/>
-      </mxCell>
-      <mxCell id="6" value="resource-allocation-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="2">
-        <mxGeometry x="20" y="230" width="200" height="40" as="geometry"/>
-      </mxCell>
-      <mxCell id="7" value="risk-assessment-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="2">
-        <mxGeometry x="20" y="290" width="200" height="40" as="geometry"/>
-      </mxCell>
-      <!-- LLM Client -->
-      <mxCell id="8" value="LLM Client&#xa;(Prompt Construction)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
-        <mxGeometry x="330" y="270" width="160" height="70" as="geometry"/>
-      </mxCell>
-      <!-- Model Gateway boundary -->
-      <mxCell id="9" value="Model Gateway" style="swimlane;startSize=30;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="1">
-        <mxGeometry x="570" y="180" width="200" height="250" as="geometry"/>
-      </mxCell>
-      <!-- Inside Model Gateway -->
-      <mxCell id="10" value="Redaction Enforcement" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="9">
-        <mxGeometry x="20" y="50" width="160" height="40" as="geometry"/>
-      </mxCell>
-      <mxCell id="11" value="Rate Limiter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="9">
-        <mxGeometry x="20" y="110" width="160" height="40" as="geometry"/>
-      </mxCell>
-      <mxCell id="12" value="Circuit Breaker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="9">
-        <mxGeometry x="20" y="170" width="160" height="40" as="geometry"/>
-      </mxCell>
-      <!-- Foundry Endpoint -->
-      <mxCell id="13" value="Foundry Endpoint&#xa;(Azure AI / OpenAI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
-        <mxGeometry x="860" y="270" width="170" height="70" as="geometry"/>
-      </mxCell>
-      <!-- Human-in-the-Loop callout (yellow) -->
-      <mxCell id="14" value="👤 Human-in-the-Loop&#xa;Approve Recommendation&#xa;(FR-009)" style="shape=callout;whiteSpace=wrap;html=1;fillColor=#ffff88;strokeColor=#36393d;fontSize=10;perimeter=calloutPerimeter;" vertex="1" parent="1">
-        <mxGeometry x="570" y="490" width="200" height="80" as="geometry"/>
-      </mxCell>
-      <!-- FR-014 label -->
-      <mxCell id="15" value="FR-014" style="text;html=1;strokeColor=none;fillColor=#fff2cc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
-        <mxGeometry x="550" y="620" width="80" height="30" as="geometry"/>
-      </mxCell>
-      <!-- Flow arrows -->
-      <mxCell id="16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="2" target="8">
-        <mxGeometry relative="1" as="geometry"/>
-      </mxCell>
-      <mxCell id="17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="8" target="9">
-        <mxGeometry relative="1" as="geometry"/>
-      </mxCell>
-      <mxCell id="18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="9" target="13">
-        <mxGeometry relative="1" as="geometry"/>
-      </mxCell>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" style="swimlane;startSize=30;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;" value="Agent Runtime Container" vertex="1">
+          <mxGeometry height="360" width="250" x="20" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="communication-agent" vertex="1">
+          <mxGeometry height="40" width="200" x="20" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="evacuation-agent" vertex="1">
+          <mxGeometry height="40" width="200" x="20" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="monitoring-agent" vertex="1">
+          <mxGeometry height="40" width="200" x="20" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="resource-allocation-agent" vertex="1">
+          <mxGeometry height="40" width="200" x="20" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" value="risk-assessment-agent" vertex="1">
+          <mxGeometry height="40" width="200" x="20" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" value="LLM Client&#xa;(Prompt Construction)" vertex="1">
+          <mxGeometry height="70" width="160" x="330" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="1" style="swimlane;startSize=30;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" value="Model Gateway" vertex="1">
+          <mxGeometry height="250" width="200" x="570" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="9" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="Redaction Enforcement" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="9" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Rate Limiter" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="9" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Circuit Breaker" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" value="Foundry Endpoint&#xa;(Azure AI / OpenAI)" vertex="1">
+          <mxGeometry height="70" width="170" x="860" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="16" edge="1" parent="1" source="2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#FFFFFF;" target="8" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="17" edge="1" parent="1" source="8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#FFFFFF;" target="9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="18" edge="1" parent="1" source="9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#FFFFFF;" target="13" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>

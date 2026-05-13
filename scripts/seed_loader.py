@@ -23,6 +23,7 @@ import hashlib
 import json
 import os
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 # Spec-039 (T032): make `packages.*` importable when this script is run as
@@ -121,6 +122,35 @@ CATALOGUE_DOMAIN_FILES = [
     "economic.json",
     "built.json",
     "natural.json",
+]
+
+# Spec-038 — Help corpus seeding. The 45 MDX articles under
+# ``apps/web/src/content/help/`` are the doctrinal source of truth for the
+# Help-Centre UI and the grounded chat assistant. They are upserted into the
+# ``help_articles`` Cosmos container (PK ``/tenant_id``) on every azd
+# postprovision so a freshly-provisioned environment serves the same
+# corpus as production. Body markdown is included in the row so the API's
+# ``GET /help/articles/{slug}`` endpoint can serve it directly without
+# resolving ``body_uri`` against a separate blob store.
+HELP_CONTENT_ROOT = _REPO_ROOT / "apps" / "web" / "src" / "content" / "help"
+HELP_ARTICLES_CONTAINER = "help_articles"
+HELP_DEFAULT_TENANT = "__global__"
+_HELP_KIND_BY_PREFIX: list[tuple[str, str]] = [
+    ("articles/playbooks/", "playbook"),
+    ("articles/screen-by-screen/", "article"),
+    ("personas/", "persona"),
+    ("articles/", "article"),
+]
+_HELP_DOMAIN_BY_PREFIX: list[tuple[str, str]] = [
+    ("articles/playbooks/", "agent-playbook"),
+    ("articles/screen-by-screen/", "screen-by-screen"),
+    ("articles/troubleshooting", "troubleshooting"),
+    ("articles/accessibility", "accessibility"),
+    ("articles/audit-observer-mode", "audit-observer"),
+    ("articles/observer-mode-guide", "audit-observer"),
+    ("articles/getting-started", "getting-started"),
+    ("articles/", "getting-started"),
+    ("personas/", "persona-workflow"),
 ]
 
 
@@ -376,6 +406,144 @@ def seed_coordination_tasks(endpoint: str, database: str, records: list[dict]) -
         )
 
 
+# ─────────────────────────────────────────────────────────────────────────
+# Spec-038 — Help corpus (MDX → help_articles Cosmos container).
+# ─────────────────────────────────────────────────────────────────────────
+
+
+def _parse_help_frontmatter(body: str) -> tuple[dict, str]:
+    """Return ``(meta, body_without_frontmatter)`` for an MDX file."""
+    if not body.startswith("---"):
+        return {}, body
+    end = body.find("\n---", 3)
+    if end < 0:
+        return {}, body
+    try:
+        import yaml  # imported lazily; PyYAML is in the postprovision deps
+    except ImportError:
+        return {}, body
+    try:
+        meta = yaml.safe_load(body[3:end]) or {}
+    except yaml.YAMLError:
+        meta = {}
+    rest = body[end + 4 :].lstrip("\n")
+    return meta if isinstance(meta, dict) else {}, rest
+
+
+def _classify_help(rel_path: str, table: list[tuple[str, str]], default: str) -> str:
+    for prefix, value in table:
+        if rel_path.startswith(prefix):
+            return value
+    return default
+
+
+def _build_help_article_row(*, abs_path: Path, content_root: Path, snapshot_id: str) -> dict:
+    """Build one ``help_articles`` Cosmos row from an MDX file."""
+    body_raw = abs_path.read_text(encoding="utf-8")
+    meta, body_md = _parse_help_frontmatter(body_raw)
+    rel = abs_path.relative_to(content_root).as_posix()
+    repo_rel = f"apps/web/src/content/help/{rel}"
+
+    slug = (meta.get("slug") or rel.removesuffix(".mdx").removeprefix("articles/")).strip()
+    title = meta.get("title") or abs_path.stem
+    classification = meta.get("classification", "OFFICIAL")
+
+    persona_tags: list[str] = []
+    if meta.get("persona"):
+        persona_tags.append(meta["persona"])
+    if isinstance(meta.get("personas"), list):
+        persona_tags.extend(meta["personas"])
+    if isinstance(meta.get("audience"), list):
+        persona_tags.extend(meta["audience"])
+    elif isinstance(meta.get("audience"), str):
+        persona_tags.extend([a.strip() for a in meta["audience"].split(",") if a.strip()])
+    persona_tags = sorted(set(persona_tags))
+
+    surface_tags = [meta["surface_id"]] if meta.get("surface_id") else []
+    sector_tags = [meta["sector"]] if meta.get("sector") else []
+
+    kind = _classify_help(rel, _HELP_KIND_BY_PREFIX, default="article")
+    domain = _classify_help(rel, _HELP_DOMAIN_BY_PREFIX, default="getting-started")
+
+    now_iso = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    body_hash = hashlib.sha256(body_md.encode("utf-8")).hexdigest()[:16]
+    article_id = slug.replace("/", "__")
+
+    return {
+        "id": article_id,
+        "tenant_id": HELP_DEFAULT_TENANT,
+        "slug": slug,
+        "title": title,
+        "kind": kind,
+        "domain": domain,
+        "persona_tags": persona_tags,
+        "sector_tags": sector_tags,
+        "surface_tags": surface_tags,
+        "jurisdiction_tags": [],
+        "body_uri": repo_rel,
+        # Body markdown is upserted verbatim so the API can serve it
+        # without a separate blob fetch. The HelpArticle pydantic model
+        # forbids extras but the API route serialises the dict directly.
+        "body_md": body_md,
+        "screenshot_ids": [],
+        "snapshot_id": snapshot_id,
+        "version": 1,
+        "status": "published",
+        "staleness_flag_id": None,
+        "last_reviewed_at": now_iso,
+        "created_at": now_iso,
+        "updated_at": now_iso,
+        "etag": body_hash,
+        "glossary_term_links": [],
+        "classification": classification,
+    }
+
+
+def load_help_articles(content_root: Path | None = None, snapshot_id: str | None = None) -> list[dict]:
+    """Walk ``content_root`` for ``*.mdx`` and build one ``help_articles`` row per file."""
+    root = (content_root or HELP_CONTENT_ROOT).resolve()
+    if not root.exists():
+        print(f"  WARNING: help content root not found at {root}")
+        return []
+    snap = snapshot_id or f"snap-{datetime.now(UTC):%Y%m%dT%H%M%SZ}"
+    files = sorted(p for p in root.rglob("*.mdx") if p.is_file())
+    rows = [_build_help_article_row(abs_path=f, content_root=root, snapshot_id=snap) for f in files]
+    print(f"  Loaded {len(rows):>4} help_articles from {root.relative_to(_REPO_ROOT)}")
+    return rows
+
+
+def seed_help_articles(endpoint: str, database: str, records: list[dict]) -> None:
+    """Upsert help-corpus rows into the ``help_articles`` Cosmos container.
+
+    Partition key is ``/tenant_id`` (mirrors
+    ``infra/bicep/modules/cosmos-help-containers.bicep``); every row uses
+    ``__global__`` unless the MDX front-matter declares a per-tenant scope.
+    """
+    if not records:
+        return
+    print(f"\n  Connecting to Cosmos DB for help_articles: {endpoint}")
+    client = _build_cosmos_client(endpoint)
+    db = client.get_database_client(database)
+    container = db.get_container_client(HELP_ARTICLES_CONTAINER)
+
+    upserted = 0
+    failed = 0
+    for record in records:
+        try:
+            container.upsert_item(record)
+            upserted += 1
+        except Exception as exc:
+            failed += 1
+            print(f"    ERROR upserting help_articles/{record.get('slug', record.get('id'))}: {exc}")
+
+    print(f"  Seeded {upserted:>4} help_articles into {HELP_ARTICLES_CONTAINER}")
+    if failed:
+        raise RuntimeError(
+            f"Failed to upsert {failed} help_articles records into "
+            f"{HELP_ARTICLES_CONTAINER}"
+        )
+
+
 def _content_hash(record: dict) -> str:
     """Stable SHA-256 over the canonical JSON of the record (sorted keys)."""
     blob = json.dumps(record, sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -492,6 +660,9 @@ def main() -> None:
     print("\nLoading coordination tasks data...")
     coordination_tasks = load_coordination_tasks()
 
+    print("\nLoading help corpus (MDX -> help_articles)...")
+    help_articles = load_help_articles()
+
     if args.dry_run or (not args.cosmos_endpoint and not args.storage_account):
         print("\n  DRY RUN — seed data validated, no Azure writes")
         return
@@ -504,6 +675,8 @@ def main() -> None:
             seed_coordination_tasks(
                 args.cosmos_endpoint, args.cosmos_database, coordination_tasks
             )
+        if help_articles:
+            seed_help_articles(args.cosmos_endpoint, args.cosmos_database, help_articles)
         # Spec-039 T032/T034: load the new subdirectory catalogues with
         # marker / PSPF / PII enforcement and content-hash idempotency.
         client = _build_cosmos_client(args.cosmos_endpoint)

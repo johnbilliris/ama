@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -11,6 +11,7 @@ import {
   type SimulationDetail,
   type SimulationClockResponse,
 } from "@/lib/api/simulations";
+import { getPlaybackEvents, type PlaybackEvent } from "@/lib/api/simulation-playback";
 import { SimulationBanner } from "@/components/simulation-banner";
 import { SimulationChatPane } from "@/components/simulation-chat-pane";
 import { SimulationMap, type ScenarioCard } from "@/components/simulation-map";
@@ -32,6 +33,11 @@ const PPRR_COLOURS: Record<string, string> = {
   Recovery: "#22c55e",
 };
 
+// Refresh cadence for the right-hand Event Log when polling the
+// /playback/events endpoint. 8 s mirrors the existing clock poll cadence
+// without flooding Cosmos with reads.
+const EVENT_LOG_POLL_INTERVAL_MS = 8000;
+
 // ── Exercise objectives ──
 interface ExerciseObjective {
   id: string;
@@ -39,21 +45,113 @@ interface ExerciseObjective {
   done: boolean;
 }
 
+interface EventLogEntry {
+  /** Stable key — server `event_seq` (`server-<n>`) or local timestamp. */
+  id: string;
+  ts: string;
+  text: string;
+  /** True when sourced from the Cosmos `sim-events` container (durable). */
+  persisted: boolean;
+}
+
+/**
+ * Render a one-line, human-friendly summary of a SimulationEvent payload
+ * so the right-hand Event Log can replay activity originally produced by
+ * other operators (or by the same operator before a refresh).
+ */
+function describePlaybackEvent(ev: PlaybackEvent): string {
+  const p = ev.payload ?? {};
+  switch (ev.event_type) {
+    case "chat_turn_user": {
+      const preview = String(p.message_preview ?? "").trim();
+      return preview ? `Command issued: ${preview}` : "Command issued";
+    }
+    case "chat_turn_assistant":
+      return "Controller reply complete";
+    case "tool_invocation": {
+      const tool = String(p.tool_name ?? "tool");
+      return `Tool invoked: ${tool}`;
+    }
+    case "state_change": {
+      const to = String(p.to_status ?? "");
+      const from = String(p.from_status ?? "");
+      return `Simulation ${to.toLowerCase() || "state changed"}${from ? ` (was ${from})` : ""}`;
+    }
+    case "warp_speed_change": {
+      const speed = p.new_speed ?? p.warp_speed ?? p.speed;
+      return speed !== undefined ? `Warp speed changed to ${speed}×` : "Warp speed changed";
+    }
+    case "signal_delivered": {
+      const cat = String(p.category ?? "signal");
+      return `Signal delivered: ${cat}`;
+    }
+    case "annotation":
+      return `Annotation: ${String(p.text ?? "").slice(0, 80)}`;
+    default:
+      return ev.event_type.replaceAll("_", " ");
+  }
+}
+
 export default function SimulationDashboardPage() {
   const { tenantId } = useParams<{ tenantId: string }>();
   const [tenant, setTenant] = useState<SimulationDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [scenarioCard, setScenarioCard] = useState<ScenarioCard | null>(null);
-  const [eventLog, setEventLog] = useState<{ ts: string; text: string }[]>([]);
+  const [eventLog, setEventLog] = useState<EventLogEntry[]>([]);
   const [objectives, setObjectives] = useState<ExerciseObjective[]>([]);
   const [newObj, setNewObj] = useState("");
   const [eventLogOpen, setEventLogOpen] = useState(true);
   const [objectivesOpen, setObjectivesOpen] = useState(true);
   const [currentWarpSpeed, setCurrentWarpSpeed] = useState<number>(1);
+  // Highest persisted event_seq we've already merged. Lets the polling
+  // loop ask Cosmos only for new events rather than re-fetching the
+  // whole stream every tick.
+  const lastSeqRef = useRef<number>(0);
 
   const logEvent = useCallback((text: string) => {
-    setEventLog((prev) => [...prev, { ts: new Date().toISOString(), text }]);
+    setEventLog((prev) => [
+      ...prev,
+      { id: `local-${Date.now()}-${prev.length}`, ts: new Date().toISOString(), text, persisted: false },
+    ]);
   }, []);
+
+  const refreshPersistedEvents = useCallback(async () => {
+    if (!tenantId) return;
+    try {
+      const page = await getPlaybackEvents(tenantId, lastSeqRef.current, 200, true);
+      if (page.events.length === 0) return;
+      const newEntries: EventLogEntry[] = page.events.map((ev) => ({
+        id: `server-${ev.event_seq}`,
+        ts: ev.wall_clock_time,
+        text: describePlaybackEvent(ev),
+        persisted: true,
+      }));
+      lastSeqRef.current = Math.max(
+        lastSeqRef.current,
+        ...page.events.map((e) => e.event_seq),
+      );
+      setEventLog((prev) => {
+        const seenIds = new Set(newEntries.map((e) => e.id));
+        // Drop any server entries we already inserted (re-poll overlap)
+        // AND any optimistic local entries older than the newest server
+        // event — by then, anything that was going to be persisted will
+        // have shown up server-side, so a stale local twin is just noise.
+        const newestServerTs = newEntries[newEntries.length - 1]?.ts;
+        const pruned = prev.filter((e) => {
+          if (e.persisted && seenIds.has(e.id)) return false;
+          if (!e.persisted && newestServerTs && e.ts < newestServerTs) return false;
+          return true;
+        });
+        return [...pruned, ...newEntries].sort((a, b) =>
+          a.ts.localeCompare(b.ts),
+        );
+      });
+    } catch (err) {
+      // Failure to read events must never break the dashboard. Keep the
+      // local log alive so the operator can still see UI-side activity.
+      console.warn("event log refresh failed", err);
+    }
+  }, [tenantId]);
 
   useEffect(() => {
     if (!tenantId) return;
@@ -65,6 +163,22 @@ export default function SimulationDashboardPage() {
       })
       .catch((err) => setError(err.message));
   }, [tenantId, logEvent]);
+
+  // Hydrate the Event Log from Cosmos on mount, then poll for new events
+  // so commands issued from the chat pane (and lifecycle changes from any
+  // other tab/operator) appear without a manual refresh.
+  useEffect(() => {
+    if (!tenantId) return;
+    let cancelled = false;
+    void refreshPersistedEvents();
+    const id = setInterval(() => {
+      if (!cancelled) void refreshPersistedEvents();
+    }, EVENT_LOG_POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [tenantId, refreshPersistedEvents]);
 
   const onClockTick = useCallback(
     (c: SimulationClockResponse) => {
@@ -119,6 +233,7 @@ export default function SimulationDashboardPage() {
       clock_paused: true,
     });
     logEvent("Simulation paused");
+    setTimeout(() => void refreshPersistedEvents(), 1500);
   };
   const handleResume = async () => {
     const result = await resumeSimulation(tenant.tenant_id);
@@ -130,6 +245,7 @@ export default function SimulationDashboardPage() {
       clock_paused: false,
     });
     logEvent("Simulation resumed");
+    setTimeout(() => void refreshPersistedEvents(), 1500);
   };
   const handleStop = async () => {
     if (!window.confirm("Stop this simulation? This is terminal.")) return;
@@ -140,6 +256,7 @@ export default function SimulationDashboardPage() {
       elapsed_seconds: result.elapsed_seconds,
     });
     logEvent("Simulation stopped (archiving)");
+    setTimeout(() => void refreshPersistedEvents(), 1500);
   };
 
   const addObjective = () => {
@@ -195,6 +312,7 @@ export default function SimulationDashboardPage() {
                 onChanged={(speed) => {
                   setCurrentWarpSpeed(speed);
                   logEvent(`Warp speed changed to ${speed}×`);
+                  setTimeout(() => void refreshPersistedEvents(), 1500);
                 }}
               />
 
@@ -345,12 +463,21 @@ export default function SimulationDashboardPage() {
                     <p className="sim-panel-empty">No events yet.</p>
                   ) : (
                     <ul className="sim-event-list">
-                      {eventLog.map((ev, i) => (
-                        <li key={i}>
+                      {eventLog.map((ev) => (
+                        <li key={ev.id}>
                           <span className="sim-event-ts">
                             {new Date(ev.ts).toLocaleTimeString()}
                           </span>
                           <span className="sim-event-text">{ev.text}</span>
+                          {!ev.persisted && (
+                            <span
+                              className="sim-event-pending"
+                              title="Local event — not yet stored in Cosmos"
+                              aria-label="local only"
+                            >
+                              ·
+                            </span>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -453,8 +580,24 @@ export default function SimulationDashboardPage() {
                 onScenarioCard={(card) => {
                   setScenarioCard(card as ScenarioCard);
                   logEvent(`Scenario seeded: ${(card as ScenarioCard).hazard ?? "scenario"}`);
+                  // Server records `signal_delivered` events when the
+                  // scenario seeds — pull them in so the Event Log shows
+                  // the seed activity, not just our optimistic line.
+                  setTimeout(() => {
+                    void refreshPersistedEvents();
+                  }, 1500);
                 }}
-                onEvent={logEvent}
+                onEvent={(text) => {
+                  logEvent(text);
+                  // Each user prompt and assistant reply is now persisted
+                  // server-side as chat_turn_user / chat_turn_assistant /
+                  // tool_invocation events. Refetch shortly after the
+                  // event fires so the durable rows replace our optimistic
+                  // local entries (which are then deduped by event id).
+                  setTimeout(() => {
+                    void refreshPersistedEvents();
+                  }, 1500);
+                }}
               />
             </div>
           </section>

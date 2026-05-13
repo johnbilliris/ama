@@ -5,10 +5,13 @@ from __future__ import annotations
 import logging
 from collections.abc import AsyncIterator
 
+import httpx
 from app.api.dependencies.rbac import require_simulation_role
+from app.api.routes.simulations import _clock, _recorder, _repo
 from app.core.auth import extract_principal_from_claims
 from app.core.tenant_context import TenantContext, set_current_tenant
 from app.services.simulation.controller_service import SimulationControllerService
+from app.services.simulation.sub_agent_invoker import production_invoker
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -17,7 +20,34 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/simulations", tags=["simulation", "chat"])
 
-_controller = SimulationControllerService()
+# Long-lived httpx client shared across all sub-agent calls. Created once
+# at module import; the underlying connection pool survives the lifetime
+# of the FastAPI process. Read timeout sits just above the SubAgentInvoker
+# hard timeout (120 s) so the wrapper times out first and writes the
+# canonical ``sub_agent.timeout`` audit row.
+_sub_agent_http_client = httpx.AsyncClient(
+    timeout=httpx.Timeout(connect=5.0, read=125.0, write=5.0, pool=5.0),
+)
+
+# Wire the production sub-agent invoker into the Controller. Without this
+# the constructor falls back to ``default_invoker()`` (empty registry),
+# which causes every ``query_sub_agent`` tool call to return
+# ``Unknown sub-agent '<role>'`` and the chat model to apologise that the
+# sub-agent "is not available in this simulation".
+#
+# We also share the SimulationEventRecorder + clock + simulation repo
+# singletons defined in :mod:`app.api.routes.simulations` so each chat
+# turn (user prompt, assistant reply, tool invocation) is mirrored into
+# the ``sim-events`` Cosmos container alongside lifecycle events. Without
+# this wiring ``_maybe_record_chat_turn`` early-returns and the right-hand
+# Event Log on the simulation dashboard never sees chat-issued commands
+# (SITREP/Risk/Deploy/Alert/Escalate) after a refresh.
+_controller = SimulationControllerService(
+    sub_agents=production_invoker(_sub_agent_http_client),
+    event_recorder=_recorder,
+    clock_service=_clock,
+    simulation_repository=_repo,
+)
 
 
 class ChatRequest(BaseModel):

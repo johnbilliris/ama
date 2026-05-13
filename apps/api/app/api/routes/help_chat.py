@@ -124,6 +124,7 @@ async def chat_ask(
     # ChatTurn objects through the production code path).
     from apps.agents.help_assistant.agent import (
         HelpChatTurnInput,
+        run_chat_turn_cosmos_grounded,
         run_chat_turn_offline,
     )
 
@@ -152,14 +153,18 @@ async def chat_ask(
         )
 
         # When live Foundry is wired, swap in run_chat_turn(turn_input). Until
-        # then, run_chat_turn_offline with no fake_chunks emits a real refusal
-        # (no_corpus_match) — never fabricated citations.
+        # then the Cosmos-grounded retrieval path returns top-K matched articles
+        # with cited extracts, so quick-actions and persona prompts produce
+        # quality answers from the published help corpus without an LLM.
         if _FOUNDRY_LIVE:
             from apps.agents.help_assistant.agent import run_chat_turn
 
             event_iter = run_chat_turn(turn_input)
         else:
-            event_iter = run_chat_turn_offline(turn_input, fake_chunks=None, fake_answer="")
+            event_iter = run_chat_turn_cosmos_grounded(
+                turn_input,
+                list_articles=repos.list_articles,
+            )
 
         last_audit_id: str | None = None
         async for event in event_iter:
@@ -171,7 +176,9 @@ async def chat_ask(
         # Persist audit entry produced by the agent (single source of truth).
         from app.repositories.help_repositories import append_chat_audit_entry as _append_audit
 
-        audit_entry = getattr(run_chat_turn_offline, "last_audit_entry", None)
+        audit_entry = getattr(run_chat_turn_cosmos_grounded, "last_audit_entry", None) or getattr(
+            run_chat_turn_offline, "last_audit_entry", None
+        )
         audit_entry_id: str | None = last_audit_id
         full_audit_payload: dict = {
             "tenant_id": caller.tenant_id,

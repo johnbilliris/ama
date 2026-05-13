@@ -10,7 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
   "pydantic>=2.10.0",
   "azure-identity>=1.19.0",
-  "azure-monitor-opentelemetry>=1.6.0",
+  "azure-monitor-opentelemetry==1.8.7",
   "openai>=1.68.0",
   "tenacity>=9.0.0",
   "azure-cosmos>=4.9.0",
@@ -39,9 +39,14 @@ dependencies = [
   "presidio-analyzer>=2.2.355",             # PII redaction at the model gateway (FR-RAG-CV-03).
   "presidio-anonymizer>=2.2.355",           # PSPF redaction transform (FR-RAG-CV-03).
   # Spec 036 / F-A11 / T233 — OTel observability (FR-RAG-OBS-01..03).
-  "opentelemetry-sdk>=1.27,<2",
-  "opentelemetry-exporter-otlp-proto-http>=1.27,<2",
+  # Upper-bounded to <1.41 because azure-monitor-opentelemetry-exporter (transitive
+  # via azure-monitor-opentelemetry==1.8.7 above) imports `LogData` which was
+  # removed in opentelemetry-sdk 1.41.0. Without the cap pip resolves
+  # azure-monitor-opentelemetry==1.8.2 + exporter b45 + sdk 1.41 → ImportError at
+  # startup (ca-agents-ama crash 2026-05-12 azd-deploy-1778546871).
+  "opentelemetry-sdk>=1.27,<1.41",
+  "opentelemetry-exporter-otlp-proto-http>=1.27,<1.41",
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["common", "monitoring", "risk_assessment", "evacuation", "resource_allocation", "communication", "maf_runtime"]
+packages = ["common", "dispatcher", "monitoring", "risk_assessment", "evacuation", "resource_allocation", "communication", "maf_runtime"]

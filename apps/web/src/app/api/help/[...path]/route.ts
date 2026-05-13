@@ -43,6 +43,18 @@ async function proxy(req: NextRequest, path: string[] | undefined) {
     headers[k] = v;
   }
 
+  // The help routes expect tenant/user identity headers (FR-019 tenant
+  // isolation). When the browser is unauthenticated (dev / preview) the
+  // upstream API still rejects with 401 because help_deps.get_caller
+  // requires them. Inject sensible non-privileged defaults so the help
+  // surface is usable; production EasyAuth/Entra middleware will overwrite
+  // these with real identity headers before they reach this proxy.
+  const lowerKeys = new Set(Object.keys(headers).map((k) => k.toLowerCase()));
+  if (!lowerKeys.has("x-tenant-id")) headers["X-Tenant-Id"] = "live";
+  if (!lowerKeys.has("x-user-id")) headers["X-User-Id"] = "anonymous";
+  if (!lowerKeys.has("x-persona-id")) headers["X-Persona-Id"] = "operational-default";
+  if (!lowerKeys.has("x-persona-source")) headers["X-Persona-Source"] = "idp_default";
+
   const init: RequestInit & { duplex?: "half" } = {
     method: req.method,
     headers,

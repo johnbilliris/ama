@@ -3,28 +3,307 @@ slug: screen-by-screen/governance-dashboard
 title: "Screen: Governance Dashboard"
 status: Active
 classification: OFFICIAL
+audience: executive-leader, observer-auditor, incident-commander, risk-manager
+surface_id: governance-dashboard
+estimated_reading_time: 13 min
 ---
 
 # Screen: Governance Dashboard
 
-## 1. Purpose
-The **Governance Dashboard** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Governance Dashboard** at `/governance/dashboard` is the
+constitutional posture monitor for the Hub. It surfaces, in real
+time, the ten constitutional gates, the calibration health, the
+audit-pipeline health, the localisation gate, the snapshot
+freshness, the jurisdictional KPIs, and the cross-tenant federation
+posture. It is the default landing surface for the **Executive
+Leader** persona; it is also a frequent reference for Observer/Auditor,
+Incident Commander, and Risk Manager.
 
-## 2. Layout
-Light and dark variants:
+This article is the screen-by-screen reference. Every panel, every
+state, every action, every audit consequence.
 
 <!-- AnnotatedScreenshot screen_id=governance-dashboard light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+The dashboard is a 12-column grid. On a 1440-wide display:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. **Header strip** — full width; declares the dashboard's tenant
+   scope and the *current snapshot* in force.
+2. **Constitutional gates panel** — 8 columns, 3 rows; ten tiles
+   in priority order.
+3. **Calibration health panel** — 4 columns, 2 rows; reliability
+   plot + thresholds.
+4. **Audit pipeline panel** — 4 columns, 1 row; throughput +
+   DLQ + latency.
+5. **Localisation panel** — 4 columns, 1 row; per-language
+   coverage + reviewer queue.
+6. **Snapshot freshness panel** — 4 columns, 1 row; current
+   snapshot age + next scheduled publish.
+7. **Jurisdictional KPI panel** — 8 columns, 2 rows; one row per
+   active jurisdiction.
+8. **Federation posture panel** — 4 columns, 2 rows; tenant
+   federation reachability matrix.
+
+On narrower viewports (≤1280 px), the grid collapses to single
+column; panel order is preserved.
+
+## 2. Header strip
+
+The header reads (left-to-right):
+
+- **Tenant name** + **environment** badge (`production` /
+  `pre-prod` / `exercise`).
+- **Snapshot ID** in force (e.g., `snap-2026-05-10T08:14:00Z`),
+  with a hover-tooltip showing the snapshot's publish manifest.
+- **Last refresh** timestamp; the dashboard polls every 8 s.
+- **Export posture** button — for Executive Leader and
+  Observer/Auditor; emits a signed posture-snapshot suitable for
+  briefings or AAO submissions.
+
+## 3. Constitutional gates panel
+
+The ten gates, in their canonical priority order:
+
+1. **AU-region residency**
+2. **Append-only audit**
+3. **Persona decision-rights**
+4. **Jurisdiction scoping**
+5. **Confidence bands**
+6. **Citation grounding**
+7. **Refusal hygiene**
+8. **Snapshot freshness**
+9. **Sensitive operational**
+10. **PII redaction**
+
+Each tile shows:
+- The gate name + ordinal.
+- A status dot: `green` healthy, `amber` degraded, `red` breach.
+- A one-line current-state summary.
+- A *"What this means"* `?` icon that opens an explainer card
+  citing the constitutional principle in force.
+- A timestamp of the last state change.
+
+Click a tile to open its history panel (a sparkline of states
+over the last 24 h plus a list of every state-change event with
+correlation IDs).
+
+### 3.1 Gate states
+
+- **Green** — the gate's invariant holds. State-changing
+  operations proceed normally.
+- **Amber** — the gate's invariant is *at risk* (e.g., calibration
+  is approaching the 60-day staleness floor). State-changing
+  operations proceed normally but a banner appears across all
+  workspaces. The constitutional steward is notified asynchronously.
+- **Red** — the gate's invariant has failed. State-changing
+  operations affected by the gate are **suspended** until the
+  steward acknowledges and remediates. The Hub is in **read-only**
+  posture for the affected scope.
+
+### 3.2 Gate priority and cascading
+
+The priority order matters for cascading. A red gate at priority N
+suspends state-changing operations whose *required envelope*
+includes any axis covered by the gate. Lower-priority gates
+continue to evaluate but their state changes are not actionable
+until the higher-priority gate is resolved.
+
+The Hub does **not** allow priority inversion: a gate cannot demand
+operations be suspended that a higher-priority gate has not also
+implicated. This is enforced in the dashboard's rendering code as
+well as in the API gateway.
+
+### 3.3 Gate-specific notes
+
+- **AU-region residency** — red iff any inbound request
+  terminates outside Australia East / Australia Southeast.
+  Detection is at the front-door layer; a red here is catastrophic
+  and is escalated to the operational SRE on-call automatically.
+- **Append-only audit** — red iff the audit DLQ is non-empty *or*
+  iff the hash chain fails verification on any tenant-scoped read.
+- **Persona decision-rights** — red iff any state-changing API
+  call bypassed the persona-envelope check. Detected by the
+  five-layer enforcement (UI/BFF/API/domain/audit) cross-check.
+- **Jurisdiction scoping** — red iff any cross-jurisdiction
+  effect proceeded without the NEMA acknowledgement step.
+- **Confidence bands** — red iff a red-band signal reached an
+  operating workspace, *or* iff calibration is more than 60 days
+  old.
+- **Citation grounding** — red iff the chat assistant emitted an
+  un-cited statement. Sampled continuously by the LLM-eval
+  harness.
+- **Refusal hygiene** — red iff a refusal lacked a structured
+  reason or a remediation, or iff a refusal slipped past the
+  audit appender.
+- **Snapshot freshness** — amber if the current snapshot is
+  approaching the 30-day floor; red at 30 days. Force a fresh
+  publish to remediate.
+- **Sensitive operational** — red iff PSPF-marked or
+  sensitive-operational content reached a non-cleared surface.
+- **PII redaction** — red iff PII reached a public surface
+  (chat response, alert publication, evidence-pack export
+  without redaction).
+
+## 4. Calibration health panel
+
+The calibration panel shows:
+- The current **reliability plot** for the tenant — predicted vs
+  empirical hit rate across binned probabilities. Diagonal =
+  perfect calibration.
+- The **threshold values** (green/amber and amber/red separators).
+- The **fit timestamp** and **next scheduled refit**.
+- A *"Force refit"* button (Risk Manager only).
+
+The plot is interactive; hover a bin to see the supporting sample
+count.
+
+## 5. Audit pipeline panel
+
+The audit panel shows:
+- **Append throughput** (rows/min) over the last hour.
+- **End-to-end latency** p50/p95/p99 (action → row visible).
+- **DLQ depth** — non-zero is a red Audit gate.
+- **Hash chain verifier** status — green if recent reads verified
+  successfully.
+
+A small *"Open audit timeline"* link jumps to `/governance/audit`
+filtered to the last hour.
+
+## 6. Localisation panel
+
+The localisation panel shows:
+- A row per supported language with **coverage** (% of
+  safety-critical articles translated) and **review queue depth**
+  (drafts awaiting cultural reviewer).
+- A **green / amber / red** band per language: green ≥ 95 %
+  coverage and queue depth ≤ 5; amber 75–95 % or queue 6–20; red
+  < 75 % or queue > 20.
+
+The Localisation gate (above) goes amber/red based on this panel's
+aggregate state.
+
+## 7. Snapshot freshness panel
+
+The snapshot panel shows:
+- The current snapshot ID + age.
+- The next scheduled publish (cron expression in
+  Australia/Sydney time).
+- The most recent failed publish, if any (with link to the failure
+  log).
+- A *"Publish now"* button (Executive Leader + Risk Manager
+  co-sign).
+
+Snapshot publication is itself audit-logged; see the publication
+workflow at
+`/specs/038-help-docs-chat/contracts/snapshot-publish.contract.md`.
+
+## 8. Jurisdictional KPI panel
+
+For each active jurisdiction in the tenant, the KPI panel shows:
+- **Active incidents** count.
+- **Open warnings** count.
+- **Approvals pending co-sign** count.
+- **Resource balance** (delta against agreed baseline).
+- **Cross-border acknowledgements** count (last 24 h).
+
+Click a row to drill into the jurisdiction's posture page.
+
+## 9. Federation posture panel
+
+The federation panel shows the inter-tenant reachability matrix —
+a small grid of tenant pairs with their last successful federation
+handshake. Cells are green/amber/red on the same staleness scale
+as the audit pipeline panel. Useful for diagnosing
+cross-jurisdiction co-publish failures.
+
+## 10. Actions available
+
+Most panels are read-only. The action buttons that *do* exist:
+
+- *Force refit* (Risk Manager) — re-runs calibration; audit-logged.
+- *Publish now* (Executive Leader + Risk Manager) — forces a help
+  snapshot publication; audit-logged with both co-signers.
+- *Acknowledge gate* (constitutional steward only) — clears an
+  amber/red gate state after remediation; audit-logged with
+  steward identity and remediation rationale.
+- *Export posture* — downloads a signed posture snapshot.
+
+## 11. Keyboard shortcuts
+
+| Shortcut    | Action                                        |
+| ----------- | --------------------------------------------- |
+| `g g`       | Jump to Governance Dashboard                  |
+| `1`–`9`,`0` | Open the corresponding gate's history panel   |
+| `c`         | Focus the calibration panel                   |
+| `a`         | Focus the audit pipeline panel                |
+| `l`         | Focus the localisation panel                  |
+| `s`         | Focus the snapshot freshness panel            |
+| `j`         | Focus the jurisdictional KPI panel            |
+| `f`         | Focus the federation posture panel            |
+| `e`         | Export posture (Executive Leader)             |
+| `?`         | Open Help Assistant grounded on this surface  |
+
+## 12. Audit consequences
+
+Every action on the dashboard is audit-logged. Specifically:
+
+- *Force refit* records the actor, prior calibration timestamp,
+  new calibration timestamp, and the threshold values immediately
+  before and after.
+- *Publish now* records both co-signers, the prior snapshot ID,
+  the new snapshot ID, and the publish manifest hash.
+- *Acknowledge gate* records the steward, the gate, the prior
+  state, the rationale, and the post-acknowledgement state.
+- *Export posture* records the exporter and the SHA-256 of the
+  exported manifest.
+
+Reads of the dashboard are not audit-logged (it is a posture view,
+not a state-changing surface).
+
+## 13. Edge cases
+
+### 13.1 Multiple concurrent red gates
+
+If two or more red gates fire simultaneously, the Hub presents the
+highest-priority gate's banner across all workspaces. The
+dashboard's gates panel still shows every red gate; the steward
+remediates in priority order.
+
+### 13.2 Gate flapping
+
+A gate that toggles between states more than three times in a
+five-minute window is flagged *flapping*. Flapping gates render
+with a hatched amber/red border on the dashboard and are escalated
+to the operational SRE on-call.
+
+### 13.3 Calibration plot empty
+
+If no signals were observed in the last 90 days (rare; only in a
+fresh-tenant exercise context), the calibration plot is empty and
+the Confidence Bands gate goes amber until enough signal volume
+accrues.
+
+### 13.4 Federation handshake stale
+
+A federation cell that has not handshaken in the last 60 minutes
+goes amber; 24 h goes red. This does not block local operations
+but blocks cross-tenant co-publish.
+
+## 14. Related
+
+- [`audit-observer-mode`](/help/articles/audit-observer-mode) — for
+  the audit pipeline data model.
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+  — for the calibration thresholds.
+- [`constitution-principle-v`](/help/articles/constitution-principle-v)
+  — for the doctrinal basis of the gates.
+- [`personas/executive-leader`](/help/personas/executive-leader) —
+  for the Executive Leader landing.
+- [`personas/risk-manager`](/help/personas/risk-manager) — for the
+  Risk Manager workspace.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+constitutional working group. Surface ID `governance-dashboard`._

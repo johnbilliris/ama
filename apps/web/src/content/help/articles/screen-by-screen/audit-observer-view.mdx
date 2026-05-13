@@ -1,30 +1,267 @@
 ---
 slug: screen-by-screen/audit-observer-view
-title: "Screen: Audit Observer View"
+title: "Screen: Audit Timeline (Observer view)"
 status: Active
 classification: OFFICIAL
+audience: observer-auditor, executive-leader, incident-commander, content-author
+surface_id: audit-observer-view
+estimated_reading_time: 11 min
 ---
 
-# Screen: Audit Observer View
+# Screen: Audit Timeline (Observer view)
 
-## 1. Purpose
-The **Audit Observer View** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Audit Timeline** at `/governance/audit` is the operator
+surface for the immutable audit trail. This article is the
+screen-by-screen reference; for the underlying data model and the
+constitutional doctrine, see
+[`audit-observer-mode`](/help/articles/audit-observer-mode); for
+the entry/exit model of Observer mode itself, see
+[`observer-mode-guide`](/help/articles/observer-mode-guide).
 
-## 2. Layout
-Light and dark variants:
+The timeline is the busiest read-only screen in the Hub. It is
+built for two activities: **monitoring** (am I about to breach a
+constitutional gate?) and **scrutiny** (what happened on shift X
+between time A and time B?). The UI is optimised for both.
 
 <!-- AnnotatedScreenshot screen_id=audit-observer-view light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+The timeline is a three-region layout:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. **Header strip** — tenant scope, scrutiny ticket if active,
+   time-window selector, evidence-pack export shortcut.
+2. **Filter rail** — left, ~20 % width; collapsible.
+3. **Timeline list** — centre and right, ~80 % width;
+   virtualised, newest-first.
+
+When a row is selected, a **detail panel** slides in from the
+right (~480 px), pushing the timeline list to ~50 %.
+
+## 2. Header strip
+
+The header reads (left-to-right):
+
+- **Tenant name** — bold; click to open tenant settings (Executive
+  Leader only).
+- **Scrutiny ticket** — present if you are in an active scrutiny
+  session, with the ticket ID and the *"Active scrutiny"* note.
+  Click to open ticket details.
+- **Time window selector** — pre-sets (`1 h`, `12 h`, `24 h`, `7 d`,
+  `30 d`, *Custom*) and a *Now* checkbox that pins the window to
+  the current moment (auto-scrolling as new rows arrive).
+- **Refresh** — manual refresh button + auto-refresh toggle. Auto
+  is on by default; off freezes the list at the moment of toggle.
+- **Export evidence pack** — opens the export wizard with the
+  current filter set pre-applied.
+
+## 3. Filter rail
+
+The filter rail composes the active filter set conjunctively. Each
+filter is independent.
+
+### 3.1 Time
+Same pre-sets as the header; *Custom* opens a date-range picker.
+Times are in the operator's display timezone with a *UTC* toggle.
+
+### 3.2 Actor
+Multi-select against the directory of personas signed in to the
+tenant in the time window. Search-as-you-type with display name
+or email.
+
+### 3.3 Action
+Multi-select against the action verb taxonomy. The taxonomy is
+hierarchical: `approve` → `approve.warning` → `approve.warning.publish`.
+Selecting a parent includes all children.
+
+### 3.4 Surface
+Multi-select against the surface enumeration: `disaster-map`,
+`alert-composer`, `audit-observer-view`, `governance-dashboard`,
+`simulation-control`, `workspace.<persona>`, `help.chat`, etc.
+
+### 3.5 Confidence
+Tri-state per band: green (include / exclude / either), amber
+(include / exclude / either), red (include / exclude / either).
+Default is *either* on all three.
+
+### 3.6 Co-signed
+Tri-state: yes / no / either.
+
+### 3.7 Refusal
+Tri-state: include / exclude / only refusals.
+
+### 3.8 Hash chain
+Tri-state: include / exclude / only mismatches. *Only mismatches*
+is the way to triage a suspected DLQ event quickly.
+
+### 3.9 Free-text
+Searches the action's narrative field. Whole-word match; case-
+insensitive. Does not search free-text operator prompts (which
+are not stored verbatim).
+
+### 3.10 Filter URL
+The active filter set is reflected in the URL (`?actor=…&action=…`).
+You can share a filtered view by copying the URL.
+
+## 4. Timeline list
+
+Each row is a card. Cards are sized to fit ~60 visible per
+1080-tall viewport. The card shows:
+
+- **Hash-chain dot** (top-left) — green if the row's `prev_hash`
+  matches the recomputed hash; red on mismatch; grey if the row
+  is in the DLQ awaiting steward review.
+- **Timestamp** — display time, with UTC on hover and a *"copy
+  ISO timestamp"* affordance.
+- **Actor block** — display name + persona at action time +
+  jurisdiction filter at action time. Click the actor to filter
+  the list to that actor.
+- **Action verb phrase** — bold; e.g., *"Approved warning W-2026-0193"*.
+  Linked artefact IDs are clickable.
+- **Surface badge** — small pill; click to filter the list to
+  that surface.
+- **Confidence badge** if the row touched a confidence-bearing
+  artefact; green / amber / red with the calibration timestamp
+  on hover.
+- **Co-signer badge** if amber co-sign applied; click to focus
+  on the co-signer's row in the list.
+- **Correlation ID** — small monospace; click to copy.
+- **Refusal indicator** — present if this is a refusal row;
+  shows the refusal kind (`outside-envelope`, `sensitive`, etc.).
+
+Card row keyboard navigation:
+- `[` / `]` move selection up / down.
+- `Enter` opens the detail panel.
+- `Space` toggles the card's *"flag for follow-up"* state.
+
+## 5. Detail panel
+
+When a row is selected, the detail panel slides in. Three tabs:
+
+### 5.1 Payload tab
+The structured payload, pretty-printed JSON, syntax-highlighted.
+For state-changing rows, the pre-state and post-state snapshots
+are linked at the bottom; click to open the snapshots in a side-by-
+side diff view.
+
+### 5.2 Correlation tab
+The correlation graph — a small DAG of related audit rows. Nodes
+are rows; edges are direct causal links (parent correlation, agent
+invocation chain, co-sign relationship). The DAG is rendered with
+the selected row highlighted.
+
+Click a node to navigate the timeline to that row. The DAG
+updates to centre on the new selection.
+
+For workflows larger than 200 nodes, the DAG truncates to the
+2-hop neighbourhood and offers *"Open in evidence pack"* to see
+the full graph.
+
+### 5.3 Snapshot tab
+The help-snapshot manifest in force at row time. Clicking opens
+the snapshot's articles in a side panel; useful when the doctrine
+in force at action time differs from current doctrine.
+
+## 6. Live updates and the *"new rows"* banner
+
+When auto-refresh is on and new rows arrive that match the active
+filter, they are inserted at the top of the list. If the user has
+scrolled away from the top, a *"N new rows"* banner appears;
+clicking scrolls to the top.
+
+When auto-refresh is off, new rows are not inserted; the *"N new
+rows"* banner appears with a *"Show"* button that re-enables auto-
+refresh and inserts.
+
+## 7. Findings (Observer mode only)
+
+If you are in Observer mode with an active scrutiny ticket, an
+extra row affordance appears: **Add finding** (`n` shortcut). See
+[`observer-mode-guide`](/help/articles/observer-mode-guide) for
+the findings model.
+
+## 8. Evidence-pack export
+
+The *Export evidence pack* button in the header opens the export
+wizard pre-filled with the active filter set. The wizard offers:
+- Time range (defaults to current filter window).
+- Redaction profile: *None* / *Standard* / *External*.
+- Inclusions: snapshots, agent reasoning traces, payload
+  attachments, findings.
+- Sign-off: the exporting persona signs the manifest.
+
+The export runs asynchronously and lands in the
+`/governance/evidence/inbox`. Export is itself audit-logged.
+
+## 9. Performance
+
+- The timeline supports tenants producing up to 1,000 rows/min
+  comfortably. Virtualisation keeps the rendered DOM small.
+- The detail panel's correlation DAG renders in < 200 ms for up
+  to 200 nodes.
+- Filter-set changes are applied client-side when the existing
+  fetched window is sufficient; otherwise a server round-trip
+  occurs (typically < 500 ms on broadband).
+
+If the timeline feels sluggish, narrow the time window or apply
+filters to reduce the row volume. Persistent sluggishness with
+the default settings is a backend issue.
+
+## 10. Edge cases
+
+### 10.1 DLQ rows
+DLQ rows are visible in the timeline if the *Only DLQ* filter is
+selected. They render with a grey hash-chain dot and a
+*"Awaiting steward review"* annotation. They cannot be opened
+into a detail panel until the steward has reviewed and re-chained.
+
+### 10.2 Cross-tenant rows
+Federation handshakes appear as rows in both tenants' timelines
+with a small *"federation"* badge. The detail panel shows the
+remote tenant's identity and the handshake's manifest.
+
+### 10.3 Time-zone cusp rows
+Rows that fall on the DST transition show *both* zone abbreviations
+in their timestamp.
+
+### 10.4 Snapshot in flight
+If a snapshot is being published while you load the timeline, the
+header shows a *"Snapshot publish in progress"* banner. Action
+rows during the publish window are stamped with the *transition*
+snapshot ID and resolve to either the prior or new snapshot once
+the publish completes; the detail panel's Snapshot tab shows the
+resolution.
+
+## 11. Keyboard shortcuts
+
+| Shortcut    | Action                                          |
+| ----------- | ----------------------------------------------- |
+| `g a`       | Jump to Audit timeline                          |
+| `[` / `]`   | Move selection up / down                        |
+| `Enter`     | Open detail panel for selected row              |
+| `Esc`       | Close detail panel                              |
+| `c`         | Copy correlation ID of selected row             |
+| `r`         | Reset filters                                   |
+| `f`         | Focus filter rail                               |
+| `e`         | Export evidence pack with current filters       |
+| `n`         | (Observer mode) Add finding to selected row     |
+| `Space`     | Toggle "flag for follow-up" on selected row     |
+| `Home`/`End`| Scroll list to top / bottom                     |
+
+## 12. Related
+
+- [`audit-observer-mode`](/help/articles/audit-observer-mode) —
+  for the audit data model and chain verification.
+- [`observer-mode-guide`](/help/articles/observer-mode-guide) —
+  for the Observer-mode workflow.
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+  — for the constitutional gates the audit pipeline drives.
+- [`personas/observer-auditor`](/help/personas/observer-auditor) —
+  for the Observer/Auditor landing.
+- [`personas/executive-leader`](/help/personas/executive-leader) —
+  for the Executive Leader landing.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+constitutional working group. Surface ID `audit-observer-view`._

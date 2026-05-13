@@ -13,7 +13,7 @@ export function SupportHandoffButton() {
   const [handoff, setHandoff] = useState<Handoff | null>(null);
 
   useEffect(() => {
-    fetch("/api/v1/help/support-handoff", { credentials: "include" })
+    fetch("/api/help/support-handoff", { credentials: "include" })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => setHandoff(j))
       .catch(() => undefined);

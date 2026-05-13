@@ -1,30 +1,215 @@
 ---
 slug: playbooks/agent-communication
-title: "Agent Playbook — Communication"
-kind: playbook
+title: "Playbook: working with the communication agent"
 status: Active
 classification: OFFICIAL
+audience: public-information-officer, incident-commander, operations-officer, planning-officer, observer-auditor
+estimated_reading_time: 10 min
 ---
 
-# Agent Playbook — Communication
+# Playbook: working with the communication agent
 
-## 1. Overview
-translation, drafting, accessibility checks, citation review
+This playbook complements the
+[Communication agent workspace](/help/articles/screen-by-screen/agent-communication).
+It covers how PIOs should consume the agent's draft proposals,
+when to accept, when to amend, when to start fresh, how to
+handle multilingual handoff, and how the agent should and
+should not influence community-facing alert authoring.
 
-## 2. Pre-flight
-- Confirm persona + jurisdiction
-- Verify the active snapshot id
+The communication agent is a **drafting assistant**, not a
+publisher. Every published alert is an authored work of the
+PIO and the co-sign chain; the agent's role is to accelerate
+the drafting and to ensure plain-language and multilingual
+considerations are surfaced early.
 
-## 3. Workflow
-1. Open the relevant workspace
-2. Review agent recommendation with provenance + citations
-3. Approve / amend with audit trail entry
-4. Hand off to next persona
+## 1. Reading a proposal
 
-## 4. Edge cases
-- Degraded mode: fall back to cached doctrine
-- Cross-jurisdiction: escalate via the Commonwealth persona
+Each proposal carries:
+- A **subject** — the incident or hazard cluster.
+- A **severity recommendation** — Advice / Watch and act /
+  Emergency warning / All clear.
+- A **confidence band** on the proposal itself.
+- **Recommended channels** — based on severity + audience
+  reachability.
+- **Recommended languages** — based on language pocket
+  coverage.
+- A **draft headline** + **draft lead instruction** in
+  English.
+- A **style-guide drawer** with the rules applied and the
+  precedent alerts considered.
 
-## 5. References
-- AIDR Handbook
-- AIIMS doctrine
+Read in this order: subject → severity → drivers → headline →
+lead instruction → channels → languages. Open the precedent
+alerts; their actual headlines are useful calibration for
+your own drafting.
+
+## 2. Opening in the Alert Composer
+
+Click *Open in Alert Composer* to launch the Composer with
+the agent's draft pre-filled. The Composer's audit trail
+records the agent's proposal as the *originating artefact*;
+your subsequent edits are recorded as field-level changes.
+
+You are now the author. The agent's draft is a starting
+point — discard it freely if it doesn't suit. Doctrinal
+authorship rests with the human PIO.
+
+## 3. When to accept the agent's headline
+
+Accept the agent's headline when:
+- It contains a clear action verb (*"Move now"*, *"Shelter
+  in place"*, *"Evacuate to..."*).
+- It names the hazard explicitly.
+- It names the geographic specifics (suburbs, routes,
+  assembly points).
+- The character count fits the strictest channel you've
+  selected (typically SMS at 160 characters).
+
+If any of these are missing, amend or rewrite.
+
+## 4. When to amend
+
+Common amendments:
+- **Sharpen the action verb** — the agent often produces
+  *"You may wish to consider..."*; community-facing alerts
+  need imperatives.
+- **Add measurable specifics** — *"high ground"* becomes
+  *"15 metres above current river level"*.
+- **Adjust register** — the agent calibrates to the
+  doctrinal style guide; local phrasing conventions
+  (e.g., alpine vs coastal terminology) may differ.
+- **Add or remove a channel** — the agent's channel
+  selection is doctrinally compliant by default but you
+  may know the local channel landscape better.
+
+## 5. Multilingual handoff
+
+For non-English language tabs, the Composer pre-fills with
+machine-translated drafts. The PIO reviews the machine
+draft side-by-side with the English source; the cultural
+reviewer co-signs.
+
+Doctrine:
+- The PIO is the **author** of every language variant; do
+  not approve a machine translation you don't read.
+- For languages the PIO doesn't speak, the cultural
+  reviewer is the **trusted translator and register
+  authority**; their co-sign is non-negotiable.
+- Plan multilingual alerts into the operational timeline.
+  Cultural reviewers' turnaround is hours, not minutes
+  outside extreme emergencies.
+
+For *Emergency warning* with imminent danger, the English
+publishes alone if the cultural reviewer cannot turn around
+in time; the non-English variants follow when ready, bound
+by the same correlation ID.
+
+## 6. Cross-border alerts
+
+For cross-border alerts (envelope spans subdivisions), the
+Composer surfaces the cross-border workflow:
+- The receiving state's PIO is notified.
+- They may *Mirror* (publish the same content into their
+  channels) or *Issue paired* (publish their own drafted
+  alert with the same correlation ID).
+- The agent's proposal accounts for receiving-side audience
+  patterns when it knows them; verify with the receiving
+  PIO during co-sign.
+
+## 7. Severity escalation and de-escalation
+
+The agent's severity recommendation reflects current
+evidence. As the situation evolves:
+- **Escalate** by re-issuing as a higher severity (e.g.,
+  Watch and act → Emergency warning). The re-issue cites
+  the original alert via correlation ID. The community
+  receives the new alert; the new alert supersedes the
+  original.
+- **De-escalate** typically via an *All clear* once the
+  threat passes. The agent will propose *All clear* when
+  the operating picture warrants; verify with the
+  underlying signals before publishing.
+
+Don't ping-pong severity (escalate / de-escalate / escalate
+within minutes). Each re-issue erodes community signal-to-
+noise.
+
+## 8. Plain-language hygiene
+
+The agent's plain-language rules (CEFR B2; action verbs;
+measurable instructions; no jargon) are doctrinal; the
+Hub's refusal-hygiene gate flags violations.
+
+Common author traps:
+- **Vague time references** — *"shortly"*, *"soon"*, *"in
+  the next while"*. Use specific times: *"by 1500 today"*.
+- **Conditional language for instructions** — *"You may
+  want to..."*; community treats this as advisory and may
+  not act. Use imperatives for safety instructions.
+- **Jargon** — *"PPRR phase Response"*, *"AIIMS Level 3"*.
+  Translate to community language.
+- **Multiple actions in one instruction** — *"evacuate
+  via Route X to assembly point Y unless your home is
+  fire-defendable in which case shelter and seal..."*.
+  Split into separate alerts or use a structured format.
+
+## 9. Audit hygiene
+
+Every Composer field edit is audit-logged with hashed values
+(the verbatim text is captured at *Publish* time). Co-sign
+chain events are audit-logged; channel partial failures are
+audit-logged.
+
+Best practice:
+- Don't publish a draft you'd be embarrassed to defend in
+  a post-event review.
+- For amber-confidence alerts, ensure the negative-evidence
+  acknowledgements are deliberate, not click-through.
+- Keep the *review-by* time honest; an alert that's never
+  reviewed is a stale alert.
+
+## 10. Edge cases
+
+### 10.1 Channel partial failure
+SMS gateway timeout while web and radio publish. Retry the
+failed channel; if persistent, *Mark as best-effort* with
+rationale. Don't leave alerts in *Partial* indefinitely.
+
+### 10.2 Concurrent draft on overlapping envelope
+Another PIO has a draft open with an overlapping geographic
+envelope. Coordinate via cross-sector chat; one PIO
+proceeds, the other defers or pairs.
+
+### 10.3 Mid-publication snapshot change
+A help-snapshot publishes between Approve and Publish; the
+Composer aborts and asks for re-validation. This is rare but
+critical — the doctrinal interpretation may have shifted.
+
+### 10.4 Cultural reviewer unreachable
+Plan the operational timeline accordingly; English publishes
+alone if necessary; non-English follows.
+
+### 10.5 Community-response signal divergence
+After publication, the agent monitors community-response
+signals (call-centre volume, social sentiment, mobile
+movement patterns). If response diverges sharply from
+expectation (e.g., expected evacuation movement not
+materialising), the agent surfaces a *"Response
+divergence"* annotation in the Composer's history pane.
+PIO considers a re-issue with sharpened language.
+
+## 11. Related
+
+- [`screen-by-screen/agent-communication`](/help/articles/screen-by-screen/agent-communication)
+  — the surface reference.
+- [`screen-by-screen/alert-composer`](/help/articles/screen-by-screen/alert-composer)
+  — the publication surface.
+- [`multilingual-authoring`](/help/articles/multilingual-authoring)
+  — the multilingual model.
+- [`personas/public-information-officer`](/help/personas/public-information-officer)
+  — PIO landing.
+
+---
+
+_Maintained by the AMA Help content team in partnership with
+the PIO and content-strategy working groups._

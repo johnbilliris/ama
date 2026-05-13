@@ -1,14 +1,270 @@
 ---
 slug: cross-border-bushfire-nema
-title: "Cross-border bushfire escalation to NEMA"
+title: "Cross-border bushfire coordination and NEMA acknowledgement"
 status: Active
 classification: OFFICIAL
+audience: incident-commander, operations-officer, public-information-officer, planning-officer, commonwealth, cross-sector
+estimated_reading_time: 13 min
 ---
 
-# Cross-border bushfire escalation to NEMA
+# Cross-border bushfire coordination and NEMA acknowledgement
 
-## 1. When to escalate
-## 2. Pre-escalation checklist
-## 3. Step-by-step
-## 4. Audit trail
-## 5. References
+Bushfires in Australia rarely respect jurisdictional boundaries. The
+Black Summer (2019–2020), the 2003 Canberra fires, and the 2009 Black
+Saturday fires all involved cross-border evacuation, asset transfer,
+and public-information coordination — usually under time pressure and
+imperfect intelligence. This article is the operator playbook for the
+Hub's **cross-border bushfire** workflow: how to recognise that
+cross-border coordination is required, how to invoke the NEMA
+acknowledgement step, how the Hub composes per-state sector responses
+into a single operating picture, and how to handle the most common
+failure modes.
+
+This is **not** a doctrine document — it implements doctrine published
+by NEMA, AFAC, and AIDR. Where this article and the source doctrine
+disagree, the source doctrine wins; raise an inconsistency via the
+article's feedback bar.
+
+## 1. The cross-border indicator
+
+The Hub flags a fire as **cross-border** when **any** of the following
+hold:
+
+- The active fire envelope (the convex hull of confirmed perimeter
+  observations within the last 60 minutes) intersects more than one
+  AU subdivision.
+- The 6-hour Bureau of Meteorology fire-weather projection extends
+  the fire envelope into a second subdivision with confidence ≥ 0.55.
+- An evacuation envelope (declared by any sector front-line persona)
+  spans a route that crosses a subdivision boundary.
+- A cross-border resource request is open (e.g., NSW RFS requesting
+  VIC CFA strike teams).
+
+Any of these conditions sets the fire's `cross_border` flag to
+`true`. The flag is visible:
+
+- On the Disaster Map as an `XB` ribbon over the fire pin.
+- In the Workspaces tile grid as a *"Cross-border"* badge on the
+  affected fire's tile.
+- In the Help Assistant's citations when answering questions about
+  the fire.
+
+## 2. The NEMA acknowledgement step
+
+When an operator attempts a state-changing action whose effect would
+cross a subdivision boundary, the Hub interrupts with the **NEMA
+acknowledgement** dialog. The dialog is not a permission gate — the
+operator's persona envelope already permits the action — it is a
+**doctrinal handshake** that records the Commonwealth's
+acknowledgement of the cross-border effect and offers a hand-off
+option.
+
+The dialog presents three choices:
+
+1. **Notify NEMA and proceed** — the action commits, with the
+   Commonwealth notified asynchronously. The audit row records the
+   notification timestamp and the Commonwealth acknowledger (set to
+   the on-call NEMA controller; if no on-call is signed in, set to
+   the on-call inbox).
+2. **Hand off to NEMA** — the action is queued for a Commonwealth
+   controller. Your workspace shows the queued state; the
+   Commonwealth controller's workspace shows an action banner. The
+   action commits with the Commonwealth controller as the actor; you
+   are listed as the originator. This is the doctrinally cleanest
+   path for genuinely federal-character actions.
+3. **Cancel** — no action is taken; the dialog is dismissed; an
+   audit row records the cancellation with the *"cross-border
+   ack required"* reason.
+
+Every choice is audit-logged. There is no path past the dialog that
+does not record an audit row.
+
+## 3. Sector composition
+
+Bushfire response is a **sector** activity — Fire is the lead sector
+— but cross-border coordination almost always pulls in Police
+(traffic and route security), Medical (evacuation triage), and SES
+(wildfire-adjacent flood-risk monitoring). The Hub composes
+sector-front-line workspaces into a unified cross-sector view via
+the **Cross-Sector** persona.
+
+The Cross-Sector workspace surfaces:
+
+- One row per affected subdivision, with each sector's status as a
+  cell.
+- A column of co-ordinated actions (e.g., "Issue joint warning to
+  routes A1 and B47") that compose into per-sector sub-actions on
+  approval.
+- A timeline of declarations from each sector's front-line persona.
+
+The Cross-Sector persona may **read** every sector's evidence panel
+but may **act** only via the cross-sector actions; per-sector
+internal actions (e.g., RFS strike team rotation) remain reserved
+for the sector's own operating personas.
+
+## 4. Resource transfers
+
+Cross-border resource transfers (RFS strike teams crossing into VIC,
+CFA appliances crossing into NSW, ACT MFB into NSW, etc.) are
+**Logistics Officer** actions but require **Operations Officer
+co-sign on both sides**. The Hub orchestrates the co-sign chain:
+
+1. Originating Logistics Officer drafts the transfer in the
+   **Resource board** workspace.
+2. Originating Operations Officer co-signs the export.
+3. Receiving Operations Officer co-signs the import.
+4. Receiving Logistics Officer accepts and books the resource into
+   the receiving sector's resource pool.
+5. NEMA acknowledgement is recorded automatically — the transfer is
+   inherently cross-border, so the dialog appears at step 1 with the
+   *Hand off* option greyed out (a Logistics action is never handed
+   to NEMA; only the *Notify NEMA and proceed* path is available).
+
+If the receiving side declines, the resource returns to the
+originating pool with no further action; both sides are audit-logged.
+
+## 5. Public information across borders
+
+Public-channel actions across borders are the highest-stakes path.
+They invoke:
+
+- The originating PIO drafts the alert in the **Alert Composer**.
+- The originating Incident Commander co-signs (within-state amber
+  doctrine).
+- The Hub detects the cross-border effect (see §1) and presents the
+  NEMA acknowledgement dialog.
+- The receiving state's Public Information Officer is notified in
+  their workspace banner; they may either *Mirror* the alert into
+  their state's channels or *Issue a paired alert* with their own
+  framing (typically used when the linguistic register differs, e.g.,
+  alpine vs coastal terminology).
+- Both alerts publish simultaneously when the receiving PIO co-signs.
+- A single correlation ID binds the originating draft, both
+  approvals, both publications, the NEMA acknowledgement, and any
+  subsequent revision.
+
+If the receiving PIO does **not** co-sign within the configured
+window (default 5 minutes; tunable per tenant by the constitutional
+steward), the originating alert publishes alone with a *"Receiving
+state did not co-publish"* annotation in the audit trail. The
+publication still occurs because public-safety doctrine requires
+that the originating state act on its own evidence; the cross-border
+co-publication is a coordination optimisation, not a precondition.
+
+## 6. Evacuation envelopes
+
+Evacuation envelopes that cross subdivision boundaries are declared
+in the **Field Coordinator** workspace (offline-first), confirmed by
+the Operations Officer, and trigger:
+
+- Notification to the receiving subdivision's Police sector for
+  route-security planning.
+- Notification to the receiving subdivision's Medical sector for
+  triage capacity planning.
+- A standing offer of accommodation co-ordination from the receiving
+  subdivision's Logistics Officer.
+
+The Hub does not **direct** the receiving subdivision; it
+notifies, surfaces, and records. Direction of the receiving
+subdivision's response is reserved for the receiving subdivision's
+operating personas.
+
+## 7. The 30-minute rule
+
+Bushfire intelligence ages quickly under wind shifts. The Hub
+enforces a **30-minute freshness** rule on cross-border actions: any
+evidence card older than 30 minutes overlays a *"Stale evidence"*
+badge and the action button refuses with *"Refresh evidence to
+proceed"*. This is stricter than the general 60-minute rule because
+cross-border decisions cascade through more receivers.
+
+To refresh:
+
+- Click the evidence card's refresh control. The card re-pulls the
+  underlying signal from Cosmos and stamps the new observation
+  time.
+- If the underlying signal itself is stale (no new observations
+  upstream), the refresh changes nothing and the badge persists.
+  This is doctrinally correct — you cannot manufacture freshness.
+
+## 8. Failure modes
+
+### 8.1 NEMA on-call inbox is unreachable
+
+If the on-call NEMA controller is not signed in **and** the on-call
+inbox configuration is missing, the *Notify NEMA and proceed* path
+queues the notification with an *"undelivered"* annotation. The
+action still commits — public-safety doctrine wins — but the
+notification appears as a constitutional alarm on the Governance
+Dashboard until delivered.
+
+### 8.2 Receiving state's Hub is offline
+
+A receiving state's Hub being unreachable does not block the
+originating state. The mirror/co-publish handshake degrades to a
+*"Receiving state offline"* annotation; the originating publication
+proceeds. When the receiving state recovers, the cross-border
+banner asks the receiving PIO whether to retroactively mirror.
+
+### 8.3 Conflicting envelopes from two states
+
+If two states independently declare evacuation envelopes that
+overlap with conflicting directions of travel, the Cross-Sector
+workspace surfaces both with a *"Conflicting evacuation directions"*
+banner. The Hub does **not** auto-resolve. The two states' Operations
+Officers (and, if escalated, NEMA) negotiate via the cross-sector
+chat; the resolution is recorded as a single audit row co-signed by
+both states.
+
+### 8.4 Time-zone confusion
+
+Subdivisions cross time-zone boundaries (the Eyre Highway is
+notorious). The Hub displays every cross-border action's timestamps
+in **both** the originating and receiving subdivision's display
+time, with UTC available on hover. Operators should never schedule
+relative to wall-clock time across borders without confirming the
+zone.
+
+## 9. Worked example
+
+A NSW RFS controller observes a Snowy Mountains fire's projection
+extending into VIC's alpine area within 4 hours.
+
+1. The controller refreshes the fire-weather panel; the projection
+   is amber (0.71). The Hub flags the fire as `cross_border`.
+2. The controller drafts an evacuation envelope spanning Khancoban
+   (NSW) and Corryong (VIC). Field Coordinator confirms.
+3. NSW Operations Officer initiates a public alert in the Alert
+   Composer, citing the projection. Amber co-sign with NSW Incident
+   Commander completes.
+4. The cross-border NEMA acknowledgement dialog appears. The IC
+   chooses *Hand off to NEMA* because the projection's
+   confidence is amber and the alpine area is a federal park.
+5. The on-call NEMA controller receives the action banner;
+   acknowledges; co-publishes with the VIC PIO via the
+   cross-sector mirror handshake.
+6. Both alerts publish simultaneously. The audit trail shows a
+   single correlation ID with: NSW draft, NSW IC co-sign, NEMA
+   acknowledgement, VIC PIO co-publish, both publications.
+7. Resource transfer (NSW RFS → VIC alpine) completes via the
+   Logistics Officer co-sign chain over the next 90 minutes.
+
+## 10. Related
+
+- [`personas/commonwealth`](/help/personas/commonwealth) — for the
+  NEMA persona's envelope.
+- [`personas/cross-sector`](/help/personas/cross-sector) — for the
+  cross-sector composition rules.
+- [`screen-by-screen/alert-composer`](/help/articles/screen-by-screen/alert-composer)
+  — for the alert composition UI.
+- [`screen-by-screen/multi-jurisdiction-filter`](/help/articles/screen-by-screen/multi-jurisdiction-filter)
+  — for the jurisdiction filter UI.
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge) —
+  for the confidence-band rules.
+
+---
+
+_Maintained by the AMA Help content team in consultation with NEMA
+operations and the AFAC cross-border working group. Doctrinal
+references are to NEMA Cross-Border Coordination Guidance v3.2,
+AFAC AIIMS-2017, and AIDR Bushfire Handbook ed. 4._

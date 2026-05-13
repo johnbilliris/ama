@@ -54,7 +54,8 @@
     "src/**/*",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "../../tests/e2e/web-coverage/**/*.ts"
+    "../../tests/e2e/web-coverage/**/*.ts",
+    ".next/dev/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

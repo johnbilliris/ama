@@ -11,6 +11,7 @@ Exposes read-only endpoints for after-action review:
 
 from __future__ import annotations
 
+from app.api.dependencies.rbac import require_simulation_role
 from app.api.routes.simulations import _event_repo, _repo
 from app.core.auth import extract_principal_from_claims
 from app.services.annotation_service import AnnotationService
@@ -29,10 +30,10 @@ _annotations = AnnotationService(event_repository=_event_repo, simulation_reposi
 
 def _principal(request: Request) -> str:
     principal = extract_principal_from_claims(request.state.claims)
-    if principal is None or not principal.subject or principal.subject == "anonymous":
-        raise HTTPException(status_code=401, detail="unauthenticated")
-    if "SimulationUser" not in principal.roles:
-        raise HTTPException(status_code=403, detail="simulation_role_required")
+    try:
+        require_simulation_role(principal)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
     return principal.subject
 
 

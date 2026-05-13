@@ -1,65 +1,196 @@
 ---
 slug: personas/field-coordinator
-title: "Field Coordinator — Getting Started"
+title: "Field Coordinator — getting started"
 persona: field-coordinator
 cluster: operational
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 10 min
 ---
 
-# Field Coordinator — Getting Started
+# Field Coordinator — getting started
 
-This guide gets a **Field Coordinator** productive in the AMA Hub in 15 minutes.
-Scope: Forward-edge coordination; degraded connectivity behaviour.
+The **Field Coordinator (FC)** is the AMA Hub's offline-first
+field persona: signal capture from on-ground observation,
+status updates from forward posts, evacuation envelope
+declaration, evacuation acknowledgement reception, and the
+durable bridge between the operating picture in the
+coordination centre and the reality on the ground. The FC
+spends most of their Hub time on tablet or vehicle laptop, in
+degraded connectivity, and the Hub is engineered for that.
 
-## 1. What you can do
+This article gets a brand-new FC productive in fifteen minutes
+and documents the envelope, the offline model, the declaration
+workflow, and the most common pitfalls.
 
-As a Field Coordinator, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Capture signals** from direct observation (fire fronts,
+  river levels, road conditions, infrastructure status).
+- **Update status** of forward posts (location, capacity,
+  resource state).
+- **Declare evacuation envelopes** following Operations
+  Officer / agent recommendation, or independently from
+  on-ground observation requiring upward escalation.
+- **Acknowledge** evacuation directives received from
+  Operations.
+- **Operate offline** with full action capture and replay on
+  reconnection.
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Approve public warnings.
+- Issue tasks across sectors.
+- Allocate resources beyond your declared post.
+- Take public-channel actions (PIO's role).
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Field Coordinator** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=field-coordinator-landing theme=light -->
-<!-- screenshot:placeholder route_id=field-coordinator-landing theme=dark -->
+1. **Sign in** on your field device (tablet or laptop). Land
+   at the Field workspace.
+2. **Confirm the AU-region banner** and the offline mode
+   icon (a small cloud icon: filled = online, empty = offline).
+3. **Declare your post** — the geographic location you'll
+   operate from. The post defines your reachable-radius and
+   your operating picture's local centre.
+4. **Read the active envelopes** in your area — current
+   warnings, evacuation declarations, agent recommendations
+   for prepare-evacuation.
+5. **Read your inbox** — any directives from Operations
+   awaiting acknowledgement.
+6. **Verbal handover** with outgoing FC. Confirm any
+   in-flight observations or queued actions.
 
-## 3. Decision rights & boundaries
+## 3. The offline model
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Field Coordinator** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+The FC workspace registers a service worker. This means:
+- Critical actions (signal capture, status update, evacuation
+  acknowledgement) work when you have no network.
+- Actions queue locally in IndexedDB; the queue persists
+  across browser restarts.
+- When connectivity returns, the queue replays in capture
+  order.
+- Each action's audit row records both the **observed time**
+  (when you took it) and the **synced time** (when it
+  reached the centre).
+- Map tiles for your reachable radius are aggressively
+  cached; tile freshness shows in the legend.
 
-## 4. Working with the Help Assistant
+A persistent banner reads *"Offline — N actions queued"*.
+Don't ignore it; a queue depth growing during a long
+deployment is a sign your sync window is unrealistic.
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+## 4. Capturing signals well
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Field Coordinator?"
+A captured signal is the operating picture's input. The
+quality of your capture directly affects the agents'
+recommendations. Best practice:
+- **Be specific** — *"Fire front 50 m west of Khancoban
+  pumper, advancing 2 m/s"* not *"fire near Khancoban"*.
+- **Stamp time and location** — the workspace defaults to
+  *now* and your GPS-derived location; correct as needed
+  before submitting.
+- **Photograph if safe** — the workspace's camera affordance
+  attaches a photo; metadata is preserved for later
+  verification.
+- **Tag confidence** — your own assessment of how reliable
+  your observation is. The agents weight your captures.
+- **Submit promptly** — even offline. The capture queues;
+  the centre sees it on next sync.
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+## 5. Declaring evacuation envelopes
 
-## 5. Where to next
+Evacuation declarations are heavy actions, even from the
+field. Process:
+1. Open the *Declare envelope* affordance.
+2. Draw the geographic envelope on the map (touch on tablet,
+   click-drag on laptop).
+3. Specify population estimate (your direct observation;
+   the agent's estimate is shown for comparison).
+4. Specify urgency (*Immediate* / *Within 6 h* / *Within 24
+   h*).
+5. Specify recommended assembly points and routes.
+6. Submit.
 
-- Browse all articles tagged `field-coordinator` via the [search page](/help/search?q=field-coordinator).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+The declaration:
+- If pre-approved by Operations Officer (you're acting on a
+  forwarded agent recommendation), commits immediately.
+- If novel (your on-ground observation requires upward
+  escalation), queues for Operations co-sign.
+
+For *Immediate* novel declarations, coordinate verbally with
+Operations via radio while the system processes the queue.
+
+## 6. Receiving evacuation acknowledgements
+
+When the public has been warned to evacuate, your post
+becomes the receiving point for acknowledgements (in person,
+via radio, via the agency app). The Hub's
+*acknowledgement reception* affordance lets you log each
+acknowledgement quickly:
+- Identity (or anonymous count for crowd ackging).
+- Method (in-person / radio / app / observed self-evacuation).
+- Time.
+- Notes.
+
+Acknowledgements feed back into the public-information
+agent's audience-response model. They are also the
+operational metric for evacuation completeness.
+
+## 7. The reachable radius
+
+The FC's reachable-radius ring on the map is your declared
+operational envelope. Stay roughly within it; venture beyond
+only with Operations notification (you become harder to
+recall and your tile cache may be sparse).
+
+## 8. Common pitfalls
+
+### 8.1 Letting the offline queue grow
+A queue with 100+ actions awaiting sync is a problem — the
+centre's operating picture is stale; the agents' models are
+stale. Find connectivity and sync as priority work, even if
+it means temporary movement away from the front.
+
+### 8.2 Acknowledging without verifying
+Acknowledging an evacuation directive without on-ground
+verification of the affected population's status is a
+constitutional gap. Verify by direct observation before
+acknowledging.
+
+### 8.3 Declaring envelope without Operations coordination
+For *Immediate* novel declarations, even the verbal
+coordination matters. The system supports the action but
+the Operations Officer needs to know.
+
+### 8.4 Ignoring the tile staleness stamp
+A *Stale tile · last refresh DD/MM* stamp on a region
+you're operating in is a signal your geographic awareness
+may be incomplete. Refresh when connectivity returns.
+
+### 8.5 Battery and connectivity neglect
+Field devices die. Carry a battery pack; coordinate with
+the post's logistical support; don't be the FC who lost
+the operating picture because the device drained.
+
+## 9. The Help corpus you'll use most
+
+- [`screen-by-screen/agent-evacuation`](/help/articles/screen-by-screen/agent-evacuation)
+- [`playbooks/agent-evacuation`](/help/articles/playbooks/agent-evacuation)
+- [`personas/operations-officer`](/help/personas/operations-officer)
+- [`getting-started`](/help/articles/getting-started) (offline
+  / degraded mode section)
+- [`troubleshooting`](/help/articles/troubleshooting) (offline
+  section)
+
+## 10. Where to next
+
+- Run a tabletop simulating extended offline operation.
+- Audit the prior month's signal captures for specificity.
+- Browse all articles tagged `field-coordinator` via search.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the field-operations working group and AFAC AIIMS-2017
+Doctrine._

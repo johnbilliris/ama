@@ -1,65 +1,188 @@
 ---
 slug: personas/risk-manager
-title: "Risk Manager — Getting Started"
+title: "Risk Manager — getting started"
 persona: risk-manager
-cluster: operational
+cluster: read-and-plan
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 11 min
 ---
 
-# Risk Manager — Getting Started
+# Risk Manager — getting started
 
-This guide gets a **Risk Manager** productive in the AMA Hub in 15 minutes.
-Scope: Pre-event risk registers; mitigation tracking; lessons-learned.
+The **Risk Manager (RM)** is the AMA Hub's confidence-band
+steward and the only operating persona who can see red-band
+signals. The RM tunes the agent's calibration, promotes /
+demotes signals across bands, runs the threshold tuning
+workflow, and acts as the Hub's connection between empirical
+hit-rate reality and the operating personas' decision-rights
+envelopes.
 
-## 1. What you can do
+This article gets a brand-new RM productive in fifteen minutes
+and documents the envelope, the calibration workflow, the
+promotion / demotion doctrine, and the most common pitfalls.
 
-As a Risk Manager, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **See** red-band signals (suppressed for every operating
+  persona other than you, Observer/Auditor, and Executive
+  Leader).
+- **Promote** red signals to amber after manual review.
+- **Demote** green/amber signals when contradicting evidence
+  emerges.
+- **Tune** confidence-band thresholds within the doctrinal
+  floors and ceilings.
+- **Force calibration refit** from the prior 90 days of
+  ground-truth labels.
+- **Read** all bands of all artefacts.
+- **Co-sign** amber actions when the operating chain runs out
+  of authorised co-signers (rare delegation pattern).
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Approve public warnings.
+- Issue tasks (Operations Officer's role).
+- Allocate resources (Logistics Officer's role).
+- Take state-changing operational actions outside the
+  band-management workflow.
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Risk Manager** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=risk-manager-landing theme=light -->
-<!-- screenshot:placeholder route_id=risk-manager-landing theme=dark -->
+1. **Sign in**; you land at the Risk workspace.
+2. **Open the calibration panel** on the Governance
+   Dashboard. Read the reliability plot. Note the fit
+   timestamp.
+3. **Open the Risk-assessment agent workspace**. Read the
+   composite scores; note any > 15.
+4. **Read pending promotion / demotion requests** from
+   operating personas (the workspace surfaces these in a
+   side rail).
+5. **Read the threshold-tuning history**. Note any recent
+   changes and their rationale.
+6. **Verbal handover** with outgoing RM. Confirm any pending
+   promotions in flight or steward acknowledgements awaited.
 
-## 3. Decision rights & boundaries
+## 3. The calibration workflow
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Risk Manager** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+See [`playbooks/agent-risk-assessment`](/help/articles/playbooks/agent-risk-assessment)
+for the playbook. The RM's calibration responsibilities:
 
-## 4. Working with the Help Assistant
+- **Daily glance** at the reliability plot. Drift from the
+  diagonal is the diagnostic.
+- **Refit** when the plot has visibly drifted; refit pulls
+  the prior 90 days of ground-truth labels and re-fits the
+  isotonic regression.
+- **Tune thresholds** when refit doesn't restore alignment,
+  or when the operational tempo demands different
+  cost-balance points. Tuning is bounded
+  (0.50–0.60 amber/red; 0.80–0.90 green/amber) and requires
+  constitutional steward acknowledgement.
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+## 4. Promotion and demotion
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Risk Manager?"
+See [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+for the band doctrine and
+[`playbooks/agent-risk-assessment`](/help/articles/playbooks/agent-risk-assessment)
+for the playbook. The RM's process:
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+- **Promote** a red signal to amber when manual review and at
+  least one independent source corroborate operational
+  significance. Rationale required; reversible within 30 min.
+- **Demote** when contradicting evidence emerges.
+- Be slow to promote; each promotion erodes the agent's
+  red-band suppression model.
 
-## 5. Where to next
+## 5. Threshold tuning
 
-- Browse all articles tagged `risk-manager` via the [search page](/help/search?q=risk-manager).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+The threshold tuning panel is the RM's most consequential
+tool. The workflow:
+1. Drag the proposed thresholds.
+2. *Preview impact*; the Hub replays 30 days under the
+   proposed thresholds.
+3. *Apply*; constitutional steward acknowledgement is
+   required.
+4. The new thresholds take effect immediately; audit-logged
+   with both the RM and steward identities.
+
+Don't tune speculatively; tune in response to a specific
+calibration-or-cost-balance signal.
+
+## 6. The constitutional steward relationship
+
+The constitutional steward is the doctrinal authority on
+band doctrine. The RM and steward have a working
+relationship:
+- Steward acknowledges threshold tuning.
+- RM consults steward on novel promotion patterns.
+- Steward records exception ledger entries when RM-steward
+  consultation produces a doctrinal-precedent decision.
+
+Cultivate this relationship; the doctrinal soundness of
+your tenant's band doctrine depends on it.
+
+## 7. Working with operating personas
+
+Operating personas can't see red signals; they can request
+promotion. Promotion requests appear in your workspace
+side-rail. Process:
+- Read the requesting persona's rationale.
+- Cross-check the requested signal's source and
+  corroboration.
+- Either *Promote* (with your own rationale) or *Decline*
+  (with rationale).
+
+A pattern of repeated promotion requests for similar signals
+indicates a possible threshold mis-calibration; consider
+tuning.
+
+## 8. Common pitfalls
+
+### 8.1 Promotion inflation
+Promoting freely turns the band model into a theatre of
+amber. Be slow; demand corroboration; document rationale.
+
+### 8.2 Stale calibration
+Day-by-day, calibration ages. Don't let it cross 60 days
+without a refit; the staleness penalty cascades through every
+operating persona's actions.
+
+### 8.3 Tuning as workflow workaround
+*"Operations is asking for too much amber co-sign; let me
+tune the threshold up"* is a doctrinal abuse. Tune for
+empirical reasons, not workflow comfort.
+
+### 8.4 Skipping the steward acknowledgement
+The acknowledgement step is constitutional. Don't try to
+work around it; the audit trail and the gate enforcement
+will catch you.
+
+### 8.5 Detachment from operations
+The RM is sometimes seen as off-floor. Stay engaged via the
+cross-sector chat and via periodic sit-ins on the Operations
+workspace; calibration should respond to operational
+reality.
+
+## 9. The Help corpus you'll use most
+
+- [`screen-by-screen/agent-risk-assessment`](/help/articles/screen-by-screen/agent-risk-assessment)
+- [`playbooks/agent-risk-assessment`](/help/articles/playbooks/agent-risk-assessment)
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+- [`constitution-principle-v`](/help/articles/constitution-principle-v)
+- [`audit-observer-mode`](/help/articles/audit-observer-mode)
+- [`personas/observer-auditor`](/help/personas/observer-auditor)
+- [`troubleshooting`](/help/articles/troubleshooting)
+
+## 10. Where to next
+
+- Sit in on an exercise as Risk Manager to feel the
+  promotion / demotion tempo.
+- Audit the prior month's promotions for pattern recognition.
+- Browse all articles tagged `risk-manager` via search.
+- Build a relationship with your tenant's constitutional
+  steward.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the risk and constitutional working groups._

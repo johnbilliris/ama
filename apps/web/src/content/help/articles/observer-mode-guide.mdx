@@ -1,14 +1,252 @@
 ---
 slug: observer-mode-guide
-title: "Observer / Auditor mode guide"
+title: "Observer mode — a complete walkthrough"
 status: Active
 classification: OFFICIAL
+audience: observer-auditor, executive-leader, content-author
+estimated_reading_time: 11 min
 ---
 
-# Observer / Auditor mode guide
+# Observer mode — a complete walkthrough
 
-## 1. Read-only access
-## 2. Timeline navigation
-## 3. Framework-deviation review
-## 4. Transcript reconstruction
-## 5. Lessons-learned export
+Observer mode is the read-only, full-visibility posture used by
+auditors, post-incident reviewers, AAO scrutiny teams, executive
+oversight, and content authors who need to verify that a doctrinal
+change is reflected end-to-end. It is not a "spectator" view — it is
+the **scrutiny instrument**. This article is the operational guide:
+how to enter, what you see, what you can and cannot do, how to
+record findings, and how to leave a clean audit trail of your own
+review.
+
+If you are reading this because you have been assigned to a
+post-incident review, start at §3 (Reviewing an incident) after
+reading §1 and §2 to ground.
+
+## 1. Entering Observer mode
+
+Observer mode is a **persona**, not a switch. You enter it by
+signing in with the `observer-auditor` claim. If your IdP grants
+both an operating persona and `observer-auditor`, the persona
+switcher (`Alt+P`) lets you move between them at will; switching
+into Observer is audit-logged, switching out is audit-logged.
+
+You **cannot** combine Observer with an operating persona in a
+single envelope. The Constitution requires the separation; an
+Observer who could also act would defeat the scrutiny model.
+
+On entry to Observer:
+
+- The default landing surface becomes `/governance/audit` (not the
+  Disaster Map).
+- An *"Observer"* watermark appears on every page; it is also
+  audible on screen-reader page-load announcements.
+- Every state-changing control is hidden. The screens still render
+  fully — you see what an operating persona would see — but
+  buttons that would commit a change are absent.
+- You gain read access to **red-band** signals that operating
+  personas cannot see.
+- The *Evidence pack* exporter appears in the page header.
+
+If your IdP claim grants `observer-auditor` and you do not see the
+watermark, the persona is misconfigured. Sign out and back in; if
+the watermark is still missing, raise an incident immediately —
+this is a constitutional gate breach.
+
+## 2. The Observer landing — `/governance/audit`
+
+The audit timeline is the workhorse of Observer mode. The
+[`audit-observer-mode`](/help/articles/audit-observer-mode) article
+documents the timeline UI in full; here we cover the
+Observer-specific affordances.
+
+### 2.1 The Observer header bar
+
+Above the timeline, Observer mode shows:
+
+- **Active scrutiny** — a one-line note about why you are in
+  Observer mode (e.g., *"AAO scrutiny: 2026-Q1 readiness"*). The
+  note is set by the scrutiny lead at session start; it appears in
+  the audit-row metadata of any evidence-pack export so reviewers
+  downstream understand the context.
+- **Scrutiny scope** — the persona / jurisdiction / time-window
+  filters declared at scrutiny start. The timeline filter rail
+  defaults to this scope; you can widen but doing so prompts a
+  *"Scope expansion?"* dialog and audit-logs the expansion.
+- **Findings inbox** — a small badge counting findings you have
+  recorded so far in this session.
+
+### 2.2 The findings recorder
+
+Findings are first-class artefacts. As you scrutinise the
+timeline, you can record findings without leaving the timeline:
+
+- Press `n` (focus on a row) to attach a *Finding* to that row.
+- Choose a **finding kind**: `observation`, `concern`, `recommendation`,
+  `compliance gap`, `commendation`.
+- Add a free-text rationale. Rationale is **not** PII-redacted; it
+  goes into the evidence pack verbatim, so write it knowing it
+  will be read by external reviewers.
+- The finding records: timestamp, your identity, the row's
+  correlation ID, the kind, the rationale, and the active scrutiny
+  note.
+
+Findings appear in the *Findings inbox* and on the right rail of
+the source row. They are visible to other Observer-mode users in
+the same scrutiny scope; they are **not** visible to operating
+personas.
+
+## 3. Reviewing an incident
+
+A typical post-incident review follows this arc:
+
+1. **Define scope.** The scrutiny lead sets the persona /
+   jurisdiction / time window in `/governance/scrutiny/new`. The
+   scope is recorded as a *scrutiny ticket*; every audit row
+   accessed during the review is bound to the ticket.
+2. **Walk the timeline forward.** Start at the scope's earliest
+   row. Read each row's detail panel, including pre-state and
+   post-state snapshots. Record findings as you go.
+3. **Walk the correlation graph.** For high-significance rows,
+   click *Open correlation graph* to see the DAG of related rows.
+   The graph helps reconstruct multi-step workflows (signal →
+   recommendation → approval → publication → community response).
+4. **Cross-reference the doctrinal snapshot.** Each row records
+   the help-snapshot version in force at action time. Open the
+   snapshot via the row's *Snapshot* link; verify that the
+   action's interpretation matches the doctrine in force *at that
+   time*, not the current doctrine.
+5. **Verify the hash chain.** Each row's hash-chain dot is green
+   if the row's `prev_hash` matches the recomputed hash; red on
+   mismatch. A red dot in your scrutiny window is a constitutional
+   incident in itself; record it as a `concern` finding and
+   escalate to the constitutional steward immediately.
+6. **Compose the evidence pack.** When the walk is complete,
+   *Generate evidence pack* from the scrutiny ticket. The pack
+   includes every row in scope, every finding you recorded, the
+   relevant doctrinal snapshot, and a signed manifest. The pack is
+   in your *Evidence-pack inbox* (`/governance/evidence/inbox`).
+
+The Hub does **not** generate a narrative report from the
+findings — that remains a human task. The pack is the raw material
+for the report; the report itself is authored outside the Hub.
+
+## 4. What you can read
+
+Observer mode reads **everything** within the scrutiny scope:
+
+- Audit rows, including refusal rows and DLQ rows.
+- Pre-state and post-state snapshots referenced by audit rows.
+- All confidence bands (green, amber, **red**), at the value they
+  carried at action time.
+- Calibration history — the calibration plot's evolution over the
+  scope's time window.
+- Snapshot publication and rollback events.
+- Configuration changes (threshold tuning, support-handoff
+  inbox edits, persona claim changes).
+- Help-corpus content as it was at any point in the scope.
+
+## 5. What you cannot do
+
+Observer cannot:
+
+- Take any state-changing action — no approvals, no publications,
+  no resource transfers, no threshold tuning, no claim changes.
+- Author or edit help articles (content authoring is a separate
+  persona).
+- Issue chat prompts that would invoke the gateway's deny path
+  (sensitive operational, PSPF, PII) — Observer's gateway profile
+  is the strictest available.
+- Read content **outside** the scrutiny scope without expanding
+  the scope (which prompts a confirmation dialog and audit-logs
+  the expansion).
+- Forge or replay audit rows. The Hub has no Observer-only path
+  past the append-only model.
+
+## 6. Reading findings other Observers recorded
+
+The findings inbox shows **your** findings by default. Switch to
+*All findings (this scope)* to see every finding any Observer in
+the scrutiny ticket has recorded. Findings are not editable by
+other Observers — each Observer owns their findings. You may add
+*"agreement"* or *"divergence"* annotations to another's finding;
+those annotations are themselves audit-logged and threaded under
+the original finding.
+
+## 7. Recording cross-cutting findings
+
+Some findings span multiple rows (e.g., *"Repeated cross-border
+publications without NEMA acknowledgement, rows X, Y, Z"*).
+Record these from the *Findings* inbox by clicking *New
+cross-cutting finding* and listing the implicated correlation
+IDs. The Hub validates that every listed correlation ID is in the
+scrutiny scope; out-of-scope IDs require a scope expansion (see
+§2.1).
+
+## 8. Leaving Observer mode
+
+Switching out of Observer (or signing out) closes the scrutiny
+session. The Hub:
+
+- Marks the scrutiny ticket as *closed* with your sign-out
+  timestamp.
+- Aggregates your findings into the ticket's findings record.
+- If you have an unexported evidence pack, prompts you to either
+  generate it now or save the scrutiny ticket as *partial*.
+- Audit-logs the session close.
+
+You can re-enter the same scrutiny ticket later (the ticket is
+yours until handed off) and the timeline filters and findings
+restore.
+
+## 9. Hand-offs between Observers
+
+Long-running scrutinies (multi-day AAO reviews, multi-week
+post-incident analyses) are typically shared across Observer
+shifts. Hand-offs use the *Hand off* button on the scrutiny
+ticket:
+
+1. Choose the receiving Observer from a dropdown of currently
+   signed-in `observer-auditor` personas.
+2. Add a hand-off note (free text; audit-logged) summarising
+   findings to date, open lines of inquiry, and suggested next
+   steps.
+3. The receiving Observer's banner shows the hand-off; on
+   acceptance, the ticket is theirs and your view becomes
+   read-only on the ticket (you keep your individual findings).
+
+Hand-offs are reversible by mutual consent: either party can
+*Return ticket*, restoring the prior owner.
+
+## 10. Interaction with the Help Assistant
+
+In Observer mode, the Help Assistant is grounded against:
+
+- The same help corpus as operating personas.
+- The audit-row content within your scrutiny scope (which
+  operating personas do not have access to).
+
+This means an Observer can ask, e.g., *"Why was warning W-2026-0193
+revised after publication?"*, and the assistant can quote the
+revision audit row inline. It cannot, however, quote rows outside
+your scrutiny scope; widening the scope is required first.
+
+The Observer's chat prompts and refusals are recorded with the
+*"observer-auditor / scrutiny-ticket-id"* metadata so external
+reviewers can later see what lines of inquiry the Observer pursued.
+
+## 11. Related
+
+- [`audit-observer-mode`](/help/articles/audit-observer-mode) —
+  for the audit-trail data model.
+- [`screen-by-screen/audit-observer-view`](/help/articles/screen-by-screen/audit-observer-view)
+  — for the timeline UI in detail.
+- [`personas/observer-auditor`](/help/personas/observer-auditor) —
+  for the Observer/Auditor landing page.
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+  — for the Governance Dashboard, an Observer's frequent
+  reference.
+
+---
+
+_Maintained by the AMA Help content team in consultation with the
+AAO and the NEMA scrutiny working group._

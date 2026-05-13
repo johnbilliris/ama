@@ -28,14 +28,38 @@ def load_sources(manifest_path: str) -> list[dict[str, Any]]:
     Each source dict carries: ``path``, ``body``, ``classification`` (from
     front-matter or ``OFFICIAL`` default), ``status``, ``tenant_id`` (or
     ``__global__``), and ``source_id`` = relative path.
+
+    The manifest may use either the flat schema ``{root, allowed_status,
+    globs:[…]}`` or the nested production schema
+    ``{admission:{spec_status_allowed:[…]}, sources:[{kind, glob, scope, …}]}``.
+    Both are accepted; the nested form is the canonical published manifest at
+    ``apps/ingest-runner/manifests/help-snapshot.yaml``.
     """
     if yaml is None:
         raise RuntimeError("PyYAML not installed — required for help_snapshot.source_loaders")
     manifest = yaml.safe_load(Path(manifest_path).read_text(encoding="utf-8"))
-    allow_status = set(manifest.get("allowed_status", ["Active", "Implemented"]))
+    admission = manifest.get("admission") or {}
+    allow_status = set(
+        manifest.get("allowed_status")
+        or admission.get("spec_status_allowed")
+        or ["Active", "Implemented"]
+    )
     root = Path(manifest.get("root", ".")).resolve()
+
+    flat_globs: list[str] = list(manifest.get("globs", []) or [])
+    nested_sources: list[dict[str, Any]] = list(manifest.get("sources", []) or [])
+    nested_globs: list[str] = [
+        s["glob"] for s in nested_sources if isinstance(s, dict) and s.get("glob")
+    ]
+    patterns = flat_globs + nested_globs
+    if not patterns:
+        logger.warning(
+            "manifest %s declares no globs (neither top-level `globs` nor `sources[*].glob`)",
+            manifest_path,
+        )
+
     sources: list[dict[str, Any]] = []
-    for pattern in manifest.get("globs", []):
+    for pattern in patterns:
         for p in glob.glob(str(root / pattern), recursive=True):
             sp = Path(p)
             if not sp.is_file():

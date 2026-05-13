@@ -57,10 +57,17 @@ resource helpArticles 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/contai
         indexingMode: 'consistent'
         includedPaths: [ { path: '/*' } ]
         excludedPaths: [ { path: '/_etag/?' } ]
+        // Cosmos limit: max 1 array-wildcard path per composite index, so the
+        // persona_tags + surface_tags pair is split into two single-array
+        // composites (each combined with snapshot_id for facet+filter queries).
         compositeIndexes: [
           [
             { path: '/persona_tags/[]', order: 'ascending' }
+            { path: '/snapshot_id', order: 'ascending' }
+          ]
+          [
             { path: '/surface_tags/[]', order: 'ascending' }
+            { path: '/snapshot_id', order: 'ascending' }
           ]
           [
             { path: '/snapshot_id', order: 'ascending' }
@@ -136,7 +143,10 @@ resource snapshotRecords 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/con
       id: 'snapshot_records'
       partitionKey: partitionKey()
       indexingPolicy: { indexingMode: 'consistent', includedPaths: [ { path: '/*' } ] }
-      analyticalStorageTtl: -1   // enable analytics store for governance reports
+      // NOTE: `analyticalStorageTtl` requires `enableAnalyticalStorage=true` on the
+      // Cosmos account (Synapse Link). The current platform account does not have
+      // analytics enabled, so the property is omitted here. Re-introduce together
+      // with an account-level update when governance reporting is wired up.
     }
     options: { autoscaleSettings: { maxThroughput: autoscaleMaxRu } }
   }

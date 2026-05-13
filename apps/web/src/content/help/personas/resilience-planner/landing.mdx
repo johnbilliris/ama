@@ -1,65 +1,201 @@
 ---
 slug: personas/resilience-planner
-title: "Resilience Planner — Getting Started"
+title: "Resilience Planner — getting started"
 persona: resilience-planner
-cluster: operational
+cluster: read-and-plan
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 10 min
 ---
 
-# Resilience Planner — Getting Started
+# Resilience Planner — getting started
 
-This guide gets a **Resilience Planner** productive in the AMA Hub in 15 minutes.
-Scope: Scenario design; capability gap analysis; pre-event exercises.
+The **Resilience Planner (RP)** is the AMA Hub's
+preparedness-and-recovery persona: pre-event jurisdictional
+coverage, framework adherence, capability gap analysis,
+exercise design, and post-event lessons-learned integration.
+The RP's envelope is **read-only and forward-looking** — no
+operational state-changing actions, but deep read access for
+analysis and substantial influence over the standing posture.
 
-## 1. What you can do
+This article gets a brand-new RP productive in fifteen
+minutes.
 
-As a Resilience Planner, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Read** every operating persona's workspace, every
+  agent's reasoning, every audit row.
+- **Read** all confidence bands except red (which is
+  Risk-Manager / Observer / Executive territory).
+- **Maintain** the standing risk register against which
+  agent assessments are scored.
+- **Maintain** the preparedness frameworks (AIDR PPRR,
+  AIIMS Levels, jurisdictional emergency plans, mutual-aid
+  agreement directory).
+- **Design** exercises (the typical exercise creator).
+- **Author** lessons-learned from prior incidents.
+- **Co-author** updates to help-corpus articles
+  (alongside content authors).
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Approve public warnings.
+- Issue tasks.
+- Allocate resources.
+- Tune confidence-band thresholds.
+- Take any state-changing operational action.
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Resilience Planner** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=resilience-planner-landing theme=light -->
-<!-- screenshot:placeholder route_id=resilience-planner-landing theme=dark -->
+1. **Sign in**; you land at the Preparedness workspace
+   (`/preparedness`).
+2. **Read the readiness posture** — coverage maps for your
+   jurisdictions, framework adherence scores, capability gap
+   tracking.
+3. **Open the Governance Dashboard** (`g g`). Note any
+   amber gates that could shape preparedness work.
+4. **Read pending lessons-learned** awaiting integration into
+   the standing posture.
+5. **Read pending exercise designs** (yours and peers'),
+   especially any in the next 30 days.
+6. **Verbal handover** with outgoing RP. Confirm in-flight
+   work.
 
-## 3. Decision rights & boundaries
+## 3. The standing risk register
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Resilience Planner** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+The standing risk register is the jurisdictional hazard
+catalogue against which agent assessments are scored. The
+RP maintains:
+- Hazard catalogue (what hazards apply to this jurisdiction
+  at what likelihood / consequence base rates).
+- Geographic coverage (which areas have what exposure).
+- Capability mapping (what resources we have for each hazard
+  class, what mutual-aid we rely on for the rest).
+- Review cadence (when each entry was last reviewed).
 
-## 4. Working with the Help Assistant
+Reviews are quarterly by default; major-event review
+triggers (e.g., a 1-in-50-year event in your jurisdiction)
+prompt out-of-cycle reviews.
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+## 4. Preparedness frameworks
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Resilience Planner?"
+The Hub aligns with:
+- **AIDR PPRR** — Prevention, Preparedness, Response,
+  Recovery doctrine.
+- **AIIMS** — Australasian Inter-service Incident
+  Management System (the doctrinal command structure).
+- **Jurisdictional emergency plans** (state-by-state).
+- **Mutual-aid agreement directory** — the catalogue at
+  `/governance/agreements`.
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+The RP ensures the Hub's posture (overlays, recommendations,
+default workspaces) reflects current framework editions and
+that any framework updates propagate into doctrine and
+content.
 
-## 5. Where to next
+## 5. Capability gap analysis
 
-- Browse all articles tagged `resilience-planner` via the [search page](/help/search?q=resilience-planner).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+The Preparedness workspace surfaces capability gaps:
+- Resource shortfalls against scenario demand.
+- Sector coverage gaps.
+- Communication channel reach gaps (especially for
+  multilingual audiences).
+- Mutual-aid agreement expiry approaching.
+- Training currency gaps for personas.
+
+The RP triages gaps; some go to the relevant operating
+persona (e.g., Logistics for resource shortfall); some go
+to the executive layer for resourcing decisions; some
+become exercise design inputs.
+
+## 6. Exercise design
+
+The RP is the typical exercise designer (see
+[`playbooks/simulation`](/help/articles/playbooks/simulation)).
+Design well:
+- Pick a hazard class and scenario shape that exercises a
+  specific capability gap or doctrinal area.
+- Define learning objectives explicitly.
+- Choose mode (tabletop / functional / live-fire / mixed).
+- Choose warp ratio.
+- Brief participants.
+- Run the exercise (or hand to a controller).
+- Debrief; capture findings; integrate into lessons-learned.
+
+## 7. Lessons-learned integration
+
+After incidents (real or exercise), the RP integrates the
+post-event lessons:
+- Review the evidence-pack export with the relevant
+  Operations Officer / IC.
+- Identify doctrinal gaps revealed.
+- Author lessons-learned articles (or feedback into existing
+  articles).
+- Update the standing risk register if base rates have
+  shifted.
+- Update the preparedness frameworks if doctrine has
+  evolved.
+- Submit content changes through the help-corpus authoring
+  workflow.
+
+## 8. Working with the constitutional steward
+
+The constitutional steward owns doctrine; the RP is a
+primary contributor of doctrine-revision proposals. The
+relationship is collaborative — the RP brings empirical
+patterns; the steward weighs them against constitutional
+soundness.
+
+## 9. Common pitfalls
+
+### 9.1 Preparedness as box-ticking
+Preparedness work that produces compliance documents but
+doesn't change operational behaviour is wasted. Each
+preparedness artefact should produce a behaviour change in
+some operating workspace.
+
+### 9.2 Stale risk register
+A risk register that hasn't been reviewed in a year is no
+longer a doctrinal anchor; it is theatre. Honour the
+quarterly cadence.
+
+### 9.3 Exercise without learning objectives
+Exercises that don't have explicit learning objectives
+produce diffuse debriefs. Always set objectives before
+designing the scenario.
+
+### 9.4 Lessons-learned without integration
+A lessons-learned report that doesn't propagate into the
+help corpus, the risk register, or the agent's training
+signal stays as a PDF in someone's drive. Integrate, don't
+file.
+
+### 9.5 Detachment from operations
+Like the RM, the RP is sometimes off-floor. Stay engaged
+via observation of active operations, periodic visits to
+operating workspaces, and post-event walkthroughs.
+
+## 10. The Help corpus you'll use most
+
+- [`playbooks/simulation`](/help/articles/playbooks/simulation)
+- [`audit-observer-mode`](/help/articles/audit-observer-mode)
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+- [`constitution-principle-v`](/help/articles/constitution-principle-v)
+- [`personas/risk-manager`](/help/personas/risk-manager)
+- [`personas/observer-auditor`](/help/personas/observer-auditor)
+- [`personas/incident-commander`](/help/personas/incident-commander)
+- [`troubleshooting`](/help/articles/troubleshooting)
+
+## 11. Where to next
+
+- Design and run a tabletop in your jurisdiction's
+  exercise tenant.
+- Audit the standing risk register against the prior
+  year's actual incident pattern.
+- Browse all articles tagged `resilience-planner` via search.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the preparedness working group, AIDR, and AFAC AIIMS-2017
+Doctrine._

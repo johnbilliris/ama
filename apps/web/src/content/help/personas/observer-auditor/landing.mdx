@@ -1,65 +1,190 @@
 ---
 slug: personas/observer-auditor
-title: "Observer / Auditor — Getting Started"
+title: "Observer / Auditor — getting started"
 persona: observer-auditor
-cluster: operational
+cluster: read-only
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 10 min
 ---
 
-# Observer / Auditor — Getting Started
+# Observer / Auditor — getting started
 
-This guide gets a **Observer / Auditor** productive in the AMA Hub in 15 minutes.
-Scope: Read-only timeline navigation; framework-deviation review; transcript reconstruction.
+The **Observer / Auditor** is the AMA Hub's read-only, full-
+visibility persona. Observer mode is used by post-incident
+review teams, AAO scrutiny, executive oversight, content
+authors verifying doctrinal change end-to-end, and standing
+governance committees. The Observer's audit weight is high
+because the findings they record become the formal scrutiny
+record for the tenant.
 
-## 1. What you can do
+This article gets a brand-new Observer productive in fifteen
+minutes; for the deep dive on the mode, read
+[`observer-mode-guide`](/help/articles/observer-mode-guide).
 
-As a Observer / Auditor, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Read** every operating workspace.
+- **Read** all confidence bands including red.
+- **Read** the audit timeline in full, including refusal rows
+  and DLQ entries.
+- **Read** every artefact's pre-state and post-state snapshots.
+- **Read** snapshot history and configuration changes.
+- **Record** findings against any audit row in your scrutiny
+  scope.
+- **Export** evidence packs for your scrutiny scope.
+- **Hand off** scrutiny tickets to peer Observers across
+  shifts.
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Take any state-changing action — no approvals, publications,
+  resource moves, threshold tuning, claim changes, calibration
+  refits.
+- Author or edit help articles.
+- Issue chat prompts that would invoke the gateway's deny path
+  (Observer's gateway profile is the strictest available).
+- Read content outside your scrutiny scope without expanding
+  the scope (which prompts a confirmation dialog and audit-
+  logs the expansion).
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Observer / Auditor** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=observer-auditor-landing theme=light -->
-<!-- screenshot:placeholder route_id=observer-auditor-landing theme=dark -->
+1. **Sign in** with your `observer-auditor` claim. Land at the
+   audit timeline.
+2. **Verify the *Observer* watermark** is present on every
+   page. If not, raise an incident — constitutional gate
+   breach.
+3. **Open the active scrutiny ticket** if one exists; if not,
+   create one for your shift's purpose at
+   `/governance/scrutiny/new`.
+4. **Set the scrutiny scope** — persona / jurisdiction / time
+   window appropriate to your purpose.
+5. **Open the Governance Dashboard** (`g g`). Note the
+   constitutional gates' state at scrutiny start.
+6. **Verbal handover** with outgoing Observer if the scrutiny
+   is multi-shift.
 
-## 3. Decision rights & boundaries
+## 3. The scrutiny workflow
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Observer / Auditor** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+See [`observer-mode-guide`](/help/articles/observer-mode-guide)
+for the full walkthrough. The Observer's typical sequence:
 
-## 4. Working with the Help Assistant
+1. Define scope (persona / jurisdiction / time window).
+2. Walk the audit timeline forward, reading each row in
+   detail.
+3. For each row, consult:
+   - The structured payload.
+   - The pre-state and post-state snapshots.
+   - The correlation graph (the DAG of related rows).
+   - The doctrinal snapshot in force at action time.
+4. Verify the hash chain (each row's chain dot should be
+   green; red is a constitutional incident).
+5. Record findings as you go (`n` shortcut on a focused row).
+6. At scrutiny close, generate an evidence pack from the
+   ticket.
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+## 4. Findings are first-class
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Observer / Auditor?"
+Findings have kinds:
+- **Observation** — a noted fact, no judgement.
+- **Concern** — a noted fact that the Observer believes
+  warrants attention.
+- **Recommendation** — a proposed change to doctrine, content,
+  or process.
+- **Compliance gap** — a noted breach of a doctrinal or
+  regulatory requirement.
+- **Commendation** — a noted positive (use these; they
+  balance the scrutiny record).
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+Rationale is **not** PII-redacted in findings; it goes into the
+evidence pack verbatim. Write knowing it will be read by
+external reviewers.
 
-## 5. Where to next
+## 5. Handing off scrutiny
 
-- Browse all articles tagged `observer-auditor` via the [search page](/help/search?q=observer-auditor).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+Long-running scrutinies span shifts. The hand-off workflow:
+- Choose the receiving Observer from a dropdown of currently
+  signed-in `observer-auditor` personas.
+- Add a hand-off note summarising findings to date, open
+  lines of inquiry, suggested next steps.
+- The receiving Observer's banner shows the hand-off; on
+  acceptance the ticket is theirs and your view becomes
+  read-only on the ticket.
+- Hand-off is reversible by mutual *Return ticket*.
+
+## 6. Working with the Help Assistant in Observer mode
+
+The Observer's chat assistant is grounded against the help
+corpus *and* the audit-row content within your scrutiny
+scope. You can ask, e.g., *"Why was warning W-2026-0193
+revised after publication?"*, and the assistant cites the
+revision audit row inline.
+
+The assistant's grounding is bounded by your scope; widening
+the scope expands grounding (with the audit-logged
+confirmation).
+
+Observer prompts are recorded with scrutiny ticket metadata so
+external reviewers can later see what lines of inquiry were
+pursued.
+
+## 7. Cross-tenant scrutiny
+
+The Observer/Auditor envelope is by default tenant-scoped.
+Cross-tenant scrutiny (e.g., a NEMA-led review of a multi-
+state event) is governed by a NEMA-level ACL and is granted
+on a per-incident basis; in-app there is no path to expand
+beyond your tenant.
+
+## 8. Common pitfalls
+
+### 8.1 Scrutiny without scope
+Walking the timeline without a defined scope produces
+diffuse findings that don't map to any review's purpose.
+Always set scope first.
+
+### 8.2 Findings without rationale
+A finding with no rationale is just a flag; the rationale is
+the value. Spend the time.
+
+### 8.3 Skipping commendations
+Scrutiny records that contain only concerns and gaps produce
+defensive postures in the audited team. Find the things
+that went well; record them.
+
+### 8.4 Scope expansion without intent
+Expanding scope prompts a confirmation; expanding casually
+to "look around" inflates the audit record. Expand
+deliberately.
+
+### 8.5 Treating Observer as spectator
+Observer is the scrutiny instrument. Read deliberately;
+record purposefully; produce evidence packs that downstream
+reviewers can use.
+
+## 9. The Help corpus you'll use most
+
+- [`observer-mode-guide`](/help/articles/observer-mode-guide)
+- [`audit-observer-mode`](/help/articles/audit-observer-mode)
+- [`screen-by-screen/audit-observer-view`](/help/articles/screen-by-screen/audit-observer-view)
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+- [`constitution-principle-v`](/help/articles/constitution-principle-v)
+- [`personas/executive-leader`](/help/personas/executive-leader)
+- [`troubleshooting`](/help/articles/troubleshooting)
+
+## 10. Where to next
+
+- Run a scrutiny against a recent exercise replay to
+  rehearse the workflow.
+- Read prior evidence packs to internalise the report
+  patterns reviewers expect.
+- Browse all articles tagged `observer-auditor` via search.
+- Engage with your tenant's constitutional steward to
+  understand the doctrinal context of your scrutiny work.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the AAO and the NEMA scrutiny working group._

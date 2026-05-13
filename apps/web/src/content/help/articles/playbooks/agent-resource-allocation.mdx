@@ -1,30 +1,207 @@
 ---
 slug: playbooks/agent-resource-allocation
-title: "Agent Playbook — Resource Allocation"
-kind: playbook
+title: "Playbook: working with the resource-allocation agent"
 status: Active
 classification: OFFICIAL
+audience: logistics-officer, operations-officer, incident-commander, frontline-fire, frontline-police, frontline-medical, frontline-ses-marine
+estimated_reading_time: 10 min
 ---
 
-# Agent Playbook — Resource Allocation
+# Playbook: working with the resource-allocation agent
 
-## 1. Overview
-supply-demand matching, contested resource arbitration, provenance
+This playbook complements the
+[Resource-allocation agent workspace](/help/articles/screen-by-screen/agent-resource-allocation).
+It covers the dispatch chain from agent recommendation to
+booked transfer, the mutual-aid agreements model, cross-border
+specifics, and the most common pitfalls.
 
-## 2. Pre-flight
-- Confirm persona + jurisdiction
-- Verify the active snapshot id
+The resource agent is an **optimiser**, not a director. Its
+recommendations balance demand against availability under the
+standing mutual-aid agreements. Operators accept, amend, or
+reject recommendations in the dispatch chain; the agent never
+moves a unit on its own.
 
-## 3. Workflow
-1. Open the relevant workspace
-2. Review agent recommendation with provenance + citations
-3. Approve / amend with audit trail entry
-4. Hand off to next persona
+## 1. Reading a recommendation
 
-## 4. Edge cases
-- Degraded mode: fall back to cached doctrine
-- Cross-jurisdiction: escalate via the Commonwealth persona
+Each recommendation carries:
+- A **kind** — `move`, `pre-position`, `release`,
+  `request-mutual-aid`, `decline-mutual-aid-request`.
+- A **source** — the unit(s) being moved.
+- A **destination** — the location, sector, or jurisdiction.
+- An **urgency** — *Immediate* / *Within 6 h* / *Within 24 h*.
+- A **confidence band**.
+- A **mutual-aid path** — intra-sector / cross-sector
+  intra-state / cross-border / international.
+- **Drivers** — top 3 signals or assessments.
 
-## 5. References
-- AIDR Handbook
-- AIIMS doctrine
+Read in this order: kind → source → destination → mutual-aid
+path → urgency → drivers. Open the mutual-aid drawer to
+verify the agreement's standing terms.
+
+## 2. The dispatch chain
+
+The chain has five steps; the agent's role is just step 1
+(propose). The remaining steps are operator actions:
+
+1. **Agent proposes** — recommendation appears in the queue.
+2. **Operations Officer forwards** to Logistics Officer. The
+   forwarding records the OO's intent; cross-border
+   forwarding triggers NEMA acknowledgement.
+3. **Originating Logistics Officer drafts** the transfer in
+   the *Resource board* workspace at `/workspaces/logistics`.
+4. **Originating Operations Officer co-signs** the export.
+   Cross-border requires receiving Operations Officer
+   co-signing the import.
+5. **Receiving Logistics Officer accepts** and books the
+   resource into the receiving pool.
+
+Each step is audit-logged. The transfer's correlation ID
+binds the agent's proposal, every co-sign, and the eventual
+unit movement (where systems-of-record are integrated).
+
+## 3. Mutual-aid agreements
+
+Mutual-aid agreements are the legal and operational framework
+for resource sharing. The Hub's agreements catalogue at
+`/governance/agreements` lists every active agreement with:
+- The parties and effective dates.
+- The standing terms (cost recovery, command-and-control
+  transfer rules, recall conditions).
+- The activation triggers.
+- The contact roles on each side.
+
+The resource agent's recommendations cite the relevant
+agreement; the mutual-aid drawer in the workspace surfaces it
+with one click. Always verify the agreement is active before
+forwarding (rare cases of an agreement having expired without
+the catalogue refreshing).
+
+## 4. Cross-border specifics
+
+Cross-border resource transfers always involve NEMA
+acknowledgement. The recommendation's mutual-aid path
+indicates `cross-border`; on forward, the NEMA dialog
+appears.
+
+The doctrinal sequence:
+1. Originating Operations Officer forwards. NEMA dialog
+   appears with *Notify and proceed* and *Hand off* options.
+   For most resource transfers, *Notify and proceed* is the
+   right path (resource transfer is not a federal-character
+   action; it's a state-to-state coordination).
+2. Originating Logistics Officer drafts; originating
+   Operations Officer co-signs export.
+3. Receiving Operations Officer co-signs import.
+4. Receiving Logistics Officer accepts.
+
+The receiving side typically responds within 5 minutes
+during active operations.
+
+## 5. Pre-positioning vs reactive movement
+
+The agent recommends both:
+- **Pre-positioning** — moving units toward a likely-impact
+  area before the impact occurs. Improves response time but
+  commits resources speculatively.
+- **Reactive movement** — moving units in response to an
+  active impact.
+
+Pre-positioning recommendations carry a `pre-position` kind
+and an *Within 24 h* or *Within 6 h* urgency. Forward
+selectively; over-pre-positioning depletes the originating
+sector's reserves for *its* potential events.
+
+## 6. Releasing units
+
+The `release` recommendation tells you a unit can return to
+the originating pool because the operational driver has
+diminished. Forward releases as readily as movements:
+unreleased units sit in receiving pools, depleting the
+originating sector unnecessarily.
+
+Release also triggers a return-leg logistics consideration
+(fuel, crew rotation, deadhead time). The Logistics Officer
+considers the return path during the release co-sign.
+
+## 7. Mutual-aid request received
+
+When a peer sector or jurisdiction requests resources from
+your sector, the request appears in your workspace as a
+`request-mutual-aid` recommendation (the agent's
+recommendation on how to respond) or as an inbound request
+in the Resource board.
+
+Either way, the response is:
+- Accept and dispatch via the standard chain.
+- Decline with rationale (e.g., your own active commitments
+  preclude release).
+- Counter-offer (different units, different timing).
+
+Audit-logged regardless. The peer's expectation should be
+managed verbally if the response will be slow.
+
+## 8. International assistance
+
+For OS jurisdiction (Pacific assistance) the chain is the
+same but with two additional steps:
+- **MFA diplomatic note** — the Department of Foreign Affairs
+  and Trade signs off on the international transfer; the
+  agent's recommendation cites the relevant diplomatic note
+  number.
+- **Customs and biosecurity** — physical movement requires
+  customs clearance and biosecurity inspection on both ends.
+  The Hub doesn't manage these directly; the Logistics
+  Officer co-ordinates with the relevant border agencies.
+
+International recommendations are rare and slow; expect
+24-hour-plus turnaround.
+
+## 9. Edge cases
+
+### 9.1 Conflicting recommendations
+Two recommendations proposing opposite movements of the
+same unit (e.g., move to A, simultaneously move to B). The
+queue surfaces the conflict with a paired view; resolve by
+choosing one and dismissing the other with rationale.
+
+### 9.2 Unit recall in transit
+A unit dispatched but in transit can be recalled by the
+originating Operations Officer with a *Recall* action. The
+recall is audit-logged and the unit reverts to the
+originating pool. Coordinate verbally — radio is faster
+than the Hub for in-transit recalls.
+
+### 9.3 Receiving side capacity exceeded
+If the receiving Logistics Officer determines the
+receiving pool cannot absorb the inbound (e.g., no
+secure parking, no crew accommodation), they decline.
+The originating side considers an alternative recipient
+or holds the unit.
+
+### 9.4 Unit unavailable mid-chain
+A unit recommended at step 1 may become unavailable by step
+3 (mechanical failure, crew sickness, recall to a higher-
+priority event). The Resource board surfaces the
+unavailability; the chain restarts with an alternative unit.
+
+### 9.5 Cost recovery dispute
+Cost recovery is governed by the standing mutual-aid
+agreement. Disputes happen post-event, not during dispatch.
+The Hub's audit trail of the dispatch chain is the
+authoritative record for cost-recovery accounting.
+
+## 10. Related
+
+- [`screen-by-screen/agent-resource-allocation`](/help/articles/screen-by-screen/agent-resource-allocation)
+  — the surface reference.
+- [`personas/logistics-officer`](/help/personas/logistics-officer)
+  — Logistics Officer landing.
+- [`personas/operations-officer`](/help/personas/operations-officer)
+  — Operations Officer landing.
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+  — cross-border resource transfer doctrine.
+
+---
+
+_Maintained by the AMA Help content team in partnership with
+the agents working group and the AFAC mutual-aid cell._

@@ -3,21 +3,226 @@ slug: getting-started
 title: "Getting started with the AMA Hub"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+estimated_reading_time: 12 min
 ---
 
 # Getting started with the AMA Hub
 
-## 1. Sign in
-Use your organisation identity. AU-region only.
+The Autonomous Disaster Response Coordination Hub (the **Hub**) is a federated
+operating picture for Australian disaster response. It brings together signals,
+warnings, agent recommendations, jurisdictional data, governance posture, and
+exercise replay into a single browser surface, while preserving AIDR doctrine,
+AIIMS function discipline, and AU-only data residency at every layer.
 
-## 2. Personas
-The Hub auto-resolves your default persona; switch via the header.
+This article gets a brand-new operator productive in roughly **fifteen minutes**.
+Read end-to-end on first sign-in; thereafter use the right-rail Help Assistant
+(`Ctrl+/` or `⌘+/`) for contextual answers grounded in this same corpus.
 
-## 3. Jurisdictions
-Filter scopes by jurisdiction; AU East data residency at all times.
+## 1. Before you sign in
 
-## 4. Accessibility
-Theme + font-size from Settings; keyboard-only is fully supported.
+You need three things from your home agency:
 
-## 5. Help on this screen
-Press `Ctrl+/` from any screen to open contextual help.
+1. **An organisation identity** registered in the Australian Government's
+   Microsoft Entra tenant, or in a tenant that has signed a federation
+   agreement with NEMA. The Hub will not accept identities from non-AU tenants
+   — this is enforced both at the Container Apps EasyAuth edge and again by
+   the API's `EntraAuthMiddleware`. If you see *"Sign-in refused: tenant not
+   permitted"*, your agency administrator needs to add the Hub's app
+   registration to their tenant. There is no self-service path.
+2. **At least one role assignment** mapped to the Hub's persona catalogue
+   (Incident Commander, Operations Officer, Planning Officer, Field
+   Coordinator, Public Information Officer, Logistics Officer, Resilience
+   Planner, Risk Manager, Observer/Auditor, Executive Leader, or one of the
+   front-line variants — Fire, Police, Medical, SES/Marine — plus the
+   cross-sector and Commonwealth aggregations). Persona is computed from
+   IdP claims (FR-027); no in-app override is possible without an audit
+   record.
+3. **A modern browser** — current Edge, Chrome, Firefox, or Safari (latest two
+   minor versions). Internet Explorer and legacy Edge are not supported. The
+   Hub is a single-page Next.js application; service-worker registration is
+   required for offline mode.
+
+If your jurisdiction operates in degraded connectivity (remote field
+deployments, cyclone-affected regions), see the **Offline mode** section in
+*Troubleshooting & FAQ* before your first deployment.
+
+## 2. Signing in
+
+1. Navigate to your agency's Hub URL (typically
+   `https://hub.<your-agency>.gov.au`). All production deployments terminate
+   on Azure Front Door in **Australia East**; you must not be tunnelling
+   through a non-AU egress.
+2. Choose **Sign in with organisation account**. The Hub redirects to your
+   IdP; if you are already signed in to Microsoft 365, no password prompt
+   appears.
+3. On return, the Hub stamps a short-lived JWT, exchanges it for a tenant
+   context, and redirects to the **Disaster Map** at `/`.
+
+If sign-in completes but you land on a `403 Forbidden` page, your IdP
+account is missing a role claim. Send the correlation ID shown on the page
+to your agency administrator — it is a deterministic UUID derived from your
+session and your tenant ID, and it is the fastest way for the support team
+to reproduce the issue.
+
+## 3. Your first sixty seconds on the Disaster Map
+
+The **Disaster Map** (`/`) is the default landing surface for every persona
+except Observer/Auditor (which lands on the Audit timeline).
+
+- **Top-of-screen jurisdiction filter** — defaults to the union of every
+  jurisdiction your IdP claim grants. Click to narrow. The filter is
+  persisted to your `localStorage` per browser; it is *not* synced server-
+  side, so a fresh device starts with the full claim union again.
+- **Layer switcher** (right side) — toggle signals, warnings, agent
+  recommendations, evacuation envelopes, and offline subsystem status.
+  Each layer carries an AIDR / AIIMS provenance tag visible in the legend.
+- **Confidence badges** on every signal pin: **green** ≥ 0.85, **amber**
+  0.55–0.85, **red** < 0.55. Red is hard-suppressed unless the operator
+  explicitly opts in via the **Risk Manager** workspace. See
+  [`amber-confidence-badge`](/help/articles/amber-confidence-badge) for
+  the full doctrine.
+- **AU-region banner** in the bottom-left — always visible. If it ever
+  reads anything other than *"Hosted in Australia · AU data residency"*,
+  stop work and raise an incident.
+
+## 4. Personas and workspaces
+
+Personas in the Hub are not job titles — they are **decision-rights envelopes**
+defined in the Constitution (`/help/articles/constitution-principle-v`).
+Switching persona changes *what* you can see and approve, not just the
+visual chrome.
+
+| Persona                       | Default landing       | Decision rights                             |
+| ----------------------------- | --------------------- | ------------------------------------------- |
+| Incident Commander            | Disaster Map          | Approve warnings, escalate cross-juris.     |
+| Operations Officer            | Workspace · Operations | Issue tasks, brief sectors, log decisions. |
+| Planning Officer              | Workspace · Planning   | Build IAPs, manage objectives.              |
+| Public Information Officer    | Alert Composer        | Draft and submit public alerts.             |
+| Logistics Officer             | Workspace · Logistics  | Resource allocation, reqs, approvals.      |
+| Field Coordinator             | Workspace · Field      | Offline-first; signal capture.             |
+| Risk Manager                  | Workspace · Risk       | Threshold tuning; red-band confidence.     |
+| Resilience Planner            | Preparedness          | Pre-event plans, frameworks, gaps.          |
+| Observer / Auditor            | Audit timeline        | Read-only; export evidence packs.           |
+| Executive Leader              | Governance Dashboard  | Posture, KPIs, constitutional gates.        |
+| Front-line (Fire/Police/Med/SES) | Sector workspace   | Sector-scoped operating views.              |
+
+The **persona switcher** lives in the top-right of every page. Switching
+records an audit row (`actor.persona_change`) so the audit trail captures
+*who* held which envelope when each decision was made — this is FR-016 of
+spec-035 and is a constitutional requirement.
+
+If your IdP claim grants a single persona, the switcher is read-only. To
+acquire a second persona you must have your agency administrator assign
+the second role; the Hub will refuse session-scoped elevations.
+
+## 5. Jurisdiction filters and AIIMS scoping
+
+Jurisdiction filtering is **multiplicative** with persona scoping. An
+Operations Officer with claim `["NSW", "VIC"]` who narrows the filter to
+`NSW` will see only NSW-scoped signals *and* will only be able to issue
+tasks to NSW resources. Re-broadening the filter does not retroactively
+expand permissions on already-issued artefacts; the audit row records the
+filter state at the moment of action.
+
+Jurisdiction codes follow ISO-3166-2 AU subdivisions (`NSW`, `VIC`, `QLD`,
+`WA`, `SA`, `TAS`, `NT`, `ACT`) plus three Hub-specific codes:
+- `CW` — Commonwealth (NEMA, BoM, Geoscience Australia).
+- `XB` — cross-border coordination cell.
+- `OS` — overseas (Australian assistance to neighbours; Pacific lens only).
+
+See [`screen-by-screen/multi-jurisdiction-filter`](/help/articles/screen-by-screen/multi-jurisdiction-filter)
+for the full UI walkthrough.
+
+## 6. The Help Assistant
+
+A right-rail chat panel is always present on `/help` and on every screen
+when you press `Ctrl+/`. The assistant is **grounded** — it cannot answer
+from training data. Every response either cites an article from this
+corpus or refuses with an explicit reason.
+
+**What it will do**
+- Answer "how do I…" questions about the Hub.
+- Surface citations (article + anchor) you can click to open the source.
+- Tell you which persona / jurisdiction / surface its answer assumed.
+- Refuse politely if you ask about something outside the corpus.
+
+**What it will not do**
+- Summarise live operational data. The assistant does not see live signals;
+  it sees only the published help corpus.
+- Make decisions on your behalf. It will not approve warnings, dispatch
+  resources, or change configuration. Those are reserved for the
+  appropriate persona workspace.
+- Speculate. If it has no grounding, it refuses.
+
+Try these starter prompts (your prompts are audit-logged with persona +
+jurisdiction context — phrase them professionally):
+
+- "How do I escalate a NSW bushfire to NEMA when VIC is also affected?"
+- "What does the amber confidence badge mean for an evacuation order?"
+- "Where is the keyboard shortcut to open the audit timeline?"
+- "Show me the playbook for an overnight communications outage."
+
+If a refusal blocks you and you genuinely need the answer, the
+**SupportHandoff** card at the bottom of the chat will compose an email
+to your tenant's nominated support inbox and include the redacted
+transcript.
+
+## 7. Audit, governance, and observability
+
+Every state-changing action — approving a warning, issuing a task,
+publishing a snapshot, switching persona — appends to the immutable
+**audit trail** (`audit_entries`, see spec-036 R-11 / spec-038 FR-020).
+Audit rows are append-only and cryptographically chained per tenant; you
+cannot edit or delete a historical entry from the UI.
+
+To inspect the audit trail:
+1. Open `/governance/audit` (Observer/Auditor lands here automatically).
+2. Filter by actor, action type, surface, or correlation ID.
+3. Export an evidence pack via `/governance/evidence` (Executive Leader
+   and Observer/Auditor only) — emits a JSON + signed manifest archive
+   suitable for post-incident review or AAO scrutiny.
+
+The **Governance Dashboard** (`/governance/dashboard`) surfaces the ten
+constitutional gates in real time. A red gate halts state-changing
+operations until the constitutional steward acknowledges the breach.
+
+## 8. Offline / degraded mode
+
+The Hub assumes connectivity but degrades gracefully:
+- **Field Coordinator** workspace and every **Sector** page register a
+  service worker that queues critical actions (signal capture, status
+  updates, evacuation acknowledgements).
+- The action queue persists across browser restarts in IndexedDB. When
+  connectivity returns, the queue replays in capture order and each
+  action records both the **observed time** and the **synced time** in
+  the audit trail.
+- A persistent banner reads *"Offline — N actions queued"*. Click it to
+  inspect or, with extreme caution, drop a queued action (audit-logged).
+- Map tiles are aggressively cached for AU subdivisions you have visited
+  in the prior thirty days. Out-of-cache regions render as a low-fidelity
+  raster with a "Stale tile · last refresh DD/MM" stamp.
+
+## 9. Accessibility
+
+Every Hub screen meets WCAG 2.2 AA. Keyboard-only navigation is fully
+supported; the help affordance opens with `Ctrl+/`, the persona switcher
+with `Alt+P`, the jurisdiction filter with `Alt+J`. See
+[`accessibility-how-to`](/help/articles/accessibility-how-to) for the
+complete shortcut map and screen-reader notes.
+
+## 10. Where to next
+
+- New persona? Open *your* persona's landing article from the persona
+  switcher's "Help on this role" link.
+- Faced with a specific screen? Search `/help/search` or press `Ctrl+/`
+  with the screen open — the assistant uses the current `surface_id` as
+  a retrieval hint.
+- Running an exercise? Start with [`playbooks/simulation`](/help/articles/playbooks/simulation).
+- Got an audit question? Start with [`audit-observer-mode`](/help/articles/audit-observer-mode).
+
+---
+
+_Maintained by the AMA Help content team. Last reviewed at the published
+help-snapshot; see the snapshot ID in the page footer for the exact
+revision._

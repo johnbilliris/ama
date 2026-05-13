@@ -1,30 +1,163 @@
 ---
 slug: screen-by-screen/agent-monitoring
-title: "Screen: Agent Monitoring"
+title: "Screen: Monitoring agent workspace"
 status: Active
 classification: OFFICIAL
+audience: incident-commander, operations-officer, planning-officer, observer-auditor, risk-manager
+surface_id: agent-monitoring
+estimated_reading_time: 10 min
 ---
 
-# Screen: Agent Monitoring
+# Screen: Monitoring agent workspace
 
-## 1. Purpose
-The **Agent Monitoring** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Monitoring agent workspace** at `/workspaces/agent-monitoring`
+exposes the Hub's monitoring agent to operating personas. The
+monitoring agent fuses signal feeds (BoM, EWN, Geoscience, agency
+observations, sentiment-filtered social) into a continuously
+updated *operating picture*: the canonical answer to *"what is
+happening right now in my jurisdictions?"*. This article is the
+screen-by-screen reference; for the underlying agent doctrine,
+see the agent contract at
+`/specs/038-help-docs-chat/contracts/agents-monitoring.contract.md`
+and the playbook at
+[`playbooks/agent-monitoring`](/help/articles/playbooks/agent-monitoring).
 
-## 2. Layout
-Light and dark variants:
+The monitoring agent is **read-only by construction** — it
+ingests, reasons, and emits recommendations; it never publishes
+or actions on its own. Operators are the only path to action.
 
 <!-- AnnotatedScreenshot screen_id=agent-monitoring light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+The workspace is a four-pane layout:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. **Header strip** — agent run state, last successful ingestion,
+   active feed health.
+2. **Operating picture** — left, ~50 % width; map + signal list
+   composed view.
+3. **Recommendations queue** — right top, ~50 % width; ranked
+   list of monitoring recommendations.
+4. **Reasoning trace** — right bottom, expandable; the cited
+   reasoning behind the selected recommendation.
+
+## 2. Header strip
+
+The header reads:
+- **Agent state** — *Running* (green dot) / *Paused* (amber) /
+  *Failed* (red).
+- **Last ingestion** — timestamp + source count + signal count
+  in the last 60 minutes.
+- **Feed health** — per-feed status; click to drill into the
+  feed health detail page.
+- **Pause / resume** — Operations Officer envelope; pauses the
+  agent (existing recommendations stay; no new emissions).
+  Audit-logged.
+
+## 3. Operating picture
+
+The operating picture composes the Disaster Map's signals layer
+with a side-panel list ranked by recency × severity × confidence.
+Selecting a signal in either view focuses the other.
+
+The composed view is the agent's *current snapshot* — what it
+believes is true at this moment. Use it as your single source of
+ground truth for situational awareness.
+
+Layer toggles match the Disaster Map's layer rail (signals,
+warnings, agent recommendations, evacuation envelopes,
+infrastructure). Filter chips above the list narrow by hazard
+class, source, confidence band, and observation age.
+
+## 4. Recommendations queue
+
+Each row in the queue is a recommendation card showing:
+- **Recommendation kind** — `monitor-closer`, `escalate-to-risk`,
+  `request-corroboration`, `prepare-evacuation`, `notify-cross-border`.
+- **Subject artefact** — the signal(s) the recommendation
+  concerns; click to focus in the operating picture.
+- **Confidence band** — green / amber / red on the recommendation
+  itself (which is itself a confidence-bearing artefact).
+- **Proposed action** — a short verb phrase.
+- **Action button** — your persona's action on the recommendation
+  (Acknowledge / Escalate / Dismiss / Hand off).
+
+Acknowledging a recommendation does not commit downstream action;
+it merely tells the agent that you have seen it. Escalating
+forwards the recommendation to the appropriate workspace (e.g.,
+*Risk* for `escalate-to-risk`, *Field Coordinator* for
+`prepare-evacuation`); dismissing records the operator's
+rationale and trains the agent's relevance model.
+
+## 5. Reasoning trace
+
+When a recommendation is selected, the reasoning trace pane
+shows the agent's chain-of-thought (citation-grounded; never
+free-form):
+- The signals it correlated (with similarity scores).
+- The doctrinal references it consulted (with anchor text).
+- The thresholds it evaluated (with values).
+- The conclusion (the recommendation card).
+
+The trace is the audit anchor for the recommendation. If you
+escalate or act on the recommendation, the resulting audit row
+inherits the trace's citation set.
+
+## 6. Audit consequences
+
+- *Acknowledge*, *Escalate*, *Dismiss*, *Hand off* are all
+  audit-logged with actor, recommendation ID, and rationale (if
+  the action requires one).
+- *Pause* / *Resume* the agent are audit-logged.
+- Reads of the workspace are not audit-logged.
+
+Recommendations the agent emits are themselves audit-logged
+under `agent.monitoring.recommend` rows.
+
+## 7. Edge cases
+
+### 7.1 Feed offline
+A feed offline does not stop the agent; it stops new ingestion
+from that feed. The *Feed health* indicator goes amber for the
+feed; persistent offline (> 30 minutes) goes red and the
+operating picture's *Last ingestion* timestamp reflects the
+unaffected feeds.
+
+### 7.2 Recommendation queue overflow
+If the queue exceeds 50 unacknowledged recommendations (most
+common in a fast-moving fire weather event), the workspace
+surfaces a *"Triage queue"* affordance that batches similar
+recommendations into one card per cluster.
+
+### 7.3 Stale calibration
+With stale calibration (> 60 days), recommendation confidence
+bands are downgraded by one band per the doctrine in
+[`amber-confidence-badge`](/help/articles/amber-confidence-badge).
+
+## 8. Keyboard shortcuts
+
+| Shortcut    | Action                                     |
+| ----------- | ------------------------------------------ |
+| `g w`, `m`  | Jump to Monitoring agent workspace         |
+| `[` / `]`   | Move selection in the recommendations queue|
+| `Enter`     | Acknowledge selected recommendation        |
+| `e`         | Escalate selected recommendation           |
+| `d`         | Dismiss selected recommendation (rationale required) |
+| `t`         | Toggle reasoning trace pane                |
+
+## 9. Related
+
+- [`playbooks/agent-monitoring`](/help/articles/playbooks/agent-monitoring)
+  — for the operational playbook.
+- [`screen-by-screen/disaster-mapper`](/help/articles/screen-by-screen/disaster-mapper)
+  — for the underlying map renderer.
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+  — for confidence-band doctrine.
+- [`screen-by-screen/agent-risk-assessment`](/help/articles/screen-by-screen/agent-risk-assessment)
+  — the natural escalation target for `escalate-to-risk`
+  recommendations.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+agents working group. Surface ID `agent-monitoring`._

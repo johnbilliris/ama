@@ -111,7 +111,14 @@ class LLMClientConfig:
     # constructor-injectable seam (FR-RAG-FM-07). The CSV format mirrors
     # apps/eval-runner/src/ama_eval/foundry_client._parse_deployment_map.
     def foundry_deployment_map(self) -> dict[str, str]:
-        """Parse ``AZURE_AI_PROJECT_DEPLOYMENTS`` into ``{modelKey: deploymentName}``."""
+        """Parse ``AZURE_AI_PROJECT_DEPLOYMENTS`` into ``{modelKey: deploymentName}``.
+
+        First-write-wins: see
+        ``apps/agents/common/foundry_chat_client._parse_deployment_map`` for
+        the rationale. Per-tier env vars (``AZURE_AI_<TIER>_DEPLOYMENT``)
+        should be preferred when callers need a specific tier rather than
+        an arbitrary first match.
+        """
         out: dict[str, str] = {}
         if not self.foundry_deployments:
             return out
@@ -119,19 +126,27 @@ class LLMClientConfig:
             if "=" not in entry:
                 continue
             key, name = entry.split("=", 1)
-            out[key.strip()] = name.strip()
+            out.setdefault(key.strip(), name.strip())
         return out
 
     def foundry_model_key_for(self, purpose: str) -> str:
         """Resolve the Foundry ``modelId@version`` key for an LLM purpose.
 
         Lookup order:
-          1. ``AZURE_AI_<PURPOSE>_MODEL_KEY`` (e.g. ``AZURE_AI_REASONING_MODEL_KEY``).
-          2. Reuse the legacy ``AZURE_OPENAI_<PURPOSE>_DEPLOYMENT`` value as the model key
+          1. ``AZURE_AI_<PURPOSE>_DEPLOYMENT`` set → return ``purpose``
+             itself (a tier alias). ``LiveFoundryChatClient._resolve``
+             recognises tier aliases and looks up the explicit deployment
+             env var. This lets callers target a specific tier even when
+             the CSV map collapses tiers onto a shared model key.
+          2. ``AZURE_AI_<PURPOSE>_MODEL_KEY`` (e.g. ``AZURE_AI_REASONING_MODEL_KEY``).
+          3. Reuse the legacy ``AZURE_OPENAI_<PURPOSE>_DEPLOYMENT`` value as the model key
              (single-deployment-per-tier convention from spec 014/032).
-          3. Default to ``gpt-4o`` (reasoning) / ``gpt-4o-mini`` (drafting) per
+          4. Default to ``gpt-4o`` (reasoning) / ``gpt-4o-mini`` (drafting) per
              plan.md Performance Goals.
         """
+        tier_env = f"AZURE_AI_{purpose.upper()}_DEPLOYMENT"
+        if os.getenv(tier_env):
+            return purpose
         env_key = f"AZURE_AI_{purpose.upper()}_MODEL_KEY"
         explicit = os.getenv(env_key)
         if explicit:

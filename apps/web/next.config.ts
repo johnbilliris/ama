@@ -18,12 +18,19 @@ const nextConfig: NextConfig = {
   // App Router Route Handlers under /src/app/api/** take precedence — this
   // matters for streaming endpoints (e.g. simulation chat SSE) which the
   // built-in rewrite proxy buffers.
+  //
+  // NOTE: Under Next 16 + Turbopack, catch-all Route Handlers
+  // (`/api/help/[...path]/route.ts`) are NOT preferred over `afterFiles`
+  // rewrites for paths matching the wildcard — the rewrite wins and the
+  // handler never runs. We work around this by explicitly excluding
+  // `/api/help/...` from the wildcard rewrite so the App Router handler
+  // (which injects identity headers + supports SSE pass-through) wins.
   async rewrites() {
     return {
       beforeFiles: [],
       afterFiles: [
         {
-          source: "/api/:path*",
+          source: "/api/:path((?!help/).*)",
           destination: `${API_PROXY_UPSTREAM}/:path*`,
         },
       ],

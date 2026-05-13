@@ -1,14 +1,267 @@
 ---
 slug: constitution-principle-v
-title: "Constitution Principle V — Coverage"
+title: "Constitutional Principle V — decision rights and persona envelopes"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+estimated_reading_time: 10 min
 ---
 
-# Principle V — Equitable access
+# Constitutional Principle V — decision-rights envelopes
 
-## 1. What it requires
-## 2. Where it shows up in the Hub
-## 3. PIO obligations
-## 4. Multilingual + accessibility coverage
-## 5. Evidence + audit
+The AMA Hub is governed by a written **Constitution**. The Constitution
+is a small, deliberately readable document that defines the doctrinal
+shape of the system: what may be done, by whom, under what evidence,
+with what audit obligation. **Principle V** is the principle that
+defines **personas as decision-rights envelopes** — the cornerstone of
+how the Hub maps Australian-Government and AIIMS doctrine onto a
+software product.
+
+This article restates Principle V verbatim, explains it in operator
+language, lists the envelope membership for each persona shipped by the
+Hub, describes the enforcement points, and documents the audit
+consequences of every envelope-touching event.
+
+The Constitution itself lives at
+`/specs/_constitution/principles.md`; this article is the operator-
+facing companion.
+
+## 1. Principle V — the verbatim text
+
+> **Principle V — Decision Rights are Envelope-Scoped.**
+> Every state-changing operation in the Hub is bound to a *decision-rights
+> envelope*: the cartesian product of (persona, jurisdiction, surface,
+> confidence band, snapshot version). An operation may be invoked only
+> by an actor whose envelope at the moment of invocation contains the
+> operation's required envelope. The Hub MUST refuse operations that
+> fall outside the actor's envelope, MUST audit-log the refusal, and MUST
+> NOT permit session-scoped envelope expansion. Envelopes are
+> compositional but not transitive: holding two persona claims does not
+> grant the union of envelopes unless the IdP issued a third claim
+> explicitly representing the union.
+
+That paragraph is the operative law of the Hub. Every other section of
+this article is commentary intended to make the law actionable.
+
+## 2. The five envelope axes
+
+### 2.1 Persona
+
+Personas are role claims issued by your IdP. The Hub maps each claim
+to a fixed persona enumeration; unmapped claims are inert. The
+persona's envelope is published at
+`/api/help/articles?kind=persona-envelope` and is also visible at the
+top of each persona's landing page in this Help corpus.
+
+A persona envelope lists, for each operation class:
+
+- The set of **actions** the persona may invoke.
+- The **co-sign requirements** (e.g., amber co-sign).
+- The **upstream evidence** required (e.g., signal age ≤ 60 minutes).
+- The **downstream propagation** (e.g., publication channels reached).
+
+### 2.2 Jurisdiction
+
+Jurisdictions narrow the persona envelope. An Operations Officer with
+claim `["NSW", "VIC"]` may invoke any Operations Officer action **but
+only with effect on NSW or VIC artefacts**. Filtering down to `NSW` in
+the UI further narrows the envelope at the moment of action; filtering
+back up does **not** retroactively expand any prior action's envelope.
+
+Jurisdictions are not transitive: a claim of `CW` (Commonwealth) does
+not imply claims on every state; cross-state action requires either an
+explicit multi-state claim or the cross-border (`XB`) claim plus a
+NEMA acknowledgement step.
+
+### 2.3 Surface
+
+Some actions are bound to specific surfaces. For example, *Approve
+warning* is bound to the **Alert Composer** surface; you cannot
+approve a warning from the Disaster Map's pin context menu even if
+your persona, jurisdiction, and confidence band are all in scope. The
+binding is doctrinal: it forces the operator to be in the workspace
+that exposes the full evidence panel for the action.
+
+### 2.4 Confidence band
+
+The amber/red bands further restrict the envelope per the doctrine in
+[`amber-confidence-badge`](/help/articles/amber-confidence-badge).
+Amber actions require co-signing; red actions are suppressed except
+for Risk Manager and read-only personas.
+
+### 2.5 Snapshot version
+
+The Hub's help corpus, doctrinal rules, and threshold configuration
+are themselves versioned via **snapshots**. Every action records the
+snapshot version in force at action time. A subsequent snapshot
+change does not retroactively alter the audit interpretation of a
+prior action — the action is read in the context of *its* snapshot.
+
+## 3. Enforcement points
+
+Principle V is enforced at five layers, each independently:
+
+1. **UI** — action buttons are disabled when the envelope rules out
+   the action. The disabled state shows an aria-tooltip explaining
+   why ("Outside persona envelope; co-signer required; jurisdiction
+   not in scope").
+2. **Web BFF** — the Next.js API proxy validates the persona /
+   jurisdiction headers against the destination route before
+   forwarding.
+3. **API gateway** — FastAPI dependencies (`require_persona`,
+   `require_jurisdiction`, `require_co_sign`, `require_band`,
+   `require_snapshot`) compose into a per-route policy.
+4. **Domain service** — each service rejects out-of-envelope payloads
+   with `EnvelopeViolation`, which surfaces as HTTP 403 with a
+   structured `code` field for the UI to render.
+5. **Audit appender** — refusals and successful actions both append;
+   the appender is the last-line defence, ensuring there is no
+   silent path past the rules.
+
+A single layer's failure does not weaken the doctrine; you would have
+to subvert all five to take an out-of-envelope action.
+
+## 4. Persona envelope summary
+
+The full envelope catalogue is large; this section is a
+human-readable digest. Authoritative details are on each persona's
+landing page in `/help/personas/<role>`.
+
+### 4.1 Operating personas
+
+- **Incident Commander** — full operational envelope within claimed
+  jurisdictions; cross-border requires NEMA ack; amber co-sign with
+  any operating persona.
+- **Operations Officer** — task issuance, briefing, decision
+  logging; warning approval requires co-sign with Incident Commander.
+- **Planning Officer** — IAP build, objectives, planning artefacts;
+  no public-channel actions.
+- **Public Information Officer** — alert composition; alert
+  publication requires co-sign with Incident Commander; cross-border
+  requires NEMA ack.
+- **Logistics Officer** — resource allocation, requisitions; large
+  resource moves require co-sign with Incident Commander.
+- **Field Coordinator** — signal capture, status updates,
+  evacuation acknowledgement; fully offline-first; no public-channel
+  actions.
+- **Risk Manager** — confidence-band tuning, calibration review,
+  red-band promotion/demotion; tuning requires constitutional
+  steward acknowledgement.
+
+### 4.2 Sector personas (front-line variants)
+
+- **Frontline Fire / Police / Medical / SES-Marine** — sector-
+  scoped operating views; signal capture and status; no
+  cross-sector public-channel actions; co-sign with sector
+  Operations Officer for state-changing actions.
+
+### 4.3 Read-and-plan personas
+
+- **Resilience Planner** — pre-event planning, frameworks,
+  preparedness gap analysis; no operational actions.
+- **Risk Manager** — see Operating section.
+- **Observer/Auditor** — full read access including red band; no
+  state-changing actions; evidence-pack export.
+- **Executive Leader** — Governance Dashboard, KPIs, evidence-pack
+  export; no operational actions.
+
+### 4.4 Aggregate personas
+
+- **Cross-sector** — explicit aggregation across sector personas
+  for combined sector views; no individual sector's state-changing
+  actions.
+- **Commonwealth** — federal-level oversight; cross-border
+  acknowledgement authority; no state-level operational actions.
+
+## 5. Refusals are first-class
+
+Every refusal records a row containing:
+
+- The actor and persona at refusal time.
+- The attempted action and the surface it was attempted from.
+- The envelope-axis that failed (persona / jurisdiction / surface /
+  band / snapshot).
+- The IdP claim set at refusal time.
+- The recommended remediation (e.g., *"Hand off to <persona>"*).
+
+The refusal row is itself in the chained audit trail. It is **not**
+attempted-but-discarded data; it is constitutionally significant. The
+Hub's chat assistant can quote refusal rows when answering questions
+about why an operator could not act.
+
+## 6. Compositionality
+
+Two persona claims compose into the **set union** of their permitted
+actions, **but only over the intersection of their jurisdictions and
+under the more-restrictive co-sign rule**. Concretely, if you hold:
+
+- Operations Officer (NSW, VIC)
+- Risk Manager (NSW)
+
+…then the union of actions you may invoke is:
+
+- All Operations Officer actions in NSW and VIC.
+- All Risk Manager actions in NSW only.
+- Both subject to the more-restrictive co-sign requirements.
+
+Compositionality is **not transitive**: holding Operations Officer in
+NSW and Operations Officer in VIC does **not** grant *cross-border*
+actions in the (NSW + VIC) jurisdiction — that requires the
+cross-border (`XB`) claim or NEMA acknowledgement.
+
+## 7. Session-scoped expansion is forbidden
+
+You cannot, mid-session, request a temporary envelope expansion. The
+only paths to a wider envelope are:
+
+- Sign out and re-acquire claims after your administrator updates
+  your IdP role assignments.
+- Hand off the action to a persona whose envelope already contains
+  it.
+- Request constitutional steward escalation, which records an
+  exception ledger entry visible to all stewards and tenants.
+
+This is intentional. Any short-circuit would invite social-engineering
+attacks against the operating personas.
+
+## 8. Practical examples
+
+**Example A.** A NSW Operations Officer attempts to approve a
+warning. The Hub disables the *Approve* button on the Alert Composer
+because warning approval is bound to Incident Commander, not
+Operations Officer. The Operations Officer chooses *Send to Incident
+Commander*; the action is forwarded with full evidence intact.
+
+**Example B.** A NSW + VIC Incident Commander attempts to publish a
+warning whose effect crosses into QLD because of geographic spread.
+The Hub presents a *"Cross-border action requires NEMA
+acknowledgement"* dialog; the IC chooses *Notify NEMA and proceed*;
+the action commits with both the IC's identity and the NEMA
+acknowledgement recorded.
+
+**Example C.** A Public Information Officer drafts an alert in
+amber-confidence territory. Approval requires co-sign with Incident
+Commander; the PIO selects an IC from the dropdown of currently
+signed-in eligible co-signers; the IC's workspace banner shows the
+co-sign request; on the IC's approval, the alert publishes.
+
+**Example D.** A Risk Manager attempts to tune the amber threshold
+to 0.49 (below the doctrinal floor of 0.50). The Hub refuses and
+records the refusal; the Risk Manager corrects the value.
+
+## 9. Related
+
+- [`audit-observer-mode`](/help/articles/audit-observer-mode) — for
+  reading the refusal and action rows that record envelope events.
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge) —
+  for the confidence-band axis of the envelope.
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+  — for constitutional-gate visualisation.
+- The Constitution itself: `/specs/_constitution/principles.md`.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+constitutional working group. The doctrine in this article is
+constitution-grade; do not edit without dual approval from a content
+steward and a constitutional steward._

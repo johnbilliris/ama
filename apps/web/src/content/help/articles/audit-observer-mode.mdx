@@ -1,14 +1,270 @@
 ---
 slug: audit-observer-mode
-title: "Audit / Observer mode"
+title: "The audit trail and Observer mode"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+estimated_reading_time: 12 min
 ---
 
-# Audit / Observer mode
+# The audit trail and Observer mode
 
-## 1. Read-only timeline
-## 2. Framework-deviation review
-## 3. Lessons-learned export
-## 4. Append-only audit log basics
-## 5. Where to next
+The Hub is **append-only and audit-first**. Every state-changing action
+— approving a warning, switching persona, dispatching a resource,
+publishing a help snapshot, dropping an offline-queued action — appends
+exactly one row to the immutable audit trail. The trail is
+cryptographically chained per tenant; rows cannot be edited or deleted
+through the UI, the API, or the database client. This article is the
+operator's reference for **reading** that trail (Observer mode), for
+understanding **what** is captured and what is not, and for the
+**evidence-pack export** workflow used in post-incident review and
+external scrutiny.
+
+## 1. Where the trail lives
+
+Audit rows are written to a single Cosmos container per tenant
+(`audit_entries`), partition-keyed by `tenant_id`, ordered by
+`sequence_number`, and each row carries the SHA-256 hash of the
+preceding row's canonical JSON form (`prev_hash`). The append pipeline
+is asynchronous but bounded: a row appears on `/governance/audit`
+within 30 s of the action that created it. A row that does not appear
+within 5 minutes is a constitutional gate breach and triggers the audit
+DLQ alarm.
+
+Operators do not interact with Cosmos directly. The Hub exposes the
+trail through three surfaces:
+
+- `/governance/audit` — the timeline browser (this article).
+- `/governance/evidence` — the evidence-pack exporter (Executive Leader
+  and Observer/Auditor only).
+- The Help Assistant's citation engine, which can quote audit rows
+  inline when grounding answers about historical decisions.
+
+## 2. Observer mode
+
+**Observer/Auditor** is a persona, not a mode-switch. When you sign in
+with the Observer/Auditor persona claim, the Hub:
+
+1. Lands you on `/governance/audit` instead of the Disaster Map.
+2. Disables every state-changing control across the entire app — the
+   workspaces still render, but the action buttons are absent.
+3. Adds an *"Observer"* watermark to every page so other operators in
+   the room (e.g., during a control-centre walkthrough) can see at a
+   glance that you cannot act.
+4. Grants you read access to **every confidence band**, including red,
+   so you can audit decisions taken under suppression.
+
+If your IdP claim grants both Observer/Auditor and an operating
+persona, the persona switcher is the doctrinal control: you can
+*switch into* Observer to lose action capability, but you cannot
+*combine* Observer's read access with another persona's action
+capability. The Constitution requires this separation.
+
+## 3. The audit timeline at `/governance/audit`
+
+### 3.1 Layout
+
+The timeline is a vertical-scrolling, virtualised list ordered newest-
+first. Each row is a card showing:
+
+- **Timestamp** in the operator's display timezone, with a hover-
+  tooltip giving UTC.
+- **Actor** — display name + persona at time of action + jurisdiction
+  filter at time of action.
+- **Action** — a short verb phrase (e.g., *"Approved warning W-2026-0193"*).
+- **Surface** — the screen/feature the action originated from
+  (`disaster-map`, `alert-composer`, `simulation-control`, …).
+- **Correlation ID** — the deterministic UUID linking this row to the
+  request, the agent invocation chain, and the resulting events.
+- **Confidence band** if the action was on a confidence-bearing
+  artefact (green/amber/red, plus the calibration timestamp).
+- **Co-signer** if amber two-person concurrence applied.
+- **Hash chain dot** — green if the row's `prev_hash` matches the
+  recomputed hash; red if mismatch (a tampering indicator that
+  triggers the audit DLQ alarm).
+
+### 3.2 Filters
+
+The right-hand filter rail offers:
+
+- **Time** — last hour, last shift (12 h), last 24 h, custom range.
+- **Actor** — multi-select; matches against display name or persona.
+- **Action** — multi-select against the action verb taxonomy.
+- **Surface** — multi-select against the surface enumeration.
+- **Confidence** — green/amber/red.
+- **Co-signed** — yes/no/either.
+- **Free-text** — searches the action's narrative field; not the
+  operator's prompts (which are not stored verbatim).
+
+Filters compose conjunctively. The active filter set is reflected in
+the URL so you can share a filtered view.
+
+### 3.3 Detail panel
+
+Clicking a row opens a detail panel showing:
+
+- The action's structured payload (immutable; pretty-printed JSON).
+- The pre-state snapshot referenced by the action.
+- The post-state snapshot the action produced.
+- The full agent invocation chain if the action was triggered by a
+  recommendation.
+- The correlation graph: a small DAG of related audit rows, useful for
+  reconstructing a multi-step workflow (e.g., "signal → recommendation
+  → approval → publication").
+
+The detail panel is read-only. There is no path from this UI to a
+write operation.
+
+## 4. What is captured and what is not
+
+### 4.1 Captured
+
+- Actor identity, persona at time of action, jurisdiction filter at
+  time of action, signed-in device fingerprint (one-way hashed).
+- Action verb, structured payload, pre-state hash, post-state hash.
+- Correlation ID, parent correlation ID (if part of a workflow).
+- Confidence band of any artefact the action touched, plus the
+  calibration timestamp at action time.
+- Co-signer identity and persona, if amber co-sign applied.
+- Refusals — both in the chat assistant and in any action that the
+  Hub itself refused (e.g., outside-decision-rights).
+- Snapshot publish/rollback events.
+- Configuration changes that affect doctrinal behaviour (threshold
+  tuning, persona claim changes, support-handoff inbox edits).
+
+### 4.2 Not captured
+
+- The free-text content of operator chat prompts. The Hub captures the
+  *fact* of a prompt and its category (refusal/answered/cancelled), but
+  not the verbatim text. This is a deliberate PII minimisation.
+- Mouse movement, scroll position, dwell time. The Hub is not a
+  surveillance instrument.
+- Read-only views (e.g., panning the map, opening a workspace tile,
+  reading a help article). Reads do not produce audit rows.
+
+If you need to understand *what* an operator was looking at when they
+took an action, the action row's pre-state snapshot is the answer; the
+viewport is not separately recorded.
+
+## 5. Evidence-pack export
+
+Evidence packs are signed, downloadable archives suitable for
+post-incident review, AAO scrutiny, FOI fulfilment, or transfer to a
+peer agency. They contain:
+
+- The audit-row JSONL for the requested filter window, with full
+  hash-chain context.
+- The pre- and post-state snapshots referenced by every row.
+- The relevant help-snapshot manifest (so reviewers can reconstruct the
+  doctrine that was in force).
+- A signed manifest (`manifest.json` + `manifest.sig`) bound to the
+  exporting persona, the export timestamp, and the SHA-256 of the
+  archive.
+
+To export:
+
+1. Open `/governance/evidence` (Executive Leader or Observer/Auditor).
+2. Set the time range and any actor / action / surface filters. The
+   export honours the same filter taxonomy as the timeline.
+3. Choose the redaction profile: **None** (raw), **Standard** (PII
+   redacted per the Hub's redaction model), or **External** (Standard
+   plus organisational identifiers redacted; suitable for international
+   transfer).
+4. Click *Generate*. The export runs asynchronously; you receive a
+   notification when it is ready, and the link is visible in your
+   evidence-pack inbox at `/governance/evidence/inbox`.
+5. The signed manifest verifies via the Hub's published signing key
+   (`/api/help/snapshots/keys`); reviewers should always verify before
+   relying on the contents.
+
+Evidence-pack generation is itself audit-logged. You cannot generate a
+silent export.
+
+## 6. Reading the hash chain
+
+Each row's `prev_hash` is the SHA-256 of the canonical JSON of the
+prior row. The first row of a tenant chains to the genesis hash
+(`"0x" + 64 zeros`). The chain is verified on every read by the
+Observer UI; a mismatch renders the row's hash-chain dot in red and
+triggers the audit DLQ alarm.
+
+To verify the chain manually (for evidence-pack reviewers):
+
+```bash
+jq -c . audit-rows.jsonl | python tools/audit/verify_chain.py
+```
+
+The verifier reads each row, computes the canonical JSON, hashes it,
+and compares against the next row's `prev_hash`. Any mismatch is
+reported with the row's `sequence_number` and the differing hash
+prefixes.
+
+The Hub publishes the verifier as part of the evidence-pack archive so
+external reviewers do not need to install AMA tooling.
+
+## 7. The audit DLQ
+
+When a row fails to chain (because the appender crashed mid-write, or
+because a downstream consumer rejected it), the row is written to the
+**audit dead-letter queue** (`audit_dlq`) and a constitutional alarm
+fires. Operators see this as:
+
+- A red **Audit gate** on the Governance Dashboard.
+- A banner on every page reading *"Audit gate red — state-changing
+  operations halted"*.
+- The chat assistant refuses with *"audit gate red"* if asked about
+  any historical decision in the affected window.
+
+Resolution is **never** an operator action. The constitutional steward
+inspects the DLQ entries, determines the impact, and either:
+
+- Re-chains the entries (after reviewing each), or
+- Declares a doctrinal gap and triggers recovery (which may involve
+  re-running the affected actions under formal review).
+
+Until resolution, the tenant is in **read-only** posture.
+
+## 8. Observer-mode shortcuts
+
+| Shortcut | Action                                                   |
+| -------- | -------------------------------------------------------- |
+| `g a`    | Jump to Audit timeline                                   |
+| `g e`    | Jump to Evidence-pack inbox                              |
+| `[`/`]`  | Move selection to previous / next audit row              |
+| `Enter`  | Open the detail panel for the selected row               |
+| `c`      | Copy the correlation ID of the selected row              |
+| `Esc`    | Close the detail panel                                   |
+| `f`      | Focus the filter rail                                    |
+| `r`      | Reset filters                                            |
+| `e`      | Export the currently filtered view as an evidence pack   |
+
+Observer-mode shortcuts work alongside the global shortcuts.
+
+## 9. Limitations and known issues
+
+- The timeline window is bounded to the most recent 90 days in the UI;
+  older rows are still in Cosmos and are reachable via evidence-pack
+  export.
+- Free-text search is whole-word only; partial matches are not
+  supported.
+- The correlation graph in the detail panel renders up to 200 nodes;
+  larger workflows are truncated with a *"Truncated; export for full
+  graph"* annotation.
+
+## 10. Related
+
+- [`screen-by-screen/audit-observer-view`](/help/articles/screen-by-screen/audit-observer-view)
+  — the screen-by-screen walkthrough of the timeline UI.
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+  — for constitutional-gate context.
+- [`personas/observer-auditor`](/help/personas/observer-auditor) — the
+  persona landing page.
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge) —
+  for understanding the confidence-band fields on audit rows.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+constitutional working group. Audit doctrine in this article is
+constitution-grade; do not edit without dual approval from a content
+steward and a constitutional steward._

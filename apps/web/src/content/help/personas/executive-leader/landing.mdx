@@ -1,65 +1,170 @@
 ---
 slug: personas/executive-leader
-title: "Executive Leader — Getting Started"
+title: "Executive Leader — getting started"
 persona: executive-leader
-cluster: operational
+cluster: read-only
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 9 min
 ---
 
-# Executive Leader — Getting Started
+# Executive Leader — getting started
 
-This guide gets a **Executive Leader** productive in the AMA Hub in 15 minutes.
-Scope: Strategic overview; board-level reporting; resourcing decisions.
+The **Executive Leader (EL)** is the AMA Hub's executive
+oversight persona: agency commissioners, jurisdiction-level
+emergency controllers, NEMA executive, government department
+leads. The EL's envelope is **read-only with publication
+authority**: they do not take operational actions, but they
+sign off on snapshot publications, posture exports, and the
+formal posture briefings that go to government.
 
-## 1. What you can do
+This article gets a brand-new EL productive in fifteen
+minutes.
 
-As a Executive Leader, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Read** the Governance Dashboard end-to-end.
+- **Read** the audit timeline (your tenant scope).
+- **Read** all confidence bands including red.
+- **Co-sign** help-snapshot publications (with Risk Manager).
+- **Export** posture snapshots for briefings.
+- **Export** evidence packs for executive review.
+- **Acknowledge** constitutional gates after steward
+  remediation (in some tenants this authority is
+  shared with the steward).
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Take any operational state-changing action.
+- Tune confidence-band thresholds.
+- Author or edit help articles.
+- Approve public warnings.
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Executive Leader** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=executive-leader-landing theme=light -->
-<!-- screenshot:placeholder route_id=executive-leader-landing theme=dark -->
+1. **Sign in**; you land at the Governance Dashboard.
+2. **Read the constitutional gates panel**. Note any amber
+   or red gates.
+3. **Read the calibration panel**. Note the fit timestamp.
+4. **Read the audit pipeline panel**. Note throughput,
+   latency, DLQ depth.
+5. **Read the localisation panel**. Note any languages with
+   coverage gaps.
+6. **Read the snapshot freshness panel**. Note when the next
+   publication is scheduled.
+7. **Read the federation posture panel** for cross-tenant
+   reachability.
+8. **Read the audit timeline** for the last hour to get a
+   sense of operational tempo.
+9. **Verbal handover** with outgoing EL if applicable.
 
-## 3. Decision rights & boundaries
+## 3. The dashboard as briefing source
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Executive Leader** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+The Governance Dashboard is your primary briefing source.
+The *Export posture* button emits a signed posture snapshot
+suitable for ministerial briefings, AAO submissions, or
+inter-agency reports. The export contains:
+- Constitutional gates state and recent state changes.
+- Calibration health summary.
+- Audit pipeline health summary.
+- Localisation coverage summary.
+- Snapshot freshness.
+- Jurisdictional KPIs.
+- Federation posture.
 
-## 4. Working with the Help Assistant
+The export is signed; reviewers can verify against the Hub's
+published signing key.
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+## 4. Snapshot publication co-sign
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Executive Leader?"
+Help-snapshot publications require Executive Leader + Risk
+Manager co-sign. The workflow:
+- Risk Manager initiates *Publish now* from the Governance
+  Dashboard's snapshot panel.
+- The Hub presents the snapshot's manifest (article diffs,
+  doctrine changes, calibration impact projection).
+- EL reviews and co-signs.
+- Snapshot publishes; audit-logged with both identities.
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+The co-sign is doctrinally significant — the snapshot is the
+in-force doctrine for every action audit-logged thereafter.
+Don't co-sign without reading the manifest.
 
-## 5. Where to next
+## 5. Constitutional gate acknowledgement
 
-- Browse all articles tagged `executive-leader` via the [search page](/help/search?q=executive-leader).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+When a constitutional gate goes red, the steward remediates;
+some tenants require EL acknowledgement to clear the gate.
+The acknowledgement records the EL's name, the gate, the
+remediation rationale, and the post-acknowledgement state.
+
+Don't acknowledge without satisfying yourself that the
+remediation is sound. The audit trail captures EL
+acknowledgement as a doctrinal-precedent decision.
+
+## 6. Working with operations
+
+The EL is not on the operations floor. Engage via:
+- The cross-sector chat for situational briefings (read-only).
+- Periodic visits to active operations workspaces.
+- Post-event evidence-pack reviews with the IC and Operations
+  Officer.
+
+Don't try to direct operations from the executive layer; the
+operating personas hold the doctrine.
+
+## 7. Inter-tenant relationships
+
+The federation panel shows cross-tenant reachability. EL
+relationships across tenants matter:
+- Coordinate with peer Executive Leaders before joint
+  posture exports.
+- Engage the on-call NEMA controller for federation
+  reachability concerns.
+- Pre-stage cross-border briefings through the federation
+  channels.
+
+## 8. Common pitfalls
+
+### 8.1 Co-signing snapshot without reading
+The manifest is dense; reading takes time; the doctrinal
+weight is high. Make the time.
+
+### 8.2 Acknowledging gate without remediation review
+EL acknowledgement is the constitutional close-out; if the
+remediation isn't sound, the close-out is hollow. Insist on
+adequate evidence.
+
+### 8.3 Posture export without context
+A posture snapshot exported without an accompanying
+narrative is hard to read. Couple with a written brief
+authored by you.
+
+### 8.4 Operational interference
+The EL is not the operations director. Stay in the
+oversight envelope; trust IC and Operations.
+
+## 9. The Help corpus you'll use most
+
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+- [`audit-observer-mode`](/help/articles/audit-observer-mode)
+- [`screen-by-screen/audit-observer-view`](/help/articles/screen-by-screen/audit-observer-view)
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+- [`constitution-principle-v`](/help/articles/constitution-principle-v)
+- [`personas/observer-auditor`](/help/personas/observer-auditor)
+- [`personas/risk-manager`](/help/personas/risk-manager)
+- [`personas/commonwealth`](/help/personas/commonwealth)
+
+## 10. Where to next
+
+- Sit in on a snapshot publication co-sign with your tenant's
+  Risk Manager.
+- Read the prior month's posture exports.
+- Engage your tenant's constitutional steward for a
+  doctrinal briefing.
+- Browse all articles tagged `executive-leader` via search.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the executive working group and the constitutional working
+group._

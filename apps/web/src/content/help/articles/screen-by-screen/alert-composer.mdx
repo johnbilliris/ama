@@ -3,28 +3,310 @@ slug: screen-by-screen/alert-composer
 title: "Screen: Alert Composer"
 status: Active
 classification: OFFICIAL
+audience: public-information-officer, incident-commander, operations-officer, planning-officer
+surface_id: alert-composer
+estimated_reading_time: 13 min
 ---
 
 # Screen: Alert Composer
 
-## 1. Purpose
-The **Alert Composer** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Alert Composer** at `/alerts/compose` is the single doctrinal
+surface through which public warnings are drafted, co-signed, and
+published. It is the **only** surface with the *Approve to publish*
+control bound to it; you cannot publish a warning from the Disaster
+Map's pin context menu, the chat assistant, or any workspace tile.
+This binding is constitutional (see Principle V at
+[`constitution-principle-v`](/help/articles/constitution-principle-v))
+— it forces the operator into the workspace that exposes the full
+evidence panel and the multilingual composer.
 
-## 2. Layout
-Light and dark variants:
+This article is the screen-by-screen reference. Every field, every
+button, every co-sign path, every multilingual nuance, every
+publication channel, every audit consequence.
 
 <!-- AnnotatedScreenshot screen_id=alert-composer light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+The Composer is a four-pane workspace:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. **Header strip** — alert metadata: classification, severity,
+   correlation ID, snapshot in force.
+2. **Evidence pane** — left, ~30 % width; the underlying signals,
+   recommendations, and reasoning.
+3. **Composer pane** — centre, ~45 % width; the alert content
+   editor with language tab strip.
+4. **Channel and approval pane** — right, ~25 % width; channel
+   selection, co-sign chain, publication state.
+
+On entry, the panes are sized as above; you can adjust via the
+splitter bars. Layout state persists per browser.
+
+## 2. Header strip
+
+The header reads:
+- **Severity** — `Advice` / `Watch and act` / `Emergency warning`
+  / `All clear`. Selectable; the choice drives the colour of the
+  alert pin on the map and the wording prefix on every channel.
+- **Hazard class** — fire, flood, storm, …; from the same
+  taxonomy as the Disaster Map.
+- **Geographic envelope** — drawn on a small inset map; click to
+  open the full editor. The envelope can be a polygon, a circle
+  (point + radius), or a route (linestring + buffer width).
+- **Temporal envelope** — start and expected end. The Composer
+  pre-fills from the originating signal/recommendation if the
+  Composer was launched from one.
+- **Classification** — `OFFICIAL` / `OFFICIAL: Sensitive`. The
+  classification gates which channels are reachable.
+- **Correlation ID** — generated on Composer entry; binds every
+  audit row produced by this drafting session.
+- **Snapshot in force** — the help-snapshot version against
+  which doctrinal interpretation will be made.
+
+## 3. Evidence pane
+
+The evidence pane shows, in priority order:
+
+- The **originating signal(s) or recommendation(s)** — the
+  artefact(s) that justified opening the Composer. Each has the
+  same evidence card as on the Disaster Map detail flyout
+  (identity, source, geographic and temporal envelope, confidence
+  band, calibration timestamp, related citations).
+- **Corroborating signals** — agent-correlated additional
+  evidence, ranked by relevance.
+- **Negative evidence** — signals that *contradict* the alert's
+  premise, if any. Negative evidence is required reading; the
+  Composer's *Approve* button is disabled until you have explicitly
+  acknowledged each piece (one click each).
+- **Doctrinal references** — citations into the help corpus that
+  bear on this alert (e.g., the relevant playbook, any
+  jurisdictional standing orders).
+
+Evidence ages are stamped per card. The 30-minute freshness rule
+applies for cross-border alerts; the 60-minute rule applies for
+single-jurisdiction alerts. Stale evidence cards are flagged and
+*Approve* is disabled.
+
+## 4. Composer pane
+
+### 4.1 Language tab strip
+
+The composer pane's top edge is a tab strip, one tab per
+authored language plus a `+` tab to add a new language. The first
+tab is always **English** (`en-AU`) and is required.
+
+Adding a language opens the language picker (catalogue: see
+[`multilingual-authoring`](/help/articles/multilingual-authoring)).
+On selection, the Composer pre-fills with a machine-translated
+draft from the Australian-region translation service, marked
+*"Machine draft — review before approval"*.
+
+### 4.2 The editor
+
+The editor is a structured-text editor with the following sections
+(each a separate field, not free-form):
+
+- **Headline** — ≤ 80 characters; appears on community-radio
+  crawls, SMS subject, social previews. The Composer enforces the
+  character limit per-language (different language widths apply).
+- **Lead instruction** — the single most important action the
+  community must take. ≤ 140 characters. The Composer flags
+  ambiguity (e.g., "be safe" without an action verb).
+- **Detail body** — full prose, ≤ 1,500 characters. Markdown
+  permitted (lists, bold, links). The Composer renders a live
+  preview as it would appear on web.
+- **Geographic specifics** — affected suburbs, evacuation routes,
+  assembly points. Drawn from the geographic envelope; editable
+  to refine.
+- **Source attribution** — the issuing agency. Pre-filled from
+  the originating sector and the persona's tenant.
+- **Time-of-issue and review-by** — issue time defaults to the
+  approval moment; review-by is the operator's commitment to
+  re-examine and either re-issue, revise, or all-clear by that
+  time.
+
+### 4.3 Side-by-side review
+
+For non-English language tabs, a *Side-by-side* toggle splits the
+pane: English on the left, target language on the right, with
+phrase-aligned highlights showing where the translation has drifted
+from the source. Drift threshold is tunable per tenant (Composer
+Settings).
+
+### 4.4 Validation
+
+The Composer validates continuously:
+
+- **Linguistic register** — checks for action verbs, measurable
+  instructions (no bare "soon"), specific geographic terms.
+- **Severity coherence** — *Emergency warning* requires a present-
+  tense imperative in the Lead instruction; *Advice* permits
+  conditional language.
+- **Channel compatibility** — if SMS is selected and the Lead
+  instruction exceeds 160 characters, the Composer flags it.
+- **Cross-border detection** — if the geographic envelope crosses
+  a subdivision boundary (or the temporal envelope reaches an
+  area projected to be affected within 6 h), the Composer flags
+  cross-border and surfaces the NEMA acknowledgement workflow.
+
+Validation results appear inline next to the relevant field and in
+a summary band at the bottom of the pane.
+
+## 5. Channel and approval pane
+
+### 5.1 Channel selection
+
+Channels are pre-selected based on the severity:
+- *Advice* — web + agency app.
+- *Watch and act* — web + agency app + SMS + community radio.
+- *Emergency warning* — all of the above + EWN federation +
+  outbound social.
+- *All clear* — same as the original alert's channel set.
+
+Each channel is a checkbox; you may add or remove channels but the
+default is doctrinally-compliant. Removing a default channel
+prompts a *"Reduced reach — confirm?"* dialog and audit-logs the
+reduction.
+
+For each channel, the Composer surfaces:
+- The channel's reach estimate (community size).
+- The channel's last successful publication timestamp.
+- The channel's outbound queue depth (red if non-zero — the
+  channel is degraded).
+
+### 5.2 Co-sign chain
+
+Below the channels, the co-sign chain shows the personas required
+to approve before publication, in order:
+
+- **PIO** drafts; PIO signs first.
+- For amber confidence, **Incident Commander** co-signs.
+- For cross-border effect, **NEMA** acknowledges (Notify or Hand
+  off; see [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)).
+- For multilingual, the **cultural reviewer** for each non-
+  English language signs off (parallel; multilingual alerts
+  publish when all reviewers have signed).
+
+Each row in the chain shows: the persona, the candidate co-signer
+(dropdown of currently signed-in eligible personas), the co-sign
+status (`pending`, `requested`, `signed`, `declined`), and a
+timestamp. The chain is read left-to-right.
+
+### 5.3 Publication state
+
+At the bottom of the pane, the publication state shows:
+- **Pre-publication** — the Composer is in draft.
+- **Approval queued** — co-sign chain in progress.
+- **Publishing** — channels are being reached; the Composer
+  surfaces per-channel progress.
+- **Published** — every channel reported success.
+- **Partial** — some channels failed; the Composer offers retry
+  per channel.
+- **Revoked** — the alert was withdrawn (only possible within 5
+  minutes of publication; later requires an *All clear* alert).
+
+## 6. Approving and publishing
+
+The *Approve and publish* button is at the bottom of the channel
+and approval pane. It is enabled when:
+
+- Every required field is populated and valid.
+- Every negative evidence acknowledgement is checked.
+- Every co-sign in the chain is complete (or the operator is the
+  final co-signer).
+- No critical validation flags are unresolved.
+- The Composer's snapshot-in-force matches the current snapshot
+  (mid-draft snapshot publication invalidates the draft; the
+  Composer warns and offers re-load).
+
+On click, the alert publishes. The publication state cycles
+through `Publishing` → `Published` (or `Partial` on per-channel
+failure).
+
+If you are not the final co-signer, the button reads *Sign and
+forward*; it commits your sign-off and notifies the next persona
+in the chain.
+
+## 7. Audit consequences
+
+Every action in the Composer audit-logs:
+- **Open Composer** — actor, originating artefact (if any),
+  correlation ID, snapshot in force.
+- **Field edit** — actor, field name, old value (hashed), new
+  value (hashed). Hashed because the verbatim text is the alert's
+  payload, which is captured at *Publish* time.
+- **Add language** — actor, language, machine-draft baseline.
+- **Channel add/remove** — actor, channel, reason if reducing
+  default reach.
+- **Co-sign request/sign/decline** — both personas, timestamp,
+  decline rationale if applicable.
+- **NEMA acknowledgement** — *Notify* or *Hand off*; NEMA
+  controller identity if signed in, inbox if queued.
+- **Publish** — every co-signer in the chain, every channel
+  attempted, per-channel outcome.
+- **Revoke** — actor, rationale (mandatory).
+- **Discard draft** — actor; discarding without publication is
+  audit-logged with the Composer state at discard time.
+
+The full alert payload is captured at the *Publish* event, signed
+with the publication manifest, and written to the
+`alert_publications` Cosmos container. It is never editable
+after publication.
+
+## 8. Edge cases
+
+### 8.1 Channel partial failure
+If one channel fails (e.g., SMS gateway timeout), the Composer
+shows *Partial* state. *Retry* attempts the failed channels only.
+If retry also fails, the Composer offers *Mark as best-effort*
+which closes the publication with the partial state recorded; this
+is audit-logged with the operator's rationale.
+
+### 8.2 Cultural reviewer unreachable
+A required cultural reviewer who is not signed in **does not**
+block English publication. The English alert publishes; the
+non-English variant queues for the reviewer and publishes when
+they sign off. The publication's correlation ID binds both.
+
+### 8.3 Mid-publication snapshot change
+If a help-snapshot publication completes between Approve and
+Publish, the Composer aborts the publish, flags *"Snapshot
+changed mid-flight"*, and asks you to re-validate. This is
+intentionally conservative — doctrinal changes mid-publication
+risk audit ambiguity.
+
+### 8.4 Concurrent draft on the same envelope
+If another operator has an open Composer with an overlapping
+geographic envelope, both are notified. The two operators
+coordinate via the cross-sector chat; the Composer does not
+auto-merge.
+
+## 9. Keyboard shortcuts
+
+| Shortcut    | Action                                          |
+| ----------- | ----------------------------------------------- |
+| `Ctrl+S`    | Save draft (auto-save also runs every 10 s)     |
+| `Ctrl+Enter`| Approve / sign and forward                      |
+| `Ctrl+L`    | Add a language                                  |
+| `Ctrl+B`    | Bold (in detail body)                           |
+| `Ctrl+K`    | Insert link (in detail body)                    |
+| `Tab` cycles| Through co-sign chain rows                       |
+| `Esc`       | Discard draft (with confirmation)                |
+
+## 10. Related
+
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+  — for amber-co-sign doctrine.
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+  — for the NEMA acknowledgement workflow.
+- [`multilingual-authoring`](/help/articles/multilingual-authoring)
+  — for the language tab strip and reviewer model.
+- [`screen-by-screen/disaster-mapper`](/help/articles/screen-by-screen/disaster-mapper)
+  — for launching the Composer from a map pin.
+- [`personas/public-information-officer`](/help/personas/public-information-officer)
+  — for the PIO landing.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+PIO working group and the AFAC public-information cell._

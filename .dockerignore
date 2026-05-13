@@ -31,6 +31,28 @@ test-results/
 **/test-results/
 artifacts/
 **/artifacts/
+docs/
+**/docs/
+# Re-include docs the API container reads at runtime (risk register +
+# governance-hub artefacts loaded by the API). Without these `!`
+# overrides the COPY steps in apps/api/Dockerfile fail with
+# "file not found in build context or excluded by .dockerignore".
+!docs/risk-register
+!docs/risk-register/**
+!docs/governance-hub
+!docs/governance-hub/adoption-roadmap
+!docs/governance-hub/adoption-roadmap/**
+!docs/governance-hub/executive-kpi
+!docs/governance-hub/executive-kpi/**
+!docs/governance-hub/rai-register
+!docs/governance-hub/rai-register/**
+# ingest-runner needs the corpus snapshots
+!docs/corpus
+!docs/corpus/**
+~$*
+**/~$*
+*.pptx
+**/*.pptx
 playwright-report/
 **/playwright-report/
 .eval-out/

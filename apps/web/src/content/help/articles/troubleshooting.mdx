@@ -3,13 +3,332 @@ slug: troubleshooting
 title: "Troubleshooting & FAQ"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+estimated_reading_time: 14 min
 ---
 
 # Troubleshooting & FAQ
 
-## 1. Login / IdP
+This is the consolidated incident catalogue for operators. Each section
+lists the symptom you will actually see in the UI, the likely cause, the
+self-service remediation, and — if the issue is not self-recoverable —
+the escalation path. Every remediation that touches a state-changing
+operation is audit-logged; remediations are not a back-door.
+
+If you are reading this *during* an incident and you cannot proceed,
+skip directly to **§12 SupportHandoff** at the bottom and start the
+escalation while you read.
+
+## 1. Sign-in and identity
+
+### 1.1 "Sign-in refused: tenant not permitted"
+Your IdP tenant is not federated with the Hub. The Hub permits exactly
+two classes of tenant: the AGW (Australian Government) tenant and any
+state/territory tenant that has signed a Tenant Federation Agreement
+with NEMA. Self-service is impossible.
+
+**Remediation:** forward the on-page correlation ID to your agency
+administrator. Do not screenshot the URL — the correlation ID alone is
+sufficient and avoids exposing query-string PII.
+
+### 1.2 "403 — your account has no Hub role"
+Your identity is recognised but no Hub persona claim is present.
+
+**Remediation:** your administrator must add you to the appropriate
+persona security group in your tenant. The Hub re-reads claims on every
+sign-in; once added, sign out fully (`/auth/signout`) and back in. Group
+propagation can take up to fifteen minutes.
+
+### 1.3 "Session expired" loop
+You are stuck in a redirect loop between `/auth/callback` and `/`.
+
+**Cause:** clock skew between your device and the IdP. The JWT `nbf`
+claim is being rejected as in-the-future.
+
+**Remediation:** sync your device clock to NTP. On Windows: open
+Settings → Time & Language → Date & Time → Sync now. On macOS the system
+clock is automatic but check that you are on AEST/AEDT, not the Pacific
+default. Repeat sign-in.
+
+### 1.4 "Persona claim ambiguous"
+You hold more than one persona but your IdP did not nominate a default.
+
+**Remediation:** the persona switcher will appear with no selection.
+Choose the persona appropriate to your current shift; the choice is
+audit-logged. Ask your administrator to set the `default_persona` claim
+attribute so the choice is stable across sessions.
+
 ## 2. Persona switching
-## 3. Jurisdiction filter
-## 4. Degraded mode
-## 5. Chat refusals
-## 6. Support handoff
+
+### 2.1 Switcher is read-only
+You hold a single persona claim. The switcher is intentionally disabled —
+session-scoped persona elevation would defeat the constitutional
+decision-rights envelope (FR-016, spec-035).
+
+**Remediation:** request a second persona via your administrator. There
+is no in-app workaround.
+
+### 2.2 Switching persona does not change the page chrome
+You changed persona on a screen that is *not* persona-scoped (e.g.,
+`/help`, `/governance/audit`). The chrome will refresh on the next
+persona-scoped navigation.
+
+**Remediation:** navigate to a workspace (e.g., `/workspaces`) to see the
+new persona's surfaces.
+
+### 2.3 "Persona switch refused: shadow exercise active"
+You are inside a Simulation tenant where switching persona would change
+your in-exercise role mid-flight. This is intentional — exercise replay
+must reproduce the same actor envelope at every step.
+
+**Remediation:** pause the exercise (Simulation Controller → Pause), or
+hand the controller role to another participant before switching.
+
+## 3. Jurisdiction filters
+
+### 3.1 "No data for this filter"
+Your filter narrowed the scope to zero permitted jurisdictions. Common
+when an operator first sees the Hub on a fresh device — the local default
+is often more restrictive than the IdP claim.
+
+**Remediation:** click **Reset to claim union** in the filter pop-over.
+
+### 3.2 Filter resets when I switch persona
+Some personas have a *constrained* default filter (e.g., a Sector
+front-line persona is locked to that sector's home jurisdiction). The
+constraint is part of the persona's decision-rights envelope.
+
+**Remediation:** none — this is by design. Use the parent jurisdiction
+persona (e.g., Operations Officer) for cross-sector views.
+
+### 3.3 "Cross-border action requires NEMA acknowledgement"
+You attempted a state-changing action whose effect crosses jurisdiction
+boundaries. The Hub requires Commonwealth (`CW`) acknowledgement before
+proceeding.
+
+**Remediation:** the dialog offers two options: *Notify NEMA and proceed*
+(records a notification and fires the action) or *Hand off to NEMA*
+(transfers the decision to a Commonwealth controller). Both are
+audit-logged.
+
+## 4. Confidence bands and red-band suppression
+
+### 4.1 No red-band signals visible
+Red-band signals (`< 0.55` model confidence) are hard-suppressed in every
+operating workspace except **Risk Manager**.
+
+**Remediation:** if you are a Risk Manager, toggle *Show red-band* in the
+layer switcher. If you are any other persona, the suppression is
+intentional — request a Risk Manager review.
+
+### 4.2 Amber band feels too aggressive
+Your tenant's amber threshold is configured by the Risk Manager. Defaults
+are 0.55 (lower) and 0.85 (upper). See the section on threshold tuning
+in [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard).
+
+## 5. Approvals and warnings
+
+### 5.1 "Approval refused: outside decision-rights envelope"
+Your persona is not authorised for the proposed action. The dialog will
+name the persona that *is* authorised.
+
+**Remediation:** hand off via *Send to <persona>*. The handoff is
+audit-logged and the receiver is notified in their workspace banner.
+
+### 5.2 Warning sits in "Pending publication"
+A warning has been approved but the public-channel adapter is offline or
+the Bureau has rate-limited the channel. The Hub queues warnings safely;
+they will publish when the channel recovers.
+
+**Remediation:** check `/governance/dashboard` → *Outbound channels*. If
+red, raise an incident with your channel administrator.
+
+### 5.3 "Stale evidence: signal age > 60 minutes"
+The evidence supporting an approval has aged out of the freshness band.
+
+**Remediation:** refresh the evidence panel (`F5` on the evidence card)
+to re-pull the signal. If the signal source is itself stale, the
+underlying issue is upstream and the Hub will not re-stamp.
+
+## 6. Audit trail
+
+### 6.1 "Audit row not yet visible"
+The audit pipeline is asynchronous; expect up to thirty seconds latency
+between an action and its appearance on `/governance/audit`. If a row
+does not appear within five minutes, raise an incident — that is a
+constitutional gate breach.
+
+### 6.2 "Audit export refused: tenant scope mismatch"
+You attempted to export an evidence pack for a tenant you do not have
+Observer/Auditor or Executive Leader rights on.
+
+**Remediation:** request the appropriate role. Cross-tenant audit access
+is governed by NEMA-level ACL and is never granted in-app.
+
+### 6.3 Audit DLQ shows non-zero
+The audit dead-letter queue surfaces rows that failed to chain
+cryptographically. This is a constitutional alarm.
+
+**Remediation:** stop state-changing work for your tenant immediately.
+Raise an incident referencing the DLQ entry IDs. The constitutional
+steward will determine whether to invoke recovery.
+
+## 7. Chat refusals
+
+The Help Assistant refuses for a closed set of reasons. Each refusal
+explains itself; this section covers the categories.
+
+### 7.1 "Out of scope"
+You asked about something not in the help corpus — typically operational
+data, real-time intelligence, or off-platform topics.
+
+**Remediation:** consult the underlying workspace (e.g., for live signals,
+go to the Disaster Map). The assistant will never speculate.
+
+### 7.2 "Sensitive operational"
+Your prompt referenced PSPF-marked or sensitive-operational content. The
+gateway is enforcing FR-RAG-NS rules.
+
+**Remediation:** rephrase to avoid sensitive specifics, or escalate to
+the cleared-channel briefing tool.
+
+### 7.3 "PII detected"
+Your prompt or the candidate response contains personally identifiable
+information. The gateway redacts before grounding.
+
+**Remediation:** the redacted answer is still delivered; a notice
+explains *what* was redacted. If the redaction is over-eager, raise a
+content review via the article's feedback bar.
+
+### 7.4 "Region not permitted"
+The deployment region for the chat agent is not in the AU allow-list.
+This should never happen in production.
+
+**Remediation:** stop using the assistant; raise an incident immediately.
+
+## 8. Offline / degraded mode
+
+### 8.1 "Offline — N actions queued"
+Connectivity is lost. The Hub continues to accept signal-capture, status
+updates, and evacuation acknowledgements; everything else is read-only.
+
+**Remediation:** none required. The queue replays automatically when
+connectivity returns. If you absolutely must drop a queued action,
+expand the banner, click the row, and confirm — the drop is audit-logged.
+
+### 8.2 Map tiles look low-resolution
+You are viewing a region whose tiles are not in the offline cache. The
+Hub falls back to a low-fidelity raster.
+
+**Remediation:** when connectivity returns, scroll the affected region;
+the cache refreshes opportunistically.
+
+### 8.3 "Stale tile · last refresh DD/MM"
+The tile cache has not been refreshed within the freshness band.
+
+**Remediation:** allow the page to sit in the foreground for ~30 seconds
+to give the cache refresh time to complete. If the stamp does not update,
+your network egress is being filtered; check with your IT team.
+
+## 9. Performance
+
+### 9.1 Map pan/zoom is sluggish
+Likely cause: too many simultaneous signal layers enabled. Each layer
+adds a Cosmos point-query subscription.
+
+**Remediation:** reduce layers in the layer switcher. Persistent
+sluggishness with the default layer set indicates a backend issue —
+raise an incident.
+
+### 9.2 Chat responses take > 30 seconds
+The chat agent is rate-limited or the model deployment is degraded. The
+SSE stream will eventually complete; do not refresh.
+
+**Remediation:** if you absolutely cannot wait, click *Cancel*; the
+turn is audit-logged as cancelled. Re-prompt with the same question; the
+assistant treats re-prompts deterministically.
+
+### 9.3 Workspace tiles show stale numbers
+The workspace polls Cosmos every eight seconds. If a tile is more than
+sixty seconds stale, it overlays a *"stale"* badge.
+
+**Remediation:** click the badge to force-refresh. Persistent staleness
+across all tiles indicates a backend issue.
+
+## 10. Browser and device
+
+### 10.1 "Service worker registration failed"
+Offline mode requires a service worker. Some browser privacy settings
+(strict tracking prevention) block registration.
+
+**Remediation:** allow service workers for the Hub origin. The Hub does
+not use service workers for tracking — only for the offline queue and
+tile cache.
+
+### 10.2 "WebGL not available"
+The map renderer requires WebGL 2.0. Headless browsers and remote-
+desktop sessions over compressed WAN often disable WebGL.
+
+**Remediation:** enable hardware acceleration in your browser. If you
+are on Citrix or AVD, request a GPU-enabled host pool from your IT team.
+
+### 10.3 Pop-up blocker eats the SupportHandoff window
+The handoff opens in a new tab to keep the audit context intact.
+
+**Remediation:** allow pop-ups for the Hub origin.
+
+## 11. Constitutional gates
+
+The ten constitutional gates are visible on `/governance/dashboard`. A red
+gate suspends state-changing operations for your tenant.
+
+| Gate | Failure symptom |
+|------|-----------------|
+| AU-region residency | "Action refused: residency gate red" |
+| Append-only audit | "Action refused: audit gate red" |
+| Persona decision-rights | "Action refused: persona gate red" |
+| Jurisdiction scoping | "Action refused: jurisdiction gate red" |
+| Confidence bands | "Action refused: confidence gate red" |
+| Citation grounding | Help Assistant refuses with "grounding gate red" |
+| Refusal hygiene | Chat panel disabled |
+| Snapshot freshness | Article serves with "Snapshot stale" banner |
+| Sensitive operational | Gateway escalates to deny |
+| PII redaction | Gateway escalates to deny |
+
+A red gate is **never** a workflow problem you can solve from the UI. It
+indicates a constitutional breach and must be resolved by the
+constitutional steward. Raise an incident immediately.
+
+## 12. SupportHandoff (escalation)
+
+When self-service is exhausted, click **Get help** at the bottom of any
+help screen or chat panel. This composes an email to your tenant's
+nominated support inbox containing:
+
+- Your correlation ID (for log correlation).
+- The redacted last-N turns of the chat (PII removed).
+- The current persona, jurisdiction filter, and surface ID.
+- The article slug you were reading, if any.
+
+Your administrator configures the support inbox via
+`PUT /api/help/support-handoff`. If the *Get help* button is missing or
+red, the inbox is unconfigured — ask your administrator to set one.
+
+## 13. Reporting a bug
+
+Bugs are filed via the *Report a bug* link in the page footer. The form
+attaches:
+
+- Browser and OS strings.
+- The last two console errors (sanitised).
+- The last navigation event.
+- Your correlation ID.
+
+It does **not** attach screenshots automatically — if you want to
+include one, attach it manually after sanitising it for PII.
+
+---
+
+_Maintained by the AMA Help content team. If a symptom you encounter is
+not covered here, please file via *Report a bug*; the content team
+triages new categories weekly._

@@ -8,11 +8,19 @@
  */
 import Link from "next/link";
 
+interface HelpArticleRef {
+  slug: string;
+  label: string;
+}
+
 interface HelpLink {
   href: string;
   label: string;
   description: string;
   external?: boolean;
+  icon?: string;
+  cta?: string;
+  helpArticles?: HelpArticleRef[];
 }
 
 const QUICK_START: HelpLink[] = [
@@ -20,31 +28,67 @@ const QUICK_START: HelpLink[] = [
     href: "/",
     label: "Disaster Map",
     description: "Operating picture across federated signals, warnings, and overlays.",
+    icon: "🗺️",
+    cta: "Open map",
+    helpArticles: [
+      { slug: "screen-by-screen/disaster-mapper", label: "Disaster mapper guide" },
+      { slug: "screen-by-screen/multi-jurisdiction-filter", label: "Multi-jurisdiction filter" },
+    ],
   },
   {
     href: "/workspaces",
     label: "Workspaces",
     description: "Persona-driven operating views aligned to AIIMS functions.",
+    icon: "🧭",
+    cta: "Open workspaces",
+    helpArticles: [
+      { slug: "screen-by-screen/persona-switcher", label: "Persona switcher" },
+      { slug: "getting-started", label: "Getting started" },
+    ],
   },
   {
     href: "/sectors",
     label: "Sectors",
     description: "Jurisdiction- and sector-specific scenarios from the capstone success criteria.",
+    icon: "🏛️",
+    cta: "Open sectors",
+    helpArticles: [
+      { slug: "cross-border-bushfire-nema", label: "Cross-border bushfire (NEMA)" },
+    ],
   },
   {
     href: "/governance/dashboard",
     label: "Governance Dashboard",
     description: "Constitutional gates, compliance, audit trail, readiness, recovery, and risk.",
+    icon: "🛡️",
+    cta: "Open dashboard",
+    helpArticles: [
+      { slug: "screen-by-screen/governance-dashboard", label: "Governance dashboard tour" },
+      { slug: "screen-by-screen/audit-observer-view", label: "Audit observer view" },
+      { slug: "constitution-principle-v", label: "Constitution principle V" },
+    ],
   },
   {
     href: "/preparedness",
     label: "Preparedness",
     description: "Pre-event jurisdiction coverage, frameworks, and coordination gaps.",
+    icon: "📋",
+    cta: "Open preparedness",
+    helpArticles: [
+      { slug: "getting-started", label: "Getting started" },
+      { slug: "accessibility-how-to", label: "Accessibility how-to" },
+    ],
   },
   {
     href: "/simulations",
     label: "Simulations",
     description: "Tabletop and live-fire exercises with replay and warp playback.",
+    icon: "🎯",
+    cta: "Open simulations",
+    helpArticles: [
+      { slug: "screen-by-screen/simulation-control", label: "Simulation control" },
+      { slug: "playbooks/simulation", label: "Simulation playbook" },
+    ],
   },
 ];
 
@@ -54,18 +98,24 @@ const REFERENCE_LINKS: HelpLink[] = [
     label: "Source repository",
     description: "Code, specs, contracts, and operator runbooks.",
     external: true,
+    icon: "📦",
+    cta: "View on GitHub",
   },
   {
     href: "https://learn.microsoft.com/azure/well-architected/",
     label: "Azure Well-Architected Framework",
     description: "Reliability, security, cost, operational excellence, and performance pillars.",
     external: true,
+    icon: "📐",
+    cta: "Read on Microsoft Learn",
   },
   {
     href: "https://www.aidr.org.au/",
     label: "Australian Institute for Disaster Resilience",
     description: "AIDR handbooks, AIIMS doctrine, and PPRR guidance referenced by the hub.",
     external: true,
+    icon: "📚",
+    cta: "Visit AIDR",
   },
 ];
 
@@ -88,31 +138,91 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
 ];
 
-function HelpCardLink({ link }: { link: HelpLink }) {
-  const className =
-    "rounded-lg border border-gray-200 bg-white p-4 transition-colors hover:border-blue-300";
-  if (link.external) {
-    return (
-      <a
-        className={className}
-        href={link.href}
-        target="_blank"
-        rel="noreferrer noopener"
+function HelpRow({ link }: { link: HelpLink }) {
+  const rowClass =
+    "help-quick-row grid grid-cols-1 items-start gap-4 rounded-xl border border-[color:var(--ama-border-subtle)] bg-[color:var(--ama-surface-elevated)] p-5 shadow-[var(--ama-shadow-xs)] md:grid-cols-3";
+  const ctaLabel = link.cta ?? (link.external ? "Open link" : "Open page");
+  const arrow = link.external ? "↗" : "→";
+
+  const NameCell = (
+    <div className="flex items-start gap-3">
+      <span
+        aria-hidden="true"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xl ring-1 ring-blue-100"
       >
-        <h3 className="text-base font-semibold text-blue-700 underline">
-          {link.label} ↗
-        </h3>
-        <p className="mt-1 text-sm text-gray-600">{link.description}</p>
-      </a>
-    );
-  }
+        {link.icon ?? "•"}
+      </span>
+      <div className="min-w-0">
+        <p className="preparedness-kicker">
+          {link.external ? "Reference" : "Hub section"}
+        </p>
+        {link.external ? (
+          <a
+            className="mt-1 block text-base font-semibold text-gray-900 hover:text-[color:var(--ama-color-ocean)] hover:underline"
+            href={link.href}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            {link.label}
+          </a>
+        ) : (
+          <Link
+            className="mt-1 block text-base font-semibold text-gray-900 hover:text-[color:var(--ama-color-ocean)] hover:underline"
+            href={link.href}
+          >
+            {link.label}
+          </Link>
+        )}
+        <span className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--ama-color-ocean)]">
+          {ctaLabel} <span aria-hidden="true">{arrow}</span>
+        </span>
+      </div>
+    </div>
+  );
+
+  const BlurbCell = (
+    <p className="text-sm leading-relaxed text-gray-600">{link.description}</p>
+  );
+
+  const HelpCell = (
+    <div>
+      <p className="preparedness-kicker mb-1">Help articles</p>
+      {link.helpArticles && link.helpArticles.length > 0 ? (
+        <ul className="list-none space-y-1 p-0">
+          {link.helpArticles.map((a) => (
+            <li key={a.slug}>
+              <Link
+                className="inline-flex items-start gap-1 text-sm text-[color:var(--ama-color-ocean)] hover:underline"
+                href={`/help/articles/${a.slug}`}
+              >
+                <span aria-hidden="true">→</span>
+                <span>{a.label}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : link.external ? (
+        <a
+          className="inline-flex items-start gap-1 text-sm text-[color:var(--ama-color-ocean)] hover:underline"
+          href={link.href}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          <span aria-hidden="true">↗</span>
+          <span>Visit reference</span>
+        </a>
+      ) : (
+        <p className="text-sm text-gray-500">No related help articles yet.</p>
+      )}
+    </div>
+  );
+
   return (
-    <Link className={className} href={link.href}>
-      <h3 className="text-base font-semibold text-blue-700 underline">
-        {link.label}
-      </h3>
-      <p className="mt-1 text-sm text-gray-600">{link.description}</p>
-    </Link>
+    <div className={rowClass}>
+      {NameCell}
+      {BlurbCell}
+      {HelpCell}
+    </div>
   );
 }
 
@@ -136,7 +246,7 @@ export default function HelpPage() {
         </div>
       </header>
 
-      <main className="space-y-6 p-6">
+      <div className="space-y-6 p-6">
         <section aria-labelledby="quick-start-heading">
           <h2
             id="quick-start-heading"
@@ -145,12 +255,12 @@ export default function HelpPage() {
             Quick start
           </h2>
           <ul
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="list-none space-y-3 p-0"
             aria-label="Quick start destinations"
           >
             {QUICK_START.map((link) => (
               <li key={link.href}>
-                <HelpCardLink link={link} />
+                <HelpRow link={link} />
               </li>
             ))}
           </ul>
@@ -164,12 +274,12 @@ export default function HelpPage() {
             Doctrine &amp; reference
           </h2>
           <ul
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="list-none space-y-3 p-0"
             aria-label="External reference material"
           >
             {REFERENCE_LINKS.map((link) => (
               <li key={link.href}>
-                <HelpCardLink link={link} />
+                <HelpRow link={link} />
               </li>
             ))}
           </ul>
@@ -193,7 +303,7 @@ export default function HelpPage() {
             </dl>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   );
 }

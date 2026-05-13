@@ -1,16 +1,224 @@
 ---
 slug: amber-confidence-badge
-title: "What does the amber confidence badge mean?"
+title: "Confidence bands: green, amber, and the doctrine of red suppression"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+estimated_reading_time: 9 min
 ---
 
-# What does the amber confidence badge mean?
+# Confidence bands and the doctrine of red suppression
 
-## 1. TL;DR
-Amber = the agent has moderate confidence; review provenance before acting.
+Every signal, recommendation, and projection surfaced in the AMA Hub is
+stamped with a **confidence band** — a single trichotomy (`green`,
+`amber`, `red`) derived from the underlying model's calibrated
+probability. The band drives both the visual treatment in the UI and a
+constitutional rule about which personas may *act* on it. This article
+documents the bands, the calibration, the suppression doctrine, the
+configuration knobs, and the audit consequences of every interaction
+with an amber or red artefact.
 
-## 2. How the band is computed
-## 3. What to do when you see it
-## 4. Examples
-## 5. References
+If you only have thirty seconds, the rules are:
+
+- **Green ≥ 0.85** — act normally.
+- **Amber 0.55 – 0.85** — act with a second-pair-of-eyes for
+  state-changing operations.
+- **Red < 0.55** — hard-suppressed in every workspace except **Risk
+  Manager**. Red signals never reach an Operations or Incident
+  Commander workspace.
+
+## 1. Where the numbers come from
+
+Confidence is a **calibrated** probability, not a raw model output. The
+calibration pipeline (spec-036, retrieval & gateway components) takes
+the model's logit, applies isotonic regression against a tenant-specific
+ground-truth set, and produces a probability that — within ±5 % across
+the operating range — equals the empirical hit rate.
+
+Calibration is re-fitted **monthly** from the prior 90 days of
+ground-truth labels. The fit timestamp is on every confidence-bearing
+artefact's evidence card; if it is older than 60 days, the artefact
+overlays a *"calibration stale"* badge and is treated as one band lower
+than its raw value.
+
+The Risk Manager workspace surfaces the calibration plot for the
+current tenant. If the plot's reliability diagram drifts substantially
+from the diagonal, raise an incident — the model is mis-calibrated and
+the bands are no longer doctrinally meaningful.
+
+## 2. Why the thresholds are where they are
+
+The 0.85 / 0.55 thresholds are not arbitrary. They were chosen against
+two reference operating points:
+
+- **0.85** is the operating point at which the marginal cost of a
+  false positive (acting on a non-event) equals the marginal cost of a
+  false negative (failing to act on a real event), under the
+  Commonwealth's tabletop assumptions for moderate hazards.
+- **0.55** is the operating point below which the model performs
+  statistically no better than the previous-decade base rate. Acting on
+  a sub-0.55 signal is acting on noise.
+
+The thresholds **may be tuned** by the Risk Manager for a tenant, but
+only within ±0.05 of the defaults and only with constitutional steward
+acknowledgement. See *§5 Tuning* below.
+
+## 3. Visual treatment
+
+### 3.1 In the map
+
+- **Green** pin: full-saturation icon in the layer's hue.
+- **Amber** pin: same icon with a thin amber halo and a "★" overstrike
+  that screen readers announce as "amber band".
+- **Red** pin: rendered only in Risk Manager view. In all other
+  workspaces, red signals are filtered server-side and never reach the
+  client, so a malicious console hack cannot reveal them.
+
+### 3.2 In the recommendation cards
+
+- **Green** card: action button enabled.
+- **Amber** card: action button enabled but flanked by a *"Requires
+  second eyes"* annotation; on click, a co-signer dialog appears.
+- **Red** card: not present in operating workspaces. In Risk Manager,
+  rendered with a red border and a *"Risk-only — not actionable"*
+  ribbon; the action button is replaced with *"Promote to amber"*
+  (which triggers a band-promotion review).
+
+### 3.3 In the audit trail
+
+Every state-changing action records the confidence band of the
+artefact at the moment of action, **plus** the calibration timestamp.
+This is the only way to reconstruct, after the fact, what the operator
+actually saw.
+
+### 3.4 In the chat assistant
+
+When the assistant cites a confidence-bearing artefact, it includes the
+band as part of the citation (e.g., *"per signal `sig-9af3` (amber,
+0.71)"*). If the cited band is amber or red, the assistant emits a
+chat-side *"Caveat: amber confidence; verify with primary source"*
+prefix.
+
+## 4. Doctrine: who can act on what
+
+| Persona              | Green | Amber                | Red               |
+| -------------------- | ----- | -------------------- | ----------------- |
+| Incident Commander   | ✓     | ✓ (co-sign required) | ✗ (suppressed)    |
+| Operations Officer   | ✓     | ✓ (co-sign required) | ✗ (suppressed)    |
+| Planning Officer     | ✓     | ✓ (read + plan)      | ✗ (suppressed)    |
+| Public Information Officer | ✓ | ✓ (co-sign required, PIO+IC) | ✗ (suppressed) |
+| Logistics Officer    | ✓     | ✓ (co-sign required) | ✗ (suppressed)    |
+| Field Coordinator    | ✓     | ✓ (capture only; no public action) | ✗ (suppressed) |
+| Risk Manager         | ✓     | ✓                    | ✓ (review only; no operational action) |
+| Resilience Planner   | ✓     | ✓ (planning only)    | ✗ (suppressed)    |
+| Observer/Auditor     | ✓     | ✓                    | ✓ (read-only)     |
+| Executive Leader     | ✓     | ✓ (read-only)        | ✓ (read-only)     |
+
+Co-signing means a second persona of the same or higher decision-rights
+envelope must approve before the action commits. The co-signer is
+selected from a dropdown of currently signed-in eligible personas; if
+none are available, the action queues until one signs in. The co-sign
+relationship is audit-logged on both sides.
+
+## 5. Tuning
+
+The Risk Manager can tune the bands within ±0.05 of the defaults via
+**Workspace → Risk → Threshold tuning**. Tuning steps:
+
+1. Open the threshold tuning panel. The current and proposed thresholds
+   are shown side-by-side over the calibration plot.
+2. Drag the green/amber separator (default 0.85) within `[0.80, 0.90]`.
+3. Drag the amber/red separator (default 0.55) within `[0.50, 0.60]`.
+4. Click *Preview impact*. The Hub replays the prior 30 days of signals
+   under the proposed thresholds and reports the change in:
+   - Volume of amber-band actions.
+   - Volume of red-suppressed signals.
+   - Estimated false-positive and false-negative rate change.
+5. If you choose *Apply*, a constitutional steward acknowledgement
+   prompt appears. The tuning takes effect only after acknowledgement
+   and is audit-logged with both actor and steward identities.
+
+Tuning is reversible. The tuning history is on the Governance Dashboard.
+
+## 6. Promotion and demotion
+
+Risk Manager can **promote** a red signal to amber (after manual
+review) or **demote** a green signal to amber (typically because of a
+contradicting observation). Both transitions:
+
+- Record an audit row with the originating Risk Manager, the rationale
+  text, and the prior/new band.
+- Take effect for all operating workspaces immediately; the WebSocket
+  push refreshes affected pins within ~1 s.
+- Are reversible by the same Risk Manager within 30 minutes; thereafter
+  a constitutional steward acknowledgement is required.
+
+Promotion is intentionally heavyweight to avoid an "amber inflation"
+spiral where every red signal eventually becomes amber.
+
+## 7. The "stale calibration" overlay
+
+If the calibration fit timestamp is older than 60 days, every
+confidence-bearing artefact in the affected tenant overlays a *"stale
+calibration"* badge. The Hub treats stale-calibration artefacts as
+**one band lower** than their nominal value:
+
+- Stale **green** ⇒ amber treatment (co-sign required for action).
+- Stale **amber** ⇒ red treatment (suppressed in operating workspaces).
+- Stale **red** ⇒ unchanged (still suppressed).
+
+Stale calibration is a constitutional gate: a red Calibration gate on
+the Governance Dashboard halts state-changing operations until
+re-calibration completes.
+
+## 8. Confidence in chat citations
+
+When the chat assistant grounds in a confidence-bearing source, the
+citation badge encodes the band:
+
+- Green badge with check: high-confidence citation.
+- Amber badge with caret: amber citation; the assistant prepends a
+  *"verify with primary source"* caveat.
+- Red badge with halt: never seen in chat — the gateway suppresses red
+  citations before they reach the assistant.
+
+## 9. Frequently asked
+
+**Why don't I see the raw probability?**
+Operationally, raw probabilities encourage spurious precision and
+inter-operator inconsistency. The bands map to action doctrine;
+probabilities map to nothing useful at the workspace level. Risk
+Manager has the raw values.
+
+**Why is amber co-sign sometimes blocked?**
+If no eligible co-signer is signed in, the action queues. You can hand
+off via *Send to <persona>* or wait. Queued actions are visible in your
+workspace inbox.
+
+**Can I bypass amber co-sign in an emergency?**
+No. The Constitution is explicit: amber requires two-person concurrence
+for state-changing operations. If you cannot find a co-signer, escalate
+to Incident Commander or invoke SupportHandoff.
+
+**A red signal looks important — can I see it?**
+Only Risk Manager, Observer/Auditor, and Executive Leader can see red
+signals. If you genuinely believe a red signal needs operational
+action, ask Risk Manager to **promote** it.
+
+## 10. Related
+
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+  — for the Calibration gate visualisation.
+- [`audit-observer-mode`](/help/articles/audit-observer-mode) — for
+  reading the audit rows that record band-at-action.
+- [`personas/risk-manager`](/help/personas/risk-manager) — for the
+  Risk Manager workspace's threshold-tuning workflow.
+- [`constitution-principle-v`](/help/articles/constitution-principle-v)
+  — for the source doctrine.
+
+---
+
+_Maintained by the AMA Help content team and the Risk Manager working
+group. The thresholds and doctrine in this article are
+constitution-grade; do not edit without dual approval from a content
+steward and a constitutional steward._

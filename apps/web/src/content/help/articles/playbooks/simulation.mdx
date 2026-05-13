@@ -1,30 +1,242 @@
 ---
 slug: playbooks/simulation
-title: "Simulation Playbook"
-kind: playbook
+title: "Playbook: designing and running an exercise"
 status: Active
 classification: OFFICIAL
+audience: incident-commander, operations-officer, planning-officer, resilience-planner, observer-auditor
+estimated_reading_time: 12 min
 ---
 
-# Simulation Playbook
+# Playbook: designing and running an exercise
 
-## 1. Overview
-scenario configuration, warp/playback, multi-jurisdiction scenarios, observation export
+This playbook is the operator's guide to designing, running, and
+debriefing exercises in the Hub. It assumes you are a controller
+or co-controller (Incident Commander or Operations Officer
+envelope on the exercise tenant) and that you have read
+[`screen-by-screen/simulation-control`](/help/articles/screen-by-screen/simulation-control)
+for the surface reference.
 
-## 2. Pre-flight
-- Confirm persona + jurisdiction
-- Verify the active snapshot id
+Exercises in the Hub are not toys: every action produces real
+audit rows in the exercise tenant's container, replay is bit-
+deterministic, and evidence packs exported from exercises have
+the same external-review value as production packs (with the
+*"exercise"* environment badge). Treat exercise design with the
+same rigour as production operations.
 
-## 3. Workflow
-1. Open the relevant workspace
-2. Review agent recommendation with provenance + citations
-3. Approve / amend with audit trail entry
-4. Hand off to next persona
+## 1. Choose the exercise mode
 
-## 4. Edge cases
-- Degraded mode: fall back to cached doctrine
-- Cross-jurisdiction: escalate via the Commonwealth persona
+The Hub supports four exercise modes:
 
-## 5. References
-- AIDR Handbook
-- AIIMS doctrine
+- **Tabletop** — discussion-based; no live agency systems
+  involved. Participants sit in a shared room or call. The
+  Hub provides the operating picture and the agent
+  recommendations; participants discuss decisions verbally.
+  Audit captures the verbal decisions via the controller's
+  *"declared decision"* affordance.
+- **Functional** — live agency systems are involved (e.g., the
+  Bureau provides real fire-weather observations into the
+  exercise tenant) but no resources actually move. Participants
+  exercise their dispatch and command paths in the Hub; agency
+  systems-of-record receive the dispatches and acknowledge but
+  no physical movement occurs.
+- **Live-fire** — real resources move. Used for drills,
+  training events with physical activation. Coordinate carefully
+  with the affected community.
+- **Mixed** — any combination, scoped per sector or
+  jurisdiction. Most realistic exercises end up here.
+
+Mode is recorded at exercise creation; it determines which
+mutual-aid agreements are *active* (live-fire) vs *acknowledged
+but not booked* (functional/tabletop).
+
+## 2. Define the scenario
+
+Scenario design has six axes:
+
+1. **Hazard class** — fire / flood / cyclone / heatwave /
+   earthquake / multi-hazard.
+2. **Geographic envelope** — the affected area; can span
+   subdivisions for cross-border practice.
+3. **Temporal envelope** — duration; tabletops typically run
+   1–4 hours of exercise time, often warp-compressed.
+4. **Severity arc** — the trajectory of the scenario over
+   exercise time; rising / steady / declining / oscillating.
+5. **Cross-sector dependencies** — which sectors are involved
+   and at what handoff points.
+6. **Learning objectives** — what specifically you want
+   participants to practise.
+
+Capture all six in the exercise's metadata at creation. The
+audit trail records each axis at action time; reviewers use
+them to bound their analysis.
+
+## 3. Seed the scenario
+
+Two seeding paths (see
+[`screen-by-screen/simulation-control`](/help/articles/screen-by-screen/simulation-control)):
+
+- **Template seeding** for deterministic reproducibility — the
+  same template ID produces bit-identical signals across runs.
+  Use for assessed exercises where bias from random variation
+  must be eliminated.
+- **Natural-language seeding** for novel scenarios — the
+  controller chats with the seeding agent (*"Seed a Riverina
+  flood with NSW–VIC cross-border evacuation across the Murray,
+  peak in 6 hours, amber confidence"*) and the agent produces
+  signal fixtures matching the description. Use for training
+  exercises where novelty is itself a learning objective.
+
+Either way, the seed is **frozen** once exercise time starts.
+Mid-exercise injections (see §6) are separate audit events.
+
+## 4. Set warp ratio
+
+Warp ratios let you compress hours of operational time into a
+session. Options: 1× (real-time), 2×, 4×, 8×, 16×, 32×.
+
+Guidance:
+- **1×** for live-fire and for high-fidelity tabletop debriefs
+  where wall-clock decision latency is itself the learning
+  objective.
+- **2×–4×** for typical functional exercises.
+- **8×–16×** for tabletop exercises focused on situational
+  awareness and persona coordination, not on dispatch latency.
+- **32×** for very-high-tempo overview exercises where the
+  goal is the arc, not any single decision.
+
+Warp can change mid-exercise (controller envelope; audit-
+logged). Be deliberate: changing warp shifts what is being
+practised.
+
+## 5. Brief participants
+
+Before starting:
+- Confirm every participant is signed in to the exercise
+  tenant under the appropriate persona.
+- Confirm the persona switcher shows the expected personas.
+- Walk through the scenario at a high level (without revealing
+  injects unless you intend a fully-briefed exercise).
+- Confirm the warp ratio and the expected exercise duration.
+- Confirm the learning objectives.
+
+For live-fire and functional, also confirm:
+- Which agency systems-of-record are participating.
+- The communication channel for out-of-Hub coordination
+  (radio frequencies, phone bridges).
+- The recall conditions if the exercise must be terminated
+  early (e.g., real incident emerges in the same area).
+
+## 6. Run the exercise
+
+During the exercise, the controller's primary tasks:
+
+- **Monitor agent emissions** for fidelity drift; agents
+  occasionally produce nonsensical recommendations during
+  novel scenarios. Pause and re-seed if needed.
+- **Inject** new signals or events at planned moments via the
+  controller chat (*"inject a power outage at Khancoban
+  substation now"*); each inject is audit-logged with the
+  controller's identity.
+- **Coordinate** between participating personas — answer
+  questions, clarify scenario details, observe decisions.
+- **Pause** for hot-debrief moments where you want the room
+  to reflect mid-stream.
+- **Record** verbal decisions via the *"declared decision"*
+  affordance for tabletops where decisions don't otherwise
+  produce audit rows.
+
+The controller is **not** a participant. Don't mix controller
+and operating-persona actions in the same session.
+
+## 7. Stop the exercise
+
+The *Stop* control archives the exercise; transitions PPRR to
+Recovery; freezes the audit trail; closes participant sessions.
+This is one-way — once stopped, an exercise cannot be resumed.
+
+Before stopping, confirm:
+- Every learning objective is either achieved or explicitly
+  marked as not-achieved (with rationale; audit-logged).
+- Every open inject is closed (declared either resolved or
+  abandoned).
+- Every participant has acknowledged the exercise end.
+
+## 8. Debrief
+
+The debrief is the most valuable part of the exercise. The
+Hub supports debriefs via the **Replay** workspace at
+`/simulations/{tenantId}/replay`:
+
+- Scrub the timeline; pause at decision points; ask
+  participants what they saw and why they acted.
+- Open the audit timeline alongside; show the rows that record
+  each decision.
+- Open the agent reasoning traces for key recommendations;
+  discuss whether the agent's reasoning matched the
+  participant's mental model.
+- Compare the actual outcome with the learning objectives.
+
+Capture findings via Observer mode (see
+[`observer-mode-guide`](/help/articles/observer-mode-guide))
+during the debrief; export an evidence pack for the formal
+report.
+
+## 9. Post-exercise
+
+After debrief:
+- File the exercise's after-action report (outside the Hub).
+- Archive the exercise tenant (it becomes read-only; replay
+  remains available indefinitely).
+- Update the standing orders and playbooks if the exercise
+  surfaced doctrinal gaps; submit changes via the help-corpus
+  authoring workflow.
+- If the exercise revealed a calibration drift in agent
+  recommendations, raise with Risk Manager for re-calibration.
+
+## 10. Common pitfalls
+
+### 10.1 Over-warping
+Warp 32× compresses a 24-hour scenario into 45 minutes. The
+audit trail is dense; participants miss inflection points. If
+the goal is decision-arc practice, prefer 4×–8×.
+
+### 10.2 Mid-exercise persona switching
+Participants want to "play" multiple personas. The Hub
+disables mid-exercise persona switching for replay fidelity.
+Plan ahead: assign each participant a single persona for the
+session, or run paired exercises for multi-persona experience.
+
+### 10.3 Cross-tenant leakage
+Participants signed in to both an exercise tenant and a
+production tenant in different browser windows must be
+careful: a published alert from the exercise tenant goes to
+exercise channels (Hub-only), not real-world channels, but
+verbal coordination over an out-of-Hub channel can leak
+intent. Use the *"Exercise"* watermark as a constant reminder.
+
+### 10.4 Insufficient learning objectives
+Exercises without explicit learning objectives debrief poorly
+— the conversation drifts to whoever's anecdote is most
+salient. Capture three to five objectives at creation, even
+for short exercises.
+
+### 10.5 No Observer
+Exercises without an Observer/Auditor in the room miss most
+of the learning. Even a single Observer recording findings
+during the exercise dramatically improves debrief quality.
+
+## 11. Related
+
+- [`screen-by-screen/simulation-control`](/help/articles/screen-by-screen/simulation-control)
+  — the surface reference.
+- [`observer-mode-guide`](/help/articles/observer-mode-guide) —
+  for the Observer's role in exercises.
+- [`personas/resilience-planner`](/help/personas/resilience-planner)
+  — Resilience Planner is the most common exercise designer.
+- [`audit-observer-mode`](/help/articles/audit-observer-mode) —
+  for reading the audit rows during debrief.
+
+---
+
+_Maintained by the AMA Help content team in partnership with
+the exercise design working group._

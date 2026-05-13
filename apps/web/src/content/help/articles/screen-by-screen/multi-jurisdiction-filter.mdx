@@ -1,30 +1,235 @@
 ---
 slug: screen-by-screen/multi-jurisdiction-filter
-title: "Screen: Multi Jurisdiction Filter"
+title: "Screen: Multi-jurisdiction filter"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+surface_id: multi-jurisdiction-filter
+estimated_reading_time: 9 min
 ---
 
-# Screen: Multi Jurisdiction Filter
+# Screen: Multi-jurisdiction filter
 
-## 1. Purpose
-The **Multi Jurisdiction Filter** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **multi-jurisdiction filter** is the small but doctrinally
+significant control in the top bar that scopes every operating
+view to the jurisdictions you have selected. It is present on
+every persona-scoped surface (Disaster Map, every Workspace,
+Sector pages, the Alert Composer, the Governance Dashboard), and
+its state is persisted per browser. This article documents the
+control, the doctrinal model, and the most common pitfalls.
 
-## 2. Layout
-Light and dark variants:
+For the broader doctrinal context (jurisdiction as one axis of
+the decision-rights envelope), see
+[`constitution-principle-v`](/help/articles/constitution-principle-v).
 
-<!-- AnnotatedScreenshot screen_id=multi-jurisdiction-filter light=true dark=true -->
+## 1. The control
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+The control sits in the top bar to the right of the persona
+switcher. It reads, in its collapsed form:
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+> **Jurisdictions: NSW, VIC + 1 more**
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+…or, if all claimed jurisdictions are selected:
+
+> **Jurisdictions: All (5)**
+
+…where the trailing number is the count of jurisdictions in your
+IdP claim. Click anywhere on the chip to expand the popover.
+
+## 2. The popover
+
+The popover lists every jurisdiction in your IdP claim with a
+checkbox. Above the list, three quick-action links:
+- **Reset to claim union** — selects every claimed jurisdiction.
+- **Clear all** — selects nothing (which produces the *"No data
+  for this filter"* state; rarely useful).
+- **Invert** — toggles every checkbox.
+
+Below the list, a small persistent reminder:
+> *Persisted per browser. To change your claimed jurisdictions,
+> contact your administrator.*
+
+The popover closes on `Esc`, on click-outside, or on the popover's
+*Apply* button. Selections take effect on *Apply*, not on each
+checkbox — this is intentional, to avoid noisy refetch storms when
+checking multiple boxes in succession.
+
+## 3. The jurisdiction taxonomy
+
+The Hub's jurisdiction codes follow ISO-3166-2 AU subdivisions:
+
+| Code  | Subdivision                  |
+| ----- | ---------------------------- |
+| `NSW` | New South Wales              |
+| `VIC` | Victoria                     |
+| `QLD` | Queensland                   |
+| `WA`  | Western Australia            |
+| `SA`  | South Australia              |
+| `TAS` | Tasmania                     |
+| `NT`  | Northern Territory           |
+| `ACT` | Australian Capital Territory |
+
+Plus three Hub-specific codes:
+
+| Code  | Scope                                                     |
+| ----- | --------------------------------------------------------- |
+| `CW`  | Commonwealth (NEMA, BoM, Geoscience Australia)            |
+| `XB`  | Cross-border coordination cell                            |
+| `OS`  | Overseas (Australian assistance to neighbours; Pacific)   |
+
+Sub-jurisdictions (LGAs, fire districts, sector areas) are not
+first-class in the filter; they are surfaced as overlays inside
+the chosen state/territory.
+
+## 4. Default and persistence
+
+On a fresh device or after clearing browser storage, the filter
+defaults to your **claim union** — every jurisdiction your IdP
+claim grants. Subsequent edits persist in `localStorage` under
+the Hub's origin; they survive across sign-out/sign-in within the
+same browser.
+
+Persistence is **per browser, per device**. Switching to your
+phone resets to the claim union; switching back to your laptop
+restores the laptop's saved selection.
+
+The Hub does **not** synchronise the filter server-side. This is
+deliberate — the filter is a UI scoping aid, not a security
+control. Doctrinal scoping (what you may *act* on) is enforced
+server-side from your IdP claim regardless of the filter.
+
+## 5. How filtering composes
+
+The filter is a **scoping** of your envelope, not an **expansion**.
+Concretely:
+
+- **Read scope** — every read query (signal lists, warning lists,
+  audit-trail filters, KPI panels) is intersected with the active
+  filter set. Out-of-filter artefacts are not returned.
+- **Action scope** — every state-changing action validates that
+  the action's effect is within the intersection of (claim ∩
+  filter). An Operations Officer with claim `[NSW, VIC]` who
+  filters down to `NSW` cannot issue a VIC task even though the
+  claim grants it; re-broadening the filter restores the
+  capability.
+- **Audit witness** — the filter state at action time is captured
+  in the audit row; this is what reviewers see when reconstructing
+  the operator's view.
+
+Filtering down does not reduce the audit trail's contents — it
+reduces what the audit *list* shows. Reviewers can always widen
+the timeline filter independently.
+
+## 6. Cross-jurisdiction effects
+
+If you initiate an action whose effect crosses your active
+filter's jurisdictions (e.g., a warning whose envelope spans
+NSW and VIC while your filter is `NSW` only), the Hub interrupts
+with a *"Cross-jurisdiction effect"* dialog. The dialog offers:
+
+- **Widen filter and proceed** — adds VIC to the filter and
+  commits the action.
+- **Narrow effect** — re-draws the action's envelope to the
+  intersection of the filter; if the resulting envelope is
+  empty, the action is refused.
+- **Cancel** — no action.
+
+The choice is audit-logged.
+
+If the action's effect crosses *outside* your claim entirely, the
+NEMA acknowledgement workflow engages (see
+[`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)).
+
+## 7. Persona-constrained filters
+
+Some personas have a constrained filter that overrides
+persistence:
+- **Frontline (Fire / Police / Medical / SES-Marine)** — locked to
+  the persona's home jurisdiction at sign-in. The popover is
+  read-only.
+- **Resilience Planner** — locked to the planner's claimed
+  jurisdictions; cannot narrow below claim. (Planning artefacts
+  are not safely meaningful at narrower scope.)
+- **Observer/Auditor** — defaults to the scrutiny ticket's
+  jurisdiction set; can widen with confirmation.
+
+If you cannot edit the filter, the popover explains *why* in a
+banner and suggests the appropriate persona switch (`Alt+P`) if
+you hold a more flexible persona.
+
+## 8. The *"No data for this filter"* state
+
+If the filter narrows to a state where no signals, warnings, or
+artefacts exist, the operating views show a *"No data for this
+filter"* placeholder. Most common cause: a fresh device with the
+default filter that someone narrowed at a prior session but the
+claim set has changed.
+
+Click *Reset to claim union* in the popover to recover.
+
+## 9. Keyboard shortcuts
+
+| Shortcut    | Action                                       |
+| ----------- | -------------------------------------------- |
+| `Alt+J`     | Open the jurisdiction filter popover         |
+| `Tab`       | Focus checkboxes in document order           |
+| `Space`     | Toggle the focused checkbox                  |
+| `Enter`     | Apply current selection (close popover)      |
+| `Esc`       | Close popover without applying               |
+| `Ctrl+R`    | Reset to claim union (within popover)        |
+| `Ctrl+I`    | Invert selection (within popover)            |
+| `Ctrl+0`    | Clear all (within popover)                    |
+
+## 10. Audit consequences
+
+Filter changes are **not** audit-logged on their own — they are UI
+state, not state-changing operations. However, every
+state-changing operation captures the filter state at action time,
+so an audit row implicitly records which filter was active when
+the action was taken.
+
+Persona switches *do* record the filter state at the moment of
+switch, so reviewers can reconstruct the filter trajectory across
+a shift.
+
+## 11. Edge cases
+
+### 11.1 Claim change mid-session
+If your administrator edits your IdP claims while you are signed
+in (rare; usually requires re-sign-in), the next page load
+re-evaluates your claim. New jurisdictions appear in the popover
+unchecked; removed jurisdictions disappear and any previously
+selected entries for them are discarded with a banner notice.
+
+### 11.2 Non-canonical codes from federated tenants
+A federated tenant may use a non-canonical code (e.g., a custom
+sub-region). The Hub maps non-canonical codes into a single
+*"Other (federated)"* bucket; the bucket is selectable but
+artefacts within it carry their original code in their detail
+view.
+
+### 11.3 Filter on Help screens
+Help screens (`/help/*`) are not persona-scoped or
+jurisdiction-scoped. The filter chip is hidden on those screens.
+
+### 11.4 Filter on Governance Dashboard
+The Governance Dashboard's KPI panel is jurisdiction-scoped to
+the filter; the constitutional-gates panel is **always** tenant-
+scoped (gates apply to the whole tenant). The dashboard makes
+this distinction explicit in its panel headers.
+
+## 12. Related
+
+- [`constitution-principle-v`](/help/articles/constitution-principle-v)
+  — for the doctrinal envelope including jurisdiction.
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+  — for the NEMA acknowledgement workflow on cross-border action.
+- [`screen-by-screen/persona-switcher`](/help/articles/screen-by-screen/persona-switcher)
+  — for the adjacent persona switcher.
+- [`getting-started`](/help/articles/getting-started) — for the
+  first-sixty-seconds orientation.
+
+---
+
+_Maintained by the AMA Help content team. Surface ID
+`multi-jurisdiction-filter`._

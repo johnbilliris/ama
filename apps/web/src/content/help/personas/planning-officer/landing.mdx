@@ -1,65 +1,178 @@
 ---
 slug: personas/planning-officer
-title: "Planning Officer — Getting Started"
+title: "Planning Officer — getting started"
 persona: planning-officer
 cluster: operational
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 10 min
 ---
 
-# Planning Officer — Getting Started
+# Planning Officer — getting started
 
-This guide gets a **Planning Officer** productive in the AMA Hub in 15 minutes.
-Scope: Situation reports; resource forecasting; intelligence cycle.
+The **Planning Officer (PO)** is the AIIMS Planning function in
+the AMA Hub: building Incident Action Plans (IAPs), maintaining
+operational objectives, anticipating future operational needs,
+and ensuring the operating picture remains coherent across
+shifts. Unlike Operations and IC, the Planning Officer's
+envelope is **deliberative** — long horizon, low click-volume,
+high-impact.
 
-## 1. What you can do
+This article gets a brand-new PO productive in fifteen minutes
+and documents the envelope, the IAP workflow, and the
+day-of-day rhythms.
 
-As a Planning Officer, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Build IAPs** — structured operational plans for an
+  upcoming operational period (12-hour shift, 24-hour cycle,
+  multi-day campaign).
+- **Manage objectives** — the prioritised list of operational
+  goals against which the IAP is composed.
+- **Forecast** — produce planning artefacts (resource demand
+  curves, evacuation capacity projections, communication
+  audience projections) that feed Logistics, Field, and PIO.
+- **Read all bands** — including amber recommendations from
+  every agent (planning artefacts must consider the full
+  band; you don't act on amber, you plan around it).
+- **Draft warnings** — for IC and PIO co-signing if
+  operational tempo requires planning-phase drafting.
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Approve public warnings.
+- Issue tasks (Operations Officer's role).
+- Allocate resources (Logistics Officer's role).
+- Tune confidence-band thresholds (Risk Manager's role).
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Planning Officer** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=planning-officer-landing theme=light -->
-<!-- screenshot:placeholder route_id=planning-officer-landing theme=dark -->
+1. **Sign in**; you land at the Planning workspace.
+2. **Read the current IAP**. Note the operational period and
+   the active objectives.
+3. **Open the Governance Dashboard** (`g g`). Note any amber
+   gates that affect planning (snapshot freshness, calibration,
+   localisation).
+4. **Read the Risk-assessment workspace**. Note the top
+   composite risks; these shape the next IAP.
+5. **Read the Monitoring agent's recommendations**. Note any
+   `prepare-evacuation` or `escalate-to-risk` items pending.
+6. **Verbal handover** with outgoing PO. Confirm the IAP's
+   objectives are still relevant.
 
-## 3. Decision rights & boundaries
+## 3. The IAP workflow
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Planning Officer** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+The IAP is built in the Planning workspace's IAP composer.
+Sections:
+- **Operational period** — start and end times.
+- **Situation summary** — the current operating picture.
+- **Objectives** — priorities for this period.
+- **Strategy** — how the operation will pursue the objectives.
+- **Resource requirements** — anticipated needs.
+- **Communication plan** — internal and public-facing.
+- **Safety considerations** — hazards specific to this period.
+- **Contingencies** — plans for foreseeable deteriorations.
 
-## 4. Working with the Help Assistant
+The IAP is reviewed and adopted by IC at the operational
+period transition. The transition itself is audit-logged with
+the prior and new IAP IDs.
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+## 4. Objectives management
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Planning Officer?"
+Objectives are the IAP's anchor. Good objectives are:
+- **Specific** — name the desired state, not the process.
+- **Measurable** — you can tell when you've achieved them.
+- **Time-bounded** — within the operational period.
+- **Owned** — a named persona responsible.
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+The Hub's objectives affordance enforces these properties via
+required fields. The audit trail captures objective creation,
+amendment, and resolution.
 
-## 5. Where to next
+## 5. Forecasting artefacts
 
-- Browse all articles tagged `planning-officer` via the [search page](/help/search?q=planning-officer).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+The Planning Officer composes forecasts from the agents'
+projections and the operational context:
+- **Resource demand curve** — when will we need more
+  appliances and from where?
+- **Evacuation capacity projection** — given the proposed
+  envelopes, what is the receiving-side load?
+- **Communication audience projection** — what audience
+  segments need addressing across the period?
+
+Forecasts feed into the IAP and into the relevant
+operational workspaces.
+
+## 6. Working with agents
+
+The Planning Officer is the agent's most analytical consumer.
+Read the reasoning traces; track patterns over operational
+periods. Systematic observations (e.g., the risk agent
+consistently over-projects bushfire activity in this LGA;
+the resource agent under-recommends pre-positioning) feed
+into Risk Manager threshold tuning, agent training feedback,
+and the standing register revision.
+
+## 7. Cross-jurisdictional planning
+
+For incidents likely to develop into cross-jurisdictional
+events, plan the cross-border coordination ahead of need:
+- Engage the receiving subdivision's Planning Officer via
+  the cross-sector chat.
+- Pre-stage NEMA acknowledgement context — the on-call NEMA
+  controller appreciates context arriving with the
+  acknowledgement request, not after.
+- Pre-draft the public-communication coordination plan.
+
+## 8. Common pitfalls
+
+### 8.1 Optimistic planning
+Forecasts that assume best-case conditions often miss the
+operational stress test. Build pessimistic-case
+contingencies; the audit trail will record both, and
+reviewers credit balanced planning.
+
+### 8.2 Stale IAP
+An IAP not refreshed at the operational-period transition is
+worse than no IAP — Operations and Logistics may act on
+stale assumptions. Refresh on every transition; update
+mid-period if the operating picture changes materially.
+
+### 8.3 Objective creep
+Adding objectives mid-period without removing achieved or
+obsoleted ones produces an unfocused IAP. Curate.
+
+### 8.4 Skipping the reasoning traces
+The agents' reasoning is the planning-period's training
+signal. Read traces deliberately; pattern-recognise across
+periods; feed observations to Risk Manager and content
+authors.
+
+### 8.5 Detachment from operations
+The PO is sometimes physically separated from the active
+ops floor. Compensate via the cross-sector chat and via
+periodic walks through the workspaces.
+
+## 9. The Help corpus you'll use most
+
+- [`screen-by-screen/agent-monitoring`](/help/articles/screen-by-screen/agent-monitoring)
+- [`screen-by-screen/agent-risk-assessment`](/help/articles/screen-by-screen/agent-risk-assessment)
+- [`screen-by-screen/agent-evacuation`](/help/articles/screen-by-screen/agent-evacuation)
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+- [`personas/risk-manager`](/help/personas/risk-manager)
+- [`personas/resilience-planner`](/help/personas/resilience-planner)
+- [`troubleshooting`](/help/articles/troubleshooting)
+
+## 10. Where to next
+
+- Run a tabletop focused on cross-period IAP transition.
+- Read prior incidents' evidence packs; note IAP-to-outcome
+  patterns.
+- Browse all articles tagged `planning-officer` via search.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the planning working group and AFAC AIIMS-2017 Doctrine._

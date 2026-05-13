@@ -1,65 +1,148 @@
 ---
 slug: personas/frontline-police
-title: "Frontline — Police — Getting Started"
+title: "Front-line Police — getting started"
 persona: frontline-police
-cluster: sector
+cluster: front-line
+sector: police
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 9 min
 ---
 
-# Frontline — Police — Getting Started
+# Front-line Police — getting started
 
-This guide gets a **Frontline — Police** productive in the AMA Hub in 15 minutes.
-Scope: Traffic management; evacuation enforcement.
+The **Front-line Police** persona is the AMA Hub's police-
+sector front-line role: NSW Police / Vic Pol / QPS / WA
+Police / SAPOL / Tas Pol / NT Police / AFP-ACT field
+sergeants, station-level command, and specialist response
+units (PORT, STAR, etc.). The persona is sector-scoped
+(Police) and jurisdiction-locked. Police-specific
+responsibilities in disaster response include traffic and
+route security, evacuation route management, public order
+in evacuation centres, and welfare checks.
 
-## 1. What you can do
+This article gets a brand-new Front-line Police operator
+productive in fifteen minutes.
 
-As a Frontline — Police, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Capture signals** — public-order observations, traffic
+  conditions, route security status, welfare-check outcomes.
+- **Update status** of your unit and forward position.
+- **Acknowledge** evacuation directives received from
+  Operations.
+- **Receive** tasks issued by your sector's Operations
+  Officer.
+- **Read** the Police-sector workspace's operating picture.
+- **Operate offline** with full action capture and replay.
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Approve public warnings.
+- Issue cross-sector tasks beyond your unit.
+- Allocate resources beyond your unit.
+- Take actions outside your sector or your home jurisdiction.
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Frontline — Police** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=frontline-police-landing theme=light -->
-<!-- screenshot:placeholder route_id=frontline-police-landing theme=dark -->
+1. **Sign in** on your patrol vehicle device or station
+   terminal. Land at the Police-sector workspace.
+2. **Confirm offline mode and tile cache freshness.**
+3. **Update unit status** — location, crew count, capability.
+4. **Read active road closures and route security
+   directives** in your area.
+5. **Read your inbox** — tasks awaiting acknowledgement.
+6. **Verbal handover** with outgoing crew.
 
-## 3. Decision rights & boundaries
+## 3. The Police-sector workspace
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Frontline — Police** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+The Police-sector workspace at `/sectors/police` shows:
+- **Road network layer** — current road closures, diversions,
+  congestion estimates.
+- **Evacuation route layer** — declared routes with security
+  responsibilities by unit.
+- **Welfare-check layer** — addresses requiring welfare
+  checks (vulnerable persons during heatwave, isolated
+  properties during bushfire, etc.).
+- **Public-order layer** — incident reports relevant to
+  public-order management at evacuation centres.
 
-## 4. Working with the Help Assistant
+## 4. Capturing signals well
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+Police-specific specifics:
+- Traffic conditions: lane availability, congestion length,
+  diversion conditions.
+- Route security: barricade status, access-control point
+  status.
+- Public-order: aggregation size, mood, specific incidents.
+- Welfare checks: occupant status, action taken.
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Frontline — Police?"
+Be specific; stamp time and location; the agents weight your
+captures.
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+## 5. Welfare checks
 
-## 5. Where to next
+Welfare-check directives arrive in your inbox with the
+address, the reason for the check (vulnerable resident
+flagged by social services, isolated property during
+bushfire, etc.), and any prior interaction history. For each
+check:
+- Attend the address.
+- Make contact (or attempt; document the attempt's
+  outcome).
+- Capture the welfare outcome (occupant status, condition,
+  any action taken).
+- Mark complete.
 
-- Browse all articles tagged `frontline-police` via the [search page](/help/search?q=frontline-police).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+## 6. Route security
+
+When Field Coordinator declares an evacuation envelope, the
+declared evacuation routes are surfaced in your workspace.
+Route security units are assigned (or you may be tasked).
+For each route:
+- Establish security at the assigned point.
+- Update status (established / patrolling / handed over).
+- Capture any incidents (vehicle collisions, civilian
+  distress, route blockages).
+- Maintain the route's clear-flow status.
+
+## 7. Working offline
+
+Same model as Front-line Fire and Field Coordinator:
+service worker; queued actions; replay on reconnection;
+tile cache for your reachable radius.
+
+## 8. Common pitfalls
+
+### 8.1 Slow welfare-check completions
+A welfare check that sits open in your inbox without status
+updates produces ambiguity. Update at meaningful milestones.
+
+### 8.2 Off-sector queries
+Don't try to action evacuation envelope amendments
+yourself; the doctrinal authority is Field Coordinator.
+
+### 8.3 Cross-jurisdictional movement without claim
+You can't act outside your home jurisdiction; if a directive
+takes you into another jurisdiction, the Hub flags it and
+you coordinate with the receiving jurisdiction's Police
+Operations Officer.
+
+## 9. The Help corpus you'll use most
+
+- [`personas/field-coordinator`](/help/personas/field-coordinator)
+- [`personas/operations-officer`](/help/personas/operations-officer)
+- [`screen-by-screen/agent-evacuation`](/help/articles/screen-by-screen/agent-evacuation)
+- [`personas/cross-sector`](/help/personas/cross-sector)
+- [`troubleshooting`](/help/articles/troubleshooting)
+
+## 10. Where to next
+
+- Run a tabletop focused on cross-jurisdictional welfare-
+  check coordination.
+- Browse all articles tagged `frontline-police` via search.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+ANZPAA and the participating police services._

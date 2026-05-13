@@ -1,65 +1,195 @@
 ---
 slug: personas/operations-officer
-title: "Operations Officer — Getting Started"
+title: "Operations Officer — getting started"
 persona: operations-officer
 cluster: operational
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 11 min
 ---
 
-# Operations Officer — Getting Started
+# Operations Officer — getting started
 
-This guide gets a **Operations Officer** productive in the AMA Hub in 15 minutes.
-Scope: Tactical task assignment; multi-sector coordination; agent recommendation review.
+The **Operations Officer (OO)** is the AIIMS Operations function
+in the AMA Hub. Where the Incident Commander makes the
+authority calls, the OO turns those calls into co-ordinated
+action: tasks issued, resources deployed, sectors briefed,
+decisions logged, escalations forwarded. The OO is the
+**busiest persona during active operations** — most amber
+co-signs, most cross-sector chats, most workspace traffic.
 
-## 1. What you can do
+This article gets a brand-new OO productive in fifteen minutes
+and documents the envelope, the typical-shift arc, the
+co-sign chain points, and the most common pitfalls.
 
-As a Operations Officer, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Issue tasks** to sectors and front-line personas within
+  your jurisdictions.
+- **Brief sectors** via the cross-sector workspace.
+- **Forward agent recommendations** to Logistics Officer (for
+  resource allocation) or Field Coordinator (for evacuation
+  preparation).
+- **Co-sign** Logistics Officer transfer co-sign chains; PIO
+  alerts in many cases (with IC as final co-signer for
+  emergency severity).
+- **Log decisions** to the Decision Log (workspace tile).
+- **Pause** agents (Monitoring, Risk-assessment, Evacuation,
+  Resource-allocation, Communication) within your tenant.
+- **Initiate** NEMA acknowledgement for cross-jurisdictional
+  effects you cause.
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Approve public warnings as final co-signer (IC's role).
+- Tune confidence-band thresholds (Risk Manager's role).
+- Take state-changing actions outside your jurisdictions
+  without NEMA acknowledgement.
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Operations Officer** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=operations-officer-landing theme=light -->
-<!-- screenshot:placeholder route_id=operations-officer-landing theme=dark -->
+1. **Sign in**; you land at the Operations workspace
+   (`/workspaces/operations`).
+2. **Glance the AU-region banner**.
+3. **Scan your inbox** — pending co-sign requests, pending
+   task acknowledgements from sectors.
+4. **Open the Monitoring agent workspace** (`g w`, `m`). Read
+   the top recommendations.
+5. **Open the Disaster Map**. Take in the operating picture.
+6. **Open the Decision Log**. Read the last shift's
+   decisions and rationale.
+7. **Verbal handover** with outgoing OO. Confirm in-flight
+   workflows.
+8. **Open the Resource board** (`/workspaces/logistics` —
+   read-only for OO). Get a sense of resource posture.
 
-## 3. Decision rights & boundaries
+## 3. The OO's typical shift arc
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Operations Officer** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+- **Quiet** — task tidying, decision-log review, exercise
+  participation if scheduled, cross-sector chat catch-up.
+- **Watch and act** — increased agent recommendation forwarding,
+  pre-positioning resource recommendations, sector briefings.
+- **Emergency warning** — co-sign chain dominates. Expect
+  interruptions every minute or two; cross-sector chat is
+  busy; the Decision Log fills rapidly.
 
-## 4. Working with the Help Assistant
+## 4. Issuing tasks
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+Tasks go through the Operations workspace's task affordance:
+- Compose the task (sector, action, deadline, any constraints).
+- Assign to a front-line persona or to a sector inbox.
+- Send. The recipient acknowledges (or queries; or declines
+  with rationale).
+- Audit-logged on every state change.
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Operations Officer?"
+For multi-step or multi-sector tasks, use the **task
+template** library — pre-built sequences for common operational
+patterns (initial assessment, evacuation envelope reconnaissance,
+warning verification, resource pre-position).
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+## 5. Co-signing well
 
-## 5. Where to next
+The OO co-signs at three points:
+- **Logistics Officer transfers** — verify the originating
+  Logistics Officer's draft; check the mutual-aid agreement
+  is active; check the receiving sector's notional capacity.
+- **PIO alerts** (when severity is amber-co-sign-required and
+  IC is unavailable; rare path, only when explicitly
+  delegated). Verify the negative-evidence acknowledgements.
+- **Field Coordinator declarations** (informational; you
+  signal acceptance of the envelope into the operating
+  posture).
 
-- Browse all articles tagged `operations-officer` via the [search page](/help/search?q=operations-officer).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+Doctrine for co-signing well is the same as for IC: read the
+evidence, verify the snapshot, prefer hand-off to delay.
+
+## 6. Cross-sector coordination
+
+The OO is the cross-sector hinge. The cross-sector workspace
+(`/workspaces/cross-sector`) shows each sector's status; the
+cross-sector chat is the OO's primary out-of-Hub-equivalent
+coordination channel.
+
+Patterns:
+- **Joint task** — issue a single task with co-ordinated
+  sector-level sub-tasks; the workspace surfaces the
+  composition.
+- **Sector briefing** — a structured narrative posted to the
+  cross-sector chat with relevant evidence cards attached;
+  recipient sectors acknowledge.
+- **Conflict resolution** — when sectors propose conflicting
+  actions, the OO chairs the resolution; the agreed action is
+  audit-logged with all sector heads.
+
+## 7. The Decision Log
+
+Every significant operational decision should be logged. The
+Decision Log captures:
+- The decision (e.g., *"Pre-position two heavy tankers at
+  Tumbarumba before the wind shift"*).
+- The rationale.
+- The alternatives considered.
+- The persona(s) involved.
+- The expected effect and the success criteria.
+- A *review-by* time at which the decision should be
+  re-examined.
+
+Decisions are audit-logged. They are the post-event review's
+primary narrative anchor.
+
+## 8. Cross-jurisdictional effects
+
+Same workflow as IC: the NEMA acknowledgement dialog
+appears for actions whose effect crosses subdivisions. As OO
+you typically choose *Notify and proceed* (your authority is
+intra-state) and let IC consider *Hand off* if the
+character is federal.
+
+## 9. Common pitfalls
+
+### 9.1 Skipping the Decision Log
+A shift with sparse Decision Log entries is harder to debrief.
+Reviewers can read the audit trail but the *why* is in the
+Decision Log.
+
+### 9.2 Over-issuing tasks
+A backlog of unacknowledged tasks creates noise. Issue
+deliberately; verify acknowledgement; close completed tasks.
+
+### 9.3 Co-signing as rubber-stamp
+The audit captures you as a peer. Read the originating
+evidence; don't co-sign on velocity alone.
+
+### 9.4 Cross-sector chat as primary
+The cross-sector chat is for coordination, not for primary
+task issuance. Tasks go through the task affordance so they
+have proper structure and tracking.
+
+### 9.5 Persona mixing mid-shift
+Don't switch into Logistics Officer mid-shift just to "see
+their view"; use the Resource board's read-only view from
+the OO workspace instead.
+
+## 10. The Help corpus you'll use most
+
+- [`screen-by-screen/disaster-mapper`](/help/articles/screen-by-screen/disaster-mapper)
+- [`screen-by-screen/agent-monitoring`](/help/articles/screen-by-screen/agent-monitoring)
+- [`screen-by-screen/agent-risk-assessment`](/help/articles/screen-by-screen/agent-risk-assessment)
+- [`screen-by-screen/agent-evacuation`](/help/articles/screen-by-screen/agent-evacuation)
+- [`screen-by-screen/agent-resource-allocation`](/help/articles/screen-by-screen/agent-resource-allocation)
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+- [`personas/incident-commander`](/help/personas/incident-commander)
+- [`troubleshooting`](/help/articles/troubleshooting)
+
+## 11. Where to next
+
+- Run a tabletop in the simulation tenant focused on
+  cross-sector co-ordination.
+- Review the prior week's Decision Log; note patterns.
+- Browse all articles tagged `operations-officer` via search.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the operations working group and AFAC AIIMS-2017 Doctrine._

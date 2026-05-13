@@ -3,28 +3,261 @@ slug: screen-by-screen/settings
 title: "Screen: Settings"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+surface_id: settings
+estimated_reading_time: 9 min
 ---
 
 # Screen: Settings
 
-## 1. Purpose
-The **Settings** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Settings** surface at `/settings` is your per-device
+preferences hub. Every setting on this page is **device-local**
+— the Hub does not synchronise preferences across your devices
+because operators routinely use different devices in different
+operational contexts (a control-centre display, a vehicle
+laptop, a field tablet, a personal phone for after-hours
+escalation), and a setting that suits one usually does not suit
+the others.
 
-## 2. Layout
-Light and dark variants:
+This article documents every setting, its default, the rationale,
+and any operational gotchas. Settings that have constitutional
+or doctrinal consequences are flagged.
 
 <!-- AnnotatedScreenshot screen_id=settings light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+Settings is a single-column form, grouped into nine sections:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. Display
+2. Audio
+3. Notifications
+4. Map
+5. Chat
+6. Offline
+7. Identity (read-only)
+8. Diagnostics
+9. About
+
+Each section is collapsible; the section heading shows a one-line
+summary of non-default values.
+
+## 2. Display
+
+### 2.1 Theme
+- *Light* (default), *Dark*, *System*.
+- *System* honours `prefers-color-scheme`; not recommended on
+  projector displays.
+- Doctrinal consequence: *None*.
+
+### 2.2 Base font size
+- *S* / *M* (default) / *L* / *XL*.
+- Affects every text element consistently; respects the
+  accessibility model.
+
+### 2.3 Motion
+- *System* (default; honours `prefers-reduced-motion`),
+  *Always reduced*, *Always animated*.
+- *Always reduced* on a low-power device extends battery life on
+  long deployments.
+
+### 2.4 Colour-blind preset
+- *None* (default), *Deuteranopia*, *Protanopia*, *Tritanopia*,
+  *Monochrome*.
+- Adjusts layer palette, confidence-band stops, and map pin
+  colours simultaneously.
+
+### 2.5 Density
+- *Comfortable* (default) / *Compact*.
+- *Compact* reduces row heights in the audit timeline, workspace
+  task lists, and resource board for higher information density;
+  not recommended for primary control-centre displays.
+
+## 3. Audio
+
+### 3.1 Master mute
+- *Off* (default) / *On*.
+- *On* mutes all three Hub-emitted audio cues. Visual equivalents
+  remain.
+- Doctrinal consequence: muting on the primary control-centre
+  display is allowed but should be paired with a clearly audible
+  alternative (e.g., the operator's personal device unmuted).
+
+### 3.2 Per-cue overrides
+Three independent toggles for: warning approval chime,
+evacuation acknowledged double-pip, audit gate breach alarm.
+
+## 4. Notifications
+
+### 4.1 Browser notifications
+- *Off* (default) / *On*.
+- *On* requests browser-level notification permission. Used for
+  critical events (audit gate breach, co-sign request received,
+  cross-border action requiring acknowledgement) when the Hub
+  tab is not in focus.
+- Doctrinal consequence: *On* leaks event timing to anyone within
+  visual range of your device's notification panel; appropriate
+  for personal devices, *not* for shared control-centre screens.
+
+### 4.2 Co-sign requests
+Choose which personas can notify you for co-sign requests.
+Default: *all personas in your IdP claim*. Narrowing reduces
+noise but may miss important requests.
+
+### 4.3 Quiet hours
+- A start and end time during which non-critical notifications
+  are suppressed. Default: *off*.
+- Critical notifications (audit gate breach, evacuation
+  acknowledgement) ignore quiet hours.
+
+## 5. Map
+
+### 5.1 Default base style
+- *Topographic* (default), *Satellite*, *Dark*.
+- Used on every fresh page load.
+
+### 5.2 Default layers
+- A multi-select of layers to enable on every page load.
+- Default: Signals + Warnings + Recommendations.
+- Persona-specific overrides are honoured (the IC default
+  includes incident envelopes; the Logistics Officer default
+  includes resource pins; etc.).
+
+### 5.3 Wrap world
+- *Off* (default), *On*.
+- *On* renders multiple copies of the world side-by-side, useful
+  for OS-jurisdiction (Pacific) operations near the antimeridian.
+
+### 5.4 Default zoom
+- *Jurisdiction fit* (default), or a specific zoom level.
+- Used on map reset (`0` shortcut).
+
+## 6. Chat
+
+### 6.1 Streaming pace
+- *Per-token* (default), *Per-paragraph*.
+- *Per-paragraph* reduces visual jitter on slow connections; also
+  the default when `prefers-reduced-motion` is on.
+
+### 6.2 History retention
+- *Session* (default), *Until cleared*, *Disabled*.
+- *Disabled* means the chat panel is empty on every page load.
+
+### 6.3 Quick actions
+- A multi-select of which quick-action buttons appear under the
+  composer. Default: all five.
+
+### 6.4 Citation expansion
+- *Inline* (default), *Side panel*, *None*.
+- *Side panel* opens cited articles in a side panel without
+  leaving the chat; *None* hides citation badges (not recommended
+  — refusal-hygiene gate may flag).
+
+## 7. Offline
+
+### 7.1 Service worker
+- *Enabled* (default), *Disabled*.
+- *Disabled* prevents offline mode entirely; not recommended
+  for field deployments.
+
+### 7.2 Tile cache size
+- *Standard* (default; ~500 MB), *Large* (~2 GB), *Minimal* (~100 MB).
+- *Large* is recommended for field tablets used in remote
+  jurisdictions.
+
+### 7.3 Tile freshness
+- *7 days* (default), *30 days*, *90 days*.
+- Older tiles render with the *"Stale tile"* stamp regardless.
+
+### 7.4 Offline action queue cap
+- *Unlimited* (default), *100*, *500*, *1000*.
+- A cap protects against runaway offline capture if the device
+  is left unattended; the Hub queues until the cap then refuses
+  new actions with an explicit message.
+
+## 8. Identity (read-only)
+
+This section shows your IdP-derived identity attributes:
+- Display name, email.
+- Tenant.
+- Personas (full claim set; the active persona is a separate
+  control in the top bar).
+- Jurisdictions (claim union).
+- IdP issuer.
+- Last sign-in time, last claim refresh time.
+
+There are no edit controls; identity is owned by your IdP.
+
+## 9. Diagnostics
+
+### 9.1 Correlation ID copy
+A button that copies your current session's correlation ID to
+the clipboard; useful when filing bugs or escalating to support.
+
+### 9.2 Network probe
+A button that runs a 30-second probe against the Hub's API and
+reports latency p50/p95, error rate, and the active region.
+Useful for diagnosing degraded connectivity claims.
+
+### 9.3 Console log download
+A button that downloads the last 100 console log entries (sanitised
+for PII). Attach to bug reports.
+
+### 9.4 Reset settings
+A button that resets all settings on this page to defaults.
+Audit-logged.
+
+## 10. About
+
+Shows the deployed Hub version, the build commit SHA (truncated;
+full SHA copied via a button), the active help-snapshot ID, the
+current API region, and the Hub's privacy and terms links.
+
+## 11. Audit consequences
+
+Most settings changes are local UI state and are not audit-logged.
+The exceptions:
+- *Reset settings* (audit-logged with the actor).
+- *Service worker enabled/disabled* (audit-logged because it
+  affects offline-mode posture, which is operationally
+  significant).
+- *Offline action queue cap* changes (audit-logged).
+- *Notifications: On* on a shared device (audit-logged with a
+  *"shared-device"* flag if the Hub detects a shared-device hint).
+
+## 12. Edge cases
+
+### 12.1 Cross-device drift
+Because settings are device-local, two operators sharing the same
+identity across devices may see different layer sets, themes, and
+font sizes. This is intentional but occasionally causes confusion
+in handovers; mention the device's settings in your handoff note
+if relevant.
+
+### 12.2 Browser private mode
+In private/incognito browsing, settings do not persist across
+sessions. The Hub is functional in private mode but offline mode
+is unavailable (no service worker registration in private mode).
+
+### 12.3 Settings reset on snapshot publish
+Help-snapshot publication does not reset settings. Personal
+preferences are independent of the corpus.
+
+## 13. Keyboard shortcuts
+
+Settings has no surface-specific shortcuts; the global navigation
+shortcut to Settings is `g t` (think *t for tweaks*; the Settings
+URL is `/settings`).
+
+## 14. Related
+
+- [`accessibility-how-to`](/help/articles/accessibility-how-to)
+  — for the accessibility-aware settings.
+- [`screen-by-screen/disaster-mapper`](/help/articles/screen-by-screen/disaster-mapper)
+  — for the map settings' effect on the Mapper.
+- [`troubleshooting`](/help/articles/troubleshooting) — for
+  per-symptom remediation when settings cause issues.
+
+---
+
+_Maintained by the AMA Help content team. Surface ID `settings`._

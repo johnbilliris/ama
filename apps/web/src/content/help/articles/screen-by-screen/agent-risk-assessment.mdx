@@ -1,30 +1,176 @@
 ---
 slug: screen-by-screen/agent-risk-assessment
-title: "Screen: Agent Risk Assessment"
+title: "Screen: Risk-assessment agent workspace"
 status: Active
 classification: OFFICIAL
+audience: risk-manager, incident-commander, operations-officer, planning-officer, observer-auditor
+surface_id: agent-risk-assessment
+estimated_reading_time: 11 min
 ---
 
-# Screen: Agent Risk Assessment
+# Screen: Risk-assessment agent workspace
 
-## 1. Purpose
-The **Agent Risk Assessment** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Risk-assessment agent workspace** at `/workspaces/agent-risk-assessment`
+is the operating surface for the Hub's risk-assessment agent. The
+agent ingests the operating picture (from the monitoring agent),
+the active jurisdiction's standing risk register, the historical
+hazard-class base rates, and the Risk Manager's tuned thresholds,
+and emits **risk assessments** — bounded judgements about the
+likelihood and consequence of unfolding hazards.
 
-## 2. Layout
-Light and dark variants:
+This workspace is the only surface where **red-band** signals are
+visible to operating personas (other than Observer/Auditor and
+Executive Leader); the Risk Manager promotes red signals to
+amber after manual review, and demotes amber/green signals when
+contradicting evidence emerges.
+
+For the agent contract, see
+`/specs/038-help-docs-chat/contracts/agents-risk.contract.md`;
+for the playbook, see
+[`playbooks/agent-risk-assessment`](/help/articles/playbooks/agent-risk-assessment).
 
 <!-- AnnotatedScreenshot screen_id=agent-risk-assessment light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+A four-pane layout:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. **Header strip** — agent state, calibration status, threshold
+   values.
+2. **Risk register** — left, ~40 % width; the standing register
+   with current scores per row.
+3. **Active assessments** — right top, ~60 % width; the agent's
+   current risk assessments, ranked by composite score.
+4. **Reasoning trace** — right bottom, expandable; the cited
+   reasoning behind the selected assessment.
+
+## 2. Header strip
+
+- **Agent state** — *Running* / *Paused* / *Failed*.
+- **Calibration status** — fit timestamp, days-until-stale.
+  Click to open the calibration plot in a side panel.
+- **Threshold values** — current green/amber and amber/red
+  separators. Click to open the threshold tuning panel
+  (Risk Manager only).
+- **Force refit** — re-runs calibration; Risk Manager envelope.
+  Audit-logged.
+
+## 3. Risk register
+
+The standing risk register is the jurisdiction's enumerated
+hazard catalogue, each row scored on:
+- **Likelihood** (1–5) over the next 24 hours.
+- **Consequence** (1–5) if realised.
+- **Composite** score (likelihood × consequence; 1–25).
+- **Trend** arrow (up / steady / down) over the last 6 hours.
+
+Rows are sortable; the default sort is composite descending.
+Click a row to open its assessment detail.
+
+## 4. Active assessments
+
+Each card is a current risk assessment for one register row,
+showing:
+- **Hazard class** + **subject geography** (e.g., "Bushfire,
+  Snowy Mountains").
+- **Confidence band** of the assessment itself.
+- **Likelihood / Consequence / Composite** scores.
+- **Drivers** — the top 3 signals or recommendations contributing
+  to the score.
+- **Counter-evidence** — signals contradicting the score (if any).
+- **Recommended action** — a short verb phrase.
+- **Action button** — Acknowledge / Promote red signal / Demote /
+  Escalate / Hand off.
+
+## 5. Promotion and demotion (Risk Manager only)
+
+The Risk Manager can:
+- **Promote** a red signal to amber after manual review. The
+  promoted signal becomes visible in operating workspaces.
+  Promotion requires a rationale and is audit-logged with both
+  the prior and new band.
+- **Demote** a green signal to amber on contradicting evidence.
+  Demotion is reversible within 30 minutes; thereafter requires
+  steward acknowledgement.
+
+Promotion / demotion controls are absent for non-Risk-Manager
+personas; the cards explain the absence in an aria-tooltip.
+
+## 6. Threshold tuning (Risk Manager only)
+
+The threshold tuning panel (opened from the header) shows:
+- The current and proposed thresholds side-by-side over the
+  calibration plot.
+- The bands the proposed thresholds would produce.
+- A *"Preview impact"* button that replays the prior 30 days of
+  signals under the proposed thresholds and reports the change
+  in volume of amber actions, red suppressions, false-positive
+  and false-negative rates.
+
+Apply requires constitutional steward acknowledgement; the
+Hub presents an in-flight prompt and audit-logs both
+identities. The doctrinal floors and ceilings are
+0.50 / 0.60 (amber/red separator) and 0.80 / 0.90
+(green/amber separator).
+
+## 7. Reasoning trace
+
+Same model as the monitoring workspace — the agent's chain-of-
+thought, citation-grounded. For risk assessments, the trace also
+includes:
+- The historical base rates the agent consulted.
+- The standing register row that the assessment is scored against.
+- The threshold values it evaluated.
+
+## 8. Audit consequences
+
+- *Acknowledge*, *Escalate*, *Hand off*, *Dismiss* — audit-logged.
+- *Promote* / *Demote* — audit-logged with prior and new band,
+  rationale, and any constitutional steward acknowledgement.
+- *Force refit*, *Tune thresholds* — audit-logged.
+
+## 9. Edge cases
+
+### 9.1 Empty register
+If the standing register is empty (rare; only fresh-tenant
+exercises), the workspace shows a setup banner with a link to
+the register-import workflow.
+
+### 9.2 Calibration unavailable
+If calibration cannot be computed (insufficient ground-truth
+labels in the last 90 days), the threshold tuning panel disables
+and the Confidence Bands gate goes amber.
+
+### 9.3 Stale calibration
+> 60 days stale: every assessment downgrades by one band per
+[`amber-confidence-badge`](/help/articles/amber-confidence-badge).
+
+## 10. Keyboard shortcuts
+
+| Shortcut  | Action                                         |
+| --------- | ---------------------------------------------- |
+| `g w`, `r`| Jump to Risk-assessment agent workspace        |
+| `[` / `]` | Move selection in the assessments list         |
+| `Enter`   | Acknowledge selected assessment                |
+| `p`       | Promote (Risk Manager)                         |
+| `d`       | Demote (Risk Manager)                          |
+| `t`       | Toggle reasoning trace pane                    |
+| `c`       | Open calibration plot side panel               |
+
+## 11. Related
+
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+  — for the band doctrine.
+- [`playbooks/agent-risk-assessment`](/help/articles/playbooks/agent-risk-assessment)
+  — for the operational playbook.
+- [`screen-by-screen/agent-monitoring`](/help/articles/screen-by-screen/agent-monitoring)
+  — the upstream operating picture.
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+  — the calibration health panel.
+- [`personas/risk-manager`](/help/personas/risk-manager) — the
+  Risk Manager landing.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+risk working group. Surface ID `agent-risk-assessment`._

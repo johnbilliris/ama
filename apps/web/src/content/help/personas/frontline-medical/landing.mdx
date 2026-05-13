@@ -1,65 +1,164 @@
 ---
 slug: personas/frontline-medical
-title: "Frontline — Medical — Getting Started"
+title: "Front-line Medical — getting started"
 persona: frontline-medical
-cluster: sector
+cluster: front-line
+sector: medical
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 9 min
 ---
 
-# Frontline — Medical — Getting Started
+# Front-line Medical — getting started
 
-This guide gets a **Frontline — Medical** productive in the AMA Hub in 15 minutes.
-Scope: Patient triage workflows; hospital bed-state.
+The **Front-line Medical** persona is the AMA Hub's medical-
+sector front-line role: state ambulance services'
+paramedics, advanced-care paramedic teams, retrieval medicine
+teams, hospital emergency-department coordinators, and
+public-health coordinators during disasters. The persona is
+sector-scoped (Medical) and jurisdiction-locked. Medical-
+specific responsibilities in disaster response include
+triage, casualty transport, hospital surge co-ordination,
+public-health monitoring, and the hand-off between
+pre-hospital and hospital care.
 
-## 1. What you can do
+This article gets a brand-new Front-line Medical operator
+productive in fifteen minutes.
 
-As a Frontline — Medical, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Capture signals** — casualty observations (counts,
+  acuity), public-health observations (heat-stroke
+  presentations, smoke-related respiratory cases),
+  hospital surge status.
+- **Update status** of your unit, your forward triage
+  position, your transport availability.
+- **Acknowledge** evacuation directives where Medical
+  participation is required.
+- **Receive** tasks from your sector's Operations Officer.
+- **Read** the Medical-sector workspace's operating picture.
+- **Operate offline** with full action capture and replay.
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Approve public warnings.
+- Issue cross-sector tasks beyond your unit.
+- Take actions outside your sector or jurisdiction.
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Frontline — Medical** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=frontline-medical-landing theme=light -->
-<!-- screenshot:placeholder route_id=frontline-medical-landing theme=dark -->
+1. **Sign in** on your ambulance device or hospital
+   coordination terminal. Land at the Medical-sector
+   workspace.
+2. **Confirm offline mode and tile cache freshness.**
+3. **Update unit status** — location, crew composition,
+   transport availability.
+4. **Read active casualty incidents** and triage points in
+   your area.
+5. **Read your inbox** — tasks awaiting acknowledgement.
+6. **Verbal handover** with outgoing crew.
 
-## 3. Decision rights & boundaries
+## 3. The Medical-sector workspace
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Frontline — Medical** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+The workspace at `/sectors/medical` shows:
+- **Casualty layer** — known incidents with casualty counts
+  by acuity (P1 / P2 / P3 / P4).
+- **Hospital surge layer** — receiving hospitals with
+  current ED load and surge capacity.
+- **Triage point layer** — declared forward triage points
+  with capacity and staffing.
+- **Public-health layer** — disease / heat / smoke
+  presentations aggregated by area.
 
-## 4. Working with the Help Assistant
+## 4. Capturing signals well
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+Medical-specific specifics:
+- Casualties: counts by acuity, mechanism, expected
+  transport need.
+- Public-health: presentation type, count, geographic
+  cluster.
+- Hospital surge: current ED load, ICU availability,
+  expected surge timeline.
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Frontline — Medical?"
+Be specific; the agents and the receiving hospitals depend
+on your captures.
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+## 5. Triage point declaration
 
-## 5. Where to next
+When forward triage is needed, your sector's Operations
+Officer declares a triage point. Your role:
+- Establish the point.
+- Update status (capacity, current load, staffing).
+- Capture casualty intake metrics.
+- Coordinate transport with the resource-allocation agent's
+  recommendations.
+- Hand off to receiving hospitals via the hospital surge
+  coordination affordance.
 
-- Browse all articles tagged `frontline-medical` via the [search page](/help/search?q=frontline-medical).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+## 6. Hospital surge co-ordination
+
+Hospitals participating in the disaster response surface
+their ED load and surge capacity. The resource-allocation
+agent recommends transport destinations based on:
+- Current ED load.
+- Acuity match (specialist trauma centre vs general).
+- Distance from the casualty.
+- Receiving hospital's stated surge capacity.
+
+Coordinate verbally with receiving hospitals during high-
+volume operations; the Hub captures the formal record but
+clinical handover requires voice contact.
+
+## 7. Public-health monitoring
+
+Public-health signals (heat-stroke clusters, smoke-related
+respiratory cases, gastrointestinal outbreaks in evacuation
+centres) feed into the agents' projections. Capture
+specifically:
+- Presentation type.
+- Count and trend.
+- Geographic cluster.
+- Demographic skew if observable.
+
+## 8. Working offline
+
+Same model as the other front-line personas: service
+worker; queued actions; replay on reconnection; tile cache
+for your reachable radius.
+
+## 9. Common pitfalls
+
+### 9.1 Vague casualty counts
+*"Several casualties"* doesn't help the agents or the
+receiving hospitals. Count and acuity-tag.
+
+### 9.2 Skipping public-health captures
+The agents cannot detect a heat-stroke cluster you don't
+report. Capture aggregate observations even when no
+individual case is critical.
+
+### 9.3 Hospital coordination via Hub only
+Clinical handover requires voice. Use the Hub for the
+formal record, the radio / phone for the actual
+coordination.
+
+## 10. The Help corpus you'll use most
+
+- [`personas/field-coordinator`](/help/personas/field-coordinator)
+- [`personas/operations-officer`](/help/personas/operations-officer)
+- [`screen-by-screen/agent-resource-allocation`](/help/articles/screen-by-screen/agent-resource-allocation)
+- [`screen-by-screen/agent-evacuation`](/help/articles/screen-by-screen/agent-evacuation)
+- [`personas/cross-sector`](/help/personas/cross-sector)
+- [`troubleshooting`](/help/articles/troubleshooting)
+
+## 11. Where to next
+
+- Run a tabletop focused on mass-casualty triage and
+  hospital surge co-ordination.
+- Browse all articles tagged `frontline-medical` via search.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the Council of Ambulance Authorities and participating
+hospital networks._

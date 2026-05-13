@@ -1,65 +1,166 @@
 ---
 slug: personas/frontline-ses-marine
-title: "Frontline — SES / Marine — Getting Started"
+title: "Front-line SES / Marine — getting started"
 persona: frontline-ses-marine
-cluster: sector
+cluster: front-line
+sector: ses-marine
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 9 min
 ---
 
-# Frontline — SES / Marine — Getting Started
+# Front-line SES / Marine — getting started
 
-This guide gets a **Frontline — SES / Marine** productive in the AMA Hub in 15 minutes.
-Scope: Flood rescue; water-based rescue.
+The **Front-line SES / Marine** persona is the AMA Hub's
+combined State Emergency Service and marine-rescue front-line
+role: NSW SES / VICSES / QFES SES / DFES SES / SA SES / TasFS
+SES / NTPFES SES / ACT SES specialist units (flood boat,
+swift water, vertical rescue, storm response), and the
+state and Commonwealth marine-rescue services (Marine
+Rescue NSW, AMSA, Coastguard, etc.). The persona is sector-
+scoped (SES-Marine) and jurisdiction-locked. SES-Marine
+specialisation includes flood-water operations, storm
+damage assessment and remediation, vertical rescue,
+swift-water rescue, missing-person searches, and marine
+search and rescue.
 
-## 1. What you can do
+This article gets a brand-new Front-line SES / Marine
+operator productive in fifteen minutes.
 
-As a Frontline — SES / Marine, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Capture signals** — flood observations (river levels,
+  inundation extent), storm damage observations, marine
+  conditions, missing-person reports, search progress.
+- **Update status** of your unit, your forward post, your
+  vessel.
+- **Acknowledge** evacuation directives where SES /
+  Marine participation is required.
+- **Receive** tasks from your sector's Operations Officer.
+- **Read** the SES-Marine sector workspace.
+- **Operate offline** with full action capture and replay.
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Approve public warnings.
+- Issue cross-sector tasks beyond your unit.
+- Take actions outside your sector or jurisdiction.
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Frontline — SES / Marine** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=frontline-ses-marine-landing theme=light -->
-<!-- screenshot:placeholder route_id=frontline-ses-marine-landing theme=dark -->
+1. **Sign in** on your unit device or vessel terminal. Land
+   at the SES-Marine sector workspace.
+2. **Confirm offline mode and tile cache freshness.**
+3. **Update unit status** — location, crew composition,
+   capability (flood boat / swift water / vertical /
+   marine).
+4. **Read active flood / storm / marine incidents** in your
+   area.
+5. **Read your inbox** — tasks awaiting acknowledgement.
+6. **Verbal handover** with outgoing crew.
 
-## 3. Decision rights & boundaries
+## 3. The SES-Marine sector workspace
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Frontline — SES / Marine** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+The workspace at `/sectors/ses-marine` shows:
+- **Flood layer** — gauge levels, inundation extent,
+  projected peaks.
+- **Storm damage layer** — reported damage with severity
+  and access status.
+- **Marine layer** — vessels in distress, sea state,
+  marine SAR cases.
+- **Search layer** — missing-person searches with search
+  pattern overlays and team assignments.
+- **Vertical-rescue layer** — height-rescue cases.
 
-## 4. Working with the Help Assistant
+## 4. Capturing signals well
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+SES-Marine specifics:
+- Flood: gauge reading, location, time; inundation extent
+  by suburb / property; rate of rise/fall.
+- Storm damage: location, type (tree / structural /
+  electrical), access status (passable / blocked).
+- Marine: vessel description, position, persons on board,
+  nature of distress.
+- Search: search pattern coverage, team progress, found /
+  not-found outcomes.
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Frontline — SES / Marine?"
+Be specific; include rate-of-change observations for
+floods and storms.
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+## 5. Search co-ordination
 
-## 5. Where to next
+Missing-person searches are co-ordinated through the
+sector workspace's search affordance:
+- Receive the search task with the missing person's last
+  known location, search pattern assigned, team
+  composition.
+- Update progress against the search pattern (segments
+  searched, segments remaining).
+- Capture findings (objects observed, witness reports,
+  found-person outcomes).
+- Hand off to receiving sectors (Police if criminal
+  context; Medical if found-person needs care).
 
-- Browse all articles tagged `frontline-ses-marine` via the [search page](/help/search?q=frontline-ses-marine).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+## 6. Marine SAR
+
+For marine rescue cases, the Hub coordinates with AMSA
+(Australian Maritime Safety Authority) for cases in the
+SAR region. Your role:
+- Capture the distress observation.
+- Update unit status as you respond.
+- Coordinate with AMSA via the federation channel for
+  joint operations.
+- Capture found / not-found outcomes; for found cases,
+  hand off to Medical.
+
+## 7. Working offline
+
+Same model as the other front-line personas. Marine
+operations especially benefit from offline capability —
+mobile coverage offshore is unreliable.
+
+## 8. Common pitfalls
+
+### 8.1 Vague flood-rate observations
+*"River is rising"* misses the operational signal;
+*"Murray gauge at Albury reading 5.42 m, +3 cm in last
+30 min"* informs the projection.
+
+### 8.2 Search-pattern non-completion reporting
+A search segment partially searched then abandoned without
+explicit non-completion reporting is a coordination
+hazard. Mark explicitly.
+
+### 8.3 Marine federation handshake delay
+For marine SAR cases involving AMSA, a stale federation
+handshake delays coordination. Watch the federation
+panel; engage AMSA via radio if the Hub is slow.
+
+### 8.4 Specialist capability mis-tagging
+A "flood boat" unit dispatched to a storm-damage tasking
+is wasted; tag your unit's capability accurately so the
+resource agent's recommendations are sound.
+
+## 9. The Help corpus you'll use most
+
+- [`personas/field-coordinator`](/help/personas/field-coordinator)
+- [`personas/operations-officer`](/help/personas/operations-officer)
+- [`screen-by-screen/agent-resource-allocation`](/help/articles/screen-by-screen/agent-resource-allocation)
+- [`screen-by-screen/agent-evacuation`](/help/articles/screen-by-screen/agent-evacuation)
+- [`personas/cross-sector`](/help/personas/cross-sector)
+- [`personas/commonwealth`](/help/personas/commonwealth) (for
+  AMSA federation context)
+- [`troubleshooting`](/help/articles/troubleshooting)
+
+## 10. Where to next
+
+- Run a tabletop focused on extended search co-ordination
+  with offline operations.
+- Browse all articles tagged `frontline-ses-marine` via
+  search.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the SES Council of Australia, AMSA, and the participating
+state SES and marine-rescue services._

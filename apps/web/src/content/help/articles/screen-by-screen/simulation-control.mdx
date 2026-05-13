@@ -1,30 +1,281 @@
 ---
 slug: screen-by-screen/simulation-control
-title: "Screen: Simulation Control"
+title: "Screen: Simulation Controller"
 status: Active
 classification: OFFICIAL
+audience: incident-commander, operations-officer, planning-officer, observer-auditor, executive-leader, resilience-planner
+surface_id: simulation-control
+estimated_reading_time: 13 min
 ---
 
-# Screen: Simulation Control
+# Screen: Simulation Controller
 
-## 1. Purpose
-The **Simulation Control** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Simulation Controller** at `/simulations/[tenantId]` is the
+operating surface for tabletop and live-fire exercises run inside
+the Hub. It is a faithful copy of the production operational
+surfaces, scoped to an isolated *exercise tenant*, with the
+addition of controller-specific affordances: scenario seeding,
+warp-speed playback, signal injection, replay, exercise
+objectives, and the exercise event log. This article is the
+screen-by-screen reference.
 
-## 2. Layout
-Light and dark variants:
+Exercises in the Hub are not toys. Every action inside an
+exercise tenant produces real audit rows in the exercise's
+audit container; replays deterministically reproduce both the
+operator-side actions and the agent-side recommendations; the
+evidence packs exported from an exercise are signed and have the
+same external-review value as production packs (with the
+*"exercise"* environment badge clearly stamped).
 
 <!-- AnnotatedScreenshot screen_id=simulation-control light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+The Simulation Controller is a three-column layout:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. **Left rail (~25 %)** — exercise metadata, PPRR phase,
+   scenario meta, participants, controls, event log, exercise
+   objectives.
+2. **Centre panel (~50 %)** — affected-area map (the same
+   WebGL Mapper renderer as production, scoped to the
+   exercise tenant).
+3. **Right rail (~25 %)** — exercise-scoped chat panel,
+   coordinating monitoring, planning, and resource agents.
+
+The layout mirrors the production Disaster Map but with the
+exercise's metadata and controls replacing the persona switcher
+and jurisdiction filter (which are fixed at exercise creation).
+
+## 2. Left rail — exercise metadata
+
+The metadata section shows:
+
+- **Tenant ID** — `sim-<short-hash>`. Click to copy.
+- **Scenario type** — bushfire, flood, cyclone, multi-hazard,
+  cross-border, etc.
+- **PPRR phase** — derived from the exercise state:
+  - `Prevention` — pre-exercise; controllers configuring.
+  - `Preparedness` — paused exercise.
+  - `Response` — active, scenario seeded.
+  - `Recovery` — archived.
+- **Status** — `Draft`, `Active`, `Paused`, `Archived`.
+- **Created at**, **Started at**, **Ended at** — full
+  timestamps in display zone with UTC on hover.
+- **Jurisdictions** — the exercise's scope; fixed at creation.
+
+A coloured PPRR badge to the right reflects the active phase
+using the AIDR PPRR palette: prevention blue, preparedness
+amber, response red, recovery green.
+
+## 3. Left rail — meters and participants
+
+Two small meter widgets:
+- **Tenant capacity** — slots used vs configured (e.g., 7 / 12).
+- **Participant count** — the number of personas currently signed
+  in to the exercise tenant.
+
+Below the meters, the **Participants** list shows each signed-in
+operator with their persona and jurisdiction. The list refreshes
+every 8 s. Click an operator to see their last action time and
+their assigned exercise role.
+
+## 4. Left rail — controls
+
+Three buttons, conditionally enabled:
+
+- **Pause** — pauses the exercise clock; agents stop emitting new
+  recommendations. Requires Incident Commander or Operations
+  Officer envelope on the exercise tenant. Audit-logged.
+- **Resume** — resumes from pause. Same envelope.
+- **Stop** — archives the exercise; transitions PPRR to Recovery;
+  freezes the audit trail; closes participant sessions. Requires
+  Incident Commander envelope and is one-way.
+
+Below the buttons, two backlinks: *All exercises* and *Refresh
+clock*. The clock backlink force-refreshes the simulation clock
+panel (otherwise polled every 8 s).
+
+## 5. Left rail — event log
+
+The event log is a chronological feed of significant exercise
+events: scenario seeds, signal arrivals, agent recommendations,
+operator actions, persona switches, evacuation declarations,
+publication attempts, and chat turns. Each entry shows:
+
+- **Timestamp** — exercise time, with UTC on hover.
+- **Event text** — a one-line human-readable summary.
+- **Pending dot** — present if the event is still being
+  reconciled with the durable Cosmos audit container; replaced
+  with a check mark on durable persistence.
+
+The log is collapsible; the heading shows the entry count.
+
+## 6. Left rail — exercise objectives
+
+Exercise objectives are the learning goals for participants. Each
+objective is a short text + a checkbox. Add via the *+* button at
+the bottom of the list; remove via the trash icon. Toggling done
+state is audit-logged.
+
+Exercise debriefs use the objectives list as the agenda; the
+evidence pack export includes the objectives and their final
+state.
+
+## 7. Centre — affected-area map
+
+The map panel is the production Mapper renderer scoped to the
+exercise tenant. It shows the exercise's signals, agent
+recommendations, evacuation envelopes, and infrastructure
+overlays. The interaction model is identical to the production
+Mapper (see
+[`screen-by-screen/disaster-mapper`](/help/articles/screen-by-screen/disaster-mapper)).
+
+The map's chrome differs in two ways:
+- A subtle *"Exercise"* watermark across the top-left corner.
+- A risk-level badge in the toolbar showing the scenario's
+  current risk classification (LOW / MED / HIGH / EXTREME).
+
+## 8. Right rail — chat panel
+
+The right rail's chat panel is the **Simulation Controller** chat,
+which differs from the production help chat:
+
+- It coordinates the **monitoring**, **planning**, and **resource**
+  agents directly, rather than only grounding in the help corpus.
+- It is **exercise-scoped** — every prompt and response is bound
+  to the exercise tenant's audit container.
+- It supports **scenario seeding** via natural language ("seed a
+  Snowy Mountains bushfire with 4-hour cross-border projection")
+  which calls into the `seed_replay` API and produces signal
+  fixtures for the exercise.
+- It surfaces **scenario cards** — agent-produced summaries of
+  the seeded scenario including hazard class, geographic and
+  temporal envelopes, and key signals to watch.
+
+Chat input is a multi-line text area; **Enter** sends, **Shift+
+Enter** inserts a newline; **Cancel** during streaming aborts the
+turn. Quick-action buttons under the input pre-fill common
+controller prompts.
+
+## 9. Scenario seeding
+
+Scenario seeding is the controller's core preparation task.
+Two paths:
+
+### 9.1 Natural-language seeding via chat
+Type the scenario into the chat: *"Seed a Riverina flood with
+NSW–VIC cross-border evacuation across the Murray, peak in 6
+hours, amber confidence."*. The agent produces a scenario card,
+the controller approves, and the seed runs; signals appear on
+the map within seconds.
+
+### 9.2 Template seeding via API
+For deterministic reproducibility, controllers call
+`POST /api/simulations/{tenantId}/seed` with a template ID. The
+template ID identifies a versioned scenario fixture; the same
+template produces bit-identical seeds across runs.
+
+Templates live in `apps/api/app/services/simulation/templates/`
+and are visible via `GET /api/simulations/templates`.
+
+## 10. Warp-speed playback
+
+For tabletop exercises that need to compress hours of
+operational time into a session, the Hub supports warp-speed
+playback:
+
+- The simulation clock advances faster than wall-clock.
+- Default warp ratios: 1×, 2×, 4×, 8×, 16×, 32×.
+- Change via *Warp controls* in the simulation banner; requires
+  Incident Commander envelope.
+- Warp changes are audit-logged with both the prior and new
+  ratios.
+
+Agents emit recommendations at warp-corrected intervals; signals
+arrive on warp-corrected timing. Operator response time remains
+wall-clock; this asymmetry is intentional — exercises should
+reproduce the *cognitive load* of compressed scenarios.
+
+## 11. Replay
+
+After an exercise ends, the **Replay** workspace at
+`/simulations/{tenantId}/replay` deterministically replays every
+event in capture order. Operators can scrub the timeline, inspect
+the operating picture at any past instant, and export evidence
+packs scoped to the replay window.
+
+Replay is the post-exercise debrief tool. It is not a re-run —
+new actions cannot be taken during replay; the view is read-only
+and Observer-equivalent.
+
+## 12. Edge cases
+
+### 12.1 Exercise tenant collision
+Tenant IDs are `sim-` + a short hash; collisions are rare but
+possible. On collision, the Hub appends `-2`, `-3`, etc. The
+controller is notified.
+
+### 12.2 Participant joins mid-exercise
+Late joiners see the operating picture as it currently is, with
+the event log scrolled to the current event. They do not
+retroactively receive missed audit rows in their notification
+banner.
+
+### 12.3 Agent failures during seeding
+If an agent fails during natural-language seeding, the controller
+is offered the partial scenario card with a *"Retry"* button. A
+retry calls the agent with the same prompt; deterministic
+failures need template seeding instead.
+
+### 12.4 Cross-tenant participant
+A participant signed in to an exercise tenant *and* a production
+tenant in different browser windows can switch between. Their
+audit identity differs (the exercise audit identity is stamped
+with the exercise tenant ID); cross-leak is impossible at the
+data layer.
+
+## 13. Audit consequences
+
+Every action in the Simulation Controller audit-logs to the
+exercise tenant's audit container:
+
+- Seed (template or natural language).
+- Pause / resume / stop.
+- Warp ratio change.
+- Operator actions (mirrored from production action audit set).
+- Chat turns (controller chat is recorded; the production help
+  chat's PII minimisation does not apply in exercises — the chat
+  text is the learning artefact and is captured verbatim with
+  participant consent recorded at exercise creation).
+- Objective add / toggle / remove.
+
+Evidence packs exported from the exercise tenant are signed with
+the exercise's environment badge.
+
+## 14. Keyboard shortcuts
+
+| Shortcut    | Action                                      |
+| ----------- | ------------------------------------------- |
+| `g s`       | Jump to Simulations list                    |
+| `p`         | Pause / resume the exercise clock           |
+| `s`         | Stop (with confirmation)                    |
+| `1`–`6`     | Set warp ratio (1×, 2×, 4×, 8×, 16×, 32×)   |
+| `Ctrl+/`    | Open exercise-scoped help chat              |
+| `Tab`       | Cycle focus between left rail, map, right   |
+| `?`         | Open the on-screen shortcut palette         |
+
+## 15. Related
+
+- [`playbooks/simulation`](/help/articles/playbooks/simulation) —
+  for the exercise-design playbook.
+- [`screen-by-screen/disaster-mapper`](/help/articles/screen-by-screen/disaster-mapper)
+  — for the centre map panel reference.
+- [`personas/operations-officer`](/help/personas/operations-officer)
+  — for the typical exercise controller persona landing.
+- [`audit-observer-mode`](/help/articles/audit-observer-mode) —
+  for the post-exercise debrief audit walk.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+exercise design working group. Surface ID `simulation-control`._

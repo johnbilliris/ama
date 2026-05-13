@@ -22,7 +22,7 @@ export async function streamChatAsk(
   handler: ChatStreamHandler,
   init?: { url?: string; headers?: HeadersInit; signal?: AbortSignal },
 ): Promise<void> {
-  const url = init?.url ?? "/api/v1/help/chat/ask";
+  const url = init?.url ?? "/api/help/chat/ask";
   const resp = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "text/event-stream", ...init?.headers },

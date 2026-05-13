@@ -246,9 +246,14 @@ class HelpRepositories:
     ) -> list[dict[str, Any]]:
         rows = query(HELP_ARTICLES, tenant_id) + query(HELP_ARTICLES, "__global__")
         if persona:
-            rows = [r for r in rows if persona in (r.get("personas") or [])]
+            # Honour both legacy ``personas`` and current ``persona_tags``
+            # front-matter spellings; ``all-personas`` matches any persona.
+            def _matches(r: dict[str, Any]) -> bool:
+                tags = r.get("personas") or r.get("persona_tags") or []
+                return persona in tags or "all-personas" in tags
+            rows = [r for r in rows if _matches(r)]
         if surface:
-            rows = [r for r in rows if surface in (r.get("surfaces") or [])]
+            rows = [r for r in rows if surface in (r.get("surfaces") or r.get("surface_tags") or [])]
         if kind:
             rows = [r for r in rows if r.get("kind") == kind]
         return rows[:limit]

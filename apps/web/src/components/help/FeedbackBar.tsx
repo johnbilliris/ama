@@ -12,7 +12,7 @@ export function FeedbackBar({ targetKind, targetId }: FeedbackBarProps) {
 
   async function submit(rating: "helpful" | "not_helpful", comment?: string) {
     try {
-      await fetch("/api/v1/help/chat/feedback", {
+      await fetch("/api/help/chat/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ target_kind: targetKind, target_id: targetId, rating, comment }),

@@ -1,30 +1,237 @@
 ---
 slug: screen-by-screen/login
-title: "Screen: Login"
+title: "Screen: Sign-in"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+surface_id: login
+estimated_reading_time: 8 min
 ---
 
-# Screen: Login
+# Screen: Sign-in
 
-## 1. Purpose
-The **Login** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Sign-in** surface at `/auth/signin` is the only path into
+the Hub. It federates with Microsoft Entra ID via OpenID Connect
+and accepts identities from the Australian Government tenant and
+from any state/territory tenant that has signed a Tenant
+Federation Agreement with NEMA. There is no local-account model;
+there is no service-account sign-in path on this surface.
 
-## 2. Layout
-Light and dark variants:
+This article documents the surface, the federation model, the
+common failure modes (with self-service remediation where
+possible), and the audit consequences of every sign-in event.
 
 <!-- AnnotatedScreenshot screen_id=login light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+The Sign-in surface is intentionally minimal:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+- The Hub mark and a one-line tagline.
+- A *"Sign in with organisation account"* button.
+- A small *"Choose a different organisation"* link beneath, used
+  when you have signed in to a different tenant on the same
+  device and need to override the cached choice.
+- A footer strip with privacy, terms, AU-region residency badge,
+  the deployed Hub version, and a *"Get help"* link that opens
+  the public help inbox (no sign-in required).
+
+There are no username or password fields on this surface. The
+Hub never sees your credentials; the IdP handles authentication
+end-to-end.
+
+## 2. The federation model
+
+### 2.1 Tenants
+The Hub's app registration is published in the AGW tenant. Each
+state/territory tenant that has signed the Federation Agreement
+adds the Hub's app registration to their own tenant; this lets
+their identities sign in via the *"Choose a different
+organisation"* link.
+
+A first-time sign-in from an unregistered tenant fails with
+*"Sign-in refused: tenant not permitted"*. Self-service is
+impossible — the tenant administrator must contact NEMA to sign
+the Federation Agreement.
+
+### 2.2 Identity flow
+1. You click *Sign in with organisation account*.
+2. The Hub redirects you to your IdP's authorisation endpoint
+   with a PKCE-protected request.
+3. The IdP authenticates you (typically silently if you are
+   already signed in to Microsoft 365).
+4. The IdP redirects back to the Hub with an authorisation code.
+5. The Hub exchanges the code for an ID token at the IdP's token
+   endpoint over a backend channel; the ID token never appears
+   in your browser's URL.
+6. The Hub validates the token's signature, issuer, audience,
+   `nbf`/`exp` claims, and the tenant claim against the
+   federation allow-list.
+7. The Hub stamps a session cookie (HTTP-only, Secure,
+   SameSite=Lax) and redirects you to the post-sign-in landing
+   surface.
+
+### 2.3 Claims
+The session cookie binds your identity to a set of derived
+claims:
+- `sub` — your IdP-issued subject identifier.
+- `tenant_id` — your home tenant (e.g., `nsw-rfs`, `vic-cfa`,
+  `nema-au`).
+- `personas` — the array of personas your IdP role assignments
+  map to.
+- `default_persona` — your IdP's nominated default, if any.
+- `jurisdictions` — the array of jurisdiction codes you are
+  authorised to operate in.
+- `iat` / `nbf` / `exp` — token timing.
+
+Claims are re-read on every sign-in. To pick up newly assigned
+roles, sign out and back in.
+
+## 3. Post-sign-in landing
+
+The post-sign-in landing surface depends on your default
+persona:
+
+| Default persona      | Landing surface             |
+| -------------------- | --------------------------- |
+| Incident Commander   | `/` (Disaster Map)          |
+| Operations Officer   | `/workspaces/operations`    |
+| Planning Officer     | `/workspaces/planning`      |
+| PIO                  | `/alerts`                   |
+| Logistics Officer    | `/workspaces/logistics`     |
+| Field Coordinator    | `/workspaces/field`         |
+| Risk Manager         | `/workspaces/risk`          |
+| Resilience Planner   | `/preparedness`             |
+| Observer/Auditor     | `/governance/audit`         |
+| Executive Leader     | `/governance/dashboard`     |
+| Front-line (any)     | `/sectors/<sector>`         |
+| Cross-sector         | `/sectors`                  |
+| Commonwealth         | `/governance/dashboard`     |
+
+If your IdP nominates no default and you hold multiple personas,
+the Hub lands on `/auth/choose-persona` and presents the
+persona switcher pre-opened.
+
+## 4. Sign-out
+
+Sign-out is via the persona switcher's *"Sign out"* link or the
+direct URL `/auth/signout`. Sign-out:
+
+1. Invalidates the Hub session cookie.
+2. Posts a sign-out audit row.
+3. Redirects to the IdP's end-session endpoint, which revokes
+   the IdP session if your IdP supports federated sign-out
+   (Microsoft Entra does).
+4. Returns to `/auth/signin`.
+
+Closing the browser window without explicit sign-out leaves the
+session cookie valid until its expiry (default: 8 hours; tunable
+per tenant).
+
+## 5. Failure modes
+
+### 5.1 "Sign-in refused: tenant not permitted"
+Your IdP tenant is not in the federation allow-list. Forward the
+on-page correlation ID to your agency administrator.
+
+### 5.2 "403 — your account has no Hub role"
+Your identity is recognised but no Hub persona claim is present.
+Your administrator must add you to a Hub persona security group.
+
+### 5.3 "Session expired" loop
+Clock skew between your device and the IdP. Sync your device
+clock to NTP and try again.
+
+### 5.4 "Token signature invalid"
+The IdP's signing key has rotated and the Hub's cached key set
+is stale. The Hub refreshes the key set every 15 minutes; if you
+hit this, wait one minute and try again. Persistent occurrence
+is a backend issue.
+
+### 5.5 "Consent required"
+For first-time sign-ins from a tenant that has signed the
+Federation Agreement but whose administrator has not yet
+consented to the Hub app's permissions, the IdP prompts for
+admin consent. Forward the prompt URL to your administrator.
+
+### 5.6 "Multiple sessions detected"
+You are signed in to the Hub on multiple devices simultaneously.
+This is allowed; the Hub does not enforce single-device sign-in.
+The dialog notifies you in case the second session is unexpected
+(e.g., a stolen device); you can sign out the other session from
+the dialog.
+
+## 6. Audit consequences
+
+Every sign-in event records:
+- Identity (`sub`, `tenant_id`, IdP issuer).
+- Personas in claim, default persona, jurisdictions in claim.
+- Device fingerprint (one-way hashed).
+- IP address (truncated to /24 for IPv4, /48 for IPv6).
+- User-agent (parsed; raw not stored).
+- Sign-in time.
+
+Every sign-out event records:
+- Identity.
+- Sign-out time.
+- Sign-out trigger (user-initiated, session expiry,
+  administrator-initiated, federated sign-out from another
+  Hub session).
+
+Every failed sign-in records:
+- Attempted identity (if known).
+- Failure reason.
+- IP address (truncated).
+- Time.
+
+Failed sign-ins are visible in the audit timeline filtered by
+action `auth.signin.failed`. A burst of failures from a single
+identity or IP triggers the security operations alert.
+
+## 7. Edge cases
+
+### 7.1 First sign-in to a new device
+The Hub welcomes first-time sign-ins with a banner *"Welcome to
+the AMA Hub"* + a link to the *Getting started* article. The
+banner appears once per device and dismisses on click.
+
+### 7.2 Maintenance mode
+During scheduled maintenance, the Sign-in surface displays a
+maintenance banner with the maintenance window. New sign-ins
+proceed but with a *"degraded mode"* badge in the chrome.
+Critical operating personas may sign in with limited
+functionality; non-critical personas may be deferred.
+
+### 7.3 Federated sign-out
+Signing out via the IdP's portal also invalidates your Hub
+session via the IdP's federated sign-out hook. This propagation
+is asynchronous; allow up to one minute.
+
+### 7.4 IdP-side conditional access
+Your IdP may impose conditional access rules (MFA, compliant
+device, in-zone IP). The Hub honours these — failures appear as
+IdP-side prompts, not Hub-side errors.
+
+## 8. Keyboard shortcuts
+
+| Shortcut | Action                                           |
+| -------- | ------------------------------------------------ |
+| `Enter`  | Click the *Sign in with organisation account* button |
+| `c`      | Open *Choose a different organisation*           |
+
+## 9. Related
+
+- [`getting-started`](/help/articles/getting-started) — for the
+  first-sixty-seconds orientation after sign-in.
+- [`troubleshooting`](/help/articles/troubleshooting) — section
+  *Sign-in and identity* for sign-in-specific failure remediation.
+- [`screen-by-screen/persona-switcher`](/help/articles/screen-by-screen/persona-switcher)
+  — for choosing among personas after sign-in.
+- [`screen-by-screen/settings`](/help/articles/screen-by-screen/settings)
+  — for the *Identity (read-only)* section showing your full
+  claim set.
+
+---
+
+_Maintained by the AMA Help content team in partnership with
+the identity working group. Surface ID `login`._

@@ -1007,11 +1007,28 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'AZURE_AI_REASONING_MODEL_KEY', value: '${openAiDeployments.outputs.reasoningDeploymentModelKey}' }
             { name: 'AZURE_AI_DRAFTING_MODEL_KEY', value: '${openAiDeployments.outputs.draftingDeploymentModelKey}' }
             { name: 'AZURE_AI_SIMULATION_MODEL_KEY', value: '${openAiDeployments.outputs.simulationDeploymentModelKey}' }
+            // Per-tier deployment-name env vars. The CSV map collapses
+            // multiple tiers onto the same `<modelId>@<version>` key (until
+            // tiers diverge — see azure-openai.bicep), so callers MUST
+            // prefer these explicit env vars when they need a specific
+            // tier (the simulation Controller's RAI policy bucket, etc.).
+            { name: 'AZURE_AI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
+            { name: 'AZURE_AI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
+            { name: 'AZURE_AI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
             // Spec 036 grounding plane (FR-RAG-IDX-04). Empty string when
             // enableSpec036FoundryRag=false so retrieval auto-wiring stays off
             // for hermetic dev tenants.
             { name: 'AZURE_SEARCH_ENDPOINT', value: enableSpec036FoundryRag ? 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net' : '' }
             { name: 'RETRIEVAL_INDEX_ALIAS', value: 'corpus' }
+            // Sub-agent dispatcher base URL — the Simulation Controller's
+            // ``query_sub_agent`` tool POSTs to {AGENTS_BASE_URL}/{role}/invoke
+            // (see apps/api/app/services/simulation/sub_agents/_base.py).
+            // Built from the managed-env default domain + agents app name to
+            // avoid a circular dependency with ``agentsContainerApp`` (which
+            // already references ``apiContainerApp.properties...fqdn`` for
+            // ``API_ENDPOINT``). Internal-ingress Container Apps in the same
+            // managed env reach each other at https://<app>.internal.<defaultDomain>.
+            { name: 'AGENTS_BASE_URL', value: 'https://${take('${abbrs.appContainerApps}agents-${environmentName}', 32)}.internal.${managedEnvironment.properties.defaultDomain}' }
             { name: 'OTEL_SERVICE_NAME', value: 'api' }
           ]
           probes: [
@@ -1093,6 +1110,13 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'AZURE_AI_REASONING_MODEL_KEY', value: '${openAiDeployments.outputs.reasoningDeploymentModelKey}' }
             { name: 'AZURE_AI_DRAFTING_MODEL_KEY', value: '${openAiDeployments.outputs.draftingDeploymentModelKey}' }
             { name: 'AZURE_AI_SIMULATION_MODEL_KEY', value: '${openAiDeployments.outputs.simulationDeploymentModelKey}' }
+            // Per-tier deployment-name env vars (matches apiContainerApp).
+            // Sub-agent dispatcher + LLMClient consumers use these to
+            // bypass the CSV map, which collapses tiers onto the same
+            // model key today.
+            { name: 'AZURE_AI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
+            { name: 'AZURE_AI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
+            { name: 'AZURE_AI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
             // Spec 036 grounding plane (FR-RAG-IDX-04). Empty string when
             // enableSpec036FoundryRag=false so retrieval auto-wiring stays off
             // for hermetic dev tenants.

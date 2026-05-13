@@ -1,65 +1,175 @@
 ---
 slug: personas/logistics-officer
-title: "Logistics Officer — Getting Started"
+title: "Logistics Officer — getting started"
 persona: logistics-officer
 cluster: operational
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 10 min
 ---
 
-# Logistics Officer — Getting Started
+# Logistics Officer — getting started
 
-This guide gets a **Logistics Officer** productive in the AMA Hub in 15 minutes.
-Scope: Supply chain; staging areas; equipment dispatch.
+The **Logistics Officer (LO)** is the AIIMS Logistics function
+in the AMA Hub: resource allocation, mutual-aid co-ordination,
+requisitions, accommodation, fuel and maintenance support, and
+the dispatch chain that turns Operations Officer's intent into
+units actually moving. The LO is the **bottleneck and the
+multiplier** — careful staging accelerates response; clumsy
+staging starves it.
 
-## 1. What you can do
+This article gets a brand-new LO productive in fifteen minutes
+and documents the envelope, the dispatch chain, the mutual-aid
+agreements model, and the most common pitfalls.
 
-As a Logistics Officer, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Draft transfers** in the Resource board workspace.
+- **Co-sign** export and import sides of resource transfers.
+- **Accept or decline** mutual-aid requests from peer
+  sectors / jurisdictions.
+- **Book** accepted resources into the receiving pool.
+- **Recall** units in-transit (with rationale).
+- **Manage requisitions** — fuel, food, accommodation,
+  maintenance support.
+- **Initiate** NEMA acknowledgement for cross-border transfers.
+- **Forward** agent recommendations to the Operations Officer
+  for envelope expansion.
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Approve public warnings.
+- Issue tasks (Operations Officer's role) — but you do
+  acknowledge and execute Operations Officer tasks affecting
+  resources.
+- Tune confidence-band thresholds.
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Logistics Officer** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=logistics-officer-landing theme=light -->
-<!-- screenshot:placeholder route_id=logistics-officer-landing theme=dark -->
+1. **Sign in**; you land at the Logistics workspace.
+2. **Read the resource pool freshness** — last refresh from
+   agency systems-of-record. Stale > 5 min is amber.
+3. **Read in-flight transfers** — units in transit, pending
+   acceptances, pending recall confirmations.
+4. **Read inbound requests** — peer mutual-aid requests
+   awaiting your decision.
+5. **Open the Resource-allocation agent workspace** (`g w`,
+   `o`). Note proposed transfers.
+6. **Verbal handover** with outgoing LO. Confirm in-transit
+   units' status.
 
-## 3. Decision rights & boundaries
+## 3. The dispatch chain
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Logistics Officer** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+The chain is in [`playbooks/agent-resource-allocation`](/help/articles/playbooks/agent-resource-allocation)
+in detail. Your role spans steps 3–5:
+- **Draft** the transfer in the Resource board — pick the
+  unit(s), confirm origin and destination, set the timing.
+- **Originating Operations Officer co-signs** export.
+- **Receiving Operations Officer co-signs** import (if
+  cross-jurisdictional).
+- **You** (or peer LO on receiving side) accept and book.
 
-## 4. Working with the Help Assistant
+Each step is audit-logged. The transfer's correlation ID
+binds the agent's proposal, every co-sign, your draft, and
+the eventual unit movement.
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+## 4. Mutual-aid agreements
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Logistics Officer?"
+Verify the relevant mutual-aid agreement is active before
+drafting. The agreements catalogue at
+`/governance/agreements` lists every agreement; the agent's
+recommendations cite the relevant agreement; the Resource
+board surfaces it in the transfer drafting pane.
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+Standing terms to verify:
+- Cost recovery (who pays for what).
+- Command-and-control transfer rules (does the receiving
+  side direct the unit, or does the originating side retain
+  command?).
+- Recall conditions (under what circumstances can the
+  originating side recall mid-event?).
+- Fuel and maintenance responsibilities.
 
-## 5. Where to next
+## 5. Cross-border specifics
 
-- Browse all articles tagged `logistics-officer` via the [search page](/help/search?q=logistics-officer).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+Cross-border transfers always involve NEMA acknowledgement.
+The receiving Operations Officer co-signs import; the
+receiving LO accepts and books.
+
+Coordinate verbally with the receiving LO during high-tempo
+transfers — the Hub captures the formal record but radio /
+phone is faster for in-transit logistics queries (e.g.,
+*"unit at the border, where do you want them?"*).
+
+## 6. Requisitions
+
+Requisitions cover non-unit logistics:
+- **Fuel** — for in-event vehicles, helibases, temporary
+  generators.
+- **Food and accommodation** — for crews on extended
+  deployment.
+- **Specialist equipment** — beyond standard issue.
+- **Maintenance support** — mobile mechanics, parts.
+
+Requisitions go through the Resource board's requisitions
+affordance; the workflow is similar to transfers but with
+different approval chains depending on cost thresholds.
+
+## 7. International assistance
+
+For OS jurisdiction (Pacific assistance):
+- The agent's recommendation cites the MFA diplomatic note.
+- Customs and biosecurity require co-ordination with border
+  agencies; the Hub doesn't manage these but the LO is the
+  liaison point.
+- Expect 24-hour-plus turnaround.
+
+## 8. Common pitfalls
+
+### 8.1 Booking before acceptance complete
+A unit booked into the receiving pool before the export
+co-sign is complete creates inventory discrepancies. The
+Hub's workflow prevents this but verbal-only coordination
+sometimes gets ahead of the system; trust the audit trail.
+
+### 8.2 Stale resource pool
+A pool > 15 min stale is unreliable. Refresh from systems-of-
+record before drafting; the workspace exposes a *Refresh now*
+control.
+
+### 8.3 Mutual-aid agreement assumption
+Don't assume an agreement is active because it was last week;
+agreements occasionally lapse without the catalogue being
+refreshed (rare but happens). Verify when in doubt.
+
+### 8.4 Recall as default
+A reflexive recall on every operational tempo dip wastes
+movement effort. Recall when conditions warrant; otherwise
+let units complete their assignment.
+
+### 8.5 Cost-recovery accounting in-event
+Cost-recovery accounting is post-event. Don't try to
+optimise for it during an active deployment; the audit trail
+is the authoritative record.
+
+## 9. The Help corpus you'll use most
+
+- [`screen-by-screen/agent-resource-allocation`](/help/articles/screen-by-screen/agent-resource-allocation)
+- [`playbooks/agent-resource-allocation`](/help/articles/playbooks/agent-resource-allocation)
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+- [`personas/operations-officer`](/help/personas/operations-officer)
+- [`personas/field-coordinator`](/help/personas/field-coordinator)
+- [`troubleshooting`](/help/articles/troubleshooting)
+
+## 10. Where to next
+
+- Run a tabletop focused on cross-border resource transfer
+  under degraded conditions.
+- Audit the prior month's transfers for cost-recovery
+  hygiene.
+- Browse all articles tagged `logistics-officer` via search.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the logistics working group and the AFAC mutual-aid cell._

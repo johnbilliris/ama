@@ -1,65 +1,189 @@
 ---
 slug: personas/public-information-officer
-title: "Public Information Officer — Getting Started"
+title: "Public Information Officer — getting started"
 persona: public-information-officer
 cluster: operational
 status: Active
 classification: OFFICIAL
+estimated_reading_time: 11 min
 ---
 
-# Public Information Officer — Getting Started
+# Public Information Officer — getting started
 
-This guide gets a **Public Information Officer** productive in the AMA Hub in 15 minutes.
-Scope: Multilingual alert composer; accessibility check; Principle V coverage.
+The **Public Information Officer (PIO)** is the AIIMS Public
+Information function in the AMA Hub: the doctrinal author of
+every public alert, the steward of community-facing language,
+the orchestrator of multilingual communication, and the
+clearinghouse for community feedback during operations. The
+PIO's audit weight is the highest in the operating-persona set
+because public alerts have the longest reach and the most
+direct community consequence.
 
-## 1. What you can do
+This article gets a brand-new PIO productive in fifteen
+minutes and documents the envelope, the alert composition
+workflow, the multilingual handling, the cross-border
+coordination, and the most common pitfalls.
 
-As a Public Information Officer, your decision rights cover:
+## 1. Your envelope at a glance
 
-- Reviewing signals and incidents within your jurisdiction(s)
-- Surfacing agent recommendations with citations and confidence bands
-- Coordinating handoffs with peer personas via the Hub's audit trail
-- Honouring AIDR / AIIMS doctrine on every state-changing action
+You can:
+- **Draft** public alerts in the Alert Composer.
+- **Approve** alerts (with IC co-sign for amber-confidence and
+  for *Emergency warning* severity).
+- **Mirror or pair** cross-border publications with peer PIOs.
+- **Author** community-facing content in non-Composer surfaces
+  (workspace banners, agency app push messages, agency social
+  posts via the channel adapters).
+- **Co-ordinate** cultural reviewers for non-English variants.
+- **Revoke** alerts within 5 minutes of publication; later
+  requires *All clear* alert.
 
-## 2. First 15 minutes — workflow
+You cannot:
+- Issue tasks to non-communication personas.
+- Allocate resources.
+- Tune confidence-band thresholds.
+- Take state-changing actions outside your jurisdictions
+  without the cross-border workflow.
 
-1. **Sign in** via your identity provider; the Hub auto-resolves your default
-   persona from your IdP claim (FR-027).
-2. Open the **Disaster Mapper** to see today's operating picture.
-3. Switch to the **Public Information Officer** workspace via the persona switcher.
-4. Review the first three workspace tiles; each links to a "Help on this
-   screen" article.
-5. Open the **Help chat** (`Ctrl+/`) and ask a starter question.
+## 2. First fifteen minutes on shift
 
-<!-- screenshot:placeholder route_id=public-information-officer-landing theme=light -->
-<!-- screenshot:placeholder route_id=public-information-officer-landing theme=dark -->
+1. **Sign in**; you land at the Alert Composer's *Drafts*
+   inbox.
+2. **Read the in-flight drafts**. Note any awaiting your
+   sign-off or with cultural-reviewer co-sign pending.
+3. **Open the Communication agent workspace**
+   (`g w`, `c`). Note proposed alert content the agent has
+   prepared.
+4. **Open the Disaster Map**. Take in the operating picture;
+   note any signal clusters that may produce alert needs.
+5. **Glance the Localisation panel** on the Governance
+   Dashboard. Note any languages with low coverage or queue
+   backlog.
+6. **Verbal handover** with outgoing PIO. Confirm in-flight
+   drafts and pending revisions.
 
-## 3. Decision rights & boundaries
+## 3. The alert composition workflow
 
-Refer to the [Constitution](/help/articles/constitution) for the precise
-decision-rights envelope of the **Public Information Officer** role. The Hub will refuse
-state-changing actions outside your scope and surface a [SupportHandoff](
-/help/articles/troubleshooting#support-handoff) prompt.
+See [`screen-by-screen/alert-composer`](/help/articles/screen-by-screen/alert-composer)
+for the surface reference. The PIO's typical sequence:
 
-## 4. Working with the Help Assistant
+1. Open Composer (often pre-filled by the communication agent).
+2. Verify the originating evidence in the evidence pane.
+3. Set severity, hazard class, geographic envelope, temporal
+   envelope, classification.
+4. Author the English headline and lead instruction with care
+   — these are the highest-impact fields.
+5. Author the detail body with structured sections.
+6. Add languages as needed; review the machine drafts;
+   request cultural-reviewer co-sign.
+7. Verify channel selection.
+8. Acknowledge the negative-evidence cards.
+9. Initiate co-sign chain.
+10. On final co-sign, publish.
+11. Monitor publication state; retry partial failures.
 
-The Help Assistant only answers from the published help corpus and always
-cites its sources. Try these starter prompts:
+## 4. Multilingual handling
 
-- "What does the amber confidence badge mean?"
-- "How do I escalate to NEMA from a cross-border bushfire?"
-- "Where can I find the keyboard shortcuts for Public Information Officer?"
+See [`multilingual-authoring`](/help/articles/multilingual-authoring)
+for the multilingual model. The PIO's role:
 
-If the assistant refuses, it tells you **why** in non-judgmental terms and
-offers your tenant's support handoff destination.
+- Author the English first; it is the doctrinal source.
+- Add languages from the catalogue based on the affected
+  audience's language pockets.
+- Review every machine draft before requesting cultural
+  co-sign — a draft you don't read is one you can't
+  defend.
+- Plan the operational timeline around cultural-reviewer
+  turnaround. For *Emergency warning*, English publishes
+  alone if necessary; non-English follows.
+- For First Nations languages, the cultural authority's
+  serial review is the doctrinal floor; do not parallelise.
 
-## 5. Where to next
+## 5. Cross-border coordination
 
-- Browse all articles tagged `public-information-officer` via the [search page](/help/search?q=public-information-officer).
-- Take the **First 15 Minutes Tour** from the landing page if you skipped it.
-- Review the [Audit / Observer guide](/help/articles/observer-mode-guide) for
-  read-only audit access.
+For alerts whose envelope crosses subdivision boundaries:
+- The cross-border workflow engages on Composer publish.
+- The receiving state's PIO is notified; they may *Mirror* or
+  *Issue paired*.
+- NEMA acknowledgement is recorded.
+- Both alerts publish simultaneously when receiving PIO
+  co-signs.
+
+If receiving PIO doesn't co-sign within the configured
+window (default 5 min), English publishes alone with an
+annotation. Don't wait indefinitely for the receiving state;
+public-safety doctrine privileges acting on your evidence.
+
+## 6. Revoke vs *All clear*
+
+- **Revoke** within 5 minutes of publication if the alert was
+  in error (wrong envelope, wrong severity, premature
+  publication). Audit-logged with rationale.
+- **All clear** alert when the threat passes. Cites the
+  original via correlation ID; supersedes the original in
+  community channels.
+
+Don't ping-pong: revoke followed by re-publish followed by
+revoke erodes community trust. Slow down; verify; publish
+once.
+
+## 7. The community-feedback loop
+
+After publication, the communication agent monitors
+community-response signals (call-centre volume, social
+sentiment, mobile movement patterns). Sharp divergence from
+expectation surfaces in the Composer's history pane. The PIO
+considers re-issue with sharpened language.
+
+## 8. Common pitfalls
+
+### 8.1 Vague action verbs
+*"You may want to consider moving"* gets ignored. *"Move
+now to high ground above 15 metres"* gets acted on.
+
+### 8.2 Multilingual machine-translation rubber-stamping
+Approving a machine translation you can't read is a
+constitutional gap. Either the cultural reviewer reads it,
+or it doesn't publish.
+
+### 8.3 Publishing under amber co-sign without IC
+For amber-confidence alerts at *Emergency warning* severity,
+IC's co-sign is non-negotiable. If IC is unavailable, hand
+off to a peer IC or escalate; don't bypass.
+
+### 8.4 Channel partial as acceptable
+A partial publication has uneven community reach. Retry
+aggressively; if persistent, *Mark as best-effort* with
+rationale and a planned re-publish window when the channel
+recovers.
+
+### 8.5 Stale review-by
+An alert with a passed *review-by* time is a stale alert.
+Re-examine and either re-issue, revise, or all-clear; don't
+let the community wonder.
+
+## 9. The Help corpus you'll use most
+
+- [`screen-by-screen/alert-composer`](/help/articles/screen-by-screen/alert-composer)
+- [`screen-by-screen/agent-communication`](/help/articles/screen-by-screen/agent-communication)
+- [`multilingual-authoring`](/help/articles/multilingual-authoring)
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+- [`accessibility-how-to`](/help/articles/accessibility-how-to)
+- [`personas/incident-commander`](/help/personas/incident-commander)
+- [`troubleshooting`](/help/articles/troubleshooting)
+
+## 10. Where to next
+
+- Run a tabletop focused on multilingual alert turnaround.
+- Read precedent alerts via the Composer's precedent drawer;
+  note framing that worked.
+- Engage your tenant's cultural reviewer panel for a
+  language-specific briefing on register and framing.
+- Browse all articles tagged `public-information-officer`
+  via search.
 
 ---
 
-_Maintained by the AMA Help content team. Last reviewed at snapshot publish._
+_Maintained by the AMA Help content team in partnership with
+the PIO working group and the AFAC public-information cell._

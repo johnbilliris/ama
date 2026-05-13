@@ -15,7 +15,12 @@ dependencies = [
   "azure-identity>=1.19.0",
   "azure-cosmos>=4.9.0",
   "azure-storage-blob>=12.24.0",
-  "azure-monitor-opentelemetry>=1.6.0",
+  # Pinned to ==1.8.7 (transitively pins opentelemetry-sdk==1.40 + exporter
+  # ~=1.0.0b49 which uses ReadableLogRecord). With a loose floor pip resolves
+  # an older azure-monitor-opentelemetry whose exporter still imports
+  # `LogData` (removed in opentelemetry-sdk 1.41) → ImportError at startup.
+  # See ca-agents-ama crash 2026-05-12 (azd-deploy-1778546871).
+  "azure-monitor-opentelemetry==1.8.7",
   "azure-mgmt-resource>=23.1.0",
   "azure-mgmt-cognitiveservices>=13.5.0",
   "presidio-analyzer>=2.2.355",

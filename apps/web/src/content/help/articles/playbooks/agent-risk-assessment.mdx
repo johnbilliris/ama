@@ -1,30 +1,228 @@
 ---
 slug: playbooks/agent-risk-assessment
-title: "Agent Playbook — Risk Assessment"
-kind: playbook
+title: "Playbook: working with the risk-assessment agent"
 status: Active
 classification: OFFICIAL
+audience: risk-manager, incident-commander, operations-officer, planning-officer, observer-auditor
+estimated_reading_time: 9 min
 ---
 
-# Agent Playbook — Risk Assessment
+# Playbook: working with the risk-assessment agent
 
-## 1. Overview
-hazard scoring, mitigation tracking, lessons-learned
+This playbook complements the
+[Risk-assessment agent workspace](/help/articles/screen-by-screen/agent-risk-assessment)
+surface reference. It covers how Risk Managers should triage
+assessments, when to promote red signals, when to demote
+green/amber signals, how to tune thresholds responsibly, and
+how non-Risk-Manager personas should consume the agent's
+output.
 
-## 2. Pre-flight
-- Confirm persona + jurisdiction
-- Verify the active snapshot id
+The risk-assessment agent is the **interpreter of the operating
+picture**. Where the monitoring agent says *"this is happening"*,
+the risk-assessment agent says *"this is what it could mean"*.
 
-## 3. Workflow
-1. Open the relevant workspace
-2. Review agent recommendation with provenance + citations
-3. Approve / amend with audit trail entry
-4. Hand off to next persona
+## 1. The Risk Manager's daily rhythm
 
-## 4. Edge cases
-- Degraded mode: fall back to cached doctrine
-- Cross-jurisdiction: escalate via the Commonwealth persona
+**Shift start (10 minutes):**
+- Read the calibration panel. Note the fit timestamp and
+  reliability plot shape. If the plot has visibly drifted from
+  the diagonal, queue a refit.
+- Scan the active assessments queue, top-to-bottom. Form a
+  baseline mental model.
+- Glance the risk register's composite-score column for any
+  score > 15 (medium-high or high); read those assessments
+  end-to-end.
+- Note any pending promotion / demotion requests from operating
+  personas (the workspace surfaces these in a side rail).
 
-## 5. References
-- AIDR Handbook
-- AIIMS doctrine
+**During shift (continuous):**
+- Triage new assessments as they arrive (typically every few
+  minutes during active events).
+- Promote red signals when manual review confirms operational
+  significance.
+- Demote signals when contradicting evidence emerges.
+- Respond to threshold-tuning requests from operations or
+  the constitutional steward.
+
+**Shift end (5 minutes):**
+- Review the day's promotions and demotions.
+- Brief the incoming Risk Manager (verbal handoff is
+  appropriate; written handoff via a *"Risk handoff"* note
+  affordance for cross-day shifts).
+- Confirm calibration is not approaching staleness; if at
+  day 50–60, schedule the refit for the next quiet window.
+
+## 2. Promoting a red signal
+
+A red signal (model confidence < 0.55) is hard-suppressed in
+operating workspaces by default. Promotion is the Risk
+Manager's mechanism for surfacing a red signal to operations
+when manual review confirms it warrants action.
+
+Process:
+1. Open the red signal in the risk-assessment workspace.
+   Read the signal's source, the corroborating signals, and
+   the contradicting signals.
+2. Cross-check with at least one independent source (a phone
+   call to the originating field crew; a peer Risk Manager's
+   second opinion).
+3. If satisfied, click *Promote* on the assessment card. The
+   promotion dialog requires:
+   - The promoted band (amber).
+   - A rationale paragraph that cites the corroborating
+     evidence and addresses any contradicting evidence.
+   - An acknowledgement of the doctrinal consequence
+     (the signal becomes visible and actionable in operating
+     workspaces).
+4. The promotion takes effect immediately; affected operators
+   see the promoted signal within ~1 second via WebSocket
+   push.
+5. The promotion is reversible by you within 30 minutes
+   (e.g., if you discover an error in your reasoning); after
+   30 minutes, reversal requires constitutional steward
+   acknowledgement.
+
+Doctrine: be slow to promote. Each promotion erodes the
+agent's red-band suppression model; systematic over-promotion
+is a calibration problem, not a workflow workaround.
+
+## 3. Demoting an amber or green signal
+
+Demotion is the inverse: lowering an amber to green-suppressed
+or a green to amber. Demote when:
+- Contradicting evidence emerges that the agent has not
+  incorporated.
+- The signal's source has been credibly impeached (e.g., a
+  field report that the originating BoM station has a known
+  fault).
+- The operational context has changed in a way the agent
+  cannot model (e.g., a wind shift visible from a hilltop).
+
+Process mirrors promotion: rationale required; reversible
+within 30 minutes; steward acknowledgement after.
+
+## 4. Tuning thresholds
+
+Thresholds (default 0.55 / 0.85) bound the bands. Tune within
+the doctrinal floors and ceilings (0.50–0.60 amber/red;
+0.80–0.90 green/amber).
+
+When to consider tuning:
+- The reliability plot has drifted such that the calibrated
+  probabilities no longer match the empirical hit rates at
+  the threshold values. *First* refit calibration; tune only
+  if refit doesn't restore alignment.
+- The operational tempo has shifted (e.g., a long fire season
+  with consistent base rate elevation) and the default
+  thresholds are producing too many or too few amber
+  recommendations for the doctrinal cost balance.
+- A constitutional steward has requested tuning as part of a
+  doctrinal review.
+
+Process:
+1. Open the threshold tuning panel.
+2. Drag the proposed thresholds. The plot updates with the
+   proposed bands.
+3. Click *Preview impact*. The Hub replays the prior 30 days
+   under the proposed thresholds and reports the change in
+   volume of amber actions, red suppressions, FP/FN rates.
+4. If the impact is acceptable, click *Apply*. The
+   constitutional steward acknowledgement prompt appears.
+5. The steward acknowledges (or refuses); on acknowledgement,
+   the new thresholds take effect across the tenant.
+6. Audit-logged with both your identity and the steward's.
+
+Tuning is reversible. The tuning history is on the Governance
+Dashboard.
+
+## 5. Non-Risk-Manager personas and risk assessments
+
+If you are not a Risk Manager, you consume the agent's
+output via:
+- The risk-assessment workspace (read-only assessments;
+  red signals not visible).
+- The Disaster Map's Recommendations layer (the agent's
+  non-suppressed recommendations).
+- The Governance Dashboard's KPI panel (composite risk by
+  jurisdiction).
+- The chat assistant's grounding (cites the agent's
+  reasoning when answering risk-related prompts).
+
+When you disagree with an assessment:
+- Document your disagreement in the workspace's *Comment*
+  field on the assessment card. Comments are audit-logged
+  and visible to the Risk Manager.
+- For urgent disagreement, use the *Escalate to Risk Manager*
+  button. The Risk Manager sees the escalation in their
+  workspace banner; expect a response within minutes during
+  active operations.
+
+Do **not** circumvent the agent by acting on red signals you
+have learned of through out-of-Hub channels. Bring the
+information to Risk Manager for promotion review.
+
+## 6. Calibration health
+
+Calibration is the agent's relationship with reality. A
+mis-calibrated agent is the most dangerous failure mode —
+its recommendations look as confident as ever but their
+actual hit rate has drifted.
+
+The reliability plot is the diagnostic. A perfectly calibrated
+agent's plot is the diagonal: predicted probability equals
+empirical hit rate. Drifts to read:
+- *Bowing above the diagonal* — the agent is over-confident;
+  acting on its recommendations more aggressively than the
+  hit rate supports. Demote the green/amber separator (move
+  it down).
+- *Bowing below the diagonal* — the agent is under-confident;
+  acting on its recommendations less aggressively than the
+  hit rate supports. Promote the green/amber separator (move
+  it up).
+- *Inverted-S shape* — the agent is over-confident on
+  extremes and under-confident in the middle; refit calibration.
+
+Refit produces a new isotonic regression fit from the prior 90
+days of ground-truth labels. The fit takes ~30 seconds; the
+new thresholds are not auto-applied (you must tune
+separately).
+
+## 7. Edge cases
+
+### 7.1 Insufficient ground-truth labels
+A fresh tenant or one with sparse hazard activity may not
+have enough labels for a robust calibration fit. The agent
+falls back to the doctrinal defaults (0.55 / 0.85) and the
+Confidence Bands gate goes amber. Continue operating
+cautiously; collect labels through the operational window.
+
+### 7.2 Adversarial signal injection
+If the agent is producing implausible recommendations from
+implausible signals (e.g., a "fire" signal from a coastal
+underwater observation), suspect adversarial signal
+injection or a feed defect. Pause the agent; raise to the
+operational SRE; preserve the affected feed's recent rows
+for forensics.
+
+### 7.3 Cross-tenant calibration drift
+A federated tenant's calibration drift can affect cross-
+border recommendations. The federation panel on the
+Governance Dashboard surfaces cross-tenant calibration
+divergence; coordinate with the affected tenant's Risk
+Manager.
+
+## 8. Related
+
+- [`screen-by-screen/agent-risk-assessment`](/help/articles/screen-by-screen/agent-risk-assessment)
+  — the surface reference.
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge)
+  — for the band doctrine.
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+  — for calibration health visualisation.
+- [`personas/risk-manager`](/help/personas/risk-manager) — the
+  Risk Manager landing.
+
+---
+
+_Maintained by the AMA Help content team in partnership with
+the risk and constitutional working groups._

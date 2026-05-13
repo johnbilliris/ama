@@ -2415,6 +2415,7 @@ nav[aria-label] a {
 /* ── Spacing — padding ── */
 
 .p-2 { padding: 0.5rem; }
+.p-0 { padding: 0; }
 .p-3 { padding: 0.75rem; }
 .p-4 { padding: 1rem; }
 .p-6 { padding: 1.5rem; }
@@ -2510,6 +2511,7 @@ nav[aria-label] a {
 .text-right { text-align: right; }
 .list-disc { list-style-type: disc; }
 .list-inside { list-style-position: inside; }
+.list-none { list-style: none; }
 
 /* ── Borders & Radius ── */
 
@@ -3145,6 +3147,14 @@ table tbody tr:hover {
   color: var(--ama-color-ink);
 }
 
+.sim-event-pending {
+  display: inline-block;
+  margin-left: 0.35rem;
+  color: var(--ama-color-ink-soft);
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
 /* ── Exercise objectives ── */
 
 .sim-objectives {
@@ -3699,6 +3709,72 @@ table tbody tr:hover {
   }
   .sim-center-panel,
   .sim-right-chat {
+    min-height: 480px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Help shell — two-column layout that mirrors the simulation dashboard
+   (full-viewport-height grid with a sticky right-rail chat). The chat
+   lives in the persistent help layout, so navigating between help
+   articles preserves the chat session.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.help-shell-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  background: #e8eff3;
+}
+
+.help-shell-wrap {
+  flex: 1;
+  min-height: 0;
+  padding: 0.75rem 1.5rem 1rem;
+  overflow: hidden;
+}
+
+.help-shell-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 1.25rem;
+  height: 100%;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.help-shell-content {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+@media (max-width: 1280px) {
+  .help-shell-layout {
+    grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1080px) {
+  .help-shell-page {
+    height: auto;
+    overflow: visible;
+  }
+  .help-shell-wrap {
+    overflow: visible;
+  }
+  .help-shell-layout {
+    grid-template-columns: 1fr;
+    grid-auto-rows: min-content;
+    height: auto;
+  }
+  .help-shell-content {
+    overflow-y: visible;
+  }
+  .help-shell-layout .sim-right-chat {
     min-height: 480px;
   }
 }

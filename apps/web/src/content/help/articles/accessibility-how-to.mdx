@@ -1,14 +1,270 @@
 ---
 slug: accessibility-how-to
-title: "Accessibility how-tos"
+title: "Accessibility — keyboard, screen-reader, motion, colour"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+estimated_reading_time: 11 min
 ---
 
-# Accessibility how-tos
+# Accessibility in the AMA Hub
 
-## 1. Keyboard navigation
-## 2. Screen reader behaviour
-## 3. Theme + contrast
-## 4. Multilingual authoring
-## 5. Reporting an accessibility bug
+The Hub is engineered to **WCAG 2.2 AA** with deliberate target overshoot
+on disaster-response-critical surfaces (Disaster Map, Alert Composer,
+Audit timeline, Governance Dashboard, Help Assistant). Accessibility is
+not a configuration choice — it is the default. This article documents
+the affordances, the keyboard map, the screen-reader model, the colour
+and motion preferences, and the escalation path when a control is not
+reachable.
+
+If you have a specific assistive-technology incompatibility, file via the
+*Report a bug* footer link with the AT name, version, and the workflow
+that broke. Accessibility regressions are treated as P1 incidents.
+
+## 1. Global keyboard shortcuts
+
+Every keyboard shortcut works on every screen unless explicitly noted.
+On macOS, swap `Ctrl` for `⌘`.
+
+| Shortcut       | Action                                            |
+| -------------- | ------------------------------------------------- |
+| `Ctrl+/`       | Open the contextual Help Assistant for the screen |
+| `Alt+P`        | Open the persona switcher                          |
+| `Alt+J`        | Open the jurisdiction filter                       |
+| `Alt+T`        | Toggle theme (light/dark)                          |
+| `Alt+M`        | Mute/unmute audio alerts                           |
+| `Alt+1`–`Alt+9`| Jump to top-nav surface 1–9                        |
+| `g a`          | Go to Audit timeline                              |
+| `g d`          | Go to Disaster Map                                |
+| `g g`          | Go to Governance Dashboard                        |
+| `g h`          | Go to Help                                         |
+| `g s`          | Go to Simulations                                 |
+| `g w`          | Go to Workspaces                                   |
+| `?`            | Show the on-screen shortcut palette               |
+| `Esc`          | Close the topmost overlay (modal, popover, chat)  |
+| `Tab` / `Shift+Tab` | Move focus forward / backward                |
+| `Space` / `Enter`  | Activate the focused control                  |
+| `F6`           | Move focus between page landmarks                  |
+
+Sequence shortcuts (`g a`, `g d`, …) require the two keys be pressed in
+order within ~500 ms; they are inert when focus is in a text field.
+
+## 2. Screen layout and landmarks
+
+Every page is built from the same five ARIA landmarks, in this order:
+
+1. `banner` — the top navigation, persona switcher, jurisdiction filter,
+   and the AU-region residency badge.
+2. `navigation` — the within-surface secondary navigation (e.g.,
+   Workspaces' tile grid, Governance's tab strip).
+3. `main` — the surface's primary content. Skip-to-main is available
+   from a visually hidden link as the first focusable element on every
+   page.
+4. `complementary` — the right-rail Help Assistant when present.
+5. `contentinfo` — the footer with snapshot ID, correlation ID, and
+   *Report a bug* link.
+
+`F6` cycles focus between landmarks; `Shift+F6` reverses. Each landmark
+exposes an accessible name (e.g., *"Help Assistant — grounded chat"*).
+
+## 3. Screen-reader behaviour
+
+### 3.1 Verified ATs
+
+The Hub is verified against:
+
+- **NVDA** ≥ 2024.1 on Windows with Edge or Firefox.
+- **JAWS** ≥ 2024 on Windows with Edge.
+- **VoiceOver** on macOS Sonoma+ with Safari.
+- **VoiceOver** on iPadOS 17+ with Safari.
+- **TalkBack** on Android 14+ with Chrome.
+
+If you use Dragon NaturallySpeaking, the per-screen voice command
+catalogue is the same as the on-screen shortcut palette (`?`).
+
+### 3.2 Live regions
+
+The Hub uses **two** live regions per screen:
+
+- A **polite** region announcing routine state changes (filter updates,
+  list refreshes). Defaults to politeness `polite`, atomic `false`.
+- An **assertive** region announcing safety-critical events (warning
+  approval, audit gate breach, evacuation acknowledgement received).
+  Politeness `assertive`, atomic `true`.
+
+Live regions are deduplicated within a 5 s window so a rapid-fire stream
+of signals does not flood the screen reader. The Help Assistant always
+streams responses to the polite region in chunks of complete sentences.
+
+### 3.3 Map accessibility
+
+The Disaster Map is a WebGL canvas. Canvas content is not
+screen-readable by nature, so the Hub provides a parallel **List view**
+toggle (`Alt+L` while focus is in the map) that exposes every visible
+signal as a focusable list item with the same metadata as the pin.
+
+Pins are also enumerated under a hidden landmark for AT users who prefer
+to scroll the entire visible-signal set without entering the canvas.
+
+## 4. Theme and contrast
+
+The Hub ships with two themes:
+
+- **Light** (default) — high contrast over a near-white surface; meets
+  AA on every text/background pair and AAA on body text.
+- **Dark** — chosen for night operations; meets AA on every text and
+  AAA on safety-critical labels (warning headlines, evacuation actions).
+
+Switch via `Alt+T` or via Settings → Display.
+
+The Hub does **not** auto-switch with `prefers-color-scheme` — operators
+have reported that automatic switching on a coordination centre's
+projected display is disorienting. Choose explicitly and the choice
+persists per device.
+
+### 4.1 High-contrast mode
+
+Windows High Contrast and macOS Increased Contrast are honoured. The Hub
+detects them via `forced-colors` and `prefers-contrast`, and switches to
+a system-palette stylesheet that respects the user's chosen colours.
+
+### 4.2 Colour-blind safety
+
+Colour is **never the sole carrier of meaning**. Confidence bands
+(green/amber/red) are paired with text labels and unique iconography.
+Map pins use both colour and shape (circle / triangle / diamond) per
+hazard class.
+
+If a colour combination is hard for you, open Settings → Display →
+*Colour-blind preset* and choose deuteranopia, protanopia, tritanopia,
+or monochrome. The preset adjusts the layer palette, the confidence
+band stops, and the map pin colours simultaneously.
+
+## 5. Motion and animation
+
+The Hub respects `prefers-reduced-motion`. When the OS preference is
+set, the following behaviours change:
+
+- Map pan/zoom uses immediate transitions instead of inertial smoothing.
+- The chat assistant streams per-paragraph instead of per-token.
+- Notification banners fade in/out is replaced with snap-on/snap-off.
+- Loading skeletons are replaced with a static "Loading…" string.
+
+You can override the OS preference in Settings → Display → Motion. The
+override is per-device.
+
+## 6. Text size and zoom
+
+The Hub honours browser zoom up to **200 %** without horizontal scroll
+on a 1280 × 720 viewport. On the Disaster Map and the Audit timeline,
+zoom up to **400 %** is supported with content reflow; some legend text
+will overlap at extreme zoom — this is a documented limitation.
+
+Settings → Display → *Base font size* offers four steps (S/M/L/XL).
+Choosing L or XL adjusts every UI label, table cell, chat bubble, and
+form control consistently — no element relies on a fixed pixel size.
+
+## 7. Forms and validation
+
+Every form input has:
+
+- A **persistent visible label** (no placeholder-as-label).
+- A programmatic association via `for`/`id`.
+- An accessible description for help text and inline error messages.
+- A `required` indicator that is both visual (asterisk) and audible
+  ("required").
+
+Validation errors:
+
+- Are announced via the assertive live region on submit.
+- Are summarised at the top of the form with anchor links to each
+  invalid field.
+- Are repeated next to each invalid field with `aria-describedby`.
+
+The Hub will never auto-submit a form on focus change.
+
+## 8. Tables and data grids
+
+Operational tables (e.g., the Audit timeline, the Workspace task list,
+the Resource board) use:
+
+- True `<table>` markup, not divs-pretending-to-be-tables.
+- `<th scope="col">` and `<th scope="row">` for unambiguous header
+  association.
+- A caption (`<caption>`) that screen readers announce on table entry.
+- Sortable columns with `aria-sort` reflecting the active sort state.
+- Keyboard sorting via `Enter` on the focused header.
+
+Row selection in multi-select tables is via `Space`; range selection via
+`Shift+Click` or `Shift+Space`.
+
+## 9. Maps without sight
+
+If you cannot use the WebGL canvas:
+
+1. Press `Alt+L` to switch to **List view** (sighted operators see this
+   as a side-panel; AT users get the canvas replaced).
+2. Each visible signal becomes a focusable row with: hazard class, sub-
+   class, jurisdiction, distance from your declared post, observed
+   timestamp, confidence band, and the same actions you would have on
+   a pin (open detail, acknowledge, escalate).
+3. The list reflects the active jurisdiction filter and layer toggles.
+4. The list is virtualised for performance; PageDown jumps a screen,
+   `End`/`Home` jumps to the bottom/top of the filtered set.
+
+The Disaster Mapper article ([`screen-by-screen/disaster-mapper`](/help/articles/screen-by-screen/disaster-mapper))
+documents the equivalence between pin actions and list-row actions in
+detail.
+
+## 10. Audio cues and alerts
+
+The Hub plays at most three non-decorative audio cues:
+
+- **Warning approved by another persona** — a 200 ms ascending chime.
+- **Evacuation acknowledged** — a 250 ms double-pip.
+- **Audit gate breach (constitutional)** — a 600 ms low alarm tone.
+
+All three are mute-able via `Alt+M`; the mute state persists per device.
+Visual equivalents (banners, badges, focus shifts) are always present
+even when audio is muted.
+
+The Hub does **not** play notification sounds for routine events
+(arriving signals, chat responses, page loads). Coordination-centre
+operators reported that ambient noise is itself an audit signal and
+should not be polluted.
+
+## 11. Cognitive load and language
+
+Help content is written to **CEFR B2** (upper-intermediate English)
+with the following deliberate exceptions:
+
+- Doctrine quotes (AIDR, AIIMS) appear verbatim with an inline plain-
+  language gloss.
+- Acronyms are expanded on first use per article (`AIIMS — Australasian
+  Inter-service Incident Management System`).
+- Numeric thresholds are stated with units, never as bare numbers.
+
+If you find a sentence that is hard to parse, please file via the
+article's feedback bar. Reading-level regressions are treated as
+content bugs.
+
+## 12. Reporting an accessibility issue
+
+The fastest path is the *Report a bug* link in the footer. Tag the
+report with **accessibility** and include:
+
+- The assistive technology (NVDA 2024.1, JAWS 2024, VoiceOver, etc.).
+- The browser and OS.
+- A short description of what failed (focus trap, missing label,
+  unreachable control).
+- The page URL or surface ID.
+
+Accessibility bugs bypass the regular triage queue and are
+acknowledged within one business day.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+accessibility working group. The shortcut palette in this article is the
+canonical reference; if any other article disagrees, treat this article
+as authoritative and file the inconsistency._

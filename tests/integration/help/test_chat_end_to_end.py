@@ -32,26 +32,39 @@ def test_chat_streams_meta_refusal_done_when_no_corpus(client: TestClient) -> No
 
 
 def test_chat_streams_meta_delta_citation_done_with_grounded_chunks(
-    client: TestClient, monkeypatch
+    client: TestClient,
 ) -> None:
-    """When the agent has grounded chunks (live Foundry simulated via monkeypatched
-    offline generator), the stream MUST emit meta → delta(s) → citation(s) → done."""
-    from apps.agents.help_assistant import agent as agent_mod
+    """When the in-memory help corpus contains a matching article, the
+    Cosmos-grounded retrieval path MUST emit meta → delta(s) → citation(s) → done.
 
-    real_offline = agent_mod.run_chat_turn_offline
-
-    async def grounded_run(input, *, fake_chunks=None, fake_answer=""):
-        async for ev in real_offline(
-            input,
-            fake_chunks=[
-                {"citation_id": "c1", "source_id": "art-001", "source_title": "Escalation guide", "anchor": "#esc", "snippet": "Use the support handoff."}
-            ],
-            fake_answer="Escalate via your configured support handoff",
-        ):
-            yield ev
-
-    monkeypatch.setattr(agent_mod, "run_chat_turn_offline", grounded_run)
-    # Re-bind the route's import (function-scope import in route resolves fresh)
+    Verifies FR-014 (citation grounding) end-to-end against the production
+    retrieval seam, not an injected fake; the article is upserted via the
+    real ``upsert`` API so the test exercises the genuine list_articles
+    code path."""
+    help_repositories.upsert(
+        help_repositories.HELP_ARTICLES,
+        "__global__",
+        {
+            "id": "art-001",
+            "tenant_id": "__global__",
+            "slug": "art-001",
+            "title": "Escalation guide",
+            "kind": "article",
+            "domain": "troubleshooting",
+            "persona_tags": ["all-personas"],
+            "sector_tags": [],
+            "surface_tags": [],
+            "jurisdiction_tags": [],
+            "body_uri": "synthetic://test",
+            "body_md": (
+                "# Escalation guide\n\n"
+                "## How to escalate\n\n"
+                "Use the support handoff button to escalate when you cannot proceed. "
+                "The escalation captures your correlation ID and the redacted transcript."
+            ),
+            "snapshot_id": "snap-test",
+        },
+    )
     with client.stream("POST", "/help/chat/ask", json={"message": "how do I escalate?"}, headers=HDR) as r:
         body = b"".join(r.iter_bytes()).decode("utf-8")
     for event in ("event: meta", "event: delta", "event: citation", "event: done"):

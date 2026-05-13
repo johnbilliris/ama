@@ -263,7 +263,19 @@ class SimulationControllerService:
         reasoning model key. Returns ``None`` when the deployment cannot be
         resolved — the caller surfaces ``openai_unavailable`` rather than
         falling back to a legacy env var.
+
+        Resolution order (post tier-env-var fix):
+          1. ``AZURE_AI_SIMULATION_DEPLOYMENT`` — explicit per-tier
+             deployment name set by Bicep. Wins because the CSV map can
+             collapse multiple tiers onto the same model key when several
+             deployments share ``<modelName>@<version>``.
+          2. CSV lookup by ``AZURE_AI_SIMULATION_MODEL_KEY`` (or the
+             reasoning key) — first-write-wins per the parser.
         """
+        explicit = os.environ.get("AZURE_AI_SIMULATION_DEPLOYMENT")
+        if explicit:
+            return explicit
+
         csv = os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS", "")
         model_key = (
             os.environ.get("AZURE_AI_SIMULATION_MODEL_KEY")

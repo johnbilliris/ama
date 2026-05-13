@@ -1,30 +1,171 @@
 ---
 slug: screen-by-screen/agent-evacuation
-title: "Screen: Agent Evacuation"
+title: "Screen: Evacuation agent workspace"
 status: Active
 classification: OFFICIAL
+audience: incident-commander, operations-officer, field-coordinator, public-information-officer, frontline-fire, frontline-police, frontline-medical, frontline-ses-marine
+surface_id: agent-evacuation
+estimated_reading_time: 11 min
 ---
 
-# Screen: Agent Evacuation
+# Screen: Evacuation agent workspace
 
-## 1. Purpose
-The **Agent Evacuation** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Evacuation agent workspace** at `/workspaces/agent-evacuation`
+is the operating surface for the Hub's evacuation-planning agent.
+The agent ingests the operating picture (signals, weather
+projections, infrastructure status), the active risk assessments
+(from the risk-assessment agent), the road-network graph (from
+Geoscience and state road authorities), and the affected
+population estimates (from ABS census and live mobile-phone
+density signals where available), and emits **evacuation
+proposals**: bounded recommendations for *who* should be moved
+*where*, by *when*, via *which routes*.
 
-## 2. Layout
-Light and dark variants:
+The agent **never** declares an evacuation autonomously. Every
+declaration is an operator action via the Field Coordinator
+workspace. This article documents the planning workspace; the
+playbook is at
+[`playbooks/agent-evacuation`](/help/articles/playbooks/agent-evacuation).
 
 <!-- AnnotatedScreenshot screen_id=agent-evacuation light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+A four-pane layout:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. **Header strip** — agent state, current-event scope, road-
+   network freshness.
+2. **Proposed envelopes** — left, ~50 % width; map with proposed
+   evacuation envelopes overlaid on the operating picture.
+3. **Proposal queue** — right top, ~50 % width; ranked list of
+   evacuation proposals.
+4. **Logistics summary** — right bottom, expandable; assembly
+   points, route capacity, receiving-side acknowledgements.
+
+## 2. Header strip
+
+- **Agent state** — *Running* / *Paused* / *Failed*.
+- **Current event** — the incident (or hazard cluster) the agent
+  is planning around. Click to switch event scope.
+- **Road-network freshness** — timestamp + amber/red staleness
+  indicator. Stale road graphs may underestimate route capacity.
+- **Pause / resume** — Operations Officer envelope.
+
+## 3. Proposed envelopes
+
+The map shows the operating picture (matching the Disaster Map
+configuration for this workspace) with proposed evacuation
+envelopes overlaid as semi-transparent polygons. Each envelope
+has:
+- Boundary colouring by **urgency** (red = immediate, amber =
+  within 6 h, blue = within 24 h).
+- A centroid pin labelled with the population estimate.
+- Egress arrows showing recommended routes (one per assembly
+  point pair).
+- A receiving-side annotation if the assembly point is in a
+  different sector or jurisdiction.
+
+Click an envelope to focus the proposal queue on that proposal.
+
+## 4. Proposal queue
+
+Each card shows:
+- **Envelope summary** — geographic centroid + population
+  estimate.
+- **Urgency** — *Immediate* / *Within 6 h* / *Within 24 h*.
+- **Confidence band** — green / amber / red.
+- **Drivers** — the top 3 signals or assessments contributing.
+- **Recommended assembly points** — list with capacity vs
+  expected demand.
+- **Recommended routes** — list with current capacity and
+  conditions.
+- **Action button** — *Forward to Field Coordinator* (Operations
+  Officer envelope) / *Acknowledge* / *Dismiss*.
+
+Forwarding to Field Coordinator inserts the proposal into the
+Field Coordinator workspace's pending-declarations list; Field
+Coordinator confirms (or amends and confirms) and the
+declaration becomes a real evacuation envelope visible on the
+production Disaster Map.
+
+## 5. Logistics summary
+
+The logistics pane shows:
+- **Assembly points** — capacity, current load, contact
+  agencies, accessibility profile.
+- **Route conditions** — for each recommended route: lane count,
+  current incident reports (closures, diversions), expected
+  travel time given current conditions.
+- **Receiving-side acknowledgements** — for cross-jurisdiction
+  evacuations, the receiving sector's acknowledgement status.
+
+## 6. Audit consequences
+
+- *Forward to Field Coordinator* / *Acknowledge* / *Dismiss* —
+  audit-logged.
+- The agent's emitted proposals are audit-logged under
+  `agent.evacuation.propose` rows.
+
+The actual evacuation declaration (Field Coordinator action) is
+audit-logged under `evacuation.declare`, which references the
+agent's proposal via the correlation ID.
+
+## 7. Cross-jurisdiction proposals
+
+If a proposal's envelope or assembly point crosses a
+jurisdiction boundary, the *Forward to Field Coordinator*
+button triggers the cross-jurisdiction effect dialog (see
+[`screen-by-screen/multi-jurisdiction-filter`](/help/articles/screen-by-screen/multi-jurisdiction-filter)).
+Receiving-sector acknowledgement is required before the
+declaration commits.
+
+## 8. Edge cases
+
+### 8.1 Empty population estimate
+For sparsely populated areas where the ABS estimate is < 50 and
+no live mobile-phone density signal is available, the proposal
+shows the population as *< 50* with a *"Verify on ground"*
+annotation. Field Coordinator should confirm by direct
+observation before declaring.
+
+### 8.2 Route capacity exceeded
+If the recommended route's expected travel time under projected
+demand exceeds the urgency window, the proposal annotates
+*"Capacity-bound: consider phased evacuation"* and offers a
+secondary proposal that staggers movement.
+
+### 8.3 Receiving side offline
+A receiving sector's Hub being offline does not block the
+proposal; the cross-jurisdiction dialog records the unreachable
+state and proceeds with a *"Receiving-side ack pending"*
+annotation. Resolution follows the federation handshake
+recovery flow.
+
+## 9. Keyboard shortcuts
+
+| Shortcut  | Action                                          |
+| --------- | ----------------------------------------------- |
+| `g w`, `e`| Jump to Evacuation agent workspace              |
+| `[` / `]` | Move selection in the proposal queue            |
+| `Enter`   | Forward selected proposal to Field Coordinator  |
+| `a`       | Acknowledge selected proposal                   |
+| `d`       | Dismiss selected proposal (rationale required)  |
+| `l`       | Toggle logistics summary pane                   |
+
+## 10. Related
+
+- [`playbooks/agent-evacuation`](/help/articles/playbooks/agent-evacuation)
+  — for the operational playbook.
+- [`screen-by-screen/agent-monitoring`](/help/articles/screen-by-screen/agent-monitoring)
+  — the upstream operating picture.
+- [`screen-by-screen/agent-risk-assessment`](/help/articles/screen-by-screen/agent-risk-assessment)
+  — the upstream risk assessments.
+- [`personas/field-coordinator`](/help/personas/field-coordinator)
+  — the Field Coordinator landing (the declaration target).
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+  — the cross-border coordination playbook.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+agents working group. Surface ID `agent-evacuation`._

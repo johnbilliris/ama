@@ -10,6 +10,9 @@
     "drawio": {
       "type": "http",
       "url": "https://mcp.draw.io/mcp"
+    },
+    "ppt-mcp": {
+      "command": "mcp-ppt"
     }
   }
 }

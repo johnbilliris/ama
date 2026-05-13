@@ -14,7 +14,7 @@ interface SearchResult {
 async function fetchResults(q: string): Promise<{ items: SearchResult[] }> {
   if (!q) return { items: [] };
   try {
-    const r = await fetch(`${process.env.NEXT_PUBLIC_API_BASE ?? ""}/api/v1/help/search?q=${encodeURIComponent(q)}`, {
+    const r = await fetch(`${process.env.NEXT_PUBLIC_API_BASE ?? ""}/api/help/search?q=${encodeURIComponent(q)}`, {
       cache: "no-store",
     });
     if (!r.ok) return { items: [] };

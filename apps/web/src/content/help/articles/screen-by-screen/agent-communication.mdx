@@ -1,30 +1,181 @@
 ---
 slug: screen-by-screen/agent-communication
-title: "Screen: Agent Communication"
+title: "Screen: Communication agent workspace"
 status: Active
 classification: OFFICIAL
+audience: public-information-officer, incident-commander, operations-officer, planning-officer, observer-auditor
+surface_id: agent-communication
+estimated_reading_time: 11 min
 ---
 
-# Screen: Agent Communication
+# Screen: Communication agent workspace
 
-## 1. Purpose
-The **Agent Communication** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Communication agent workspace** at
+`/workspaces/agent-communication` is the operating surface for
+the Hub's communication-planning agent. The agent ingests the
+operating picture, the active risk assessments, the active
+evacuation envelopes, the multilingual catalogue, the
+community-information channel inventory, and the standing
+plain-language style guide, and emits **communication proposals**:
+draft headlines, lead instructions, and channel selections that
+PIOs can refine in the Alert Composer.
 
-## 2. Layout
-Light and dark variants:
+The agent **never** publishes. PIO drafts in the Composer (using
+the agent's draft as a starting point or ignoring it entirely);
+co-sign chains and NEMA acknowledgement run as documented in
+[`screen-by-screen/alert-composer`](/help/articles/screen-by-screen/alert-composer).
+
+For the playbook, see
+[`playbooks/agent-communication`](/help/articles/playbooks/agent-communication).
 
 <!-- AnnotatedScreenshot screen_id=agent-communication light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+A four-pane layout:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. **Header strip** — agent state, multilingual coverage,
+   reviewer queue depth.
+2. **Audience map** — left, ~50 % width; the operating picture
+   with audience overlays (community language pockets,
+   accessibility profiles, channel reachability).
+3. **Proposal queue** — right top, ~50 % width; ranked list of
+   communication proposals.
+4. **Style guide drawer** — right bottom, expandable; the
+   relevant style-guide rules and any precedent alerts.
+
+## 2. Header strip
+
+- **Agent state** — *Running* / *Paused* / *Failed*.
+- **Multilingual coverage** — % of safety-critical articles in
+  the active jurisdictions translated; click for the breakdown.
+- **Reviewer queue** — count of language-reviewer items pending;
+  click to open the reviewer queue.
+- **Pause / resume** — Operations Officer envelope.
+
+## 3. Audience map
+
+The map shows the operating picture with audience-specific
+overlays:
+- **Language pockets** — community language density choropleth
+  (from ABS census) for the active jurisdiction; one layer per
+  catalogue language.
+- **Accessibility profile** — areas with high concentration of
+  audiences requiring alternate formats (older Australians,
+  Auslan-first communities, audio-only audiences in remote
+  regions).
+- **Channel reachability** — heatmap of effective channel
+  reach (mobile coverage, community radio frequencies, agency
+  app installation density).
+
+Layer toggles match the catalogue languages and the
+accessibility profile classes.
+
+## 4. Proposal queue
+
+Each card shows:
+- **Subject** — the incident or hazard cluster the proposal
+  addresses.
+- **Severity recommendation** — Advice / Watch and act /
+  Emergency warning / All clear.
+- **Confidence band** — green / amber / red.
+- **Recommended channels** — based on severity + audience
+  reachability; explained in the style-guide drawer.
+- **Recommended languages** — based on language pocket
+  coverage; English always plus per-pocket recommendations.
+- **Draft headline** + **draft lead instruction** — agent-
+  produced; treat as starting point.
+- **Action button** — *Open in Alert Composer* (PIO envelope) /
+  *Acknowledge* / *Dismiss*.
+
+## 5. Style guide drawer
+
+For the selected proposal, the drawer shows:
+- The **plain-language rules** the agent applied (CEFR B2,
+  action verbs, measurable instructions, no jargon).
+- The **precedent alerts** the agent considered — past alerts
+  with similar context, shown with their actual headlines and
+  lead instructions and the post-event community response
+  signals (where available).
+- The **multilingual handling** the agent recommended — which
+  languages, which cultural reviewers, expected turnaround.
+
+The drawer is read-only.
+
+## 6. Opening in the Alert Composer
+
+The *Open in Alert Composer* button opens the Composer with the
+agent's draft pre-filled into the relevant fields:
+- Severity, hazard class, geographic envelope.
+- Headline, lead instruction (English).
+- Channel selection.
+- Language tabs for each recommended non-English language with
+  machine-draft pre-fills.
+
+The PIO is the author from this point; the Composer's audit
+trail records the agent's draft as the *originating artefact*
+(via correlation ID) but the published payload is whatever the
+PIO approves.
+
+## 7. Audit consequences
+
+- *Open in Alert Composer*, *Acknowledge*, *Dismiss* —
+  audit-logged.
+- The agent's emitted proposals are audit-logged under
+  `agent.communication.propose`.
+- The eventual publication's audit row references the agent's
+  proposal via the correlation ID, allowing reviewers to compare
+  draft vs published.
+
+## 8. Edge cases
+
+### 8.1 Sparse language pocket data
+If the active jurisdiction has no recent ABS language pocket
+data (rare; typically remote OS jurisdictions), the audience
+map shows a *"Sparse data"* annotation and the agent recommends
+English-only with a request for human verification of language
+needs.
+
+### 8.2 Channel outage
+A channel currently in outage state is excluded from the
+recommended channels with a *"Channel offline"* annotation.
+
+### 8.3 Cultural reviewer unavailable
+If a recommended language has no cultural reviewer signed in
+and the reviewer queue is non-empty, the proposal annotates
+*"Reviewer queue depth N: language variant may publish late"*.
+
+### 8.4 Conflicting precedent
+If precedent alerts diverge significantly in framing, the
+proposal surfaces both with a *"Precedent divergence"*
+annotation; the PIO chooses the framing in the Composer.
+
+## 9. Keyboard shortcuts
+
+| Shortcut  | Action                                            |
+| --------- | ------------------------------------------------- |
+| `g w`, `c`| Jump to Communication agent workspace             |
+| `[` / `]` | Move selection in the proposal queue              |
+| `Enter`   | Open in Alert Composer                            |
+| `a`       | Acknowledge                                       |
+| `d`       | Dismiss (rationale required)                      |
+| `s`       | Toggle style-guide drawer                         |
+
+## 10. Related
+
+- [`playbooks/agent-communication`](/help/articles/playbooks/agent-communication)
+  — for the operational playbook.
+- [`screen-by-screen/alert-composer`](/help/articles/screen-by-screen/alert-composer)
+  — for the Composer the agent feeds into.
+- [`multilingual-authoring`](/help/articles/multilingual-authoring)
+  — for the multilingual model.
+- [`personas/public-information-officer`](/help/personas/public-information-officer)
+  — for the PIO landing.
+- [`screen-by-screen/agent-monitoring`](/help/articles/screen-by-screen/agent-monitoring)
+  — the upstream operating picture.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+PIO and content-strategy working groups. Surface ID
+`agent-communication`._

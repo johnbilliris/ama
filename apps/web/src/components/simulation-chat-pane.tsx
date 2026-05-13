@@ -17,6 +17,19 @@ import { SimBadge } from "@/components/SimBadge";
 
 type Role = "user" | "assistant" | "sub_agent";
 
+const QUICK_ACTION_DEFS = [
+  { label: "📋 SITREP", prompt: "Provide a situation report for the current simulation state." },
+  { label: "🚒 Deploy", prompt: "Deploy available resources to the staging area nearest the incident." },
+  { label: "📢 Alert", prompt: "Draft a public alert message for the affected area." },
+  { label: "⬆ Escalate", prompt: "Escalate the current situation to executive leadership with a risk summary." },
+  { label: "⚠ Risk", prompt: "Provide a risk assessment for the current scenario including hazard severity and consequences." },
+];
+
+function truncateForLog(text: string, max = 80): string {
+  const oneLine = text.replace(/\s+/g, " ").trim();
+  return oneLine.length <= max ? oneLine : `${oneLine.slice(0, max - 1)}…`;
+}
+
 interface ChatMessage {
   id: string;
   role: Role;
@@ -50,6 +63,10 @@ export function SimulationChatPane({
   // onScenarioCard callback identity changes on every render.
   const onScenarioCardRef = useRef(onScenarioCard);
   onScenarioCardRef.current = onScenarioCard;
+  // Stable ref for onEvent so the streaming loop always sees the latest
+  // callback without forcing send() to re-create on every parent render.
+  const onEventRef = useRef(onEvent);
+  onEventRef.current = onEvent;
 
   // Auto-scroll to the newest message whenever the list or streamed content
   // grows. Keeps the active reply + input visible without the user chasing it.
@@ -94,10 +111,11 @@ export function SimulationChatPane({
 
   const send = useCallback(async () => {
     if (!input.trim() || isStreaming) return;
+    const prompt = input.trim();
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: input.trim(),
+      content: prompt,
     };
     const assistantId = crypto.randomUUID();
     setMessages((prev) => [
@@ -109,6 +127,16 @@ export function SimulationChatPane({
     setStreaming(true);
     setError(null);
 
+    // Mirror the operator command into the parent's event log so the
+    // post-exercise audit reflects every SITREP/Risk/Deploy/Alert/Escalate
+    // (or freeform) instruction issued via the chat pane.
+    const quickLabel = QUICK_ACTIONS.find((qa) => qa.prompt === prompt)?.label;
+    onEventRef.current?.(
+      quickLabel
+        ? `Command issued: ${quickLabel.replace(/^[^\w]+\s*/, "")}`
+        : `Command issued: ${truncateForLog(prompt)}`,
+    );
+
     const ctrl = new AbortController();
     abortRef.current = ctrl;
 
@@ -118,10 +146,27 @@ export function SimulationChatPane({
         if (ev.event === "card.scenario" && onScenarioCard) {
           onScenarioCard(ev.data as Record<string, unknown>);
         }
+        // Surface notable streaming milestones into the event log so the
+        // controller can see tool invocations and refusals without digging
+        // through the chat transcript.
+        if (ev.event === "tool.call") {
+          const toolName = String(ev.data.name ?? "tool");
+          onEventRef.current?.(`Tool invoked: ${toolName}`);
+        } else if (ev.event === "turn.end" && ev.data.refused) {
+          onEventRef.current?.("Controller refused command (out of scope)");
+        } else if (ev.event === "error") {
+          onEventRef.current?.(
+            `Chat error: ${String(ev.data.code ?? "unknown")}`,
+          );
+        }
       }
+      onEventRef.current?.("Controller reply complete");
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
         setError((err as Error).message);
+        onEventRef.current?.(`Chat stream failed: ${(err as Error).message}`);
+      } else {
+        onEventRef.current?.("Command cancelled by operator");
       }
     } finally {
       setStreaming(false);
@@ -150,13 +195,7 @@ export function SimulationChatPane({
     URL.revokeObjectURL(url);
   }, [messages, tenantId]);
 
-  const QUICK_ACTIONS = [
-    { label: "📋 SITREP", prompt: "Provide a situation report for the current simulation state." },
-    { label: "🚒 Deploy", prompt: "Deploy available resources to the staging area nearest the incident." },
-    { label: "📢 Alert", prompt: "Draft a public alert message for the affected area." },
-    { label: "⬆ Escalate", prompt: "Escalate the current situation to executive leadership with a risk summary." },
-    { label: "⚠ Risk", prompt: "Provide a risk assessment for the current scenario including hazard severity and consequences." },
-  ];
+  const QUICK_ACTIONS = QUICK_ACTION_DEFS;
 
   const injectQuickAction = useCallback((prompt: string) => {
     setInput(prompt);

@@ -178,6 +178,14 @@ def _parse_deployment_map(raw: str | None) -> dict[str, str]:
 
     Mirrors ``apps/eval-runner/src/ama_eval/foundry_client._parse_deployment_map``
     so a single env-var format works across both seams.
+
+    First-write-wins: when multiple entries share the same key (e.g. when
+    Bicep collapses reasoning/drafting/simulation tiers onto the same
+    ``modelName@version``) the FIRST entry in the CSV is preserved. This
+    keeps lookups deterministic and matches the simulation Controller's
+    own ``_resolve_simulation_deployment`` semantics. Callers that need a
+    specific tier should resolve it via the per-tier
+    ``AZURE_AI_<TIER>_DEPLOYMENT`` env var instead.
     """
     out: dict[str, str] = {}
     if not raw:
@@ -186,7 +194,7 @@ def _parse_deployment_map(raw: str | None) -> dict[str, str]:
         if "=" not in entry:
             continue
         key, name = entry.split("=", 1)
-        out[key.strip()] = name.strip()
+        out.setdefault(key.strip(), name.strip())
     return out
 
 
@@ -200,6 +208,21 @@ class LiveFoundryChatClient:
                                            used by the carve-out gateway path.
 
     Token scope: ``https://cognitiveservices.azure.com/.default`` (FR-RAG-FM-05).
+
+    Endpoint shapes
+    ---------------
+    Two endpoint shapes are supported transparently:
+
+    * **Native Foundry project** (``*.services.ai.azure.com``,
+      ``*.inference.ml.azure.com``) — a single ``ChatCompletionsClient``
+      bound to the project endpoint handles every deployment; ``model=``
+      selects which one. Typed ``max_tokens`` is honoured.
+    * **Azure-OpenAI cognitive-services** (``*.cognitiveservices.azure.com``,
+      ``*.openai.azure.com``) — the inference SDK requires
+      ``/openai/deployments/<name>`` in the URL. A per-deployment client
+      is constructed (and cached) automatically. The ``max_completion_tokens``
+      parameter required by GPT-5+ family models is forwarded via the SDK's
+      ``model_extras`` passthrough.
     """
 
     # Class-attribute alias for tests / introspection.
@@ -224,8 +247,15 @@ class LiveFoundryChatClient:
         )
         self._region = (region or os.environ.get("AZURE_AI_PROJECT_REGION") or "").lower()
         self._cred = credential
-        self._sync_client: Any | None = None
-        self._async_client: Any | None = None
+        # Spec 036 / FR-RAG-FM-01 — clients are cached *per resolved
+        # endpoint URL*. For Azure-OpenAI-kind cognitive-services accounts
+        # the inference SDK requires the URL to include
+        # ``/openai/deployments/<name>`` (without it the client POSTs to
+        # ``{endpoint}/chat/completions`` which 404s on AOAI). Per-deployment
+        # caches keep each ChatCompletionsClient pointed at the right route
+        # while still avoiding per-call client construction.
+        self._sync_clients: dict[str, Any] = {}
+        self._async_clients: dict[str, Any] = {}
         # Gateway is injected lazily — avoids importing presidio at import time
         # (presidio has heavy spaCy deps; only needed for non-AU regions).
         self._gateway_apply = gateway_apply
@@ -234,53 +264,96 @@ class LiveFoundryChatClient:
     # Resolve deployment name from the env-var map.
     # ------------------------------------------------------------------ #
 
+    # Recognised tier aliases — when ``model_key`` matches one of these the
+    # resolver checks ``AZURE_AI_<TIER>_DEPLOYMENT`` env vars first. This
+    # lets callers express "give me the simulation-tier deployment" without
+    # having to know whether the CSV map distinguishes that tier (it
+    # currently can't — multiple tiers collapse onto the same
+    # ``<modelName>@<version>`` key when they share a model).
+    _TIER_ALIASES: frozenset[str] = frozenset({"reasoning", "drafting", "simulation", "embedding"})
+
     def _resolve(self, model_key: str) -> str:
         if model_key in self._deployments:
             return self._deployments[model_key]
+        if model_key in self._TIER_ALIASES:
+            env_name = f"AZURE_AI_{model_key.upper()}_DEPLOYMENT"
+            override = os.environ.get(env_name)
+            if override:
+                return override
         base = model_key.split("@", 1)[0]
         if base in self._deployments:
             return self._deployments[base]
         raise FoundryConfigurationError(
             f"no Foundry deployment configured for {model_key!r}; "
-            "set AZURE_AI_PROJECT_DEPLOYMENTS env var (CSV: 'modelId@version=deploymentName')"
+            "set AZURE_AI_PROJECT_DEPLOYMENTS env var (CSV: 'modelId@version=deploymentName') "
+            "or AZURE_AI_<TIER>_DEPLOYMENT for tier names ('reasoning', 'simulation', ...)"
         )
+
+    # ------------------------------------------------------------------ #
+    # Endpoint URL shaping — distinguishes Azure-OpenAI cognitive-services
+    # accounts (which require ``/openai/deployments/<name>`` in the URL)
+    # from native Foundry project endpoints (which accept the bare host).
+    # ------------------------------------------------------------------ #
+
+    @staticmethod
+    def _is_aoai_endpoint(endpoint: str) -> bool:
+        """Detect Azure-OpenAI / cognitive-services style endpoints.
+
+        Returns ``True`` for hosts ending in ``cognitiveservices.azure.com``
+        or ``openai.azure.com``. Native Foundry project endpoints (e.g.
+        ``*.services.ai.azure.com`` or ``*.inference.ml.azure.com``) return
+        ``False`` and use the existing inference-SDK URL pattern.
+        """
+        host = endpoint.lower()
+        return ".cognitiveservices.azure.com" in host or ".openai.azure.com" in host
+
+    def _endpoint_for(self, deployment: str) -> str:
+        """Compose the inference-SDK endpoint URL for a given deployment."""
+        if not self._endpoint:
+            raise FoundryConfigurationError("AZURE_AI_PROJECT_ENDPOINT is not set")
+        base = self._endpoint.rstrip("/")
+        if self._is_aoai_endpoint(base) and "/openai/deployments/" not in base:
+            return f"{base}/openai/deployments/{deployment}"
+        return base
 
     # ------------------------------------------------------------------ #
     # Lazy client construction — avoids importing azure-ai-inference at
     # import time (saves cold-start in unit tests using FakeFoundryClient).
     # ------------------------------------------------------------------ #
 
-    def _ensure_sync_client(self) -> Any:
-        if self._sync_client is not None:
-            return self._sync_client
+    def _ensure_sync_client(self, deployment: str) -> Any:
+        url = self._endpoint_for(deployment)
+        cached = self._sync_clients.get(url)
+        if cached is not None:
+            return cached
         from azure.ai.inference import ChatCompletionsClient  # noqa: PLC0415
         from azure.identity import DefaultAzureCredential  # noqa: PLC0415
 
-        if not self._endpoint:
-            raise FoundryConfigurationError("AZURE_AI_PROJECT_ENDPOINT is not set")
         cred = self._cred or DefaultAzureCredential()
-        self._sync_client = ChatCompletionsClient(
-            endpoint=self._endpoint.rstrip("/"),
+        client = ChatCompletionsClient(
+            endpoint=url,
             credential=cred,
             credential_scopes=[AAD_SCOPE],
         )
-        return self._sync_client
+        self._sync_clients[url] = client
+        return client
 
-    def _ensure_async_client(self) -> Any:
-        if self._async_client is not None:
-            return self._async_client
+    def _ensure_async_client(self, deployment: str) -> Any:
+        url = self._endpoint_for(deployment)
+        cached = self._async_clients.get(url)
+        if cached is not None:
+            return cached
         from azure.ai.inference.aio import ChatCompletionsClient as AsyncChatClient  # noqa: PLC0415
         from azure.identity.aio import DefaultAzureCredential as AsyncDefaultAzureCredential  # noqa: PLC0415
 
-        if not self._endpoint:
-            raise FoundryConfigurationError("AZURE_AI_PROJECT_ENDPOINT is not set")
         cred = self._cred or AsyncDefaultAzureCredential()
-        self._async_client = AsyncChatClient(
-            endpoint=self._endpoint.rstrip("/"),
+        client = AsyncChatClient(
+            endpoint=url,
             credential=cred,
             credential_scopes=[AAD_SCOPE],
         )
-        return self._async_client
+        self._async_clients[url] = client
+        return client
 
     # ------------------------------------------------------------------ #
     # Carve-out gateway integration (FR-RAG-CV-03 / FR-RAG-CV-04).
@@ -335,7 +408,7 @@ class LiveFoundryChatClient:
         """Single-shot chat completion."""
         deployment = self._resolve(model_key)
         guarded_messages = self._apply_gateway(messages=messages)
-        client = self._ensure_sync_client()
+        client = self._ensure_sync_client(deployment)
 
         kwargs: dict[str, Any] = {"model": deployment, "messages": guarded_messages}
         if tools is not None:
@@ -343,7 +416,16 @@ class LiveFoundryChatClient:
         if temperature is not None:
             kwargs["temperature"] = temperature
         if max_tokens is not None:
-            kwargs["max_tokens"] = max_tokens
+            # GPT-5+ family deployments reject ``max_tokens`` and require
+            # ``max_completion_tokens``. The inference SDK only types
+            # ``max_tokens`` natively; surface the new parameter via the
+            # SDK's ``model_extras`` passthrough for AOAI deployments where
+            # the newer parameter is mandatory. Native Foundry endpoints
+            # keep the typed ``max_tokens`` for backwards compat.
+            if self._endpoint and self._is_aoai_endpoint(self._endpoint):
+                kwargs["model_extras"] = {"max_completion_tokens": max_tokens}
+            else:
+                kwargs["max_tokens"] = max_tokens
 
         # Spec 036 / F-A11 / T235 — emit foundry.inference OTel span. The
         # correlation_id stitches this span back to the surrounding
@@ -402,7 +484,7 @@ class LiveFoundryChatClient:
         """Streaming chat completion. Used by the simulation Controller's SSE turn loop."""
         deployment = self._resolve(model_key)
         guarded_messages = self._apply_gateway(messages=messages)
-        client = self._ensure_async_client()
+        client = self._ensure_async_client(deployment)
 
         kwargs: dict[str, Any] = {
             "model": deployment,
@@ -414,7 +496,13 @@ class LiveFoundryChatClient:
         if temperature is not None:
             kwargs["temperature"] = temperature
         if max_tokens is not None:
-            kwargs["max_tokens"] = max_tokens
+            # See chat_complete for the AOAI ``max_completion_tokens``
+            # parameter rename. Mirrored here to keep streaming behaviour
+            # consistent with single-shot calls.
+            if self._endpoint and self._is_aoai_endpoint(self._endpoint):
+                kwargs["model_extras"] = {"max_completion_tokens": max_tokens}
+            else:
+                kwargs["max_tokens"] = max_tokens
 
         try:
             stream = await client.complete(**kwargs)

@@ -1,0 +1,69 @@
+<mxfile host="app.diagrams.net" modified="2026-05-11T00:00:00.000Z" agent="spec-001-fallback" version="24.0.0">
+  <diagram name="SECTOR-02" id="sector02-ingestion">
+    <mxGraphModel><root>
+      <mxCell id="0"/>
+      <mxCell id="1" parent="0"/>
+      <mxCell id="2" value="BoM weather feed
+CAP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dbeafe;" vertex="1" parent="1">
+        <mxGeometry x="20" y="90" width="120" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="3" value="GA seismic feed
+GeoJSON" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dbeafe;" vertex="1" parent="1">
+        <mxGeometry x="20" y="190" width="120" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="4" value="NEMA NCM
+EDXL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dbeafe;" vertex="1" parent="1">
+        <mxGeometry x="20" y="290" width="120" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="5" value="State agencies
+CAP / EDXL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dbeafe;" vertex="1" parent="1">
+        <mxGeometry x="20" y="390" width="120" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="6" value="Azure Event Hubs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fee2e2;" vertex="1" parent="1">
+        <mxGeometry x="220" y="130" width="150" height="80" as="geometry"/>
+      </mxCell>
+      <mxCell id="7" value="Azure Service Bus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fee2e2;" vertex="1" parent="1">
+        <mxGeometry x="220" y="290" width="150" height="80" as="geometry"/>
+      </mxCell>
+      <mxCell id="8" value="Ingest Service
+validate → normalise → route" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dcfce7;" vertex="1" parent="1">
+        <mxGeometry x="430" y="210" width="170" height="90" as="geometry"/>
+      </mxCell>
+      <mxCell id="9" value="Cosmos DB
+incident + signal store" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fef3c7;" vertex="1" parent="1">
+        <mxGeometry x="650" y="210" width="120" height="90" as="geometry"/>
+      </mxCell>
+      <mxCell id="10" value="Agents Runtime
+alerting, impact, coordination" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#ede9fe;strokeColor=#7c3aed;" vertex="1" parent="1">
+        <mxGeometry x="620" y="360" width="150" height="90" as="geometry"/>
+      </mxCell>
+      <mxCell id="11" value="CAP" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="2" target="6">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="12" value="GeoJSON" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="3" target="6">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="13" value="EDXL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="4" target="7">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="14" value="CAP" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="5" target="6">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="15" value="EDXL" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="5" target="7">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="16" value="stream ingress" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="6" target="8">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="17" value="queued ingress" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="7" target="8">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="18" value="tenant-scoped event documents" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="8" target="9">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="19" value="change feed / query" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" edge="1" parent="1" source="9" target="10">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+    </root></mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,42 +1,42 @@
-<mxfile host="app.diagrams.net" modified="2026-05-11T00:00:00.000Z" agent="spec-001-fallback" version="24.0.0">
+<mxfile host="Electron" agent="spec-001-fallback">
   <diagram name="SEQ-01" id="seq01-fallback">
-    <mxGraphModel dx="1214" dy="686" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="953" dy="713" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
-      <mxCell id="0"/>
-      <mxCell id="1" parent="0"/>
-      <mxCell id="2" value="Authoring" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
-        <mxGeometry x="120" y="180" width="180" height="80" as="geometry"/>
-      </mxCell>
-      <mxCell id="3" value="Draft alert with hazard summary,<br>area, timing, and channels" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
-        <mxGeometry x="100" y="320" width="220" height="80" as="geometry"/>
-      </mxCell>
-      <mxCell id="4" value="👤 Human Approval Gate" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#ff0000;strokeWidth=2;fontColor=#b30000;fontStyle=1;" vertex="1" parent="1">
-        <mxGeometry x="410" y="170" width="180" height="100" as="geometry"/>
-      </mxCell>
-      <mxCell id="5" value="Operator reviews legal wording,<br>life-safety impact, and release timing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
-        <mxGeometry x="360" y="320" width="220" height="80" as="geometry"/>
-      </mxCell>
-      <mxCell id="6" value="Publication" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
-        <mxGeometry x="710" y="180" width="180" height="80" as="geometry"/>
-      </mxCell>
-      <mxCell id="7" value="SMS / push / social / media<br>release only after approval" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
-        <mxGeometry x="680" y="320" width="220" height="80" as="geometry"/>
-      </mxCell>
-      <mxCell id="8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="2" target="4">
-        <mxGeometry relative="1" as="geometry"/>
-      </mxCell>
-      <mxCell id="9" value="approved only" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="4" target="6">
-        <mxGeometry relative="1" as="geometry"/>
-      </mxCell>
-      <mxCell id="10" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="2" target="3">
-        <mxGeometry relative="1" as="geometry"/>
-      </mxCell>
-      <mxCell id="11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="4" target="5">
-        <mxGeometry relative="1" as="geometry"/>
-      </mxCell>
-      <mxCell id="12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="6" target="7">
-        <mxGeometry relative="1" as="geometry"/>
-      </mxCell>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" value="Authoring" vertex="1">
+          <mxGeometry height="80" width="180" x="120" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="Draft alert with hazard summary,&lt;br/&gt;area, timing, and channels" vertex="1">
+          <mxGeometry height="80" width="220" x="100" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="1" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#ff0000;strokeWidth=2;fontColor=#b30000;fontStyle=1;" value="👤 Human Approval Gate" vertex="1">
+          <mxGeometry height="100" width="180" x="410" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="Operator reviews legal wording,&lt;br/&gt;life-safety impact, and release timing" vertex="1">
+          <mxGeometry height="80" width="220" x="390" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" value="Publication" vertex="1">
+          <mxGeometry height="80" width="180" x="710" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" value="SMS / push / social / media&lt;br/&gt;release only after approval" vertex="1">
+          <mxGeometry height="80" width="220" x="690" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="8" edge="1" parent="1" source="2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#CCCCCC;" target="4" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="9" edge="1" parent="1" source="4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#CCCCCC;" target="6" value="approved only">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="10" edge="1" parent="1" source="2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#CCCCCC;" target="3" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="11" edge="1" parent="1" source="4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#CCCCCC;" target="5" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="12" edge="1" parent="1" source="6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#CCCCCC;" target="7" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>

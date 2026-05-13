@@ -1,30 +1,184 @@
 ---
 slug: screen-by-screen/agent-resource-allocation
-title: "Screen: Agent Resource Allocation"
+title: "Screen: Resource-allocation agent workspace"
 status: Active
 classification: OFFICIAL
+audience: logistics-officer, operations-officer, incident-commander, frontline-fire, frontline-police, frontline-medical, frontline-ses-marine
+surface_id: agent-resource-allocation
+estimated_reading_time: 11 min
 ---
 
-# Screen: Agent Resource Allocation
+# Screen: Resource-allocation agent workspace
 
-## 1. Purpose
-The **Agent Resource Allocation** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Resource-allocation agent workspace** at
+`/workspaces/agent-resource-allocation` is the operating surface
+for the Hub's resource-allocation agent. The agent ingests the
+operating picture, the active risk assessments, the active
+evacuation envelopes, the resource pool (appliances, strike
+teams, helicopters, support vehicles, medical teams, marine
+craft, SES specialist units), and the standing mutual-aid
+agreements (intra-state, cross-border via NEMA, international
+via MFA), and emits **resource recommendations**: which units to
+move, where, by when, via which mutual-aid path.
 
-## 2. Layout
-Light and dark variants:
+The agent **never** dispatches autonomously. Logistics Officer
+co-signs every transfer; Operations Officer co-signs cross-border
+transfers; cross-border transfers also produce a NEMA
+acknowledgement.
+
+For the playbook, see
+[`playbooks/agent-resource-allocation`](/help/articles/playbooks/agent-resource-allocation).
 
 <!-- AnnotatedScreenshot screen_id=agent-resource-allocation light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+A four-pane layout:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. **Header strip** — agent state, resource pool freshness,
+   mutual-aid agreement count.
+2. **Resource map** — left, ~50 % width; resource pins and
+   movement arrows over the operating picture.
+3. **Recommendation queue** — right top, ~50 % width; ranked
+   list of resource recommendations.
+4. **Mutual-aid drawer** — right bottom, expandable; the
+   active mutual-aid agreements relevant to the selected
+   recommendation.
+
+## 2. Header strip
+
+- **Agent state** — *Running* / *Paused* / *Failed*.
+- **Resource pool freshness** — last refresh of the pool from
+  agency systems-of-record. Stale > 5 minutes is amber.
+- **Active agreements** — count + a click-through to the
+  agreements catalogue.
+- **Pause / resume** — Operations Officer envelope.
+
+## 3. Resource map
+
+The map shows resources as pin clusters by class:
+- **Fire appliances** — by appliance type (heavy / medium /
+  light tanker, pumper, aerial, command).
+- **Strike teams** — composite units of multiple appliances.
+- **Helicopters** — by capability (water-bombing, transport,
+  observation).
+- **Medical teams** — paramedic, advanced care, retrieval.
+- **Marine craft** — SES rescue, surf rescue, harbour patrol.
+- **SES specialist** — flood boats, vertical rescue, swift water.
+- **Police** — patrol, traffic, specialist (PORT/STAR/etc.).
+- **Support** — fuel, mechanical, comms vehicles.
+
+Movement arrows show recommended transfers; arrows are
+colour-coded by urgency (red = immediate, amber = within 6 h,
+blue = within 24 h).
+
+## 4. Recommendation queue
+
+Each card shows:
+- **Recommendation kind** — `move`, `pre-position`, `release`,
+  `request-mutual-aid`, `decline-mutual-aid-request`.
+- **Source** — the unit(s) being moved or requested.
+- **Destination** — the location, sector, or jurisdiction.
+- **Urgency** — *Immediate* / *Within 6 h* / *Within 24 h*.
+- **Confidence band** — green / amber / red.
+- **Mutual-aid path** — intra-sector / cross-sector intra-state /
+  cross-border / international.
+- **Drivers** — top 3 signals or assessments justifying the
+  recommendation.
+- **Action button** — *Forward to Logistics Officer* (Operations
+  Officer envelope) / *Acknowledge* / *Dismiss*.
+
+## 5. Mutual-aid drawer
+
+For the selected recommendation, the drawer shows the relevant
+mutual-aid agreements:
+- The agreement title (e.g., *"NSW–VIC Strike Team Mutual Aid
+  v3.4"*).
+- Effective dates.
+- Standing terms (cost recovery, command-and-control transfer
+  rules, recall conditions).
+- The contact roles on each side (initiator, approver, receiver).
+- A *"Open agreement"* link to the agreements catalogue at
+  `/governance/agreements`.
+
+Cross-border recommendations always cite the relevant NEMA
+mutual-aid framework; international citations include the MFA
+diplomatic note number.
+
+## 6. The dispatch chain
+
+For a recommendation to commit:
+1. Operations Officer forwards to Logistics Officer.
+2. Originating Logistics Officer drafts the transfer in the
+   *Resource board* workspace (`/workspaces/logistics`).
+3. Originating Operations Officer co-signs the export.
+4. For cross-border / international: NEMA acknowledgement +
+   receiving Operations Officer co-sign import.
+5. Receiving Logistics Officer accepts and books the resource.
+
+The agent's role ends at step 1; subsequent steps are operator
+actions.
+
+## 7. Audit consequences
+
+- *Forward*, *Acknowledge*, *Dismiss* — audit-logged.
+- The agent's emitted recommendations are audit-logged under
+  `agent.resource.recommend`.
+- Each step of the dispatch chain is audit-logged in the
+  Resource board workspace.
+
+## 8. Edge cases
+
+### 8.1 Resource pool stale
+If the resource pool is more than 15 minutes stale (e.g., an
+agency system-of-record outage), recommendations annotate
+*"Pool stale: verify availability before forwarding"*.
+Logistics Officer should confirm by direct contact before
+booking the transfer.
+
+### 8.2 Conflicting requests
+If two recommendations propose moving the same unit to different
+destinations, the queue shows them as a paired conflict with a
+*"Resolve conflict"* action that opens both in a side-by-side
+view; Logistics Officer chooses one and dismisses the other
+with rationale.
+
+### 8.3 Receiving side declines
+Receiving Logistics Officer declines an import; the resource
+returns to the originating pool; the originating Operations
+Officer is notified to consider an alternative recipient.
+
+### 8.4 Recall during transit
+A unit in transit can be recalled by the originating Operations
+Officer with a *Recall* action; the recall is audit-logged and
+the unit reverts to the originating pool.
+
+## 9. Keyboard shortcuts
+
+| Shortcut  | Action                                            |
+| --------- | ------------------------------------------------- |
+| `g w`, `o`| Jump to Resource-allocation agent workspace       |
+| `[` / `]` | Move selection in the recommendation queue        |
+| `Enter`   | Forward to Logistics Officer                      |
+| `a`       | Acknowledge                                       |
+| `d`       | Dismiss (rationale required)                      |
+| `m`       | Toggle mutual-aid drawer                          |
+
+## 10. Related
+
+- [`playbooks/agent-resource-allocation`](/help/articles/playbooks/agent-resource-allocation)
+  — for the operational playbook.
+- [`screen-by-screen/agent-monitoring`](/help/articles/screen-by-screen/agent-monitoring)
+  — the upstream operating picture.
+- [`screen-by-screen/agent-evacuation`](/help/articles/screen-by-screen/agent-evacuation)
+  — adjacent agent for evacuation logistics.
+- [`personas/logistics-officer`](/help/personas/logistics-officer)
+  — Logistics Officer landing.
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+  — cross-border resource transfer doctrine.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+agents working group and the AFAC mutual-aid cell. Surface ID
+`agent-resource-allocation`._

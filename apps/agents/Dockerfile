@@ -3,6 +3,7 @@ FROM python:3.12-slim AS builder
 WORKDIR /app
 COPY apps/agents/pyproject.toml ./apps/agents/
 COPY apps/agents/common/ ./apps/agents/common/
+COPY apps/agents/dispatcher/ ./apps/agents/dispatcher/
 COPY apps/agents/monitoring/ ./apps/agents/monitoring/
 COPY apps/agents/risk_assessment/ ./apps/agents/risk_assessment/
 COPY apps/agents/evacuation/ ./apps/agents/evacuation/
@@ -21,6 +22,7 @@ RUN useradd -m -u 10001 appuser
 WORKDIR /app
 COPY --from=builder /usr/local /usr/local
 COPY apps/agents/common/ ./common/
+COPY apps/agents/dispatcher/ ./dispatcher/
 COPY apps/agents/monitoring/ ./monitoring/
 COPY apps/agents/risk_assessment/ ./risk_assessment/
 COPY apps/agents/evacuation/ ./evacuation/
@@ -38,4 +40,4 @@ USER appuser
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -f http://localhost:8080/health || exit 1
 
-CMD ["python", "-m", "monitoring.agent"]
+CMD ["python", "-m", "dispatcher"]

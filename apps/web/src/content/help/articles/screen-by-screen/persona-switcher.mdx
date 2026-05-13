@@ -1,30 +1,221 @@
 ---
 slug: screen-by-screen/persona-switcher
-title: "Screen: Persona Switcher"
+title: "Screen: Persona switcher"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+surface_id: persona-switcher
+estimated_reading_time: 9 min
 ---
 
-# Screen: Persona Switcher
+# Screen: Persona switcher
 
-## 1. Purpose
-The **Persona Switcher** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **persona switcher** is the small but doctrinally critical
+control in the top bar that determines which decision-rights
+envelope your subsequent actions execute under. Switching persona
+is **never** a cosmetic change — it changes what you can read,
+what you can act on, what evidence you must reckon with, and what
+the audit trail records you as. This article documents the
+control, the IdP claim model that drives it, the audit
+consequences of every switch, and the constitutional rules that
+forbid certain transitions.
 
-## 2. Layout
-Light and dark variants:
+For the broader doctrinal framing, see
+[`constitution-principle-v`](/help/articles/constitution-principle-v).
 
-<!-- AnnotatedScreenshot screen_id=persona-switcher light=true dark=true -->
+## 1. The control
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+The switcher sits in the top bar to the left of the jurisdiction
+filter. It reads, in its collapsed form:
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+> **Persona: Operations Officer**
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+…with a small chevron indicating that it is interactive. Click
+the chip to expand the popover.
+
+The collapsed chip uses a persona-specific colour band on its left
+edge: ocean for operating personas, plum for read-and-plan, slate
+for Observer/Auditor and Executive Leader, sand for the front-
+line variants, and crimson for Commonwealth.
+
+## 2. The popover
+
+The popover lists every persona in your IdP claim, grouped by
+operational class:
+
+- **Operating** — Incident Commander, Operations Officer, Planning
+  Officer, Public Information Officer, Logistics Officer, Field
+  Coordinator.
+- **Read and plan** — Resilience Planner, Risk Manager.
+- **Read only** — Observer/Auditor, Executive Leader.
+- **Front-line** — Frontline Fire / Police / Medical / SES-Marine.
+- **Aggregate** — Cross-sector, Commonwealth.
+
+Each persona row shows:
+- The persona name.
+- Its envelope summary (one sentence).
+- A *"Help on this role"* link that opens the persona's landing
+  article.
+
+The currently active persona is highlighted with a check icon.
+Click any other persona to switch.
+
+## 3. Single-persona claim
+
+If your IdP claim grants exactly one persona, the switcher is
+disabled — its chip is greyed out and clicking opens a banner
+*"You hold a single persona. Contact your administrator to
+acquire additional roles."*. There is no in-app workaround;
+session-scoped persona elevation is forbidden by the Constitution
+(see Principle V).
+
+## 4. Default persona
+
+If your IdP claim grants more than one persona, the IdP may
+nominate a **default persona** via the `default_persona` claim
+attribute. The Hub uses this on sign-in to choose your initial
+persona without prompting.
+
+If the IdP does not nominate a default, the persona switcher
+appears with no selection on first sign-in; you must choose
+explicitly. The choice is audit-logged and the Hub remembers it
+for the session (subsequent page loads in the same session
+retain the choice; a fresh sign-in re-prompts).
+
+## 5. Switch effects
+
+When you switch persona, the following happens, in order:
+
+1. The Hub validates that the target persona is in your claim
+   set. (It will be — the popover only shows claimed personas —
+   but the validation is the last-line defence against a stale
+   popover state.)
+2. An audit row appends with action `actor.persona_change`,
+   recording the prior and new personas, the active jurisdiction
+   filter, the surface you are on, and the snapshot in force.
+3. The Hub re-evaluates the current page against the new
+   envelope:
+   - If the page's required envelope is incompatible with the
+     new persona, the Hub navigates to the new persona's default
+     landing surface.
+   - Otherwise, the page stays put but its action controls
+     re-evaluate (see §6).
+4. The persona-specific chrome refreshes — workspace tile sets,
+   layer overlays, default jurisdiction filter (if any persona
+   constraint applies), default theme accent.
+5. The next chat prompt sent to the Help Assistant is grounded
+   with the new persona context.
+
+## 6. Action controls re-evaluation
+
+After a switch, every action button on the current page re-
+evaluates against the new envelope. The most common transitions:
+
+- Buttons your prior persona could press but your new persona
+  cannot: become disabled with an aria-tooltip explaining the
+  envelope mismatch (e.g., *"Operations Officer cannot publish
+  warnings — switch to Public Information Officer or hand off"*).
+- Buttons your new persona can press but your prior could not:
+  become enabled.
+- Buttons that require co-signing under the new envelope (e.g.,
+  amber co-sign requirements differ across personas): show the
+  *"Requires second eyes"* annotation.
+
+If you are mid-action (e.g., you have an Alert Composer open with
+a draft), switching persona does **not** discard the draft — the
+draft is bound to the originating persona; you cannot
+*Approve* from the new persona unless it is in the originating
+persona's co-sign chain.
+
+## 7. Switching mid-exercise
+
+Inside an exercise tenant, persona switching is disabled while the
+exercise clock is running. The Hub presents *"Persona switch
+refused: shadow exercise active"*. To switch:
+- Pause the exercise (Incident Commander or Operations Officer
+  envelope), switch persona, resume.
+- Or hand off the exercise controller role to another participant
+  before switching.
+
+This is doctrinal: exercise replay must reproduce the same actor
+envelope at every step, so mid-exercise switches break the replay
+fidelity.
+
+## 8. Switching during a workflow
+
+Some workflows span personas (e.g., a PIO drafts an alert, an IC
+co-signs). The Hub does not treat these as switches — they are
+co-sign chain events. Each persona acts in their own envelope;
+the workflow's correlation ID binds them.
+
+If you are *inside* a co-sign chain (i.e., another persona has
+queued an action for your sign-off), switching persona before
+signing dismisses the request from your new-persona inbox; it
+remains pending in your prior persona's view (which you can
+return to). This is so a hand-off via persona switch is
+intentional, not accidental.
+
+## 9. Audit consequences
+
+Every switch records:
+- Actor identity.
+- Prior persona, new persona.
+- Active jurisdiction filter (unchanged by the switch itself).
+- Active surface (the page you were on).
+- Snapshot in force.
+- Timestamp.
+
+Switches are visible in the audit timeline as `actor.persona_change`
+rows. Filtering the timeline by your identity and this action
+verb shows your full persona trajectory across a shift.
+
+## 10. Edge cases
+
+### 10.1 Claim revoked mid-session
+If your administrator removes a persona from your claim while you
+hold that persona active, the next page load detects the
+revocation, switches you to the next-most-privileged remaining
+persona (or signs you out if no claim remains), and audit-logs
+the revocation event.
+
+### 10.2 Constitutional steward intervention
+The constitutional steward may, in rare circumstances, force a
+persona switch on an actor (e.g., to remove a compromised
+persona from active use). This appears as an external event and
+is audit-logged with the steward's identity and rationale.
+
+### 10.3 Same-persona "switch"
+Selecting the currently active persona from the popover is a
+no-op; the Hub does not audit-log a self-switch.
+
+### 10.4 Front-line persona auto-binding
+Front-line personas are auto-bound to their sector's home
+jurisdiction at sign-in (see *Persona-constrained filters* in
+[`screen-by-screen/multi-jurisdiction-filter`](/help/articles/screen-by-screen/multi-jurisdiction-filter)).
+Switching *into* a front-line persona automatically narrows the
+filter; switching *out* restores the prior filter.
+
+## 11. Keyboard shortcuts
+
+| Shortcut | Action                                         |
+| -------- | ---------------------------------------------- |
+| `Alt+P`  | Open the persona switcher popover              |
+| `Tab`    | Focus persona rows in document order           |
+| `Enter`  | Switch to the focused persona                  |
+| `Esc`    | Close popover without switching                |
+
+## 12. Related
+
+- [`constitution-principle-v`](/help/articles/constitution-principle-v)
+  — for the doctrinal envelope.
+- [`screen-by-screen/multi-jurisdiction-filter`](/help/articles/screen-by-screen/multi-jurisdiction-filter)
+  — for the adjacent jurisdiction filter.
+- [`audit-observer-mode`](/help/articles/audit-observer-mode) —
+  for reading the audit rows.
+- [`personas/`](/help/personas/) — for each persona's landing
+  article and envelope details.
+
+---
+
+_Maintained by the AMA Help content team in partnership with the
+constitutional working group. Surface ID `persona-switcher`._

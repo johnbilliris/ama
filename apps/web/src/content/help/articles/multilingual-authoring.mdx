@@ -1,14 +1,287 @@
 ---
 slug: multilingual-authoring
-title: "Multilingual authoring guide for PIOs"
+title: "Multilingual content authoring and language attributes"
 status: Active
 classification: OFFICIAL
+audience: content-author, public-information-officer, planning-officer, observer-auditor
+estimated_reading_time: 10 min
 ---
 
-# Multilingual authoring guide
+# Multilingual content authoring
 
-## 1. Community languages
-## 2. Aboriginal & Torres Strait Islander considerations
-## 3. Cultural-authority registry references
-## 4. lang attributes
-## 5. Editorial checklist
+Australia's emergency information must reach communities in the
+languages they actually use. The AMA Hub treats multilingual content
+as a first-class concern: every operator-facing string can be
+authored in multiple languages, the Help corpus declares language
+attributes that screen readers and translation tools rely on, and the
+public-alert pipeline composes per-language alerts under a single
+correlation ID. This article is the **content-author and operator
+reference** for multilingual authoring across all three surfaces.
+
+If you are an operator who only **consumes** translated content
+(e.g., a Public Information Officer reviewing a translated alert),
+read §6 (Reviewing translated alerts) and §9 (Common pitfalls)
+first.
+
+## 1. Languages the Hub supports
+
+The Hub's authoring and rendering pipeline supports the following
+languages, in the order they are typically prioritised in Australian
+emergency communications:
+
+1. **English** (`en-AU`) — primary; every artefact must have an
+   English version.
+2. **Mandarin** (`zh-Hans-AU`, simplified) — major metropolitan
+   communities.
+3. **Arabic** (`ar`) — RTL; major metropolitan communities.
+4. **Vietnamese** (`vi`) — major metropolitan communities.
+5. **Greek** (`el`) — established communities, especially Melbourne
+   and Sydney.
+6. **Italian** (`it`) — established communities, especially
+   Melbourne.
+7. **Hindi** (`hi`) — growing communities, primarily Sydney and
+   Melbourne.
+8. **Tagalog** (`tl`) — growing communities.
+9. **Punjabi** (`pa`) — growing communities, primarily Melbourne.
+10. **Spanish** (`es`) — growing and established.
+11. **First Nations languages** — represented as a category; per-
+    language sub-codes follow ISO-639-3 (e.g., `aus-y137` for
+    Yolŋu Matha). Each language is on-boarded individually with
+    community consent and a nominated cultural reviewer.
+
+The catalogue is configurable per tenant; the production-deployed
+catalogue is published at `/api/help/i18n/catalogue` and visible on
+the Governance Dashboard's *Localisation* panel.
+
+## 2. The `lang` attribute everywhere
+
+Every renderable surface in the Hub stamps a `lang` attribute on
+the wrapping HTML element (`<html lang="en-AU">`) and on every
+translated subtree (`<section lang="zh-Hans-AU">`, etc.). This is
+not cosmetic:
+
+- Screen readers (NVDA, JAWS, VoiceOver) switch voice profiles on
+  `lang` changes; without correct attributes, they read non-English
+  content with English phonotactics, which is unintelligible.
+- Translation tools (browser, organisational MT) detect source
+  languages from `lang` rather than guessing; mis-tagged content
+  produces wrong translations.
+- Spell-checkers respect `lang` per-region; an `en-AU`-tagged
+  article is not flagged for *organisation* vs *organization*.
+
+The Help authoring linter (`tools/help/lint_lang_attributes.py`)
+enforces:
+
+- Every `<lang>` change in MDX must be in a wrapping element with a
+  valid `lang` attribute.
+- The wrapping element's tag must be a structural element
+  (`section`, `aside`, `figure`, `blockquote`, `p`) — not a
+  presentational one (`span`, `b`, `i`).
+- The `lang` value must be in the supported catalogue.
+
+Violations are CI errors, not warnings.
+
+## 3. Authoring in MDX
+
+Help articles are MDX. To author a multi-language article, organise
+content as parallel sections per language, each wrapped in a
+language-tagged structural element:
+
+```mdx
+<section lang="en-AU">
+
+## English summary
+
+This is the English text.
+
+</section>
+
+<section lang="zh-Hans-AU">
+
+## 中文摘要
+
+这是中文文本。
+
+</section>
+
+<section lang="ar" dir="rtl">
+
+## ملخص بالعربية
+
+هذا هو النص العربي.
+
+</section>
+```
+
+Note the `dir="rtl"` attribute on the Arabic section — RTL
+languages require both `lang` and `dir`. The renderer flips the
+text direction within the wrapping element only; surrounding
+chrome remains LTR.
+
+The Help build pipeline emits one rendered HTML page per article
+(not per language); language switching is client-side via the
+language picker in the page header.
+
+## 4. Frontmatter
+
+Multilingual articles declare their available languages in
+frontmatter:
+
+```yaml
+---
+slug: my-article
+title: "My article"
+status: Active
+classification: OFFICIAL
+languages: [en-AU, zh-Hans-AU, ar, vi]
+primary_language: en-AU
+review_required:
+  zh-Hans-AU: cultural-reviewer-zh
+  ar: cultural-reviewer-ar
+---
+```
+
+The `languages` array drives the language picker. The
+`primary_language` is what the assistant grounds against for
+non-grounding-cited prose; non-primary languages are surfaced via
+parallel citations when available. The `review_required` mapping
+binds each non-primary language to a nominated reviewer; without
+the reviewer's sign-off, the snapshot publish gate refuses the
+article.
+
+## 5. Authoring public alerts
+
+Public alerts go through the **Alert Composer**. Multilingual
+alerts are composed via the Composer's language tab strip:
+
+1. Author the English alert first. The Composer enforces this
+   ordering — the English version is the doctrinal source.
+2. Click the *+* tab and choose a target language. The Composer
+   pre-fills with a draft from the organisational MT service
+   (Azure Translator, AU region), labelled *"Machine draft —
+   review before approval"*.
+3. Edit the draft in the target language. The Composer surfaces
+   the English source side-by-side and highlights paragraphs that
+   have drifted significantly between the two (Levenshtein on
+   embedded phrase-aligned tokens; threshold tunable per tenant).
+4. For languages with `review_required` reviewers, the alert
+   cannot be approved until the cultural reviewer signs off.
+5. On publication, all approved language variants publish
+   simultaneously to the appropriate channels (community radio,
+   SMS gateways, social, signage). A single correlation ID binds
+   all variants.
+
+The Composer never publishes a machine-translated draft without a
+human review. The doctrinal floor is human-in-the-loop for every
+non-English public communication.
+
+## 6. Reviewing translated alerts
+
+If you are reviewing a translated alert, the workflow is:
+
+1. Open the alert in the Composer's review pane (your workspace
+   banner notifies you).
+2. Read the English source first. Form your understanding of
+   intent.
+3. Switch to the translated language tab. Read end-to-end.
+4. Use the side-by-side highlight view to verify that the
+   translation preserves both the **information content** and the
+   **register** (urgency, formality, instruction-vs-advisory).
+5. Either *Approve* (signs off) or *Reject with rationale* (the
+   author re-drafts; your rationale is audit-logged).
+
+Cultural reviewers are not language proof-readers — they are
+domain experts in the linguistic community. They are reviewing for
+register, framing, and culturally-appropriate phrasing, not just
+for grammatical correctness.
+
+## 7. First Nations languages
+
+First Nations languages are on-boarded individually with formal
+community consent. The on-boarding workflow is documented in the
+NEMA *First Nations Emergency Communications Protocol* (current
+edition). Operationally:
+
+- Each on-boarded language has a nominated **cultural authority**
+  who is the sole approver of public communications in that
+  language.
+- The cultural authority's review is **strictly serial** — it
+  cannot run in parallel with English approval. The English
+  alert publishes first; the First Nations variant publishes when
+  the cultural authority signs off.
+- For ceremonial and culturally sensitive contexts (funeral
+  protocols, story restrictions), the Hub permits the cultural
+  authority to **decline** publication of the variant entirely;
+  the English alert proceeds alone with an annotation in the
+  audit trail.
+
+## 8. Translations of help corpus content
+
+The Help corpus is authored in English and selectively translated.
+Articles tagged `safety_critical` (e.g., evacuation procedures,
+public-alert authoring) **must** have translations in the top six
+catalogue languages before snapshot publication. Other articles
+translate opportunistically; the language picker shows only
+languages actually authored.
+
+When the assistant grounds in a non-English article, it cites the
+non-English version explicitly so reviewers can verify register.
+
+## 9. Common pitfalls
+
+### 9.1 Mis-tagged language regions
+
+Tagging Mandarin as `zh` (no region) instead of `zh-Hans-AU`
+causes screen readers to fall back to mainland-China voice models
+and renders some Australian community simplifications as oddly
+formal. Always include the region.
+
+### 9.2 RTL embedding inside LTR
+
+Embedding an RTL phrase inline within an LTR sentence (e.g., quoting
+an Arabic place name in an English paragraph) requires a
+`<bdi>` wrapping element, not a `<span lang="ar">`. The `<bdi>`
+element instructs the bidi algorithm to isolate the embedding; a
+plain `<span>` lets it leak punctuation in surprising ways.
+
+### 9.3 Translating measurements
+
+Measurements should be re-formatted, not just translated. *"50 km"*
+in English may become *"50 公里"* in Mandarin (no space) or
+*"٥٠ كم"* in Arabic with eastern-Arabic numerals. The Composer's
+*Format measurements* button does this automatically; resist the
+temptation to "fix" the spacing afterwards.
+
+### 9.4 Ambiguous English source
+
+Ambiguity in the English source amplifies in translation. If the
+English alert says "Move to higher ground" without specifying *how
+high*, a translator will guess; the guesses will diverge across
+languages. Author English with explicit, measurable instructions
+when safety-critical.
+
+### 9.5 Cultural reviewer turnaround
+
+Cultural reviewers are typically community volunteers; their
+turnaround is usually hours, not minutes. Plan multilingual alerts
+into the operational timeline; do not assume same-minute
+turnaround. For emergency-imminent alerts, the English version
+publishes first and the translations follow as fast as review
+allows.
+
+## 10. Related
+
+- [`screen-by-screen/alert-composer`](/help/articles/screen-by-screen/alert-composer)
+  — for the Composer UI and language tab strip.
+- [`accessibility-how-to`](/help/articles/accessibility-how-to) —
+  for the screen-reader interaction with `lang` attributes.
+- [`screen-by-screen/governance-dashboard`](/help/articles/screen-by-screen/governance-dashboard)
+  — for the Localisation gate.
+- The NEMA *First Nations Emergency Communications Protocol* —
+  authoritative on First Nations on-boarding.
+
+---
+
+_Maintained by the AMA Help content team in consultation with the
+NEMA multilingual communications working group, the cultural
+reviewer panel, and the AIDR community-resilience programme._

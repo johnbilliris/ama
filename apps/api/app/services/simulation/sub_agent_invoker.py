@@ -162,8 +162,11 @@ def production_invoker(
     :func:`default_invoker` are no longer used.
     """
     # Local imports keep this module import-light when stubs are sufficient
-    # (e.g. unit tests that don't have httpx wired).
-    from apps.api.app.services.simulation.sub_agents import (
+    # (e.g. unit tests that don't have httpx wired). Imported via the
+    # ``app.`` namespace because the API container's Dockerfile copies
+    # ``apps/api/app/ → ./app/`` and the ``apps.api.app`` namespace does
+    # not exist in the runtime image (see memory: api packaging).
+    from app.services.simulation.sub_agents import (
         communication_adapter,
         evacuation_adapter,
         monitoring_adapter,

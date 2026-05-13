@@ -1,30 +1,206 @@
 ---
 slug: playbooks/agent-evacuation
-title: "Agent Playbook — Evacuation"
-kind: playbook
+title: "Playbook: working with the evacuation agent"
 status: Active
 classification: OFFICIAL
+audience: incident-commander, operations-officer, field-coordinator, frontline-fire, frontline-police, frontline-medical, frontline-ses-marine, public-information-officer
+estimated_reading_time: 10 min
 ---
 
-# Agent Playbook — Evacuation
+# Playbook: working with the evacuation agent
 
-## 1. Overview
-route planning, vulnerable-population handling, throughput calc, escalation
+This playbook is the operator's guide to the
+[Evacuation agent workspace](/help/articles/screen-by-screen/agent-evacuation).
+It covers how Operations Officers and Field Coordinators
+should triage proposals, when to forward, when to amend, when
+to dismiss, how cross-jurisdiction proposals work, and how the
+agent should and should not influence your declaration
+decisions.
 
-## 2. Pre-flight
-- Confirm persona + jurisdiction
-- Verify the active snapshot id
+The evacuation agent is the **route-and-capacity calculator**
+for the Hub. It does not declare evacuations; it proposes
+them. The operator who reads the proposal and signs the
+declaration is the doctrinal author of the evacuation, and the
+audit trail records that authorship.
 
-## 3. Workflow
-1. Open the relevant workspace
-2. Review agent recommendation with provenance + citations
-3. Approve / amend with audit trail entry
-4. Hand off to next persona
+## 1. Reading a proposal
 
-## 4. Edge cases
-- Degraded mode: fall back to cached doctrine
-- Cross-jurisdiction: escalate via the Commonwealth persona
+Each proposal carries:
+- A **geographic envelope** — the area to be moved.
+- A **population estimate** — how many people, with the
+  estimate's source and uncertainty.
+- An **urgency** — *Immediate* / *Within 6 h* / *Within 24 h*.
+- A **confidence band** — green / amber / red on the
+  recommendation itself.
+- **Drivers** — top 3 signals or assessments justifying it.
+- **Recommended assembly points and routes** — with capacity
+  and current condition.
+- **Cross-jurisdictional notes** if the envelope or assembly
+  points span borders.
 
-## 5. References
-- AIDR Handbook
-- AIIMS doctrine
+Read in this order: envelope → population → urgency → drivers
+→ assembly points → routes → cross-jurisdictional notes. If
+any step doesn't make sense, open the reasoning trace.
+
+## 2. Verifying with on-ground reality
+
+Before forwarding to Field Coordinator, verify:
+- The **population estimate** against your direct knowledge
+  (especially in sparsely populated areas where the
+  estimate may be < 50 with high uncertainty).
+- The **assembly points** are actually open and adequately
+  staffed for the proposed inflow. The agent reads the
+  infrastructure layer's status but cannot detect last-minute
+  closures.
+- The **routes** are actually clear. The agent reads incident
+  reports but a freshly-felled tree across the Alpine Way
+  may not have been reported yet.
+
+For *Immediate* urgency, time may not allow full verification.
+Forward and verify in parallel; trust the agent's data freshness
+on a sub-15-minute basis.
+
+## 3. The doctrinal floor: when to forward
+
+Forward to Field Coordinator when:
+- The agent's confidence is green or amber (red is
+  Risk-Manager-promotion territory).
+- The population estimate exceeds your sector's capacity to
+  shelter-in-place safely.
+- The urgency window is meaningful for the proposed
+  operation (don't forward a *Within 24 h* if you can
+  organise a more deliberate response in the same window).
+
+Don't forward for the sake of "being seen to act"; the
+doctrinal cost of a false-positive evacuation is real
+(community fatigue, route congestion, secondary incidents).
+
+## 4. The doctrinal floor: when not to forward
+
+Don't forward when:
+- The agent's drivers are stale (> 30 minutes).
+- The proposed envelope contradicts a recently-issued *All
+  clear* without compelling new evidence.
+- A peer Operations Officer has already forwarded an
+  overlapping proposal (avoid duplicate declarations).
+- The cross-jurisdictional notes show receiving sectors
+  unreachable and the urgency permits delay until they
+  recover.
+
+In each case, dismiss with rationale. The rationale becomes
+training signal for the agent and audit context for reviewers.
+
+## 5. Cross-jurisdiction proposals
+
+Cross-jurisdiction evacuations are heavyweight:
+1. The receiving sector's Operations Officer must
+   acknowledge before declaration commits.
+2. Receiving Police plan route security; receiving Medical
+   plan triage capacity; receiving Logistics plan
+   accommodation.
+3. NEMA acknowledgement is required (Notify or Hand off; see
+   [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)).
+4. Public communication on both sides is co-ordinated
+   through the communication agent and the Alert Composer.
+
+Plan for receiving-side latency. Receiving sectors typically
+respond within 5 minutes during active operations but expect
+longer in degraded conditions.
+
+## 6. Field Coordinator's role
+
+Once forwarded, the proposal lands in the Field Coordinator
+workspace as a *pending declaration*. Field Coordinator:
+- Verifies on-ground (radio to the affected sector's command
+  vehicle or scout team).
+- Amends the envelope, assembly points, or routes if
+  on-ground reality differs from the agent's proposal.
+- Confirms the declaration. The declaration becomes a
+  real evacuation envelope visible on the production
+  Disaster Map and to the public-information channels.
+- Or declines, with rationale. The decline returns to
+  Operations Officer for re-consideration.
+
+Field Coordinator's amendments are audit-logged with
+delta-from-agent-proposal annotation. Reviewers can later see
+how on-ground reality refined the agent's plan.
+
+## 7. Public communication coordination
+
+Evacuation declarations almost always trigger public alerts.
+The communication agent picks up the declaration and proposes
+alert content; PIO drafts in the Alert Composer; the
+declaration's correlation ID binds the alert to the
+evacuation.
+
+Sequence the communication carefully:
+- For *Immediate* urgency, the alert publishes within minutes
+  of the declaration — community needs to act now.
+- For *Within 6 h*, sequence the alert with the on-ground
+  preparation. Premature alert before assembly points are
+  staffed produces community frustration.
+- For *Within 24 h*, the alert often goes out as *Watch and
+  act* with a planned escalation to *Emergency warning* as
+  the urgency window narrows.
+
+## 8. Recall and re-issue
+
+If conditions change such that the evacuation should be
+recalled (the wind shifts, the threat passes, a forecast
+update reduces the projection):
+- Open the active declaration in the Field Coordinator
+  workspace.
+- Click *Recall*. The recall dialog requires rationale and
+  asks for the public-communication co-ordination plan
+  (typically an *All clear* alert).
+- The recall is audit-logged; the *All clear* alert binds
+  to the declaration's correlation ID.
+
+Don't recall casually. A recall followed by a re-issue within
+the same operational period erodes community trust.
+
+## 9. Edge cases
+
+### 9.1 Proposal during shift handover
+A proposal arriving mid-handover should be acknowledged by
+the outgoing operator and explicitly handed off to the
+incoming operator with verbal context. Don't let it sit in
+limbo.
+
+### 9.2 Receiving side declines
+If the receiving sector's Operations Officer declines the
+acknowledgement (e.g., capacity is exceeded), the
+declaration cannot proceed at the proposed assembly points.
+Field Coordinator may amend to alternative assembly points;
+otherwise the declaration is deferred.
+
+### 9.3 Mass-casualty cascade
+A *prepare-evacuation* recommendation that arrives alongside
+a *casualty surge* recommendation from the medical sector
+deserves a coordination call between Operations and Medical
+before forwarding. The agent doesn't model casualty surge
+constraints on evacuation routes.
+
+### 9.4 Vulnerable populations
+The agent uses ABS census plus accessibility profile data to
+flag vulnerable populations (high concentration of older
+Australians, mobility-impaired residents, dependent care
+facilities). The proposal annotates these flags; Field
+Coordinator should coordinate with Medical for
+specialised transport.
+
+## 10. Related
+
+- [`screen-by-screen/agent-evacuation`](/help/articles/screen-by-screen/agent-evacuation)
+  — the surface reference.
+- [`personas/field-coordinator`](/help/personas/field-coordinator)
+  — Field Coordinator landing.
+- [`screen-by-screen/agent-communication`](/help/articles/screen-by-screen/agent-communication)
+  — adjacent agent for public alert content.
+- [`cross-border-bushfire-nema`](/help/articles/cross-border-bushfire-nema)
+  — the cross-border coordination playbook.
+
+---
+
+_Maintained by the AMA Help content team in partnership with
+the agents and field-operations working groups._

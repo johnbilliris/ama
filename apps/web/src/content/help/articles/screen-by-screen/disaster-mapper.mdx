@@ -3,28 +3,322 @@ slug: screen-by-screen/disaster-mapper
 title: "Screen: Disaster Mapper"
 status: Active
 classification: OFFICIAL
+audience: all-personas
+surface_id: disaster-mapper
+estimated_reading_time: 13 min
 ---
 
 # Screen: Disaster Mapper
 
-## 1. Purpose
-The **Disaster Mapper** screen lets operators … (placeholder — captured during the
-Playwright screenshot pass).
+The **Disaster Mapper** at `/` is the default landing surface for
+every operating persona except Observer/Auditor (which lands on the
+audit timeline) and Executive Leader (which lands on the Governance
+Dashboard). It is the federated operating picture: signals,
+warnings, agent recommendations, evacuation envelopes, and
+infrastructure overlays composed into a single map view scoped by
+your persona and active jurisdiction filter.
 
-## 2. Layout
-Light and dark variants:
+This article is the screen-by-screen reference. Every control,
+every keyboard shortcut, every layer, every state transition. If
+you only need the conceptual model (what is *on* the map and why),
+read [`getting-started`](/help/articles/getting-started) first.
 
 <!-- AnnotatedScreenshot screen_id=disaster-mapper light=true dark=true -->
 
-## 3. Keyboard equivalents
-Every interactive control is reachable via Tab; opening the help affordance
-is `Ctrl+/` (`⌘+/` on macOS).
+## 1. Layout
 
-## 4. Common tasks
-1. …
-2. …
-3. …
+The Mapper has six regions:
 
-## 5. Related
-- [Glossary](/help/glossary)
-- [Help chat](/help/chat)
+1. **Top bar** — global navigation (left), persona switcher
+   (right-of-centre), jurisdiction filter (right), AU-region
+   residency badge (far-right).
+2. **Map canvas** — the WebGL Azure Maps surface; ~70 % of the
+   viewport on a typical 1440-wide display.
+3. **Layer rail** — right-hand floating panel; collapsible.
+4. **Legend strip** — bottom of the canvas; reflects the active
+   layer set.
+5. **Detail flyout** — appears from the right when a pin is
+   selected; ~360 px wide.
+6. **Help affordance** — `?` floating button bottom-right; opens
+   the Help Assistant pre-grounded on `surface_id=disaster-mapper`.
+
+If you press `Alt+L` while focus is in the canvas, the Mapper
+switches to **List view** — the canvas is replaced with a virtualised,
+focusable list of every visible signal. This is the
+screen-reader-accessible equivalent (see
+[`accessibility-how-to`](/help/articles/accessibility-how-to)).
+
+## 2. The map canvas
+
+### 2.1 Base map
+
+The base map is Azure Maps' Australia-region tile set. Tiles are
+served from `australiaeast`; the Hub never proxies through a
+non-AU CDN. The bottom-right corner shows the tile attribution.
+
+The default base style is *Topographic*. Three alternatives are
+available via the layer rail's *Base style* selector:
+- *Topographic* — terrain shading; default.
+- *Satellite* — recent imagery; useful for confirming damage.
+- *Dark* — minimal chrome for night operations and projector use.
+
+Switching base style does not affect the operational layers or the
+audit trail.
+
+### 2.2 Pan, zoom, rotate
+
+- **Pan** — click-drag, or arrow keys (4-directional, 50 px steps).
+- **Zoom** — scroll wheel, `+`/`-` keys, or pinch gesture on touch.
+- **Rotate** — right-click-drag, or `Shift+Arrow` keys.
+- **Pitch** (3D tilt) — `Ctrl+drag`, or `Ctrl+Shift+Arrow` keys.
+- **Reset view** — `0` (zero key) returns to the default
+  jurisdiction-filtered fit.
+
+The map persists pan/zoom state per browser via `localStorage`. A
+fresh device starts at the jurisdiction-filtered fit.
+
+### 2.3 Selection
+
+Click a pin to select it. Selection has three effects:
+
+- The pin renders with a 3 px ocean-blue selection ring.
+- The detail flyout opens on the right with the pin's full
+  evidence card.
+- The chat assistant's grounding context updates to include the
+  selected signal's `signal_id`; subsequent prompts can reference
+  it as *"the selected signal"*.
+
+`Esc` clears selection. Multi-select is via `Shift+Click` (the
+detail flyout switches to a comparison view; max 4 signals).
+
+## 3. The layer rail
+
+The layer rail (right side, collapsible via the chevron) toggles
+the operational layers. Each toggle is independent.
+
+### 3.1 Signals
+
+The **Signals** layer shows raw signal observations: BoM weather
+warnings, EWN feeds, agency-reported observations, social-media
+extracts (sentiment-filtered), Geoscience seismic events. Each
+signal renders as a pin with hazard-class iconography and the
+confidence-band ring.
+
+Sub-toggles let you filter signals by hazard class:
+fire, flood, storm, cyclone, heatwave, earthquake, tsunami,
+landslide, biological, chemical, radiological, infrastructure,
+transport, marine, public-order, other.
+
+Signal density is virtualised; if more than 500 signals are
+in-view, the layer auto-clusters and clusters expand on click.
+
+### 3.2 Warnings
+
+The **Warnings** layer shows currently published public warnings
+(from the Hub itself and from federated EWN feeds). Each warning
+renders as an oriented polygon (geographic envelope) plus a header
+pin at the centroid.
+
+Sub-toggles: `Advice`, `Watch and act`, `Emergency warning`,
+`All clear`.
+
+### 3.3 Agent recommendations
+
+The **Recommendations** layer shows agent-produced recommendations
+for the active jurisdiction filter. Each recommendation renders as
+a small "lightbulb" pin with the confidence band. Click to open
+the recommendation card in the detail flyout; the card includes
+the proposed action, the evidence, the agent's reasoning trace
+(citation-grounded), and the action buttons appropriate to your
+persona envelope.
+
+Sub-toggles by recommendation kind: `monitoring`, `risk`,
+`evacuation`, `resource`, `communication`. These map 1:1 to the
+agent set published by spec-036 / spec-038.
+
+### 3.4 Evacuation envelopes
+
+The **Evacuation envelopes** layer shows declared evacuation areas
+with arrowed flow vectors indicating egress directions. Click an
+envelope to see the declaring sector, declaration time, expected
+duration, route conditions, and the receiving subdivision (if
+cross-border).
+
+### 3.5 Infrastructure
+
+The **Infrastructure** layer shows hospitals, evacuation
+assembly points, water/power distribution nodes, telecom mobile
+sites, fuel depots, and helibases. Each is a small static icon;
+clicking opens the infrastructure card in the detail flyout with
+operational status (`green` operating normally, `amber` degraded,
+`red` offline) and the responsible operator.
+
+### 3.6 Offline-subsystem status
+
+The **Offline subsystem** layer surfaces field-coordinator
+offline-queue status as small flags over the field coordinator's
+declared post. Useful in degraded-connectivity ops to see *who* is
+queued and *how many* actions are pending sync.
+
+### 3.7 Workspace overlays
+
+Each operating persona contributes a workspace-specific overlay:
+- IC — current incident envelopes.
+- Operations — active task envelopes.
+- Planning — IAP planning envelopes (hatched).
+- PIO — recent publication footprints (fading over 6 h).
+- Logistics — resource pin clusters with rotation arrows.
+- Field Coordinator — declared posts with reachable-radius rings.
+
+Workspace overlays are visible in addition to the persona's
+default operating layers; they are not visible to other personas.
+
+## 4. The legend strip
+
+The legend strip at the bottom of the canvas shows the active
+layer set, the iconography, the confidence-band stops, and the
+tile-freshness indicator. It is keyboard-accessible (`Tab` focuses
+each item; `Enter` toggles).
+
+The freshness indicator on the right shows the last
+tile-cache refresh and the last operational-data refresh as two
+separate timestamps. If either is more than two minutes stale, the
+indicator turns amber; six minutes turns red.
+
+## 5. The detail flyout
+
+When a pin or polygon is selected, the detail flyout opens on the
+right (~360 px). The flyout has three panes, accessible via tabs at
+the top:
+
+### 5.1 Evidence pane
+
+The evidence pane is the artefact's full data sheet:
+- Identity (signal/warning/recommendation/etc. ID).
+- Source (provider, observation method).
+- Geographic envelope (centroid + bounding box; copy-to-clipboard
+  button for each).
+- Temporal envelope (observation time, expected end, confidence
+  in temporal estimate).
+- Confidence band + calibration timestamp.
+- Linked artefacts (other signals correlated by the agent set).
+- Related help-corpus citations.
+
+### 5.2 Decision pane
+
+The decision pane shows the actions your persona may take on this
+artefact. Each action is a button with a one-line description; the
+button's enabled/disabled state reflects your envelope at this
+moment. Disabled actions show an aria-tooltip explaining the
+envelope mismatch (persona, jurisdiction, surface, band, snapshot).
+
+For amber-band artefacts, the action buttons are flanked by the
+*"Requires second eyes"* annotation and on click open the
+co-signer dialog (see [`amber-confidence-badge`](/help/articles/amber-confidence-badge)).
+
+### 5.3 History pane
+
+The history pane shows the artefact's audit-row sequence: the row
+that created it, every revision, every related approval/refusal,
+the publication if applicable, and any community-response signals
+correlated back to it. Clicking a row opens it in the audit
+timeline (in a new tab) with the artefact pre-selected.
+
+## 6. Keyboard shortcuts
+
+In addition to the global shortcuts (see
+[`accessibility-how-to`](/help/articles/accessibility-how-to)),
+the Mapper offers:
+
+| Shortcut    | Action                                           |
+| ----------- | ------------------------------------------------ |
+| Arrow keys  | Pan 50 px in the indicated direction             |
+| `+` / `-`   | Zoom in / out                                    |
+| `0`         | Reset view to jurisdiction fit                   |
+| `Shift+Arrow` | Rotate 15° in the indicated direction          |
+| `Ctrl+Shift+Arrow` | Pitch (tilt) 10° in the indicated direction |
+| `s`         | Toggle Signals layer                             |
+| `w`         | Toggle Warnings layer                            |
+| `r`         | Toggle Recommendations layer                     |
+| `e`         | Toggle Evacuation envelopes layer                |
+| `i`         | Toggle Infrastructure layer                      |
+| `b`         | Cycle base style (Topo / Sat / Dark)             |
+| `Alt+L`     | Switch to List view                              |
+| `Esc`       | Clear selection                                  |
+| `Enter`     | Open the detail flyout for the selected pin      |
+| `Tab` / `Shift+Tab` | Move pin focus within the visible set    |
+| `c`         | Copy the selected pin's coordinates to clipboard |
+
+## 7. List view
+
+`Alt+L` switches the canvas to a virtualised list. Each row is a
+focusable button representing one visible signal/warning/recommendation
+with the same metadata as the pin's evidence card. Row actions
+mirror the pin's decision-pane buttons.
+
+The list reflects the active layer set, the jurisdiction filter,
+and the canvas viewport. Resize the canvas (e.g., open the layer
+rail) and the list updates.
+
+## 8. Performance
+
+- The Mapper renders smoothly with up to 5,000 visible signals.
+  Beyond that, layers auto-cluster.
+- Panning across cached tile regions is instant; uncached regions
+  show a low-fidelity raster stamped *"Loading…"* until tiles
+  arrive (typically < 500 ms on broadband).
+- Layer toggles are O(1) — no full re-render.
+- Selection updates the detail flyout via WebSocket; expect ~50 ms
+  on broadband.
+
+If pan/zoom is sluggish, reduce the layer set; persistent
+sluggishness with the default layer set is a backend issue and
+should be raised as an incident.
+
+## 9. Edge cases
+
+### 9.1 Daylight savings transitions
+
+At 02:00 local time on the DST transition date, signal timestamps
+display *both* zone abbreviations for the affected hour
+("AEDT/AEST 02:14"). UTC is always available on hover.
+
+### 9.2 Antimeridian crossings
+
+OS-jurisdiction signals (Pacific assistance) may cross the
+antimeridian. The Mapper renders these as a single envelope using
+the great-circle path; pan-wrap is supported via the *world copies*
+mode (Settings → Display → *Wrap world*).
+
+### 9.3 Stale calibration
+
+When the Risk Manager's calibration is more than 60 days old, the
+confidence-band rings overlay a small *"stale"* dot. The doctrinal
+treatment is one band lower (see
+[`amber-confidence-badge`](/help/articles/amber-confidence-badge)).
+
+### 9.4 Mid-action persona switch
+
+If you switch persona while the detail flyout is open, the flyout
+re-evaluates the decision pane against your new envelope; actions
+your prior persona could take but your new persona cannot become
+disabled with an aria-tooltip explaining the change.
+
+## 10. Related
+
+- [`screen-by-screen/multi-jurisdiction-filter`](/help/articles/screen-by-screen/multi-jurisdiction-filter)
+  — for the jurisdiction filter UI.
+- [`screen-by-screen/persona-switcher`](/help/articles/screen-by-screen/persona-switcher)
+  — for the persona switcher UI.
+- [`screen-by-screen/alert-composer`](/help/articles/screen-by-screen/alert-composer)
+  — for the alert composition workflow when escalating from a pin.
+- [`amber-confidence-badge`](/help/articles/amber-confidence-badge) —
+  for the confidence rings.
+- [`getting-started`](/help/articles/getting-started) — for the
+  first-sixty-seconds orientation.
+
+---
+
+_Maintained by the AMA Help content team. Surface ID
+`disaster-mapper`; the Help Assistant uses this article when
+grounding answers about the Mapper screen._
