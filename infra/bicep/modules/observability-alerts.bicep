@@ -194,7 +194,7 @@ output sliEgressBlockId string = sliEgressBlock.id
 // These alerts are INFORMATIONAL (severity 3 — warn-only Slack via the
 // shared action group). The breach action is implemented by
 // `tests/staging_gates.py::assert_sli_thresholds` (T-AA17): the
-// `staging-promotion.yml` workflow refuses promotion when the 24 h
+// the release-gate procedure refuses promotion when the 24 h
 // trailing-window SLI either starves below the 30-sample CLT floor or
 // breaches the threshold from `contracts/sli-thresholds.md` rows 6/7.
 //

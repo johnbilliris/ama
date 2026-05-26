@@ -42,4 +42,3 @@ Every exercise produces:
 
 - [Spec 030 — LLM Evaluation](../../../specs/030-llm-eval-framework/spec.md)
 - [DR/BCP runbook](../../operator-runbooks/dr-bcp.md) *(spec-032 T809)*
-- [Chaos quarterly workflow](../../../.github/workflows/chaos-quarterly.yml) *(spec-032 T807)*

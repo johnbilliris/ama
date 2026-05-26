@@ -1,11 +1,6 @@
 name: spec-038 — help build-time gates
 
 on:
-  pull_request:
-    paths:
-      - "apps/web/src/content/help/**"
-      - "tools/help/**"
-      - "specs/038-help-docs-chat/**"
   workflow_dispatch:
 
 jobs:

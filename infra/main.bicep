@@ -1437,7 +1437,7 @@ module helpDashboard './bicep/modules/help-app-insights-dashboard.bicep' = if (e
 // Note: `helpSearch` (./bicep/modules/help-search-index-pair.bicep) is invoked
 // per-publish by `tools/help/publish_snapshot.py`, not at static infra time —
 // each snapshot stamps a new immutable index and re-binds the alias. The
-// module is built but parameterised at runtime by the CI workflow
-// (.github/workflows/help-snapshot.yml).
+// module is built but parameterised at runtime by the snapshot publish
+// procedure documented in docs/runbooks/help/snapshot-publish-rollback.md.
 
 output AZURE_SPEC038_HELP_ENABLED bool = enableSpec038Help

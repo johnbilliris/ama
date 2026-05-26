@@ -5,10 +5,6 @@ name: prompts-publish
 # cd.yml verifies before deploy (T607).
 
 on:
-  push:
-    branches: [main, production]
-    paths:
-      - "packages/prompts/**/*.yaml"
   workflow_dispatch:
 
 permissions:

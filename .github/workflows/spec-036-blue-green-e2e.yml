@@ -11,8 +11,6 @@
 name: Spec 036 Blue-Green E2E
 
 on:
-  schedule:
-    - cron: "0 17 * * *"
   workflow_dispatch:
     inputs:
       against-staging:

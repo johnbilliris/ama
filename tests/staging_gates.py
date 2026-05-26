@@ -56,7 +56,6 @@ _TRUTHY = {"1", "true", "yes", "on", "y"}
 #: ``tests/contract/test_sli_kql_schema_v2.py:25``.
 _SLI_PATH: Final[Path] = Path(__file__).resolve().parent.parent / "infra" / "observability" / "sli-kql.json"
 
-
 @functools.lru_cache(maxsize=1)
 def _sli_doc() -> Mapping[str, Any]:
     """Return the parsed ``infra/observability/sli-kql.json`` document.
@@ -68,7 +67,6 @@ def _sli_doc() -> Mapping[str, Any]:
 
     return json.loads(_SLI_PATH.read_text(encoding="utf-8"))
 
-
 def _sli_entry(sli_id: str) -> Mapping[str, Any]:
     """Return the JSON entry for *sli_id* (raises :class:`KeyError` if missing)."""
 
@@ -77,43 +75,34 @@ def _sli_entry(sli_id: str) -> Mapping[str, Any]:
             return entry
     raise KeyError(f"{sli_id} not found in {_SLI_PATH!s}")
 
-
 #: Cycle 2 / T-AA17 / pass-2 Q4 — minimum sample count per SLI evaluated
 #: over a 24 h trailing window. Below this the staging-promotion gate
 #: refuses to evaluate the SLI (Central-Limit-Theorem floor; raise to
 #: ``100`` if the false-positive rate exceeds 5 %). The synthetic
-#: smoke-injection job in ``.github/workflows/staging-promotion.yml``
+#: smoke-injection release-gate exercise
 #: (T-AA19) maintains a 33 % safety margin (≥ 40 events / 24 h).
 MIN_SAMPLES_PER_SLI_24H: Final[int] = 30
-
 
 def _is_truthy(name: str) -> bool:
     return os.getenv(name, "").strip().lower() in _TRUTHY
 
-
 def azure_staging_enabled() -> bool:
     return _is_truthy("AMA_STAGING_AZURE")
-
 
 def foundry_staging_enabled() -> bool:
     return _is_truthy("AMA_STAGING_FOUNDRY")
 
-
 def cosmos_staging_enabled() -> bool:
     return _is_truthy("AMA_STAGING_COSMOS")
-
 
 def speech_staging_enabled() -> bool:
     return _is_truthy("AMA_STAGING_SPEECH")
 
-
 def blob_worm_staging_enabled() -> bool:
     return _is_truthy("AMA_STAGING_BLOB_WORM")
 
-
 def measurement_staging_enabled() -> bool:
     return _is_truthy("AMA_STAGING_MEASUREMENT")
-
 
 ALL_GATES = {
     "azure_staging": azure_staging_enabled,
@@ -124,11 +113,9 @@ ALL_GATES = {
     "measurement_staging": measurement_staging_enabled,
 }
 
-
 # ---------------------------------------------------------------------------
 # Cycle 2 / T-AA17 — SLI threshold-gate helper
 # ---------------------------------------------------------------------------
-
 
 class StagingPromotionRefused(AssertionError):
     """Raised when a staging-promotion gate refuses promotion.
@@ -147,7 +134,6 @@ class StagingPromotionRefused(AssertionError):
     coalescing across calls).
     """
 
-
 #: Default audit-envelope sink. Tests may inject a different sink via the
 #: ``envelope_sink`` keyword argument; production CI runs use
 #: :func:`_default_envelope_sink` which logs the structured details and
@@ -155,11 +141,10 @@ class StagingPromotionRefused(AssertionError):
 #: the workflow YAML can collect the envelope as a build artefact.
 EnvelopeSink = Callable[[Mapping[str, Any]], None]
 
-
 def _default_envelope_sink(envelope: Mapping[str, Any]) -> None:
     """Default sink — log + (optionally) append-to-file.
 
-    The CI workflow at ``.github/workflows/staging-promotion.yml`` (T-AA35)
+    The release-gate procedure (T-AA35)
     sets ``STAGING_PROMOTION_AUDIT_PATH`` to a job-temp path so the file is
     uploaded as a build artefact; if unset, the envelope is logged only.
     """
@@ -180,7 +165,6 @@ def _default_envelope_sink(envelope: Mapping[str, Any]) -> None:
         # replacement for the typed audit container).
         with open(audit_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(envelope, sort_keys=True, default=str) + "\n")
-
 
 def _build_refused_envelope(
     *,
@@ -218,7 +202,6 @@ def _build_refused_envelope(
         "correlation_id": correlation_id,
         "details": details,
     }
-
 
 def assert_sli_thresholds(
     *,
@@ -350,7 +333,6 @@ def assert_sli_thresholds(
     # message text); the full breach + underage set is carried in the
     # audit envelope for forensic reconstruction.
     raise StagingPromotionRefused(failure_messages[0] if failure_messages else "staging promotion refused")
-
 
 __all__ = [
     "ALL_GATES",

@@ -7,10 +7,7 @@ exceptions, TWO distinct ``staging_promotion.refused`` audit envelopes,
 TWO distinct ``staging_promotion_correlation_id`` UUIDs, and (when the
 helper is invoked via two subprocesses) TWO non-zero process exits.
 
-Concurrent invocations on the SAME ref are queued by the workflow-level
-``concurrency:`` block in ``.github/workflows/staging-promotion.yml``
-(T-AA37); concurrent invocations on DIFFERENT refs (cross-ref races)
-DO race — and that is the case this test exercises.
+This test exercises the cross-ref race case directly: concurrent helper invocations must remain independent and produce distinct refusal envelopes.
 """
 
 from __future__ import annotations
@@ -31,7 +28,6 @@ from tests.staging_gates import (
 
 _UUID4_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
 
-
 def _red_results() -> dict:
     """Red Z6 fixture (gpt-4o p95 over 5000 ms breach)."""
 
@@ -48,7 +44,6 @@ def _red_results() -> dict:
             "drift_budget_pct": 99.7,
         },
     }
-
 
 def _invoke_with_capturing_sink() -> tuple[Exception | None, list[dict]]:
     """Invoke ``assert_sli_thresholds`` once; return (exception, [envelope])."""
@@ -67,7 +62,6 @@ def _invoke_with_capturing_sink() -> tuple[Exception | None, list[dict]]:
         return None, captured
     except StagingPromotionRefused as exc:
         return exc, captured
-
 
 def test_two_concurrent_invocations_produce_distinct_envelopes() -> None:
     """Pass-1 Q3 — concurrent invocations → distinct exceptions + UUIDs."""
@@ -100,7 +94,6 @@ def test_two_concurrent_invocations_produce_distinct_envelopes() -> None:
     # Top-level / nested correlation_id parity per §3.26.
     assert captured_a[0]["correlation_id"] == captured_a[0]["details"]["staging_promotion_correlation_id"]
     assert captured_b[0]["correlation_id"] == captured_b[0]["details"]["staging_promotion_correlation_id"]
-
 
 def _subprocess_script() -> str:
     """Return the script run by the subprocess-exit-code test below."""
@@ -153,7 +146,6 @@ def _subprocess_script() -> str:
             sys.exit(1)
         """
     ).strip()
-
 
 def test_two_concurrent_subprocesses_yield_two_non_zero_exits() -> None:
     """Two concurrent subprocesses exit non-zero with distinct correlation_ids."""

@@ -8,7 +8,7 @@ While a snapshot publish is in-flight, kill the alias-bind step
 
 ## Drill steps
 1. Pick a non-prod environment in AU East.
-2. Trigger `help-snapshot.yml` workflow with `snapshot_id=YYYY-MM-DD-drill`.
+2. Run the publish procedure from `snapshot-publish-rollback.md` with `snapshot_id=YYYY-MM-DD-drill`.
 3. At "swing alias" step, run:
    ```pwsh
    az search service update --resource-group <rg> --name <search> --disable-local-auth true
@@ -16,7 +16,7 @@ While a snapshot publish is in-flight, kill the alias-bind step
 4. Confirm `audit.snapshot_publish_failed` emitted.
 5. Initiate rollback:
    ```pwsh
-   python tools/help/publish_snapshot.py --rollback --to <prev>
+   python tools/help/publish_snapshot.py rollback --restored-snapshot-id <prev>
    ```
 6. Re-enable auth:
    ```pwsh

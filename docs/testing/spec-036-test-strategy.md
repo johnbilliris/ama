@@ -32,7 +32,6 @@ contract         ✓                              –                  –
 integration      ✓                              –                  –
 e2e (in-proc)    ✓ (T221 in-proc body)          –                  ✓ (full body)
 e2e (staging)    –                              –                  ✓ (`AMA_E2E_AGAINST_STAGING=1`)
-load 50-agent    –                              ✓ (FR-RAG-TEST-02) –
 load burst       –                              –                  –
 ```
 
@@ -41,7 +40,7 @@ CI workflow file mapping:
 - `.github/workflows/ci.yml` — `quality` (Linux contract+integration+coverage),
   `quality-windows` (Windows contract+integration), `golden-set-canonical`
   (T220 lint).
-- `.github/workflows/nightly-load.yml` — weekly + nightly load harnesses.
+
 - `.github/workflows/spec-036-blue-green-e2e.yml` — nightly blue-green E2E
   against staging.
 - `.github/workflows/corpus-ingest.yml` — daily drift detection (cron

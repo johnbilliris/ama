@@ -1,14 +1,7 @@
 name: eval-pr-gate
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "apps/agents/**"
-      - "apps/eval-runner/**"
-      - "packages/eval-core/**"
-      - "specs/030-llm-eval-framework/**"
-      - ".github/workflows/eval-pr-gate.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read

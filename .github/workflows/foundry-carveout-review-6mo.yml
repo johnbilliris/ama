@@ -9,11 +9,6 @@ name: Foundry Carve-out Registry Review (6-Month Cadence)
 # review. The registry is the single source of truth.
 
 on:
-  schedule:
-    - cron: "0 0 1 * *"  # midnight on the 1st of every month
-  pull_request:
-    paths:
-      - "data/governance/foundry_carveout_registry.json"
   workflow_dispatch:
 
 permissions:

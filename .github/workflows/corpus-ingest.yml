@@ -15,17 +15,6 @@
 name: Corpus Ingest (Spec 036)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "docs/corpus/**"
-      - "apps/ingest-runner/**"
-      - ".github/workflows/corpus-ingest.yml"
-  schedule:
-    # Spec 036 T213 — 14:00 UTC daily = 0100 AEST / 0000 AEDT (Plan §F-A8.1).
-    # Pre-T213 schedule was "0 18 * * *"; tightened so drift detection runs at
-    # the start of the AU business day rather than overlapping European prime.
-    - cron: "0 14 * * *"
   workflow_dispatch:
     inputs:
       environment:

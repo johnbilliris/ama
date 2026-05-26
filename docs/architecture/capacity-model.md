@@ -75,4 +75,4 @@ Per spec-032 FR-A02 + `cosmos-partitioning.md`:
 
 ## Failover capacity
 
-Australia Southeast (paired region): provisioned at 50% of primary baseline; will scale to 100% within 60 minutes of an automatic failover (RTO compliance per FR-D01). DR drill verifies (FR-D01 + dr-drill.yml workflow).
+Australia Southeast (paired region): provisioned at 50% of primary baseline; will scale to 100% within 60 minutes of an operator-led failover drill or incident failover (RTO compliance per FR-D01).

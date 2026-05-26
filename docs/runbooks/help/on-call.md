@@ -20,7 +20,7 @@ alias-bind issues, AI Search throttling, redaction recogniser failure.
 
 ## 2. Snapshot publish failure (`audit.snapshot_publish_failed`)
 See `snapshot-publish-rollback.md` for the full procedure. Short version:
-1. Inspect GH Actions run for `help-snapshot.yml`.
+1. Inspect the latest snapshot publish or rollback activity and related audit rows.
 2. Verify dual-approval gate passed (≥2 distinct approvers, ≥1
    help_content_owner, ≥1 safety_lead|governance_lead).
 3. If the new index built but alias swing failed → run rollback within
@@ -28,7 +28,7 @@ See `snapshot-publish-rollback.md` for the full procedure. Short version:
 
 ## 3. Rollback procedure
 ```pwsh
-python tools/help/publish_snapshot.py --rollback --to <previous_snapshot_id>
+python tools/help/publish_snapshot.py rollback --restored-snapshot-id <previous_snapshot_id>
 ```
 1. Confirm audit event `audit.snapshot_rolled_back` with prior snapshot id.
 2. Verify alias `help-corpus-active` now points at the previous index.
@@ -40,7 +40,7 @@ python tools/help/publish_snapshot.py --rollback --to <previous_snapshot_id>
    the Search service is online.
 2. List indexes; verify the snapshot index exists in AU East only.
 3. If alias points at a missing index, force-rebind:
-   `python tools/help/publish_snapshot.py --rebind-alias <snapshot_id>`.
+   `python tools/help/publish_snapshot.py rollback --restored-snapshot-id <snapshot_id>`.
 
 ## 5. AI Search throttling (`429`)
 1. Check Search service tier; scale up replicas in AU East (DO NOT move

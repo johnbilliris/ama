@@ -1,23 +1,7 @@
 name: spec-035-gate
 
 on:
-  pull_request:
-    paths:
-      - "apps/api/app/**"
-      - "apps/web/**"
-      - "packages/domain/**"
-      - "packages/schemas/spec_035/**"
-      - "infra/modules/apim-rate-limit.bicep"
-      - "infra/modules/blob-immutable.bicep"
-      - "infra/modules/app-configuration.bicep"
-      - "specs/035-webapp-capstone-closure/**"
-      - "scripts/verify-activation-mutex.ps1"
-      - "scripts/verify-spec-hardening.ps1"
-      - ".github/workflows/spec-035-gate.yml"
-  push:
-    branches:
-      - main
-      - production
+  workflow_dispatch:
 
 permissions:
   contents: read

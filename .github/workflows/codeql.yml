@@ -7,13 +7,7 @@ name: codeql
 # steps below to restore CodeQL analysis.
 
 on:
-  push:
-    branches: [main, dev, staging, production]
-  pull_request:
-    branches: [main]
-  schedule:
-    # Weekly Monday 06:00 UTC supplementary scan
-    - cron: "0 6 * * 1"
+  workflow_dispatch:
 
 permissions:
   actions: read

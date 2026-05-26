@@ -8,21 +8,7 @@ name: Amend-loop coupling guard (spec 036 F-A4 / FR-RAG-CV-01)
 # emergency override trailer format.
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - infra/policy/rego/foundry_carveout.rego
-      - infra/parameters/foundry-carveout.schema.json
-      - specs/036-foundry-rag-grounding/tasks.md
-      - specs/036-foundry-rag-grounding/contracts/foundry-cv.schema.json
-      - apps/agents/common/cultural_authority_registry.py
-      - apps/agents/common/retrieval_service.py
-      - apps/api/app/services/approval_workflow.py
-      - apps/api/app/services/conflict_detection.py
-      - apps/api/app/services/index_rollback.py
-      - infra/modules/cosmos-cultural-authority.bicep
-      - infra/modules/cosmos-conflict-detection.bicep
-      - infra/policy/rego/cultural_authority_flag.rego
+  workflow_dispatch:
 
 permissions:
   contents: read

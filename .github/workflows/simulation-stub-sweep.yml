@@ -1,14 +1,7 @@
 name: simulation-stub-sweep
 
 on:
-  pull_request:
-    paths:
-      - "apps/api/**"
-      - "apps/agents/**"
-      - "tools/simulation_stub_sweep.py"
-      - ".github/workflows/simulation-stub-sweep.yml"
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   sweep:

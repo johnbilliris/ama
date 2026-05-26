@@ -1,11 +1,6 @@
 name: eval-publish-dataset
 
 on:
-  push:
-    branches:
-      - "dataset/*"
-    paths:
-      - "packages/eval-dataset/**"
   workflow_dispatch:
     inputs:
       dataset_path:

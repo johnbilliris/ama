@@ -5,9 +5,6 @@ name: dora-metrics
 # Visualised by a Workbook (T816 doc + future workbook).
 
 on:
-  schedule:
-    # 06:00 UTC daily (= 16:00 AEST)
-    - cron: "0 6 * * *"
   workflow_dispatch:
 
 permissions:
