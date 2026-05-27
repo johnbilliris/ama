@@ -36,6 +36,9 @@ obj/
 .eval-out/
 .coverage
 .benchmarks/
+.hypothesis/
+.bicep-planning-files/
+weblogs/
 
 infra/**/*.json
 !infra/parameters/**/*.json

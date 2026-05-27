@@ -1,5 +1,47 @@
 targetScope = 'resourceGroup'
 
+/*
+Reference archive migrated from .bicep-planning-files/INFRA.disaster-response-hub.md
+Goal: disaster-response-hub-infrastructure
+
+Resource references (design intent and canonical docs):
+1) Container Registry (cr{env}{suffix}) - AVM module: avm/res/container-registry/registry
+  https://learn.microsoft.com/en-us/azure/container-registry/
+2) Storage Account (st{env}{suffix}) - Microsoft.Storage/storageAccounts@2023-05-01
+  https://learn.microsoft.com/en-us/azure/storage/blobs/
+3) Cosmos DB Account + DB + Containers (cosmos-{env}-{suffix}) - Microsoft.DocumentDB/databaseAccounts@2023-11-15
+  https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/
+4) Redis Cache (redis-{env}-{suffix}) - Microsoft.Cache/Redis@2024-03-01
+  https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/
+5) Azure OpenAI (cog-{env}-{suffix}) - Microsoft.CognitiveServices/accounts@2024-10-01
+  https://learn.microsoft.com/en-us/azure/ai-services/openai/
+6) Log Analytics Workspace (log-{env}) - Microsoft.OperationalInsights/workspaces@2023-09-01
+  https://learn.microsoft.com/en-us/azure/azure-monitor/logs/
+7) Application Insights (appi-{env}) - Microsoft.Insights/components@2020-02-02
+  https://learn.microsoft.com/en-us/azure/azure-monitor/app/
+8) Action Group (ag-{env}) - Microsoft.Insights/actionGroups@2023-01-01
+  https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/
+9) Metric Alerts x2 (alert-errors-{env}, alert-latency-{env}) - Microsoft.Insights/metricAlerts@2018-03-01
+  https://learn.microsoft.com/en-us/azure/azure-monitor/alerts/
+10) Container Apps Environment (cae-{env}) - Microsoft.App/managedEnvironments@2024-03-01
+   https://learn.microsoft.com/en-us/azure/container-apps/
+11) Container App API (ca-api-{env}) - Microsoft.App/containerApps@2024-03-01
+   https://learn.microsoft.com/en-us/azure/container-apps/
+12) Container App Agents (ca-agents-{env}) - Microsoft.App/containerApps@2024-03-01
+   https://learn.microsoft.com/en-us/azure/container-apps/
+13) Container App Ingestion (ca-ingest-{env}) - Microsoft.App/containerApps@2024-03-01
+   https://learn.microsoft.com/en-us/azure/container-apps/
+14) App Service Plan (plan-{env}) - Microsoft.Web/serverfarms@2023-12-01
+15) Web App (app-{env}-{suffix}) - Microsoft.Web/sites@2023-12-01
+
+Original implementation task references:
+- TASK-001 monitoring module (resources 6, 7, 8, 9)
+- TASK-002 core services module (resources 1, 2, 3, 4, 5)
+- TASK-003 compute module (resources 10-15)
+- TASK-004 main orchestrator
+- TASK-005 validation gate (restore/build/format/lint/dead-code/secrets/naming/AU-region)
+*/
+
 // ────────────────────────────────────────────────────────────────────────────────
 // Per-agent scale-out targets (FR-A03 / spec-032 T023)
 //
