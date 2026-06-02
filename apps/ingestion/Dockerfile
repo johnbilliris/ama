@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /app
 COPY apps/ingestion/pyproject.toml ./apps/ingestion/
@@ -12,7 +12,7 @@ COPY apps/api/app/validators/ ./apps/api/app/validators/
 RUN pip install --no-cache-dir --upgrade pip && \
     cd apps/ingestion && pip install --no-cache-dir .
 
-FROM python:3.12-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 ENV PYTHONUNBUFFERED=1
 
