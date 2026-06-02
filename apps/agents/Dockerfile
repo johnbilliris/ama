@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /app
 COPY apps/agents/pyproject.toml ./apps/agents/
@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     # (verified — no `import mem0*` in apps/, packages/, tests/).
     pip install --no-cache-dir --no-deps --upgrade "mem0ai>=2.0.0b2"
 
-FROM python:3.12-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 ENV PYTHONUNBUFFERED=1
 
