@@ -11,7 +11,7 @@ dependencies = [
   "azure-cosmos>=4.9.0",
   "azure-storage-blob>=12.24.0",
   "azure-identity>=1.19.0",
-  "cryptography>=46.0.7",
+  "cryptography>=48.0.1",
   "Pygments>=2.20.0",
   "requests>=2.33.0",
   # Spec-037 (T002, RES-01, FR-009) — JSON Schema draft 2020-12 validation
