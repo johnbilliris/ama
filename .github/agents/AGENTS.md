@@ -1,193 +1,133 @@
 ---
-description: "Reference catalogue of all actor-specific agents — not an interactive agent."
+description: "Reference catalogue of all actor-specific agents - not an interactive agent."
+user-invocable: false
+disable-model-invocation: true
 ---
 
 # Actor Agent Catalogue
 
-**Last Updated**: 2026-04-19
-**Total Agents**: 94 (+ 6 archived)
-**Feature**: [004-actor-github-agents](../../specs/004-actor-github-agents/spec.md)
+**Last Updated**: 2026-09-15
+**Totals**: 85 active actor files (10 operational, 58 sector, 17 technical); 12 workflow agents; 6 archived sector agents
 
-This registry lists all actor-specific GitHub Copilot agents for the Autonomous Disaster Response Coordination Hub. Each agent provides domain-specific guidance for development-time use in VS Code.
+This file is generated from `.github/agents/**/*.agent.md` frontmatter and body headings.
+Do not hand-edit tables; run `python scripts/generate_agents_catalogue.py --write`.
 
-## Operational Persona Agents (10)
+## Active Actor Agents
 
-AIIMS-aligned roles for incident management and coordination.
+| Agent Name | Agent ID | File Path | Tier | Description | Key Handoffs |
+|---|---|---|---|---|---|
+| Executive Leader | executive-leader | .github/agents/operational/executive-leader.agent.md | operational | Executive oversight — strategic decisions, policy escalation, inter-government liaison, and resource commitment authority. | incident-commander, nema, state-government, compliance-auditor, risk-manager |
+| Field Coordinator | field-coordinator | .github/agents/operational/field-coordinator.agent.md | operational | Field operations coordinator — ground-level coordination, local situation reporting, and connectivity-degraded scenarios. | operations-officer, logistics-officer |
+| Incident Commander | incident-commander | .github/agents/operational/incident-commander.agent.md | operational | AIIMS Incident Controller — overall coordination authority for multi-agency disaster response operations. | operations-officer, planning-officer, logistics-officer, public-information-officer, executive-leader, risk-manager |
+| Logistics Officer | logistics-officer | .github/agents/operational/logistics-officer.agent.md | operational | AIIMS Logistics function — supply chain, transport coordination, medical supplies, resource tracking, and provisioning. | planning-officer, health, transport, incident-commander |
+| Observer Auditor | observer-auditor | .github/agents/operational/observer-auditor.agent.md | operational | Read-only observer and auditor — audit trail review, post-incident analysis, compliance verification, and lessons learned. | resilience-planner, planning-officer, executive-leader, compliance-auditor |
+| Operations Officer | operations-officer | .github/agents/operational/operations-officer.agent.md | operational | AIIMS Operations function — tactical coordination, field deployment, and staging area management for disaster response. | incident-commander, field-coordinator, logistics-officer |
+| Planning Officer | planning-officer | .github/agents/operational/planning-officer.agent.md | operational | AIIMS Planning function — situation assessment, resource forecasting, intelligence analysis, and action plan development. | incident-commander, logistics-officer, resilience-planner, risk-manager |
+| Public Information Officer | public-information-officer | .github/agents/operational/public-information-officer.agent.md | operational | AIIMS Public Information function — media liaison, community alerts, multilingual messaging, and accessibility compliance. | incident-commander, community-ngos, bom-national |
+| Resilience Planner | resilience-planner | .github/agents/operational/resilience-planner.agent.md | operational | Preparedness analysis and scenario rehearsal — gap identification, framework modelling, and resilience planning (User Story 3). | planning-officer, executive-leader, observer-auditor, risk-manager |
+| Risk Manager | risk-manager | .github/agents/operational/risk-manager.agent.md | operational | Risk Manager — risk assessment, hazard analysis, risk register management, risk communication, and risk-informed decision support for disaster response operations. | incident-commander, planning-officer, resilience-planner, executive-leader, observer-auditor, compliance-auditor, bom-national |
+| ABF | abf | .github/agents/sectors/commonwealth/abf.agent.md | sector | Australian Border Force agent — maritime emergency response, border security, and customs enforcement in Commonwealth of Australia. | afp-commonwealth, nema, incident-commander |
+| ACT Ambulance | act-ambulance | .github/agents/sectors/act/act-ambulance.agent.md | sector | ACT Ambulance Service agent — pre-hospital emergency medical care, patient triage, and medical evacuation in Australian Capital Territory. | health, logistics-officer, bom-national, incident-commander |
+| ACT Esa | act-esa | .github/agents/sectors/act/act-esa.agent.md | sector | ACT Emergency Services Agency agent — umbrella coordination of fire, rescue, ambulance, and SES services in Australian Capital Territory. | bom-national, act-policing, logistics-officer, incident-commander |
+| ACT Fr | act-fr | .github/agents/sectors/act/act-fr.agent.md | sector | ACT Fire and Rescue agent — urban fire suppression, hazmat response, structural rescue, and technical rescue in Australian Capital Territory. | act-policing, act-ambulance, bom-national, incident-commander |
+| ACT Policing | act-policing | .github/agents/sectors/act/act-policing.agent.md | sector | ACT Policing agent — evacuation enforcement, traffic management, search and rescue coordination, and emergency management in Australian Capital Territory. | act-fr, act-rfs, act-ambulance, incident-commander |
+| ACT Rfs | act-rfs | .github/agents/sectors/act/act-rfs.agent.md | sector | ACT Rural Fire Service agent — bushfire suppression, rural fire management, hazard reduction burns, and community preparedness in Australian Capital Territory. | act-policing, act-ambulance, bom-national, incident-commander |
+| ADF | adf | .github/agents/sectors/commonwealth/adf.agent.md | sector | Australian Defence Force agent — Defence Assistance to the Civil Community (DACC) including logistics, transport, and personnel in Commonwealth of Australia. | nema, logistics-officer, incident-commander, afp-commonwealth |
+| AFP ACT | afp-act | .github/agents/sectors/act/afp-act.agent.md | sector | Australian Federal Police (ACT) agent — federal policing and national-capital protective security coordination in Australian Capital Territory. | act-fr, act-rfs, act-ambulance, incident-commander |
+| AFP Commonwealth | afp-commonwealth | .github/agents/sectors/commonwealth/afp-commonwealth.agent.md | sector | Australian Federal Police (Commonwealth) agent — federal law enforcement and national coordination in Commonwealth of Australia. | adf, rfds, incident-commander |
+| Arc | arc | .github/agents/sectors/commonwealth/arc.agent.md | sector | Australian Red Cross agent — humanitarian relief, evacuation centre support, and disaster recovery assistance in Commonwealth of Australia. | local-government, community-ngos, incident-commander |
+| Asa | asa | .github/agents/sectors/commonwealth/asa.agent.md | sector | Airservices Australia agent — aviation fire and rescue services at major Australian airports in Commonwealth of Australia. | afp-commonwealth, rfds, bom-national, incident-commander |
+| At | at | .github/agents/sectors/tas/at.agent.md | sector | Ambulance Tasmania agent — pre-hospital emergency medical care, patient triage, and medical evacuation in Tasmania. | health, logistics-officer, bom-national, incident-commander |
+| Av | av | .github/agents/sectors/vic/av.agent.md | sector | Ambulance Victoria agent — pre-hospital emergency medical care, patient triage, and medical evacuation in Victoria. | health, logistics-officer, bom-national, incident-commander |
+| BoM National | bom-national | .github/agents/sectors/commonwealth/bom-national.agent.md | sector | Bureau of Meteorology agent — weather forecasting, severe weather warnings, flood predictions, and fire weather intelligence in Commonwealth of Australia. | nema, incident-commander, public-information-officer, state-government |
+| Bushfires NT | bushfires-nt | .github/agents/sectors/nt/bushfires-nt.agent.md | sector | Bushfires NT agent — bushfire suppression, rural fire management, hazard reduction burns, and community preparedness in Northern Territory. | ntpf, sja-nt, bom-national, incident-commander |
+| Cfa VIC | cfa-vic | .github/agents/sectors/vic/cfa-vic.agent.md | sector | Country Fire Authority agent — bushfire suppression, rural fire management, hazard reduction burns, and community preparedness in Victoria. | vicpol, av, bom-national, incident-commander |
+| Community Ngos | community-ngos | .github/agents/sectors/cross-sector/community-ngos.agent.md | sector | Community and NGO sector agent — Red Cross, Salvation Army, evacuation centre management, emergency relief, and psychological first aid coordination. | local-government, volunteer, public-information-officer |
+| Dfes WA | dfes-wa | .github/agents/sectors/wa/dfes-wa.agent.md | sector | Department of Fire and Emergency Services agent — fire suppression, rescue operations, SES coordination, and emergency management in Western Australia. | wapol, sja-wa, bom-national, incident-commander |
+| Frnsw | frnsw | .github/agents/sectors/nsw/frnsw.agent.md | sector | Fire and Rescue New South Wales agent — urban fire suppression, hazmat response, structural rescue, and technical rescue in New South Wales. | nswpf, nsw-ambulance, bom-national, incident-commander |
+| Frv | frv | .github/agents/sectors/vic/frv.agent.md | sector | Fire Rescue Victoria agent — urban fire suppression, hazmat response, structural rescue, and technical rescue in Victoria. | vicpol, av, bom-national, incident-commander |
+| Ga National | ga-national | .github/agents/sectors/commonwealth/ga-national.agent.md | sector | Geoscience Australia agent — earthquake monitoring, tsunami warnings, and geological hazard assessment in Commonwealth of Australia. | nema, public-information-officer, incident-commander |
+| Health | health | .github/agents/sectors/cross-sector/health.agent.md | sector | Health sector agent — public health emergencies, hospital surge capacity, environmental health, and mental health response across Australian jurisdictions. | nsw-ambulance, av, qas, sja-wa, saas, at, sja-nt, act-ambulance, logistics-officer, nema |
+| Local Government | local-government | .github/agents/sectors/cross-sector/local-government.agent.md | sector | Local Government sector agent — municipal emergency management plans, community recovery, council responsibilities, and evacuation centre management. | state-government, community-ngos, volunteer |
+| Mrnsw | mrnsw | .github/agents/sectors/nsw/mrnsw.agent.md | sector | Marine Rescue New South Wales agent — marine search and rescue, boating safety, and coastal emergency response in New South Wales. | incident-commander, state-government |
+| Nema | nema | .github/agents/sectors/commonwealth/nema.agent.md | sector | National Emergency Management Agency agent — national emergency coordination, COMDISPLAN activation, and disaster recovery funding in Commonwealth of Australia. | state-government, bom-national, adf, incident-commander |
+| NSW Ambulance | nsw-ambulance | .github/agents/sectors/nsw/nsw-ambulance.agent.md | sector | NSW Ambulance agent — pre-hospital emergency medical care, patient triage, and medical evacuation in New South Wales. | health, logistics-officer, bom-national, incident-commander |
+| NSW Rfs | nsw-rfs | .github/agents/sectors/nsw/nsw-rfs.agent.md | sector | New South Wales Rural Fire Service agent — bushfire suppression, rural fire management, hazard reduction burns, and community preparedness in New South Wales. | nswpf, nsw-ambulance, bom-national, incident-commander |
+| Nswpf | nswpf | .github/agents/sectors/nsw/nswpf.agent.md | sector | New South Wales Police Force agent — evacuation enforcement, traffic management, search and rescue coordination, and emergency management in New South Wales. | frnsw, nsw-rfs, nsw-ambulance, incident-commander |
+| Ntes | ntes | .github/agents/sectors/nt/ntes.agent.md | sector | Northern Territory Emergency Service agent — cyclone, flood, and severe weather response including tropical cyclone preparedness in Northern Territory. | bom-national, ntpf, logistics-officer, incident-commander |
+| Ntfrs | ntfrs | .github/agents/sectors/nt/ntfrs.agent.md | sector | Northern Territory Fire and Rescue Service agent — fire suppression, rescue operations, and emergency response in Northern Territory. | ntpf, sja-nt, bom-national, incident-commander |
+| Ntpf | ntpf | .github/agents/sectors/nt/ntpf.agent.md | sector | Northern Territory Police Force agent — evacuation enforcement, traffic management, search and rescue coordination, and emergency management in Northern Territory. | ntfrs, bushfires-nt, sja-nt, incident-commander |
+| Qas | qas | .github/agents/sectors/qld/qas.agent.md | sector | Queensland Ambulance Service agent — pre-hospital emergency medical care, patient triage, and medical evacuation in Queensland. | health, logistics-officer, bom-national, incident-commander |
+| Qfd | qfd | .github/agents/sectors/qld/qfd.agent.md | sector | Queensland Fire Department agent — fire suppression, rescue operations, SES coordination, and emergency management in Queensland. | qps, qas, bom-national, incident-commander |
+| Qps | qps | .github/agents/sectors/qld/qps.agent.md | sector | Queensland Police Service agent — evacuation enforcement, traffic management, search and rescue coordination, and emergency management in Queensland. | qfd, qas, incident-commander |
+| RFDS | rfds | .github/agents/sectors/commonwealth/rfds.agent.md | sector | Royal Flying Doctor Service agent — aeromedical retrieval and remote area medical services in Commonwealth of Australia. | health, logistics-officer, bom-national, incident-commander |
+| Saas | saas | .github/agents/sectors/sa/saas.agent.md | sector | SA Ambulance Service agent — pre-hospital emergency medical care, patient triage, and medical evacuation in South Australia. | health, logistics-officer, bom-national, incident-commander |
+| Sacfs | sacfs | .github/agents/sectors/sa/sacfs.agent.md | sector | South Australian Country Fire Service agent — bushfire suppression, rural fire management, hazard reduction burns, and community preparedness in South Australia. | sapol, saas, bom-national, incident-commander |
+| Samfs | samfs | .github/agents/sectors/sa/samfs.agent.md | sector | South Australian Metropolitan Fire Service agent — urban fire suppression, hazmat response, structural rescue, and technical rescue in South Australia. | sapol, saas, bom-national, incident-commander |
+| Sapol | sapol | .github/agents/sectors/sa/sapol.agent.md | sector | South Australia Police agent — evacuation enforcement, traffic management, search and rescue coordination, and emergency management in South Australia. | sacfs, samfs, saas, incident-commander |
+| SES ACT | ses-act | .github/agents/sectors/act/ses-act.agent.md | sector | ACT State Emergency Service agent — flood and storm combat agency operations, rescue, sandbagging, and community support in Australian Capital Territory. | bom-national, act-policing, logistics-officer, incident-commander |
+| SES NSW | ses-nsw | .github/agents/sectors/nsw/ses-nsw.agent.md | sector | New South Wales State Emergency Service agent — flood and storm combat agency operations, rescue, sandbagging, and community support in New South Wales. | bom-national, nswpf, logistics-officer, incident-commander |
+| SES QLD | ses-qld | .github/agents/sectors/qld/ses-qld.agent.md | sector | Queensland State Emergency Service agent — flood and storm combat agency operations, rescue, sandbagging, and community support in Queensland. | bom-national, qps, logistics-officer, incident-commander |
+| SES SA | ses-sa | .github/agents/sectors/sa/ses-sa.agent.md | sector | South Australian State Emergency Service agent — flood and storm combat agency operations, rescue, sandbagging, and community support in South Australia. | bom-national, sapol, logistics-officer, incident-commander |
+| SES TAS | ses-tas | .github/agents/sectors/tas/ses-tas.agent.md | sector | Tasmania State Emergency Service agent — flood and storm combat agency operations, rescue, sandbagging, and community support in Tasmania. | bom-national, taspol, logistics-officer, incident-commander |
+| SES VIC | ses-vic | .github/agents/sectors/vic/ses-vic.agent.md | sector | Victoria State Emergency Service agent — flood and storm combat agency operations, rescue, sandbagging, and community support in Victoria. | bom-national, vicpol, logistics-officer, incident-commander |
+| Sja National | sja-national | .github/agents/sectors/commonwealth/sja-national.agent.md | sector | St John Ambulance Australia agent — first aid training, event medical support, and community health education in Commonwealth of Australia. | health, logistics-officer, bom-national, incident-commander |
+| Sja NT | sja-nt | .github/agents/sectors/nt/sja-nt.agent.md | sector | St John Northern Territory agent — pre-hospital emergency medical care, patient triage, and medical evacuation in Northern Territory. | health, logistics-officer, bom-national, incident-commander |
+| Sja WA | sja-wa | .github/agents/sectors/wa/sja-wa.agent.md | sector | St John Western Australia agent — pre-hospital emergency medical care, patient triage, and medical evacuation in Western Australia. | health, logistics-officer, bom-national, incident-commander |
+| State Government | state-government | .github/agents/sectors/cross-sector/state-government.agent.md | sector | State Government sector agent — state emergency management legislation, state coordination centres, and lead agency designation across Australian states. | nema, local-government, incident-commander, compliance-auditor |
+| Surf Lifesaving | surf-lifesaving | .github/agents/sectors/commonwealth/surf-lifesaving.agent.md | sector | Surf Life Saving Australia agent — coastal and surf rescue, beach safety, and marine emergency response in Commonwealth of Australia. | community-ngos, health, incident-commander |
+| Taspol | taspol | .github/agents/sectors/tas/taspol.agent.md | sector | Tasmania Police agent — evacuation enforcement, traffic management, search and rescue coordination, and emergency management in Tasmania. | tfs, at, incident-commander |
+| Territory Government | territory-government | .github/agents/sectors/cross-sector/territory-government.agent.md | sector | Territory Government sector agent — territory emergency management ordinances, ACT and NT arrangements, and closer Commonwealth integration. | nema, local-government |
+| Tfs | tfs | .github/agents/sectors/tas/tfs.agent.md | sector | Tasmania Fire Service agent — fire suppression, rescue operations, and emergency response in Tasmania. | taspol, at, bom-national, incident-commander |
+| Transport | transport | .github/agents/sectors/cross-sector/transport.agent.md | sector | Transport sector agent — road and rail closure authorities, evacuation transport coordination, and freight management across Australian jurisdictions. | nswpf, vicpol, qps, wapol, sapol, taspol, ntpf, act-policing, logistics-officer, utility |
+| Utility | utility | .github/agents/sectors/cross-sector/utility.agent.md | sector | Utility sector agent — energy, water, and telecommunications essential services restoration, priority reconnection, and infrastructure damage assessment. | transport, local-government, incident-commander |
+| Vicpol | vicpol | .github/agents/sectors/vic/vicpol.agent.md | sector | Victoria Police agent — evacuation enforcement, traffic management, search and rescue coordination, and emergency management in Victoria. | frv, cfa-vic, av, incident-commander |
+| Volunteer | volunteer | .github/agents/sectors/cross-sector/volunteer.agent.md | sector | Volunteer sector agent — spontaneous volunteer management, volunteer protection legislation, credentialing, and coordination with SES and NGO organisations. | ses-nsw, ses-vic, ses-qld, dfes-wa, ses-sa, ses-tas, ntes, ses-act, community-ngos, local-government |
+| Wapol | wapol | .github/agents/sectors/wa/wapol.agent.md | sector | Western Australia Police Force agent — evacuation enforcement, traffic management, search and rescue coordination, and emergency management in Western Australia. | dfes-wa, sja-wa, incident-commander |
+| Accessibility Tester | accessibility-tester | .github/agents/technical/accessibility-tester.agent.md | technical | Accessibility Tester — WCAG 2.2 compliance, multilingual and RTL validation, assistive technology testing, and inclusive design verification for the disaster response hub. | ux-designer, qa-test-engineer, software-developer, public-information-officer, compliance-auditor |
+| AI/ML Engineer | ai-ml-engineer | .github/agents/technical/ai-ml-engineer.agent.md | technical | AI/ML Engineer — AI agent system design, LLM architecture, Azure OpenAI integration, prompt engineering, confidence scoring, and content safety for the disaster response hub agent runtime. | software-developer, solution-architect, data-engineer, security-engineer, api-architect, qa-test-engineer |
+| API & Backend Architect | api-architect | .github/agents/technical/api-architect.agent.md | technical | API & Backend Architect — API design, service boundaries, resilience patterns, event-driven architecture, caching, observability, and layered service architecture for the disaster response hub. | solution-architect, software-developer, data-engineer, azure-principal-architect, security-engineer, principal-engineer, sre-engineer, ai-ml-engineer |
+| Azure Principal Architect | azure-principal-architect | .github/agents/technical/azure-principal-architect.agent.md | technical | Azure Principal Architect — WAF pillar assessment, Azure architecture patterns, and Microsoft best practices for the disaster response hub. | solution-architect, infrastructure-devops, security-engineer, data-engineer, api-architect |
+| Chaos Engineer | chaos-engineer | .github/agents/technical/chaos-engineer.agent.md | technical | Chaos Engineer — chaos experiment design, failure injection, resilience validation, blast radius control, and disaster-scenario stress testing for the disaster response hub. | sre-engineer, infrastructure-devops, qa-test-engineer, api-architect, security-engineer, docker-container-engineer |
+| Compliance Auditor | compliance-auditor | .github/agents/technical/compliance-auditor.agent.md | technical | Compliance Auditor — regulatory, privacy, emergency-management, data-handling, and accessibility compliance guidance for the Australian disaster response hub. | security-engineer, observer-auditor, executive-leader, product-owner-ba, solution-architect, accessibility-tester |
+| Data Engineer | data-engineer | .github/agents/technical/data-engineer.agent.md | technical | Data engineer agent — Cosmos DB, Blob Storage, signal ingestion pipelines, data model conventions, and schema governance for the disaster response hub. | solution-architect, security-engineer, azure-principal-architect, api-architect, ai-ml-engineer |
+| Docker & Container Engineer | docker-container-engineer | .github/agents/technical/docker-container-engineer.agent.md | technical | Docker & Container Engineer — Dockerfile optimisation, Azure Container Apps setup, image security, multi-stage builds, and runtime reliability guidance for the disaster response hub. | infrastructure-devops, software-developer, security-engineer, sre-engineer, azure-principal-architect |
+| Infrastructure Devops | infrastructure-devops | .github/agents/technical/infrastructure-devops.agent.md | technical | Infrastructure and DevOps agent — Azure AU infrastructure, Bicep IaC (planning, authoring, AVM), Container Apps, CI/CD pipelines, and monitoring for the disaster response hub. | solution-architect, security-engineer, azure-principal-architect, sre-engineer, docker-container-engineer |
+| Principal Software Engineer | principal-engineer | .github/agents/technical/principal-engineer.agent.md | technical | Principal Software Engineer — engineering excellence, design patterns, technical debt management, code review mentoring, and pragmatic implementation guidance. | software-developer, solution-architect, qa-test-engineer, api-architect, security-engineer, ai-ml-engineer |
+| Product Owner Ba | product-owner-ba | .github/agents/technical/product-owner-ba.agent.md | technical | Product owner and business analyst agent — requirements, acceptance criteria, BDD scenarios, success metrics, and speckit workflow for the disaster response hub. | solution-architect, ux-designer |
+| QA Test Engineer | qa-test-engineer | .github/agents/technical/qa-test-engineer.agent.md | technical | QA and test engineer agent — pytest, Playwright, contract/integration/simulation/e2e/load testing, and quality gate enforcement for the disaster response hub. | software-developer, accessibility-tester, principal-engineer, chaos-engineer |
+| Security Engineer | security-engineer | .github/agents/technical/security-engineer.agent.md | technical | Security engineer agent — privacy, RBAC, tenant isolation, content safety, Australian data residency, and compliance for the disaster response hub. | infrastructure-devops, software-developer, solution-architect, azure-principal-architect, compliance-auditor |
+| Software Developer | software-developer | .github/agents/technical/software-developer.agent.md | technical | Software developer agent — Python and TypeScript code conventions, FastAPI/Next.js patterns, PR workflow, and code review for the disaster response hub. | solution-architect, security-engineer, qa-test-engineer, api-architect, principal-engineer, ai-ml-engineer, accessibility-tester |
+| Solution Architect | solution-architect | .github/agents/technical/solution-architect.agent.md | technical | Solution architect agent — system design, Azure architecture governance, NFR enforcement, and cross-cutting technical decisions for the disaster response hub. | software-developer, infrastructure-devops, security-engineer, data-engineer, product-owner-ba, azure-principal-architect, api-architect, principal-engineer, ai-ml-engineer |
+| SRE Engineer | sre-engineer | .github/agents/technical/sre-engineer.agent.md | technical | SRE Engineer — SLI/SLO management, error budgets, chaos engineering, toil reduction, incident response, and reliability automation for the disaster response hub. | infrastructure-devops, api-architect, azure-principal-architect, qa-test-engineer, security-engineer, solution-architect, chaos-engineer, docker-container-engineer |
+| Ux Designer | ux-designer | .github/agents/technical/ux-designer.agent.md | technical | UX designer agent — dashboard design for high-pressure operations, accessibility, multilingual communication, and Tailwind CSS component patterns for the disaster response hub. | software-developer, product-owner-ba, accessibility-tester |
 
-| Agent Name | Agent ID | File Path | Description |
-|---|---|---|---|
-| Incident Commander | incident-commander | operational/incident-commander.agent.md | AIIMS Incident Controller — overall coordination authority for multi-agency disaster response operations |
-| Operations Officer | operations-officer | operational/operations-officer.agent.md | AIIMS Operations — tactical coordination, field deployment, and staging area management |
-| Planning Officer | planning-officer | operational/planning-officer.agent.md | AIIMS Planning — situation assessment, resource forecasting, and action plan development |
-| Logistics Officer | logistics-officer | operational/logistics-officer.agent.md | AIIMS Logistics — supply chain, transport coordination, medical supplies, and resource tracking |
-| Public Information Officer | public-information-officer | operational/public-information-officer.agent.md | AIIMS Public Information — media liaison, multilingual community alerts, and accessibility compliance |
-| Field Coordinator | field-coordinator | operational/field-coordinator.agent.md | Field operations — ground-level coordination and degraded-connectivity scenario management |
-| Resilience Planner | resilience-planner | operational/resilience-planner.agent.md | Preparedness analysis — scenario rehearsal, gap identification, and framework modelling |
-| Executive Leader | executive-leader | operational/executive-leader.agent.md | Executive oversight — strategic decisions, policy escalation, and inter-government liaison |
-| Observer/Auditor | observer-auditor | operational/observer-auditor.agent.md | Read-only observer — audit trail review, compliance verification, and lessons learned |
-| Risk Manager | risk-manager | operational/risk-manager.agent.md | Risk assessment, hazard analysis, risk register management, risk communication, and risk-informed decision support |
+## Workflow Agents
 
-## Sector Agents — Jurisdiction-Specific (58)
+| Agent Name | Agent ID | File Path | Tier | Description | Key Handoffs |
+|---|---|---|---|---|---|
+| Speckit.analyze | speckit.analyze | .github/agents/speckit.analyze.agent.md | workflow | Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation. |  |
+| Speckit.checklist | speckit.checklist | .github/agents/speckit.checklist.agent.md | workflow | Generate a custom checklist for the current feature based on user requirements. |  |
+| Speckit.clarify | speckit.clarify | .github/agents/speckit.clarify.agent.md | workflow | Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec. | speckit.plan |
+| Speckit.constitution | speckit.constitution | .github/agents/speckit.constitution.agent.md | workflow | Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync. | speckit.specify |
+| Pre-Implementation Review | speckit.fleet.review | .github/agents/speckit.fleet.review.agent.md | workflow | Cross-model evaluation of plan.md and tasks.md before implementation. Reviews feasibility, completeness, dependency ordering, risk, and parallelization correctness using a different model than was used to generate the artifacts. |  |
+| Speckit.fleet.run | speckit.fleet.run | .github/agents/speckit.fleet.run.agent.md | workflow | Orchestrate a full feature lifecycle through all SpecKit phases with human-in-the-loop checkpoints: specify -> clarify -> plan -> checklist -> tasks -> analyze -> cross-model review -> implement -> verify -> CI. Detects partially complete features and resumes from the right phase. |  |
+| Speckit.implement | speckit.implement | .github/agents/speckit.implement.agent.md | workflow | Execute the implementation plan by processing and executing all tasks defined in tasks.md |  |
+| Speckit.plan | speckit.plan | .github/agents/speckit.plan.agent.md | workflow | Execute the implementation planning workflow using the plan template to generate design artifacts. | speckit.tasks, speckit.checklist |
+| Speckit.specify | speckit.specify | .github/agents/speckit.specify.agent.md | workflow | Create or update the feature specification from a natural language feature description. | speckit.plan, speckit.clarify |
+| Speckit.tasks | speckit.tasks | .github/agents/speckit.tasks.agent.md | workflow | Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts. | speckit.analyze, speckit.implement |
+| Speckit.taskstoissues | speckit.taskstoissues | .github/agents/speckit.taskstoissues.agent.md | workflow | Convert existing tasks into actionable, dependency-ordered GitHub issues for the feature based on available design artifacts. |  |
+| Speckit.verify.run | speckit.verify.run | .github/agents/speckit.verify.run.agent.md | workflow | Perform a non-destructive post-implementation verification gate validating the implementation against spec.md, plan.md, tasks.md, and constitution.md. |  |
 
-Australian emergency management agencies organised by jurisdiction.
+## Archived Sector Agents
 
-### New South Wales (6)
+Archived rows are non-invocable and include explicit successor mappings.
 
-| Agent ID | File Path | Description |
-|---|---|---|
-| frnsw | sectors/nsw/frnsw.agent.md | Fire and Rescue NSW — urban fire suppression, hazmat response, structural and technical rescue |
-| mrnsw | sectors/nsw/mrnsw.agent.md | Marine Rescue NSW — marine search and rescue, boating safety, and coastal emergency response |
-| nsw-ambulance | sectors/nsw/nsw-ambulance.agent.md | NSW Ambulance — pre-hospital emergency medical care, patient triage, and medical evacuation |
-| nsw-rfs | sectors/nsw/nsw-rfs.agent.md | NSW Rural Fire Service — bushfire suppression, rural fire management, and hazard reduction burns |
-| nswpf | sectors/nsw/nswpf.agent.md | NSW Police Force — evacuation enforcement, traffic management, and search and rescue coordination |
-| ses-nsw | sectors/nsw/ses-nsw.agent.md | NSW State Emergency Service — flood and storm combat agency operations, rescue, and community support |
-
-### Victoria (5)
-
-| Agent ID | File Path | Description |
-|---|---|---|
-| av | sectors/vic/av.agent.md | Ambulance Victoria — pre-hospital emergency medical care, patient triage, and medical evacuation |
-| cfa-vic | sectors/vic/cfa-vic.agent.md | Country Fire Authority — bushfire suppression, rural fire management, and community preparedness |
-| frv | sectors/vic/frv.agent.md | Fire Rescue Victoria — urban fire suppression, hazmat response, and structural rescue |
-| ses-vic | sectors/vic/ses-vic.agent.md | Victoria SES — flood and storm combat agency operations, rescue, and community support |
-| vicpol | sectors/vic/vicpol.agent.md | Victoria Police — evacuation enforcement, traffic management, and search and rescue coordination |
-
-### Queensland (4)
-
-| Agent ID | File Path | Description |
-|---|---|---|
-| qas | sectors/qld/qas.agent.md | Queensland Ambulance Service — pre-hospital emergency medical care and patient triage |
-| qfd | sectors/qld/qfd.agent.md | Queensland Fire Department — fire suppression, rescue operations, and SES coordination |
-| qps | sectors/qld/qps.agent.md | Queensland Police Service — evacuation enforcement, traffic management, and search and rescue |
-| ses-qld | sectors/qld/ses-qld.agent.md | Queensland SES — flood and storm combat agency operations, rescue, and community support |
-
-### South Australia (5)
-
-| Agent ID | File Path | Description |
-|---|---|---|
-| saas | sectors/sa/saas.agent.md | SA Ambulance Service — pre-hospital emergency medical care and patient triage |
-| sacfs | sectors/sa/sacfs.agent.md | SA Country Fire Service — bushfire suppression, rural fire management, and hazard reduction burns |
-| samfs | sectors/sa/samfs.agent.md | SA Metropolitan Fire Service — urban fire suppression, hazmat response, and structural rescue |
-| sapol | sectors/sa/sapol.agent.md | SA Police — evacuation enforcement, traffic management, and search and rescue coordination |
-| ses-sa | sectors/sa/ses-sa.agent.md | SA State Emergency Service — flood and storm combat agency operations and community support |
-
-### Western Australia (3)
-
-| Agent ID | File Path | Description |
-|---|---|---|
-| dfes-wa | sectors/wa/dfes-wa.agent.md | WA Dept of Fire and Emergency Services — fire suppression, rescue, and SES coordination |
-| sja-wa | sectors/wa/sja-wa.agent.md | St John WA — pre-hospital emergency medical care, patient triage, and medical evacuation |
-| wapol | sectors/wa/wapol.agent.md | WA Police Force — evacuation enforcement, traffic management, and search and rescue coordination |
-
-### Tasmania (4)
-
-| Agent ID | File Path | Description |
-|---|---|---|
-| at | sectors/tas/at.agent.md | Ambulance Tasmania — pre-hospital emergency medical care, patient triage, and medical evacuation |
-| ses-tas | sectors/tas/ses-tas.agent.md | Tasmania SES — flood and storm combat agency operations, rescue, and community support |
-| taspol | sectors/tas/taspol.agent.md | Tasmania Police — evacuation enforcement, traffic management, and search and rescue coordination |
-| tfs | sectors/tas/tfs.agent.md | Tasmania Fire Service — fire suppression, rescue operations, and emergency response |
-
-### Australian Capital Territory (7)
-
-| Agent ID | File Path | Description |
-|---|---|---|
-| act-ambulance | sectors/act/act-ambulance.agent.md | ACT Ambulance Service — pre-hospital emergency medical care and patient triage |
-| act-esa | sectors/act/act-esa.agent.md | ACT Emergency Services Agency — umbrella coordination of fire, rescue, ambulance, and SES |
-| act-fr | sectors/act/act-fr.agent.md | ACT Fire and Rescue — urban fire suppression, hazmat response, and structural rescue |
-| act-policing | sectors/act/act-policing.agent.md | ACT Policing — evacuation enforcement, traffic management, and search and rescue coordination |
-| act-rfs | sectors/act/act-rfs.agent.md | ACT Rural Fire Service — bushfire suppression, rural fire management, and hazard reduction burns |
-| afp | sectors/act/afp.agent.md | Australian Federal Police (ACT) — federal law enforcement and counter-terrorism |
-| ses-act | sectors/act/ses-act.agent.md | ACT State Emergency Service — flood and storm combat operations and community support |
-
-### Northern Territory (5)
-
-| Agent ID | File Path | Description |
-|---|---|---|
-| bushfires-nt | sectors/nt/bushfires-nt.agent.md | Bushfires NT — bushfire suppression, rural fire management, and hazard reduction burns |
-| ntes | sectors/nt/ntes.agent.md | NT Emergency Service — cyclone, flood, and severe weather response including tropical cyclone preparedness |
-| ntfrs | sectors/nt/ntfrs.agent.md | NT Fire and Rescue Service — fire suppression, rescue operations, and emergency response |
-| ntpf | sectors/nt/ntpf.agent.md | NT Police Force — evacuation enforcement, traffic management, and search and rescue coordination |
-| sja-nt | sectors/nt/sja-nt.agent.md | St John NT — pre-hospital emergency medical care, patient triage, and medical evacuation |
-
-### Commonwealth (11)
-
-| Agent ID | File Path | Description |
-|---|---|---|
-| abf | sectors/commonwealth/abf.agent.md | Australian Border Force — maritime emergency response and border security |
-| adf | sectors/commonwealth/adf.agent.md | Australian Defence Force — Defence Assistance to the Civil Community (DACC) |
-| afp | sectors/commonwealth/afp.agent.md | Australian Federal Police — federal law enforcement and counter-terrorism |
-| arc | sectors/commonwealth/arc.agent.md | Australian Red Cross — humanitarian relief, evacuation centre support, and disaster recovery |
-| asa | sectors/commonwealth/asa.agent.md | Airservices Australia — aviation fire and rescue services at major airports |
-| bom-national | sectors/commonwealth/bom-national.agent.md | Bureau of Meteorology — weather forecasting, severe weather warnings, and fire weather intelligence |
-| ga-national | sectors/commonwealth/ga-national.agent.md | Geoscience Australia — earthquake monitoring, tsunami warnings, and geological hazard assessment |
-| nema | sectors/commonwealth/nema.agent.md | National Emergency Management Agency — national coordination and COMDISPLAN activation |
-| rfds | sectors/commonwealth/rfds.agent.md | Royal Flying Doctor Service — aeromedical retrieval and remote area medical services |
-| sja-national | sectors/commonwealth/sja-national.agent.md | St John Ambulance Australia — first aid training and event medical support |
-| surf-lifesaving | sectors/commonwealth/surf-lifesaving.agent.md | Surf Life Saving Australia — coastal and surf rescue, beach safety, and marine emergency response |
-
-### Cross-Sector (8)
-
-| Agent ID | File Path | Description |
-|---|---|---|
-| community-ngos | sectors/cross-sector/community-ngos.agent.md | Community and NGO sector — Red Cross, Salvation Army, evacuation centre management, and emergency relief |
-| health | sectors/cross-sector/health.agent.md | Health sector — public health emergencies, hospital surge, environmental health, and mental health response |
-| local-government | sectors/cross-sector/local-government.agent.md | Local Government — municipal emergency management plans, community recovery, and evacuation centres |
-| state-government | sectors/cross-sector/state-government.agent.md | State Government — state emergency management legislation, coordination centres, and lead agency designation |
-| territory-government | sectors/cross-sector/territory-government.agent.md | Territory Government — territory emergency management ordinances, ACT and NT arrangements |
-| transport | sectors/cross-sector/transport.agent.md | Transport sector — road and rail closure authorities, evacuation transport, and freight coordination |
-| utility | sectors/cross-sector/utility.agent.md | Utility sector — energy, water, and telecommunications essential services restoration |
-| volunteer | sectors/cross-sector/volunteer.agent.md | Volunteer sector — spontaneous volunteer management, protection legislation, and credentialing |
-
-### Archived (6)
-
-Generic sector agents superseded by jurisdiction-specific agents above.
-
-| Agent ID | File Path |
-|---|---|
-| ambulance-paramedic | sectors/_archive/ambulance-paramedic.agent.md |
-| commonwealth-government | sectors/_archive/commonwealth-government.agent.md |
-| fire-services | sectors/_archive/fire-services.agent.md |
-| meteorology-bom | sectors/_archive/meteorology-bom.agent.md |
-| police | sectors/_archive/police.agent.md |
-| ses | sectors/_archive/ses.agent.md |
-
-## Technical Persona Agents (17)
-
-Project contributor roles with architecture and convention guidance.
-
-| Agent Name | Agent ID | File Path | Description |
-|---|---|---|---|
-| Solution Architect | solution-architect | technical/solution-architect.agent.md | System design, Azure architecture governance, NFR enforcement, and cross-cutting technical decisions |
-| Software Developer | software-developer | technical/software-developer.agent.md | Python 3.12 and TypeScript 5.8 conventions, FastAPI/Next.js patterns, and PR workflow |
-| Infrastructure/DevOps | infrastructure-devops | technical/infrastructure-devops.agent.md | Azure AU infrastructure, Bicep templates, Container Apps, and CI/CD pipelines |
-| Data Engineer | data-engineer | technical/data-engineer.agent.md | Cosmos DB, signal ingestion pipelines, Event Hubs/Service Bus, and data model conventions |
-| Security Engineer | security-engineer | technical/security-engineer.agent.md | Constitution IV compliance, tenant isolation, RBAC, content safety, and Australian data residency |
-| QA/Test Engineer | qa-test-engineer | technical/qa-test-engineer.agent.md | Testing strategy — pytest, Playwright, contract/integration/simulation/e2e test conventions |
-| UX Designer | ux-designer | technical/ux-designer.agent.md | Dashboard design for high-pressure ops, SC-007 rubric, accessibility per Constitution V |
-| Product Owner/BA | product-owner-ba | technical/product-owner-ba.agent.md | Requirements methodology, acceptance criteria, success metrics, and speckit workflow |
-| Azure Principal Architect | azure-principal-architect | technical/azure-principal-architect.agent.md | Azure WAF pillar assessment, Azure architecture patterns, and Microsoft best practices |
-| API Architect | api-architect | technical/api-architect.agent.md | API design, service boundaries, resilience patterns, event-driven architecture, and layered service architecture |
-| Principal Engineer | principal-engineer | technical/principal-engineer.agent.md | Engineering excellence, design patterns, technical debt management, and code review mentoring |
-| SRE Engineer | sre-engineer | technical/sre-engineer.agent.md | SLI/SLO management, error budgets, chaos engineering, toil reduction, and reliability automation |
-| AI/ML Engineer | ai-ml-engineer | technical/ai-ml-engineer.agent.md | AI agent system design, LLM architecture, Azure OpenAI integration, and prompt engineering |
-| Accessibility Tester | accessibility-tester | technical/accessibility-tester.agent.md | WCAG 2.2 compliance, multilingual and RTL validation, and assistive technology testing |
-| Chaos Engineer | chaos-engineer | technical/chaos-engineer.agent.md | Chaos experiment design, failure injection, resilience validation, and blast radius control |
-| Compliance Auditor | compliance-auditor | technical/compliance-auditor.agent.md | Australian government regulatory compliance, privacy legislation, and data handling obligations |
-| Docker & Container Engineer | docker-container-engineer | technical/docker-container-engineer.agent.md | Dockerfile optimisation, Azure Container Apps configuration, and container image security |
-
-## Speckit Workflow Agents (9)
-
-Feature specification, planning, and implementation workflow agents.
-
-| Agent ID | File Path | Description |
-|---|---|---|
-| speckit.analyze | speckit.analyze.agent.md | Cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md |
-| speckit.checklist | speckit.checklist.agent.md | Generate a custom checklist for the current feature based on user requirements |
-| speckit.clarify | speckit.clarify.agent.md | Identify underspecified areas in the feature spec via targeted clarification questions |
-| speckit.constitution | speckit.constitution.agent.md | Create or update the project constitution from principle inputs |
-| speckit.implement | speckit.implement.agent.md | Execute the implementation plan by processing tasks defined in tasks.md |
-| speckit.plan | speckit.plan.agent.md | Execute the implementation planning workflow to generate design artifacts |
-| speckit.specify | speckit.specify.agent.md | Create or update the feature specification from a natural language description |
-| speckit.tasks | speckit.tasks.agent.md | Generate an actionable, dependency-ordered tasks.md from design artifacts |
-| speckit.taskstoissues | speckit.taskstoissues.agent.md | Convert tasks into dependency-ordered GitHub issues |
+| Agent Name | Agent ID | File Path | Tier | Description | Key Handoffs | Successor Mapping |
+|---|---|---|---|---|---|---|
+| Ambulance Paramedic | ambulance-paramedic | .github/agents/sectors/_archive/ambulance-paramedic.agent.md | archived | Ambulance and paramedic sector agent — patient triage, medical evacuation, and mass casualty management across Australian state and territory services. | health, logistics-officer, police | Ask jurisdiction; use act-ambulance/nsw-ambulance/av/qas/saas/at/sja-wa/sja-nt; national: rfds/sja-national |
+| Commonwealth Government | commonwealth-government | .github/agents/sectors/_archive/commonwealth-government.agent.md | archived | Commonwealth Government sector agent — COMDISPLAN national coordination, Emergency Management Australia, NEMA, and Defence assistance during declared national emergencies. | state-government, meteorology-bom, incident-commander, compliance-auditor | nema (primary), adf, bom-national, ga-national, arc, afp-commonwealth, abf |
+| Fire Services | fire-services | .github/agents/sectors/_archive/fire-services.agent.md | archived | Fire services sector agent — bushfire and structural fire response, lead agency designation, and evacuation zone management across Australian jurisdictions. | police, ses, meteorology-bom, incident-commander, ambulance-paramedic | Ask jurisdiction; use frnsw/nsw-rfs/frv/cfa-vic/qfd/dfes-wa/tfs/sacfs/samfs/act-fr/act-rfs/ntfrs/bushfires-nt; aviation: asa |
+| Meteorology BoM | meteorology-bom | .github/agents/sectors/_archive/meteorology-bom.agent.md | archived | Bureau of Meteorology sector agent — authoritative weather warnings, fire weather intelligence, flood watches, and cyclone tracking under the Meteorology Act 1955. | fire-services, ses, incident-commander, commonwealth-government | bom-national (primary), nema for national-coordination escalation |
+| Police | police | .github/agents/sectors/_archive/police.agent.md | archived | Police sector agent — evacuation enforcement, traffic management, coronial engagement, and search and rescue coordination across Australian jurisdictions. | fire-services, ses, incident-commander, ambulance-paramedic | Ask jurisdiction; use act-policing/nswpf/vicpol/qps/sapol/wapol/taspol/ntpf; national: afp-commonwealth |
+| SES | ses | .github/agents/sectors/_archive/ses.agent.md | archived | State Emergency Service sector agent — flood and storm lead combat agency, rescue operations, and volunteer coordination across Australian jurisdictions. | police, meteorology-bom, volunteer, fire-services | Ask jurisdiction; use ses-nsw/ses-vic/ses-qld/ses-sa/ses-tas/ses-act/ntes/dfes-wa |

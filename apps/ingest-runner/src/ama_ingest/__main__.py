@@ -622,7 +622,9 @@ def _failure(
 def main(argv: Iterable[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
-    logging.basicConfig(level=getattr(logging, args.log_level.upper(), logging.INFO))
+    from apps.console_logging import configure_console_logging
+
+    configure_console_logging(level=getattr(logging, args.log_level.upper(), logging.INFO))
     result = run(args=args)
     sys.stdout.write(json.dumps(result.__dict__, default=str) + "\n")
     return result.exit_code

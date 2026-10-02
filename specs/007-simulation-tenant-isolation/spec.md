@@ -167,8 +167,8 @@ An administrator manages the lifecycle of simulation tenants: creating, monitori
 
 - **FR-020**: The system MUST provide a simulation dashboard that is functionally identical to the live dashboard but displays only data from the selected simulation tenant.
 - **FR-021**: The system MUST display a persistent, prominent "SIMULATION" identification banner on all simulation dashboard views that cannot be dismissed, minimised, or obscured by other UI elements.
-- **FR-022**: The system MUST never display simulation data on the default (live) dashboard view. The live dashboard MUST NOT include a tenant picker, simulation toggle, or any simulation-related UI element.
-- **FR-023**: The system MUST provide a separate simulation management area (accessible only to authorised roles) where exercise coordinators can create, monitor, pause, resume, archive, and delete simulation tenants.
+- **FR-022**: The system MUST never display simulation data, tenant selection, simulation mode toggles, or simulation controls on the default (live) dashboard view. Developer environments MAY display a navigation link to the separate simulation management area; that link MUST NOT change the live tenant context or embed simulation data in the live view. Non-developer environments MUST NOT display this developer navigation entry.
+- **FR-023**: The system MUST provide a separate simulation management area (accessible only to authorised roles) where exercise coordinators can create, monitor, pause, resume, archive, and delete simulation tenants. Local and Azure-hosted developer environments MUST expose a clearly labelled navigation entry to this separate area.
 - **FR-024**: The system MUST support persona-scoped workspaces within simulation tenants, filtering tasks, signals, and recommendations by persona role and jurisdiction identically to the live workspace filtering logic.
 
 #### Audit and Reporting
@@ -246,5 +246,4 @@ Items explicitly deferred from this spec; promotion to in-scope requires the nam
 - **SCP-016**: Constitutional-level changes (NON-NEGOTIABLE #1..#5) are not modified by this spec; any tension is documented as `[RISK]` in Assumptions, never resolved here.
 - **SCP-017**: Cross-spec authority disputes are arbitrated via `product-owner-ba` and the speckit governance flow; this spec does not unilaterally claim ownership of capabilities owned elsewhere. `defers-to:` 018 (recovery-phase indicators, triggers, phase-exit criteria); 008 (warning-tier authoring, multilingual delivery, misinformation defence) where applicable.
 - **SCP-018** [META]: This spec is delivery-hygiene / enabling infrastructure; capstone-outcome-critical-path ownership lives in specs (canonical list — see the verbatim bullet inserted by feature 028 / US4 elsewhere in this section). (See `specs/028-capstone-alignment/contracts/meta-spec-flag.contract.md`; the verbatim canonical bullet is added in US4.)
-
 

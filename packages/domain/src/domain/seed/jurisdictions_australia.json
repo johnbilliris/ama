@@ -289,6 +289,79 @@
         ]
       ]
     },
+    "geometry_fidelity": "approximate",
+    "status": "active"
+  },
+  {
+    "jurisdiction_id": "nsw-regional-blue-mountains",
+    "name": "NSW Blue Mountains Region",
+    "level": "regional",
+    "parent_jurisdiction_id": "nsw",
+    "policy_set_id": "policy-nsw",
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            150.0,
+            -34.2
+          ],
+          [
+            150.8,
+            -34.2
+          ],
+          [
+            150.8,
+            -33.3
+          ],
+          [
+            150.0,
+            -33.3
+          ],
+          [
+            150.0,
+            -34.2
+          ]
+        ]
+      ]
+    },
+    "geometry_fidelity": "approximate",
+    "status": "active"
+  },
+  {
+    "jurisdiction_id": "lga-blue-mountains",
+    "name": "Blue Mountains Local Government Area",
+    "level": "local",
+    "parent_jurisdiction_id": "nsw-regional-blue-mountains",
+    "policy_set_id": "policy-nsw",
+    "geospatial_boundary": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [
+            150.2,
+            -34.05
+          ],
+          [
+            150.75,
+            -34.05
+          ],
+          [
+            150.75,
+            -33.5
+          ],
+          [
+            150.2,
+            -33.5
+          ],
+          [
+            150.2,
+            -34.05
+          ]
+        ]
+      ]
+    },
+    "geometry_fidelity": "approximate",
     "status": "active"
   }
 ]

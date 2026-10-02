@@ -4,10 +4,13 @@ import os
 
 if __name__ == "__main__":
     import uvicorn
+    from apps.console_logging import configure_console_logging, uvicorn_log_config
+
     from planning.agent import create_app
     from planning.config import PlanningConfig
 
+    configure_console_logging()
     _PORT = int(os.environ.get("PORT", "8085"))
     config = PlanningConfig()
     app = create_app(config=config)
-    uvicorn.run(app, host="0.0.0.0", port=_PORT)
+    uvicorn.run(app, host="0.0.0.0", port=_PORT, log_config=uvicorn_log_config())

@@ -5,7 +5,9 @@ import random
 import time
 import uuid
 
-from locust import HttpUser, between, events, task
+from locust import HttpUser, LoadTestShape, between, constant_throughput, events, task
+
+from tests.load.spec006_load_payload import build_canonical_ingest_payload
 
 # Spec 036 / F-A10 / T219 — 50-agent retrieval harness (FR-RAG-TEST-02).
 # `psutil` is best-effort: when absent we fall back to a no-op probe so
@@ -19,38 +21,74 @@ except ImportError:  # pragma: no cover - exercised on first wheel pin
 class DashboardUser(HttpUser):
     wait_time = between(0.2, 1.0)
 
+    def _auth_headers(self) -> dict[str, str]:
+        header_name = os.getenv("AMA_LOAD_AUTH_HEADER_NAME", "").strip()
+        header_value = os.getenv("AMA_LOAD_AUTH_HEADER_VALUE", "").strip()
+        if not header_name or not header_value:
+            return {}
+        return {header_name: header_value}
+
     @task(3)
     def read_dashboard(self) -> None:
-        self.client.get("/api/health", name="dashboard_health")
+        incident_id = os.getenv("AMA_LOAD_INCIDENT_ID", "inc-1")
+        self.client.get(
+            f"/api/incidents/{incident_id}/dashboard",
+            name="dashboard_incident_aggregate",
+            headers=self._auth_headers(),
+        )
 
     @task(2)
     def list_signals(self) -> None:
-        self.client.get("/api/signals", name="signals_list")
+        incident_id = os.getenv("AMA_LOAD_INCIDENT_ID", "inc-1")
+        self.client.get(
+            f"/api/signals?incidentId={incident_id}",
+            name="signals_list",
+            headers=self._auth_headers(),
+        )
 
 
 class BurstIngestionUser(HttpUser):
-    wait_time = between(0.01, 0.1)
+    wait_time = constant_throughput(14)
+
+    def _auth_headers(self) -> dict[str, str]:
+        header_name = os.getenv("AMA_LOAD_AUTH_HEADER_NAME", "").strip()
+        header_value = os.getenv("AMA_LOAD_AUTH_HEADER_VALUE", "").strip()
+        if not header_name or not header_value:
+            return {}
+        return {header_name: header_value}
+
+    @staticmethod
+    def _canonical_payload(*, incident_id: str) -> dict[str, object]:
+        source_id = os.getenv("AMA_LOAD_SOURCE_ID", "bom-warnings").strip() or "bom-warnings"
+        return build_canonical_ingest_payload(source_id=source_id, incident_id=incident_id)
 
     @task
     def ingest_signal(self) -> None:
+        incident_id = os.getenv("AMA_LOAD_INCIDENT_ID", "inc-1")
+        payload = self._canonical_payload(incident_id=incident_id)
         self.client.post(
             "/api/signals",
-            json={
-                "source": {"dataSourceId": "ds-1", "name": "sim", "kind": "authoritative"},
-                "incidentId": "inc-1",
-                "category": "fire",
-                "occurredAt": "2026-03-16T00:00:00Z",
-                "receivedAt": "2026-03-16T00:00:05Z",
-                "jurisdictionId": "jur-1",
-                "location": {"lat": -33.86, "lon": 151.21},
-                "payload": {"severity": "high"},
-                "confidenceScore": 0.95,
-                "freshnessScore": 0.9,
-                "validationStatus": "validated",
-                "provenance": {"source": "simulator"},
-            },
+            json=payload,
             name="signals_ingest",
+            headers=self._auth_headers(),
         )
+
+
+class StagingPlateauShape(LoadTestShape):
+    """Ramp to a 1,000-user plateau for the nightly staging scenario."""
+
+    stages = (
+        {"duration": 60, "users": 500, "spawn_rate": 50},
+        {"duration": 120, "users": 1000, "spawn_rate": 50},
+        {"duration": 660, "users": 1000, "spawn_rate": 10},
+    )
+
+    def tick(self):
+        run_time = self.get_run_time()
+        for stage in self.stages:
+            if run_time < stage["duration"]:
+                return stage["users"], stage["spawn_rate"]
+        return None
 
 
 # ---------------------------------------------------------------------------

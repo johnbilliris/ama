@@ -119,7 +119,7 @@
     "containerRegistryName": "[format('acramaeval{0}{1}', variables('storageEnvSegment'), variables('shortUniqueSuffix'))]",
     "evalRunnerImageRepository": "eval-runner",
     "evalRunnerImageTag": "[parameters('env')]",
-    "apiImageRepository": "ama-api",
+    "apiImageRepository": "ama/api",
     "apiImageTag": "[parameters('env')]",
     "allowPublicEvalDataPlane": "[equals(parameters('env'), 'dev')]",
     "dataPlanePublicNetworkAccess": "[if(variables('allowPublicEvalDataPlane'), 'Enabled', 'Disabled')]",

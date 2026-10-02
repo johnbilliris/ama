@@ -49,6 +49,48 @@ jobs:
             Write-Host "Primary region already unhealthy: $_"
           }
 
+      - name: Write pre-failover sentinel records
+        shell: pwsh
+        env:
+          API_URL: ${{ vars.API_URL_STAGING || 'https://api.staging.disaster-response-hub.example' }}
+          SENTINEL_COUNT: ${{ vars.DR_SENTINEL_COUNT || '12' }}
+        run: |
+          $incidentId = "dr-drill-$env:GITHUB_RUN_ID"
+          $capturedAt = (Get-Date).ToUniversalTime().ToString("o")
+          $sentinels = @()
+          for ($i = 0; $i -lt [int]$env:SENTINEL_COUNT; $i++) {
+            $occurred = (Get-Date).ToUniversalTime().ToString("o")
+            $body = @{
+              source = @{ dataSourceId = "dr-drill-sentinel"; name = "dr-drill-sentinel"; kind = "authoritative" }
+              incidentId = $incidentId
+              category = "weather"
+              occurredAt = $occurred
+              receivedAt = $occurred
+              location = @{ type = "Point"; coordinates = @(151.2093, -33.8688); precisionMeters = 100 }
+              payload = @{ probe = "dr-drill-sentinel"; ordinal = $i }
+              confidenceScore = 1.0
+              freshnessScore = 1.0
+              validationStatus = "pending"
+              provenance = @{ collectionMethod = "dr-drill"; sourceUri = "dr-drill://sentinel/$i" }
+            } | ConvertTo-Json -Depth 10
+            $resp = Invoke-RestMethod "$env:API_URL/api/signals" -Method Post -ContentType "application/json" -Body $body -TimeoutSec 30
+            if (-not $resp.signalId) {
+              throw "Sentinel ingest missing signalId at index $i"
+            }
+            $sentinels += @{
+              signal_id = $resp.signalId
+              ordinal = $i
+              wrote_at = $occurred
+            }
+          }
+          $meta = @{
+            incident_id = $incidentId
+            captured_at = $capturedAt
+            sentinels = $sentinels
+          }
+          $meta | ConvertTo-Json -Depth 10 | Out-File -FilePath dr-sentinels.json -Encoding utf8
+          Write-Host "Wrote $($sentinels.Count) sentinel records for incident $incidentId"
+
       - name: Trigger Cosmos failover to australiasoutheast
         shell: pwsh
         env:
@@ -68,24 +110,99 @@ jobs:
             exit 1
           }
 
-      - name: Smoke check failover (australiasoutheast)
+      - name: Validate sentinel recovery and RPO
         shell: pwsh
         env:
           API_URL: ${{ vars.API_URL_STAGING || 'https://api.staging.disaster-response-hub.example' }}
         run: |
-          # Allow DNS + Container Apps revision warm-up
-          Start-Sleep -Seconds 30
-          for ($i = 0; $i -lt 10; $i++) {
-            try {
-              Invoke-WebRequest "$env:API_URL/api/health" -TimeoutSec 30 | Out-Null
-              Write-Host "Secondary region healthy after $($i*30) seconds"
-              exit 0
-            } catch {
-              Start-Sleep -Seconds 30
+          $meta = Get-Content dr-sentinels.json -Raw | ConvertFrom-Json
+          $incidentId = $meta.incident_id
+          $expected = @($meta.sentinels | ForEach-Object { $_.signal_id })
+          $deadline = (Get-Date).ToUniversalTime().AddMinutes(15)
+          $recovered = @()
+          while ((Get-Date).ToUniversalTime() -lt $deadline) {
+            $resp = Invoke-RestMethod "$env:API_URL/api/signals?incidentId=$incidentId" -Method Get -TimeoutSec 30
+            $items = @()
+            if ($resp -is [System.Collections.IEnumerable]) {
+              $items = @($resp)
+            } elseif ($resp.items) {
+              $items = @($resp.items)
             }
+            $recovered = @($items | ForEach-Object { $_.signalId })
+            $missing = @($expected | Where-Object { $_ -notin $recovered })
+            if ($missing.Count -eq 0) {
+              break
+            }
+            Start-Sleep -Seconds 15
           }
-          Write-Error "Secondary region failed to come up within 5 minutes"
-          exit 1
+          $missing = @($expected | Where-Object { $_ -notin $recovered })
+          $lostWrites = $missing.Count
+          $capturedAt = [DateTime]::Parse($meta.captured_at).ToUniversalTime()
+          $rpoMinutes = ((Get-Date).ToUniversalTime() - $capturedAt).TotalMinutes
+          $result = @{
+            incident_id = $incidentId
+            expected_count = $expected.Count
+            recovered_count = $recovered.Count
+            lost_writes = $lostWrites
+            missing_signal_ids = $missing
+            observed_rpo_minutes = [Math]::Round($rpoMinutes, 2)
+          }
+          $result | ConvertTo-Json -Depth 6 | Out-File -FilePath dr-rpo-result.json -Encoding utf8
+          if ($lostWrites -gt 0) {
+            Write-Error "RPO breach: lost writes detected ($lostWrites)"
+            exit 1
+          }
+          if ($rpoMinutes -gt 15) {
+            Write-Error "RPO breach: observed RPO ${rpoMinutes}m > 15m"
+            exit 1
+          }
+
+      - name: Probe real user workflow after failover
+        shell: pwsh
+        env:
+          API_URL: ${{ vars.API_URL_STAGING || 'https://api.staging.disaster-response-hub.example' }}
+        run: |
+          $meta = Get-Content dr-sentinels.json -Raw | ConvertFrom-Json
+          $incidentId = $meta.incident_id
+          $dashboard = Invoke-WebRequest "$env:API_URL/api/incidents/$incidentId/dashboard" -TimeoutSec 30
+          if ($dashboard.StatusCode -ne 200) {
+            Write-Error "Workflow probe failed: dashboard endpoint returned $($dashboard.StatusCode)"
+            exit 1
+          }
+          $signals = Invoke-WebRequest "$env:API_URL/api/signals?incidentId=$incidentId" -TimeoutSec 30
+          if ($signals.StatusCode -ne 200) {
+            Write-Error "Workflow probe failed: signals endpoint returned $($signals.StatusCode)"
+            exit 1
+          }
+
+      - name: Build residency inventory and fail non-AU resources
+        shell: bash
+        env:
+          RG: ${{ vars.AZURE_RG_STAGING || 'rg-drh-staging' }}
+          COSMOS_NAME: ${{ vars.COSMOS_NAME_STAGING || 'cdb-drh-staging' }}
+        run: |
+          set -euo pipefail
+          az resource list -g "${RG}" -o json > dr-resources.json
+          az cosmosdb show -g "${RG}" -n "${COSMOS_NAME}" -o json > dr-cosmos.json
+          az storage account list -g "${RG}" -o json > dr-storage.json
+          az monitor app-insights component list -g "${RG}" -o json > dr-telemetry.json
+          python scripts/dr_drill_residency_inventory.py \
+            --resources-json dr-resources.json \
+            --cosmos-json dr-cosmos.json \
+            --storage-json dr-storage.json \
+            --telemetry-json dr-telemetry.json \
+            --out dr-residency-inventory.json
+
+      - name: Upload drill artefacts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: dr-drill-${{ github.run_id }}
+          path: |
+            dr-sentinels.json
+            dr-rpo-result.json
+            dr-residency-inventory.json
+          retention-days: 30
 
       - name: Fail back (best-effort)
         if: always()

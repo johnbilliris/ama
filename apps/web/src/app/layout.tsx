@@ -2,6 +2,7 @@ import type { PropsWithChildren } from "react";
 import { AppShell } from "@ama/ui/components/layout/app-shell";
 
 import { HelpAssistantDock } from "@/components/help/HelpAssistantDock";
+import { LocaleShell } from "@/components/accessibility/locale-shell";
 import { HelpChatProvider } from "@/lib/help/chatStore";
 
 import "./globals.css";
@@ -27,7 +28,9 @@ export default function RootLayout({ children }: PropsWithChildren) {
       </head>
       <body>
         <HelpChatProvider>
-          <AppShell>{children}</AppShell>
+          <AppShell>
+            <LocaleShell>{children}</LocaleShell>
+          </AppShell>
           <HelpAssistantDock />
         </HelpChatProvider>
       </body>

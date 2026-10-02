@@ -25,29 +25,69 @@ class MonitoringMafAgent(MafAgentFacade):
     async def run_legacy(self, input_payload: Any) -> BaseModel:
         # Lazy import: the legacy package pulls in heavy modules (azure-iot,
         # shapely transitively) that the test environment may stub out.
-        from monitoring.agent import MonitoringAgent
+        from monitoring.audit import AuditWriter
+        from monitoring.config import MonitoringConfig
         from monitoring.models import DecisionType, MonitoringDecisionRecord
+        from monitoring.pipeline import SignalProcessingPipeline
 
-        legacy = MonitoringAgent()
         envelope = input_payload  # caller MUST already pass a SignalEnvelope-shaped object
-        summary = legacy.summarize_signal(envelope)
-        handoff = legacy.build_high_risk_handoff(envelope)
         signal_id = getattr(envelope, "envelope_id", None) or getattr(envelope, "signalId", "unknown")
-        confidence = float(getattr(envelope, "confidenceScore", 0.0))
-        freshness = float(getattr(envelope, "freshnessScore", 0.0))
-        record = MonitoringDecisionRecord(
-            signal_id=str(signal_id),
-            decision=DecisionType.escalated if handoff is not None else DecisionType.discarded,
-            confidence=confidence,
-            effective_confidence=confidence * freshness,
-            freshness_score=freshness,
-            inputs={"category": getattr(envelope, "category", "unknown")},
-            output={"summary": summary, "handoff_target": handoff.target_agent if handoff else None},
-            reasoning_summary=summary.get("llm_summary", "rule-based decision"),
-            content_safety_result=summary.get("content_safety_result", "passed"),
-            incident_scope_key=f"live:{getattr(envelope, 'incidentId', 'unassociated')}",
+        tenant_id = str(getattr(envelope, "tenantId", "live") or "live")
+
+        payload = {
+            "source": {
+                "dataSourceId": str(getattr(getattr(envelope, "source", object()), "dataSourceId", "unknown")),
+                "name": str(getattr(getattr(envelope, "source", object()), "name", "unknown")),
+                "kind": str(getattr(getattr(envelope, "source", object()), "kind", "unknown")),
+            },
+            "incidentId": getattr(envelope, "incidentId", None),
+            "category": str(getattr(envelope, "category", "unknown")),
+            "occurredAt": getattr(getattr(envelope, "occurredAt", None), "isoformat", lambda: "")(),
+            "receivedAt": getattr(getattr(envelope, "receivedAt", None), "isoformat", lambda: "")(),
+            "location": getattr(envelope, "location", {}),
+            "payload": getattr(envelope, "payload", {}),
+            "confidenceScore": float(getattr(envelope, "confidenceScore", 0.0)),
+            "freshnessScore": float(getattr(envelope, "freshnessScore", 0.0)),
+            "validationStatus": str(getattr(envelope, "validationStatus", "pending")),
+            "provenance": {
+                "collectionMethod": "maf_runtime",
+                "sourceUri": f"maf://monitoring/{signal_id}",
+            },
+        }
+
+        delivered: list[object] = []
+
+        async def _deliver(handoff):
+            delivered.append(handoff)
+
+        config = MonitoringConfig()
+        audit_writer = AuditWriter(config=config, cosmos_client=None)
+        pipeline = SignalProcessingPipeline(
+            config=config,
+            audit_writer=audit_writer,
+            deliver_fn=_deliver,
         )
-        return record
+
+        await pipeline.process_signal(payload, str(signal_id), tenant_id=tenant_id)
+
+        latest = next(iter(audit_writer._buffer), None)
+        if latest is not None:
+            return latest.record
+
+        decision = DecisionType.escalated if delivered else DecisionType.discarded
+        return MonitoringDecisionRecord(
+            signal_id=str(signal_id),
+            decision=decision,
+            confidence=float(getattr(envelope, "confidenceScore", 0.0)),
+            effective_confidence=float(getattr(envelope, "confidenceScore", 0.0))
+            * float(getattr(envelope, "freshnessScore", 0.0)),
+            freshness_score=float(getattr(envelope, "freshnessScore", 0.0)),
+            inputs={"category": getattr(envelope, "category", "unknown")},
+            output={"handoff_delivered": bool(delivered)},
+            reasoning_summary="pipeline fallback record",
+            incident_scope_key=f"{tenant_id}:{getattr(envelope, 'incidentId', 'unassociated')}",
+            tenant_id=tenant_id,
+        )
 
 
 async def _amain() -> int:

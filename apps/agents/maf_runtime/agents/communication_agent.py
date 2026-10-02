@@ -29,15 +29,37 @@ class CommunicationMafAgent(MafAgentFacade):
     name = "communication"
 
     async def run_legacy(self, input_payload: Any) -> BaseModel:
+        from common.handoffs import AgentHandoffEvent
         from communication.models import PublicAlert
+        from communication.pipeline import CommunicationProcessingPipeline
 
-        payload = input_payload if isinstance(input_payload, dict) else {}
+        payload = input_payload if isinstance(input_payload, dict) else getattr(input_payload, "payload", {})
+        if not isinstance(payload, dict):
+            payload = {}
         incident_id = payload.get("incident_id", "unknown")
-        return PublicAlert(
-            alert_id=f"ca-{incident_id}-v1",
-            incident_id=incident_id,
-            version=1,
+        handoff = AgentHandoffEvent(
+            handoff_id=f"handoff-{incident_id}-communication",
+            incident_id=str(incident_id),
+            source_agent="risk_assessment",
+            target_agent="communication",
+            scope_key=str(incident_id),
+            confidence=float(payload.get("confidenceScore", payload.get("confidence", 0.85))),
+            payload={
+                "hazard_type": payload.get("category", "general"),
+                "severity": payload.get("severity", "moderate"),
+                "location": payload.get("location", "affected area"),
+                "change_type": "initial",
+                "recommendationId": payload.get("recommendationId", ""),
+                "assessmentId": payload.get("assessmentId", ""),
+                "summary": payload.get("summary", ""),
+                "explanation": payload.get("explanation", ""),
+            },
+            tenant_id=str(payload.get("tenant_id", "live")),
         )
+        alert = CommunicationProcessingPipeline().process_handoff(handoff)
+        if alert is None:
+            raise RuntimeError("Communication pipeline rejected generated handoff")
+        return PublicAlert.model_validate(alert.model_dump(mode="json"))
 
 
 async def _amain() -> int:

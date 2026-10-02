@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import re
 from typing import Any
 
@@ -32,11 +31,18 @@ logger = logging.getLogger(__name__)
 
 
 _PROTECTED_PREFIXES = (
+    "/api/signals",
+    "/api/audit/",
     "/api/outcomes/",
-    "/api/audit/list",
     "/api/auth/whoami",
     "/api/offline/replay",
     "/api/recovery/handover",
+)
+
+_EXPLICIT_ALLOW_PREFIXES = (
+    "/api/health",
+    "/api/docs",
+    "/api/openapi.json",
 )
 
 
@@ -78,10 +84,27 @@ def _mask_pii(text: str) -> tuple[str, int]:
 
 class ClassifierGatewayMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
+        if request.url.path.startswith(_EXPLICIT_ALLOW_PREFIXES):
+            return await call_next(request)
+
         if not _is_protected(request.url.path):
             return await call_next(request)
 
-        if request.method.upper() not in {"POST", "PUT", "PATCH"}:
+        method = request.method.upper()
+        if method == "GET":
+            if request.url.path.startswith("/api/audit/") and "subject" in request.query_params:
+                subject = request.query_params.get("subject", "")
+                if not subject.strip():
+                    return error_to_envelope_response(
+                        request,
+                        ExtensionEnvelopeError(
+                            ExtensionErrorCode.SOVEREIGNTY_DENIED,
+                            detail="classifier_failed: empty subject query",
+                        ),
+                    )
+            return await call_next(request)
+
+        if method not in {"POST", "PUT", "PATCH"}:
             return await call_next(request)
 
         try:
@@ -97,6 +120,14 @@ class ClassifierGatewayMiddleware(BaseHTTPMiddleware):
             )
 
         text = body.decode("utf-8", errors="replace") if body else ""
+        if not text.strip():
+            return error_to_envelope_response(
+                request,
+                ExtensionEnvelopeError(
+                    ExtensionErrorCode.SOVEREIGNTY_DENIED,
+                    detail="classifier_failed: empty mutation payload",
+                ),
+            )
 
         if text and _has_pspf(text):
             request.state.audit_extension_envelope = {
@@ -134,8 +165,6 @@ class ClassifierGatewayMiddleware(BaseHTTPMiddleware):
 
 
 def add_classifier_gateway_middleware(app: FastAPI) -> None:
-    if os.environ.get("AMA_ENABLE_PRODUCTION_AUTH", "0") != "1":
-        return
     app.add_middleware(ClassifierGatewayMiddleware)
 
 

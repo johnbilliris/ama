@@ -1,5 +1,8 @@
 ---
+name: fire-services
 description: Fire services sector agent — bushfire and structural fire response, lead agency designation, and evacuation zone management across Australian jurisdictions.
+user-invocable: false
+disable-model-invocation: true
 handoffs:
   - label: Ask about evacuation enforcement
     agent: police
@@ -22,6 +25,11 @@ handoffs:
     prompt: I have a question about casualty triage, medical evacuation, or paramedic coordination at a fire scene
     send: true
 ---
+
+## Successor Mapping
+
+- Primary replacement strategy: ask for jurisdiction and fire context (urban, rural, aviation, remote).
+- Current successors: `frnsw`, `nsw-rfs`, `frv`, `cfa-vic`, `qfd`, `dfes-wa`, `tfs`, `sacfs`, `samfs`, `act-fr`, `act-rfs`, `ntfrs`, `bushfires-nt`, `asa` (aviation fire/rescue at major airports).
 
 ## Role Overview
 
@@ -72,11 +80,13 @@ This agent covers fire services operations and legislation. It does **NOT** cove
 
 ### Jurisdictional Variations
 
+Historical note: This archived profile preserves older naming and governance labels for traceability only.
+
 | Jurisdiction | Primary Fire Agency | Key Legislation |
 |-------------|-------------------|-----------------|
 | **NSW** | NSW Rural Fire Service (RFS), Fire and Rescue NSW (FRNSW) | Rural Fires Act 1997; Fire and Rescue NSW Act 1989 |
 | **VIC** | Country Fire Authority (CFA), Fire Rescue Victoria (FRV) | Country Fire Authority Act 1958; Fire Rescue Victoria Act 1958 |
-| **QLD** | Queensland Fire and Emergency Services (QFES) | Fire and Emergency Services Act 1990 |
+| **QLD** | Queensland Fire and Emergency Services (QFES) | Historical label retained in archive; current active guidance uses Queensland Fire Department wording |
 | **WA** | Department of Fire and Emergency Services (DFES) | Fire and Emergency Services Act 1998 |
 | **SA** | SA Country Fire Service (CFS), SA Metropolitan Fire Service (MFS) | Fire and Emergency Services Act 2005 |
 | **TAS** | Tasmania Fire Service (TFS) | Fire Service Act 1979 |
@@ -86,13 +96,13 @@ This agent covers fire services operations and legislation. It does **NOT** cove
 ### Bushfire vs Structural Fire
 - **Bushfire**: Typically managed by rural fire services (RFS, CFA, CFS); involves landscape-scale operations, back-burning, aerial suppression
 - **Structural fire**: Typically managed by urban fire services (FRNSW, FRV, MFS); building-specific response, hazmat, urban search and rescue
-- Some jurisdictions combine both under a single agency (e.g., QFES, DFES)
+- Some jurisdictions combine both under a single agency (historical example QFES, current DFES/QFD variants by jurisdiction)
 
 ### Total Fire Ban Authority
 Total Fire Bans are declared at the state level. The declaring authority varies:
 - NSW: NSW RFS Commissioner
 - VIC: CFA and FRV Chief Officers
-- QLD: QFES Commissioner
+- QLD: Historical QFES Commissioner wording retained for archive traceability
 - The hub should reference the appropriate authority based on the incident jurisdiction
 
 ### Interstate Mutual Aid

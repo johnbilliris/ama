@@ -169,6 +169,62 @@ class TestStage3DemandExtraction:
         assert plan is not None
         assert any(d.source_type == "transport_requirement" for d in plan.demands)
 
+    def test_structured_transport_fields_are_preserved_with_stable_demand_id(self):
+        pipeline = _make_pipeline()
+        handoff = _make_handoff(
+            source_agent="evacuation",
+            payload={
+                "transportRequirements": [
+                    {
+                        "requirementId": "tr-stable-001",
+                        "vehicleType": "wheelchair_accessible_vehicle",
+                        "quantity": 10,
+                        "pickupLocation": {"lat": -16.93, "lon": 145.77},
+                        "priority": "immediate",
+                        "estimatedIndividuals": 40,
+                        "facilityId": "facility-access-centre",
+                        "facilityName": "Access Centre",
+                        "destinationAssemblyAreaId": "aa-001",
+                        "destinationAssemblyAreaName": "Assembly One",
+                        "destinationRouteId": "route-access-001",
+                        "destinationResolved": True,
+                        "unresolvedDestinationReason": None,
+                        "originZone": 1,
+                        "phaseNumber": 1,
+                        "specialConsiderations": ["assisted_transport"],
+                        "countBasis": "facility_capacity",
+                        "dispatchAuthorized": False,
+                    }
+                ],
+                "evacuationPlanId": "ep-inc001-v1",
+                "dispatchAuthorized": False,
+            },
+        )
+
+        first = pipeline._extract_transport_demands(
+            handoff,
+            "live:inc001",
+        )[0]
+        second = pipeline._extract_transport_demands(
+            handoff,
+            "live:inc001",
+        )[0]
+
+        assert first.demand_id == second.demand_id
+        assert first.source_id == "tr-stable-001"
+        assert first.quantity == 10
+        assert first.estimated_individuals == 40
+        assert first.destination_assembly_area_id == "aa-001"
+        assert first.destination_assembly_area_name == "Assembly One"
+        assert first.destination_route_id == "route-access-001"
+        assert first.destination_resolved is True
+        assert first.unresolved_destination_reason is None
+        assert first.origin_zone == 1
+        assert first.phase_number == 1
+        assert first.special_considerations == ["assisted_transport"]
+        assert first.count_basis == "facility_capacity"
+        assert first.evacuation_plan_id == "ep-inc001-v1"
+
 
 class TestStage7PlanGeneration:
     def test_plan_has_version(self):

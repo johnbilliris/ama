@@ -6,10 +6,10 @@ import logging
 from collections.abc import AsyncIterator
 
 import httpx
-from app.api.dependencies.rbac import require_simulation_role
-from app.api.routes.simulations import _clock, _recorder, _repo
+from app.api.dependencies.rbac import require_simulation_participant, require_simulation_role
+from app.api.routes.simulations import _clock, _recorder, _repo, _seeding
+from app.core.async_io import run_blocking
 from app.core.auth import extract_principal_from_claims
-from app.core.tenant_context import TenantContext, set_current_tenant
 from app.services.simulation.controller_service import SimulationControllerService
 from app.services.simulation.sub_agent_invoker import production_invoker
 from fastapi import APIRouter, HTTPException, Request
@@ -47,6 +47,7 @@ _controller = SimulationControllerService(
     event_recorder=_recorder,
     clock_service=_clock,
     simulation_repository=_repo,
+    scenario_seeding_service=_seeding,
 )
 
 
@@ -62,15 +63,7 @@ async def post_chat(tenant_id: str, body: ChatRequest, request: Request) -> Stre
 
     if not tenant_id.startswith("sim-"):
         raise HTTPException(status_code=400, detail="chat endpoint is simulation-scoped only")
-
-    set_current_tenant(
-        TenantContext(
-            agency_id=principal.agency_id,
-            jurisdiction_ids=principal.jurisdiction_ids,
-            persona_id=principal.persona_id,
-            tenant_id=tenant_id,
-        )
-    )
+    await require_simulation_participant(principal, tenant_id, _repo)
 
     async def _generator() -> AsyncIterator[bytes]:
         async for event in _controller.stream_turn(
@@ -114,6 +107,7 @@ async def get_chat_history(
 
     if not tenant_id.startswith("sim-"):
         raise HTTPException(status_code=400, detail="chat endpoint is simulation-scoped only")
+    await require_simulation_participant(principal, tenant_id, _repo)
 
     # Clamp to a sensible window — the UI only needs recent context.
     if limit < 1:
@@ -121,7 +115,7 @@ async def get_chat_history(
     elif limit > 500:
         limit = 500
 
-    turns = _controller.history.list_turns(tenant_id, limit=limit)
+    turns = await run_blocking(_controller.history.list_turns, tenant_id, limit=limit)
     return {
         "tenant_id": tenant_id,
         "turns": [t.model_dump(mode="json") for t in turns],

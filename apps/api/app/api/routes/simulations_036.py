@@ -161,7 +161,9 @@ class LifecycleAck(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def _validate_sim_id(sim_id: str) -> UUID:
+def _validate_sim_id(sim_id: str | UUID) -> UUID:
+    if isinstance(sim_id, UUID):
+        return sim_id
     try:
         return UUID(sim_id)
     except ValueError as exc:
@@ -586,14 +588,14 @@ async def abort_simulation_036(
 
 
 @router.post(
-    "/{sim_id}/pause",
+    "/{sim_id:uuid}/pause",
     response_model=LifecycleAck,
     operation_id="pauseSimulation",
     status_code=status.HTTP_200_OK,
 )
 async def pause_simulation_036(
     request: Request,
-    sim_id: str = Path(..., min_length=1),
+    sim_id: UUID = Path(...),
     principal: CoordinatorPrincipal = Depends(require_simulation_coordinator),
 ) -> LifecycleAck:
     """Direct-REST pause (T-E02, FR-059).
@@ -610,7 +612,7 @@ async def pause_simulation_036(
         get_simulation_state_repository,
     )
 
-    _validate_sim_id(sim_id)
+    sim_id = str(_validate_sim_id(sim_id))
     audit = get_audit_writer()
 
     # T-P03 — durable state transition with ETag conditional replace.
@@ -667,14 +669,14 @@ async def pause_simulation_036(
 
 
 @router.post(
-    "/{sim_id}/resume",
+    "/{sim_id:uuid}/resume",
     response_model=LifecycleAck,
     operation_id="resumeSimulation",
     status_code=status.HTTP_200_OK,
 )
 async def resume_simulation_036(
     request: Request,
-    sim_id: str = Path(..., min_length=1),
+    sim_id: UUID = Path(...),
     principal: CoordinatorPrincipal = Depends(require_simulation_coordinator),
 ) -> LifecycleAck:
     """Direct-REST resume (T-E03, FR-059).
@@ -691,7 +693,7 @@ async def resume_simulation_036(
         get_simulation_state_repository,
     )
 
-    _validate_sim_id(sim_id)
+    sim_id = str(_validate_sim_id(sim_id))
     audit = get_audit_writer()
 
     # T-P03 — durable state transition.

@@ -22,6 +22,7 @@ from resource_allocation.models import (
     ShortfallDetail,
 )
 from resource_allocation.scoring import (
+    check_type_compatibility,
     compute_score,
     estimate_travel_time,
     haversine_distance,
@@ -112,6 +113,13 @@ class ResourceMatcher:
         scored: list[tuple[ResourceInventoryItem, float, ScoringRationale]] = []
 
         for resource in eligible_resources:
+            if not check_type_compatibility(
+                resource.resource_type.value,
+                resource.resource_sub_type,
+                demand.resource_type.value,
+                demand.resource_sub_type,
+            ):
+                continue
             score, rationale_dict = compute_score(resource, demand, config)
 
             if score <= 0.0:

@@ -16,6 +16,7 @@ Each stage produces audit records (RiskAssessmentDecisionRecord) and emits metri
 
 from __future__ import annotations
 
+import inspect
 import logging
 import time
 
@@ -36,6 +37,24 @@ from packages.domain.src.domain.models.hazard_assessment import HazardAssessment
 from packages.domain.src.domain.models.recommendation import Recommendation
 
 logger = logging.getLogger(__name__)
+
+
+def _persist_dead_letter_entry(handoff: AgentHandoffEvent) -> str:
+    from app.services.dead_letter_service import DeadLetterService
+
+    entry = DeadLetterService().create_entry(
+        entry_type="handoff_failure",
+        correlation_id=f"handoff:{handoff.handoff_id}",
+        original_payload=handoff.model_dump(mode="json"),
+        failure_reason=handoff.failure_reason or "handoff delivery exhausted",
+        failure_code="MAX_RETRIES_EXCEEDED",
+        source_service=handoff.source_agent,
+        target_service=handoff.target_agent,
+        tenant_scope_key=handoff.scope_key,
+        incident_id=handoff.incident_id,
+        retry_count=max(handoff.retry_count, 0),
+    )
+    return entry.entry_id
 
 
 def _build_scope_key(tenant_id: str, incident_id: str) -> str:
@@ -76,7 +95,7 @@ class AssessmentProcessingPipeline:
         self._assessment_store = assessment_store
         self._recommendation_store = recommendation_store
         self._deliver_fn = deliver_fn
-        self._on_dead_letter_fn = on_dead_letter_fn or (lambda h: f"dl-{h.handoff_id}")
+        self._on_dead_letter_fn = on_dead_letter_fn or _persist_dead_letter_entry
 
         # Counters for metrics
         self._handoff_count = 0
@@ -186,6 +205,11 @@ class AssessmentProcessingPipeline:
             signal_ids = signal_summary.get("signal_ids", [])
         if not signal_ids:
             signal_ids = payload.get("signal_ids", [])
+        stored_signal_refs = payload.get("stored_signal_refs", [])
+        if not isinstance(stored_signal_refs, list):
+            stored_signal_refs = []
+        evidence_snapshot = payload.get("evidence_snapshot", {})
+        snapshot_signals = evidence_snapshot.get("signals", []) if isinstance(evidence_snapshot, dict) else []
 
         # Extract signal info directly from the handoff payload for immediate use
         category = str(payload.get("category", signal_summary.get("category", "fire")))
@@ -195,34 +219,70 @@ class AssessmentProcessingPipeline:
         missing_count = 0
 
         if self._signal_store is not None:
-            for sid in signal_ids:
-                try:
-                    sig = self._signal_store.read_item(item=sid, partition_key=handoff.incident_id)
-                    signals.append(self._normalize_signal(sig))
-                except Exception:
-                    missing_count += 1
-                    logger.warning("Signal %s not retrievable", sid)
+            used_hpk_refs = False
+            if hasattr(self._signal_store, "get_by_hpk") and stored_signal_refs:
+                used_hpk_refs = True
+                for ref in stored_signal_refs:
+                    if not isinstance(ref, dict):
+                        continue
+                    sid = str(ref.get("signal_id") or "").strip()
+                    scope = str(ref.get("scope") or tenant_id).strip() or tenant_id
+                    jurisdiction_id = str(ref.get("jurisdiction_id") or "national").strip() or "national"
+                    data_source_id = str(ref.get("data_source_id") or "").strip()
+                    if not sid or not data_source_id:
+                        missing_count += 1
+                        continue
+                    try:
+                        maybe_sig = self._signal_store.get_by_hpk(
+                            signal_id=sid,
+                            scope=scope,
+                            jurisdiction_id=jurisdiction_id,
+                            data_source_id=data_source_id,
+                        )
+                        sig = run_async(maybe_sig) if inspect.isawaitable(maybe_sig) else maybe_sig
+                        if sig is None:
+                            raise KeyError(sid)
+                        signals.append(self._normalize_signal(sig))
+                    except Exception:
+                        missing_count += 1
+                        logger.warning("Signal %s not retrievable via exact reference", sid)
+
+            if not used_hpk_refs:
+                for sid in signal_ids:
+                    try:
+                        sig = self._signal_store.read_item(item=sid, partition_key=handoff.incident_id)
+                        signals.append(self._normalize_signal(sig))
+                    except Exception:
+                        missing_count += 1
+                        logger.warning("Signal %s not retrievable", sid)
         elif signal_ids:
-            # No signal store — build synthetic signal entries from handoff payload
+            # No signal store — use bounded handoff snapshot evidence for traceability.
+            snapshot_by_id = {
+                str(item.get("signal_id")): item
+                for item in snapshot_signals
+                if isinstance(item, dict) and item.get("signal_id")
+            }
             for sid in signal_ids:
+                snapshot = snapshot_by_id.get(sid, {})
                 signals.append(
                     {
                         "signal_id": sid,
                         "confidence_score": handoff.confidence,
                         "freshness_score": 1.0,
-                        "source_kind": source_kind,
-                        "category": category,
+                        "source_kind": snapshot.get("source_kind", source_kind),
+                        "category": snapshot.get("category", category),
                         "risk_direction": "increasing",
                         "hazard_parameter": "general",
-                        "payload": {},
-                        "provenance": {},
+                        "payload": snapshot.get("payload", {}),
+                        "provenance": snapshot.get("provenance", {}),
+                        "evidence_state": "snapshot",
                     }
                 )
         else:
-            # No signal IDs provided — use handoff payload as a synthetic signal
+            # No signal IDs provided — explicit unevidenced state (never a synthetic signal id).
             signals.append(
                 {
-                    "signal_id": f"synth-{handoff.handoff_id}",
+                    "signal_id": "unevidenced",
                     "confidence_score": handoff.confidence,
                     "freshness_score": 1.0,
                     "source_kind": source_kind,
@@ -231,6 +291,7 @@ class AssessmentProcessingPipeline:
                     "hazard_parameter": "general",
                     "payload": payload,
                     "provenance": {},
+                    "evidence_state": "unevidenced",
                 }
             )
 
@@ -515,6 +576,8 @@ class AssessmentProcessingPipeline:
         assessment: HazardAssessment,
         recommendations: list[Recommendation],
         tenant_id: str,
+        *,
+        all_stale: bool = False,
     ) -> list[AgentHandoffEvent]:
         """Stage 8: Evaluate and deliver downstream escalation handoffs.
 
@@ -522,6 +585,12 @@ class AssessmentProcessingPipeline:
         """
         scope_key = _build_scope_key(tenant_id, handoff.incident_id)
         handoffs: list[AgentHandoffEvent] = []
+
+        if all_stale:
+            logger.info(
+                "Suppressing downstream escalation for all-stale assessment %s", assessment.hazard_assessment_id
+            )
+            return handoffs
 
         # Block simulation → live escalation
         if tenant_id != "live" and tenant_id.startswith("sim"):
@@ -781,6 +850,7 @@ class AssessmentProcessingPipeline:
                     assessment,
                     recommendations,
                     effective_tenant,
+                    all_stale=correlation.all_stale,
                 )
                 result["handoffs"] = downstream_handoffs
 

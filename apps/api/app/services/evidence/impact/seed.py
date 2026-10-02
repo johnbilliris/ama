@@ -1,100 +1,125 @@
-"""Pillar D — Causal chain seed (T-D06, SC-006).
-
-Seeds one chain per AMA capability listed in the spec (specs 008-012, 036,
-036-sim-agent-extend). Real text would be sourced from each origin spec; we
-stub representative content so SC-006 (every capability has ≥1 chain) holds.
-"""
-
 from __future__ import annotations
 
 import secrets
 from datetime import UTC, datetime
-from decimal import Decimal
+from typing import TypedDict
 
 from ..models.chain import Assumption, CausalChain, ThreatToValidity
 
-CAPABILITIES: list[dict] = [
+
+class _Capability(TypedDict):
+    capability_id: str
+    spec: str
+    requirement: str
+    name: str
+    claim: str
+    kpis: list[str]
+
+
+CAPABILITIES: tuple[_Capability, ...] = (
     {
-        "capability_id": "risk-assessment-agent",
-        "spec": "specs/008-risk-assessment-agent/spec.md",
-        "name": "Risk Assessment Agent",
-        "kpis": ["lives_saved_lagging", "econ_loss_lagging"],
-        "magnitude": Decimal("15.0000"),
-        "unit": "pct uplift",
+        "capability_id": "communication-agent",
+        "spec": "specs/008-communication-agent/spec.md",
+        "requirement": "FR-005",
+        "name": "Communication Agent",
+        "claim": "Reviewed multilingual alerts may improve public-information reach.",
+        "kpis": ["public_info_alert_reach"],
     },
     {
         "capability_id": "evacuation-agent",
         "spec": "specs/009-evacuation-agent/spec.md",
+        "requirement": "FR-014",
         "name": "Evacuation Agent",
+        "claim": "Capacity-aware evacuation planning may increase usable evacuation lead time.",
         "kpis": ["evac_lead_lagging"],
-        "magnitude": Decimal("24.0000"),
-        "unit": "hours",
     },
     {
-        "capability_id": "communication-agent",
-        "spec": "specs/010-communication-agent/spec.md",
-        "name": "Communication Agent",
-        "kpis": ["public_info_alert_reach"],
-        "magnitude": Decimal("20.0000"),
-        "unit": "pct reach",
+        "capability_id": "monitoring-agent",
+        "spec": "specs/010-monitoring-agent/spec.md",
+        "requirement": "FR-010",
+        "name": "Monitoring Agent",
+        "claim": "Timely, confidence-bearing signal handoffs may reduce incident control time.",
+        "kpis": ["response_time_p1"],
     },
     {
         "capability_id": "resource-allocation-agent",
         "spec": "specs/011-resource-allocation-agent/spec.md",
+        "requirement": "FR-011",
         "name": "Resource Allocation Agent",
+        "claim": "Constraint-aware demand matching may improve measured logistics efficiency.",
         "kpis": ["logistics_efficiency"],
-        "magnitude": Decimal("30.0000"),
-        "unit": "pct uplift",
     },
     {
-        "capability_id": "monitoring-agent",
-        "spec": "specs/012-monitoring-agent/spec.md",
-        "name": "Monitoring Agent",
-        "kpis": ["response_time_p1"],
-        "magnitude": Decimal("45.0000"),
-        "unit": "pct reduction",
+        "capability_id": "risk-assessment-agent",
+        "spec": "specs/012-risk-assessment-agent/spec.md",
+        "requirement": "FR-011",
+        "name": "Risk Assessment Agent",
+        "claim": "Multi-source correlation may improve harm-reduction recommendations.",
+        "kpis": ["lives_saved_lagging", "econ_loss_lagging"],
     },
     {
         "capability_id": "foundry-rag-client",
-        "spec": "specs/036-foundry-rag-client/spec.md",
+        "spec": "specs/036-foundry-rag-grounding/spec.md",
+        "requirement": "FR-RAG-AG-04",
         "name": "Foundry RAG Client",
+        "claim": "Jurisdiction-grounded retrieval may reduce unsupported decision context.",
         "kpis": ["lives_saved_leading"],
-        "magnitude": Decimal("10.0000"),
-        "unit": "pct uplift",
     },
     {
         "capability_id": "telemetry-injection-agent",
         "spec": "specs/036-sim-agent-extend/spec.md",
+        "requirement": "FR-009",
         "name": "Telemetry-Injection Agent",
+        "claim": "Provenance-complete synthetic signals may improve replay measurement fidelity.",
         "kpis": ["evac_warning_leading"],
-        "magnitude": Decimal("12.0000"),
-        "unit": "minutes earlier",
     },
-]
+)
 
 
 def seed_chains() -> list[CausalChain]:
-    out: list[CausalChain] = []
-    for cap in CAPABILITIES:
-        out.append(
-            CausalChain(
-                id=secrets.token_hex(13),
-                capability_id=cap["capability_id"],
-                capability_name=cap["name"],
-                version=1,
-                kpis_moved=cap["kpis"],
-                expected_magnitude_value=cap["magnitude"],
-                expected_magnitude_unit=cap["unit"],
-                assumptions=[
-                    Assumption(text=f"{cap['name']} integrates with AIIMS function", resolved=True),
-                    Assumption(text="Operator accepts agent recommendation in <60s", resolved=False),
-                ],
-                threats_to_validity=[
-                    ThreatToValidity(text="Telemetry source lag > 60s", severity="medium"),
-                    ThreatToValidity(text="Out-of-domain scenario regression", severity="low"),
-                ],
-                originating_spec_path=cap["spec"],
-                created_at=datetime.now(UTC),
-            )
+    created_at = datetime.now(UTC)
+    return [
+        CausalChain(
+            id=secrets.token_hex(13),
+            capability_id=capability["capability_id"],
+            capability_name=capability["name"],
+            version=1,
+            claim=capability["claim"],
+            kpis_moved=capability["kpis"],
+            magnitude_status="hypothesis",
+            assumptions=[
+                Assumption(
+                    id=f"{capability['capability_id']}-integration",
+                    text="The capability is connected to the measured scenario event stream.",
+                    validation_method="Resolve emitted signal IDs in a persisted baseline/assisted replay.",
+                    evidence_required="Replay trace containing source event, capability version, and KPI value IDs.",
+                    owner_role="observer-auditor",
+                ),
+                Assumption(
+                    id=f"{capability['capability_id']}-decision",
+                    text="A human-approved decision uses the capability output before the measured outcome.",
+                    validation_method="Walk recommendation and approval IDs in the audit trace.",
+                    evidence_required="Named approver, decision timestamp, recommendation ID, and outcome ID.",
+                    owner_role="incident-commander",
+                ),
+            ],
+            threats_to_validity=[
+                ThreatToValidity(
+                    text="Scenario mix or event quality may explain an observed change.",
+                    severity="high",
+                    mitigation=(
+                        "Compare identical seeded baseline and assisted event sets and disclose missing sources."
+                    ),
+                ),
+                ThreatToValidity(
+                    text="The observed result may not transfer from a prototype exercise to a live incident.",
+                    severity="high",
+                    mitigation="Keep the claim advisory and require independent operational evidence.",
+                ),
+            ],
+            originating_spec_path=capability["spec"],
+            originating_requirement=capability["requirement"],
+            created_at=created_at,
         )
-    return out
+        for capability in CAPABILITIES
+    ]

@@ -1,0 +1,14 @@
+{
+  "manifest_version": "1.0.0",
+  "catalogue_version": "spec005-test",
+  "runtime_assignable_agents": [
+    { "agent_name": "monitoring" },
+    { "agent_name": "risk_assessment" },
+    { "agent_name": "evacuation" },
+    { "agent_name": "resource_allocation" },
+    { "agent_name": "communication" }
+  ],
+  "explicitly_non_assignable_packages": [
+    "development-only"
+  ]
+}

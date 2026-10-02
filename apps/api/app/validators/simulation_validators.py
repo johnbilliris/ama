@@ -8,16 +8,9 @@ class SimulationValidators:
         self._repo = simulation_repository
         self._settings = get_settings()
 
-    async def validate_concurrency_limit(self) -> None:
-        active = await self._repo.count_active()
-        if active >= self._settings.max_concurrent_simulations:
-            raise HTTPException(
-                status_code=409,
-                detail=(
-                    f"Maximum concurrent simulations ({self._settings.max_concurrent_simulations}) reached. "
-                    "Archive or delete an existing simulation before creating a new one."
-                ),
-            )
+    # Concurrency is enforced by SimulationRepository.reserve_capacity, which takes a
+    # conditional reservation across replicas. The former count-then-create check was
+    # removed because a separate read could not make creation atomic (AUD-024).
 
     def validate_resource_limits(
         self,

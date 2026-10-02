@@ -1,163 +1,107 @@
-/**
- * Spec-038 US7 / T-AMD-17 — Public Information 8-language slice with Auslan rendering.
- *
- * Fetches live data from GET /api/v1/evidence/public-information/{scenario_id} (T-AMD-15).
- * Renders Auslan as video (when auslan_asset_status=available — mandatory for cyclone/bushfire/flood)
- * or as a captioned still image + transcript (when auslan-asset-missing — deferred for
- * urban-fire/mass-casualty/hazmat/marine-SAR per FR-039 / CHK082).
- *
- * Falls back to static language-packs.ts for display names (REUSE — no new i18n catalogue).
- */
 "use client";
-import { useEffect, useState } from "react";
-import {
-  LANGUAGE_PACKS,
-  type LanguagePackId,
-} from "../../../../lib/i18n/language-packs";
+
+import type { PublicInformationRender } from "@ama/domain";
+import { useCallback, useEffect, useState } from "react";
+import { getPublicInformation } from "../../../../lib/api/evidence";
+import { LANGUAGE_PACKS, type LanguagePackId } from "../../../../lib/i18n/language-packs";
 import LanguageFallbackBadge from "./LanguageFallbackBadge";
 
-// FR-037 / SC-013 — fixed channel order.
-export const PUBLIC_INFO_CHANNELS: LanguagePackId[] = [
-  "en",
-  "zh-Hans",
-  "ar",
-  "vi",
-  "yue",
-  "pa",
-  "auslan",
-  "yolngu_matha",
-];
+const SCENARIOS = [
+  "bushfire",
+  "flood",
+  "cyclone",
+  "urban_fire",
+  "mass_casualty",
+  "hazmat",
+  "marine_sar",
+] as const;
+const LANGUAGES = ["en-AU", "zh-Hans", "ar", "vi", "yue", "pa", "auslan", "yolngu_matha"] as const;
 
-interface PIChannel {
-  language_code: string;
-  content: string;
-  auslan_asset_status?: "available" | "auslan-asset-missing" | null;
-}
+export default function PublicInformationChannels() {
+  const [scenarioId, setScenarioId] = useState<string>("cyclone");
+  const [language, setLanguage] = useState<string>("en-AU");
+  const [render, setRender] = useState<PublicInformationRender | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-interface PIRender {
-  scenario_id: string;
-  channels: PIChannel[];
-  auslan_asset_status: "available" | "auslan-asset-missing";
-  language_fallback_used?: string | null;
-}
-
-function AuslanRenderer({ status }: { status: "available" | "auslan-asset-missing" }) {
-  if (status === "available") {
-    return (
-      <span
-        aria-label="Auslan video available"
-        className="ml-2 inline-flex items-center text-green-700 text-xs"
-      >
-        🎬 Auslan video
-      </span>
-    );
-  }
-  // Deferred state — show badge + transcript placeholder per CHK082
-  return (
-    <span
-      role="img"
-      aria-label="Auslan content pending — sign-language description available as text transcript"
-      className="ml-2 inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800"
-    >
-      auslan-asset-missing
-    </span>
+  const load = useCallback(
+    (signal?: AbortSignal) => {
+      setLoading(true);
+      setError("");
+      void getPublicInformation(scenarioId, language, signal)
+        .then(setRender)
+        .catch((reason: unknown) => {
+          if ((reason as Error).name !== "AbortError") setError(String(reason));
+        })
+        .finally(() => setLoading(false));
+    },
+    [language, scenarioId],
   );
-}
-
-export default function PublicInformationChannels({
-  jurisdiction = "AU",
-  scenarioId = "cyclone",
-}: {
-  jurisdiction?: string;
-  scenarioId?: string;
-}) {
-  const [render, setRender] = useState<PIRender | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/v1/evidence/public-information/${scenarioId}`)
-      .then((r) => {
-        if (!r.ok) { setError(`HTTP ${r.status}`); return null; }
-        return r.json();
-      })
-      .then((d) => d && setRender(d))
-      .catch(() => {
-        // Fall back to static language-packs on network error
-        setError("offline-fallback");
-      });
-  }, [scenarioId]);
-
-  // Static fallback (offline or API unavailable)
-  if (error === "offline-fallback" || (!render && !error)) {
-    const channels = PUBLIC_INFO_CHANNELS.map((id) => LANGUAGE_PACKS[id]).filter(
-      (p) =>
-        p.jurisdictions.includes(jurisdiction) ||
-        p.jurisdictions.includes("AU") ||
-        p.id === "en",
-    );
-    return (
-      <section aria-labelledby="public-info-channels-h" className="public-info">
-        <h3 id="public-info-channels-h">
-          Public Information channels ({channels.length} languages)
-        </h3>
-        <ul role="list" aria-label="Public Information language channels">
-          {channels.map((c) => (
-            <li
-              key={c.id}
-              lang={
-                c.id === "auslan"
-                  ? "en-AU"
-                  : c.id.startsWith("zh") || c.id === "yue"
-                    ? c.id
-                    : c.id.length === 2
-                      ? c.id
-                      : "en"
-              }
-            >
-              <strong>{c.display_name}</strong>
-              <span className="community"> — {c.community_label}</span>
-              {c.reviewer_required ? (
-                <span aria-label="Community reviewer required" role="note">
-                  {" "}
-                  (reviewer required)
-                </span>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-        <p role="note">Advisory only · WCAG 2.2 AA · FR-037</p>
-      </section>
-    );
-  }
-
-  if (!render) return <p>Loading Public Information channels…</p>;
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
   return (
-    <section aria-labelledby="public-info-channels-h" className="public-info">
-      <h3 id="public-info-channels-h">
-        Public Information channels ({render.channels.length} languages)
-      </h3>
-      <LanguageFallbackBadge fallback={render.language_fallback_used} />
-      <ul role="list" aria-label="Public Information language channels">
-        {render.channels.map((ch) => {
-          const pack = LANGUAGE_PACKS[ch.language_code as LanguagePackId];
-          return (
-            <li
-              key={ch.language_code}
-              lang={ch.language_code === "auslan" ? "en-AU" : ch.language_code.split("-")[0]}
-            >
-              <strong>{pack?.display_name ?? ch.language_code}</strong>
-              {pack && (
-                <span className="community"> — {pack.community_label}</span>
-              )}
-              {ch.language_code === "auslan" && ch.auslan_asset_status && (
-                <AuslanRenderer status={ch.auslan_asset_status} />
-              )}
-            </li>
-          );
-        })}
-      </ul>
-      <p role="note">Advisory only · WCAG 2.2 AA · FR-037</p>
-    </section>
+    <div data-testid="evidence-public-information-tab">
+      <div className="mb-4 flex flex-wrap gap-4">
+        <label>
+          Scenario{" "}
+          <select value={scenarioId} onChange={(event) => setScenarioId(event.target.value)}>
+            {SCENARIOS.map((scenario) => (
+              <option key={scenario} value={scenario}>{scenario.replaceAll("_", " ")}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Requested language{" "}
+          <select value={language} onChange={(event) => setLanguage(event.target.value)}>
+            {LANGUAGES.map((code) => (
+              <option key={code} value={code}>{LANGUAGE_PACKS[code]?.display_name ?? code}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {loading ? <p role="status">Loading public information…</p> : null}
+      {error ? (
+        <div role="alert">
+          <p>Failed to load public information: {error}</p>
+          <button type="button" onClick={() => load()}>Retry</button>
+        </div>
+      ) : null}
+      {render ? (
+        <section className="public-info" aria-label="Public information channels">
+          {render.auslan_asset_missing ? (
+            <p role="status">auslan-asset-missing · manual</p>
+          ) : null}
+          {render.auslan ? (
+            <figure>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={render.auslan.captioned_image_url}
+                alt={`${scenarioId.replaceAll("_", " ")} Auslan transcript placeholder`}
+              />
+              <figcaption>{render.auslan.transcript}</figcaption>
+            </figure>
+          ) : null}
+          <ul role="list">
+            {render.channels.map((channel) => {
+              const pack = LANGUAGE_PACKS[channel.language_code as LanguagePackId];
+              return (
+                <li key={channel.language_code} lang={channel.language_code.split("-")[0]}>
+                  <h3>{pack?.display_name ?? channel.language_code}</h3>
+                  <LanguageFallbackBadge fallback={channel.language_fallback_used} />
+                  {channel.provenance === "manual" ? <span role="status">manual</span> : null}
+                  <p>{channel.body}</p>
+                  {channel.fk_grade != null ? <p>Readability grade: {channel.fk_grade}</p> : null}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+    </div>
   );
 }

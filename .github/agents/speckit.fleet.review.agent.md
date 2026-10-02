@@ -1,4 +1,5 @@
 ---
+name: speckit.fleet.review
 description: Cross-model evaluation of plan.md and tasks.md before implementation.
   Reviews feasibility, completeness, dependency ordering, risk, and parallelization
   correctness using a different model than was used to generate the artifacts.

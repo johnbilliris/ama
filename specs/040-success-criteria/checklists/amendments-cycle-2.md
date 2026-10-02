@@ -61,11 +61,11 @@
 
 ## AU-Refusal Audit Durability — FR-044 / SC-020(a) (AMD-07 + R2-Q2)
 
-- [ ] CHK101 Does FR-044 specify the Cosmos consistency level for the audit write as **per-operation `Strong`** (overriding the account-level `Session` default), with the SDK call form named (`consistency_level=Strong` on `create_item`)? [Clarity, Spec §FR-044, R2-Q2]
+- [ ] CHK101 Does FR-044 retain account-level `Session`, explicitly prohibit an impossible Strong-per-request upgrade, and require both create-only Cosmos and locked-Blob acknowledgements before refusal? [Clarity, Spec §FR-044, 2026-09-24 resolution]
 - [ ] CHK102 Is the **await-before-respond ordering** (durable Cosmos write 201 completes before the AU-refusal HTTP response is returned) explicit in FR-044? [Completeness, Spec §FR-044, R2-Q2]
 - [ ] CHK103 Does FR-044 quantify the retry policy — **3 attempts with 250 ms / 1 s / 4 s exponential backoff** — for transient HTTP 5xx / 429 from Cosmos? [Clarity, Spec §FR-044, R2-Q2]
 - [ ] CHK104 Does FR-044 require **`503 Service Unavailable` + `ProblemDetails` referencing FR-044** on retry exhaustion (explicitly NOT a swallowed exception followed by a 4xx refusal)? [Completeness, Spec §FR-044]
-- [ ] CHK105 Does R2-Q2 constrain the audit Cosmos account to a **single AU region (`australiaeast`)** so per-operation `Strong` consistency remains compatible with FR-029 + FR-043 (multi-region Strong forbidden by Cosmos)? [Consistency, Spec §FR-044 vs §FR-029, §FR-043]
+- [ ] CHK105 Does R2-Q2 preserve the approved Session-consistency AU two-region topology and prohibit adding a non-AU region to obtain stronger quorum semantics? [Consistency, Spec §FR-044 vs §FR-029, §FR-043]
 - [ ] CHK106 Does R2-Q2 confirm the account-level `defaultConsistencyLevel: 'Session'` (per `eval-platform.bicep` portfolio default) MAY remain unchanged for non-audit containers (so FR-034 reuse invariant holds)? [Consistency, Spec §R2-Q2 vs §FR-034]
 - [ ] CHK107 Is the 3-retry × backoff total bounded **below the FR-046 freshness SLO (≤ 60 s)** so the retry policy cannot independently breach the SLO budget? [Consistency, Spec §FR-044 vs §FR-046]
 - [ ] CHK108 Does SC-020(a) require an integration test that asserts **`503` specifically when the audit write fails** (not a generic write-failure path)? [Measurability, Spec §SC-020]

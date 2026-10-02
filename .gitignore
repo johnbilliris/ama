@@ -8,6 +8,9 @@ __pycache__/
 *.pyc
 *.egg-info/
 .pytest_cache/
+.mypy_cache
+.pytest039/
+.pnpm-store
 .ruff_cache/
 .venv/
 venv/
@@ -43,6 +46,7 @@ weblogs/
 infra/**/*.json
 !infra/parameters/**/*.json
 !infra/main.parameters.*.json
+!infra/bicep/modules/evidence-harness-slo-workbook.json
 !infra/modules/workbooks/*.json
 !infra/parameters/foundry-carveout.schema.json
 !infra/foundry/carveout-registry.json
@@ -67,4 +71,3 @@ test-results/
 artifacts/
 # Spec-038 — bicep-build artefact dir
 /build/
-

@@ -204,8 +204,8 @@ SPEC_036_PROBLEM_JSON_ROUTES: Final[frozenset[str]] = frozenset({
     "/api/simulations/{sim_id}/inject-telemetry",
     # FR-059 / FR-066 — lifecycle endpoints (idempotent; RFC 9457 on conflict / refusal)
     "/api/simulations/{sim_id}/abort",
-    "/api/simulations/{sim_id}/pause",
-    "/api/simulations/{sim_id}/resume",
+    "/api/simulations/{sim_id:uuid}/pause",
+    "/api/simulations/{sim_id:uuid}/resume",
     # FR-013 — recent-signals (RBAC failures emit RFC 9457)
     "/api/simulations/{sim_id}/recent-signals",
     # FR-049 / FR-054 — outcome read (audit-export, evidence-integrity warning carrier)

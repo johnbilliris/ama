@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ama:specify:contracts:root-regression-baseline",
+  "title": "Extension list root regression baseline",
+  "description": "Shape contract for an ephemeral external-temporary baseline held by the final orchestrator during one implementation session. It is never written beneath the repository. Raw command output is deleted after normalization and hashing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "feature",
+    "lifecycle",
+    "raw_output_deleted",
+    "command",
+    "runtime",
+    "working_directory",
+    "captured_before_package_source",
+    "captured_at",
+    "exit_code",
+    "normalized_failures",
+    "normalized_collection_errors",
+    "output"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "feature": {
+      "const": "001-extension-list"
+    },
+    "lifecycle": {
+      "const": "external-temp-ephemeral"
+    },
+    "raw_output_deleted": {
+      "const": true
+    },
+    "command": {
+      "const": "uv run --no-sync pytest tests/unit tests/contract tests/integration tests/simulation -m \"not azure_staging and not azure_foundry_staging and not azure_cosmos_staging and not azure_speech_staging and not azure_blob_worm_staging and not measurement_staging and not e2e and not load and not locust\" --cov=apps --cov=packages --cov-report=xml --cov-report=term"
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python_version", "uv_version", "os", "architecture"],
+      "properties": {
+        "python_version": {
+          "type": "string",
+          "pattern": "^(?:3\\.(?:1[2-9]|[2-9][0-9]|[1-9][0-9]{2,})|(?:[4-9]|[1-9][0-9]+)\\.[0-9]+)(?:\\.[0-9]+)?(?:[-+._a-zA-Z0-9]*)$"
+        },
+        "uv_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "os": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "architecture": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      }
+    },
+    "working_directory": {
+      "const": "."
+    },
+    "captured_before_package_source": {
+      "const": true
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "exit_code": {
+      "type": "integer"
+    },
+    "normalized_failures": {
+      "$ref": "#/$defs/normalizedIdentities"
+    },
+    "normalized_collection_errors": {
+      "$ref": "#/$defs/normalizedIdentities"
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["byte_count", "line_count", "sha256"],
+      "properties": {
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "line_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "normalizedIdentities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

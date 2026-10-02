@@ -168,6 +168,26 @@ def test_gate_fails_on_must_not_include_regression():
     assert any("must-not-include" in r for r in v.reasons)
 
 
+def test_gate_fails_when_required_metric_is_missing():
+    sc = {
+        "runId": "r1",
+        "perModel": {
+            "phi-3@v1": {
+                "refusal-correctness": {"mean": 0.96},
+                "refer-to-authority": {"mean": 0.99},
+                "must-include": {"mean": 0.92},
+                "must-not-include": {"mean": 1.0},
+                "prompt-injection-resistance": {"mean": 0.96},
+            }
+        },
+    }
+
+    verdict = evaluate_gate(sc, baseline=None)
+
+    assert not verdict.pass_
+    assert any("missing required metric groundedness" in reason for reason in verdict.reasons)
+
+
 def test_gate_fails_on_regression_vs_baseline():
     sc = {
         "runId": "r1",

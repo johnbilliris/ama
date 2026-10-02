@@ -2,6 +2,11 @@
 described in quickstart.md: signal ingestion, dashboard, approval, alert
 publish, preparedness replay, and cross-agency isolation."""
 
+import base64
+import json
+
+import pytest
+from app.api.routes import signals as signals_route
 from app.main import create_app
 from app.services.state_store import (
     ALERTS,
@@ -13,9 +18,31 @@ from app.services.state_store import (
 from fastapi.testclient import TestClient
 
 from packages.domain.src.domain.models.coordination_task import CoordinationTask
+from packages.domain.src.domain.models.data_source import DataSource
 from packages.domain.src.domain.models.persona import Persona
 from packages.domain.src.domain.models.public_alert import PublicAlert
 from packages.domain.src.domain.models.recommendation import Recommendation
+
+
+@pytest.fixture(autouse=True)
+def _trusted_forwarded_principal_fixture(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("AMA_TRUST_FORWARDED_PRINCIPAL", "1")
+    monkeypatch.setenv("AMA_TEST_SUPPORT", "1")
+    monkeypatch.setenv("AMA_ENABLE_PRODUCTION_AUTH", "0")
+
+
+def _auth_headers(persona_id: str = "planning-officer") -> dict[str, str]:
+    claims = {
+        "sub": "user-quickstart-001",
+        "agency_id": "ses-nsw",
+        "jurisdiction_ids": ["nsw"],
+        "roles": ["planning-officer"],
+        "persona_id": persona_id,
+    }
+    encoded = base64.b64encode(json.dumps(claims).encode("utf-8")).decode("utf-8")
+    return {
+        "X-MS-CLIENT-PRINCIPAL": encoded,
+    }
 
 
 def test_quickstart_full_rehearsal_flow() -> None:
@@ -27,12 +54,22 @@ def test_quickstart_full_rehearsal_flow() -> None:
     """
     reset_state()
     client = TestClient(create_app())
+    client.headers.update(_auth_headers())
+    signals_route._governance_registry.register_source(
+        DataSource(
+            data_source_id="bom-warnings",
+            name="BoM Warnings",
+            kind="authoritative",
+            trust_tier="tier_1_authoritative_government",
+        ),
+        actor_id="quickstart-suite",
+    )
 
     # Step 1: Ingest an authoritative weather signal
     ingest = client.post(
         "/api/signals",
         json={
-            "source": {"dataSourceId": "bom-001", "name": "BoM", "kind": "authoritative"},
+            "source": {"dataSourceId": "bom-warnings", "name": "BoM", "kind": "authoritative"},
             "incidentId": "incident-quickstart",
             "category": "weather",
             "occurredAt": "2026-03-09T00:00:00Z",
@@ -50,7 +87,7 @@ def test_quickstart_full_rehearsal_flow() -> None:
             },
         },
     )
-    assert ingest.status_code == 200
+    assert ingest.status_code == 202
 
     # Step 2: Load the dashboard
     dashboard = client.get("/api/incidents/incident-quickstart/dashboard")
@@ -80,7 +117,7 @@ def test_quickstart_full_rehearsal_flow() -> None:
     approval = client.post(
         "/api/recommendations/rec-qs/approvals",
         json={
-            "approverPersonaId": "persona-commander",
+            "approverPersonaId": "planning-officer",
             "outcome": "approved",
             "rationale": "Authoritative warning confirmed.",
         },
@@ -89,7 +126,7 @@ def test_quickstart_full_rehearsal_flow() -> None:
 
     publish = client.post(
         "/api/alerts/alert-rec-qs/publish",
-        json={"publishedByPersonaId": "persona-commander"},
+        json={"publishedByPersonaId": "planning-officer"},
     )
     assert publish.status_code == 200
     assert publish.json()["status"] == "published"

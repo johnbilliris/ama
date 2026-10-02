@@ -13,11 +13,11 @@ class TestReproducibility:
     async def test_same_inputs_produce_same_alert_id(self):
         """Two calls with the same incident_id produce sequential but predictable IDs."""
         counter = VersionCounter()
-        v1 = await counter.assign_version("INC-001")
+        v1 = await counter.assign_version("INC-001", "live")
         id1 = counter.format_alert_id("INC-001", v1)
 
         counter2 = VersionCounter()
-        v2 = await counter2.assign_version("INC-001")
+        v2 = await counter2.assign_version("INC-001", "live")
         id2 = counter2.format_alert_id("INC-001", v2)
 
         assert id1 == "ca-INC-001-v1"
@@ -32,6 +32,8 @@ class TestReproducibility:
         config = CommunicationConfig()
         record = CommunicationDecisionRecord(
             decision_type=CommunicationDecisionType.alert_drafted,
+            correlation_id="alert-1",
+            tenant_id="live",
             config_version=config.compute_config_hash(),
         )
         assert record.config_version != ""

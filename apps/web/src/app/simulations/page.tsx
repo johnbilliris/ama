@@ -1,29 +1,52 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { listSimulations, pauseSimulation, resumeSimulation, archiveSimulation, deleteSimulation, type SimulationSummary } from "@/lib/api/simulations";
+
+const PAGE_SIZE = 20;
 
 export default function SimulationListPage() {
   const [simulations, setSimulations] = useState<SimulationSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [offset, setOffset] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  const reload = () => {
+  const reload = useCallback(() => {
     setLoading(true);
-    listSimulations(statusFilter || undefined)
+    setError(null);
+    listSimulations(statusFilter || undefined, PAGE_SIZE, offset)
       .then((data) => {
         setSimulations(data.simulations);
         setTotal(data.total);
       })
-      .catch(() => {})
+      .catch((err: Error) => {
+        setSimulations([]);
+        setTotal(0);
+        setError(err.message);
+      })
       .finally(() => setLoading(false));
+  }, [statusFilter, offset]);
+
+  useEffect(() => { reload(); }, [reload]);
+
+  const runAction = (action: Promise<unknown>) => {
+    setActionError(null);
+    action.then(reload).catch((err: Error) => setActionError(err.message));
   };
 
-  useEffect(() => { reload(); }, [statusFilter]);
+  const onFilterChange = (value: string) => {
+    setOffset(0);
+    setStatusFilter(value);
+  };
 
-  if (loading) return <div className="p-6">Loading simulations...</div>;
+  const rangeStart = total === 0 ? 0 : offset + 1;
+  const rangeEnd = offset + simulations.length;
+  const hasPrev = offset > 0;
+  const hasNext = offset + PAGE_SIZE < total;
 
   return (
     <div className="mx-auto max-w-6xl p-6">
@@ -41,7 +64,7 @@ export default function SimulationListPage() {
         <div>
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => onFilterChange(e.target.value)}
             className="rounded border px-3 py-1"
             aria-label="Filter by status"
           >
@@ -60,8 +83,26 @@ export default function SimulationListPage() {
         </Link>
       </div>
 
-      {simulations.length === 0 ? (
-        <p className="text-gray-500">No simulation exercises found.</p>
+      {error && (
+        <div role="alert" data-testid="sim-list-error" className="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+          <p className="font-semibold">Could not load simulations.</p>
+          <p className="mt-1 break-words">{error}</p>
+          <button type="button" onClick={reload} className="mt-2 rounded bg-red-600 px-3 py-1 text-xs text-white">
+            Retry
+          </button>
+        </div>
+      )}
+
+      {actionError && (
+        <div role="alert" data-testid="sim-action-error" className="mb-4 rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+          {actionError}
+        </div>
+      )}
+
+      {loading ? (
+        <p data-testid="sim-list-loading">Loading simulations…</p>
+      ) : simulations.length === 0 ? (
+        !error && <p className="text-gray-500">No simulation exercises found.</p>
       ) : (
         <table className="w-full table-auto border-collapse text-sm">
           <thead>
@@ -106,16 +147,16 @@ export default function SimulationListPage() {
                 <td className="p-2">{(sim.storage_bytes / 1024).toFixed(1)} KB</td>
                 <td className="p-2 space-x-1">
                   {sim.status === "Active" && (
-                    <button onClick={() => pauseSimulation(sim.tenant_id).then(reload)} className="rounded bg-yellow-500 px-2 py-0.5 text-xs text-white">Pause</button>
+                    <button onClick={() => runAction(pauseSimulation(sim.tenant_id))} className="rounded bg-yellow-500 px-2 py-0.5 text-xs text-white">Pause</button>
                   )}
                   {sim.status === "Paused" && (
-                    <button onClick={() => resumeSimulation(sim.tenant_id).then(reload)} className="rounded bg-green-500 px-2 py-0.5 text-xs text-white">Resume</button>
+                    <button onClick={() => runAction(resumeSimulation(sim.tenant_id))} className="rounded bg-green-500 px-2 py-0.5 text-xs text-white">Resume</button>
                   )}
                   {(sim.status === "Active" || sim.status === "Paused") && (
-                    <button onClick={() => archiveSimulation(sim.tenant_id).then(reload)} className="rounded bg-orange-500 px-2 py-0.5 text-xs text-white">Archive</button>
+                    <button onClick={() => runAction(archiveSimulation(sim.tenant_id))} className="rounded bg-orange-500 px-2 py-0.5 text-xs text-white">Archive</button>
                   )}
                   {sim.status === "Archived" && (
-                    <button onClick={() => { if (confirm("Delete this simulation?")) deleteSimulation(sim.tenant_id).then(reload); }} className="rounded bg-red-500 px-2 py-0.5 text-xs text-white">Delete</button>
+                    <button onClick={() => { if (confirm("Delete this simulation?")) runAction(deleteSimulation(sim.tenant_id)); }} className="rounded bg-red-500 px-2 py-0.5 text-xs text-white">Delete</button>
                   )}
                 </td>
               </tr>
@@ -123,6 +164,30 @@ export default function SimulationListPage() {
           </tbody>
         </table>
       )}
+
+      <nav className="mt-4 flex items-center gap-3 text-sm" aria-label="Simulation list pagination">
+        <button
+          type="button"
+          data-testid="sim-page-prev"
+          onClick={() => setOffset((o) => Math.max(0, o - PAGE_SIZE))}
+          disabled={!hasPrev || loading}
+          className="rounded border px-3 py-1 disabled:opacity-40"
+        >
+          Previous
+        </button>
+        <span data-testid="sim-page-range">
+          {rangeStart}–{rangeEnd} of {total}
+        </span>
+        <button
+          type="button"
+          data-testid="sim-page-next"
+          onClick={() => setOffset((o) => o + PAGE_SIZE)}
+          disabled={!hasNext || loading}
+          className="rounded border px-3 py-1 disabled:opacity-40"
+        >
+          Next
+        </button>
+      </nav>
     </div>
   );
 }

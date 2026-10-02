@@ -1,0 +1,48 @@
+{
+  "spec": "006-data-ingestion-storage",
+  "generatedAt": "2026-09-16T03:01:23Z",
+  "status": "GOVERNANCE-BLOCKED",
+  "discovery": {
+    "subscription": {
+      "name": "AI Impact Analyzer",
+      "id": "879c3e12-a379-45c7-b1b1-5a44f3cc2713"
+    },
+    "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+    "method": "azure-policy-assignment-list-scoped-and-subscription-wide",
+    "restApiTotalAssignments": 0,
+    "subscriptionScopedAssignments": 0,
+    "managementGroupInheritedAssignments": "UNVERIFIED",
+    "portalParity": "UNVERIFIED",
+    "denyEffectAssignments": "UNVERIFIED",
+    "tagPolicyRequirements": "UNVERIFIED",
+    "securityPolicyRequirements": "UNVERIFIED",
+    "notes": [
+      "Authenticated exact-scope and subscription-wide Azure Policy queries both returned zero assignments at 2026-09-16T03:01:23Z.",
+      "Do not infer there are no effective policies until Portal parity and management-group inheritance are confirmed.",
+      "The inspectable Azure Portal session remained unauthenticated and the assignment count could not be independently verified.",
+      "Management group inheritance and Portal parity are unresolved blockers."
+    ]
+  },
+  "authoritativeIac": {
+    "azureYaml": {
+      "infraPath": "infra",
+      "infraModule": "main"
+    },
+    "authoritativeBicep": "infra/main.bicep",
+    "deprecatedLegacyBicep": "infra/bicep/main.bicep",
+    "legacyTemplateAcceptedAsEvidence": false,
+    "staticFindings": {
+      "ingressState": "headless-ingress-intent-unverified",
+      "probeConfiguration": "missing-or-unverified",
+      "queueScalingConfiguration": "missing-or-unverified",
+      "cpuScaling": "min-2-max-6-observed",
+      "orphanLegacyModulesDetected": true
+    }
+  },
+  "blockers": [
+    "Azure Policy API results are available, but management-group inheritance completeness is not verified.",
+    "Portal parity cannot be confirmed.",
+    "Deny/Modify/DeployIfNotExists effect analysis is not available.",
+    "IaC probe, queue scaling, and orphan module wiring drift remain unresolved without policy-cleared IaC edits."
+  ]
+}

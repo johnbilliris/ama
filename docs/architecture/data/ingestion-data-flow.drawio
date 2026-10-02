@@ -1,4 +1,4 @@
-<mxfile host="Electron" agent="spec-001-fallback">
+<mxfile host="Electron" agent="remediation-source-updated; export=pending-drawio">
   <diagram name="SECTOR-02" id="sector02-ingestion">
     <mxGraphModel dx="965" dy="726" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
       <root>
@@ -16,20 +16,23 @@
         <mxCell id="5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dbeafe;" value="State agencies CAP / EDXL" vertex="1">
           <mxGeometry height="70" width="120" x="20" y="390" as="geometry" />
         </mxCell>
-        <mxCell id="6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fee2e2;" value="Azure Event Hubs" vertex="1">
-          <mxGeometry height="80" width="150" x="290" y="130" as="geometry" />
+        <mxCell id="6" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/analytics/Event_Hubs.svg;" value="Azure Event Hubs" vertex="1">
+          <mxGeometry height="64" width="64" x="333" y="130" as="geometry" />
         </mxCell>
-        <mxCell id="7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fee2e2;" value="Azure Service Bus" vertex="1">
-          <mxGeometry height="80" width="150" x="290" y="290" as="geometry" />
+        <mxCell id="7" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/integration/Service_Bus.svg;" value="Azure Service Bus" vertex="1">
+          <mxGeometry height="64" width="64" x="333" y="290" as="geometry" />
         </mxCell>
         <mxCell id="8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#dcfce7;" value="Ingest Service&amp;nbsp;&lt;div&gt;validate → normalise → route&lt;/div&gt;" vertex="1">
           <mxGeometry height="90" width="170" x="530" y="210" as="geometry" />
         </mxCell>
-        <mxCell id="9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#fef3c7;" value="Cosmos DB&amp;nbsp;&lt;div&gt;incident + signal store&lt;/div&gt;" vertex="1">
-          <mxGeometry height="90" width="150" x="750" y="210" as="geometry" />
+        <mxCell id="9" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/databases/Azure_Cosmos_DB.svg;" value="Azure Cosmos DB&#xa;signals container (/scope, /jurisdictionId, /dataSourceId)" vertex="1">
+          <mxGeometry height="64" width="64" x="793" y="210" as="geometry" />
         </mxCell>
-        <mxCell id="10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#1f2937;fontSize=12;fillColor=#ede9fe;strokeColor=#7c3aed;" value="Agents Runtime&amp;nbsp;&lt;div&gt;alerting, impact, coordination&lt;/div&gt;" vertex="1">
-          <mxGeometry height="90" width="150" x="750" y="360" as="geometry" />
+        <mxCell id="20" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/storage/Storage_Accounts.svg;" value="Azure Storage&#xa;raw payload archive" vertex="1">
+          <mxGeometry height="64" width="64" x="560" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontSize=12;" value="Agents Runtime consumers (canonical five): communication-agent, evacuation-agent, monitoring-agent, resource-allocation-agent, risk-assessment-agent" vertex="1">
+          <mxGeometry height="90" width="210" x="750" y="360" as="geometry" />
         </mxCell>
         <mxCell id="11" edge="1" parent="1" source="2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#4b5563;fontSize=11;" target="6" value="CAP">
           <mxGeometry relative="1" as="geometry">

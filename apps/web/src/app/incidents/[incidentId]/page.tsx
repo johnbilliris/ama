@@ -1,10 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { IncidentTypeIcon } from "@ama/ui/components/disaster-map/incident-type-icon";
-import { getIncidentDashboard, type DashboardPayload } from "../../../lib/api/dashboard";
+import {
+  ApiHttpError,
+  getIncidentDashboard,
+  type DashboardPayload,
+} from "../../../lib/api/dashboard";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { SharedOperatingPicture } from "../../../components/dashboard/shared-operating-picture";
+import { PublicAlertComposer } from "../../../components/alerts/public-alert-composer";
+import { listSignals, type SignalRecord } from "../../../lib/api/signals";
+import { ConnectivityBanner } from "../../../components/offline/connectivity-banner";
+import { useI18n } from "../../../lib/i18n/runtime";
 
 /* ── Stat card helper ── */
 function StatCard({ value, label }: { value: string | number; label: string }) {
@@ -16,56 +25,128 @@ function StatCard({ value, label }: { value: string | number; label: string }) {
   );
 }
 
-/* ── Format helpers ── */
-function formatDate(iso?: string): string {
-  if (!iso) return "";
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString("en-AU", { year: "numeric", month: "long", day: "numeric" });
-  } catch {
-    return iso;
-  }
-}
-
-function formatCost(aud?: number | null, formatted?: string | null): string | null {
+function formatCost(aud?: number | null, formatted?: string | null, locale = "en-AU"): string | null {
   if (formatted) return formatted;
   if (aud == null) return null;
   if (aud >= 1_000_000_000) return `$${(aud / 1_000_000_000).toFixed(1)} billion`;
   if (aud >= 1_000_000) return `$${(aud / 1_000_000).toFixed(0)} million`;
   if (aud >= 1_000) return `$${(aud / 1_000).toFixed(0)},000`;
-  return `$${aud.toLocaleString()}`;
+  return `$${new Intl.NumberFormat(locale).format(aud)}`;
 }
 
 export default function IncidentPage() {
+  const { locale, t, formatDateTime, formatNumber } = useI18n();
   const params = useParams<{ incidentId: string }>();
   const searchParams = useSearchParams();
   const incidentId = params.incidentId;
   const returnUrl = searchParams.get("returnUrl") || "/";
   const [dashboard, setDashboard] = useState<DashboardPayload | null>(null);
-  const [error, setError] = useState(false);
+  const [signals, setSignals] = useState<SignalRecord[]>([]);
+  const [viewState, setViewState] = useState<
+    "loading" | "stale" | "degraded" | "empty" | "ready" | "error" | "not-found" | "unauthorized"
+  >("loading");
+  const [refreshNonce, setRefreshNonce] = useState(0);
+  const isLiveIncident = dashboard
+    ? ["active", "monitoring", "stabilising"].includes(dashboard.incident.status)
+    : false;
 
-  useEffect(() => {
-    getIncidentDashboard(incidentId)
-      .then(setDashboard)
-      .catch(() => setError(true));
+  const refresh = useCallback(async (signal: AbortSignal) => {
+    const [dash, liveSignals] = await Promise.all([
+      getIncidentDashboard(incidentId, signal),
+      listSignals(incidentId, signal),
+    ]);
+    setDashboard(dash);
+    setSignals(liveSignals);
+    if ((dash.signalSummary.degradedSources?.length ?? 0) > 0) {
+      setViewState("degraded");
+      return;
+    }
+    const isEmpty =
+      dash.participatingOrganisations.length === 0 &&
+      dash.activeRecommendations.length === 0 &&
+      dash.activeTasks.length === 0 &&
+      liveSignals.length === 0;
+    setViewState(isEmpty ? "empty" : "ready");
   }, [incidentId]);
 
-  if (error) {
+  useEffect(() => {
+    let disposed = false;
+    const controller = new AbortController();
+
+    const load = async () => {
+      try {
+        await refresh(controller.signal);
+      } catch (error) {
+        if (disposed || controller.signal.aborted) {
+          return;
+        }
+        if (error instanceof ApiHttpError) {
+          if (error.status === 404) {
+            setViewState("not-found");
+            return;
+          }
+          if (error.status === 401 || error.status === 403) {
+            setViewState("unauthorized");
+            return;
+          }
+        }
+        setViewState((current) => current === "loading" ? "error" : "stale");
+      }
+    };
+
+    load();
+    const interval = window.setInterval(load, 10000);
+    return () => {
+      disposed = true;
+      controller.abort();
+      window.clearInterval(interval);
+    };
+  }, [incidentId, refresh, refreshNonce]);
+
+  if (viewState === "not-found") {
     return (
       <div className="incident-detail-page">
+        <ConnectivityBanner />
         <div className="incident-error">
-          <h1>Incident not found</h1>
-          <p>The requested incident could not be loaded.</p>
-          <Link href={returnUrl} className="incident-back-link">← Back to map</Link>
+          <h1>{t("incident.notFound")}</h1>
+          <p>{t("incident.notFoundBody")}</p>
+          <Link href={returnUrl} className="incident-back-link">← {t("common.backToMap")}</Link>
         </div>
       </div>
     );
   }
 
-  if (!dashboard) {
+  if (viewState === "unauthorized") {
     return (
       <div className="incident-detail-page">
-        <div className="incident-loading">Loading incident details…</div>
+        <ConnectivityBanner />
+        <div className="incident-error">
+          <h1>{t("incident.unauthorized")}</h1>
+          <p>{t("incident.unauthorizedBody")}</p>
+          <Link href={returnUrl} className="incident-back-link">← {t("common.backToMap")}</Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (viewState === "loading" || !dashboard) {
+    return (
+      <div className="incident-detail-page">
+        <ConnectivityBanner />
+        <div className="incident-loading">{t("incident.loading")}</div>
+      </div>
+    );
+  }
+
+  if (viewState === "error") {
+    return (
+      <div className="incident-detail-page">
+        <ConnectivityBanner />
+        <div className="incident-error">
+          <h1>{t("incident.error")}</h1>
+          <p>{t("incident.errorBody")}</p>
+          <Link href={returnUrl} className="incident-back-link">← {t("common.backToMap")}</Link>
+        </div>
       </div>
     );
   }
@@ -86,8 +167,20 @@ export default function IncidentPage() {
       ? `https://atlas.microsoft.com/map/static/png?api-version=2024-04-01&center=${loc.longitude},${loc.latitude}&zoom=7&width=1200&height=400&layer=basic&style=main&subscription-key=${process.env.NEXT_PUBLIC_AZURE_MAPS_KEY ?? ""}`
       : null;
 
+  const publicAlertRecommendation = dashboard.activeRecommendations.find(
+    (recommendation) => recommendation.type === "public_alert",
+  );
+  const canApproveAlert = Boolean(publicAlertRecommendation?.approvalAction?.allowed);
+
   return (
     <div className="incident-detail-page">
+        <ConnectivityBanner />
+        {viewState === "stale" ? (
+          <section className="degraded-banner" role="status">
+            <strong>{t("incident.staleTitle")}</strong>
+            <p className="degraded-copy">{t("incident.staleBody")}</p>
+          </section>
+        ) : null}
         {/* ── Hero section with map background ── */}
         <section
           className="incident-hero"
@@ -99,7 +192,7 @@ export default function IncidentPage() {
         >
           <div className="incident-hero-overlay" />
           <div className="incident-hero-content">
-            <Link href={returnUrl} className="incident-back-link">← Back to map</Link>
+            <Link href={returnUrl} className="incident-back-link">← {t("common.backToMap")}</Link>
             <div className="incident-hero-meta">
               <IncidentTypeIcon type={inc.incidentType} size={36} />
               <span className="incident-hero-type">
@@ -109,7 +202,7 @@ export default function IncidentPage() {
                 <span className="incident-hero-region">{inc.region}</span>
               )}
               {inc.startedAt && (
-                <span className="incident-hero-date">{formatDate(inc.startedAt)}</span>
+                <span className="incident-hero-date">{formatDateTime(inc.startedAt)}</span>
               )}
             </div>
             <h1 className="incident-hero-title">{inc.title}</h1>
@@ -130,20 +223,20 @@ export default function IncidentPage() {
             <h2 className="incident-section-title">Quick Statistics</h2>
             <div className="incident-stats-grid">
               {impact.deaths != null && (
-                <StatCard value={impact.deaths.toLocaleString()} label="Fatalities" />
+                <StatCard value={formatNumber(impact.deaths)} label="Fatalities" />
               )}
               {impact.injuries != null && (
-                <StatCard value={impact.injuries.toLocaleString()} label="Injuries" />
+                <StatCard value={formatNumber(impact.injuries)} label="Injuries" />
               )}
               {impact.homesDestroyed != null && (
-                <StatCard value={impact.homesDestroyed.toLocaleString()} label="Homes Destroyed" />
+                <StatCard value={formatNumber(impact.homesDestroyed)} label="Homes Destroyed" />
               )}
               {impact.businessesDestroyed != null && (
-                <StatCard value={impact.businessesDestroyed.toLocaleString()} label="Businesses Destroyed" />
+                <StatCard value={formatNumber(impact.businessesDestroyed)} label="Businesses Destroyed" />
               )}
               {(impact.insuranceCostAud != null || impact.insuranceCostFormatted) && (
                 <StatCard
-                  value={formatCost(impact.insuranceCostAud, impact.insuranceCostFormatted) ?? "N/A"}
+                  value={formatCost(impact.insuranceCostAud, impact.insuranceCostFormatted, locale) ?? "N/A"}
                   label="Insurance Cost"
                 />
               )}
@@ -182,12 +275,39 @@ export default function IncidentPage() {
         )}
 
         {/* ── Operational data (only for active/simulation incidents) ── */}
-        {(dashboard.participatingOrganisations.length > 0 ||
+        {viewState === "empty" ? (
+          <section className="incident-operational">
+            <h2 className="incident-section-title">{t("incident.operationalData")}</h2>
+            <p>{t("incident.noOperational")}</p>
+          </section>
+        ) : null}
+
+        {isLiveIncident && (
+          <section className="incident-operational">
+            <SharedOperatingPicture dashboard={dashboard} signals={signals} />
+            {publicAlertRecommendation ? (
+              <PublicAlertComposer
+                recommendationId={publicAlertRecommendation.recommendation_id}
+                alertId={`alert-${publicAlertRecommendation.recommendation_id}`}
+                languages={["en-AU", "zh-Hans"]}
+                actorPersonaId={inc.actorPersonaId}
+                onWorkflowComplete={() => setRefreshNonce((value) => value + 1)}
+              />
+            ) : null}
+            {!canApproveAlert ? (
+              <p className="incident-source-link" role="status">
+                {t("incident.alertUnavailable")}
+              </p>
+            ) : null}
+          </section>
+        )}
+
+        {!isLiveIncident && (dashboard.participatingOrganisations.length > 0 ||
           dashboard.activeRecommendations.length > 0 ||
           dashboard.signalSummary.authoritativeCount > 0 ||
           dashboard.signalSummary.communityCount > 0) && (
           <section className="incident-operational">
-            <h2 className="incident-section-title">Operational Data</h2>
+            <h2 className="incident-section-title">{t("incident.operationalData")}</h2>
             {dashboard.participatingOrganisations.length > 0 && (
               <div className="incident-orgs">
                 <h3>Participating Organisations</h3>

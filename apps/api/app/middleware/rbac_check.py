@@ -30,16 +30,42 @@ from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 _PROTECTED_PREFIXES = (
+    "/api/alerts/",
+    "/api/recommendations/",
+    "/api/dead-letters",
+    "/api/incidents/",
     "/api/outcomes/",
     "/api/audit/list",
     "/api/auth/whoami",
     "/api/offline/replay",
     "/api/recovery/handover",
+    "/api/governance/dashboard",
+    "/api/workflow_runs",
+    "/api/help",
+    "/api/governance/evidence-pack",
+    "/api/v1/evidence",
 )
+
+_INCIDENT_MAP_PATH = "/api/incidents/map"
+_INCIDENT_MAP_DELEGATED_SCOPE = "access_as_user"
 
 
 def _is_protected(path: str) -> bool:
     return any(path.startswith(prefix) for prefix in _PROTECTED_PREFIXES)
+
+
+def _production_auth_enabled() -> bool:
+    return os.environ.get("AMA_ENABLE_PRODUCTION_AUTH", "0") == "1"
+
+
+def _incident_map_auth_enabled() -> bool:
+    return os.environ.get("AMA_ENABLE_INCIDENT_MAP_AUTH", "0") == "1"
+
+
+def _should_enforce(path: str) -> bool:
+    return (_production_auth_enabled() and _is_protected(path)) or (
+        _incident_map_auth_enabled() and path == _INCIDENT_MAP_PATH
+    )
 
 
 def _resolve_persona_aiims_function(persona_id: str) -> str | None:
@@ -75,9 +101,16 @@ def _normalise_persona_id(claims: dict[str, Any]) -> str | None:
     return claims.get("persona_id") or claims.get("personaId")
 
 
+def _has_incident_map_scope(claims: dict[str, Any]) -> bool:
+    scopes = claims.get("scp") or ""
+    if isinstance(scopes, str):
+        return _INCIDENT_MAP_DELEGATED_SCOPE in scopes.split()
+    return False
+
+
 class RbacCheckMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        if not _is_protected(request.url.path):
+        if not _should_enforce(request.url.path):
             return await call_next(request)
 
         try:
@@ -90,6 +123,9 @@ class RbacCheckMiddleware(BaseHTTPMiddleware):
     @staticmethod
     def _enforce(request: Request) -> None:
         claims: dict[str, Any] = getattr(request.state, "claims", None) or {}
+        if request.url.path == _INCIDENT_MAP_PATH and _has_incident_map_scope(claims):
+            return
+
         role = _normalise_role(claims)
 
         if role is None:
@@ -147,7 +183,7 @@ class RbacCheckMiddleware(BaseHTTPMiddleware):
 
 
 def add_rbac_check_middleware(app: FastAPI) -> None:
-    if os.environ.get("AMA_ENABLE_PRODUCTION_AUTH", "0") != "1":
+    if not (_production_auth_enabled() or _incident_map_auth_enabled()):
         return
     app.add_middleware(RbacCheckMiddleware)
 

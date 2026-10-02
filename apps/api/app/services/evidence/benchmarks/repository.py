@@ -11,7 +11,11 @@ CONTAINER = "benchmark_register"
 def list_for(kpi_id: str, *, jurisdiction: str | None = None) -> list[BenchmarkEntry]:
     rows = [r for r in get_registry().get(CONTAINER).all() if r.get("kpi_id") == kpi_id]
     if jurisdiction:
-        rows = [r for r in rows if r.get("jurisdiction") == jurisdiction]
+        selected = [r for r in rows if r.get("jurisdiction") == jurisdiction]
+        baselines = [
+            r for r in rows if r.get("kind") == "prototype_baseline" and r.get("jurisdiction") in {jurisdiction, "AU"}
+        ]
+        rows = [*selected, *baselines]
     return [BenchmarkEntry.model_validate(r) for r in rows]
 
 

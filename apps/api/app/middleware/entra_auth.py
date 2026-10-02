@@ -8,7 +8,9 @@ on `401 unauthorized` or `403 forbidden`.
 
 Activation:
 - Disabled by default (test_support guard already covers dev/test).
-- Enabled when ``AMA_ENABLE_PRODUCTION_AUTH=1``; required env vars then are
+- Enabled for every protected route when ``AMA_ENABLE_PRODUCTION_AUTH=1``.
+- Enabled only for ``/api/incidents/map`` when ``AMA_ENABLE_INCIDENT_MAP_AUTH=1``.
+- Required env vars in either mode are
   ``AMA_ENTRA_TENANT_ID`` and ``AMA_ENTRA_AUDIENCE``.
 - For tests, set ``AMA_ENTRA_TEST_PRINCIPAL`` to an inline JSON string and the
   middleware will short-circuit JWKS validation and adopt that principal —
@@ -35,24 +37,51 @@ logger = logging.getLogger(__name__)
 
 
 _PROTECTED_PREFIXES = (
+    "/api/simulations",
+    "/api/incidents",
+    "/api/alerts/",
+    "/api/recommendations/",
     "/api/outcomes/",
     "/api/audit/list",
     "/api/auth/whoami",
     "/api/offline/replay",
     "/api/recovery/handover",
+    "/api/governance/dashboard",
+    "/api/workflow_runs",
+    "/api/help",
+    "/api/governance/evidence-pack",
+    "/api/v1/evidence",
 )
 
 _JWKS_CACHE_TTL = 3600.0
 _jwks_cache: dict[str, tuple[float, list[dict[str, Any]]]] = {}
+_INCIDENT_MAP_PATH = "/api/incidents/map"
 
 
 def _is_protected(path: str) -> bool:
     return any(path.startswith(prefix) for prefix in _PROTECTED_PREFIXES)
 
 
+def _production_auth_enabled() -> bool:
+    return os.environ.get("AMA_ENABLE_PRODUCTION_AUTH", "0") == "1"
+
+
+def _incident_map_auth_enabled() -> bool:
+    return os.environ.get("AMA_ENABLE_INCIDENT_MAP_AUTH", "0") == "1"
+
+
+def _should_authenticate(path: str) -> bool:
+    return (_production_auth_enabled() and _is_protected(path)) or (
+        _incident_map_auth_enabled() and path == _INCIDENT_MAP_PATH
+    )
+
+
 def _get_test_principal() -> dict[str, Any] | None:
     raw = os.environ.get("AMA_ENTRA_TEST_PRINCIPAL")
     if not raw:
+        return None
+    if _production_auth_enabled() or _incident_map_auth_enabled():
+        logger.warning("Ignoring AMA_ENTRA_TEST_PRINCIPAL when live Entra authentication is enabled")
         return None
     try:
         return json.loads(raw)
@@ -86,8 +115,8 @@ def _validate_jwt(token: str) -> dict[str, Any]:
 
     Raises ``ExtensionEnvelopeError(unauthorized)`` on any validation failure.
     """
-    tenant_id = os.environ.get("AMA_ENTRA_TENANT_ID")
-    audience = os.environ.get("AMA_ENTRA_AUDIENCE")
+    tenant_id = os.environ.get("AMA_ENTRA_TENANT_ID", os.environ.get("ENTRA_TENANT_ID"))
+    audience = os.environ.get("AMA_ENTRA_AUDIENCE", os.environ.get("ENTRA_AUDIENCE"))
     if not (tenant_id and audience):
         raise ExtensionEnvelopeError(
             ExtensionErrorCode.UNAUTHORIZED,
@@ -142,7 +171,7 @@ class EntraAuthMiddleware(BaseHTTPMiddleware):
     """Resolve principal claims from ``Authorization: Bearer ...``."""
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
-        if not _is_protected(request.url.path):
+        if not _should_authenticate(request.url.path):
             return await call_next(request)
 
         try:
@@ -178,7 +207,7 @@ class EntraAuthMiddleware(BaseHTTPMiddleware):
 
 
 def add_entra_auth_middleware(app: FastAPI) -> None:
-    if os.environ.get("AMA_ENABLE_PRODUCTION_AUTH", "0") != "1":
+    if not (_production_auth_enabled() or _incident_map_auth_enabled()):
         return
     app.add_middleware(EntraAuthMiddleware)
 

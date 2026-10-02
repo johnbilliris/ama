@@ -207,6 +207,8 @@ class DeadLetterRedeliveryPoller:
 
     async def _attempt_redeliver(self, entry: DeadLetterEntry) -> None:
         """Attempt to redeliver a single dead-letter entry."""
+        if entry.status == "permanently_failed":
+            return
         entry.auto_redeliver_attempts += 1
         backoff = min(30 * (2**entry.auto_redeliver_attempts), 300)
 

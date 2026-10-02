@@ -31,6 +31,7 @@ async def _one_run(workflow: Any, incident_id: str) -> float:
     started = time.monotonic()
     await workflow.run_incident(
         incident={"incident_id": incident_id, "category": "fire"},
+        tenant_id="live",
         created_by="loadtest",
     )
     return (time.monotonic() - started) * 1000

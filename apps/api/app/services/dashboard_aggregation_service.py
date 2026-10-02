@@ -646,13 +646,4 @@ class DashboardAggregationService:
         jurisdiction_id: str | None = None,
     ) -> RiskDetailResponse | None:
         """Get detailed risk information."""
-        return RiskDetailResponse(
-            risk_id=risk_id,
-            description=f"Risk {risk_id}",
-            severity="unknown",
-            likelihood="unknown",
-            consequence="unknown",
-            treatments=[],
-            treatment_history=[],
-            related_audit_urls=[],
-        )
+        return None

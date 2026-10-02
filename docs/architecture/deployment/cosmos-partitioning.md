@@ -24,10 +24,10 @@ specs:
 
 | Container set | Partition key | Reason |
 | --- | --- | --- |
-| `signals`, `incidents` | `/tenant_id` | Keeps tenant and jurisdiction traffic isolated for the primary operational write path |
+| `signals` | `/scope`, `/jurisdictionId`, `/dataSourceId` (hierarchical) | Separates live and simulation workloads while preserving jurisdiction and source-level isolation |
 | `recommendations`, `timeline_events` | `/incident_id` | Optimises incident-scoped replay, retrieval, and operator review |
 | `audit_segments` | `/segment_id` | Balances append-only evidence segments while preserving audit sealing workflows |
 
 ## Routing model
 
-Disaster-event documents arrive with tenant and incident metadata. The routing layer selects the correct partition key path, then forwards operational writes and audit segments in a way that preserves the multi-jurisdiction isolation model described by SECTOR-01.
+Signals are persisted with deterministic partition metadata: `scope` (`live` or `sim-*`), `jurisdictionId`, and `dataSourceId`, then composed into partition routing for the `signals` container. Disaster-event and audit records continue using their workload-specific partitioning to preserve replay and audit traversal performance.

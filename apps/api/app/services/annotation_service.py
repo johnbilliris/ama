@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+from app.core.async_io import run_blocking
 from app.repositories.simulation_event_repository import SimulationEventRepository
 from app.repositories.simulation_repository import SimulationRepository
 
@@ -41,7 +42,7 @@ class AnnotationService:
         text: str,
     ) -> SimulationEvent:
         await self._check_participant(tenant_id, author_oid)
-        seq = self._events.next_sequence(tenant_id)
+        seq = await run_blocking(self._events.next_sequence, tenant_id)
         event = SimulationEvent(
             tenant_id=tenant_id,
             event_seq=seq,
@@ -54,7 +55,7 @@ class AnnotationService:
                 "created_at": datetime.now(UTC).isoformat(),
             },
         )
-        return self._events.append_event(event)
+        return await run_blocking(self._events.append_event, event)
 
     async def update(
         self,
@@ -64,14 +65,14 @@ class AnnotationService:
         requesting_user_oid: str,
         text: str,
     ) -> SimulationEvent:
-        ann = self._events.get_annotation(tenant_id, annotation_id)
+        ann = await run_blocking(self._events.get_annotation, tenant_id, annotation_id)
         if ann is None:
             raise LookupError("annotation_not_found")
         if ann.payload.get("author_oid") != requesting_user_oid:
             raise PermissionError("annotation_author_only")
         ann.payload["text"] = text
         ann.payload["updated_at"] = datetime.now(UTC).isoformat()
-        return self._events.update_event(ann)
+        return await run_blocking(self._events.update_event, ann)
 
     async def delete(
         self,
@@ -80,9 +81,9 @@ class AnnotationService:
         annotation_id: str,
         requesting_user_oid: str,
     ) -> None:
-        ann = self._events.get_annotation(tenant_id, annotation_id)
+        ann = await run_blocking(self._events.get_annotation, tenant_id, annotation_id)
         if ann is None:
             raise LookupError("annotation_not_found")
         if ann.payload.get("author_oid") != requesting_user_oid:
             raise PermissionError("annotation_author_only")
-        self._events.delete_event(tenant_id, ann.id)
+        await run_blocking(self._events.delete_event, tenant_id, ann.id)

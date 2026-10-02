@@ -48,6 +48,11 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/ama_ingest"]
 
+[[tool.uv.index]]
+name = "microsoft-package-feed-proxy"
+url = "https://packagefeedproxy.microsoft.io/pypi/simple"
+default = true
+
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"
 testpaths = ["tests"]

@@ -1,0 +1,25 @@
+schemaVersion: 1
+status: Not measured
+thresholdPercent: 85
+instrument:
+  instrumentVersion: v1.0.0
+  frozenDate: '2026-09-15'
+  primaryBenefitQuestion: Did your assigned technical persona agent materially improve your onboarding understanding of project conventions, architecture, and quality gates?
+  scale: 1-5 Likert (1=Strongly disagree, 5=Strongly agree)
+  favourableDefinition: score >= 4
+  eligibilityRule: First-time onboarding contributors completing assigned starter tasks.
+  denominatorRule: Eligible respondents with one final response each.
+  nonResponseRule: Eligible non-responders are excluded from denominator and tracked separately.
+  duplicateRule: Deduplicate by anonymized respondentId, keep most recent response.
+  privacyRule: Collect anonymized respondent IDs only; do not collect names, email addresses, or free-text PII.
+firstResponseAt: ""
+instrumentLastModifiedAt: '2026-09-15T00:00:00Z'
+aggregate:
+  eligible: 0
+  favourable: 0
+  measuredPercent: 0.0
+run:
+  runId: ""
+  reviewer: ""
+  cohort: ""
+responses: []

@@ -859,5 +859,41 @@
     "jurisdiction_id": "nt",
     "effective_from": "2024-01-01",
     "effective_to": null
+  },
+  {
+    "assignment_id": "assign-local-recovery-blue-mountains",
+    "framework_id": "aidr-community-recovery",
+    "jurisdiction_id": "lga-blue-mountains",
+    "organisation_id": "blue-mountains-city-council",
+    "effective_from": "2024-01-01T00:00:00+00:00",
+    "effective_to": null,
+    "overrides": {
+      "coordination_layer": "lga",
+      "source_provenance": "state_policy_registry"
+    }
+  },
+  {
+    "assignment_id": "assign-utility-coordination-nsw",
+    "framework_id": "nsw-emplan",
+    "jurisdiction_id": "nsw",
+    "organisation_id": "energy-networks-nsw",
+    "effective_from": "2024-01-01T00:00:00+00:00",
+    "effective_to": null,
+    "overrides": {
+      "sector": "utility",
+      "source_provenance": "state_policy_registry"
+    }
+  },
+  {
+    "assignment_id": "assign-transport-coordination-nsw",
+    "framework_id": "nsw-emplan",
+    "jurisdiction_id": "nsw",
+    "organisation_id": "transport-for-nsw",
+    "effective_from": "2024-01-01T00:00:00+00:00",
+    "effective_to": null,
+    "overrides": {
+      "sector": "transport",
+      "source_provenance": "state_policy_registry"
+    }
   }
 ]

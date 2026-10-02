@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "specs/005-data-source-governance/contracts/readiness-manifest.schema.json",
+  "title": "Spec005 Readiness Manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "revision",
+    "environment",
+    "topology",
+    "fixture",
+    "timestamps",
+    "participants",
+    "reviewer",
+    "scenarios",
+    "success_criteria",
+    "artifacts",
+    "skip_reasons"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "spec005-readiness-manifest-v1"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "UNVERIFIED",
+        "PASS",
+        "FAIL"
+      ]
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 7
+    },
+    "environment": {
+      "type": "object",
+      "required": [
+        "name",
+        "region",
+        "tenant_id",
+        "agency_id"
+      ],
+      "properties": {
+        "name": { "type": "string" },
+        "region": { "type": "string" },
+        "tenant_id": { "type": "string" },
+        "agency_id": { "type": "string" }
+      }
+    },
+    "topology": {
+      "type": "object",
+      "required": [
+        "cache_sku",
+        "cache_sla_status",
+        "service_version"
+      ],
+      "properties": {
+        "cache_sku": { "type": "string" },
+        "cache_sla_status": { "type": "string" },
+        "service_version": { "type": "string" }
+      }
+    },
+    "fixture": {
+      "type": "object",
+      "required": [
+        "catalogue_source",
+        "required_source_ids"
+      ],
+      "properties": {
+        "catalogue_source": { "type": "string" },
+        "required_source_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "timestamps": {
+      "type": "object",
+      "required": [
+        "started_at",
+        "ended_at"
+      ],
+      "properties": {
+        "started_at": { "type": "string", "format": "date-time" },
+        "ended_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "participants": {
+      "type": "object",
+      "required": [
+        "denominator",
+        "successful"
+      ],
+      "properties": {
+        "denominator": { "type": "integer", "minimum": 0 },
+        "successful": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "reviewer": {
+      "type": "object",
+      "required": [
+        "name",
+        "role"
+      ],
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": "string" }
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 8,
+      "items": {
+        "type": "object",
+        "required": ["id", "outcome", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^quickstart-[1-8]$"
+          },
+          "outcome": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["UNVERIFIED", "PASS", "FAIL", "SKIP"]
+          },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "success_criteria": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "measured"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^SC-00[1-6]$"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["UNVERIFIED", "PASS", "FAIL"]
+          },
+          "measured": { "type": "string" },
+          "seconds": { "type": "number" },
+          "ratio": { "type": "number" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256", "kind"],
+        "properties": {
+          "kind": { "type": "string" },
+          "path": { "type": "string" },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "skip_reasons": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

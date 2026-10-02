@@ -7,12 +7,17 @@
 # New endpoints: dead-letter management, handoff status, health checks
 # Modified schemas: Recommendation, PublicAlert, TimelineEvent (new fields)
 # New schemas: DeadLetterEntry, AgentHandoffEvent, ModelDeployment, ErrorResponse
+# Wire field convention: camelCase.
 
 openapi: 3.1.0
 info:
   title: Disaster Response Coordination Hub API — Feature 003 Addendum
   version: 0.2.0
   summary: Additions for AI integration, agent handoff orchestration, dead-letter management, and structured error handling.
+
+servers:
+  - url: /api
+    description: Application API prefix.
 
 paths:
   /dead-letters:
@@ -132,7 +137,7 @@ paths:
   /health:
     get:
       tags: [Operations]
-      summary: Container health check endpoint.
+      summary: Readiness health check endpoint (`/api/health` via server prefix).
       security: []
       responses:
         '200':
@@ -141,7 +146,7 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [status, version]
+                required: [status, version, dependencies]
                 properties:
                   status:
                     type: string
@@ -150,9 +155,37 @@ paths:
                     type: string
                   dependencies:
                     type: object
-                    additionalProperties:
-                      type: string
-                      enum: [healthy, degraded, unavailable, stub]
+                    required: [cosmos, redis, foundry]
+                    properties:
+                      cosmos:
+                        type: string
+                        enum: [healthy, unavailable, stub]
+                      redis:
+                        type: string
+                        enum: [healthy, unavailable, stub]
+                      foundry:
+                        type: string
+                        enum: [healthy, unavailable, stub]
+
+  /health/liveness:
+    get:
+      tags: [Operations]
+      summary: Process liveness endpoint (`/api/health/liveness` via server prefix).
+      security: []
+      responses:
+        '200':
+          description: Service process is alive.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, version]
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy]
+                  version:
+                    type: string
 
 components:
   schemas:
@@ -188,7 +221,7 @@ components:
 
     DeadLetterEntry:
       type: object
-      required: [entryId, entryType, correlationId, originalPayload, failureReason, failureCode, sourceService, targetService, tenantScopeKey, createdAt, resolution]
+      required: [entryId, entryType, correlationId, originalPayload, failureReason, failureCode, attemptCount, retryCount, sourceService, targetService, tenantScopeKey, createdAt, resolution]
       properties:
         entryId:
           type: string
@@ -205,9 +238,16 @@ components:
         failureCode:
           type: string
           enum: [CIRCUIT_OPEN, TIMEOUT, VALIDATION_ERROR, DELIVERY_FAILED, MAX_RETRIES_EXCEEDED]
+        attemptCount:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: Total calls including the initial call.
         retryCount:
           type: integer
           minimum: 0
+          maximum: 2
+          description: Retries after the initial call.
         sourceService:
           type: string
         targetService:
@@ -233,7 +273,7 @@ components:
 
     AgentHandoffEvent:
       type: object
-      required: [handoffId, sourceAgent, targetAgent, scopeKey, confidence, incidentId, status, retryCount, createdAt]
+      required: [handoffId, sourceAgent, targetAgent, scopeKey, tenantScopeKey, correlationId, confidence, incidentId, status, attemptCount, retryCount, maxAttempts, maxRetries, createdAt]
       properties:
         handoffId:
           type: string
@@ -243,22 +283,42 @@ components:
           type: string
         scopeKey:
           type: string
+        tenantScopeKey:
+          type: string
+        correlationId:
+          type: string
         confidence:
           type: number
           minimum: 0
           maximum: 1
         payload:
           type: object
+          description: Allow-listed and redacted payload projection for operator visibility.
           additionalProperties: true
+        payloadSummary:
+          type: string
+          description: Safe bounded summary of payload fields.
         incidentId:
           type: string
         status:
           type: string
           enum: [pending, delivered, retrying, failed, dead_lettered]
+        attemptCount:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: Total delivery calls including initial call.
         retryCount:
           type: integer
           minimum: 0
-          maximum: 3
+          maximum: 2
+          description: Retries after initial call.
+        maxAttempts:
+          type: integer
+          enum: [3]
+        maxRetries:
+          type: integer
+          enum: [2]
         timelineEventId:
           type: string
           nullable: true

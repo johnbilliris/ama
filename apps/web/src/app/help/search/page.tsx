@@ -1,3 +1,4 @@
+import { getServerApiBaseUrl } from "@/lib/api/base-url";
 /** spec-038 T-AA101 — help search page. */
 import { DegradedSearchBanner } from "@/components/help/DegradedSearchBanner";
 
@@ -11,13 +12,10 @@ interface SearchResult {
   summary?: string;
 }
 
-// Server components run in Node, so `fetch` requires an absolute URL — the
-// browser proxy at `/api/help/...` isn't reachable during SSR. Call upstream
+// Server components run in Node, so `fetch` requires an absolute URL. Call
+// the configured API endpoint directly
 // directly with the same default identity headers the proxy injects.
-const UPSTREAM =
-  process.env.API_PROXY_UPSTREAM ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:8000/api";
+const UPSTREAM = getServerApiBaseUrl();
 
 async function fetchResults(q: string): Promise<{ items: SearchResult[] }> {
   if (!q) return { items: [] };

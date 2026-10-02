@@ -48,8 +48,17 @@ def _seed_alert(
         "alert_id": alert_id,
         "incident_id": incident_id,
         "status": "published" if published else "draft",
-        "content_blocks": {"headline": f"Test alert {alert_id}", "areas": "Region A"},
+        "content_blocks": {
+            "headline": f"Test alert {alert_id}",
+            "body": "Primary body",
+            "areas": "Region A",
+            "geography": "Region A; Region B",
+            "approvedAt": "2025-01-15T09:58:00+00:00",
+            "headline:zh-Hans": "测试告警",
+            "body:zh-Hans": "请按指示撤离",
+        },
         "audience_segments": ["community-north"],
+        "languages": ["en-AU", "zh-Hans"],
         "is_all_clear": is_all_clear,
         "superseded_warning_id": superseded_warning_id,
     }
@@ -99,6 +108,23 @@ def test_get_cap_xml_returns_valid_xml(client):
     ns = {"cap": "urn:oasis:names:tc:emergency:cap:1.2"}
     assert root.find("cap:identifier", ns).text == "alert-cap"
     assert root.find("cap:info/cap:headline", ns).text == "Test alert alert-cap"
+    infos = root.findall("cap:info", ns)
+    assert len(infos) == 2
+
+
+def test_get_cap_xml_escapes_special_characters(client):
+    _seed_incident()
+    alert = _seed_alert("alert-cap-special")
+    alert.content_blocks["headline"] = 'Fire & smoke <near> "town"'
+    alert.content_blocks["body"] = "Evacuate > now"
+
+    resp = client.get("/api/alerts/alert-cap-special/cap")
+    assert resp.status_code == 200
+    root = fromstring(resp.text)
+    ns = {"cap": "urn:oasis:names:tc:emergency:cap:1.2"}
+    headline = root.find("cap:info/cap:headline", ns)
+    assert headline is not None
+    assert headline.text == 'Fire & smoke <near> "town"'
 
 
 def test_get_cap_xml_not_found(client):
@@ -138,16 +164,13 @@ def test_get_edxl_returns_valid_xml(client):
     assert resp.headers["content-type"].startswith("application/xml")
 
     root = fromstring(resp.text)
-    ns = {"edxl": "urn:oasis:names:tc:emergency:EDXL:DE:1.0"}
-    # Elements may be namespaced or not depending on serialiser output
-    dist_id = root.find("distributionID") or root.find("edxl:distributionID", ns)
+    ns = {"edxl": "urn:oasis:names:tc:emergency:EDXL:DE:2.0"}
+    dist_id = root.find("edxl:distributionID", ns)
     assert dist_id is not None and dist_id.text == "alert-edxl"
-    sender = root.find("senderID") or root.find("edxl:senderID", ns)
+    sender = root.find("edxl:senderID", ns)
     assert sender is not None and sender.text == "disaster-response-hub"
-    tier_el = root.find("contentObject/awsWarning/warningTier") or root.find(
-        "edxl:contentObject/edxl:awsWarning/edxl:warningTier", ns
-    )
-    assert tier_el is not None and tier_el.text == "emergency_warning"
+    embedded_cap = root.find("edxl:contentObject/edxl:xmlContent/edxl:embeddedXMLContent", ns)
+    assert embedded_cap is not None
 
 
 def test_get_edxl_not_found(client):

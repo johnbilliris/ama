@@ -3,13 +3,21 @@
 Uses mocks — does not require actual Cosmos DB connection.
 """
 
+from datetime import UTC, datetime
+
 import pytest
 from evacuation.models import (
+    DataSnapshot,
     DecisionType,
     EvacuationDecisionRecord,
+    EvacuationPhase,
     EvacuationPlan,
+    EvacuationZone,
+    HazardSourceSnapshot,
     HazardSummary,
     Traceability,
+    ZoneDisposition,
+    ZoneDispositionType,
 )
 
 # ---------------------------------------------------------------------------
@@ -50,13 +58,71 @@ class MockCosmosContainer:
 class TestPlanWriteReadRoundTrip:
     def test_write_and_read_plan(self):
         container = MockCosmosContainer()
+        area = {
+            "type": "Polygon",
+            "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 0]]],
+        }
+        source = HazardSourceSnapshot(
+            assessment_id="assess-001",
+            hazard_type="bushfire",
+            severity_level="high",
+            affected_area=area,
+            generated_at=datetime.now(UTC),
+            buffer_radius_metres=2_000,
+            geometry_sha256="a" * 64,
+        )
         plan = EvacuationPlan(
             plan_id="ep-inc-001-v1",
             incident_id="inc-001",
             confidence_score=0.85,
-            hazard_summary=HazardSummary(hazard_type="bushfire"),
-            traceability=Traceability(source_handoff_id="hf-001"),
+            affected_area=area,
+            hazard_summary=HazardSummary(
+                hazard_type="bushfire",
+                hazard_types=["bushfire"],
+                severity_level="high",
+                time_horizon="4h",
+                source_assessment_id="assess-001",
+                affected_area=area,
+                sources=[source],
+            ),
+            zones=[EvacuationZone(zone_id="1", zone_number=1, boundary=area)],
+            phases=[EvacuationPhase(phase_number=1, zone_ids=["1"])],
+            zone_dispositions=[
+                ZoneDisposition(
+                    zone_id="1",
+                    zone_number=1,
+                    disposition=ZoneDispositionType.shelter_in_place,
+                    urgency="immediate",
+                    affected_population=0,
+                    evacuating_population=0,
+                    remaining_population=0,
+                    rationale="No movement required",
+                )
+            ],
+            traceability=Traceability(
+                source_handoff_id="hf-001",
+                risk_assessment_id="assess-001",
+                risk_assessment_ids=["assess-001"],
+                recommendation_id="rec-001",
+                input_data_versions={"config": "config"},
+                generation_method="template_fallback",
+            ),
+            data_snapshot=DataSnapshot(
+                road_network_version="road",
+                population_data_version="population",
+                facility_data_version="facility",
+                assembly_area_data_version="assembly",
+                hazard_assessment_ids=["assess-001"],
+                hazard_geometry_algorithm="per-hazard-aeqd-level-union-v1",
+            ),
+            generation_method="template_fallback",
+            configuration_version="config",
             summary="Test plan",
+            incident_scope_key="live:inc-001",
+            simulation=False,
+            assumptions=[],
+            population_estimate=0,
+            total_population=0,
         )
         doc = plan.model_dump(mode="json")
         doc["id"] = plan.plan_id
@@ -95,15 +161,32 @@ class TestPlanWriteReadRoundTrip:
 # ---------------------------------------------------------------------------
 
 
+def _audit_record(handoff_id, decision_type=DecisionType.handoff_received):
+    plan_event = decision_type in {
+        DecisionType.plan_generated,
+        DecisionType.plan_updated,
+    }
+    return EvacuationDecisionRecord(
+        handoff_id=handoff_id,
+        operation_id=handoff_id,
+        incident_id="inc-001",
+        plan_id="ep-inc-001-v1" if plan_event else None,
+        version=1 if plan_event else None,
+        decision_type=decision_type,
+        decision_rationale="Test canonical audit decision",
+        agent_version="0.1.0",
+        configuration_version="config",
+        incident_scope_key="live:inc-001",
+        tenant_id="live",
+        routes_count=0 if plan_event else None,
+        transport_requests_count=0 if plan_event else None,
+    )
+
+
 class TestDecisionRecordRoundTrip:
     def test_write_and_read_decision_record(self):
         container = MockCosmosContainer()
-        record = EvacuationDecisionRecord(
-            handoff_id="hf-001",
-            decision_type=DecisionType.handoff_received,
-            incident_id="inc-001",
-            decision_rationale="Test rationale",
-        )
+        record = _audit_record("hf-001")
         doc = record.model_dump(mode="json")
         doc["id"] = str(doc["id"])
 
@@ -116,10 +199,7 @@ class TestDecisionRecordRoundTrip:
     def test_multiple_records_stored(self):
         container = MockCosmosContainer()
         for i in range(5):
-            record = EvacuationDecisionRecord(
-                handoff_id=f"hf-{i}",
-                decision_type=DecisionType.handoff_received,
-            )
+            record = _audit_record(f"hf-{i}")
             doc = record.model_dump(mode="json")
             doc["id"] = f"record-{i}"
             container.create_item(body=doc)
@@ -140,10 +220,7 @@ class TestAuditWriterWithMockCosmos:
         container = MockCosmosContainer()
         writer = AuditWriter(cosmos_client=container)
 
-        record = EvacuationDecisionRecord(
-            handoff_id="hf-audit",
-            decision_type=DecisionType.plan_generated,
-        )
+        record = _audit_record("hf-audit", DecisionType.plan_generated)
         writer.write(record)
 
         assert len(container._store) == 1

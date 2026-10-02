@@ -7,6 +7,8 @@ from evacuation.models import EvacuationPlan
 from evacuation.pipeline import EvacuationProcessingPipeline
 from evacuation.road_network import RoadNetworkLoader
 
+from simulation.evacuation_provenance import build_scenario_provenance_stores
+
 SAMPLE_FILE = "data/road-networks/far-north-qld-sample.json"
 
 
@@ -45,9 +47,12 @@ def _make_bushfire_handoff():
 def pipeline():
     road_network = RoadNetworkLoader()
     road_network.load(SAMPLE_FILE)
+    recommendation_store, assessment_store = build_scenario_provenance_stores(_make_bushfire_handoff())
     return EvacuationProcessingPipeline(
         config=EvacuationConfig(),
         road_network=road_network,
+        cosmos_assessments_container=assessment_store,
+        cosmos_recommendations_container=recommendation_store,
     )
 
 

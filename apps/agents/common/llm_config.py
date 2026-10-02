@@ -47,6 +47,7 @@ class LLMClientConfig:
     # Model parameters
     model_tier: str = field(default_factory=lambda: os.getenv("LLM_MODEL_TIER", "drafting"))
     temperature: float = field(default_factory=lambda: float(os.getenv("LLM_TEMPERATURE", "0.3")))
+    max_input_tokens: int = field(default_factory=lambda: int(os.getenv("LLM_MAX_INPUT_TOKENS", "4000")))
     max_output_tokens: int = field(default_factory=lambda: int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "2000")))
 
     # Retry & circuit breaker
@@ -90,6 +91,8 @@ class LLMClientConfig:
             raise ValueError(f"Invalid LLM_MODEL_TIER: {self.model_tier}")
         if not (0.0 <= self.temperature <= 2.0):
             raise ValueError(f"LLM_TEMPERATURE must be 0.0–2.0, got {self.temperature}")
+        if self.max_input_tokens <= 0 or self.max_input_tokens > 200000:
+            raise ValueError(f"LLM_MAX_INPUT_TOKENS must be 1–200000, got {self.max_input_tokens}")
         if self.max_output_tokens <= 0 or self.max_output_tokens > 16384:
             raise ValueError(f"LLM_MAX_OUTPUT_TOKENS must be 1–16384, got {self.max_output_tokens}")
         if not (0.0 <= self.confidence_threshold <= 1.0):

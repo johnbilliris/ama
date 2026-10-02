@@ -41,10 +41,10 @@ from packages.domain.src.domain.seed._fixture_marker import (  # noqa: E402
     validate_wrapper,
 )
 
-try:  # PII detector is optional at import time; tests inject it via subdir flow.
+try:
     from scripts._pii_detector import detect as _pii_detect
-except Exception:  # pragma: no cover
-    _pii_detect = None  # type: ignore[assignment]
+except Exception as exc:  # pragma: no cover
+    raise RuntimeError("The required seed-data PII detector could not be initialized") from exc
 
 
 class SeedRejectedError(RuntimeError):

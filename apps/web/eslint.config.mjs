@@ -1,15 +1,11 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
 import { createRequire } from "module";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const compat = new FlatCompat({ baseDirectory: __dirname });
 const require = createRequire(import.meta.url);
 const noWaitForTimeout = require("../../tests/e2e/web-coverage/_support/eslint-rules/no-waitfortimeout.cjs");
 
-export default [
-  ...compat.extends("next/core-web-vitals"),
+const config = [
+  ...nextCoreWebVitals,
   {
     ignores: [
       ".next/**",
@@ -34,3 +30,5 @@ export default [
     }
   }
 ];
+
+export default config;

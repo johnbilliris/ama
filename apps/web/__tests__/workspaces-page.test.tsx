@@ -9,9 +9,11 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import React from "react";
+import { I18nProvider } from "../src/lib/i18n/runtime";
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ personaId: "incident_commander_au_east" }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("next/link", () => ({
@@ -51,7 +53,11 @@ describe("workspaces/[personaId] page", () => {
       "../src/app/workspaces/[personaId]/page"
     );
 
-    render(<WorkspacePage />);
+    render(
+      <I18nProvider>
+        <WorkspacePage />
+      </I18nProvider>,
+    );
 
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent("Workspace not found"),
@@ -73,7 +79,11 @@ describe("workspaces/[personaId] page", () => {
       "../src/app/workspaces/[personaId]/page"
     );
 
-    render(<WorkspacePage />);
+    render(
+      <I18nProvider>
+        <WorkspacePage />
+      </I18nProvider>,
+    );
 
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent("Workspace failed to load"),
@@ -98,7 +108,11 @@ describe("workspaces/[personaId] page", () => {
       "../src/app/workspaces/[personaId]/page"
     );
 
-    render(<WorkspacePage />);
+    render(
+      <I18nProvider>
+        <WorkspacePage />
+      </I18nProvider>,
+    );
 
     const backLink = await screen.findByRole("link", { name: /Back to workspaces/i });
     expect(backLink).toHaveAttribute("href", "/workspaces");

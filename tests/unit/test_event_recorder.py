@@ -113,3 +113,16 @@ def test_snapshot_created_on_time_boundary(recorder, tenant_id) -> None:
     snapshots = repo.list_snapshots(tenant_id)
     assert len(snapshots) == 1
     assert snapshots[0].sim_time_offset == 350.0
+
+
+def test_snapshot_failure_marks_recording_unhealthy(recorder, tenant_id) -> None:
+    rec, repo = recorder
+
+    def _boom(*args, **kwargs):  # type: ignore[no-untyped-def]
+        raise RuntimeError("snapshot store unavailable")
+
+    repo.save_snapshot = _boom  # type: ignore[assignment]
+    rec.record_event(tenant_id, "signal_delivered", 0.0, {})
+    rec.record_event(tenant_id, "signal_delivered", 350.0, {})
+
+    assert rec.is_healthy(tenant_id) is False

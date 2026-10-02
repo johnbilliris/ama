@@ -1,6 +1,9 @@
 """Contract tests validating simulation API request/response schemas per contracts/simulation-api.md."""
 
 import pytest
+from app.api.routes import simulations as simulations_routes
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 from packages.domain.src.domain.models.exercise_report import ExerciseReport
 from packages.domain.src.domain.models.scenario_template import (
@@ -28,11 +31,9 @@ class TestSimulationTenantContract:
             "status": tenant.status,
             "created_at": tenant.created_at.isoformat(),
         }
-        assert "tenant_id" in response
-        assert "scenario_run_id" in response
-        assert "status" in response
-        assert "created_at" in response
+        assert set(response) == {"tenant_id", "scenario_run_id", "status", "created_at"}
         assert response["tenant_id"].startswith("sim-")
+        assert response["status"] == "Provisioning"
 
     def test_list_response_schema(self):
         """GET /api/simulations → 200 response must include simulations array, total, limit, offset."""
@@ -52,12 +53,13 @@ class TestSimulationTenantContract:
             "limit": 20,
             "offset": 0,
         }
+        assert set(response) == {"simulations", "total", "limit", "offset"}
         assert isinstance(response["simulations"], list)
-        assert "total" in response
-        assert "limit" in response
-        assert "offset" in response
+        assert response["total"] == 1
+        assert response["limit"] == 20
+        assert response["offset"] == 0
         sim = response["simulations"][0]
-        for key in (
+        assert set(sim) == {
             "tenant_id",
             "scenario_type",
             "status",
@@ -65,8 +67,7 @@ class TestSimulationTenantContract:
             "participant_count",
             "signal_count",
             "storage_bytes",
-        ):
-            assert key in sim
+        }
 
     def test_detail_response_full_document(self):
         """GET /api/simulations/{tenantId} → 200 response is full SimulationTenant."""
@@ -94,8 +95,7 @@ class TestSimulationTenantContract:
             "resource_consumption",
             "elapsed_seconds",
         ]
-        for field in required_fields:
-            assert field in doc, f"Missing field: {field}"
+        assert set(required_fields).issubset(doc.keys())
         # Verify removed fields are NOT present
         # Note: feature 026 reintroduces `last_resumed_at` as part of the server-owned
         # simulation clock (used to compute accumulated_sim_seconds on pause/resume).
@@ -228,3 +228,120 @@ class TestExerciseReportContract:
             "benchmark_comparison",
         ):
             assert field in doc
+
+
+@pytest.fixture()
+def simulation_client() -> TestClient:
+    app = FastAPI()
+
+    @app.middleware("http")
+    async def _inject_claims(request, call_next):
+        request.state.claims = {
+            "sub": "user-1",
+            "agency_id": "agency-a",
+            "jurisdiction_ids": ["NSW"],
+            "roles": ["SimulationUser"],
+            "persona_id": "persona-1",
+        }
+        return await call_next(request)
+
+    simulations_routes._repo._in_memory_docs.clear()
+    app.include_router(simulations_routes.router)
+    return TestClient(app)
+
+
+class TestSpec006CompatSimulationRoutes:
+    def test_create_list_start_get_abort_flow(self, simulation_client: TestClient) -> None:
+        scenario_body = {
+            "name": "Flood NSW",
+            "scenarioType": "flood",
+            "targetRegion": {
+                "type": "Polygon",
+                "coordinates": [[[151.0, -34.0], [151.5, -34.0], [151.5, -33.5], [151.0, -33.5], [151.0, -34.0]]],
+            },
+            "targetJurisdictionIds": ["NSW"],
+            "activatedDataSourceIds": ["bom-warnings", "bom-river-gauges"],
+            "timeCompressionRatio": 4.0,
+            "misinformationRatio": 0.2,
+        }
+        created = simulation_client.post("/simulations/scenarios", json=scenario_body)
+        assert created.status_code == 201
+        scenario_id = created.json()["scenarioId"]
+
+        listed = simulation_client.get("/simulations/scenarios")
+        assert listed.status_code == 200
+        assert any(row["scenarioId"] == scenario_id for row in listed.json())
+
+        started = simulation_client.post(
+            "/simulations/runs",
+            json={"scenarioId": scenario_id, "requestedByPersonaId": "persona-1", "timeCompressionRatio": 8.0},
+        )
+        assert started.status_code == 202
+        run = started.json()
+        assert run["status"] == "running"
+
+        fetched = simulation_client.get(f"/simulations/runs/{run['runId']}")
+        assert fetched.status_code == 200
+        assert fetched.json()["runId"] == run["runId"]
+
+        aborted = simulation_client.post(
+            f"/simulations/runs/{run['runId']}/abort",
+            json={"requestedByPersonaId": "persona-1"},
+        )
+        assert aborted.status_code == 200
+        assert aborted.json()["status"] == "aborted"
+
+        duplicate_abort = simulation_client.post(
+            f"/simulations/runs/{run['runId']}/abort",
+            json={"requestedByPersonaId": "persona-1"},
+        )
+        assert duplicate_abort.status_code == 409
+
+    def test_unknown_run_returns_404(self, simulation_client: TestClient) -> None:
+        response = simulation_client.get("/simulations/runs/not-found")
+        assert response.status_code == 404
+
+    def test_polygon_and_catalogue_validation(self, simulation_client: TestClient) -> None:
+        invalid_polygon = simulation_client.post(
+            "/simulations/scenarios",
+            json={
+                "name": "Bad",
+                "scenarioType": "flood",
+                "targetRegion": {"type": "Point", "coordinates": [151.0, -33.8]},
+                "targetJurisdictionIds": ["NSW"],
+                "activatedDataSourceIds": ["bom-warnings"],
+            },
+        )
+        assert invalid_polygon.status_code == 400
+
+        invalid_source = simulation_client.post(
+            "/simulations/scenarios",
+            json={
+                "name": "Bad Source",
+                "scenarioType": "flood",
+                "targetRegion": {
+                    "type": "Polygon",
+                    "coordinates": [[[151.0, -34.0], [151.5, -34.0], [151.5, -33.5], [151.0, -33.5], [151.0, -34.0]]],
+                },
+                "targetJurisdictionIds": ["NSW"],
+                "activatedDataSourceIds": ["not-a-source"],
+            },
+        )
+        assert invalid_source.status_code == 400
+
+    def test_ratio_bounds_validation(self, simulation_client: TestClient) -> None:
+        response = simulation_client.post(
+            "/simulations/scenarios",
+            json={
+                "name": "Bad Ratio",
+                "scenarioType": "flood",
+                "targetRegion": {
+                    "type": "Polygon",
+                    "coordinates": [[[151.0, -34.0], [151.5, -34.0], [151.5, -33.5], [151.0, -33.5], [151.0, -34.0]]],
+                },
+                "targetJurisdictionIds": ["NSW"],
+                "activatedDataSourceIds": ["bom-warnings"],
+                "misinformationRatio": 1.5,
+            },
+        )
+        assert response.status_code == 422

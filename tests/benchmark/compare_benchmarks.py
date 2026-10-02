@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import subprocess
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -18,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 # ── Thresholds ────────────────────────────────────────────────────────────────
 
-WARNING_THRESHOLD: float = 0.20  # ≥ 20% median increase → warning
-FAILURE_THRESHOLD: float = 0.50  # ≥ 50% median increase → failure
+WARNING_THRESHOLD: float = 0.20  # ≥ 20% p95 increase → warning
+FAILURE_THRESHOLD: float = 0.50  # ≥ 50% p95 increase → failure
 
 BASELINE_PATH: Path = Path(".benchmarks/baseline.json")
 CURRENT_PATH: Path = Path(".benchmarks/current.json")
@@ -33,6 +34,9 @@ DEFAULT_SLO_TARGETS: dict[str, float] = {
     "test_health_evacuation": 0.075,
     "test_health_resource": 0.100,
     "test_health_communication": 0.100,
+    # Lightweight CI concurrent API checks
+    "test_api_dashboard_p95_concurrent": 2.0,
+    "test_api_signals_list_p95_concurrent": 0.5,
     # Pipeline processing
     "test_pipeline_monitoring": 2.0,
     "test_pipeline_risk": 2.0,
@@ -45,6 +49,11 @@ DEFAULT_SLO_TARGETS: dict[str, float] = {
     # validated inside the test, not in the wrapper
 }
 
+REQUIRED_BENCHMARKS: tuple[str, ...] = (
+    "test_api_dashboard_p95_concurrent",
+    "test_api_signals_list_p95_concurrent",
+)
+
 
 # ── Data classes ──────────────────────────────────────────────────────────────
 
@@ -56,8 +65,8 @@ class MetricComparison:
     benchmark_name: str
     group: str
     agent: str | None
-    baseline_median_s: float | None
-    current_median_s: float
+    baseline_p95_s: float | None
+    current_p95_s: float
     slo_target_s: float | None
     slo_pass: bool
     pct_change: float | None
@@ -121,6 +130,32 @@ def get_commit_sha() -> str:
     return "unknown"
 
 
+def _percentile(values: list[float], pct: float) -> float:
+    if not values:
+        raise ValueError("cannot compute percentile for empty sample list")
+    ordered = sorted(values)
+    index = int(round((pct / 100.0) * (len(ordered) - 1)))
+    index = max(0, min(index, len(ordered) - 1))
+    return float(ordered[index])
+
+
+def _extract_p95_seconds(benchmark: dict) -> float:
+    extra = benchmark.get("extra_info", {}) or {}
+    from_extra = extra.get("p95_s")
+    if from_extra is not None:
+        value = float(from_extra)
+        if not math.isfinite(value) or value < 0.0:
+            raise ValueError(f"invalid p95_s in extra_info for {benchmark.get('name', 'unknown')}")
+        return value
+
+    stats = benchmark.get("stats", {}) or {}
+    data = stats.get("data")
+    if isinstance(data, list) and data:
+        return _percentile([float(v) for v in data], 95.0)
+
+    raise ValueError(f"missing p95 samples for benchmark {benchmark.get('name', 'unknown')}")
+
+
 # ── Core comparison logic ─────────────────────────────────────────────────────
 
 
@@ -150,7 +185,9 @@ def compare_benchmarks(
     # Load current results (required)
     current_data = load_benchmark_json(current_path)
     if current_data is None:
-        report.summary = "No current benchmark results found — skipping comparison."
+        report.overall_status = "FAILURE"
+        report.has_failures = True
+        report.summary = "Current benchmark results missing or invalid."
         return report
 
     # Load baseline (optional)
@@ -171,61 +208,121 @@ def compare_benchmarks(
         if name:
             current_by_name[name] = bench
 
+    for required_name in REQUIRED_BENCHMARKS:
+        if required_name not in current_by_name:
+            report.has_failures = True
+            report.results.append(
+                MetricComparison(
+                    benchmark_name=required_name,
+                    group="api-lightweight",
+                    agent="api",
+                    baseline_p95_s=None,
+                    current_p95_s=0.0,
+                    slo_target_s=targets.get(required_name),
+                    slo_pass=False,
+                    pct_change=None,
+                    status="FAILURE",
+                    message=f"missing required metric: {required_name}",
+                )
+            )
+
     # Compare current benchmarks against baseline
     for name, current_bench in current_by_name.items():
-        stats = current_bench.get("stats", {})
-        current_median = stats.get("median", 0.0)
         group = current_bench.get("group", "unknown")
         extra = current_bench.get("extra_info", {})
         agent = extra.get("agent")
         slo_target = targets.get(name)
-        slo_pass = slo_target is None or current_median <= slo_target
-
-        if name not in baseline_by_name:
-            # First run for this metric
+        try:
+            current_p95 = _extract_p95_seconds(current_bench)
+        except ValueError as exc:
+            report.has_failures = True
             report.results.append(
                 MetricComparison(
                     benchmark_name=name,
                     group=group,
                     agent=agent,
-                    baseline_median_s=None,
-                    current_median_s=current_median,
+                    baseline_p95_s=None,
+                    current_p95_s=0.0,
+                    slo_target_s=slo_target,
+                    slo_pass=False,
+                    pct_change=None,
+                    status="FAILURE",
+                    message=str(exc),
+                )
+            )
+            continue
+        slo_pass = slo_target is None or current_p95 <= slo_target
+
+        if name not in baseline_by_name:
+            # First run for this metric
+            status = "FIRST_RUN"
+            message = f"First run for {name} — no baseline to compare"
+            if slo_target is not None and not slo_pass:
+                status = "FAILURE"
+                message = f"{name}: first run p95={current_p95:.3f}s breaches SLO={slo_target:.3f}s"
+                report.has_failures = True
+            report.results.append(
+                MetricComparison(
+                    benchmark_name=name,
+                    group=group,
+                    agent=agent,
+                    baseline_p95_s=None,
+                    current_p95_s=current_p95,
                     slo_target_s=slo_target,
                     slo_pass=slo_pass,
                     pct_change=None,
-                    status="FIRST_RUN",
-                    message=f"First run for {name} — no baseline to compare",
+                    status=status,
+                    message=message,
                 )
             )
             continue
 
         baseline_bench = baseline_by_name[name]
-        baseline_median = baseline_bench.get("stats", {}).get("median", 0.0)
-
-        if baseline_median <= 0:
-            logger.warning(
-                "Baseline median is zero/negative for %s — skipping percentage comparison",
-                name,
-            )
+        try:
+            baseline_p95 = _extract_p95_seconds(baseline_bench)
+        except ValueError as exc:
+            report.has_failures = True
             report.results.append(
                 MetricComparison(
                     benchmark_name=name,
                     group=group,
                     agent=agent,
-                    baseline_median_s=baseline_median,
-                    current_median_s=current_median,
+                    baseline_p95_s=None,
+                    current_p95_s=current_p95,
                     slo_target_s=slo_target,
-                    slo_pass=slo_pass,
+                    slo_pass=False,
                     pct_change=None,
-                    status="PASS",
-                    message=f"Baseline median zero for {name} — skipped regression check",
+                    status="FAILURE",
+                    message=f"baseline metric invalid for {name}: {exc}",
                 )
             )
             continue
 
-        pct_change = (current_median - baseline_median) / baseline_median
+        if baseline_p95 <= 0:
+            report.has_failures = True
+            report.results.append(
+                MetricComparison(
+                    benchmark_name=name,
+                    group=group,
+                    agent=agent,
+                    baseline_p95_s=baseline_p95,
+                    current_p95_s=current_p95,
+                    slo_target_s=slo_target,
+                    slo_pass=False,
+                    pct_change=None,
+                    status="FAILURE",
+                    message=f"baseline p95 for {name} must be > 0",
+                )
+            )
+            continue
 
-        if pct_change >= FAILURE_THRESHOLD:
+        pct_change = (current_p95 - baseline_p95) / baseline_p95
+
+        if not slo_pass:
+            status = "FAILURE"
+            message = f"{name}: p95={current_p95:.3f}s breaches SLO={slo_target:.3f}s"
+            report.has_failures = True
+        elif pct_change >= FAILURE_THRESHOLD:
             status = "FAILURE"
             message = f"{name}: +{pct_change:.1%} regression (≥ {FAILURE_THRESHOLD:.0%} threshold)"
             report.has_failures = True
@@ -245,8 +342,8 @@ def compare_benchmarks(
                 benchmark_name=name,
                 group=group,
                 agent=agent,
-                baseline_median_s=baseline_median,
-                current_median_s=current_median,
+                baseline_p95_s=baseline_p95,
+                current_p95_s=current_p95,
                 slo_target_s=slo_target,
                 slo_pass=slo_pass,
                 pct_change=pct_change,
@@ -262,23 +359,33 @@ def compare_benchmarks(
             group = baseline_bench.get("group", "unknown")
             extra = baseline_bench.get("extra_info", {})
             agent = extra.get("agent")
-            baseline_median = baseline_bench.get("stats", {}).get("median", 0.0)
+            try:
+                baseline_p95 = _extract_p95_seconds(baseline_bench)
+            except ValueError:
+                baseline_p95 = 0.0
             logger.info(
                 "Baseline metric %s not found in current run — logging as BASELINE_ONLY",
                 name,
             )
+            is_required = name in REQUIRED_BENCHMARKS
+            if is_required:
+                report.has_failures = True
             report.results.append(
                 MetricComparison(
                     benchmark_name=name,
                     group=group,
                     agent=agent,
-                    baseline_median_s=baseline_median,
-                    current_median_s=0.0,
+                    baseline_p95_s=baseline_p95,
+                    current_p95_s=0.0,
                     slo_target_s=targets.get(name),
-                    slo_pass=True,
+                    slo_pass=False if is_required else True,
                     pct_change=None,
-                    status="BASELINE_ONLY",
-                    message=f"{name}: present in baseline but not in current run",
+                    status="FAILURE" if is_required else "BASELINE_ONLY",
+                    message=(
+                        f"missing required metric in current run: {name}"
+                        if is_required
+                        else f"{name}: present in baseline but not in current run"
+                    ),
                 )
             )
 
@@ -338,7 +445,7 @@ def format_report(report: ComparisonReport) -> str:
 
     for r in report.results:
         emoji = _STATUS_EMOJI.get(r.status, r.status)
-        ms = r.current_median_s * 1000
+        ms = r.current_p95_s * 1000
 
         if r.slo_target_s is not None:
             if r.slo_target_s >= 1.0:

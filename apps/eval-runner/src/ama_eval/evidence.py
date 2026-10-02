@@ -221,5 +221,7 @@ def _cli(argv: list[str] | None = None) -> int:
 if __name__ == "__main__":
     import sys  # noqa: PLC0415
 
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    from apps.console_logging import configure_console_logging  # noqa: PLC0415
+
+    configure_console_logging()
     sys.exit(_cli())

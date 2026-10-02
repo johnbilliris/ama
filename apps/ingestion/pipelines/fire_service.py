@@ -8,6 +8,17 @@ from apps.ingestion.normalisers.geojson_normaliser import normalise_geojson_feat
 
 logger = logging.getLogger(__name__)
 
+STATE_TIMEZONES: dict[str, str] = {
+    "nsw": "Australia/Sydney",
+    "vic": "Australia/Melbourne",
+    "qld": "Australia/Brisbane",
+    "sa": "Australia/Adelaide",
+    "wa": "Australia/Perth",
+    "tas": "Australia/Hobart",
+    "act": "Australia/Canberra",
+    "nt": "Australia/Darwin",
+}
+
 STATE_CONFIGS: dict[str, dict[str, str]] = {
     "nsw": {
         "data_source_id": "nsw-rfs-fires-near-me",
@@ -90,7 +101,7 @@ class FireServicePipeline(IngestionPipelineBase):
 
         features = data.get("features", [])
         payloads: list[dict[str, Any]] = []
-        for feature in features[:100]:
+        for feature in features:
             feature["data_source_id"] = self._config["data_source_id"]
             feature["source_name"] = self._config["name"]
             feature["source_kind"] = "authoritative"
@@ -106,6 +117,7 @@ class FireServicePipeline(IngestionPipelineBase):
             "source_uri": self._endpoint_url,
             "jurisdiction_id": self._state_code,
             "state_key": self._config["state_key"],
+            "source_timezone": STATE_TIMEZONES[self._state_code],
         }
         envelope = normalise_geojson_feature(raw_payload, context)
         envelope["category"] = "fire"

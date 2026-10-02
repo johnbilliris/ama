@@ -13,12 +13,13 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 from collections import deque
 from datetime import UTC, datetime
 from pathlib import Path
 
 from communication.config import CommunicationConfig
-from communication.models import AuditBufferEntry, CommunicationDecisionRecord
+from communication.models import AuditBufferEntry, CommunicationDecisionRecord, CommunicationDecisionType
 
 logger = logging.getLogger(__name__)
 
@@ -38,18 +39,26 @@ class AuditWriter:
         self._tier: str = "cosmos"
         self._records_written: int = 0
         self._file_spill_count: int = 0
+        self._lock = threading.RLock()
 
     def write(self, record: CommunicationDecisionRecord) -> None:
         """Write an audit record. Falls through tiers on failure."""
+        with self._lock:
+            self._write_locked(record)
+
+    def _write_locked(self, record: CommunicationDecisionRecord) -> None:
         # Tier 1: Cosmos DB
         if self._cosmos_client is not None:
             try:
-                self._write_to_cosmos(record)
                 record.flush_source = "direct"
+                self._write_to_cosmos(record)
                 self._tier = "cosmos"
                 self._records_written += 1
                 return
-            except Exception:
+            except Exception as exc:
+                if self._is_duplicate(exc):
+                    self._tier = "cosmos"
+                    return
                 logger.warning("Cosmos DB write failed, falling back to memory buffer")
 
         # Tier 2: In-memory buffer
@@ -107,6 +116,10 @@ class AuditWriter:
 
     def flush(self) -> int:
         """Flush buffered records to Cosmos DB. Returns count of records flushed."""
+        with self._lock:
+            return self._flush_locked()
+
+    def _flush_locked(self) -> int:
         if self._cosmos_client is None:
             return 0
 
@@ -123,36 +136,50 @@ class AuditWriter:
                 self._write_to_cosmos(entry.record)
                 self._buffer.popleft()
                 flushed += 1
-            except Exception:
+            except Exception as exc:
+                if self._is_duplicate(exc):
+                    self._buffer.popleft()
+                    flushed += 1
+                    continue
                 logger.warning("Flush failed for memory-buffered record, stopping flush")
-                break
+                return flushed
 
         # Then drain file buffer (if it exists)
         file_path = Path(self._file_path)
         if file_path.exists():
             try:
+                lines = file_path.read_text(encoding="utf-8").splitlines()
                 remaining_lines: list[str] = []
-                with open(file_path, encoding="utf-8") as f:
-                    for line in f:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        try:
-                            entry_data = json.loads(line)
-                            entry = AuditBufferEntry.model_validate(entry_data)
-                            entry.record.buffered_at = entry.buffered_at
-                            entry.record.flush_source = "file_buffer"
-                            self._write_to_cosmos(entry.record)
+                failed = False
+                for line in lines:
+                    if failed:
+                        remaining_lines.append(line)
+                        continue
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        entry_data = json.loads(line)
+                        entry = AuditBufferEntry.model_validate(entry_data)
+                        entry.record.buffered_at = entry.buffered_at
+                        entry.record.flush_source = "file_buffer"
+                        self._write_to_cosmos(entry.record)
+                        flushed += 1
+                    except Exception as exc:
+                        if self._is_duplicate(exc):
                             flushed += 1
-                        except Exception:
-                            remaining_lines.append(line)
+                            continue
+                        remaining_lines.append(line)
+                        failed = True
 
                 if remaining_lines:
-                    with open(file_path, "w", encoding="utf-8") as f:
-                        for remaining in remaining_lines:
-                            f.write(remaining + "\n")
+                    temporary = file_path.with_suffix(file_path.suffix + ".tmp")
+                    temporary.write_text("\n".join(remaining_lines) + "\n", encoding="utf-8")
+                    temporary.replace(file_path)
+                    self._file_spill_count = len(remaining_lines)
                 else:
                     file_path.unlink(missing_ok=True)
+                    self._file_spill_count = 0
             except Exception:
                 logger.warning("Failed to process file buffer during flush", exc_info=True)
 
@@ -172,12 +199,56 @@ class AuditWriter:
             return "buffering"
         return "healthy"
 
+    def records_for(
+        self,
+        *,
+        tenant_id: str,
+        handoff_id: str | None = None,
+        alert_id: str | None = None,
+    ) -> list[CommunicationDecisionRecord]:
+        records = [entry.record for entry in self._buffer if entry.record.tenant_id == tenant_id]
+        if self._cosmos_client is not None:
+            clauses = ["c.tenant_id = @tenant_id"]
+            parameters = [{"name": "@tenant_id", "value": tenant_id}]
+            if handoff_id is not None:
+                clauses.append("c.handoff_id = @handoff_id")
+                parameters.append({"name": "@handoff_id", "value": handoff_id})
+            if alert_id is not None:
+                clauses.append("c.alert_id = @alert_id")
+                parameters.append({"name": "@alert_id", "value": alert_id})
+            documents = self._cosmos_client.query_items(
+                query=f"SELECT * FROM c WHERE {' AND '.join(clauses)}",
+                parameters=parameters,
+                partition_key=tenant_id,
+            )
+            records.extend(CommunicationDecisionRecord.model_validate(document) for document in documents)
+        if handoff_id is not None:
+            records = [record for record in records if record.handoff_id == handoff_id]
+        if alert_id is not None:
+            records = [record for record in records if record.alert_id == alert_id]
+        return records
+
+    def missing_decisions(
+        self,
+        expected: set[CommunicationDecisionType],
+        *,
+        tenant_id: str,
+        handoff_id: str,
+    ) -> set[CommunicationDecisionType]:
+        observed = {record.decision_type for record in self.records_for(tenant_id=tenant_id, handoff_id=handoff_id)}
+        return expected - observed
+
     @property
     def buffer_depth(self) -> int:
-        """Current in-memory buffer depth."""
-        return len(self._buffer)
+        """Current in-memory and file-backed record count."""
+        return len(self._buffer) + self._file_spill_count
 
     @property
     def records_written(self) -> int:
         """Total records written to primary storage."""
         return self._records_written
+
+    @staticmethod
+    def _is_duplicate(exc: Exception) -> bool:
+        status_code = getattr(exc, "status_code", None) or getattr(exc, "http_status", None)
+        return status_code == 409 or "Conflict" in type(exc).__name__

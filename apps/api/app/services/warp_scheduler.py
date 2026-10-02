@@ -26,12 +26,17 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+from app.core.async_io import run_blocking
+from app.observability import simulation_metrics
 from app.repositories.signal_repository import SignalRepository
 from app.repositories.simulation_event_repository import SimulationEventRepository
 from app.repositories.simulation_repository import SimulationRepository
+from app.services.signal_accepted_workflow import enqueue_signal_accepted
 from app.services.simulation_clock_service import SimulationClockService
 from app.services.simulation_event_recorder import SimulationEventRecorder
+from app.services.simulation_signal_adapter import template_entry_to_signal
 
+from packages.domain.src.domain.models.signal_accepted_event import SignalAcceptedEvent
 from packages.domain.src.domain.models.simulation_event import SignalSchedulerState
 
 logger = logging.getLogger(__name__)
@@ -64,6 +69,7 @@ class WarpScheduler:
         self._owner = owner_id or f"sched-{uuid4().hex[:8]}"
         self._max_burst = max_burst_rate
         self._timelines: dict[str, list[dict[str, Any]]] = {}
+        self._delivery_tasks: dict[str, asyncio.Task[None]] = {}
 
     # ------------------------------------------------------------------
     # initialisation
@@ -77,6 +83,7 @@ class WarpScheduler:
     ) -> SignalSchedulerState:
         sorted_timeline = sorted(signal_timeline, key=lambda s: float(s.get("offset_seconds", 0.0)))
         self._timelines[tenant_id] = sorted_timeline
+        self._events.save_scheduler_timeline(tenant_id, sorted_timeline)
         state = SignalSchedulerState(
             id=f"sched-{tenant_id}",
             tenant_id=tenant_id,
@@ -98,6 +105,55 @@ class WarpScheduler:
 
     def load_timeline(self, tenant_id: str, signal_timeline: list[dict[str, Any]]) -> None:
         self._timelines[tenant_id] = sorted(signal_timeline, key=lambda s: float(s.get("offset_seconds", 0.0)))
+
+    def start_delivery_loop(self, tenant_id: str) -> bool:
+        if tenant_id not in self._timelines:
+            persisted = self._events.get_scheduler_timeline(tenant_id)
+            if persisted:
+                self.load_timeline(tenant_id, persisted)
+        if not self._timelines.get(tenant_id):
+            return False
+        current = self._delivery_tasks.get(tenant_id)
+        if current is not None and not current.done():
+            return False
+
+        async def _run() -> None:
+            try:
+                await self.run_delivery_loop(tenant_id)
+            finally:
+                if self._delivery_tasks.get(tenant_id) is asyncio.current_task():
+                    self._delivery_tasks.pop(tenant_id, None)
+
+        self._delivery_tasks[tenant_id] = asyncio.create_task(_run())
+        return True
+
+    async def start_delivery_loop_async(self, tenant_id: str) -> bool:
+        """Offloaded variant for ``async`` routes and startup.
+
+        The cache-miss timeline read is the only blocking call in
+        :meth:`start_delivery_loop`; resolving it here (and caching even an
+        empty result) leaves the synchronous call free of storage I/O. Task
+        creation stays on the caller's loop because ``asyncio.create_task``
+        requires a running loop in the calling thread.
+        """
+        if tenant_id not in self._timelines:
+            persisted = await run_blocking(self._events.get_scheduler_timeline, tenant_id)
+            self.load_timeline(tenant_id, persisted or [])
+        return self.start_delivery_loop(tenant_id)
+
+    async def stop_delivery_loop(self, tenant_id: str) -> None:
+        task = self._delivery_tasks.pop(tenant_id, None)
+        if task is None or task.done():
+            return
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+
+    async def stop_all(self) -> None:
+        for tenant_id in list(self._delivery_tasks):
+            await self.stop_delivery_loop(tenant_id)
 
     def get_state(self, tenant_id: str) -> SignalSchedulerState | None:
         return self._events.get_scheduler_state(tenant_id)
@@ -132,10 +188,12 @@ class WarpScheduler:
         tenant = await self._sim_repo.get_by_tenant_id(tenant_id)
         if tenant is None or tenant.clock_paused:
             return False
-        state = self._events.get_scheduler_state(tenant_id)
+        state = await run_blocking(self._events.get_scheduler_state, tenant_id)
         if state is None:
             return False
-        timeline = self._timelines.get(tenant_id) or []
+        timeline = self._timelines.get(tenant_id) or await run_blocking(self._events.get_scheduler_timeline, tenant_id)
+        if timeline and tenant_id not in self._timelines:
+            self.load_timeline(tenant_id, timeline)
         if state.next_signal_index >= len(timeline):
             return False
 
@@ -146,12 +204,31 @@ class WarpScheduler:
             return False  # not due yet
 
         envelope = dict(signal.get("signal_envelope") or signal)
-        envelope.setdefault("signal_id", f"sig-{uuid4().hex[:12]}")
-        envelope["scope"] = tenant_id
-        envelope["source_context"] = "simulation"
-        envelope["offset_seconds"] = offset
+        domain_signal = template_entry_to_signal(
+            envelope,
+            tenant_id=tenant_id,
+            offset_seconds=offset,
+            exercise_start=tenant.created_at,
+        )
         try:
-            await self._signals.create_signal(tenant_id, envelope)
+            signal_repository = self._signals.bind(tenant_id) if hasattr(self._signals, "bind") else self._signals
+            await signal_repository.save(domain_signal, scope=tenant_id)
+            await enqueue_signal_accepted(
+                SignalAcceptedEvent(
+                    tenant_id=tenant_id,
+                    scope=tenant_id,
+                    signal_id=domain_signal.signal_id,
+                    data_source_id=domain_signal.data_source_id,
+                    correlation_id=f"sim-signal-{tenant_id}-{domain_signal.signal_id}",
+                    incident_id=domain_signal.incident_id,
+                    jurisdiction_id=domain_signal.jurisdiction_id,
+                    derived_source_kind=domain_signal.source_kind or "derived",
+                    derived_trust_tier=domain_signal.trust_tier or "tier_7_derived_computed",
+                    validation_status=domain_signal.validation_status,
+                    evaluated_confidence_score=domain_signal.confidence_score,
+                )
+            )
+            await self._sim_repo.touch_activity(tenant_id)
         except Exception as exc:  # noqa: BLE001
             logger.warning(
                 "warp_scheduler_delivery_failed tenant=%s idx=%s err=%s",
@@ -159,14 +236,16 @@ class WarpScheduler:
                 state.next_signal_index,
                 exc,
             )
+            simulation_metrics.record_scheduler_delivery(tenant_id, "failed")
             return False
 
-        self._recorder.record_signal_delivered(
+        await run_blocking(
+            self._recorder.record_signal_delivered,
             tenant_id,
             current,
-            signal_id=envelope["signal_id"],
-            data_source_id=envelope.get("data_source_id", "unknown"),
-            category=envelope.get("category", envelope.get("hazard_type", "unknown")),
+            signal_id=domain_signal.signal_id,
+            data_source_id=domain_signal.data_source_id,
+            category=domain_signal.category,
             offset_seconds=offset,
         )
 
@@ -175,14 +254,15 @@ class WarpScheduler:
         new_state = state.model_copy(
             update={
                 "next_signal_index": state.next_signal_index + 1,
-                "last_delivered_signal_id": envelope["signal_id"],
+                "last_delivered_signal_id": domain_signal.signal_id,
                 "last_delivery_sim_time": offset,
                 "scheduler_owner": self._owner,
                 "heartbeat_at": datetime.now(UTC),
                 "delivery_lag_seconds": lag_wall_seconds,
             }
         )
-        self._events.save_scheduler_state(new_state)
+        await run_blocking(self._events.save_scheduler_state, new_state)
+        simulation_metrics.record_scheduler_delivery(tenant_id, "delivered", lag_wall_seconds)
         return True
 
     async def run_delivery_loop(self, tenant_id: str) -> None:
@@ -198,7 +278,7 @@ class WarpScheduler:
             tenant = await self._sim_repo.get_by_tenant_id(tenant_id)
             if tenant is None or tenant.status not in ("Active",) or tenant.clock_paused:
                 return
-            state = self._events.get_scheduler_state(tenant_id)
+            state = await run_blocking(self._events.get_scheduler_state, tenant_id)
             if state is None:
                 return
             delay = self.next_delivery_delay(tenant, state)
@@ -224,18 +304,19 @@ class WarpScheduler:
             now = datetime.now(UTC)
             if (now - heartbeat).total_seconds() > _HEARTBEAT_INTERVAL_SECONDS:
                 heartbeat = now
-                state = self._events.get_scheduler_state(tenant_id)
+                state = await run_blocking(self._events.get_scheduler_state, tenant_id)
                 if state is not None:
-                    self._events.save_scheduler_state(state.model_copy(update={"heartbeat_at": now}))
+                    await run_blocking(
+                        self._events.save_scheduler_state,
+                        state.model_copy(update={"heartbeat_at": now}),
+                    )
 
     # ------------------------------------------------------------------
     # control
     # ------------------------------------------------------------------
 
     def pause(self, tenant_id: str) -> None:
-        state = self._events.get_scheduler_state(tenant_id)
-        if state is not None:
-            self._events.save_scheduler_state(state.model_copy(update={"heartbeat_at": datetime.now(UTC)}))
+        self._touch_heartbeat(tenant_id)
 
     def resume(self, tenant_id: str) -> None:
         self.pause(tenant_id)  # same bookkeeping
@@ -248,6 +329,21 @@ class WarpScheduler:
         the tenant and recomputes on its next iteration, so this hook
         exists primarily to refresh the heartbeat.
         """
+        self._touch_heartbeat(tenant_id)
+
+    async def pause_async(self, tenant_id: str) -> None:
+        """Offloaded variant for ``async`` routes."""
+        await run_blocking(self._touch_heartbeat, tenant_id)
+
+    async def resume_async(self, tenant_id: str) -> None:
+        """Offloaded variant for ``async`` routes."""
+        await run_blocking(self._touch_heartbeat, tenant_id)
+
+    async def update_speed_async(self, tenant_id: str, new_speed: float) -> None:
+        """Offloaded variant for ``async`` routes."""
+        await run_blocking(self._touch_heartbeat, tenant_id)
+
+    def _touch_heartbeat(self, tenant_id: str) -> None:
         state = self._events.get_scheduler_state(tenant_id)
         if state is not None:
             self._events.save_scheduler_state(state.model_copy(update={"heartbeat_at": datetime.now(UTC)}))

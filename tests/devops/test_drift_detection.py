@@ -34,9 +34,11 @@ class TestDriftWorkflowSyntax:
         trigger = drift_workflow["on"]
         assert "workflow_dispatch" in trigger, "Drift workflow must have workflow_dispatch trigger for manual runs"
 
-    def test_drift_workflow_permissions_oidc(self, drift_workflow):
+    def test_drift_workflow_uses_environment_credentials(self, drift_workflow, drift_workflow_path):
         perms = drift_workflow.get("permissions", {})
-        assert perms.get("id-token") == "write", "id-token permission must be 'write'"
+        assert "id-token" not in perms, "drift workflow must not require retired Azure OIDC permissions"
+        content = drift_workflow_path.read_text(encoding="utf-8")
+        assert "secrets.AZURE_CREDENTIALS" in content
 
     def test_drift_workflow_permissions_contents(self, drift_workflow):
         perms = drift_workflow.get("permissions", {})
@@ -121,3 +123,9 @@ class TestDriftDetectionJobStructure:
         assert len(issue_steps) > 0, "Must have issue creation step"
         run_content = issue_steps[0].get("run", "")
         assert "infrastructure-drift" in run_content, "Issue must use 'infrastructure-drift' label"
+
+    def test_drift_parser_fails_closed_on_invalid_what_if_output(self, drift_workflow_path):
+        content = drift_workflow_path.read_text(encoding="utf-8")
+        assert 'type == "object" and (.changes | type == "array")' in content
+        assert "refusing to report clean drift status" in content
+        assert '|| echo "[]"' not in content

@@ -87,6 +87,7 @@ jobs:
         id: parse-drift
         if: steps.what-if.outputs.rg-exists == 'true' && steps.what-if.outputs.what-if-success == 'true'
         run: |
+          set -euo pipefail
           ENVIRONMENT="${{ matrix.environment }}"
 
           # Define false-positive properties to filter out
@@ -105,8 +106,13 @@ jobs:
             "properties.possibleOutboundIpAddresses"
           ]'
 
+          if ! jq -e 'type == "object" and (.changes | type == "array")' what-if-output.json >/dev/null; then
+            echo "::error::What-If output is missing a valid changes array; refusing to report clean drift status"
+            exit 1
+          fi
+
           # Extract meaningful changes (Create, Delete, Modify — not NoChange or Ignore)
-          DRIFT_CHANGES=$(jq -r --argjson ignore "${IGNORE_PROPS}" '
+          if ! DRIFT_CHANGES=$(jq -r --argjson ignore "${IGNORE_PROPS}" '
             .changes // [] |
             map(select(.changeType != "NoChange" and .changeType != "Ignore")) |
             map({
@@ -131,7 +137,10 @@ jobs:
             }) |
             # Remove Modify entries where all property changes were filtered
             map(select(.changeType != "Modify" or (.propertyChanges | length > 0)))
-          ' what-if-output.json 2>/dev/null || echo "[]")
+          ' what-if-output.json); then
+            echo "::error::Unable to parse What-If changes; refusing to report clean drift status"
+            exit 1
+          fi
 
           DRIFT_COUNT=$(echo "${DRIFT_CHANGES}" | jq 'length')
 

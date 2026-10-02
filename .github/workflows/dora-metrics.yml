@@ -1,5 +1,16 @@
 name: dora-metrics
 
+env:
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+  UV_DEFAULT_INDEX: https://packagefeedproxy.microsoft.io/pypi/simple
+  PIP_CONFIG_FILE: /dev/null
+  PIP_EXTRA_INDEX_URL: ""
+  PIP_FIND_LINKS: ""
+  UV_INDEX: ""
+  UV_EXTRA_INDEX_URL: ""
+  UV_FIND_LINKS: ""
+  UV_NO_CONFIG: "1"
+
 # Spec-032 FR-C04 — daily aggregator that computes DORA metrics from
 # GitHub data and posts them to Application Insights customMetrics.
 # Visualised by a Workbook (T816 doc + future workbook).

@@ -2384,5 +2384,143 @@
       "Flood rescue support requested",
       "Beach hazard declared"
     ]
+  },
+  {
+    "organisation_id": "blue-mountains-city-council",
+    "name": "Blue Mountains City Council",
+    "category": "local_government",
+    "jurisdiction_ids": [
+      "lga-blue-mountains",
+      "nsw"
+    ],
+    "operating_role": "local_government_coordination",
+    "authority_level": "lga_controller",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.bmcc.nsw.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "Local evacuation centre and recovery referral coordination"
+    ],
+    "status": "active",
+    "abbreviation": "BMCC",
+    "aiims_functions": [
+      "planning",
+      "logistics"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "evacuation_centre_coordination",
+      "local_road_management",
+      "community_recovery_referrals"
+    ],
+    "hazard_types": [
+      "bushfire",
+      "flood",
+      "storm"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Local Government Act 1993 (NSW)",
+    "mutual_aid_partner_ids": [
+      "ses-nsw",
+      "nsw-rfs"
+    ],
+    "activation_triggers": [
+      "LGA emergency operations centre activation",
+      "State agency request for local coordination"
+    ]
+  },
+  {
+    "organisation_id": "energy-networks-nsw",
+    "name": "Energy Networks NSW Coordination",
+    "category": "utility",
+    "jurisdiction_ids": [
+      "nsw"
+    ],
+    "operating_role": "critical_utility_restoration",
+    "authority_level": "network_operator",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.energynetworks.com.au"
+      }
+    ],
+    "participation_conditions": [
+      "Electricity and gas network outage coordination"
+    ],
+    "status": "active",
+    "abbreviation": "ENNSW",
+    "aiims_functions": [
+      "operations",
+      "logistics"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "network_outage_detection",
+      "asset_isolation",
+      "restoration_prioritisation"
+    ],
+    "hazard_types": [
+      "other",
+      "bushfire",
+      "storm"
+    ],
+    "workforce_type": "mixed",
+    "legislative_basis": "Electricity Supply Act 1995 (NSW)",
+    "mutual_aid_partner_ids": [
+      "transgrid",
+      "ses-nsw"
+    ],
+    "activation_triggers": [
+      "Network outage over 5000 customers",
+      "Emergency services restoration request"
+    ]
+  },
+  {
+    "organisation_id": "transport-for-nsw",
+    "name": "Transport for NSW",
+    "category": "transport",
+    "jurisdiction_ids": [
+      "nsw"
+    ],
+    "operating_role": "transport_network_coordination",
+    "authority_level": "state_transport_controller",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.transport.nsw.gov.au"
+      }
+    ],
+    "participation_conditions": [
+      "Road and rail disruption coordination during incidents"
+    ],
+    "status": "active",
+    "abbreviation": "TfNSW",
+    "aiims_functions": [
+      "operations"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "road_closure_coordination",
+      "public_transport_rerouting",
+      "evacuation_route_management"
+    ],
+    "hazard_types": [
+      "flood",
+      "bushfire",
+      "storm"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "Transport Administration Act 1988 (NSW)",
+    "mutual_aid_partner_ids": [
+      "nsw-police",
+      "ses-nsw"
+    ],
+    "activation_triggers": [
+      "State transport emergency coordination activation",
+      "Major evacuation route disruption"
+    ]
   }
 ]

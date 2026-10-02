@@ -65,9 +65,25 @@ class SimAwareHttpClient:
         try:
             tenant = self._tenant_resolver()
         except LookupError:
-            return
+            tenant = None
         if not isinstance(tenant, TenantContext):
-            return
+            payload_bytes = _serialize_payload(payload)
+            await self._delivery.record_blocked(
+                tenant_id="unresolved",
+                simulation_id="unresolved",
+                channel=self._channel,
+                audience=url,
+                payload_bytes=payload_bytes,
+                block_reason="http-wrapper-gate",
+                intended_url=url,
+            )
+            logger.warning(
+                "outbound.egress.blocked_missing_tenant channel=%s method=%s url=%s",
+                self._channel,
+                method,
+                url,
+            )
+            raise SimEgressBlocked(tenant_id="unresolved", url=url, channel=self._channel)
         if not tenant.is_simulation:
             return
         payload_bytes = _serialize_payload(payload)
@@ -90,6 +106,7 @@ class SimAwareHttpClient:
         raise SimEgressBlocked(tenant_id=tenant.tenant_id, url=url, channel=self._channel)
 
     async def get(self, url: str, **kwargs: Any) -> httpx.Response:
+        await self._guard("GET", url)
         return await self._client.get(url, **kwargs)
 
     async def post(self, url: str, *, json: Any = None, data: Any = None, **kwargs: Any) -> httpx.Response:

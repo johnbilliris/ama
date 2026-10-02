@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class HazardMap(BaseModel):
@@ -16,6 +16,8 @@ class HazardMap(BaseModel):
 
 
 class HazardAssessment(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+
     hazard_assessment_id: str
     incident_id: str
     assessment_type: Literal[
@@ -52,6 +54,8 @@ class HazardAssessment(BaseModel):
 
     @model_validator(mode="after")
     def _validate_valid_until(self) -> "HazardAssessment":
+        if not self.input_signal_ids:
+            raise ValueError("input_signal_ids must include at least one signal")
         if self.valid_until is not None and self.valid_until <= self.generated_at:
             raise ValueError("valid_until must be after generated_at")
         return self

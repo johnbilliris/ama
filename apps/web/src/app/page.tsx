@@ -160,6 +160,8 @@ function DisastersPageContent({ filters, setFilter, resetAll, keywordInput, setK
               {/* Search bar */}
               <div className="disaster-mapper-search-wrapper">
                 <input
+                  id="incident-keyword-search"
+                  name="incidentKeyword"
                   type="search"
                   className="disaster-mapper-search-input"
                   placeholder="Search incidents by title…"
@@ -296,4 +298,3 @@ export default function HomePage() {
     </Suspense>
   );
 }
-

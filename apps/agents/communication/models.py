@@ -17,6 +17,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from packages.domain.src.domain.tenant_mode import classify_tenant_mode
+
 # ---------------------------------------------------------------------------
 # Enums
 # ---------------------------------------------------------------------------
@@ -32,6 +34,7 @@ class AlertStatus(StrEnum):
     delivering = "delivering"
     delivered = "delivered"
     partially_delivered = "partially_delivered"
+    delivery_failed = "delivery_failed"
     superseded = "superseded"
     expired = "expired"
     cancelled = "cancelled"
@@ -43,9 +46,10 @@ VALID_STATUS_TRANSITIONS: dict[AlertStatus, set[AlertStatus]] = {
     AlertStatus.pending_review: {AlertStatus.approved, AlertStatus.rejected, AlertStatus.cancelled},
     AlertStatus.approved: {AlertStatus.delivering, AlertStatus.cancelled},
     AlertStatus.rejected: set(),
-    AlertStatus.delivering: {AlertStatus.delivered, AlertStatus.partially_delivered},
+    AlertStatus.delivering: {AlertStatus.delivered, AlertStatus.partially_delivered, AlertStatus.delivery_failed},
     AlertStatus.delivered: {AlertStatus.superseded, AlertStatus.expired},
     AlertStatus.partially_delivered: {AlertStatus.superseded, AlertStatus.expired},
+    AlertStatus.delivery_failed: {AlertStatus.delivering, AlertStatus.cancelled},
     AlertStatus.superseded: set(),
     AlertStatus.expired: set(),
     AlertStatus.cancelled: set(),
@@ -70,13 +74,16 @@ class ChannelType(StrEnum):
 
 
 class DeliveryStatus(StrEnum):
-    """Per-channel delivery status (5 values)."""
+    """Per-channel delivery status."""
 
     pending = "pending"
     in_progress = "in_progress"
     delivered = "delivered"
     failed = "failed"
     retrying = "retrying"
+    skipped = "skipped"
+    unconfigured = "unconfigured"
+    accepted = "accepted"
 
 
 class GenerationMethod(StrEnum):
@@ -124,6 +131,7 @@ class CommunicationDecisionType(StrEnum):
 
     handoff_received = "handoff_received"
     handoff_rejected = "handoff_rejected"
+    data_retrieved = "data_retrieved"
     duplicate_discarded = "duplicate_discarded"
     alert_drafted = "alert_drafted"
     content_safety_evaluated = "content_safety_evaluated"
@@ -140,6 +148,7 @@ class CommunicationDecisionType(StrEnum):
     content_safety_failure = "content_safety_failure"
     health_status_changed = "health_status_changed"
     template_fallback = "template_fallback"
+    audit_finalised = "audit_finalised"
 
 
 # ---------------------------------------------------------------------------
@@ -153,13 +162,17 @@ class ContentBlock(BaseModel):
     """Alert content for a single language."""
 
     language_code: str
-    title: str = Field(max_length=200)
-    body: str = Field(max_length=1200)
-    action_items: str = Field(max_length=500)
+    title: str = Field(min_length=1, max_length=200)
+    body: str = Field(min_length=1, max_length=1200)
+    action_items: str = Field(min_length=1, max_length=500)
     generation_method: GenerationMethod = GenerationMethod.llm
     content_safety_result: str = "passed"
     content_safety_failure_reason: str | None = None
+    original_content_safety_result: str | None = None
+    original_content_safety_failure_reason: str | None = None
+    safety_checks: dict[str, str] = Field(default_factory=dict)
     back_translation_score: float | None = None
+    back_translation_measured: bool = False
     back_translation_flagged: bool = False
     translation_unavailable: bool = False
 
@@ -190,15 +203,19 @@ class AudienceSegment(BaseModel):
 
     segment_id: str = Field(default_factory=lambda: uuid4().hex)
     alert_id: str = ""
+    zone_id: str = ""
     zone_level: int = Field(ge=1, le=3)
     zone_boundary: dict = Field(default_factory=dict)
     population_estimate: int = Field(ge=0, default=0)
     estimated_segment_size: int = Field(ge=0, default=0)
     vulnerability_categories: list[str] = Field(default_factory=list)
     preferred_language: str = "en-AU"
+    fallback_language: str = "en-AU"
     urgency_level: UrgencyLevel = UrgencyLevel.advisory
     priority: SegmentPriority = SegmentPriority.moderate
     delivery_channels: list[ChannelType] = Field(default_factory=list)
+    recipient_ids: list[str] = Field(default_factory=list)
+    facility_instructions: str | None = None
     missing_data_flags: list[str] = Field(default_factory=list)
 
     @field_validator("vulnerability_categories")
@@ -208,6 +225,14 @@ class AudienceSegment(BaseModel):
             if cat not in ALLOWED_VULNERABILITY_CATEGORIES:
                 raise ValueError(f"Invalid vulnerability category '{cat}'. Allowed: {ALLOWED_VULNERABILITY_CATEGORIES}")
         return v
+
+    @field_validator("preferred_language", "fallback_language")
+    @classmethod
+    def _validate_language(cls, value: str) -> str:
+        supported = {"en-AU", "zh-Hans", "ar", "vi", "el", "it"}
+        if value not in supported:
+            raise ValueError(f"Unsupported alert language '{value}'")
+        return value
 
     @model_validator(mode="after")
     def _vulnerable_must_be_critical(self) -> AudienceSegment:
@@ -230,6 +255,10 @@ class DeliveryRecord(BaseModel):
     max_retries: int = 3
     retry_backoff_intervals: list[float] = Field(default_factory=lambda: [1.0, 2.0, 4.0])
     failure_reason: str | None = None
+    provider_receipt_ids: list[str] = Field(default_factory=list)
+    provider_status: str | None = None
+    targeted_recipient_count: int = Field(ge=0, default=0)
+    deduplicated_recipient_count: int = Field(ge=0, default=0)
     content_payload: str = ""
     segment_count: int | None = None
     is_deduplicated: bool = False
@@ -237,7 +266,7 @@ class DeliveryRecord(BaseModel):
     initiated_at: datetime | None = None
     completed_at: datetime | None = None
     delivery_duration_ms: int | None = None
-    tenant_id: str = "live"
+    tenant_id: str
 
 
 # ---------------------------------------------------------------------------
@@ -257,6 +286,7 @@ class PublicAlert(BaseModel):
     change_type: ChangeType = ChangeType.initial
     change_summary: str | None = None
     referenced_alert_id: str | None = None
+    superseded_by_alert_id: str | None = None
     content_blocks: dict[str, ContentBlock] = Field(default_factory=dict)
     audience_segments: list[str] = Field(default_factory=list)
     languages: list[str] = Field(default_factory=lambda: ["en-AU", "zh-Hans", "ar", "vi", "el", "it"])
@@ -273,11 +303,21 @@ class PublicAlert(BaseModel):
     approval_action: str | None = None
     approval_justification: str | None = None
     approved_at: datetime | None = None
+    decision_at: datetime | None = None
     escalation_level: int = Field(ge=0, le=3, default=0)
     escalation_history: list[EscalationEvent] = Field(default_factory=list)
+    commander_chain: list[str] = Field(default_factory=list)
+    current_commander_id: str | None = None
+    approval_deadline_at: datetime | None = None
+    escalation_exhausted: bool = False
+    warning_tier: str | None = None
+    active_subzone_ids: list[str] = Field(default_factory=list)
     recommendation_id: str = ""
     assessment_id: str = ""
-    tenant_id: str = "live"
+    assessment_timestamp: datetime | None = None
+    assessment_freshness: str = "unavailable"
+    tenant_id: str
+    mode: str = "live"
     published_at: datetime | None = None
     expires_at: datetime | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -298,6 +338,14 @@ class PublicAlert(BaseModel):
 
     @model_validator(mode="after")
     def _validate_alert_rules(self) -> PublicAlert:
+        derived_mode = classify_tenant_mode(self.tenant_id).value
+        if self.mode != derived_mode:
+            raise ValueError(f"mode '{self.mode}' does not match tenant_id '{self.tenant_id}'")
+        if self.approval_deadline_at is not None and self.approval_deadline_at.tzinfo is None:
+            raise ValueError("approval_deadline_at must be timezone-aware")
+        if self.assessment_timestamp is not None and self.assessment_timestamp.tzinfo is None:
+            raise ValueError("assessment_timestamp must be timezone-aware")
+
         # content_blocks must contain en-AU
         if self.content_blocks and "en-AU" not in self.content_blocks:
             raise ValueError("content_blocks must contain 'en-AU' key")
@@ -333,6 +381,13 @@ class CommunicationDecisionRecord(BaseModel):
     handoff_id: str | None = None
     alert_id: str | None = None
     delivery_id: str | None = None
+    correlation_id: str
+    stage_name: str | None = None
+    language: str | None = None
+    channel: str | None = None
+    audience_segment_id: str | None = None
+    retry_count: int | None = None
+    approval_mode: str | None = None
     decision_type: CommunicationDecisionType
     content_safety_results: dict[str, str] | None = None
     generation_method: str | None = None
@@ -346,7 +401,7 @@ class CommunicationDecisionRecord(BaseModel):
     escalation_details: dict | None = None
     degradation_details: dict | None = None
     flush_source: str | None = None
-    tenant_id: str = "live"
+    tenant_id: str
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     buffered_at: datetime | None = None
 
@@ -356,6 +411,13 @@ class CommunicationDecisionRecord(BaseModel):
         if v is not None:
             return max(0.0, min(1.0, v))
         return v
+
+    @field_validator("tenant_id")
+    @classmethod
+    def _require_tenant_id(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("tenant_id is required for communication audit records")
+        return value
 
 
 # ---------------------------------------------------------------------------

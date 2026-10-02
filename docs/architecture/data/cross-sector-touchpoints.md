@@ -16,21 +16,22 @@ specs:
 ![SECTOR-05: Cross-Sector Touchpoints](cross-sector-touchpoints.png)
 
 <!-- spec-cross-ref: spec-015 -->
+<!-- spec-cross-ref: spec-022 -->
 
-This view documents the data exchange protocols and lead-agency designation rules at each cross-sector boundary for Community/NGOs, Health, Local Gov, State Gov, Territory Gov, Transport, Utility, and Volunteer personas.
+This view documents bidirectional data exchanges and lead-agency designation rules at each cross-sector boundary for Fire, SES/Flood, Health, Transport, Utilities, and supporting partner sectors.
+
+The lead-agency examples are policy/documentation guidance, not proof that every external exchange is wired in the current deployment. Implemented jurisdiction routing is hazard- and agency-hint-dependent; see `apps/api/app/services/simulation/jurisdiction_routing.py` and SECTOR-04.
 
 ## Touchpoint Reference
 
 | Sector Pair | Data Format | Lead-Agency Rule | Spec Citation |
 | --- | --- | --- | --- |
-| Community/NGOs ↔ AMA Hub | REST/GeoJSON | State Government designated lead | spec-022 |
-| Health ↔ AMA Hub | EDXL/REST | Health jurisdiction lead | spec-015 |
-| Local Gov ↔ AMA Hub | REST/GeoJSON | Local authority designated | spec-022 |
-| State Gov ↔ AMA Hub | CAP/EDXL | State designated lead agency | spec-022 |
-| Territory Gov ↔ AMA Hub | CAP/EDXL | Territory designated lead agency | spec-022 |
-| Transport ↔ AMA Hub | REST/GeoJSON | Transport authority lead | spec-015 |
-| Utility ↔ AMA Hub | REST/EDXL | Utility operator designated | spec-015 |
-| Volunteer ↔ AMA Hub | REST/GeoJSON | Coordinating agency designated | spec-022 |
+| Fire (RFS/CFA) ↔ AMA Hub | CAP, EDXL-DE, GeoJSON | Fire lead during suppression hazards; handover when hazard class changes | spec-022 |
+| SES/Flood ↔ AMA Hub | CAP, EDXL-DE, GeoJSON | SES lead for flood/storm response and evacuation routing | spec-022 |
+| Health ↔ AMA Hub | EDXL-HAVE, REST | Health authority lead for casualty and public-health advisories | spec-015 |
+| Transport ↔ AMA Hub | REST, GeoJSON | Transport lead for corridor closures and re-entry routing | spec-015 |
+| Utilities ↔ AMA Hub | REST, EDXL, GeoJSON | Utility operator lead for network restoration and outage constraints | spec-015 |
+| Local Government ↔ AMA Hub | REST, GeoJSON | Local government lead for welfare coordination during recovery | spec-022 |
 
 ## FR Notes
 

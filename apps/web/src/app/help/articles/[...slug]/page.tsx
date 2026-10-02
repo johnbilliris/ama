@@ -1,3 +1,4 @@
+import { getServerApiBaseUrl } from "@/lib/api/base-url";
 /**
  * spec-038 T-AA103 — help article page (server component).
  *
@@ -21,15 +22,11 @@ interface Article {
   updated_at?: string;
 }
 
-// Server components run in Node, so `fetch` requires an absolute URL. The
-// browser-facing `/api/help/...` proxy is unreachable during SSR, so call the
-// upstream API directly using the same env var the rewrite/proxy uses, and
+// Server components run in Node, so `fetch` requires an absolute URL. Call
+// the configured API endpoint directly and
 // inject the same default tenant/persona headers the proxy injects so
 // `help_deps.get_caller` doesn't 401 the request.
-const UPSTREAM =
-  process.env.API_PROXY_UPSTREAM ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:8000/api";
+const UPSTREAM = getServerApiBaseUrl();
 
 async function fetchArticle(slugSegments: string[]): Promise<Article | null> {
   const slugPath = slugSegments.map(encodeURIComponent).join("/");

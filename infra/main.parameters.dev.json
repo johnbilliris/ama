@@ -3,12 +3,14 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "environmentName":       { "value": "drh-dev" },
+    "environmentTier":       { "value": "dev" },
     "location":              { "value": "australiaeast" },
     "principalType":         { "value": "ServicePrincipal" },
     "developerIpAddress":    { "value": "" },
     "actionGroupEmail":      { "value": "dev-ops@example.com" },
     "actionGroupWebhook":    { "value": "" },
     "openAiDeploymentSku":   { "value": "GlobalStandard" },
-    "restrictNetworkAccess": { "value": false }
+    "restrictNetworkAccess": { "value": false },
+    "additionalTags": { "value": { "SecurityControl": "Ignore"} }
   }
 }

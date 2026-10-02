@@ -2,6 +2,15 @@
 
 ## 1. Agent File Conventions
 
+## Scope Evolution Snapshot (2026-09-15)
+
+- Historical draft snapshot: 27 actors (9 operational + 10 sectors + 8 technical).
+- Historical implementation baseline snapshot: 31 actors (9 operational + 14 sectors + 8 technical).
+- Historical specification target snapshot: 35 actors (9 operational + 14 sectors + 12 technical minimum).
+- Current filesystem snapshot: 85 active actor files, 12 workflow agents, 6 archived sector agents.
+
+The conventions below remain useful as authoring guidance, but inventory validation must use the current filesystem snapshot.
+
 **Decision**: Follow the existing `.agent.md` format established by the speckit agents.
 
 **Rationale**: The project already has 9 working agents using a proven YAML frontmatter + Markdown body pattern. Consistency ensures VS Code Copilot discovers and loads agents correctly.
@@ -42,7 +51,7 @@ handoffs:
 
 **Rationale**: Standardised sections make agents predictable, maintainable, and machine-readable for future catalogue validation. Knowledge-style agents (vs workflow agents) work best with structured reference content rather than procedural scripts.
 
-**Alternatives considered**: Unstructured prose per agent. Rejected because 31 agents with inconsistent formats would be difficult to maintain and validate against SC-002.
+**Alternatives considered**: Unstructured prose per agent. Rejected because a large actor catalogue with inconsistent formats is difficult to maintain and validate against SC-002.
 
 ## 3. AIIMS Framework Alignment (Operational Personas)
 
@@ -74,7 +83,7 @@ handoffs:
 
 | Sector | Agent File | Data Model category | Key Legislation/Framework |
 |--------|-----------|-------------------|--------------------------|
-| Commonwealth Government | commonwealth-government | `commonwealth` | COMDISPLAN, Emergency Management Act 2005 (Cth) |
+| Commonwealth Government | commonwealth-government | `commonwealth` | COMDISPLAN, Commonwealth establishing authority pending verification (see contracts/authority-ledger.yaml) |
 | State Government | state-government | `state` | State emergency management acts (varies by state) |
 | Territory Government | territory-government | `territory` | Territory emergency management ordinances |
 | Local Government | local-government | `local_government` | Local government acts, municipal emergency plans |

@@ -47,7 +47,7 @@ docker run -d --name cosmos-emu -p 8081:8081 -p 10250-10255:10250-10255 `
 docker run -d --name azurite -p 10000:10000 mcr.microsoft.com/azure-storage/azurite
 ```
 
-Seed the six new Cosmos containers (idempotent):
+Ensure the seven physical Cosmos containers exist (idempotent):
 
 ```powershell
 python -m apps.api.scripts.seed_evidence_containers `
@@ -62,34 +62,46 @@ python -m apps.api.scripts.seed_evidence_containers `
 
 ```powershell
 cd apps/api
-uv run uvicorn app.main:app --reload --port 8080
+$env:AMA_TEST_MODE = "1" # local/test only; never set in staging or production
+uv run uvicorn app.main:app --reload --port 8000
 ```
+
+Without `AMA_TEST_MODE=1`, startup requires the real Cosmos endpoint,
+locked-Blob endpoint, and Application Insights connection string and
+fails closed when any are absent.
 
 Smoke-test the new endpoints:
 
 ```powershell
 # Pillar A — KPI ladder
-curl http://localhost:8080/api/v1/evidence/kpi-ladder | jq '.groups | length'   # → 5
+curl http://localhost:8000/api/v1/evidence/kpi-ladder | jq '.groups | length'   # → 5
 
 # Pillar B — Measurement Method
-curl "http://localhost:8080/api/v1/evidence/measurement-method?format=markdown"
+curl "http://localhost:8000/api/v1/evidence/measurement-method?format=markdown"
 
-# Pillar C — Replay (bushfire, deterministic seed)
-curl -X POST http://localhost:8080/api/v1/evidence/scenarios/bushfire/replay `
+# Pillar C — read latest persisted scorecard without replay side effects
+curl "http://localhost:8000/api/v1/evidence/scorecards/latest?scenario_id=bushfire"
+
+# Pillar C — explicit replay action against existing simulation events
+curl -X POST http://localhost:8000/api/v1/evidence/scenarios/bushfire/replay `
   -H "content-type: application/json" `
-  -d '{"seed":"S1","run_pair_id":"qs-1","repetitions":3}'
+  -d '{"seed":"S1","run_pair_id":"qs-1","repetitions":3,"allow_degraded_mode":false}'
 
 # Pillar D — Causal chain for the Resource Allocation Agent (spec 011)
-curl http://localhost:8080/api/v1/evidence/causal-chains/resource-allocation-agent
+curl http://localhost:8000/api/v1/evidence/causal-chains/resource-allocation-agent
 
 # Pillar E — Benchmarks for response-time KPI in NSW
-curl "http://localhost:8080/api/v1/evidence/benchmarks/response_time_p1?jurisdiction=NSW%20Ambulance"
+curl "http://localhost:8000/api/v1/evidence/benchmarks/response_time_p1?jurisdiction=NSW"
 
 # Pillar F — Audit trace for any KPI value id
-curl http://localhost:8080/api/v1/evidence/audit/<value_id>
+curl http://localhost:8000/api/v1/evidence/audit/<value_id>
 
 # Health
-curl http://localhost:8080/healthz/evidence
+curl http://localhost:8000/api/healthz/evidence
+
+# Regenerate the stored OpenAPI artifact after any route/model change
+cd ../..
+python scripts/generate_evidence_openapi.py
 ```
 
 Every response carries `x-ama-correlation-id`. Verify it appears in
@@ -106,7 +118,7 @@ pnpm dev
 ```
 
 Open http://localhost:3000/governance/evidence — the
-`PersonaWorkspace` shell mounts six tabs:
+shared workspace shell mounts seven tabs:
 
 1. KPI Ladder
 2. Measurement Method
@@ -114,6 +126,7 @@ Open http://localhost:3000/governance/evidence — the
 4. Impact Chains
 5. Benchmarks
 6. Audit Trace
+7. Public Information
 
 Verify the Public Information KPI render shows ≥8 language channels
 (English + Mandarin + Arabic + Vietnamese + Cantonese + Punjabi +
@@ -137,7 +150,7 @@ uv run pytest tests/integration/test_audit_append_only.py -v
 
 # Frontend E2E + accessibility
 cd apps/web
-pnpm exec playwright test tests/playwright/governance/evidence.spec.ts
+pnpm exec playwright test --project=evidence
 ```
 
 Acceptance bars to watch for:
@@ -148,36 +161,36 @@ Acceptance bars to watch for:
 | `test_baseline_vs_ama_delta.py`             | SC-003 — 7 scenarios × 5 KPIs                       |
 | `test_imputation_rule.py`                   | FR-008 — >10 % imputed → small-sample + auditor gate |
 | `test_au_region_refusal.py`                 | FR-029 / SC-009                                     |
-| `test_audit_append_only.py`                 | FR-025 — PATCH/DELETE rejected                      |
+| `test_audit_append_only.py`                 | FR-025 — PUT/PATCH/DELETE rejected and mirrored     |
 | Playwright `evidence.spec.ts` (axe-core)    | SC-013 — WCAG 2.2 AA + 8-language render            |
 
 ---
 
-## 5. Bicep deploy (dev subscription)
+## 5. Bicep deployment gate
 
-```powershell
-cd infra/bicep
-az deployment group create `
-  --resource-group rg-ama `
-  --template-file main.bicep `
-  --parameters enableEvidenceHarness=true location=australiaeast
-```
+Do not run a Spec 040 deployment until live Azure Policy discovery has
+produced `04-governance-constraints.md` and
+`04-governance-constraints.json` for this spec and the compiled template
+has passed the AU-location, 2555-day policy, mirror identity, workbook,
+action-group, and both-severity what-if gates. The policy is deployed only
+for `staging` and `prod`; `dev` must not contain the policy. Keep the policy
+`Unlocked` while it shares the azd-managed resource group so the `predown`
+hook can remove it before storage-account deletion. A locked policy is
+irreversible and must instead live in a separately retained resource group.
+Authored Bicep is not deployment evidence.
 
-This declares (via the new `modules/evidence-harness.bicep`):
-
-- 7 Cosmos containers (the 6 evidence stores + 1 dead-letter).
-- 1 Storage Blob container (`evidence-audit-cold`, Cool tier, 7-y
-  immutability lock) — AVM `avm/res/storage/storage-account` where
-  available.
-- 1 App Insights workbook `evidence-harness-slo`.
-
-Region is pinned to `australiaeast` with `australiasoutheast` paired
-DR. Deployments to any other region MUST be rejected by the existing
-posture-policy-set Bicep module.
+For dev, the azd `preprovision` hook recovers tagged soft-deleted Cognitive
+Services accounts in the same resource group before Bicep runs. The optional
+Spec-035 APIM, App Configuration, and Key Vault bundle is never deployed in dev.
+Blob and container soft delete are disabled in dev. Because Cognitive Services
+and Log Analytics soft delete cannot be disabled, the `postdown` hook purges
+their dev tombstones immediately. Before provisioning, `preprovision` purges
+only matching soft-deleted tombstones. Existing active resources are not listed,
+deleted, restored, or otherwise changed, so repeated `azd up` runs are idempotent.
 
 ---
 
-## 6. Chaos drill (staged, dev only)
+## 6. Synthetic fault-injection rehearsal
 
 Three experiments validate FR-027 / FR-032 graceful degradation:
 
@@ -192,19 +205,18 @@ python -m apps.api.scripts.chaos_evidence --experiment aoai_timeout --duration 6
 python -m apps.api.scripts.chaos_evidence --experiment appi_lag --duration 90
 ```
 
-After each run, confirm in the `evidence-harness-slo` workbook that the
-"degraded-mode evidence emitted with reduced-fidelity tag" SLI fires
-the 2 %/h burn-rate alert (informational), not the 5 %/h page-out alert.
+These commands are synthetic local fault injections, not staged outage
+evidence. A real chaos gate requires a separately authorised AU
+environment, attributable timestamps, dependency telemetry, and
+workbook/alert receipts.
 
 ---
 
 ## 7. Capstone-trace tagging
 
-After plan acceptance and before the first implementation PR merges,
-append the following row at the end of the
+The following non-attribution row is committed in the
 *"Spec-level capstone-criticality flags"* table in
-`specs/shared/capstone-metric-trace.md` (per FR-033, mirroring the
-existing spec-037 row):
+`specs/shared/capstone-metric-trace.md`:
 
 ```markdown
 | `specs/040-success-criteria/` | non-capstone-critical-path / delivery-hygiene | `specs/040-success-criteria/spec.md` FR-033 + SC-011 | spec-040 (originally Spec-038) produces a measurement *harness* that demonstrates the prototype's capstone success criteria are measurable; it does NOT itself contribute a capstone success-criterion metric and MUST be excluded from capstone-metric attribution roll-ups (precedent: spec-037 FR-020). |

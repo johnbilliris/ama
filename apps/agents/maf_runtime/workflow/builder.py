@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Any
 
 from agent_framework import InMemoryCheckpointStorage
+from apps.console_logging import configure_console_logging
 
 from ..repositories.workflow_run_repository import WorkflowRunRepository
 from .executors import (
@@ -90,6 +91,7 @@ class AmaWorkflow:
         self,
         *,
         incident: dict[str, Any],
+        tenant_id: str,
         created_by: str = "smoke-test",
     ) -> dict[str, Any]:
         """End-to-end durable run for one incident. Returns the final run document.
@@ -99,11 +101,12 @@ class AmaWorkflow:
         ``AwaitingApproval`` (HITL pause at the public-alert step).
         """
         incident_id = incident.get("incident_id") or f"incident-{uuid.uuid4().hex[:8]}"
-        incident_clean = {**incident, "incident_id": incident_id}
+        incident_clean = {**incident, "incident_id": incident_id, "tenant_id": tenant_id}
         run_doc = self._repo.create(
             incident_id=incident_id,
             current_step="monitoring",
             created_by=created_by,
+            tenant_id=tenant_id,
         )
         run_id = run_doc["id"]
         correlation_id = uuid.uuid4().hex
@@ -117,7 +120,11 @@ class AmaWorkflow:
                 run_id=run_id,
             )
             steps_completed.append("monitoring")
-            await self._save_checkpoint(run_id, "monitoring", {"output": _to_jsonable(monitoring_out)})
+            await self._save_checkpoint(
+                run_id,
+                "monitoring",
+                {"tenant_id": tenant_id, "output": _to_jsonable(monitoring_out)},
+            )
 
             # 2. Risk Assessment
             risk_out = await self._risk.execute_step(
@@ -126,7 +133,11 @@ class AmaWorkflow:
                 run_id=run_id,
             )
             steps_completed.append("risk_assessment")
-            await self._save_checkpoint(run_id, "risk_assessment", {"output": _to_jsonable(risk_out)})
+            await self._save_checkpoint(
+                run_id,
+                "risk_assessment",
+                {"tenant_id": tenant_id, "output": _to_jsonable(risk_out)},
+            )
 
             # 3. Evacuation || Resource Allocation (parallel)
             evac_task = self._evac.execute_step(
@@ -145,6 +156,7 @@ class AmaWorkflow:
                 run_id,
                 "evacuation_resource",
                 {
+                    "tenant_id": tenant_id,
                     "evacuation": _to_jsonable(evac_out),
                     "resource_allocation": _to_jsonable(res_out),
                 },
@@ -157,17 +169,32 @@ class AmaWorkflow:
                 run_id=run_id,
             )
             steps_completed.append("communication")
-            await self._save_checkpoint(run_id, "communication", {"output": _to_jsonable(comm_out)})
+            await self._save_checkpoint(
+                run_id,
+                "communication",
+                {"tenant_id": tenant_id, "output": _to_jsonable(comm_out)},
+            )
 
             # 5. HITL gate — pauses workflow with status=AwaitingApproval
-            await self._hitl.run(
+            hitl_out = await self._hitl.run(
                 draft_alert=comm_out,
                 incident_id=incident_id,
                 run_id=run_id,
                 step_index=len(steps_completed),
                 correlation_id=correlation_id,
+                tenant_id=tenant_id,
             )
-            return self._repo.get(run_id) or run_doc
+            final_doc = dict(self._repo.get(run_id, tenant_id=tenant_id) or run_doc)
+            final_doc["workflow_outputs"] = {
+                "correlation_id": correlation_id,
+                "monitoring": _to_jsonable(monitoring_out),
+                "risk_assessment": _to_jsonable(risk_out),
+                "evacuation": _to_jsonable(evac_out),
+                "resource_allocation": _to_jsonable(res_out),
+                "communication": _to_jsonable(comm_out),
+                "hitl": _to_jsonable(hitl_out),
+            }
+            return final_doc
 
         except Exception:  # noqa: BLE001
             logger.exception("workflow run failed run_id=%s steps_completed=%s", run_id, steps_completed)
@@ -175,6 +202,7 @@ class AmaWorkflow:
                 run_id,
                 WorkflowRunStatus.FAILED,
                 correlation_id=correlation_id,
+                tenant_id=tenant_id,
                 failure_reason={
                     "reason_code": "workflow_step_failure",
                     "last_completed_step": steps_completed[-1] if steps_completed else "monitoring",
@@ -230,7 +258,7 @@ async def _amain(args: argparse.Namespace) -> int:
     if args.incident_fixture:
         incident = json.loads(Path(args.incident_fixture).read_text(encoding="utf-8"))
     workflow = AmaWorkflow()
-    final_doc = await workflow.run_incident(incident=incident)
+    final_doc = await workflow.run_incident(incident=incident, tenant_id=args.tenant_id)
     print(json.dumps(final_doc, indent=2, sort_keys=True, default=str))
     return (
         0
@@ -240,8 +268,10 @@ async def _amain(args: argparse.Namespace) -> int:
 
 
 def main() -> int:  # pragma: no cover
+    configure_console_logging()
     p = argparse.ArgumentParser()
     p.add_argument("--incident-fixture", type=str, default=None)
+    p.add_argument("--tenant-id", type=str, default="live")
     args = p.parse_args()
     return asyncio.run(_amain(args))
 

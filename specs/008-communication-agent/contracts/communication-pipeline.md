@@ -19,9 +19,9 @@ Stage 7: Content Safety Validation             [≤ 3s]
 Stage 8: Alert Versioning & Persistence        [≤ 3s]
 Stage 9: Approval Notification                 [≤ 5s]
                                                ────────
-                                  Drafting subtotal: ≤ 20s (stages 4–7)
-                                     Pipeline total: ≤ 35s
-                                     Queue overhead: ≤ 25s buffer
+                                  Drafting subtotal: ≤ 24s (stages 4–7)
+                                     Pipeline total: ≤ 40s
+                                     Queue overhead: ≤ 20s buffer
                                      End-to-end:     ≤ 60s
 
     [APPROVAL WAIT — excluded from SLA]

@@ -1,72 +1,109 @@
-/**
- * Spec-038 Benchmarks tab — live fetch (T-AMD-15).
- * Fetches from GET /api/v1/evidence/benchmarks/{kpi_id}?jurisdiction=NSW on mount.
- */
 "use client";
-import { useEffect, useState } from "react";
 
-const DEFAULT_KPI = "response_time_p1";
-const DEFAULT_JURISDICTION = "NSW";
+import type { BenchmarkEntry } from "@ama/domain";
+import { useCallback, useEffect, useState } from "react";
+import { getBenchmarks } from "../../../../lib/api/evidence";
 
-interface BenchmarkRow {
-  id: string;
-  kind: "external_benchmark" | "prototype_baseline";
-  source_name: string;
-  target_value: number | null;
-  target_unit: string;
-  not_available: boolean;
-  provenance: "auto" | "manual";
-}
+const KPI_OPTIONS = [
+  ["response_time_p1", "Priority response time"],
+  ["fire_structural_response", "Structure fire response"],
+  ["ses_flood_response", "SES flood response"],
+  ["police_evacuation_clearance", "Police evacuation clearance"],
+  ["airservices_arff_response", "Airservices ARFF response"],
+  ["saidi", "SAIDI"],
+  ["saifi", "SAIFI"],
+] as const;
+const JURISDICTIONS = ["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA", "AU"];
 
 export default function BenchmarkTab() {
-  const [rows, setRows] = useState<BenchmarkRow[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [jurisdiction, setJurisdiction] = useState(DEFAULT_JURISDICTION);
+  const [kpiId, setKpiId] = useState(KPI_OPTIONS[0][0]);
+  const [jurisdiction, setJurisdiction] = useState("NSW");
+  const [rows, setRows] = useState<BenchmarkEntry[]>([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(
+    (signal?: AbortSignal) => {
+      setLoading(true);
+      setError("");
+      void getBenchmarks(kpiId, jurisdiction, signal)
+        .then(setRows)
+        .catch((reason: unknown) => {
+          if ((reason as Error).name !== "AbortError") setError(String(reason));
+        })
+        .finally(() => setLoading(false));
+    },
+    [jurisdiction, kpiId],
+  );
 
   useEffect(() => {
-    fetch(`/api/v1/evidence/benchmarks/${DEFAULT_KPI}?jurisdiction=${jurisdiction}`)
-      .then((r) => {
-        if (!r.ok) { setError(`HTTP ${r.status}`); return null; }
-        return r.json();
-      })
-      .then((d) => d && setRows(Array.isArray(d) ? d : d.entries ?? []))
-      .catch((e) => setError(String(e)));
-  }, [jurisdiction]);
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
   return (
     <div data-testid="evidence-benchmarks-tab">
-      <label className="mr-2 text-sm font-medium">Jurisdiction:
-        <select className="ml-1 border rounded px-1" value={jurisdiction} onChange={(e) => setJurisdiction(e.target.value)}>
-          {["NSW","VIC","QLD","SA","WA","ACT","NT","TAS","AU"].map((j) => (
-            <option key={j} value={j}>{j}</option>
-          ))}
-        </select>
-      </label>
-      {error && <p role="alert" className="text-red-600">Failed to load: {error}</p>}
-      {rows.length === 0 && !error && <p>Loading Benchmarks…</p>}
-      {rows.length > 0 && (
-        <table className="w-full text-sm" aria-label="Benchmarks">
+      <div className="mb-4 flex flex-wrap gap-4">
+        <label>
+          Metric{" "}
+          <select value={kpiId} onChange={(event) => setKpiId(event.target.value as typeof kpiId)}>
+            {KPI_OPTIONS.map(([id, label]) => (
+              <option key={id} value={id}>{label}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Jurisdiction{" "}
+          <select value={jurisdiction} onChange={(event) => setJurisdiction(event.target.value)}>
+            {JURISDICTIONS.map((item) => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {loading ? <p role="status">Loading benchmarks…</p> : null}
+      {error ? (
+        <div role="alert">
+          <p>Failed to load benchmarks: {error}</p>
+          <button type="button" onClick={() => load()}>Retry</button>
+        </div>
+      ) : null}
+      {!loading && !error && rows.length === 0 ? (
+        <p>No external benchmark is published for this selection.</p>
+      ) : null}
+      {rows.length > 0 ? (
+        <table className="w-full text-sm" aria-label="Benchmark comparison">
           <thead>
-            <tr><th>Source</th><th>Kind</th><th>Target</th><th>Unit</th><th>Status</th></tr>
+            <tr>
+              <th>Source</th>
+              <th>Comparison</th>
+              <th>Value</th>
+              <th>Context</th>
+              <th>Provenance</th>
+              <th>Citation</th>
+            </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
-              <tr key={r.id} className={r.kind === "external_benchmark" ? "" : "bg-gray-50"}>
-                <td>{r.source_name}</td>
-                <td>{r.kind === "external_benchmark" ? "External" : "Prototype baseline"}</td>
-                <td>{r.not_available ? "—" : String(r.target_value ?? "—")}</td>
-                <td>{r.target_unit}</td>
+            {rows.map((row) => (
+              <tr key={row.id}>
+                <td>{row.source_name}</td>
+                <td>{row.kind === "external_benchmark" ? "External" : "Prototype baseline"}</td>
+                <td>{row.not_available ? "Not available" : `${row.target_value} ${row.target_unit}`}</td>
+                <td>{row.target_context}</td>
+                <td>{row.provenance === "manual" ? <span role="status">manual</span> : "automatic"}</td>
                 <td>
-                  {r.not_available && <span className="text-gray-500 text-xs">not available</span>}
-                  {r.provenance === "manual" && (
-                    <span className="ml-1 inline-flex items-center rounded-full bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-800">manual</span>
-                  )}
+                  {row.source_citation ? (
+                    <a href={row.source_citation.url} rel="noreferrer">
+                      {row.source_citation.organisation}, {row.source_citation.year}
+                    </a>
+                  ) : "Internal prototype"}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      )}
+      ) : null}
     </div>
   );
 }

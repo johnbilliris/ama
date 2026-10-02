@@ -107,7 +107,7 @@ class WorkflowRunRepository:
             "tenant_id": tenant_id,
         }
 
-        existing_active = self.get_active_run_id_for_incident(incident_id)
+        existing_active = self.get_active_run_id_for_incident(incident_id, tenant_id=tenant_id)
         if existing_active is not None:
             raise ActiveRunAlreadyExistsError(
                 f"Cannot start a second active workflow run for incident {incident_id!r}; "
@@ -125,15 +125,18 @@ class WorkflowRunRepository:
                 self._in_memory[run_id] = doc
         return doc
 
-    def get(self, run_id: str) -> dict[str, Any] | None:
+    def get(self, run_id: str, *, tenant_id: str | None = None) -> dict[str, Any] | None:
         container = self._container()
         if container is not None:
             try:
                 # Cross-partition read by id since we don't know the incident_id here.
                 items = list(
                     container.query_items(
-                        query="SELECT * FROM c WHERE c.id=@id",
-                        parameters=[{"name": "@id", "value": run_id}],
+                        query="SELECT * FROM c WHERE c.id=@id AND (@tenant=null OR c.tenant_id=@tenant)",
+                        parameters=[
+                            {"name": "@id", "value": run_id},
+                            {"name": "@tenant", "value": tenant_id},
+                        ],
                         enable_cross_partition_query=True,
                     )
                 )
@@ -142,16 +145,25 @@ class WorkflowRunRepository:
                 logger.exception("Cosmos get(%s) failed; returning None", run_id)
                 return None
         with self._mem_lock:
-            return self._in_memory.get(run_id)
+            document = self._in_memory.get(run_id)
+            if document is not None and tenant_id is not None and document.get("tenant_id") != tenant_id:
+                return None
+            return document
 
-    def get_active_run_id_for_incident(self, incident_id: str) -> str | None:
+    def get_active_run_id_for_incident(self, incident_id: str, *, tenant_id: str = "live") -> str | None:
         container = self._container()
         if container is not None:
             try:
                 items = list(
                     container.query_items(
-                        query="SELECT TOP 1 c.id FROM c WHERE c.incident_id=@i AND c.is_active=true",
-                        parameters=[{"name": "@i", "value": incident_id}],
+                        query=(
+                            "SELECT TOP 1 c.id FROM c WHERE c.incident_id=@i "
+                            "AND c.tenant_id=@tenant AND c.is_active=true"
+                        ),
+                        parameters=[
+                            {"name": "@i", "value": incident_id},
+                            {"name": "@tenant", "value": tenant_id},
+                        ],
                         partition_key=incident_id,
                     )
                 )
@@ -161,7 +173,7 @@ class WorkflowRunRepository:
                 return None
         with self._mem_lock:
             for doc in self._in_memory.values():
-                if doc["incident_id"] == incident_id and doc.get("is_active"):
+                if doc["incident_id"] == incident_id and doc.get("tenant_id") == tenant_id and doc.get("is_active"):
                     return doc["id"]
         return None
 
@@ -170,6 +182,7 @@ class WorkflowRunRepository:
         *,
         status: str | None = None,
         incident_id: str | None = None,
+        tenant_id: str | None = None,
         limit: int = 50,
     ) -> list[dict[str, Any]]:
         container = self._container()
@@ -182,6 +195,9 @@ class WorkflowRunRepository:
             if incident_id:
                 clauses.append("c.incident_id=@i")
                 params.append({"name": "@i", "value": incident_id})
+            if tenant_id:
+                clauses.append("c.tenant_id=@tenant")
+                params.append({"name": "@tenant", "value": tenant_id})
             where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
             q = f"SELECT TOP {int(limit)} * FROM c{where} ORDER BY c.started_at DESC"
             try:
@@ -201,6 +217,8 @@ class WorkflowRunRepository:
             items = [i for i in items if i["status"] == status]
         if incident_id:
             items = [i for i in items if i["incident_id"] == incident_id]
+        if tenant_id:
+            items = [i for i in items if i.get("tenant_id") == tenant_id]
         items.sort(key=lambda d: d.get("started_at", ""), reverse=True)
         return items[:limit]
 
@@ -258,11 +276,12 @@ class WorkflowRunRepository:
         new_status: WorkflowRunStatus | str,
         *,
         correlation_id: str,
+        tenant_id: str | None = None,
         failure_reason: dict[str, Any] | None = None,
         pending_request_id: str | None = None,
     ) -> dict[str, Any]:
         """Validate + persist a state transition. Idempotent on same-state."""
-        doc = self.get(run_id)
+        doc = self.get(run_id, tenant_id=tenant_id)
         if doc is None:
             raise KeyError(f"workflow run {run_id} not found")
         current = doc["status"]

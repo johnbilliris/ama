@@ -23,6 +23,7 @@ def _auth_headers(sub: str) -> dict[str, str]:
 
 @pytest.fixture
 def client(monkeypatch):
+    from app.api.dependencies import simulation_composition
     from app.api.routes import simulation_playback as pb_routes
     from app.api.routes import simulations as sim_routes
     from app.main import app
@@ -67,6 +68,7 @@ def client(monkeypatch):
     annotations = AnnotationService(event_repository=event_repo, simulation_repository=repo)
 
     monkeypatch.setattr(sim_routes, "_repo", repo)
+    monkeypatch.setattr(simulation_composition, "_SIMULATION_REPOSITORY", repo)
     monkeypatch.setattr(sim_routes, "_signal_repo", signal_repo)
     monkeypatch.setattr(sim_routes, "_event_repo", event_repo)
     monkeypatch.setattr(sim_routes, "_clock", clock)

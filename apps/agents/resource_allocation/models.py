@@ -234,6 +234,17 @@ class ResourceDemand(BaseModel):
     required_capabilities: list[str] = Field(default_factory=list)
     quantity: int = 1
     location: dict = Field(default_factory=dict)
+    estimated_individuals: int = Field(default=0, ge=0)
+    destination_assembly_area_id: str = ""
+    destination_assembly_area_name: str = ""
+    destination_route_id: str = ""
+    destination_resolved: bool = True
+    unresolved_destination_reason: str | None = None
+    origin_zone: int | None = Field(default=None, ge=1)
+    phase_number: int | None = Field(default=None, ge=1)
+    special_considerations: list[str] = Field(default_factory=list)
+    count_basis: str = ""
+    evacuation_plan_id: str = ""
     priority_tier: PriorityTier = PriorityTier.tier_2_property
     urgency: UrgencyLevel = UrgencyLevel.moderate
     urgency_raw: str | None = None

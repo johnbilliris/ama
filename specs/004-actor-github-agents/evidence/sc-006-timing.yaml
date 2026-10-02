@@ -1,0 +1,20 @@
+schemaVersion: 1
+status: Not measured
+timingDefinition:
+  startEvent: catalogue review started
+  stopEvent: new actor file + registry + handoffs + references pass validator
+  passBoundarySeconds: 1799
+  failBoundarySeconds: 1800
+executionPolicy:
+  independentContributor: true
+  unfamiliarContributor: true
+  facilitatorAuthored: false
+  disposableWorkspace: true
+  commitCreated: false
+run:
+  runId: ""
+  reviewer: ""
+  elapsedSeconds: null
+  outcome: ""
+  validatorOutput: ""
+  artifacts: []

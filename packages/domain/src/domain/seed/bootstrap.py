@@ -59,6 +59,7 @@ def bootstrap_seed_data(seed_root: Path) -> dict[str, object]:
         "disasters": load_seed_file(seed_root / "disasters_australia.json"),
         "framework_assignments": load_seed_file(seed_root / "framework_assignments_australia.json"),
         "scenario_templates": load_seed_file(seed_root / "scenario_templates_australia.json"),
+        "jurisdiction_policies": load_seed_file(seed_root / "jurisdiction_policies_australia.json"),
         "recovery_catalogue": _load_recovery_catalogue(seed_root),
         # ----------------------------------------------------------------
         # spec 034 — web coverage capstone validation suite (T052).

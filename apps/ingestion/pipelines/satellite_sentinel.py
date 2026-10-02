@@ -46,7 +46,7 @@ class SentinelSatellitePipeline(IngestionPipelineBase):
         if isinstance(entries, dict):
             entries = [entries]
         payloads: list[dict[str, Any]] = []
-        for entry in entries[:20]:
+        for entry in entries:
             payloads.append(
                 {
                     "data_source_id": "sentinel-satellite",

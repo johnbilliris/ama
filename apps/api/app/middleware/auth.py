@@ -1,7 +1,8 @@
 """Management API authorization middleware (FR-021).
 
-Production: Azure AD JWT with issuer/audience validation, requires operator/admin role.
-Local dev: X-API-Key header matching MANAGEMENT_API_KEY env var.
+Non-dev: signed Entra JWT with issuer/audience validation and operator/admin role.
+Dev: full access only when AMA_ALLOW_ANONYMOUS_DEV_ACCESS is enabled.
+Local fallback: X-API-Key header matching MANAGEMENT_API_KEY env var.
 """
 
 from __future__ import annotations
@@ -9,7 +10,8 @@ from __future__ import annotations
 import logging
 import os
 
-import jwt
+from app.core.dev_access import dev_access_enabled
+from app.schemas.envelope_errors import ExtensionEnvelopeError
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -21,10 +23,10 @@ _bearer_scheme = HTTPBearer(auto_error=False)
 def _get_env() -> tuple[str, str, str, str]:
     """Read environment variables at call time (testable with monkeypatch)."""
     return (
-        os.environ.get("ENVIRONMENT", "local"),
+        os.environ.get("AMA_ENVIRONMENT", os.environ.get("ENVIRONMENT", "local")),
         os.environ.get("MANAGEMENT_API_KEY", ""),
-        os.environ.get("ENTRA_TENANT_ID", ""),
-        os.environ.get("ENTRA_AUDIENCE", "api://disaster-response-hub"),
+        os.environ.get("AMA_ENTRA_TENANT_ID", os.environ.get("ENTRA_TENANT_ID", "")),
+        os.environ.get("AMA_ENTRA_AUDIENCE", os.environ.get("ENTRA_AUDIENCE", "api://disaster-response-hub")),
     )
 
 
@@ -60,29 +62,13 @@ def _log_auth_forbidden(
 
 
 def _validate_jwt(token: str) -> dict:
-    """Decode and validate Azure AD JWT.
-
-    SECURITY: verify_signature=False is acceptable ONLY during local dev/staging.
-    Production MUST use JWKS from Azure AD to verify token signatures.
-    See: https://login.microsoftonline.com/{tenant}/.well-known/openid-configuration
-    """
-    _, _, tenant_id, audience = _get_env()
+    """Validate management tokens using the shared Entra JWKS verifier."""
     try:
-        issuer = f"https://sts.windows.net/{tenant_id}/"
-        # TODO(security): Implement JWKS-based signature verification for production.
-        # Fetch keys from https://login.microsoftonline.com/{tenant_id}/discovery/v2.0/keys
-        # and pass the matching public key to jwt.decode() with verify_signature=True.
-        payload = jwt.decode(
-            token,
-            options={"verify_signature": False},
-            audience=audience,
-            issuer=issuer,
-        )
-        return payload
-    except jwt.ExpiredSignatureError as exc:
-        raise HTTPException(status_code=401, detail="Token expired") from exc
-    except jwt.InvalidTokenError as exc:
-        raise HTTPException(status_code=401, detail="Invalid token") from exc
+        from app.middleware.entra_auth import _validate_jwt as validate_entra_jwt
+
+        return validate_entra_jwt(token)
+    except ExtensionEnvelopeError as exc:
+        raise HTTPException(status_code=401, detail="Invalid authorization token") from exc
 
 
 async def authorize_management(
@@ -95,6 +81,9 @@ async def authorize_management(
     Returns the authenticated identity as a dict with 'sub' and 'roles' keys.
     """
     environment, api_key_expected, _, _ = _get_env()
+    if dev_access_enabled():
+        return {"sub": "dev-user", "roles": ["admin", "operator", "system-administrator"]}
+
     if environment == "local":
         api_key = request.headers.get("X-API-Key", "")
         if not api_key or api_key != api_key_expected:

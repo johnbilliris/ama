@@ -16,25 +16,25 @@ Reports agent readiness for container orchestration health checks. Must respond 
   "timestamp": "2026-04-18T10:30:00Z",
   "checks": {
     "llm_connectivity": {
-      "status": "healthy | degraded | unhealthy",
+      "status": "healthy | unhealthy | not_configured",
       "latency_ms": 150,
       "last_checked": "2026-04-18T10:29:55Z"
     },
     "cosmos_connectivity": {
-      "status": "healthy | degraded | unhealthy",
+      "status": "healthy | unhealthy | not_configured",
       "latency_ms": 25,
       "last_checked": "2026-04-18T10:29:55Z"
     },
     "sms_service_status": {
-      "status": "healthy | degraded | unhealthy",
+      "status": "healthy | unhealthy | not_configured",
       "last_checked": "2026-04-18T10:29:55Z"
     },
     "push_service_status": {
-      "status": "healthy | degraded | unhealthy",
+      "status": "healthy | unhealthy | not_configured",
       "last_checked": "2026-04-18T10:29:55Z"
     },
     "broadcast_endpoint_status": {
-      "status": "healthy | degraded | unhealthy",
+      "status": "healthy | unhealthy | not_configured",
       "last_checked": "2026-04-18T10:29:55Z"
     }
   },
@@ -54,7 +54,7 @@ Reports agent readiness for container orchestration health checks. Must respond 
 | Overall Status | Condition |
 |---------------|-----------|
 | `healthy` | All checks healthy |
-| `degraded` | Any non-critical check degraded (LLM, single delivery channel) |
+| `degraded` | Any non-critical check is unhealthy or not configured, or audit storage is buffering/degraded |
 | `unhealthy` | Cosmos DB unhealthy OR all delivery channels unhealthy |
 
 ### Response Codes

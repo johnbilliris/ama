@@ -9,7 +9,7 @@ import {
 } from "../../../../components/claims-velocity";
 
 const PLACEHOLDER_SNAPSHOT: ClaimsVelocitySnapshot = {
-  as_at: new Date().toISOString(),
+  as_at: "2025-03-01T00:00:00.000Z",
   claims_lodged: 0,
   claims_closed: 0,
   dollars_lodged: 0,

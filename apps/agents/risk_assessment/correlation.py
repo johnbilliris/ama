@@ -103,6 +103,16 @@ class SignalCorrelator:
 
         all_stale = len(stale_ids) == len(signals)
 
+        if all_stale:
+            return CorrelationResult(
+                weighted_confidence=0.0,
+                stale_signal_ids=stale_ids,
+                source_kinds=source_kinds,
+                source_diversity=len(source_kinds),
+                all_stale=True,
+                signal_count=len(signals),
+            )
+
         if denominator <= 0.0:
             return CorrelationResult(
                 weighted_confidence=0.0,

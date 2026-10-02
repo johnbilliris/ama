@@ -13,6 +13,7 @@ Stage 9: Audit finalisation (comprehensive audit records)
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import time
 from collections.abc import Callable
@@ -318,23 +319,44 @@ class AllocationProcessingPipeline:
         """Extract demands from evacuation transport requirements."""
         payload = handoff.payload or {}
         requirements = payload.get("transportRequirements", [])
-        payload.get("evacuationPlanId", "")
+        evacuation_plan_id = str(payload.get("evacuationPlanId", ""))
         demands = []
 
         for req in requirements:
             raw_priority = req.get("priority", "high")
             urgency = normalise_urgency(raw_priority, "evacuation")
+            requirement_id = str(req.get("requirementId", ""))
+            if not requirement_id:
+                continue
+            demand_identity = "|".join([incident_scope_key, requirement_id])
 
             demand = ResourceDemand(
-                demand_id=f"dem-{uuid4().hex[:12]}",
+                demand_id=("dem-" + hashlib.sha256(demand_identity.encode()).hexdigest()[:12]),
                 incident_id=handoff.incident_id,
-                source_id=req.get("requirementId", f"tr-{uuid4().hex[:8]}"),
+                source_id=requirement_id,
                 source_type="transport_requirement",
                 resource_type=ResourceType.vehicle,
                 resource_sub_type=req.get("vehicleType", "bus"),
                 required_capabilities=self._infer_transport_capabilities(req.get("vehicleType", "")),
                 quantity=req.get("quantity", 1),
                 location=req.get("pickupLocation", {}),
+                estimated_individuals=req.get("estimatedIndividuals", 0),
+                destination_assembly_area_id=req.get(
+                    "destinationAssemblyAreaId",
+                    "",
+                ),
+                destination_assembly_area_name=req.get(
+                    "destinationAssemblyAreaName",
+                    "",
+                ),
+                destination_route_id=req.get("destinationRouteId", ""),
+                destination_resolved=req.get("destinationResolved", True),
+                unresolved_destination_reason=req.get("unresolvedDestinationReason"),
+                origin_zone=req.get("originZone"),
+                phase_number=req.get("phaseNumber"),
+                special_considerations=req.get("specialConsiderations", []),
+                count_basis=req.get("countBasis", ""),
+                evacuation_plan_id=evacuation_plan_id,
                 priority_tier=PriorityTier.tier_1_life_safety,
                 urgency=urgency,
                 urgency_raw=raw_priority,

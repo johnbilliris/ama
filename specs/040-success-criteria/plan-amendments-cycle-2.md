@@ -25,9 +25,10 @@ structure under `apps/web/src/app/governance/evidence/`:
 2. **AU-residency hardening** — Bicep deploy-time `existing.location`
    assertion against `{australiaeast, australiasoutheast}`; production
    fail-fast on missing AU credentials guarded by `AMA_TEST_MODE=1`
-   sentinel; per-operation `Strong` consistency on the AU-refusal audit
-   write with bounded 3-retry exponential backoff and `503` on
-   exhaustion (FR-042, FR-043, FR-044, SC-018, SC-019, SC-020(a)).
+   sentinel; Session-consistency create-only Cosmos source plus synchronous
+   create-only locked-Blob acknowledgement on the AU-refusal path, with
+   bounded transient retries and `503` on exhaustion (FR-042, FR-043,
+   FR-044, SC-018, SC-019, SC-020(a)).
 3. **Operability** — `/healthz/evidence` partitioned into critical
    (Cosmos containers + Blob immutable archive + change-feed mirror →
    `503` when down) vs non-critical (App Insights + read-only cache →
@@ -60,7 +61,7 @@ toward the FR-028 / SC-010 ≤50 % manual-row cap (FR-041, SC-017).
 | TS twin parity (R2-Q1)                     | Reuses portfolio convention `packages/domain/src/app-role.ts` (type-only); contract test reuses existing `pytest`/OpenAPI test pattern. | No           |
 | axe-core + Flesch-Kincaid (FR-039)         | Reuses Playwright + axe-core deps already installed by tasks T-A09/T-A10. FK readability = `textstat` (verify; if absent, use a 60-LOC Pyte-style helper inside the existing Playwright spec — no Python pkg). | **Action** — confirm `textstat` already transitive via existing dev deps; otherwise inline JS Flesch-Kincaid (no new dep, ≈40 LOC). |
 | Cosmos change-feed → Blob mirror (FR-040)  | Container Apps **job** (`Microsoft.App/jobs@2024-03-01`) — pattern already used in `infra/bicep/modules/eval/eval-platform.bicep:390`. Storage change-feed already enabled on prior modules (`infra/bicep/modules/evidence-store.bicep:38`). | No           |
-| Per-op Strong consistency (FR-044 / D21)   | Cosmos SDK request-options override `consistency_level=Strong` on `create_item`. No new SDK or wrapper.                                 | No           |
+| Durable refusal acknowledgement (FR-044 / D21) | Existing Cosmos + Blob SDKs; create-only Session Cosmos write followed by synchronous locked-Blob upload.                          | No           |
 | 3-retry exp backoff (D21)                  | Reuses the resilience helper already wrapping Cosmos clients in `services/governance` (D9 in base research).                            | No           |
 | SLO workbook + burn-rate alerts (FR-046)   | `Microsoft.Insights/scheduledQueryRules` + workbook resources — pattern used in existing `observability-alerts.bicep` precedent.        | No           |
 | Healthz banding (FR-045)                   | Existing `/healthz/*` aiohttp pattern in `apps/api/app`; only re-partitions checks, no new dep.                                         | No           |
@@ -89,7 +90,7 @@ Same 11-row table as base plan, re-checked against the Cycle 2 delta:
 | 4 | III. Multi-Hazard, Multi-Agency Design               | FR-039 retains all 7 canonical scenarios; deferred-permitted Auslan scope (urban-fire, mass-casualty, hazmat, marine SAR) is **rendering** only — coverage matrix preserved with `auslan-asset-missing` badge. | ✅ |
 | 5 | IV. Transparency and Auditability                    | FR-038 hardens immutability (`Locked` + 2555 d); FR-040 server-side rejection + tampering-attempt row; FR-044 durable-before-respond + 503 on audit-write failure; FR-045 critical/non-critical banding makes audit-store outage observable. **Strengthens** transparency. | ✅ |
 | 6 | V. Warning and Public Information                    | FR-039 adds axe-core zero `serious`/`critical` and FK ≤ 8 thresholds; FR-048 forbids silent language downgrade. Aligns with Ten Warning Principles #3 (trusted, verifiable) and #8 (clearly communicated). | ✅ |
-| 7 | AU Sovereignty (Non-Negotiable #2)                  | FR-042 production fail-fast; FR-043 deploy-time `existing.location` assertion against `{australiaeast, australiasoutheast}`; FR-044 single-region `australiaeast` for audit Cosmos to permit per-op `Strong`. **Strengthens** sovereignty. | ✅ |
+| 7 | AU Sovereignty (Non-Negotiable #2)                  | FR-042 production fail-fast; FR-043 deploy-time `existing.location` assertion against `{australiaeast, australiasoutheast}`; FR-044 Session Cosmos source plus synchronous locked-Blob acknowledgement. **Strengthens** sovereignty. | ✅ |
 | 8 | Advisory-only / human-in-the-loop                    | Unchanged — all amended endpoints remain advisory-only; `ProblemDetails.ama_advisory_only=true` invariant preserved.                                                    | ✅ |
 | 9 | Graceful degradation                                 | FR-045 critical vs non-critical banding **codifies** what may degrade gracefully (App Insights, read-only cache) vs what must fail loudly (audit + AU-sovereignty path). FR-050 surfaces all 4 state badges to the operator. | ✅ |
 |10 | Reuse-only / no new primitives                       | See §Reuse audit — zero new runtime deps; R2-Q1 explicitly forbids Zod/class-validator on the TS twin. FR-049 citations are static text — no scraping, no republishing of external benchmark data. | ✅ |

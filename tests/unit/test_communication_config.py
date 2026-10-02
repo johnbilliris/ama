@@ -12,7 +12,7 @@ class TestCommunicationConfigDefaults:
     def test_supported_languages_default(self, monkeypatch):
         monkeypatch.delenv("SUPPORTED_LANGUAGES", raising=False)
         cfg = CommunicationConfig()
-        assert cfg.supported_languages == ["en-AU", "zh-Hans", "ar", "vi", "el", "it"]
+        assert cfg.supported_languages == ("en-AU", "zh-Hans", "ar", "vi", "el", "it")
 
     def test_back_translation_threshold_default(self, monkeypatch):
         monkeypatch.delenv("BACK_TRANSLATION_THRESHOLD", raising=False)
@@ -52,7 +52,7 @@ class TestCommunicationConfigDefaults:
     def test_delivery_channels_default(self, monkeypatch):
         monkeypatch.delenv("DELIVERY_CHANNELS", raising=False)
         cfg = CommunicationConfig()
-        assert cfg.delivery_channels == ["sms", "push", "emergency_broadcast"]
+        assert cfg.delivery_channels == ("sms", "push", "emergency_broadcast")
 
     def test_sms_max_length_default(self, monkeypatch):
         monkeypatch.delenv("SMS_MAX_LENGTH", raising=False)
@@ -104,12 +104,12 @@ class TestCommunicationConfigEnvOverrides:
     def test_supported_languages_override(self, monkeypatch):
         monkeypatch.setenv("SUPPORTED_LANGUAGES", "en-AU,zh-Hans")
         cfg = CommunicationConfig()
-        assert cfg.supported_languages == ["en-AU", "zh-Hans"]
+        assert cfg.supported_languages == ("en-AU", "zh-Hans")
 
     def test_delivery_channels_override(self, monkeypatch):
         monkeypatch.setenv("DELIVERY_CHANNELS", "sms,push")
         cfg = CommunicationConfig()
-        assert cfg.delivery_channels == ["sms", "push"]
+        assert cfg.delivery_channels == ("sms", "push")
 
     def test_back_translation_threshold_override(self, monkeypatch):
         monkeypatch.setenv("BACK_TRANSLATION_THRESHOLD", "0.90")
@@ -141,17 +141,40 @@ class TestCSVParsing:
     def test_csv_with_spaces_stripped(self, monkeypatch):
         monkeypatch.setenv("SUPPORTED_LANGUAGES", " en-AU , zh-Hans , ar ")
         cfg = CommunicationConfig()
-        assert cfg.supported_languages == ["en-AU", "zh-Hans", "ar"]
+        assert cfg.supported_languages == ("en-AU", "zh-Hans", "ar")
 
     def test_csv_empty_entries_removed(self, monkeypatch):
         monkeypatch.setenv("DELIVERY_CHANNELS", "sms,,push,")
         cfg = CommunicationConfig()
-        assert cfg.delivery_channels == ["sms", "push"]
+        assert cfg.delivery_channels == ("sms", "push")
 
     def test_csv_single_value(self, monkeypatch):
         monkeypatch.setenv("SUPPORTED_LANGUAGES", "en-AU")
         cfg = CommunicationConfig()
-        assert cfg.supported_languages == ["en-AU"]
+        assert cfg.supported_languages == ("en-AU",)
+
+    def test_primary_language_is_normalized_first(self, monkeypatch):
+        monkeypatch.setenv("SUPPORTED_LANGUAGES", "vi,en-AU,zh-Hans")
+        assert CommunicationConfig().supported_languages == ("en-AU", "vi", "zh-Hans")
+
+    def test_legacy_broadcast_channel_is_normalized(self, monkeypatch):
+        monkeypatch.setenv("DELIVERY_CHANNELS", "sms,broadcast")
+        assert CommunicationConfig().delivery_channels == ("sms", "emergency_broadcast")
+
+    @pytest.mark.parametrize(
+        ("name", "value"),
+        [
+            ("SUPPORTED_LANGUAGES", "fr"),
+            ("DELIVERY_CHANNELS", "fax"),
+            ("MAX_CONCURRENT_ALERTS", "0"),
+            ("FRESHNESS_PENALTY_FACTOR", "1.5"),
+            ("MAX_ESCALATION_LEVELS", "4"),
+        ],
+    )
+    def test_invalid_configuration_is_rejected(self, monkeypatch, name, value):
+        monkeypatch.setenv(name, value)
+        with pytest.raises(ValueError):
+            CommunicationConfig()
 
 
 # ---------------------------------------------------------------------------

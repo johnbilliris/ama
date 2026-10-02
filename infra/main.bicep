@@ -11,7 +11,7 @@ Resource references (design intent and canonical docs):
   https://learn.microsoft.com/en-us/azure/storage/blobs/
 3) Cosmos DB Account + DB + Containers (cosmos-{env}-{suffix}) - Microsoft.DocumentDB/databaseAccounts@2023-11-15
   https://learn.microsoft.com/en-us/azure/cosmos-db/nosql/
-4) Redis Cache (redis-{env}-{suffix}) - Microsoft.Cache/Redis@2024-03-01
+4) Azure Managed Redis (redis-{env}-{suffix}) - Microsoft.Cache/redisEnterprise via AVM
   https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/
 5) Azure OpenAI (cog-{env}-{suffix}) - Microsoft.CognitiveServices/accounts@2024-10-01
   https://learn.microsoft.com/en-us/azure/ai-services/openai/
@@ -33,6 +33,7 @@ Resource references (design intent and canonical docs):
    https://learn.microsoft.com/en-us/azure/container-apps/
 14) App Service Plan (plan-{env}) - Microsoft.Web/serverfarms@2023-12-01
 15) Web App (app-{env}-{suffix}) - Microsoft.Web/sites@2023-12-01
+16) Microsoft Entra API + SPA registrations - Microsoft Graph Bicep extension
 
 Original implementation task references:
 - TASK-001 monitoring module (resources 6, 7, 8, 9)
@@ -93,8 +94,14 @@ param apiImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:la
 @description('Agents container image (set by azd deploy)')
 param agentsImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
+@description('Evacuation container image (set by azd deploy)')
+param evacuationImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
 @description('Ingestion container image (set by azd deploy)')
 param ingestionImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
+@description('Ingest-runner Container App Job image (set by azd deploy)')
+param ingestRunnerImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
 @description('Principal ID for RBAC role assignments (set by azd)')
 param principalId string = ''
@@ -118,10 +125,10 @@ param restrictNetworkAccess bool = true
 
 @description('Deployment environment tier — controls auth policies (e.g. Azure Maps local auth)')
 @allowed(['dev', 'staging', 'prod'])
-param environmentTier string = 'dev'
+param environmentTier string = endsWith(toLower(environmentName), 'production') || endsWith(toLower(environmentName), 'prod') ? 'prod' : endsWith(toLower(environmentName), 'staging') ? 'staging' : 'dev'
 
 @description('Spec 029 — Subscription topology. A: per-environment subscriptions. B: single subscription per environment OR one subscription for all environments. Defaults to B; Topology A tenants must override.')
-@allowed([ 'A', 'B' ])
+@allowed(['A', 'B'])
 param subscriptionTopology string = 'B'
 
 @description('Azure subscription ID this deployment targets.')
@@ -135,28 +142,43 @@ param additionalTags object = {}
 // ────────────────────────────────────────────────────────────────────────────────
 
 var abbrs = loadJsonContent('./abbreviations.json')
-var tags = union({
-  'azd-env-name': environmentName
-  project: 'disaster-response-hub'
-  SecurityControl: 'Ignore'
-}, additionalTags)
+var tags = union(
+  {
+    'azd-env-name': environmentName
+    project: 'disaster-response-hub'
+    SecurityControl: 'Ignore'
+  },
+  additionalTags
+)
 var uniqueSuffix = uniqueString(resourceGroup().id)
+var webAppName = take('${abbrs.webSitesAppService}${environmentName}-${take(uniqueSuffix, 6)}', 60)
+var allowAnonymousIncidentMap = environmentTier == 'dev'
+var enableIncidentMapAuth = !allowAnonymousIncidentMap
 
-// Azure Portal and Azure-services IPs used to restrict Cosmos DB in production
+module entraAuth './modules/entra-auth.bicep' = if (enableIncidentMapAuth) {
+  name: 'entra-auth'
+  params: {
+    environmentName: environmentName
+    uniqueSuffix: uniqueSuffix
+    spaRedirectUris: [
+      'https://${webAppName}.azurewebsites.net'
+      'http://localhost:3000'
+    ]
+  }
+}
+
+// Current Azure Public portal middleware and Azure-services IPs used to restrict Cosmos DB in production
 var portalAndServiceIpRules = [
-  { ipAddressOrRange: '0.0.0.0' }           // allow Azure services (Container Apps, etc.)
-  { ipAddressOrRange: '104.42.195.92' }     // Azure Portal
-  { ipAddressOrRange: '40.76.54.131' }      // Azure Portal
-  { ipAddressOrRange: '52.176.6.30' }       // Azure Portal
-  { ipAddressOrRange: '52.169.50.45' }      // Azure Portal
-  { ipAddressOrRange: '52.187.184.26' }     // Azure Portal
+  { ipAddressOrRange: '0.0.0.0' } // allow Azure services (Container Apps, etc.)
+  { ipAddressOrRange: '13.91.105.215' }
+  { ipAddressOrRange: '4.210.172.107' }
+  { ipAddressOrRange: '13.88.56.148' }
+  { ipAddressOrRange: '40.91.218.243' }
 ]
 var developerIpRules = empty(developerIpAddress) ? [] : [{ ipAddressOrRange: developerIpAddress }]
 // Production: Portal + Azure-services IPs + optional developer IP.
 // Dev/staging: only developer IP if set, otherwise fully open (no IP filtering).
-var cosmosIpRules = restrictNetworkAccess
-  ? concat(portalAndServiceIpRules, developerIpRules)
-  : developerIpRules
+var cosmosIpRules = restrictNetworkAccess ? concat(portalAndServiceIpRules, developerIpRules) : developerIpRules
 
 // ────────────────────────────────────────────────────────────────────────────────
 // Monitoring (Log Analytics + App Insights + Alerts)
@@ -167,9 +189,20 @@ module monitoring './modules/monitoring.bicep' = {
   params: {
     location: location
     envPrefix: environmentName
+    environmentTier: environmentTier
     tags: tags
     actionGroupEmail: actionGroupEmail
     actionGroupWebhook: actionGroupWebhook
+  }
+}
+
+module evacuationAlerts './bicep/modules/evacuation-alerts.bicep' = {
+  params: {
+    appInsightsName: monitoring.outputs.appInsightsName
+    actionGroupResourceId: monitoring.outputs.actionGroupId
+    environmentName: environmentName
+    location: location
+    tags: tags
   }
 }
 
@@ -179,8 +212,10 @@ module monitoring './modules/monitoring.bicep' = {
 // can ship without paying for APIM until staging.
 // ────────────────────────────────────────────────────────────────────────────────
 
-@description('Spec-035 — Provision APIM rate-limit + immutable handover container + App Configuration store. Default OFF in dev to keep cost low; enable for staging/production.')
+@description('Spec-035 — Provision APIM rate-limit + immutable handover container + App Configuration store. Ignored in dev; enable for staging/production.')
 param enableSpec035Hardening bool = false
+
+var deploySpec035Hardening = enableSpec035Hardening && environmentTier != 'dev'
 
 @description('Spec-035 — APIM publisher email override.')
 param spec035ApimPublisherEmail string = 'ops@example.com'
@@ -188,7 +223,7 @@ param spec035ApimPublisherEmail string = 'ops@example.com'
 @description('Spec-035 — Recovery handover signing certificate name in Key Vault (FR-007).')
 param spec035RecoverySigningCertName string = 'recovery-handover-signing'
 
-module spec035AppConfig './modules/app-configuration.bicep' = if (enableSpec035Hardening) {
+module spec035AppConfig './modules/app-configuration.bicep' = if (deploySpec035Hardening) {
   name: 'spec035-app-configuration'
   params: {
     location: location
@@ -197,7 +232,7 @@ module spec035AppConfig './modules/app-configuration.bicep' = if (enableSpec035H
   }
 }
 
-module spec035ApimRateLimit './modules/apim-rate-limit.bicep' = if (enableSpec035Hardening) {
+module spec035ApimRateLimit './modules/apim-rate-limit.bicep' = if (deploySpec035Hardening) {
   name: 'spec035-apim-rate-limit'
   params: {
     location: location
@@ -211,7 +246,7 @@ module spec035ApimRateLimit './modules/apim-rate-limit.bicep' = if (enableSpec03
   ]
 }
 
-module spec035BlobImmutable './modules/blob-immutable.bicep' = if (enableSpec035Hardening) {
+module spec035BlobImmutable './modules/blob-immutable.bicep' = if (deploySpec035Hardening) {
   name: 'spec035-blob-immutable'
   params: {
     location: location
@@ -221,7 +256,7 @@ module spec035BlobImmutable './modules/blob-immutable.bicep' = if (enableSpec035
   }
 }
 
-module spec035RecoverySigningKv './modules/recovery-signing-keyvault.bicep' = if (enableSpec035Hardening) {
+module spec035RecoverySigningKv './modules/recovery-signing-keyvault.bicep' = if (deploySpec035Hardening) {
   name: 'spec035-recovery-signing-kv'
   params: {
     location: location
@@ -243,9 +278,6 @@ param enableSpec036FoundryRag bool = true
 
 @description('Spec-036 — AI Search service name (auto-generated when empty).')
 param spec036SearchServiceName string = ''
-
-@description('Spec-036 — Ingest-runner image tag (azd deploy / cd.yml sets this to the corpus_build_sha).')
-param spec036IngestRunnerImageTag string = 'latest'
 
 @description('Spec-036 — Embedding deployment name (Foundry).')
 param spec036EmbeddingDeploymentName string = 'text-embedding-3-large'
@@ -302,7 +334,9 @@ resource spec036CorpusSubscription 'Microsoft.ServiceBus/namespaces/topics/subsc
 module spec036SearchBlueGreen './modules/ai-search-blue-green.bicep' = if (enableSpec036FoundryRag) {
   name: 'spec036-ai-search-blue-green'
   params: {
-    name: empty(spec036SearchServiceName) ? 'srch-${environmentName}-${take(uniqueSuffix, 6)}' : spec036SearchServiceName
+    name: empty(spec036SearchServiceName)
+      ? 'srch-${environmentName}-${take(uniqueSuffix, 6)}'
+      : spec036SearchServiceName
     location: location
     tags: tags
     sku: 'standard'
@@ -323,9 +357,9 @@ module spec036IngestRunnerJob './modules/ingest-runner-job.bicep' = if (enableSp
   params: {
     name: 'caj-ingest-runner-${environmentName}'
     location: location
-    tags: tags
+    tags: union(tags, { 'azd-service-name': 'ingest-runner' })
     environmentId: managedEnvironment.id
-    image: '${containerRegistry.properties.loginServer}/ama/ingest-runner:${spec036IngestRunnerImageTag}'
+    image: ingestRunnerImage
     userAssignedIdentityId: spec036IngestIdentity!.id
     userAssignedClientId: spec036IngestIdentity!.properties.clientId
     containerRegistryLoginServer: containerRegistry.properties.loginServer
@@ -352,7 +386,10 @@ resource spec036SearchRbac 'Microsoft.Authorization/roleAssignments@2022-04-01' 
   name: guid('spec036-ingest-search-data-contributor', environmentName)
   scope: resourceGroup()
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036SearchIndexDataContributorRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      spec036SearchIndexDataContributorRoleId
+    )
     principalId: spec036IngestIdentity!.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -366,7 +403,10 @@ resource spec036SearchServiceContribRbac 'Microsoft.Authorization/roleAssignment
   name: guid('spec036-ingest-search-service-contributor', environmentName)
   scope: resourceGroup()
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036SearchServiceContributorRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      spec036SearchServiceContributorRoleId
+    )
     principalId: spec036IngestIdentity!.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -379,7 +419,10 @@ resource spec036FoundryRbacIngest 'Microsoft.Authorization/roleAssignments@2022-
   name: guid('spec036-ingest-foundry-cogsvc-user', environmentName)
   scope: openAi
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036CognitiveServicesUserRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      spec036CognitiveServicesUserRoleId
+    )
     principalId: spec036IngestIdentity!.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -390,7 +433,10 @@ resource spec036ServiceBusRbacIngest 'Microsoft.Authorization/roleAssignments@20
   name: guid('spec036-ingest-sb-data-sender', environmentName)
   scope: spec036ServiceBus!
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036ServiceBusDataSenderRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      spec036ServiceBusDataSenderRoleId
+    )
     principalId: spec036IngestIdentity!.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -402,7 +448,10 @@ resource spec036SearchRbacApi 'Microsoft.Authorization/roleAssignments@2022-04-0
   name: guid('spec036-api-search-data-reader', environmentName)
   scope: resourceGroup()
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036SearchIndexDataReaderRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      spec036SearchIndexDataReaderRoleId
+    )
     principalId: apiContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -412,7 +461,10 @@ resource spec036SearchRbacAgents 'Microsoft.Authorization/roleAssignments@2022-0
   name: guid('spec036-agents-search-data-reader', environmentName)
   scope: resourceGroup()
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', spec036SearchIndexDataReaderRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      spec036SearchIndexDataReaderRoleId
+    )
     principalId: agentsContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -443,6 +495,10 @@ module azureMaps './modules/azure-maps.bicep' = {
     envPrefix: environmentName
     environment: environmentTier
     tags: tags
+    corsAllowedOrigins: [
+      'https://${webAppName}.azurewebsites.net'
+      'http://localhost:3000'
+    ]
   }
 }
 
@@ -489,9 +545,10 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' =
 // ────────────────────────────────────────────────────────────────────────────────
 // Storage Account + Blob Containers
 // ────────────────────────────────────────────────────────────────────────────────
-
+// TO DO
+// Remove the 2 from the end of the storage account name when immutability lock issue is resolved.
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
-  name: '${abbrs.storageStorageAccounts}${take(replace(environmentName, '-', ''), 14)}${take(uniqueSuffix, 6)}'
+  name: '${abbrs.storageStorageAccounts}${take(replace(environmentName, '-', ''), 14)}${take(uniqueSuffix, 6)}2'
   location: location
   tags: tags
   sku: { name: 'Standard_LRS' }
@@ -507,16 +564,15 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
 resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
   name: 'default'
   parent: storage
-  // PSRule: Azure.Storage.SoftDelete + Azure.Storage.ContainerSoftDelete
-  // 7-day retention is the floor required by both rules and gives operators
-  // a recovery window without bloating storage cost.
+  // Dev disables recoverable deletion so teardown leaves no retained Blob data.
+  // Non-dev keeps the seven-day operational recovery window.
   properties: {
     deleteRetentionPolicy: {
-      enabled: true
+      enabled: environmentTier != 'dev'
       days: 7
     }
     containerDeleteRetentionPolicy: {
-      enabled: true
+      enabled: environmentTier != 'dev'
       days: 7
     }
   }
@@ -536,7 +592,10 @@ resource storageBlobContributorAssignment 'Microsoft.Authorization/roleAssignmen
   name: guid(storage.id, principalId, 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
   scope: storage
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+    )
     principalId: principalId
     principalType: principalType
   }
@@ -547,7 +606,10 @@ resource storageApiRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-
   name: guid(storage.id, apiContainerApp.id, 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
   scope: storage
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+    )
     principalId: apiContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -557,7 +619,10 @@ resource storageAgentsRoleAssignment 'Microsoft.Authorization/roleAssignments@20
   name: guid(storage.id, agentsContainerApp.id, 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
   scope: storage
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+    )
     principalId: agentsContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -567,7 +632,10 @@ resource storageIngestionRoleAssignment 'Microsoft.Authorization/roleAssignments
   name: guid(storage.id, ingestionContainerApp.id, 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
   scope: storage
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+    )
     principalId: ingestionContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -628,7 +696,7 @@ resource signalsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/co
         ]
       }
     }
-    options: { autoscaleSettings: { maxThroughput: 4000 } }
+    options: { autoscaleSettings: { maxThroughput: 6000 } }
   }
 }
 
@@ -653,6 +721,31 @@ resource simulationContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases
           [
             { path: '/document_type', order: 'ascending' }
             { path: '/expires_at', order: 'ascending' }
+          ]
+        ]
+      }
+    }
+    options: { autoscaleSettings: { maxThroughput: 1000 } }
+  }
+}
+
+resource simEventsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
+  name: 'sim-events'
+  parent: cosmosDb
+  properties: {
+    resource: {
+      id: 'sim-events'
+      partitionKey: { paths: ['/tenant_id'], kind: 'Hash' }
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        compositeIndexes: [
+          [
+            { path: '/tenant_id', order: 'ascending' }
+            { path: '/event_seq', order: 'ascending' }
+          ]
+          [
+            { path: '/tenant_id', order: 'ascending' }
+            { path: '/sim_time_offset', order: 'ascending' }
           ]
         ]
       }
@@ -733,8 +826,8 @@ resource coordinationTasksContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDa
       partitionKey: { paths: ['/assigned_organisation_id'], kind: 'Hash' }
       indexingPolicy: {
         indexingMode: 'consistent'
-        includedPaths: [ { path: '/*' } ]
-        excludedPaths: [ { path: '/_etag/?' } ]
+        includedPaths: [{ path: '/*' }]
+        excludedPaths: [{ path: '/_etag/?' }]
         compositeIndexes: [
           [
             { path: '/assigned_organisation_id', order: 'ascending' }
@@ -769,8 +862,8 @@ resource evidencePackArtefactCacheContainer 'Microsoft.DocumentDB/databaseAccoun
       partitionKey: { paths: ['/artefact_id'], kind: 'Hash' }
       indexingPolicy: {
         indexingMode: 'consistent'
-        includedPaths: [ { path: '/*' } ]
-        excludedPaths: [ { path: '/_etag/?' } ]
+        includedPaths: [{ path: '/*' }]
+        excludedPaths: [{ path: '/_etag/?' }]
       }
       defaultTtl: -1
     }
@@ -784,10 +877,10 @@ resource evidencePackArtefactCacheContainer 'Microsoft.DocumentDB/databaseAccoun
 // tamper-evident). Retention default 7 years matches the spec-030 audit
 // archive baseline; tighten only via parameter override.
 @description('Spec-037 — Immutable retention period in days for evidence-pack snapshots (FR-005, PD-037-04).')
-param spec037ArchiveRetentionDays int = 2555  // ≈ 7 years
+param spec037ArchiveRetentionDays int = 2555 // ≈ 7 years
 resource evidencePackArchiveImmutability 'Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies@2023-05-01' = {
   name: 'default'
-  parent: blobContainerResources[4]  // index 4 == 'evidence-pack-archive'
+  parent: blobContainerResources[4] // index 4 == 'evidence-pack-archive'
   properties: {
     immutabilityPeriodSinceCreationInDays: spec037ArchiveRetentionDays
     allowProtectedAppendWrites: true
@@ -837,15 +930,17 @@ resource cosmosDataContributorAssignment 'Microsoft.DocumentDB/databaseAccounts/
   }
 }
 
-resource cosmosGlobalAdministratorReaderAssignments 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-11-15' = [for globalAdministratorPrincipalId in globalAdministratorPrincipalIds: {
-  name: guid(cosmos.id, globalAdministratorPrincipalId, '00000000-0000-0000-0000-000000000001')
-  parent: cosmos
-  properties: {
-    roleDefinitionId: '${cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000001'
-    principalId: globalAdministratorPrincipalId
-    scope: cosmos.id
+resource cosmosGlobalAdministratorReaderAssignments 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-11-15' = [
+  for globalAdministratorPrincipalId in globalAdministratorPrincipalIds: {
+    name: guid(cosmos.id, globalAdministratorPrincipalId, '00000000-0000-0000-0000-000000000001')
+    parent: cosmos
+    properties: {
+      roleDefinitionId: '${cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000001'
+      principalId: globalAdministratorPrincipalId
+      scope: cosmos.id
+    }
   }
-}]
+]
 
 // Cosmos DB Account Reader Role (control-plane) — required for readMetadata
 // Grants the deploying principal and Container App identities permission to
@@ -854,7 +949,10 @@ resource cosmosAccountReaderAssignment 'Microsoft.Authorization/roleAssignments@
   name: guid(cosmos.id, principalId, 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')
   scope: cosmos
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'fbdf93bf-df7d-467e-a4d2-9458aa1360c8'
+    )
     principalId: principalId
     principalType: principalType
   }
@@ -864,7 +962,10 @@ resource cosmosAccountReaderApi 'Microsoft.Authorization/roleAssignments@2022-04
   name: guid(cosmos.id, apiContainerApp.id, 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')
   scope: cosmos
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'fbdf93bf-df7d-467e-a4d2-9458aa1360c8'
+    )
     principalId: apiContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -874,7 +975,10 @@ resource cosmosAccountReaderAgents 'Microsoft.Authorization/roleAssignments@2022
   name: guid(cosmos.id, agentsContainerApp.id, 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')
   scope: cosmos
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'fbdf93bf-df7d-467e-a4d2-9458aa1360c8'
+    )
     principalId: agentsContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -884,7 +988,10 @@ resource cosmosAccountReaderIngestion 'Microsoft.Authorization/roleAssignments@2
   name: guid(cosmos.id, ingestionContainerApp.id, 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')
   scope: cosmos
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      'fbdf93bf-df7d-467e-a4d2-9458aa1360c8'
+    )
     principalId: ingestionContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -922,22 +1029,39 @@ resource cosmosIngestionRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sq
 }
 
 // ────────────────────────────────────────────────────────────────────────────────
-// Redis Cache
+// Azure Managed Redis
 // ────────────────────────────────────────────────────────────────────────────────
 
-resource redis 'Microsoft.Cache/Redis@2024-03-01' = {
-  name: '${abbrs.cacheRedis}${environmentName}-${take(uniqueSuffix, 6)}'
-  location: location
-  tags: tags
-  properties: {
-    sku: { name: 'Basic', family: 'C', capacity: 0 }
-    enableNonSslPort: false
+var redisName = take('${abbrs.cacheRedis}${environmentName}-${take(uniqueSuffix, 6)}', 60)
+var redisHostName = '${redisName}.${location}.redis.azure.net'
+
+module redis 'br/public:avm/res/cache/redis-enterprise:0.5.1' = {
+  params: {
+    name: redisName
+    location: location
+    tags: tags
+    skuName: 'Balanced_B0'
+    highAvailability: 'Disabled'
     minimumTlsVersion: '1.2'
-    // PSRule: Azure.Redis.MaxMemoryReserved
-    // 125 MB reserved (~12% of C0 1 GB) leaves headroom for replication,
-    // failover, and non-cache ops without starving the cache.
-    redisConfiguration: {
-      'maxmemory-reserved': '125'
+    publicNetworkAccess: 'Enabled'
+    database: {
+      accessKeysAuthentication: 'Disabled'
+      clientProtocol: 'Encrypted'
+      clusteringPolicy: 'NoCluster'
+      accessPolicyAssignments: [
+        {
+          name: 'api'
+          userObjectId: apiContainerApp.identity.principalId
+        }
+        {
+          name: 'agents'
+          userObjectId: agentsContainerApp.identity.principalId
+        }
+        {
+          name: 'ingestion'
+          userObjectId: ingestionContainerApp.identity.principalId
+        }
+      ]
     }
   }
 }
@@ -1034,10 +1158,25 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
           image: apiImage
           resources: { cpu: json('1.0'), memory: '2Gi' }
           env: [
+            { name: 'AMA_ENVIRONMENT', value: environmentTier == 'dev' ? 'dev' : environmentName }
+            {
+              name: 'AMA_ALLOW_ANONYMOUS_DEV_ACCESS'
+              value: environmentTier == 'dev' ? '1' : '0'
+            }
+            { name: 'AMA_ALLOW_ANONYMOUS_INCIDENT_MAP', value: allowAnonymousIncidentMap ? '1' : '0' }
+            { name: 'AMA_ENABLE_INCIDENT_MAP_AUTH', value: enableIncidentMapAuth ? '1' : '0' }
+            { name: 'AMA_ENTRA_TENANT_ID', value: enableIncidentMapAuth ? tenant().tenantId : '' }
+            {
+              name: 'AMA_ENTRA_AUDIENCE'
+              value: enableIncidentMapAuth ? entraAuth!.outputs.apiAudience : ''
+            }
             { name: 'COSMOS_ENDPOINT', value: cosmos.properties.documentEndpoint }
             { name: 'COSMOS_DATABASE', value: 'disaster-hub' }
             { name: 'STORAGE_ACCOUNT_NAME', value: storage.name }
-            { name: 'REDIS_HOST', value: redis.properties.hostName }
+            { name: 'AMA_EVIDENCE_COSMOS_DATABASE', value: 'disaster-hub' }
+            { name: 'AMA_EVIDENCE_STORAGE_ACCOUNT_NAME', value: storage.name }
+            { name: 'REDIS_HOST', value: redisHostName }
+            { name: 'REDIS_PORT', value: '10000' }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
             // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
             { name: 'AZURE_AI_PROJECT_ENDPOINT', value: openAi.properties.endpoint }
@@ -1048,7 +1187,10 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // ``gpt-4o`` and raises ``openai_unavailable``.
             { name: 'AZURE_AI_REASONING_MODEL_KEY', value: '${openAiDeployments.outputs.reasoningDeploymentModelKey}' }
             { name: 'AZURE_AI_DRAFTING_MODEL_KEY', value: '${openAiDeployments.outputs.draftingDeploymentModelKey}' }
-            { name: 'AZURE_AI_SIMULATION_MODEL_KEY', value: '${openAiDeployments.outputs.simulationDeploymentModelKey}' }
+            {
+              name: 'AZURE_AI_SIMULATION_MODEL_KEY'
+              value: '${openAiDeployments.outputs.simulationDeploymentModelKey}'
+            }
             // Per-tier deployment-name env vars. The CSV map collapses
             // multiple tiers onto the same `<modelId>@<version>` key (until
             // tiers diverge — see azure-openai.bicep), so callers MUST
@@ -1060,7 +1202,12 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // Spec 036 grounding plane (FR-RAG-IDX-04). Empty string when
             // enableSpec036FoundryRag=false so retrieval auto-wiring stays off
             // for hermetic dev tenants.
-            { name: 'AZURE_SEARCH_ENDPOINT', value: enableSpec036FoundryRag ? 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net' : '' }
+            {
+              name: 'AZURE_SEARCH_ENDPOINT'
+              value: enableSpec036FoundryRag
+                ? 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net'
+                : ''
+            }
             { name: 'RETRIEVAL_INDEX_ALIAS', value: 'corpus' }
             // Sub-agent dispatcher base URL — the Simulation Controller's
             // ``query_sub_agent`` tool POSTs to {AGENTS_BASE_URL}/{role}/invoke
@@ -1070,7 +1217,10 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // already references ``apiContainerApp.properties...fqdn`` for
             // ``API_ENDPOINT``). Internal-ingress Container Apps in the same
             // managed env reach each other at https://<app>.internal.<defaultDomain>.
-            { name: 'AGENTS_BASE_URL', value: 'https://${take('${abbrs.appContainerApps}agents-${environmentName}', 32)}.internal.${managedEnvironment.properties.defaultDomain}' }
+            {
+              name: 'AGENTS_BASE_URL'
+              value: 'https://${take('${abbrs.appContainerApps}agents-${environmentName}', 32)}.internal.${managedEnvironment.properties.defaultDomain}'
+            }
             { name: 'OTEL_SERVICE_NAME', value: 'api' }
           ]
           probes: [
@@ -1139,7 +1289,8 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'COSMOS_ENDPOINT', value: cosmos.properties.documentEndpoint }
             { name: 'COSMOS_DATABASE', value: 'disaster-hub' }
             { name: 'STORAGE_ACCOUNT_NAME', value: storage.name }
-            { name: 'REDIS_HOST', value: redis.properties.hostName }
+            { name: 'REDIS_HOST', value: redisHostName }
+            { name: 'REDIS_PORT', value: '10000' }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
             // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
             { name: 'AZURE_AI_PROJECT_ENDPOINT', value: openAi.properties.endpoint }
@@ -1151,7 +1302,10 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // deployment outputs in `infra/modules/azure-openai.bicep`.
             { name: 'AZURE_AI_REASONING_MODEL_KEY', value: '${openAiDeployments.outputs.reasoningDeploymentModelKey}' }
             { name: 'AZURE_AI_DRAFTING_MODEL_KEY', value: '${openAiDeployments.outputs.draftingDeploymentModelKey}' }
-            { name: 'AZURE_AI_SIMULATION_MODEL_KEY', value: '${openAiDeployments.outputs.simulationDeploymentModelKey}' }
+            {
+              name: 'AZURE_AI_SIMULATION_MODEL_KEY'
+              value: '${openAiDeployments.outputs.simulationDeploymentModelKey}'
+            }
             // Per-tier deployment-name env vars (matches apiContainerApp).
             // Sub-agent dispatcher + LLMClient consumers use these to
             // bypass the CSV map, which collapses tiers onto the same
@@ -1162,7 +1316,12 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // Spec 036 grounding plane (FR-RAG-IDX-04). Empty string when
             // enableSpec036FoundryRag=false so retrieval auto-wiring stays off
             // for hermetic dev tenants.
-            { name: 'AZURE_SEARCH_ENDPOINT', value: enableSpec036FoundryRag ? 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net' : '' }
+            {
+              name: 'AZURE_SEARCH_ENDPOINT'
+              value: enableSpec036FoundryRag
+                ? 'https://${spec036SearchBlueGreen!.outputs.searchServiceName}.search.windows.net'
+                : ''
+            }
             { name: 'RETRIEVAL_INDEX_ALIAS', value: 'corpus' }
             // Spec 036 / ADR-20 §Q-P6-02 — all five named agents land grounded by default.
             // Disable per-agent grounding mid-incident with `az containerapp update --set-env-vars FEATURE_FOUNDRY_RAG_<AGENT>=0`.
@@ -1228,7 +1387,8 @@ resource ingestionContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'COSMOS_ENDPOINT', value: cosmos.properties.documentEndpoint }
             { name: 'COSMOS_DATABASE', value: 'disaster-hub' }
             { name: 'STORAGE_ACCOUNT_NAME', value: storage.name }
-            { name: 'REDIS_HOST', value: redis.properties.hostName }
+            { name: 'REDIS_HOST', value: redisHostName }
+            { name: 'REDIS_PORT', value: '10000' }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
             { name: 'OTEL_SERVICE_NAME', value: 'ingestion' }
           ]
@@ -1265,9 +1425,15 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 }
 
 resource webApp 'Microsoft.Web/sites@2023-12-01' = {
-  name: take('${abbrs.webSitesAppService}${environmentName}-${take(uniqueSuffix, 6)}', 60)
+  name: webAppName
   location: location
-  tags: union(tags, { 'azd-service-name': 'web', 'hidden-link: /app-insights-resource-id': resourceId('Microsoft.Insights/components', take('appi-${environmentName}', 255)) })
+  tags: union(tags, {
+    'azd-service-name': 'web'
+    'hidden-link: /app-insights-resource-id': resourceId(
+      'Microsoft.Insights/components',
+      take('appi-${environmentName}', 255)
+    )
+  })
   kind: 'app,linux'
   identity: { type: 'SystemAssigned' }
   properties: {
@@ -1299,6 +1465,28 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
       healthCheckPath: '/api/health'
       appSettings: [
         { name: 'API_ENDPOINT', value: 'https://${apiContainerApp.properties.configuration.ingress.fqdn}' }
+        {
+          name: 'NEXT_PUBLIC_ALLOW_ANONYMOUS_INCIDENT_MAP'
+          value: allowAnonymousIncidentMap ? '1' : '0'
+        }
+        {
+          name: 'NEXT_PUBLIC_ALLOW_ANONYMOUS_DEV_ACCESS'
+          value: environmentTier == 'dev' ? '1' : '0'
+        }
+        { name: 'AZURE_MAPS_SUBSCRIPTION_KEY', value: azureMaps.outputs.azureMapsPrimaryKey }
+        {
+          name: 'NEXT_PUBLIC_AZURE_AD_CLIENT_ID'
+          value: enableIncidentMapAuth ? entraAuth!.outputs.spaApplicationId : ''
+        }
+        { name: 'NEXT_PUBLIC_AZURE_AD_TENANT_ID', value: enableIncidentMapAuth ? tenant().tenantId : '' }
+        {
+          name: 'NEXT_PUBLIC_AZURE_AD_API_APP_ID'
+          value: enableIncidentMapAuth ? entraAuth!.outputs.apiApplicationId : ''
+        }
+        {
+          name: 'NEXT_PUBLIC_AZURE_AD_API_AUDIENCE'
+          value: enableIncidentMapAuth ? entraAuth!.outputs.apiAudience : ''
+        }
         { name: 'SCM_DO_BUILD_DURING_DEPLOYMENT', value: 'false' }
         { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.appInsightsConnectionString }
         { name: 'OTEL_SERVICE_NAME', value: 'web' }
@@ -1321,7 +1509,10 @@ resource appInsightsRoleApi 'Microsoft.Authorization/roleAssignments@2022-04-01'
   name: guid(appInsightsRef.id, apiContainerApp.id, monitoringMetricsPublisherRoleId)
   scope: appInsightsRef
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', monitoringMetricsPublisherRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      monitoringMetricsPublisherRoleId
+    )
     principalId: apiContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -1331,7 +1522,10 @@ resource appInsightsRoleAgents 'Microsoft.Authorization/roleAssignments@2022-04-
   name: guid(appInsightsRef.id, agentsContainerApp.id, monitoringMetricsPublisherRoleId)
   scope: appInsightsRef
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', monitoringMetricsPublisherRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      monitoringMetricsPublisherRoleId
+    )
     principalId: agentsContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -1341,7 +1535,10 @@ resource appInsightsRoleIngestion 'Microsoft.Authorization/roleAssignments@2022-
   name: guid(appInsightsRef.id, ingestionContainerApp.id, monitoringMetricsPublisherRoleId)
   scope: appInsightsRef
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', monitoringMetricsPublisherRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      monitoringMetricsPublisherRoleId
+    )
     principalId: ingestionContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -1351,7 +1548,10 @@ resource appInsightsRoleWeb 'Microsoft.Authorization/roleAssignments@2022-04-01'
   name: guid(appInsightsRef.id, webApp.id, monitoringMetricsPublisherRoleId)
   scope: appInsightsRef
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', monitoringMetricsPublisherRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      monitoringMetricsPublisherRoleId
+    )
     principalId: webApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -1393,7 +1593,10 @@ resource openAiRoleApi 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(openAi.id, apiContainerApp.id, cognitiveServicesOpenAiUserRoleId)
   scope: openAi
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesOpenAiUserRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      cognitiveServicesOpenAiUserRoleId
+    )
     principalId: apiContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -1403,9 +1606,53 @@ resource openAiRoleAgents 'Microsoft.Authorization/roleAssignments@2022-04-01' =
   name: guid(openAi.id, agentsContainerApp.id, cognitiveServicesOpenAiUserRoleId)
   scope: openAi
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesOpenAiUserRoleId)
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      cognitiveServicesOpenAiUserRoleId
+    )
     principalId: agentsContainerApp.identity.principalId
     principalType: 'ServicePrincipal'
+  }
+}
+
+module evacuationRuntime './bicep/modules/evacuation-runtime.bicep' = {
+  params: {
+    environmentName: environmentName
+    uniqueSuffix: uniqueSuffix
+    location: location
+    tags: tags
+    containerImage: evacuationImage
+    containerAppsEnvironmentResourceId: managedEnvironment.id
+    containerAppsEnvironmentName: managedEnvironment.name
+    containerRegistryLoginServer: containerRegistry.properties.loginServer
+    cosmosAccountName: cosmos.name
+    cosmosEndpoint: cosmos.properties.documentEndpoint
+    cosmosDatabaseName: cosmosDb.name
+    storageAccountName: storage.name
+    storageAccountKey: storage.listKeys().keys[0].value
+    logAnalyticsWorkspaceResourceId: monitoring.outputs.logAnalyticsId
+    applicationInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
+    azureAiProjectEndpoint: openAi.properties.endpoint
+    azureAiProjectDeployments: openAiDeployments.outputs.azureAiProjectDeployments
+    azureAiReasoningDeployment: openAiDeployments.outputs.reasoningDeploymentName
+    azureAiReasoningModelKey: openAiDeployments.outputs.reasoningDeploymentModelKey
+    handoffSenderPrincipalId: agentsContainerApp.identity.principalId
+  }
+}
+
+module evidenceHarness './bicep/modules/evidence-harness.bicep' = {
+  name: 'spec040-evidence-harness'
+  params: {
+    cosmosAccountName: cosmos.name
+    auditCosmosAccountName: cosmos.name
+    databaseName: cosmosDb.name
+    storageAccountName: storage.name
+    location: 'australiaeast'
+    pairedRegion: 'australiasoutheast'
+    appInsightsName: ''
+    sloAlertActionGroupId: ''
+    environmentTier: environmentTier
+    tags: tags
   }
 }
 
@@ -1418,13 +1665,45 @@ output AZURE_CONTAINER_REGISTRY_NAME string = containerRegistry.name
 output AZURE_COSMOS_ENDPOINT string = cosmos.properties.documentEndpoint
 output AZURE_COSMOS_DATABASE string = 'disaster-hub'
 output AZURE_STORAGE_ACCOUNT_NAME string = storage.name
-output AZURE_REDIS_HOST string = redis.properties.hostName
+output AZURE_REDIS_HOST string = redis.outputs.hostName
+output AZURE_REDIS_PORT int = redis.outputs.port
 // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
 output AZURE_AI_PROJECT_ENDPOINT string = openAi.properties.endpoint
 output AZURE_AI_PROJECT_DEPLOYMENTS string = openAiDeployments.outputs.azureAiProjectDeployments
 output AZURE_APP_INSIGHTS_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
+output AZURE_EVACUATION_ALERT_RULE_IDS array = evacuationAlerts.outputs.resourceIds
+output AZURE_EVACUATION_SERVICE_ENDPOINT string = evacuationRuntime.outputs.serviceEndpoint
+output SERVICE_EVACUATION_ENDPOINT_URL string = evacuationRuntime.outputs.serviceEndpoint
 output SERVICE_API_ENDPOINT_URL string = 'https://${apiContainerApp.properties.configuration.ingress.fqdn}'
 output SERVICE_WEB_ENDPOINT_URL string = 'https://${webApp.properties.defaultHostName}'
+
+@description('Microsoft Entra tenant ID used to validate AMA API access tokens.')
+output AMA_ENTRA_TENANT_ID string = enableIncidentMapAuth ? tenant().tenantId : ''
+
+@description('Microsoft Entra audience URI used to validate AMA API access tokens.')
+output AMA_ENTRA_AUDIENCE string = enableIncidentMapAuth ? entraAuth!.outputs.apiAudience : ''
+
+@description('Whether the web bundle may call the exact incident-map read route anonymously.')
+output NEXT_PUBLIC_ALLOW_ANONYMOUS_INCIDENT_MAP string = allowAnonymousIncidentMap ? '1' : '0'
+
+@description('Whether the web bundle may expose the unauthenticated full-access dev experience.')
+output NEXT_PUBLIC_ALLOW_ANONYMOUS_DEV_ACCESS string = environmentTier == 'dev' ? '1' : '0'
+
+@description('Azure Maps subscription key supplied to the web app at runtime.')
+@secure()
+output AZURE_MAPS_SUBSCRIPTION_KEY string = azureMaps.outputs.azureMapsPrimaryKey
+
+@description('Client ID baked into the web bundle for MSAL authentication.')
+output NEXT_PUBLIC_AZURE_AD_CLIENT_ID string = enableIncidentMapAuth ? entraAuth!.outputs.spaApplicationId : ''
+
+@description('Microsoft Entra tenant ID baked into the web bundle for MSAL authentication.')
+output NEXT_PUBLIC_AZURE_AD_TENANT_ID string = enableIncidentMapAuth ? tenant().tenantId : ''
+
+@description('AMA API application client ID exposed to the web bundle.')
+output NEXT_PUBLIC_AZURE_AD_API_APP_ID string = enableIncidentMapAuth ? entraAuth!.outputs.apiApplicationId : ''
+
+@description('AMA API audience URI baked into the web bundle for delegated scopes.')
+output NEXT_PUBLIC_AZURE_AD_API_AUDIENCE string = enableIncidentMapAuth ? entraAuth!.outputs.apiAudience : ''
 
 @description('Spec 029 — subscription topology used for this deployment.')
 output AZURE_SUBSCRIPTION_TOPOLOGY string = subscriptionTopology

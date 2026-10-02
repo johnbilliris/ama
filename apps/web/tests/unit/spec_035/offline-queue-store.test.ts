@@ -15,11 +15,18 @@ import {
 function makeEntry(overrides: Partial<QueueEntry> = {}): QueueEntry {
   return {
     persona_id: "field-coordinator",
+    actor_id: "field-coordinator",
+    tenant_id: "live",
+    incident_id: "incident-001",
+    mode: "live",
     client_correlation_id: `ccid-${Math.random().toString(36).slice(2, 10)}`,
     tier: "routine",
+    method: "PATCH",
     route: "/api/outcomes/sc-1/evaluate",
     payload: { hello: "world" },
     captured_ts: new Date().toISOString(),
+    expires_ts: new Date(Date.now() + 60_000).toISOString(),
+    attempts: 0,
     ...overrides,
   };
 }
@@ -126,7 +133,7 @@ describe("offline-queue-store (T034)", () => {
     expect(remaining).toEqual(["r-mid", "r-new", "ls-1"]);
   });
 
-  it("drainBatch returns life-safety first then routine in captured_ts order", async () => {
+  it("leaseBatch returns life-safety first then routine in captured_ts order", async () => {
     const store = await freshStore();
     await store.enqueue(
       makeEntry({
@@ -142,12 +149,20 @@ describe("offline-queue-store (T034)", () => {
         captured_ts: "2025-01-01T00:00:05.000Z",
       }),
     );
-    const batch = await store.drainBatch(10);
+    const batch = await store.leaseBatch(10, 20_000);
     expect(batch.map((e) => e.client_correlation_id)).toEqual([
       "ls-a",
       "r-a",
     ]);
-    expect(await store.size()).toBe(0);
+    expect(await store.size()).toBe(2);
+
+    await store.ack("field-coordinator", "ls-a");
+    expect(await store.size()).toBe(1);
+
+    await store.nack("field-coordinator", "r-a", "retryable_http_500", 0);
+    const rows = await store.list();
+    const retried = rows.find((row) => row.client_correlation_id === "r-a");
+    expect(retried?.attempts).toBe(1);
   });
 
   it("encrypts payload at rest (raw IDB row not human-readable)", async () => {

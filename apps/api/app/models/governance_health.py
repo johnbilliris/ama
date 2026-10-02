@@ -45,6 +45,8 @@ class ComplianceMatrixEntry(BaseModel):
     grace_period_reason: str | None = None
     grace_period_countdown_days: int | None = None
     category: str | None = None
+    data_source_type: str | None = None
+    degraded: bool = False
 
 
 class ComplianceMatrixResponse(BaseModel):

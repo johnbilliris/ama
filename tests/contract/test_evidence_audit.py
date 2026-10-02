@@ -27,24 +27,32 @@ def test_audit_trace_404_for_missing_value(client):
 
 def test_audit_trace_chain_complete_when_all_5_steps_referenced(client):
     value_id = "kpi-value-001"
-    # Stage entries that together cover all 5 chain steps.
+    references = {
+        "signal_id": "sig-1",
+        "model_output_id": "model-1",
+        "recommendation_id": "rec-1",
+        "human_decision_id": "dec-1",
+        "outcome_id": "out-1",
+    }
+    for referenced_id in references.values():
+        audit_manager.record(
+            kind="signal_ingested",
+            value_id=referenced_id,
+            actor="fixture",
+        )
     audit_manager.record(
         kind="signal_ingested",
         value_id=value_id,
         actor="ingest",
-        references={"signal": "sig-1", "model_output": "model-1"},
-    )
-    audit_manager.record(
-        kind="ladder_version_published",
-        value_id=value_id,
-        actor="risk-mgr",
-        references={"recommendation": "rec-1", "human_decision": "dec-1", "outcome": "out-1"},
+        references=references,
     )
     r = client.get(f"/api/v1/evidence/audit/{value_id}")
     assert r.status_code == 200
     body = r.json()
     assert body["chain_complete"] is True
-    assert len(body["entries"]) >= 2
+    assert body["missing_references"] == []
+    assert len(body["entries"]) == 6
+    assert all(entry["storage_source"] == "hot+cold" for entry in body["entries"])
 
 
 def test_audit_trace_chain_incomplete(client):
@@ -53,8 +61,9 @@ def test_audit_trace_chain_incomplete(client):
         kind="signal_ingested",
         value_id=value_id,
         actor="ingest",
-        references={"signal": "sig-1"},
+        references={"signal_id": "sig-1"},
     )
     r = client.get(f"/api/v1/evidence/audit/{value_id}")
     assert r.status_code == 200
     assert r.json()["chain_complete"] is False
+    assert "model_output_id" in r.json()["missing_references"]

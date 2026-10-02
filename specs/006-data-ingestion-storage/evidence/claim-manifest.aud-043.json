@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "feature": "006-data-ingestion-storage",
+  "audit": "AUD-043",
+  "revision": "local-worktree",
+  "capturedAt": "2026-09-16",
+  "actor": "principal-engineer",
+  "method": "static-evidence-classification",
+  "claims": [
+    {
+      "claimId": "T085-QUICKSTART-A-I",
+      "status": "UNVERIFIED",
+      "artifact": "specs/006-data-ingestion-storage/quickstart.md",
+      "reason": "Verification checklist remains unchecked; task checkbox is historical and preserved."
+    },
+    {
+      "claimId": "PLAN-CONSTITUTION-PASS",
+      "status": "UNVERIFIED",
+      "artifact": "specs/006-data-ingestion-storage/plan.md",
+      "reason": "PASS statements are prose and not attributable execution evidence."
+    },
+    {
+      "claimId": "HYP-004-UPLIFT",
+      "status": "UNVERIFIED",
+      "artifact": "specs/006-data-ingestion-storage/evidence/HYP-044.md",
+      "reason": "Owner-scoped HYP stub created as Not tested; no measured uplift record exists yet."
+    },
+    {
+      "claimId": "RISK-NEW-013-TREATMENT",
+      "status": "PARTIAL",
+      "artifact": "docs/risk-register/RISK-NEW-013.md",
+      "reason": "Schema v2 artifact exists, but contract test path and backward-compat layer claims remain incomplete."
+    },
+    {
+      "claimId": "PROVIDER-ACCESS-VERIFICATION",
+      "status": "DEFERRED",
+      "artifact": "specs/006-data-ingestion-storage/spec.md",
+      "reason": "Provider access and licensing proof require external owner attestations not present in repository evidence."
+    },
+    {
+      "claimId": "SOURCE-DOC-REVIEW-COMPLETENESS",
+      "status": "DEFERRED",
+      "artifact": "specs/006-data-ingestion-storage/spec.md",
+      "reason": "Source technical-document verification is declared but not linked to immutable run records."
+    },
+    {
+      "claimId": "COUNTRY-GATES-FR-CAP-006-001-003",
+      "status": "DEFERRED",
+      "artifact": "specs/006-data-ingestion-storage/spec.md",
+      "reason": "PH/JP/BD prerequisites are explicitly deferred and require external agreements/SME sign-off."
+    },
+    {
+      "claimId": "PORTFOLIO-RUBRIC-POSTFEATURE",
+      "status": "VERIFIED",
+      "artifact": "specs/028-capstone-alignment/evidence/rubric-postfeature.md",
+      "reason": "Artifact exists and is explicitly supplemental portfolio evidence, not per-spec HYP-004 proof."
+    }
+  ]
+}

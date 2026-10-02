@@ -1,10 +1,12 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Recommendation(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+
     recommendation_id: str
     incident_id: str
     type: Literal["evacuation", "resource_allocation", "coordination", "public_alert", "infrastructure_action"]

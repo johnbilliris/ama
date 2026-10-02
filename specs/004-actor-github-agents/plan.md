@@ -5,7 +5,7 @@
 
 ## Summary
 
-Create 31 dedicated GitHub Copilot agent definition files (`.agent.md`) covering all actors in the disaster response hub — 9 operational personas (AIIMS-aligned), 14 organisation sectors (Australian emergency management), and 8 technical personas (project contributors). Agents are organised in tier subdirectories under `.github/agents/` and reference shared project artefacts (constitution, data model, operating frameworks) rather than duplicating content. A registry index provides catalogue-level discovery and handoff relationships.
+Initial plan baseline created 31 dedicated GitHub Copilot agent definition files (`.agent.md`) — 9 operational personas, 14 organisation sectors, and 8 technical personas. The authoritative specification target is at least 35 actors (including 12 technical personas), and the current filesystem has expanded further. Agents are organised in tier subdirectories under `.github/agents/` and reference shared project artefacts (constitution, data model, operating frameworks) rather than duplicating content. A registry index provides catalogue-level discovery and handoff relationships.
 
 ## Technical Context
 
@@ -17,14 +17,25 @@ Create 31 dedicated GitHub Copilot agent definition files (`.agent.md`) covering
 **Project Type**: Developer tooling — agent definition files (content authoring, not software build)  
 **Performance Goals**: N/A — static files parsed at agent load time  
 **Constraints**: Each agent must stay within VS Code Copilot context limits; references to project artefacts via relative file paths  
-**Scale/Scope**: 35 agent files + 1 registry index + 3 tier directories
+**Scale/Scope**: Historical snapshots: 27 → 31 → 35 (minimum target). Current filesystem snapshot (2026-09-15): 85 active actor files + 12 workflow agents + 6 archived sector agents.
+
+## Scope Evolution Snapshot (2026-09-15)
+
+- Historical 27 actor count came from early draft scope before sector and technical expansion.
+- Historical 31 actor count came from the first implementation baseline (9 operational + 14 sectors + 8 technical).
+- Historical 35 actor count is the accepted minimum target after adding four technical roles.
+- Current filesystem inventory is authoritative for validation and maintenance activity in this repository state: 85 active actor files, 12 workflow agents, 6 archived sector agents.
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-| Principle | Status | Notes |
-|-----------|--------|-------|
+### Historical Snapshot (2026-03-23)
+
+The table below is preserved as the original historical authoring snapshot and is not a current acceptance gate.
+
+| Principle | Historical status | Historical notes |
+| --------- | ----------------- | ---------------- |
 | I. Life Safety First | PASS | Agents encode safety-critical escalation pathways for operational personas; do not bypass human override |
 | II. Multi-Agent Coordination | PASS | Agents reference AIIMS-aligned roles and explicit handoff relationships between persona/sector agents |
 | III. Data Trust & Provenance | PASS | Sector agents (especially Meteorology) encode BoM authority and provenance requirements |
@@ -32,7 +43,25 @@ Create 31 dedicated GitHub Copilot agent definition files (`.agent.md`) covering
 | V. Multilingual & Accessible Communication | PASS | `public-information-officer` (operational) and `community-ngos` (sector) agents encode multilingual alert obligations per Constitution V |
 | VI. Cloud Platform (Azure AU) | PASS | Technical persona agents encode Azure AU-region constraint from constitution |
 
-**Gate Result**: PASS — no violations. Proceed to Phase 0.
+### Current Gate (2026-09-15)
+
+| Current constitution heading | Status | Notes |
+| --- | --- | --- |
+| I. Primacy of Life and Harm Reduction | Unverified | Requires role-by-role reconciliation against current agent content and escalation language. |
+| II. National Emergency Management Principles | Unverified | Current conformance needs refreshed mapping across all actor tiers. |
+| III. Multi-Hazard, Multi-Agency Design | Unverified | Coverage breadth exists, but consistency and authority depth remain under review. |
+| IV. Transparency and Auditability | Unverified | Structural references exist; formal signoff evidence is tracked separately in `evidence/review-ledger.md`. |
+| V. Warning and Public Information | Unverified | Warning taxonomy and nested model conformance are under active remediation. |
+| VI. Evacuation Framework | Unverified | Evacuation boundary and authority consistency checks remain incomplete. |
+| VII. Recovery Support | Unverified | Recovery-specific obligation mapping is not fully settled across all relevant roles. |
+| VIII. Cloud Platform and Infrastructure | Unverified | Technical personas require current-stack and authority reconciliation. |
+| NON-NEGOTIABLE #1 Human-in-the-loop | Unverified | Human consultation/signoff evidence remains explicit and separate from agent invocation records. |
+| NON-NEGOTIABLE #2 Data sovereignty (+ bounded Foundry carve-out) | Unverified | Carve-out is bounded to non-AU model-hosting endpoints only; AU persistence/telemetry/secrets constraints remain mandatory. |
+| NON-NEGOTIABLE #3 Privacy by design | Unverified | Requires explicit, current privacy controls mapping in the actor corpus. |
+| NON-NEGOTIABLE #4 Interoperability | Unverified | Standards references exist but full consistency and applicability checks are incomplete. |
+| NON-NEGOTIABLE #5 Graceful degradation | Unverified | No current feature-local evidence demonstrates completed degradation validation. |
+
+**Current Gate Result**: Unverified. Historical PASS rows are retained for traceability only and do not constitute present acceptance.
 
 ## Project Structure
 

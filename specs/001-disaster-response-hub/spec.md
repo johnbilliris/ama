@@ -124,7 +124,7 @@ A resilience planner, policy lead, or program administrator uses the hub outside
 
 - **SC-001**: In an operational exercise scoped to the **v1 Australian evaluation cohort** (participants drawn from ≥ 3 tier-1 Australian emergency-management agencies), authorised users identify the relevant organisations, personas, and governing frameworks for an affected jurisdiction in under 5 minutes.
 - **SC-002**: In a multi-agency disaster simulation against the **v1 Australian** jurisdiction set, incident leaders establish a shared operating picture and issue the first coordinated action plan in under 10 minutes from incident activation.
-- **SC-003**: At least 90 % of tested **v1 Australian** personas — the validated operational set enumerated in § Personas below (Incident Controller, Operations Officer, Logistics Officer, Public Information Officer, Field Coordinator, Resilience Planner, Observer / Auditor) — complete their highest-priority incident tasks on the first attempt without facilitator assistance.
+- **SC-003**: At least 90 % of tested **v1 Australian** personas — the implemented canonical operational role set (Incident Commander, Planning Officer, Operations Officer, Logistics Officer, Public Information Officer, Field Coordinator, Resilience Planner, Observer / Auditor) — complete their highest-priority incident tasks on the first attempt without facilitator assistance.
 - **SC-004**: Coordinated response time in scenario-based exercises run against the **v1 Australian evaluation cohort** improves by at least 50 % compared with the current documented baseline process, where the baseline is the pre-hub tabletop or exercise workflow recorded in the project evaluation pack for the same scenario and jurisdiction. *(Revisit if HYP-001 is invalidated.)*
 - **SC-005**: Scenario-based risk assessment enables at-risk population evacuation decisions at least 24 hours earlier than the current documented baseline in applicable **v1 Australian** events, using the same scenario definition, authority threshold, and documented baseline exercise pack. *(Revisit if HYP-002 is invalidated.)*
 - **SC-006**: Resource deployment efficiency improves by at least 30 % in rehearsal or pilot measurements within the **v1 Australian evaluation cohort** against the current documented baseline, with efficiency measured using time-to-assignment, resource-utilization ratio, and unfilled-priority-request count captured in the evaluation pack. *(Revisit if HYP-003 is invalidated.)*
@@ -172,7 +172,7 @@ A resilience planner, policy lead, or program administrator uses the hub outside
 
 ```yaml
 persona_id: P-OPS-IC
-display_name: Australian Incident Controller
+display_name: Australian Incident Commander
 aiims_function: Control
 role_basis: AIIMS-5 §2 Command; AFAC Doctrine
 jurisdiction_scope: Australian state or territory
@@ -504,7 +504,7 @@ accessibility_needs: [voice control, switch-access compatibility]
 | decision_class | autonomy mode | who approves | audit requirement |
 | --- | --- | --- | --- |
 | Public evacuation order | Human only | Statutory incident controller | NFR-008 + NFR-012 retention ≥ 7 y |
-| Public alert dispatch (CAP) | Recommend + human-approve | PIO under delegated authority | NFR-008 full decision trail |
+| Public alert dispatch (CAP) | Recommend + human-approve | Incident Commander (PIO may draft under delegated authority; live dispatch requires IC approval) | NFR-008 full decision trail |
 | Cross-border resource request | Recommend + human-approve | Incident controller / state ops | NFR-008 |
 | Internal resource assignment (non-safety-critical) | Decide (with human over-ride) | System (automated) with operator veto | NFR-008 |
 | Misinformation rebuttal drafting | Recommend + human-approve | PIO | NFR-008 |
@@ -581,7 +581,7 @@ accessibility_needs: [voice control, switch-access compatibility]
 | delta_id | description | source_section | target_feature | blocking_phase | status | resolution_link |
 | --- | --- | --- | --- | --- | --- | --- |
 | OD-001 | Capstone "no code changes" framing for Asia jurisdictions is aspirational; system portability to non-Australian jurisdictions is HYP-006, not an architectural guarantee. Any future Asia work needs a spec-amendment lane. | § Scope — v1 Primary Jurisdiction + § Hypotheses HYP-006 | unassigned | plan | Open | evidence/HYP-006.md |
-| OD-002 | `.github/CODEOWNERS` references team `@johnbilliris/ama-spec-maintainers`. If the team does not yet exist in GitHub, individual interim maintainers apply until the team is provisioned, per CODEOWNERS comment. | governance / CODEOWNERS | 027-spec-hardening | none (governance) | Open | .github/CODEOWNERS |
+| OD-002 | `.github/CODEOWNERS` references team `@johnbilliris/ama-spec-maintainers`, but repository-only evidence cannot verify team membership. Current file state is fail-closed with no uncommented interim individual fallback; governance verification remains external. | governance / CODEOWNERS | 027-spec-hardening | none (governance) | Open | .github/CODEOWNERS |
 | OD-003 | Drafter and countersigner cells currently name the accountable AMA role (e.g., `product-owner-ba`). Named individuals will be populated during PR review per the dual-control rule. | § Status-transition authority | 001-disaster-response-hub | none (authoring workflow) | Open | — |
 
 ---
@@ -594,13 +594,13 @@ accessibility_needs: [voice control, switch-access compatibility]
 
 > **Traceability**: the canonical Traceability Table covering every Gap ID resolved by this hardening lives in `specs/027-spec-hardening/spec.md` § Traceability Table. See also the cross-spec monotonic register at `specs/shared/gap-id-register.md`.
 
-
 ## Assumptions
 
 > Cross-reference: this feature's authoritative assumption table is the H3 `### Assumptions` block under `## Requirements` (lines 98..111: ASM-001..ASM-008). Capstone-aligned assumptions added by feature `028-capstone-alignment` are listed below; later specs that need to reuse these IDs should reference them by `ASM-NNN` rather than redefining.
 
 - **ASM-080**: Australia is the v1 primary deployment jurisdiction (capstone-reinterpretation per `specs/028-capstone-alignment/research.md` D-009). Capstone countries (PH / JP / BD) are explicitly deferred and listed in the Out-of-Scope section below; promotion preconditions are documented in `specs/028-capstone-alignment/spec.md` and per-country `[DEFERRED]` items added by feature 028 / US1.
 - **ASM-081**: This spec is authoritative for AIIMS personas (Incident Commander, Planning Officer, Operations Officer, Logistics Officer, Public Information Officer, Field Coordinator, Resilience Planner, Observer / Auditor) per `### Personas` below; other specs reference these via `cross-ref to specs/001-disaster-response-hub/spec.md` rather than re-declaring.
+- **ASM-082**: External role-validation evidence for the canonical operational set remains open until independent reviewer sign-off is attached; this naming reconciliation does not imply that external validation has completed.
 
 ## Out of Scope
 

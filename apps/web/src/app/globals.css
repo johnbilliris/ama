@@ -2224,6 +2224,10 @@ nav[aria-label] a {
   align-items: center;
 }
 
+.ama-locale-switcher-shell {
+  display: none;
+}
+
 .language-switcher-label {
   display: inline-flex;
   align-items: center;
@@ -2790,7 +2794,10 @@ table tbody tr:hover {
 .sim-dashboard-page {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 60px);
+  /* Height comes from .sim-exercise-content (the /simulations layout flex
+     column) so the layout-owned marker is not double-counted. */
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
   background: #e8eff3;
 }
@@ -3010,6 +3017,41 @@ table tbody tr:hover {
   font-family: var(--ama-font-mono, ui-monospace, monospace);
 }
 
+/* AUD-015 — assigned-persona workspace loader inside the exercise panel. */
+.sim-workspace-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+}
+
+.sim-workspace-form label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ama-color-ink-muted, #5b6b70);
+}
+
+.sim-workspace-form input {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid rgba(15, 76, 92, 0.25);
+  border-radius: var(--ama-radius-xs, 4px);
+  font-family: var(--ama-font-mono, ui-monospace, monospace);
+}
+
+.sim-workspace-form button {
+  font-size: 0.72rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--ama-radius-xs, 4px);
+  background: var(--ama-color-primary, #0f4c5c);
+  color: #fff;
+}
+
+.sim-workspace-form button:disabled {
+  opacity: 0.45;
+}
+
 .sim-control-buttons {
   display: flex;
   gap: 0.4rem;
@@ -3155,112 +3197,8 @@ table tbody tr:hover {
   opacity: 0.6;
 }
 
-/* ── Exercise objectives ── */
-
-.sim-objectives {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.sim-obj-count {
-  font-weight: 400;
-  font-size: 0.68rem;
-  color: var(--ama-color-ink-soft);
-}
-
-.sim-objectives-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.sim-objectives-list li {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.4rem;
-  border-radius: var(--ama-radius-xs, 4px);
-  background: rgba(15, 76, 92, 0.03);
-}
-
-.sim-objectives-list li.sim-obj-done {
-  opacity: 0.55;
-}
-
-.sim-objectives-list li.sim-obj-done span {
-  text-decoration: line-through;
-}
-
-.sim-obj-label {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex: 1;
-  cursor: pointer;
-  font-size: 0.75rem;
-  color: var(--ama-color-ink);
-}
-
-.sim-obj-label input[type="checkbox"] {
-  margin: 0;
-  accent-color: var(--ama-color-ocean, #0f4c5c);
-}
-
-.sim-obj-remove {
-  background: none;
-  border: none;
-  font-size: 0.85rem;
-  color: var(--ama-color-ink-soft);
-  cursor: pointer;
-  padding: 0 0.2rem;
-  line-height: 1;
-}
-
-.sim-obj-remove:hover {
-  color: #dc2626;
-}
-
-.sim-obj-add {
-  display: flex;
-  gap: 0.3rem;
-}
-
-.sim-obj-input {
-  flex: 1;
-  font-size: 0.72rem;
-  padding: 0.3rem 0.5rem;
-  border: 1px solid var(--ama-border-subtle, #e5e7eb);
-  border-radius: var(--ama-radius-xs, 4px);
-  background: #fff;
-  color: var(--ama-color-ink);
-}
-
-.sim-obj-input::placeholder {
-  color: var(--ama-color-ink-soft);
-}
-
-.sim-obj-add-btn {
-  padding: 0.2rem 0.6rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  border: 1px solid var(--ama-border-subtle, #e5e7eb);
-  border-radius: var(--ama-radius-xs, 4px);
-  background: var(--ama-color-ocean, #0f4c5c);
-  color: #fff;
-  cursor: pointer;
-}
-
-.sim-obj-add-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
+/* AUD-016 — the local-only "Exercise objectives" panel was removed from the
+   simulation dashboard; its .sim-objectives / .sim-obj-* rules went with it. */
 
 /* ── Quick-action buttons (chat pane) ── */
 
@@ -3946,15 +3884,53 @@ table tbody tr:hover {
    Sticks directly below the 60px .ama-nav so the warning stays visible.
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* AUD-018 — the /simulations layout owns the marker for every route/state.
+   The shell is a flex column so the fixed-viewport dashboard can claim the
+   remaining height instead of pushing the page past the viewport. */
+.sim-exercise-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 60px);
+}
+
+.sim-exercise-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sim-exercise-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1.5rem 0;
+  font-size: 0.8rem;
+  color: var(--ama-text-muted, #475569);
+}
+
+.sim-exercise-nav a {
+  color: #b91c1c;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sim-exercise-nav a:hover,
+.sim-exercise-nav a:focus-visible {
+  text-decoration: underline;
+}
+
 .sim-banner-wrap {
   flex: none;
+  /* Stays visible while scrolling, pinned under the 60px sticky .ama-nav.
+     Sits above page overlays but below --ama-z-modal (200) and --ama-z-nav
+     (300) so dialogs and the primary navigation remain operable. */
+  position: sticky;
+  top: 60px;
+  z-index: calc(var(--ama-z-modal, 200) - 1);
   padding: 0.75rem 1.5rem 0;
-  background: linear-gradient(
-    to bottom,
-    var(--ama-surface, #f6fbfc) 0%,
-    var(--ama-surface, #f6fbfc) 85%,
-    transparent 100%
-  );
+  background: var(--ama-surface, #f6fbfc);
+  box-shadow: 0 6px 12px -10px rgba(15, 23, 42, 0.45);
 }
 
 .sim-banner-card {
@@ -3996,6 +3972,9 @@ table tbody tr:hover {
 @media (max-width: 720px) {
   .sim-banner-wrap {
     padding: 0.5rem 0.75rem 0;
+  }
+  .sim-exercise-nav {
+    padding: 0.35rem 0.75rem 0;
   }
   .sim-banner-title {
     font-size: 0.95rem;

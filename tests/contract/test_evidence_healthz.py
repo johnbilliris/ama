@@ -9,7 +9,12 @@ from fastapi.testclient import TestClient
 
 
 @pytest.fixture()
-def client():
+def client(monkeypatch):
+    monkeypatch.setenv("AMA_TEST_MODE", "1")
+    monkeypatch.setenv(
+        "APPLICATIONINSIGHTS_CONNECTION_STRING",
+        "InstrumentationKey=00000000-0000-0000-0000-000000000000",
+    )
     reset_registry()
     app = create_app()
     with TestClient(app) as c:
@@ -21,7 +26,7 @@ def test_healthz_evidence_ok(client):
     assert r.status_code == 200
     body = r.json()
     assert body["status"] in {"ok", "degraded"}
-    # 7 Cosmos containers + cold-archive Blob
+    # Seven physical Cosmos containers plus archive, mirror, and telemetry.
     expected = {
         "kpi_ladder",
         "kpi_signals",
@@ -30,6 +35,9 @@ def test_healthz_evidence_ok(client):
         "benchmark_register",
         "evidence_audit",
         "evidence_audit_dlq",
-        "evidence-audit-cold",
+        "evidence_audit_cold_blob",
+        "audit_change_feed_mirror",
+        "app_insights_ingestion",
     }
-    assert expected <= set(body["checks"].keys())
+    assert set(body["checks"]) == expected
+    assert body["degraded"] is False

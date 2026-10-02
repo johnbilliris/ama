@@ -9,6 +9,7 @@ from app.api.routes.aiims import level_router as aiims_level_router
 from app.api.routes.aiims import router as aiims_router
 from app.api.routes.alerts import router as alerts_router
 from app.api.routes.audit import router as audit_router
+from app.api.routes.audit_compliance import router as audit_compliance_router
 from app.api.routes.dead_letters import router as dead_letters_mgmt_router
 from app.api.routes.emergency_plans import router as emergency_plans_router
 from app.api.routes.evacuation import router as evacuation_router
@@ -97,6 +98,7 @@ api_router.include_router(workflow_runs_router)
 api_router.include_router(i18n_router)
 api_router.include_router(agents_router)
 api_router.include_router(audit_router)
+api_router.include_router(audit_compliance_router)
 
 # spec-038 — In-Product Help docs + grounded chat assistant.
 from app.api.routes.help_articles import router as help_articles_router  # noqa: E402

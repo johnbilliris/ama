@@ -36,6 +36,10 @@ export interface DisasterMapProps {
   saveViewportTrigger?: string | number | null;
 }
 
+interface AzureMapsConfig {
+  subscriptionKey: string;
+}
+
 export function DisasterMap({
   features,
   onMarkerClick,
@@ -76,8 +80,20 @@ export function DisasterMap({
 
         if (disposed || !containerRef.current) return;
 
-        const subscriptionKey =
-          process.env.NEXT_PUBLIC_AZURE_MAPS_KEY ?? "";
+        const configResponse = await fetch("/api/maps/config", {
+          cache: "no-store",
+        });
+        if (!configResponse.ok) {
+          throw new Error(
+            `Azure Maps configuration request failed with ${configResponse.status}`,
+          );
+        }
+
+        const { subscriptionKey } =
+          (await configResponse.json()) as AzureMapsConfig;
+        if (!subscriptionKey) {
+          throw new Error("Azure Maps subscription key is unavailable");
+        }
 
         // Restore saved viewport or default to Australia bounds
         const savedViewport = getSavedViewport();
@@ -88,12 +104,10 @@ export function DisasterMap({
         const map = new atlas.Map(containerRef.current, {
           ...viewOptions,
           language: "en-AU",
-          authOptions: subscriptionKey
-            ? {
-                authType: atlas.AuthenticationType.subscriptionKey as unknown as import("azure-maps-control").AuthenticationType,
-                subscriptionKey,
-              }
-            : undefined,
+          authOptions: {
+            authType: atlas.AuthenticationType.subscriptionKey as unknown as import("azure-maps-control").AuthenticationType,
+            subscriptionKey,
+          },
           style: "road",
           // Touch gesture support for mobile
           dragRotateInteraction: false,

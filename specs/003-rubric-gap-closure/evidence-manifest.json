@@ -1,0 +1,162 @@
+{
+  "feature": "003-rubric-gap-closure",
+  "generatedAt": "2026-09-15",
+  "entries": [
+    {
+      "scId": "SC-001",
+      "outcome": "UNVERIFIED",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "C:/Users/prbillir/AppData/Local/Python/pythoncore-3.14-64/python.exe -m pytest tests/simulation/test_quickstart_live_llm_rehearsal.py -q",
+      "environment": "local-python3.14",
+      "fixtureCohort": "live-llm-rehearsal-not-run",
+      "denominator": "0/1 live runs",
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "Live rehearsal was not executed in this session."
+    },
+    {
+      "scId": "SC-002",
+      "outcome": "UNVERIFIED",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "C:/Users/prbillir/AppData/Local/Python/pythoncore-3.14-64/python.exe -m pytest tests/simulation/test_quickstart_live_llm_rehearsal.py -q",
+      "environment": "local-python3.14",
+      "fixtureCohort": "six-language-live-draft-not-run",
+      "denominator": "0/1 live runs",
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "No credentialed live draft generation evidence captured in this session."
+    },
+    {
+      "scId": "SC-003",
+      "outcome": "SKIP",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "C:/Users/prbillir/AppData/Local/Python/pythoncore-3.14-64/python.exe -m pytest tests/simulation/test_quickstart_live_llm_rehearsal.py -q",
+      "environment": "local-python3.14",
+      "fixtureCohort": "live-gate-opt-in",
+      "denominator": "0/1 live runs",
+      "artifactPath": "artifacts/spec003-docs-and-live-gate.txt",
+      "artifactSha256": "7068c701376e6ad07f84d43db629e1535bfe7204eef9b7b6f30584ad05fffd87",
+      "reason": "AMA_LIVE_REHEARSAL was not set to 1; gate intentionally skipped live execution."
+    },
+    {
+      "scId": "SC-004",
+      "outcome": "UNVERIFIED",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "n/a",
+      "environment": "local-python3.14",
+      "fixtureCohort": "ci-pipeline",
+      "denominator": "0/1 CI runs",
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "No GitHub Actions CI run was executed in this session."
+    },
+    {
+      "scId": "SC-005",
+      "outcome": "PASS",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "C:/Users/prbillir/AppData/Local/Python/pythoncore-3.14-64/python.exe -m pytest tests/integration/test_handoff_chain.py tests/contract/test_aud013_wire_contract.py -q",
+      "environment": "local-python3.14",
+      "fixtureCohort": "handoff-chain-and-contract-linkage",
+      "denominator": "12/12 tests",
+      "artifactPath": "artifacts/spec003-sc005-handoff-chain.txt",
+      "artifactSha256": "12290c5ab1b6c97c36357854c0e41cebba831dd2ef809aa12491dc78cec9fd02",
+      "reason": ""
+    },
+    {
+      "scId": "SC-006",
+      "outcome": "UNVERIFIED",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "C:/Users/prbillir/AppData/Local/Python/pythoncore-3.14-64/python.exe -m pytest tests/contract/test_api_health_dependencies.py -q",
+      "environment": "local-python3.14",
+      "fixtureCohort": "api-health-contract-only",
+      "denominator": "9/9 tests",
+      "artifactPath": "artifacts/spec003-health-contract.txt",
+      "artifactSha256": "8168eb473b6798ebea826456fbc9ba3d09c7f347134c4c6497a19ff6793715e2",
+      "reason": "Container build and runtime non-root evidence was not executed in this session."
+    },
+    {
+      "scId": "SC-007",
+      "outcome": "UNVERIFIED",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "n/a",
+      "environment": "local-python3.14",
+      "fixtureCohort": "infra-what-if",
+      "denominator": "0/1 what-if runs",
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "No Azure deployment what-if was executed in this session."
+    },
+    {
+      "scId": "SC-008",
+      "outcome": "UNVERIFIED",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "C:/Users/prbillir/AppData/Local/Python/pythoncore-3.14-64/python.exe -m pytest tests/devops/test_demo_evidence_pack_docs.py tests/simulation/test_quickstart_live_llm_rehearsal.py -q",
+      "environment": "local-python3.14",
+      "fixtureCohort": "demo-doc-validator-and-live-gate-guards",
+      "denominator": "4 passed, 1 skipped",
+      "artifactPath": "artifacts/spec003-docs-and-live-gate.txt",
+      "artifactSha256": "7068c701376e6ad07f84d43db629e1535bfe7204eef9b7b6f30584ad05fffd87",
+      "reason": "Screenshot assets and human reviewer acceptance evidence are still pending capture."
+    },
+    {
+      "scId": "SC-009",
+      "outcome": "UNVERIFIED",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "n/a",
+      "environment": "local-python3.14",
+      "fixtureCohort": "error-response-contract",
+      "denominator": "0/1 focused runs",
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "No dedicated SC-009 error-response run artifact was generated in this session."
+    },
+    {
+      "scId": "SC-010",
+      "outcome": "UNVERIFIED",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "n/a",
+      "environment": "local-python3.14",
+      "fixtureCohort": "retry-recovery-rate",
+      "denominator": "0/1 measured cohorts",
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "No quantified transient-failure recovery denominator was captured in this session."
+    },
+    {
+      "scId": "SC-011",
+      "outcome": "SKIP",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "n/a",
+      "environment": "local-python3.14",
+      "fixtureCohort": "alert-delivery-breach-to-receipt",
+      "denominator": "0/1 staged runs",
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "Staging/live controlled breach and receiver delivery evidence is external and was not run."
+    },
+    {
+      "scId": "SC-012",
+      "outcome": "UNVERIFIED",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "n/a",
+      "environment": "local-python3.14",
+      "fixtureCohort": "load-and-benchmark",
+      "denominator": "0/1 full-load cohorts",
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "No 1000-user and 50,000 signals/hour run artifact was generated in this session."
+    },
+    {
+      "scId": "SC-013",
+      "outcome": "UNVERIFIED",
+      "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+      "command": "n/a",
+      "environment": "local-python3.14",
+      "fixtureCohort": "independent-rubric-evaluation",
+      "denominator": "0/1 independent evaluations",
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "Independent evaluator rubric result was not produced in this session."
+    }
+  ]
+}

@@ -1,13 +1,12 @@
+import { getApiBaseUrl } from "@/lib/api/base-url";
 /**
  * T039 — Evidence Pack API client (server-side fetch helpers).
  *
  * Uses the existing MSAL token interceptor pattern (apps/web/src/lib/api/).
  * Read-only — these helpers never POST/PUT/DELETE.
  *
- * Server-side (Server Components, Route Handlers) bypasses the Next.js /api
- * proxy and reads from API_PROXY_UPSTREAM directly because relative URLs have
- * no origin during SSR. Client-side reads from NEXT_PUBLIC_API_BASE (which is
- * "/api" relative so the browser hits the same-origin proxy rewrite).
+ * Server-side requests use the configured API endpoint because relative URLs
+ * have no origin during SSR. Client-side requests use the same-origin API proxy.
  *
  * Citations: FR-021, RES-03.
  */
@@ -19,14 +18,7 @@ import type {
 } from './types';
 
 function _resolveBase(): string {
-  if (typeof window === 'undefined') {
-    return (
-      process.env.API_PROXY_UPSTREAM ??
-      process.env.NEXT_PUBLIC_API_BASE ??
-      'http://localhost:8000/api'
-    );
-  }
-  return process.env.NEXT_PUBLIC_API_BASE ?? '/api';
+  return getApiBaseUrl();
 }
 
 async function _fetch<T>(path: string, init?: RequestInit): Promise<T> {

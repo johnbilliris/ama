@@ -1,3 +1,4 @@
+import logging
 import uuid
 from typing import Any
 
@@ -5,12 +6,16 @@ from app.middleware.spec_036_routes import is_problem_json_route
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+logger = logging.getLogger(__name__)
 
 _ERROR_CATEGORY_BY_STATUS = {
     400: "validation_error",
     401: "authorization_error",
     403: "authorization_error",
     404: "not_found",
+    405: "validation_error",
     422: "validation_error",
     429: "rate_limited",
 }
@@ -20,6 +25,41 @@ def _error_category(status_code: int) -> str:
     if status_code >= 500:
         return "internal_error"
     return _ERROR_CATEGORY_BY_STATUS.get(status_code, "dependency_failure")
+
+
+def _correlation_id(request: Request) -> str:
+    existing = getattr(request.state, "correlation_id", None)
+    if existing:
+        return str(existing)
+    evidence_correlation_id = request.headers.get("x-ama-correlation-id", "").strip()
+    if evidence_correlation_id:
+        return evidence_correlation_id[:128]
+    try:
+        return str(uuid.UUID(request.headers.get("X-Correlation-ID", "")))
+    except (ValueError, TypeError, AttributeError):
+        return str(uuid.uuid4())
+
+
+def _safe_message(status_code: int) -> str:
+    if status_code == 400:
+        return "Request could not be processed"
+    if status_code == 401:
+        return "Authentication is required"
+    if status_code == 403:
+        return "You are not authorized to perform this action"
+    if status_code == 404:
+        return "Requested resource was not found"
+    if status_code == 405:
+        return "HTTP method is not allowed for this endpoint"
+    if status_code == 409:
+        return "Request conflicts with current resource state"
+    if status_code == 422:
+        return "Request validation failed"
+    if status_code == 429:
+        return "Too many requests; please retry later"
+    if status_code >= 500:
+        return "Unexpected internal error occurred"
+    return "Request failed"
 
 
 def _matched_route_template(request: Request) -> str | None:
@@ -108,6 +148,38 @@ def _problem_response(
     )
 
 
+def _is_evidence_request(request: Request) -> bool:
+    return request.url.path.startswith(("/api/v1/evidence", "/api/healthz/evidence"))
+
+
+def _evidence_problem_response(
+    *,
+    request: Request,
+    status_code: int,
+    correlation_id: str,
+    title: str,
+    detail: str,
+    type_uri: str,
+    errors: list[dict[str, Any]] | None = None,
+) -> JSONResponse:
+    body: dict[str, Any] = {
+        "type": type_uri,
+        "title": title,
+        "status": status_code,
+        "detail": detail,
+        "instance": request.url.path,
+        "ama_advisory_only": True,
+    }
+    if errors:
+        body["errors"] = errors
+    return JSONResponse(
+        status_code=status_code,
+        content=body,
+        media_type="application/problem+json",
+        headers={"x-ama-correlation-id": correlation_id},
+    )
+
+
 def _error_response(
     *,
     status_code: int,
@@ -145,12 +217,42 @@ def _error_response(
 
 
 def add_error_handler_middleware(app: FastAPI) -> None:
+    from app.services.evidence.audit_writer import AuditWriteUnavailableError
+
+    @app.exception_handler(AuditWriteUnavailableError)
+    async def handle_audit_write_unavailable(
+        request: Request,
+        error: AuditWriteUnavailableError,
+    ) -> JSONResponse:
+        correlation_id = _correlation_id(request)
+        problem = error.to_problem_details()
+        return _evidence_problem_response(
+            request=request,
+            status_code=503,
+            correlation_id=correlation_id,
+            title=problem.title,
+            detail=problem.detail or _safe_message(503),
+            type_uri=problem.type,
+        )
+
     @app.exception_handler(RequestValidationError)
     async def handle_validation_error(request: Request, error: RequestValidationError) -> JSONResponse:
-        correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+        correlation_id = _correlation_id(request)
         details = [
             {"field": ".".join(str(item) for item in issue["loc"]), "reason": issue["msg"]} for issue in error.errors()
         ]
+        if _is_evidence_request(request):
+            has_extra = any(issue.get("type") == "extra_forbidden" for issue in error.errors())
+            title = "request-body-extra-fields" if has_extra else "request-validation-failed"
+            return _evidence_problem_response(
+                request=request,
+                status_code=422,
+                correlation_id=correlation_id,
+                title=title,
+                detail="Request validation failed.",
+                type_uri=f"https://ama.example/errors/{title}",
+                errors=details,
+            )
         return _error_response(
             status_code=422,
             message="Request validation failed",
@@ -160,21 +262,64 @@ def add_error_handler_middleware(app: FastAPI) -> None:
         )
 
     @app.exception_handler(HTTPException)
-    async def handle_http_error(request: Request, error: HTTPException) -> JSONResponse:
-        correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+    @app.exception_handler(StarletteHTTPException)
+    async def handle_http_error(request: Request, error: StarletteHTTPException) -> JSONResponse:
+        correlation_id = _correlation_id(request)
+        logger.warning(
+            "http_exception_handled",
+            extra={
+                "correlation_id": correlation_id,
+                "status_code": error.status_code,
+                "raw_detail": str(error.detail),
+            },
+        )
+        if _is_evidence_request(request):
+            if isinstance(error.detail, dict):
+                payload = error.detail
+                title = str(payload.get("title") or "request-failed")
+                detail = str(payload.get("detail") or _safe_message(error.status_code))
+                type_uri = str(payload.get("type") or f"https://ama.example/errors/{title}")
+            else:
+                title = "resource-not-found" if error.status_code == 404 else "request-failed"
+                detail = _safe_message(error.status_code)
+                type_uri = f"https://ama.example/errors/{title}"
+            return _evidence_problem_response(
+                request=request,
+                status_code=error.status_code,
+                correlation_id=correlation_id,
+                title=title,
+                detail=detail,
+                type_uri=type_uri,
+            )
         return _error_response(
             status_code=error.status_code,
-            message=str(error.detail),
+            message=_safe_message(error.status_code),
             correlation_id=correlation_id,
             request=request,
         )
 
     @app.exception_handler(PermissionError)
     async def handle_permission_error(request: Request, error: PermissionError) -> JSONResponse:
-        correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+        correlation_id = _correlation_id(request)
+        logger.warning(
+            "permission_error_handled",
+            extra={
+                "correlation_id": correlation_id,
+                "raw_detail": str(error),
+            },
+        )
+        if _is_evidence_request(request):
+            return _evidence_problem_response(
+                request=request,
+                status_code=403,
+                correlation_id=correlation_id,
+                title="forbidden",
+                detail=_safe_message(403),
+                type_uri="https://ama.example/errors/forbidden",
+            )
         return _error_response(
             status_code=403,
-            message=str(error),
+            message=_safe_message(403),
             correlation_id=correlation_id,
             request=request,
         )
@@ -190,12 +335,19 @@ def add_error_handler_middleware(app: FastAPI) -> None:
 
     @app.exception_handler(SequenceAllocationExhausted)
     async def handle_sequence_exhausted(request: Request, error: SequenceAllocationExhausted) -> JSONResponse:
-        correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+        correlation_id = _correlation_id(request)
+        logger.warning(
+            "sequence_allocator_exhausted",
+            extra={
+                "correlation_id": correlation_id,
+                "raw_detail": str(error),
+            },
+        )
         body: dict[str, Any] = {
             "type": "https://aidr.gov.au/problems/sequence-allocator-unavailable",
             "title": "Sequence allocator unavailable",
             "status": 503,
-            "detail": str(error),
+            "detail": _safe_message(503),
             "correlationId": correlation_id,
             "retry_after_seconds": 5,
         }
@@ -207,11 +359,24 @@ def add_error_handler_middleware(app: FastAPI) -> None:
         )
 
     @app.exception_handler(Exception)
-    async def handle_unexpected_error(request: Request, _: Exception) -> JSONResponse:
-        correlation_id = request.headers.get("X-Correlation-ID", str(uuid.uuid4()))
+    async def handle_unexpected_error(request: Request, error: Exception) -> JSONResponse:
+        correlation_id = _correlation_id(request)
+        logger.exception(
+            "unexpected_error_handled",
+            extra={"correlation_id": correlation_id, "error_type": type(error).__name__},
+        )
+        if _is_evidence_request(request):
+            return _evidence_problem_response(
+                request=request,
+                status_code=500,
+                correlation_id=correlation_id,
+                title="internal-error",
+                detail=_safe_message(500),
+                type_uri="https://ama.example/errors/internal-error",
+            )
         return _error_response(
             status_code=500,
-            message="Unexpected internal error occurred",
+            message=_safe_message(500),
             correlation_id=correlation_id,
             request=request,
         )

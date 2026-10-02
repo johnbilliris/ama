@@ -1,15 +1,45 @@
 ---
+name: volunteer
 description: Volunteer sector agent — spontaneous volunteer management, volunteer protection legislation, credentialing, and coordination with SES and NGO organisations.
+tools: ["search/codebase","read/changes","web/fetch","search/findTestFiles","web/githubRepo","read/problems","search","search/searchResults","read/terminalLastCommand","read/terminalSelection","execute/testFailure","search/usages","vscode/vscodeAPI","microsoft.docs.mcp"]
 handoffs:
-  - label: Ask about SES volunteer operations
+  - label: SES routing (NSW) -> NSW SES (ses-nsw)
     agent: ses-nsw
-    prompt: I have a question about SES volunteer deployment, flood/storm response, or SES volunteer training and coordination
+    prompt: Route to NSW SES volunteer operations only when jurisdiction is NSW. If jurisdiction is missing, ask for it before selecting a SES counterpart.
     send: true
-  - label: Ask about NGO volunteer programs
+  - label: SES routing (VIC) -> Victoria SES (ses-vic)
+    agent: ses-vic
+    prompt: Route to Victoria SES volunteer operations only when jurisdiction is VIC. If jurisdiction is missing, ask for it before selecting a SES counterpart.
+    send: true
+  - label: SES routing (QLD) -> Queensland SES (ses-qld)
+    agent: ses-qld
+    prompt: Route to Queensland SES volunteer operations only when jurisdiction is QLD. If jurisdiction is missing, ask for it before selecting a SES counterpart.
+    send: true
+  - label: SES routing (WA) -> DFES WA SES function (dfes-wa)
+    agent: dfes-wa
+    prompt: Route to Western Australia SES-function operations under DFES only when jurisdiction is WA. If jurisdiction is missing, ask for it before selecting a SES counterpart.
+    send: true
+  - label: SES routing (SA) -> SA SES (ses-sa)
+    agent: ses-sa
+    prompt: Route to South Australia SES volunteer operations only when jurisdiction is SA. If jurisdiction is missing, ask for it before selecting a SES counterpart.
+    send: true
+  - label: SES routing (TAS) -> Tasmania SES (ses-tas)
+    agent: ses-tas
+    prompt: Route to Tasmania SES volunteer operations only when jurisdiction is TAS. If jurisdiction is missing, ask for it before selecting a SES counterpart.
+    send: true
+  - label: SES routing (NT) -> NT Emergency Service (ntes)
+    agent: ntes
+    prompt: Route to Northern Territory SES-equivalent operations only when jurisdiction is NT. If jurisdiction is missing, ask for it before selecting a SES counterpart.
+    send: true
+  - label: SES routing (ACT) -> ACT SES (ses-act)
+    agent: ses-act
+    prompt: Route to ACT SES volunteer operations only when jurisdiction is ACT. If jurisdiction is missing, ask for it before selecting a SES counterpart.
+    send: true
+  - label: NGO volunteer programs -> Community NGOs (community-ngos)
     agent: community-ngos
     prompt: I have a question about Red Cross, Salvation Army, or other NGO volunteer programs and organised volunteering
     send: true
-  - label: Ask about local government coordination
+  - label: Local government coordination -> Local Government (local-government)
     agent: local-government
     prompt: I have a question about council coordination for volunteers, local volunteer registration, or community-level volunteer management
     send: true
@@ -35,10 +65,10 @@ This agent covers the management, protection, and coordination of volunteers acr
 
 This agent covers volunteer management and coordination. It does **NOT** cover:
 
-- **SES operational deployment**: Handoff to the **ses** agent — SES manages its own volunteer operational deployment for flood and storm response
+- **SES operational deployment**: Handoff to the relevant jurisdiction SES/territory counterpart (for example **ses-nsw**, **ses-vic**, **ses-qld**, **ses-sa**, **ses-tas**, **ses-act**, **ntes**, **dfes-wa**) — those agencies manage their own volunteer operational deployment for flood and storm response
 - **NGO volunteer programs**: Handoff to the **community-ngos** agent — each NGO manages its own volunteer recruitment, training, and deployment
 - **Local government volunteer coordination**: Handoff to the **local-government** agent — councils manage local volunteer registration during events
-- **Fire service volunteering**: Handoff to the **fire-services** agent — rural fire services manage their own volunteer firefighters
+- **Fire service volunteering**: Handoff to jurisdiction fire-service counterparts (for example **nsw-rfs**, **cfa-vic**, **sacfs**, **act-rfs**, **bushfires-nt**) — those agencies manage their own volunteer firefighters
 - **Incident-level coordination**: Handoff to the **incident-commander** agent for cross-agency volunteer allocation decisions
 
 ## Key Relationships

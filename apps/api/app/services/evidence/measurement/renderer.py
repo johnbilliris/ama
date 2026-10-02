@@ -1,105 +1,127 @@
-"""Pillar B — Measurement-Method renderer (T-B03, FR-007/009)."""
+# Measurement Method renderer backed by the canonical metric definitions.
 
 from __future__ import annotations
 
 from datetime import UTC, datetime
 from typing import Literal
 
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+
 from .._summariser import summarise_blocks
 from ..kpi_ladder.repository import list_published
+from ..models.kpi import ConfidenceBandRule
+from .definitions import CAPSTONE_METRIC_BY_SC_ID, CAPSTONE_METRICS, FORMULA_VERSION
 
-CAPSTONE_DEFINITIONS: dict[str, dict[str, str]] = {
-    "SC-CAP-015-001": {
-        "name": "Lives saved",
-        "plain": "Estimated lives preserved versus the prototype-baseline run.",
-        "start": "Triage decision recorded",
-        "end": "Patient outcome recorded (12-h horizon)",
-        "missing_rule": "Forward-impute next-adjacent canonical event; row excluded from CI.",
-        "calibration": "Bootstrap-95% CI vs historical mortality benchmark.",
-    },
-    "SC-CAP-015-002": {
-        "name": "Response time",
-        "plain": "Median elapsed time from call-received to on-scene arrival.",
-        "start": "call_received_at",
-        "end": "arrived_at",
-        "missing_rule": "Forward-impute from controlled_at/dispatched_at.",
-        "calibration": "Bootstrap-95% CI vs jurisdiction Pri-1 ambulance benchmark.",
-    },
-    "SC-CAP-015-003": {
-        "name": "Evacuation lead time",
-        "plain": "Hours between hazard warning issuance and evacuation completion.",
-        "start": "Warning issued",
-        "end": "Evacuation completion confirmed",
-        "missing_rule": "Forward-impute from BoM warning timestamp.",
-        "calibration": "Bootstrap-95% CI vs BoM hazard warning lead-time.",
-    },
-    "SC-CAP-015-004": {
-        "name": "Logistics efficiency",
-        "plain": "Asset-utilisation uplift (% optimised routes accepted).",
-        "start": "Resource request raised",
-        "end": "Resource on-task",
-        "missing_rule": "Forward-impute from dispatched_at.",
-        "calibration": "Bootstrap-95% CI vs spec-015 prototype baseline.",
-    },
-    "SC-CAP-015-005": {
-        "name": "Economic loss reduction",
-        "plain": "Estimated AUDm avoided versus the prototype-baseline run.",
-        "start": "Risk-exposure snapshot at T-0",
-        "end": "Post-event loss assessment",
-        "missing_rule": "Forward-impute from controlled_at; CI excludes imputed rows.",
-        "calibration": "Bootstrap-95% CI vs spec-015 prototype baseline + AFAC FDI.",
-    },
-}
+CAPSTONE_DEFINITIONS = CAPSTONE_METRIC_BY_SC_ID
 
 
-def build_definitions() -> list[dict]:
+class MeasurementMethodDefinition(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    capstone_sc_id: str
+    kpi_id: str
+    name: str
+    definition_version: str
+    formula_version: str
+    formula: str
+    unit: str
+    delta_unit: str
+    target_measure: Literal["absolute_delta", "percent_delta"]
+    target_value: str
+    plain_language_definition: str
+    start_signal: str
+    end_signal: str
+    missing_timestamp_rule: str
+    calibration_method: str
+    calibration_reference: str
+    prototype_disclaimer: str
+    confidence_band_rule: ConfidenceBandRule
+
+
+class MeasurementMethod(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    version: str
+    generated_at: AwareDatetime
+    definitions: list[MeasurementMethodDefinition] = Field(min_length=5, max_length=5)
+    ama_advisory_only: bool = True
+
+
+def build_definitions() -> list[MeasurementMethodDefinition]:
     indicators = list_published()
-    out = []
-    for sc, base in CAPSTONE_DEFINITIONS.items():
-        sample_indicator = next((i for i in indicators if i.capstone_sc_id == sc), None)
-        rule = sample_indicator.confidence_band_rule if sample_indicator else None
-        out.append(
-            {
-                "capstone_sc_id": sc,
-                "plain_language_definition": base["plain"],
-                "start_signal": base["start"],
-                "end_signal": base["end"],
-                "missing_timestamp_rule": base["missing_rule"],
-                "calibration_method": base["calibration"],
-                "confidence_band_rule": (
-                    rule.model_dump()
-                    if rule
-                    else {
-                        "method": "bootstrap_p2_5_p97_5",
-                        "min_resamples": 1000,
-                    }
-                ),
-            }
+    definitions: list[MeasurementMethodDefinition] = []
+    for metric in CAPSTONE_METRICS:
+        sample_indicator = next(
+            (indicator for indicator in indicators if indicator.capstone_sc_id == metric.capstone_sc_id),
+            None,
         )
-    return out
+        rule = sample_indicator.confidence_band_rule if sample_indicator else None
+        definitions.append(
+            MeasurementMethodDefinition(
+                capstone_sc_id=metric.capstone_sc_id,
+                kpi_id=metric.kpi_id,
+                name=metric.name,
+                definition_version=FORMULA_VERSION,
+                formula_version=metric.formula_version,
+                formula=metric.formula,
+                unit=metric.unit,
+                delta_unit=metric.delta_unit,
+                target_measure=metric.target_measure,
+                target_value=str(metric.target_value),
+                plain_language_definition=metric.plain_language_definition,
+                start_signal=metric.start_signal,
+                end_signal=metric.end_signal,
+                missing_timestamp_rule=metric.missing_timestamp_rule,
+                calibration_method=metric.calibration_reference,
+                calibration_reference=metric.calibration_reference,
+                prototype_disclaimer=metric.prototype_disclaimer,
+                confidence_band_rule=rule or ConfidenceBandRule(),
+            )
+        )
+    return definitions
 
 
-def render(format: Literal["json", "markdown"] = "json") -> dict | str:
-    defs = build_definitions()
-    payload = {
-        "version": "1",
-        "generated_at": datetime.now(UTC).isoformat(),
-        "definitions": defs,
-        "ama_advisory_only": True,
-    }
+def render(format: Literal["json", "markdown"] = "json") -> MeasurementMethod | str:
+    definitions = build_definitions()
+    payload = MeasurementMethod(
+        version=FORMULA_VERSION,
+        generated_at=datetime.now(UTC),
+        definitions=definitions,
+    )
     if format == "json":
         return payload
-    blocks = ["# Measurement Method (spec 040 (originally Spec 038))\n"]
-    for d in defs:
-        sc = d["capstone_sc_id"]
-        info = CAPSTONE_DEFINITIONS[sc]
+
+    newline = chr(10)
+    blocks = [f"# Measurement Method (formula version {FORMULA_VERSION}){newline}"]
+    for definition in definitions:
+        capstone_sc_id = definition.capstone_sc_id
+        name = definition.name
+        plain = definition.plain_language_definition
+        formula = definition.formula
+        unit = definition.unit
+        formula_version = definition.formula_version
+        start_signal = definition.start_signal
+        end_signal = definition.end_signal
+        missing_rule = definition.missing_timestamp_rule
+        calibration = definition.calibration_reference
+        target_value = definition.target_value
+        target_measure = definition.target_measure
+        disclaimer = definition.prototype_disclaimer
         blocks.append(
-            f"## {sc} — {info['name']}\n\n"
-            f"{d['plain_language_definition']}\n\n"
-            f"- **Start signal**: {d['start_signal']}\n"
-            f"- **End signal**: {d['end_signal']}\n"
-            f"- **Missing-timestamp rule**: {d['missing_timestamp_rule']}\n"
-            f"- **Calibration method**: {d['calibration_method']}\n"
+            f"## {capstone_sc_id} — {name}{newline}{newline}"
+            f"{plain}{newline}{newline}"
+            f"- **Formula**: `{formula}`{newline}"
+            f"- **Unit**: {unit}{newline}"
+            f"- **Formula version**: {formula_version}{newline}"
+            f"- **Start signal**: {start_signal}{newline}"
+            f"- **End signal**: {end_signal}{newline}"
+            f"- **Missing-timestamp rule**: {missing_rule}{newline}"
+            f"- **Calibration reference**: {calibration}{newline}"
+            f"- **Target**: {target_value} ({target_measure}){newline}"
+            f"- **Prototype disclaimer**: {disclaimer}{newline}"
         )
-    blocks.append("> Advisory only — no autonomous action. (FR-030)\n")
-    return summarise_blocks(blocks, max_chars=8000)
+    blocks.append(
+        "> Advisory only — confidence intervals use at least 1,000 deterministic bootstrap resamples when "
+        f"two or more non-imputed observations are available; otherwise they are labelled ±1 SD.{newline}"
+    )
+    return summarise_blocks(blocks, max_chars=12000)

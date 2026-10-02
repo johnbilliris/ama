@@ -37,8 +37,9 @@ class TestZoneMapping:
         segmenter = AudienceSegmenter()
         segments = segmenter.segment_audience({"zones": []})
         assert len(segments) >= 1
-        assert segments[0].zone_level == 1
-        assert segments[0].urgency_level == UrgencyLevel.immediate
+        assert segments[0].zone_level == 3
+        assert segments[0].urgency_level == UrgencyLevel.advisory
+        assert "zone_data_unavailable" in segments[0].missing_data_flags
 
 
 # ---------------------------------------------------------------------------
@@ -51,20 +52,25 @@ class TestVulnerablePopulations:
         segmenter = AudienceSegmenter()
         segments = segmenter.segment_audience(
             {
-                "zones": [{"level": 1}],
-                "vulnerability_data": {"facilities": [{"zone_level": 1, "category": "aged_care", "population": 50}]},
+                "zones": [{"id": "zone-a", "level": 1}],
+                "vulnerability_data": {
+                    "facilities": [{"id": "care-1", "zone_id": "zone-a", "category": "aged_care", "population": 50}]
+                },
             }
         )
         critical = [s for s in segments if s.priority == SegmentPriority.critical]
         assert len(critical) >= 1
         assert "aged_care" in critical[0].vulnerability_categories
+        assert "assist residents" in critical[0].facility_instructions
 
     def test_hospital_vulnerability(self):
         segmenter = AudienceSegmenter()
         segments = segmenter.segment_audience(
             {
-                "zones": [{"level": 1}],
-                "vulnerability_data": {"facilities": [{"zone_level": 1, "category": "hospital", "population": 200}]},
+                "zones": [{"id": "zone-a", "level": 1}],
+                "vulnerability_data": {
+                    "facilities": [{"id": "hospital-1", "zone_id": "zone-a", "category": "hospital", "population": 200}]
+                },
             }
         )
         critical = [s for s in segments if s.priority == SegmentPriority.critical]
@@ -95,7 +101,59 @@ class TestLanguagePreference:
             incident_demographics={"language_distribution": {"zone_1": {"zh-Hans": 0.6, "en-AU": 0.4}}},
         )
         zone1 = [s for s in segments if s.zone_level == 1 and not s.vulnerability_categories]
-        assert zone1[0].preferred_language == "zh-Hans"
+        assert {segment.preferred_language for segment in zone1} == {"zh-Hans", "en-AU"}
+        assert sum(segment.estimated_segment_size for segment in zone1) == 0
+
+    def test_minority_languages_receive_proportional_subsegments(self):
+        segmenter = AudienceSegmenter()
+        segments = segmenter.segment_audience(
+            {"zones": [{"id": "zone-a", "level": 1, "population_estimate": 1000}]},
+            incident_demographics={
+                "language_distribution": {"zone-a": {"en-AU": 0.8, "zh-Hans": 0.15, "vi": 0.05}},
+                "recipient_ids": {
+                    "zone-a": {
+                        "en-AU": ["en-1"],
+                        "zh-Hans": ["zh-1"],
+                        "vi": ["vi-1"],
+                    }
+                },
+            },
+        )
+
+        by_language = {segment.preferred_language: segment for segment in segments}
+        assert set(by_language) == {"en-AU", "zh-Hans", "vi"}
+        assert by_language["zh-Hans"].estimated_segment_size == 150
+        assert by_language["zh-Hans"].fallback_language == "en-AU"
+        assert by_language["vi"].recipient_ids == ["vi-1"]
+
+    def test_facility_without_zone_or_intersecting_geometry_is_not_targeted(self):
+        segmenter = AudienceSegmenter()
+        segments = segmenter.segment_audience(
+            {
+                "zones": [
+                    {
+                        "id": "zone-a",
+                        "level": 1,
+                        "boundary": {
+                            "type": "Polygon",
+                            "coordinates": [[[0, 0], [2, 0], [2, 2], [0, 2], [0, 0]]],
+                        },
+                    }
+                ],
+                "vulnerability_data": {
+                    "facilities": [
+                        {
+                            "id": "outside",
+                            "category": "hospital",
+                            "boundary": {"type": "Point", "coordinates": [5, 5]},
+                        }
+                    ]
+                },
+            }
+        )
+
+        assert not [segment for segment in segments if segment.vulnerability_categories]
+        assert "facility_location_unverified" in segments[0].missing_data_flags
 
     def test_default_language_en_au(self):
         segmenter = AudienceSegmenter()
@@ -143,8 +201,10 @@ class TestMissingDataFlags:
         segmenter = AudienceSegmenter()
         segments = segmenter.segment_audience(
             {
-                "zones": [{"level": 1}],
-                "vulnerability_data": {"facilities": [{"zone_level": 1, "category": "school", "population": 100}]},
+                "zones": [{"id": "zone-a", "level": 1}],
+                "vulnerability_data": {
+                    "facilities": [{"id": "school-1", "zone_id": "zone-a", "category": "school", "population": 100}]
+                },
             },
             incident_demographics={"language_distribution": {"zone_1": {"en-AU": 0.9}}},
         )

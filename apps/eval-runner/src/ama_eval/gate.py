@@ -71,6 +71,7 @@ def evaluate_gate(
         ]:
             mr = metrics.get(metric_id)
             if not mr:
+                reasons.append(f"{model_key}: missing required metric {metric_id}")
                 continue
             value = mr.get("passRate") if mr.get("passRate") is not None else mr.get("mean", 0.0)
             min_v = getattr(thr, threshold_attr)

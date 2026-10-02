@@ -21,6 +21,31 @@ for path in (ROOT, API_ROOT, AGENTS_ROOT, INGEST_RUNNER_ROOT, DOMAIN_PKG_ROOT):
 # Spec 036 / F-A10 / T218 — force UTF-8 stdio on every test process so Windows
 # runners don't trip on CRLF + cp1252 codepoint surprises (closes F-DEL-08).
 os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+os.environ.setdefault("AMA_TEST_SUPPORT", "1")
+
+
+@pytest.fixture(autouse=True)
+def _evidence_test_mode(monkeypatch):
+    monkeypatch.delenv("AMA_TEST_SUPPORT", raising=False)
+    monkeypatch.setenv("AMA_TEST_MODE", "1")
+
+
+@pytest.fixture(autouse=True)
+def _reset_simulation_capacity_ledger():
+    """Keep the process-wide simulation concurrency ledger per-test deterministic.
+
+    The ledger is shared by every in-memory ``SimulationRepository`` so two
+    instances enforce one cap (AUD-024). Resetting it between tests stops one
+    module's active exercises from consuming another module's slots. Only resets
+    when the module is already imported so non-API tests keep their import graph.
+    """
+    module = sys.modules.get("app.repositories.simulation_repository")
+    if module is not None:
+        module.get_shared_capacity_ledger().reset()
+    yield
+    module = sys.modules.get("app.repositories.simulation_repository")
+    if module is not None:
+        module.get_shared_capacity_ledger().reset()
 
 
 @pytest.fixture

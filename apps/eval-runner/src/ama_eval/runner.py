@@ -14,14 +14,13 @@ import sys
 from datetime import UTC, datetime
 from typing import Any
 
+from apps.console_logging import configure_console_logging
+
 logger = logging.getLogger(__name__)
 
 
 def _setup_logging() -> None:
-    logging.basicConfig(
-        level=os.environ.get("LOG_LEVEL", "INFO"),
-        format="%(asctime)s %(levelname)s %(name)s %(message)s",
-    )
+    configure_console_logging(level=os.environ.get("LOG_LEVEL", "INFO"))
 
 
 def main(argv: list[str] | None = None) -> int:

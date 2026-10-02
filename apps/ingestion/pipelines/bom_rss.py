@@ -1,3 +1,4 @@
+import asyncio
 import ftplib
 import io
 import logging
@@ -5,7 +6,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 from apps.api.app.services.ingestion.pipeline_base import IngestionPipelineBase
-from apps.ingestion.normalisers.bom_xml_normaliser import normalise_bom_xml
+from apps.ingestion.normalisers.bom_xml_normaliser import extract_bom_product_metadata, normalise_bom_xml
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +46,10 @@ class BomRssPipeline(IngestionPipelineBase):
             expected_update_seconds=60,
             **kwargs,
         )
-        self._known_files: set[str] = set()
 
     async def poll_source(self) -> list[dict[str, Any]]:
-        payloads: list[dict[str, Any]] = []
-        try:
+        def _fetch() -> list[dict[str, Any]]:
+            payloads: list[dict[str, Any]] = []
             ftp = ftplib.FTP(BOM_FTP_HOST, timeout=30)
             ftp.login()
             ftp.cwd(BOM_FTP_FWO_PATH)
@@ -59,14 +59,8 @@ class BomRssPipeline(IngestionPipelineBase):
                 prefix = _STATE_PREFIX.get(state)
                 if not prefix:
                     continue
-                # Filter for this state's XML products (skip .amoc.xml metadata files)
                 state_xmls = [
-                    f
-                    for f in all_files
-                    if f.startswith(prefix)
-                    and f.endswith(".xml")
-                    and not f.endswith(".amoc.xml")
-                    and f not in self._known_files
+                    f for f in all_files if f.startswith(prefix) and f.endswith(".xml") and not f.endswith(".amoc.xml")
                 ]
                 for filename in state_xmls:
                     try:
@@ -74,38 +68,46 @@ class BomRssPipeline(IngestionPipelineBase):
                         ftp.retrbinary(f"RETR {filename}", buf.write)
                         content = buf.getvalue().decode("utf-8", errors="replace")
 
-                        # Check AMOC header for warning product-type
                         if not self._is_warning_product(content):
-                            self._known_files.add(filename)
                             continue
+
+                        provider_version = _get_mdtm(ftp, filename)
 
                         payloads.append(
                             {
                                 "xml": content,
                                 "filename": filename,
+                                "provider_version": provider_version,
                                 "data_source_id": "bom-warnings",
                                 "source_uri": f"ftp://{BOM_FTP_HOST}{BOM_FTP_FWO_PATH}{filename}",
                                 "jurisdiction_id": state,
                             }
                         )
-                        self._known_files.add(filename)
                     except Exception as exc:
                         logger.warning("Failed to retrieve %s: %s", filename, exc)
 
             ftp.quit()
+            return payloads
+
+        try:
+            return await asyncio.to_thread(_fetch)
         except Exception as exc:
             logger.error("BoM FTP warning poll failed: %s", exc)
             raise
-        return payloads
 
     @staticmethod
     def _is_warning_product(xml_text: str) -> bool:
         """Return True if the AMOC header indicates a warning product."""
         try:
             root = ElementTree.fromstring(xml_text)
-            amoc = root.find(".//amoc")
+            amoc = root.find(".//{http://www.bom.gov.au/schema/v1.7}amoc")
+            if amoc is None:
+                amoc = root.find(".//amoc")
             if amoc is not None:
-                product_type = (amoc.findtext("product-type") or "").strip()
+                product_type = amoc.findtext("{http://www.bom.gov.au/schema/v1.7}product-type")
+                if not product_type:
+                    product_type = amoc.findtext("product-type")
+                product_type = (product_type or "").strip()
                 return product_type in _WARNING_PRODUCT_TYPES
         except ElementTree.ParseError:
             pass
@@ -115,5 +117,15 @@ class BomRssPipeline(IngestionPipelineBase):
         return normalise_bom_xml(raw_payload)
 
     def compute_canonical_key(self, raw_payload: dict[str, Any]) -> str:
-        filename = raw_payload.get("filename", "")
-        return f"bom-ftp-fwo:{filename}"
+        metadata = extract_bom_product_metadata(raw_payload)
+        provider_version = str(raw_payload.get("provider_version", "")).strip()
+        if provider_version:
+            return f"bom-rss:{metadata['productId']}:{metadata['issueTimeUtc']}:{provider_version}"
+        return f"bom-rss:{metadata['productId']}:{metadata['issueTimeUtc']}"
+
+
+def _get_mdtm(ftp: ftplib.FTP, filename: str) -> str:
+    try:
+        return ftp.sendcmd(f"MDTM {filename}").strip()
+    except Exception:
+        return ""

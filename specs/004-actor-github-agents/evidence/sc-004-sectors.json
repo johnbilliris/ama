@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "status": "Not measured",
+  "thresholdPercent": 80,
+  "denominator": 14,
+  "measuredCorrect": 0,
+  "measuredPercent": 0.0,
+  "run": {
+    "runId": "",
+    "reviewer": "",
+    "editor": "",
+    "model": ""
+  },
+  "families": [
+    {
+      "familyId": "commonwealth-government",
+      "successorAgents": ["nema", "adf", "afp-commonwealth"],
+      "questions": [{"questionId": "CG-001", "question": "Which Commonwealth authority coordinates national disaster support?", "targetAgentId": "nema", "ownerRole": "commonwealth-reviewer", "expectedAnswer": "Must identify NEMA coordination role with qualified authority wording.", "primarySourceCitation": "specs/004-actor-github-agents/contracts/authority-ledger.yaml"}]
+    },
+    {
+      "familyId": "state-government",
+      "successorAgents": ["state-government"],
+      "questions": [{"questionId": "SG-001", "question": "How are state-level lead agencies determined?", "targetAgentId": "state-government", "ownerRole": "state-reviewer", "expectedAnswer": "Must explain state coordination and delegated lead-agency assignment.", "primarySourceCitation": ".github/agents/sectors/cross-sector/state-government.agent.md"}]
+    },
+    {
+      "familyId": "territory-government",
+      "successorAgents": ["territory-government"],
+      "questions": [{"questionId": "TG-001", "question": "How do ACT/NT territory arrangements differ from states?", "targetAgentId": "territory-government", "ownerRole": "territory-reviewer", "expectedAnswer": "Must distinguish ACT/NT arrangements and Commonwealth proximity.", "primarySourceCitation": ".github/agents/sectors/cross-sector/territory-government.agent.md"}]
+    },
+    {
+      "familyId": "local-government",
+      "successorAgents": ["local-government"],
+      "questions": [{"questionId": "LG-001", "question": "Which local-government obligations apply to evacuation centres?", "targetAgentId": "local-government", "ownerRole": "local-reviewer", "expectedAnswer": "Must identify council obligations and local facility ownership boundaries.", "primarySourceCitation": ".github/agents/sectors/cross-sector/local-government.agent.md"}]
+    },
+    {
+      "familyId": "fire-services",
+      "successorAgents": ["frnsw", "nsw-rfs", "frv", "cfa-vic", "qfd", "dfes-wa", "tfs", "sacfs", "samfs", "act-fr", "act-rfs", "ntfrs", "bushfires-nt", "asa"],
+      "questions": [{"questionId": "FIRE-001", "question": "Which NSW counterpart handles rural bushfire combat operations?", "targetAgentId": "nsw-rfs", "ownerRole": "fire-reviewer", "expectedAnswer": "Must route NSW rural fire to nsw-rfs, not archived fire-services.", "primarySourceCitation": ".github/agents/AGENTS.md"}]
+    },
+    {
+      "familyId": "police",
+      "successorAgents": ["act-policing", "nswpf", "vicpol", "qps", "sapol", "wapol", "taspol", "ntpf", "afp-commonwealth"],
+      "questions": [{"questionId": "POL-001", "question": "Which NSW police profile owns evacuation enforcement?", "targetAgentId": "nswpf", "ownerRole": "police-reviewer", "expectedAnswer": "Must identify nswpf and avoid archived police profile.", "primarySourceCitation": ".github/agents/sectors/nsw/nswpf.agent.md"}]
+    },
+    {
+      "familyId": "ambulance-paramedic",
+      "successorAgents": ["act-ambulance", "nsw-ambulance", "av", "qas", "saas", "at", "sja-wa", "sja-nt", "rfds", "sja-national"],
+      "questions": [{"questionId": "MED-001", "question": "Which NSW profile owns pre-hospital triage and patient transport?", "targetAgentId": "nsw-ambulance", "ownerRole": "ambulance-reviewer", "expectedAnswer": "Must identify nsw-ambulance with health/logistics boundaries.", "primarySourceCitation": ".github/agents/sectors/nsw/nsw-ambulance.agent.md"}]
+    },
+    {
+      "familyId": "ses",
+      "successorAgents": ["ses-nsw", "ses-vic", "ses-qld", "ses-sa", "ses-tas", "ses-act", "ntes", "dfes-wa"],
+      "questions": [{"questionId": "SES-001", "question": "Which profile owns NSW flood/storm combat responsibilities?", "targetAgentId": "ses-nsw", "ownerRole": "ses-reviewer", "expectedAnswer": "Must identify ses-nsw and qualified flood/storm combat scope.", "primarySourceCitation": ".github/agents/sectors/nsw/ses-nsw.agent.md"}]
+    },
+    {
+      "familyId": "meteorology",
+      "successorAgents": ["bom-national"],
+      "questions": [{"questionId": "MET-001", "question": "Which profile provides authoritative severe-weather guidance?", "targetAgentId": "bom-national", "ownerRole": "weather-reviewer", "expectedAnswer": "Must identify bom-national as weather intelligence authority.", "primarySourceCitation": ".github/agents/sectors/commonwealth/bom-national.agent.md"}]
+    },
+    {
+      "familyId": "health",
+      "successorAgents": ["health"],
+      "questions": [{"questionId": "HEALTH-001", "question": "Which profile handles cross-jurisdiction health surge coordination?", "targetAgentId": "health", "ownerRole": "health-reviewer", "expectedAnswer": "Must identify health and clinical authority boundaries.", "primarySourceCitation": ".github/agents/sectors/cross-sector/health.agent.md"}]
+    },
+    {
+      "familyId": "utility",
+      "successorAgents": ["utility"],
+      "questions": [{"questionId": "UTIL-001", "question": "Which profile covers utility restoration and reconnection priorities?", "targetAgentId": "utility", "ownerRole": "utility-reviewer", "expectedAnswer": "Must identify utility role and escalation boundaries.", "primarySourceCitation": ".github/agents/sectors/cross-sector/utility.agent.md"}]
+    },
+    {
+      "familyId": "transport",
+      "successorAgents": ["transport"],
+      "questions": [{"questionId": "TRANS-001", "question": "Which profile handles road/rail closure and evacuation transport guidance?", "targetAgentId": "transport", "ownerRole": "transport-reviewer", "expectedAnswer": "Must identify transport and jurisdictional police counterpart handoffs.", "primarySourceCitation": ".github/agents/sectors/cross-sector/transport.agent.md"}]
+    },
+    {
+      "familyId": "community",
+      "successorAgents": ["community-ngos"],
+      "questions": [{"questionId": "COMM-001", "question": "Which profile owns NGO humanitarian support coordination?", "targetAgentId": "community-ngos", "ownerRole": "community-reviewer", "expectedAnswer": "Must identify community-ngos and non-command boundaries.", "primarySourceCitation": ".github/agents/sectors/cross-sector/community-ngos.agent.md"}]
+    },
+    {
+      "familyId": "volunteer",
+      "successorAgents": ["volunteer"],
+      "questions": [{"questionId": "VOL-001", "question": "Which profile addresses spontaneous volunteer coordination controls?", "targetAgentId": "volunteer", "ownerRole": "volunteer-reviewer", "expectedAnswer": "Must identify volunteer role and legal/safety constraints.", "primarySourceCitation": ".github/agents/sectors/cross-sector/volunteer.agent.md"}]
+    }
+  ],
+  "responses": []
+}

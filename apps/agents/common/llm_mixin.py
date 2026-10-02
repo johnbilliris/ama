@@ -3,14 +3,29 @@ import json as _json
 import logging
 import time
 from typing import Any as _Any
+from typing import Protocol
 
 from common.circuit_breaker import CircuitBreaker
 from common.content_safety import ContentSafetyValidator
 from common.llm_client import LLMClient
 from common.llm_config import LLMClientConfig
+from common.token_budget import Tokenizer, create_tokenizer
 from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
+
+
+class RestrictedSafetySink(Protocol):
+    """Restricted sink for safety-flagged raw content evidence."""
+
+    def write(
+        self,
+        *,
+        correlation_id: str | None,
+        content: str,
+        retention_days: int,
+        metadata: dict[str, object],
+    ) -> str: ...
 
 
 class LLMCallMixin:
@@ -24,10 +39,17 @@ class LLMCallMixin:
     - Budget tracking: tracks cumulative token costs and emits warnings
     """
 
-    def __init__(self, config: LLMClientConfig | None = None) -> None:
+    def __init__(
+        self,
+        config: LLMClientConfig | None = None,
+        tokenizer: Tokenizer | None = None,
+        safety_evidence_sink: RestrictedSafetySink | None = None,
+    ) -> None:
         self._llm_config = config or LLMClientConfig()
         self._llm_client = LLMClient(self._llm_config)
         self._content_safety = ContentSafetyValidator()
+        self._tokenizer = tokenizer or create_tokenizer(self._llm_config.model_tier)
+        self._safety_evidence_sink = safety_evidence_sink
         self._circuit_breaker = CircuitBreaker(
             failure_threshold=self._llm_config.circuit_breaker_failure_threshold,
             recovery_timeout=self._llm_config.circuit_breaker_recovery_timeout,
@@ -61,6 +83,63 @@ class LLMCallMixin:
                 self._llm_config.monthly_budget_usd,
             )
 
+    def _apply_output_budget(
+        self,
+        *,
+        text: str,
+        max_output_tokens: int,
+        correlation_id: str | None,
+        provider_token_usage: dict[str, int] | None = None,
+    ) -> dict[str, object]:
+        measured_output_tokens = self._tokenizer.count_tokens(text)
+        provider_usage = provider_token_usage or {"input_tokens": 0, "output_tokens": measured_output_tokens}
+        provider_output_tokens = int(provider_usage.get("output_tokens", measured_output_tokens))
+        actual_output_tokens = max(measured_output_tokens, provider_output_tokens)
+
+        retained_text = text
+        retained_output_tokens = measured_output_tokens
+        if measured_output_tokens > max_output_tokens:
+            retained_text = self._tokenizer.truncate_to_tokens(text, max_output_tokens)
+            retained_output_tokens = self._tokenizer.count_tokens(retained_text)
+            logger.warning(
+                "Token budget exceeded (correlation_id=%s): output_actual=%s retained_output=%s max_output=%s",
+                correlation_id,
+                actual_output_tokens,
+                retained_output_tokens,
+                max_output_tokens,
+            )
+
+        retained_usage = {
+            "input_tokens": int(provider_usage.get("input_tokens", 0)),
+            "output_tokens": retained_output_tokens,
+        }
+        actual_usage = {
+            "input_tokens": int(provider_usage.get("input_tokens", 0)),
+            "output_tokens": actual_output_tokens,
+        }
+        return {
+            "text": retained_text,
+            "retained_token_usage": retained_usage,
+            "actual_token_usage": actual_usage,
+            "output_truncated": measured_output_tokens > max_output_tokens,
+        }
+
+    def enforce_post_append_budget(
+        self,
+        *,
+        text: str,
+        max_output_tokens: int,
+        correlation_id: str | None,
+        provider_token_usage: dict[str, int] | None = None,
+    ) -> dict[str, object]:
+        """Re-apply output budget after post-generation text mutations."""
+        return self._apply_output_budget(
+            text=text,
+            max_output_tokens=max_output_tokens,
+            correlation_id=correlation_id,
+            provider_token_usage=provider_token_usage,
+        )
+
     def _generate_with_fallback(
         self,
         *,
@@ -71,6 +150,7 @@ class LLMCallMixin:
         expected_language: str | None = None,
         max_output_tokens: int = 300,
         timeout_seconds: float = 30.0,
+        deadline_monotonic: float | None = None,
         temperature: float = 0.0,
         response_model: type | None = None,
     ) -> dict[str, object]:
@@ -88,6 +168,41 @@ class LLMCallMixin:
             response_model: Optional Pydantic model for structured output validation (FR-018).
         """
         cb_state = self._circuit_breaker.state
+        max_input_tokens = self._llm_config.max_input_tokens
+        measured_input_tokens = self._tokenizer.count_tokens(prompt)
+
+        if deadline_monotonic is not None:
+            remaining = deadline_monotonic - time.monotonic()
+            if remaining <= 0:
+                logger.warning(
+                    "LLM deadline exceeded before dispatch (correlation_id=%s)",
+                    correlation_id,
+                )
+                return self._template_fallback_response(
+                    template_text=template_text,
+                    circuit_breaker_state=cb_state.value,
+                    correlation_id=correlation_id,
+                    error_reason="deadline_exceeded",
+                    token_usage={"input_tokens": 0, "output_tokens": 0},
+                    actual_token_usage={"input_tokens": measured_input_tokens, "output_tokens": 0},
+                )
+            timeout_seconds = min(timeout_seconds, remaining)
+
+        if measured_input_tokens > max_input_tokens:
+            logger.warning(
+                "Input token budget exceeded (correlation_id=%s): input_tokens=%s max_input_tokens=%s",
+                correlation_id,
+                measured_input_tokens,
+                max_input_tokens,
+            )
+            return self._template_fallback_response(
+                template_text=template_text,
+                circuit_breaker_state=cb_state.value,
+                correlation_id=correlation_id,
+                error_reason="input_budget_exceeded",
+                token_usage={"input_tokens": 0, "output_tokens": 0},
+                actual_token_usage={"input_tokens": measured_input_tokens, "output_tokens": 0},
+            )
 
         # Circuit breaker OPEN — skip directly to template fallback
         if not self._circuit_breaker.can_execute():
@@ -109,6 +224,7 @@ class LLMCallMixin:
                 correlation_id=correlation_id,
                 max_output_tokens=max_output_tokens,
                 timeout_seconds=timeout_seconds,
+                deadline_monotonic=deadline_monotonic,
                 temperature=temperature,
             )
             text = str(response.get("text", "")).strip()
@@ -121,14 +237,18 @@ class LLMCallMixin:
             # Track budget
             self._track_budget(deployment_id, input_tokens, output_tokens)
 
-            # Token trimming
-            if output_tokens > max_output_tokens:
-                logger.warning(
-                    "Token budget exceeded: output_tokens=%s max_output_tokens=%s",
-                    output_tokens,
-                    max_output_tokens,
-                )
-                text = text[: max(80, int(len(text) * 0.8))]
+            budgeted = self._apply_output_budget(
+                text=text,
+                max_output_tokens=max_output_tokens,
+                correlation_id=correlation_id,
+                provider_token_usage={
+                    "input_tokens": input_tokens,
+                    "output_tokens": output_tokens,
+                },
+            )
+            text = str(budgeted["text"])
+            retained_usage = budgeted["retained_token_usage"]
+            actual_usage = budgeted["actual_token_usage"]
 
             # Structured output validation (FR-018 / T007b)
             if response_model is not None:
@@ -147,6 +267,7 @@ class LLMCallMixin:
                         correlation_id=correlation_id,
                         error_reason=f"validation_error: {val_err}",
                         token_usage=token_usage,
+                        actual_token_usage=actual_usage,
                         deployment_id=deployment_id,
                     )
 
@@ -156,17 +277,49 @@ class LLMCallMixin:
                 expected_language=expected_language,
             )
             if not safety.passed:
+                evidence_ref = "dropped"
+                retention_days = 7
+                if self._safety_evidence_sink is not None:
+                    try:
+                        evidence_ref = self._safety_evidence_sink.write(
+                            correlation_id=correlation_id,
+                            content=text,
+                            retention_days=retention_days,
+                            metadata={
+                                "reason": safety.reason or "unknown",
+                                "validation_method": safety.validation_method,
+                            },
+                        )
+                    except Exception as sink_error:
+                        logger.warning(
+                            "safety_evidence_sink_write_failed correlation_id=%s retention_days=%s error=%s",
+                            correlation_id,
+                            retention_days,
+                            sink_error,
+                        )
+                else:
+                    logger.warning(
+                        "safety_evidence_sink_unavailable correlation_id=%s retention_days=%s action=dropped",
+                        correlation_id,
+                        retention_days,
+                    )
+
                 self._circuit_breaker.record_success()
                 return {
                     "text": template_text,
                     "generation_method": "safety_fallback",
                     "model_deployment_id": response.get("deployment_id"),
-                    "token_usage": token_usage,
+                    "token_usage": retained_usage,
+                    "actual_token_usage": actual_usage,
                     "content_safety_result": safety.result,
+                    "content_safety_validation_method": safety.validation_method,
+                    "content_safety_reason": safety.reason or "",
+                    "content_safety_reference": evidence_ref,
                     "circuit_breaker_state": self._circuit_breaker.state.value,
                     "confidence_adjustment": None,
                     "correlation_id": correlation_id,
                     "requires_human_review": True,
+                    "output_truncated": False,
                 }
 
             # Success path — apply confidence gating
@@ -176,12 +329,16 @@ class LLMCallMixin:
                 "text": text,
                 "generation_method": "llm",
                 "model_deployment_id": response.get("deployment_id"),
-                "token_usage": token_usage,
+                "token_usage": retained_usage,
+                "actual_token_usage": actual_usage,
                 "content_safety_result": "passed",
+                "content_safety_validation_method": safety.validation_method,
+                "content_safety_reason": safety.reason or "",
                 "circuit_breaker_state": self._circuit_breaker.state.value,
                 "confidence_adjustment": gating.get("confidence_adjustment"),
                 "correlation_id": correlation_id,
-                "requires_human_review": gating.get("requires_human_review", False),
+                "requires_human_review": bool(safety.review_flag or gating.get("requires_human_review", False)),
+                "output_truncated": bool(budgeted["output_truncated"]),
             }
 
         except Exception as error:
@@ -207,6 +364,7 @@ class LLMCallMixin:
         correlation_id: str | None = None,
         error_reason: str = "",
         token_usage: dict | None = None,
+        actual_token_usage: dict | None = None,
         deployment_id: str | None = None,
     ) -> dict[str, object]:
         """Build a template fallback response with confidence reduction."""
@@ -215,10 +373,12 @@ class LLMCallMixin:
             "generation_method": "template_fallback",
             "model_deployment_id": deployment_id,
             "token_usage": token_usage,
+            "actual_token_usage": actual_token_usage,
             "content_safety_result": "not_checked",
             "circuit_breaker_state": circuit_breaker_state,
             "confidence_adjustment": self._llm_config.fallback_reduction_factor,
             "requires_human_review": True,
+            "output_truncated": False,
             "error_reason": error_reason,
             "correlation_id": correlation_id,
         }

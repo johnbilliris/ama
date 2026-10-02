@@ -14,6 +14,8 @@ class RecommendationSummary(BaseModel):
     total: int = 0
     approved: int = 0
     rejected: int = 0
+    escalated: int = 0
+    timed_out: int = 0
     pending: int = 0
 
 
@@ -34,6 +36,8 @@ class BenchmarkComparison(BaseModel):
     target: float
     actual: float | None = None
     passed: bool = False
+    prior_actual: float | None = None
+    delta_from_prior: float | None = None
 
 
 class ExerciseReport(BaseModel):

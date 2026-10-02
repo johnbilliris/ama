@@ -65,6 +65,12 @@ _ACTION_STATUS_MAP: dict[str, PlanStatus] = {
 }
 
 _VALID_ACTIONS = set(_ACTION_STATUS_MAP.keys())
+_AUTHORIZED_OVERRIDE_ROLES = {
+    "incident_commander",
+    "state_controller",
+    "operations_officer",
+    "logistics_officer",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -391,10 +397,79 @@ def create_app(
                 status_code=400,
                 detail="Justification is mandatory for all overrides",
             )
+        if body.role not in _AUTHORIZED_OVERRIDE_ROLES:
+            raise HTTPException(status_code=403, detail="Role is not authorized to override plans")
 
         agent_instance: ResourceAllocationAgent | None = app.state.agent
         if agent_instance is None:
             raise HTTPException(status_code=503, detail="Agent not initialised")
+        if agent_instance._cosmos_plans is None:
+            raise HTTPException(status_code=503, detail="Plan repository unavailable")
+
+        try:
+            current_doc = agent_instance._cosmos_plans.read_item(
+                item=body.plan_id,
+                partition_key=body.plan_id,
+            )
+        except Exception as exc:
+            exc_str = str(exc)
+            if "NotFound" in exc_str or "404" in exc_str:
+                raise HTTPException(status_code=404, detail=f"Plan {body.plan_id} not found")
+            raise HTTPException(status_code=503, detail="Failed to load plan")
+
+        previous_status = current_doc.get("status", "proposed")
+        target_status = _ACTION_STATUS_MAP[body.action].value
+        try:
+            previous_status_enum = PlanStatus(previous_status)
+        except ValueError as exc:
+            raise HTTPException(status_code=409, detail=f"Unknown persisted status '{previous_status}'") from exc
+
+        if target_status != previous_status:
+            allowed = _VALID_TRANSITIONS.get(previous_status_enum, set())
+            if PlanStatus(target_status) not in allowed:
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        f"Invalid transition: {previous_status} -> {target_status}. "
+                        f"Allowed: {sorted(s.value for s in allowed)}"
+                    ),
+                )
+
+        material_change = target_status != previous_status or bool(body.details)
+        if not material_change:
+            return OverrideResponse(
+                success=False,
+                action_applied=body.action,
+                message="No material change; plan left unchanged",
+            )
+
+        updated_doc = dict(current_doc)
+        updated_doc["status"] = target_status
+        updated_doc["updated_at"] = datetime.now(UTC).isoformat()
+        if body.details:
+            updated_doc["override_details"] = body.details
+        current_version = int(current_doc.get("version", 1))
+        updated_doc["version"] = current_version + 1
+
+        etag = current_doc.get("_etag")
+        try:
+            if etag is not None:
+                agent_instance._cosmos_plans.replace_item(
+                    item=body.plan_id,
+                    body=updated_doc,
+                    etag=etag,
+                    match_condition="IfNotModified",
+                )
+            else:
+                agent_instance._cosmos_plans.replace_item(
+                    item=body.plan_id,
+                    body=updated_doc,
+                )
+        except Exception as exc:
+            exc_str = str(exc)
+            if "PreconditionFailed" in exc_str or "412" in exc_str:
+                raise HTTPException(status_code=409, detail="Stale plan version; reload and retry")
+            raise HTTPException(status_code=503, detail="Failed to persist override")
 
         # Write audit record for override
         config_hash = cfg.compute_config_hash()
@@ -408,11 +483,14 @@ def create_app(
             override_justification=body.justification,
             agent_version=cfg.agent_version,
             configuration_version=config_hash,
+            version=updated_doc["version"],
         )
         agent_instance.audit_writer.write(record)
 
         return OverrideResponse(
             success=True,
+            new_plan_id=body.plan_id,
+            new_version=updated_doc["version"],
             action_applied=body.action,
             override_record_id=record.id,
             message=f"Override '{body.action}' applied to plan {body.plan_id}",
@@ -428,6 +506,9 @@ def create_app(
 if __name__ == "__main__":
     import uvicorn
 
+    from apps.console_logging import configure_console_logging, uvicorn_log_config
+
+    configure_console_logging()
     config = ResourceAllocationConfig()
     agent = ResourceAllocationAgent(
         config=config,
@@ -437,4 +518,4 @@ if __name__ == "__main__":
         ),
     )
     app = create_app(agent=agent, config=config)
-    uvicorn.run(app, host="0.0.0.0", port=config.port)
+    uvicorn.run(app, host="0.0.0.0", port=config.port, log_config=uvicorn_log_config())

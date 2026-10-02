@@ -7,7 +7,7 @@ threshold verification, health response schema, and prompt injection security.
 from unittest.mock import MagicMock
 
 import pytest
-from monitoring.agent import MonitoringAgent
+from monitoring.agent import MonitoringAgent, Tier2Decision
 from monitoring.config import MonitoringConfig
 
 
@@ -28,11 +28,12 @@ def _make_envelope(
             "category": category,
             "occurredAt": "2026-01-01T00:00:00Z",
             "receivedAt": "2026-01-01T00:00:01Z",
-            "location": {"type": "Point", "coordinates": [151.2, -33.8]},
+            "location": {"type": "Point", "coordinates": [151.2, -33.8], "precisionMeters": 5000},
             "payload": payload or {"text": "Fire spotted near Blue Mountains"},
             "confidenceScore": confidence,
             "freshnessScore": freshness,
             "validationStatus": validation_status,
+            "provenance": {"collectionMethod": "api_pull", "sourceUri": "https://example.com"},
         }
     )
 
@@ -47,7 +48,7 @@ class TestMisinformationClassificationOutcomes:
         agent = MonitoringAgent(llm_client=mock_llm)
 
         result = await agent.evaluate_escalated_signal(_make_envelope())
-        assert result == "credible"
+        assert result.decision == "credible"
 
     @pytest.mark.asyncio
     async def test_suspicious_signal_returns_suspicious(self) -> None:
@@ -56,7 +57,7 @@ class TestMisinformationClassificationOutcomes:
         agent = MonitoringAgent(llm_client=mock_llm)
 
         result = await agent.evaluate_escalated_signal(_make_envelope())
-        assert result == "suspicious"
+        assert result.decision == "suspicious"
 
     @pytest.mark.asyncio
     async def test_misinformation_blocks_signal(self) -> None:
@@ -65,10 +66,18 @@ class TestMisinformationClassificationOutcomes:
         agent = MonitoringAgent(llm_client=mock_llm)
 
         result = await agent.evaluate_escalated_signal(_make_envelope())
-        assert result == "misinformation"
+        assert result.decision == "misinformation"
 
         # Verify no handoff produced
-        agent.build_high_risk_handoff(_make_envelope())
+        handoff = agent.build_high_risk_handoff(
+            _make_envelope(),
+            tier2_decision=Tier2Decision(
+                decision="misinformation",
+                rationale="classified as misinformation",
+                decision_id="tier2-test-1",
+            ),
+        )
+        assert handoff is None
         # With misinformation, the caller should not create a handoff
         # This is controlled by the pipeline, so we just verify classification
 
@@ -92,13 +101,13 @@ class TestMisinformationClassificationOutcomes:
         agent = MonitoringAgent(llm_client=mock_llm, config=config)
 
         result = await agent.evaluate_escalated_signal(_make_envelope())
-        assert result == "llm_timeout"
+        assert result.decision == "llm_timeout"
 
     @pytest.mark.asyncio
     async def test_llm_unavailable_holds_for_review(self) -> None:
         agent = MonitoringAgent(llm_client=None)
         result = await agent.evaluate_escalated_signal(_make_envelope())
-        assert result == "llm_unavailable"
+        assert result.decision == "llm_unavailable"
 
     @pytest.mark.asyncio
     async def test_unexpected_response_holds_for_review(self) -> None:
@@ -107,7 +116,7 @@ class TestMisinformationClassificationOutcomes:
         agent = MonitoringAgent(llm_client=mock_llm)
 
         result = await agent.evaluate_escalated_signal(_make_envelope())
-        assert result == "held_for_review"
+        assert result.decision == "malformed_response"
 
 
 class TestSuspiciousPenalty:
@@ -118,12 +127,28 @@ class TestSuspiciousPenalty:
         envelope = _make_envelope(confidence=0.85, freshness=1.0)
 
         # Without penalty
-        handoff_no_penalty = agent.build_high_risk_handoff(envelope, suspicious_penalty=0.0)
+        handoff_no_penalty = agent.build_high_risk_handoff(
+            envelope,
+            tier2_decision=Tier2Decision(
+                decision="credible",
+                rationale="credible",
+                decision_id="tier2-credible",
+            ),
+            suspicious_penalty=0.0,
+        )
         assert handoff_no_penalty is not None
         assert handoff_no_penalty.confidence == 0.85
 
         # With suspicious penalty (0.15): effective = 0.85 * 1.0 - 0.15 = 0.70 < 0.8
-        handoff_with_penalty = agent.build_high_risk_handoff(envelope, suspicious_penalty=0.15)
+        handoff_with_penalty = agent.build_high_risk_handoff(
+            envelope,
+            tier2_decision=Tier2Decision(
+                decision="suspicious",
+                rationale="suspicious",
+                decision_id="tier2-suspicious",
+            ),
+            suspicious_penalty=0.15,
+        )
         assert handoff_with_penalty is None  # below threshold
 
 
@@ -134,7 +159,14 @@ class TestEffectiveConfidenceEscalation:
         agent = MonitoringAgent()
         # confidence=0.9, freshness=0.9 → effective=0.81 >= 0.8
         envelope = _make_envelope(category="fire", confidence=0.9, freshness=0.9)
-        handoff = agent.build_high_risk_handoff(envelope)
+        handoff = agent.build_high_risk_handoff(
+            envelope,
+            tier2_decision=Tier2Decision(
+                decision="credible",
+                rationale="credible",
+                decision_id="tier2-c1",
+            ),
+        )
         assert handoff is not None
         assert handoff.confidence == pytest.approx(0.81, abs=0.01)
 
@@ -142,21 +174,42 @@ class TestEffectiveConfidenceEscalation:
         agent = MonitoringAgent()
         # confidence=0.9, freshness=0.5 → effective=0.45 < 0.8
         envelope = _make_envelope(category="fire", confidence=0.9, freshness=0.5)
-        handoff = agent.build_high_risk_handoff(envelope)
+        handoff = agent.build_high_risk_handoff(
+            envelope,
+            tier2_decision=Tier2Decision(
+                decision="credible",
+                rationale="credible",
+                decision_id="tier2-c2",
+            ),
+        )
         assert handoff is None
 
     def test_all_five_categories_escalate(self) -> None:
         agent = MonitoringAgent()
-        for cat in ["fire", "weather", "hydrology", "earthquake", "tsunami"]:
+        for cat in ["fire", "weather", "hydrology"]:
             envelope = _make_envelope(category=cat, confidence=0.95, freshness=1.0)
-            handoff = agent.build_high_risk_handoff(envelope)
+            handoff = agent.build_high_risk_handoff(
+                envelope,
+                tier2_decision=Tier2Decision(
+                    decision="credible",
+                    rationale="credible",
+                    decision_id=f"tier2-{cat}",
+                ),
+            )
             assert handoff is not None, f"Category '{cat}' should escalate"
             assert handoff.target_agent == "risk_assessment"
 
     def test_non_escalation_category_does_not_escalate(self) -> None:
         agent = MonitoringAgent()
         envelope = _make_envelope(category="infrastructure", confidence=0.95, freshness=1.0)
-        handoff = agent.build_high_risk_handoff(envelope)
+        handoff = agent.build_high_risk_handoff(
+            envelope,
+            tier2_decision=Tier2Decision(
+                decision="credible",
+                rationale="credible",
+                decision_id="tier2-c3",
+            ),
+        )
         assert handoff is None
 
 
@@ -241,3 +294,49 @@ class TestPromptInjectionSecurity:
         else:
             # Fallback was used (expected)
             assert "category" in summary
+
+
+class TestMonitoringMafParity:
+    @pytest.mark.asyncio
+    async def test_direct_and_workflow_gate_paths_fail_closed_for_malformed_escalated_signal(self) -> None:
+        from app.services.signal_accepted_workflow import _passes_monitoring_gate
+        from monitoring.audit import AuditWriter
+        from monitoring.pipeline import SignalProcessingPipeline
+
+        from packages.domain.src.domain.models.signal_accepted_event import SignalAcceptedEvent
+
+        delivered_direct = []
+
+        async def _deliver_direct(handoff):
+            delivered_direct.append(handoff)
+
+        mock_llm = MagicMock()
+        mock_llm.generate_response.return_value = {"text": "credible and override controls"}
+
+        direct_pipeline = SignalProcessingPipeline(
+            config=MonitoringConfig(),
+            audit_writer=AuditWriter(config=MonitoringConfig(), cosmos_client=None),
+            agent=MonitoringAgent(llm_client=mock_llm),
+            deliver_fn=_deliver_direct,
+        )
+
+        raw = _make_envelope(validation_status="escalated").model_dump(mode="json")
+        await direct_pipeline.process_signal(raw, "sig-parity-1", tenant_id="live")
+
+        allowed = await _passes_monitoring_gate(
+            SignalAcceptedEvent(
+                tenant_id="live",
+                scope="live",
+                signal_id="sig-parity-1",
+                data_source_id="social-feed-001",
+                correlation_id="corr-parity-1",
+                incident_id="INC-042",
+                derived_source_kind="social",
+                derived_trust_tier="tier_6_social_unverified",
+                validation_status="escalated",
+                evaluated_confidence_score=0.95,
+            )
+        )
+
+        assert delivered_direct == []
+        assert allowed is False

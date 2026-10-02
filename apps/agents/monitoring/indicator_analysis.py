@@ -93,8 +93,7 @@ class IndicatorAnalysisService:
                     else:
                         result["content_safety_result"] = "failed"
                 elif llm_text:
-                    result["ai_summary"] = llm_text
-                    result["content_safety_result"] = "not_validated"
+                    result["content_safety_result"] = "content_safety_unavailable"
             except Exception:
                 logger.info("LLM unavailable for analysis, using rule-based output")
                 result["content_safety_result"] = "llm_unavailable"

@@ -8,9 +8,13 @@ Bug fixes applied:
 """
 
 import asyncio
+import json
 import logging
 import os
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
+
+from apps.console_logging import configure_console_logging, uvicorn_log_config
 
 if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
     try:
@@ -28,11 +32,18 @@ from app.validators.signal_envelope import SignalEnvelope
 from common.content_safety import ContentSafetyValidator
 from common.handoffs import AgentHandoffEvent, build_handoff
 from monitoring.config import MonitoringConfig
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
 # Escalation categories — T021 bug fix: added earthquake & tsunami
 ESCALATION_CATEGORIES = {"fire", "weather", "hydrology", "earthquake", "tsunami"}
+
+
+class Tier2Decision(BaseModel):
+    decision: str
+    rationale: str
+    decision_id: str
 
 
 class MonitoringAgent:
@@ -86,11 +97,40 @@ class MonitoringAgent:
 
         return base_summary
 
+    @staticmethod
+    def _evidence_snapshot(envelope: SignalEnvelope, signal_id: str | None) -> dict[str, object]:
+        payload = envelope.payload or {}
+        provenance = envelope.provenance.model_dump(mode="json") if envelope.provenance else {}
+        allowlisted_payload = {
+            "hazard_type": payload.get("hazard_type"),
+            "severity": payload.get("severity"),
+            "severity_level": payload.get("severity_level"),
+            "location_name": payload.get("location_name"),
+            "summary": str(payload.get("summary", ""))[:240],
+        }
+        allowlisted_provenance = {
+            "sourceUri": provenance.get("sourceUri"),
+            "collectionMethod": provenance.get("collectionMethod"),
+            "sourceTimestamp": provenance.get("sourceTimestamp"),
+        }
+        return {
+            "signal_id": signal_id,
+            "category": envelope.category,
+            "source_kind": envelope.source.kind,
+            "occurred_at": envelope.occurredAt.isoformat(),
+            "received_at": envelope.receivedAt.isoformat(),
+            "payload": allowlisted_payload,
+            "provenance": allowlisted_provenance,
+        }
+
     def build_high_risk_handoff(
         self,
         envelope: SignalEnvelope,
+        *,
+        tier2_decision: Tier2Decision,
         suspicious_penalty: float = 0.0,
         tenant_id: str = "live",
+        signal_id: str | None = None,
     ) -> AgentHandoffEvent | None:
         """Build a handoff event if the signal meets escalation criteria.
 
@@ -101,6 +141,22 @@ class MonitoringAgent:
         effective_confidence = envelope.confidenceScore * envelope.freshnessScore
         effective_confidence -= suspicious_penalty
         effective_confidence = max(0.0, effective_confidence)
+
+        if envelope.validationStatus not in {"validated", "pending", "escalated"}:
+            return None
+
+        blocked_decisions = {
+            "misinformation",
+            "held_for_review",
+            "llm_timeout",
+            "llm_unavailable",
+            "malformed_response",
+        }
+        if tier2_decision.decision in blocked_decisions:
+            return None
+
+        if envelope.validationStatus == "escalated" and tier2_decision.decision not in {"credible", "suspicious"}:
+            return None
 
         is_high_risk = (
             envelope.category in ESCALATION_CATEGORIES
@@ -113,17 +169,60 @@ class MonitoringAgent:
             incident_id=envelope.incidentId,
             source_agent="monitoring",
             target_agent="risk_assessment",
-            scope_key=envelope.incidentId,
+            scope_key=f"{tenant_id}:{envelope.incidentId}",
             payload={
                 "category": envelope.category,
                 "sourceKind": envelope.source.kind,
                 "signalSummary": self.summarize_signal(envelope),
+                "signal_ids": [signal_id] if signal_id else [],
+                "stored_signal_refs": (
+                    [
+                        {
+                            "signal_id": signal_id,
+                            "scope": tenant_id,
+                            "jurisdiction_id": envelope.jurisdictionId or "national",
+                            "data_source_id": envelope.source.dataSourceId,
+                        }
+                    ]
+                    if signal_id
+                    else []
+                ),
+                "tier2_decision": tier2_decision.model_dump(mode="json"),
+                "evidence_snapshot": {
+                    "signals": [self._evidence_snapshot(envelope, signal_id)],
+                },
             },
             confidence=effective_confidence,
             tenant_id=tenant_id,
         )
 
-    async def evaluate_escalated_signal(self, envelope: SignalEnvelope) -> str:
+    @staticmethod
+    def _parse_tier2_response(response: dict[str, object]) -> tuple[str, str]:
+        allowed = {"credible", "suspicious", "misinformation"}
+        raw_decision = response.get("decision")
+        if isinstance(raw_decision, str) and raw_decision.strip().lower() in allowed:
+            rationale = str(response.get("rationale") or "structured_decision")
+            return raw_decision.strip().lower(), rationale
+
+        text = str(response.get("text", "")).strip()
+        lowered = text.lower()
+        if lowered in allowed:
+            return lowered, "exact_text_decision"
+
+        try:
+            parsed = json.loads(text)
+        except Exception:
+            return "malformed_response", "unparseable_classifier_response"
+
+        if not isinstance(parsed, dict):
+            return "malformed_response", "non_object_classifier_response"
+        decision = str(parsed.get("decision", "")).strip().lower()
+        if decision not in allowed:
+            return "malformed_response", "invalid_classifier_decision"
+        rationale = str(parsed.get("rationale") or "structured_json_decision")
+        return decision, rationale
+
+    async def evaluate_escalated_signal(self, envelope: SignalEnvelope) -> Tier2Decision:
         """Tier 2 LLM-based evaluation with async timeout and fail-safe-CLOSED.
 
         T020 bug fix: uses correct LLM client signature (purpose + prompt).
@@ -134,7 +233,11 @@ class MonitoringAgent:
         Returns one of: credible, suspicious, misinformation, held_for_review, llm_unavailable.
         """
         if not self._llm_client:
-            return "llm_unavailable"
+            return Tier2Decision(
+                decision="llm_unavailable",
+                rationale="llm client not configured",
+                decision_id=f"tier2-{uuid4().hex[:12]}",
+            )
 
         try:
             # T020 bug fix: correct call signature
@@ -157,30 +260,29 @@ class MonitoringAgent:
                 timeout=self._config.llm_eval_timeout_seconds,
             )
 
-            result_text = response.get("text", "").strip().lower()
-
-            # Parse classification
-            if "misinformation" in result_text:
-                return "misinformation"
-            if "suspicious" in result_text:
-                return "suspicious"  # T025
-            if "credible" in result_text:
-                return "credible"
-
-            # T024: Unexpected response → fail-safe-CLOSED
-            logger.warning(
-                "LLM returned unexpected response '%s', holding for review (fail-safe-CLOSED)",
-                result_text,
+            decision, rationale = self._parse_tier2_response(response)
+            if decision == "malformed_response":
+                logger.warning("LLM returned malformed classifier response; failing closed")
+            return Tier2Decision(
+                decision=decision,
+                rationale=rationale,
+                decision_id=f"tier2-{uuid4().hex[:12]}",
             )
-            return "held_for_review"
 
         except TimeoutError:
-            # T024: Timeout → fail-safe-CLOSED
             logger.warning("LLM evaluation timed out, holding for review (fail-safe-CLOSED)")
-            return "llm_timeout"
+            return Tier2Decision(
+                decision="llm_timeout",
+                rationale="classifier timeout",
+                decision_id=f"tier2-{uuid4().hex[:12]}",
+            )
         except Exception:
             logger.warning("LLM evaluation failed, holding for review")
-            return "llm_unavailable"
+            return Tier2Decision(
+                decision="llm_unavailable",
+                rationale="classifier unavailable",
+                decision_id=f"tier2-{uuid4().hex[:12]}",
+            )
 
     async def retrospective_associate(
         self,
@@ -202,11 +304,18 @@ class MonitoringAgent:
         unassociated = await self._signal_repository.query_unassociated(
             jurisdiction_id=jurisdiction_id,
             since=cutoff,
-            tenant_id=tenant_id,  # T046: tenant isolation
+            scope=tenant_id,
         )
         count = 0
         for signal in unassociated:
-            await self._signal_repository.update_incident_id(signal.signal_id, incident_id)
+            updated = await self._signal_repository.update_incident_id(
+                signal.signal_id,
+                incident_id,
+                scope=tenant_id,
+                expected_incident_id=None,
+            )
+            if not updated:
+                continue
             count += 1
             logger.info(
                 "Retrospectively associated signal %s with incident %s (tenant=%s)",
@@ -311,8 +420,10 @@ def create_app(
 
         # Overall status determination
         overall = "healthy"
-        if llm_status == "offline" or audit_status == "degraded":
+        if audit_status == "degraded" or (llm_status == "offline" and llm_agent is None):
             overall = "unhealthy"
+        elif llm_status == "offline":
+            overall = "degraded"
         elif any(x != "healthy" for x in [llm_status, freshness_summary, queue_status, audit_status]):
             overall = "degraded"
 
@@ -571,12 +682,7 @@ def create_app(
 if __name__ == "__main__":
     import uvicorn
 
-    _fmt = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-    _console = logging.StreamHandler()
-    _console.setFormatter(_fmt)
-    root = logging.getLogger()
-    root.addHandler(_console)
-    root.setLevel(logging.INFO)
+    configure_console_logging()
 
     _PORT = int(os.environ.get("PORT", "8080"))
     _config = MonitoringConfig()
@@ -585,4 +691,4 @@ if __name__ == "__main__":
     app = create_app(agent=_agent, config=_config)
 
     logger.info("Monitoring Agent health server starting on port %d", _PORT)
-    uvicorn.run(app, host="0.0.0.0", port=_PORT, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=_PORT, log_level="info", log_config=uvicorn_log_config())

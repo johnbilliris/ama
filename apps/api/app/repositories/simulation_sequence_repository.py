@@ -45,6 +45,8 @@ import random
 from typing import Any, Final
 from uuid import uuid4
 
+from app.core.async_io import run_blocking
+
 logger = logging.getLogger(__name__)
 
 #: Maximum retries for ETag conflict resolution (ADR-036-007).
@@ -203,7 +205,7 @@ class SimulationSequenceRepository:
         container = self._get_container()
         if container is not None:
             try:
-                doc = await asyncio.to_thread(
+                doc = await run_blocking(
                     container.read_item,
                     item=simulation_id,
                     partition_key=simulation_id,
@@ -215,7 +217,7 @@ class SimulationSequenceRepository:
                     "simulation_id": simulation_id,
                     "value": 0,
                 }
-                created = await asyncio.to_thread(
+                created = await run_blocking(
                     container.create_item,
                     body=doc,
                 )
@@ -248,7 +250,7 @@ class SimulationSequenceRepository:
                 "simulation_id": simulation_id,
                 "value": value,
             }
-            replaced = await asyncio.to_thread(
+            replaced = await run_blocking(
                 container.replace_item,
                 item=simulation_id,
                 body=doc,

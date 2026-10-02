@@ -55,6 +55,8 @@ from datetime import UTC, datetime
 from pathlib import PurePosixPath
 from typing import Any, Final, Literal
 
+from app.core.async_io import run_blocking
+
 logger = logging.getLogger(__name__)
 
 #: Canonical TTL for cached idempotency entries (24 h per ADR-036-009).
@@ -374,7 +376,7 @@ class IdempotencyCacheRepository:
         container = self._get_container()
         if container is not None:
             try:
-                doc = container.read_item(item=cache_doc_id, partition_key=sim_id)
+                doc = await run_blocking(container.read_item, item=cache_doc_id, partition_key=sim_id)
             except Exception as exc:
                 # T-O08 — distinguish "not found" (azure.cosmos.exceptions
                 # CosmosResourceNotFoundError) from genuine transport
@@ -398,7 +400,7 @@ class IdempotencyCacheRepository:
         container = self._get_container()
         if container is not None:
             try:
-                container.upsert_item(_entry_to_doc(entry))
+                await run_blocking(container.upsert_item, _entry_to_doc(entry))
             except Exception as exc:
                 logger.error(
                     "idempotency_cache.store_failed cache_doc=%s err=%s",

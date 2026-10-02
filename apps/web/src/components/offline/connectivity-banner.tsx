@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 
 type ConnectivityState = "online" | "degraded" | "offline";
 
@@ -12,10 +12,20 @@ export function ConnectivityBanner({ initialState = "online" }: ConnectivityBann
   const [connectivity, setConnectivity] = useState<ConnectivityState>(initialState);
   const deferredConnectivity = useDeferredValue(connectivity);
 
-  if (typeof window !== "undefined") {
-    window.addEventListener("online", () => setConnectivity("online"), { once: false });
-    window.addEventListener("offline", () => setConnectivity("offline"), { once: false });
-  }
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (!navigator.onLine) setConnectivity("offline");
+    const goOnline = () => setConnectivity("online");
+    const goOffline = () => setConnectivity("offline");
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, []);
 
   if (deferredConnectivity === "online") {
     return null;

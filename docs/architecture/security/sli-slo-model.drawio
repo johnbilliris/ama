@@ -1,21 +1,48 @@
-<mxfile host="app.diagrams.net" modified="2026-05-11T00:00:00.000Z" agent="spec-001-fallback" version="24.0.0">
+<mxfile host="app.diagrams.net" modified="2026-09-15T00:00:00.000Z" agent="remediation-source-updated; export=pending-drawio" version="24.0.0">
   <diagram name="SEC-04" id="sec04-sli-slo">
-    <mxGraphModel dx="1230" dy="740" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="1230" dy="740" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
-        <mxCell id="1legend" value="SEC-04 SLI/SLO model&#xa;Targets and burn-rate thresholds per service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#6c8ebf;strokeWidth=2;dashed=1;fontSize=13;" vertex="1" parent="1"><mxGeometry x="20" y="20" width="1040" height="400" as="geometry"/></mxCell>
-        <mxCell id="2" value="Signal Ingestion&#xa;SLI: end-to-end ingest latency&#xa;SLO: P95 ≤ 60s&#xa;Burn: 2x/4x" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="40" y="80" width="220" height="110" as="geometry"/></mxCell>
-        <mxCell id="3" value="Handoff Success&#xa;SLI: successful handoff ratio&#xa;SLO: ≥99.5%&#xa;Burn: 1x/2x" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="290" y="80" width="220" height="110" as="geometry"/></mxCell>
-        <mxCell id="4" value="Alert Publish&#xa;SLI: operator-approved to sent&#xa;SLO: P95 ≤ 90s&#xa;Burn: 2x/4x" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="540" y="80" width="220" height="110" as="geometry"/></mxCell>
-        <mxCell id="5" value="Dashboard Availability&#xa;SLI: uptime&#xa;SLO: ≥99.9%&#xa;Burn: 1x/2x" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="790" y="80" width="220" height="110" as="geometry"/></mxCell>
-        <mxCell id="6" value="LLM Cost / incident&#xa;SLI: cost per incident&#xa;SLO: budget threshold&#xa;Burn: 1x/1.5x" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="165" y="270" width="220" height="110" as="geometry"/></mxCell>
-        <mxCell id="7" value="RAG Retrieval&#xa;SLI: retrieval latency&#xa;SLO: P95 ≤ 400ms&#xa;Burn: 2x/4x" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1"><mxGeometry x="540" y="270" width="220" height="110" as="geometry"/></mxCell>
-        <mxCell id="8" value="platform telemetry" style="endArrow=block;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1" source="2" target="3"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="9" value="operator workflow" style="endArrow=block;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1" source="3" target="4"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="10" value="user experience" style="endArrow=block;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1" source="4" target="5"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="11" value="cost guardrail" style="endArrow=block;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1" source="3" target="6"><mxGeometry relative="1" as="geometry"/></mxCell>
-        <mxCell id="12" value="retrieval dependency" style="endArrow=block;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1" source="6" target="7"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="title" value="SEC-04 — SLI/SLO model. Authoritative catalogue: docs/observability/slo.md (SLO-1 through SLO-10). This page does not define alternative objectives or burn thresholds." style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="20" width="1330" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="slo1" value="SLO-1 — Signal Ingestion Latency&#xa;SLI: signal.ingestion.lag_seconds (histogram)&#xa;Objective: P95 ≤ 60 s over rolling 30 d&#xa;Error budget: 36 h / 30 d&#xa;Paging: P2 if budget burns &gt;50% in 24 h; P1 if exhausted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="30" y="80" width="320" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="slo2" value="SLO-2 — Agent Handoff Success Rate&#xa;SLI: handoff success ÷ (success + failure)&#xa;Objective: ≥ 99.5% over rolling 30 d&#xa;Error budget: 0.5%&#xa;Paging: P2 if budget burns &gt;50% in 24 h; P1 if dead-letter depth ≥ 100 in any queue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="370" y="80" width="320" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="slo3" value="SLO-3 — Alert-to-Publish Time&#xa;SLI: alert.publish.lag_seconds (histogram)&#xa;Objective: P95 ≤ 90 s over rolling 30 d&#xa;Error budget: 36 h / 30 d&#xa;Paging: P1 life-safety if P95 &gt; 90 s for any 15-minute window" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="710" y="80" width="320" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="slo4" value="SLO-4 — Dashboard Availability&#xa;SLI: availability test success rate&#xa;Objective: ≥ 99.9% over rolling 30 d&#xa;Error budget: 43 min / 30 d&#xa;Paging: P2 if 3/5 locations fail 10 min; P1 if 5/5 fail 5 min" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="80" width="320" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="slo5" value="SLO-5 — Audit Ledger Integrity&#xa;SLI: audit.integrity_check.failures_total&#xa;Objective: 0 failures per check&#xa;Error budget: 0 (zero-budget gate — no burn-rate alert applies)&#xa;Paging: P1 on any failure; publication block plus Observer-Auditor page" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="30" y="230" width="320" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="slo6" value="SLO-6 — LLM Cost per Incident&#xa;SLI: llm.cost.aud_micros by incident_id&#xa;Objective: ≤ AUD 50 per typical incident; ≤ AUD 500 per Level-3 incident&#xa;Error budget: not applicable (cost guardrail)&#xa;Paging: P3 at 80% of bucket; P2 at 100%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="370" y="230" width="320" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="slo7" value="SLO-7 — Kill-Switch Propagation&#xa;SLI: agent.killswitch.lag_seconds (histogram)&#xa;Objective: P99 ≤ 30 s&#xa;Error budget: breach counter, target ≤ 1 per 30 d&#xa;Paging: P2 on any breach; P1 if breached during a declared incident" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="710" y="230" width="320" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="slo8" value="SLO-8 — RAG Retrieval Latency&#xa;SLI: rag.retrieval.lag_milliseconds (histogram)&#xa;Objective: P95 ≤ 400 ms over rolling 30 d&#xa;Error budget: breach counter, target ≤ 100 per 30 d&#xa;Paging: P3 on burn; P2 if continuously degraded &gt; 30 min" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="230" width="320" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="slo9" value="SLO-9 — Eval Baseline Adherence&#xa;SLI: eval scorecard pass/fail per dataset version&#xa;Objective: 100% pass for all metrics at or above baseline&#xa;Error budget: 0 (CI gate — no burn-rate alert applies)&#xa;Paging: P2 on PR fail; P3 on baseline drift detection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="200" y="390" width="360" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="slo10" value="SLO-10 — Public-Network Refusal (Production)&#xa;SLI: public-network probe success count&#xa;Objective: 100% rejection over rolling 24 h&#xa;Error budget: 0 (zero-budget gate — no burn-rate alert applies)&#xa;Paging: P1 on any probe success (data exfiltration risk)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="840" y="390" width="360" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="burn" value="Authoritative burn-rate policy (applies only to SLOs with a non-zero error budget: SLO-1, SLO-2, SLO-3, SLO-4, SLO-7, SLO-8)&#xa;&#xa;FAST BURN — long window 1 h, short window 5 m, trigger burn rate &gt; 14.4 (consumes 100% of the budget in 50 minutes)&#xa;SLOW BURN — long window 6 h, short window 30 m, trigger burn rate &gt; 6 (consumes 100% of the budget in 5 days)&#xa;&#xa;Zero-budget objectives (SLO-5, SLO-9, SLO-10) and the cost guardrail (SLO-6) are NOT governed by burn rate; they page on the condition stated in their own card." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9cc;strokeColor=#d6b656;fontSize=12;align=left;spacingLeft=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="30" y="560" width="1340" height="180" as="geometry"/>
+        </mxCell>
+        <mxCell id="prov" value="Any 1x / 2x / 4x burn multipliers previously shown on this page are superseded by the catalogue values above. Objective changes require an ADR and quarterly SRE plus Solution Architect review. Checked-in alert configuration under infra/observability covers the simulation metric set only; parity between every objective above and a deployed alert rule is UNVERIFIED." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="30" y="760" width="1340" height="70" as="geometry"/>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>

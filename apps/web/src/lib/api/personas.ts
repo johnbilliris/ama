@@ -1,23 +1,35 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+import { getApiBaseUrl } from "@/lib/api/base-url";
+const API_BASE_URL = getApiBaseUrl();
 
 export interface PersonaWorkspacePayload {
   persona: {
     persona_id: string;
     display_name: string;
     organisation_id: string;
+    jurisdiction_id: string;
     role: string;
+    decision_rights?: string[];
+    information_needs?: string[];
+    communication_pathways?: string[];
   };
   tasks: Array<{
     task_id: string;
     title: string;
     status: string;
     priority: string;
+    version?: number;
   }>;
   dependencies: Array<{
-    task_id: string;
+    taskId: string;
     title: string;
     status: string;
+    ownerOrganisationId: string;
+    expectedCompletion?: string | null;
+    blockerReason?: string | null;
   }>;
+  incidentId?: string;
+  inboundRequests?: Array<Record<string, unknown>>;
+  pendingApprovals?: Array<Record<string, unknown>>;
 }
 
 export class PersonaWorkspaceError extends Error {
@@ -30,11 +42,17 @@ export class PersonaWorkspaceError extends Error {
   }
 }
 
-export async function getPersonaWorkspace(personaId: string): Promise<PersonaWorkspacePayload> {
+export async function getPersonaWorkspace(
+  personaId: string,
+  incidentId: string,
+  tenantId?: string,
+): Promise<PersonaWorkspacePayload> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE_URL}/personas/${personaId}/workspace`, {
+    const params = new URLSearchParams({ incidentId });
+    response = await fetch(`${API_BASE_URL}/personas/${personaId}/workspace?${params.toString()}`, {
       cache: "no-store",
+      headers: tenantId ? { "X-Tenant-Id": tenantId } : undefined,
     });
   } catch (cause) {
     throw new PersonaWorkspaceError(

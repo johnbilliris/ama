@@ -10,7 +10,12 @@ def live_scope() -> str:
 
 
 def simulation_scope(run_id: str) -> str:
-    return f"sim-{run_id}"
+    run_value = run_id.strip()
+    if not run_value:
+        raise ValueError("run_id is required")
+    if run_value.startswith("sim-"):
+        return run_value
+    return f"sim-{run_value}"
 
 
 def simulation_partition_key(scenario_id: str) -> str:

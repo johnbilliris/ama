@@ -29,6 +29,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from app.core.async_io import run_blocking
 from app.repositories.sim_chat_history_repository import (
     SimChatHistoryRepository,
     default_history_repo,
@@ -114,6 +115,7 @@ class SimulationControllerService:
         event_recorder: Any = None,
         clock_service: Any = None,
         simulation_repository: Any = None,
+        scenario_seeding_service: Any = None,
         retrieval_service: Any = None,
         audit_writer: Any = None,
     ) -> None:
@@ -123,6 +125,7 @@ class SimulationControllerService:
         self._event_recorder = event_recorder
         self._clock = clock_service
         self._sim_repo = simulation_repository
+        self._scenario_seeding = scenario_seeding_service
         self._prompt_text = _PROMPT_PATH.read_text(encoding="utf-8")
         self._prompt_hash = hashlib.sha256(self._prompt_text.encode("utf-8")).hexdigest()
         # Spec 036 FR-RAG-SIM-01..06: optional retrieval client + audit writer.
@@ -266,6 +269,13 @@ class SimulationControllerService:
             logger.warning("sim_chat_history_persist_failed: %s", exc)
             return None
 
+    async def _persist_turn_async(self, **kwargs: Any) -> SimChatTurn | None:
+        """Offloaded variant — chat history writes must not stall the SSE loop."""
+        return await run_blocking(self._persist_turn, **kwargs)
+
+    async def _maybe_record_tool_invocation_async(self, **kwargs: Any) -> None:
+        await run_blocking(self._maybe_record_tool_invocation, **kwargs)
+
     def _load_history_messages(self, tenant_id: str) -> list[dict[str, Any]]:
         """Return prior turns formatted as OpenAI chat messages.
 
@@ -283,6 +293,10 @@ class SimulationControllerService:
             if t.role in ("user", "assistant", "system"):
                 out.append({"role": t.role, "content": t.content})
         return out
+
+    async def _load_history_messages_async(self, tenant_id: str) -> list[dict[str, Any]]:
+        """Offloaded variant — history replay reads must not stall the SSE loop."""
+        return await run_blocking(self._load_history_messages, tenant_id)
 
     def _resolve_simulation_deployment(self) -> str | None:
         """Resolve the simulation deployment name from the Foundry env vars.
@@ -330,6 +344,20 @@ class SimulationControllerService:
         user_message: str,
         mode: str | None = None,
     ) -> AsyncIterator[ChatEvent]:
+        if self._sim_repo is not None:
+            tenant = await self._sim_repo.get_by_tenant_id(tenant_id)
+            if tenant is None:
+                yield ChatEvent("error", {"code": "not_found", "message": "Simulation tenant not found."})
+                return
+            if tenant.status != "Active" or tenant.clock_paused:
+                yield ChatEvent(
+                    "error",
+                    {
+                        "code": "lifecycle_state_conflict",
+                        "message": f"Simulation is {tenant.status.lower()}; resume it before sending chat commands.",
+                    },
+                )
+                return
         if not self._rl.check_and_consume(tenant_id=tenant_id, user_oid=user_oid):
             yield ChatEvent(
                 "error",
@@ -343,7 +371,7 @@ class SimulationControllerService:
 
         # Persist the user message BEFORE streaming the reply so the history
         # is consistent even if the assistant stream is aborted mid-flight.
-        self._persist_turn(
+        await self._persist_turn_async(
             tenant_id=tenant_id,
             simulation_id=simulation_id,
             role="user",
@@ -353,7 +381,7 @@ class SimulationControllerService:
 
         if refusal is not None:
             yield ChatEvent("turn.delta", {"turn_id": turn_id, "delta": refusal})
-            self._persist_turn(
+            await self._persist_turn_async(
                 tenant_id=tenant_id,
                 simulation_id=simulation_id,
                 role="assistant",
@@ -439,7 +467,7 @@ class SimulationControllerService:
                     "result": {"summary": reply.summary, "citations": reply.citations},
                 },
             )
-            self._maybe_record_tool_invocation(
+            await self._maybe_record_tool_invocation_async(
                 tenant_id=tenant_id,
                 sim_seconds=await self._current_sim_seconds(tenant_id),
                 tool_name=f"query_sub_agent:{intent['sub_agent']}",
@@ -447,7 +475,7 @@ class SimulationControllerService:
             )
             # Audit trail: persist the tool round-trip as a tool-role turn so
             # operators can reconstruct which sub-agent informed the response.
-            self._persist_turn(
+            await self._persist_turn_async(
                 tenant_id=tenant_id,
                 simulation_id=simulation_id,
                 role="tool",
@@ -471,7 +499,7 @@ class SimulationControllerService:
             )
 
         assistant_text = "".join(assistant_parts)
-        self._persist_turn(
+        await self._persist_turn_async(
             tenant_id=tenant_id,
             simulation_id=simulation_id,
             role="assistant",
@@ -585,7 +613,7 @@ class SimulationControllerService:
         # memory across requests. Ordering is [system, ...prior turns (oldest
         # first), current user message].
         messages: list[dict[str, Any]] = [{"role": "system", "content": self._prompt_text}]
-        messages.extend(self._load_history_messages(tenant_id))
+        messages.extend(await self._load_history_messages_async(tenant_id))
         messages.append({"role": "user", "content": forwarded_message})
 
         # Spec 036 FR-RAG-SIM-01: retrieve grounding chunks BEFORE the first
@@ -779,7 +807,7 @@ class SimulationControllerService:
                 # Surface card.scenario for the map + chat UI.
                 if name == "seed_scenario" and isinstance(result.get("card"), dict):
                     yield ChatEvent("card.scenario", result["card"])
-                    self._persist_turn(
+                    await self._persist_turn_async(
                         tenant_id=tenant_id,
                         simulation_id=simulation_id,
                         role="tool",
@@ -798,7 +826,7 @@ class SimulationControllerService:
                 tool_label = name
                 if name == "query_sub_agent" and isinstance(args.get("sub_agent"), str):
                     tool_label = f"query_sub_agent:{args['sub_agent']}"
-                self._maybe_record_tool_invocation(
+                await self._maybe_record_tool_invocation_async(
                     tenant_id=tenant_id,
                     sim_seconds=await self._current_sim_seconds(tenant_id),
                     tool_name=tool_label,
@@ -813,7 +841,7 @@ class SimulationControllerService:
                 )
 
         assistant_text = "".join(collected_all)
-        self._persist_turn(
+        await self._persist_turn_async(
             tenant_id=tenant_id,
             simulation_id=simulation_id,
             role="assistant",
@@ -1019,19 +1047,21 @@ class SimulationControllerService:
             "created_at": datetime.now(UTC).isoformat(),
         }
 
-        # Schedule best-effort synthetic ingestion so the Signals meter ticks
-        # up during the exercise. Non-blocking; errors are swallowed.
-        try:
-            import asyncio
+        if self._scenario_seeding is None:
+            return {
+                "outcome": "error",
+                "card": card,
+                "ingestion_started": False,
+                "error": "Scenario seeding service is unavailable",
+            }
 
-            asyncio.create_task(_ingest_synthetic_signals(tenant_id))
-        except Exception:
-            logger.exception("sim_synthetic_ingestion_schedule_failed")
+        seed_result = await self._scenario_seeding.seed_for_hazard(tenant_id, hazard)
 
         return {
             "outcome": "ok",
             "card": card,
             "ingestion_started": True,
+            **seed_result,
         }
 
 
@@ -1076,29 +1106,6 @@ def _geocode_au(location_name: str) -> tuple[float, float, int] | None:
         if k in key or key in k:
             return v
     return None
-
-
-async def _ingest_synthetic_signals(tenant_id: str) -> None:
-    """Bump the simulation's signal counter a few times so the left-panel
-    meter animates during the exercise. Best-effort: routes that use a
-    different repository instance will simply see no increment.
-    """
-    import asyncio
-
-    try:
-        from app.api.routes.simulations import _repo  # shared singleton
-    except Exception:
-        return
-    try:
-        for _ in range(5):
-            await asyncio.sleep(2.0)
-            tenant = await _repo.get_by_tenant_id(tenant_id)
-            if tenant is None or tenant.status not in ("Active", "Paused"):
-                return
-            tenant.resource_consumption.signal_count += 1
-            await _repo.update(tenant)
-    except Exception:
-        logger.exception("sim_synthetic_ingestion_failed tenant=%s", tenant_id)
 
 
 def _sha256(text: str) -> str:

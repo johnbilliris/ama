@@ -1,4 +1,7 @@
 import logging
+import math
+import re
+from collections import Counter
 from datetime import datetime
 from typing import Any
 
@@ -8,49 +11,301 @@ logger = logging.getLogger(__name__)
 class MisinformationDetector:
     """Detects misinformation patterns in social media signals."""
 
+    def __init__(
+        self,
+        *,
+        burst_threshold: int = 20,
+        burst_window_minutes: int = 10,
+        contradiction_window_minutes: int = 30,
+        contradiction_distance_km: float = 25.0,
+        duplicate_similarity_threshold: float = 0.9,
+        duplicate_window_minutes: int = 5,
+    ) -> None:
+        self.burst_threshold = burst_threshold
+        self.burst_window_minutes = burst_window_minutes
+        self.contradiction_window_minutes = contradiction_window_minutes
+        self.contradiction_distance_km = contradiction_distance_km
+        self.duplicate_similarity_threshold = duplicate_similarity_threshold
+        self.duplicate_window_minutes = duplicate_window_minutes
+
+    @staticmethod
+    def _parse_timestamp(value: Any) -> datetime | None:
+        if not isinstance(value, str):
+            return None
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except (ValueError, TypeError):
+            return None
+
+    @staticmethod
+    def _signal_id(signal: dict[str, Any]) -> str | None:
+        candidates = [
+            signal.get("signalId"),
+            signal.get("signal_id"),
+            signal.get("id"),
+            signal.get("payload", {}).get("signalId") if isinstance(signal.get("payload"), dict) else None,
+        ]
+        for candidate in candidates:
+            if candidate is None:
+                continue
+            value = str(candidate).strip()
+            if value:
+                return value
+        return None
+
+    @staticmethod
+    def _account_id(signal: dict[str, Any]) -> str:
+        payload = signal.get("payload") if isinstance(signal.get("payload"), dict) else {}
+        source = signal.get("source") if isinstance(signal.get("source"), dict) else {}
+        for key in ("accountId", "authorId", "userId", "sourceAccountId", "account"):
+            value = payload.get(key)
+            if value is not None and str(value).strip():
+                return str(value).strip()
+        for key in ("accountId", "authorId", "userId"):
+            value = source.get(key)
+            if value is not None and str(value).strip():
+                return str(value).strip()
+        return "unknown"
+
+    @staticmethod
+    def _topic_bucket(signal: dict[str, Any]) -> str:
+        payload = signal.get("payload") if isinstance(signal.get("payload"), dict) else {}
+        topic = str(payload.get("topic", payload.get("category", signal.get("category", "unknown")))).strip().lower()
+        location = signal.get("location") if isinstance(signal.get("location"), dict) else {}
+        points = MisinformationDetector._extract_points(location)
+        if points:
+            lon, lat = points[0]
+            return f"{topic}:{round(lon, 1)},{round(lat, 1)}"
+        return f"{topic}:unknown"
+
+    @staticmethod
+    def _extract_points(geometry: dict[str, Any]) -> list[tuple[float, float]]:
+        kind = str(geometry.get("type", ""))
+        coords = geometry.get("coordinates")
+        if kind == "Point" and isinstance(coords, list) and len(coords) >= 2:
+            return [(float(coords[0]), float(coords[1]))]
+        points: list[tuple[float, float]] = []
+        if kind == "Polygon" and isinstance(coords, list):
+            for ring in coords:
+                if isinstance(ring, list):
+                    for point in ring:
+                        if isinstance(point, list) and len(point) >= 2:
+                            points.append((float(point[0]), float(point[1])))
+        if kind == "MultiPolygon" and isinstance(coords, list):
+            for polygon in coords:
+                if not isinstance(polygon, list):
+                    continue
+                for ring in polygon:
+                    if not isinstance(ring, list):
+                        continue
+                    for point in ring:
+                        if isinstance(point, list) and len(point) >= 2:
+                            points.append((float(point[0]), float(point[1])))
+        return points
+
+    @staticmethod
+    def _extract_polygons(geometry: dict[str, Any]) -> list[list[tuple[float, float]]]:
+        kind = str(geometry.get("type", ""))
+        coords = geometry.get("coordinates")
+        polygons: list[list[tuple[float, float]]] = []
+        if kind == "Polygon" and isinstance(coords, list):
+            for ring in coords:
+                if not isinstance(ring, list):
+                    continue
+                poly = [
+                    (float(point[0]), float(point[1])) for point in ring if isinstance(point, list) and len(point) >= 2
+                ]
+                if poly:
+                    polygons.append(poly)
+        if kind == "MultiPolygon" and isinstance(coords, list):
+            for polygon in coords:
+                if not isinstance(polygon, list):
+                    continue
+                for ring in polygon:
+                    if not isinstance(ring, list):
+                        continue
+                    poly = [
+                        (float(point[0]), float(point[1]))
+                        for point in ring
+                        if isinstance(point, list) and len(point) >= 2
+                    ]
+                    if poly:
+                        polygons.append(poly)
+        return polygons
+
+    @staticmethod
+    def _haversine_km(a: tuple[float, float], b: tuple[float, float]) -> float:
+        lon1, lat1 = a
+        lon2, lat2 = b
+        r = 6371.0
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        lat1r = math.radians(lat1)
+        lat2r = math.radians(lat2)
+        h = math.sin(dlat / 2) ** 2 + math.cos(lat1r) * math.cos(lat2r) * math.sin(dlon / 2) ** 2
+        return 2 * r * math.asin(math.sqrt(h))
+
+    @staticmethod
+    def _point_in_polygon(point: tuple[float, float], polygon: list[tuple[float, float]]) -> bool:
+        if len(polygon) < 3:
+            return False
+        x, y = point
+        inside = False
+        j = len(polygon) - 1
+        for i in range(len(polygon)):
+            xi, yi = polygon[i]
+            xj, yj = polygon[j]
+            intersects = ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / ((yj - yi) or 1e-12) + xi)
+            if intersects:
+                inside = not inside
+            j = i
+        return inside
+
+    @staticmethod
+    def _bbox(polygons: list[list[tuple[float, float]]]) -> tuple[float, float, float, float] | None:
+        points = [p for poly in polygons for p in poly]
+        if not points:
+            return None
+        lons = [p[0] for p in points]
+        lats = [p[1] for p in points]
+        return min(lons), min(lats), max(lons), max(lats)
+
+    @classmethod
+    def _geometries_overlap(
+        cls,
+        lhs: dict[str, Any],
+        rhs: dict[str, Any],
+        *,
+        max_distance_km: float,
+    ) -> bool:
+        lhs_points = cls._extract_points(lhs)
+        rhs_points = cls._extract_points(rhs)
+        lhs_polys = cls._extract_polygons(lhs)
+        rhs_polys = cls._extract_polygons(rhs)
+
+        if lhs_points and rhs_points:
+            return any(cls._haversine_km(a, b) <= max_distance_km for a in lhs_points for b in rhs_points)
+
+        if lhs_points and rhs_polys:
+            return any(any(cls._point_in_polygon(point, poly) for poly in rhs_polys) for point in lhs_points)
+
+        if rhs_points and lhs_polys:
+            return any(any(cls._point_in_polygon(point, poly) for poly in lhs_polys) for point in rhs_points)
+
+        if lhs_polys and rhs_polys:
+            bbox_l = cls._bbox(lhs_polys)
+            bbox_r = cls._bbox(rhs_polys)
+            if bbox_l is None or bbox_r is None:
+                return False
+            l_min_lon, l_min_lat, l_max_lon, l_max_lat = bbox_l
+            r_min_lon, r_min_lat, r_max_lon, r_max_lat = bbox_r
+            return not (
+                l_max_lon < r_min_lon or r_max_lon < l_min_lon or l_max_lat < r_min_lat or r_max_lat < l_min_lat
+            )
+
+        return False
+
+    @staticmethod
+    def _token_frequency(text: str) -> Counter[str]:
+        tokens = re.findall(r"[a-z0-9]+", text.lower())
+        return Counter(tokens)
+
+    @staticmethod
+    def _cosine_similarity(left: Counter[str], right: Counter[str]) -> float:
+        if not left or not right:
+            return 0.0
+        dot = sum(left[token] * right.get(token, 0) for token in left)
+        left_norm = math.sqrt(sum(value * value for value in left.values()))
+        right_norm = math.sqrt(sum(value * value for value in right.values()))
+        if left_norm == 0.0 or right_norm == 0.0:
+            return 0.0
+        return dot / (left_norm * right_norm)
+
+    def _is_authoritative_signal(self, signal: dict[str, Any]) -> bool:
+        source = signal.get("source") if isinstance(signal.get("source"), dict) else {}
+        return str(source.get("kind", "")).strip().lower() == "authoritative"
+
+    def has_authoritative_corroboration(
+        self,
+        signal: dict[str, Any],
+        authoritative_signals: list[dict[str, Any]],
+        *,
+        window_minutes: int | None = None,
+        max_distance_km: float | None = None,
+    ) -> bool:
+        if not authoritative_signals:
+            return False
+
+        signal_time = self._parse_timestamp(signal.get("occurredAt"))
+        if signal_time is None:
+            return False
+        signal_category = str(signal.get("category", "")).strip()
+        signal_location = signal.get("location") if isinstance(signal.get("location"), dict) else {}
+        if not signal_location:
+            return False
+
+        time_window = window_minutes if window_minutes is not None else self.contradiction_window_minutes
+        distance_km = max_distance_km if max_distance_km is not None else self.contradiction_distance_km
+
+        for auth_signal in authoritative_signals:
+            if not self._is_authoritative_signal(auth_signal):
+                continue
+            if str(auth_signal.get("category", "")).strip() != signal_category:
+                continue
+            auth_time = self._parse_timestamp(auth_signal.get("occurredAt"))
+            if auth_time is None:
+                continue
+            if abs((signal_time - auth_time).total_seconds()) > time_window * 60:
+                continue
+            auth_location = auth_signal.get("location") if isinstance(auth_signal.get("location"), dict) else {}
+            if not auth_location:
+                continue
+            if self._geometries_overlap(signal_location, auth_location, max_distance_km=distance_km):
+                return True
+        return False
+
     def burst_detection(
         self,
         signals: list[dict[str, Any]],
-        threshold: int = 20,
-        window_minutes: int = 10,
+        threshold: int | None = None,
+        window_minutes: int | None = None,
+        authoritative_signals: list[dict[str, Any]] | None = None,
     ) -> list[int]:
-        """Counts posts per topic/location within a time window. Returns indices of signals in burst clusters."""
+        """Flags bursts by distinct account count for uncorroborated posts only."""
         if not signals:
             return []
 
+        min_accounts = threshold if threshold is not None else self.burst_threshold
+        window = window_minutes if window_minutes is not None else self.burst_window_minutes
+
         flagged_indices: list[int] = []
-        buckets: dict[str, list[int]] = {}
+        buckets: dict[str, list[tuple[int, datetime, str]]] = {}
 
         for i, signal in enumerate(signals):
-            payload = signal.get("payload", {})
-            location = signal.get("location", {})
-            coords = location.get("coordinates", [0, 0])
-            topic = payload.get("topic", payload.get("category", "unknown"))
-            coord_key = f"{round(coords[0], 1)},{round(coords[1], 1)}" if coords else "0,0"
-            bucket_key = f"{topic}:{coord_key}"
-            buckets.setdefault(bucket_key, []).append(i)
-
-        for _key, indices in buckets.items():
-            if len(indices) < threshold:
+            if authoritative_signals and self.has_authoritative_corroboration(signal, authoritative_signals):
                 continue
-            timestamps = []
-            for idx in indices:
-                occurred = signals[idx].get("occurredAt", "")
-                try:
-                    timestamps.append(datetime.fromisoformat(occurred.replace("Z", "+00:00")))
-                except (ValueError, AttributeError):
-                    continue
-
-            if len(timestamps) < 2:
+            signal_time = self._parse_timestamp(signal.get("occurredAt"))
+            if signal_time is None:
                 continue
-            timestamps.sort()
+            bucket_key = self._topic_bucket(signal)
+            account_id = self._account_id(signal)
+            buckets.setdefault(bucket_key, []).append((i, signal_time, account_id))
+
+        for tuples in buckets.values():
+            if len(tuples) < min_accounts:
+                continue
+
+            tuples.sort(key=lambda item: item[1])
             window_start = 0
-            for window_end in range(len(timestamps)):
-                while (timestamps[window_end] - timestamps[window_start]).total_seconds() > window_minutes * 60:
+            for window_end in range(len(tuples)):
+                while (tuples[window_end][1] - tuples[window_start][1]).total_seconds() > window * 60:
                     window_start += 1
-                if (window_end - window_start + 1) >= threshold:
-                    flagged_indices.extend(indices[window_start : window_end + 1])
-                    break
+
+                window_tuples = tuples[window_start : window_end + 1]
+                distinct_accounts = {entry[2] for entry in window_tuples if entry[2] != "unknown"}
+                account_count = len(distinct_accounts) if distinct_accounts else len(window_tuples)
+                if account_count >= min_accounts:
+                    flagged_indices.extend([entry[0] for entry in window_tuples])
 
         return sorted(set(flagged_indices))
 
@@ -58,91 +313,112 @@ class MisinformationDetector:
         self,
         signal: dict[str, Any],
         authoritative_signals: list[dict[str, Any]],
-        window_minutes: int = 30,
+        window_minutes: int | None = None,
+        max_distance_km: float | None = None,
     ) -> bool:
-        """Checks if social signal contradicts authoritative signals for same location/hazard."""
-        signal_location = signal.get("location", {}).get("coordinates", [])
-        signal_category = signal.get("category", "")
+        """Checks contradiction against corroborating authoritative signals only."""
+        time_window = window_minutes if window_minutes is not None else self.contradiction_window_minutes
+        distance_km = max_distance_km if max_distance_km is not None else self.contradiction_distance_km
+        if not self.has_authoritative_corroboration(
+            signal,
+            authoritative_signals,
+            window_minutes=time_window,
+            max_distance_km=distance_km,
+        ):
+            return False
 
-        if not signal_location or not authoritative_signals:
-            return True
-
-        signal_time_str = signal.get("occurredAt", "")
-        try:
-            signal_time = datetime.fromisoformat(signal_time_str.replace("Z", "+00:00"))
-        except (ValueError, AttributeError):
-            return True
+        payload = signal.get("payload") if isinstance(signal.get("payload"), dict) else {}
+        text_blob = " ".join(
+            str(payload.get(key, "")) for key in ("text", "title", "content", "status", "hazard_state", "condition")
+        ).lower()
+        social_hazard_claim = any(token in text_blob for token in ("fire", "flood", "cyclone", "evacuat", "emergency"))
 
         for auth_signal in authoritative_signals:
-            auth_location = auth_signal.get("location", {}).get("coordinates", [])
-            auth_category = auth_signal.get("category", "")
-
-            if auth_category != signal_category:
+            if not self._is_authoritative_signal(auth_signal):
+                continue
+            if str(auth_signal.get("category", "")).strip() != str(signal.get("category", "")).strip():
+                continue
+            if not self.has_authoritative_corroboration(
+                signal,
+                [auth_signal],
+                window_minutes=time_window,
+                max_distance_km=distance_km,
+            ):
                 continue
 
-            if not auth_location:
-                continue
+            auth_payload = auth_signal.get("payload") if isinstance(auth_signal.get("payload"), dict) else {}
+            auth_text = " ".join(
+                str(auth_payload.get(key, "")) for key in ("status", "hazard_state", "condition", "text", "title")
+            ).lower()
+            authoritative_denial = any(
+                token in auth_text for token in ("contained", "controlled", "false alarm", "all clear", "resolved")
+            )
+            if social_hazard_claim and authoritative_denial:
+                return True
 
-            distance = abs(auth_location[0] - signal_location[0]) + abs(auth_location[1] - signal_location[1])
-            if distance > 1.0:
-                continue
-
-            auth_time_str = auth_signal.get("occurredAt", "")
-            try:
-                auth_time = datetime.fromisoformat(auth_time_str.replace("Z", "+00:00"))
-            except (ValueError, AttributeError):
-                continue
-
-            if abs((signal_time - auth_time).total_seconds()) <= window_minutes * 60:
-                return False
-
-        return True
+        return False
 
     def duplicate_amplification_detection(
         self,
         signals: list[dict[str, Any]],
-        similarity_threshold: float = 0.9,
-        window_minutes: int = 5,
+        similarity_threshold: float | None = None,
+        window_minutes: int | None = None,
+        comparison_context: list[dict[str, Any]] | None = None,
     ) -> list[int]:
-        """Flags near-duplicate posts using Jaccard similarity on word sets."""
-        if len(signals) < 2:
+        """Flags duplicate amplification using cosine similarity; retains earliest timestamp member."""
+        if len(signals) < 2 and not comparison_context:
             return []
 
+        threshold = similarity_threshold if similarity_threshold is not None else self.duplicate_similarity_threshold
+        window = window_minutes if window_minutes is not None else self.duplicate_window_minutes
+
         flagged_indices: list[int] = []
+        context = comparison_context or []
 
         def get_text(s: dict[str, Any]) -> str:
             payload = s.get("payload", {})
             return str(payload.get("text", payload.get("title", payload.get("content", "")))).lower()
 
         def get_time(s: dict[str, Any]) -> datetime | None:
-            try:
-                return datetime.fromisoformat(s.get("occurredAt", "").replace("Z", "+00:00"))
-            except (ValueError, AttributeError):
-                return None
+            return self._parse_timestamp(s.get("occurredAt"))
 
-        def jaccard_similarity(a: str, b: str) -> float:
-            words_a = set(a.split())
-            words_b = set(b.split())
-            if not words_a or not words_b:
-                return 0.0
-            intersection = words_a & words_b
-            union = words_a | words_b
-            return len(intersection) / len(union)
-
-        for i in range(len(signals)):
-            text_i = get_text(signals[i])
-            time_i = get_time(signals[i])
-            if not text_i or not time_i:
+        # Include cross-batch context as immutable candidates; only current-batch indices are returned.
+        candidates: list[tuple[int | None, datetime, Counter[str]]] = []
+        for signal in context:
+            text = get_text(signal)
+            timestamp = get_time(signal)
+            if not text or timestamp is None:
                 continue
-            for j in range(i + 1, len(signals)):
-                text_j = get_text(signals[j])
-                time_j = get_time(signals[j])
-                if not text_j or not time_j:
+            candidates.append((None, timestamp, self._token_frequency(text)))
+
+        indexed_batch: list[tuple[int, datetime, Counter[str]]] = []
+        for index, signal in enumerate(signals):
+            text = get_text(signal)
+            timestamp = get_time(signal)
+            if not text or timestamp is None:
+                continue
+            indexed_batch.append((index, timestamp, self._token_frequency(text)))
+
+        candidates.extend(indexed_batch)
+        candidates.sort(key=lambda item: item[1])
+
+        for i in range(len(candidates)):
+            left_index, left_time, left_tokens = candidates[i]
+            if left_tokens is None:
+                continue
+            for j in range(i + 1, len(candidates)):
+                right_index, right_time, right_tokens = candidates[j]
+                if (right_time - left_time).total_seconds() > window * 60:
+                    break
+                similarity = self._cosine_similarity(left_tokens, right_tokens)
+                if similarity < threshold:
                     continue
-                if abs((time_i - time_j).total_seconds()) > window_minutes * 60:
-                    continue
-                if jaccard_similarity(text_i, text_j) >= similarity_threshold:
-                    flagged_indices.append(j)
+
+                # Keep earliest timestamp member of similar cluster.
+                if left_index is not None and right_index is not None:
+                    flagged_indices.append(right_index)
+                elif left_index is None and right_index is not None:
+                    flagged_indices.append(right_index)
 
         return sorted(set(flagged_indices))
 
@@ -157,22 +433,37 @@ class MisinformationDetector:
         validation_status = signal.get("validationStatus", "pending")
         flags: list[str] = []
 
-        burst_indices = self.burst_detection(recent_signals)
+        burst_indices = self.burst_detection(
+            recent_signals,
+            threshold=self.burst_threshold,
+            window_minutes=self.burst_window_minutes,
+            authoritative_signals=authoritative_signals,
+        )
         signal_idx = None
+        signal_id = self._signal_id(signal)
         for i, s in enumerate(recent_signals):
-            if s is signal:
+            if signal_id and self._signal_id(s) == signal_id:
                 signal_idx = i
                 break
         if signal_idx is not None and signal_idx in burst_indices:
             flags.append("burst_detected")
             validation_status = "escalated"
 
-        has_contradiction = self.contradiction_detection(signal, authoritative_signals)
-        if has_contradiction:
+        has_corroboration = self.has_authoritative_corroboration(signal, authoritative_signals)
+        if not has_corroboration:
             flags.append("no_authoritative_corroboration")
             confidence *= 0.5
+        elif self.contradiction_detection(signal, authoritative_signals):
+            flags.append("authoritative_contradiction")
+            validation_status = "escalated"
+            confidence *= 0.5
 
-        dup_indices = self.duplicate_amplification_detection(recent_signals)
+        dup_indices = self.duplicate_amplification_detection(
+            recent_signals,
+            similarity_threshold=self.duplicate_similarity_threshold,
+            window_minutes=self.duplicate_window_minutes,
+            comparison_context=authoritative_signals,
+        )
         if signal_idx is not None and signal_idx in dup_indices:
             flags.append("duplicate_amplification")
             validation_status = "escalated"

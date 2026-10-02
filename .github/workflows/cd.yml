@@ -16,6 +16,17 @@
 
 name: cd
 
+env:
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+  UV_DEFAULT_INDEX: https://packagefeedproxy.microsoft.io/pypi/simple
+  PIP_CONFIG_FILE: /dev/null
+  PIP_EXTRA_INDEX_URL: ""
+  PIP_FIND_LINKS: ""
+  UV_INDEX: ""
+  UV_EXTRA_INDEX_URL: ""
+  UV_FIND_LINKS: ""
+  UV_NO_CONFIG: "1"
+
 on:
   workflow_run:
     workflows: ["ci"]
@@ -41,8 +52,9 @@ jobs:
     # Initial dev provision of the full DRH stack (Container Apps environment +
     # api/agents/ingestion containers + Cosmos + Storage + OpenAI + App Service
     # + monitoring) takes 25-35 minutes. 60 leaves headroom; subsequent
-    # provisions on existing resources are faster (~5-10 min).
-    timeout-minutes: 60
+    # provisions on existing resources are faster (~5-10 min). Multi-platform
+    # container builds add ARM64 emulation work on the hosted AMD64 runner.
+    timeout-minutes: 90
     concurrency:
       # Branch ↔ environment is 1:1, so grouping by head_branch is equivalent
       # to grouping by target environment and prevents concurrent deploys to
@@ -52,6 +64,9 @@ jobs:
 
     outputs:
       deployment-status: ${{ steps.set-status.outputs.status }}
+      health_passed: ${{ steps.health-check.outputs.health-passed }}
+      target_env: ${{ steps.resolve-env.outputs.target_env }}
+      resource_group: ${{ steps.resolve-env.outputs.resource_group }}
       revision-api: ${{ steps.record-revisions.outputs.revision-api }}
       revision-agents: ${{ steps.record-revisions.outputs.revision-agents }}
       revision-ingest: ${{ steps.record-revisions.outputs.revision-ingest }}
@@ -65,18 +80,39 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
+      # azd invokes the service-specific Dockerfiles from azure.yaml and
+      # retains the resulting images locally before publishing them. Docker
+      # automatically applies each Dockerfile.dockerignore beside its file,
+      # keeping repository-root contexts small for remote and local builds.
+      - name: Set up multi-platform Docker image store
+        uses: docker/setup-docker-action@2bf61fb9464cc67f0cbdeabed6aa0380accd1c70 # v5
+        with:
+          daemon-config: |
+            {
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
+
       # Step 2 — pin TARGET_ENV from the source branch for downstream steps.
       # Branch ↔ environment is 1:1: dev/staging/production map to their
       # respective environments. `main` is excluded by the trigger filter
       # above, so head_branch is always one of these three here.
       - name: Resolve target environment
+        id: resolve-env
         env:
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         run: |
           TARGET_ENV="${HEAD_BRANCH}"
+          RESOURCE_GROUP="rg-drh-${TARGET_ENV}"
           echo "TARGET_ENV=${TARGET_ENV}" >> "$GITHUB_ENV"
           echo "AZURE_ENV_NAME=drh-${TARGET_ENV}" >> "$GITHUB_ENV"
-          echo "RESOURCE_GROUP=rg-drh-${TARGET_ENV}" >> "$GITHUB_ENV"
+          echo "RESOURCE_GROUP=${RESOURCE_GROUP}" >> "$GITHUB_ENV"
+          echo "target_env=${TARGET_ENV}" >> "$GITHUB_OUTPUT"
+          echo "resource_group=${RESOURCE_GROUP}" >> "$GITHUB_OUTPUT"
 
       # Step 3 — explicit fail-fast on missing AZURE_CREDENTIALS (FR-016).
       # azure/login also fails on this, but its message does not name the
@@ -117,6 +153,36 @@ jobs:
 
       - name: Install seed loader dependencies
         run: python -m pip install -e apps/api
+
+      - name: Validate service-specific Docker build filters
+        run: |
+          set -euo pipefail
+          for dockerfile in \
+            apps/agents/Dockerfile \
+            apps/api/Dockerfile \
+            apps/ingestion/Dockerfile \
+            apps/ingest-runner/Dockerfile; do
+            if [[ ! -f "${dockerfile}.dockerignore" ]]; then
+              echo "::error::Missing service-specific build filter: ${dockerfile}.dockerignore"
+              exit 1
+            fi
+          done
+
+      - name: Enforce P1 training release gate
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          base_sha="$(git rev-parse "${HEAD_SHA}^" 2>/dev/null || true)"
+          if [[ -z "${base_sha}" ]]; then
+            echo "::error::Unable to derive base SHA for release classification; refusing deployment."
+            exit 1
+          fi
+          python scripts/p1_release_training_gate.py \
+            --inventory docs/disaster-response-hub/p1-flow-inventory.yaml \
+            --base-sha "${base_sha}" \
+            --head-sha "${HEAD_SHA}" \
+            --summary-out artifacts/p1-release-gate-summary.json
 
       # azd has its own auth flow, separate from azure/login. Authenticate
       # with the same service principal so `azd provision`/`azd deploy`
@@ -177,36 +243,21 @@ jobs:
           echo "Resolved $(echo "${global_admin_ids}" | jq 'length') Global Administrator user account(s) for Cosmos DB data-plane reader access."
           azd env set globalAdministratorPrincipalIds "$(echo "${global_admin_ids}" | jq -c '.')"
 
-      # Self-heal soft-deleted Cognitive Services accounts in the target
-      # resource group before provisioning. Bicep generates account names
-      # deterministically from `uniqueString(rg.id)` (infra/main.bicep,
-      # infra/modules/content-safety.bicep), so a soft-deleted predecessor
-      # from a prior destroyed deploy collides on the next `azd provision`
-      # with `FlagMustBeSetForRestore`. Scope: any Cognitive Services kind
-      # (OpenAI, ContentSafety, …) located in this deployment RG. Purge is
-      # idempotent and a no-op when nothing matches; restricting to the
-      # deployment RG keeps it from touching unrelated soft-deleted accounts
-      # elsewhere in the subscription.
-      - name: Purge soft-deleted Cognitive Services accounts (self-heal)
+      # Soft-deleted Cognitive Services recovery is intentionally not part of
+      # routine CD. Purging is irreversible and requires a separately approved
+      # resource-specific recovery operation.
+      - name: Check for soft-deleted Cognitive Services accounts
         run: |
           set -euo pipefail
           deleted=$(az cognitiveservices account list-deleted \
             --query "[?contains(id, '/resourceGroups/${RESOURCE_GROUP}/')].{name:name, location:location, kind:kind}" \
             -o json)
           count=$(echo "${deleted}" | jq 'length')
-          echo "Soft-deleted Cognitive Services accounts in ${RESOURCE_GROUP}: ${count}"
           if [[ "${count}" -gt 0 ]]; then
-            echo "${deleted}" | jq -c '.[]' | while read -r row; do
-              name=$(echo "${row}" | jq -r .name)
-              loc=$(echo "${row}" | jq -r .location)
-              kind=$(echo "${row}" | jq -r .kind)
-              echo "Purging ${kind} account ${name} in ${loc}..."
-              az cognitiveservices account purge \
-                --name "${name}" \
-                --location "${loc}" \
-                --resource-group "${RESOURCE_GROUP}"
-            done
+            echo "::error::Found ${count} soft-deleted Cognitive Services account(s) in ${RESOURCE_GROUP}; run the separately authorized recovery procedure before CD."
+            exit 1
           fi
+          echo "No soft-deleted Cognitive Services accounts found in ${RESOURCE_GROUP}."
 
       - name: Verify Foundry carve-out registry (spec 036, FR-RAG-CV-01..04)
         # Spec 036 T026 — block deploy if any Foundry deployment lacks
@@ -226,6 +277,48 @@ jobs:
 
       - name: Deploy services
         run: azd deploy --no-prompt
+
+      - name: Verify deployed container images
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          check_app_image() {
+            local resource_type="$1"
+            local resource_name="$2"
+            local expected_repository="$3"
+            local image
+
+            if [[ "${resource_type}" == "job" ]]; then
+              image=$(az containerapp job show \
+                --name "${resource_name}" \
+                --resource-group "${RESOURCE_GROUP}" \
+                --query "properties.template.containers[0].image" -o tsv)
+            else
+              image=$(az containerapp show \
+                --name "${resource_name}" \
+                --resource-group "${RESOURCE_GROUP}" \
+                --query "properties.template.containers[0].image" -o tsv)
+            fi
+
+            if [[ -z "${image}" || "${image}" == *"azuredocs/containerapps-helloworld"* ]]; then
+              echo "::error::${resource_name} is still using the placeholder image: ${image:-<empty>}"
+              return 1
+            fi
+
+            if [[ "${image}" != *"/${expected_repository}:"* ]]; then
+              echo "::error::${resource_name} uses unexpected image '${image}'; expected repository '${expected_repository}'."
+              return 1
+            fi
+
+            echo "✅ ${resource_name}: ${image}"
+          }
+
+          check_app_image app "ca-api-${AZURE_ENV_NAME}" "ama/api"
+          check_app_image app "ca-agents-${AZURE_ENV_NAME}" "ama/agents"
+          check_app_image app "ca-evacuation-${AZURE_ENV_NAME}" "ama/evacuation"
+          check_app_image app "ca-ingest-${AZURE_ENV_NAME}" "ama/ingestion"
+          check_app_image job "caj-ingest-runner-${AZURE_ENV_NAME}" "ama/ingest-runner"
 
       - name: Health checks (api + web)
         id: health-check
@@ -351,47 +444,6 @@ jobs:
             echo "::notice::known-good manifest unchanged"
           fi
 
-      # FR-015a: rollback runs only for staging and production (never for dev).
-      - name: Rollback on health failure (staging/prod only)
-        id: rollback
-        if: failure() && steps.health-check.outcome == 'failure' && env.TARGET_ENV != 'dev'
-        run: |
-          chmod +x scripts/rollback.sh
-          scripts/rollback.sh \
-            --environment "${TARGET_ENV}" \
-            --resource-group "${RESOURCE_GROUP}"
-          echo "rollback-result=success" >> "$GITHUB_OUTPUT"
-        continue-on-error: true
-
-      # FR-015a: critical-failure issue created only when staging/prod rollback fails.
-      - name: Create critical failure issue (staging/prod only)
-        if: failure() && steps.rollback.outcome == 'failure' && env.TARGET_ENV != 'dev'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh issue create \
-            --title "CRITICAL: Rollback failed in ${TARGET_ENV}" \
-            --body "## 🚨 Critical Deployment Failure
-
-          **Environment**: ${TARGET_ENV}
-          **Resource Group**: ${RESOURCE_GROUP}
-          **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          **Trigger**: CI run #${{ github.event.workflow_run.id }}
-
-          ### What happened
-          1. Deployment to ${TARGET_ENV} completed
-          2. Health checks **failed**
-          3. Automated rollback was triggered
-          4. Rollback also **failed** — manual intervention required
-
-          ### Required Actions
-          1. Check the [workflow run logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          2. Manually verify service health in Azure Portal
-          3. If needed, manually roll back using: \`scripts/rollback.sh --environment ${TARGET_ENV} --resource-group ${RESOURCE_GROUP}\`
-          4. Investigate root cause before re-deploying
-          " \
-            --label "critical"
-
       - name: Set deployment status
         id: set-status
         if: always()
@@ -400,10 +452,8 @@ jobs:
             echo "status=success" >> "$GITHUB_OUTPUT"
           elif [[ "${TARGET_ENV}" == "dev" ]]; then
             echo "status=failed-no-rollback" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ steps.rollback.outcome }}" == "success" ]]; then
-            echo "status=rolled-back" >> "$GITHUB_OUTPUT"
           else
-            echo "status=critical-failure" >> "$GITHUB_OUTPUT"
+            echo "status=failed-requires-rollback" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Deployment summary
@@ -421,13 +471,80 @@ jobs:
             success)
               echo "✅ **Status**: Deployed successfully" >> "$GITHUB_STEP_SUMMARY"
               ;;
-            rolled-back)
-              echo "⚠️ **Status**: Rolled back (health check failure in ${TARGET_ENV})" >> "$GITHUB_STEP_SUMMARY"
-              ;;
-            critical-failure)
-              echo "🚨 **Status**: CRITICAL FAILURE in ${TARGET_ENV} — manual intervention required" >> "$GITHUB_STEP_SUMMARY"
+            failed-requires-rollback)
+              echo "⚠️ **Status**: Deployment failed checks in ${TARGET_ENV}; rollback is handled by the post-deploy rollback job." >> "$GITHUB_STEP_SUMMARY"
               ;;
             failed-no-rollback)
               echo "❌ **Status**: Deploy failed in ${TARGET_ENV}; no rollback (dev environment, FR-015b). Push a fix commit." >> "$GITHUB_STEP_SUMMARY"
               ;;
           esac
+
+  quality-gate:
+    name: Post-deploy eval quality gate
+    needs: [deploy]
+    if: always() && needs.deploy.result == 'success'
+    uses: ./.github/workflows/eval-pr-gate.yml
+    with:
+      evaluation_mode: pr-fast-subset
+      evaluation_region: australiaeast
+      pr_number: 0
+      min_evaluated_samples: 1
+      max_hallucination_rate: 0.02
+      max_false_positive_rate: 0.05
+      fail_on_missing_metrics: true
+      evaluation_summary_json: ${{ vars.EVAL_GATE_SUMMARY_JSON || '' }}
+    secrets: inherit
+
+  rollback:
+    name: Rollback on health or quality gate failure (staging/prod only)
+    runs-on: ubuntu-latest
+    needs: [deploy, quality-gate]
+    if: >-
+      always() &&
+      needs.deploy.outputs.target_env != 'dev' &&
+      (needs.deploy.outputs.health_passed != 'true' || needs.quality-gate.result == 'failure')
+    environment: ${{ needs.deploy.outputs.target_env }}
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Azure Login
+        uses: azure/login@2dd0bbf4064d5a1812889dc200bb8eed2597f82a # v3.x
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Execute rollback script
+        run: |
+          chmod +x scripts/rollback.sh
+          scripts/rollback.sh \
+            --environment "${{ needs.deploy.outputs.target_env }}" \
+            --resource-group "${{ needs.deploy.outputs.resource_group }}"
+
+      - name: Create critical failure issue when rollback fails
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "CRITICAL: Rollback failed in ${{ needs.deploy.outputs.target_env }}" \
+            --body "## 🚨 Critical Deployment Failure
+
+          **Environment**: ${{ needs.deploy.outputs.target_env }}
+          **Resource Group**: ${{ needs.deploy.outputs.resource_group }}
+          **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          **Trigger**: CI run #${{ github.event.workflow_run.id }}
+
+          ### What happened
+          1. Deployment to ${{ needs.deploy.outputs.target_env }} completed
+          2. A required gate failed (health check and/or eval quality gate)
+          3. Automated rollback was triggered
+          4. Rollback also **failed** — manual intervention required
+
+          ### Required Actions
+          1. Check the [workflow run logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          2. Manually verify service health in Azure Portal
+          3. If needed, manually roll back using: \`scripts/rollback.sh --environment ${{ needs.deploy.outputs.target_env }} --resource-group ${{ needs.deploy.outputs.resource_group }}\`
+          4. Investigate root cause before re-deploying
+          " \
+            --label "critical"

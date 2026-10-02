@@ -1,0 +1,4464 @@
+{
+  "schema_version": "spec005-readiness-v2",
+  "generator": {
+    "tool": "tools/lint/check_spec005_readiness.py",
+    "version": "2026-09-16",
+    "source_sha256": "d91031783d32b927bb99694fc314bab83d118e82de95fe0b1f9d5a477e304c9f"
+  },
+  "revision": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+  "generated_at": "2026-09-16T00:37:38.944531+00:00",
+  "tenant_scope": {
+    "tenant_id": "live",
+    "agency_id": "nsw-ses"
+  },
+  "sources": [
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.775923Z",
+      "data_source_id": "bom-warnings",
+      "data_type": "cap_alert",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Bureau of Meteorology \u2014 Warnings",
+      "next_assessment_due_date": "2026-09-16T00:37:38.776809Z",
+      "provider": "Bureau of Meteorology",
+      "status": "available",
+      "sub_category": "weather_climate",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.776826Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.802705Z",
+      "data_source_id": "bom-forecasts",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Bureau of Meteorology \u2014 Forecasts",
+      "next_assessment_due_date": "2026-09-16T00:37:38.803303Z",
+      "provider": "Bureau of Meteorology",
+      "status": "available",
+      "sub_category": "weather_climate",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "hourly",
+      "updated_at": "2026-09-16T00:37:38.803312Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.803463Z",
+      "data_source_id": "bom-radar",
+      "data_type": "image_raster",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Bureau of Meteorology \u2014 Radar",
+      "next_assessment_due_date": "2026-09-16T00:37:38.804174Z",
+      "provider": "Bureau of Meteorology",
+      "status": "available",
+      "sub_category": "weather_climate",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "5_minutes",
+      "updated_at": "2026-09-16T00:37:38.804178Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.804514Z",
+      "data_source_id": "bom-observations",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Bureau of Meteorology \u2014 Observations",
+      "next_assessment_due_date": "2026-09-16T00:37:38.804952Z",
+      "provider": "Bureau of Meteorology",
+      "status": "available",
+      "sub_category": "weather_climate",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.804959Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.805371Z",
+      "data_source_id": "ga-earthquake-alerts",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Geoscience Australia \u2014 Earthquake Alerts",
+      "next_assessment_due_date": "2026-09-16T00:37:38.805987Z",
+      "provider": "Geoscience Australia",
+      "status": "available",
+      "sub_category": "geohazard",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.806002Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.806253Z",
+      "data_source_id": "ga-tsunami-warnings",
+      "data_type": "cap_alert",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Geoscience Australia \u2014 Tsunami Warnings",
+      "next_assessment_due_date": "2026-09-16T00:37:38.806590Z",
+      "provider": "Geoscience Australia",
+      "status": "available",
+      "sub_category": "geohazard",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.806595Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.806779Z",
+      "data_source_id": "ga-sentinel-hotspots",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Geoscience Australia \u2014 Sentinel Hotspot Data",
+      "next_assessment_due_date": "2026-09-16T00:37:38.806958Z",
+      "provider": "Geoscience Australia",
+      "status": "available",
+      "sub_category": "geohazard",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "hourly",
+      "updated_at": "2026-09-16T00:37:38.806962Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.807056Z",
+      "data_source_id": "nsw-rfs-fires-near-me",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "nsw",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "NSW Rural Fire Service \u2014 Fires Near Me",
+      "next_assessment_due_date": "2026-09-16T00:37:38.807214Z",
+      "provider": "NSW Rural Fire Service",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.807218Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.807312Z",
+      "data_source_id": "vic-cfa",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "vic",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Country Fire Authority Victoria",
+      "next_assessment_due_date": "2026-09-16T00:37:38.807666Z",
+      "provider": "CFA Victoria",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.807675Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.807925Z",
+      "data_source_id": "qld-qfes",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "qld",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Queensland Fire and Emergency Services",
+      "next_assessment_due_date": "2026-09-16T00:37:38.808145Z",
+      "provider": "QFES",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.808149Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.808251Z",
+      "data_source_id": "sa-cfs",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "sa",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "South Australia Country Fire Service",
+      "next_assessment_due_date": "2026-09-16T00:37:38.808419Z",
+      "provider": "CFS South Australia",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.808422Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.808512Z",
+      "data_source_id": "wa-dfes",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "wa",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Western Australia Dept of Fire and Emergency Services",
+      "next_assessment_due_date": "2026-09-16T00:37:38.808666Z",
+      "provider": "DFES Western Australia",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.808669Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.808757Z",
+      "data_source_id": "tas-tfs",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "tas",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Tasmania Fire Service",
+      "next_assessment_due_date": "2026-09-16T00:37:38.808908Z",
+      "provider": "TFS Tasmania",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.808911Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.808998Z",
+      "data_source_id": "act-esa",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "act",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "ACT Emergency Services Agency",
+      "next_assessment_due_date": "2026-09-16T00:37:38.809141Z",
+      "provider": "ACTESA",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.809144Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.809228Z",
+      "data_source_id": "nt-pfes",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "nt",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Northern Territory Police, Fire and Emergency Services",
+      "next_assessment_due_date": "2026-09-16T00:37:38.809367Z",
+      "provider": "NTPFES",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.809370Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.809455Z",
+      "data_source_id": "bom-flood-warnings",
+      "data_type": "cap_alert",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Bureau of Meteorology \u2014 Flood Warnings",
+      "next_assessment_due_date": "2026-09-16T00:37:38.809596Z",
+      "provider": "Bureau of Meteorology",
+      "status": "available",
+      "sub_category": "weather_climate",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.809599Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.809683Z",
+      "data_source_id": "nsw-ses-flood",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "nsw",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "NSW State Emergency Service \u2014 Flood Intelligence",
+      "next_assessment_due_date": "2026-09-16T00:37:38.809821Z",
+      "provider": "NSW SES",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.809825Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.809914Z",
+      "data_source_id": "vic-ses-flood",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "vic",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "VIC State Emergency Service \u2014 Flood Intelligence",
+      "next_assessment_due_date": "2026-09-16T00:37:38.810061Z",
+      "provider": "VIC SES",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.810064Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.810151Z",
+      "data_source_id": "qld-ses-flood",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "qld",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "QLD State Emergency Service \u2014 Flood Intelligence",
+      "next_assessment_due_date": "2026-09-16T00:37:38.810300Z",
+      "provider": "QLD SES",
+      "status": "available",
+      "sub_category": "emergency_services",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.810303Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 1,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.810393Z",
+      "data_source_id": "ema",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_1_authoritative_government",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Emergency Management Australia",
+      "next_assessment_due_date": "2026-09-16T00:37:38.810531Z",
+      "provider": "Emergency Management Australia",
+      "status": "available",
+      "sub_category": "gov_commonwealth",
+      "trust_tier": "tier_1_authoritative_government",
+      "update_frequency": "daily",
+      "updated_at": "2026-09-16T00:37:38.810534Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 2,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.810620Z",
+      "data_source_id": "aidr",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_2_verified_institutional",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Australian Institute for Disaster Resilience",
+      "next_assessment_due_date": "2026-09-16T00:37:38.810760Z",
+      "provider": "AIDR",
+      "status": "available",
+      "sub_category": "gov_commonwealth",
+      "trust_tier": "tier_2_verified_institutional",
+      "update_frequency": "daily",
+      "updated_at": "2026-09-16T00:37:38.810764Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 2,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.810857Z",
+      "data_source_id": "nsw-health",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_2_verified_institutional",
+      "geographic_coverage": "nsw",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "NSW Health \u2014 Public Health Advisories",
+      "next_assessment_due_date": "2026-09-16T00:37:38.811008Z",
+      "provider": "NSW Health",
+      "status": "available",
+      "sub_category": "health",
+      "trust_tier": "tier_2_verified_institutional",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.811012Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 2,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.811099Z",
+      "data_source_id": "vic-health",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_2_verified_institutional",
+      "geographic_coverage": "vic",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "VIC Health \u2014 Public Health Advisories",
+      "next_assessment_due_date": "2026-09-16T00:37:38.811240Z",
+      "provider": "VIC Department of Health",
+      "status": "available",
+      "sub_category": "health",
+      "trust_tier": "tier_2_verified_institutional",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.811243Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 2,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.811326Z",
+      "data_source_id": "qld-health",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_2_verified_institutional",
+      "geographic_coverage": "qld",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "QLD Health \u2014 Public Health Advisories",
+      "next_assessment_due_date": "2026-09-16T00:37:38.811471Z",
+      "provider": "QLD Health",
+      "status": "available",
+      "sub_category": "health",
+      "trust_tier": "tier_2_verified_institutional",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.811508Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 2,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.811600Z",
+      "data_source_id": "tfnsw",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_2_verified_institutional",
+      "geographic_coverage": "nsw",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Transport for NSW \u2014 Road Status",
+      "next_assessment_due_date": "2026-09-16T00:37:38.811893Z",
+      "provider": "Transport for NSW",
+      "status": "available",
+      "sub_category": "transport_infrastructure",
+      "trust_tier": "tier_2_verified_institutional",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.811904Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 2,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.812105Z",
+      "data_source_id": "vicroads",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_2_verified_institutional",
+      "geographic_coverage": "vic",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "VicRoads \u2014 Road Status",
+      "next_assessment_due_date": "2026-09-16T00:37:38.812308Z",
+      "provider": "VicRoads",
+      "status": "available",
+      "sub_category": "transport_infrastructure",
+      "trust_tier": "tier_2_verified_institutional",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.812311Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 2,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.812424Z",
+      "data_source_id": "tmr-qld",
+      "data_type": "geojson",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_2_verified_institutional",
+      "geographic_coverage": "qld",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "Transport and Main Roads QLD \u2014 Road Status",
+      "next_assessment_due_date": "2026-09-16T00:37:38.812596Z",
+      "provider": "TMR Queensland",
+      "status": "available",
+      "sub_category": "transport_infrastructure",
+      "trust_tier": "tier_2_verified_institutional",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.812601Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 2,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.812707Z",
+      "data_source_id": "energy-networks-nsw",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_2_verified_institutional",
+      "geographic_coverage": "nsw",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "NSW Energy Network Operators",
+      "next_assessment_due_date": "2026-09-16T00:37:38.812863Z",
+      "provider": "Various NSW energy operators",
+      "status": "available",
+      "sub_category": "utilities",
+      "trust_tier": "tier_2_verified_institutional",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.812867Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 2,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.812955Z",
+      "data_source_id": "water-authorities-nsw",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_2_verified_institutional",
+      "geographic_coverage": "nsw",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "authoritative",
+      "name": "NSW Water Authorities",
+      "next_assessment_due_date": "2026-09-16T00:37:38.813102Z",
+      "provider": "Various NSW water authorities",
+      "status": "available",
+      "sub_category": "utilities",
+      "trust_tier": "tier_2_verified_institutional",
+      "update_frequency": "hourly",
+      "updated_at": "2026-09-16T00:37:38.813106Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 3,
+      "collection_method": "satellite_downlink",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.813967Z",
+      "data_source_id": "sentinel-satellite",
+      "data_type": "image_raster",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_3_operational_sensor",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "sensor",
+      "name": "Sentinel Satellite Imagery",
+      "next_assessment_due_date": "2026-09-16T00:37:38.814115Z",
+      "provider": "Copernicus / ESA",
+      "status": "available",
+      "sub_category": "satellite",
+      "trust_tier": "tier_3_operational_sensor",
+      "update_frequency": "daily",
+      "updated_at": "2026-09-16T00:37:38.814118Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 3,
+      "collection_method": "satellite_downlink",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.814204Z",
+      "data_source_id": "himawari-satellite",
+      "data_type": "image_raster",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_3_operational_sensor",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "sensor",
+      "name": "Himawari-8/9 Satellite Imagery",
+      "next_assessment_due_date": "2026-09-16T00:37:38.814345Z",
+      "provider": "Japan Meteorological Agency / BoM",
+      "status": "available",
+      "sub_category": "satellite",
+      "trust_tier": "tier_3_operational_sensor",
+      "update_frequency": "10_minutes",
+      "updated_at": "2026-09-16T00:37:38.814349Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 3,
+      "collection_method": "sensor_network",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.813196Z",
+      "data_source_id": "bom-aws-stations",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_3_operational_sensor",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "sensor",
+      "name": "Bureau of Meteorology \u2014 Automatic Weather Stations",
+      "next_assessment_due_date": "2026-09-16T00:37:38.813338Z",
+      "provider": "Bureau of Meteorology",
+      "status": "available",
+      "sub_category": "weather_station",
+      "trust_tier": "tier_3_operational_sensor",
+      "update_frequency": "5_minutes",
+      "updated_at": "2026-09-16T00:37:38.813341Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 3,
+      "collection_method": "sensor_network",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.813431Z",
+      "data_source_id": "bom-river-gauges",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_3_operational_sensor",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "sensor",
+      "name": "River Gauge Networks (BoM/State)",
+      "next_assessment_due_date": "2026-09-16T00:37:38.813575Z",
+      "provider": "Bureau of Meteorology / State agencies",
+      "status": "available",
+      "sub_category": "river_gauge",
+      "trust_tier": "tier_3_operational_sensor",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.813578Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 3,
+      "collection_method": "sensor_network",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.813662Z",
+      "data_source_id": "epa-air-quality",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_3_operational_sensor",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "sensor",
+      "name": "State EPA Air Quality Sensors",
+      "next_assessment_due_date": "2026-09-16T00:37:38.813876Z",
+      "provider": "State Environment Protection Authorities",
+      "status": "available",
+      "sub_category": "air_quality",
+      "trust_tier": "tier_3_operational_sensor",
+      "update_frequency": "hourly",
+      "updated_at": "2026-09-16T00:37:38.813879Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 4,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.816086Z",
+      "data_source_id": "icon-ims",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_4_field_reports",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "field_report",
+      "name": "ICON Incident Management System",
+      "next_assessment_due_date": "2026-09-16T00:37:38.816239Z",
+      "provider": "State emergency services",
+      "status": "available",
+      "sub_category": "incident_management",
+      "trust_tier": "tier_4_field_reports",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.816242Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 4,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.816329Z",
+      "data_source_id": "webeoc-ims",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_4_field_reports",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "field_report",
+      "name": "WebEOC Incident Management System",
+      "next_assessment_due_date": "2026-09-16T00:37:38.816480Z",
+      "provider": "Juvare / State agencies",
+      "status": "available",
+      "sub_category": "incident_management",
+      "trust_tier": "tier_4_field_reports",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.816483Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 4,
+      "collection_method": "manual_entry",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.815853Z",
+      "data_source_id": "field-officer-reports",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_4_field_reports",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "field_report",
+      "name": "Agency Field Officer Reports",
+      "next_assessment_due_date": "2026-09-16T00:37:38.815997Z",
+      "provider": "Various emergency agencies",
+      "status": "available",
+      "sub_category": "incident_management",
+      "trust_tier": "tier_4_field_reports",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.816000Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 5,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.815624Z",
+      "data_source_id": "snap-send-solve",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_5_community_volunteer",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "community",
+      "name": "Snap Send Solve \u2014 Community Reporting",
+      "next_assessment_due_date": "2026-09-16T00:37:38.815766Z",
+      "provider": "Snap Send Solve",
+      "status": "available",
+      "sub_category": "community_reporting",
+      "trust_tier": "tier_5_community_volunteer",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.815769Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 5,
+      "collection_method": "manual_entry",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.815159Z",
+      "data_source_id": "surf-life-saving",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_5_community_volunteer",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "community",
+      "name": "Surf Life Saving Australia",
+      "next_assessment_due_date": "2026-09-16T00:37:38.815304Z",
+      "provider": "Surf Life Saving Australia",
+      "status": "available",
+      "sub_category": "volunteer_rescue",
+      "trust_tier": "tier_5_community_volunteer",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.815308Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 5,
+      "collection_method": "manual_entry",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.815395Z",
+      "data_source_id": "volunteer-bushfire-brigades",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_5_community_volunteer",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "community",
+      "name": "Volunteer Bushfire Brigades",
+      "next_assessment_due_date": "2026-09-16T00:37:38.815536Z",
+      "provider": "Various state volunteer brigades",
+      "status": "available",
+      "sub_category": "volunteer_rescue",
+      "trust_tier": "tier_5_community_volunteer",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.815539Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 6,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.814445Z",
+      "data_source_id": "twitter-disaster",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_6_social_unverified",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "social",
+      "name": "X/Twitter \u2014 Disaster Hashtags and Emergency Accounts",
+      "next_assessment_due_date": "2026-09-16T00:37:38.814589Z",
+      "provider": "X Corp",
+      "status": "available",
+      "sub_category": "social_twitter",
+      "trust_tier": "tier_6_social_unverified",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.814592Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 6,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.814680Z",
+      "data_source_id": "facebook-community",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_6_social_unverified",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "social",
+      "name": "Facebook \u2014 Community Groups and Official Pages",
+      "next_assessment_due_date": "2026-09-16T00:37:38.814838Z",
+      "provider": "Meta Platforms",
+      "status": "available",
+      "sub_category": "social_facebook",
+      "trust_tier": "tier_6_social_unverified",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.814841Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 6,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.814925Z",
+      "data_source_id": "reddit-australia",
+      "data_type": "text_report",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_6_social_unverified",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [],
+      "kind": "social",
+      "name": "Reddit \u2014 Australian Subreddits During Events",
+      "next_assessment_due_date": "2026-09-16T00:37:38.815067Z",
+      "provider": "Reddit Inc",
+      "status": "available",
+      "sub_category": "social_reddit",
+      "trust_tier": "tier_6_social_unverified",
+      "update_frequency": "real_time",
+      "updated_at": "2026-09-16T00:37:38.815072Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 7,
+      "collection_method": "api_pull",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.817106Z",
+      "data_source_id": "historical-incidents-db",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_7_derived_computed",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [
+        "bom-warnings",
+        "nsw-ses-alerts"
+      ],
+      "kind": "derived",
+      "name": "Historical Incident Databases",
+      "next_assessment_due_date": "2026-09-16T00:37:38.817256Z",
+      "provider": "Disaster Response Hub / AIDR",
+      "status": "available",
+      "sub_category": "historical",
+      "trust_tier": "tier_7_derived_computed",
+      "update_frequency": "daily",
+      "updated_at": "2026-09-16T00:37:38.817259Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 7,
+      "collection_method": "push_webhook",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.816604Z",
+      "data_source_id": "agent-risk-assessments",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_7_derived_computed",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [
+        "bom-warnings",
+        "ga-earthquakes",
+        "nsw-rfs-fires-near-me"
+      ],
+      "kind": "derived",
+      "name": "Internal Agent-Generated Risk Assessments",
+      "next_assessment_due_date": "2026-09-16T00:37:38.816751Z",
+      "provider": "Disaster Response Hub",
+      "status": "available",
+      "sub_category": "agent_generated",
+      "trust_tier": "tier_7_derived_computed",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.816754Z",
+      "version": 2
+    },
+    {
+      "authority_rank": 7,
+      "collection_method": "push_webhook",
+      "compliance_status": "unassessed",
+      "created_at": "2026-09-16T00:37:38.816843Z",
+      "data_source_id": "aggregated-risk-scores",
+      "data_type": "json_observations",
+      "deactivated_at": null,
+      "effective_trust_tier": "tier_7_derived_computed",
+      "geographic_coverage": "national",
+      "governance_gap_count": 3,
+      "governance_status": "unassigned",
+      "grace_period_end": null,
+      "grace_period_expiry": null,
+      "grace_period_reason": null,
+      "grace_period_start": null,
+      "input_source_ids": [
+        "agent-risk-assessments",
+        "ga-earthquakes",
+        "vic-emergency"
+      ],
+      "kind": "derived",
+      "name": "Aggregated Risk Scores",
+      "next_assessment_due_date": "2026-09-16T00:37:38.817012Z",
+      "provider": "Disaster Response Hub",
+      "status": "available",
+      "sub_category": "aggregated_risk",
+      "trust_tier": "tier_7_derived_computed",
+      "update_frequency": "event_driven",
+      "updated_at": "2026-09-16T00:37:38.817015Z",
+      "version": 2
+    }
+  ],
+  "assessments": [],
+  "assignments": [],
+  "chains": [],
+  "gaps": {
+    "by_source": {
+      "act-esa": [
+        {
+          "data_source_id": "act-esa",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "act-esa",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "act-esa",
+          "gap": "no_assignment"
+        }
+      ],
+      "agent-risk-assessments": [
+        {
+          "data_source_id": "agent-risk-assessments",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "agent-risk-assessments",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "agent-risk-assessments",
+          "gap": "no_assignment"
+        }
+      ],
+      "aggregated-risk-scores": [
+        {
+          "data_source_id": "aggregated-risk-scores",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "aggregated-risk-scores",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "aggregated-risk-scores",
+          "gap": "no_assignment"
+        }
+      ],
+      "aidr": [
+        {
+          "data_source_id": "aidr",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "aidr",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "aidr",
+          "gap": "no_assignment"
+        }
+      ],
+      "bom-aws-stations": [
+        {
+          "data_source_id": "bom-aws-stations",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "bom-aws-stations",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "bom-aws-stations",
+          "gap": "no_assignment"
+        }
+      ],
+      "bom-flood-warnings": [
+        {
+          "data_source_id": "bom-flood-warnings",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "bom-flood-warnings",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "bom-flood-warnings",
+          "gap": "no_assignment"
+        }
+      ],
+      "bom-forecasts": [
+        {
+          "data_source_id": "bom-forecasts",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "bom-forecasts",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "bom-forecasts",
+          "gap": "no_assignment"
+        }
+      ],
+      "bom-observations": [
+        {
+          "data_source_id": "bom-observations",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "bom-observations",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "bom-observations",
+          "gap": "no_assignment"
+        }
+      ],
+      "bom-radar": [
+        {
+          "data_source_id": "bom-radar",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "bom-radar",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "bom-radar",
+          "gap": "no_assignment"
+        }
+      ],
+      "bom-river-gauges": [
+        {
+          "data_source_id": "bom-river-gauges",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "bom-river-gauges",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "bom-river-gauges",
+          "gap": "no_assignment"
+        }
+      ],
+      "bom-warnings": [
+        {
+          "data_source_id": "bom-warnings",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "bom-warnings",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "bom-warnings",
+          "gap": "no_assignment"
+        }
+      ],
+      "ema": [
+        {
+          "data_source_id": "ema",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "ema",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "ema",
+          "gap": "no_assignment"
+        }
+      ],
+      "energy-networks-nsw": [
+        {
+          "data_source_id": "energy-networks-nsw",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "energy-networks-nsw",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "energy-networks-nsw",
+          "gap": "no_assignment"
+        }
+      ],
+      "epa-air-quality": [
+        {
+          "data_source_id": "epa-air-quality",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "epa-air-quality",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "epa-air-quality",
+          "gap": "no_assignment"
+        }
+      ],
+      "facebook-community": [
+        {
+          "data_source_id": "facebook-community",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "facebook-community",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "facebook-community",
+          "gap": "no_assignment"
+        }
+      ],
+      "field-officer-reports": [
+        {
+          "data_source_id": "field-officer-reports",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "field-officer-reports",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "field-officer-reports",
+          "gap": "no_assignment"
+        }
+      ],
+      "ga-earthquake-alerts": [
+        {
+          "data_source_id": "ga-earthquake-alerts",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "ga-earthquake-alerts",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "ga-earthquake-alerts",
+          "gap": "no_assignment"
+        }
+      ],
+      "ga-sentinel-hotspots": [
+        {
+          "data_source_id": "ga-sentinel-hotspots",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "ga-sentinel-hotspots",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "ga-sentinel-hotspots",
+          "gap": "no_assignment"
+        }
+      ],
+      "ga-tsunami-warnings": [
+        {
+          "data_source_id": "ga-tsunami-warnings",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "ga-tsunami-warnings",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "ga-tsunami-warnings",
+          "gap": "no_assignment"
+        }
+      ],
+      "himawari-satellite": [
+        {
+          "data_source_id": "himawari-satellite",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "himawari-satellite",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "himawari-satellite",
+          "gap": "no_assignment"
+        }
+      ],
+      "historical-incidents-db": [
+        {
+          "data_source_id": "historical-incidents-db",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "historical-incidents-db",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "historical-incidents-db",
+          "gap": "no_assignment"
+        }
+      ],
+      "icon-ims": [
+        {
+          "data_source_id": "icon-ims",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "icon-ims",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "icon-ims",
+          "gap": "no_assignment"
+        }
+      ],
+      "nsw-health": [
+        {
+          "data_source_id": "nsw-health",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "nsw-health",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "nsw-health",
+          "gap": "no_assignment"
+        }
+      ],
+      "nsw-rfs-fires-near-me": [
+        {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "nsw-rfs-fires-near-me",
+          "gap": "no_assignment"
+        }
+      ],
+      "nsw-ses-flood": [
+        {
+          "data_source_id": "nsw-ses-flood",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "nsw-ses-flood",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "nsw-ses-flood",
+          "gap": "no_assignment"
+        }
+      ],
+      "nt-pfes": [
+        {
+          "data_source_id": "nt-pfes",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "nt-pfes",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "nt-pfes",
+          "gap": "no_assignment"
+        }
+      ],
+      "qld-health": [
+        {
+          "data_source_id": "qld-health",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "qld-health",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "qld-health",
+          "gap": "no_assignment"
+        }
+      ],
+      "qld-qfes": [
+        {
+          "data_source_id": "qld-qfes",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "qld-qfes",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "qld-qfes",
+          "gap": "no_assignment"
+        }
+      ],
+      "qld-ses-flood": [
+        {
+          "data_source_id": "qld-ses-flood",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "qld-ses-flood",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "qld-ses-flood",
+          "gap": "no_assignment"
+        }
+      ],
+      "reddit-australia": [
+        {
+          "data_source_id": "reddit-australia",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "reddit-australia",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "reddit-australia",
+          "gap": "no_assignment"
+        }
+      ],
+      "sa-cfs": [
+        {
+          "data_source_id": "sa-cfs",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "sa-cfs",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "sa-cfs",
+          "gap": "no_assignment"
+        }
+      ],
+      "sentinel-satellite": [
+        {
+          "data_source_id": "sentinel-satellite",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "sentinel-satellite",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "sentinel-satellite",
+          "gap": "no_assignment"
+        }
+      ],
+      "snap-send-solve": [
+        {
+          "data_source_id": "snap-send-solve",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "snap-send-solve",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "snap-send-solve",
+          "gap": "no_assignment"
+        }
+      ],
+      "surf-life-saving": [
+        {
+          "data_source_id": "surf-life-saving",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "surf-life-saving",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "surf-life-saving",
+          "gap": "no_assignment"
+        }
+      ],
+      "tas-tfs": [
+        {
+          "data_source_id": "tas-tfs",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "tas-tfs",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "tas-tfs",
+          "gap": "no_assignment"
+        }
+      ],
+      "tfnsw": [
+        {
+          "data_source_id": "tfnsw",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "tfnsw",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "tfnsw",
+          "gap": "no_assignment"
+        }
+      ],
+      "tmr-qld": [
+        {
+          "data_source_id": "tmr-qld",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "tmr-qld",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "tmr-qld",
+          "gap": "no_assignment"
+        }
+      ],
+      "twitter-disaster": [
+        {
+          "data_source_id": "twitter-disaster",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "twitter-disaster",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "twitter-disaster",
+          "gap": "no_assignment"
+        }
+      ],
+      "vic-cfa": [
+        {
+          "data_source_id": "vic-cfa",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "vic-cfa",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "vic-cfa",
+          "gap": "no_assignment"
+        }
+      ],
+      "vic-health": [
+        {
+          "data_source_id": "vic-health",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "vic-health",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "vic-health",
+          "gap": "no_assignment"
+        }
+      ],
+      "vic-ses-flood": [
+        {
+          "data_source_id": "vic-ses-flood",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "vic-ses-flood",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "vic-ses-flood",
+          "gap": "no_assignment"
+        }
+      ],
+      "vicroads": [
+        {
+          "data_source_id": "vicroads",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "vicroads",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "vicroads",
+          "gap": "no_assignment"
+        }
+      ],
+      "volunteer-bushfire-brigades": [
+        {
+          "data_source_id": "volunteer-bushfire-brigades",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "volunteer-bushfire-brigades",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "volunteer-bushfire-brigades",
+          "gap": "no_assignment"
+        }
+      ],
+      "wa-dfes": [
+        {
+          "data_source_id": "wa-dfes",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "wa-dfes",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "wa-dfes",
+          "gap": "no_assignment"
+        }
+      ],
+      "water-authorities-nsw": [
+        {
+          "data_source_id": "water-authorities-nsw",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "water-authorities-nsw",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "water-authorities-nsw",
+          "gap": "no_assignment"
+        }
+      ],
+      "webeoc-ims": [
+        {
+          "data_source_id": "webeoc-ims",
+          "gap": "missing_principles",
+          "missing_principles": [
+            "cloud_platform",
+            "data_trust_provenance_freshness",
+            "life_safety_first",
+            "multi_agent_coordination",
+            "multilingual_accessible_actionable",
+            "privacy_security_regional_policy"
+          ]
+        },
+        {
+          "data_source_id": "webeoc-ims",
+          "gap": "no_assessment"
+        },
+        {
+          "data_source_id": "webeoc-ims",
+          "gap": "no_assignment"
+        }
+      ]
+    },
+    "total": 138
+  },
+  "audit": [
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-0ea6885a88a845879ae5cb9c939d1add",
+      "correlation_id": null,
+      "data_source_id": "water-authorities-nsw",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.813009Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-138ec22f06c149e3a170f93da5e43a16",
+      "correlation_id": null,
+      "data_source_id": "epa-air-quality",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.813713Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-1a256f863714437e8507ef5281a91493",
+      "correlation_id": null,
+      "data_source_id": "historical-incidents-db",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.817158Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-311d9dbe46944824a2e1bf9a52264795",
+      "correlation_id": null,
+      "data_source_id": "bom-forecasts",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.802874Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-3c2f73134274426e9cc4505f544bd103",
+      "correlation_id": null,
+      "data_source_id": "bom-warnings",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.776583Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-3e39b278dfd34ef6a2ccff06253cb2ee",
+      "correlation_id": null,
+      "data_source_id": "bom-river-gauges",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.813482Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-48c28064dc4d477fb0b85ed8128d6d8a",
+      "correlation_id": null,
+      "data_source_id": "himawari-satellite",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.814254Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-5118c94b683d4fc6b1e89853c8936be6",
+      "correlation_id": null,
+      "data_source_id": "vicroads",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.812178Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-57fdff5941ea4eb39ea115aa2298931e",
+      "correlation_id": null,
+      "data_source_id": "qld-ses-flood",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.810203Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-5917bbb0cc33464fa53fafc1ba571031",
+      "correlation_id": null,
+      "data_source_id": "wa-dfes",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.808569Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-5926e38ef53b4cf584692292d465c02c",
+      "correlation_id": null,
+      "data_source_id": "nsw-health",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.810910Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-5d18ff13b0794efeba17be027ca6c45a",
+      "correlation_id": null,
+      "data_source_id": "nt-pfes",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.809279Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-5f9c315b72fa476dbda0d9b0943ca9c1",
+      "correlation_id": null,
+      "data_source_id": "tmr-qld",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.812483Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-64c5b2c56bf8416ab9e261ac1ffb2289",
+      "correlation_id": null,
+      "data_source_id": "qld-qfes",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.808009Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-6f16f2fd035f43d5a62ccceb7a04a788",
+      "correlation_id": null,
+      "data_source_id": "bom-flood-warnings",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.809505Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-74aaf660540a4b5689c4bd35a5d5a94e",
+      "correlation_id": null,
+      "data_source_id": "bom-observations",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.804716Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-7ffeceb204bc4dd0a30257f0667216d5",
+      "correlation_id": null,
+      "data_source_id": "sentinel-satellite",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.814018Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-8230884d36ce47e58727a721cbc1d5ac",
+      "correlation_id": null,
+      "data_source_id": "aggregated-risk-scores",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.816893Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-84bf7d7b4b034fa5b511d4882c87c6e9",
+      "correlation_id": null,
+      "data_source_id": "sa-cfs",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.808312Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-8f676840f5914231a172de16ee81b5b3",
+      "correlation_id": null,
+      "data_source_id": "facebook-community",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.814738Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-90f092caef3d4eb181db8d6ce8fad7fb",
+      "correlation_id": null,
+      "data_source_id": "webeoc-ims",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.816381Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-9f20f5e8306d4533a6917526990a30f8",
+      "correlation_id": null,
+      "data_source_id": "ga-tsunami-warnings",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.806380Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-a81b261f73f04239a21494e58f338189",
+      "correlation_id": null,
+      "data_source_id": "energy-networks-nsw",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.812761Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-aa66190050694320833967f12333affb",
+      "correlation_id": null,
+      "data_source_id": "surf-life-saving",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.815212Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-b1d2775588f744daafafb0825af87bf6",
+      "correlation_id": null,
+      "data_source_id": "ga-earthquake-alerts",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.805615Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-b1e719b8cbda444db9756dd1a563e1b6",
+      "correlation_id": null,
+      "data_source_id": "nsw-rfs-fires-near-me",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.807111Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-b26e607dd83f4043bec07bb9ac572d39",
+      "correlation_id": null,
+      "data_source_id": "reddit-australia",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.814975Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-b2a06f25b3c6426e8e009d8ab8e5439f",
+      "correlation_id": null,
+      "data_source_id": "vic-health",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.811151Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-ba1610ed5dce4f36a595017949e3f501",
+      "correlation_id": null,
+      "data_source_id": "agent-risk-assessments",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.816659Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-ba5d6cefa99f43e993bae8bdb59b32ad",
+      "correlation_id": null,
+      "data_source_id": "bom-aws-stations",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.813246Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-baced85b29bd45c6bec26496d12d329e",
+      "correlation_id": null,
+      "data_source_id": "snap-send-solve",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.815675Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-bd91b336cac64b9e9bcfdd081253777e",
+      "correlation_id": null,
+      "data_source_id": "aidr",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.810671Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-be6aa8aaaa5c4673a64e94247f2d3fbc",
+      "correlation_id": null,
+      "data_source_id": "act-esa",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.809049Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-c21ea2dbbb2046fe8bb5631cc5698d7f",
+      "correlation_id": null,
+      "data_source_id": "nsw-ses-flood",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.809733Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-c70bf83d16c640e393beffd40fb88888",
+      "correlation_id": null,
+      "data_source_id": "ga-sentinel-hotspots",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.806846Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-c81c799052fc4e4c95c72f4f154fdb84",
+      "correlation_id": null,
+      "data_source_id": "field-officer-reports",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.815906Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-d7d9766d2b694d6b9a7a099a1f8cb1b5",
+      "correlation_id": null,
+      "data_source_id": "tfnsw",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.811651Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-d828372e88c74cfba5dec49235b81ff2",
+      "correlation_id": null,
+      "data_source_id": "icon-ims",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.816146Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-d8daa0c43b934d548b6398fdd701ef2f",
+      "correlation_id": null,
+      "data_source_id": "vic-ses-flood",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.809967Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-d8dddb1a875945bbaed0c3cb12d41e7a",
+      "correlation_id": null,
+      "data_source_id": "bom-radar",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.803911Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-e98a481016364588acd068ac84656ea6",
+      "correlation_id": null,
+      "data_source_id": "vic-cfa",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.807372Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-e9e85e4cc80d4d4c97cda24a35d1a8d9",
+      "correlation_id": null,
+      "data_source_id": "qld-health",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.811380Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-ea894e211a0d4e2a9119fd926a9970fe",
+      "correlation_id": null,
+      "data_source_id": "twitter-disaster",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.814496Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-f80a2d3f49854b65ad8799864be7b635",
+      "correlation_id": null,
+      "data_source_id": "ema",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.810442Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-fad60a883c164d56862fa9c22c9803bb",
+      "correlation_id": null,
+      "data_source_id": "volunteer-bushfire-brigades",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.815447Z",
+      "view_context": null
+    },
+    {
+      "action": "registered",
+      "actor_id": "readiness-export",
+      "agency_id": "nsw-ses",
+      "audit_entry_id": "audit-fe0cd0d8f5864bff865ab403a1c647cc",
+      "correlation_id": null,
+      "data_source_id": "tas-tfs",
+      "details": {
+        "source": "seed_catalogue"
+      },
+      "idempotency_key": null,
+      "outcome": "completed",
+      "related_entity_id": null,
+      "schema_version": 1,
+      "session_id": null,
+      "tenant_id": "live",
+      "timestamp": "2026-09-16T00:37:38.808817Z",
+      "view_context": null
+    }
+  ],
+  "readiness": {
+    "catalogue_source": "packages/domain/src/domain/seed/data_sources_australia.json",
+    "required_source_ids": [
+      "act-esa",
+      "agent-risk-assessments",
+      "aggregated-risk-scores",
+      "aidr",
+      "bom-aws-stations",
+      "bom-flood-warnings",
+      "bom-forecasts",
+      "bom-observations",
+      "bom-radar",
+      "bom-river-gauges",
+      "bom-warnings",
+      "ema",
+      "energy-networks-nsw",
+      "epa-air-quality",
+      "facebook-community",
+      "field-officer-reports",
+      "ga-earthquake-alerts",
+      "ga-sentinel-hotspots",
+      "ga-tsunami-warnings",
+      "himawari-satellite",
+      "historical-incidents-db",
+      "icon-ims",
+      "nsw-health",
+      "nsw-rfs-fires-near-me",
+      "nsw-ses-flood",
+      "nt-pfes",
+      "qld-health",
+      "qld-qfes",
+      "qld-ses-flood",
+      "reddit-australia",
+      "sa-cfs",
+      "sentinel-satellite",
+      "snap-send-solve",
+      "surf-life-saving",
+      "tas-tfs",
+      "tfnsw",
+      "tmr-qld",
+      "twitter-disaster",
+      "vic-cfa",
+      "vic-health",
+      "vic-ses-flood",
+      "vicroads",
+      "volunteer-bushfire-brigades",
+      "wa-dfes",
+      "water-authorities-nsw",
+      "webeoc-ims"
+    ],
+    "covered_source_ids": [
+      "act-esa",
+      "agent-risk-assessments",
+      "aggregated-risk-scores",
+      "aidr",
+      "bom-aws-stations",
+      "bom-flood-warnings",
+      "bom-forecasts",
+      "bom-observations",
+      "bom-radar",
+      "bom-river-gauges",
+      "bom-warnings",
+      "ema",
+      "energy-networks-nsw",
+      "epa-air-quality",
+      "facebook-community",
+      "field-officer-reports",
+      "ga-earthquake-alerts",
+      "ga-sentinel-hotspots",
+      "ga-tsunami-warnings",
+      "himawari-satellite",
+      "historical-incidents-db",
+      "icon-ims",
+      "nsw-health",
+      "nsw-rfs-fires-near-me",
+      "nsw-ses-flood",
+      "nt-pfes",
+      "qld-health",
+      "qld-qfes",
+      "qld-ses-flood",
+      "reddit-australia",
+      "sa-cfs",
+      "sentinel-satellite",
+      "snap-send-solve",
+      "surf-life-saving",
+      "tas-tfs",
+      "tfnsw",
+      "tmr-qld",
+      "twitter-disaster",
+      "vic-cfa",
+      "vic-health",
+      "vic-ses-flood",
+      "vicroads",
+      "volunteer-bushfire-brigades",
+      "wa-dfes",
+      "water-authorities-nsw",
+      "webeoc-ims"
+    ],
+    "source_coverage_ratio": 1.0,
+    "unresolved_gap_total": 138,
+    "human_protocol": {
+      "roles": {
+        "governance_lead": "required",
+        "qa_observer": "required",
+        "sme_panel": "required",
+        "ux_researcher": "required"
+      },
+      "start_event": "manual_start",
+      "end_event": "manual_end",
+      "tested_user_count": 0,
+      "successful_user_count": 0,
+      "workflow_seconds": 1800,
+      "gap_identification_seconds": 120,
+      "approval_decision": "Not measured",
+      "deactivated_history_considered": false,
+      "notes": "UNVERIFIED pending scheduled rehearsal/usability and reviewer evidence."
+    }
+  },
+  "replay_validation": {
+    "audit_entries": [
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-0ea6885a88a845879ae5cb9c939d1add",
+        "correlation_id": null,
+        "data_source_id": "water-authorities-nsw",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.813009Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-138ec22f06c149e3a170f93da5e43a16",
+        "correlation_id": null,
+        "data_source_id": "epa-air-quality",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.813713Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-1a256f863714437e8507ef5281a91493",
+        "correlation_id": null,
+        "data_source_id": "historical-incidents-db",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.817158Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-311d9dbe46944824a2e1bf9a52264795",
+        "correlation_id": null,
+        "data_source_id": "bom-forecasts",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.802874Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-3c2f73134274426e9cc4505f544bd103",
+        "correlation_id": null,
+        "data_source_id": "bom-warnings",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.776583Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-3e39b278dfd34ef6a2ccff06253cb2ee",
+        "correlation_id": null,
+        "data_source_id": "bom-river-gauges",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.813482Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-48c28064dc4d477fb0b85ed8128d6d8a",
+        "correlation_id": null,
+        "data_source_id": "himawari-satellite",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.814254Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-5118c94b683d4fc6b1e89853c8936be6",
+        "correlation_id": null,
+        "data_source_id": "vicroads",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.812178Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-57fdff5941ea4eb39ea115aa2298931e",
+        "correlation_id": null,
+        "data_source_id": "qld-ses-flood",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.810203Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-5917bbb0cc33464fa53fafc1ba571031",
+        "correlation_id": null,
+        "data_source_id": "wa-dfes",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.808569Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-5926e38ef53b4cf584692292d465c02c",
+        "correlation_id": null,
+        "data_source_id": "nsw-health",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.810910Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-5d18ff13b0794efeba17be027ca6c45a",
+        "correlation_id": null,
+        "data_source_id": "nt-pfes",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.809279Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-5f9c315b72fa476dbda0d9b0943ca9c1",
+        "correlation_id": null,
+        "data_source_id": "tmr-qld",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.812483Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-64c5b2c56bf8416ab9e261ac1ffb2289",
+        "correlation_id": null,
+        "data_source_id": "qld-qfes",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.808009Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-6f16f2fd035f43d5a62ccceb7a04a788",
+        "correlation_id": null,
+        "data_source_id": "bom-flood-warnings",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.809505Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-74aaf660540a4b5689c4bd35a5d5a94e",
+        "correlation_id": null,
+        "data_source_id": "bom-observations",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.804716Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-7ffeceb204bc4dd0a30257f0667216d5",
+        "correlation_id": null,
+        "data_source_id": "sentinel-satellite",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.814018Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-8230884d36ce47e58727a721cbc1d5ac",
+        "correlation_id": null,
+        "data_source_id": "aggregated-risk-scores",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.816893Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-84bf7d7b4b034fa5b511d4882c87c6e9",
+        "correlation_id": null,
+        "data_source_id": "sa-cfs",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.808312Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-8f676840f5914231a172de16ee81b5b3",
+        "correlation_id": null,
+        "data_source_id": "facebook-community",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.814738Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-90f092caef3d4eb181db8d6ce8fad7fb",
+        "correlation_id": null,
+        "data_source_id": "webeoc-ims",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.816381Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-9f20f5e8306d4533a6917526990a30f8",
+        "correlation_id": null,
+        "data_source_id": "ga-tsunami-warnings",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.806380Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-a81b261f73f04239a21494e58f338189",
+        "correlation_id": null,
+        "data_source_id": "energy-networks-nsw",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.812761Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-aa66190050694320833967f12333affb",
+        "correlation_id": null,
+        "data_source_id": "surf-life-saving",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.815212Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-b1d2775588f744daafafb0825af87bf6",
+        "correlation_id": null,
+        "data_source_id": "ga-earthquake-alerts",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.805615Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-b1e719b8cbda444db9756dd1a563e1b6",
+        "correlation_id": null,
+        "data_source_id": "nsw-rfs-fires-near-me",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.807111Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-b26e607dd83f4043bec07bb9ac572d39",
+        "correlation_id": null,
+        "data_source_id": "reddit-australia",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.814975Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-b2a06f25b3c6426e8e009d8ab8e5439f",
+        "correlation_id": null,
+        "data_source_id": "vic-health",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.811151Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-ba1610ed5dce4f36a595017949e3f501",
+        "correlation_id": null,
+        "data_source_id": "agent-risk-assessments",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.816659Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-ba5d6cefa99f43e993bae8bdb59b32ad",
+        "correlation_id": null,
+        "data_source_id": "bom-aws-stations",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.813246Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-baced85b29bd45c6bec26496d12d329e",
+        "correlation_id": null,
+        "data_source_id": "snap-send-solve",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.815675Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-bd91b336cac64b9e9bcfdd081253777e",
+        "correlation_id": null,
+        "data_source_id": "aidr",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.810671Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-be6aa8aaaa5c4673a64e94247f2d3fbc",
+        "correlation_id": null,
+        "data_source_id": "act-esa",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.809049Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-c21ea2dbbb2046fe8bb5631cc5698d7f",
+        "correlation_id": null,
+        "data_source_id": "nsw-ses-flood",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.809733Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-c70bf83d16c640e393beffd40fb88888",
+        "correlation_id": null,
+        "data_source_id": "ga-sentinel-hotspots",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.806846Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-c81c799052fc4e4c95c72f4f154fdb84",
+        "correlation_id": null,
+        "data_source_id": "field-officer-reports",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.815906Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-d7d9766d2b694d6b9a7a099a1f8cb1b5",
+        "correlation_id": null,
+        "data_source_id": "tfnsw",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.811651Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-d828372e88c74cfba5dec49235b81ff2",
+        "correlation_id": null,
+        "data_source_id": "icon-ims",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.816146Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-d8daa0c43b934d548b6398fdd701ef2f",
+        "correlation_id": null,
+        "data_source_id": "vic-ses-flood",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.809967Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-d8dddb1a875945bbaed0c3cb12d41e7a",
+        "correlation_id": null,
+        "data_source_id": "bom-radar",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.803911Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-e98a481016364588acd068ac84656ea6",
+        "correlation_id": null,
+        "data_source_id": "vic-cfa",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.807372Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-e9e85e4cc80d4d4c97cda24a35d1a8d9",
+        "correlation_id": null,
+        "data_source_id": "qld-health",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.811380Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-ea894e211a0d4e2a9119fd926a9970fe",
+        "correlation_id": null,
+        "data_source_id": "twitter-disaster",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.814496Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-f80a2d3f49854b65ad8799864be7b635",
+        "correlation_id": null,
+        "data_source_id": "ema",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.810442Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-fad60a883c164d56862fa9c22c9803bb",
+        "correlation_id": null,
+        "data_source_id": "volunteer-bushfire-brigades",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.815447Z",
+        "view_context": null
+      },
+      {
+        "action": "registered",
+        "actor_id": "readiness-export",
+        "agency_id": "nsw-ses",
+        "audit_entry_id": "audit-fe0cd0d8f5864bff865ab403a1c647cc",
+        "correlation_id": null,
+        "data_source_id": "tas-tfs",
+        "details": {
+          "source": "seed_catalogue"
+        },
+        "idempotency_key": null,
+        "outcome": "completed",
+        "related_entity_id": null,
+        "schema_version": 1,
+        "session_id": null,
+        "tenant_id": "live",
+        "timestamp": "2026-09-16T00:37:38.808817Z",
+        "view_context": null
+      }
+    ],
+    "replayed_state": {
+      "sources": [],
+      "assessments": [],
+      "assignments": [],
+      "chains": []
+    },
+    "unsupported_events": [
+      {
+        "audit_entry_id": "audit-3c2f73134274426e9cc4505f544bd103",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-311d9dbe46944824a2e1bf9a52264795",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-d8dddb1a875945bbaed0c3cb12d41e7a",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-74aaf660540a4b5689c4bd35a5d5a94e",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-b1d2775588f744daafafb0825af87bf6",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-9f20f5e8306d4533a6917526990a30f8",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-c70bf83d16c640e393beffd40fb88888",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-b1e719b8cbda444db9756dd1a563e1b6",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-e98a481016364588acd068ac84656ea6",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-64c5b2c56bf8416ab9e261ac1ffb2289",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-84bf7d7b4b034fa5b511d4882c87c6e9",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-5917bbb0cc33464fa53fafc1ba571031",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-fe0cd0d8f5864bff865ab403a1c647cc",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-be6aa8aaaa5c4673a64e94247f2d3fbc",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-5d18ff13b0794efeba17be027ca6c45a",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-6f16f2fd035f43d5a62ccceb7a04a788",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-c21ea2dbbb2046fe8bb5631cc5698d7f",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-d8daa0c43b934d548b6398fdd701ef2f",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-57fdff5941ea4eb39ea115aa2298931e",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-f80a2d3f49854b65ad8799864be7b635",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-bd91b336cac64b9e9bcfdd081253777e",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-5926e38ef53b4cf584692292d465c02c",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-b2a06f25b3c6426e8e009d8ab8e5439f",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-e9e85e4cc80d4d4c97cda24a35d1a8d9",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-d7d9766d2b694d6b9a7a099a1f8cb1b5",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-5118c94b683d4fc6b1e89853c8936be6",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-5f9c315b72fa476dbda0d9b0943ca9c1",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-a81b261f73f04239a21494e58f338189",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-0ea6885a88a845879ae5cb9c939d1add",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-ba5d6cefa99f43e993bae8bdb59b32ad",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-3e39b278dfd34ef6a2ccff06253cb2ee",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-138ec22f06c149e3a170f93da5e43a16",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-7ffeceb204bc4dd0a30257f0667216d5",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-48c28064dc4d477fb0b85ed8128d6d8a",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-ea894e211a0d4e2a9119fd926a9970fe",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-8f676840f5914231a172de16ee81b5b3",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-b26e607dd83f4043bec07bb9ac572d39",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-aa66190050694320833967f12333affb",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-fad60a883c164d56862fa9c22c9803bb",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-baced85b29bd45c6bec26496d12d329e",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-c81c799052fc4e4c95c72f4f154fdb84",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-d828372e88c74cfba5dec49235b81ff2",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-90f092caef3d4eb181db8d6ce8fad7fb",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-ba1610ed5dce4f36a595017949e3f501",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-8230884d36ce47e58727a721cbc1d5ac",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      },
+      {
+        "audit_entry_id": "audit-1a256f863714437e8507ef5281a91493",
+        "action": "registered",
+        "reason": "missing_after_payload"
+      }
+    ],
+    "exact_diff": {
+      "sources": {
+        "expected_sha256": "d4ac14f67817b5d7492e1692ef2d5b059d9a1fe675032b9f7537b1be1dd5ea55",
+        "actual_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "expected_count": 46,
+        "actual_count": 0
+      }
+    }
+  },
+  "hashes": {
+    "sources": "d4ac14f67817b5d7492e1692ef2d5b059d9a1fe675032b9f7537b1be1dd5ea55",
+    "assessments": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "assignments": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "chains": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "gaps": "e9a8e23d869b69792c476642e922a172e498c98504d2ab39ed796fd34964718e",
+    "audit": "c3ced35c4f57660072b3fa104593f36fc79664beda4fcfd7fdc2c7fc023ca561",
+    "readiness": "d38fb920da3fa36d654fba1b5b9d92ec5b68704e70bbaa3537c7edfb9d90f109",
+    "replay": "6d826afd91f8b44e4766267c2aff04dfcf87a078bbd182e517e1610a371d38df",
+    "snapshot": "324940d423a8c7cc42a7461ae7cf9729b6a9d5c64c12fc7d4f54d94ba2ef5c2d"
+  }
+}

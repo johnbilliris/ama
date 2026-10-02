@@ -35,7 +35,7 @@ class BomAwsSensorPipeline(IngestionPipelineBase):
         observations = data.get("observations", {})
         records = observations.get("data", [])
         payloads: list[dict[str, Any]] = []
-        for record in records[:50]:
+        for record in records:
             payloads.append(
                 {
                     "observations": {"data": [record]},

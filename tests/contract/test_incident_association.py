@@ -26,6 +26,10 @@ def nsw_incident():
         status="active",
         severity="emergency",
         affected_jurisdiction_ids=["nsw"],
+        location={
+            "type": "Polygon",
+            "coordinates": [[[151.0, -34.0], [151.5, -34.0], [151.5, -33.5], [151.0, -33.5], [151.0, -34.0]]],
+        },
     )
     INCIDENTS["inc-nsw-001"] = incident
     return incident
@@ -40,6 +44,10 @@ def vic_incident():
         status="active",
         severity="warning",
         affected_jurisdiction_ids=["vic"],
+        location={
+            "type": "Polygon",
+            "coordinates": [[[144.7, -38.1], [145.4, -38.1], [145.4, -37.6], [144.7, -37.6], [144.7, -38.1]]],
+        },
     )
     INCIDENTS["inc-vic-001"] = incident
     return incident
@@ -58,8 +66,8 @@ class TestIncidentAssociation:
     @pytest.mark.asyncio
     async def test_signal_outside_any_incident_gets_null(self, service):
         envelope = {
-            "jurisdictionId": "wa",
-            "location": {"type": "Point", "coordinates": [115.8, -31.9], "precisionMeters": 100},
+            "jurisdictionId": "nsw",
+            "location": {"type": "Point", "coordinates": [149.1, -35.3], "precisionMeters": 100},
         }
         result = await service.associate(envelope)
         assert result["incidentId"] is None
@@ -83,6 +91,10 @@ class TestIncidentAssociation:
             status="active",
             severity="warning",
             affected_jurisdiction_ids=["nsw"],
+            location={
+                "type": "Polygon",
+                "coordinates": [[[151.0, -34.0], [151.4, -34.0], [151.4, -33.5], [151.0, -33.5], [151.0, -34.0]]],
+            },
         )
         INCIDENTS["inc-b"] = Incident(
             incident_id="inc-b",
@@ -91,6 +103,10 @@ class TestIncidentAssociation:
             status="active",
             severity="emergency",
             affected_jurisdiction_ids=["nsw"],
+            location={
+                "type": "Polygon",
+                "coordinates": [[[151.1, -33.9], [151.5, -33.9], [151.5, -33.4], [151.1, -33.4], [151.1, -33.9]]],
+            },
         )
         envelope = {
             "jurisdictionId": "nsw",
@@ -110,6 +126,10 @@ class TestIncidentAssociation:
             status="closed",
             severity="advisory",
             affected_jurisdiction_ids=["nsw"],
+            location={
+                "type": "Polygon",
+                "coordinates": [[[151.0, -34.0], [151.4, -34.0], [151.4, -33.5], [151.0, -33.5], [151.0, -34.0]]],
+            },
         )
         envelope = {
             "jurisdictionId": "nsw",
@@ -117,3 +137,47 @@ class TestIncidentAssociation:
         }
         result = await service.associate(envelope)
         assert result["incidentId"] is None
+
+    @pytest.mark.asyncio
+    async def test_missing_incident_footprint_allows_jurisdiction_fallback(self, service):
+        INCIDENTS["inc-no-geom"] = Incident(
+            incident_id="inc-no-geom",
+            title="No Geometry",
+            incident_type="flood",
+            status="active",
+            severity="warning",
+            affected_jurisdiction_ids=["nsw"],
+            location=None,
+        )
+        envelope = {
+            "jurisdictionId": "nsw",
+            "location": {"type": "Point", "coordinates": [149.0, -35.2], "precisionMeters": 100},
+            "provenance": {"collectionMethod": "api_pull", "sourceUri": "https://example.test"},
+        }
+        result = await service.associate(envelope)
+        assert result["incidentId"] == "inc-no-geom"
+        assert "jurisdiction_only_no_footprint" in str(result["provenance"].get("validationNotes", ""))
+
+    @pytest.mark.asyncio
+    async def test_multipolygon_overlap_matches(self, service):
+        INCIDENTS["inc-multi"] = Incident(
+            incident_id="inc-multi",
+            title="Multi",
+            incident_type="flood",
+            status="active",
+            severity="warning",
+            affected_jurisdiction_ids=["nsw"],
+            location={
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [[[150.0, -34.0], [150.3, -34.0], [150.3, -33.7], [150.0, -33.7], [150.0, -34.0]]],
+                    [[[151.0, -34.0], [151.3, -34.0], [151.3, -33.7], [151.0, -33.7], [151.0, -34.0]]],
+                ],
+            },
+        )
+        envelope = {
+            "jurisdictionId": "nsw",
+            "location": {"type": "Point", "coordinates": [151.2, -33.8], "precisionMeters": 100},
+        }
+        result = await service.associate(envelope)
+        assert result["incidentId"] == "inc-multi"

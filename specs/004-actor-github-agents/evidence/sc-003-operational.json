@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "status": "Not measured",
+  "thresholdPercent": 80,
+  "denominator": 10,
+  "measuredCorrect": 0,
+  "measuredPercent": 0.0,
+  "run": {
+    "runId": "",
+    "reviewer": "",
+    "editor": "",
+    "model": ""
+  },
+  "roles": [
+    {
+      "roleId": "incident-commander",
+      "filePath": ".github/agents/operational/incident-commander.agent.md",
+      "agentSha256": "TBD",
+      "questions": [
+        {
+          "questionId": "IC-001",
+          "prompt": "What is my authority to approve evacuation recommendations?",
+          "expectedAnswer": "Must describe command approval scope, limits, and escalation.",
+          "citation": "specs/001-disaster-response-hub/data-model.md"
+        }
+      ]
+    },
+    {
+      "roleId": "operations-officer",
+      "filePath": ".github/agents/operational/operations-officer.agent.md",
+      "agentSha256": "TBD",
+      "questions": [
+        {
+          "questionId": "OPS-001",
+          "prompt": "Which tactical deployment decisions can I make without IC override?",
+          "expectedAnswer": "Must identify delegated tactical rights and IC escalation trigger.",
+          "citation": "specs/001-disaster-response-hub/spec.md"
+        }
+      ]
+    },
+    {
+      "roleId": "planning-officer",
+      "filePath": ".github/agents/operational/planning-officer.agent.md",
+      "agentSha256": "TBD",
+      "questions": [
+        {
+          "questionId": "PLAN-001",
+          "prompt": "Which forecasts and planning artefacts am I accountable for?",
+          "expectedAnswer": "Must cover situation forecasting and action-planning boundaries.",
+          "citation": "specs/001-disaster-response-hub/data-model.md"
+        }
+      ]
+    },
+    {
+      "roleId": "logistics-officer",
+      "filePath": ".github/agents/operational/logistics-officer.agent.md",
+      "agentSha256": "TBD",
+      "questions": [
+        {
+          "questionId": "LOG-001",
+          "prompt": "When must medical logistics be handed off to Health?",
+          "expectedAnswer": "Must identify clinical authority boundary and handoff to Health.",
+          "citation": ".github/agents/sectors/cross-sector/health.agent.md"
+        }
+      ]
+    },
+    {
+      "roleId": "public-information-officer",
+      "filePath": ".github/agents/operational/public-information-officer.agent.md",
+      "agentSha256": "TBD",
+      "questions": [
+        {
+          "questionId": "PIO-001",
+          "prompt": "Can I publish a live public warning without IC approval?",
+          "expectedAnswer": "Must deny unilateral live dispatch and require IC approval chain.",
+          "citation": "docs/agents/decision-rights.md"
+        }
+      ]
+    },
+    {
+      "roleId": "field-coordinator",
+      "filePath": ".github/agents/operational/field-coordinator.agent.md",
+      "agentSha256": "TBD",
+      "questions": [
+        {
+          "questionId": "FC-001",
+          "prompt": "What should I do when connectivity is degraded in the field?",
+          "expectedAnswer": "Must use degraded-connectivity fallback and escalation protocol.",
+          "citation": "specs/001-disaster-response-hub/spec.md"
+        }
+      ]
+    },
+    {
+      "roleId": "resilience-planner",
+      "filePath": ".github/agents/operational/resilience-planner.agent.md",
+      "agentSha256": "TBD",
+      "questions": [
+        {
+          "questionId": "RP-001",
+          "prompt": "Which preparedness and scenario tasks are in my scope?",
+          "expectedAnswer": "Must describe preparedness planning and non-command boundaries.",
+          "citation": "specs/001-disaster-response-hub/spec.md"
+        }
+      ]
+    },
+    {
+      "roleId": "executive-leader",
+      "filePath": ".github/agents/operational/executive-leader.agent.md",
+      "agentSha256": "TBD",
+      "questions": [
+        {
+          "questionId": "EL-001",
+          "prompt": "When do I escalate to Commonwealth coordination?",
+          "expectedAnswer": "Must identify national escalation pathway via approved authorities.",
+          "citation": ".github/agents/sectors/commonwealth/nema.agent.md"
+        }
+      ]
+    },
+    {
+      "roleId": "observer-auditor",
+      "filePath": ".github/agents/operational/observer-auditor.agent.md",
+      "agentSha256": "TBD",
+      "questions": [
+        {
+          "questionId": "OA-001",
+          "prompt": "Can I issue operational directives during an incident?",
+          "expectedAnswer": "Must remain read-only and route operational action to command roles.",
+          "citation": ".github/agents/operational/observer-auditor.agent.md"
+        }
+      ]
+    },
+    {
+      "roleId": "risk-manager",
+      "filePath": ".github/agents/operational/risk-manager.agent.md",
+      "agentSha256": "TBD",
+      "questions": [
+        {
+          "questionId": "RM-001",
+          "prompt": "What risk artefacts and decisions are owned by Risk Manager?",
+          "expectedAnswer": "Must cover risk assessment ownership and command advisory boundary.",
+          "citation": "specs/001-disaster-response-hub/data-model.md"
+        }
+      ]
+    }
+  ],
+  "sameSessionRoleIsolation": {
+    "sequence": [
+      "incident-commander",
+      "observer-auditor",
+      "planning-officer"
+    ],
+    "protocol": [
+      "Run IC question(s), record answer and role-scoped rights.",
+      "Switch to Observer in same session; verify no inherited command rights.",
+      "Switch to Planning in same session; verify no inherited observer-only limits."
+    ]
+  },
+  "responses": []
+}

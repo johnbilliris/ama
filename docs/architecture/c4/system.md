@@ -16,11 +16,9 @@ specs:
   - spec-009
 ---
 
-<!-- markdownlint-disable-file MD041 -->
+# C4 Model — System Context
 
 [→ Architecture index](../README.md)
-
-# C4 Model — System Context
 
 **Notation**: [C4 Model](https://c4model.com/) — System Context.
 **Audience**: cross-agency reviewers (operational, technical, executive). Pairs with the Container view in `container.md`.
@@ -48,7 +46,7 @@ C4Context
   System_Ext(aoai, "Azure OpenAI (AU East)", "Reasoning + drafting deployments")
   System_Ext(content_safety, "Azure AI Content Safety (AU East)", "LLM output safety validation")
   System_Ext(ai_search, "Azure AI Search (AU East)", "RAG over AIDR handbook corpus")
-  System_Ext(foundry_phi, "Foundry Phi (non-AU, carve-out)", "Shadow path; deny-by-default classification gate")
+  System_Ext(foundry_phi, "Foundry carve-out endpoint (conditional non-AU)", "Registry-gated path; zero active non-AU entries")
 
   Rel(operator, ama, "Approves recommendations / publishes alerts / runs scenarios")
   Rel(ama, public, "Public warnings (AWS-compliant, multilingual)", "SMS/push/social/radio")
@@ -64,26 +62,26 @@ C4Context
   Rel(ama, aoai, "LLM calls (Private Endpoint)")
   Rel(ama, content_safety, "Output safety check (Private Endpoint)")
   Rel(ama, ai_search, "RAG retrieval (Private Endpoint)")
-  Rel(ama, foundry_phi, "Shadow LLM calls (gateway: PII + PSPF + sensitive-ops filter; deny-by-default)")
+  Rel(ama, foundry_phi, "Conditional shadow LLM calls when explicitly enabled by carve-out registry")
 ```
 
 ## Boundaries
 
-- **Tenant** boundary: each Australian jurisdiction (`act|nsw|vic|qld|sa|wa|tas|nt|commonwealth`) is a tenant; data is partitioned by `/tenant_id` in Cosmos and segregated by Entra group + RBAC.
-- **AU residency** boundary: every data plane (Cosmos, Storage, App Insights, Log Analytics, Key Vault, ACR, AI Search, Content Safety, AOAI primary) is in **Australia East**, replicated to **Australia Southeast** for DR.
-- **Foundry carve-out** boundary: only model-hosting endpoints listed in `infra/parameters/foundry-carveout.yaml` may be called outside Australia. Every call passes through the classification gate (ADR-033).
+- **Scope/jurisdiction** boundary: workload scope (`live` versus `sim-*`) is separated from jurisdiction and source controls; signals persist with hierarchical partition metadata (`scope`, `jurisdictionId`, `dataSourceId`) and are governed by policy + RBAC boundaries.
+- **AU residency** boundary: every data plane (Cosmos, Storage, App Insights, Log Analytics, Key Vault, ACR, AI Search, Content Safety, AOAI primary) is in Australia East, replicated to Australia Southeast for DR.
+- **Foundry carve-out** boundary: only model-hosting endpoints listed in `infra/parameters/foundry-carveout.yaml` may be called outside Australia. This is a conditional path controlled by the registry; current inventory has zero active non-AU entries.
 
 ## Quality attributes (drivers)
 
-- **Life safety primacy** — every recommendation requires human approval before life-safety publication.
-- **AIIMS COP integrity** — single shared operating picture across operators.
-- **Auditability** — append-only ledger with cryptographic continuity (spec-032 US1).
-- **Graceful degradation** — when LLM/AI Search/Content Safety degraded, agents fall through deterministic templates.
+- **Life safety primacy**: recommendations that drive public actuation require explicit human approval before publication.
+- **AIIMS COP integrity**: a single shared operating picture across operators and partner agencies.
+- **Auditability**: append-only ledger with cryptographic continuity and provenance records.
+- **Graceful degradation**: when LLM/AI Search/Content Safety are degraded, deterministic fallback paths preserve core operations.
 
 ## See also
 
 - [Container view](container.md)
-- [Sequence: Monitoring → Risk → Communication](../sequence/monitoring-risk-comms.md)
+- [Sequence: Monitoring -> Risk -> Communication](../sequence/monitoring-risk-comms.md)
 
 ## Trust boundaries
 
@@ -102,7 +100,7 @@ Cross-tenant isolation is enforced at every boundary by tenant-scoped middleware
 | --- | --- |
 | I. Primacy of life | Operator-in-the-loop approval gates all life-safety publication; degraded-mode fallback never blocks publication. |
 | II. AIIMS | All five business agents map to AIIMS functions via the typed registry (FR-P05). |
-| III. Multi-hazard / multi-agency | Tenant boundary per jurisdiction; jurisdiction policy drives autonomy + language priorities. |
+| III. Multi-hazard / multi-agency | Scope, jurisdiction, and agency controls remain distinct so hazard policy can drive authority and language priorities. |
 | IV. Auditability | Audit ledger with hash chain (US1); every recommendation carries provenance. |
 | V. Warning + public information | Communication agent + Content Safety + AWS-compliant tier mapping. |
-| NN-2 Data sovereignty | All data planes AU East; Phi carve-out only via gateway. |
+| NN-2 Data sovereignty | All data planes AU East; carve-out route is registry-gated and conditional. |

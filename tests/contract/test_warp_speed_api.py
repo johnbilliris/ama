@@ -22,6 +22,7 @@ def _auth_headers(sub: str) -> dict[str, str]:
 
 @pytest.fixture
 def client(monkeypatch):
+    from app.api.dependencies import simulation_composition
     from app.api.routes import simulations as sim_routes
     from app.main import app
     from app.repositories.signal_repository import SignalRepository
@@ -61,6 +62,7 @@ def client(monkeypatch):
     )
 
     monkeypatch.setattr(sim_routes, "_repo", repo)
+    monkeypatch.setattr(simulation_composition, "_SIMULATION_REPOSITORY", repo)
     monkeypatch.setattr(sim_routes, "_signal_repo", signal_repo)
     monkeypatch.setattr(sim_routes, "_event_repo", event_repo)
     monkeypatch.setattr(sim_routes, "_clock", clock)
@@ -181,6 +183,35 @@ def test_change_warp_speed_controller_only(client):
     assert data["previous_speed"] == 5.0
     assert data["current_warp_speed"] == 24.0
     assert "accumulated_sim_seconds" in data
+
+
+def test_participant_assignment_metadata_is_persisted(client):
+    created = _create_sim(client, user_oid="controller-1").json()
+    tenant_id = created["tenant_id"]
+
+    response = client.post(
+        f"/api/simulations/{tenant_id}/participants",
+        json={
+            "participants": [
+                {
+                    "oid": "observer-2",
+                    "persona": "frnsw",
+                    "role": "observer",
+                }
+            ]
+        },
+        headers=_auth_headers("controller-1"),
+    )
+
+    assert response.status_code == 200
+    assignment = next(item for item in response.json()["participant_assignments"] if item["oid"] == "observer-2")
+    assert assignment == {
+        "oid": "observer-2",
+        "persona_id": "frnsw",
+        "organisation_id": "org-frnsw",
+        "jurisdiction_id": "nsw",
+        "role": "observer",
+    }
 
 
 def test_change_warp_speed_while_paused_succeeds(client):

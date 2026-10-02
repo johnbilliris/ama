@@ -73,7 +73,7 @@ var logAnalyticsWorkspaceName = take('log-ama-eval-${nameSuffix}', 63)
 var containerRegistryName = 'acramaeval${storageEnvSegment}${shortUniqueSuffix}'
 var evalRunnerImageRepository = 'eval-runner'
 var evalRunnerImageTag = env
-var apiImageRepository = 'ama-api'
+var apiImageRepository = 'ama/api'
 var apiImageTag = env
 var allowPublicEvalDataPlane = env == 'dev'
 var dataPlanePublicNetworkAccess = allowPublicEvalDataPlane ? 'Enabled' : 'Disabled'

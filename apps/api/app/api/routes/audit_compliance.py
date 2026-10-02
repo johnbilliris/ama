@@ -27,11 +27,65 @@ from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query, Response
+from app.core.auth import extract_principal_from_claims
+from fastapi import APIRouter, HTTPException, Query, Request, Response
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/audit", tags=["audit", "compliance"])
+
+_PRIVACY_ROLES = frozenset(
+    {
+        "privacy-officer",
+        "privacy_officer",
+        "privacy officer",
+        "compliance-officer",
+        "compliance_officer",
+        "compliance officer",
+    }
+)
+
+_ERASURE_RETENTION_DAYS = 30
+_ERASURE_REQUESTS: dict[str, dict[str, Any]] = {}
+
+
+def _normalize_role(role: str) -> str:
+    return role.strip().lower().replace("_", "-")
+
+
+def _is_privacy_officer(roles: tuple[str, ...]) -> bool:
+    return any(_normalize_role(role) in _PRIVACY_ROLES for role in roles)
+
+
+def _authorize_subject_access(request: Request, subject: str) -> None:
+    claims = getattr(request.state, "claims", None) or {}
+    principal = extract_principal_from_claims(claims)
+    if principal.subject == "anonymous":
+        raise HTTPException(status_code=401, detail="authenticated subject required")
+    if subject == principal.subject:
+        return
+    if _is_privacy_officer(principal.roles):
+        return
+    raise HTTPException(status_code=403, detail="privacy officer role required for third-party subject access")
+
+
+def _retention_active(event: dict[str, Any], now: datetime) -> bool:
+    retention_until = event.get("retention_until")
+    if retention_until is None:
+        return True
+    text = str(retention_until).strip()
+    if not text:
+        return True
+    candidate = text[:-1] + "+00:00" if text.endswith("Z") else text
+    try:
+        expiry = datetime.fromisoformat(candidate)
+    except ValueError:
+        # Unparseable retention metadata is non-compliant. Fail closed.
+        return False
+    if expiry.tzinfo is None:
+        expiry = expiry.replace(tzinfo=UTC)
+    return now <= expiry.astimezone(UTC)
 
 
 # --------------------------------------------------------------------------- #
@@ -98,8 +152,26 @@ def _sar_payload(
     }
 
 
+class ErasureRequestBody(BaseModel):
+    subject: str = Field(..., min_length=3, max_length=256)
+    legal_hold: bool = False
+    reason: str | None = Field(default=None, max_length=2000)
+    idempotency_key: str = Field(..., min_length=8, max_length=128)
+
+
+class ErasureRequestResult(BaseModel):
+    request_id: str
+    status: str
+    subject: str
+    legal_hold: bool
+    submitted_at: str
+    due_by: str
+    deletion_actions: list[str]
+
+
 @router.get("/sar")
 async def get_subject_access_request(
+    request: Request,
     subject: str = Query(..., min_length=3, max_length=256, description="Entra OID or email of the subject"),
 ) -> dict[str, Any]:
     """Privacy Act 1988 subject-access request endpoint.
@@ -109,16 +181,21 @@ async def get_subject_access_request(
     """
     if not subject.strip():
         raise HTTPException(status_code=400, detail="subject must be non-empty")
+    _authorize_subject_access(request, subject)
 
     try:
         repo = _audit_query_callable()
-        # Repository returns a list of dicts matching audit-record-llm-call.json
-        events = list(repo.fetch_for_subject(subject)) if repo else []
-    except Exception as exc:  # noqa: BLE001 — log but degrade gracefully
+        if repo is None:
+            raise RuntimeError("audit repository unavailable")
+        events = list(repo.fetch_for_subject(subject))
+    except Exception as exc:  # noqa: BLE001
         logger.warning("audit_sar_fetch_error subject=%s err=%s", subject, exc)
-        events = []
+        raise HTTPException(status_code=503, detail="audit backend unavailable") from exc
 
-    return _sar_payload(subject, events)
+    now = datetime.now(tz=UTC)
+    retained_events = [event for event in events if _retention_active(event, now)]
+
+    return _sar_payload(subject, retained_events)
 
 
 # --------------------------------------------------------------------------- #
@@ -156,6 +233,7 @@ def _render_pspf_csv(events: Iterable[dict[str, Any]]) -> str:
 
 @router.get("/export")
 async def get_pspf_audit_export(
+    request: Request,
     format: str = Query("pspf", pattern="^pspf$"),
     start: str = Query(..., description="ISO-8601 start of audit window (inclusive)"),
     end: str = Query(..., description="ISO-8601 end of audit window (exclusive)"),
@@ -176,12 +254,22 @@ async def get_pspf_audit_export(
     if (end_dt - start_dt) > timedelta(days=370):
         raise HTTPException(status_code=400, detail="window must be <= 370 days")
 
+    claims = getattr(request.state, "claims", None) or {}
+    principal = extract_principal_from_claims(claims)
+    if principal.subject == "anonymous" or not _is_privacy_officer(principal.roles):
+        raise HTTPException(status_code=403, detail="privacy officer role required")
+
     try:
         repo = _audit_query_callable()
-        events = list(repo.fetch_window(start_dt, end_dt)) if repo else []
+        if repo is None:
+            raise RuntimeError("audit repository unavailable")
+        events = list(repo.fetch_window(start_dt, end_dt))
     except Exception as exc:  # noqa: BLE001
         logger.warning("pspf_export_fetch_error start=%s end=%s err=%s", start, end, exc)
-        events = []
+        raise HTTPException(status_code=503, detail="audit backend unavailable") from exc
+
+    now = datetime.now(tz=UTC)
+    events = [event for event in events if _retention_active(event, now)]
 
     csv_body = _render_pspf_csv(events)
     return Response(
@@ -203,9 +291,49 @@ def _parse_iso(value: str) -> datetime:
     return dt.astimezone(UTC)
 
 
+@router.post("/erasure-requests", response_model=ErasureRequestResult, status_code=202)
+async def submit_erasure_request(request: Request, body: ErasureRequestBody) -> ErasureRequestResult:
+    """Create an idempotent erasure request with a 30-day SLA and legal-hold branching."""
+    _authorize_subject_access(request, body.subject)
+
+    existing = _ERASURE_REQUESTS.get(body.idempotency_key)
+    if existing is not None:
+        return ErasureRequestResult(**existing)
+
+    submitted = datetime.now(tz=UTC)
+    due_by = submitted + timedelta(days=_ERASURE_RETENTION_DAYS)
+
+    if body.legal_hold:
+        status = "legal_hold"
+        deletion_actions = ["legal-hold-recorded", "erasure-paused"]
+    else:
+        status = "accepted"
+        deletion_actions = [
+            "audit-redaction-requested",
+            "operational-store-delete-requested",
+            "cache-eviction-requested",
+            "backup-tombstone-requested",
+        ]
+
+    row = {
+        "request_id": f"erasure-{submitted.strftime('%Y%m%d%H%M%S')}-{len(_ERASURE_REQUESTS) + 1}",
+        "status": status,
+        "subject": body.subject,
+        "legal_hold": body.legal_hold,
+        "submitted_at": submitted.isoformat(),
+        "due_by": due_by.isoformat(),
+        "deletion_actions": deletion_actions,
+    }
+    _ERASURE_REQUESTS[body.idempotency_key] = row
+    return ErasureRequestResult(**row)
+
+
 __all__ = [
     "PSPF_COLUMNS",
+    "ErasureRequestBody",
+    "ErasureRequestResult",
     "_render_pspf_csv",
+    "_retention_active",
     "_sar_payload",
     "router",
 ]

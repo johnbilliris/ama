@@ -233,4 +233,5 @@ class SimulationEventRecorder:
             self._repo.save_snapshot(snapshot)
             self._last_snapshot_time[tenant_id] = event.sim_time_offset
         except Exception as exc:  # noqa: BLE001
+            self._healthy[tenant_id] = False
             logger.warning("snapshot_write_failed tenant_id=%s err=%s", tenant_id, exc)

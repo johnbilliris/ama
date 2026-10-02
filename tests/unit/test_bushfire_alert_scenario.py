@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 from common.handoffs import AgentHandoffEvent
+from communication.approval import ApprovalWorkflow
 from communication.config import CommunicationConfig
 from communication.delivery import MultiChannelDeliveryService
 from communication.models import (
@@ -13,6 +14,7 @@ from communication.models import (
     UrgencyLevel,
 )
 from communication.pipeline import CommunicationProcessingPipeline
+from communication.repository import CommunicationAlertRepository
 from communication.segmentation import AudienceSegmenter
 
 
@@ -28,6 +30,9 @@ class TestBushfireAlertScenario:
             scope_key="INC-BUSHFIRE-2025",
             confidence=0.88,
             payload={
+                "recommendationId": "rec-bushfire",
+                "assessmentId": "assess-bushfire",
+                "explanation": "Bushfire impact requires public warning",
                 "hazard_type": "bushfire",
                 "severity": "high",
                 "urgency": "watch",
@@ -38,6 +43,41 @@ class TestBushfireAlertScenario:
                     {"level": 2, "boundary": {}, "population_estimate": 8000},
                 ],
             },
+        )
+
+    def _pipeline(self) -> CommunicationProcessingPipeline:
+        repository = CommunicationAlertRepository()
+
+        class _Store:
+            def __init__(self, record):
+                self.record = record
+
+            def read_item(self, item, partition_key):
+                return self.record
+
+        class _Publisher:
+            async def publish(self, payload):
+                return None
+
+        approval = ApprovalWorkflow(service_bus_client=_Publisher(), alert_repository=repository)
+        return CommunicationProcessingPipeline(
+            incident_store=_Store({"id": "INC-BUSHFIRE-2025", "tenant_id": "live", "commander_chain": ["ic-1"]}),
+            recommendation_store=_Store(
+                {"id": "rec-bushfire", "incident_id": "INC-BUSHFIRE-2025", "tenant_id": "live"}
+            ),
+            assessment_store=_Store(
+                {
+                    "id": "assess-bushfire",
+                    "incident_id": "INC-BUSHFIRE-2025",
+                    "tenant_id": "live",
+                    "hazard_type": "bushfire",
+                    "severity": "high",
+                    "location": "Blue Mountains, NSW",
+                    "zones": [{"id": "zone-2", "level": 2, "boundary": {}, "population_estimate": 8000}],
+                }
+            ),
+            alert_repository=repository,
+            approval_workflow=approval,
         )
 
     @patch("communication.translator.MultilingualTranslator._generate_with_fallback")
@@ -54,7 +94,7 @@ class TestBushfireAlertScenario:
             "content_safety_result": "passed",
         }
 
-        pipeline = CommunicationProcessingPipeline()
+        pipeline = self._pipeline()
         alert = pipeline.process_handoff(self._build_bushfire_handoff())
 
         assert alert is not None
@@ -107,7 +147,7 @@ class TestBushfireAlertScenario:
             "content_safety_result": "passed",
         }
 
-        pipeline = CommunicationProcessingPipeline()
+        pipeline = self._pipeline()
         alert = pipeline.process_handoff(self._build_bushfire_handoff())
 
         assert alert is not None

@@ -20,6 +20,7 @@ class TestPublicAlertSchema:
             "alert_id": "ca-INC-2025-001-v1",
             "incident_id": "INC-2025-001",
             "version": 1,
+            "tenant_id": "live",
             "status": AlertStatus.drafting,
             "content_blocks": {
                 "en-AU": ContentBlock(
