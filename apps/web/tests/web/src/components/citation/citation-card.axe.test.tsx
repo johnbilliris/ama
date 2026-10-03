@@ -43,7 +43,7 @@ describe("CitationCard — axe WCAG 2.2 AA (T239, warn-only)", () => {
 
     if (results.violations.length > 0) {
       // Warn-only per F-A12.5 — surface the violations but do not fail.
-      // eslint-disable-next-line no-console
+       
       console.warn(
         "[T239 a11y warn] CitationCard default-state axe violations:",
         results.violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help })),
@@ -62,7 +62,7 @@ describe("CitationCard — axe WCAG 2.2 AA (T239, warn-only)", () => {
 
     const results = await axe.run(container, AXE_RUN_OPTIONS);
     if (results.violations.length > 0) {
-      // eslint-disable-next-line no-console
+       
       console.warn(
         "[T239 a11y warn] CitationCard expanded-state axe violations:",
         results.violations.map((v) => ({ id: v.id, impact: v.impact, help: v.help })),

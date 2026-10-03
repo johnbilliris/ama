@@ -151,6 +151,7 @@ def test_maps_epa_fields_to_canonical_measurements() -> None:
     assert obs["pm10"] == 25.0
     assert obs["ozone"] == 11.0
 
+
 def test_bom_compact_utc_publication_timestamp_is_not_parsed_as_epoch_milliseconds() -> None:
     envelope = normalise_json_observation(
         _base_payload(

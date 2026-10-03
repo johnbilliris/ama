@@ -9,8 +9,9 @@ from __future__ import annotations
 import os
 
 import uvicorn
-from apps.console_logging import configure_console_logging, uvicorn_log_config
 from dispatcher.agent import app
+
+from apps.console_logging import configure_console_logging, uvicorn_log_config
 
 if __name__ == "__main__":
     configure_console_logging()

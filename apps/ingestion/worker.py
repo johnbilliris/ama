@@ -10,6 +10,7 @@ from typing import Any
 from jsonschema import Draft202012Validator
 
 from apps.console_logging import configure_console_logging
+from apps.ingestion.pipeline_config import IngestionPipelineConfig
 
 if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
     try:
@@ -24,8 +25,6 @@ if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
         logging.getLogger(__name__).warning("Failed to configure Azure Monitor", exc_info=True)
 
 configure_console_logging()
-
-from apps.ingestion.pipeline_config import IngestionPipelineConfig
 
 logger = logging.getLogger(__name__)
 

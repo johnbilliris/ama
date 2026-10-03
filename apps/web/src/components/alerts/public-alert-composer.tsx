@@ -69,7 +69,7 @@ export function PublicAlertComposer({
     return () => {
       cancelled = true;
     };
-  }, [activeAlertId, languages]);
+  }, [activeAlertId, languages, t]);
 
   const contentBlocks = useMemo(
     () => ({

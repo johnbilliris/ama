@@ -40,7 +40,9 @@ def test_container_dockerfiles_do_not_pin_a_single_architecture() -> None:
 def test_ingest_runner_job_uses_azd_bootstrap_and_discovery_contract() -> None:
     main_bicep = (ROOT / "infra" / "main.bicep").read_text(encoding="utf-8")
 
-    assert "param ingestRunnerImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'" in main_bicep
+    assert (
+        "param ingestRunnerImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'" in main_bicep
+    )
     assert "tags: union(tags, { 'azd-service-name': 'ingest-runner' })" in main_bicep
     assert "image: ingestRunnerImage" in main_bicep
     assert "spec036IngestRunnerImageTag" not in main_bicep

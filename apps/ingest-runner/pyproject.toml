@@ -33,7 +33,7 @@ dependencies = [
   "tenacity>=9.0.0",                        # 429/503 retries on Foundry embedding calls (R-02).
   "tiktoken>=0.8.0",                        # 1024-token chunk cap (FR-RAG-IDX-02 / R-04).
   # Manifest signing prep (cosign keyless invoked via CLI in CI)
-  "cryptography>=46.0.7",
+  "cryptography>=50.0.0,<51",
 ]
 
 [project.optional-dependencies]

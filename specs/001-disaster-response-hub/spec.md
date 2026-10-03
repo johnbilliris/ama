@@ -581,7 +581,7 @@ accessibility_needs: [voice control, switch-access compatibility]
 | delta_id | description | source_section | target_feature | blocking_phase | status | resolution_link |
 | --- | --- | --- | --- | --- | --- | --- |
 | OD-001 | Capstone "no code changes" framing for Asia jurisdictions is aspirational; system portability to non-Australian jurisdictions is HYP-006, not an architectural guarantee. Any future Asia work needs a spec-amendment lane. | § Scope — v1 Primary Jurisdiction + § Hypotheses HYP-006 | unassigned | plan | Open | evidence/HYP-006.md |
-| OD-002 | `.github/CODEOWNERS` references team `@johnbilliris/ama-spec-maintainers`, but repository-only evidence cannot verify team membership. Current file state is fail-closed with no uncommented interim individual fallback; governance verification remains external. | governance / CODEOWNERS | 027-spec-hardening | none (governance) | Open | .github/CODEOWNERS |
+| OD-002 | The user-owned repository currently has one actual collaborator, `@johnbilliris`, so `.github/CODEOWNERS` uses that valid admin user. Team-based dual control remains unavailable until a second write collaborator or an organisation with real teams is provisioned. | governance / CODEOWNERS | 027-spec-hardening | none (governance) | Open | .github/CODEOWNERS |
 | OD-003 | Drafter and countersigner cells currently name the accountable AMA role (e.g., `product-owner-ba`). Named individuals will be populated during PR review per the dual-control rule. | § Status-transition authority | 001-disaster-response-hub | none (authoring workflow) | Open | — |
 
 ---

@@ -24,9 +24,7 @@ def test_api_image_copies_maf_runtime_for_workflow_runs_imports() -> None:
 def test_api_dockerfile_uses_manifest_first_install_order() -> None:
     text = _text(API_DOCKERFILE)
     idx_pyproject = text.index("COPY apps/api/pyproject.toml")
-    idx_dep_install = text.index(
-        "python ./scripts/install_pyproject_dependencies.py ./apps/api/pyproject.toml"
-    )
+    idx_dep_install = text.index("python ./scripts/install_pyproject_dependencies.py ./apps/api/pyproject.toml")
     idx_app_copy = text.index("COPY apps/api/app/")
     assert idx_pyproject < idx_dep_install < idx_app_copy
     assert "python - <<'PY'" not in text
@@ -35,9 +33,7 @@ def test_api_dockerfile_uses_manifest_first_install_order() -> None:
 def test_agents_dockerfile_uses_manifest_first_install_order() -> None:
     text = _text(AGENTS_DOCKERFILE)
     idx_pyproject = text.index("COPY apps/agents/pyproject.toml")
-    idx_dep_install = text.index(
-        "python ./scripts/install_pyproject_dependencies.py ./apps/agents/pyproject.toml"
-    )
+    idx_dep_install = text.index("python ./scripts/install_pyproject_dependencies.py ./apps/agents/pyproject.toml")
     idx_source_copy = text.index("COPY apps/agents/common/")
     assert idx_pyproject < idx_dep_install < idx_source_copy
     assert "python - <<'PY'" not in text

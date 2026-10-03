@@ -20,7 +20,7 @@ describe("simulation-chat-pane sub-agent rendering", () => {
       {
         // The runtime carries `sub_agent.reply` even though `streamChat`'s
         // typed union doesn't list it yet — apply works via runtime check.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         event: "sub_agent.reply" as any,
         data: {
           thread_id: "thread-weather-1",

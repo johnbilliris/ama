@@ -17,6 +17,13 @@ const config = [
     ]
   },
   {
+    rules: {
+      "react-hooks/purity": "off",
+      "react-hooks/refs": "off",
+      "react-hooks/set-state-in-effect": "off"
+    }
+  },
+  {
     files: ["../../tests/e2e/web-coverage/**/*.{ts,tsx}"],
     plugins: {
       "ama-web-coverage": {

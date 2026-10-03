@@ -137,7 +137,7 @@ export function useSseReconnect({
     };
     // The `*Ref` mirrors above let us depend only on URL/enabled/factory
     // without forcing a reconnect on every parent render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [url, enabled, eventSourceFactory, initialBackoffMs, maxBackoffMs]);
 
   return { status, lastEventId, attempt };

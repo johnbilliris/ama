@@ -21,8 +21,9 @@ from communication.telemetry import configure_telemetry
 from communication.templates import TemplateLoader
 from communication.translator import MultilingualTranslator
 from communication.versioning import VersionCounter
-from apps.console_logging import configure_console_logging, uvicorn_log_config
 from fastapi import FastAPI
+
+from apps.console_logging import configure_console_logging, uvicorn_log_config
 
 logger = logging.getLogger(__name__)
 

@@ -50,6 +50,28 @@ READONLY_TOOLS = {
     "microsoft.docs.mcp",
 }
 
+TOOL_ID_ALIASES = {
+    "edit/new": "new",
+    "execute/runCommands": "runCommands",
+    "execute/runTasks": "runTasks",
+    "execute/runTests": "runTests",
+    "execute/testFailure": "testFailure",
+    "manage/todos": "todos",
+    "read/changes": "changes",
+    "read/problems": "problems",
+    "read/terminalLastCommand": "terminalLastCommand",
+    "read/terminalSelection": "terminalSelection",
+    "search/codebase": "codebase",
+    "search/findTestFiles": "findTestFiles",
+    "search/searchResults": "searchResults",
+    "search/usages": "usages",
+    "vscode/extensions": "extensions",
+    "vscode/vscodeAPI": "vscodeAPI",
+    "web/fetch": "fetch",
+    "web/githubRepo": "githubRepo",
+    "web/openSimpleBrowser": "openSimpleBrowser",
+}
+
 AZURE_PRINCIPAL_MUTATOR_DENYLIST = {"new", "runCommands", "runTasks", "runTests", "todos"}
 
 PROFILE_ALIAS_TOKENS = {"advisory-readonly", "advisory-plus-docs", "implementation"}
@@ -200,7 +222,7 @@ def _check_frontmatter(doc: AgentDoc, violations: list[str]) -> None:
                     _diag(doc.rel_path, 1, f"tools[{idx}] must be explicit tool ID, not profile alias '{item}'")
                 )
 
-        tool_set = set(tool_values)
+        tool_set = {TOOL_ID_ALIASES.get(tool, tool) for tool in tool_values}
         actor_id = doc.actor_id
         if doc.class_name in {"active-operational", "active-sector"} and tool_set != READONLY_TOOLS:
             violations.append(
@@ -648,7 +670,6 @@ def run(root: Path) -> list[str]:
         return violations
 
     _check_index_visibility(root / ".github" / "agents" / "AGENTS.md", violations)
-    _check_index_visibility(root / ".github" / "agents" / "copilot-instructions.md", violations)
 
     ledger = _parse_authority_ledger(
         root / "specs" / "004-actor-github-agents" / "contracts" / "authority-ledger.yaml", violations

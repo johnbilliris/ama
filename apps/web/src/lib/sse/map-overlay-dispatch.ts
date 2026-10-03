@@ -13,7 +13,7 @@ import {
   type MapOverlayLayerType,
 } from "@/lib/sse/map-overlay-events";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
 /** Minimal GeoJSON feature shape — geometry differs per layer_type. */
 export interface SimulationOverlayFeature {

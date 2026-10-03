@@ -4,10 +4,10 @@ import os
 
 if __name__ == "__main__":
     import uvicorn
-    from apps.console_logging import configure_console_logging, uvicorn_log_config
-
     from planning.agent import create_app
     from planning.config import PlanningConfig
+
+    from apps.console_logging import configure_console_logging, uvicorn_log_config
 
     configure_console_logging()
     _PORT = int(os.environ.get("PORT", "8085"))

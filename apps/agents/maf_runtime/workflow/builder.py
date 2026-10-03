@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Any
 
 from agent_framework import InMemoryCheckpointStorage
+
 from apps.console_logging import configure_console_logging
 
 from ..repositories.workflow_run_repository import WorkflowRunRepository

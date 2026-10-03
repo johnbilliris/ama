@@ -3,7 +3,6 @@
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = ROOT / "infra" / "bicep" / "modules" / "evidence-harness.bicep"
 MAIN_PATH = ROOT / "infra" / "main.bicep"
@@ -54,4 +53,4 @@ def test_azd_down_removes_an_unlocked_policy_first() -> None:
 
     assert "No evidence immutability policy exists; teardown can continue." in powershell_hook
     assert "$null -eq $stateProperty" in powershell_hook
-    assert "if [ -z \"$policy_state\" ]" in posix_hook
+    assert 'if [ -z "$policy_state" ]' in posix_hook

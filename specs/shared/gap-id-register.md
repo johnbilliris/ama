@@ -2,7 +2,7 @@
 
 **Purpose**: Monorepo-wide, append-only, monotonic register of every gap identifier cited under `specs/`. Satisfies FR-036 and Clarification 8 of `specs/027-spec-hardening/spec.md`.
 
-**Authority**: `.github/CODEOWNERS` entry for `specs/shared/` (the `@johnbilliris/ama-spec-maintainers` team per FR-034).
+**Authority**: `.github/CODEOWNERS` entry for `specs/shared/` (`@johnbilliris`, the current repository admin). FR-034 dual control remains open until another eligible reviewer is provisioned.
 
 **Rules** (enforced by `scripts/verify-spec-hardening.ps1`):
 

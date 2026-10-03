@@ -19,11 +19,7 @@ def configure_console_logging(level: int | str = logging.INFO) -> None:
     console_handlers = []
 
     loggers = [root_logger]
-    loggers.extend(
-        logger
-        for logger in logging.root.manager.loggerDict.values()
-        if isinstance(logger, logging.Logger)
-    )
+    loggers.extend(logger for logger in logging.root.manager.loggerDict.values() if isinstance(logger, logging.Logger))
     for logger in loggers:
         for handler in logger.handlers:
             if isinstance(handler, logging.StreamHandler) and (

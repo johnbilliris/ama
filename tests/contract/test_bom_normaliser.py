@@ -246,11 +246,16 @@ def test_same_filename_newer_issue_time_has_new_canonical_key() -> None:
 
     assert old_key != new_key
 
+
 def test_warning_product_filter_accepts_warnings_and_rejects_other_products() -> None:
     warning_payload = {"filename": "IDN11060.xml", "xml": SAMPLE_BOM_WARNING_XML}
     forecast_payload = {
         "filename": "IDN00001.xml",
-        "xml": "<?xml version='1.0'?><product type='forecast' id='IDN00001'><amoc><identifier>IDN00001</identifier><issue-time-utc>2026-03-25T10:00:00Z</issue-time-utc><product-type>forecast</product-type></amoc></product>",
+        "xml": (
+            "<?xml version='1.0'?><product type='forecast' id='IDN00001'><amoc>"
+            "<identifier>IDN00001</identifier><issue-time-utc>2026-03-25T10:00:00Z</issue-time-utc>"
+            "<product-type>forecast</product-type></amoc></product>"
+        ),
     }
     non_product_payload = {"filename": "IDN00002.xml", "xml": "<product><area /></product>"}
 

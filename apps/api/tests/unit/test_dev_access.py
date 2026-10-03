@@ -7,9 +7,9 @@ import pytest
 from app.api.dependencies.rbac import require_simulation_admin, require_simulation_participant
 from app.core.auth import AuthenticatedPrincipal, require_authenticated_persona
 from app.core.dev_access import dev_access_enabled
-from app.middleware.auth import authorize_management
 from app.middleware import auth as management_auth
 from app.middleware import entra_auth
+from app.middleware.auth import authorize_management
 from app.middleware.auth_middleware import add_auth_middleware
 from app.middleware.tenant_middleware import add_tenant_middleware
 from fastapi import Depends, FastAPI, Request
@@ -95,9 +95,7 @@ def test_dev_access_bypasses_simulation_role_and_membership_checks(monkeypatch: 
 
     assert require_simulation_admin(principal) == principal
     assert (
-        asyncio.run(
-            require_simulation_participant(principal, "sim-existing", OtherParticipantsRepository())
-        )
+        asyncio.run(require_simulation_participant(principal, "sim-existing", OtherParticipantsRepository()))
         == principal
     )
 

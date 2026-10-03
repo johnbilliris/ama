@@ -47,4 +47,4 @@ def test_msal_requests_the_provisioned_delegated_scope() -> None:
     msal = ENTRA_MSAL.read_text(encoding="utf-8")
 
     assert "NEXT_PUBLIC_AZURE_AD_API_AUDIENCE" in msal
-    assert '/access_as_user`' in msal
+    assert "/access_as_user`" in msal

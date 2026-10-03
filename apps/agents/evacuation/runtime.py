@@ -14,12 +14,13 @@ from importlib import import_module
 from pathlib import Path
 from typing import Any
 
-from apps.console_logging import configure_console_logging, uvicorn_log_config
 from evacuation.agent import EvacuationAgent, create_app, run_consumer
 from evacuation.config import EvacuationConfig
 from evacuation.road_network import RoadNetworkLoader
 from evacuation.telemetry import configure_telemetry
 from fastapi import FastAPI
+
+from apps.console_logging import configure_console_logging, uvicorn_log_config
 
 logger = logging.getLogger(__name__)
 

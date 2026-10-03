@@ -15,6 +15,6 @@ Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
 // CommonJS shim which is incompatible with Vite 7 / Vitest 2 SSR transform
 // (`__vite_ssr_exportName__ is not defined`).
 if (typeof globalThis.crypto === "undefined" || !globalThis.crypto.subtle) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   (globalThis as any).crypto = webcrypto;
 }
