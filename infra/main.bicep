@@ -564,15 +564,14 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
 resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-05-01' = {
   name: 'default'
   parent: storage
-  // Dev disables recoverable deletion so teardown leaves no retained Blob data.
-  // Non-dev keeps the seven-day operational recovery window.
+  // Keep the seven-day recovery window in every environment, including dev.
   properties: {
     deleteRetentionPolicy: {
-      enabled: environmentTier != 'dev'
+      enabled: true
       days: 7
     }
     containerDeleteRetentionPolicy: {
-      enabled: environmentTier != 'dev'
+      enabled: true
       days: 7
     }
   }
@@ -1635,7 +1634,7 @@ module evacuationRuntime './bicep/modules/evacuation-runtime.bicep' = {
     azureAiProjectEndpoint: openAi.properties.endpoint
     azureAiProjectDeployments: openAiDeployments.outputs.azureAiProjectDeployments
     azureAiReasoningDeployment: openAiDeployments.outputs.reasoningDeploymentName
-    azureAiReasoningModelKey: openAiDeployments.outputs.reasoningDeploymentModelKey
+    azureAiReasoningModelCoordinate: openAiDeployments.outputs.reasoningDeploymentModelKey
     handoffSenderPrincipalId: agentsContainerApp.identity.principalId
   }
 }

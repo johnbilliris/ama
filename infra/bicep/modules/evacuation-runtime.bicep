@@ -48,6 +48,7 @@ param storageAccountKey string
 param logAnalyticsWorkspaceResourceId string
 
 @description('Application Insights connection string for evacuation telemetry export.')
+@secure()
 param applicationInsightsConnectionString string
 
 @description('Microsoft Foundry project endpoint used by the evacuation LLM client.')
@@ -59,8 +60,8 @@ param azureAiProjectDeployments string
 @description('Foundry reasoning deployment name.')
 param azureAiReasoningDeployment string
 
-@description('Foundry reasoning model coordinate.')
-param azureAiReasoningModelKey string
+@description('Foundry reasoning model coordinate; not a credential.')
+param azureAiReasoningModelCoordinate string
 
 @description('Principal ID allowed to publish risk-assessment handoffs to the evacuation queue.')
 param handoffSenderPrincipalId string
@@ -90,6 +91,7 @@ module evacuationIdentity 'br/public:avm/res/managed-identity/user-assigned-iden
 }
 
 module evacuationContainers 'br/public:avm/res/document-db/database-account/sql-database/container:0.2.1' = [for containerName in evacuationContainerNames: {
+  name: 'evacuation-container-${containerName}'
   params: {
     name: containerName
     databaseAccountName: cosmosAccountName
@@ -247,7 +249,7 @@ module evacuationContainerApp 'br/public:avm/res/app/container-app:0.23.0' = {
           { name: 'AZURE_AI_PROJECT_ENDPOINT', value: azureAiProjectEndpoint }
           { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: azureAiProjectDeployments }
           { name: 'AZURE_AI_REASONING_DEPLOYMENT', value: azureAiReasoningDeployment }
-          { name: 'AZURE_AI_REASONING_MODEL_KEY', value: azureAiReasoningModelKey }
+          { name: 'AZURE_AI_REASONING_MODEL_KEY', value: azureAiReasoningModelCoordinate }
           { name: 'ROAD_NETWORK_FILE_PATH', value: 'data/road-networks/far-north-qld-sample.json' }
           { name: 'POPULATION_DATA_FILE_PATH', value: 'data/population/sample-population.json' }
           { name: 'AUDIT_BUFFER_FILE_PATH', value: '/app/var/evacuation-agent/audit-buffer.jsonl' }
@@ -283,7 +285,7 @@ module evacuationContainerApp 'br/public:avm/res/app/container-app:0.23.0' = {
       }
     ]
     scaleSettings: {
-      minReplicas: 1
+      minReplicas: 2
       maxReplicas: 4
       pollingInterval: 30
       rules: [

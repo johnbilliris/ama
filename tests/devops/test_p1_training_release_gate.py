@@ -108,6 +108,8 @@ def test_p1_gate_honors_not_p1_waiver(tmp_path: Path, monkeypatch: pytest.Monkey
                 "owner: incident-commander",
                 "reason: docs-only release",
                 "expires_on: 2026-09-20",
+                "not_p1_paths:",
+                "  - README.md",
             ]
         ),
         encoding="utf-8",
@@ -125,6 +127,69 @@ def test_p1_gate_honors_not_p1_waiver(tmp_path: Path, monkeypatch: pytest.Monkey
 
     assert passed is True
     assert summary["waiver_valid"] is True
+    assert summary["not_p1_classified_files"] == ["README.md"]
+
+
+def test_p1_gate_rejects_unlisted_path_in_not_p1_waiver(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    inventory = _write_inventory(tmp_path)
+    waiver = tmp_path / "waiver.yaml"
+    waiver.write_text(
+        "\n".join(
+            [
+                "type: not-p1",
+                "owner: incident-commander",
+                "reason: scoped non-P1 documentation",
+                "expires_on: 2026-09-20",
+                "not_p1_paths:",
+                "  - README.md",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    passed, summary = run_gate(
+        inventory_path=inventory,
+        release_date=dt.date(2026, 9, 15),
+        changed_files=["README.md", "docs/other.md"],
+        base_sha=None,
+        head_sha=None,
+        waiver_path=waiver,
+    )
+
+    assert passed is False
+    assert any("docs/other.md" in err for err in summary["errors"])
+
+
+def test_p1_gate_rejects_stale_or_wildcard_not_p1_classifications(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inventory = _write_inventory(tmp_path)
+    waiver = tmp_path / "waiver.yaml"
+    waiver.write_text(
+        "\n".join(
+            [
+                "type: not-p1",
+                "owner: incident-commander",
+                "reason: scoped non-P1 documentation",
+                "expires_on: 2026-09-20",
+                "not_p1_paths:",
+                "  - docs/**",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    with pytest.raises(RuntimeError, match="exact repository-relative paths"):
+        run_gate(
+            inventory_path=inventory,
+            release_date=dt.date(2026, 9, 15),
+            changed_files=["README.md"],
+            base_sha=None,
+            head_sha=None,
+            waiver_path=waiver,
+        )
 
 
 def test_p1_gate_rejects_expired_waiver(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

@@ -13,12 +13,18 @@ def test_ci_wires_feature_evidence_binding_and_p1_gate() -> None:
     assert "python tools/lint/check_feature_evidence_binding.py" in text
     assert "p1-training-release-gate" in text
     assert "python scripts/p1_release_training_gate.py" in text
+    assert 'git diff --name-only "$P1_BASE_SHA" "$P1_HEAD_SHA"' in text
+    assert 'grep -Fxq "docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml"' in text
+    assert "waiver_args+=(--waiver-file docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml)" in text
 
 
 def test_cd_wires_p1_gate_before_deploy() -> None:
     text = _read(".github/workflows/cd.yml")
     assert "Enforce P1 training release gate" in text
     assert "python scripts/p1_release_training_gate.py" in text
+    assert 'git diff --name-only "${base_sha}" "${HEAD_SHA}"' in text
+    assert 'grep -Fxq "docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml"' in text
+    assert "waiver_args+=(--waiver-file docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml)" in text
 
 
 def test_dr_drill_includes_rpo_and_residency_inventory_steps() -> None:

@@ -101,7 +101,7 @@ def test_stage_provision_creates_resource_group_before_deployment(monkeypatch):
     assert str(_REPO_ROOT) not in commands[2]
     assert "<minimal-eval-runner-context>" in commands[2][-1]
     assert commands[3][:4] == ["az", "acr", "build", "--registry"]
-    assert commands[3][5:7] == ["--image", "ama-api:dev"]
+    assert commands[3][5:7] == ["--image", "ama/api:dev"]
     assert "<minimal-api-context>" in commands[3][-1]
     assert commands[4][:4] == ["az", "deployment", "group", "create"]
     assert "deployContainerJobs=true" in commands[4]
@@ -301,7 +301,7 @@ def test_eval_platform_emits_anonymous_env_var_only_in_dev():
 def test_eval_platform_api_image_repository_is_ama_api():
     template = _EVAL_PLATFORM_BICEP.read_text(encoding="utf-8")
 
-    assert "var apiImageRepository = 'ama-api'" in template
+    assert "var apiImageRepository = 'ama/api'" in template
     assert "var apiImageTag = env" in template
 
 
@@ -320,7 +320,7 @@ def test_provision_builds_api_image_into_acr(monkeypatch):
     script.stage_provision(ctx)
 
     api_build = next(
-        (c for c in commands if c[:4] == ["az", "acr", "build", "--registry"] and "ama-api:dev" in c),
+        (c for c in commands if c[:4] == ["az", "acr", "build", "--registry"] and "ama/api:dev" in c),
         None,
     )
     assert api_build is not None

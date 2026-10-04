@@ -38,6 +38,17 @@ def test_required_ci_steps_do_not_swallow_failures() -> None:
     assert "pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q || true" not in text
 
 
+def test_coverage_and_benchmark_follow_their_artifact_producers() -> None:
+    text = _ci_text()
+    assert "- name: python-test\n        id: python-test" in text
+    assert "- name: perf-benchmark\n        id: perf-benchmark" in text
+    assert "name: coverage-ratchet-unit\n        if: always() && steps.python-test.outcome == 'success'" in text
+    assert "name: upload-benchmark-results\n        uses:" in text
+    assert "if: always() && steps.perf-benchmark.outcome == 'success'" in text
+    assert "name: upload-coverage-results\n        uses:" in text
+    assert "if: always() && steps.python-test.outcome == 'success'" in text
+
+
 def test_strict_python_types_are_a_blocking_gate() -> None:
     text = _ci_text()
     assert "- name: python-type-strict" in text

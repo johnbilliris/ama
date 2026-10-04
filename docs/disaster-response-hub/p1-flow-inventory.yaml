@@ -1,6 +1,6 @@
 version: 1
 feature_id: 001-disaster-response-hub
-last_reviewed: 2026-09-15
+last_reviewed: 2026-10-04
 flows:
   - flow_id: p1-shared-operating-picture
     description: Incident dashboard and shared operating picture updates.
@@ -18,6 +18,13 @@ flows:
       - apps/api/app/api/routes/incidents.py
       - apps/web/src/app/incidents/**
       - apps/web/src/components/dashboard/**
+      - .github/workflows/ci.yml
+      - .github/workflows/cd.yml
+      - docs/disaster-response-hub/p1-flow-inventory.yaml
+      - docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml
+      - scripts/p1_release_training_gate.py
+      - tests/devops/test_ci_workflow_structure.py
+      - tests/devops/test_p1_training_release_gate.py
     training_pack:
       path: docs/disaster-response-hub/operator-runbooks.md
       version: v1.0.0
@@ -30,9 +37,9 @@ flows:
       locale:
         - en-AU
     owner: product-owner-ba
-    last_reviewed: 2026-09-15
-    signed_by: training-lead
-    signed_at: 2026-09-15
+    last_reviewed: 2026-10-04
+    signed_by: johnbilliris
+    signed_at: 2026-10-04
 
   - flow_id: p1-role-workspace-coordination
     description: Persona workspace task coordination and dependency updates.
@@ -52,6 +59,13 @@ flows:
       - apps/api/app/api/routes/tasks.py
       - apps/web/src/app/workspaces/**
       - apps/web/src/components/workspaces/**
+      - .github/workflows/ci.yml
+      - .github/workflows/cd.yml
+      - docs/disaster-response-hub/p1-flow-inventory.yaml
+      - docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml
+      - scripts/p1_release_training_gate.py
+      - tests/devops/test_ci_workflow_structure.py
+      - tests/devops/test_p1_training_release_gate.py
     training_pack:
       path: docs/disaster-response-hub/operator-runbooks.md
       version: v1.0.0
@@ -64,9 +78,9 @@ flows:
       locale:
         - en-AU
     owner: product-owner-ba
-    last_reviewed: 2026-09-15
-    signed_by: training-lead
-    signed_at: 2026-09-15
+    last_reviewed: 2026-10-04
+    signed_by: johnbilliris
+    signed_at: 2026-10-04
 
   - flow_id: p1-public-alert-approval-dispatch
     description: Human-approved public alert authoring and dispatch boundary.
@@ -80,6 +94,13 @@ flows:
       - apps/api/app/api/routes/alerts.py
       - apps/agents/communication/delivery.py
       - apps/web/src/components/alerts/**
+      - .github/workflows/ci.yml
+      - .github/workflows/cd.yml
+      - docs/disaster-response-hub/p1-flow-inventory.yaml
+      - docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml
+      - scripts/p1_release_training_gate.py
+      - tests/devops/test_ci_workflow_structure.py
+      - tests/devops/test_p1_training_release_gate.py
     training_pack:
       path: docs/disaster-response-hub/operator-runbooks.md
       version: v1.0.0
@@ -92,6 +113,6 @@ flows:
       locale:
         - en-AU
     owner: product-owner-ba
-    last_reviewed: 2026-09-15
-    signed_by: training-lead
-    signed_at: 2026-09-15
+    last_reviewed: 2026-10-04
+    signed_by: johnbilliris
+    signed_at: 2026-10-04

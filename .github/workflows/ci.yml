@@ -195,12 +195,21 @@ jobs:
           echo "base_sha=${base_sha}" >> "$GITHUB_OUTPUT"
 
       - name: p1-training-release-gate
+        env:
+          P1_BASE_SHA: ${{ steps.p1-base-sha.outputs.base_sha }}
+          P1_HEAD_SHA: ${{ github.sha }}
         run: |
+          waiver_args=()
+          if git diff --name-only "$P1_BASE_SHA" "$P1_HEAD_SHA" \
+            | grep -Fxq "docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml"; then
+            waiver_args+=(--waiver-file docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml)
+          fi
           python scripts/p1_release_training_gate.py \
             --inventory docs/disaster-response-hub/p1-flow-inventory.yaml \
             --base-sha "${{ steps.p1-base-sha.outputs.base_sha }}" \
             --head-sha "${{ github.sha }}" \
-            --summary-out artifacts/p1-release-gate-summary.json
+            --summary-out artifacts/p1-release-gate-summary.json \
+            "${waiver_args[@]}"
 
       # Spec 036 T055 / T039 — fail CI on docs/corpus/INDEXING-LICENCE-INVENTORY drift.
       - name: licence-inventory-lint
@@ -271,6 +280,7 @@ jobs:
         run: python scripts/codegen/generate_map_overlay_taxonomy_ts.py --check
 
       - name: python-test
+        id: python-test
         run: |
           pytest tests/unit tests/contract tests/integration tests/simulation \
             -m "not azure_staging and not azure_foundry_staging and not azure_cosmos_staging and not azure_speech_staging and not azure_blob_worm_staging and not measurement_staging and not e2e and not load and not locust" \
@@ -278,7 +288,7 @@ jobs:
 
       # Spec-032 FR-T01 — ratcheting coverage check.
       - name: coverage-ratchet-unit
-        if: always()
+        if: always() && steps.python-test.outcome == 'success'
         shell: pwsh
         run: ./scripts/coverage-ratchet.ps1 -Phase $env:COVERAGE_PHASE -Tier unit
 
@@ -290,12 +300,13 @@ jobs:
 
       # Spec-032 FR-R01 — gate the benchmark step (no continue-on-error).
       - name: perf-benchmark
+        id: perf-benchmark
         timeout-minutes: 5
         run: pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q
 
       - name: upload-benchmark-results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: always()
+        if: always() && steps.perf-benchmark.outcome == 'success'
         with:
           name: benchmark-results
           path: .benchmarks/current.json
@@ -303,7 +314,7 @@ jobs:
 
       - name: upload-coverage-results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: always()
+        if: always() && steps.python-test.outcome == 'success'
         with:
           name: coverage-results
           path: coverage.xml

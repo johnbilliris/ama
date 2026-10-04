@@ -91,6 +91,45 @@ def _waiver_is_valid(waiver: dict[str, Any] | None, release_date: dt.date) -> tu
     return True, waiver_type
 
 
+def _not_p1_classifications(
+    waiver: dict[str, Any] | None,
+    waiver_type: str,
+    waiver_valid: bool,
+    changed: list[str],
+    p1_classified: set[str],
+) -> set[str]:
+    if waiver is None or waiver_type != "not-p1" or not waiver_valid:
+        return set()
+
+    paths = waiver.get("not_p1_paths")
+    if not isinstance(paths, list) or not paths:
+        raise GateError("not-p1 waiver must enumerate non-empty not_p1_paths")
+
+    normalized: list[str] = []
+    for path in paths:
+        if not isinstance(path, str) or not path.strip():
+            raise GateError("not_p1_paths entries must be non-empty strings")
+        value = path.replace("\\", "/")
+        if value.startswith("/") or ".." in value.split("/") or any(char in value for char in "*?"):
+            raise GateError(f"not_p1_paths must contain exact repository-relative paths: {path!r}")
+        normalized.append(value)
+
+    if len(normalized) != len(set(normalized)):
+        raise GateError("not_p1_paths must not contain duplicates")
+
+    changed_set = set(changed)
+    listed = set(normalized)
+    stale = sorted(listed - changed_set)
+    if stale:
+        raise GateError(f"not_p1_paths contains files not changed in this revision: {', '.join(stale)}")
+
+    overlap = sorted(listed & p1_classified)
+    if overlap:
+        raise GateError(f"not_p1_paths overlaps classified P1 flow files: {', '.join(overlap)}")
+
+    return listed
+
+
 def _required_metadata_errors(flow: dict[str, Any], release_date: dt.date) -> list[str]:
     errors: list[str] = []
     flow_id = flow.get("flow_id", "<unknown>")
@@ -170,12 +209,14 @@ def run_gate(
 
     waiver = _load_waiver(waiver_path)
     waiver_valid, waiver_type = _waiver_is_valid(waiver, release_date)
+    not_p1_files = _not_p1_classifications(waiver, waiver_type, waiver_valid, changed, matched_files)
+    unclassified_files = sorted(set(unmatched) - not_p1_files)
 
     errors: list[str] = []
-    if unmatched and not waiver_valid:
+    if unclassified_files:
         errors.append(
             "unclassified changed files require explicit non-expired waiver (type emergency or not-p1): "
-            + ", ".join(unmatched)
+            + ", ".join(unclassified_files)
         )
 
     if matched_by_flow:
@@ -195,7 +236,8 @@ def run_gate(
         "head_sha": head_sha,
         "changed_files": changed,
         "matched_flows": matched_by_flow,
-        "unclassified_files": unmatched,
+        "not_p1_classified_files": sorted(not_p1_files),
+        "unclassified_files": unclassified_files,
         "waiver": waiver,
         "waiver_valid": waiver_valid,
         "waiver_type": waiver_type,
