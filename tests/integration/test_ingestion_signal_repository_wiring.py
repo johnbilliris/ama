@@ -8,7 +8,27 @@ import pytest
 from apps.api.app.repositories.signal_repository import SignalRepository
 from apps.ingestion.pipeline_config import IngestionPipelineConfig
 from apps.ingestion.pipeline_factory import create_pipeline
+from apps.ingestion.worker import _build_signal_repository
 from packages.domain.src.domain.models.signal import Signal
+from packages.domain.src.domain.repositories.signal_repository import SignalRepository as DomainSignalRepository
+
+
+def test_ingestion_worker_uses_domain_repository_without_api_dependency(monkeypatch) -> None:
+    monkeypatch.delenv("COSMOS_ENDPOINT", raising=False)
+    monkeypatch.setenv("AMA_ENVIRONMENT", "test")
+
+    repository, init_error = _build_signal_repository()
+
+    assert isinstance(repository, DomainSignalRepository)
+    assert init_error is None
+
+
+def test_ingestion_worker_requires_cosmos_endpoint_in_production(monkeypatch) -> None:
+    monkeypatch.delenv("COSMOS_ENDPOINT", raising=False)
+    monkeypatch.setenv("AMA_ENVIRONMENT", "production")
+
+    with pytest.raises(RuntimeError, match="COSMOS_ENDPOINT"):
+        _build_signal_repository()
 
 
 def test_signal_repository_save_sets_partition_metadata() -> None:

@@ -11,6 +11,7 @@ from jsonschema import Draft202012Validator
 
 from apps.console_logging import configure_console_logging
 from apps.ingestion.pipeline_config import IngestionPipelineConfig
+from packages.domain.src.domain.repositories.signal_repository import SignalRepository
 
 if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
     try:
@@ -31,6 +32,24 @@ logger = logging.getLogger(__name__)
 SIGNAL_ENVELOPE_V1_SCHEMA_ID = "https://example.gov.au/schemas/signal-envelope.schema.json"
 
 
+def _build_signal_repository() -> tuple[SignalRepository, str | None]:
+    endpoint = os.environ.get("COSMOS_ENDPOINT")
+    environment = (os.environ.get("AMA_ENVIRONMENT") or os.environ.get("ENVIRONMENT") or "dev").lower()
+    if not endpoint:
+        if environment in {"production", "staging"}:
+            raise RuntimeError("SignalRepository requires COSMOS_ENDPOINT in production/staging")
+        return SignalRepository(), None
+
+    try:
+        from azure.cosmos.aio import CosmosClient
+        from azure.identity.aio import DefaultAzureCredential
+
+        client = CosmosClient(endpoint, credential=DefaultAzureCredential())
+    except Exception as exc:
+        return SignalRepository(), str(exc)
+    return SignalRepository(cosmos_client=client), None
+
+
 def _load_and_compile_schema(schema_path: Path) -> Draft202012Validator:
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     if schema.get("$id") != SIGNAL_ENVELOPE_V1_SCHEMA_ID:
@@ -49,7 +68,7 @@ class PipelineWorker:
 
     def __init__(self) -> None:
         self._pipelines: dict[str, Any] = {}
-        self._tasks: dict[str, asyncio.Task] = {}
+        self._tasks: dict[str, asyncio.Task[Any]] = {}
         self._running = False
         self._healthy = True
         self._repository_available = True
@@ -205,7 +224,7 @@ if __name__ == "__main__":
     _worker = PipelineWorker()
 
     class _HealthHandler(BaseHTTPRequestHandler):
-        def do_GET(self):
+        def do_GET(self) -> None:
             if self.path == "/health":
                 status = _worker.get_status()
                 healthy = _worker.is_healthy
@@ -218,7 +237,7 @@ if __name__ == "__main__":
                 self.send_response(404)
                 self.end_headers()
 
-        def log_message(self, format, *args):  # noqa: A002
+        def log_message(self, format: str, *args: object) -> None:  # noqa: A002
             pass  # suppress per-request logs
 
     # Start health server in a daemon thread so the main thread can run the
@@ -247,7 +266,6 @@ if __name__ == "__main__":
         logger.info("STORAGE_ACCOUNT_NAME not set — raw payload archival disabled")
 
     # Build dedup service (uses Redis when available, falls back to local dict)
-    from apps.api.app.repositories.signal_repository import SignalRepository
     from apps.api.app.services.ingestion.audit_writer import AuditWriter
     from apps.api.app.services.ingestion.dedup_service import DedupService
     from apps.api.app.services.ingestion.incident_association import IncidentAssociationService
@@ -281,11 +299,11 @@ if __name__ == "__main__":
 
     _dedup_service = DedupService(redis_client=_redis_client)
     logger.info("Dedup service initialised (redis=%s)", _redis_client is not None)
-    _signal_repository = SignalRepository()
-    if os.environ.get("COSMOS_ENDPOINT") and _signal_repository.init_error:
+    _signal_repository, _signal_repository_error = _build_signal_repository()
+    if _signal_repository_error:
         _worker._healthy = False
-        _worker.set_repository_status(False, _signal_repository.init_error)
-        logger.error("Signal repository degraded: %s", _signal_repository.init_error)
+        _worker.set_repository_status(False, _signal_repository_error)
+        logger.error("Signal repository degraded: %s", _signal_repository_error)
     logger.info("Signal repository initialised for ingestion persistence")
 
     _signal_schema: dict[str, Any] = {}
@@ -297,7 +315,7 @@ if __name__ == "__main__":
     _audit_writer = AuditWriter(blob_storage=_blob_store)
     _incident_association = IncidentAssociationService()
 
-    def _factory(config):
+    def _factory(config: IngestionPipelineConfig) -> Any:
         return create_pipeline(
             config,
             blob_storage=_blob_store,

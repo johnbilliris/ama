@@ -3,8 +3,9 @@ import hashlib
 import logging
 import time
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, Literal
 from uuid import uuid4
 
 from app.services.privacy_classification import classify_payload
@@ -18,6 +19,46 @@ from packages.domain.src.domain.models.signal_accepted_event import SignalAccept
 logger = logging.getLogger(__name__)
 
 IngestionProcessingResult = Signal
+
+
+@dataclass(frozen=True, slots=True)
+class PipelineProcessingResult:
+    accepted: bool
+    status: str
+    reason: str | None = None
+    signal_ids: tuple[str, ...] = ()
+
+
+DerivedSourceKind = Literal["authoritative", "sensor", "iot", "field_report", "social", "community", "derived"]
+DerivedTrustTier = Literal[
+    "tier_1_authoritative_government",
+    "tier_2_verified_institutional",
+    "tier_3_operational_sensor",
+    "tier_4_field_reports",
+    "tier_5_community_volunteer",
+    "tier_6_social_unverified",
+    "tier_7_derived_computed",
+]
+
+_DERIVED_SOURCE_KINDS: dict[str, DerivedSourceKind] = {
+    "authoritative": "authoritative",
+    "sensor": "sensor",
+    "iot": "iot",
+    "field_report": "field_report",
+    "social": "social",
+    "community": "community",
+    "derived": "derived",
+}
+_DERIVED_TRUST_TIERS: dict[str, DerivedTrustTier] = {
+    "tier_1_authoritative_government": "tier_1_authoritative_government",
+    "tier_2_verified_institutional": "tier_2_verified_institutional",
+    "tier_3_operational_sensor": "tier_3_operational_sensor",
+    "tier_4_field_reports": "tier_4_field_reports",
+    "tier_5_community_volunteer": "tier_5_community_volunteer",
+    "tier_6_social_unverified": "tier_6_social_unverified",
+    "tier_7_derived_computed": "tier_7_derived_computed",
+}
+
 
 TRUST_TIER_CONFIDENCE: dict[str, float] = {
     "tier_1_authoritative_government": 0.95,
@@ -107,7 +148,7 @@ class IngestionPipelineBase(ABC):
         misinformation_detector: Any = None,
         governance_registry: Any = None,
         dead_letter_service: Any = None,
-        schema: dict | None = None,
+        schema: dict[str, Any] | None = None,
         schema_validator: Any = None,
         scope: str = "live",
         allow_simulation_scope: bool = False,
@@ -210,7 +251,7 @@ class IngestionPipelineBase(ABC):
                     len(raw_payloads),
                 )
 
-    async def _process_payload(self, raw_payload: dict[str, Any]) -> None:
+    async def _process_payload(self, raw_payload: dict[str, Any]) -> PipelineProcessingResult:
         start_time = time.monotonic()
         correlation_id = str(uuid4())
         data_source_id = self.data_source_ids[0] if self.data_source_ids else "unknown"
@@ -230,7 +271,7 @@ class IngestionPipelineBase(ABC):
                         validation_errors=[decision.reason],
                         pipeline_id=self.pipeline_id,
                     )
-                return
+                return PipelineProcessingResult(False, "blocked", decision.reason)
 
         canonical_key = self.compute_canonical_key(raw_payload)
         dedup_hash = hashlib.sha256(canonical_key.encode()).hexdigest()
@@ -255,7 +296,7 @@ class IngestionPipelineBase(ABC):
                         dedup_hash=dedup_hash,
                         pipeline_id=self.pipeline_id,
                     )
-                return
+                return PipelineProcessingResult(False, "deduplicated", "canonical payload was already processed")
 
         signal_id = f"sig-{uuid4().hex[:12]}"
         raw_blob_uri = None
@@ -283,7 +324,7 @@ class IngestionPipelineBase(ABC):
                     dedup_hash=dedup_hash,
                     pipeline_id=self.pipeline_id,
                 )
-            return
+            return PipelineProcessingResult(False, "rejected", str(exc))
 
         envelope = self._enrich_envelope(envelope, correlation_id)
 
@@ -304,7 +345,7 @@ class IngestionPipelineBase(ABC):
                     failure_code="schema_validation_failed",
                     error=str(getattr(exc, "message", exc)),
                 )
-                return
+                return PipelineProcessingResult(False, "rejected", str(getattr(exc, "message", exc)))
 
         if (
             self.misinformation_detector is not None
@@ -359,7 +400,12 @@ class IngestionPipelineBase(ABC):
                     dedup_hash=dedup_hash,
                     pipeline_id=self.pipeline_id,
                 )
-            return
+            return PipelineProcessingResult(False, "degraded", "signal repository unavailable")
+
+        if not envelopes:
+            if dedup_claimed and hasattr(self.dedup_service, "release"):
+                await self.dedup_service.release(dedup_hash)
+            return PipelineProcessingResult(False, "rejected", "incident association produced no signal envelopes")
 
         persisted_signals: list[tuple[Signal, dict[str, Any]]] = []
         for index, associated_envelope in enumerate(envelopes):
@@ -403,7 +449,7 @@ class IngestionPipelineBase(ABC):
                     failure_code="payload_model_validation_failed",
                     error=str(exc),
                 )
-                return
+                return PipelineProcessingResult(False, "rejected", str(exc))
             except Exception as exc:
                 self._metrics.record_persistence_failure()
                 if dedup_claimed and hasattr(self.dedup_service, "release"):
@@ -419,7 +465,10 @@ class IngestionPipelineBase(ABC):
                         dedup_hash=dedup_hash,
                         pipeline_id=self.pipeline_id,
                     )
-                return
+                return PipelineProcessingResult(False, "degraded", str(exc))
+
+        if not persisted_signals:
+            return PipelineProcessingResult(False, "rejected", "no signal was persisted")
 
         if self.dedup_service:
             if hasattr(self.dedup_service, "commit"):
@@ -437,8 +486,14 @@ class IngestionPipelineBase(ABC):
             tel.signals_ingested.add(1, {"pipeline.id": self.pipeline_id, "data_source_id": data_source_id})
             tel.ingestion_latency.record(latency_ms, {"pipeline.id": self.pipeline_id})
 
-            derived_kind = str(signal.provenance.get("derivedSourceKind", associated_envelope["source"]["kind"]))
-            derived_trust = str(signal.provenance.get("derivedTrustTier", self.trust_tier))
+            derived_kind = _DERIVED_SOURCE_KINDS.get(
+                str(signal.provenance.get("derivedSourceKind", associated_envelope["source"]["kind"])),
+                "derived",
+            )
+            derived_trust = _DERIVED_TRUST_TIERS.get(
+                str(signal.provenance.get("derivedTrustTier", self.trust_tier)),
+                "tier_7_derived_computed",
+            )
             evaluated_confidence = float(signal.provenance.get("evaluatedConfidenceScore", signal.confidence_score))
             await publish_signal_accepted(
                 SignalAcceptedEvent(
@@ -467,6 +522,12 @@ class IngestionPipelineBase(ABC):
                     dedup_hash=dedup_hash,
                     pipeline_id=self.pipeline_id,
                 )
+
+        return PipelineProcessingResult(
+            accepted=True,
+            status="accepted",
+            signal_ids=tuple(signal.signal_id for signal, _ in persisted_signals),
+        )
 
     async def _reject_payload(
         self,

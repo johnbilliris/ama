@@ -12,7 +12,6 @@ from uuid import uuid4
 from jsonschema import Draft202012Validator, FormatChecker
 from opentelemetry import trace
 
-from apps.api.app.repositories.cosmos_scope import simulation_scope
 from apps.api.app.services.ingestion.pipeline_base import IngestionPipelineBase
 from apps.ingestion import telemetry as tel
 from apps.ingestion.simulation.generators.historical_overlay import HistoricalOverlay
@@ -20,6 +19,7 @@ from apps.ingestion.simulation.scenario_source_matrix import (
     source_matrix_for_scenario,
     validate_source_region,
 )
+from packages.domain.src.domain.repositories.cosmos_scope import simulation_scope
 
 logger = logging.getLogger(__name__)
 
@@ -102,8 +102,10 @@ class SimulationSourcePipeline(IngestionPipelineBase):
         return envelope
 
     def compute_canonical_key(self, raw_payload: dict[str, Any]) -> str:
-        envelope = raw_payload.get("envelope") if isinstance(raw_payload.get("envelope"), dict) else {}
-        source = envelope.get("source") if isinstance(envelope.get("source"), dict) else {}
+        envelope_value = raw_payload.get("envelope")
+        envelope: dict[str, Any] = envelope_value if isinstance(envelope_value, dict) else {}
+        source_value = envelope.get("source")
+        source: dict[str, Any] = source_value if isinstance(source_value, dict) else {}
         data_source_id = str(source.get("dataSourceId", self.data_source_ids[0]))
         occurred_at = str(envelope.get("occurredAt", ""))
         signal_id = str(envelope.get("signalId", envelope.get("id", "")))
@@ -391,9 +393,9 @@ class SimulationRunner:
                 }
                 for source_id, config in matrix.items()
             }
-        matrix = self._scenario.get("source_matrix")
-        if isinstance(matrix, dict):
-            return {str(k): v for k, v in matrix.items() if isinstance(v, dict)}
+        configured_matrix = self._scenario.get("source_matrix")
+        if isinstance(configured_matrix, dict):
+            return {str(k): v for k, v in configured_matrix.items() if isinstance(v, dict)}
         return {}
 
     def _default_cadence_seconds(self, source_id: str) -> float:
@@ -447,11 +449,13 @@ class SimulationRunner:
         return filtered
 
     def _tag_simulation_provenance(self, envelope: dict[str, Any], run: SimulationRun, source_id: str) -> None:
-        provenance = envelope.get("provenance", {})
+        provenance_value = envelope.get("provenance")
+        provenance: dict[str, Any] = provenance_value if isinstance(provenance_value, dict) else {}
         provenance["collectionMethod"] = "simulation"
         provenance["simulationRunId"] = run.run_id
         envelope["provenance"] = provenance
-        source = envelope.get("source") if isinstance(envelope.get("source"), dict) else {}
+        source_value = envelope.get("source")
+        source: dict[str, Any] = source_value if isinstance(source_value, dict) else {}
         source.setdefault("dataSourceId", source_id)
         envelope["source"] = source
 
@@ -552,8 +556,7 @@ class SimulationRunner:
                 maybe = simulation_repo.upsert_document(manifest)
                 if inspect.isawaitable(maybe):
                     # Persist best-effort without failing simulation completion paths.
-                    loop = asyncio.get_running_loop()
-                    loop.create_task(maybe)
+                    asyncio.ensure_future(maybe)
             except Exception:
                 logger.warning("failed to persist run manifest for run_id=%s", run.run_id, exc_info=True)
 

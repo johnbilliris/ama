@@ -47,9 +47,9 @@ def bootstrap_seed_data(seed_root: Path) -> dict[str, object]:
     # list on every request. This is *additive* — existing consumers continue
     # to read the list under ``hazard_scenarios``.
     scenarios_by_id: dict[str, object] = {
-        scenario["scenario_id"]: scenario  # type: ignore[index]
+        scenario_id: scenario
         for scenario in hazard_scenarios
-        if isinstance(scenario, dict) and "scenario_id" in scenario
+        if isinstance(scenario, dict) and isinstance((scenario_id := scenario.get("scenario_id")), str)
     }
     return {
         "jurisdictions": load_seed_file(seed_root / "jurisdictions_australia.json"),

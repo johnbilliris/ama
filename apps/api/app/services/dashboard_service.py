@@ -1,7 +1,6 @@
 import logging
 import os
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 
 from app.middleware.resilience import retry_transient_dependency_call
@@ -15,7 +14,6 @@ from app.services.state_store import HANDOFF_EVENTS
 logger = logging.getLogger(__name__)
 
 
-@retry_transient_dependency_call
 def _query_cosmos_incident(container: Any, incident_id: str) -> list[dict[str, Any]]:
     return list(
         container.query_items(
@@ -24,6 +22,9 @@ def _query_cosmos_incident(container: Any, incident_id: str) -> list[dict[str, A
             enable_cross_partition_query=True,
         )
     )
+
+
+_query_cosmos_incident_with_retry = retry_transient_dependency_call(_query_cosmos_incident)
 
 
 def _lookup_cosmos_incident(incident_id: str) -> dict[str, Any] | None:
@@ -38,7 +39,7 @@ def _lookup_cosmos_incident(incident_id: str) -> dict[str, Any] | None:
         database = os.environ.get("COSMOS_DATABASE", "disaster-hub")
         client = CosmosClient(endpoint, credential=DefaultAzureCredential())
         container = client.get_database_client(database).get_container_client("seed")
-        items = _query_cosmos_incident(container, incident_id)
+        items = _query_cosmos_incident_with_retry(container, incident_id)
         return items[0] if items else None
     except Exception:
         logger.warning("Cosmos DB lookup failed for %s", incident_id, exc_info=True)
@@ -134,9 +135,7 @@ class DashboardService:
     def _framework_context(self, framework_ids: list[str]) -> list[dict[str, Any]]:
         if not framework_ids:
             return []
-        from packages.domain.src.domain.seed import bootstrap as _seed_mod
-
-        seeds = self._seed_service.load(Path(_seed_mod.__file__).resolve().parent)
+        seeds = self._seed_service.load_default()
         framework_rows = {row.get("framework_id"): row for row in seeds.get("frameworks", [])}
         context: list[dict[str, Any]] = []
         for framework_id in framework_ids:
@@ -154,16 +153,16 @@ class DashboardService:
         return context
 
     def _incident_geometry(self, incident: Any) -> dict[str, Any] | None:
-        if incident.location:
-            return incident.location
-        from packages.domain.src.domain.seed import bootstrap as _seed_mod
-
-        seeds = self._seed_service.load(Path(_seed_mod.__file__).resolve().parent)
+        location = incident.location
+        if isinstance(location, dict):
+            return location
+        seeds = self._seed_service.load_default()
         jurisdictions = {row.get("jurisdiction_id"): row for row in seeds.get("jurisdictions", [])}
         for jurisdiction_id in incident.affected_jurisdiction_ids:
             row = jurisdictions.get(jurisdiction_id)
-            if row and row.get("geospatial_boundary"):
-                return row.get("geospatial_boundary")
+            boundary = row.get("geospatial_boundary") if row else None
+            if isinstance(boundary, dict):
+                return boundary
         return None
 
     def _source_status_index(self, signals: list[Any]) -> dict[str, str | dict[str, str]]:

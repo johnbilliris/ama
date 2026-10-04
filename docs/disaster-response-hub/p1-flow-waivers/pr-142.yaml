@@ -378,6 +378,7 @@ not_p1_paths:
 - apps/api/app/services/rehearsal_orchestrator.py
 - apps/api/app/services/resource_governor.py
 - apps/api/app/services/scenario_seeding_service.py
+- apps/api/app/services/seed_service.py
 - apps/api/app/services/signal_accepted_workflow.py
 - apps/api/app/services/simulation/audit_writer.py
 - apps/api/app/services/simulation/controller_service.py
@@ -672,6 +673,7 @@ not_p1_paths:
 - packages/domain/src/domain/models/signal_accepted_event.py
 - packages/domain/src/domain/models/simulation_tenant.py
 - packages/domain/src/domain/models/timeline_event.py
+- packages/domain/src/domain/repositories/cosmos_scope.py
 - packages/domain/src/domain/repositories/signal_read_write.py
 - packages/domain/src/domain/repositories/signal_repository.py
 - packages/domain/src/domain/repositories/signal_wire.py
@@ -1166,6 +1168,7 @@ not_p1_paths:
 - tests/unit/test_indicator_analysis.py
 - tests/unit/test_live_llm_rehearsal_gate.py
 - tests/unit/test_monitoring_pipeline.py
+- tests/unit/test_multi_jurisdiction_filter.py
 - tests/unit/test_resource_allocation_endpoints.py
 - tests/unit/test_resource_allocation_matcher.py
 - tests/unit/test_resource_allocation_pipeline.py

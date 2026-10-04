@@ -113,7 +113,7 @@ class SignalRepository:
         if self._cosmos:
             container = self._cosmos.get_database_client(self._database_name).get_container_client(self._container_name)
             conditions = ["c.incident_id = @incidentId", "c.scope = @scope"]
-            params = [
+            params: list[dict[str, Any]] = [
                 {"name": "@incidentId", "value": incident_id},
                 {"name": "@scope", "value": scope},
             ]
@@ -151,7 +151,7 @@ class SignalRepository:
     ) -> list[Signal]:
         if self._cosmos:
             conditions = ["c.scope = @scope"]
-            params: list[dict] = [{"name": "@scope", "value": scope}]
+            params: list[dict[str, Any]] = [{"name": "@scope", "value": scope}]
             if category:
                 conditions.append("c.category = @category")
                 params.append({"name": "@category", "value": category})
@@ -200,7 +200,7 @@ class SignalRepository:
     ) -> list[Signal]:
         if self._cosmos:
             conditions = ["c.incident_id = null", "c.scope = @scope", "c.occurred_at >= @since"]
-            params = [
+            params: list[dict[str, Any]] = [
                 {"name": "@scope", "value": scope},
                 {"name": "@since", "value": (since or datetime.now(UTC)).isoformat()},
             ]

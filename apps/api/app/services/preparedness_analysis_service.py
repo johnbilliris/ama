@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TypedDict
 
 from app.services.seed_service import SeedService
 
@@ -10,6 +11,14 @@ from packages.domain.src.domain.models.operating_framework import OperatingFrame
 from packages.domain.src.domain.models.organisation import Organisation
 
 
+class PreparednessContext(TypedDict):
+    jurisdictions: list[Jurisdiction]
+    frameworks: list[OperatingFramework]
+    organisations: list[Organisation]
+    framework_assignments: list[FrameworkAssignment]
+    jurisdiction_policies: list[JurisdictionPolicy]
+
+
 class PreparednessAnalysisService:
     def __init__(self, seed_root: Path | None = None) -> None:
         if seed_root is None:
@@ -18,9 +27,7 @@ class PreparednessAnalysisService:
             seed_root = Path(_seed_mod.__file__).resolve().parent
         self.seed_root = seed_root
 
-    def get_context(
-        self,
-    ) -> dict[str, list[Jurisdiction | OperatingFramework | Organisation | FrameworkAssignment | JurisdictionPolicy]]:
+    def get_context(self) -> PreparednessContext:
         seeds = SeedService().load(self.seed_root)
         return {
             "jurisdictions": [Jurisdiction(**item) for item in seeds["jurisdictions"]],
@@ -57,29 +64,19 @@ class PreparednessAnalysisService:
             for organisation in context["organisations"]
             if any(jurisdiction_id in organisation.jurisdiction_ids for jurisdiction_id in jurisdiction_ids)
         ]
-        organisation_ids = {organisation.organisation_id for organisation in organisations}
         all_assignments = context["framework_assignments"]
 
         candidate_assignments = [
             assignment
             for assignment in all_assignments
-            if is_effective(assignment, now)
-            and (
-                assignment.jurisdiction_id in jurisdiction_ids
-                or (assignment.organisation_id is not None and assignment.organisation_id in organisation_ids)
-            )
+            if is_effective(assignment, now) and assignment.jurisdiction_id in jurisdiction_ids
         ]
 
-        selected_by_framework: dict[str, FrameworkAssignment] = {}
+        selected_by_id: dict[str, FrameworkAssignment] = {}
         for assignment in candidate_assignments:
-            current = selected_by_framework.get(assignment.framework_id)
-            if current is None:
-                selected_by_framework[assignment.framework_id] = assignment
-                continue
-            if current.organisation_id is None and assignment.organisation_id is not None:
-                selected_by_framework[assignment.framework_id] = assignment
+            selected_by_id.setdefault(assignment.assignment_id, assignment)
 
-        assignments = list(selected_by_framework.values())
+        assignments = list(selected_by_id.values())
         matched_framework_ids = {a.framework_id for a in assignments}
         frameworks = [fw for fw in context["frameworks"] if fw.framework_id in matched_framework_ids]
         gaps = []

@@ -13,7 +13,7 @@ import uuid
 from collections import defaultdict
 from collections.abc import Callable
 from importlib import import_module
-from typing import Any
+from typing import Any, cast
 
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
@@ -141,11 +141,12 @@ def _is_retryable_dependency_exception(error: BaseException) -> bool:
     return type_name in retryable_type_names
 
 
-def retry_transient_dependency_call(func: Callable[..., Any]) -> Callable[..., Any]:
+def retry_transient_dependency_call[**P, R](func: Callable[P, R]) -> Callable[P, R]:
     tenacity = import_module("tenacity")
-    return tenacity.retry(
+    retry = tenacity.retry(
         retry=tenacity.retry_if_exception(_is_retryable_dependency_exception),
         wait=tenacity.wait_exponential_jitter(initial=0.5, max=5),
         stop=tenacity.stop_after_attempt(3),
         reraise=True,
-    )(func)
+    )
+    return cast(Callable[P, R], retry(func))
