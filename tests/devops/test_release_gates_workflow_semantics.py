@@ -13,8 +13,8 @@ def test_ci_wires_feature_evidence_binding_and_p1_gate() -> None:
     assert "python tools/lint/check_feature_evidence_binding.py" in text
     assert "p1-training-release-gate" in text
     assert "python scripts/p1_release_training_gate.py" in text
-    assert 'git diff --name-only "$P1_BASE_SHA" "$P1_HEAD_SHA"' in text
-    assert 'grep -Fxq "docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml"' in text
+    assert 'git merge-base origin/main "${head_sha}"' in text
+    assert 'if [[ "$P1_PR_NUMBER" == "142" || "$P1_BRANCH" == "001-extension-list" ]]' in text
     assert "waiver_args+=(--waiver-file docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml)" in text
 
 

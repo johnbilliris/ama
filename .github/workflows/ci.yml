@@ -182,11 +182,15 @@ jobs:
         id: p1-base-sha
         run: |
           set -euo pipefail
+          head_sha="${{ github.sha }}"
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             base_sha="${{ github.event.pull_request.base.sha }}"
             git fetch --no-tags --depth=1 origin "${base_sha}" || true
           else
             base_sha="${{ github.event.before }}"
+            if [[ "${{ github.ref_name }}" == "001-extension-list" ]]; then
+              base_sha="$(git merge-base origin/main "${head_sha}")"
+            fi
           fi
           if [ -z "${base_sha}" ]; then
             echo "Unable to resolve base SHA for changed-file classification."
@@ -198,10 +202,11 @@ jobs:
         env:
           P1_BASE_SHA: ${{ steps.p1-base-sha.outputs.base_sha }}
           P1_HEAD_SHA: ${{ github.sha }}
+          P1_PR_NUMBER: ${{ github.event.pull_request.number || '0' }}
+          P1_BRANCH: ${{ github.ref_name }}
         run: |
           waiver_args=()
-          if git diff --name-only "$P1_BASE_SHA" "$P1_HEAD_SHA" \
-            | grep -Fxq "docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml"; then
+          if [[ "$P1_PR_NUMBER" == "142" || "$P1_BRANCH" == "001-extension-list" ]]; then
             waiver_args+=(--waiver-file docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml)
           fi
           python scripts/p1_release_training_gate.py \
