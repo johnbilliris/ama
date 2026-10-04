@@ -21,12 +21,12 @@ Cross-references:
 ## Summary
 
 - Schema version: `1.0.0`
-- Total entries: **134**
+- Total entries: **135**
 - `alert-template`: 8
 - `generator`: 14
 - `mock`: 41
 - `simulator-feed-shape`: 13
-- `synthetic`: 58
+- `synthetic`: 59
 
 ## Category: `alert-template`
 
@@ -153,6 +153,7 @@ Cross-references:
 | `packages-domain-src-domain-seed-hospital-capability-wa-json` | `packages/domain/src/domain/seed/hospital-capability/wa.json` | `ambulance` | dfes-wa, logistics-officer, wapol | `OFFICIAL` | `CC-BY-4.0` | **YES** |
 | `packages-domain-src-domain-seed-identities-australia-json` | `packages/domain/src/domain/seed/identities_australia.json` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
 | `packages-domain-src-domain-seed-inter-government-agreements-agreements-australia-json` | `packages/domain/src/domain/seed/inter-government-agreements/agreements_australia.json` | `commonwealth` | executive-leader, nema | `OFFICIAL` | `CC-BY-4.0` | no |
+| `packages-domain-src-domain-seed-jurisdiction-policies-australia-json` | `packages/domain/src/domain/seed/jurisdiction_policies_australia.json` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
 | `packages-domain-src-domain-seed-jurisdictions-australia-json` | `packages/domain/src/domain/seed/jurisdictions_australia.json` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
 | `packages-domain-src-domain-seed-lemp-memp-templates-templates-australia-json` | `packages/domain/src/domain/seed/lemp-memp-templates/templates_australia.json` | `operational` | local-government, state-government | `OFFICIAL` | `CC-BY-4.0` | no |
 | `packages-domain-src-domain-seed-organisations-australia-json` | `packages/domain/src/domain/seed/organisations_australia.json` | `operational` | incident-commander, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |

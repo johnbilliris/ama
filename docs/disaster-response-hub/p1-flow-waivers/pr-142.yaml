@@ -631,6 +631,8 @@ not_p1_paths:
 - docs/specify/extension-list-usability-protocol.md
 - docs/specify/extension-list-validation-handoff.md
 - docs/specify/extension-list.md
+- docs/test-data/MANIFEST.md
+- docs/test-data/manifest.json
 - infra/bicep/main.bicep
 - infra/bicep/modules/evacuation-alerts.bicep
 - infra/bicep/modules/evacuation-runtime.bicep
