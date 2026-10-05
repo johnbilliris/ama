@@ -3,13 +3,14 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+from app.api.dependencies.governance_composition import initialize_governance_composition
+from app.api.dependencies.simulation_composition import simulation_repository_proxy
 from app.api.router import api_router
 from app.core.env_contract import EnvironmentContractError, validate_runtime_environment
 from app.core.settings import get_settings
 from app.middleware.activation_mutex import activation_mutex_lifespan
 from app.middleware.error_handler import add_error_handler_middleware
 from app.middleware.resilience import add_resilience_middleware
-from app.repositories.simulation_repository import SimulationRepository
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -38,6 +39,7 @@ async def _composed_lifespan(app: FastAPI) -> AsyncIterator[None]:
         validate_runtime_environment()
     except EnvironmentContractError as exc:
         raise RuntimeError(f"Startup blocked by environment contract: {exc}") from exc
+    initialize_governance_composition(app)
     initialize_registry()
     try:
         async with activation_mutex_lifespan(app):
@@ -77,7 +79,7 @@ def create_app() -> FastAPI:
     from app.middleware.tenant_middleware import add_tenant_middleware
     from app.services.evidence.middleware import add_evidence_contract_middleware
 
-    add_tenant_middleware(app, simulation_repository=SimulationRepository())
+    add_tenant_middleware(app, simulation_repository=simulation_repository_proxy())
     add_auth_middleware(app)
 
     # spec-035 production-auth stack. The full stack activates only when

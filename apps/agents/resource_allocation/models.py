@@ -180,8 +180,8 @@ class TradeOffAnalysis(BaseModel):
 
     competing_incidents: list[str] = Field(default_factory=list)
     contested_resources: list[str] = Field(default_factory=list)
-    allocations: list[dict] = Field(default_factory=list)
-    reallocation_recommendations: list[dict] = Field(default_factory=list)
+    allocations: list[dict[str, object]] = Field(default_factory=list)
+    reallocation_recommendations: list[dict[str, object]] = Field(default_factory=list)
     impact_summary: str = ""
     requires_commander_approval: bool = True
 
@@ -210,11 +210,11 @@ class OverrideMetadata(BaseModel):
 class InputSnapshot(BaseModel):
     """Complete input data for reproducibility (5 fields)."""
 
-    demands_snapshot: list[dict] = Field(default_factory=list)
+    demands_snapshot: list[dict[str, object]] = Field(default_factory=list)
     inventory_snapshot_hash: str = ""
     inventory_staleness_minutes: float = 0.0
     config_version: str = ""
-    scoring_parameters: dict = Field(default_factory=dict)
+    scoring_parameters: dict[str, object] = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -233,7 +233,7 @@ class ResourceDemand(BaseModel):
     resource_sub_type: str
     required_capabilities: list[str] = Field(default_factory=list)
     quantity: int = 1
-    location: dict = Field(default_factory=dict)
+    location: dict[str, object] = Field(default_factory=dict)
     estimated_individuals: int = Field(default=0, ge=0)
     destination_assembly_area_id: str = ""
     destination_assembly_area_name: str = ""
@@ -282,7 +282,7 @@ class ResourceInventoryItem(BaseModel):
     resource_type: ResourceType
     resource_sub_type: str
     capabilities: list[str] = Field(default_factory=list)
-    location: dict = Field(default_factory=dict)
+    location: dict[str, object] = Field(default_factory=dict)
     status: ResourceStatus = ResourceStatus.available
     assigned_incident_id: str | None = None
     capacity: int | None = None

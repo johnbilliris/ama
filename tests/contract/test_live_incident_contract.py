@@ -2,7 +2,7 @@ import base64
 import json
 
 import pytest
-from app.api.routes import signals as signals_route
+from app.api.dependencies.governance_composition import get_governance_composition
 from app.core.tenant_context import TenantContext, reset_current_tenant, set_current_tenant
 from app.main import create_app
 from app.services.state_store import ALERTS, INCIDENTS, RECOMMENDATIONS, reset_state
@@ -73,14 +73,24 @@ def test_signal_ingestion_dashboard_and_alert_contracts() -> None:
         incident_id="incident-001",
         status="approved",
         audience_segments=["community"],
-        languages=["en-AU"],
+        languages=["en-AU", "zh-Hans", "ar", "vi", "el", "it"],
         channel_set=["sms"],
-        content_blocks={"headline": "Prepare to evacuate."},
+        content_blocks={
+            "headline": "Prepare to evacuate.",
+            "body": "Follow emergency service instructions.",
+            "en-AU": "Prepare to evacuate.",
+            "zh-Hans": "准备疏散。",
+            "ar": "استعد للإخلاء.",
+            "vi": "Chuẩn bị sơ tán.",
+            "el": "Ετοιμαστείτε για εκκένωση.",
+            "it": "Prepararsi all'evacuazione.",
+        },
+        content_safety_result="passed",
     )
 
     client = TestClient(create_app())
 
-    data_source = signals_route._governance_registry.register_source(
+    data_source = get_governance_composition(client.app).registry.register_source(
         DataSource(
             data_source_id="ds-test-bom",
             name="BoM Official Feed",
@@ -118,7 +128,7 @@ def test_signal_ingestion_dashboard_and_alert_contracts() -> None:
     assert isinstance(listed_payload.get("items"), list)
     assert isinstance(listed_payload.get("total"), int)
 
-    dashboard_response = client.get("/api/incidents/incident-001/dashboard")
+    dashboard_response = client.get("/api/incidents/incident-001/dashboard", headers=_auth_headers())
     assert dashboard_response.status_code == 200
     assert dashboard_response.json()["incident"]["incidentId"] == "incident-001"
 
@@ -134,12 +144,22 @@ def test_signal_ingestion_dashboard_and_alert_contracts() -> None:
     assert approval_response.status_code == 200
     assert approval_response.json()["outcome"] == "approved"
 
+    alert_approval = client.post(
+        "/api/alerts/alert-rec-001/approvals",
+        json={
+            "approverPersonaId": "persona-incident-commander",
+            "rationale": "Alert content and safety review complete.",
+        },
+        headers=_auth_headers(),
+    )
+    assert alert_approval.status_code == 200, alert_approval.text
+
     publish_response = client.post(
         "/api/alerts/alert-rec-001/publish",
         json={"publishedByPersonaId": "persona-incident-commander"},
         headers=_auth_headers(),
     )
-    assert publish_response.status_code == 200
+    assert publish_response.status_code == 200, publish_response.text
     assert publish_response.json()["status"] == "published"
 
 

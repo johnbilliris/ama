@@ -5,8 +5,11 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from app.api.dependencies.governance_composition import get_governance_registry
 from app.core.tenant_context import TenantContext, reset_current_tenant, set_current_tenant
 from app.main import create_app
+from app.repositories.governance_repository import GovernanceRepository
+from app.services.governance_registry import GovernanceRegistryService
 from app.services.state_store import reset_state
 from fastapi.testclient import TestClient
 
@@ -57,6 +60,15 @@ def _seed_source(client: TestClient) -> str:
     return source.data_source_id
 
 
+@pytest.fixture
+def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    registry = GovernanceRegistryService(repo=GovernanceRepository())
+    app = create_app()
+    app.state.governance_registry = registry
+    app.dependency_overrides[get_governance_registry] = lambda: registry
+    return TestClient(app)
+
+
 def _seed_signal(client: TestClient, *, signal_id: str, occurred_at: datetime, source_id: str) -> None:
     from app.services.operational_store import OperationalStore
 
@@ -85,9 +97,8 @@ def _seed_signal(client: TestClient, *, signal_id: str, occurred_at: datetime, s
     )
 
 
-def test_list_signals_supports_naive_since_and_returns_deterministic_order() -> None:
+def test_list_signals_supports_naive_since_and_returns_deterministic_order(client: TestClient) -> None:
     reset_state()
-    client = TestClient(create_app())
     source_id = _seed_source(client)
 
     at = datetime.now(UTC).replace(microsecond=0)
@@ -105,9 +116,8 @@ def test_list_signals_supports_naive_since_and_returns_deterministic_order() -> 
     assert [item["signal_id"] for item in payload["items"]] == ["sig-b", "sig-a"]
 
 
-def test_list_signals_rejects_invalid_query_parameters_with_422_and_no_mutation() -> None:
+def test_list_signals_rejects_invalid_query_parameters_with_422_and_no_mutation(client: TestClient) -> None:
     reset_state()
-    client = TestClient(create_app())
     source_id = _seed_source(client)
     _seed_signal(
         client,

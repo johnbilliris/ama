@@ -74,9 +74,9 @@ LifecycleState = Literal["active", "paused", "aborted", "ended"]
 
 
 try:  # pragma: no cover - install-time branch
-    import rfc8785 as _rfc8785_pkg  # type: ignore[import-not-found]
+    import rfc8785 as _rfc8785_pkg
 except Exception:  # pragma: no cover - fallback for envs without rfc8785
-    _rfc8785_pkg = None  # type: ignore[assignment]
+    _rfc8785_pkg = None
 
 
 def _rfc8785_canonical_json(body: Any) -> bytes:

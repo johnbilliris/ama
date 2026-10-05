@@ -136,46 +136,44 @@ class ExerciseMetricsService:
         )
 
     def _sc006(self, baseline: ExerciseKPI, hub: ExerciseKPI) -> dict[str, Any]:
-        complete = all(
-            value is not None
+        baseline_assignment = baseline.time_to_assignment_minutes
+        hub_assignment = hub.time_to_assignment_minutes
+        baseline_utilization = baseline.resource_utilization_ratio
+        hub_utilization = hub.resource_utilization_ratio
+        baseline_unfilled = baseline.unfilled_priority_requests
+        hub_unfilled = hub.unfilled_priority_requests
+        if any(
+            value is None
             for value in (
-                baseline.time_to_assignment_minutes,
-                hub.time_to_assignment_minutes,
-                baseline.resource_utilization_ratio,
-                hub.resource_utilization_ratio,
-                baseline.unfilled_priority_requests,
-                hub.unfilled_priority_requests,
+                baseline_assignment,
+                hub_assignment,
+                baseline_utilization,
+                hub_utilization,
+                baseline_unfilled,
+                hub_unfilled,
             )
-        )
-        if not complete:
+        ):
+            return self._criterion(False, False, {})
+        if (
+            baseline_assignment is None
+            or hub_assignment is None
+            or baseline_utilization is None
+            or hub_utilization is None
+            or baseline_unfilled is None
+            or hub_unfilled is None
+        ):
             return self._criterion(False, False, {})
 
         assignment_improvement = (
-            (
-                (baseline.time_to_assignment_minutes - hub.time_to_assignment_minutes)
-                / baseline.time_to_assignment_minutes
-            )
-            * 100
-            if baseline.time_to_assignment_minutes and baseline.time_to_assignment_minutes > 0
-            else 0.0
+            ((baseline_assignment - hub_assignment) / baseline_assignment) * 100 if baseline_assignment > 0 else 0.0
         )
         utilization_improvement = (
-            (
-                (hub.resource_utilization_ratio - baseline.resource_utilization_ratio)
-                / baseline.resource_utilization_ratio
-            )
-            * 100
-            if baseline.resource_utilization_ratio and baseline.resource_utilization_ratio > 0
-            else 0.0
+            ((hub_utilization - baseline_utilization) / baseline_utilization) * 100 if baseline_utilization > 0 else 0.0
         )
         unfilled_reduction = (
-            (
-                (baseline.unfilled_priority_requests - hub.unfilled_priority_requests)
-                / baseline.unfilled_priority_requests
-            )
-            * 100
-            if baseline.unfilled_priority_requests and baseline.unfilled_priority_requests > 0
-            else (100.0 if (hub.unfilled_priority_requests or 0) == 0 else 0.0)
+            ((baseline_unfilled - hub_unfilled) / baseline_unfilled) * 100
+            if baseline_unfilled > 0
+            else (100.0 if hub_unfilled == 0 else 0.0)
         )
 
         weighted_composite = (
@@ -207,7 +205,11 @@ class ExerciseMetricsService:
         proportions: dict[str, float] = {}
         per_dimension_pass: dict[str, bool] = {}
         for dimension in dimensions:
-            values = [row.get(dimension) for row in participant_scores if row.get(dimension) is not None]
+            values: list[float] = []
+            for row in participant_scores:
+                value = row.get(dimension)
+                if value is not None:
+                    values.append(value)
             if not values:
                 return self._criterion(False, False, {})
             favourable = sum(1 for value in values if value >= 4.0)

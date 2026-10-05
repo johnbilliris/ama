@@ -11,8 +11,12 @@ import logging
 import os
 import re
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from common.content_safety_circuit_breaker import ContentSafetyCircuitBreaker
+
+if TYPE_CHECKING:
+    from azure.ai.contentsafety import ContentSafetyClient
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +88,7 @@ class ContentSafetyValidator:
     def __init__(
         self,
         circuit_breaker: ContentSafetyCircuitBreaker | None = None,
-        azure_client: object | None = None,
+        azure_client: ContentSafetyClient | None = None,
     ) -> None:
         self._circuit_breaker = circuit_breaker or ContentSafetyCircuitBreaker()
         self._azure_client = azure_client
@@ -95,7 +99,7 @@ class ContentSafetyValidator:
             self._azure_client = self._init_azure_client()
 
     @staticmethod
-    def _init_azure_client():
+    def _init_azure_client() -> ContentSafetyClient | None:
         """Initialize Azure AI Content Safety client if credentials available."""
         endpoint = os.environ.get("AZURE_CONTENT_SAFETY_ENDPOINT", "")
         if not endpoint:
@@ -217,17 +221,12 @@ class ContentSafetyValidator:
         from azure.ai.contentsafety.models import AnalyzeTextOptions
 
         request = AnalyzeTextOptions(text=text)
-        response = self._azure_client.analyze_text(request)
+        client = self._azure_client
+        if client is None:
+            raise RuntimeError("Azure AI Content Safety client is not configured")
+        response = client.analyze_text(request)
 
-        max_severity = 0
-        for category in (
-            response.hate_result,
-            response.self_harm_result,
-            response.sexual_result,
-            response.violence_result,
-        ):
-            if category and category.severity > max_severity:
-                max_severity = category.severity
+        max_severity = max((category.severity or 0 for category in response.categories_analysis), default=0)
 
         # Pass threshold: all categories severity <= 2
         passed = max_severity <= 2
@@ -269,23 +268,29 @@ class ContentSafetyValidator:
     def validate_factual(
         self,
         alert_message: str,
-        originating_signal: dict,
+        originating_signal: dict[str, object],
     ) -> ContentSafetyResult:
         """Validate factual consistency against originating signal data (FR-007b)."""
         alert_lower = alert_message.lower()
-        mismatches = []
+        mismatches: list[str] = []
 
         hazard_type = originating_signal.get("hazard_type", "")
-        if hazard_type and hazard_type.lower() not in alert_lower:
-            mismatches.append(f"hazard_type '{hazard_type}' not found in alert")
+        if hazard_type:
+            if not isinstance(hazard_type, str):
+                raise TypeError("Signal hazard_type must be a string")
+            if hazard_type.lower() not in alert_lower:
+                mismatches.append(f"hazard_type '{hazard_type}' not found in alert")
 
         severity = str(originating_signal.get("severity_level", ""))
         if severity and severity not in alert_message:
             mismatches.append(f"severity_level '{severity}' not found in alert")
 
         location = originating_signal.get("location_name", "")
-        if location and location.lower() not in alert_lower:
-            mismatches.append(f"location_name '{location}' not found in alert")
+        if location:
+            if not isinstance(location, str):
+                raise TypeError("Signal location_name must be a string")
+            if location.lower() not in alert_lower:
+                mismatches.append(f"location_name '{location}' not found in alert")
 
         if mismatches:
             return ContentSafetyResult(

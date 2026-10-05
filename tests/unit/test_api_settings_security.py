@@ -17,6 +17,7 @@ class TestApiSettingsSecurity:
         assert settings.environment == "dev"
 
     def test_legacy_aliases_are_accepted(self, monkeypatch):
+        monkeypatch.delenv("AMA_ENVIRONMENT", raising=False)
         monkeypatch.setenv("ENVIRONMENT", "dev")
         monkeypatch.setenv("ENTRA_TENANT_ID", "00000000-0000-0000-0000-000000000000")
         monkeypatch.setenv("ENTRA_AUDIENCE", "api://disaster-response-hub")

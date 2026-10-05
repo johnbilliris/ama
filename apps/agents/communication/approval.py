@@ -14,7 +14,7 @@ import logging
 import os
 import time
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, Protocol
 from uuid import UUID, uuid5
 
 from common.async_bridge import run_async
@@ -23,8 +23,10 @@ from communication.config import CommunicationConfig
 from communication.models import (
     AlertStatus,
     ApprovalMode,
+    AudienceSegment,
     CommunicationDecisionRecord,
     CommunicationDecisionType,
+    DeliveryRecord,
     EscalationEvent,
     PublicAlert,
 )
@@ -35,6 +37,12 @@ from communication.versioning import VersionCounter
 logger = logging.getLogger(__name__)
 
 _APPROVAL_NAMESPACE = UUID("c6cf3a6a-8a68-4c18-9e7f-2d03c0f0c2b5")
+
+
+class ApprovalCosmosContainer(Protocol):
+    def replace_item(self, *, item: str, body: dict[str, object], if_match: str) -> object: ...
+
+    def upsert_item(self, *, body: dict[str, object]) -> object: ...
 
 
 class ApprovalConflictError(Exception):
@@ -83,7 +91,7 @@ class ApprovalWorkflow:
     def __init__(
         self,
         config: CommunicationConfig | None = None,
-        cosmos_client: object | None = None,
+        cosmos_client: ApprovalCosmosContainer | None = None,
         service_bus_client: object | None = None,
         alert_repository: CommunicationAlertRepository | None = None,
         version_counter: VersionCounter | None = None,
@@ -95,7 +103,7 @@ class ApprovalWorkflow:
         self._alert_repository = alert_repository
         self._version_counter = version_counter or VersionCounter(config=self._config)
         self._audit_writer = audit_writer
-        self._escalation_timers: dict[tuple[str, str], asyncio.Task] = {}
+        self._escalation_timers: dict[tuple[str, str], asyncio.Task[None]] = {}
         self._pending_alerts: dict[str, PublicAlert] = {}
 
     def get_alert(self, tenant_id: str, alert_id: str) -> PublicAlert | None:
@@ -104,17 +112,17 @@ class ApprovalWorkflow:
         alert = self._pending_alerts.get(alert_id)
         return alert if alert is not None and alert.tenant_id == tenant_id else None
 
-    def get_segments(self, tenant_id: str, alert_id: str):
+    def get_segments(self, tenant_id: str, alert_id: str) -> list[AudienceSegment]:
         if self._alert_repository is None:
             return []
         return self._alert_repository.audience_segments(tenant_id, alert_id)
 
-    def get_delivery_records(self, tenant_id: str, alert_id: str):
+    def get_delivery_records(self, tenant_id: str, alert_id: str) -> list[DeliveryRecord]:
         if self._alert_repository is None:
             return []
         return self._alert_repository.delivery_records(tenant_id, alert_id)
 
-    def get_version_history(self, tenant_id: str, incident_id: str):
+    def get_version_history(self, tenant_id: str, incident_id: str) -> list[PublicAlert]:
         if self._alert_repository is None:
             return []
         return self._alert_repository.version_history(tenant_id, incident_id)
@@ -482,7 +490,7 @@ class ApprovalWorkflow:
     def create_modified_version(
         self,
         alert: PublicAlert,
-        modifications: dict,
+        modifications: dict[str, object],
         user_id: str,
         role: str,
     ) -> PublicAlert:

@@ -59,7 +59,7 @@ class ScenarioSeedingService:
             return bool(await starter(tenant_id))
         return bool(self._scheduler.start_delivery_loop(tenant_id))
 
-    async def seed_from_template(self, tenant_id: str, template_id: str, warp_speed: float = 1.0) -> dict:
+    async def seed_from_template(self, tenant_id: str, template_id: str, warp_speed: float = 1.0) -> dict[str, object]:
         template = await self._load_template(template_id)
         if template is None:
             raise ValueError(f"Template '{template_id}' not found")
@@ -117,7 +117,7 @@ class ScenarioSeedingService:
             "jurisdictions_seeded": len(template.seed_jurisdictions),
         }
 
-    async def seed_for_hazard(self, tenant_id: str, hazard: str, warp_speed: float = 1.0) -> dict:
+    async def seed_for_hazard(self, tenant_id: str, hazard: str, warp_speed: float = 1.0) -> dict[str, object]:
         expected_type = {
             "storm": "severe storm",
             "heat": "heatwave",
@@ -141,7 +141,7 @@ class ScenarioSeedingService:
         start: str,
         end: str,
         time_compression: float = 1.0,
-    ) -> dict:
+    ) -> dict[str, object]:
         """Copy historical signals from the live partition into the simulation partition."""
         if time_compression <= 0:
             raise ValueError("time_compression must be > 0")
@@ -231,7 +231,7 @@ class ScenarioSeedingService:
         tenant_id: str,
         template_id: str,
         time_multiplier: float = 1.0,
-    ) -> dict:
+    ) -> dict[str, object]:
         """Schedule signal injection following real-time offsets with optional compression."""
         template = await self._load_template(template_id)
         if template is None:

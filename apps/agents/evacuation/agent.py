@@ -22,12 +22,16 @@ from copy import deepcopy
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from threading import RLock
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from azure.core import MatchConditions
 from common.entra_principal import AuthenticatedPrincipal, EntraPrincipalResolver, normalize_role
 from common.handoffs import AgentHandoffEvent
-from common.llm_mixin import LLMCallMixin
+
+if TYPE_CHECKING:
+    from apps.agents.common.llm_mixin import LLMCallMixin
+else:
+    from common.llm_mixin import LLMCallMixin
 from evacuation import telemetry as tel
 from evacuation.audit import AuditQueryPage
 from evacuation.config import EvacuationConfig
@@ -687,8 +691,8 @@ class EvacuationAgent(LLMCallMixin):
         cosmos_decisions_container: Any = None,
         cosmos_assessments_container: Any = None,
         cosmos_recommendations_container: Any = None,
-        population_data: list[dict] | None = None,
-        facility_data: list[dict] | None = None,
+        population_data: list[dict[str, object]] | None = None,
+        facility_data: list[dict[str, object]] | None = None,
         reference_data_metadata: dict[str, Any] | None = None,
         emergency_notification_publisher: Any = None,
     ) -> None:
@@ -1978,7 +1982,7 @@ class _OverrideRequest(_PydanticBaseModel):
     user_id: str | None = None
     role: str | None = None
     justification: str
-    modifications: dict | None = None
+    modifications: dict[str, object] | None = None
 
 
 class _OverrideResponse(_PydanticBaseModel):
@@ -2377,6 +2381,9 @@ def create_app(
             except (TypeError, ValueError) as exc:
                 raise HTTPException(status_code=422, detail=f"Modified plan is invalid: {exc}") from exc
 
+            counter_operation: (
+                tuple[str, tuple[dict[str, object]]] | tuple[str, tuple[str, dict[str, object]], dict[str, str]]
+            )
             if counter_doc is None:
                 counter_operation = (
                     "create",
@@ -2919,7 +2926,7 @@ def run_consumer(
     try:
         if service_bus_client is not None:
 
-            def client_factory():
+            def client_factory() -> Any:
                 return service_bus_client
         else:
             try:
@@ -2932,9 +2939,11 @@ def run_consumer(
                 owns_lock_renewer = True
             if connection_string:
 
-                def client_factory():
+                def client_factory() -> Any:
                     return ServiceBusClient.from_connection_string(connection_string)
             else:
+                if not fully_qualified_namespace:
+                    raise ValueError("fully_qualified_namespace is required for managed-identity Service Bus clients")
                 from azure.identity import DefaultAzureCredential
 
                 client_id = os.environ.get("AZURE_CLIENT_ID")
@@ -2944,7 +2953,7 @@ def run_consumer(
                     else DefaultAzureCredential()
                 )
 
-                def client_factory():
+                def client_factory() -> Any:
                     return ServiceBusClient(
                         fully_qualified_namespace=fully_qualified_namespace,
                         credential=credential,

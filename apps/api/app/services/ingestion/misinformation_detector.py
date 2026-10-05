@@ -8,6 +8,10 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
+def _mapping(value: object) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
 class MisinformationDetector:
     """Detects misinformation patterns in social media signals."""
 
@@ -43,7 +47,7 @@ class MisinformationDetector:
             signal.get("signalId"),
             signal.get("signal_id"),
             signal.get("id"),
-            signal.get("payload", {}).get("signalId") if isinstance(signal.get("payload"), dict) else None,
+            _mapping(signal.get("payload")).get("signalId"),
         ]
         for candidate in candidates:
             if candidate is None:
@@ -55,8 +59,8 @@ class MisinformationDetector:
 
     @staticmethod
     def _account_id(signal: dict[str, Any]) -> str:
-        payload = signal.get("payload") if isinstance(signal.get("payload"), dict) else {}
-        source = signal.get("source") if isinstance(signal.get("source"), dict) else {}
+        payload = _mapping(signal.get("payload"))
+        source = _mapping(signal.get("source"))
         for key in ("accountId", "authorId", "userId", "sourceAccountId", "account"):
             value = payload.get(key)
             if value is not None and str(value).strip():
@@ -69,9 +73,9 @@ class MisinformationDetector:
 
     @staticmethod
     def _topic_bucket(signal: dict[str, Any]) -> str:
-        payload = signal.get("payload") if isinstance(signal.get("payload"), dict) else {}
+        payload = _mapping(signal.get("payload"))
         topic = str(payload.get("topic", payload.get("category", signal.get("category", "unknown")))).strip().lower()
-        location = signal.get("location") if isinstance(signal.get("location"), dict) else {}
+        location = _mapping(signal.get("location"))
         points = MisinformationDetector._extract_points(location)
         if points:
             lon, lat = points[0]
@@ -222,7 +226,7 @@ class MisinformationDetector:
         return dot / (left_norm * right_norm)
 
     def _is_authoritative_signal(self, signal: dict[str, Any]) -> bool:
-        source = signal.get("source") if isinstance(signal.get("source"), dict) else {}
+        source = _mapping(signal.get("source"))
         return str(source.get("kind", "")).strip().lower() == "authoritative"
 
     def has_authoritative_corroboration(
@@ -240,7 +244,7 @@ class MisinformationDetector:
         if signal_time is None:
             return False
         signal_category = str(signal.get("category", "")).strip()
-        signal_location = signal.get("location") if isinstance(signal.get("location"), dict) else {}
+        signal_location = _mapping(signal.get("location"))
         if not signal_location:
             return False
 
@@ -257,7 +261,7 @@ class MisinformationDetector:
                 continue
             if abs((signal_time - auth_time).total_seconds()) > time_window * 60:
                 continue
-            auth_location = auth_signal.get("location") if isinstance(auth_signal.get("location"), dict) else {}
+            auth_location = _mapping(auth_signal.get("location"))
             if not auth_location:
                 continue
             if self._geometries_overlap(signal_location, auth_location, max_distance_km=distance_km):
@@ -327,7 +331,7 @@ class MisinformationDetector:
         ):
             return False
 
-        payload = signal.get("payload") if isinstance(signal.get("payload"), dict) else {}
+        payload = _mapping(signal.get("payload"))
         text_blob = " ".join(
             str(payload.get(key, "")) for key in ("text", "title", "content", "status", "hazard_state", "condition")
         ).lower()
@@ -346,7 +350,7 @@ class MisinformationDetector:
             ):
                 continue
 
-            auth_payload = auth_signal.get("payload") if isinstance(auth_signal.get("payload"), dict) else {}
+            auth_payload = _mapping(auth_signal.get("payload"))
             auth_text = " ".join(
                 str(auth_payload.get(key, "")) for key in ("status", "hazard_state", "condition", "text", "title")
             ).lower()

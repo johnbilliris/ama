@@ -15,6 +15,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from common.telemetry_types import Attributes
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -59,7 +61,7 @@ class _NoOpSpan:
     def record_exception(self, exc: BaseException) -> None:  # noqa: D102
         pass
 
-    def add_event(self, name: str, attributes: dict | None = None) -> None:  # noqa: D102
+    def add_event(self, name: str, attributes: Attributes | None = None) -> None:  # noqa: D102
         pass
 
     def __enter__(self) -> _NoOpSpan:  # noqa: D105
@@ -374,10 +376,10 @@ class ResourceAllocationMetrics:
 class _NoOpMetric:
     """Drop-in stub for any metric type."""
 
-    def add(self, value: Any = 1, attributes: dict | None = None) -> None:  # noqa: D102
+    def add(self, value: Any = 1, attributes: Attributes | None = None) -> None:  # noqa: D102
         pass
 
-    def record(self, value: Any = 0, attributes: dict | None = None) -> None:  # noqa: D102
+    def record(self, value: Any = 0, attributes: Attributes | None = None) -> None:  # noqa: D102
         pass
 
 

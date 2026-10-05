@@ -2,7 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Callable, Sequence
+from typing import Any, TypedDict
+
+from ama_eval_core.models import EvaluationCase
+
+
+class DistributionEntry(TypedDict):
+    count: int
+    percentage: float
+
 
 HAZARD_TARGETS: dict[str, float] = {
     "structure-fire": 0.085,
@@ -67,7 +76,7 @@ def _to_str(value: Any) -> str:
     return value.value if hasattr(value, "value") else str(value)
 
 
-def validate_distribution(cases: list) -> dict[str, dict]:
+def validate_distribution(cases: list[EvaluationCase]) -> dict[str, dict[str, DistributionEntry]]:
     """Compute counts and percentages across key dimensions.
 
     Returns a dict with keys: hazard, language, action, severity, sensitivity.
@@ -77,13 +86,16 @@ def validate_distribution(cases: list) -> dict[str, dict]:
     if n == 0:
         return {}
 
-    def _counts(values_fn) -> dict:
+    def _counts(values_fn: Callable[[EvaluationCase], Sequence[object]]) -> dict[str, DistributionEntry]:
         counts: dict[str, int] = {}
         for case in cases:
             for v in values_fn(case):
                 key = _to_str(v)
                 counts[key] = counts.get(key, 0) + 1
-        return {k: {"count": v, "percentage": round(v / n, 4)} for k, v in sorted(counts.items())}
+        result: dict[str, DistributionEntry] = {}
+        for key, value in sorted(counts.items()):
+            result[key] = {"count": value, "percentage": round(value / n, 4)}
+        return result
 
     return {
         "hazard": _counts(lambda c: c.hazardTags),

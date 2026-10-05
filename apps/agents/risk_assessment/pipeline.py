@@ -19,13 +19,21 @@ from __future__ import annotations
 import inspect
 import logging
 import time
+from collections.abc import Awaitable, Callable
+from typing import Protocol
 
 from common.async_bridge import run_async
 from common.handoffs import AgentHandoffEvent, deliver_handoff_with_retry
 from risk_assessment.agent import RiskAssessmentAgent
 from risk_assessment.audit import AuditWriter
 from risk_assessment.config import RiskAssessmentConfig
-from risk_assessment.correlation import ContradictionDetector, ContradictionResult, CorrelationResult, SignalCorrelator
+from risk_assessment.correlation import (
+    ContradictionDetector,
+    ContradictionResult,
+    CorrelationResult,
+    RiskSignal,
+    SignalCorrelator,
+)
 from risk_assessment.dedup import HandoffDeduplicator
 from risk_assessment.extrapolation import ExtrapolationResult, extrapolate_hazard_trend
 from risk_assessment.models import DecisionType, RiskAssessmentDecisionRecord
@@ -37,6 +45,12 @@ from packages.domain.src.domain.models.hazard_assessment import HazardAssessment
 from packages.domain.src.domain.models.recommendation import Recommendation
 
 logger = logging.getLogger(__name__)
+
+
+class RiskAssessmentContainer(Protocol):
+    def read_item(self, *, item: str, partition_key: str) -> dict[str, object]: ...
+
+    def create_item(self, *, body: dict[str, object]) -> object: ...
 
 
 def _persist_dead_letter_entry(handoff: AgentHandoffEvent) -> str:
@@ -62,6 +76,13 @@ def _build_scope_key(tenant_id: str, incident_id: str) -> str:
     return f"{tenant_id}:{incident_id}"
 
 
+def _signal_float(raw: dict[str, object], field: str, alternate: str, default: float) -> float:
+    value = raw.get(field, raw.get(alternate, default))
+    if isinstance(value, (int, float, str, bytes)):
+        return float(value)
+    raise TypeError(f"Signal field '{field}' must be numeric")
+
+
 class AssessmentProcessingPipeline:
     """Orchestrates the 8-stage assessment processing pipeline."""
 
@@ -75,11 +96,11 @@ class AssessmentProcessingPipeline:
         version_counter: VersionCounter | None = None,
         audit_writer: AuditWriter | None = None,
         agent: RiskAssessmentAgent | None = None,
-        signal_store: object | None = None,
-        assessment_store: object | None = None,
-        recommendation_store: object | None = None,
-        deliver_fn=None,
-        on_dead_letter_fn=None,
+        signal_store: RiskAssessmentContainer | None = None,
+        assessment_store: RiskAssessmentContainer | None = None,
+        recommendation_store: RiskAssessmentContainer | None = None,
+        deliver_fn: Callable[[AgentHandoffEvent], Awaitable[None]] | None = None,
+        on_dead_letter_fn: Callable[[AgentHandoffEvent], str] | None = None,
     ) -> None:
         self._config = config or RiskAssessmentConfig()
         self._deduplicator = deduplicator or HandoffDeduplicator(
@@ -189,7 +210,7 @@ class AssessmentProcessingPipeline:
         self,
         handoff: AgentHandoffEvent,
         tenant_id: str,
-    ) -> list[dict]:
+    ) -> list[RiskSignal]:
         # RAG-OPTOUT [FR-RAG-NS-03]: GA seismic-feed signals are authoritative; doctrine grounding moves to the downstream assessment call. ADR: docs/decisions/036-foundry-rag-grounding/03-rag-optout-ga-live.md  # noqa: E501
         """Stage 2: Retrieve signals from signal store.
 
@@ -215,7 +236,7 @@ class AssessmentProcessingPipeline:
         category = str(payload.get("category", signal_summary.get("category", "fire")))
         source_kind = str(payload.get("sourceKind", signal_summary.get("sourceKind", "authoritative")))
 
-        signals: list[dict] = []
+        signals: list[RiskSignal] = []
         missing_count = 0
 
         if self._signal_store is not None:
@@ -316,19 +337,24 @@ class AssessmentProcessingPipeline:
 
         return signals
 
-    def _normalize_signal(self, raw: dict) -> dict:
+    def _normalize_signal(self, raw: dict[str, object]) -> RiskSignal:
         """Normalize a raw signal document to the expected dict format."""
+        provenance_value = raw.get("provenance", {})
+        if not isinstance(provenance_value, dict):
+            raise TypeError("Signal provenance must be a mapping")
+        disaster_type = raw.get("disaster_type")
         return {
-            "signal_id": raw.get("signal_id", raw.get("id", "unknown")),
-            "confidence_score": float(raw.get("confidence_score", raw.get("confidenceScore", 0.0))),
-            "freshness_score": float(raw.get("freshness_score", raw.get("freshnessScore", 1.0))),
-            "source_kind": raw.get("source_kind", raw.get("sourceKind", "social")),
-            "category": raw.get("category", "fire"),
-            "risk_direction": raw.get("risk_direction", raw.get("riskDirection", "increasing")),
-            "hazard_parameter": raw.get("hazard_parameter", "general"),
+            "signal_id": str(raw.get("signal_id", raw.get("id", "unknown"))),
+            "confidence_score": _signal_float(raw, "confidence_score", "confidenceScore", 0.0),
+            "freshness_score": _signal_float(raw, "freshness_score", "freshnessScore", 1.0),
+            "source_kind": str(raw.get("source_kind", raw.get("sourceKind", "social"))),
+            "category": str(raw.get("category", "fire")),
+            "risk_direction": str(raw.get("risk_direction", raw.get("riskDirection", "increasing"))),
+            "hazard_parameter": str(raw.get("hazard_parameter", "general")),
             "payload": raw.get("payload", {}),
-            "provenance": raw.get("provenance", {}),
-            "disaster_type": raw.get("disaster_type"),
+            "provenance": {str(key): value for key, value in provenance_value.items()},
+            "disaster_type": disaster_type if isinstance(disaster_type, str) else None,
+            "evidence_state": str(raw.get("evidence_state", "retrieved")),
         }
 
     # ------------------------------------------------------------------
@@ -337,8 +363,8 @@ class AssessmentProcessingPipeline:
 
     def _correlate_signals(
         self,
-        signals: list[dict],
-    ):
+        signals: list[RiskSignal],
+    ) -> CorrelationResult:
         """Stage 3: Compute weighted confidence from multi-source signals."""
         return self._correlator.compute_weighted_confidence(signals)
 
@@ -348,11 +374,11 @@ class AssessmentProcessingPipeline:
 
     def _detect_contradictions(
         self,
-        signals: list[dict],
+        signals: list[RiskSignal],
         handoff_id: str,
         tenant_id: str,
         incident_id: str,
-    ):
+    ) -> ContradictionResult:
         """Stage 4: Detect contradictory signals."""
         result = self._contradiction_detector.detect(signals)
 
@@ -387,7 +413,7 @@ class AssessmentProcessingPipeline:
 
     def _extrapolate_trend(
         self,
-        signals: list[dict],
+        signals: list[RiskSignal],
         handoff_id: str,
         tenant_id: str,
         incident_id: str,
@@ -438,7 +464,7 @@ class AssessmentProcessingPipeline:
     def _generate_assessment(
         self,
         handoff: AgentHandoffEvent,
-        signals: list[dict],
+        signals: list[RiskSignal],
         correlation: CorrelationResult,
         contradiction: ContradictionResult,
         tenant_id: str,
@@ -523,7 +549,7 @@ class AssessmentProcessingPipeline:
         self,
         handoff: AgentHandoffEvent,
         assessment: HazardAssessment,
-        signals: list[dict],
+        signals: list[RiskSignal],
         tenant_id: str,
     ) -> list[Recommendation]:
         """Stage 7: Generate recommendations from assessment."""
@@ -718,7 +744,7 @@ class AssessmentProcessingPipeline:
         self,
         handoff: AgentHandoffEvent,
         tenant_id: str | None = None,
-    ) -> dict:
+    ) -> dict[str, object]:
         """Process a handoff through all 9 pipeline stages.
 
         Returns a result dict with assessment, recommendations, and handoffs.
@@ -727,7 +753,7 @@ class AssessmentProcessingPipeline:
         start = time.perf_counter()
         effective_tenant = tenant_id or handoff.tenant_id
 
-        result: dict = {
+        result: dict[str, object] = {
             "handoff_id": handoff.handoff_id,
             "assessment": None,
             "recommendations": [],

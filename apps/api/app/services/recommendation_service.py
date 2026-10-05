@@ -1,3 +1,4 @@
+from typing import Literal
 from uuid import uuid4
 
 from app.core.tenant_context import get_current_tenant
@@ -31,7 +32,7 @@ class RecommendationService:
         self,
         recommendation_id: str,
         approver_persona_id: str,
-        outcome: str,
+        outcome: Literal["approved", "rejected", "escalated", "timed_out"],
         rationale: str,
         conditions: list[str] | None = None,
         approver_roles: list[str] | tuple[str, ...] | None = None,

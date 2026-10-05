@@ -118,8 +118,8 @@ class EvacuationProcessingPipeline:
         cosmos_decisions_container: Any = None,
         cosmos_assessments_container: Any = None,
         cosmos_recommendations_container: Any = None,
-        population_data: list[dict] | None = None,
-        facility_data: list[dict] | None = None,
+        population_data: list[dict[str, object]] | None = None,
+        facility_data: list[dict[str, object]] | None = None,
         reference_data_metadata: dict[str, Any] | None = None,
         llm_generate_fn: Any = None,  # _generate_with_fallback callable
         emergency_notification_publisher: Any = None,
@@ -2229,12 +2229,12 @@ class EvacuationProcessingPipeline:
             hazard_types=sorted({source.hazard_type for source in hazard_sources}),
             severity_level=max(
                 (source.severity_level for source in hazard_sources),
-                key={
+                key=lambda level: {
                     "low": 0,
                     "moderate": 1,
                     "high": 2,
                     "critical": 3,
-                }.get,
+                }.get(level, -1),
                 default=assessment_data.get("severity_level", ""),
             ),
             time_horizon=str(assessment_data.get("time_horizon") or ""),
@@ -2897,7 +2897,7 @@ class EvacuationProcessingPipeline:
     ) -> dict[int, list[str]]:
         """Assign every physical road node to at most one priority zone."""
         network = road_network or self._road_network
-        assignments = {zone.zone_number: [] for zone in zones}
+        assignments: dict[int, list[str]] = {zone.zone_number: [] for zone in zones}
         if not network.is_loaded:
             return assignments
 

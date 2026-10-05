@@ -758,16 +758,14 @@ class RouteComputer:
                 return total_flow
             path_flow = float("inf")
             current = sink
-            while parents[current] is not None:
-                previous = parents[current]
+            while (previous := parents[current]) is not None:
                 path_flow = min(
                     path_flow,
                     residual[(previous, current)],
                 )
                 current = previous
             current = sink
-            while parents[current] is not None:
-                previous = parents[current]
+            while (previous := parents[current]) is not None:
                 residual[(previous, current)] -= path_flow
                 residual[(current, previous)] += path_flow
                 current = previous

@@ -48,6 +48,25 @@ def _get_tenant_id(request: Request) -> str:
     return request.headers.get("X-Tenant-Id", "live")
 
 
+def _organization_jurisdiction_ids(organisation: dict[str, object]) -> list[str]:
+    raw_ids = organisation.get("jurisdiction_ids", [])
+    if not isinstance(raw_ids, list):
+        raise ValueError("Managed organisation jurisdiction_ids must be a list")
+    jurisdiction_ids: list[str] = []
+    for jurisdiction_id in raw_ids:
+        if not isinstance(jurisdiction_id, str):
+            raise ValueError("Managed organisation jurisdiction_ids must contain strings")
+        jurisdiction_ids.append(jurisdiction_id)
+    return jurisdiction_ids
+
+
+def _stored_version(record: dict[str, object]) -> int:
+    version = record.get("version", 1)
+    if not isinstance(version, int):
+        raise HTTPException(status_code=409, detail="Stored record version is invalid")
+    return version
+
+
 @router.get("")
 async def list_organisations(
     request: Request, jurisdictionId: list[str] = Query(default=[])
@@ -62,7 +81,7 @@ async def list_organisations(
     scoped_managed = [
         organisation
         for organisation in _ORG_CATALOGUE.values()
-        if any(jid in jurisdictionId for jid in organisation.get("jurisdiction_ids", []))
+        if any(jid in jurisdictionId for jid in _organization_jurisdiction_ids(organisation))
     ]
     return base + scoped_managed
 
@@ -81,7 +100,7 @@ async def update_organisation(organisation_id: str, payload: ManagedOrganisation
     existing = _ORG_CATALOGUE.get(organisation_id)
     if existing is None:
         raise HTTPException(status_code=404, detail="Organisation not found")
-    if payload.version != int(existing.get("version", 1)):
+    if payload.version != _stored_version(existing):
         raise HTTPException(status_code=409, detail="Version conflict")
     updated = payload.model_dump(mode="json")
     updated["version"] = payload.version + 1
@@ -103,7 +122,7 @@ async def update_persona(persona_id: str, payload: ManagedPersonaInput) -> dict[
     existing = _PERSONA_CATALOGUE.get(persona_id)
     if existing is None:
         raise HTTPException(status_code=404, detail="Persona not found")
-    if payload.version != int(existing.get("version", 1)):
+    if payload.version != _stored_version(existing):
         raise HTTPException(status_code=409, detail="Version conflict")
     updated = payload.model_dump(mode="json")
     updated["version"] = payload.version + 1
@@ -125,7 +144,7 @@ async def update_jurisdiction(jurisdiction_id: str, payload: ManagedJurisdiction
     existing = _JURISDICTION_CATALOGUE.get(jurisdiction_id)
     if existing is None:
         raise HTTPException(status_code=404, detail="Jurisdiction not found")
-    if payload.version != int(existing.get("version", 1)):
+    if payload.version != _stored_version(existing):
         raise HTTPException(status_code=409, detail="Version conflict")
     updated = payload.model_dump(mode="json")
     updated["version"] = payload.version + 1

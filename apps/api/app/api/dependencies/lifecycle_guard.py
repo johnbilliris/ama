@@ -105,7 +105,7 @@ def make_lifecycle_guard(attempted_action: str) -> Any:
     async def _guard(
         request: Request,
         sim_id: str = Path(..., min_length=1, description="Simulation ID"),
-        principal: CoordinatorPrincipal = None,  # type: ignore[assignment]
+        principal: CoordinatorPrincipal = None,
     ) -> CoordinatorPrincipal:
         # The principal is supplied by ``require_simulation_coordinator``
         # via FastAPI's dependency injection (route-level wiring).

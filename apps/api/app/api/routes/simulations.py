@@ -27,7 +27,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from packages.domain.src.domain.models.simulation_run import SimulationRun as ScenarioRunModel
 from packages.domain.src.domain.models.simulation_scenario import EventPhase, SimulationScenario
-from packages.domain.src.domain.models.simulation_tenant import SimulationParticipant
+from packages.domain.src.domain.models.simulation_tenant import (
+    SimulationParticipant,
+    SimulationScenarioType,
+    SimulationTenant,
+)
 from packages.domain.src.domain.models.warp_constants import (
     ALLOWED_WARP_SPEEDS,
     DEFAULT_WARP_SPEED,
@@ -90,7 +94,7 @@ _registered_source_ids = {
 }
 
 
-def _tenant_public_view(tenant) -> dict:
+def _tenant_public_view(tenant: SimulationTenant) -> dict[str, object]:
     data = tenant.model_dump(mode="json")
     current = _clock.get_current_sim_seconds(tenant)
     data["current_sim_seconds"] = current
@@ -104,22 +108,22 @@ def _tenant_public_view(tenant) -> dict:
 
 
 class CreateSimulationRequest(BaseModel):
-    scenario_type: str
+    scenario_type: SimulationScenarioType
     jurisdictions: list[str] = Field(default_factory=list)
     scenario_template_id: str | None = None
     participants: list[str] = Field(default_factory=list)
-    resource_limits: dict | None = None
+    resource_limits: dict[str, int] | None = None
     warp_speed: float = Field(default=DEFAULT_WARP_SPEED)
 
     @classmethod
-    def _validate(cls, v):
+    def _validate(cls, v: float) -> float:
         return validate_warp_speed(v)
 
 
 class SimulationScenarioInputCompat(BaseModel):
     name: str
     scenarioType: str
-    targetRegion: dict
+    targetRegion: dict[str, object]
     targetJurisdictionIds: list[str]
     activatedDataSourceIds: list[str]
     timeCompressionRatio: float = Field(default=1.0, gt=0)
@@ -139,7 +143,7 @@ class AbortRunInputCompat(BaseModel):
 
 
 @router.post("", status_code=201)
-async def create_simulation(body: CreateSimulationRequest, request: Request) -> dict:
+async def create_simulation(body: CreateSimulationRequest, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
 
@@ -183,7 +187,7 @@ async def list_simulations(
     status: str | None = None,
     limit: int = 20,
     offset: int = 0,
-) -> dict:
+) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
 
@@ -218,7 +222,7 @@ async def list_simulations(
 
 
 @router.get("/scenarios")
-async def list_compat_scenarios(request: Request) -> list[dict]:
+async def list_compat_scenarios(request: Request) -> list[dict[str, object]]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     rows = await _repo.list_documents(
@@ -245,7 +249,7 @@ async def list_compat_scenarios(request: Request) -> list[dict]:
 
 
 @router.post("/scenarios", status_code=201)
-async def create_compat_scenario(body: SimulationScenarioInputCompat, request: Request) -> dict:
+async def create_compat_scenario(body: SimulationScenarioInputCompat, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
 
@@ -304,7 +308,7 @@ async def create_compat_scenario(body: SimulationScenarioInputCompat, request: R
 
 
 @router.post("/runs", status_code=202)
-async def start_compat_run(body: StartRunInputCompat, request: Request) -> dict:
+async def start_compat_run(body: StartRunInputCompat, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
 
@@ -349,7 +353,7 @@ async def start_compat_run(body: StartRunInputCompat, request: Request) -> dict:
 
 
 @router.get("/runs/{run_id}")
-async def get_compat_run(run_id: str, request: Request) -> dict:
+async def get_compat_run(run_id: str, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     doc = await _repo.get_document(document_type="spec006_simulation_run", document_id=run_id)
@@ -359,7 +363,7 @@ async def get_compat_run(run_id: str, request: Request) -> dict:
 
 
 @router.post("/runs/{run_id}/abort")
-async def abort_compat_run(run_id: str, body: AbortRunInputCompat, request: Request) -> dict:
+async def abort_compat_run(run_id: str, body: AbortRunInputCompat, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     doc = await _repo.get_document(document_type="spec006_simulation_run", document_id=run_id)
@@ -380,7 +384,7 @@ async def abort_compat_run(run_id: str, body: AbortRunInputCompat, request: Requ
 
 
 @router.get("/{tenant_id}")
-async def get_simulation(tenant_id: str, request: Request) -> dict:
+async def get_simulation(tenant_id: str, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
 
@@ -392,7 +396,7 @@ async def get_simulation(tenant_id: str, request: Request) -> dict:
     return _tenant_public_view(tenant)
 
 
-def _to_compat_run_response(document: dict) -> dict:
+def _to_compat_run_response(document: dict[str, object]) -> dict[str, object]:
     return {
         "runId": document.get("run_id"),
         "scenarioId": document.get("scenario_id"),
@@ -410,7 +414,7 @@ def _to_compat_run_response(document: dict) -> dict:
 
 
 @router.get("/{tenant_id}/clock")
-async def get_simulation_clock(tenant_id: str, request: Request) -> dict:
+async def get_simulation_clock(tenant_id: str, request: Request) -> dict[str, object]:
     """Lightweight polling endpoint for the server-owned clock."""
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
@@ -446,7 +450,7 @@ class SeedReplayRequest(BaseModel):
 
 
 @router.post("/{tenant_id}/seed", status_code=202)
-async def seed_simulation(tenant_id: str, body: SeedTemplateRequest, request: Request) -> dict:
+async def seed_simulation(tenant_id: str, body: SeedTemplateRequest, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -462,7 +466,7 @@ async def seed_simulation(tenant_id: str, body: SeedTemplateRequest, request: Re
 
 
 @router.post("/{tenant_id}/seed/replay", status_code=202)
-async def seed_replay(tenant_id: str, body: SeedReplayRequest, request: Request) -> dict:
+async def seed_replay(tenant_id: str, body: SeedReplayRequest, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -500,7 +504,7 @@ class AddParticipantsRequest(BaseModel):
 
 
 @router.post("/{tenant_id}/participants")
-async def add_participants(tenant_id: str, body: AddParticipantsRequest, request: Request) -> dict:
+async def add_participants(tenant_id: str, body: AddParticipantsRequest, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -576,7 +580,7 @@ async def add_participants(tenant_id: str, body: AddParticipantsRequest, request
 
 
 @router.get("/{tenant_id}/report")
-async def get_report(tenant_id: str, request: Request) -> dict:
+async def get_report(tenant_id: str, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -595,7 +599,7 @@ async def get_report(tenant_id: str, request: Request) -> dict:
 
 
 @router.get("/reports/{report_id}")
-async def get_report_by_id(report_id: str, request: Request) -> dict:
+async def get_report_by_id(report_id: str, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     report = await _report_service.get_report_by_id(report_id)
@@ -612,7 +616,9 @@ class PauseResumeRequest(BaseModel):
 
 
 @router.post("/{tenant_id}/pause")
-async def pause_simulation(tenant_id: str, request: Request, body: PauseResumeRequest | None = None) -> dict:
+async def pause_simulation(
+    tenant_id: str, request: Request, body: PauseResumeRequest | None = None
+) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -635,7 +641,9 @@ async def pause_simulation(tenant_id: str, request: Request, body: PauseResumeRe
 
 
 @router.post("/{tenant_id}/resume")
-async def resume_simulation(tenant_id: str, request: Request, body: PauseResumeRequest | None = None) -> dict:
+async def resume_simulation(
+    tenant_id: str, request: Request, body: PauseResumeRequest | None = None
+) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -668,7 +676,7 @@ async def archive_simulation(
     request: Request,
     background_tasks: BackgroundTasks,
     body: ArchiveRequest | None = None,
-) -> dict:
+) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -695,7 +703,7 @@ class ChangeWarpSpeedRequest(BaseModel):
 
 
 @router.post("/{tenant_id}/warp-speed")
-async def change_warp_speed(tenant_id: str, body: ChangeWarpSpeedRequest, request: Request) -> dict:
+async def change_warp_speed(tenant_id: str, body: ChangeWarpSpeedRequest, request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_role(principal)
     await require_simulation_participant(principal, tenant_id, _repo)
@@ -746,5 +754,5 @@ async def delete_simulation(tenant_id: str, request: Request) -> None:
 
 
 @router.get("/meta/warp-speeds")
-async def get_allowed_warp_speeds() -> dict:
+async def get_allowed_warp_speeds() -> dict[str, object]:
     return {"allowed": list(ALLOWED_WARP_SPEEDS), "default": DEFAULT_WARP_SPEED}

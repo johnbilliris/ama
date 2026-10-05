@@ -4,15 +4,21 @@ from __future__ import annotations
 
 import random
 from datetime import UTC, datetime
+from typing import Literal
 
 from ama_eval_core.models import (
+    ApprovalAction,
     ApprovalEntry,
     ApprovalState,
     EvaluationCase,
+    ExpectedAction,
     ExpectedBehaviour,
+    HazardTag,
     Provenance,
     ProvenanceMeta,
     RetrievedContextEntry,
+    SensitivityLabel,
+    Severity,
     Tone,
 )
 
@@ -66,7 +72,11 @@ def _pick_jurisdiction(rng: random.Random, language: str) -> str:
 
 def _make_retrieval_context(rng: random.Random, hazard: str, case_idx: int) -> list[RetrievedContextEntry]:
     n_docs = rng.randint(1, 3)
-    labels = ["relevant", "partially-relevant", "irrelevant"]
+    labels: list[Literal["relevant", "partially-relevant", "irrelevant"]] = [
+        "relevant",
+        "partially-relevant",
+        "irrelevant",
+    ]
     contents = [
         (
             f"Emergency protocol for {hazard} incidents: Always call 000 first. "
@@ -98,16 +108,16 @@ def _derive_sensitivity_labels(
     hazard: str,
     template: PromptTemplate,
     is_injection: bool,
-) -> list[str]:
-    labels: list[str] = list(template.sensitivity_hints)
+) -> list[SensitivityLabel]:
+    labels = [SensitivityLabel(label) for label in template.sensitivity_hints]
     if hazard in _GRAPHIC_HAZARDS and _GRAPHIC_HAZARD_LABELS[hazard] not in labels:
-        labels.append(_GRAPHIC_HAZARD_LABELS[hazard])
+        labels.append(SensitivityLabel(_GRAPHIC_HAZARD_LABELS[hazard]))
     if hazard == "crisis-distress" and "crisis-distress" not in labels:
-        labels.append("crisis-distress")
+        labels.append(SensitivityLabel("crisis-distress"))
     if hazard == "mass-casualty" and "mass-casualty" not in labels:
-        labels.append("mass-casualty")
+        labels.append(SensitivityLabel("mass-casualty"))
     if is_injection and "prompt-injection" not in labels:
-        labels.append("prompt-injection")
+        labels.append(SensitivityLabel("prompt-injection"))
     return list(dict.fromkeys(labels))
 
 
@@ -149,7 +159,7 @@ def generate_corpus(seed: int, target_size: int = 5000) -> list[EvaluationCase]:
         ApprovalEntry(
             role="eval-author",
             principal="synthetic-generator-v1",
-            action="draft",
+            action=ApprovalAction.draft,
             timestamp=DATASET_VERSION_TS,
         )
     ]
@@ -197,15 +207,15 @@ def generate_corpus(seed: int, target_size: int = 5000) -> list[EvaluationCase]:
             expectedBehaviour=ExpectedBehaviour(
                 mustInclude=list(template.must_include),
                 mustNotInclude=list(template.must_not_include),
-                expectedAction=action,
+                expectedAction=ExpectedAction(action),
                 escalationTriggers=escalation_triggers,
                 referToAuthority=refer_to_authority,
                 tone=tone_val,
             ),
             sensitivityLabels=sensitivity_labels,
-            hazardTags=[hazard],
+            hazardTags=[HazardTag(hazard)],
             jurisdictionTags=[jurisdiction],
-            severity=severity,
+            severity=Severity(severity),
             language=lang,
             provenance=Provenance.synthetic,
             provenanceMeta=provenance_meta,

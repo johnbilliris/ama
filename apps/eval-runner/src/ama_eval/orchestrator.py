@@ -19,7 +19,7 @@ from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Literal
 
 from ama_eval_core.audit import AuditAction
 from ama_eval_core.models import (
@@ -30,7 +30,7 @@ from ama_eval_core.models import (
     Scorecard,
 )
 
-from .evaluators.base import EvalInput, EvalResult, ModelOutput, list_evaluators
+from .evaluators.base import EvalInput, EvalResult, Evaluator, ModelOutput, list_evaluators
 from .scorecard import build_scorecard
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ class OrchestratorContext:
     cases: list[EvaluationCase]
     run: EvaluationRun
     audit_emit: Callable[..., Any]
-    foundry_call: Callable[[str, list[dict], dict], ModelOutput]
+    foundry_call: Callable[[str, list[dict[str, str]], dict[str, Any]], ModelOutput]
     sample_traces: list[SampleTrace] = field(default_factory=list)
     secondary_judge_sample_rate: float = 0.05
 
@@ -60,7 +60,9 @@ def _to_eval_input(case: EvaluationCase) -> EvalInput:
     )
 
 
-def _classify_output(out: ModelOutput, expected_action: str | None) -> str:
+def _classify_output(
+    out: ModelOutput, expected_action: str | None
+) -> Literal["answered", "refused", "failed-to-answer"]:
     text = (out.text or "").strip()
     if not text:
         return "failed-to-answer"
@@ -148,7 +150,7 @@ def _run_single_case(
     ctx: OrchestratorContext,
     model: ModelUnderTest,
     case: EvaluationCase,
-    evaluators,
+    evaluators: list[Evaluator],
 ) -> tuple[list[EvalResult], SampleTrace | None]:
     inp = _to_eval_input(case)
     messages = [

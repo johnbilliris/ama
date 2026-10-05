@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from importlib import import_module
+from typing import TYPE_CHECKING
 
 from common.foundry_query_embedder import build_query_embedder
 from communication.agent import create_app
@@ -12,8 +13,9 @@ from communication.approval import ApprovalWorkflow, ServiceBusApprovalPublisher
 from communication.audit import AuditWriter
 from communication.config import CommunicationConfig
 from communication.dedup import HandoffDeduplicator
-from communication.delivery import MultiChannelDeliveryService, NotificationHubRestClient
+from communication.delivery import MultiChannelDeliveryService, NotificationHubRestClient, SmsDeliveryClient
 from communication.health import DependencyHealthReporter
+from communication.models import PublicAlert
 from communication.pipeline import CommunicationProcessingPipeline
 from communication.repository import CommunicationAlertRepository
 from communication.segmentation import AudienceSegmenter
@@ -24,6 +26,9 @@ from communication.versioning import VersionCounter
 from fastapi import FastAPI
 
 from apps.console_logging import configure_console_logging, uvicorn_log_config
+
+if TYPE_CHECKING:
+    from azure.cosmos import ContainerProxy
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +118,7 @@ def build_application(config: CommunicationConfig | None = None) -> FastAPI:
     )
 
 
-def _resolve_containers(config: CommunicationConfig) -> dict[str, object]:
+def _resolve_containers(config: CommunicationConfig) -> dict[str, ContainerProxy]:
     if not config.cosmos_endpoint:
         if config.environment in {"staging", "production"}:
             raise RuntimeError("COSMOS_ENDPOINT is required outside development and test")
@@ -135,7 +140,7 @@ def _resolve_containers(config: CommunicationConfig) -> dict[str, object]:
     }
 
 
-def _build_sms_client(config: CommunicationConfig):
+def _build_sms_client(config: CommunicationConfig) -> SmsDeliveryClient | None:
     if not config.sms_endpoint:
         return None
     from azure.identity import DefaultAzureCredential
@@ -151,7 +156,7 @@ def _resolve_approved_alert(
     tenant_id: str,
     alert_id: str,
     version: int,
-):
+) -> PublicAlert | None:
     alert = repository.get(tenant_id, alert_id)
     if alert is None or alert.tenant_id != tenant_id or alert.version != version:
         return None

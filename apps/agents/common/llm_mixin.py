@@ -3,16 +3,46 @@ import json as _json
 import logging
 import time
 from typing import Any as _Any
-from typing import Protocol
+from typing import Protocol, TypedDict
 
 from common.circuit_breaker import CircuitBreaker
 from common.content_safety import ContentSafetyValidator
 from common.llm_client import LLMClient
 from common.llm_config import LLMClientConfig
 from common.token_budget import Tokenizer, create_tokenizer
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 logger = logging.getLogger(__name__)
+
+
+class LLMGenerationResponse(TypedDict, total=False):
+    text: str
+    generation_method: str
+    model_deployment_id: str | None
+    token_usage: dict[str, int] | None
+    actual_token_usage: dict[str, int] | None
+    content_safety_result: str
+    content_safety_validation_method: str
+    content_safety_reason: str
+    content_safety_reference: str
+    circuit_breaker_state: str
+    confidence_adjustment: float | None
+    correlation_id: str | None
+    requires_human_review: bool
+    output_truncated: bool
+    error_reason: str
+
+
+class ConfidenceGatingResult(TypedDict):
+    confidence: float
+    requires_human_review: bool
+
+
+class OutputBudgetResult(TypedDict):
+    text: str
+    retained_token_usage: dict[str, int]
+    actual_token_usage: dict[str, int]
+    output_truncated: bool
 
 
 class RestrictedSafetySink(Protocol):
@@ -90,7 +120,7 @@ class LLMCallMixin:
         max_output_tokens: int,
         correlation_id: str | None,
         provider_token_usage: dict[str, int] | None = None,
-    ) -> dict[str, object]:
+    ) -> OutputBudgetResult:
         measured_output_tokens = self._tokenizer.count_tokens(text)
         provider_usage = provider_token_usage or {"input_tokens": 0, "output_tokens": measured_output_tokens}
         provider_output_tokens = int(provider_usage.get("output_tokens", measured_output_tokens))
@@ -131,7 +161,7 @@ class LLMCallMixin:
         max_output_tokens: int,
         correlation_id: str | None,
         provider_token_usage: dict[str, int] | None = None,
-    ) -> dict[str, object]:
+    ) -> OutputBudgetResult:
         """Re-apply output budget after post-generation text mutations."""
         return self._apply_output_budget(
             text=text,
@@ -152,8 +182,8 @@ class LLMCallMixin:
         timeout_seconds: float = 30.0,
         deadline_monotonic: float | None = None,
         temperature: float = 0.0,
-        response_model: type | None = None,
-    ) -> dict[str, object]:
+        response_model: type[BaseModel] | None = None,
+    ) -> LLMGenerationResponse:
         """Generate LLM response with circuit breaker, content safety, and fallback chain.
 
         Args:
@@ -231,6 +261,8 @@ class LLMCallMixin:
 
             token_usage = response.get("token_usage", {"input_tokens": 0, "output_tokens": 0})
             deployment_id = str(response.get("deployment_id", ""))
+            raw_model_deployment_id = response.get("deployment_id")
+            model_deployment_id = raw_model_deployment_id if isinstance(raw_model_deployment_id, str) else None
             input_tokens = int(token_usage.get("input_tokens", 0))
             output_tokens = int(token_usage.get("output_tokens", 0))
 
@@ -308,7 +340,7 @@ class LLMCallMixin:
                 return {
                     "text": template_text,
                     "generation_method": "safety_fallback",
-                    "model_deployment_id": response.get("deployment_id"),
+                    "model_deployment_id": model_deployment_id,
                     "token_usage": retained_usage,
                     "actual_token_usage": actual_usage,
                     "content_safety_result": safety.result,
@@ -328,16 +360,16 @@ class LLMCallMixin:
             return {
                 "text": text,
                 "generation_method": "llm",
-                "model_deployment_id": response.get("deployment_id"),
+                "model_deployment_id": model_deployment_id,
                 "token_usage": retained_usage,
                 "actual_token_usage": actual_usage,
                 "content_safety_result": "passed",
                 "content_safety_validation_method": safety.validation_method,
                 "content_safety_reason": safety.reason or "",
                 "circuit_breaker_state": self._circuit_breaker.state.value,
-                "confidence_adjustment": gating.get("confidence_adjustment"),
+                "confidence_adjustment": None,
                 "correlation_id": correlation_id,
-                "requires_human_review": bool(safety.review_flag or gating.get("requires_human_review", False)),
+                "requires_human_review": safety.review_flag or gating["requires_human_review"],
                 "output_truncated": bool(budgeted["output_truncated"]),
             }
 
@@ -363,10 +395,10 @@ class LLMCallMixin:
         circuit_breaker_state: str,
         correlation_id: str | None = None,
         error_reason: str = "",
-        token_usage: dict | None = None,
-        actual_token_usage: dict | None = None,
+        token_usage: dict[str, int] | None = None,
+        actual_token_usage: dict[str, int] | None = None,
         deployment_id: str | None = None,
-    ) -> dict[str, object]:
+    ) -> LLMGenerationResponse:
         """Build a template fallback response with confidence reduction."""
         return {
             "text": template_text,
@@ -383,7 +415,7 @@ class LLMCallMixin:
             "correlation_id": correlation_id,
         }
 
-    def _apply_confidence_gating(self, confidence: float, generation_method: str) -> dict[str, object]:
+    def _apply_confidence_gating(self, confidence: float, generation_method: str) -> ConfidenceGatingResult:
         """Apply confidence threshold gating.
 
         Returns dict with adjusted confidence and human_review flag.

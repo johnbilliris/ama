@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone, tzinfo
 from email.utils import parsedate_to_datetime
 from zoneinfo import ZoneInfo
 
@@ -91,6 +91,7 @@ def parse_local_timestamp(
             reason=f"expected one of: {', '.join(formats)}",
         )
 
+    timezone_info: tzinfo | None = None
     try:
         timezone_info = ZoneInfo(source_timezone)
     except Exception:
@@ -128,6 +129,7 @@ def parse_bom_local_timestamp(
             provider=provider, field=field, value=value, reason="invalid calendar timestamp"
         ) from exc
 
+    tz: tzinfo | None = None
     try:
         tz = ZoneInfo(source_timezone)
     except Exception:

@@ -11,10 +11,27 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
+from collections.abc import Iterable
 from datetime import UTC, datetime
+from typing import Protocol
 
 from common.async_bridge import run_async
 from communication.config import CommunicationConfig
+
+
+class VersioningContainer(Protocol):
+    def read_item(self, *, item: str, partition_key: str) -> dict[str, object]: ...
+
+    def replace_item(self, *, item: str, body: dict[str, object], if_match: str) -> object: ...
+
+    def create_item(self, *, body: dict[str, object]) -> object: ...
+
+    def upsert_item(self, *, body: dict[str, object]) -> object: ...
+
+    def query_items(
+        self, *, query: str, parameters: list[dict[str, object]], partition_key: str
+    ) -> Iterable[dict[str, object]]: ...
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +50,7 @@ class VersionCounter:
     def __init__(
         self,
         config: CommunicationConfig | None = None,
-        cosmos_container: object | None = None,
+        cosmos_container: VersioningContainer | None = None,
     ) -> None:
         self._config = config or CommunicationConfig()
         self._container = cosmos_container
@@ -105,18 +122,38 @@ class VersionCounter:
         """Format alert_id as ``ca-{incident_id}-v{N}``."""
         return f"ca-{incident_id}-v{version}"
 
+    def _require_container(self) -> VersioningContainer:
+        container = self._container
+        if container is None:
+            raise RuntimeError("Cosmos container is not configured")
+        return container
+
     def _try_increment(self, counter_id: str, partition_key: str, reservation_key: str | None) -> int:
         """Attempt to read-increment-replace the counter document."""
+        container = self._require_container()
         try:
-            doc = self._container.read_item(
+            doc = container.read_item(
                 item=counter_id,
                 partition_key=partition_key,
             )
-            current_version = doc.get("current_version", 0)
-            reservations = dict(doc.get("reservations", {}))
+            current_version_value = doc.get("current_version", 0)
+            if not isinstance(current_version_value, int):
+                raise TypeError("Alert counter current_version must be an integer")
+            reservations_value = doc.get("reservations", {})
+            if not isinstance(reservations_value, dict):
+                raise TypeError("Alert counter reservations must be a mapping")
+            reservations: dict[str, int] = {}
+            for key, value in reservations_value.items():
+                if not isinstance(key, str) or not isinstance(value, int):
+                    raise TypeError("Alert counter reservation keys and versions must be strings and integers")
+                reservations[key] = value
             if reservation_key is not None and reservation_key in reservations:
-                return int(reservations[reservation_key])
-            etag = doc.get("_etag", "")
+                return reservations[reservation_key]
+            etag_value = doc.get("_etag", "")
+            if not isinstance(etag_value, str):
+                raise TypeError("Alert counter etag must be a string")
+            etag = etag_value
+            current_version = current_version_value
 
             new_version = current_version + 1
             doc["current_version"] = new_version
@@ -124,7 +161,7 @@ class VersionCounter:
                 reservations[reservation_key] = new_version
                 doc["reservations"] = reservations
 
-            self._container.replace_item(
+            container.replace_item(
                 item=counter_id,
                 body=doc,
                 if_match=etag,
@@ -141,6 +178,7 @@ class VersionCounter:
 
     def _create_counter(self, counter_id: str, partition_key: str, reservation_key: str | None) -> int:
         """Create a new counter document starting at version 1."""
+        container = self._require_container()
         doc = {
             "id": counter_id,
             "current_version": 1,
@@ -148,7 +186,7 @@ class VersionCounter:
             "reservations": {reservation_key: 1} if reservation_key is not None else {},
         }
         try:
-            self._container.create_item(body=doc)
+            container.create_item(body=doc)
             return 1
         except Exception as exc:
             if "409" in str(exc) or "Conflict" in str(exc):
@@ -258,7 +296,7 @@ class VersionCounter:
         self,
         incident_id: str,
         tenant_id: str,
-    ) -> list[dict]:
+    ) -> list[dict[str, object]]:
         """Retrieve all versions for an incident ordered by version number."""
         if self._container is None:
             return []

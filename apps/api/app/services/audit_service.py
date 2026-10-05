@@ -1,3 +1,4 @@
+from typing import Literal
 from uuid import uuid4
 
 from app.repositories.audit_repository import AuditRepository
@@ -5,12 +6,31 @@ from app.services.state_store import TIMELINE_EVENTS
 
 from packages.domain.src.domain.models.timeline_event import TimelineEvent
 
+TimelineEventType = Literal[
+    "signal",
+    "recommendation",
+    "approval",
+    "alert",
+    "ingestion",
+    "publication",
+    "supersession",
+    "delivery",
+    "task_status",
+    "task",
+    "system",
+    "handoff",
+    "dead_letter",
+    "llm_call",
+]
+
 
 class AuditService:
     def __init__(self, repository: AuditRepository | None = None) -> None:
         self._repository = repository or AuditRepository()
 
-    def build_event(self, *, incident_id: str, event_type: str, summary: str, actor: str) -> TimelineEvent:
+    def build_event(
+        self, *, incident_id: str, event_type: TimelineEventType, summary: str, actor: str
+    ) -> TimelineEvent:
         return TimelineEvent(
             event_id=f"evt-{uuid4().hex}",
             incident_id=incident_id,
@@ -23,7 +43,7 @@ class AuditService:
         self,
         *,
         incident_id: str,
-        event_type: str,
+        event_type: TimelineEventType,
         summary: str,
         actor: str,
         tenant_id: str,
@@ -102,7 +122,7 @@ class AuditService:
         return event
 
 
-def _simulation_audit_action(event_type: str, outcome: str) -> str:
+def _simulation_audit_action(event_type: TimelineEventType, outcome: str) -> str:
     if outcome in {"rejected", "rejection"}:
         return "rejection"
     if outcome in {"escalated", "escalation"}:

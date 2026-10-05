@@ -10,10 +10,35 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+from collections.abc import Awaitable, Iterable
 from datetime import UTC, datetime
+from typing import Protocol
 
 import httpx
 from pydantic import BaseModel, Field
+
+
+class DeadLetterCosmosContainer(Protocol):
+    def upsert_item(self, *, body: dict[str, object]) -> object: ...
+
+    def read_item(self, *, item: str, partition_key: str) -> object: ...
+
+    def query_items(
+        self,
+        *,
+        query: str,
+        parameters: list[dict[str, object]],
+        enable_cross_partition_query: bool,
+    ) -> Iterable[object]: ...
+
+
+class RedeliveryCallback(Protocol):
+    def __call__(self, entry: DeadLetterEntry) -> Awaitable[object]: ...
+
+
+class HealthCheckCallback(Protocol):
+    def __call__(self, agent_name: str) -> Awaitable[bool]: ...
+
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +55,7 @@ class DeadLetterEntry(BaseModel):
     target_agent: str
     scope_key: str
     confidence: float
-    payload: dict
+    payload: dict[str, object]
     tenant_id: str = "live"
     status: str = "dead_lettered"
     failure_reason: str | None = None
@@ -48,7 +73,7 @@ class DeadLetterEntry(BaseModel):
 class DeadLetterStore:
     """Cosmos DB-backed dead-letter store."""
 
-    def __init__(self, cosmos_container: object | None = None) -> None:
+    def __init__(self, cosmos_container: DeadLetterCosmosContainer | None = None) -> None:
         self._container = cosmos_container
         self._in_memory: dict[str, DeadLetterEntry] = {}
 
@@ -70,6 +95,8 @@ class DeadLetterStore:
                     item=handoff_id,
                     partition_key=handoff_id,
                 )
+                if not isinstance(doc, dict):
+                    raise TypeError("Dead-letter read returned a non-document value")
                 return DeadLetterEntry(**doc)
             except Exception:
                 return None
@@ -87,7 +114,7 @@ class DeadLetterStore:
         """Query dead-letter entries with optional filters."""
         if self._container is not None:
             conditions = ["1=1"]
-            params = []
+            params: list[dict[str, object]] = []
             if incident_id:
                 conditions.append("c.incident_id = @incident_id")
                 params.append({"name": "@incident_id", "value": incident_id})
@@ -100,23 +127,28 @@ class DeadLetterStore:
 
             where_clause = " AND ".join(conditions)
             count_query = f"SELECT VALUE COUNT(1) FROM c WHERE {where_clause}"
-            total = list(
+            count_rows = list(
                 self._container.query_items(
                     query=count_query,
                     parameters=params,
                     enable_cross_partition_query=True,
                 )
-            )[0]
+            )
+            total_value = count_rows[0]
+            if not isinstance(total_value, int):
+                raise TypeError("Dead-letter count query must return an integer")
+            total = total_value
 
             query_str = f"SELECT * FROM c WHERE {where_clause} ORDER BY c.failed_at DESC OFFSET {offset} LIMIT {limit}"
-            items = [
-                DeadLetterEntry(**doc)
-                for doc in self._container.query_items(
-                    query=query_str,
-                    parameters=params,
-                    enable_cross_partition_query=True,
-                )
-            ]
+            items = []
+            for doc in self._container.query_items(
+                query=query_str,
+                parameters=params,
+                enable_cross_partition_query=True,
+            ):
+                if not isinstance(doc, dict):
+                    raise TypeError("Dead-letter query returned a non-document row")
+                items.append(DeadLetterEntry(**doc))
             return items, total
 
         # In-memory fallback
@@ -148,8 +180,8 @@ class DeadLetterRedeliveryPoller:
     def __init__(
         self,
         store: DeadLetterStore,
-        deliver_fn=None,
-        health_check_fn=None,
+        deliver_fn: RedeliveryCallback | None = None,
+        health_check_fn: HealthCheckCallback | None = None,
         poll_interval: int = _POLL_INTERVAL,
     ) -> None:
         self._store = store
@@ -157,7 +189,7 @@ class DeadLetterRedeliveryPoller:
         self._health_check_fn = health_check_fn or self._default_health_check
         self._poll_interval = poll_interval
         self._running = False
-        self._task: asyncio.Task | None = None
+        self._task: asyncio.Task[None] | None = None
         self._known_agents: set[str] = {
             "monitoring",
             "risk_assessment",

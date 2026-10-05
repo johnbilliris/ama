@@ -15,13 +15,27 @@ import json
 import logging
 import threading
 from collections import deque
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Protocol
 
 from communication.config import CommunicationConfig
 from communication.models import AuditBufferEntry, CommunicationDecisionRecord, CommunicationDecisionType
 
 logger = logging.getLogger(__name__)
+
+
+class CommunicationAuditContainer(Protocol):
+    def create_item(self, *, body: dict[str, object]) -> object: ...
+
+    def query_items(
+        self,
+        *,
+        query: str,
+        parameters: list[dict[str, str]],
+        partition_key: str,
+    ) -> Iterable[dict[str, object]]: ...
 
 
 class AuditWriter:
@@ -30,7 +44,7 @@ class AuditWriter:
     def __init__(
         self,
         config: CommunicationConfig | None = None,
-        cosmos_client: object | None = None,
+        cosmos_client: CommunicationAuditContainer | None = None,
     ) -> None:
         self._config = config or CommunicationConfig()
         self._cosmos_client = cosmos_client

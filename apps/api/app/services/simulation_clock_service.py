@@ -9,6 +9,7 @@ clock fields. Persistence is handled by the simulation service layer.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import UTC, datetime
 
 from packages.domain.src.domain.models.simulation_tenant import SimulationTenant
@@ -22,7 +23,7 @@ from packages.domain.src.domain.models.warp_speed_change import WarpSpeedChange
 class SimulationClockService:
     """Pure functions that mutate a tenant's clock state."""
 
-    def __init__(self, now_provider=None) -> None:
+    def __init__(self, now_provider: Callable[[], datetime] | None = None) -> None:
         self._now = now_provider or (lambda: datetime.now(UTC))
 
     # ------------------------------------------------------------------

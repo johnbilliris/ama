@@ -2,6 +2,7 @@ import asyncio
 import ftplib
 import io
 import logging
+from typing import Any
 
 from apps.ingestion.normalisers.cap_normaliser import extract_cap_identity, normalise_cap_xml
 from apps.ingestion.pipelines.bom_warnings import BomWarningsPipeline
@@ -12,24 +13,24 @@ logger = logging.getLogger(__name__)
 class GaTsunamiPipeline(BomWarningsPipeline):
     """Polls BoM FTP for tsunami warning CAP/XML at 30-second intervals (FR-005 Tsunami)."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.pipeline_id = "ga-tsunami"
         self.data_source_ids = ["ga-tsunami-warnings"]
         self.poll_interval_seconds = 30
         self._ftp_path = "/anon/gen/fwo/"
 
-    def compute_canonical_key(self, raw_payload):
+    def compute_canonical_key(self, raw_payload: dict[str, Any]) -> str:
         cap_identity = extract_cap_identity(raw_payload)
         provider_version = str(raw_payload.get("provider_version", "")).strip()
         if provider_version:
             return f"ga-tsunami:{cap_identity['identifier']}:{cap_identity['sent']}:{provider_version}"
         return f"ga-tsunami:{cap_identity['identifier']}:{cap_identity['sent']}"
 
-    def normalise(self, raw_payload):
+    def normalise(self, raw_payload: dict[str, Any]) -> dict[str, Any]:
         return normalise_cap_xml(raw_payload)
 
-    async def poll_source(self):
+    async def poll_source(self) -> list[dict[str, Any]]:
         """Override parent to use retrbinary (avoids 8192-byte retrlines buffer overflow)."""
 
         def _fetch() -> list[dict[str, str]]:

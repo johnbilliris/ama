@@ -261,7 +261,7 @@ class ResourceMatcher:
         self,
         demands: list[ResourceDemand],
         eligible_resources: list[ResourceInventoryItem],
-    ) -> list[dict]:
+    ) -> list[dict[str, object]]:
         """Identify resources demanded by multiple incidents.
 
         Returns list of contention records: {resource_id, competing_incidents, resource_type}.

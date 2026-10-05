@@ -14,6 +14,8 @@ from app.repositories.simulation_repository import SimulationRepository
 from app.services.audit_service import AuditService
 from app.services.simulation_audit_writer import get_simulation_audit_writer
 
+from packages.domain.src.domain.models.simulation_tenant import SimulationTenant, ThrottleMode
+
 logger = logging.getLogger(__name__)
 
 USAGE_OK = "ok"
@@ -424,7 +426,7 @@ class ResourceGovernor:
         remaining = max(0, self._shared_capacity - live)
         return int(remaining * max(0, min(100, quota_pct)) / 100)
 
-    def _bucket_settings(self, tenant) -> tuple[float, int]:
+    def _bucket_settings(self, tenant: SimulationTenant) -> tuple[float, int]:
         quota_pct = max(1, min(100, int(tenant.throttle_quota_pct)))
         capacity = min(1000, max(1, int(tenant.resource_limits.max_signals * quota_pct / 100)))
         if tenant.throttle_mode == "throttled":
@@ -485,7 +487,7 @@ class ResourceGovernor:
         active, _ = await self.incident_mode_status()
         return active
 
-    async def initial_tenant_mode(self) -> tuple[str, int, str | None]:
+    async def initial_tenant_mode(self) -> tuple[ThrottleMode, int, str | None]:
         active, available = await self.incident_mode_status()
         quota = self._settings.incident_throttle_quota_pct
         if not available:

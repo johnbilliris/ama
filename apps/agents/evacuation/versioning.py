@@ -7,10 +7,26 @@ import logging
 import random
 import threading
 from collections.abc import Awaitable, Callable
+from typing import Protocol
 
 from azure.core import MatchConditions
 
 logger = logging.getLogger(__name__)
+
+
+class VersioningContainer(Protocol):
+    def read_item(self, *, item: str, partition_key: str) -> dict[str, object]: ...
+
+    def replace_item(
+        self,
+        *,
+        item: str,
+        body: dict[str, object],
+        etag: str,
+        match_condition: MatchConditions,
+    ) -> object: ...
+
+    def create_item(self, *, body: dict[str, object]) -> object: ...
 
 
 class VersionConflictError(RuntimeError):
@@ -26,7 +42,7 @@ class VersionCounter:
 
     def __init__(
         self,
-        cosmos_container: object | None = None,
+        cosmos_container: VersioningContainer | None = None,
         *,
         max_retries: int = 5,
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
@@ -68,9 +84,16 @@ class VersionCounter:
     def format_plan_id(self, incident_id: str, version: int) -> str:
         return f"ep-{incident_id}-v{version}"
 
+    def _require_container(self) -> VersioningContainer:
+        container = self._container
+        if container is None:
+            raise RuntimeError("Cosmos container is not configured")
+        return container
+
     def _try_increment(self, counter_id: str, partition_key: str) -> int:
+        container = self._require_container()
         try:
-            document = self._container.read_item(
+            document = container.read_item(
                 item=counter_id,
                 partition_key=partition_key,
             )
@@ -82,8 +105,11 @@ class VersionCounter:
         etag = str(document.get("_etag") or "")
         if not etag:
             raise VersionReservationError(f"Version counter {counter_id} has no concurrency token")
+        raw_current_version = document.get("current_version", 0)
+        if not isinstance(raw_current_version, (int, float, str)):
+            raise VersionReservationError(f"Version counter {counter_id} is malformed")
         try:
-            current_version = int(document.get("current_version", 0))
+            current_version = int(raw_current_version)
         except (TypeError, ValueError) as exc:
             raise VersionReservationError(f"Version counter {counter_id} is malformed") from exc
         if current_version < 0:
@@ -97,7 +123,7 @@ class VersionCounter:
         body.setdefault("uncertain_versions", [])
         body["incident_scope_key"] = partition_key
         try:
-            self._container.replace_item(
+            container.replace_item(
                 item=counter_id,
                 body=body,
                 etag=etag,
@@ -110,6 +136,7 @@ class VersionCounter:
         return version
 
     def _create_counter(self, counter_id: str, partition_key: str) -> int:
+        container = self._require_container()
         document = {
             "id": counter_id,
             "current_version": 1,
@@ -119,7 +146,7 @@ class VersionCounter:
             "incident_scope_key": partition_key,
         }
         try:
-            self._container.create_item(body=document)
+            container.create_item(body=document)
         except Exception as exc:
             if _status_code(exc) == 409:
                 raise VersionConflictError(f"Concurrent counter creation for {counter_id}") from exc
@@ -138,11 +165,12 @@ class VersionCounter:
         """Record a reserved version that did not reach confirmed readability."""
         if self._container is None:
             return
+        container = self._require_container()
         counter_id = f"{incident_id}_plan_counter"
         field = "uncertain_versions" if uncertain else "orphaned_versions"
         for _ in range(self._max_retries):
             try:
-                document = self._container.read_item(
+                document = container.read_item(
                     item=counter_id,
                     partition_key=incident_scope_key,
                 )
@@ -151,12 +179,23 @@ class VersionCounter:
             etag = str(document.get("_etag") or "")
             if not etag:
                 raise VersionReservationError(f"Version counter {counter_id} has no concurrency token")
-            entries = [entry for entry in document.get(field, []) if int(entry.get("version", -1)) != version]
+            raw_entries = document.get(field, [])
+            if not isinstance(raw_entries, list):
+                raise VersionReservationError(f"Version counter {counter_id} has malformed gap entries")
+            entries: list[dict[str, object]] = []
+            for entry in raw_entries:
+                if not isinstance(entry, dict):
+                    raise VersionReservationError(f"Version counter {counter_id} has malformed gap entry")
+                raw_version = entry.get("version", -1)
+                if not isinstance(raw_version, (int, float, str)):
+                    raise VersionReservationError(f"Version counter {counter_id} has malformed gap version")
+                if int(raw_version) != version:
+                    entries.append(entry)
             entries.append({"version": version, "reason": reason})
             body = {key: value for key, value in document.items() if not key.startswith("_")}
             body[field] = entries[-100:]
             try:
-                self._container.replace_item(
+                container.replace_item(
                     item=counter_id,
                     body=body,
                     etag=etag,

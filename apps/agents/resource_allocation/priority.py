@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import bisect
 import logging
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from functools import total_ordering
 
@@ -58,7 +59,7 @@ def normalise_urgency(raw_priority: str, source_agent: str) -> UrgencyLevel:
     return _RISK_ASSESSMENT_MAPPING.get(raw_lower, UrgencyLevel.moderate)
 
 
-def classify_priority_tier(demand_context: dict) -> PriorityTier:
+def classify_priority_tier(demand_context: Mapping[str, str]) -> PriorityTier:
     """Assign priority tier based on demand type context.
 
     Tier 1: evacuation, medical, rescue (life safety)
@@ -131,7 +132,7 @@ class _PrioritisedDemand:
     demand: ResourceDemand
     proximity_km: float = 0.0  # lower = closer = higher priority
 
-    def _sort_key(self) -> tuple:
+    def _sort_key(self) -> tuple[int, int, float, float]:
         tier_val = _TIER_ORDER.get(self.demand.priority_tier, 9)
         urgency_val = _URGENCY_ORDER.get(self.demand.urgency, 9)
         ts = self.demand.created_at.timestamp() if self.demand.created_at else 0.0
@@ -163,7 +164,7 @@ class DemandQueue:
         wrapped = _PrioritisedDemand(demand=demand, proximity_km=proximity_km)
         bisect.insort(self._items, wrapped)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[ResourceDemand]:
         """Iterate demands in priority order (highest first)."""
         return iter(d.demand for d in self._items)
 
@@ -209,7 +210,7 @@ def distribute_proportionally(
         return result
 
     # Proportional allocation
-    result: dict[str, int] = {}
+    result = {}
     allocated = 0
     for inc in incidents:
         ratio = per_incident[inc] / total_demand

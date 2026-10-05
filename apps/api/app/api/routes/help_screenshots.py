@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 from uuid import uuid4
 
 from app.api.routes.help_deps import CallerDep
@@ -24,7 +24,7 @@ class StalenessFlagWriteRequest(BaseModel):
 async def list_staleness(
     caller: CallerDep,
     repos: Annotated[HelpRepositories, Depends(get_help_repositories)],
-):
+) -> list[dict[str, Any]]:
     return repos.list_staleness_flags(caller.tenant_id)
 
 
@@ -33,7 +33,7 @@ async def write_staleness(
     body: StalenessFlagWriteRequest,
     caller: CallerDep,
     repos: Annotated[HelpRepositories, Depends(get_help_repositories)],
-):
+) -> dict[str, str]:
     row = {
         "id": str(uuid4()),
         "tenant_id": caller.tenant_id,
@@ -52,7 +52,7 @@ async def clear_staleness(
     flag_id: str,
     caller: CallerDep,
     repos: Annotated[HelpRepositories, Depends(get_help_repositories)],
-):
+) -> dict[str, str]:
     for f in repos.list_staleness_flags(caller.tenant_id):
         if f["id"] == flag_id:
             f["status"] = "cleared"
@@ -66,7 +66,7 @@ async def signed_url(
     screen_id: str,
     caller: CallerDep,
     theme: Literal["light", "dark"] = Query(...),
-):
+) -> dict[str, str]:
     expires = datetime.now(UTC) + timedelta(minutes=5)
     return {
         "url": f"https://helpscreenshots.blob.core.windows.net/{screen_id}_{theme}.png?sig=placeholder&se={expires.isoformat()}",

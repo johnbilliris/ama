@@ -8,6 +8,7 @@ authority-referral detection.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from .base import EvalInput, EvalResult, ModelOutput, register
@@ -38,8 +39,22 @@ _TONE_TOKEN_MAP = {
 }
 
 
+def _expected_strings(inp: EvalInput, field: str) -> list[str]:
+    raw_values = inp.expected_behaviour.get(field)
+    if raw_values is None:
+        return []
+    if not isinstance(raw_values, list):
+        raise TypeError(f"Expected evaluation field {field!r} to be a list of strings")
+    values: list[str] = []
+    for value in raw_values:
+        if not isinstance(value, str):
+            raise TypeError(f"Expected evaluation field {field!r} to contain only strings")
+        values.append(value)
+    return values
+
+
 def _must_include(inp: EvalInput, out: ModelOutput) -> EvalResult:
-    must = inp.expected_behaviour.get("mustInclude") or []
+    must = _expected_strings(inp, "mustInclude")
     if not must:
         return EvalResult(metric_id="must-include", score=1.0, pass_=True, rationale="no requirements")
     text = (out.text or "").lower()
@@ -55,7 +70,7 @@ def _must_include(inp: EvalInput, out: ModelOutput) -> EvalResult:
 
 
 def _must_not_include(inp: EvalInput, out: ModelOutput) -> EvalResult:
-    must_not = inp.expected_behaviour.get("mustNotInclude") or []
+    must_not = _expected_strings(inp, "mustNotInclude")
     if not must_not:
         return EvalResult(metric_id="must-not-include", score=1.0, pass_=True, rationale="no forbidden")
     text = (out.text or "").lower()
@@ -124,6 +139,8 @@ def _tone_appropriate_rule(inp: EvalInput, out: ModelOutput) -> EvalResult:
     expected_tone = inp.expected_behaviour.get("tone")
     if not expected_tone:
         return EvalResult(metric_id="tone-rule", score=1.0, pass_=True, rationale="no tone expectation")
+    if not isinstance(expected_tone, str):
+        raise TypeError("Expected evaluation tone to be a string")
     tokens = _TONE_TOKEN_MAP.get(expected_tone, [])
     text = (out.text or "").lower()
     hits = sum(1 for tok in tokens if tok in text)
@@ -154,7 +171,7 @@ class _Eval:
     metric_id: str
     family: str
     tier: str
-    fn: callable
+    fn: Callable[[EvalInput, ModelOutput], EvalResult]
 
     def evaluate(self, inp: EvalInput, out: ModelOutput) -> EvalResult:
         return self.fn(inp, out)

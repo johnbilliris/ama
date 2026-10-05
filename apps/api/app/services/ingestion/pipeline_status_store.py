@@ -138,10 +138,12 @@ class PipelineStatusStore:
             fresh_rows.append(row)
 
         active_rows = fresh_rows if fresh_rows else [freshest]
-        last_success = max(
-            (_parse_timestamp(row.get("lastSuccessfulPoll")) for row in active_rows),
-            default=None,
-        )
+        successful_timestamps = [
+            timestamp
+            for row in active_rows
+            if (timestamp := _parse_timestamp(row.get("lastSuccessfulPoll"))) is not None
+        ]
+        last_success = max(successful_timestamps, default=None)
         data_source_ids: set[str] = set()
         for row in active_rows:
             for source_id in row.get("dataSourceIds", []):

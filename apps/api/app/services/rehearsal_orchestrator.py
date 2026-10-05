@@ -6,9 +6,15 @@ from app.services.preparedness_analysis_service import PreparednessAnalysisServi
 from app.services.seed_service import SeedService
 
 from packages.domain.src.domain.models.framework_assignment import FrameworkAssignment, is_effective
-from packages.domain.src.domain.models.scenario_run import ScenarioEvent, ScenarioRun
+from packages.domain.src.domain.models.scenario_run import ScenarioEvent, ScenarioRun, ScenarioRunType
 
 _RUNS: dict[str, ScenarioRun] = {}
+_SUPPORTED_SCENARIO_TYPES: dict[str, ScenarioRunType] = {
+    "bushfire": "bushfire",
+    "flood": "flood",
+    "cyclone": "cyclone",
+    "severe_storm": "severe_storm",
+}
 
 
 class RehearsalOrchestrator:
@@ -16,8 +22,10 @@ class RehearsalOrchestrator:
         self._analysis_service = PreparednessAnalysisService()
 
     def run(self, scenario_name: str, scenario_type: str, jurisdiction_ids: list[str]) -> ScenarioRun:
-        if scenario_type not in {"bushfire", "flood", "cyclone", "severe_storm"}:
+        resolved_scenario_type = _SUPPORTED_SCENARIO_TYPES.get(scenario_type)
+        if resolved_scenario_type is None:
             raise ValueError(f"Unsupported scenario type '{scenario_type}'")
+        scenario_type = resolved_scenario_type
 
         if not jurisdiction_ids:
             raise ValueError("At least one jurisdiction is required")
@@ -75,7 +83,10 @@ class RehearsalOrchestrator:
 
     @staticmethod
     def _build_trace(template: dict[str, object], started_at: datetime) -> list[ScenarioEvent]:
-        timeline = list(template.get("signal_timeline", []))
+        raw_timeline = template.get("signal_timeline", [])
+        if not isinstance(raw_timeline, list):
+            raise TypeError("Rehearsal signal_timeline must be a list")
+        timeline = list(raw_timeline)
         trace: list[ScenarioEvent] = []
         for index, entry in enumerate(timeline[:12]):
             if not isinstance(entry, dict):
@@ -104,11 +115,17 @@ class RehearsalOrchestrator:
 
     def _derive_findings(self, analysis: dict[str, object], trace: list[ScenarioEvent]) -> list[str]:
         findings: list[str] = []
-        gaps = list(analysis.get("coordinationGaps", []))
+        raw_gaps = analysis.get("coordinationGaps", [])
+        if not isinstance(raw_gaps, list):
+            raise TypeError("Preparedness coordinationGaps must be a list")
+        gaps = list(raw_gaps)
         if gaps:
             findings.append("finding-missing-owner")
 
-        assignments = [FrameworkAssignment(**item) for item in list(analysis.get("assignments", []))]
+        raw_assignments = analysis.get("assignments", [])
+        if not isinstance(raw_assignments, list):
+            raise TypeError("Preparedness assignments must be a list")
+        assignments = [FrameworkAssignment.model_validate(item) for item in raw_assignments]
         now = datetime.now(UTC)
         duplicate_scope = {
             (assignment.framework_id, assignment.organisation_id or assignment.jurisdiction_id)

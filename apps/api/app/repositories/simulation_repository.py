@@ -32,9 +32,9 @@ class _SharedCapacityLedger:
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
-        self._repositories: weakref.WeakSet = weakref.WeakSet()
+        self._repositories: weakref.WeakSet[SimulationRepository] = weakref.WeakSet()
         # tenant_id -> (owning repository ref, confirmed against a stored tenant)
-        self._entries: dict[str, tuple[weakref.ReferenceType, bool]] = {}
+        self._entries: dict[str, tuple[weakref.ReferenceType[SimulationRepository], bool]] = {}
 
     def register(self, repository: "SimulationRepository") -> None:
         with self._lock:
@@ -77,14 +77,14 @@ class _SharedCapacityLedger:
             self._entries.clear()
             self._repositories = weakref.WeakSet()
 
-    def _reconcile(self) -> dict[str, tuple[weakref.ReferenceType, bool]]:
+    def _reconcile(self) -> dict[str, tuple[weakref.ReferenceType["SimulationRepository"], bool]]:
         live: dict[str, SimulationRepository] = {}
         for repository in list(self._repositories):
             for tenant_id, tenant in list(repository._in_memory.items()):
                 if tenant.occupies_capacity():
                     live[tenant_id] = repository
 
-        retained: dict[str, tuple[weakref.ReferenceType, bool]] = {}
+        retained: dict[str, tuple[weakref.ReferenceType[SimulationRepository], bool]] = {}
         for tenant_id, (reference, confirmed) in self._entries.items():
             if reference() is None:
                 continue

@@ -7,8 +7,12 @@ from uuid import uuid4
 from app.core.async_io import run_blocking
 from app.core.settings import get_settings
 from app.repositories.cosmos_scope import simulation_scope
+from app.repositories.signal_repository import SignalRepository
+from app.repositories.simulation_event_repository import SimulationEventRepository
 from app.repositories.simulation_repository import SimulationRepository
 from app.services import state_store
+from app.services.exercise_report_service import ExerciseReportService
+from app.services.resource_governor import ResourceGovernor
 from app.services.simulation_audit_writer import SimulationAuditWriter
 from app.services.simulation_clock_service import SimulationClockService
 from app.services.simulation_event_recorder import SimulationEventRecorder
@@ -19,12 +23,16 @@ from app.services.simulation_notifier import (
 )
 from app.validators.simulation_validators import SimulationValidators
 from fastapi import HTTPException
+from redis.asyncio import Redis
 
-from packages.domain.src.domain.models.scenario_run import ScenarioRun
+from packages.domain.src.domain.models.exercise_report import ExerciseReport
+from packages.domain.src.domain.models.scenario_run import ScenarioRun, ScenarioRunType
 from packages.domain.src.domain.models.simulation_tenant import (
     ArchiveCleanupSummary,
     ResourceLimits,
+    SimulationScenarioType,
     SimulationTenant,
+    ThrottleMode,
 )
 from packages.domain.src.domain.models.warp_constants import (
     DEFAULT_WARP_SPEED,
@@ -36,19 +44,32 @@ logger = logging.getLogger(__name__)
 EXPIRY_NOTICE_LEAD_HOURS = 24
 ARCHIVE_LEASE_SECONDS = 600
 
+SCENARIO_RUN_TYPE_BY_TENANT_TYPE: dict[SimulationScenarioType, ScenarioRunType] = {
+    "Bushfire": "bushfire",
+    "Flood": "flood",
+    "Cyclone": "cyclone",
+    "Severe Storm": "severe_storm",
+    "Heatwave": "heatwave",
+    "Earthquake": "earthquake",
+    "Tsunami": "tsunami",
+    "Pandemic": "pandemic",
+    "Other": "other",
+    "Cross-jurisdiction": "cross_jurisdiction",
+}
+
 
 class SimulationService:
     def __init__(
         self,
         simulation_repository: SimulationRepository,
         audit_writer: SimulationAuditWriter | None = None,
-        redis_client=None,
+        redis_client: Redis | None = None,
         clock_service: SimulationClockService | None = None,
         event_recorder: SimulationEventRecorder | None = None,
-        report_service=None,
-        signal_repository=None,
-        event_repository=None,
-        resource_governor=None,
+        report_service: ExerciseReportService | None = None,
+        signal_repository: SignalRepository | None = None,
+        event_repository: SimulationEventRepository | None = None,
+        resource_governor: ResourceGovernor | None = None,
         notifier: SimulationNotifier | None = None,
     ):
         self._repo = simulation_repository
@@ -72,10 +93,10 @@ class SimulationService:
         participants: list[str],
         creator_oid: str,
         scenario_template_id: str | None = None,
-        resource_limits: dict | None = None,
+        resource_limits: dict[str, int] | None = None,
         warp_speed: float = DEFAULT_WARP_SPEED,
     ) -> SimulationTenant:
-        self._validators.validate_scenario_type(scenario_type)
+        validated_scenario_type = self._validators.validate_scenario_type(scenario_type)
         self._validators.validate_participants(participants, creator_oid)
         validated_warp = validate_warp_speed(warp_speed)
         if resource_limits:
@@ -101,7 +122,7 @@ class SimulationService:
             )
 
         limits = ResourceLimits(**(resource_limits or {}))
-        throttle_mode = "normal"
+        throttle_mode: ThrottleMode = "normal"
         throttle_quota_pct = 100
         throttle_notice = None
         if self._resource_governor is not None:
@@ -111,7 +132,7 @@ class SimulationService:
             tenant_id=tenant_id,
             scenario_id=scenario_id,
             scenario_run_id=scenario_run_id,
-            scenario_type=scenario_type,
+            scenario_type=validated_scenario_type,
             scenario_template_id=scenario_template_id,
             created_by=creator_oid,
             created_at=created_at,
@@ -129,8 +150,8 @@ class SimulationService:
 
         run = ScenarioRun(
             scenario_run_id=scenario_run_id,
-            scenario_name=scenario_type,
-            scenario_type=scenario_type.lower().replace(" ", "_").replace("-", "_"),
+            scenario_name=validated_scenario_type,
+            scenario_type=SCENARIO_RUN_TYPE_BY_TENANT_TYPE[validated_scenario_type],
             jurisdiction_ids=jurisdictions,
             status="running",
             started_at=created_at,
@@ -293,15 +314,18 @@ class SimulationService:
             await self._repo.release_archive_claim(tenant_id, lease_owner)
 
     async def _run_archive_stages(self, tenant_id: str, tenant: SimulationTenant) -> SimulationTenant:
+        report_service = self._report_service
+        if report_service is None:
+            raise RuntimeError("Simulation archive requires the report service")
         if tenant.archive_job_state == "not_started":
-            await self._report_service.generate_report(tenant_id)
+            await report_service.generate_report(tenant_id)
             tenant = await self._repo.get_by_tenant_id(tenant_id)
             if tenant is None:
                 raise RuntimeError("Simulation disappeared while report was persisted")
             tenant = await self._repo.update(tenant.model_copy(update={"archive_job_state": "report_written"}))
 
         if tenant.archive_job_state == "report_written":
-            report = await self._report_service.get_report(tenant_id)
+            report = await report_service.get_report(tenant_id)
             if report is None:
                 raise RuntimeError("Persisted exercise report is unavailable during archive")
             archive_uri = await self._persist_archive_manifest(tenant_id, report)
@@ -348,8 +372,11 @@ class SimulationService:
         logger.info("simulation_archived tenant_id=%s", tenant_id)
         return tenant
 
-    async def _persist_archive_manifest(self, tenant_id: str, report) -> str:
-        persist = self._report_service.persist_archive_manifest
+    async def _persist_archive_manifest(self, tenant_id: str, report: ExerciseReport) -> str:
+        report_service = self._report_service
+        if report_service is None:
+            raise RuntimeError("Simulation archive requires the report service")
+        persist = report_service.persist_archive_manifest
         try:
             accepts_audit_writer = len(inspect.signature(persist).parameters) >= 3
         except (TypeError, ValueError):
@@ -411,7 +438,7 @@ class SimulationService:
         )
         return cleanup
 
-    def _bound_signal_repository(self, tenant_id: str):
+    def _bound_signal_repository(self, tenant_id: str) -> SignalRepository:
         if self._signal_repository is None:
             return None
         if hasattr(self._signal_repository, "bind"):
@@ -431,7 +458,7 @@ class SimulationService:
         tenant = tenant.transition_to("Archiving", elapsed_seconds=tenant.accumulated_sim_seconds)
         return await self._repo.update(tenant)
 
-    async def delete_archived_tenant(self, tenant_id: str, *, actor_id: str | None = None) -> dict:
+    async def delete_archived_tenant(self, tenant_id: str, *, actor_id: str | None = None) -> dict[str, object]:
         """Remove operational tenant metadata while retaining immutable evidence.
 
         The report and archive manifest are never destroyed here; an authorized
@@ -483,7 +510,7 @@ class SimulationService:
         logger.info("simulation_tenant_deleted tenant_id=%s actor=%s", tenant_id, actor_id)
         return evidence
 
-    async def get_archive_evidence(self, tenant_id: str) -> dict | None:
+    async def get_archive_evidence(self, tenant_id: str) -> dict[str, object] | None:
         return await self._repo.get_archive_evidence(tenant_id)
 
     async def check_expired_tenants(self) -> list[str]:

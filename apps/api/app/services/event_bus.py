@@ -34,10 +34,10 @@ def _safe_payload(payload: dict[str, object]) -> dict[str, object]:
         if key in payload:
             safe[key] = _mask(payload[key])
     signal_ids = payload.get("signalIds")
+    if not isinstance(signal_ids, list):
+        signal_ids = payload.get("signal_ids")
     if isinstance(signal_ids, list):
         safe["signalIdCount"] = len(signal_ids)
-    elif payload.get("signal_ids") and isinstance(payload.get("signal_ids"), list):
-        safe["signalIdCount"] = len(payload["signal_ids"])
     return safe
 
 
@@ -51,6 +51,8 @@ def _payload_summary(payload: dict[str, object], max_chars: int = 180) -> str:
 
 
 def _to_float_confidence(raw: object) -> float:
+    if not isinstance(raw, (int, float, str)):
+        return 0.0
     try:
         value = float(raw)
     except (TypeError, ValueError):
@@ -59,8 +61,10 @@ def _to_float_confidence(raw: object) -> float:
 
 
 def _to_int(raw: object, default: int) -> int:
+    if not isinstance(raw, (int, float, str)):
+        return default
     try:
-        return int(raw)  # type: ignore[arg-type]
+        return int(raw)
     except (TypeError, ValueError):
         return default
 

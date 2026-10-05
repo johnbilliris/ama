@@ -21,7 +21,7 @@ async def list_articles(
     kind: Literal["article", "playbook", "faq", "glossary", "persona"] | None = Query(default=None),
     limit: int = Query(default=50, le=200, ge=1),
     continuation: str | None = Query(default=None),
-):
+) -> dict[str, object]:
     items = repos.list_articles(
         tenant_id=caller.tenant_id,
         persona=persona or caller.persona_id,
@@ -39,7 +39,7 @@ async def get_article(
     response: Response,
     repos: Annotated[HelpRepositories, Depends(get_help_repositories)],
     if_none_match: Annotated[str | None, Header(alias="If-None-Match")] = None,
-):
+) -> dict[str, object] | None:
     article = repos.get_article(tenant_id=caller.tenant_id, slug=slug)
     if not article:
         raise HTTPException(status_code=404, detail={"code": "article.not_found", "message": "not found"})

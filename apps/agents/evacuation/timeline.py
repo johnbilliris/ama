@@ -88,11 +88,9 @@ class TimelineEstimator:
             phase_definitions,
             start=1,
         ):
-            zone = next(
-                (candidate for candidate in sorted_zones if candidate.get("zone_number") == zone_number),
-                None,
-            )
-            if zone is None:
+            matching_zones = [candidate for candidate in sorted_zones if candidate.get("zone_number") == zone_number]
+            phase_zone = matching_zones[0] if matching_zones else None
+            if phase_zone is None:
                 phase = self._create_minimal_phase(
                     phase_number,
                     zone_number,
@@ -106,10 +104,10 @@ class TimelineEstimator:
                 current_offset_min = phase.selected_transition_offset_minutes or current_offset_min
                 continue
 
-            total_population = int(zone.get("population_estimate", 0))
-            vulnerable_population = int(zone.get("vulnerable_population", 0))
-            unallocated_population = int(zone.get("unallocated_route_population", 0))
-            unallocated_vulnerable = int(zone.get("unallocated_vulnerable_population", 0))
+            total_population = int(phase_zone.get("population_estimate", 0))
+            vulnerable_population = int(phase_zone.get("vulnerable_population", 0))
+            unallocated_population = int(phase_zone.get("unallocated_route_population", 0))
+            unallocated_vulnerable = int(phase_zone.get("unallocated_vulnerable_population", 0))
             if population_type == "vulnerable":
                 phase_population = vulnerable_population
                 phase_unallocated = unallocated_vulnerable
@@ -239,7 +237,7 @@ class TimelineEstimator:
                 time_transition_offset = (
                     phase_start_offset + clearance_minutes * self._config.phase_transition_time_factor
                 )
-                completion_offset = phase_start_offset + duration
+                candidate_completion_offset = phase_start_offset + duration
                 candidates = [
                     (
                         population_transition_offset,
@@ -250,7 +248,7 @@ class TimelineEstimator:
                         PhaseTransitionTrigger.time_threshold,
                     ),
                     (
-                        completion_offset,
+                        candidate_completion_offset,
                         PhaseTransitionTrigger.phase_completion,
                     ),
                 ]

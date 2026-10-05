@@ -12,6 +12,20 @@ from packages.domain.src.domain.models.warp_speed_change import WarpSpeedChange
 
 TENANT_ID_PATTERN = re.compile(r"^sim-[a-z0-9-]{36}$")
 
+SimulationScenarioType = Literal[
+    "Bushfire",
+    "Flood",
+    "Cyclone",
+    "Severe Storm",
+    "Heatwave",
+    "Earthquake",
+    "Tsunami",
+    "Pandemic",
+    "Other",
+    "Cross-jurisdiction",
+]
+ThrottleMode = Literal["normal", "throttled", "incident-throttled"]
+
 VALID_STATUS_TRANSITIONS: dict[str, set[str]] = {
     "Provisioning": {"Active"},
     "Active": {"Paused", "Archiving"},
@@ -63,18 +77,7 @@ class SimulationTenant(BaseModel):
     tenant_id: str
     scenario_id: str
     scenario_run_id: str
-    scenario_type: Literal[
-        "Bushfire",
-        "Flood",
-        "Cyclone",
-        "Severe Storm",
-        "Heatwave",
-        "Earthquake",
-        "Tsunami",
-        "Pandemic",
-        "Other",
-        "Cross-jurisdiction",
-    ]
+    scenario_type: SimulationScenarioType
     scenario_template_id: str | None = None
     status: Literal["Provisioning", "Active", "Paused", "Archiving", "Archived", "Deleted"] = "Provisioning"
     created_by: str
@@ -94,7 +97,7 @@ class SimulationTenant(BaseModel):
     jurisdictions: list[str] = Field(default_factory=list)
     resource_limits: ResourceLimits = Field(default_factory=ResourceLimits)
     resource_consumption: ResourceConsumption = Field(default_factory=ResourceConsumption)
-    throttle_mode: Literal["normal", "throttled", "incident-throttled"] = "normal"
+    throttle_mode: ThrottleMode = "normal"
     throttle_quota_pct: int = 100
     throttle_notice: str | None = None
     throttle_changed_at: datetime | None = None
@@ -190,7 +193,7 @@ class SimulationTenant(BaseModel):
                 f"Cannot transition from '{self.status}' to '{new_status}'. "
                 f"Allowed: {VALID_STATUS_TRANSITIONS.get(self.status, set())}"
             )
-        updates: dict = {"status": new_status}
+        updates: dict[str, object] = {"status": new_status}
         if elapsed_seconds is not None:
             updates["elapsed_seconds"] = elapsed_seconds
         return self.model_copy(update=updates)

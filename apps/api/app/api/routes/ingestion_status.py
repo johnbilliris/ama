@@ -6,10 +6,10 @@ router = APIRouter(prefix="/ingestion", tags=["ingestion"])
 _status_store = get_pipeline_status_store()
 
 
-def register_pipeline_status(status: dict) -> None:
+def register_pipeline_status(status: dict[str, object]) -> None:
     _status_store.record(status)
 
 
 @router.get("/status")
-async def get_ingestion_status() -> dict:
+async def get_ingestion_status() -> dict[str, object]:
     return _status_store.summary()

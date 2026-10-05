@@ -7,9 +7,12 @@ injected so the model can recover. This is defence in depth against prompt injec
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING
 
-TOOL_SCHEMAS: list[dict[str, Any]] = [
+if TYPE_CHECKING:
+    from openai.types.chat import ChatCompletionToolParam
+
+TOOL_SCHEMAS: list[ChatCompletionToolParam] = [
     {
         "type": "function",
         "function": {

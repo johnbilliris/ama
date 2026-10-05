@@ -465,4 +465,5 @@ def test_aud010_production_requires_durable_backend_mode(monkeypatch: pytest.Mon
     monkeypatch.setenv("AMA_GOVERNANCE_BACKEND_MODE", "durable")
     monkeypatch.delenv("COSMOS_ENDPOINT", raising=False)
     with pytest.raises(RuntimeError, match="durable governance backend mode requires COSMOS_ENDPOINT"):
-        create_app()
+        with TestClient(create_app()):
+            pass

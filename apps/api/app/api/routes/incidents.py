@@ -18,7 +18,7 @@ _sim_repo = simulation_repository_proxy()
 _governor = get_resource_governor()
 _signal_repository = SignalRepository(write_guard=_governor)
 _declaration_lock = asyncio.Lock()
-_declaration_results: dict[str, dict] = {}
+_declaration_results: dict[str, dict[str, object]] = {}
 
 
 class DeclareIncidentRequest(BaseModel):
@@ -38,7 +38,7 @@ def _default_lookback_hours() -> int:
     return value if value > 0 else 24
 
 
-async def _run_retrospective_association(request: DeclareIncidentRequest) -> dict:
+async def _run_retrospective_association(request: DeclareIncidentRequest) -> dict[str, object]:
     if not request.incident_id:
         return {"status": "skipped", "reason": "incident_id_not_provided", "signals_associated": 0}
 
@@ -144,7 +144,7 @@ async def get_dashboard(incident_id: str, request: Request) -> dict[str, object]
 
 
 @router.post("/declare")
-async def declare_incident(http_request: Request, request: DeclareIncidentRequest | None = None) -> dict:
+async def declare_incident(http_request: Request, request: DeclareIncidentRequest | None = None) -> dict[str, object]:
     principal = extract_principal_from_claims(http_request.state.claims)
     require_simulation_admin(principal)
     transition = await _governor.declare_incident_with_status(principal.subject)
@@ -160,7 +160,7 @@ async def declare_incident(http_request: Request, request: DeclareIncidentReques
 
 
 @router.post("/resolve")
-async def resolve_incident(request: Request) -> dict:
+async def resolve_incident(request: Request) -> dict[str, object]:
     principal = extract_principal_from_claims(request.state.claims)
     require_simulation_admin(principal)
     transition = await _governor.resolve_incident_with_status(principal.subject)

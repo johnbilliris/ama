@@ -53,7 +53,7 @@ def transition_stage(
     now = datetime.now(UTC)
     re_entry = is_re_entry(stage.current_stage, target)
 
-    updates: dict = {
+    updates: dict[str, object] = {
         "previous_stage": stage.current_stage,
         "current_stage": target,
         "stage_started_at": now,

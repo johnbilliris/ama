@@ -82,7 +82,7 @@ async def post_chat(tenant_id: str, body: ChatRequest, request: Request) -> Stre
 
 
 @router.get("/{tenant_id}/chat/health")
-async def chat_health(tenant_id: str) -> dict:
+async def chat_health(tenant_id: str) -> dict[str, str]:
     return {
         "tenant_id": tenant_id,
         "prompt_hash": _controller.prompt_hash,
@@ -95,7 +95,7 @@ async def get_chat_history(
     tenant_id: str,
     request: Request,
     limit: int = 100,
-) -> dict:
+) -> dict[str, object]:
     """Return prior chat turns for the simulation in ascending sequence.
 
     Used by the UI to hydrate the chat pane when a controller opens an

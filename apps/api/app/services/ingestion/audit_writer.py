@@ -1,6 +1,6 @@
 import logging
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import uuid4
 
 from app.services.ingestion.audit_sink import AuditSink
@@ -26,9 +26,9 @@ class AuditWriter:
         signal_id: str | None,
         data_source_id: str,
         correlation_id: str,
-        outcome: str,
+        outcome: Literal["success", "rejected", "failed", "deduplicated", "blocked", "degraded"],
         validation_errors: list[str] | None = None,
-        validation_status: str | None = None,
+        validation_status: Literal["pending", "validated", "contradicted", "rejected", "escalated"] | None = None,
         raw_payload_blob_uri: str | None = None,
         raw_archival_enabled: bool | None = None,
         normalisation_latency_ms: float = 0.0,

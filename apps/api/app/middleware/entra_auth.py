@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 _PROTECTED_PREFIXES = (
     "/api/simulations",
     "/api/incidents",
+    "/api/data-sources",
     "/api/alerts/",
     "/api/recommendations/",
     "/api/outcomes/",
@@ -149,7 +150,10 @@ def _validate_jwt(token: str) -> dict[str, Any]:
             detail="signing key not found in JWKS",
         )
 
-    public_key = RSAAlgorithm.from_jwk(json.dumps(matching))
+    from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+
+    parsed_key = RSAAlgorithm.from_jwk(json.dumps(matching))
+    public_key = parsed_key.public_key() if isinstance(parsed_key, RSAPrivateKey) else parsed_key
     try:
         claims: dict[str, Any] = pyjwt.decode(
             token,

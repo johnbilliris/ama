@@ -1,6 +1,7 @@
 from app.core.auth import AuthenticatedPrincipal
 from app.core.dev_access import dev_access_enabled
 from app.core.tenant_context import TenantContext
+from app.repositories.simulation_repository import SimulationRepository
 from fastapi import HTTPException
 
 
@@ -25,7 +26,7 @@ def require_simulation_admin(principal: AuthenticatedPrincipal) -> Authenticated
 async def require_simulation_participant(
     principal: AuthenticatedPrincipal,
     tenant_id: str,
-    simulation_repository: object,
+    simulation_repository: SimulationRepository,
 ) -> AuthenticatedPrincipal:
     """Verify the caller is a participant of the named simulation.
 
@@ -39,7 +40,7 @@ async def require_simulation_participant(
       participant even if the stored list drifted (e.g. migrations).
     * caller absent from ``participants`` → ``403``.
     """
-    repo = simulation_repository  # type: ignore[assignment]
+    repo = simulation_repository
     tenant = await repo.get_by_tenant_id(tenant_id)
     if tenant is None:
         raise HTTPException(status_code=404, detail="Simulation tenant not found")

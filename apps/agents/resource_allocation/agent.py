@@ -13,10 +13,14 @@ from __future__ import annotations
 import logging
 import os
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from common.handoffs import AgentHandoffEvent
-from common.llm_mixin import LLMCallMixin
+
+if TYPE_CHECKING:
+    from apps.agents.common.llm_mixin import LLMCallMixin
+else:
+    from common.llm_mixin import LLMCallMixin
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel as _BaseModel
 from resource_allocation.audit import AuditWriter
@@ -81,7 +85,7 @@ _AUTHORIZED_OVERRIDE_ROLES = {
 class HealthCheck(_BaseModel):
     name: str
     status: str
-    details: dict | None = None
+    details: dict[str, object] | None = None
 
 
 class HealthResponse(_BaseModel):
@@ -97,7 +101,7 @@ class OverrideRequest(_BaseModel):
     user_id: str
     role: str
     justification: str
-    details: dict | None = None
+    details: dict[str, object] | None = None
 
 
 class OverrideResponse(_BaseModel):
@@ -181,7 +185,7 @@ class ResourceAllocationAgent(LLMCallMixin):
         """Delegate to the 9-stage processing pipeline."""
         return self._pipeline.process_handoff(handoff)
 
-    def process_status_update(self, signal: dict) -> bool:
+    def process_status_update(self, signal: dict[str, object]) -> bool:
         """Process a resource status update signal.
 
         Updates resource status via state machine and creates audit record.
@@ -191,8 +195,13 @@ class ResourceAllocationAgent(LLMCallMixin):
         location = signal.get("location")
         remaining_capacity = signal.get("remaining_capacity")
 
-        if not resource_id or not new_status_str:
-            logger.warning("Invalid status update signal: missing resource_id or new_status")
+        if (
+            not isinstance(resource_id, str)
+            or not resource_id
+            or not isinstance(new_status_str, str)
+            or not new_status_str
+        ):
+            logger.warning("Invalid status update signal: missing or invalid resource_id or new_status")
             return False
 
         try:
@@ -219,6 +228,9 @@ class ResourceAllocationAgent(LLMCallMixin):
 
             # Update capacity if provided
             if remaining_capacity is not None:
+                if not isinstance(remaining_capacity, (int, float, str)):
+                    logger.warning("Invalid resource remaining_capacity: %s", remaining_capacity)
+                    return False
                 self._inventory.update_capacity(resource_id, int(remaining_capacity))
 
             # Check operational flags

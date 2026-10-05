@@ -12,6 +12,7 @@ import json
 import logging
 import os
 from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING, Protocol
 from uuid import uuid4
 
 from apps.console_logging import configure_console_logging, uvicorn_log_config
@@ -31,7 +32,15 @@ if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
 from app.validators.signal_envelope import SignalEnvelope
 from common.content_safety import ContentSafetyValidator
 from common.handoffs import AgentHandoffEvent, build_handoff
+from common.llm_client import LLMClient
+from monitoring.audit import AuditWriter
 from monitoring.config import MonitoringConfig
+from monitoring.freshness import DataFreshnessTracker
+
+from packages.domain.src.domain.models.signal import Signal
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -46,13 +55,32 @@ class Tier2Decision(BaseModel):
     decision_id: str
 
 
+class _SignalRepository(Protocol):
+    async def query_unassociated(
+        self,
+        jurisdiction_id: str,
+        since: datetime | None = None,
+        *,
+        scope: str,
+    ) -> list[Signal]: ...
+
+    async def update_incident_id(
+        self,
+        signal_id: str,
+        incident_id: str,
+        *,
+        scope: str,
+        expected_incident_id: str | None = None,
+    ) -> bool: ...
+
+
 class MonitoringAgent:
     """Core monitoring agent with LLM-powered misinformation detection."""
 
     def __init__(
         self,
-        signal_repository=None,
-        llm_client=None,
+        signal_repository: _SignalRepository | None = None,
+        llm_client: LLMClient | None = None,
         config: MonitoringConfig | None = None,
         content_safety: ContentSafetyValidator | None = None,
     ):
@@ -333,10 +361,10 @@ class MonitoringAgent:
 
 def create_app(
     agent: MonitoringAgent | None = None,
-    audit_writer=None,
-    freshness_tracker=None,
+    audit_writer: AuditWriter | None = None,
+    freshness_tracker: DataFreshnessTracker | None = None,
     config: MonitoringConfig | None = None,
-):
+) -> "FastAPI":
     """Create the FastAPI application with health and association endpoints."""
     from fastapi import FastAPI, HTTPException
     from monitoring.me_framework_service import MEFrameworkService
@@ -364,7 +392,7 @@ def create_app(
         status: str
         agent_version: str
         timestamp: str
-        checks: dict
+        checks: dict[str, object]
 
     class AssociationRequest(PydanticBaseModel):
         incident_id: str
@@ -512,7 +540,7 @@ def create_app(
     # ------------------------------------------------------------------
 
     @app.post("/me-framework", status_code=201)
-    async def create_me_framework(request: CreateMEFrameworkRequest) -> dict:
+    async def create_me_framework(request: CreateMEFrameworkRequest) -> dict[str, object]:
         """Create a new M&E framework for a recovery programme."""
         svc = app.state.me_framework_service
         framework = svc.create_framework(
@@ -524,7 +552,7 @@ def create_app(
         return framework
 
     @app.get("/me-framework/{framework_id}")
-    async def get_me_framework(framework_id: str) -> dict:
+    async def get_me_framework(framework_id: str) -> dict[str, object]:
         """Retrieve an M&E framework by ID."""
         svc = app.state.me_framework_service
         framework = svc.get_framework(framework_id)
@@ -533,7 +561,7 @@ def create_app(
         return framework
 
     @app.post("/me-framework/{framework_id}/outcomes")
-    async def select_outcomes(framework_id: str, request: SelectOutcomesRequest) -> dict:
+    async def select_outcomes(framework_id: str, request: SelectOutcomesRequest) -> dict[str, object]:
         """Select outcomes from the catalogue for a framework."""
         svc = app.state.me_framework_service
         try:
@@ -542,7 +570,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/me-framework/{framework_id}/program-logic", status_code=201)
-    async def create_program_logic(framework_id: str, request: CreateProgramLogicRequest) -> dict:
+    async def create_program_logic(framework_id: str, request: CreateProgramLogicRequest) -> dict[str, object]:
         """Create a program logic model for a framework."""
         svc = app.state.me_framework_service
         try:
@@ -551,7 +579,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/me-framework/{framework_id}/standards")
-    async def set_standards(framework_id: str, request: SetStandardsRequest) -> dict:
+    async def set_standards(framework_id: str, request: SetStandardsRequest) -> dict[str, object]:
         """Set standards of success for framework indicators."""
         svc = app.state.me_framework_service
         try:
@@ -560,7 +588,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/me-framework/{framework_id}/collection-schedule")
-    async def set_collection_schedule(framework_id: str, request: SetCollectionScheduleRequest) -> dict:
+    async def set_collection_schedule(framework_id: str, request: SetCollectionScheduleRequest) -> dict[str, object]:
         """Set the data-collection schedule for framework indicators."""
         svc = app.state.me_framework_service
         try:
@@ -569,7 +597,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.get("/me-framework/{framework_id}/monitoring-report")
-    async def get_monitoring_report(framework_id: str) -> dict:
+    async def get_monitoring_report(framework_id: str) -> dict[str, object]:
         """Generate a monitoring report for the framework."""
         svc = app.state.me_framework_service
         try:
@@ -578,7 +606,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/me-framework/{framework_id}/evaluation", status_code=201)
-    async def create_evaluation(framework_id: str, request: CreateEvaluationRequest) -> dict:
+    async def create_evaluation(framework_id: str, request: CreateEvaluationRequest) -> dict[str, object]:
         """Generate an evaluation report for the framework."""
         svc = app.state.me_framework_service
         try:
@@ -604,12 +632,14 @@ def create_app(
         lagging_indicator_ids: list[str]
 
     @app.get("/catalogue/outcomes")
-    async def list_catalogue_outcomes(domain: str | None = None, objective_type: str | None = None) -> list[dict]:
+    async def list_catalogue_outcomes(
+        domain: str | None = None, objective_type: str | None = None
+    ) -> list[dict[str, object]]:
         """List all recovery outcomes with optional domain/objective-type filter."""
         return app.state.catalogue_service.list_outcomes(domain=domain, objective_type=objective_type)
 
     @app.get("/catalogue/outcomes/{outcome_id}")
-    async def get_catalogue_outcome(outcome_id: str) -> dict:
+    async def get_catalogue_outcome(outcome_id: str) -> dict[str, object]:
         """Retrieve a single outcome by ID."""
         result = app.state.catalogue_service.get_outcome(outcome_id)
         if not result:
@@ -617,12 +647,12 @@ def create_app(
         return result
 
     @app.get("/catalogue/domains/{domain}/summary")
-    async def get_catalogue_domain_summary(domain: str) -> dict:
+    async def get_catalogue_domain_summary(domain: str) -> dict[str, object]:
         """Return aggregate counts for a recovery domain."""
         return app.state.catalogue_service.get_domain_summary(domain)
 
     @app.get("/catalogue/evaluation-questions/{domain}")
-    async def get_catalogue_evaluation_questions(domain: str) -> dict:
+    async def get_catalogue_evaluation_questions(domain: str) -> dict[str, object]:
         """Retrieve evaluation questions for a domain."""
         result = app.state.catalogue_service.get_evaluation_questions(domain)
         if not result:
@@ -630,7 +660,7 @@ def create_app(
         return result
 
     @app.post("/catalogue/suggest-activities")
-    async def suggest_catalogue_activities(request: SuggestActivitiesRequest) -> list[dict]:
+    async def suggest_catalogue_activities(request: SuggestActivitiesRequest) -> list[dict[str, object]]:
         """Suggest catalogue activities that address lagging indicators."""
         return app.state.catalogue_service.suggest_activities(request.lagging_indicator_ids)
 
@@ -645,27 +675,27 @@ def create_app(
     )
 
     class CrossDomainRequest(PydanticBaseModel):
-        indicator_data: list[dict]
+        indicator_data: list[dict[str, object]]
 
     class RecommendationsRequest(PydanticBaseModel):
         lagging_indicator_ids: list[str]
 
     class CommunitySummaryRequest(PydanticBaseModel):
-        indicator_data: list[dict]
+        indicator_data: list[dict[str, object]]
         domain_filter: str | None = None
 
     @app.post("/analysis/cross-domain")
-    async def analysis_cross_domain(request: CrossDomainRequest) -> dict:
+    async def analysis_cross_domain(request: CrossDomainRequest) -> dict[str, object]:
         """Analyse cross-domain correlations in recovery indicator data."""
         return app.state.analysis_service.analyse_cross_domain_correlations(request.indicator_data)
 
     @app.post("/analysis/recommendations")
-    async def analysis_recommendations(request: RecommendationsRequest) -> list[dict]:
+    async def analysis_recommendations(request: RecommendationsRequest) -> list[dict[str, object]]:
         """Recommend AIDR catalogue activities for lagging indicators."""
         return app.state.analysis_service.recommend_activities(request.lagging_indicator_ids)
 
     @app.post("/analysis/community-summary")
-    async def analysis_community_summary(request: CommunitySummaryRequest) -> dict:
+    async def analysis_community_summary(request: CommunitySummaryRequest) -> dict[str, object]:
         """Generate a plain-language recovery summary for community communication."""
         return app.state.analysis_service.generate_community_summary(
             request.indicator_data,

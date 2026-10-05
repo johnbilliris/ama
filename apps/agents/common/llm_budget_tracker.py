@@ -25,6 +25,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Protocol
 
+from azure.core import MatchConditions
+
 logger = logging.getLogger(__name__)
 
 # 1 AUD = 1_000_000 micros. We track in micros to avoid floating-point loss.
@@ -56,6 +58,21 @@ class BudgetSnapshot:
         return self.total_aud / self.monthly_budget_aud
 
 
+class BudgetContainer(Protocol):
+    def read_item(self, *, item: str, partition_key: str) -> dict[str, object]: ...
+
+    def upsert_item(self, body: dict[str, object]) -> object: ...
+
+    def replace_item(
+        self,
+        *,
+        item: str,
+        body: dict[str, object],
+        etag: str,
+        match_condition: MatchConditions,
+    ) -> object: ...
+
+
 class BudgetTracker(Protocol):
     """Persistent counter of cumulative LLM cost for a budget scope."""
 
@@ -74,6 +91,24 @@ class BudgetTracker(Protocol):
     def get(self, scope: str) -> BudgetSnapshot | None:
         """Read the current snapshot for a scope (None if no record)."""
         ...
+
+
+def _document_string(value: object) -> str:
+    if not isinstance(value, str):
+        raise ValueError("Budget document contains a non-string timestamp")
+    return value
+
+
+def _document_int(value: object) -> int:
+    if not isinstance(value, (int, float, str)):
+        raise ValueError("Budget document contains a non-numeric integer field")
+    return int(value)
+
+
+def _document_float(value: object) -> float:
+    if not isinstance(value, (int, float, str)):
+        raise ValueError("Budget document contains a non-numeric float field")
+    return float(value)
 
 
 def _current_period() -> str:
@@ -131,18 +166,18 @@ class CosmosBudgetTracker:
     (``_etag``) so concurrent agent processes don't lose increments.
     """
 
-    def __init__(self, container: object | None = None, *, max_conflict_retries: int = 3) -> None:
+    def __init__(self, container: BudgetContainer | None = None, *, max_conflict_retries: int = 3) -> None:
         self._container = container or self._build_container()
         self._max_conflict_retries = max(0, max_conflict_retries)
 
     @staticmethod
-    def _build_container() -> object | None:
+    def _build_container() -> BudgetContainer | None:
         endpoint = os.getenv("COSMOS_ENDPOINT")
         database = os.getenv("COSMOS_DATABASE", "ama")
         if not endpoint:
             return None
         try:
-            from azure.cosmos import CosmosClient  # type: ignore[import-untyped]
+            from azure.cosmos import CosmosClient
             from azure.identity import DefaultAzureCredential
 
             client = CosmosClient(endpoint, credential=DefaultAzureCredential())
@@ -198,7 +233,7 @@ class CosmosBudgetTracker:
                     monitored_day=monitored_day,
                 )
 
-            new_total = int(existing.get("total_aud_micros", 0)) + max(aud_micros, 0)
+            new_total = _document_int(existing.get("total_aud_micros", 0)) + max(aud_micros, 0)
             doc = {
                 **existing,
                 "total_aud_micros": new_total,
@@ -206,11 +241,14 @@ class CosmosBudgetTracker:
                 "last_updated": datetime.now(UTC).isoformat(),
             }
             try:
+                etag = existing.get("_etag")
+                if not isinstance(etag, str):
+                    raise ValueError("Budget document is missing its Cosmos etag")
                 self._container.replace_item(
                     item=doc_id,
                     body=doc,
-                    etag=existing.get("_etag"),
-                    match_condition="IfMatch",
+                    etag=etag,
+                    match_condition=MatchConditions.IfNotModified,
                 )
                 break
             except Exception as exc:  # noqa: BLE001
@@ -241,7 +279,7 @@ class CosmosBudgetTracker:
         snap = BudgetSnapshot(
             scope=scope,
             period_yyyymm=period,
-            total_aud_micros=int(doc["total_aud_micros"]),
+            total_aud_micros=_document_int(doc["total_aud_micros"]),
             monthly_budget_aud=monthly_budget_aud,
             last_updated=datetime.now(UTC),
         )
@@ -263,9 +301,9 @@ class CosmosBudgetTracker:
             return BudgetSnapshot(
                 scope=scope,
                 period_yyyymm=period,
-                total_aud_micros=int(doc.get("total_aud_micros", 0)),
-                monthly_budget_aud=float(doc.get("monthly_budget_aud", 0.0)),
-                last_updated=datetime.fromisoformat(doc["last_updated"]),
+                total_aud_micros=_document_int(doc.get("total_aud_micros", 0)),
+                monthly_budget_aud=_document_float(doc.get("monthly_budget_aud", 0.0)),
+                last_updated=datetime.fromisoformat(_document_string(doc.get("last_updated"))),
             )
         except Exception:  # noqa: BLE001
             return None

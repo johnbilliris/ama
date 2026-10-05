@@ -10,35 +10,48 @@ FRs: FR-025–028 | Research: R-006
 import logging
 from datetime import UTC, datetime
 
+from common.content_safety import ContentSafetyValidator
+from common.llm_client import LLMClient
+from monitoring.catalogue_service import CatalogueService
+
+
+def _is_lagging_indicator(indicator: dict[str, object]) -> bool:
+    value = indicator.get("value")
+    target = indicator.get("target_value")
+    if value is not None and not isinstance(value, (int, float)):
+        raise TypeError("indicator value must be numeric")
+    if target is not None and not isinstance(target, (int, float)):
+        raise TypeError("indicator target_value must be numeric")
+    return indicator.get("trend") == "negative" or (value is not None and target is not None and value < target * 0.8)
+
+
 logger = logging.getLogger(__name__)
 
 
 class IndicatorAnalysisService:
-    def __init__(self, llm_client=None, content_safety=None, catalogue_service=None):
+    def __init__(
+        self,
+        llm_client: LLMClient | None = None,
+        content_safety: ContentSafetyValidator | None = None,
+        catalogue_service: CatalogueService | None = None,
+    ) -> None:
         self._llm = llm_client
         self._content_safety = content_safety
         self._catalogue = catalogue_service
 
-    def analyse_cross_domain_correlations(self, indicator_data: list[dict]) -> dict:
+    def analyse_cross_domain_correlations(self, indicator_data: list[dict[str, object]]) -> dict[str, object]:
         """Identify cross-domain correlations in recovery indicator data."""
-        domains: dict[str, list[dict]] = {}
+        domains: dict[str, list[dict[str, object]]] = {}
         for ind in indicator_data:
             d = ind.get("domain", "unknown")
+            if not isinstance(d, str):
+                raise TypeError("indicator domain must be a string")
             domains.setdefault(d, []).append(ind)
 
-        correlations: list[dict] = []
-        lagging_domains: list[dict] = []
+        correlations: list[dict[str, object]] = []
+        lagging_domains: list[dict[str, object]] = []
         for domain, indicators in domains.items():
-            lagging = [
-                i
-                for i in indicators
-                if i.get("trend") == "negative"
-                or (
-                    i.get("value") is not None
-                    and i.get("target_value") is not None
-                    and i["value"] < i["target_value"] * 0.8
-                )
-            ]
+            lagging = [i for i in indicators if _is_lagging_indicator(i)]
             if lagging:
                 lagging_domains.append(
                     {
@@ -66,7 +79,7 @@ class IndicatorAnalysisService:
                         }
                     )
 
-        result: dict = {
+        result: dict[str, object] = {
             "analysis_id": f"analysis-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}",
             "domains_analysed": list(domains.keys()),
             "total_indicators": len(indicator_data),
@@ -100,7 +113,7 @@ class IndicatorAnalysisService:
 
         return result
 
-    def recommend_activities(self, lagging_indicator_ids: list[str]) -> list[dict]:
+    def recommend_activities(self, lagging_indicator_ids: list[str]) -> list[dict[str, object]]:
         """Recommend AIDR catalogue activities for lagging indicators."""
         if not self._catalogue:
             return []
@@ -108,14 +121,16 @@ class IndicatorAnalysisService:
 
     def generate_community_summary(
         self,
-        indicator_data: list[dict],
+        indicator_data: list[dict[str, object]],
         domain_filter: str | None = None,
-    ) -> dict:
+    ) -> dict[str, object]:
         """Generate a plain-language recovery summary for community communication."""
         summary_parts: list[str] = []
-        domains: dict[str, list[dict]] = {}
+        domains: dict[str, list[dict[str, object]]] = {}
         for ind in indicator_data:
             d = ind.get("domain", "unknown")
+            if not isinstance(d, str):
+                raise TypeError("indicator domain must be a string")
             if domain_filter and d != domain_filter:
                 continue
             domains.setdefault(d, []).append(ind)
@@ -132,7 +147,7 @@ class IndicatorAnalysisService:
             "content_safety_result": None,
         }
 
-    def _build_analysis_prompt(self, correlations: list[dict], lagging: list[dict]) -> str:
+    def _build_analysis_prompt(self, correlations: list[dict[str, object]], lagging: list[dict[str, object]]) -> str:
         parts = ["Analyse these cross-domain recovery correlations for an Australian disaster recovery program:"]
         for c in correlations:
             parts.append(f"- {c['description']} (Evidence: {c['evidence']})")

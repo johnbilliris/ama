@@ -37,13 +37,17 @@ class CommunicationMafAgent(MafAgentFacade):
         if not isinstance(payload, dict):
             payload = {}
         incident_id = payload.get("incident_id", "unknown")
+        confidence = payload.get("confidenceScore", payload.get("confidence", 0.85))
+        if confidence is None:
+            raise ValueError("Communication handoff confidence cannot be null")
+
         handoff = AgentHandoffEvent(
             handoff_id=f"handoff-{incident_id}-communication",
             incident_id=str(incident_id),
             source_agent="risk_assessment",
             target_agent="communication",
             scope_key=str(incident_id),
-            confidence=float(payload.get("confidenceScore", payload.get("confidence", 0.85))),
+            confidence=float(confidence),
             payload={
                 "hazard_type": payload.get("category", "general"),
                 "severity": payload.get("severity", "moderate"),

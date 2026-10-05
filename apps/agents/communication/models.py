@@ -205,7 +205,7 @@ class AudienceSegment(BaseModel):
     alert_id: str = ""
     zone_id: str = ""
     zone_level: int = Field(ge=1, le=3)
-    zone_boundary: dict = Field(default_factory=dict)
+    zone_boundary: dict[str, object] = Field(default_factory=dict)
     population_estimate: int = Field(ge=0, default=0)
     estimated_segment_size: int = Field(ge=0, default=0)
     vulnerability_categories: list[str] = Field(default_factory=list)
@@ -396,10 +396,10 @@ class CommunicationDecisionRecord(BaseModel):
     processing_duration_ms: int | None = None
     agent_version: str = "0.1.0"
     config_version: str = ""
-    input_snapshot: dict | None = None
+    input_snapshot: dict[str, object] | None = None
     output_summary: str | None = None
-    escalation_details: dict | None = None
-    degradation_details: dict | None = None
+    escalation_details: dict[str, object] | None = None
+    degradation_details: dict[str, object] | None = None
     flush_source: str | None = None
     tenant_id: str
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))

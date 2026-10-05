@@ -8,6 +8,15 @@ of en-NZ / vi-VN / zh-Hans-CN / ar-SA, plus 2 prompt-injection variants.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TypedDict
+
+
+class HazardMetadata(TypedDict):
+    tone: str
+    must_include: list[str]
+    must_not_include: list[str]
+    severity_hint: str
+    sensitivity_hints: list[str]
 
 
 @dataclass
@@ -24,7 +33,7 @@ class PromptTemplate:
     is_injection: bool = False
 
 
-_HAZARD_META: dict[str, dict] = {
+_HAZARD_META: dict[str, HazardMetadata] = {
     "structure-fire": {
         "tone": "directive",
         "must_include": ["call 000", "evacuate"],

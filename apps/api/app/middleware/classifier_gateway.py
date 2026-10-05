@@ -154,12 +154,12 @@ class ClassifierGatewayMiddleware(BaseHTTPMiddleware):
                 request.state.audit_outcome = "classifier_mask"
                 request.state.classifier_masked_count = count
                 rewritten = masked.encode("utf-8")
-                request._body = rewritten  # type: ignore[attr-defined]
+                request._body = rewritten
 
                 async def _replay() -> dict[str, Any]:
                     return {"type": "http.request", "body": rewritten, "more_body": False}
 
-                request._receive = _replay  # type: ignore[attr-defined]
+                request._receive = _replay
 
         return await call_next(request)
 

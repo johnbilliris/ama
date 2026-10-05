@@ -202,7 +202,7 @@ class SignalRepository:
         container = self._get_container()
         if container:
             conditions = ["c.scope = @scope"]
-            params = [{"name": "@scope", "value": tenant_id}]
+            params: list[dict[str, object]] = [{"name": "@scope", "value": tenant_id}]
             if owning_agency_id:
                 conditions.append("c.owningAgencyId = @owningAgencyId")
                 params.append({"name": "@owningAgencyId", "value": owning_agency_id})
@@ -502,7 +502,11 @@ class SignalRepository:
         doc = self._in_memory.get(key)
         if doc is None:
             return False
-        payload = doc.get("payload") if isinstance(doc.get("payload"), dict) else {}
+        payload_value = doc.get("payload")
+        if isinstance(payload_value, dict):
+            payload = payload_value
+        else:
+            payload = {}
         if str(payload.get("binaryAssetUri", "")).strip() != source_uri:
             return False
         payload["binaryAssetUri"] = stored_uri

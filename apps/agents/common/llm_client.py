@@ -18,15 +18,25 @@ import os
 import time
 from contextvars import ContextVar
 from importlib import import_module
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 from uuid import uuid4
 
 from common.llm_config import LLMClientConfig
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
+if TYPE_CHECKING:
+    from openai import (
+        AzureOpenAI,  # AMA-FM04: allow — type-only for the hermetic fallback; production uses the Foundry seam.
+    )
+
 logger = logging.getLogger(__name__)
 
 _request_correlation_id: ContextVar[str | None] = ContextVar("llm_request_correlation_id", default=None)
+
+
+def _is_transient_error(exc: BaseException) -> bool:
+    status = getattr(exc, "status_code", None) or getattr(exc, "code", None)
+    return status in (429, 503)
 
 
 class _ChatCompleteCallable(Protocol):
@@ -69,7 +79,7 @@ class LLMClient:
         # AND ``AZURE_AI_PROJECT_ENDPOINT`` is unset. Production NEVER hits
         # this branch — Bicep sets ``AZURE_AI_PROJECT_ENDPOINT`` and the
         # Foundry seam is wired below.
-        self._client: object | None = None
+        self._client: AzureOpenAI | None = None
 
         # Selection (post-cutover, ADR-20 §Q-P6-03):
         #   1. Caller-injected ``chat_complete`` kwarg wins (test seam).
@@ -278,11 +288,10 @@ class LLMClient:
     @staticmethod
     def _is_transient(exc: BaseException) -> bool:
         """Return True for transient HTTP errors (429, 503) that warrant retry."""
-        status = getattr(exc, "status_code", None) or getattr(exc, "code", None)
-        return status in (429, 503)
+        return _is_transient_error(exc)
 
     @retry(
-        retry=retry_if_exception(_is_transient.__func__),
+        retry=retry_if_exception(_is_transient_error),
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=1, max=4),
         reraise=True,

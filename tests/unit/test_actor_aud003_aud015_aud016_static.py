@@ -13,20 +13,40 @@ AGENTS_ROOT = ROOT / ".github" / "agents"
 ARCHIVED_ROOT = AGENTS_ROOT / "sectors" / "_archive"
 
 READONLY_TOOLS = {
-    "codebase",
-    "changes",
-    "fetch",
-    "findTestFiles",
-    "githubRepo",
-    "problems",
-    "search",
-    "searchResults",
-    "terminalLastCommand",
-    "terminalSelection",
-    "testFailure",
-    "usages",
-    "vscodeAPI",
+    "execute/testFailure",
     "microsoft.docs.mcp",
+    "read/changes",
+    "read/problems",
+    "read/terminalLastCommand",
+    "read/terminalSelection",
+    "search",
+    "search/codebase",
+    "search/findTestFiles",
+    "search/searchResults",
+    "search/usages",
+    "vscode/vscodeAPI",
+    "web/fetch",
+    "web/githubRepo",
+}
+
+READONLY_TOOL_ALIASES = {
+    "changes": "read/changes",
+    "codebase": "search/codebase",
+    "edit/new": "new",
+    "fetch": "web/fetch",
+    "findTestFiles": "search/findTestFiles",
+    "githubRepo": "web/githubRepo",
+    "problems": "read/problems",
+    "searchResults": "search/searchResults",
+    "execute/runCommands": "runCommands",
+    "execute/runTasks": "runTasks",
+    "execute/runTests": "runTests",
+    "terminalLastCommand": "read/terminalLastCommand",
+    "terminalSelection": "read/terminalSelection",
+    "testFailure": "execute/testFailure",
+    "usages": "search/usages",
+    "vscodeAPI": "vscode/vscodeAPI",
+    "manage/todos": "todos",
 }
 
 ADVISORY_PLUS_DOCS_TOOLS = READONLY_TOOLS | {
@@ -91,7 +111,7 @@ def test_aud003_explicit_tools_and_least_privilege_profiles() -> None:
         tools = fm.get("tools")
 
         assert isinstance(tools, list) and tools, f"missing explicit tools in {aid}"
-        tool_set = set(str(t) for t in tools)
+        tool_set = {READONLY_TOOL_ALIASES.get(str(tool), str(tool)) for tool in tools}
 
         rel = path.relative_to(AGENTS_ROOT).as_posix()
         if rel.startswith("operational/") or rel.startswith("sectors/"):

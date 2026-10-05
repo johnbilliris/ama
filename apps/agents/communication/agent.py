@@ -11,9 +11,10 @@ from __future__ import annotations
 import asyncio
 import inspect
 import logging
-from collections.abc import Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from typing import ParamSpec, TypeVar
 
 from common.entra_principal import (
     AuthenticatedPrincipal,
@@ -30,12 +31,16 @@ from communication.health import DependencyHealthReporter
 from communication.models import (
     CommunicationDecisionRecord,
     CommunicationDecisionType,
+    PublicAlert,
 )
 from communication.pipeline import CommunicationProcessingPipeline
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
+
+_P = ParamSpec("_P")
+_T = TypeVar("_T")
 
 
 class AdmissionRejectedError(RuntimeError):
@@ -54,13 +59,13 @@ class BoundedAdmissionController:
     def active(self) -> int:
         return self._active
 
-    async def run(self, func, /, *args):
+    async def run(self, func: Callable[_P, _T], /, *args: _P.args, **kwargs: _P.kwargs) -> _T:
         async with self._lock:
             if self._active >= self._limit:
                 raise AdmissionRejectedError("Communication processing capacity is full")
             self._active += 1
         try:
-            return await asyncio.to_thread(func, *args)
+            return await asyncio.to_thread(func, *args, **kwargs)
         finally:
             async with self._lock:
                 self._active -= 1
@@ -84,7 +89,7 @@ class ModifyRequest(BaseModel):
 
     user_id: str | None = None
     role: str | None = None
-    modifications: dict = Field(default_factory=dict)
+    modifications: dict[str, object] = Field(default_factory=dict)
 
 
 class CancelRequest(BaseModel):
@@ -122,7 +127,7 @@ class HealthResponse(BaseModel):
     version: str = ""
     timestamp: str = ""
     checks: dict[str, HealthCheck] = Field(default_factory=dict)
-    operational: dict = Field(default_factory=dict)
+    operational: dict[str, object] = Field(default_factory=dict)
     config_hash: str = ""
 
 
@@ -131,8 +136,8 @@ class DeliveryStatusResponse(BaseModel):
 
     alert_id: str
     overall_status: str
-    delivery_summary: dict = Field(default_factory=dict)
-    by_channel: dict = Field(default_factory=dict)
+    delivery_summary: dict[str, object] = Field(default_factory=dict)
+    by_channel: dict[str, list[dict[str, object]]] = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -152,9 +157,9 @@ def create_app(
     _config = config or CommunicationConfig()
 
     @asynccontextmanager
-    async def lifespan(_app: FastAPI):
+    async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         workflow = _app.state.approval_workflow
-        lifecycle_task: asyncio.Task | None = None
+        lifecycle_task: asyncio.Task[None] | None = None
         try:
             await workflow.retry_pending_notifications()
             await workflow.recover_escalation_deadlines()
@@ -203,7 +208,7 @@ def create_app(
         principal = await resolved if inspect.isawaitable(resolved) else resolved
         return require_handoff_producer(principal)
 
-    def authorized_alert(alert_id: str, principal: AuthenticatedPrincipal):
+    def authorized_alert(alert_id: str, principal: AuthenticatedPrincipal) -> PublicAlert:
         alert = app.state.approval_workflow.get_alert(principal.tenant_id, alert_id)
         if alert is None:
             raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
@@ -277,7 +282,7 @@ def create_app(
     async def process_handoff(
         event: AgentHandoffEvent,
         principal: AuthenticatedPrincipal = Depends(authenticated_producer),
-    ) -> dict:
+    ) -> dict[str, object]:
         """Process a handoff event through the pipeline."""
         if principal.tenant_id != event.tenant_id:
             raise HTTPException(status_code=403, detail="Handoff tenant must match authenticated tenant")
@@ -522,7 +527,7 @@ def create_app(
     async def get_alert(
         alert_id: str,
         principal: AuthenticatedPrincipal = Depends(authenticated_commander),
-    ) -> dict:
+    ) -> dict[str, object]:
         """Get full alert details."""
         alert = authorized_alert(alert_id, principal)
         return alert.model_dump(mode="json")
@@ -563,7 +568,7 @@ def create_app(
     async def deliver_alert(
         alert_id: str,
         principal: AuthenticatedPrincipal = Depends(authenticated_commander),
-    ) -> list[dict]:
+    ) -> list[dict[str, object]]:
         alert = authorized_alert(alert_id, principal)
         if app.state.pipeline is None:
             raise HTTPException(status_code=503, detail="Pipeline is not initialised")
@@ -581,7 +586,7 @@ def create_app(
     async def alert_history(
         incident_id: str,
         principal: AuthenticatedPrincipal = Depends(authenticated_commander),
-    ) -> list[dict]:
+    ) -> list[dict[str, object]]:
         alerts = app.state.approval_workflow.get_version_history(principal.tenant_id, incident_id)
         return [alert.model_dump(mode="json") for alert in alerts]
 

@@ -17,13 +17,27 @@ class AuthenticatedPrincipal:
         return "SimulationUser" in self.roles
 
 
+def _claim_strings(claims: dict[str, object], name: str) -> tuple[str, ...]:
+    value = claims.get(name, [])
+    if value is None:
+        return ()
+    if not isinstance(value, (list, tuple)):
+        raise ValueError(f"JWT claim {name!r} must be a list of strings")
+    values: list[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            raise ValueError(f"JWT claim {name!r} must contain only strings")
+        values.append(item)
+    return tuple(values)
+
+
 def extract_principal_from_claims(claims: dict[str, object]) -> AuthenticatedPrincipal:
     persona_id = claims.get("persona_id") or claims.get("personaId")
     return AuthenticatedPrincipal(
         subject=str(claims.get("oid") or claims.get("sub") or "anonymous"),
         agency_id=str(claims.get("agency_id", "unknown-agency")),
-        jurisdiction_ids=tuple(claims.get("jurisdiction_ids", [])),
-        roles=tuple(claims.get("roles", [])),
+        jurisdiction_ids=_claim_strings(claims, "jurisdiction_ids"),
+        roles=_claim_strings(claims, "roles"),
         persona_id=str(persona_id) if persona_id else None,
     )
 

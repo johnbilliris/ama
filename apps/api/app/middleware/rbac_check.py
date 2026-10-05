@@ -84,7 +84,7 @@ def _resolve_persona_aiims_function(persona_id: str) -> str | None:
     persona = getattr(repo, "find_by_id", lambda _pid: None)(persona_id)
     if persona is None:
         return None
-    return getattr(persona, "aiims_function", None) or persona.get("aiims_function")  # type: ignore[union-attr]
+    return getattr(persona, "aiims_function", None) or persona.get("aiims_function")
 
 
 def _normalise_role(claims: dict[str, Any]) -> str | None:

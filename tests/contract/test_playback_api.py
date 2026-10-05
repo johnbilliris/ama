@@ -23,6 +23,9 @@ def _auth_headers(sub: str) -> dict[str, str]:
 
 @pytest.fixture
 def client(monkeypatch):
+    monkeypatch.setenv("AMA_ALLOW_ANONYMOUS_DEV_ACCESS", "0")
+    monkeypatch.setenv("AMA_TEST_SUPPORT", "1")
+    monkeypatch.setenv("AMA_TRUST_FORWARDED_PRINCIPAL", "1")
     from app.api.dependencies import simulation_composition
     from app.api.routes import simulation_playback as pb_routes
     from app.api.routes import simulations as sim_routes

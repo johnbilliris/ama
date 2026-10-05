@@ -38,6 +38,7 @@ from app.services.simulation_signal_adapter import template_entry_to_signal
 
 from packages.domain.src.domain.models.signal_accepted_event import SignalAcceptedEvent
 from packages.domain.src.domain.models.simulation_event import SignalSchedulerState
+from packages.domain.src.domain.models.simulation_tenant import SimulationTenant
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +165,7 @@ class WarpScheduler:
 
     def next_delivery_delay(
         self,
-        tenant,
+        tenant: SimulationTenant,
         state: SignalSchedulerState,
         signal_timeline: list[dict[str, Any]] | None = None,
     ) -> float | None:

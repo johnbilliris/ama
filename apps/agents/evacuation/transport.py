@@ -358,7 +358,7 @@ class TransportCoordinator:
         )
 
     @staticmethod
-    def _facility_sort_key(facility: dict[str, Any]) -> tuple:
+    def _facility_sort_key(facility: dict[str, Any]) -> tuple[int, str]:
         category = str(facility.get("vulnerability_category", ""))
         return (
             _PRIORITY_ORDER.get(PRIORITY_MAP.get(category, "high"), 3),

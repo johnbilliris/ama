@@ -26,25 +26,42 @@ class Orphan:
 
 @dataclass
 class ReconcileContext:
-    list_deployments: Callable[[], Iterable[dict]]
+    list_deployments: Callable[[], Iterable[dict[str, object]]]
     delete_deployment: Callable[[str], None]
     is_run_terminal: Callable[[str], bool]
     audit_emit: Callable[..., None] = lambda **_: None
     grace_minutes: int = 30
 
 
+def _required_deployment_string(deployment: dict[str, object], field: str) -> str:
+    value = deployment.get(field, "")
+    if not isinstance(value, str):
+        raise ValueError(f"Deployment {field} must be a string")
+    return value
+
+
 def find_orphans(ctx: ReconcileContext) -> list[Orphan]:
     """Identify deployments tagged with eval-runId whose run has terminated."""
     now = datetime.now(UTC)
     orphans: list[Orphan] = []
-    for d in ctx.list_deployments():
-        tags = d.get("tags") or {}
+    for deployment in ctx.list_deployments():
+        raw_tags = deployment.get("tags")
+        if raw_tags is None:
+            tags: dict[str, object] = {}
+        elif isinstance(raw_tags, dict):
+            tags = raw_tags
+        else:
+            raise TypeError("Deployment tags must be an object")
         run_id = tags.get("eval-runId")
-        if not run_id:
+        if not isinstance(run_id, str) or not run_id:
             continue
-        created_str = d.get("createdAt") or tags.get("eval-createdAt")
+        created_value = deployment.get("createdAt") or tags.get("eval-createdAt")
         try:
-            created = datetime.fromisoformat(created_str.replace("Z", "+00:00")) if created_str else now
+            created = (
+                datetime.fromisoformat(created_value.replace("Z", "+00:00"))
+                if isinstance(created_value, str) and created_value
+                else now
+            )
         except Exception:
             created = now
         age = (now - created) // timedelta(minutes=1)
@@ -53,8 +70,8 @@ def find_orphans(ctx: ReconcileContext) -> list[Orphan]:
         if ctx.is_run_terminal(run_id):
             orphans.append(
                 Orphan(
-                    resourceId=d.get("id", ""),
-                    deploymentName=d.get("name", ""),
+                    resourceId=_required_deployment_string(deployment, "id"),
+                    deploymentName=_required_deployment_string(deployment, "name"),
                     runId=run_id,
                     ageMinutes=int(age),
                 )

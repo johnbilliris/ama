@@ -43,6 +43,8 @@ ALLOWLIST_GLOBS: tuple[str, ...] = (
 
 def _is_allowlisted(path: Path) -> bool:
     rel = path.relative_to(ROOT).as_posix()
+    if any(part in {".venv", "venv", "site-packages", "__pycache__"} for part in path.parts):
+        return True
     return any(_glob_match(rel, pat) for pat in ALLOWLIST_GLOBS)
 
 

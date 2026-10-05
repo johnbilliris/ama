@@ -73,6 +73,7 @@ class PipelineWorker:
         self._healthy = True
         self._repository_available = True
         self._repository_reason: str | None = None
+        self._replica_id = os.environ.get("CONTAINER_APP_REPLICA_NAME", "local")
 
     async def start(self, configs: list[IngestionPipelineConfig], pipeline_factory: Any = None) -> None:
         self._running = True
@@ -170,6 +171,29 @@ class PipelineWorker:
     def get_status(self) -> dict[str, Any]:
         statuses = []
         for pid, pipeline in self._pipelines.items():
+            snapshotter = getattr(pipeline, "_pipeline_status_snapshot", None)
+            if callable(snapshotter):
+                snapshot = dict(snapshotter())
+                health = dict(snapshot.get("health") or {})
+                task = self._tasks.get(pid)
+                if task is None or not task.done():
+                    task_state = "running" if self._running else "stopped"
+                elif task.cancelled():
+                    task_state = "stopped"
+                elif task.exception() is not None:
+                    task_state = "failed"
+                    health["state"] = "failed"
+                    health["reason"] = str(task.exception())
+                else:
+                    task_state = "stopped"
+                health["taskState"] = task_state
+                if task_state == "stopped":
+                    health["state"] = "stopped"
+                snapshot["health"] = health
+                snapshot["replicaId"] = self._replica_id
+                statuses.append(snapshot)
+                continue
+
             breaker = pipeline.circuit_breaker
             expected_update_seconds = int(getattr(pipeline, "expected_update_seconds", 60))
             last_success_at = breaker.last_success_at.isoformat() if breaker.last_success_at else None

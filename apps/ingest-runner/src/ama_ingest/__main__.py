@@ -162,7 +162,7 @@ def run(
     try:
         from common.otel_telemetry import ingest_span as _ingest_span  # noqa: PLC0415
     except Exception:  # noqa: BLE001 - keep ingest runnable when agents pkg not on path
-        _ingest_span = None  # type: ignore[assignment]
+        _ingest_span = None
 
     if _ingest_span is None:
         return _run_inner(
@@ -279,11 +279,11 @@ def _run_inner(
 
     if use_live_clients and index is None:
         try:
-            _live.ensure_index_schema(  # type: ignore[possibly-undefined]
+            _live.ensure_index_schema(
                 endpoint=args.search_endpoint,
                 index_name=target_index_name,
             )
-            index = _live.LiveAzureSearchIndex(  # type: ignore[possibly-undefined]
+            index = _live.LiveAzureSearchIndex(
                 endpoint=args.search_endpoint,
                 index_name=target_index_name,
             )

@@ -27,8 +27,9 @@ from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from ama_domain.retrieval import RetrievedChunk
 from app.core.async_io import run_blocking
 from app.repositories.sim_chat_history_repository import (
     SimChatHistoryRepository,
@@ -39,6 +40,9 @@ from app.services.simulation.rate_limiter import RateLimiter, get_rate_limiter
 from app.services.simulation.sub_agent_invoker import SubAgentInvoker, default_invoker
 
 from packages.domain.src.domain.models.sim_chat_turn import SimChatTurn
+
+if TYPE_CHECKING:
+    from openai.types.chat import ChatCompletionMessageParam, ChatCompletionMessageToolCallParam
 
 logger = logging.getLogger(__name__)
 
@@ -276,7 +280,7 @@ class SimulationControllerService:
     async def _maybe_record_tool_invocation_async(self, **kwargs: Any) -> None:
         await run_blocking(self._maybe_record_tool_invocation, **kwargs)
 
-    def _load_history_messages(self, tenant_id: str) -> list[dict[str, Any]]:
+    def _load_history_messages(self, tenant_id: str) -> list[ChatCompletionMessageParam]:
         """Return prior turns formatted as OpenAI chat messages.
 
         Only ``user``, ``assistant`` and ``system`` roles are replayed — ``tool``
@@ -288,13 +292,13 @@ class SimulationControllerService:
         except Exception as exc:  # pragma: no cover
             logger.warning("sim_chat_history_load_failed: %s", exc)
             return []
-        out: list[dict[str, Any]] = []
+        out: list[ChatCompletionMessageParam] = []
         for t in turns:
             if t.role in ("user", "assistant", "system"):
                 out.append({"role": t.role, "content": t.content})
         return out
 
-    async def _load_history_messages_async(self, tenant_id: str) -> list[dict[str, Any]]:
+    async def _load_history_messages_async(self, tenant_id: str) -> list[ChatCompletionMessageParam]:
         """Offloaded variant — history replay reads must not stall the SSE loop."""
         return await run_blocking(self._load_history_messages, tenant_id)
 
@@ -393,7 +397,7 @@ class SimulationControllerService:
             )
             return
 
-        backend = (mode or os.getenv("SIM_CONTROLLER_MODE", "")).lower()
+        backend = (mode or os.getenv("SIM_CONTROLLER_MODE") or "").lower()
         if not backend:
             backend = "foundry" if os.getenv("AZURE_AI_PROJECT_ENDPOINT") else "offline"
 
@@ -593,9 +597,9 @@ class SimulationControllerService:
         deployment_region = os.environ.get("AZURE_AI_PROJECT_REGION", "australiaeast").lower()
         forwarded_message = user_message
         try:
-            from common.model_gateway import apply as gateway_apply  # type: ignore[import-not-found]
+            from common.model_gateway import apply as gateway_apply
         except Exception:
-            gateway_apply = None  # type: ignore[assignment]
+            gateway_apply = None
         if gateway_apply is not None:
             decision = gateway_apply(text=user_message, deployment_region=deployment_region)
             if decision.gateway_decision == "deny":
@@ -612,7 +616,7 @@ class SimulationControllerService:
         # Replay the rolling window of prior turns so the model has conversational
         # memory across requests. Ordering is [system, ...prior turns (oldest
         # first), current user message].
-        messages: list[dict[str, Any]] = [{"role": "system", "content": self._prompt_text}]
+        messages: list[ChatCompletionMessageParam] = [{"role": "system", "content": self._prompt_text}]
         messages.extend(await self._load_history_messages_async(tenant_id))
         messages.append({"role": "user", "content": forwarded_message})
 
@@ -622,14 +626,14 @@ class SimulationControllerService:
         # when retrieval returns non-empty results. Empty results emit a
         # ``citations: []`` SSE event with the operator-verification note
         # (FR-RAG-SIM-03).
-        retrieved_chunks: list[Any] = []
+        retrieved_chunks: list[RetrievedChunk] = []
         retrieval_result: Any = None
         sim_corpus_build_sha: str | None = None
         sim_embedding_model_id: str | None = None
         sim_retrieval_index_name: str | None = None
         if self._retrieval is not None:
             try:
-                from ama_domain import (  # type: ignore[import-not-found]
+                from ama_domain import (
                     RetrievalRequest,
                 )
 
@@ -670,11 +674,8 @@ class SimulationControllerService:
                 "Grounding context (cite by jurisdiction/topic/page; do not invent sources):",
             ]
             for c in retrieved_chunks[:5]:
-                jurisdiction = getattr(c, "jurisdiction", "")
-                jurisdiction = getattr(jurisdiction, "value", jurisdiction)
                 context_lines.append(
-                    f"- [{jurisdiction}/{getattr(c, 'topic', '')}#p{getattr(c, 'page', '')}]"
-                    f" {(getattr(c, 'text', '') or getattr(c, 'summary', '') or '')[:280]}"
+                    f"- [{c.jurisdiction.value}/{c.topic}#p{c.page}] {(c.text or c.summary or '')[:280]}"
                 )
             messages[-1]["content"] = "\n".join(context_lines) + "\n\n---\n\n" + forwarded_message
 
@@ -723,11 +724,12 @@ class SimulationControllerService:
                 delta = chunk.choices[0].delta
                 if delta is None:
                     continue
-                if getattr(delta, "content", None):
-                    round_text.append(delta.content)
+                content = delta.content
+                if isinstance(content, str) and content:
+                    round_text.append(content)
                     yield ChatEvent(
                         "turn.delta",
-                        {"turn_id": turn_id, "delta": delta.content},
+                        {"turn_id": turn_id, "delta": content},
                     )
                 tcs = getattr(delta, "tool_calls", None)
                 if tcs:
@@ -749,7 +751,7 @@ class SimulationControllerService:
             if not tool_acc:
                 break  # model finished with a natural-language reply.
 
-            assembled_calls = [
+            assembled_calls: list[ChatCompletionMessageToolCallParam] = [
                 {
                     "id": slot["id"] or f"call_{idx}",
                     "type": "function",
@@ -873,22 +875,19 @@ class SimulationControllerService:
             elif retrieved_chunks:
                 citation_dicts = []
                 for c in retrieved_chunks[:5]:
-                    licence = getattr(c, "licence_mode", None)
-                    licence = getattr(licence, "value", licence) or "metadata-only"
-                    jurisdiction = getattr(c, "jurisdiction", "")
-                    jurisdiction = getattr(jurisdiction, "value", jurisdiction)
+                    licence = c.licence_mode.value
                     cit = {
-                        "jurisdiction": jurisdiction,
-                        "topic": getattr(c, "topic", ""),
-                        "page": getattr(c, "page", 0),
-                        "source_url": getattr(c, "source_url", ""),
-                        "rendered_url": getattr(c, "rendered_url", ""),
-                        "sha256_of_chunk": getattr(c, "sha256_of_chunk", ""),
+                        "jurisdiction": c.jurisdiction.value,
+                        "topic": c.topic,
+                        "page": c.page,
+                        "source_url": c.source_url,
+                        "rendered_url": c.rendered_url,
+                        "sha256_of_chunk": c.sha256_of_chunk,
                         "licence_mode": licence,
-                        "confidence": float(getattr(c, "confidence", 0.0) or 0.0),
+                        "confidence": c.confidence,
                     }
                     if licence == "full-text":
-                        cit["snippet"] = (getattr(c, "text", "") or "")[:300]
+                        cit["snippet"] = (c.text or "")[:300]
                     citation_dicts.append(cit)
                 yield ChatEvent(
                     "citation",
@@ -920,21 +919,13 @@ class SimulationControllerService:
                             corpus_build_sha=sim_corpus_build_sha or "unknown",
                             retrieved_chunks=[
                                 {
-                                    "chunk_id": getattr(c, "chunk_id", ""),
-                                    "sha256_of_chunk": getattr(c, "sha256_of_chunk", ""),
-                                    "jurisdiction": (
-                                        getattr(c, "jurisdiction", "").value
-                                        if hasattr(getattr(c, "jurisdiction", ""), "value")
-                                        else getattr(c, "jurisdiction", "")
-                                    ),
-                                    "topic": getattr(c, "topic", ""),
+                                    "chunk_id": c.chunk_id,
+                                    "sha256_of_chunk": c.sha256_of_chunk,
+                                    "jurisdiction": c.jurisdiction.value,
+                                    "topic": c.topic,
                                     "page": getattr(c, "page", 0),
-                                    "licence_mode": (
-                                        getattr(c, "licence_mode", "").value
-                                        if hasattr(getattr(c, "licence_mode", ""), "value")
-                                        else getattr(c, "licence_mode", "")
-                                    ),
-                                    "confidence": float(getattr(c, "confidence", 0.0) or 0.0),
+                                    "licence_mode": c.licence_mode.value,
+                                    "confidence": c.confidence,
                                 }
                                 for c in retrieved_chunks
                             ],

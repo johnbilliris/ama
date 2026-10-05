@@ -15,6 +15,7 @@ import json
 import logging
 import re
 from pathlib import Path
+from typing import NotRequired, TypedDict
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +35,25 @@ _FALLBACK_ALIAS = {
 }
 
 
+class AlertTemplate(TypedDict):
+    template_id: str
+    hazard_type: str
+    severity: str
+    alert_type: str
+    language_code: str
+    title_template: str
+    body_template: str
+    action_items_template: str
+    _operational_fallback: NotRequired[bool]
+    _translation_unavailable: NotRequired[bool]
+
+
 class TemplateLoader:
     """Loads and interpolates pre-approved alert templates."""
 
     def __init__(self, template_dir: str | Path | None = None) -> None:
         self._template_dir = Path(template_dir) if template_dir else _DEFAULT_TEMPLATE_DIR
-        self._templates: dict[str, list[dict]] = {}
+        self._templates: dict[str, list[AlertTemplate]] = {}
         self._load_all()
 
     def _load_all(self) -> None:
@@ -112,7 +126,7 @@ class TemplateLoader:
         severity: str,
         alert_type: str,
         language_code: str,
-    ) -> dict | None:
+    ) -> AlertTemplate | None:
         """Find a matching template for the given criteria.
 
         Returns None if no exact match found.
@@ -128,8 +142,7 @@ class TemplateLoader:
         )
         template = self._find_template(templates, alias_hazard, alias_severity, alias_type)
         if template is not None:
-            fallback = dict(template)
-            fallback["_operational_fallback"] = True
+            fallback: AlertTemplate = {**template, "_operational_fallback": True}
             return fallback
 
         # Try en-AU fallback per CHK008 if language not found
@@ -145,7 +158,7 @@ class TemplateLoader:
 
         return None
 
-    def _get_en_au_fallback(self, hazard_type: str, severity: str, alert_type: str) -> dict | None:
+    def _get_en_au_fallback(self, hazard_type: str, severity: str, alert_type: str) -> AlertTemplate | None:
         """Get en-AU template as fallback with [Translation unavailable] suffix."""
         for tmpl in self._templates.get("en-AU", []):
             if (
@@ -154,18 +167,17 @@ class TemplateLoader:
                 and tmpl.get("alert_type") == alert_type
             ):
                 # Return a copy with [Translation unavailable] annotation
-                fallback = dict(tmpl)
-                fallback["_translation_unavailable"] = True
+                fallback: AlertTemplate = {**tmpl, "_translation_unavailable": True}
                 return fallback
         return None
 
     @staticmethod
     def _find_template(
-        templates: list[dict],
+        templates: list[AlertTemplate],
         hazard_type: str,
         severity: str,
         alert_type: str,
-    ) -> dict | None:
+    ) -> AlertTemplate | None:
         exact = next(
             (
                 template
@@ -194,7 +206,7 @@ class TemplateLoader:
         Missing placeholder values are replaced with ``[unknown]`` per CHK006.
         """
 
-        def _replace(match: re.Match) -> str:
+        def _replace(match: re.Match[str]) -> str:
             key = match.group(1)
             value = values.get(key)
             if value is None:

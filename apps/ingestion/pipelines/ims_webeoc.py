@@ -189,9 +189,12 @@ def _require_timestamp(raw_payload: dict[str, Any]) -> str:
 
 
 def _require_location(raw_payload: dict[str, Any]) -> tuple[float, float]:
-    location_data = raw_payload.get("location") if isinstance(raw_payload.get("location"), dict) else {}
+    location_value = raw_payload.get("location")
+    location_data = location_value if isinstance(location_value, dict) else {}
     lat = location_data.get("latitude", raw_payload.get("latitude"))
     lon = location_data.get("longitude", raw_payload.get("longitude"))
     if lat in (None, "") or lon in (None, ""):
         raise ValueError("IMS payload missing location coordinates")
+    if not isinstance(lat, (int, float, str)) or not isinstance(lon, (int, float, str)):
+        raise ValueError("IMS payload location coordinates must be numeric")
     return float(lat), float(lon)

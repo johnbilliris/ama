@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+from collections.abc import Callable
 from typing import Any, Literal
 
 import httpx
@@ -44,12 +45,12 @@ class SimAwareHttpClient:
         *,
         channel: SimChannel = "http",
         delivery_service: SyntheticDeliveryService | None = None,
-        tenant_resolver=None,
+        tenant_resolver: Callable[[], TenantContext | None] = get_current_tenant,
         timeout: float = 10.0,
     ) -> None:
         self._channel = channel
         self._delivery = delivery_service or get_synthetic_delivery_service()
-        self._tenant_resolver = tenant_resolver or get_current_tenant
+        self._tenant_resolver = tenant_resolver
         self._client = httpx.AsyncClient(timeout=timeout)
 
     async def __aenter__(self) -> SimAwareHttpClient:

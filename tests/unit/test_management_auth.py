@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient
 @pytest.fixture
 def _local_env(monkeypatch):
     """Configure local dev environment."""
-    monkeypatch.setenv("ENVIRONMENT", "local")
+    monkeypatch.setenv("AMA_ENVIRONMENT", "local")
     monkeypatch.setenv("MANAGEMENT_API_KEY", "test-secret-key")
 
 

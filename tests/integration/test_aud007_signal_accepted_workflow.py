@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pytest
-from app.api.routes import signals as signals_route
+from app.api.dependencies.governance_composition import get_governance_composition
 from app.main import create_app
 from app.services.operational_store import OperationalStore
 from app.services.signal_accepted_workflow import publish_signal_accepted, reset_signal_accepted_dedup
@@ -143,7 +143,7 @@ async def test_aud007_signal_post_persists_risk_recommendation_and_draft(
 
     monkeypatch.setattr("app.services.signal_accepted_workflow._run_workflow", _ok)
 
-    signals_route._governance_registry.register_source(
+    get_governance_composition(client.app).registry.register_source(
         DataSource(
             data_source_id="bom-aud007",
             name="BoM Official Feed",

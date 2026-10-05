@@ -9,6 +9,7 @@ FRs: FR-001–005, FR-048 | SCs: SC-001–005
 
 from __future__ import annotations
 
+from typing import Literal
 from uuid import uuid4
 
 from packages.domain.src.domain.models.public_alert import (
@@ -69,8 +70,8 @@ def build_aws_warning(
     supersedes_alert_id: str | None = None,
     tier_skip_justification: str | None = None,
     content_blocks: dict[str, str] | None = None,
-    approval_mode: str = "human_approved",
-    generation_method: str = "template",
+    approval_mode: Literal["human_approved", "autonomous", "escalated"] = "human_approved",
+    generation_method: Literal["llm", "template", "template_fallback", "safety_fallback"] = "template",
 ) -> PublicAlert:
     """Build a PublicAlert conforming to the AWS three-tier warning model."""
     if tier_skip_justification:

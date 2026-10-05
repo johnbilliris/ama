@@ -17,6 +17,7 @@ import hashlib
 import inspect
 import logging
 import time
+from collections.abc import Awaitable, Callable
 
 from app.validators.signal_envelope import SignalEnvelope
 from common.async_bridge import run_async  # noqa: F401 — kept for downstream pipeline compatibility
@@ -72,8 +73,8 @@ class SignalProcessingPipeline:
         content_safety: ContentSafetyValidator | None = None,
         signal_store: object | None = None,
         signal_repository: object | None = None,
-        deliver_fn=None,
-        on_dead_letter_fn=None,
+        deliver_fn: Callable[[AgentHandoffEvent], Awaitable[None]] | None = None,
+        on_dead_letter_fn: Callable[[AgentHandoffEvent], str] | None = None,
     ) -> None:
         self._config = config or MonitoringConfig()
         self._deduplicator = deduplicator or SignalDeduplicator(window_minutes=self._config.signal_dedup_window_minutes)
@@ -98,7 +99,7 @@ class SignalProcessingPipeline:
     # Stage 1: Input Validation
     # ------------------------------------------------------------------
 
-    def _validate(self, raw: dict, signal_id: str, tenant_id: str) -> SignalEnvelope | None:
+    def _validate(self, raw: dict[str, object], signal_id: str, tenant_id: str) -> SignalEnvelope | None:
         # RAG-OPTOUT [FR-RAG-NS-02]: BoM live-feed signals are authoritative; doctrine grounding lives on the downstream escalation call. ADR: docs/decisions/036-foundry-rag-grounding/02-rag-optout-bom-live.md  # noqa: E501
         """Stage 1: Validate incoming signal via Pydantic."""
         try:
@@ -452,7 +453,7 @@ class SignalProcessingPipeline:
 
     async def process_signal(
         self,
-        raw: dict,
+        raw: dict[str, object],
         signal_id: str,
         tenant_id: str = "live",
     ) -> MonitoringDecisionRecord | None:

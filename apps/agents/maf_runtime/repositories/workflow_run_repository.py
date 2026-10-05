@@ -11,6 +11,7 @@ Responsibilities:
 
 from __future__ import annotations
 
+import builtins
 import logging
 import os
 import uuid
@@ -229,7 +230,7 @@ class WorkflowRunRepository:
         incident_id: str | None = None,
         limit: int = 50,
         continuation: str | None = None,
-    ) -> tuple[list[dict[str, Any]], str | None]:
+    ) -> tuple[builtins.list[dict[str, Any]], str | None]:
         """Paginated variant of ``list()`` that threads Cosmos continuation tokens.
 
         Returns a ``(items, next_continuation_token)`` tuple.  The token is

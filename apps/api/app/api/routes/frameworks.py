@@ -39,6 +39,13 @@ def _get_tenant_id(request: Request) -> str:
     return request.headers.get("X-Tenant-Id", "live")
 
 
+def _stored_version(record: dict[str, object]) -> int:
+    version = record.get("version", 1)
+    if not isinstance(version, int):
+        raise HTTPException(status_code=409, detail="Stored record version is invalid")
+    return version
+
+
 @router.get("")
 async def list_frameworks(request: Request, jurisdictionId: list[str] = Query(default=[])) -> list[dict[str, object]]:
     tenant_id = _get_tenant_id(request)
@@ -64,7 +71,7 @@ async def update_framework(framework_id: str, payload: ManagedFrameworkInput) ->
     existing = _FRAMEWORK_CATALOGUE.get(framework_id)
     if existing is None:
         raise HTTPException(status_code=404, detail="Framework not found")
-    if payload.version != int(existing.get("version", 1)):
+    if payload.version != _stored_version(existing):
         raise HTTPException(status_code=409, detail="Version conflict")
     updated = payload.model_dump(mode="json")
     updated["version"] = payload.version + 1
@@ -88,7 +95,7 @@ async def update_assignment(assignment_id: str, payload: ManagedAssignmentInput)
     existing = _ASSIGNMENT_CATALOGUE.get(assignment_id)
     if existing is None:
         raise HTTPException(status_code=404, detail="Assignment not found")
-    if payload.version != int(existing.get("version", 1)):
+    if payload.version != _stored_version(existing):
         raise HTTPException(status_code=409, detail="Version conflict")
     if payload.jurisdiction_id is None and payload.organisation_id is None:
         raise HTTPException(status_code=422, detail="Assignment scope requires jurisdiction_id or organisation_id")

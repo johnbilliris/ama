@@ -66,7 +66,7 @@ class IoTSignalAdapter:
     def __init__(self, deduplicator: IoTSignalDeduplicator | None = None) -> None:
         self._dedup = deduplicator or IoTSignalDeduplicator()
 
-    async def process_event_grid_event(self, event: dict[str, Any]) -> dict | None:
+    async def process_event_grid_event(self, event: dict[str, Any]) -> dict[str, object] | None:
         """Process an Event Grid event containing IoT device telemetry.
 
         Returns a normalised SignalEnvelope dict, or None if duplicate/invalid.
@@ -118,7 +118,7 @@ class IoTSignalAdapter:
 
         return await self.normalise(iot_msg)
 
-    async def normalise(self, iot_msg: IoTSignalMessage) -> dict | None:
+    async def normalise(self, iot_msg: IoTSignalMessage) -> dict[str, object] | None:
         """Normalise an IoT message to SignalEnvelope format.
 
         Returns None if the message is a duplicate.

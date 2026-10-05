@@ -10,7 +10,43 @@ FRs: FR-006, FR-007 | Research: R-002
 
 import logging
 import os
-from typing import Any
+from typing import Any, TypedDict
+
+
+class PlanSectionRecord(TypedDict, total=False):
+    section_slug: str
+    title: str
+    content: str
+    is_complete: bool
+    last_edited_at: str | None
+    last_edited_by: str | None
+
+
+class ProcessStepRecord(TypedDict, total=False):
+    step_number: int
+    step_name: str
+    is_complete: bool
+
+
+class PlanDocumentRecord(TypedDict, total=False):
+    id: str
+    plan_id: str
+    title: str
+    region_id: str
+    hazard_types: list[str]
+    hierarchy_level: str
+    parent_plan_id: str | None
+    lifecycle_state: str
+    version: int
+    security_rating: str
+    authority: str
+    created_by: str
+    created_at: str
+    updated_at: str | None
+    plan_sections: dict[str, PlanSectionRecord]
+    planning_principles_checklist: dict[str, bool]
+    process_steps: dict[str, ProcessStepRecord]
+
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +72,7 @@ class EmergencyPlanRepository:
     def __init__(self, cosmos_client: Any = None, database_name: str = "disaster-hub"):
         self._db_name = database_name
         self._container_name = "emergency-plans"
-        self._in_memory: dict[str, dict[str, Any]] = {}
+        self._in_memory: dict[str, PlanDocumentRecord] = {}
 
         if cosmos_client is not None:
             self._client = cosmos_client
@@ -62,7 +98,7 @@ class EmergencyPlanRepository:
     # CRUD
     # ------------------------------------------------------------------
 
-    async def create_plan(self, plan_doc: dict) -> dict:
+    async def create_plan(self, plan_doc: PlanDocumentRecord) -> PlanDocumentRecord:
         """Upsert an emergency plan document by plan_id."""
         container = self._get_container()
         if container:
@@ -73,7 +109,7 @@ class EmergencyPlanRepository:
             self._in_memory[key] = plan_doc
         return plan_doc
 
-    async def get_plan(self, plan_id: str, region_id: str) -> dict | None:
+    async def get_plan(self, plan_id: str, region_id: str) -> PlanDocumentRecord | None:
         """Read a single plan by id with partition key ``region_id``."""
         container = self._get_container()
         if container:
@@ -88,7 +124,7 @@ class EmergencyPlanRepository:
         region_id: str | None = None,
         lifecycle_state: str | None = None,
         limit: int = 50,
-    ) -> list[dict]:
+    ) -> list[PlanDocumentRecord]:
         """Query plans with optional region and lifecycle-state filters."""
         container = self._get_container()
         if container:
@@ -118,7 +154,7 @@ class EmergencyPlanRepository:
             results = [d for d in results if d.get("lifecycle_state") == lifecycle_state]
         return results[:limit]
 
-    async def update_plan(self, plan_doc: dict) -> dict:
+    async def update_plan(self, plan_doc: PlanDocumentRecord) -> PlanDocumentRecord:
         """Upsert an updated plan document."""
         return await self.create_plan(plan_doc)
 
@@ -130,7 +166,7 @@ class EmergencyPlanRepository:
         self,
         region_id: str,
         hierarchy_level: str | None = None,
-    ) -> list[dict]:
+    ) -> list[PlanDocumentRecord]:
         """Return plans for a region, optionally filtered by hierarchy level."""
         container = self._get_container()
         if container:
@@ -153,7 +189,7 @@ class EmergencyPlanRepository:
         self,
         lifecycle_state: str,
         limit: int = 50,
-    ) -> list[dict]:
+    ) -> list[PlanDocumentRecord]:
         """Cross-partition query for plans in a specific lifecycle state."""
         container = self._get_container()
         if container:

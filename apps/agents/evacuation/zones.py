@@ -185,7 +185,7 @@ class ZoneComputer:
         ]
 
     @staticmethod
-    def _local_transformers(geometry: Any) -> tuple[Callable, Callable]:
+    def _local_transformers(geometry: Any) -> tuple[Callable[..., tuple[float, ...]], Callable[..., tuple[float, ...]]]:
         centroid = geometry.centroid
         local_crs = CRS.from_proj4(
             f"+proj=aeqd +lat_0={centroid.y:.12f} +lon_0={centroid.x:.12f} +datum=WGS84 +units=m +no_defs"

@@ -163,7 +163,7 @@ def _validate_dispatch_payloads(alert: PublicAlert) -> None:
         raise HTTPException(status_code=422, detail="EDXL payload does not use EDXL-DE 2.0 namespace")
 
 
-def _resolve_approval_decision(alert_id: str):
+def _resolve_approval_decision(alert_id: str) -> tuple[str, ApprovalDecision]:
     store = OperationalStore.current()
     for approval_decision_id, decision in store.approvals.items():
         if decision.public_alert_id == alert_id and decision.outcome == "approved":

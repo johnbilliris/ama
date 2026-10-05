@@ -30,14 +30,17 @@ class HandoffDeduplicator:
         self._in_flight_ids: set[tuple[str, str]] = set()
         self._in_flight_incidents: set[tuple[str, str, str]] = set()
 
-    def _evict_expired(self, cache: OrderedDict[tuple[str, ...], float]) -> None:
+    def _evict_expired(
+        self,
+        cache: OrderedDict[tuple[str, str], float] | OrderedDict[tuple[str, str, str], float],
+    ) -> None:
         """Remove entries older than the TTL window."""
         now = time.monotonic()
         cutoff = now - self._window_seconds
         while cache:
-            key, ts = next(iter(cache.items()))
+            _, ts = next(iter(cache.items()))
             if ts < cutoff:
-                cache.pop(key)
+                cache.popitem(last=False)
             else:
                 break
 

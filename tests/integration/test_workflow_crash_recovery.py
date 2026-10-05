@@ -28,7 +28,20 @@ def _make_workflow_with_in_memory_publisher() -> tuple[AmaWorkflow, _ServiceBusP
     repo = WorkflowRunRepository()
     publisher = _ServiceBusPublisher()
     gate = HitlGateExecutor(repo=repo, publisher=publisher)
-    workflow = AmaWorkflow(repo=repo, hitl_gate=gate)
+
+    class _SuccessfulStep:
+        async def execute_step(self, _input_payload: Any, **_kwargs: Any) -> dict[str, str]:
+            return {"status": "complete"}
+
+    workflow = AmaWorkflow(
+        repo=repo,
+        hitl_gate=gate,
+        monitoring_executor=_SuccessfulStep(),
+        risk_executor=_SuccessfulStep(),
+        evacuation_executor=_SuccessfulStep(),
+        resource_executor=_SuccessfulStep(),
+        communication_executor=_SuccessfulStep(),
+    )
     return workflow, publisher
 
 

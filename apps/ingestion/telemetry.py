@@ -31,7 +31,10 @@ def current_tenant_id(default: str = UNKNOWN_TENANT) -> str:
         return default
 
 
-def tenant_attributes(attributes: dict | None = None, tenant_id: str | None = None) -> dict:
+def tenant_attributes(
+    attributes: dict[str, str | bool | int | float] | None = None,
+    tenant_id: str | None = None,
+) -> dict[str, str | bool | int | float]:
     merged = dict(attributes or {})
     merged["tenant_id"] = (tenant_id or "").strip() or current_tenant_id()
     return merged

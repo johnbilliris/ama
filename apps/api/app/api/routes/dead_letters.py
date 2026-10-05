@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from app.middleware.auth import authorize_management
+from app.middleware.auth import AuthenticatedIdentity, authorize_management
 from app.services.dead_letter_service import DeadLetterService
 from fastapi import APIRouter, Depends
 
@@ -21,8 +21,8 @@ service = DeadLetterService()
 )
 async def redeliver_dead_letter(
     entry_id: str,
-    identity: dict = Depends(authorize_management),
-) -> dict:
+    identity: AuthenticatedIdentity = Depends(authorize_management),
+) -> dict[str, str]:
     """Manually trigger redelivery of a dead-lettered handoff (Section 3b + 5b)."""
     resolved = service.resolve_entry(
         entry_id=entry_id,

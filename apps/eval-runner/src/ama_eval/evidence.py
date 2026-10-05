@@ -14,6 +14,7 @@ import json
 import logging
 import os
 import tarfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
@@ -49,7 +50,7 @@ def build_evidence_bundle(
     judge_set: dict[str, Any],
     model_registry: dict[str, Any],
     extra_artifacts: dict[str, bytes] | None = None,
-    signer=None,
+    signer: Callable[[bytes], str | None] | None = None,
 ) -> EvidenceBundle:
     now = datetime.now(UTC)
 

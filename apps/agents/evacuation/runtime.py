@@ -7,7 +7,7 @@ import logging
 import os
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from importlib import import_module
@@ -283,7 +283,7 @@ def build_application(
     health_monitor = dependency_health_monitor or ThreadedDependencyHealthMonitor(agent)
 
     @asynccontextmanager
-    async def lifespan(_app: FastAPI):
+    async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         intake.start()
         sweeper.start()
         health_monitor.start()

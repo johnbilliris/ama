@@ -11,7 +11,7 @@ data with an explicit ``tenant_id`` instead of relying on ambient context.
 """
 
 from collections.abc import Iterator, MutableMapping
-from typing import TypeVar
+from typing import Protocol, TypeVar
 
 from packages.domain.src.domain.models.aiims_role_assignment import AiimsRoleAssignment
 from packages.domain.src.domain.models.approval_decision import ApprovalDecision
@@ -27,6 +27,13 @@ from packages.domain.src.domain.models.recommendation import Recommendation
 from packages.domain.src.domain.models.recovery_environment_tracker import RecoveryEnvironmentTracker
 from packages.domain.src.domain.models.signal import Signal
 from packages.domain.src.domain.models.timeline_event import TimelineEvent
+
+
+class _ClearableTenantStore(Protocol):
+    def clear_all_tenants(self) -> None: ...
+
+    def clear_tenant(self, tenant_id: str) -> None: ...
+
 
 T = TypeVar("T")
 
@@ -106,7 +113,7 @@ RECOVERY_TRACKERS: dict[str, RecoveryEnvironmentTracker] = {}
 LESSONS: dict[str, Lesson] = {}
 PPRR_CONTEXTS: dict[str, PprrPhaseContext] = {}
 
-_TENANT_SCOPED: tuple[TenantScopedDict, ...] = (
+_TENANT_SCOPED: tuple[_ClearableTenantStore, ...] = (
     INCIDENTS,
     SIGNALS,
     RECOMMENDATIONS,

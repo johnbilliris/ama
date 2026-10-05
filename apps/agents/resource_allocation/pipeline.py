@@ -18,7 +18,7 @@ import logging
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, TypedDict
 from uuid import uuid4
 
 from common.async_bridge import run_async
@@ -60,6 +60,18 @@ from resource_allocation.versioning import VersionCounter
 logger = logging.getLogger(__name__)
 
 
+logger = logging.getLogger(__name__)
+
+
+class ResourceNeed(TypedDict, total=False):
+    type: str
+    sub_type: str
+    capabilities: list[str]
+    quantity: int
+    priority: str
+    location: dict[str, object] | None
+
+
 class AllocationProcessingPipeline:
     """9-stage orchestrator for resource allocation processing."""
 
@@ -71,7 +83,7 @@ class AllocationProcessingPipeline:
         matcher: ResourceMatcher | None = None,
         version_counter: VersionCounter | None = None,
         audit_writer: AuditWriter | None = None,
-        llm_generate_fn: Callable[..., dict] | None = None,
+        llm_generate_fn: Callable[..., dict[str, object]] | None = None,
         cosmos_plans_container: Any = None,
         cosmos_assessments_container: Any = None,
     ) -> None:
@@ -235,7 +247,7 @@ class AllocationProcessingPipeline:
         handoff: AgentHandoffEvent,
         config_hash: str,
         incident_scope_key: str,
-    ) -> tuple[dict | None, dict | None]:
+    ) -> tuple[dict[str, object] | None, dict[str, object] | None]:
         """Retrieve recommendation and assessment data from Cosmos DB or payload."""
         payload = handoff.payload or {}
 
@@ -276,8 +288,8 @@ class AllocationProcessingPipeline:
     def _stage3_identify_demands(
         self,
         handoff: AgentHandoffEvent,
-        recommendation_data: dict | None,
-        assessment_data: dict | None,
+        recommendation_data: dict[str, object] | None,
+        assessment_data: dict[str, object] | None,
         config_hash: str,
         incident_scope_key: str,
     ) -> list[ResourceDemand]:
@@ -371,8 +383,8 @@ class AllocationProcessingPipeline:
     def _extract_coordination_demands(
         self,
         handoff: AgentHandoffEvent,
-        recommendation_data: dict | None,
-        assessment_data: dict | None,
+        recommendation_data: dict[str, object] | None,
+        assessment_data: dict[str, object] | None,
         incident_scope_key: str,
     ) -> list[ResourceDemand]:
         """Extract demands from risk assessment coordination tasks."""
@@ -440,14 +452,14 @@ class AllocationProcessingPipeline:
     def _parse_resource_needs(
         self,
         summary: str,
-        assessment_data: dict | None,
-    ) -> list[dict]:
+        assessment_data: dict[str, object] | None,
+    ) -> list[ResourceNeed]:
         """Parse summary text and assessment data to identify resource needs."""
-        needs: list[dict] = []
+        needs: list[ResourceNeed] = []
         summary_lower = summary.lower()
 
         # Keyword-based extraction
-        resource_keywords = {
+        resource_keywords: dict[str, ResourceNeed] = {
             "water tanker": {"type": "vehicle", "sub_type": "water_tanker", "capabilities": ["water_delivery"]},
             "ambulance": {
                 "type": "vehicle",
@@ -467,25 +479,46 @@ class AllocationProcessingPipeline:
 
         for keyword, resource_info in resource_keywords.items():
             if keyword in summary_lower:
-                need = dict(resource_info)
-                # Try to extract quantity from summary
-                need["quantity"] = self._extract_quantity(summary_lower, keyword)
-                need["priority"] = self._infer_priority(summary_lower)
+                need: ResourceNeed = {
+                    **resource_info,
+                    "quantity": self._extract_quantity(summary_lower, keyword),
+                    "priority": self._infer_priority(summary_lower),
+                }
                 needs.append(need)
 
         # Extract coordination tasks from assessment data
         if assessment_data:
-            tasks = assessment_data.get("coordination_tasks", [])
-            for task in tasks:
-                need = {
-                    "type": task.get("resource_type", "personnel"),
-                    "sub_type": task.get("resource_sub_type", ""),
-                    "capabilities": task.get("required_capabilities", []),
-                    "quantity": task.get("quantity", 1),
-                    "priority": task.get("priority", "moderate"),
-                    "location": task.get("location"),
-                }
-                needs.append(need)
+            raw_tasks = assessment_data.get("coordination_tasks", [])
+            if not isinstance(raw_tasks, list):
+                raise ValueError("Assessment coordination_tasks must be a list")
+            for raw_task in raw_tasks:
+                if not isinstance(raw_task, dict):
+                    raise ValueError("Assessment coordination task must be an object")
+                task: dict[str, object] = raw_task
+                resource_type = task.get("resource_type", "personnel")
+                resource_sub_type = task.get("resource_sub_type", "")
+                capabilities = task.get("required_capabilities", [])
+                quantity = task.get("quantity", 1)
+                priority = task.get("priority", "moderate")
+                location = task.get("location")
+                if not isinstance(resource_type, str) or not isinstance(resource_sub_type, str):
+                    raise ValueError("Assessment coordination task resource types must be strings")
+                if not isinstance(capabilities, list) or any(not isinstance(item, str) for item in capabilities):
+                    raise ValueError("Assessment coordination task capabilities must be strings")
+                if not isinstance(quantity, int) or not isinstance(priority, str):
+                    raise ValueError("Assessment coordination task quantity and priority are invalid")
+                if location is not None and not isinstance(location, dict):
+                    raise ValueError("Assessment coordination task location must be an object")
+                needs.append(
+                    {
+                        "type": resource_type,
+                        "sub_type": resource_sub_type,
+                        "capabilities": capabilities,
+                        "quantity": quantity,
+                        "priority": priority,
+                        "location": location,
+                    }
+                )
 
         return needs
 
@@ -701,9 +734,13 @@ class AllocationProcessingPipeline:
             confidence=confidence,
         )
 
-        if summary.get("generation_method") in ("template_fallback", "safety_fallback"):
+        summary_generation_method = summary.get("generation_method")
+        if isinstance(summary_generation_method, str) and summary_generation_method in (
+            "template_fallback",
+            "safety_fallback",
+        ):
             confidence *= self._config.fallback_reduction_factor
-            generation_method = summary["generation_method"]
+            generation_method = summary_generation_method
 
         confidence = max(0.0, min(1.0, confidence))
         confidence_level = confidence_to_level(confidence)
@@ -776,7 +813,7 @@ class AllocationProcessingPipeline:
         shortfalls: list[ShortfallDetail],
         trade_off: TradeOffAnalysis | None,
         confidence: float,
-    ) -> dict:
+    ) -> dict[str, object]:
         """Generate plan summary using LLM with template fallback."""
         # Build template text first (always available)
         template_text = generate_plan_summary(

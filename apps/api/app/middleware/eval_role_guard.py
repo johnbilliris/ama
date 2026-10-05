@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Annotated, Any
 
@@ -110,7 +111,7 @@ async def get_principal(
     return _parse_token(authorization.split(" ", 1)[1])
 
 
-def _require_roles(allowed: frozenset[str]):
+def _require_roles(allowed: frozenset[str]) -> Callable[..., Awaitable[EvalPrincipal]]:
     async def _dep(p: Annotated[EvalPrincipal, Depends(get_principal)]) -> EvalPrincipal:
         if not (p.roles & allowed):
             raise HTTPException(

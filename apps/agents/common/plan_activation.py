@@ -6,14 +6,42 @@ edge case handling for activation during plan revision.
 FRs: FR-007, FR-029 | Research: R-008
 """
 
+from __future__ import annotations
+
+from collections.abc import Sequence
 from datetime import UTC, datetime
+from typing import TypedDict
+
+
+class RecoverySection(TypedDict, total=False):
+    content: str
+
+
+class EmergencyPlanDocument(TypedDict, total=False):
+    lifecycle_state: str
+    _last_endorsed_version: EmergencyPlanDocument
+    plan_sections: dict[str, RecoverySection]
+
+
+class PlanActivationRecord(TypedDict):
+    incident_id: str
+    activated_at: str
+    activated_by: str
+    deactivated_at: str | None
+    deactivation_reason: str | None
+
+
+class StakeholderEngagementLink(TypedDict):
+    planning_stakeholders: int
+    recovery_community: str
+    continuity_status: str
 
 
 def resolve_activatable_plan(
-    plan_doc: dict,
+    plan_doc: EmergencyPlanDocument,
     *,
     fallback_to_last_endorsed: bool = True,
-) -> dict | None:
+) -> EmergencyPlanDocument | None:
     """Resolve which version of a plan should be activated.
 
     If the plan is under revision (draft/in_consultation/under_review),
@@ -32,7 +60,7 @@ def build_activation_record(
     *,
     incident_id: str,
     activated_by: str,
-) -> dict:
+) -> PlanActivationRecord:
     """Build a PlanActivationRecord dict for embedding in an EmergencyPlan."""
     return {
         "incident_id": incident_id,
@@ -44,10 +72,10 @@ def build_activation_record(
 
 
 def build_deactivation_update(
-    activation_record: dict,
+    activation_record: PlanActivationRecord,
     *,
     reason: str,
-) -> dict:
+) -> PlanActivationRecord:
     """Add deactivation information to an existing activation record."""
     return {
         **activation_record,
@@ -57,9 +85,9 @@ def build_deactivation_update(
 
 
 def link_stakeholder_engagement(
-    planning_engagement_log: list[dict],
+    planning_engagement_log: Sequence[object],
     recovery_community_definition: str,
-) -> dict:
+) -> StakeholderEngagementLink:
     """Link planning stakeholder engagement to recovery community-led approach."""
     return {
         "planning_stakeholders": len(planning_engagement_log),
@@ -68,7 +96,7 @@ def link_stakeholder_engagement(
     }
 
 
-def should_trigger_me_framework(plan_doc: dict) -> bool:
+def should_trigger_me_framework(plan_doc: EmergencyPlanDocument) -> bool:
     """Check if plan activation should trigger M&E framework initialisation.
 
     Returns True if the plan has recovery_arrangements section with content.

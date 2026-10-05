@@ -11,11 +11,20 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
+from typing import Protocol
 
 logger = logging.getLogger(__name__)
 
 # Maximum OCC retries before falling back to UUID-suffixed version
 _DEFAULT_MAX_RETRIES = 3
+
+
+class VersioningContainer(Protocol):
+    def read_item(self, *, item: str, partition_key: str) -> dict[str, object]: ...
+
+    def replace_item(self, *, item: str, body: dict[str, object], if_match: str) -> object: ...
+
+    def create_item(self, *, body: dict[str, object]) -> object: ...
 
 
 class VersionConflictError(Exception):
@@ -37,7 +46,7 @@ class VersionCounter:
 
     def __init__(
         self,
-        cosmos_container: object | None = None,
+        cosmos_container: VersioningContainer | None = None,
         max_retries: int = _DEFAULT_MAX_RETRIES,
     ) -> None:
         self._container = cosmos_container
@@ -87,22 +96,31 @@ class VersionCounter:
         )
         return self._fallback_version(counter_id, incident_scope_key)
 
+    def _require_container(self) -> VersioningContainer:
+        container = self._container
+        if container is None:
+            raise RuntimeError("Cosmos container is not configured")
+        return container
+
     def _try_increment(self, counter_id: str, partition_key: str) -> int:
         """Attempt to read-increment-replace the counter document."""
+        container = self._require_container()
         try:
             # Read existing counter
-            doc = self._container.read_item(
+            doc = container.read_item(
                 item=counter_id,
                 partition_key=partition_key,
             )
             current_version = doc.get("current_version", 0)
             etag = doc.get("_etag", "")
+            if not isinstance(current_version, int) or not isinstance(etag, str):
+                raise ValueError(f"Version counter {counter_id} is malformed")
 
             new_version = current_version + 1
             doc["current_version"] = new_version
 
             # Replace with etag check
-            self._container.replace_item(
+            container.replace_item(
                 item=counter_id,
                 body=doc,
                 if_match=etag,
@@ -121,13 +139,14 @@ class VersionCounter:
 
     def _create_counter(self, counter_id: str, partition_key: str) -> int:
         """Create a new counter document starting at version 1."""
+        container = self._require_container()
         doc = {
             "id": counter_id,
             "current_version": 1,
             "incident_scope_key": partition_key,
         }
         try:
-            self._container.create_item(body=doc)
+            container.create_item(body=doc)
             return 1
         except Exception as exc:
             # If another instance already created it, try increment
@@ -137,11 +156,15 @@ class VersionCounter:
 
     def _fallback_version(self, counter_id: str, partition_key: str) -> int:
         """Generate a fallback version using current + 1 to avoid collision."""
+        container = self._require_container()
         try:
-            doc = self._container.read_item(
+            doc = container.read_item(
                 item=counter_id,
                 partition_key=partition_key,
             )
-            return doc.get("current_version", 0) + 1
+            current_version = doc.get("current_version", 0)
+            if not isinstance(current_version, int):
+                raise ValueError(f"Version counter {counter_id} is malformed")
+            return current_version + 1
         except Exception:
             return 1

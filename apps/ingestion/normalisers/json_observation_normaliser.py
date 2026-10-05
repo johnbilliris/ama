@@ -214,13 +214,14 @@ def _collect_measurements(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def _extract_coordinates(record: dict[str, Any], raw_payload: dict[str, Any]) -> tuple[float, float]:
-    station_metadata = (
-        raw_payload.get("station_metadata") if isinstance(raw_payload.get("station_metadata"), dict) else {}
-    )
+    station_metadata_value = raw_payload.get("station_metadata")
+    station_metadata = station_metadata_value if isinstance(station_metadata_value, dict) else {}
     raw_lon = record.get("lon", record.get("longitude", station_metadata.get("longitude")))
     raw_lat = record.get("lat", record.get("latitude", station_metadata.get("latitude")))
     if raw_lon in (None, "") or raw_lat in (None, ""):
         raise ValueError("station coordinates are required for JSON observations")
+    if not isinstance(raw_lon, (int, float, str)) or not isinstance(raw_lat, (int, float, str)):
+        raise ValueError("station coordinates must be numeric")
     return float(raw_lon), float(raw_lat)
 
 

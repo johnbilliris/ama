@@ -41,8 +41,8 @@ class SimToolInvocation(BaseModel):
         "stop",
         "list_participants",
     ]
-    arguments: dict = Field(default_factory=dict)
-    result: dict | None = None
+    arguments: dict[str, object] = Field(default_factory=dict)
+    result: dict[str, object] | None = None
     outcome: Literal["ok", "refused", "error", "cancelled-by-stop"]
     sub_agent: SubAgent | None = None
     latency_ms: int = 0

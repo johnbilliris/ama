@@ -17,6 +17,8 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from typing import Any
 
+from common.telemetry_types import Attributes
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -83,7 +85,7 @@ class _NoOpSpan:
     def record_exception(self, exc: BaseException) -> None:
         pass
 
-    def add_event(self, name: str, attributes: dict | None = None) -> None:
+    def add_event(self, name: str, attributes: Attributes | None = None) -> None:
         pass
 
     def __enter__(self) -> _NoOpSpan:
@@ -106,17 +108,17 @@ class _NoOpTracer:
 
 
 class _NoOpCounter:
-    def add(self, amount: int | float, attributes: dict | None = None) -> None:
+    def add(self, amount: int | float, attributes: Attributes | None = None) -> None:
         pass
 
 
 class _NoOpHistogram:
-    def record(self, amount: int | float, attributes: dict | None = None) -> None:
+    def record(self, amount: int | float, attributes: Attributes | None = None) -> None:
         pass
 
 
 class _NoOpGauge:
-    def set(self, amount: int | float, attributes: dict | None = None) -> None:
+    def set(self, amount: int | float, attributes: Attributes | None = None) -> None:
         pass
 
 

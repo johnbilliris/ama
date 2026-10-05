@@ -14,11 +14,16 @@ import inspect
 import json
 import logging
 from collections.abc import Awaitable, Callable
+from typing import TYPE_CHECKING
 
 import numpy as np
 from common.async_bridge import run_async
 from common.content_safety import ContentSafetyValidator
-from common.llm_mixin import LLMCallMixin
+
+if TYPE_CHECKING:
+    from apps.agents.common.llm_mixin import LLMCallMixin
+else:
+    from common.llm_mixin import LLMCallMixin
 from communication.config import CommunicationConfig
 from communication.models import ContentBlock, GenerationMethod
 from communication.templates import TemplateLoader

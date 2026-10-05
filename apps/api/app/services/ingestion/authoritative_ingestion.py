@@ -1,5 +1,7 @@
 from uuid import uuid4
 
+from app.api.dependencies.simulation_composition import get_resource_governor
+from app.repositories.signal_repository import SignalRepository
 from app.services.audit_service import AuditService
 from app.services.governance_registry import GovernanceRegistryService
 from app.services.operational_store import OperationalStore
@@ -13,9 +15,14 @@ from packages.domain.src.domain.models.signal import Signal
 
 
 class AuthoritativeIngestionService:
-    def __init__(self, registry: GovernanceRegistryService | None = None) -> None:
+    def __init__(
+        self,
+        registry: GovernanceRegistryService | None = None,
+        signal_repository: SignalRepository | None = None,
+    ) -> None:
         self._registry = registry or GovernanceRegistryService()
         self._scoring = ProvenanceScoringService()
+        self._signal_repository = signal_repository or SignalRepository(write_guard=get_resource_governor())
 
     def ingest(self, envelope: SignalEnvelope, source: DataSource | None = None) -> Signal:
         store = OperationalStore.current()

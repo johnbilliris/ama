@@ -64,7 +64,15 @@ def _resolve_backend_mode() -> str:
 
 def _default_seed_loader() -> list[dict[str, Any]]:
     seed_root = Path(seed_bootstrap.__file__).resolve().parent
-    return list(seed_bootstrap.bootstrap_seed_data(seed_root).get("data_sources", []))
+    raw_sources = seed_bootstrap.bootstrap_seed_data(seed_root).get("data_sources", [])
+    if not isinstance(raw_sources, list):
+        raise ValueError("Governance seed data_sources must be a list")
+    sources: list[dict[str, Any]] = []
+    for source in raw_sources:
+        if not isinstance(source, dict):
+            raise ValueError("Governance seed data source must be an object")
+        sources.append(source)
+    return sources
 
 
 def _build_composition() -> GovernanceComposition:
@@ -155,7 +163,10 @@ def initialize_governance_composition(app: FastAPI) -> GovernanceComposition:
 
 
 def get_governance_registry(request: Request) -> GovernanceRegistryService:
-    return get_governance_composition(request.app).registry
+    composition = get_governance_composition(request.app)
+    loader = getattr(request.app.state, "governance_seed_loader", None)
+    ensure_governance_seed_loaded(composition, seed_loader=loader)
+    return composition.registry
 
 
 def get_governance_cache(request: Request) -> GovernanceCacheService:

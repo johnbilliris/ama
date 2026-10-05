@@ -2479,6 +2479,52 @@
     ]
   },
   {
+    "organisation_id": "transgrid",
+    "name": "Transgrid",
+    "category": "utility",
+    "jurisdiction_ids": [
+      "nsw"
+    ],
+    "operating_role": "electricity_transmission_network_operator",
+    "authority_level": "network_operator",
+    "contact_channels": [
+      {
+        "type": "web",
+        "value": "https://www.transgrid.com.au"
+      }
+    ],
+    "participation_conditions": [
+      "Electricity transmission outage and restoration coordination"
+    ],
+    "status": "active",
+    "abbreviation": "Transgrid",
+    "aiims_functions": [
+      "operations",
+      "logistics"
+    ],
+    "lead_agency_for": [],
+    "primary_capabilities": [
+      "electricity_transmission",
+      "grid_restoration",
+      "infrastructure_damage_assessment"
+    ],
+    "hazard_types": [
+      "other",
+      "bushfire",
+      "storm"
+    ],
+    "workforce_type": "paid",
+    "legislative_basis": "National Electricity Law (NSW)",
+    "mutual_aid_partner_ids": [
+      "energy-networks-nsw",
+      "ses-nsw"
+    ],
+    "activation_triggers": [
+      "Transmission network outage impacting emergency response",
+      "State restoration coordination request"
+    ]
+  },
+  {
     "organisation_id": "transport-for-nsw",
     "name": "Transport for NSW",
     "category": "transport",
@@ -2515,7 +2561,7 @@
     "workforce_type": "paid",
     "legislative_basis": "Transport Administration Act 1988 (NSW)",
     "mutual_aid_partner_ids": [
-      "nsw-police",
+      "nswpf",
       "ses-nsw"
     ],
     "activation_triggers": [

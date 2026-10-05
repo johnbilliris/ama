@@ -5,7 +5,7 @@ import sys
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 from uuid import NAMESPACE_URL, uuid4, uuid5
 
 from app.services import state_store
@@ -44,6 +44,34 @@ _OUTBOX_TERMINAL_STATUSES: frozenset[str] = frozenset(
         "dead_lettered_failure",
     }
 )
+
+
+RecommendationMethod = Literal["llm", "template", "template_fallback", "safety_fallback"]
+ContentSafetyResult = Literal["passed", "failed_with_fallback", "not_checked"]
+
+
+def _recommendation_method(value: object, fallback: RecommendationMethod) -> RecommendationMethod:
+    for method in ("llm", "template", "template_fallback", "safety_fallback"):
+        if value == method:
+            return method
+    return fallback
+
+
+def _content_safety_result(value: object) -> ContentSafetyResult:
+    if value == "passed":
+        return "passed"
+    if value == "failed_with_fallback":
+        return "failed_with_fallback"
+    return "not_checked"
+
+
+def _outbox_count(entry: dict[str, object], field: str) -> int:
+    value = entry.get(field)
+    if not value:
+        return 0
+    if isinstance(value, (int, float, str, bytes)):
+        return int(value)
+    raise TypeError(f"Outbox field '{field}' must be integer-convertible")
 
 
 def _is_maf_runtime_enabled() -> bool:
@@ -187,15 +215,15 @@ async def consume_signal_accepted_outbox(tenant_id: str, *, max_items: int = 50)
             continue
         payload = entry.get("event") if isinstance(entry.get("event"), dict) else {}
         event = SignalAcceptedEvent.model_validate(payload)
-        attempt_count = int(entry.get("attempt_count") or 0) + 1
+        attempt_count = _outbox_count(entry, "attempt_count") + 1
         entry["status"] = "processing"
         entry["attempt_count"] = attempt_count
         entry["updated_at"] = datetime.now(UTC).isoformat()
         await publish_signal_accepted(event)
-        _record_outbox_result(event, attempt_count=attempt_count, retry_count=int(entry.get("retry_count") or 0))
+        _record_outbox_result(event, attempt_count=attempt_count, retry_count=_outbox_count(entry, "retry_count"))
         if not _outcomes_bucket(event).get(correlation_id):
             _record_outcome(event, status="dead_lettered_failure")
-            _record_outbox_result(event, attempt_count=attempt_count, retry_count=int(entry.get("retry_count") or 0))
+            _record_outbox_result(event, attempt_count=attempt_count, retry_count=_outbox_count(entry, "retry_count"))
         processed += 1
     return processed
 
@@ -262,8 +290,10 @@ def _lookup_existing_recommendation(event: SignalAcceptedEvent) -> Recommendatio
 def _extract_signal_ids(event: SignalAcceptedEvent, risk_output: dict[str, Any]) -> list[str]:
     raw_ids = risk_output.get("input_signal_ids") or risk_output.get("inputSignalIds") or []
     signal_ids: list[str] = [str(value) for value in raw_ids if str(value).strip()]
-    inputs = risk_output.get("inputs") if isinstance(risk_output.get("inputs"), dict) else {}
-    payload = inputs.get("payload") if isinstance(inputs.get("payload"), dict) else {}
+    inputs_value = risk_output.get("inputs")
+    inputs = inputs_value if isinstance(inputs_value, dict) else {}
+    payload_value = inputs.get("payload")
+    payload = payload_value if isinstance(payload_value, dict) else {}
     nested_signal_id = payload.get("signal_id") or payload.get("signalId")
     if nested_signal_id:
         signal_ids.append(str(nested_signal_id))
@@ -273,21 +303,21 @@ def _extract_signal_ids(event: SignalAcceptedEvent, risk_output: dict[str, Any])
 
 
 def _build_recommendation(event: SignalAcceptedEvent, workflow_doc: dict[str, Any]) -> Recommendation:
-    outputs = workflow_doc.get("workflow_outputs") if isinstance(workflow_doc.get("workflow_outputs"), dict) else {}
-    risk_output = outputs.get("risk_assessment") if isinstance(outputs.get("risk_assessment"), dict) else {}
+    outputs_value = workflow_doc.get("workflow_outputs")
+    outputs = outputs_value if isinstance(outputs_value, dict) else {}
+    risk_output_value = outputs.get("risk_assessment")
+    risk_output = risk_output_value if isinstance(risk_output_value, dict) else {}
 
     signal_ids = _extract_signal_ids(event, risk_output)
     confidence_score = float(risk_output.get("confidence_adjusted") or event.evaluated_confidence_score)
     if confidence_score >= 0.85:
-        level = "high"
+        level: Literal["low", "medium", "high"] = "high"
     elif confidence_score >= 0.65:
         level = "medium"
     else:
         level = "low"
 
-    generation_method = str(risk_output.get("generation_method") or "template")
-    if generation_method not in _RECOMMENDATION_METHODS:
-        generation_method = "template"
+    generation_method = _recommendation_method(risk_output.get("generation_method"), "template")
 
     evidence_payload = {
         "risk_decision_type": risk_output.get("decision_type"),
@@ -328,12 +358,13 @@ def _build_recommendation(event: SignalAcceptedEvent, workflow_doc: dict[str, An
 def _build_draft_alert(
     event: SignalAcceptedEvent, workflow_doc: dict[str, Any], recommendation: Recommendation
 ) -> PublicAlert:
-    outputs = workflow_doc.get("workflow_outputs") if isinstance(workflow_doc.get("workflow_outputs"), dict) else {}
-    communication = outputs.get("communication") if isinstance(outputs.get("communication"), dict) else {}
+    outputs_value = workflow_doc.get("workflow_outputs")
+    outputs = outputs_value if isinstance(outputs_value, dict) else {}
+    communication_value = outputs.get("communication")
+    communication = communication_value if isinstance(communication_value, dict) else {}
 
-    communication_blocks = (
-        communication.get("content_blocks") if isinstance(communication.get("content_blocks"), dict) else {}
-    )
+    blocks_value = communication.get("content_blocks")
+    communication_blocks = blocks_value if isinstance(blocks_value, dict) else {}
     flattened_blocks: dict[str, str] = {}
     for language, block in communication_blocks.items():
         if isinstance(block, dict):
@@ -349,33 +380,30 @@ def _build_draft_alert(
                 sort_keys=True,
             )
 
-    en_au_block = communication_blocks.get("en-AU") if isinstance(communication_blocks.get("en-AU"), dict) else {}
+    en_au_value = communication_blocks.get("en-AU")
+    en_au_block = en_au_value if isinstance(en_au_value, dict) else {}
     headline = str(en_au_block.get("title") or recommendation.summary)
     body = str(en_au_block.get("body") or recommendation.explanation)
     flattened_blocks["headline"] = headline
     flattened_blocks["body"] = body
 
-    languages = communication.get("languages") if isinstance(communication.get("languages"), list) else []
+    languages_value = communication.get("languages")
+    languages = languages_value if isinstance(languages_value, list) else []
     language_list = [str(language) for language in languages if str(language).strip()]
     if not language_list:
         language_list = [str(language) for language in communication_blocks.keys() if str(language).strip()]
 
-    audience = (
-        communication.get("audience_segments") if isinstance(communication.get("audience_segments"), list) else []
-    )
+    audience_value = communication.get("audience_segments")
+    audience = audience_value if isinstance(audience_value, list) else []
     audience_segments = [str(segment) for segment in audience if str(segment).strip()]
-    channels = communication.get("channel_set") if isinstance(communication.get("channel_set"), list) else []
+    channels_value = communication.get("channel_set")
+    channels = channels_value if isinstance(channels_value, list) else []
     channel_set = [str(channel) for channel in channels if str(channel).strip()]
 
-    content_safety_result = str(communication.get("content_safety_result") or "not_checked")
-    if content_safety_result not in _ALERT_SAFETY_RESULTS:
-        content_safety_result = "not_checked"
+    content_safety_result = _content_safety_result(communication.get("content_safety_result"))
+    generation_method = _recommendation_method(communication.get("generation_method"), recommendation.generation_method)
 
-    generation_method = str(communication.get("generation_method") or recommendation.generation_method)
-    if generation_method not in _RECOMMENDATION_METHODS:
-        generation_method = recommendation.generation_method
-
-    mode = "live" if is_live_tenant(event.tenant_id) else "rehearsal"
+    mode: Literal["live", "rehearsal"] = "live" if is_live_tenant(event.tenant_id) else "rehearsal"
 
     flattened_blocks["recommendationId"] = recommendation.recommendation_id
     flattened_blocks["requiredApprovalLevel"] = recommendation.required_approval_level

@@ -69,7 +69,12 @@ class RiverGaugePipeline(IngestionPipelineBase):
 
             metadata: dict[str, float] = {}
             try:
-                if station_latitude not in (None, "") and station_longitude not in (None, ""):
+                if (
+                    station_latitude not in (None, "")
+                    and station_longitude not in (None, "")
+                    and isinstance(station_latitude, (int, float, str))
+                    and isinstance(station_longitude, (int, float, str))
+                ):
                     metadata["latitude"] = float(station_latitude)
                     metadata["longitude"] = float(station_longitude)
             except (TypeError, ValueError):

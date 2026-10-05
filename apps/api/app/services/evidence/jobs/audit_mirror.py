@@ -7,6 +7,7 @@ import logging
 import os
 from datetime import UTC, datetime
 from typing import Any
+from uuid import uuid4
 
 from .._clients import EvidenceClientRegistry
 
@@ -109,7 +110,7 @@ def _record_heartbeat(registry: EvidenceClientRegistry) -> None:
     now = datetime.now(UTC)
     registry.get("evidence_audit_dlq").create_item(
         {
-            "id": f"heartbeat-{now.timestamp():.6f}",
+            "id": f"heartbeat-{uuid4().hex}",
             "audit_id": "audit-mirror",
             "kind": HEARTBEAT_KIND,
             "recorded_at": now.isoformat(),

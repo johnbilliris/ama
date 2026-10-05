@@ -25,11 +25,14 @@ import io
 import logging
 from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from app.core.auth import extract_principal_from_claims
 from fastapi import APIRouter, HTTPException, Query, Request, Response
 from pydantic import BaseModel, Field
+
+if TYPE_CHECKING:
+    from apps.api.app.repositories.audit_repository import AuditRepository
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +50,19 @@ _PRIVACY_ROLES = frozenset(
 )
 
 _ERASURE_RETENTION_DAYS = 30
-_ERASURE_REQUESTS: dict[str, dict[str, Any]] = {}
+
+
+class ErasureRequestRecord(TypedDict):
+    request_id: str
+    status: str
+    subject: str
+    legal_hold: bool
+    submitted_at: str
+    due_by: str
+    deletion_actions: list[str]
+
+
+_ERASURE_REQUESTS: dict[str, ErasureRequestRecord] = {}
 
 
 def _normalize_role(role: str) -> str:
@@ -119,7 +134,7 @@ _APP_SURFACES: dict[str, str] = {
 }
 
 
-def _audit_query_callable():  # pragma: no cover — wiring point
+def _audit_query_callable() -> AuditRepository | None:  # pragma: no cover — wiring point
     """Return the audit-repository SAR fetcher.
 
     Lazy-imported so tests can monkey-patch; production wiring uses the
@@ -315,7 +330,7 @@ async def submit_erasure_request(request: Request, body: ErasureRequestBody) -> 
             "backup-tombstone-requested",
         ]
 
-    row = {
+    row: ErasureRequestRecord = {
         "request_id": f"erasure-{submitted.strftime('%Y%m%d%H%M%S')}-{len(_ERASURE_REQUESTS) + 1}",
         "status": status,
         "subject": body.subject,

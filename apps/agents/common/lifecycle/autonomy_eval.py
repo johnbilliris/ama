@@ -19,14 +19,21 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Literal
+from typing import Literal, Protocol
 
 logger = logging.getLogger(__name__)
 
 AutonomyLevel = Literal["low", "standard", "high"]
 Environment = Literal["dev", "staging", "production", "rehearsal"]
+
+
+class JurisdictionPolicy(Protocol):
+    autonomy_level: AutonomyLevel
+    version: int
+
 
 DEFAULT_AUTONOMY_BY_ENV: dict[Environment, AutonomyLevel] = {
     "dev": "high",
@@ -74,7 +81,7 @@ class AutonomyEvaluator:
 
     def __init__(
         self,
-        policy_lookup: callable | None = None,
+        policy_lookup: Callable[[str], JurisdictionPolicy | None] | None = None,
         environment: Environment | None = None,
     ) -> None:
         self._policy_lookup = policy_lookup
@@ -86,7 +93,7 @@ class AutonomyEvaluator:
         if env not in DEFAULT_AUTONOMY_BY_ENV:
             logger.warning("Unknown AMA_ENVIRONMENT %r; defaulting to dev", env)
             return "dev"
-        return env  # type: ignore[return-value]
+        return env
 
     def evaluate(self, jurisdiction_code: str) -> AutonomyDial:
         """Return the autonomy dial for the given jurisdiction (with snapshot timestamp)."""
@@ -98,7 +105,7 @@ class AutonomyEvaluator:
             try:
                 policy = self._policy_lookup(jurisdiction_code)
                 if policy and getattr(policy, "autonomy_level", None) in ("low", "standard", "high"):
-                    level = policy.autonomy_level  # type: ignore[assignment]
+                    level = policy.autonomy_level
                     rationale = f"jurisdiction-policy:{jurisdiction_code}:v{getattr(policy, 'version', 0)}"
             except Exception as exc:  # noqa: BLE001
                 logger.warning("policy_lookup for %s failed: %s; using env default", jurisdiction_code, exc)

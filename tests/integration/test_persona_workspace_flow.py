@@ -22,7 +22,7 @@ def seed_workspace_state() -> None:
     PERSONAS["persona-police-001"] = Persona(
         persona_id="persona-police-001",
         display_name="Police Liaison",
-        organisation_id="nsw-police",
+        organisation_id="nswpf",
         jurisdiction_id="nsw",
         role="liaison_officer",
         active_incident_ids=["incident-001"],
@@ -41,7 +41,7 @@ def seed_workspace_state() -> None:
         incident_id="incident-001",
         title="Close arterial road",
         assigned_persona_id="persona-police-001",
-        assigned_organisation_id="nsw-police",
+        assigned_organisation_id="nswpf",
         dependency_task_ids=["task-001"],
         priority="critical",
     )
@@ -59,7 +59,7 @@ def test_workspace_filters_cross_agency_tasks() -> None:
         {
             "taskId": "task-002",
             "title": "Close arterial road",
-            "ownerOrganisationId": "nsw-police",
+            "ownerOrganisationId": "nswpf",
             "status": "queued",
             "expectedCompletion": None,
             "blockerReason": None,

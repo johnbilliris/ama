@@ -18,8 +18,10 @@ def template_entry_to_signal(
     exercise_start: datetime,
 ) -> Signal:
     raw = deepcopy(signal_envelope)
-    source_payload = raw.get("source") if isinstance(raw.get("source"), dict) else {}
-    provenance_payload = raw.get("provenance") if isinstance(raw.get("provenance"), dict) else {}
+    source_value = raw.get("source")
+    source_payload = source_value if isinstance(source_value, dict) else {}
+    provenance_value = raw.get("provenance")
+    provenance_payload = provenance_value if isinstance(provenance_value, dict) else {}
     data_source_id = str(
         source_payload.get("dataSourceId")
         or raw.get("data_source_id")

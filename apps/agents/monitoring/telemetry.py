@@ -9,6 +9,8 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from common.telemetry_types import Attributes
+
 logger = logging.getLogger(__name__)
 
 _OTEL_AVAILABLE = False
@@ -27,10 +29,10 @@ _SERVICE_NAME = "monitoring-agent"
 class _NoOpMetric:
     """Drop-in stub for any metric type."""
 
-    def add(self, value: Any = 1, attributes: dict | None = None) -> None:
+    def add(self, value: Any = 1, attributes: Attributes | None = None) -> None:
         pass
 
-    def record(self, value: Any = 0, attributes: dict | None = None) -> None:
+    def record(self, value: Any = 0, attributes: Attributes | None = None) -> None:
         pass
 
 

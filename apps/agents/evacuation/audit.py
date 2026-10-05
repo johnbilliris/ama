@@ -18,12 +18,13 @@ import logging
 import os
 import tempfile
 from collections import deque
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from itertools import islice
 from pathlib import Path
 from threading import RLock
-from typing import Any
+from typing import Any, Protocol
 from uuid import uuid4
 
 from evacuation.config import EvacuationConfig
@@ -54,13 +55,27 @@ class AuditQueryPage:
     next_cursor: str | None
 
 
+class AuditCosmosContainer(Protocol):
+    def create_item(self, *, body: dict[str, object]) -> object: ...
+
+    def read_item(self, *, item: str, partition_key: str) -> dict[str, object]: ...
+
+    def query_items(
+        self,
+        *,
+        query: str,
+        parameters: list[dict[str, Any]],
+        partition_key: str,
+    ) -> Iterable[dict[str, object]]: ...
+
+
 class AuditWriter:
     """Append-only audit trail with three-tier degradation."""
 
     def __init__(
         self,
         config: EvacuationConfig | None = None,
-        cosmos_client: object | None = None,
+        cosmos_client: AuditCosmosContainer | None = None,
     ) -> None:
         self._config = config or EvacuationConfig()
         self._cosmos_client = cosmos_client
@@ -411,10 +426,10 @@ class AuditWriter:
                 self._format_timestamp(to_timestamp),
             ),
         )
-        for clause, name, value in optional_filters:
-            if value is not None:
+        for clause, name, filter_value in optional_filters:
+            if filter_value is not None:
                 clauses.append(clause)
-                parameters.append({"name": name, "value": value})
+                parameters.append({"name": name, "value": filter_value})
         if cursor_timestamp is not None and cursor_id is not None:
             clauses.append(
                 "(c.timestamp > @cursor_timestamp OR (c.timestamp = @cursor_timestamp AND c.id > @cursor_id))"
@@ -439,7 +454,7 @@ class AuditWriter:
             next_cursor = self._encode_cursor(
                 {
                     "fingerprint": fingerprint,
-                    "timestamp": self._format_timestamp(last.timestamp),
+                    "timestamp": last.timestamp.astimezone(UTC).isoformat().replace("+00:00", "Z"),
                     "id": last.id,
                 }
             )

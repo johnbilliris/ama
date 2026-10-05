@@ -2,6 +2,8 @@ from app.core.settings import get_settings
 from app.repositories.simulation_repository import SimulationRepository
 from fastapi import HTTPException
 
+from packages.domain.src.domain.models.simulation_tenant import SimulationScenarioType
+
 
 class SimulationValidators:
     def __init__(self, simulation_repository: SimulationRepository):
@@ -34,21 +36,22 @@ class SimulationValidators:
                 detail="Creator must be included in the participants list",
             )
 
-    def validate_scenario_type(self, scenario_type: str) -> None:
-        valid = {
-            "Bushfire",
-            "Flood",
-            "Cyclone",
-            "Severe Storm",
-            "Heatwave",
-            "Earthquake",
-            "Tsunami",
-            "Pandemic",
-            "Other",
-            "Cross-jurisdiction",
+    def validate_scenario_type(self, scenario_type: str) -> SimulationScenarioType:
+        valid: dict[str, SimulationScenarioType] = {
+            "Bushfire": "Bushfire",
+            "Flood": "Flood",
+            "Cyclone": "Cyclone",
+            "Severe Storm": "Severe Storm",
+            "Heatwave": "Heatwave",
+            "Earthquake": "Earthquake",
+            "Tsunami": "Tsunami",
+            "Pandemic": "Pandemic",
+            "Other": "Other",
+            "Cross-jurisdiction": "Cross-jurisdiction",
         }
         if scenario_type not in valid:
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid scenario_type '{scenario_type}'. Must be one of: {sorted(valid)}",
             )
+        return valid[scenario_type]

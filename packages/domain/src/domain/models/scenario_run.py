@@ -3,6 +3,19 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+ScenarioRunType = Literal[
+    "bushfire",
+    "flood",
+    "cyclone",
+    "severe_storm",
+    "heatwave",
+    "earthquake",
+    "tsunami",
+    "pandemic",
+    "other",
+    "cross_jurisdiction",
+]
+
 
 class ScenarioEvent(BaseModel):
     event_id: str
@@ -17,7 +30,7 @@ class ScenarioRun(BaseModel):
 
     scenario_run_id: str
     scenario_name: str
-    scenario_type: Literal["bushfire", "flood", "cyclone", "severe_storm"]
+    scenario_type: ScenarioRunType
     jurisdiction_ids: list[str] = Field(default_factory=list)
     organisation_ids: list[str] = Field(default_factory=list)
     framework_ids: list[str] = Field(default_factory=list)

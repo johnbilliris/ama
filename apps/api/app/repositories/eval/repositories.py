@@ -16,6 +16,7 @@ from __future__ import annotations
 import logging
 import os
 import threading
+from collections.abc import Callable
 from typing import Any
 
 from ama_eval_core.audit import AuditAction, AuditEmitter, make_event
@@ -89,7 +90,7 @@ class _MemBackend:
         with self._lock:
             return dict(self._store[(partition, item_id)]) if (partition, item_id) in self._store else None
 
-    def query(self, predicate) -> list[dict[str, Any]]:
+    def query(self, predicate: Callable[[dict[str, Any]], bool]) -> list[dict[str, Any]]:
         with self._lock:
             return [dict(d) for d in self._store.values() if predicate(d)]
 

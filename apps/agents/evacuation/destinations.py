@@ -62,7 +62,9 @@ class DestinationAllocator:
             ]
             by_area = self._routes_by_area(zone_routes)
             known_capacity_areas = [
-                area_id for area_id in sorted(by_area) if residual.get(area_id) is not None and residual[area_id] > 0
+                area_id
+                for area_id in sorted(by_area)
+                if (remaining_capacity := residual.get(area_id)) is not None and remaining_capacity > 0
             ]
             unknown_capacity_areas = [area_id for area_id in sorted(by_area) if residual.get(area_id) is None]
             vulnerable_population = min(
@@ -99,7 +101,10 @@ class DestinationAllocator:
                 if assigned <= 0:
                     continue
                 area = areas[area_id]
-                before = residual[area_id] + assigned
+                remaining_capacity = residual[area_id]
+                if remaining_capacity is None:
+                    raise RuntimeError(f"Known-capacity area {area_id} lost its verified capacity")
+                before = remaining_capacity + assigned
                 area_routes = by_area[area_id]
                 route_allocations = self._largest_remainder(
                     assigned,
@@ -211,7 +216,9 @@ class DestinationAllocator:
         return grouped
 
     @staticmethod
-    def _route_key(route: EvacuationRoute) -> tuple:
+    def _route_key(
+        route: EvacuationRoute,
+    ) -> tuple[int, float, float, float, str, str, tuple[str, ...]]:
         return (
             int(route.zone_id),
             route.hazard_risk_score,

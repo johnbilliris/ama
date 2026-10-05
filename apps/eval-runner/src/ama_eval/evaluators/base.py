@@ -9,18 +9,20 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Protocol
 
+JsonObject = dict[str, object]
+
 
 @dataclass(frozen=True)
 class EvalInput:
     case_id: str
-    case_inputs: dict
-    expected_behaviour: dict
+    case_inputs: JsonObject
+    expected_behaviour: JsonObject
     sensitivity_labels: list[str]
     hazard_tags: list[str]
     severity: str
     language: str
     retrieval_scope: bool = False
-    retrieved_context: list[dict] = field(default_factory=list)
+    retrieved_context: list[JsonObject] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -39,13 +41,18 @@ class EvalResult:
     score: float
     pass_: bool
     rationale: str
-    evidence: dict = field(default_factory=dict)
+    evidence: JsonObject = field(default_factory=dict)
 
 
 class Evaluator(Protocol):
-    metric_id: str
-    family: str
-    tier: str
+    @property
+    def metric_id(self) -> str: ...
+
+    @property
+    def family(self) -> str: ...
+
+    @property
+    def tier(self) -> str: ...
 
     def evaluate(self, inp: EvalInput, out: ModelOutput) -> EvalResult: ...
 

@@ -3,6 +3,7 @@ import hashlib
 import logging
 import time
 from abc import ABC, abstractmethod
+from collections import deque
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
@@ -630,6 +631,10 @@ class IngestionPipelineBase(ABC):
 
 
 class PipelineMetrics:
+    MAX_LATENCY_SAMPLES = 1000
+    ROLLING_DEDUP_SECONDS = 3600
+    ROLLING_SIGNALS_SECONDS = 3600
+
     def __init__(self, pipeline_id: str):
         self.pipeline_id = pipeline_id
         self.signals_ingested: int = 0
@@ -639,7 +644,9 @@ class PipelineMetrics:
         self.poll_failures: int = 0
         self.validation_failures: int = 0
         self.persistence_failures: int = 0
-        self.latencies: list[float] = []
+        self.latencies: deque[float] = deque(maxlen=self.MAX_LATENCY_SAMPLES)
+        self._dedup_events: deque[tuple[datetime, bool]] = deque()
+        self._signal_events: deque[datetime] = deque()
 
     def record_poll(self, outcome: str) -> None:
         if outcome == "success":
@@ -650,11 +657,33 @@ class PipelineMetrics:
     def record_dedup_hit(self) -> None:
         self.dedup_hits += 1
         self.dedup_total += 1
+        now = datetime.now(UTC)
+        self._dedup_events.appendleft((now, True))
+        self._prune_events(now)
 
     def record_ingestion(self, latency_ms: float) -> None:
         self.signals_ingested += 1
         self.dedup_total += 1
         self.latencies.append(latency_ms)
+        now = datetime.now(UTC)
+        self._dedup_events.appendleft((now, False))
+        self._signal_events.appendleft(now)
+        self._prune_events(now)
+
+    def _prune_events(self, now: datetime) -> None:
+        dedup_cutoff = now - timedelta(seconds=self.ROLLING_DEDUP_SECONDS)
+        signal_cutoff = now - timedelta(seconds=self.ROLLING_SIGNALS_SECONDS)
+        self._dedup_events = deque(
+            (event_time, hit) for event_time, hit in self._dedup_events if event_time >= dedup_cutoff
+        )
+        self._signal_events = deque(event_time for event_time in self._signal_events if event_time >= signal_cutoff)
+
+    def dedup_window_counts(self, *, now: datetime | None = None) -> dict[str, int | float]:
+        now = now or datetime.now(UTC)
+        self._prune_events(now)
+        total = len(self._dedup_events)
+        hits = sum(1 for _, hit in self._dedup_events if hit)
+        return {"total": total, "hits": hits, "rate": hits / total if total else 0.0}
 
     def record_validation_failure(self) -> None:
         self.validation_failures += 1

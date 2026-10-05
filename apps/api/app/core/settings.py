@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     shared_write_capacity: int = Field(default=10000, alias="SHARED_WRITE_CAPACITY")
 
     @classmethod
-    def model_validate_strings(cls, value: str | list[str]) -> list[str]:
+    def _parse_string_list(cls, value: str | list[str]) -> list[str]:
         if isinstance(value, list):
             return value
         return [item.strip() for item in value.split(",") if item.strip()]
@@ -82,5 +82,5 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     settings = Settings()
-    settings.allowed_azure_regions = Settings.model_validate_strings(settings.allowed_azure_regions)
+    settings.allowed_azure_regions = Settings._parse_string_list(settings.allowed_azure_regions)
     return settings

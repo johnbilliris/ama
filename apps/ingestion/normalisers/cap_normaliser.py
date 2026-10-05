@@ -135,10 +135,10 @@ def normalise_cap_xml(raw_payload: dict[str, Any]) -> dict[str, Any]:
             raise ValueError("CAP XML missing required urgency/severity/certainty in info block")
 
         area_entries: list[dict[str, Any]] = []
-        for area in _findall(info, "area"):
-            area_desc = _find_text(area, "areaDesc")
-            circle = _find_text(area, "circle")
-            polygon = _find_text(area, "polygon")
+        for area_element in _findall(info, "area"):
+            area_desc = _find_text(area_element, "areaDesc")
+            circle = _find_text(area_element, "circle")
+            polygon = _find_text(area_element, "polygon")
             area_entries.append(
                 {
                     "areaDesc": area_desc,
@@ -184,9 +184,9 @@ def normalise_cap_xml(raw_payload: dict[str, Any]) -> dict[str, Any]:
         category = "geohazard"
 
     location: dict[str, Any] | None = None
-    for area in all_areas:
-        if area["polygon"]:
-            coord_pairs = area["polygon"].split()
+    for area_data in all_areas:
+        if area_data["polygon"]:
+            coord_pairs = area_data["polygon"].split()
             coordinates: list[list[float]] = []
             for pair in coord_pairs:
                 parts = pair.split(",")
@@ -202,8 +202,8 @@ def normalise_cap_xml(raw_payload: dict[str, Any]) -> dict[str, Any]:
                     "precisionMeters": 1000,
                 }
                 break
-        if area["circle"]:
-            parts = area["circle"].split()
+        if area_data["circle"]:
+            parts = area_data["circle"].split()
             if parts:
                 coords = parts[0].split(",")
                 if len(coords) >= 2:

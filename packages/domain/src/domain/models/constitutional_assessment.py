@@ -20,6 +20,7 @@ AssessmentTrigger = Literal["initial_review", "source_change", "constitution_ame
 class ConstitutionalAssessment(BaseModel):
     assessment_id: str
     data_source_id: str
+    tenant_id: str = "live"
     principle: ConstitutionalPrinciple
     compliance_status: AssessmentComplianceStatus
     explanation: str

@@ -17,7 +17,7 @@ import re
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Protocol
 from uuid import UUID, uuid5
 
 from communication.config import CommunicationConfig
@@ -39,6 +39,40 @@ from packages.domain.src.domain.tenant_mode import is_live_tenant
 logger = logging.getLogger(__name__)
 
 ApprovalResolver = Callable[[str, str, int], PublicAlert | None | Awaitable[PublicAlert | None]]
+
+
+class SmsDeliveryClient(Protocol):
+    def send(
+        self,
+        *,
+        from_: str,
+        to: list[str],
+        message: str,
+        enable_delivery_report: bool,
+        tag: str,
+    ) -> object | Awaitable[object]: ...
+
+
+class PushDeliveryClient(Protocol):
+    def send_notification(
+        self,
+        payload: dict[str, object],
+        *,
+        target: str | list[str],
+    ) -> object | Awaitable[object]: ...
+
+
+class BroadcastDeliveryClient(Protocol):
+    def post(
+        self,
+        url: str,
+        *,
+        json: dict[str, object],
+        headers: dict[str, str],
+        timeout: float,
+    ) -> object | Awaitable[object]: ...
+
+
 _DELIVERY_NAMESPACE = UUID("23803077-a011-41be-8f74-c39104c9eec8")
 _GSM7_BASIC = frozenset(
     "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?"
@@ -59,7 +93,7 @@ class NotificationHubRestClient:
         self._authorization = authorization
         self._timeout_seconds = timeout_seconds
 
-    async def send_notification(self, payload: dict[str, Any], *, target: str | list[str]):
+    async def send_notification(self, payload: dict[str, Any], *, target: str | list[str]) -> object:
         import httpx
 
         tags = [target] if isinstance(target, str) else target
@@ -104,9 +138,9 @@ class MultiChannelDeliveryService:
     def __init__(
         self,
         config: CommunicationConfig | None = None,
-        sms_client: object | None = None,
-        push_client: object | None = None,
-        broadcast_client: object | None = None,
+        sms_client: SmsDeliveryClient | None = None,
+        push_client: PushDeliveryClient | None = None,
+        broadcast_client: BroadcastDeliveryClient | None = None,
         approval_resolver: ApprovalResolver | None = None,
     ) -> None:
         self._config = config or CommunicationConfig()
@@ -287,7 +321,7 @@ class MultiChannelDeliveryService:
         return targets
 
     @staticmethod
-    def _geometry_key(zone_boundary: dict) -> str | None:
+    def _geometry_key(zone_boundary: dict[str, object]) -> str | None:
         if not zone_boundary:
             return None
         return json.dumps(zone_boundary, sort_keys=True, separators=(",", ":"))

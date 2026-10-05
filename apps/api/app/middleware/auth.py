@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import os
+from typing import TypedDict
 
 from app.core.dev_access import dev_access_enabled
 from app.schemas.envelope_errors import ExtensionEnvelopeError
@@ -16,6 +17,18 @@ from fastapi import Depends, HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 logger = logging.getLogger(__name__)
+
+
+class JWTClaims(TypedDict, total=False):
+    sub: str
+    oid: str
+    roles: list[str]
+
+
+class AuthenticatedIdentity(TypedDict):
+    sub: str
+    roles: list[str]
+
 
 _bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -61,7 +74,7 @@ def _log_auth_forbidden(
     )
 
 
-def _validate_jwt(token: str) -> dict:
+def _validate_jwt(token: str) -> JWTClaims:
     """Validate management tokens using the shared Entra JWKS verifier."""
     try:
         from app.middleware.entra_auth import _validate_jwt as validate_entra_jwt
@@ -75,7 +88,7 @@ async def authorize_management(
     request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
     required_role: str = "operator",
-) -> dict:
+) -> AuthenticatedIdentity:
     """FastAPI dependency for management API authorization.
 
     Returns the authenticated identity as a dict with 'sub' and 'roles' keys.
@@ -114,6 +127,6 @@ async def authorize_management(
 async def authorize_admin(
     request: Request,
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
-) -> dict:
+) -> AuthenticatedIdentity:
     """Require admin role specifically."""
     return await authorize_management(request, credentials, required_role="admin")

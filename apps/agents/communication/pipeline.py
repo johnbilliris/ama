@@ -22,6 +22,7 @@ import logging
 import time
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
+from typing import Protocol
 
 from common.async_bridge import run_async
 from common.content_safety import ContentSafetyValidator
@@ -59,6 +60,26 @@ from packages.domain.src.domain.tenant_mode import is_live_tenant
 logger = logging.getLogger(__name__)
 
 
+class CommunicationReadContainer(Protocol):
+    def read_item(self, *, item: str, partition_key: str) -> dict[str, object]: ...
+
+
+class CommunicationWriteContainer(Protocol):
+    def create_item(self, *, body: dict[str, object]) -> object: ...
+
+
+def _required_string_list(record: dict[str, object], field: str) -> list[str]:
+    raw_values = record.get(field, [])
+    if not isinstance(raw_values, list):
+        raise HandoffReferenceError(f"Referenced record field {field!r} must be a list")
+    values: list[str] = []
+    for value in raw_values:
+        if not isinstance(value, str):
+            raise HandoffReferenceError(f"Referenced record field {field!r} must contain strings")
+        values.append(value)
+    return values
+
+
 class CommunicationHandoffPayload(BaseModel):
     """Validated boundary shared with the Risk Assessment producer."""
 
@@ -92,11 +113,11 @@ class CommunicationProcessingPipeline:
         audit_writer: AuditWriter | None = None,
         delivery_service: MultiChannelDeliveryService | None = None,
         content_safety: ContentSafetyValidator | None = None,
-        alert_store: object | None = None,
-        assessment_store: object | None = None,
-        recommendation_store: object | None = None,
-        incident_store: object | None = None,
-        delivery_store: object | None = None,
+        alert_store: CommunicationReadContainer | None = None,
+        assessment_store: CommunicationReadContainer | None = None,
+        recommendation_store: CommunicationReadContainer | None = None,
+        incident_store: CommunicationReadContainer | None = None,
+        delivery_store: CommunicationWriteContainer | None = None,
         alert_repository: CommunicationAlertRepository | None = None,
         approval_workflow: ApprovalWorkflow | None = None,
     ) -> None:
@@ -358,7 +379,7 @@ class CommunicationProcessingPipeline:
             )
             return True
 
-    def _stage_2_retrieve(self, event: AgentHandoffEvent) -> tuple[dict, dict]:
+    def _stage_2_retrieve(self, event: AgentHandoffEvent) -> tuple[dict[str, object], dict[str, object]]:
         """Stage 2: Data Retrieval — get recommendation and assessment."""
         with pipeline_span("communication.stage.retrieve"):
             payload = CommunicationHandoffPayload.model_validate(event.payload)
@@ -404,15 +425,17 @@ class CommunicationProcessingPipeline:
             return deepcopy(assessment_data), deepcopy(recommendation_data)
 
     @staticmethod
-    def _semantic_change_key(event: AgentHandoffEvent, assessment_data: dict) -> str:
+    def _semantic_change_key(event: AgentHandoffEvent, assessment_data: dict[str, object]) -> str:
         assessment_id = str(assessment_data.get("assessment_id") or assessment_data.get("id") or "")
         hazard_type = str(assessment_data.get("hazard_type") or "general")
         change_type = str(event.payload.get("change_type") or "initial")
         return f"{hazard_type}:{assessment_id}:{change_type}"
 
     @staticmethod
-    def _commander_chain(incident_data: dict) -> list[str]:
+    def _commander_chain(incident_data: dict[str, object]) -> list[str]:
         raw_chain = incident_data.get("commander_chain") or incident_data.get("commanderChain") or []
+        if not isinstance(raw_chain, list):
+            raise HandoffReferenceError("Incident commander_chain must be a list")
         chain: list[str] = []
         for entry in raw_chain:
             if isinstance(entry, str) and entry.strip():
@@ -425,12 +448,12 @@ class CommunicationProcessingPipeline:
 
     @staticmethod
     def _read_required(
-        store: object | None,
+        store: CommunicationReadContainer | None,
         *,
         record_id: str,
         partition_key: str,
         record_type: str,
-    ) -> dict:
+    ) -> dict[str, object]:
         if store is None:
             raise TransientHandoffDependencyError(f"{record_type} store is not configured")
         try:
@@ -445,7 +468,7 @@ class CommunicationProcessingPipeline:
         return record
 
     @staticmethod
-    def _validate_record_scope(record_type: str, record: dict, event: AgentHandoffEvent) -> None:
+    def _validate_record_scope(record_type: str, record: dict[str, object], event: AgentHandoffEvent) -> None:
         record_incident = record.get("incident_id") or record.get("incidentId") or record.get("id")
         if str(record_incident or "") != event.incident_id:
             raise HandoffReferenceError(f"Referenced {record_type} belongs to a different incident")
@@ -453,7 +476,7 @@ class CommunicationProcessingPipeline:
         if record_tenant is not None and str(record_tenant) != event.tenant_id:
             raise HandoffReferenceError(f"Referenced {record_type} belongs to a different tenant")
 
-    def _stage_3_segment(self, event: AgentHandoffEvent, assessment_data: dict) -> list[AudienceSegment]:
+    def _stage_3_segment(self, event: AgentHandoffEvent, assessment_data: dict[str, object]) -> list[AudienceSegment]:
         """Stage 3: Audience Segmentation."""
         with pipeline_span("communication.stage.segment"):
             demographics = dict(event.payload.get("demographics", {}) or {})
@@ -468,7 +491,7 @@ class CommunicationProcessingPipeline:
             )
             return segments
 
-    def _stage_4_templates(self, event: AgentHandoffEvent, assessment_data: dict) -> dict[str, str]:
+    def _stage_4_templates(self, event: AgentHandoffEvent, assessment_data: dict[str, object]) -> dict[str, str]:
         """Stage 4: Template Loading & Interpolation — build template values."""
         with pipeline_span("communication.stage.templates"):
             return {
@@ -484,8 +507,8 @@ class CommunicationProcessingPipeline:
         self,
         event: AgentHandoffEvent,
         template_values: dict[str, str],
-        assessment_data: dict,
-        recommendation_data: dict,
+        assessment_data: dict[str, object],
+        recommendation_data: dict[str, object],
         draft_deadline: float,
     ) -> dict[str, ContentBlock]:
         """Stage 5: Multilingual Alert Drafting."""
@@ -596,7 +619,7 @@ class CommunicationProcessingPipeline:
         self,
         content_blocks: dict[str, ContentBlock],
         template_values: dict[str, str],
-        assessment_data: dict,
+        assessment_data: dict[str, object],
         tenant_id: str,
         handoff_id: str,
         alert_type: str,
@@ -727,8 +750,8 @@ class CommunicationProcessingPipeline:
         safety_result: ContentSafetyResult,
         safety_details: dict[str, ContentSafetyDetail],
         bt_penalty: float,
-        recommendation_data: dict,
-        assessment_data: dict,
+        recommendation_data: dict[str, object],
+        assessment_data: dict[str, object],
     ) -> PublicAlert:
         """Stage 8: Alert Versioning & Persistence."""
         with pipeline_span("communication.stage.version_persist"):
@@ -838,9 +861,9 @@ class CommunicationProcessingPipeline:
                 assessment_id=assessment_id,
                 assessment_timestamp=assessment_timestamp,
                 assessment_freshness=freshness,
-                commander_chain=list(recommendation_data.get("_commander_chain", [])),
+                commander_chain=_required_string_list(recommendation_data, "_commander_chain"),
                 warning_tier=str(event.payload.get("warningTier") or "") or None,
-                active_subzone_ids=list(assessment_data.get("active_subzone_ids", [])),
+                active_subzone_ids=_required_string_list(assessment_data, "active_subzone_ids"),
                 tenant_id=event.tenant_id,
                 expires_at=datetime.now(UTC) + timedelta(hours=self._config.alert_expiry_hours),
             )
@@ -882,7 +905,7 @@ class CommunicationProcessingPipeline:
 
             return alert
 
-    def _assessment_freshness(self, assessment_data: dict) -> tuple[datetime | None, str]:
+    def _assessment_freshness(self, assessment_data: dict[str, object]) -> tuple[datetime | None, str]:
         raw_timestamp = (
             assessment_data.get("assessed_at")
             or assessment_data.get("assessment_timestamp")
@@ -1053,7 +1076,7 @@ class CommunicationProcessingPipeline:
         confidence: float | None = None,
         confidence_penalties_applied: list[str] | None = None,
         processing_duration_ms: int | None = None,
-        input_snapshot: dict | None = None,
+        input_snapshot: dict[str, object] | None = None,
         output_summary: str | None = None,
         content_safety_results: dict[str, str] | None = None,
         generation_method: str | None = None,

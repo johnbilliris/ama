@@ -174,7 +174,12 @@ class DashboardService:
             reason = str(signal.provenance.get("sourceReason", state))
             received_at = signal.received_at
             age_seconds = (now - received_at).total_seconds()
-            freshness_window = int(signal.provenance.get("expectedUpdateSeconds", 600))
+            expected_update_seconds = signal.provenance.get("expectedUpdateSeconds")
+            freshness_window = (
+                expected_update_seconds
+                if isinstance(expected_update_seconds, int) and not isinstance(expected_update_seconds, bool)
+                else 600
+            )
             if age_seconds > freshness_window:
                 state = "stale"
                 reason = "stale_signal_window"

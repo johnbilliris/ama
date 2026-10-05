@@ -8,8 +8,10 @@ from __future__ import annotations
 
 from risk_assessment.models import SeverityLevel
 
+from packages.domain.src.domain.models.hazard_assessment import AssessmentType
+
 # Signal category → default assessment type mapping
-CATEGORY_TO_ASSESSMENT_TYPE: dict[str, str] = {
+CATEGORY_TO_ASSESSMENT_TYPE: dict[str, AssessmentType] = {
     "fire": "spread_prediction",
     "weather": "impact_projection",
     "hydrology": "impact_projection",
@@ -93,6 +95,6 @@ class SeverityComputer:
 
         return severity
 
-    def derive_assessment_type(self, signal_category: str) -> str:
+    def derive_assessment_type(self, signal_category: str) -> AssessmentType:
         """Derive the assessment type from signal category (FR-010)."""
         return CATEGORY_TO_ASSESSMENT_TYPE.get(signal_category, "impact_projection")

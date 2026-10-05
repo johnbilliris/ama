@@ -289,14 +289,14 @@ class RoadNetworkLoader:
         snapshot._refresh_failure_reason = self._refresh_failure_reason
 
         for override in edge_overrides:
-            edge = snapshot._edges_by_id.get(str(override.get("id", "")))
-            if edge is None:
+            overridden_edge = snapshot._edges_by_id.get(str(override.get("id", "")))
+            if overridden_edge is None:
                 continue
-            edge.capacity_vehicles_per_hour = int(
-                override.get("capacity_vehicles_per_hour", edge.capacity_vehicles_per_hour)
+            overridden_edge.capacity_vehicles_per_hour = int(
+                override.get("capacity_vehicles_per_hour", overridden_edge.capacity_vehicles_per_hour)
             )
-            edge.closure_status = str(override.get("closure_status", edge.closure_status))
-            edge.closure_reason = override.get("closure_reason", edge.closure_reason)
+            overridden_edge.closure_status = str(override.get("closure_status", overridden_edge.closure_status))
+            overridden_edge.closure_reason = override.get("closure_reason", overridden_edge.closure_reason)
         return snapshot
 
     def apply_closure(self, edge_id: str, reason: str) -> bool:

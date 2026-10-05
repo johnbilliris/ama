@@ -110,7 +110,10 @@ class EntraPrincipalResolver:
         if matching_key is None:
             raise HTTPException(status_code=401, detail="Bearer token signing key is unknown")
 
-        public_key = RSAAlgorithm.from_jwk(json.dumps(matching_key))
+        from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+
+        parsed_key = RSAAlgorithm.from_jwk(json.dumps(matching_key))
+        public_key = parsed_key.public_key() if isinstance(parsed_key, RSAPrivateKey) else parsed_key
         try:
             return jwt.decode(
                 token,

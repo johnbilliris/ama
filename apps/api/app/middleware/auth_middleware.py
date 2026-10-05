@@ -20,7 +20,7 @@ DEFAULT_CLAIMS: dict[str, Any] = {
     "roles": ["SimulationUser"],
 }
 
-_AUTHENTICATED_PREFIXES = ("/api/simulations", "/api/incidents", "/api/personas")
+_AUTHENTICATED_PREFIXES = ("/api/simulations", "/api/incidents", "/api/personas", "/api/data-sources")
 _INCIDENT_MAP_PATH = "/api/incidents/map"
 _ANONYMOUS_INCIDENT_MAP_METHODS = frozenset({"GET", "HEAD"})
 _NON_PRODUCTION_ENVIRONMENTS = frozenset({"dev", "development", "test"})

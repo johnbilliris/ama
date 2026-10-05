@@ -16,6 +16,9 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from typing import TypedDict
+
+from risk_assessment.correlation import RiskSignal
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +35,18 @@ DEFAULT_THRESHOLDS: dict[str, float] = {
     "warning": 0.8,
     "emergency": 0.95,
 }
+
+
+class ExtrapolationDetails(TypedDict, total=False):
+    reason: str
+    slope_per_hour: float
+    intercept: float
+    r_squared: float
+    time_span_hours: float
+    signal_ids: list[str]
+    warning_threshold: float
+    emergency_threshold: float
+
 
 MAX_EXTRAPOLATION_HOURS = 72
 
@@ -61,10 +76,10 @@ class ExtrapolationResult:
     data_points_used: int = 0
     extrapolation_confidence: float = 0.0
     category: str = ""
-    details: dict = field(default_factory=dict)
+    details: ExtrapolationDetails = field(default_factory=ExtrapolationDetails)
 
 
-def _extract_trend_points(signals: list[dict]) -> list[TrendPoint]:
+def _extract_trend_points(signals: list[RiskSignal]) -> list[TrendPoint]:
     """Extract timestamped confidence values from signals for trend analysis."""
     points: list[TrendPoint] = []
 
@@ -161,7 +176,7 @@ def _r_squared(points: list[TrendPoint], slope: float, intercept: float) -> floa
 
 
 def extrapolate_hazard_trend(
-    signals: list[dict],
+    signals: list[RiskSignal],
     category: str = "",
     min_points: int = 2,
 ) -> ExtrapolationResult:

@@ -68,7 +68,7 @@ class RawPayloadBlobStore:
 
         container_name, blob_name = blob_path.split("/", 1)
         container_client = self._client.get_container_client(container_name)
-        append_blob = container_client.get_blob_client(blob_name).get_append_blob_client()
+        append_blob = container_client.get_blob_client(blob_name)
 
         last_error: Exception | None = None
         for attempt in range(3):

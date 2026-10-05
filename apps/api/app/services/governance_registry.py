@@ -1,9 +1,11 @@
 import logging
 import time
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
+from app.core.tenant_context import TenantContext, get_current_tenant
 from app.repositories.governance_repository import GovernanceRepository
 from app.validators.governance_validators import validate_agent_name, validate_handoff_chain
 from fastapi import HTTPException
@@ -14,7 +16,7 @@ from packages.domain.src.domain.models.data_source import DataSource
 from packages.domain.src.domain.models.functional_domain_precedence import (
     FunctionalDomainPrecedence,
 )
-from packages.domain.src.domain.models.governance_audit import GovernanceAuditEntry
+from packages.domain.src.domain.models.governance_audit import GovernanceAction, GovernanceAuditEntry
 from packages.domain.src.domain.models.handoff_chain import HandoffChainDefinition
 from packages.domain.src.domain.seed.bootstrap import bootstrap_seed_data
 
@@ -24,17 +26,39 @@ DEFAULT_GRACE_PERIOD_HOURS = 72
 
 
 class GovernanceRegistryService:
-    def __init__(self, repo: GovernanceRepository | None = None) -> None:
+    def __init__(
+        self,
+        repo: GovernanceRepository | None = None,
+        tenant_context_provider: Callable[[], TenantContext] | None = None,
+    ) -> None:
         self._repo = repo or GovernanceRepository()
+        self._tenant_context_provider = tenant_context_provider or get_current_tenant
+        self._has_custom_tenant_context_provider = tenant_context_provider is not None
+        self._cache_invalidator: Callable[[str, str], None] | None = None
+
+    def set_cache_invalidator(self, invalidator: Callable[[str, str], None]) -> None:
+        self._cache_invalidator = invalidator
+
+    def _invalidate_cache(self, data_source_id: str) -> None:
+        if self._cache_invalidator is not None:
+            self._cache_invalidator(data_source_id, self._assessment_tenant_id(require_context=False))
+
+    def _assessment_tenant_id(self, *, require_context: bool) -> str:
+        try:
+            return self._tenant_context_provider().tenant_id
+        except LookupError as exc:
+            if require_context and self._has_custom_tenant_context_provider:
+                raise HTTPException(status_code=403, detail="Tenant context is required") from exc
+            return "live"
 
     # --- Audit helper ---
 
     def _audit(
         self,
         data_source_id: str,
-        action: str,
+        action: GovernanceAction,
         actor_id: str,
-        details: dict | None = None,
+        details: dict[str, object] | None = None,
         related_entity_id: str | None = None,
     ) -> GovernanceAuditEntry:
         entry = GovernanceAuditEntry(
@@ -57,7 +81,12 @@ class GovernanceRegistryService:
     def import_seed_catalogue(self, seed_root: Path, actor_id: str = "system") -> list[DataSource]:
         seed_data = bootstrap_seed_data(seed_root)
         imported: list[DataSource] = []
-        for raw in seed_data.get("data_sources", []):
+        raw_data_sources = seed_data.get("data_sources", [])
+        if not isinstance(raw_data_sources, list):
+            raise TypeError("Seed catalogue data_sources must be a list")
+        for raw in raw_data_sources:
+            if not isinstance(raw, dict):
+                raise TypeError("Each seed catalogue data source must be an object")
             source = DataSource(**raw)
             existing = self._repo.get_source(source.data_source_id)
             if not existing:
@@ -84,7 +113,7 @@ class GovernanceRegistryService:
     def list_sources(self, **filters: str | None) -> list[DataSource]:
         return self._repo.list_sources(**filters)
 
-    def update_source(self, data_source_id: str, updates: dict, actor_id: str) -> DataSource:
+    def update_source(self, data_source_id: str, updates: dict[str, object], actor_id: str) -> DataSource:
         source = self.get_source(data_source_id)
         old_values = {k: getattr(source, k) for k in updates if hasattr(source, k)}
         for key, value in updates.items():
@@ -93,6 +122,7 @@ class GovernanceRegistryService:
         saved = self._repo.save_source(source)
         self._audit(data_source_id, "updated", actor_id, {"old": old_values, "new": updates})
         self._trigger_rereview_on_change(data_source_id, actor_id)
+        self._invalidate_cache(data_source_id)
         return saved
 
     def deactivate_source(self, data_source_id: str, actor_id: str) -> DataSource:
@@ -103,11 +133,14 @@ class GovernanceRegistryService:
         source.deactivated_at = datetime.now(UTC)
         saved = self._repo.save_source(source)
         self._audit(data_source_id, "deactivated", actor_id)
+        self._invalidate_cache(data_source_id)
         return saved
 
     # --- Constitutional compliance ---
 
     def create_assessment(self, assessment: ConstitutionalAssessment, actor_id: str) -> ConstitutionalAssessment:
+        tenant_id = self._assessment_tenant_id(require_context=True)
+        assessment = assessment.model_copy(update={"tenant_id": tenant_id})
         self.get_source(assessment.data_source_id)
 
         if assessment.compliance_status == "partially_compliant" and not assessment.conditions:
@@ -119,9 +152,9 @@ class GovernanceRegistryService:
             )
 
         current = [
-            a
-            for a in self._repo.get_current_assessments(assessment.data_source_id)
-            if a.principle == assessment.principle
+            current_assessment
+            for current_assessment in self._repo.get_current_assessments(assessment.data_source_id, tenant_id)
+            if current_assessment.principle == assessment.principle
         ]
         for prev in current:
             prev.is_current = False
@@ -145,9 +178,10 @@ class GovernanceRegistryService:
         self._derive_compliance_status(assessment.data_source_id)
         return saved
 
-    def get_compliance_profile(self, data_source_id: str) -> dict:
+    def get_compliance_profile(self, data_source_id: str) -> dict[str, object]:
         self.get_source(data_source_id)
-        all_assessments = self._repo.get_assessments_for_source(data_source_id)
+        tenant_id = self._assessment_tenant_id(require_context=False)
+        all_assessments = self._repo.get_assessments_for_source(data_source_id, tenant_id)
         return {
             "data_source_id": data_source_id,
             "current_assessments": [a for a in all_assessments if a.is_current],
@@ -220,7 +254,10 @@ class GovernanceRegistryService:
         source = self.get_source(data_source_id)
         if source.compliance_status != "compliance_lapsed":
             raise HTTPException(status_code=409, detail="Source is not in compliance_lapsed state.")
-        source.grace_period_end = source.grace_period_end + timedelta(hours=extend_hours)
+        grace_period_end = source.grace_period_end
+        if grace_period_end is None:
+            raise HTTPException(status_code=409, detail="Source has no grace-period end to extend.")
+        source.grace_period_end = grace_period_end + timedelta(hours=extend_hours)
         saved = self._repo.save_source(source)
         self._audit(
             data_source_id,
@@ -283,6 +320,7 @@ class GovernanceRegistryService:
             related_entity_id=saved.assignment_id,
         )
         self._derive_governance_status(assignment.data_source_id)
+        self._invalidate_cache(assignment.data_source_id)
         return saved
 
     def define_handoff_chain(self, chain: HandoffChainDefinition, actor_id: str) -> HandoffChainDefinition:
@@ -313,9 +351,10 @@ class GovernanceRegistryService:
             related_entity_id=saved.chain_id,
         )
         self._derive_governance_status(chain.data_source_id)
+        self._invalidate_cache(chain.data_source_id)
         return saved
 
-    def get_governance_profile(self, data_source_id: str) -> dict:
+    def get_governance_profile(self, data_source_id: str) -> dict[str, object]:
         self.get_source(data_source_id)
         return {
             "data_source_id": data_source_id,
@@ -360,8 +399,8 @@ class GovernanceRegistryService:
 
     # --- Governance gaps ---
 
-    def detect_governance_gaps(self) -> list[dict]:
-        gaps: list[dict] = []
+    def detect_governance_gaps(self) -> list[dict[str, object]]:
+        gaps: list[dict[str, object]] = []
         for source in self._repo.list_sources():
             if source.status == "deactivated":
                 continue
@@ -375,7 +414,7 @@ class GovernanceRegistryService:
 
     # --- Dashboard ---
 
-    def get_dashboard_summary(self) -> dict:
+    def get_dashboard_summary(self) -> dict[str, object]:
         sources = [s for s in self._repo.list_sources() if s.status != "deactivated"]
         gaps = self.detect_governance_gaps()
         gap_count = len(gaps)

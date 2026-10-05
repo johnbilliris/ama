@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from typing import Literal
 from uuid import uuid4
 
 from app.services.state_store import DEAD_LETTERS
@@ -24,7 +25,7 @@ class DeadLetterService:
     def create_entry(
         self,
         *,
-        entry_type: str,
+        entry_type: Literal["handoff_failure", "ingestion_failure", "event_delivery_failure"],
         correlation_id: str,
         original_payload: dict[str, object],
         failure_reason: str,

@@ -10,11 +10,14 @@ import asyncio
 import json
 import logging
 import sys
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
 
 from ._factory import MafAgentFacade
+
+if TYPE_CHECKING:
+    from common.handoffs import AgentHandoffEvent
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +60,7 @@ class MonitoringMafAgent(MafAgentFacade):
 
         delivered: list[object] = []
 
-        async def _deliver(handoff):
+        async def _deliver(handoff: AgentHandoffEvent) -> None:
             delivered.append(handoff)
 
         config = MonitoringConfig()

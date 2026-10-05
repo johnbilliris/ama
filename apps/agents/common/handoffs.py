@@ -393,7 +393,7 @@ def build_evaluation_lessons_handoff(
     *,
     incident_id: str,
     report_id: str,
-    recommendations: list[dict],
+    recommendations: list[dict[str, object]],
 ) -> AgentHandoffEvent:
     """Build a handoff from evaluation report recommendations to lessons management."""
     return build_handoff(

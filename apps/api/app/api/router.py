@@ -157,10 +157,10 @@ if test_support_guard.is_enabled():
 import os as _os  # noqa: E402
 
 if _os.environ.get("AMA_ENABLE_PRODUCTION_AUTH", "0") == "1" and not test_support_guard.is_enabled():
-    from app.api.routes.audit_list import router as audit_list_router  # type: ignore[no-redef]
+    from app.api.routes.audit_list import router as audit_list_router
     from app.api.routes.auth_whoami import router as auth_whoami_router
     from app.api.routes.offline_replay import router as offline_replay_router
-    from app.api.routes.outcome_evaluator import router as outcome_evaluator_router  # type: ignore[no-redef]
+    from app.api.routes.outcome_evaluator import router as outcome_evaluator_router
 
     api_router.include_router(outcome_evaluator_router)
     api_router.include_router(audit_list_router)

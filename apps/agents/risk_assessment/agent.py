@@ -14,11 +14,18 @@ import logging
 import os
 import re
 from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING
 
 from common.handoffs import AgentHandoffEvent, build_handoff
-from common.llm_mixin import LLMCallMixin
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+
+    from apps.agents.common.llm_mixin import LLMCallMixin
+else:
+    from common.llm_mixin import LLMCallMixin
 from risk_assessment.config import RiskAssessmentConfig
-from risk_assessment.correlation import ContradictionResult, CorrelationResult
+from risk_assessment.correlation import ContradictionResult, CorrelationResult, RiskSignal
 from risk_assessment.extrapolation import ExtrapolationResult
 from risk_assessment.models import (
     DecisionType,
@@ -31,13 +38,21 @@ from risk_assessment.templates import (
     generate_recommendation_explanation,
 )
 
-from packages.domain.src.domain.models.hazard_assessment import HazardAssessment
-from packages.domain.src.domain.models.recommendation import Recommendation
+from packages.domain.src.domain.models.hazard_assessment import (
+    AssessmentGenerationMethod,
+    AssessmentType,
+    HazardAssessment,
+)
+from packages.domain.src.domain.models.recommendation import (
+    Recommendation,
+    RecommendationGenerationMethod,
+    RecommendationType,
+)
 
 logger = logging.getLogger(__name__)
 
 # Assessment type → recommendation types mapping per contracts/assessment-pipeline.md §Stage 6
-ASSESSMENT_TO_RECOMMENDATION_TYPES: dict[str, list[str]] = {
+ASSESSMENT_TO_RECOMMENDATION_TYPES: dict[AssessmentType, list[RecommendationType]] = {
     "spread_prediction": ["public_alert", "evacuation"],
     "impact_projection": ["public_alert", "resource_allocation"],
     "route_risk": ["evacuation"],
@@ -53,6 +68,28 @@ REC_TYPE_ABBREV: dict[str, str] = {
     "coordination": "co",
     "infrastructure_action": "ia",
 }
+
+
+def _assessment_generation_method(value: object) -> AssessmentGenerationMethod:
+    if value == "llm":
+        return "llm"
+    if value == "template_fallback":
+        return "template_fallback"
+    if value == "safety_fallback":
+        return "safety_fallback"
+    raise ValueError(f"Unsupported assessment generation method: {value!r}")
+
+
+def _recommendation_generation_method(value: object) -> RecommendationGenerationMethod:
+    if value == "llm":
+        return "llm"
+    if value == "template":
+        return "template"
+    if value == "template_fallback":
+        return "template_fallback"
+    if value == "safety_fallback":
+        return "safety_fallback"
+    raise ValueError(f"Unsupported recommendation generation method: {value!r}")
 
 
 class RiskAssessmentAgent(LLMCallMixin):
@@ -77,10 +114,10 @@ class RiskAssessmentAgent(LLMCallMixin):
     def generate_assessment(
         self,
         incident_id: str,
-        signals: list[dict],
+        signals: list[RiskSignal],
         correlation: CorrelationResult,
         contradiction: ContradictionResult,
-        assessment_type: str,
+        assessment_type: AssessmentType,
         version: int,
         config_hash: str,
         tenant_id: str = "live",
@@ -139,7 +176,7 @@ class RiskAssessmentAgent(LLMCallMixin):
         )
 
         summary = str(response["text"])
-        generation_method = str(response["generation_method"])
+        generation_method = _assessment_generation_method(response["generation_method"])
 
         # Apply fallback penalty AFTER contradiction penalty
         if generation_method == "template_fallback":
@@ -256,7 +293,7 @@ class RiskAssessmentAgent(LLMCallMixin):
             tenant_id=tenant_id,
         )
 
-    def _estimate_population(self, signals: list[dict]) -> int | None:
+    def _estimate_population(self, signals: list[RiskSignal]) -> int | None:
         """Extract population estimate from signals if available."""
         for sig in signals:
             payload = sig.get("payload", {})
@@ -266,7 +303,7 @@ class RiskAssessmentAgent(LLMCallMixin):
         return None
 
     @staticmethod
-    def _build_evidence_lines(signals: list[dict]) -> tuple[list[str], list[str], bool]:
+    def _build_evidence_lines(signals: list[RiskSignal]) -> tuple[list[str], list[str], bool]:
         lines: list[str] = []
         signal_ids: list[str] = []
         has_unevidenced = False
@@ -308,7 +345,7 @@ class RiskAssessmentAgent(LLMCallMixin):
     def generate_recommendations(
         self,
         assessment: HazardAssessment,
-        signals: list[dict],
+        signals: list[RiskSignal],
     ) -> list[Recommendation]:
         """Generate all applicable recommendations from an assessment.
 
@@ -346,8 +383,8 @@ class RiskAssessmentAgent(LLMCallMixin):
     def _generate_recommendation(
         self,
         assessment: HazardAssessment,
-        signals: list[dict],
-        rec_type: str,
+        signals: list[RiskSignal],
+        rec_type: RecommendationType,
     ) -> Recommendation:
         """Generate a single recommendation of the given type."""
         signal_ids = assessment.input_signal_ids
@@ -416,7 +453,7 @@ class RiskAssessmentAgent(LLMCallMixin):
 
         explanation = str(response["text"])
 
-        resolved_generation_method = str(response["generation_method"])
+        resolved_generation_method = _recommendation_generation_method(response["generation_method"])
         if resolved_generation_method == "llm":
             citations_valid, cited_subset, invalid_citations = self._validate_citations(
                 explanation,
@@ -457,7 +494,7 @@ class RiskAssessmentAgent(LLMCallMixin):
             tenant_id=assessment.tenant_id,
         )
 
-    def _has_coordination_tasks(self, signals: list[dict]) -> bool:
+    def _has_coordination_tasks(self, signals: list[RiskSignal]) -> bool:
         """Check if signals indicate coordination tasks are needed."""
         for sig in signals:
             payload = sig.get("payload", {})
@@ -471,7 +508,7 @@ class RiskAssessmentAgent(LLMCallMixin):
 
     def _threatens_evacuation_routes(
         self,
-        signals: list[dict],
+        signals: list[RiskSignal],
         assessment: HazardAssessment,
     ) -> bool:
         """Check if signals indicate threat to evacuation routes."""
@@ -519,7 +556,7 @@ class RiskAssessmentAgent(LLMCallMixin):
         )
 
         explanation = str(response["text"])
-        resolved_generation_method = str(response["generation_method"])
+        resolved_generation_method = _recommendation_generation_method(response["generation_method"])
         if resolved_generation_method == "llm":
             citations_valid, _, invalid_citations = self._validate_citations(explanation, signal_ids)
             if not citations_valid:
@@ -684,7 +721,7 @@ class _OverrideRequest(_PydanticBaseModel):
     user_id: str
     role: str
     justification: str
-    modifications: dict | None = None
+    modifications: dict[str, object] | None = None
 
 
 class _OverrideResponse(_PydanticBaseModel):
@@ -697,11 +734,11 @@ class _OverrideResponse(_PydanticBaseModel):
 
 def create_app(
     agent: RiskAssessmentAgent | None = None,
-    audit_writer=None,
-    pipeline=None,
+    audit_writer: object | None = None,
+    pipeline: object | None = None,
     config: RiskAssessmentConfig | None = None,
-    recommendation_store=None,
-):
+    recommendation_store: object | None = None,
+) -> FastAPI:
     """Create the FastAPI application with health and override endpoints.
 
     Follows the monitoring agent pattern: ``create_app`` as factory, deps on

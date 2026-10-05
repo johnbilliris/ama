@@ -302,7 +302,7 @@ def create_clients() -> dict[str, Any]:
     from fastapi.testclient import TestClient  # noqa: I001
 
     from app.main import create_app as create_api_app
-    from app.api.routes import signals as signals_route
+    from app.api.dependencies.governance_composition import get_governance_composition
     from communication.agent import create_app as create_communication_app
     from evacuation.agent import create_app as create_evacuation_app
     from evacuation.agent import EvacuationAgent
@@ -332,7 +332,9 @@ def create_clients() -> dict[str, Any]:
 
     def resolve_demo_principal(_request: Any) -> AuthenticatedPrincipal:
         return demo_principal
-    signals_route._governance_registry.import_seed_catalogue(  # noqa: SLF001
+
+    api_app = create_api_app()
+    get_governance_composition(api_app).registry.import_seed_catalogue(
         Path(__file__).resolve().parent.parent
         / "packages"
         / "domain"
@@ -342,7 +344,7 @@ def create_clients() -> dict[str, Any]:
     )
 
     return {
-        "platform": TestClient(create_api_app()),
+        "platform": TestClient(api_app),
         "monitoring": TestClient(create_monitoring_app(agent=monitoring_agent)),
         "risk_assessment": TestClient(create_risk_app()),
         "evacuation": TestClient(

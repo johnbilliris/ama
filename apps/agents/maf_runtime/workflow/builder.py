@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import logging
 import os
@@ -46,6 +47,11 @@ from .hitl_request_port import HitlGateExecutor
 from .run_state import WorkflowRunStatus
 
 logger = logging.getLogger(__name__)
+
+_WORKFLOW_NAME = "ama-incident-response"
+_WORKFLOW_GRAPH_SIGNATURE = hashlib.sha256(
+    b"MonitoringExecutor|RiskExecutor|EvacuationExecutor|ResourceExecutor|CommunicationExecutor|HitlGateExecutor"
+).hexdigest()
 
 
 def _build_checkpoint_storage() -> Any:
@@ -74,15 +80,20 @@ class AmaWorkflow:
         repo: WorkflowRunRepository | None = None,
         checkpoint_storage: Any | None = None,
         hitl_gate: HitlGateExecutor | None = None,
+        monitoring_executor: Any | None = None,
+        risk_executor: Any | None = None,
+        evacuation_executor: Any | None = None,
+        resource_executor: Any | None = None,
+        communication_executor: Any | None = None,
     ) -> None:
         self._repo = repo or WorkflowRunRepository()
         self._checkpoints = checkpoint_storage or _build_checkpoint_storage()
         self._hitl = hitl_gate or HitlGateExecutor(repo=self._repo)
-        self._monitoring = MonitoringExecutor()
-        self._risk = RiskExecutor()
-        self._evac = EvacuationExecutor()
-        self._resource = ResourceExecutor()
-        self._communication = CommunicationExecutor()
+        self._monitoring = monitoring_executor if monitoring_executor is not None else MonitoringExecutor()
+        self._risk = risk_executor if risk_executor is not None else RiskExecutor()
+        self._evac = evacuation_executor if evacuation_executor is not None else EvacuationExecutor()
+        self._resource = resource_executor if resource_executor is not None else ResourceExecutor()
+        self._communication = communication_executor if communication_executor is not None else CommunicationExecutor()
 
     @property
     def repository(self) -> WorkflowRunRepository:
@@ -219,10 +230,11 @@ class AmaWorkflow:
 
             checkpoint = WorkflowCheckpoint(
                 checkpoint_id=f"{run_id}-{step_name}-{uuid.uuid4().hex[:8]}",
-                workflow_id=run_id,
-                executor_states={"step": step_name, "payload": payload},
+                workflow_name=_WORKFLOW_NAME,
+                graph_signature_hash=_WORKFLOW_GRAPH_SIGNATURE,
+                state={"run_id": run_id, "step": step_name, "payload": payload},
             )
-            await self._checkpoints.save_checkpoint(checkpoint)  # type: ignore[arg-type]
+            await self._checkpoints.save_checkpoint(checkpoint)
         except Exception:  # noqa: BLE001
             logger.debug("checkpoint save skipped/failed step=%s", step_name, exc_info=True)
 

@@ -66,7 +66,7 @@ class PersonaWorkspaceService:
                 display_name=registry_persona.display_name or registry_persona.persona_id,
                 organisation_id=organisation_id,
                 jurisdiction_id=registry_persona.jurisdiction_id or "",
-                role=registry_persona.role or "operations_officer",
+                role=registry_persona.persona_id,
                 decision_rights=list(registry_persona.decision_rights),
                 information_needs=list(registry_persona.information_needs),
                 communication_pathways=list(registry_persona.communication_pathways),

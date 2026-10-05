@@ -9,6 +9,7 @@ Three-dimensional segmentation per FR-022, FR-024, FR-025:
 from __future__ import annotations
 
 import logging
+from typing import TypedDict
 from uuid import uuid4
 
 from communication.config import CommunicationConfig
@@ -19,6 +20,40 @@ from communication.models import (
     UrgencyLevel,
 )
 from shapely.geometry import shape
+
+
+class ZoneData(TypedDict, total=False):
+    level: int
+    zone_id: str
+    id: str
+    boundary: dict[str, object]
+    population_estimate: int
+
+
+class FacilityData(TypedDict, total=False):
+    category: str
+    facility_id: str
+    id: str
+    zone_id: str
+    boundary: dict[str, object]
+    population: int
+    recipient_ids: list[str]
+    name: str
+
+
+class VulnerabilityData(TypedDict, total=False):
+    facilities: list[FacilityData]
+
+
+class AssessmentData(TypedDict, total=False):
+    zones: list[ZoneData]
+    vulnerability_data: VulnerabilityData
+
+
+class IncidentDemographics(TypedDict, total=False):
+    language_distribution: dict[str, dict[str, float]]
+    recipient_ids: dict[str, dict[str, list[str]]]
+
 
 logger = logging.getLogger(__name__)
 
@@ -38,8 +73,8 @@ class AudienceSegmenter:
 
     def segment_audience(
         self,
-        assessment_data: dict,
-        incident_demographics: dict | None = None,
+        assessment_data: AssessmentData,
+        incident_demographics: IncidentDemographics | None = None,
     ) -> list[AudienceSegment]:
         """Perform three-dimensional audience segmentation.
 
@@ -70,7 +105,7 @@ class AudienceSegmenter:
 
         return segments
 
-    def _create_zone_segments(self, zones: list[dict]) -> list[AudienceSegment]:
+    def _create_zone_segments(self, zones: list[ZoneData]) -> list[AudienceSegment]:
         """Create one segment per geographic zone."""
         segments = []
         for zone in zones:
@@ -106,8 +141,8 @@ class AudienceSegmenter:
 
     def _identify_vulnerable_populations(
         self,
-        zones: list[dict],
-        vulnerability_data: dict,
+        zones: list[ZoneData],
+        vulnerability_data: VulnerabilityData,
     ) -> list[AudienceSegment]:
         """Create priority=critical segments for vulnerable populations per FR-024."""
         segments = []
@@ -145,7 +180,7 @@ class AudienceSegmenter:
     def _assign_language_preferences(
         self,
         segments: list[AudienceSegment],
-        demographics: dict,
+        demographics: IncidentDemographics,
     ) -> list[AudienceSegment]:
         """Assign preferred language from demographic data per FR-025.
 
@@ -191,7 +226,7 @@ class AudienceSegmenter:
         return updated
 
     @staticmethod
-    def _match_facility_zone(facility: dict, zones: list[dict]) -> dict | None:
+    def _match_facility_zone(facility: FacilityData, zones: list[ZoneData]) -> ZoneData | None:
         facility_zone_id = facility.get("zone_id")
         if facility_zone_id:
             return next(
@@ -215,7 +250,7 @@ class AudienceSegmenter:
             return None
 
     @staticmethod
-    def _facility_instructions(category: str, facility: dict) -> str:
+    def _facility_instructions(category: str, facility: FacilityData) -> str:
         facility_name = str(facility.get("name") or "the facility")
         actions = {
             "aged_care": f"Staff at {facility_name} must assist residents and follow the facility evacuation plan.",
@@ -251,8 +286,8 @@ class AudienceSegmenter:
     def _flag_missing_data(
         self,
         segments: list[AudienceSegment],
-        demographics: dict,
-        vulnerability_data: dict,
+        demographics: IncidentDemographics,
+        vulnerability_data: VulnerabilityData,
     ) -> list[AudienceSegment]:
         """Annotate missing_data_flags per CHK042."""
         updated = []
