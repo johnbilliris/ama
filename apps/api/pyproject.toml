@@ -24,6 +24,7 @@ dependencies = [
   "cryptography>=50.0.0,<51",
   "Pygments>=2.20.0",
   "requests>=2.33.0",
+  "redis>=5.2.0",
   "jsonschema>=4.23.0",
   "shapely>=2.0.0",
   "pyproj>=3.7.0",
