@@ -313,6 +313,9 @@ jobs:
       - name: perf-benchmark
         id: perf-benchmark
         timeout-minutes: 5
+        env:
+          AMA_ENVIRONMENT: test
+          AMA_TRUST_FORWARDED_PRINCIPAL: "1"
         run: pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q
 
       - name: upload-benchmark-results

@@ -93,7 +93,14 @@ def _p95(values: Sequence[float]) -> float:
 
 async def _concurrent_get_p95(app, path: str, concurrency: int) -> float:
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with httpx.AsyncClient(
+        transport=transport,
+        base_url="http://testserver",
+        headers={
+            "X-MS-CLIENT-PRINCIPAL-ID": "benchmark-user",
+            "X-MS-CLIENT-PRINCIPAL-NAME": "benchmark-agency",
+        },
+    ) as client:
 
         async def _timed_get() -> tuple[int, float]:
             started = time.perf_counter()

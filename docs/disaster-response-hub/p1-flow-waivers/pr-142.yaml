@@ -1064,6 +1064,7 @@ not_p1_paths:
 - tests/benchmark/benchmark_helpers.py
 - tests/benchmark/compare_benchmarks.py
 - tests/benchmark/conftest.py
+- tests/benchmark/test_aidr_performance.py
 - tests/benchmark/test_api_performance.py
 - tests/benchmark/test_compare_benchmarks_gate.py
 - tests/benchmark/test_pipeline_performance.py

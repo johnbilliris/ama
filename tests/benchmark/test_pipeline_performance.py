@@ -129,15 +129,78 @@ def evacuation_pipeline():
     from evacuation.pipeline import EvacuationProcessingPipeline
     from evacuation.road_network import RoadNetworkLoader
 
+    class _UpstreamStore:
+        def __init__(self, documents):
+            self.documents = documents
+
+        def read_item(self, item, partition_key):
+            document = self.documents[item]
+            assert partition_key == document["incident_scope_key"]
+            return document
+
     config = EvacuationConfig()
     road_network = RoadNetworkLoader()
     road_network.load("data/road-networks/far-north-qld-sample.json")
+    incident_id = "INC-BENCH-001"
+    scope_key = f"live:{incident_id}"
+    recommendation_id = "rec-bench-001"
+    assessment_id = "assess-bench-001"
+    affected_area = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [145.75, -16.95],
+                [145.80, -16.95],
+                [145.80, -16.90],
+                [145.75, -16.90],
+                [145.75, -16.95],
+            ]
+        ],
+    }
+    recommendation_store = _UpstreamStore(
+        {
+            recommendation_id: {
+                "recommendation_id": recommendation_id,
+                "incident_id": incident_id,
+                "type": "evacuation",
+                "summary": "Evacuate the affected community",
+                "explanation": "A bushfire threatens the evacuation area.",
+                "required_approval_level": "incident_commander",
+                "assessment_id": assessment_id,
+                "incident_scope_key": scope_key,
+                "tenant_id": "live",
+            }
+        }
+    )
+    assessment_store = _UpstreamStore(
+        {
+            assessment_id: {
+                "hazard_assessment_id": assessment_id,
+                "incident_id": incident_id,
+                "assessment_type": "route_risk",
+                "input_signal_ids": ["signal-bench-001"],
+                "summary": "Bushfire threatens evacuation corridors.",
+                "confidence_level": "high",
+                "incident_scope_key": scope_key,
+                "tenant_id": "live",
+                "hazard_map": {
+                    "affected_area": affected_area,
+                    "severity_level": "high",
+                    "hazard_type": "bushfire",
+                    "confidence_score": 0.85,
+                    "time_horizon": "4h",
+                    "population_estimate": 1000,
+                },
+            }
+        }
+    )
     return EvacuationProcessingPipeline(
         config=config,
         road_network=road_network,
         cosmos_plans_container=None,
         cosmos_decisions_container=None,
-        cosmos_assessments_container=None,
+        cosmos_assessments_container=assessment_store,
+        cosmos_recommendations_container=recommendation_store,
     )
 
 
