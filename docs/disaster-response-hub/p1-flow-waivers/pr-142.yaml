@@ -244,6 +244,7 @@ not_p1_paths:
 - apps/agents/maf_runtime/agents/communication_agent.py
 - apps/agents/maf_runtime/agents/evacuation_agent.py
 - apps/agents/maf_runtime/agents/monitoring_agent.py
+- apps/agents/maf_runtime/checkpoint/cosmos_checkpoint_storage.py
 - apps/agents/maf_runtime/mcp/allow_list.py
 - apps/agents/maf_runtime/observability.py
 - apps/agents/maf_runtime/repositories/tool_registration_repository.py
