@@ -812,7 +812,7 @@ requires-dist = [
     { name = "import-linter", marker = "extra == 'dev'", specifier = ">=2.0" },
     { name = "jsonschema", specifier = ">=4.21" },
     { name = "locust", marker = "extra == 'load'", specifier = ">=2.31,<3" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.13" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = "==2.0.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0" },
     { name = "pre-commit-hooks", marker = "extra == 'dev'", specifier = ">=5.0" },
     { name = "psutil", marker = "extra == 'load'", specifier = ">=6.0,<8" },

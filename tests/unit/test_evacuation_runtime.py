@@ -286,13 +286,16 @@ class TestThreadedConsumerLifecycle:
 class TestDependencyHealthMonitor:
     def test_slow_probe_is_bounded_and_updates_cached_offline_state(self):
         release = threading.Event()
-        late_update = threading.Event()
+        probe_finished = threading.Event()
 
         class Client:
             def generate_response(self, **kwargs):
                 del kwargs
-                release.wait(timeout=2)
-                return {"text": "late"}
+                try:
+                    release.wait(timeout=2)
+                    return {"text": "late"}
+                finally:
+                    probe_finished.set()
 
         class Agent:
             _llm_client = Client()
@@ -302,8 +305,6 @@ class TestDependencyHealthMonitor:
 
             def update_llm_health(self, **values):
                 self.updates.append(values)
-                if len(self.updates) == 2:
-                    late_update.set()
 
         agent = Agent()
         monitor = ThreadedDependencyHealthMonitor(
@@ -315,9 +316,13 @@ class TestDependencyHealthMonitor:
         monitor.probe_once()
         elapsed = (datetime.now(UTC) - started).total_seconds()
         release.set()
-        assert late_update.wait(timeout=1)
+        assert probe_finished.wait(timeout=1)
+        assert monitor._probe_thread is not None
+        monitor._probe_thread.join(timeout=1)
 
         assert elapsed < 0.2
+        assert not monitor._probe_thread.is_alive()
+        assert len(agent.updates) == 1
         assert agent.updates[-1]["status"] == "offline"
 
 

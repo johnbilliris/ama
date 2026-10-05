@@ -135,6 +135,12 @@ class ThreadedDependencyHealthMonitor:
         def probe() -> None:
             started = time.perf_counter()
             checked_at = datetime.now(UTC)
+
+            def update_if_not_timed_out(**values: Any) -> None:
+                with probe_update_lock:
+                    if not probe_timed_out.is_set():
+                        self._agent.update_llm_health(**values)
+
             try:
                 self._agent._llm_client.generate_response(
                     purpose="reasoning",
@@ -143,7 +149,7 @@ class ThreadedDependencyHealthMonitor:
                     timeout_seconds=self._probe_timeout_seconds,
                 )
             except Exception:
-                self._agent.update_llm_health(
+                update_if_not_timed_out(
                     status="offline",
                     checked_at=checked_at,
                     latency_ms=None,
@@ -151,18 +157,20 @@ class ThreadedDependencyHealthMonitor:
                 return
             latency_ms = round((time.perf_counter() - started) * 1000)
             if latency_ms > self._probe_timeout_seconds * 1_000:
-                self._agent.update_llm_health(
+                update_if_not_timed_out(
                     status="offline",
                     checked_at=checked_at,
                     latency_ms=latency_ms,
                 )
                 return
-            self._agent.update_llm_health(
+            update_if_not_timed_out(
                 status="healthy" if latency_ms < 5_000 else "degraded",
                 checked_at=checked_at,
                 latency_ms=latency_ms,
             )
 
+        probe_update_lock = threading.Lock()
+        probe_timed_out = threading.Event()
         self._probe_thread = threading.Thread(
             target=probe,
             name="evacuation-llm-health-probe",
@@ -171,11 +179,13 @@ class ThreadedDependencyHealthMonitor:
         self._probe_thread.start()
         self._probe_thread.join(timeout=self._probe_timeout_seconds)
         if self._probe_thread.is_alive():
-            self._agent.update_llm_health(
-                status="offline",
-                checked_at=datetime.now(UTC),
-                latency_ms=None,
-            )
+            with probe_update_lock:
+                probe_timed_out.set()
+                self._agent.update_llm_health(
+                    status="offline",
+                    checked_at=datetime.now(UTC),
+                    latency_ms=None,
+                )
 
     def stop(self) -> None:
         self._stop_event.set()
