@@ -9,8 +9,27 @@ REQUIRED_DASHBOARD = "test_api_dashboard_p95_concurrent"
 REQUIRED_SIGNALS = "test_api_signals_list_p95_concurrent"
 
 
-def _write_benchmark_json(path: Path, benchmarks: list[dict]) -> None:
-    path.write_text(json.dumps({"benchmarks": benchmarks}), encoding="utf-8")
+def _write_benchmark_json(
+    path: Path,
+    benchmarks: list[dict],
+    *,
+    machine_info: dict[str, str] | None = None,
+) -> None:
+    path.write_text(
+        json.dumps(
+            {
+                "benchmarks": benchmarks,
+                "machine_info": machine_info
+                or {
+                    "system": "Linux",
+                    "machine": "x86_64",
+                    "python_implementation": "CPython",
+                    "python_version": "3.12.0",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
 
 
 def _bench(name: str, *, median_s: float, p95_s: float, group: str = "api-lightweight") -> dict:
@@ -113,6 +132,44 @@ def test_compare_benchmarks_uses_p95_not_median(tmp_path: Path, monkeypatch) -> 
     assert report.overall_status == "FAILURE"
     assert report.has_failures is True
     assert any(result.benchmark_name == REQUIRED_SIGNALS and result.current_p95_s == 0.70 for result in report.results)
+
+
+def test_compare_benchmarks_uses_slo_for_incompatible_environment(tmp_path: Path) -> None:
+    current = tmp_path / "current.json"
+    baseline = tmp_path / "baseline.json"
+    _write_benchmark_json(
+        current,
+        [
+            _bench(REQUIRED_DASHBOARD, median_s=0.15, p95_s=0.16),
+            _bench(REQUIRED_SIGNALS, median_s=0.08, p95_s=0.09),
+        ],
+        machine_info={
+            "system": "Linux",
+            "machine": "x86_64",
+            "python_implementation": "CPython",
+            "python_version": "3.12.14",
+        },
+    )
+    _write_benchmark_json(
+        baseline,
+        [
+            _bench(REQUIRED_DASHBOARD, median_s=0.08, p95_s=0.10),
+            _bench(REQUIRED_SIGNALS, median_s=0.03, p95_s=0.04),
+        ],
+        machine_info={
+            "system": "Windows",
+            "machine": "AMD64",
+            "python_implementation": "CPython",
+            "python_version": "3.12.10",
+        },
+    )
+
+    report = compare_benchmarks(current_path=current, baseline_path=baseline)
+
+    assert report.overall_status == "PASS"
+    assert report.has_failures is False
+    assert {result.status for result in report.results} == {"FIRST_RUN"}
+    assert all("No compatible baseline" in result.message for result in report.results)
 
 
 def test_compare_benchmarks_fails_on_empty_benchmark_list(tmp_path: Path) -> None:

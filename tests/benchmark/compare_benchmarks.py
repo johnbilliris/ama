@@ -156,6 +156,34 @@ def _extract_p95_seconds(benchmark: dict) -> float:
     raise ValueError(f"missing p95 samples for benchmark {benchmark.get('name', 'unknown')}")
 
 
+def _compatible_environment(current: dict, baseline: dict) -> bool:
+    current_machine = current.get("machine_info")
+    baseline_machine = baseline.get("machine_info")
+    if not isinstance(current_machine, dict) or not isinstance(baseline_machine, dict):
+        return False
+
+    for key in ("system", "machine", "python_implementation"):
+        current_value = current_machine.get(key)
+        baseline_value = baseline_machine.get(key)
+        if not isinstance(current_value, str) or not isinstance(baseline_value, str):
+            return False
+        if current_value.casefold() != baseline_value.casefold():
+            return False
+
+    current_version = current_machine.get("python_version")
+    baseline_version = baseline_machine.get("python_version")
+    if not isinstance(current_version, str) or not isinstance(baseline_version, str):
+        return False
+
+    current_version_parts = current_version.split(".")
+    baseline_version_parts = baseline_version.split(".")
+    if len(current_version_parts) < 2 or len(baseline_version_parts) < 2:
+        return False
+    if not all(part.isdigit() for part in current_version_parts[:2] + baseline_version_parts[:2]):
+        return False
+    return current_version_parts[:2] == baseline_version_parts[:2]
+
+
 # ── Core comparison logic ─────────────────────────────────────────────────────
 
 
@@ -192,6 +220,12 @@ def compare_benchmarks(
 
     # Load baseline (optional)
     baseline_data = load_benchmark_json(baseline_path)
+    incompatible_baseline = baseline_data is not None and not _compatible_environment(current_data, baseline_data)
+    if incompatible_baseline:
+        logger.warning(
+            "Benchmark baseline environment differs from current run; enforcing SLOs without relative comparison"
+        )
+        baseline_data = None
 
     # Index baseline benchmarks by name
     baseline_by_name: dict[str, dict] = {}
@@ -256,7 +290,11 @@ def compare_benchmarks(
         if name not in baseline_by_name:
             # First run for this metric
             status = "FIRST_RUN"
-            message = f"First run for {name} — no baseline to compare"
+            message = (
+                f"No compatible baseline for {name} — enforcing SLO only"
+                if incompatible_baseline
+                else f"First run for {name} — no baseline to compare"
+            )
             if slo_target is not None and not slo_pass:
                 status = "FAILURE"
                 message = f"{name}: first run p95={current_p95:.3f}s breaches SLO={slo_target:.3f}s"
