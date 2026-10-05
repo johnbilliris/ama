@@ -53,6 +53,7 @@ import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import PurePosixPath
+from types import ModuleType
 from typing import Any, Final, Literal
 
 from app.core.async_io import run_blocking
@@ -73,10 +74,13 @@ LifecycleState = Literal["active", "paused", "aborted", "ended"]
 # ---- T-O03 / T-O09 RFC 8785 JCS canonicalisation -----------------------
 
 
+_rfc8785_pkg: ModuleType | None = None
 try:  # pragma: no cover - install-time branch
-    import rfc8785 as _rfc8785_pkg
-except Exception:  # pragma: no cover - fallback for envs without rfc8785
-    _rfc8785_pkg = None
+    import rfc8785 as _rfc8785_module
+except ImportError:  # pragma: no cover - fallback for envs without rfc8785
+    pass
+else:
+    _rfc8785_pkg = _rfc8785_module
 
 
 def _rfc8785_canonical_json(body: Any) -> bytes:
