@@ -300,6 +300,9 @@ jobs:
         shell: pwsh
         run: ./scripts/coverage-ratchet.ps1 -Phase $env:COVERAGE_PHASE -Tier unit
 
+      - name: Build TypeScript domain package
+        run: pnpm --filter @ama/domain build
+
       - name: ts-typecheck
         run: pnpm --filter ./apps/web exec tsc --noEmit
 

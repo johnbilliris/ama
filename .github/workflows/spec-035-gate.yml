@@ -62,6 +62,9 @@ jobs:
       - name: domain package typecheck
         run: pnpm --filter @ama/domain run typecheck
 
+      - name: Build TypeScript domain package
+        run: pnpm --filter @ama/domain build
+
       - name: web typecheck (spec-035 surfaces)
         run: pnpm --filter @ama/web exec tsc --noEmit
 
