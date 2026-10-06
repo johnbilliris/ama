@@ -128,6 +128,42 @@ def test_p1_gate_fails_unclassified_change_without_waiver(tmp_path: Path, monkey
     assert any("unclassified changed files" in err for err in summary["errors"])
 
 
+def test_p1_gate_ignores_root_coverage_report_as_generated_artifact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inventory = _write_inventory(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    passed, summary = run_gate(
+        inventory_path=inventory,
+        release_date=dt.date(2026, 9, 15),
+        changed_files=["coverage.xml"],
+        waiver_path=None,
+    )
+
+    assert passed is True
+    assert summary["generated_artifact_files"] == ["coverage.xml"]
+    assert summary["unclassified_files"] == []
+
+
+def test_p1_gate_does_not_ignore_nested_coverage_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    inventory = _write_inventory(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    passed, summary = run_gate(
+        inventory_path=inventory,
+        release_date=dt.date(2026, 9, 15),
+        changed_files=["reports/coverage.xml"],
+        waiver_path=None,
+    )
+
+    assert passed is False
+    assert summary["generated_artifact_files"] == []
+    assert summary["unclassified_files"] == ["reports/coverage.xml"]
+
+
 def test_p1_gate_fails_stale_review_metadata(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     inventory = _write_inventory(tmp_path, last_reviewed="2026-09-01", signed_at="2026-09-01")
     monkeypatch.chdir(tmp_path)

@@ -18,6 +18,7 @@ AU_ALLOWED_LOCATIONS = {
     "australiacentral",
     "australiacentral2",
 }
+GENERATED_ARTIFACT_PATHS = {"coverage.xml"}
 
 
 class GateError(RuntimeError):
@@ -282,11 +283,12 @@ def run_gate(
             matched_files.update(matched)
 
     unmatched = [path for path in changed if path not in matched_files]
+    generated_artifacts = sorted(set(unmatched) & GENERATED_ARTIFACT_PATHS)
 
     waiver = _load_waiver(waiver_path)
     waiver_valid, waiver_type = _waiver_is_valid(waiver, release_date)
     not_p1_files = _not_p1_classifications(waiver, waiver_type, waiver_valid, changed, matched_files)
-    unclassified_files = sorted(set(unmatched) - not_p1_files)
+    unclassified_files = sorted(set(unmatched) - not_p1_files - set(generated_artifacts))
 
     errors: list[str] = []
     if unclassified_files:
@@ -312,6 +314,7 @@ def run_gate(
         "head_sha": head_sha,
         "changed_files": changed,
         "matched_flows": matched_by_flow,
+        "generated_artifact_files": generated_artifacts,
         "not_p1_classified_files": sorted(not_p1_files),
         "unclassified_files": unclassified_files,
         "waiver": waiver,
