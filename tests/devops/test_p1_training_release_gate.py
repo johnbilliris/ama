@@ -34,9 +34,7 @@ def _make_git_history(root: Path) -> tuple[str, str]:
     return base_sha, _git(root, "rev-parse", "HEAD")
 
 
-def test_git_range_is_inferred_from_local_repository(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_git_range_is_inferred_from_local_repository(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     base_sha, head_sha = _make_git_history(tmp_path)
     monkeypatch.chdir(tmp_path)
     for name in ("GITHUB_EVENT_NAME", "GITHUB_EVENT_PATH", "GITHUB_SHA", "GITHUB_REF_NAME"):
@@ -45,9 +43,7 @@ def test_git_range_is_inferred_from_local_repository(
     assert _resolve_git_range() == (base_sha, head_sha)
 
 
-def test_git_range_uses_push_event_shas(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_git_range_uses_push_event_shas(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     base_sha, head_sha = _make_git_history(tmp_path)
     monkeypatch.chdir(tmp_path)
     event_path = tmp_path / "event.json"
@@ -146,9 +142,7 @@ def test_p1_gate_ignores_root_coverage_report_as_generated_artifact(
     assert summary["unclassified_files"] == []
 
 
-def test_p1_gate_does_not_ignore_nested_coverage_report(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_p1_gate_does_not_ignore_nested_coverage_report(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     inventory = _write_inventory(tmp_path)
     monkeypatch.chdir(tmp_path)
 
