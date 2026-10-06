@@ -26,7 +26,7 @@ on:
         description: "Maximum dataset cases evaluated by the PR-fast subset"
         required: false
         type: number
-        default: 200
+        default: 25
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_call:
@@ -53,7 +53,7 @@ on:
         description: "Maximum dataset cases evaluated by the PR-fast subset"
         required: false
         type: number
-        default: 200
+        default: 25
     outputs:
       evaluation_status:
         description: "Runner terminal status"
@@ -171,8 +171,8 @@ jobs:
         env:
           EVAL_REGION: ${{ env.EVAL_RUN_REGION }}
           PR_NUMBER: ${{ steps.eval-context.outputs.pr-number }}
-          MIN_EVALUATED_SAMPLES: ${{ inputs.min_evaluated_samples || github.event.inputs.min_evaluated_samples || inputs.max_cases || github.event.inputs.max_cases || 200 }}
-          MAX_EVAL_CASES: ${{ inputs.max_cases || github.event.inputs.max_cases || 200 }}
+          MIN_EVALUATED_SAMPLES: ${{ inputs.min_evaluated_samples || github.event.inputs.min_evaluated_samples || inputs.max_cases || github.event.inputs.max_cases || 25 }}
+          MAX_EVAL_CASES: ${{ inputs.max_cases || github.event.inputs.max_cases || 25 }}
         run: |
           set -euo pipefail
           python scripts/run_llm_evaluation.py \

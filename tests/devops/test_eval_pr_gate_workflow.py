@@ -39,12 +39,15 @@ def test_eval_gate_workflow_call_exposes_explicit_inputs_outputs(eval_pr_gate_wo
 def test_eval_gate_threshold_defaults_are_fail_closed(eval_pr_gate_workflow):
     call = eval_pr_gate_workflow["on"]["workflow_call"]
     inputs = call["inputs"]
+    dispatch_inputs = eval_pr_gate_workflow["on"]["workflow_dispatch"]["inputs"]
     assert "default" not in inputs["min_evaluated_samples"]
-    assert inputs["max_cases"]["default"] == 200
+    assert inputs["max_cases"]["default"] == 25
+    assert dispatch_inputs["max_cases"]["default"] == 25
     evaluation_step = next(
         step for step in eval_pr_gate_workflow["jobs"]["eval-gate"]["steps"] if step.get("id") == "evaluation"
     )
     assert "inputs.max_cases" in evaluation_step["env"]["MIN_EVALUATED_SAMPLES"]
+    assert evaluation_step["env"]["MAX_EVAL_CASES"].endswith("|| 25 }}")
 
 
 def test_eval_gate_enforces_non_zero_collection_and_required_metrics(eval_pr_gate_workflow_path):

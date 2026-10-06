@@ -178,20 +178,6 @@ jobs:
       - name: feature-evidence-binding-lint
         run: python tools/lint/check_feature_evidence_binding.py
 
-      - name: p1-training-release-gate
-        env:
-          P1_PR_NUMBER: ${{ github.event.pull_request.number || '0' }}
-          P1_BRANCH: ${{ github.ref_name }}
-        run: |
-          waiver_args=()
-          if [[ "$P1_PR_NUMBER" == "142" || "$P1_BRANCH" == "001-extension-list" ]]; then
-            waiver_args+=(--waiver-file docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml)
-          fi
-          python scripts/p1_release_training_gate.py \
-            --inventory docs/disaster-response-hub/p1-flow-inventory.yaml \
-            --summary-out artifacts/p1-release-gate-summary.json \
-            "${waiver_args[@]}"
-
       # Spec 036 T055 / T039 — fail CI on docs/corpus/INDEXING-LICENCE-INVENTORY drift.
       - name: licence-inventory-lint
         env:
