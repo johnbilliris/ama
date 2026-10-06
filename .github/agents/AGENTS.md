@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Actor Agent Catalogue
 
-**Last Updated**: 2026-10-05
+**Last Updated**: 2026-10-06
 **Totals**: 85 active actor files (10 operational, 58 sector, 17 technical); 12 workflow agents; 6 archived sector agents
 
 This file is generated from `.github/agents/**/*.agent.md` frontmatter and body headings.

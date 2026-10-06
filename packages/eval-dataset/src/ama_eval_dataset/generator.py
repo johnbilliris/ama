@@ -300,7 +300,7 @@ def generate_corpus(seed: int, target_size: int = 5000) -> list[EvaluationCase]:
         authority_terms = ("call 000", "call 132 500", "contact police", "official", "emergency services", "lifeline")
         required_terms = " ".join(template.must_include).casefold()
         if is_injection:
-            refer_to_authority = False
+            refer_to_authority: bool | None = False
             tone_val = None
         else:
             authority_required = any(term in required_terms for term in authority_terms)

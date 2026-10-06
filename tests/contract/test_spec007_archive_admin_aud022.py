@@ -23,6 +23,10 @@ def _auth_headers(sub: str, roles: list[str] | None = None) -> dict[str, str]:
 
 @pytest.fixture
 def context(monkeypatch):
+    monkeypatch.setenv("AMA_ENVIRONMENT", "test")
+    monkeypatch.setenv("AMA_ENABLE_PRODUCTION_AUTH", "0")
+    monkeypatch.setenv("AMA_TRUST_FORWARDED_PRINCIPAL", "1")
+
     from app.api.dependencies import simulation_composition
     from app.api.routes import simulations as sim_routes
     from app.main import app
