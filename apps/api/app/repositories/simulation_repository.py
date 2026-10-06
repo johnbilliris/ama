@@ -122,13 +122,14 @@ def _build_cosmos_client() -> Any:
 class SimulationRepository:
     """Cosmos DB operations for SimulationTenant CRUD against the ``simulation`` container.
 
-    When ``COSMOS_ENDPOINT`` is set the repository talks to Cosmos DB.
+    When ``COSMOS_ENDPOINT`` is set the repository talks to Cosmos DB, using
+    ``COSMOS_DATABASE`` or the default ``disaster-hub`` database.
     Otherwise it falls back to an in-memory dict so that unit / contract
     tests keep working without infrastructure.
     """
 
-    def __init__(self, cosmos_client: Any = None, database_name: str = "disaster-hub"):
-        self._db_name = database_name
+    def __init__(self, cosmos_client: Any = None, database_name: str | None = None):
+        self._db_name = database_name or os.environ.get("COSMOS_DATABASE") or "disaster-hub"
         self._container_name = "simulation"
         self._in_memory: dict[str, SimulationTenant] = {}
         self._in_memory_docs: dict[str, dict[str, Any]] = {}

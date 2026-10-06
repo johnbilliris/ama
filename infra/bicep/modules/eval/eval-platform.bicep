@@ -43,6 +43,12 @@ param deployContainerJobs bool = true
 @description('Deploy the AMA API container app once the api image has been pushed to the eval Azure Container Registry.')
 param deployApi bool = false
 
+@description('Container image tag for the eval runner.')
+param evalRunnerImageTag string = env
+
+@description('Container image tag for the AMA API.')
+param apiImageTag string = env
+
 @description('Entra ID tenant id used for AMA API JWT validation.')
 param entraTenantId string = subscription().tenantId
 
@@ -64,6 +70,7 @@ param tags object = {
   'managed-by': 'bicep'
 }
 
+var resourceTags = union(tags, env == 'dev' ? { SecurityControl: 'Ignore' } : {})
 var nameSuffix = '${env}-${uniqueString(resourceGroup().id)}'
 var shortUniqueSuffix = take(uniqueString(resourceGroup().id), 6)
 var storageEnvSegment = env == 'production' ? 'prod' : env
@@ -72,9 +79,7 @@ var keyVaultName = 'kv-amaeval-${storageEnvSegment}-${shortUniqueSuffix}${keyVau
 var logAnalyticsWorkspaceName = take('log-ama-eval-${nameSuffix}', 63)
 var containerRegistryName = 'acramaeval${storageEnvSegment}${shortUniqueSuffix}'
 var evalRunnerImageRepository = 'eval-runner'
-var evalRunnerImageTag = env
 var apiImageRepository = 'ama/api'
-var apiImageTag = env
 var allowPublicEvalDataPlane = env == 'dev'
 var dataPlanePublicNetworkAccess = allowPublicEvalDataPlane ? 'Enabled' : 'Disabled'
 var dataPlaneNetworkDefaultAction = allowPublicEvalDataPlane ? 'Allow' : 'Deny'
@@ -85,7 +90,7 @@ var acrPullRoleDefinitionId = subscriptionResourceId('Microsoft.Authorization/ro
 resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = {
   name: 'cosmos-ama-eval-${nameSuffix}'
   location: location
-  tags: tags
+  tags: resourceTags
   kind: 'GlobalDocumentDB'
   properties: {
     databaseAccountOfferType: 'Standard'
@@ -119,6 +124,14 @@ var containers = [
   { name: 'eval_runs',                partitionKey: '/runId' }
   { name: 'eval_metric_definitions',  partitionKey: '/metricId' }
   { name: 'eval_audit',               partitionKey: '/runId' }
+  { name: 'simulation',               partitionKey: '/scenario_id' }
+  { name: 'kpi_ladder',               partitionKey: '/kpi_id' }
+  { name: 'kpi_signals',              partitionKey: '/scenario_id' }
+  { name: 'delta_scorecards',         partitionKey: '/scenario_id' }
+  { name: 'causal_chains',            partitionKey: '/capability_id' }
+  { name: 'benchmark_register',       partitionKey: '/kpi_id' }
+  { name: 'evidence_audit',           partitionKey: '/audit_id' }
+  { name: 'evidence_audit_dlq',       partitionKey: '/audit_id' }
 ]
 
 resource cosmosContainers 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-11-15' = [for c in containers: {
@@ -139,7 +152,7 @@ resource cosmosContainers 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/co
 resource storage 'Microsoft.Storage/storageAccounts@2024-01-01' = {
   name: storageAccountName
   location: location
-  tags: tags
+  tags: resourceTags
   sku: { name: 'Standard_ZRS' }
   kind: 'StorageV2'
   properties: {
@@ -197,7 +210,7 @@ resource blobImmutabilityPolicies 'Microsoft.Storage/storageAccounts/blobService
 resource kv 'Microsoft.KeyVault/vaults@2024-04-01-preview' = {
   name: keyVaultName
   location: location
-  tags: tags
+  tags: resourceTags
   properties: {
     sku: { family: 'A', name: 'standard' }
     tenantId: subscription().tenantId
@@ -215,7 +228,7 @@ resource kv 'Microsoft.KeyVault/vaults@2024-04-01-preview' = {
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2025-04-01' = {
   name: containerRegistryName
   location: location
-  tags: tags
+  tags: resourceTags
   sku: { name: 'Basic' }
   properties: {
     adminUserEnabled: false
@@ -235,7 +248,7 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2025-04-01' =
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: logAnalyticsWorkspaceName
   location: location
-  tags: tags
+  tags: resourceTags
   properties: {
     sku: { name: 'PerGB2018' }
     retentionInDays: 90
@@ -248,7 +261,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: 'appi-ama-eval-${nameSuffix}'
   location: location
-  tags: tags
+  tags: resourceTags
   kind: 'web'
   properties: {
     Application_Type: 'web'
@@ -270,11 +283,12 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 // tracked separately.
 
 var foundryAccountName = take('aoai-amaeval-${storageEnvSegment}-${shortUniqueSuffix}', 32)
+var foundryInferenceEndpoint = 'https://${foundryAccountName}.services.ai.azure.com/models'
 
 resource foundry 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: foundryAccountName
   location: location
-  tags: tags
+  tags: resourceTags
   kind: 'AIServices'
   sku: { name: 'S0' }
   identity: { type: 'SystemAssigned' }
@@ -290,7 +304,6 @@ resource foundry 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
 var foundryModelDeployments = [
   { name: 'gpt-5-4',                modelName: 'gpt-5.4',                  modelVersion: '2026-03-05', format: 'OpenAI',    sku: 'GlobalStandard', capacity: 10 }
   { name: 'gpt-5-4-mini',           modelName: 'gpt-5.4-mini',             modelVersion: '2026-03-17', format: 'OpenAI',    sku: 'GlobalStandard', capacity: 10 }
-  { name: 'gpt-4o-mini',            modelName: 'gpt-4o-mini',              modelVersion: '2024-07-18', format: 'OpenAI',    sku: 'GlobalStandard', capacity: 10 }
   { name: 'phi-4',                  modelName: 'Phi-4',                    modelVersion: '7',          format: 'Microsoft', sku: 'GlobalStandard', capacity: 1  }
   { name: 'llama-3-3-70b-instruct', modelName: 'Llama-3.3-70B-Instruct',   modelVersion: '9',          format: 'Meta',      sku: 'GlobalStandard', capacity: 1  }
   { name: 'mistral-large-3',        modelName: 'Mistral-Large-3',          modelVersion: '1',          format: 'Mistral AI',sku: 'GlobalStandard', capacity: 1  }
@@ -309,13 +322,14 @@ resource foundryDeployments 'Microsoft.CognitiveServices/accounts/deployments@20
   }
 }]
 
-var cognitiveServicesOpenAIUserRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd')
+// The MaaS chat-completions action is not included in Cognitive Services OpenAI User.
+var cognitiveServicesUserRoleId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a97b65f3-24c7-4388-baec-2e87135dc908')
 
 resource runnerFoundryAccess 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(foundry.id, runnerIdentity.id, 'CognitiveServicesOpenAIUser')
   scope: foundry
   properties: {
-    roleDefinitionId: cognitiveServicesOpenAIUserRoleId
+    roleDefinitionId: cognitiveServicesUserRoleId
     principalId: runnerIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -326,7 +340,7 @@ resource runnerFoundryAccess 'Microsoft.Authorization/roleAssignments@2022-04-01
 resource cae 'Microsoft.App/managedEnvironments@2024-03-01' = {
   name: 'cae-ama-eval-${nameSuffix}'
   location: location
-  tags: tags
+  tags: resourceTags
   properties: {
     appLogsConfiguration: {
       destination: 'log-analytics'
@@ -345,7 +359,7 @@ resource cae 'Microsoft.App/managedEnvironments@2024-03-01' = {
 resource runnerIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: 'id-caj-eval-runner-${nameSuffix}'
   location: location
-  tags: tags
+  tags: resourceTags
 }
 
 resource cosmosSqlRoleAssignmentRunner 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-11-15' = {
@@ -365,6 +379,16 @@ resource runnerStorageBlobReader 'Microsoft.Authorization/roleAssignments@2022-0
   scope: storage
   properties: {
     roleDefinitionId: storageBlobDataReaderRoleId
+    principalId: runnerIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource runnerTraceBlobContributor 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(blobContainers[1].id, runnerIdentity.id, 'StorageBlobDataContributor')
+  scope: blobContainers[1]
+  properties: {
+    roleDefinitionId: storageBlobDataContributorRoleId
     principalId: runnerIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -390,7 +414,7 @@ var jobNames = [
 resource jobs 'Microsoft.App/jobs@2024-03-01' = [for j in jobNames: if (deployContainerJobs) {
   name: j.name
   location: location
-  tags: tags
+  tags: resourceTags
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: { '${runnerIdentity.id}': {} }
@@ -425,9 +449,12 @@ resource jobs 'Microsoft.App/jobs@2024-03-01' = [for j in jobNames: if (deployCo
             { name: 'COSMOS_ENDPOINT',          value: cosmos.properties.documentEndpoint }
             { name: 'COSMOS_DATABASE',          value: 'ama-eval' }
             { name: 'EVAL_BLOB_ACCOUNT',        value: storage.name }
+            { name: 'EVAL_STORAGE_ACCOUNT',     value: storage.name }
+            { name: 'EVAL_TRACES_CONTAINER',    value: 'runs' }
             { name: 'EVAL_KEY_VAULT',           value: kv.name }
             { name: 'AZURE_CLIENT_ID',          value: runnerIdentity.properties.clientId }
             { name: 'AZURE_AI_PROJECT_ENDPOINT', value: foundry.properties.endpoint }
+            { name: 'AZURE_AI_INFERENCE_ENDPOINT', value: foundryInferenceEndpoint }
             { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: join(map(foundryModelDeployments, d => '${d.modelName}@${d.modelVersion}=${d.name}'), ',') }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.properties.ConnectionString }
             { name: 'EVAL_JOB_ROLE',            value: split(j.name, '-')[2] }
@@ -451,7 +478,7 @@ var cosmosBuiltinDataContributorId = guid(cosmos.id, 'cosmos-data-contributor')
 resource apiIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = if (deployApi) {
   name: 'id-app-ama-api-${nameSuffix}'
   location: location
-  tags: tags
+  tags: resourceTags
 }
 
 resource apiAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (deployApi) {
@@ -497,7 +524,7 @@ resource cosmosSqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleA
 resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = if (deployApi) {
   name: 'app-ama-api-${env}'
   location: location
-  tags: tags
+  tags: resourceTags
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: { '${apiIdentity.id}': {} }
@@ -535,6 +562,10 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = if (deployAp
               { name: 'ENVIRONMENT',                            value: env }
               { name: 'COSMOS_ENDPOINT',                        value: cosmos.properties.documentEndpoint }
               { name: 'COSMOS_DATABASE',                        value: 'ama-eval' }
+              { name: 'AMA_EVIDENCE_COSMOS_ENDPOINT',            value: cosmos.properties.documentEndpoint }
+              { name: 'AMA_EVIDENCE_COSMOS_DATABASE',            value: 'ama-eval' }
+              { name: 'AMA_EVIDENCE_BLOB_ENDPOINT',              value: 'https://${storage.name}.blob.core.windows.net' }
+              { name: 'AMA_EVIDENCE_BLOB_CONTAINER',             value: 'audit-archive' }
               { name: 'EVAL_STORAGE_ACCOUNT',                   value: storage.name }
               { name: 'EVAL_TRACES_CONTAINER',                  value: 'runs' }
               { name: 'AZURE_KEY_VAULT_URI',                    value: kv.properties.vaultUri }

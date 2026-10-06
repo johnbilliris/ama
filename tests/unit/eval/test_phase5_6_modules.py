@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import importlib.util
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 for p in (_REPO_ROOT, _REPO_ROOT / "apps" / "eval-runner" / "src", _REPO_ROOT / "packages" / "eval-core" / "src"):
@@ -54,6 +56,119 @@ def _run(*models) -> EvaluationRun:
         createdAt=datetime.now(UTC),
         createdBy="t",
     )
+
+
+def test_acr_build_contexts_include_every_required_source_directory() -> None:
+    script_path = _REPO_ROOT / "scripts" / "run_llm_evaluation.py"
+    spec = importlib.util.spec_from_file_location("run_llm_evaluation", script_path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    assert Path("apps/console_logging.py") in module.EVAL_RUNNER_BUILD_CONTEXT_PATHS
+    assert {
+        Path("scripts/install_pyproject_dependencies.py"),
+        Path("apps/console_logging.py"),
+        Path("apps/agents"),
+        Path("apps/ingestion"),
+        Path("docs/risk-register"),
+        Path("docs/governance-hub/adoption-roadmap"),
+        Path("docs/governance-hub/executive-kpi"),
+        Path("docs/governance-hub/rai-register"),
+        Path("specs/shared"),
+    } <= set(module.API_BUILD_CONTEXT_PATHS)
+    assert all(
+        (module.REPO_ROOT / path).exists()
+        for path in [*module.EVAL_RUNNER_BUILD_CONTEXT_PATHS, *module.API_BUILD_CONTEXT_PATHS]
+    )
+
+
+def test_pr_fast_execute_posts_bounded_correlated_run_and_gates_scorecard(monkeypatch, tmp_path) -> None:
+    script_path = _REPO_ROOT / "scripts" / "run_llm_evaluation.py"
+    spec = importlib.util.spec_from_file_location("run_llm_evaluation_pr_gate", script_path)
+    assert spec is not None and spec.loader is not None
+    script = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = script
+    spec.loader.exec_module(script)
+
+    ctx = script.RunContext(
+        env=script.replace(script.ENVIRONMENTS["dev"], api_base_url="https://api.dev.local"),
+        args=SimpleNamespace(
+            api_base_url="https://api.dev.local",
+            change_ref="PR-142",
+            continue_on_gate_block=False,
+            dry_run=False,
+            max_cases=2,
+            metric_set="disaster-core-v1",
+            min_evaluated_samples=2,
+            mode="pr-fast-subset",
+            models="gpt-5.4-mini:2026-03-17",
+            output_dir=str(tmp_path),
+            poll_seconds=0,
+            timeout_minutes=1,
+        ),
+    )
+    request_bodies: list[dict] = []
+    passing_metrics = {
+        metric: {"mean": 0.5, "distribution": {"count": 2, "pass_rate": rate}}
+        for metric, rate in (
+            ("refusal-correctness", 0.97),
+            ("refer-to-authority", 0.99),
+            ("must-include", 0.93),
+            ("must-not-include", 1.0),
+            ("prompt-injection-resistance", 0.96),
+            ("groundedness", 0.88),
+        )
+    }
+
+    def fake_get(url, **_kwargs):
+        if url.endswith("/api/eval/health"):
+            return SimpleNamespace(status_code=200, json=lambda: {"anonymousAccess": True})
+        if url.endswith("/api/eval/runs/r1"):
+            return SimpleNamespace(status_code=200, json=lambda: {"runId": "r1", "status": "succeeded"})
+        if url.endswith("/api/eval/runs/r1/scorecard"):
+            return SimpleNamespace(
+                status_code=200,
+                json=lambda: {"runId": "r1", "perModel": {"gpt-5.4-mini@2026-03-17": passing_metrics}},
+            )
+        raise AssertionError(f"unexpected eval GET: {url}")
+
+    def fake_post(url, *, json, **_kwargs):
+        request_bodies.append(json)
+        return SimpleNamespace(status_code=201, json=lambda: {"runId": "r1", "status": "queued"})
+
+    monkeypatch.setattr(script.requests, "get", fake_get)
+    monkeypatch.setattr(script.requests, "post", fake_post)
+    monkeypatch.setattr(script, "_resolve_api_base_url", lambda *_args, **_kwargs: None)
+
+    script.stage_execute(ctx)
+
+    assert request_bodies == [
+        {
+            "datasetId": "disaster-response-core",
+            "datasetVersion": "1.1.3",
+            "models": [
+                {
+                    "modelId": "gpt-5.4-mini",
+                    "version": "2026-03-17",
+                    "deploymentRegion": "australiaeast",
+                    "sku": "GlobalStandard",
+                }
+            ],
+            "metricSetVersion": "disaster-core-v1",
+            "policyVersion": "1.0.0",
+            "mode": "pr-fast-subset",
+            "estimatedCostAud": 0.0,
+            "estimatedDurationMinutes": 30,
+            "changeRef": "PR-142",
+            "datasetSubset": {"maxCases": 2},
+        }
+    ]
+    assert ctx.state["run_id"] == "r1"
+    assert ctx.state["evaluation_status"] == "succeeded"
+    assert ctx.state["gate_passed"] is True
+    assert ctx.state["evaluated_samples"] == 2
 
 
 def test_provision_two_models():
@@ -131,22 +246,29 @@ def test_aggregate_run_cost():
 
 
 def test_gate_pass_when_thresholds_met():
+    def metric(pass_rate: float) -> dict:
+        return {
+            "mean": 0.5,
+            "distribution": {"count": 12, "pass_rate": pass_rate},
+        }
+
     sc = {
         "runId": "r1",
         "perModel": {
             "gpt-4o@v1": {
-                "refusal-correctness": {"mean": 0.97, "passRate": 0.97},
-                "refer-to-authority": {"mean": 0.99, "passRate": 0.99},
-                "must-include": {"mean": 0.93, "passRate": 0.93},
-                "must-not-include": {"mean": 1.0, "passRate": 1.0},
-                "prompt-injection-resistance": {"mean": 0.96, "passRate": 0.96},
-                "groundedness": {"mean": 0.88, "passRate": 0.88},
+                "refusal-correctness": metric(0.97),
+                "refer-to-authority": metric(0.99),
+                "must-include": metric(0.93),
+                "must-not-include": metric(1.0),
+                "prompt-injection-resistance": metric(0.96),
+                "groundedness": metric(0.88),
             }
         },
     }
     v = evaluate_gate(sc, baseline=None)
     assert v.pass_, v.reasons
     assert v.reasons == []
+    assert v.evaluatedSamples == 12
 
 
 def test_gate_fails_on_must_not_include_regression():
@@ -189,16 +311,22 @@ def test_gate_fails_when_required_metric_is_missing():
 
 
 def test_gate_fails_on_regression_vs_baseline():
+    def metric(pass_rate: float) -> dict:
+        return {
+            "mean": 0.5,
+            "distribution": {"count": 12, "pass_rate": pass_rate},
+        }
+
     sc = {
         "runId": "r1",
         "perModel": {
             "gpt-4o@v1": {
-                "refusal-correctness": {"mean": 0.96, "passRate": 0.96},
-                "refer-to-authority": {"mean": 0.99, "passRate": 0.99},
-                "must-include": {"mean": 0.92, "passRate": 0.92},
-                "must-not-include": {"mean": 1.0, "passRate": 1.0},
-                "prompt-injection-resistance": {"mean": 0.96, "passRate": 0.96},
-                "groundedness": {"mean": 0.70, "passRate": 0.70},
+                "refusal-correctness": metric(0.96),
+                "refer-to-authority": metric(0.99),
+                "must-include": metric(0.92),
+                "must-not-include": metric(1.0),
+                "prompt-injection-resistance": metric(0.96),
+                "groundedness": metric(0.70),
             }
         },
     }
@@ -206,3 +334,27 @@ def test_gate_fails_on_regression_vs_baseline():
     v = evaluate_gate(sc, baseline=baseline, thresholds=GateThresholds(groundednessMin=0.5))
     assert not v.pass_
     assert any("regression on groundedness" in r for r in v.reasons)
+
+
+def test_gate_fails_when_sample_floor_is_not_met():
+    metrics = {
+        metric: {"mean": 1.0, "distribution": {"count": 2, "pass_rate": 1.0}}
+        for metric in (
+            "refusal-correctness",
+            "refer-to-authority",
+            "must-include",
+            "must-not-include",
+            "prompt-injection-resistance",
+            "groundedness",
+        )
+    }
+
+    verdict = evaluate_gate(
+        {"runId": "r1", "perModel": {"gpt-5.4-mini@2026-03-17": metrics}},
+        baseline=None,
+        thresholds=GateThresholds(minEvaluatedSamples=3),
+    )
+
+    assert not verdict.pass_
+    assert verdict.evaluatedSamples == 2
+    assert any("evaluated samples 2 < required minimum 3" in reason for reason in verdict.reasons)

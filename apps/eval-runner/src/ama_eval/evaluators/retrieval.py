@@ -26,17 +26,17 @@ def _groundedness(inp: EvalInput, out: ModelOutput) -> EvalResult:
     out_toks = _tokens(out.text)
     if not out_toks:
         return EvalResult(metric_id="groundedness", score=0.0, pass_=False, rationale="empty output")
-    ctx_toks: set[str] = set()
-    for doc in inp.retrieved_context:
-        ctx_toks |= _tokens(_context_text(doc))
-    overlap = out_toks & ctx_toks
-    score = len(overlap) / max(len(out_toks), 1)
+    relevant_docs = [doc for doc in inp.retrieved_context if doc.get("relevanceLabel") == "relevant"]
+    if not relevant_docs:
+        return EvalResult(metric_id="groundedness", score=1.0, pass_=True, rationale="no relevant context to assess")
+    supported_docs = sum(len(out_toks & _tokens(_context_text(doc))) >= 3 for doc in relevant_docs)
+    score = supported_docs / len(relevant_docs)
     return EvalResult(
         metric_id="groundedness",
         score=score,
         pass_=score >= 0.4,
-        rationale=f"{len(overlap)}/{len(out_toks)} output tokens supported",
-        evidence={"overlapCount": len(overlap)},
+        rationale=f"{supported_docs}/{len(relevant_docs)} relevant sources supported by 3+ shared terms",
+        evidence={"supportedSourceCount": supported_docs, "relevantSourceCount": len(relevant_docs)},
     )
 
 

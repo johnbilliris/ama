@@ -518,6 +518,7 @@ not_p1_paths:
 - apps/eval-runner/src/ama_eval/evaluators/retrieval.py
 - apps/eval-runner/src/ama_eval/evaluators/rule_based.py
 - apps/eval-runner/src/ama_eval/evidence.py
+- apps/eval-runner/src/ama_eval/foundry_client.py
 - apps/eval-runner/src/ama_eval/gate.py
 - apps/eval-runner/src/ama_eval/orchestrator.py
 - apps/eval-runner/src/ama_eval/provisioner.py
@@ -752,6 +753,7 @@ not_p1_paths:
 - docs/disaster-response-hub/evaluation/live-llm-rehearsal-runbook.md
 - docs/disaster-response-hub/evaluation/quickstart-rehearsal-results-2026-03-16.md
 - docs/disaster-response-hub/regional-adaptation-asia-pacific.md
+- docs/llm-evaluation/manual-evaluation-guide.md
 - docs/specify/extension-list-usability-protocol.md
 - docs/specify/extension-list-validation-handoff.md
 - docs/specify/extension-list.md
@@ -818,11 +820,21 @@ not_p1_paths:
 - packages/domain/src/evidence/index.ts
 - packages/domain/src/index.ts
 - packages/eval-core/pyproject.toml
+- packages/eval-dataset/README.md
+- packages/eval-dataset/data/dataset-disaster-core-1.1.0/cases.jsonl
+- packages/eval-dataset/data/dataset-disaster-core-1.1.0/manifest.json
+- packages/eval-dataset/data/dataset-disaster-core-1.1.1/cases.jsonl
+- packages/eval-dataset/data/dataset-disaster-core-1.1.1/manifest.json
+- packages/eval-dataset/data/dataset-disaster-core-1.1.2/cases.jsonl
+- packages/eval-dataset/data/dataset-disaster-core-1.1.2/manifest.json
+- packages/eval-dataset/data/dataset-disaster-core-1.1.3/cases.jsonl
+- packages/eval-dataset/data/dataset-disaster-core-1.1.3/manifest.json
 - packages/eval-dataset/pyproject.toml
 - packages/eval-dataset/src/ama_eval_dataset/distribution.py
 - packages/eval-dataset/src/ama_eval_dataset/generator.py
 - packages/eval-dataset/src/ama_eval_dataset/manifest.py
 - packages/eval-dataset/src/ama_eval_dataset/templates.py
+- packages/eval-dataset/tests/test_generator.py
 - packages/schemas/openapi.yaml
 - packages/schemas/signal-envelope.schema.json
 - packages/schemas/signal-envelope.schema.v2.json
@@ -1256,6 +1268,9 @@ not_p1_paths:
 - tests/simulation/test_social_generator.py
 - tests/staging_gates.py
 - tests/unit/eval/test_phase5_6_modules.py
+- tests/unit/eval/test_foundry_failures.py
+- tests/unit/eval/test_retrieval_evaluators.py
+- tests/unit/eval/test_rule_based_evaluators.py
 - tests/unit/eval/test_run_llm_evaluation_script.py
 - tests/unit/scripts/test_install_pyproject_dependencies.py
 - tests/unit/test_actor_agent_catalogue.py

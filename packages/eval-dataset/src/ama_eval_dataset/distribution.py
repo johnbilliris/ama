@@ -38,11 +38,8 @@ LANGUAGE_TARGETS: dict[str, float] = {
 }
 
 ACTION_TARGETS: dict[str, float] = {
-    "answer": 0.35,
-    "refuse": 0.25,
-    "escalate": 0.20,
-    "clarify": 0.15,
-    "redirect": 0.05,
+    "answer": 0.90,
+    "refuse": 0.10,
 }
 
 SEVERITY_TARGETS: dict[str, float] = {

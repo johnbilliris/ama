@@ -62,6 +62,33 @@ class TestSimulationService:
         with pytest.raises(RuntimeError, match="requires COSMOS_ENDPOINT"):
             SimulationRepository()
 
+    def test_simulation_repository_uses_configured_cosmos_database(self, monkeypatch):
+        monkeypatch.setenv("AMA_ENVIRONMENT", "dev")
+        monkeypatch.setenv("COSMOS_DATABASE", "ama-eval")
+        requested_databases = []
+        container = object()
+
+        class _Database:
+            def get_container_client(self, container_name: str) -> object:
+                assert container_name == "simulation"
+                return container
+
+        class _CosmosClient:
+            def get_database_client(self, database_name: str) -> _Database:
+                requested_databases.append(database_name)
+                return _Database()
+
+        repository = SimulationRepository(cosmos_client=_CosmosClient())
+        assert repository._get_container() is container
+        assert requested_databases == ["ama-eval"]
+
+        explicit_repository = SimulationRepository(
+            cosmos_client=_CosmosClient(),
+            database_name="explicit-database",
+        )
+        explicit_repository._get_container()
+        assert requested_databases == ["ama-eval", "explicit-database"]
+
     @pytest.mark.asyncio
     async def test_create_tenant_validates_scenario_type(self, service):
         from fastapi import HTTPException

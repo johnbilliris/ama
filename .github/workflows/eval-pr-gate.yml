@@ -7,10 +7,26 @@ on:
         description: "PR number for manual dispatch context"
         required: false
         type: number
-      evaluation_summary_json:
-        description: "JSON summary with evaluated_samples, hallucination_rate, false_positive_rate"
+      evaluation_mode:
+        description: "Evaluation mode"
+        required: false
+        type: choice
+        options: [pr-fast-subset, ad-hoc, progressive-delivery-full]
+        default: pr-fast-subset
+      evaluation_region:
+        description: "Azure region used by the evaluation platform"
         required: false
         type: string
+        default: australiaeast
+      min_evaluated_samples:
+        description: "Minimum scorecard sample count required for a passing PR evaluation"
+        required: false
+        type: number
+      max_cases:
+        description: "Maximum dataset cases evaluated by the PR-fast subset"
+        required: false
+        type: number
+        default: 200
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_call:
@@ -33,26 +49,11 @@ on:
         description: "Minimum number of evaluated samples required"
         required: false
         type: number
-        default: 1
-      max_hallucination_rate:
-        description: "Maximum allowed hallucination rate (fraction)"
+      max_cases:
+        description: "Maximum dataset cases evaluated by the PR-fast subset"
         required: false
         type: number
-        default: 0.02
-      max_false_positive_rate:
-        description: "Maximum allowed false-positive rate (fraction)"
-        required: false
-        type: number
-        default: 0.05
-      fail_on_missing_metrics:
-        description: "Fail when quality summary is missing or incomplete"
-        required: false
-        type: boolean
-        default: true
-      evaluation_summary_json:
-        description: "JSON summary with evaluated_samples, hallucination_rate, false_positive_rate"
-        required: false
-        type: string
+        default: 200
     outputs:
       evaluation_status:
         description: "Runner terminal status"
@@ -63,12 +64,9 @@ on:
       evaluated_samples:
         description: "Evaluated sample count"
         value: ${{ jobs.eval-gate.outputs.evaluated_samples }}
-      hallucination_rate:
-        description: "Observed hallucination rate"
-        value: ${{ jobs.eval-gate.outputs.hallucination_rate }}
-      false_positive_rate:
-        description: "Observed false-positive rate"
-        value: ${{ jobs.eval-gate.outputs.false_positive_rate }}
+      run_id:
+        description: "Correlated evaluation run ID"
+        value: ${{ jobs.eval-gate.outputs.run_id }}
 
 permissions:
   contents: read
@@ -94,12 +92,14 @@ jobs:
     # Per spec 031 / FR-019a: PR evals run against dev infrastructure; the
     # AZURE_CREDENTIALS secret resolves from the `dev` GitHub Environment.
     environment: dev
+    env:
+      EVAL_RUNNER_JOB_NAME: ${{ vars.EVAL_RUNNER_JOB_NAME || 'caj-eval-runner-dev' }}
+      EVAL_RG: ${{ vars.EVAL_RG || 'rg-ama-eval-dev' }}
     outputs:
-      evaluation_status: ${{ steps.verdict.outputs.status }}
-      gate_passed: ${{ steps.thresholds.outputs.gate_passed }}
-      evaluated_samples: ${{ steps.thresholds.outputs.evaluated_samples }}
-      hallucination_rate: ${{ steps.thresholds.outputs.hallucination_rate }}
-      false_positive_rate: ${{ steps.thresholds.outputs.false_positive_rate }}
+      evaluation_status: ${{ steps.evaluation.outputs.evaluation_status }}
+      gate_passed: ${{ steps.evaluation.outputs.gate_passed }}
+      evaluated_samples: ${{ steps.evaluation.outputs.evaluated_samples }}
+      run_id: ${{ steps.evaluation.outputs.run_id }}
     steps:
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
@@ -112,17 +112,18 @@ jobs:
       - name: Install eval framework
         run: |
           pip install -e packages/eval-core
+          pip install -e packages/eval-dataset
           pip install -e apps/eval-runner
           pip install -e apps/api
           pip install pytest ruff
 
       - name: Lint
         run: |
-          ruff check packages/eval-core/ apps/eval-runner/ tests/unit/eval/
+          ruff check packages/eval-core/ packages/eval-dataset/ apps/eval-runner/ tests/unit/eval/
 
       - name: Run unit tests
         run: |
-          python -m pytest packages/eval-core/tests/ tests/unit/eval/ -q
+          python -m pytest packages/eval-core/tests/ packages/eval-dataset/tests/ tests/unit/eval/ -q
 
       - name: Resolve evaluation context
         id: eval-context
@@ -134,7 +135,7 @@ jobs:
       - name: Check eval runner configuration (fail-closed)
         id: eval-config
         run: |
-          if [ -n "${{ vars.EVAL_RUNNER_JOB_NAME }}" ] && [ -n "${{ vars.EVAL_RG }}" ]; then
+          if [ -n "$EVAL_RUNNER_JOB_NAME" ] && [ -n "$EVAL_RG" ]; then
             echo "configured=true" >> "$GITHUB_OUTPUT"
           else
             echo "::error::EVAL_RUNNER_JOB_NAME and EVAL_RG must be configured; missing metrics cannot pass the gate."
@@ -147,134 +148,44 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Trigger Container Apps Job
+      - name: Verify eval platform is provisioned
         if: steps.eval-config.outputs.configured == 'true'
-        id: trigger
         run: |
           set -euo pipefail
-          RUN_ID=$(az containerapp job start \
-            --name "${{ vars.EVAL_RUNNER_JOB_NAME }}" \
-            --resource-group "${{ vars.EVAL_RG }}" \
-            --env-vars "RUN_MODE=$AZURE_RUN_MODE" "PR_NUMBER=${{ steps.eval-context.outputs.pr-number }}" \
-            --query "properties.startTime" -o tsv)
-          echo "run_started_at=$RUN_ID" >> "$GITHUB_OUTPUT"
+          az containerapp job show \
+            --name "$EVAL_RUNNER_JOB_NAME" \
+            --resource-group "$EVAL_RG" \
+            --query "properties.provisioningState" -o tsv
+          api_fqdn=$(az deployment group show \
+            --name eval-platform \
+            --resource-group "$EVAL_RG" \
+            --query "properties.outputs.apiFqdn.value" -o tsv)
+          if [ -z "$api_fqdn" ]; then
+            echo "::error::Eval API deployment output apiFqdn is missing."
+            exit 1
+          fi
 
-      - name: Poll for verdict
+      - name: Run correlated PR evaluation and scorecard gate
         if: steps.eval-config.outputs.configured == 'true'
-        id: verdict
-        run: |
-          set -euo pipefail
-          for i in $(seq 1 60); do
-            VERDICT=$(az containerapp job execution list \
-              --name "${{ vars.EVAL_RUNNER_JOB_NAME }}" \
-              --resource-group "${{ vars.EVAL_RG }}" \
-              --query "[0].properties.template.containers[0].command" -o tsv || echo "running")
-            STATUS=$(az containerapp job execution list \
-              --name "${{ vars.EVAL_RUNNER_JOB_NAME }}" \
-              --resource-group "${{ vars.EVAL_RG }}" \
-              --query "[0].properties.status" -o tsv || echo "Running")
-            if [ "$STATUS" = "Succeeded" ] || [ "$STATUS" = "Failed" ]; then
-              echo "status=$STATUS" >> "$GITHUB_OUTPUT"
-              break
-            fi
-            sleep 30
-          done
-
-      - name: Validate quality thresholds (fail-closed)
-        id: thresholds
+        id: evaluation
         env:
-          SUMMARY_FROM_INPUT: ${{ inputs.evaluation_summary_json || github.event.inputs.evaluation_summary_json || '' }}
-          SUMMARY_FROM_VARS: ${{ vars.EVAL_GATE_SUMMARY_JSON || '' }}
-          FAIL_ON_MISSING: ${{ inputs.fail_on_missing_metrics || 'true' }}
-          MIN_SAMPLES: ${{ inputs.min_evaluated_samples || 1 }}
-          MAX_HALLUCINATION: ${{ inputs.max_hallucination_rate || 0.02 }}
-          MAX_FALSE_POSITIVE: ${{ inputs.max_false_positive_rate || 0.05 }}
-          EVAL_STATUS: ${{ steps.verdict.outputs.status }}
+          EVAL_REGION: ${{ env.EVAL_RUN_REGION }}
+          PR_NUMBER: ${{ steps.eval-context.outputs.pr-number }}
+          MIN_EVALUATED_SAMPLES: ${{ inputs.min_evaluated_samples || github.event.inputs.min_evaluated_samples || inputs.max_cases || github.event.inputs.max_cases || 200 }}
+          MAX_EVAL_CASES: ${{ inputs.max_cases || github.event.inputs.max_cases || 200 }}
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import json
-          import os
-          import sys
-
-          def _truthy(value: str) -> bool:
-            return str(value).strip().lower() in {"1", "true", "yes", "on"}
-
-          def _extract_metric(doc: dict, *keys: str):
-            for key in keys:
-              if key in doc and doc[key] is not None:
-                return doc[key]
-            return None
-
-          summary_raw = os.environ.get("SUMMARY_FROM_INPUT", "").strip() or os.environ.get("SUMMARY_FROM_VARS", "").strip()
-          fail_on_missing = _truthy(os.environ.get("FAIL_ON_MISSING", "true"))
-
-          if os.environ.get("EVAL_STATUS") != "Succeeded":
-            print("::error::Evaluation runner did not report Succeeded status.")
-            sys.exit(1)
-
-          if not summary_raw:
-            if fail_on_missing:
-              print("::error::Missing evaluation summary JSON; fail-closed prevents passing with skipped metrics.")
-              sys.exit(1)
-            print("::warning::No evaluation summary provided; gate marked failed by policy.")
-            print("gate_passed=false")
-            sys.exit(1)
-
-          try:
-            summary = json.loads(summary_raw)
-          except json.JSONDecodeError as exc:
-            print(f"::error::Invalid evaluation summary JSON: {exc}")
-            sys.exit(1)
-
-          evaluated = _extract_metric(summary, "evaluated_samples", "evaluatedSamples", "sample_count")
-          hallucination = _extract_metric(summary, "hallucination_rate", "hallucinationRate")
-          false_positive = _extract_metric(summary, "false_positive_rate", "falsePositiveRate")
-
-          missing = [
-            name
-            for name, value in {
-              "evaluated_samples": evaluated,
-              "hallucination_rate": hallucination,
-              "false_positive_rate": false_positive,
-            }.items()
-            if value is None
-          ]
-          if missing:
-            print(f"::error::Missing required metrics: {', '.join(missing)}")
-            sys.exit(1)
-
-          evaluated = int(evaluated)
-          hallucination = float(hallucination)
-          false_positive = float(false_positive)
-
-          min_samples = int(float(os.environ.get("MIN_SAMPLES", "1")))
-          max_hallucination = float(os.environ.get("MAX_HALLUCINATION", "0.02"))
-          max_false_positive = float(os.environ.get("MAX_FALSE_POSITIVE", "0.05"))
-
-          if evaluated < min_samples:
-            print(f"::error::No evaluation samples collected at required floor ({evaluated} < {min_samples}).")
-            sys.exit(1)
-
-          if hallucination > max_hallucination:
-            print(
-              f"::error::Hallucination rate breach: {hallucination:.4f} > {max_hallucination:.4f}"
-            )
-            sys.exit(1)
-
-          if false_positive > max_false_positive:
-            print(
-              f"::error::False-positive rate breach: {false_positive:.4f} > {max_false_positive:.4f}"
-            )
-            sys.exit(1)
-
-          output_path = os.environ["GITHUB_OUTPUT"]
-          with open(output_path, "a", encoding="utf-8") as fh:
-            fh.write("gate_passed=true\n")
-            fh.write(f"evaluated_samples={evaluated}\n")
-            fh.write(f"hallucination_rate={hallucination:.6f}\n")
-            fh.write(f"false_positive_rate={false_positive:.6f}\n")
-          PY
+          python scripts/run_llm_evaluation.py \
+            --stage execute \
+            --env dev \
+            --mode "$AZURE_RUN_MODE" \
+            --models "gpt-5.4-mini:2026-03-17" \
+            --max-cases "$MAX_EVAL_CASES" \
+            --min-evaluated-samples "$MIN_EVALUATED_SAMPLES" \
+            --change-ref "PR-${PR_NUMBER}" \
+            --poll-seconds 15 \
+            --timeout-minutes 30 \
+            --output-dir "$RUNNER_TEMP/eval-out"
 
       - name: Comment PR with scorecard summary
         if: always() && github.event_name == 'pull_request'
@@ -282,18 +193,16 @@ jobs:
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.x
         with:
           script: |
-            const status = "${{ steps.verdict.outputs.status }}" || "skipped";
-            const gate = "${{ steps.thresholds.outputs.gate_passed }}" || "false";
-            const samples = "${{ steps.thresholds.outputs.evaluated_samples }}" || "0";
-            const hallucination = "${{ steps.thresholds.outputs.hallucination_rate }}" || "n/a";
-            const falsePositive = "${{ steps.thresholds.outputs.false_positive_rate }}" || "n/a";
+            const status = "${{ steps.evaluation.outputs.evaluation_status }}" || "${{ steps.evaluation.outcome }}" || "not run";
+            const gate = "${{ steps.evaluation.outputs.gate_passed }}" || "false";
+            const samples = "${{ steps.evaluation.outputs.evaluated_samples }}" || "0";
+            const runId = "${{ steps.evaluation.outputs.run_id }}" || "unavailable";
             const body = `## LLM eval gate\n\n` +
               `Status: **${status}**\n\n` +
               `Gate passed: **${gate}**\n` +
               `Evaluated samples: **${samples}**\n` +
-              `Hallucination rate: **${hallucination}** (max 0.02)\n` +
-              `False-positive rate: **${falsePositive}** (max 0.05)\n\n` +
-              `_Triggered for PR #${context.issue.number}; full scorecard published to artifact storage._`;
+              `Run ID: \`${runId}\`\n` +
+              `_Triggered for PR #${context.issue.number}; gate evaluated the correlated scorecard._`;
             github.rest.issues.createComment({
               owner: context.repo.owner, repo: context.repo.repo,
               issue_number: context.issue.number,
@@ -301,7 +210,7 @@ jobs:
             });
 
       - name: Fail job if eval failed
-        if: steps.verdict.outputs.status == 'Failed' || steps.thresholds.outputs.gate_passed != 'true'
+        if: always() && (steps.eval-config.outcome != 'success' || steps.evaluation.outcome != 'success' || steps.evaluation.outputs.gate_passed != 'true')
         run: |
-          echo "::error::eval-runner gate failed — status or quality thresholds did not pass."
+          echo "::error::eval-runner or scorecard quality gate failed."
           exit 1

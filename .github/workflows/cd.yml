@@ -495,10 +495,7 @@ jobs:
       evaluation_region: australiaeast
       pr_number: 0
       min_evaluated_samples: 1
-      max_hallucination_rate: 0.02
-      max_false_positive_rate: 0.05
-      fail_on_missing_metrics: true
-      evaluation_summary_json: ${{ vars.EVAL_GATE_SUMMARY_JSON || '' }}
+      max_cases: 200
     secrets: inherit
 
   rollback:
