@@ -40,7 +40,7 @@ jobs:
       - name: Install Bicep CLI
         uses: anthony-c-martin/setup-bicep@faf8170f496c10a2ea75977d2e77024131331404 # v1
         with:
-          version: v0.48.1
+          version: 0.48.1
       - name: Run PSRule for Azure (Bicep)
         uses: microsoft/ps-rule@46451b8f5258c41beb5ae69ed7190ccbba84112c # v2.9.0
         with:
