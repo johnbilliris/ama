@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
 
 
@@ -52,8 +53,25 @@ def test_coverage_and_benchmark_follow_their_artifact_producers() -> None:
 def test_strict_python_types_are_a_blocking_gate() -> None:
     text = _ci_text()
     assert "- name: python-type-strict" in text
-    assert "mypy --strict apps packages" in text
+    assert "run: mypy apps packages" in text
+    config_path = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    config = tomllib.loads(config_path.read_text(encoding="utf-8"))
+    assert config["tool"]["mypy"]["strict"] is True
     assert "python-type-strict\n        continue-on-error: true" not in text
+
+
+def test_windows_quality_job_caches_and_limits_python_dependencies() -> None:
+    text = _ci_text()
+    job = text.split("  quality-windows:\n", 1)[1].split("\n  golden-set-canonical:", 1)[0]
+
+    assert "cache: pip" in job
+    assert "cache-dependency-path:" in job
+    assert (
+        "python -m pip install --upgrade pip pytest pytest-asyncio hypothesis ruff "
+        "-e apps/api -e apps/agents -e packages/eval-core"
+    ) in job
+    assert "python -m pip install --no-deps -e apps/eval-runner" in job
+    assert "Install eval gate package without runtime dependencies" in job
 
 
 def test_quality_job_runs_web_lint() -> None:

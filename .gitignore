@@ -29,6 +29,8 @@ Thumbs.db
 
 .idea/
 .vscode/
+!.vscode/
+!.vscode/mcp.json
 
 bin/
 obj/
