@@ -134,6 +134,7 @@ not_p1_paths:
 - .github/workflows/help-gates.yml
 - .github/workflows/help-snapshot.yml
 - .github/workflows/nightly-load.yml
+- .github/workflows/security-scan.yml
 - .github/workflows/simulation-load-test.yml
 - .github/workflows/spec-035-gate.yml
 - .github/workflows/spec-036-50-agent-load.yml
