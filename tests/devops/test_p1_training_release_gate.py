@@ -1,12 +1,63 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
+import subprocess
 from pathlib import Path
 
 import pytest
 import yaml
 
-from scripts.p1_release_training_gate import run_gate
+from scripts.p1_release_training_gate import _resolve_git_range, run_gate
+
+
+def _git(root: Path, *args: str) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(root), *args],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
+
+
+def _make_git_history(root: Path) -> tuple[str, str]:
+    _git(root, "init")
+    _git(root, "config", "user.name", "Test")
+    _git(root, "config", "user.email", "test@example.com")
+    (root / "README.md").write_text("initial", encoding="utf-8")
+    _git(root, "add", "README.md")
+    _git(root, "commit", "-m", "initial")
+    base_sha = _git(root, "rev-parse", "HEAD")
+    (root / "README.md").write_text("updated", encoding="utf-8")
+    _git(root, "commit", "-am", "update")
+    return base_sha, _git(root, "rev-parse", "HEAD")
+
+
+def test_git_range_is_inferred_from_local_repository(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    base_sha, head_sha = _make_git_history(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for name in ("GITHUB_EVENT_NAME", "GITHUB_EVENT_PATH", "GITHUB_SHA", "GITHUB_REF_NAME"):
+        monkeypatch.delenv(name, raising=False)
+
+    assert _resolve_git_range() == (base_sha, head_sha)
+
+
+def test_git_range_uses_push_event_shas(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    base_sha, head_sha = _make_git_history(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    event_path = tmp_path / "event.json"
+    event_path.write_text(json.dumps({"before": base_sha}), encoding="utf-8")
+    monkeypatch.setenv("GITHUB_EVENT_NAME", "push")
+    monkeypatch.setenv("GITHUB_EVENT_PATH", str(event_path))
+    monkeypatch.setenv("GITHUB_SHA", head_sha)
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+
+    assert _resolve_git_range() == (base_sha, head_sha)
 
 
 def _write_inventory(root: Path, *, last_reviewed: str = "2026-09-15", signed_at: str = "2026-09-15") -> Path:
@@ -54,8 +105,6 @@ def test_p1_gate_passes_with_fresh_signed_metadata(tmp_path: Path, monkeypatch: 
         inventory_path=inventory,
         release_date=dt.date(2026, 9, 15),
         changed_files=["apps/api/app/services/dashboard_service.py"],
-        base_sha=None,
-        head_sha=None,
         waiver_path=None,
     )
 
@@ -72,8 +121,6 @@ def test_p1_gate_fails_unclassified_change_without_waiver(tmp_path: Path, monkey
         inventory_path=inventory,
         release_date=dt.date(2026, 9, 15),
         changed_files=["README.md"],
-        base_sha=None,
-        head_sha=None,
         waiver_path=None,
     )
 
@@ -89,8 +136,6 @@ def test_p1_gate_fails_stale_review_metadata(tmp_path: Path, monkeypatch: pytest
         inventory_path=inventory,
         release_date=dt.date(2026, 9, 15),
         changed_files=["apps/api/app/services/dashboard_service.py"],
-        base_sha=None,
-        head_sha=None,
         waiver_path=None,
     )
 
@@ -120,8 +165,6 @@ def test_p1_gate_honors_not_p1_waiver(tmp_path: Path, monkeypatch: pytest.Monkey
         inventory_path=inventory,
         release_date=dt.date(2026, 9, 15),
         changed_files=["README.md"],
-        base_sha=None,
-        head_sha=None,
         waiver_path=waiver,
     )
 
@@ -152,8 +195,6 @@ def test_p1_gate_rejects_unlisted_path_in_not_p1_waiver(tmp_path: Path, monkeypa
         inventory_path=inventory,
         release_date=dt.date(2026, 9, 15),
         changed_files=["README.md", "docs/other.md"],
-        base_sha=None,
-        head_sha=None,
         waiver_path=waiver,
     )
 
@@ -186,8 +227,6 @@ def test_p1_gate_rejects_stale_or_wildcard_not_p1_classifications(
             inventory_path=inventory,
             release_date=dt.date(2026, 9, 15),
             changed_files=["README.md"],
-            base_sha=None,
-            head_sha=None,
             waiver_path=waiver,
         )
 
@@ -212,8 +251,6 @@ def test_p1_gate_rejects_expired_waiver(tmp_path: Path, monkeypatch: pytest.Monk
         inventory_path=inventory,
         release_date=dt.date(2026, 9, 15),
         changed_files=["README.md"],
-        base_sha=None,
-        head_sha=None,
         waiver_path=waiver,
     )
 

@@ -4,6 +4,7 @@ import argparse
 import datetime as dt
 import fnmatch
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -51,9 +52,83 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return loaded
 
 
+def _git_output(args: list[str]) -> str:
+    result = subprocess.run(["git", *args], check=False, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise GateError(f"git {' '.join(args)} failed: {result.stderr.strip()}")
+    return result.stdout.strip()
+
+
+def _resolve_git_range() -> tuple[str, str]:
+    event_name = os.environ.get("GITHUB_EVENT_NAME")
+    event_path = os.environ.get("GITHUB_EVENT_PATH")
+    event: dict[str, Any] = {}
+    if event_path:
+        try:
+            loaded = json.loads(Path(event_path).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise GateError(f"unable to read GitHub event payload: {exc}") from exc
+        if not isinstance(loaded, dict):
+            raise GateError("GitHub event payload must contain an object")
+        event = loaded
+
+    if event_name == "pull_request":
+        pull_request = event.get("pull_request")
+        base = pull_request.get("base") if isinstance(pull_request, dict) else None
+        base_sha = base.get("sha") if isinstance(base, dict) else None
+        head_sha = os.environ.get("GITHUB_SHA")
+    elif event_name == "push":
+        base_sha = event.get("before")
+        head_sha = os.environ.get("GITHUB_SHA")
+        if os.environ.get("GITHUB_REF_NAME") == "001-extension-list":
+            base_sha = _git_output(["merge-base", "origin/main", head_sha or "HEAD"])
+    elif event_name == "workflow_run":
+        workflow_run = event.get("workflow_run")
+        head_sha = workflow_run.get("head_sha") if isinstance(workflow_run, dict) else None
+        if not isinstance(head_sha, str) or not head_sha:
+            raise GateError("workflow_run event is missing workflow_run.head_sha")
+        parents = _git_output(["rev-list", "--parents", "-n", "1", head_sha]).split()
+        if len(parents) == 1:
+            _git_output(["fetch", "--no-tags", "--deepen=1", "origin", head_sha])
+            parents = _git_output(["rev-list", "--parents", "-n", "1", head_sha]).split()
+        if len(parents) < 2:
+            raise GateError("workflow_run head commit has no parent for changed-file classification")
+        base_sha = parents[1]
+    else:
+        head_sha = _git_output(["rev-parse", "HEAD"])
+        base_sha = _git_output(["rev-parse", f"{head_sha}^"])
+
+    if not isinstance(base_sha, str) or not base_sha or set(base_sha) == {"0"}:
+        raise GateError("unable to resolve a non-zero base SHA for changed-file classification")
+    if not isinstance(head_sha, str) or not head_sha:
+        raise GateError("unable to resolve head SHA for changed-file classification")
+
+    _ensure_commit(base_sha)
+    _ensure_commit(head_sha)
+    return base_sha, head_sha
+
+
+def _ensure_commit(sha: str) -> None:
+    result = subprocess.run(
+        ["git", "cat-file", "-e", f"{sha}^{{commit}}"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0:
+        return
+
+    fetch = subprocess.run(
+        ["git", "fetch", "--no-tags", "--depth=1", "origin", sha],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if fetch.returncode != 0:
+        raise GateError(f"required commit {sha} is unavailable locally and fetch failed: {fetch.stderr.strip()}")
+
+
 def _git_changed_files(base_sha: str, head_sha: str) -> list[str]:
-    if not base_sha or not head_sha:
-        raise GateError("base_sha and head_sha are required when changed-file arguments are not provided")
     cmd = ["git", "diff", "--name-only", base_sha, head_sha]
     result = subprocess.run(cmd, check=False, capture_output=True, text=True)
     if result.returncode != 0:
@@ -173,8 +248,6 @@ def run_gate(
     inventory_path: Path,
     release_date: dt.date,
     changed_files: list[str] | None,
-    base_sha: str | None,
-    head_sha: str | None,
     waiver_path: Path | None,
 ) -> tuple[bool, dict[str, Any]]:
     inventory = _load_yaml(inventory_path)
@@ -184,8 +257,11 @@ def run_gate(
 
     if changed_files:
         changed = sorted({f.replace("\\", "/") for f in changed_files if f.strip()})
+        base_sha = None
+        head_sha = None
     else:
-        changed = sorted({f.replace("\\", "/") for f in _git_changed_files(base_sha or "", head_sha or "")})
+        base_sha, head_sha = _resolve_git_range()
+        changed = sorted({f.replace("\\", "/") for f in _git_changed_files(base_sha, head_sha)})
 
     if not changed:
         raise GateError("no changed files detected; classification is required and fail-closed")
@@ -254,8 +330,6 @@ def main(argv: list[str] | None = None) -> int:
         default=Path("docs/disaster-response-hub/p1-flow-inventory.yaml"),
     )
     parser.add_argument("--release-date", default=dt.date.today().isoformat())
-    parser.add_argument("--base-sha")
-    parser.add_argument("--head-sha", default="HEAD")
     parser.add_argument("--changed-file", action="append", dest="changed_files")
     parser.add_argument("--waiver-file", type=Path)
     parser.add_argument("--summary-out", type=Path)
@@ -267,8 +341,6 @@ def main(argv: list[str] | None = None) -> int:
             inventory_path=args.inventory,
             release_date=release_date,
             changed_files=args.changed_files,
-            base_sha=args.base_sha,
-            head_sha=args.head_sha,
             waiver_path=args.waiver_file,
         )
     except GateError as exc:

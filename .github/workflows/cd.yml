@@ -173,20 +173,14 @@ jobs:
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
-          base_sha="$(git rev-parse "${HEAD_SHA}^" 2>/dev/null || true)"
-          if [[ -z "${base_sha}" ]]; then
-            echo "::error::Unable to derive base SHA for release classification; refusing deployment."
-            exit 1
-          fi
+          git fetch --no-tags --deepen=1 origin "${HEAD_SHA}"
           waiver_args=()
-          if git diff --name-only "${base_sha}" "${HEAD_SHA}" \
+          if git diff --name-only HEAD^ HEAD \
             | grep -Fxq "docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml"; then
             waiver_args+=(--waiver-file docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml)
           fi
           python scripts/p1_release_training_gate.py \
             --inventory docs/disaster-response-hub/p1-flow-inventory.yaml \
-            --base-sha "${base_sha}" \
-            --head-sha "${HEAD_SHA}" \
             --summary-out artifacts/p1-release-gate-summary.json \
             "${waiver_args[@]}"
 
