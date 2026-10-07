@@ -101,6 +101,10 @@ def _active_actor_files() -> list[Path]:
     return files
 
 
+def _without_catalogue_date(content: str) -> str:
+    return re.sub(r"(?m)^\*\*Last Updated\*\*: \d{4}-\d{2}-\d{2}\n", "", content)
+
+
 def test_aud003_explicit_tools_and_least_privilege_profiles() -> None:
     active = _active_actor_files()
     assert len(active) == 85
@@ -147,7 +151,9 @@ def test_aud015_catalogue_is_generated_and_bijective() -> None:
     entries = collect_entries()
     rendered = render_catalogue(entries)
     current = (AGENTS_ROOT / "AGENTS.md").read_text(encoding="utf-8")
-    assert current == rendered, "AGENTS.md must match generator output"
+    assert _without_catalogue_date(current) == _without_catalogue_date(rendered), (
+        "AGENTS.md must match generator output apart from the generated date"
+    )
 
     actors = [e for e in entries if e.tier in {"operational", "sector", "technical"}]
     workflows = [e for e in entries if e.tier == "workflow"]
