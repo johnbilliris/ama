@@ -83,6 +83,7 @@ def test_quality_job_runs_web_lint() -> None:
 def test_story_acceptance_job_exists_with_required_projects() -> None:
     text = _ci_text()
     assert "story-acceptance:" in text
+    assert "PYTHONPATH: ${{ github.workspace }}/packages/domain/src" in text
     assert "--project=chromium" in text
     assert "--project=mobile" in text
 
