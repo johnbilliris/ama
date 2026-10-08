@@ -24,7 +24,7 @@
     "@ama/ui": "workspace:*",
     "@azure/monitor-opentelemetry": "^1.20.0",
     "@azure/msal-browser": "^5.9.0",
-    "@azure/msal-react": "^5.3.2",
+    "@azure/msal-react": "^5.7.2",
     "idb": "^8.0.3",
     "next": "16.3.6",
     "pdf-lib": "^1.17.1",
