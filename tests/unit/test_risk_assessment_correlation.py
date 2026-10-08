@@ -75,6 +75,7 @@ class TestSignalCorrelator:
         ]
         result = correlator.compute_weighted_confidence(signals)
         assert result.all_stale is True
+        assert result.weighted_confidence == 0.0
 
     def test_single_source_assessment(self):
         correlator = SignalCorrelator()

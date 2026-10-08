@@ -207,6 +207,7 @@ class TestHazardAssessment:
             hazard_assessment_id="ha-1",
             incident_id="inc-1",
             assessment_type="spread_prediction",
+            input_signal_ids=["signal-1"],
             summary="Test summary",
             confidence_level="medium",
             generated_at=now,

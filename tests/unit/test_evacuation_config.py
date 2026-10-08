@@ -1,5 +1,6 @@
 """Tests for evacuation.config — defaults, hash, mobilisation, env overrides (T013)."""
 
+import pytest
 from evacuation.config import EvacuationConfig
 
 # ---------------------------------------------------------------------------
@@ -10,11 +11,24 @@ from evacuation.config import EvacuationConfig
 class TestConfigDefaults:
     def test_road_network_file_path(self):
         cfg = EvacuationConfig()
-        assert cfg.road_network_file_path == "data/road-network.json"
+        assert cfg.road_network_file_path == "data/road-networks/far-north-qld-sample.json"
+
+    def test_reference_and_runtime_defaults(self):
+        cfg = EvacuationConfig()
+        assert cfg.population_data_file_path == "data/population/sample-population.json"
+        assert cfg.cosmos_database_name == "disaster-response"
+        assert cfg.plans_container_name == "evacuation-plans"
+        assert cfg.decisions_container_name == "evacuation-decisions"
+        assert cfg.assessments_container_name == "hazard-assessments"
+        assert cfg.recommendations_container_name == "risk-recommendations"
+        assert cfg.service_bus_queue_name == "evacuation-handoffs"
 
     def test_road_data_staleness_hours(self):
         cfg = EvacuationConfig()
         assert cfg.road_data_staleness_hours == 6
+
+    def test_population_data_staleness_hours(self):
+        assert EvacuationConfig().population_data_staleness_hours == 24
 
     def test_handoff_dedup_window_minutes(self):
         cfg = EvacuationConfig()
@@ -80,9 +94,28 @@ class TestConfigDefaults:
         cfg = EvacuationConfig()
         assert cfg.replan_rate_limit_seconds == 30
 
+    def test_plan_expiry_hours(self):
+        assert EvacuationConfig().plan_expiry_hours == 4
+
+    def test_plan_lifecycle_sweep_seconds(self):
+        assert EvacuationConfig().plan_lifecycle_sweep_seconds == 30
+
     def test_agent_version(self):
         cfg = EvacuationConfig()
         assert cfg.agent_version == "0.1.0"
+
+    @pytest.mark.parametrize(
+        "overrides",
+        [
+            {"vulnerable_population_buffer": 0.99},
+            {"phase_transition_time_factor": 0},
+            {"phase_transition_population_pct": 0},
+            {"phase_transition_population_pct": 101},
+        ],
+    )
+    def test_invalid_timeline_values_are_rejected(self, overrides):
+        with pytest.raises(ValueError):
+            EvacuationConfig(**overrides)
 
 
 # ---------------------------------------------------------------------------
@@ -150,6 +183,21 @@ class TestEnvOverrides:
         monkeypatch.setenv("ROAD_DATA_STALENESS_HOURS", "12")
         cfg = EvacuationConfig()
         assert cfg.road_data_staleness_hours == 12
+
+    def test_env_population_data_staleness_hours(self, monkeypatch):
+        monkeypatch.setenv("POPULATION_DATA_STALENESS_HOURS", "48")
+        assert EvacuationConfig().population_data_staleness_hours == 48
+
+    @pytest.mark.parametrize(
+        "overrides",
+        [
+            {"road_data_staleness_hours": 0},
+            {"population_data_staleness_hours": 0},
+        ],
+    )
+    def test_freshness_windows_must_be_positive(self, overrides):
+        with pytest.raises(ValueError, match="STALENESS_HOURS"):
+            EvacuationConfig(**overrides)
 
     def test_handoff_dedup_window_override(self, monkeypatch):
         monkeypatch.setenv("HANDOFF_DEDUP_WINDOW_MINUTES", "5")

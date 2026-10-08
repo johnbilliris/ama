@@ -12,9 +12,12 @@ module exports no-op stubs so production code runs without instrumentation overh
 from __future__ import annotations
 
 import logging
+import os
 from collections.abc import Generator
 from contextlib import contextmanager
 from typing import Any
+
+from common.telemetry_types import Attributes
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +41,29 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 _SERVICE_NAME = "communication-agent"
+_TELEMETRY_CONFIGURED = False
+
+
+def configure_telemetry() -> bool:
+    """Configure Azure Monitor export once when a connection string is present."""
+    global _TELEMETRY_CONFIGURED
+    if _TELEMETRY_CONFIGURED:
+        return True
+    connection_string = os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING", "")
+    if not connection_string:
+        return False
+    try:
+        from azure.monitor.opentelemetry import configure_azure_monitor
+
+        configure_azure_monitor(
+            connection_string=connection_string,
+            resource_attributes={"service.name": _SERVICE_NAME},
+        )
+    except Exception:
+        logger.exception("Communication telemetry exporter configuration failed")
+        return False
+    _TELEMETRY_CONFIGURED = True
+    return True
 
 
 def _get_tracer() -> Any:
@@ -59,7 +85,7 @@ class _NoOpSpan:
     def record_exception(self, exc: BaseException) -> None:
         pass
 
-    def add_event(self, name: str, attributes: dict | None = None) -> None:
+    def add_event(self, name: str, attributes: Attributes | None = None) -> None:
         pass
 
     def __enter__(self) -> _NoOpSpan:
@@ -82,17 +108,17 @@ class _NoOpTracer:
 
 
 class _NoOpCounter:
-    def add(self, amount: int | float, attributes: dict | None = None) -> None:
+    def add(self, amount: int | float, attributes: Attributes | None = None) -> None:
         pass
 
 
 class _NoOpHistogram:
-    def record(self, amount: int | float, attributes: dict | None = None) -> None:
+    def record(self, amount: int | float, attributes: Attributes | None = None) -> None:
         pass
 
 
 class _NoOpGauge:
-    def set(self, amount: int | float, attributes: dict | None = None) -> None:
+    def set(self, amount: int | float, attributes: Attributes | None = None) -> None:
         pass
 
 
@@ -150,7 +176,7 @@ end_to_end_latency = _meter.create_histogram(
 # Approval metrics
 approval_wait_time = _meter.create_histogram(
     "communication.approval_wait_time",
-    unit="s",
+    unit="ms",
     description="Time waiting for commander approval",
 )
 approval_notification_latency = _meter.create_histogram(
@@ -165,12 +191,12 @@ escalation_count = _meter.create_counter(
 
 # Delivery metrics
 delivery_latency_per_channel = _meter.create_histogram(
-    "communication.delivery_latency",
+    "communication.delivery_latency_per_channel",
     unit="ms",
     description="Per-channel delivery latency",
 )
 delivery_success_rate = _meter.create_counter(
-    "communication.delivery_success_count",
+    "communication.delivery_success_rate_per_channel",
     description="Successful deliveries per channel",
 )
 delivery_failure_count = _meter.create_counter(
@@ -184,15 +210,15 @@ sms_segment_count = _meter.create_histogram(
 
 # Quality metrics
 back_translation_quality = _meter.create_histogram(
-    "communication.back_translation_quality",
+    "communication.back_translation_quality_score",
     description="Back-translation cosine similarity score",
 )
 template_fallback_rate = _meter.create_counter(
-    "communication.template_fallback_count",
+    "communication.template_fallback_rate",
     description="Number of template fallbacks used",
 )
 content_safety_failure_rate = _meter.create_counter(
-    "communication.content_safety_failure_count",
+    "communication.content_safety_failure_rate",
     description="Number of content safety failures",
 )
 

@@ -1,3 +1,4 @@
+import { getApiBaseUrl } from "@/lib/api/base-url";
 /**
  * Client for the Simulation Controller SSE chat endpoint.
  *
@@ -7,7 +8,9 @@
  * No external deps — uses the browser fetch + ReadableStream with a tiny SSE parser.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+import { simulationAuthHeaders } from "./simulation-auth";
+
+const API_BASE_URL = getApiBaseUrl();
 
 export type ChatEventName =
   | "turn.start"
@@ -29,11 +32,16 @@ export async function* streamChat(
   message: string,
   signal?: AbortSignal,
 ): AsyncGenerator<ChatEvent> {
+  const auth = await simulationAuthHeaders();
   const res = await fetch(
     `${API_BASE_URL}/simulations/${encodeURIComponent(tenantId)}/chat`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "text/event-stream",
+        ...auth,
+      },
       body: JSON.stringify({ message }),
       signal,
     },

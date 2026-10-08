@@ -16,11 +16,16 @@ import logging
 from collections import deque
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Protocol
 
 from monitoring.config import MonitoringConfig
 from monitoring.models import AuditBufferEntry, MonitoringDecisionRecord
 
 logger = logging.getLogger(__name__)
+
+
+class AuditCosmosContainer(Protocol):
+    def create_item(self, *, body: dict[str, object]) -> object: ...
 
 
 class AuditWriter:
@@ -29,7 +34,7 @@ class AuditWriter:
     def __init__(
         self,
         config: MonitoringConfig | None = None,
-        cosmos_client: object | None = None,
+        cosmos_client: AuditCosmosContainer | None = None,
     ) -> None:
         self._config = config or MonitoringConfig()
         self._cosmos_client = cosmos_client

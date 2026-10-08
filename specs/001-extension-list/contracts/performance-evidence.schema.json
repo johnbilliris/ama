@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ama:specify:contracts:performance-evidence",
+  "title": "Extension list sovereign performance evidence",
+  "description": "Closed ephemeral SC-002 timing object for a verified standalone AU VM. Shape validation does not establish a qualifying run.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "os",
+    "architecture",
+    "cpu_model",
+    "logical_cpu_count",
+    "total_memory_bytes",
+    "python_version",
+    "package_version",
+    "lock_sha256",
+    "network_disabled",
+    "fixture_id",
+    "fixture_count",
+    "executed_at",
+    "warmup_outcomes",
+    "durations_seconds",
+    "rank",
+    "p95_seconds",
+    "threshold_seconds",
+    "passed",
+    "execution_mode",
+    "audit_sink",
+    "sovereign_session_id",
+    "preflight_attestation_digest",
+    "execution_vm_resource_id",
+    "audit_intent_event_id",
+    "audit_intent_event_digest"
+  ],
+  "properties": {
+    "os": {"type": "string", "minLength": 1, "maxLength": 128},
+    "architecture": {"type": "string", "minLength": 1, "maxLength": 64},
+    "cpu_model": {"type": "string", "minLength": 1, "maxLength": 256},
+    "logical_cpu_count": {"type": "integer", "minimum": 1},
+    "total_memory_bytes": {"type": "integer", "minimum": 1},
+    "python_version": {"type": "string", "minLength": 1, "maxLength": 64},
+    "package_version": {"type": "string", "minLength": 1, "maxLength": 128},
+    "lock_sha256": {"$ref": "#/$defs/sha256"},
+    "runner_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "network_disabled": {"const": true},
+    "fixture_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "fixture_count": {"const": 100},
+    "executed_at": {"type": "string", "format": "date-time"},
+    "warmup_outcomes": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/warmupOutcome"}
+    },
+    "durations_seconds": {
+      "type": "array",
+      "minItems": 30,
+      "maxItems": 30,
+      "items": {"type": "number", "minimum": 0}
+    },
+    "rank": {"const": 29},
+    "p95_seconds": {"type": "number", "minimum": 0},
+    "threshold_seconds": {"const": 2.0},
+    "passed": {"type": "boolean"},
+    "execution_mode": {"const": "sovereign"},
+    "audit_sink": {"const": "immutable-au"},
+    "sovereign_session_id": {"type": "string", "format": "uuid"},
+    "preflight_attestation_digest": {"$ref": "#/$defs/sha256"},
+    "execution_vm_resource_id": {
+      "type": "string",
+      "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Compute/virtualMachines/[^/]+$"
+    },
+    "audit_intent_event_id": {"type": "string", "format": "uuid"},
+    "audit_intent_event_digest": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "warmupOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exit_code", "passed"],
+      "properties": {
+        "exit_code": {"type": "integer", "minimum": 0, "maximum": 255},
+        "passed": {"type": "boolean"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"passed": {"const": true}},
+            "required": ["passed"]
+          },
+          "then": {
+            "properties": {"exit_code": {"const": 0}}
+          },
+          "else": {
+            "properties": {"exit_code": {"type": "integer", "minimum": 1, "maximum": 255}}
+          }
+        }
+      ]
+    }
+  }
+}

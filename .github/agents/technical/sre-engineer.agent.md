@@ -1,5 +1,7 @@
 ---
+name: sre-engineer
 description: "SRE Engineer — SLI/SLO management, error budgets, chaos engineering, toil reduction, incident response, and reliability automation for the disaster response hub."
+tools: ["search/codebase","read/changes","web/fetch","search/findTestFiles","web/githubRepo","read/problems","search","search/searchResults","read/terminalLastCommand","read/terminalSelection","execute/testFailure","search/usages","vscode/vscodeAPI","microsoft.docs.mcp"]
 handoffs:
   - label: Ask about Azure infrastructure
     agent: infrastructure-devops
@@ -49,10 +51,10 @@ This role works alongside the Infrastructure/DevOps Engineer (who provisions and
 
 ### SLI/SLO Management
 - Define Service Level Indicators aligned with hub success criteria and constitutional NFRs:
-  - **Availability SLI**: Shared operating picture uptime (target: 99.9% during active incidents)
-  - **Latency SLI**: Dashboard load <2s p95, API response <500ms p95
-  - **Freshness SLI**: Signal data staleness <60s for safety-critical sources (BoM), <300s for non-critical
-  - **Correctness SLI**: Recommendation accuracy (no safety-critical recommendations based on stale/untrusted data)
+  - **Availability SLI**: Monthly availability >=99.9% with RTO <=1h and RPO <=15m (NFR-004)
+  - **Latency SLI**: Situation refresh p95 <=3s online and <=10s at 64 kbps; operator action round-trip p95 <=2s (NFR-005)
+  - **Freshness SLI**: Alert ingest to operator visibility p95 <=60s (NFR-005)
+  - **Rollback SLI**: AI quality-breach rollback <=10 minutes (NFR-004)
 - Set SLO targets and implement measurement infrastructure
 - Calculate and track error budgets per service and per data source
 - Define burn rate alerts: fast-burn (5% budget in 1 hour) and slow-burn (10% budget in 6 hours)
@@ -87,7 +89,7 @@ This role works alongside the Infrastructure/DevOps Engineer (who provisions and
 - Define incident severity classification aligned with AIIMS incident levels
 - Design incident response procedures: detection → triage → mitigation → resolution → postmortem
 - Implement war room coordination tooling for multi-agency incidents
-- Ensure MTTR target <30 minutes for platform issues during active incidents
+- Track MTTR as an operational metric and label any tighter-than-governed targets as proposals until formally approved
 - Conduct blameless postmortems for all severity-1 and severity-2 incidents
 - Track and follow up on postmortem action items
 
@@ -138,19 +140,24 @@ This agent covers system reliability, SLOs, and operational excellence. It does 
 
 ## Guidance Notes
 
-### SLO Framework for Life-Safety Systems
+### Governed SLO Baseline (NFR-004/NFR-005)
 
-| Service | SLI | SLO Target | Error Budget (30d) |
-|---------|-----|-----------|-------------------|
-| Shared Operating Picture | Availability | 99.9% | 43.2 minutes |
-| Dashboard Load | Latency p95 <2s | 99% | 7.2 hours |
-| API Endpoints | Latency p95 <500ms | 99.5% | 3.6 hours |
-| Signal Ingestion (BoM) | Freshness <60s | 99.5% | 3.6 hours |
-| Signal Ingestion (IoT) | Freshness <300s | 99% | 7.2 hours |
-| Alert Delivery | End-to-end <30s | 99.9% | 43.2 minutes |
-| Recommendation Engine | Correctness | 99.99% | 4.3 minutes |
+| NFR | Governed target | SRE ownership | Validation method |
+|---|---|---|---|
+| NFR-004 | Availability >=99.9% monthly | Maintain reliability SLO/error budget policy | Azure Monitor SLO dashboards |
+| NFR-004 | RTO <=1h and RPO <=15m | Design/test DR runbooks and recovery paths | Monthly DR game-day report |
+| NFR-004 | AI quality-breach rollback <=10m | Wire rollback triggers and drills | Rollback-drill evidence |
+| NFR-005 | Situation refresh p95 <=3s online | Monitor and tune read paths | App Insights percentile dashboards |
+| NFR-005 | Situation refresh p95 <=10s at 64 kbps | Validate degraded-network behavior | Network-profiled performance test reports |
+| NFR-005 | Alert ingest -> operator visibility p95 <=60s | Track end-to-end ingestion latency | Pipeline telemetry and trace sampling |
+| NFR-005 | Operator action round-trip p95 <=2s | Monitor interaction critical paths | Client/server percentile telemetry |
 
 **Critical distinction**: During an active incident, error budgets are effectively zero for safety-critical services. SLO violations during active incidents trigger immediate escalation.
+
+### Proposal Metrics (Non-Governing Until Approved)
+
+- Faster alert-delivery or dashboard sub-targets may be tracked as proposals for engineering improvement.
+- Proposed metrics must be labelled "proposal" in runbooks/reports until approved by governance owners.
 
 ### Chaos Engineering Scenarios
 

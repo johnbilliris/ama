@@ -120,7 +120,7 @@ Smoke checks:
 Pull request workflow (mirrors the GitHub Actions pipeline `.github/workflows/help-snapshot.yml`):
 
 1. Author edits MDX under `apps/web/src/content/help/**` and/or amends the snapshot manifest at `apps/ingest-runner/manifests/help-snapshot.yaml`.
-2. CODEOWNERS enforces dual review: `@ama/help-content-owners` AND `@ama/safety-or-governance-leads` (FR-011b).
+2. CODEOWNERS routes the change to the current repository admin, `@johnbilliris`. FR-011b dual review remains pending until a second eligible reviewer or valid organisation teams are provisioned.
 3. On merge to `main`, the workflow runs `python tools/help/publish_snapshot.py ...` against the prod environment with the merged approver identities recorded in `SnapshotRecord.approvers[]`.
 4. Verify in `help-slis` workbook: `snapshot_publish_duration_seconds` < 60 s; `audit.snapshot_published` event present.
 

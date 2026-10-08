@@ -1,5 +1,16 @@
 name: spec-035-gate
 
+env:
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+  UV_DEFAULT_INDEX: https://packagefeedproxy.microsoft.io/pypi/simple
+  PIP_CONFIG_FILE: /dev/null
+  PIP_EXTRA_INDEX_URL: ""
+  PIP_FIND_LINKS: ""
+  UV_INDEX: ""
+  UV_EXTRA_INDEX_URL: ""
+  UV_FIND_LINKS: ""
+  UV_NO_CONFIG: "1"
+
 on:
   workflow_dispatch:
 
@@ -50,6 +61,9 @@ jobs:
 
       - name: domain package typecheck
         run: pnpm --filter @ama/domain run typecheck
+
+      - name: Build TypeScript domain package
+        run: pnpm --filter @ama/domain build
 
       - name: web typecheck (spec-035 surfaces)
         run: pnpm --filter @ama/web exec tsc --noEmit

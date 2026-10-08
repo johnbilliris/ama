@@ -8,13 +8,12 @@ FRs: FR-001–005 | Tasks: T023, T024, T025
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
-
 from app.services.state_store import ALERTS
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
 from apps.agents.common.warning_compliance import validate_warning_compliance
+from apps.agents.communication.cap_serialiser import serialize_cap, validate_cap_xml
 from apps.agents.communication.edxl_serialiser import serialize_to_edxl
 from apps.agents.communication.warning_builder import (
     traverse_chain,
@@ -45,57 +44,6 @@ async def get_warning_chain(alert_id: str) -> list[dict[str, object]]:
     ]
 
 
-# ---- GET /api/alerts/{alert_id}/cap ----
-
-_CAP_TEMPLATE = """\
-<?xml version="1.0" encoding="UTF-8"?>
-<alert xmlns="urn:oasis:names:tc:emergency:cap:1.2">
-  <identifier>{identifier}</identifier>
-  <sender>aidr-hub</sender>
-  <sent>{sent}</sent>
-  <status>{status}</status>
-  <msgType>{msg_type}</msgType>
-  <scope>Public</scope>
-  <info>
-    <category>Met</category>
-    <event>{event}</event>
-    <urgency>{urgency}</urgency>
-    <severity>{severity}</severity>
-    <certainty>Observed</certainty>
-    <headline>{headline}</headline>
-    <description>{description}</description>
-    <instruction>{instruction}</instruction>{area_block}
-  </info>
-</alert>"""
-
-_CAP_AREA = """
-    <area>
-      <areaDesc>{area_desc}</areaDesc>
-    </area>"""
-
-
-def _tier_to_severity(tier: str | None, is_all_clear: bool) -> str:
-    if is_all_clear:
-        return "Minor"
-    mapping = {
-        "advice": "Minor",
-        "watch_and_act": "Moderate",
-        "emergency_warning": "Extreme",
-    }
-    return mapping.get(tier or "", "Unknown")
-
-
-def _tier_to_urgency(tier: str | None, is_all_clear: bool) -> str:
-    if is_all_clear:
-        return "Past"
-    mapping = {
-        "advice": "Future",
-        "watch_and_act": "Expected",
-        "emergency_warning": "Immediate",
-    }
-    return mapping.get(tier or "", "Unknown")
-
-
 @router.get(
     "/{alert_id}/cap",
     response_class=Response,
@@ -106,30 +54,9 @@ async def get_cap_xml(alert_id: str) -> Response:
     if alert_id not in ALERTS:
         raise HTTPException(status_code=404, detail="Alert not found")
     alert = ALERTS[alert_id]
-
-    headline = alert.content_blocks.get("headline", alert.alert_id)
-    description = alert.content_blocks.get("areas", "")
-    event = alert.hazard_icon.replace("_", " ").title() if alert.hazard_icon else "Hazard"
-    msg_type = "Cancel" if alert.is_all_clear else "Alert"
-    status = "Actual" if alert.status == "published" else "Draft"
-
-    areas = alert.audience_segments or []
-    area_block = "".join(_CAP_AREA.format(area_desc=a) for a in areas)
-
-    xml = _CAP_TEMPLATE.format(
-        identifier=alert.alert_id,
-        sent=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S+00:00"),
-        status=status,
-        msg_type=msg_type,
-        event=event,
-        urgency=_tier_to_urgency(alert.warning_tier, alert.is_all_clear),
-        severity=_tier_to_severity(alert.warning_tier, alert.is_all_clear),
-        headline=headline,
-        description=description,
-        instruction=alert.action_statement or "",
-        area_block=area_block,
-    )
-    return Response(content=xml, media_type="application/xml")
+    cap_bytes = serialize_cap(alert)
+    validate_cap_xml(cap_bytes)
+    return Response(content=cap_bytes, media_type="application/xml")
 
 
 # ---- POST /api/alerts/{alert_id}/validate-compliance ----

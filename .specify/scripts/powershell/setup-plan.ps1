@@ -31,6 +31,16 @@ if (-not (Test-FeatureBranch -Branch $paths.CURRENT_BRANCH -HasGit $paths.HAS_GI
 # Ensure the feature directory exists
 New-Item -ItemType Directory -Path $paths.FEATURE_DIR -Force | Out-Null
 
+# Block plan creation when this feature has an unresolved plan-phase delta.
+$hardeningVerifier = Join-Path $paths.REPO_ROOT 'scripts/verify-spec-hardening.ps1'
+if (Test-Path $hardeningVerifier) {
+    $featureId = Split-Path $paths.FEATURE_DIR -Leaf
+    & $hardeningVerifier -FeatureId $featureId -Quiet
+    if ($LASTEXITCODE -ne 0) {
+        throw "Cannot create plan for '$featureId' while a plan-phase Open Delta remains unresolved."
+    }
+}
+
 # Copy plan template if it exists, otherwise note it or create empty file
 $template = Join-Path $paths.REPO_ROOT '.specify/templates/plan-template.md'
 if (Test-Path $template) { 

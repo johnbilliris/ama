@@ -302,9 +302,13 @@ def create_clients() -> dict[str, Any]:
     from fastapi.testclient import TestClient  # noqa: I001
 
     from app.main import create_app as create_api_app
+    from app.api.dependencies.governance_composition import get_governance_composition
     from communication.agent import create_app as create_communication_app
     from evacuation.agent import create_app as create_evacuation_app
-    from monitoring.agent import create_app as create_monitoring_app
+    from evacuation.agent import EvacuationAgent
+    from evacuation.road_network import RoadNetworkLoader
+    from common.entra_principal import AuthenticatedPrincipal
+    from monitoring.agent import MonitoringAgent, create_app as create_monitoring_app
     from resource_allocation.agent import (
         ResourceAllocationAgent,
         create_app as create_resource_app,
@@ -315,12 +319,40 @@ def create_clients() -> dict[str, Any]:
     resource_agent = ResourceAllocationAgent(
         inventory_path=str(DATA_DIR / "resource-inventories" / "sample-inventory.json"),
     )
+    monitoring_agent = MonitoringAgent()
+    road_network = RoadNetworkLoader()
+    road_network.load(str(DATA_DIR / "road-networks" / "far-north-qld-sample.json"))
+    evacuation_agent = EvacuationAgent(road_network=road_network)
+    demo_principal = AuthenticatedPrincipal(
+        subject="demo-commander",
+        tenant_id="live",
+        roles=("incident_commander",),
+        incident_ids=("incident-demo-001",),
+    )
+
+    def resolve_demo_principal(_request: Any) -> AuthenticatedPrincipal:
+        return demo_principal
+
+    api_app = create_api_app()
+    get_governance_composition(api_app).registry.import_seed_catalogue(
+        Path(__file__).resolve().parent.parent
+        / "packages"
+        / "domain"
+        / "src"
+        / "domain"
+        / "seed"
+    )
 
     return {
-        "platform": TestClient(create_api_app()),
-        "monitoring": TestClient(create_monitoring_app()),
+        "platform": TestClient(api_app),
+        "monitoring": TestClient(create_monitoring_app(agent=monitoring_agent)),
         "risk_assessment": TestClient(create_risk_app()),
-        "evacuation": TestClient(create_evacuation_app()),
+        "evacuation": TestClient(
+            create_evacuation_app(
+                agent=evacuation_agent,
+                principal_resolver=resolve_demo_principal,
+            )
+        ),
         "resource_allocation": TestClient(create_resource_app(agent=resource_agent)),
         "communication": TestClient(create_communication_app()),
     }
@@ -371,10 +403,21 @@ def run_setup_phase(
         if status == "healthy":
             agents_healthy += 1
             narrator.success(f"{name.replace('_', ' ').title()} Agent ... healthy")
-        else:
+        elif status == "degraded":
             agents_degraded += 1
-            agents_healthy += 1  # degraded/unhealthy still counts as operational
-            narrator.success(f"{name.replace('_', ' ').title()} Agent ... {status} (template fallback)")
+            agents_healthy += 1
+            narrator.success(f"{name.replace('_', ' ').title()} Agent ... degraded (template fallback)")
+        else:
+            duration = time.perf_counter() - t0
+            return PhaseResult(
+                phase="setup",
+                order=1,
+                status="fail",
+                agent=name,
+                duration_seconds=round(duration, 2),
+                summary=f"Agent {name} is not ready: {status}",
+                error=f"GET /health on {name} reported unsupported status '{status}'",
+            )
 
     # Count seed files validated
     seed_count = 3  # structural files
@@ -424,7 +467,7 @@ def run_monitoring_phase(
     # Ingest signal via platform API
     signal_payload = {
         "source": {
-            "dataSourceId": "bom-demo-001",
+            "dataSourceId": "bom-warnings",
             "name": "Bureau of Meteorology",
             "kind": "authoritative",
         },
@@ -452,7 +495,7 @@ def run_monitoring_phase(
     platform = clients["platform"]
     ingest_resp = platform.post("/api/signals", json=signal_payload)
 
-    if ingest_resp.status_code != 200:
+    if ingest_resp.status_code != 202:
         duration = time.perf_counter() - t0
         return PhaseResult(
             phase="monitoring",
@@ -583,7 +626,9 @@ def run_risk_assessment_phase(
         },
     )
 
-    if override_resp.status_code != 200:
+    if override_resp.status_code == 503:
+        narrator.detail("Risk assessment: agent operating in degraded template mode (plan repository unavailable)")
+    elif override_resp.status_code != 200:
         duration = time.perf_counter() - t0
         return PhaseResult(
             phase="risk_assessment",
@@ -659,6 +704,7 @@ def run_evacuation_phase(
     narrator.phase_start("evacuation", 4, "Planning evacuation routes")
 
     evac_client = clients["evacuation"]
+    now_str = datetime.now(UTC).isoformat()
 
     # Trigger replan
     narrator.detail("Triggering evacuation replanning for affected area")
@@ -666,7 +712,12 @@ def run_evacuation_phase(
     replan_resp = evac_client.post(
         "/replan",
         json={
+            "plan_id": "plan-demo-001",
             "incident_id": "incident-demo-001",
+            "update_id": "demo-replan-001",
+            "base_plan_version": 1,
+            "observed_at": now_str,
+            "justification": "Demo exercise replanning",
             "new_severity": scenario_config.default_severity,
             "current_severity": "moderate",
             "manual_trigger": True,
@@ -811,7 +862,10 @@ def run_resource_allocation_phase(
         },
     )
 
-    if override_resp.status_code != 200:
+    if override_resp.status_code == 503:
+        narrator.detail("Resource allocation: agent operating in degraded template mode (plan repository unavailable)")
+        narrator.detail("Resource allocation: agent operating in degraded template mode (plan repository unavailable)")
+    elif override_resp.status_code != 200:
         duration = time.perf_counter() - t0
         return PhaseResult(
             phase="resource_allocation",

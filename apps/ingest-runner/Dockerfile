@@ -18,12 +18,23 @@ ARG INGEST_BUILD_TAG=2026-05-10-v4-direct-copy
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_CONFIG_FILE=/dev/null \
+    PIP_INDEX_URL=https://packagefeedproxy.microsoft.io/pypi/simple \
+    PIP_EXTRA_INDEX_URL= \
+    PIP_FIND_LINKS= \
+    UV_DEFAULT_INDEX=https://packagefeedproxy.microsoft.io/pypi/simple \
+    UV_INDEX= \
+    UV_EXTRA_INDEX_URL= \
+    UV_FIND_LINKS= \
+    UV_NO_CONFIG=1
 
 RUN pip install --no-cache-dir uv==0.5.14
 
 COPY apps/ingest-runner/pyproject.toml /app/
 COPY apps/ingest-runner/src /app/src
+COPY apps/__init__.py /app/apps/__init__.py
+COPY apps/console_logging.py /app/apps/console_logging.py
 # Install dependencies-only via uv (do NOT install our own package — we'll
 # expose it via PYTHONPATH so source edits land deterministically and we
 # bypass any layer/wheel cache mismatch.).

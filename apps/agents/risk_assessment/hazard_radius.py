@@ -7,7 +7,9 @@ for GeoJSON polygon generation. Changes effective without restart.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 from datetime import UTC, datetime
+from typing import Protocol
 
 from pydantic import BaseModel, Field
 
@@ -31,6 +33,14 @@ _FALLBACK_RADII: dict[str, float] = {
 }
 
 
+class HazardRadiusContainer(Protocol):
+    def read_item(self, *, item: str, partition_key: str) -> dict[str, object]: ...
+
+    def query_items(self, *, query: str, enable_cross_partition_query: bool) -> Iterable[dict[str, object]]: ...
+
+    def upsert_item(self, *, body: dict[str, object]) -> object: ...
+
+
 class HazardRadiusLookup(BaseModel):
     """Admin-editable radius lookup entry stored in Cosmos DB."""
 
@@ -40,7 +50,7 @@ class HazardRadiusLookup(BaseModel):
     last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_by: str = "system-seed"
 
-    def model_post_init(self, __context) -> None:
+    def model_post_init(self, __context: object) -> None:
         if not self.id:
             self.id = self.hazard_type
 
@@ -48,7 +58,7 @@ class HazardRadiusLookup(BaseModel):
 class HazardRadiusRepository:
     """Cosmos DB client wrapper for radius_lookup collection."""
 
-    def __init__(self, cosmos_container: object | None = None) -> None:
+    def __init__(self, cosmos_container: HazardRadiusContainer | None = None) -> None:
         self._container = cosmos_container
         # In-memory fallback for local dev
         self._local: dict[str, HazardRadiusLookup] = {}
@@ -79,7 +89,7 @@ class HazardRadiusRepository:
                     item=hazard_type,
                     partition_key=hazard_type,
                 )
-                return HazardRadiusLookup(**doc)
+                return HazardRadiusLookup.model_validate(doc)
             except Exception:
                 return None
         return self._local.get(hazard_type)
@@ -93,7 +103,7 @@ class HazardRadiusRepository:
                     enable_cross_partition_query=True,
                 )
             )
-            return [HazardRadiusLookup(**doc) for doc in docs]
+            return [HazardRadiusLookup.model_validate(doc) for doc in docs]
         return list(self._local.values())
 
     def upsert(self, entry: HazardRadiusLookup) -> None:

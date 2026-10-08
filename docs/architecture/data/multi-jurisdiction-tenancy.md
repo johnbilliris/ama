@@ -13,15 +13,16 @@ specs:
 
 [→ Architecture index](../README.md)
 
-This page shows how AMA isolates each Australian jurisdiction as a separate tenant while keeping Cosmos DB partitioning aligned to `/tenant_id`.
+This page documents production isolation boundaries using hierarchical partition metadata: `/scope`, `/jurisdictionId`, and `/dataSourceId`.
 
 ![SECTOR-01: Multi-Jurisdiction Tenancy](multi-jurisdiction-tenancy.png)
 
 ## Key Elements
 
-- FR-015 coverage for NSW, VIC, QLD, SA, WA, TAS, ACT, NT, and Commonwealth tenant boundaries.
-- Lead-agency designation is called out per tenant so operational ownership stays explicit.
-- Cosmos DB partition alignment uses `/tenant_id` for jurisdiction-scoped isolation.
+- FR-015 coverage for NSW, VIC, QLD, SA, WA, TAS, ACT, NT, and Commonwealth boundaries.
+- Scope and jurisdiction are separate controls: `scope=live` for operational traffic and `scope=sim-*` for simulation replay traffic.
+- Cosmos partition alignment uses `scope/jurisdictionId/dataSourceId`, with jurisdiction filters on read paths.
+- Lead-agency designation is hazard-dependent (for example fire suppression, flood response, or welfare recovery) and is not a static per-state mapping.
 
 ## Related Pages
 

@@ -43,6 +43,14 @@ test("dashboard displays decision-support elements for incident commander", asyn
           authoritativeCount: 3,
           communityCount: 2,
           contradictedCount: 1,
+          degradedSources: [
+            {
+              sourceId: "community-001",
+              status: "stale",
+              reason: "stale_signal_window",
+              since: "2026-03-09T00:00:00Z",
+            },
+          ],
         },
       },
     });
@@ -50,28 +58,31 @@ test("dashboard displays decision-support elements for incident commander", asyn
 
   await page.route("**/api/signals?incidentId=incident-001", async (route) => {
     await route.fulfill({
-      json: [
-        {
-          signal_id: "sig-001",
-          incident_id: "incident-001",
-          data_source_id: "bom-001",
-          category: "weather",
-          validation_status: "validated",
-          confidence_score: 0.95,
-          freshness_score: 0.91,
-          provenance: { sourceKind: "authoritative" },
-        },
-        {
-          signal_id: "sig-002",
-          incident_id: "incident-001",
-          data_source_id: "community-001",
-          category: "community_report",
-          validation_status: "contradicted",
-          confidence_score: 0.45,
-          freshness_score: 0.6,
-          provenance: { sourceKind: "community" },
-        },
-      ],
+      json: {
+        items: [
+          {
+            signal_id: "sig-001",
+            incident_id: "incident-001",
+            data_source_id: "bom-001",
+            category: "weather",
+            validation_status: "validated",
+            confidence_score: 0.95,
+            freshness_score: 0.91,
+            provenance: { sourceKind: "authoritative" },
+          },
+          {
+            signal_id: "sig-002",
+            incident_id: "incident-001",
+            data_source_id: "community-001",
+            category: "community_report",
+            validation_status: "contradicted",
+            confidence_score: 0.45,
+            freshness_score: 0.6,
+            provenance: { sourceKind: "community" },
+          },
+        ],
+        total: 2,
+      },
     });
   });
 
@@ -86,7 +97,7 @@ test("dashboard displays decision-support elements for incident commander", asyn
   await expect(page.locator(".source-health-label").filter({ hasText: "Contradicted" })).toBeVisible();
 
   // Decision-support element: degraded-mode banner (1 contradicted signal)
-  await expect(page.getByText("contradicted or degraded signal")).toBeVisible();
+  await expect(page.getByTestId("degraded-mode-banner")).toBeVisible();
 
   // Decision-support element: participating agencies
   await expect(page.getByText("NSW SES")).toBeVisible();

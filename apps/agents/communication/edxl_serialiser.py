@@ -6,37 +6,40 @@ per R-009/Constitution NN-4 (interoperability).
 
 from __future__ import annotations
 
-from xml.etree.ElementTree import Element, SubElement, tostring
+from datetime import UTC, datetime
+from xml.etree.ElementTree import Element, SubElement, fromstring, register_namespace, tostring
 
+from apps.agents.communication.cap_serialiser import serialize_cap, validate_cap_xml
 from packages.domain.src.domain.models.public_alert import PublicAlert
 
-EDXL_NAMESPACE = "urn:oasis:names:tc:emergency:EDXL:DE:1.0"
+EDXL_NAMESPACE = "urn:oasis:names:tc:emergency:EDXL:DE:2.0"
+register_namespace("", EDXL_NAMESPACE)
 
 
 def serialize_to_edxl(alert: PublicAlert) -> str:
-    """Serialize a PublicAlert to EDXL-DE XML string."""
-    root = Element("EDXLDistribution", xmlns=EDXL_NAMESPACE)
-    SubElement(root, "distributionID").text = alert.alert_id
-    SubElement(root, "senderID").text = "disaster-response-hub"
-    SubElement(root, "dateTimeSent").text = alert.published_at.isoformat() if alert.published_at else ""
-    SubElement(root, "distributionStatus").text = "Actual"
-    SubElement(root, "distributionType").text = "Alert"
+    """Serialize a PublicAlert to EDXL-DE 2.0 string with embedded CAP."""
+    cap_xml = serialize_cap(alert)
+    validate_cap_xml(cap_xml)
+    cap_root = fromstring(cap_xml)
 
-    content = SubElement(root, "contentObject")
-    content_desc = SubElement(content, "contentDescription")
-    content_desc.text = alert.content_blocks.get("headline", alert.alert_id)
+    root = Element(f"{{{EDXL_NAMESPACE}}}EDXLDistribution")
+    SubElement(root, f"{{{EDXL_NAMESPACE}}}distributionID").text = alert.alert_id
+    SubElement(root, f"{{{EDXL_NAMESPACE}}}senderID").text = (
+        alert.content_blocks.get("sender") or "disaster-response-hub"
+    )
+    sent_at = alert.published_at or datetime.now(UTC)
+    SubElement(root, f"{{{EDXL_NAMESPACE}}}dateTimeSent").text = sent_at.replace(microsecond=0).isoformat()
+    SubElement(root, f"{{{EDXL_NAMESPACE}}}distributionStatus").text = (
+        "Actual" if alert.status == "published" else "Exercise"
+    )
+    SubElement(root, f"{{{EDXL_NAMESPACE}}}distributionType").text = "Report"
 
-    # AWS-specific elements in embedded content
-    if alert.warning_tier:
-        aws = SubElement(content, "awsWarning")
-        SubElement(aws, "warningTier").text = alert.warning_tier
-        SubElement(aws, "colourCode").text = alert.colour_code or ""
-        if alert.hazard_icon:
-            SubElement(aws, "hazardIcon").text = alert.hazard_icon
-        if alert.action_statement:
-            SubElement(aws, "actionStatement").text = alert.action_statement
-
-    if alert.is_all_clear:
-        SubElement(content, "isAllClear").text = "true"
+    content = SubElement(root, f"{{{EDXL_NAMESPACE}}}contentObject")
+    SubElement(content, f"{{{EDXL_NAMESPACE}}}contentDescription").text = alert.content_blocks.get(
+        "headline", alert.alert_id
+    )
+    xml_content = SubElement(content, f"{{{EDXL_NAMESPACE}}}xmlContent")
+    embedded = SubElement(xml_content, f"{{{EDXL_NAMESPACE}}}embeddedXMLContent")
+    embedded.append(cap_root)
 
     return tostring(root, encoding="unicode", xml_declaration=True)

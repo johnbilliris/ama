@@ -1,6 +1,6 @@
 """Entry point for ``python -m communication``."""
 
-from communication.agent import *  # noqa: F401, F403
+from communication.runtime import main
 
 if __name__ == "__main__":
-    pass
+    main()

@@ -8,7 +8,11 @@ from communication.models import CommunicationDecisionRecord, CommunicationDecis
 
 
 def _make_record(**overrides):
-    defaults = dict(decision_type=CommunicationDecisionType.handoff_received)
+    defaults = dict(
+        decision_type=CommunicationDecisionType.handoff_received,
+        tenant_id="live",
+        correlation_id="handoff-1",
+    )
     defaults.update(overrides)
     return CommunicationDecisionRecord(**defaults)
 
@@ -164,4 +168,30 @@ class TestFlush:
         # Flush still fails → returns 0
         flushed = writer.flush()
         assert flushed == 0
+        assert writer.buffer_depth == 2
+
+    def test_duplicate_during_replay_is_treated_as_idempotent_success(self):
+        class ConflictError(Exception):
+            status_code = 409
+
+        cosmos = MagicMock()
+        cosmos.create_item.side_effect = RuntimeError("unavailable")
+        writer = AuditWriter(cosmos_client=cosmos)
+        writer.write(_make_record())
+        cosmos.create_item.side_effect = ConflictError("already exists")
+
+        assert writer.flush() == 1
+        assert writer.buffer_depth == 0
+
+    def test_memory_failure_prevents_newer_file_records_from_replaying(self, tmp_path):
+        cfg = CommunicationConfig(audit_buffer_capacity=1, audit_buffer_file_path=str(tmp_path / "audit.jsonl"))
+        cosmos = MagicMock()
+        cosmos.create_item.side_effect = RuntimeError("unavailable")
+        writer = AuditWriter(config=cfg, cosmos_client=cosmos)
+        writer.write(_make_record(correlation_id="older"))
+        writer.write(_make_record(correlation_id="newer"))
+        cosmos.create_item.reset_mock()
+
+        assert writer.flush() == 0
+        assert cosmos.create_item.call_count == 1
         assert writer.buffer_depth == 2

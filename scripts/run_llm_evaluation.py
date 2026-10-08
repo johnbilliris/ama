@@ -63,7 +63,7 @@ except ImportError:
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DATASET_DIR = REPO_ROOT / "packages" / "eval-dataset" / "data" / "dataset-disaster-core-1.0.0"
+DATASET_DIR = REPO_ROOT / "packages" / "eval-dataset" / "data" / "dataset-disaster-core-1.1.3"
 DATASET_CASES = DATASET_DIR / "cases.jsonl"
 DATASET_MANIFEST = DATASET_DIR / "manifest.json"
 EVAL_RUNNER_DOCKERFILE_RELATIVE = Path("apps") / "eval-runner" / "Dockerfile"
@@ -76,6 +76,7 @@ EVAL_RUNNER_BUILD_CONTEXT_PATHS = [
     Path("packages") / "eval-core" / "pyproject.toml",
     Path("packages") / "eval-core" / "src",
     Path("apps") / "__init__.py",
+    Path("apps") / "console_logging.py",
     Path("apps") / "api" / "__init__.py",
     Path("apps") / "api" / "app" / "__init__.py",
     Path("apps") / "api" / "app" / "repositories" / "__init__.py",
@@ -84,23 +85,27 @@ EVAL_RUNNER_BUILD_CONTEXT_PATHS = [
 
 API_DOCKERFILE_RELATIVE = Path("apps") / "api" / "Dockerfile"
 API_DOCKERFILE = REPO_ROOT / API_DOCKERFILE_RELATIVE
-API_IMAGE_REPOSITORY = "ama-api"
+API_IMAGE_REPOSITORY = "ama/api"
 API_BUILD_CONTEXT_PATHS = [
     API_DOCKERFILE_RELATIVE,
     Path("apps") / "__init__.py",
+    Path("apps") / "console_logging.py",
     Path("apps") / "api" / "pyproject.toml",
+    Path("scripts") / "install_pyproject_dependencies.py",
     Path("apps") / "api" / "app",
-    Path("apps") / "agents" / "__init__.py",
-    Path("apps") / "agents" / "common",
-    Path("apps") / "agents" / "communication",
-    Path("apps") / "agents" / "evacuation",
+    Path("apps") / "agents",
+    Path("apps") / "ingestion",
     Path("packages"),
+    Path("docs") / "risk-register",
+    Path("docs") / "governance-hub" / "adoption-roadmap",
+    Path("docs") / "governance-hub" / "executive-kpi",
+    Path("docs") / "governance-hub" / "rai-register",
+    Path("specs") / "shared",
 ]
 
 DEFAULT_MODELS = [
     "gpt-5.4:2026-03-05",
     "gpt-5.4-mini:2026-03-17",
-    "gpt-4o-mini:2024-07-18",
     "Phi-4:7",
     "Llama-3.3-70B-Instruct:9",
     "Mistral-Large-3:1",
@@ -1102,8 +1107,8 @@ def stage_publish(ctx: RunContext) -> None:
     wait_for_rbac_propagation(stage, granted)
 
     for src, blob_name in [
-        (DATASET_CASES, "disaster-response-core/1.0.0/cases.jsonl"),
-        (DATASET_MANIFEST, "disaster-response-core/1.0.0/manifest.json"),
+        (DATASET_CASES, "disaster-response-core/1.1.3/cases.jsonl"),
+        (DATASET_MANIFEST, "disaster-response-core/1.1.3/manifest.json"),
     ]:
         upload = run_cmd(
             stage,
@@ -1188,9 +1193,12 @@ def stage_execute(ctx: RunContext) -> None:
     stage = "execute"
     _resolve_api_base_url(ctx, stage)
     model_refs = _parse_models(ctx.args.models or ",".join(DEFAULT_MODELS))
+    for model_ref in model_refs:
+        model_ref.setdefault("deploymentRegion", ctx.env.location)
+        model_ref.setdefault("sku", "GlobalStandard")
     manifest = _publish_dataset_payload()
     dataset_id = manifest.get("datasetId", "disaster-response-core")
-    dataset_version = manifest.get("version", "1.0.0")
+    dataset_version = manifest.get("version", "1.1.3")
 
     body = {
         "datasetId": dataset_id,
@@ -1200,8 +1208,11 @@ def stage_execute(ctx: RunContext) -> None:
         "policyVersion": "1.0.0",
         "mode": ctx.args.mode,
         "estimatedCostAud": 0.0,
-        "estimatedDurationMinutes": 60,
+        "estimatedDurationMinutes": 30 if ctx.args.mode == "pr-fast-subset" else 60,
     }
+    change_ref = getattr(ctx.args, "change_ref", None)
+    if change_ref:
+        body["changeRef"] = change_ref
     max_cases = getattr(ctx.args, "max_cases", None)
     if max_cases:
         body["datasetSubset"] = {"maxCases": int(max_cases)}
@@ -1281,12 +1292,44 @@ def fetch_scorecard(ctx: RunContext, stage: str, token: str | None, run_id: str)
         encoding="utf-8",
     )
 
-    verdicts = scorecard.get("modelVerdicts", [])
-    log_event(stage, "info", "scorecard fetched", model_verdicts=verdicts)
-    blocked = [v for v in verdicts if v.get("overallVerdict") not in (None, "pass", "allow")]
-    if blocked and not ctx.args.continue_on_gate_block:
-        log_event(stage, "error", "gate blocked one or more models", blocked=blocked)
-        sys.exit(EXIT_GATE_BLOCK)
+    if ctx.args.mode == "pr-fast-subset":
+        from ama_eval.gate import GateThresholds, evaluate_gate
+
+        min_evaluated_samples = ctx.args.min_evaluated_samples
+        if min_evaluated_samples is None:
+            max_cases = getattr(ctx.args, "max_cases", 0)
+            min_evaluated_samples = max_cases if max_cases and max_cases > 0 else 1
+        verdict = evaluate_gate(
+            scorecard,
+            baseline=None,
+            thresholds=GateThresholds(minEvaluatedSamples=min_evaluated_samples),
+        )
+        ctx.state.update(
+            {
+                "evaluation_status": ctx.state.get("run_final_status", "succeeded"),
+                "gate_passed": verdict.pass_,
+                "evaluated_samples": verdict.evaluatedSamples,
+                "gate_reasons": verdict.reasons,
+            }
+        )
+        log_event(
+            stage,
+            "info" if verdict.pass_ else "error",
+            "PR evaluation scorecard gate evaluated",
+            run_id=run_id,
+            gate_passed=verdict.pass_,
+            evaluated_samples=verdict.evaluatedSamples,
+            reasons=verdict.reasons,
+        )
+        if not verdict.pass_ and not ctx.args.continue_on_gate_block:
+            fail(stage, "PR evaluation scorecard gate failed", EXIT_GATE_BLOCK, verdict=verdict.to_json())
+    else:
+        verdicts = scorecard.get("modelVerdicts", [])
+        log_event(stage, "info", "scorecard fetched", model_verdicts=verdicts)
+        blocked = [v for v in verdicts if v.get("overallVerdict") not in (None, "pass", "allow")]
+        if blocked and not ctx.args.continue_on_gate_block:
+            log_event(stage, "error", "gate blocked one or more models", blocked=blocked)
+            sys.exit(EXIT_GATE_BLOCK)
     log_event(stage, "ok", f"scorecard saved to {out_dir / 'scorecard.json'}")
 
 
@@ -1496,6 +1539,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         choices=["pr-fast-subset", "ad-hoc", "progressive-delivery-full"],
     )
     p.add_argument("--models", help="comma-separated 'modelId:version' refs")
+    p.add_argument("--change-ref", help="optional change identifier stored with the evaluation run")
     p.add_argument(
         "--max-cases",
         type=int,
@@ -1509,6 +1553,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--output-dir", default=".eval-out")
     p.add_argument("--poll-seconds", type=int, default=30)
     p.add_argument("--timeout-minutes", type=int, default=540)  # 9 h cap
+    p.add_argument(
+        "--min-evaluated-samples",
+        type=int,
+        default=None,
+        help="minimum scorecard sample count for the PR-fast-subset gate (defaults to --max-cases)",
+    )
     p.add_argument("--skip-baseline", action="store_true", help="skip pytest/ruff/bicep checks")
     p.add_argument(
         "--skip-api-register",
@@ -1573,6 +1623,14 @@ def _resolve_api_base_url(ctx: RunContext, stage: str) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     env = ENVIRONMENTS[args.env]
+    environment_overrides = {
+        "resource_group": os.environ.get("EVAL_RG"),
+        "runner_job": os.environ.get("EVAL_RUNNER_JOB_NAME"),
+        "location": os.environ.get("EVAL_REGION"),
+        "api_base_url": os.environ.get("EVAL_API_BASE_URL"),
+        "api_resource_uri": os.environ.get("EVAL_API_RESOURCE_URI"),
+    }
+    env = replace(env, **{key: value for key, value in environment_overrides.items() if value})
     if args.api_base_url:
         env = replace(env, api_base_url=args.api_base_url.rstrip("/"))
 
@@ -1598,6 +1656,23 @@ def main(argv: list[str] | None = None) -> int:
     for stage_name in stage_names:
         log_event("driver", "info", f"→ entering stage '{stage_name}'")
         STAGES[stage_name](ctx)
+    github_output = os.environ.get("GITHUB_OUTPUT")
+    if github_output:
+        output_values = {
+            "evaluation_status": ctx.state.get("evaluation_status"),
+            "gate_passed": ctx.state.get("gate_passed"),
+            "evaluated_samples": ctx.state.get("evaluated_samples"),
+            "run_id": ctx.state.get("run_id"),
+        }
+        with Path(github_output).open("a", encoding="utf-8") as output:
+            for name, value in output_values.items():
+                if value is None:
+                    continue
+                if isinstance(value, (dict, list)):
+                    value = json.dumps(value, separators=(",", ":"))
+                elif isinstance(value, bool):
+                    value = str(value).lower()
+                output.write(f"{name}={value}\n")
     elapsed = round(time.monotonic() - started, 1)
     log_event(
         "driver",

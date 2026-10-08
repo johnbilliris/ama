@@ -2,7 +2,7 @@
 
 **Purpose**: Monorepo-wide, append-only, monotonic register of every gap identifier cited under `specs/`. Satisfies FR-036 and Clarification 8 of `specs/027-spec-hardening/spec.md`.
 
-**Authority**: `.github/CODEOWNERS` entry for `specs/shared/` (the `@johnbilliris/ama-spec-maintainers` team per FR-034).
+**Authority**: `.github/CODEOWNERS` entry for `specs/shared/` (`@johnbilliris`, the current repository admin). FR-034 dual control remains open until another eligible reviewer is provisioned.
 
 **Rules** (enforced by `scripts/verify-spec-hardening.ps1`):
 
@@ -66,7 +66,7 @@
 | Family | Pre-feature current_max | Reserved range | Notes |
 | --- | --- | --- | --- |
 | ASM | 0 | ASM-001 .. ASM-100 | Per-spec assumptions; AU-only-residency [RISK] propagates across PII-touching specs (D-009). Actual usage post-feature: ASM-001 .. ASM-079 (79 IDs). |
-| HYP | 0 | HYP-001 .. HYP-100 | Capstone-country hypotheses (PH/JP/BD) for agent specs 008..012 + portfolio-wide HYPs. Reserved bumped from HYP-050 to HYP-100 by feature 028 / Phase 7 (T060) after monotonic audit. Actual usage post-feature: HYP-001 .. HYP-041 (41 IDs). |
+| HYP | 0 | HYP-001 .. HYP-100 | Capstone-country hypotheses (PH/JP/BD) for agent specs 008..012 + portfolio-wide HYPs. Reserved bumped from HYP-050 to HYP-100 by feature 028 / Phase 7 (T060) after monotonic audit. Actual usage including feature 004 AUD-024 allocation: HYP-001 .. HYP-042 (42 IDs). |
 | PER | 0 | PER-001 .. PER-100 | Persona refs and placeholders; non-AU personas (PH/JP/BD) MUST carry status: placeholder + preconditions per FR-023. Reserved bumped from PER-050 to PER-100 by feature 028 / Phase 7 (T060) after monotonic audit (3 PER per spec x 26 specs = 78 actual). Actual usage post-feature: PER-001 .. PER-076 (76 IDs). |
 | SCP | 0 | SCP-001 .. SCP-100 | Out-of-scope items; >= 1 capstone-country deferral per spec where applicable. Actual usage post-feature: SCP-001 .. SCP-082 (82 IDs). |
 | REQ | 0 | REQ-001 .. REQ-030 | Reserved token; current spec set uses local FR-NNN scoping rather than global REQ-NNN. Unused by feature 028. |

@@ -1,5 +1,7 @@
-from contextvars import ContextVar
+from contextvars import ContextVar, Token
 from dataclasses import dataclass
+
+from packages.domain.src.domain.tenant_mode import is_live_tenant
 
 
 @dataclass(frozen=True)
@@ -11,7 +13,7 @@ class TenantContext:
 
     @property
     def is_simulation(self) -> bool:
-        return self.tenant_id != "live"
+        return not is_live_tenant(self.tenant_id)
 
     @property
     def scope_key(self) -> str:
@@ -26,5 +28,9 @@ def get_current_tenant() -> TenantContext:
     return _tenant_context_var.get()
 
 
-def set_current_tenant(ctx: TenantContext) -> None:
-    _tenant_context_var.set(ctx)
+def set_current_tenant(ctx: TenantContext) -> Token[TenantContext]:
+    return _tenant_context_var.set(ctx)
+
+
+def reset_current_tenant(token: Token[TenantContext]) -> None:
+    _tenant_context_var.reset(token)

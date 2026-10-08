@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from ..repositories.tool_registration_repository import ToolRegistrationRepository
+from ..repositories.tool_registration_repository import ToolRegistrationDocument, ToolRegistrationRepository
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class AllowListEntry:
     address: str
 
     @classmethod
-    def from_doc(cls, doc: dict) -> AllowListEntry:
+    def from_doc(cls, doc: ToolRegistrationDocument) -> AllowListEntry:
         return cls(
             tool_name=doc["tool_name"],
             pinned_major_version=int(doc["pinned_major_version"]),

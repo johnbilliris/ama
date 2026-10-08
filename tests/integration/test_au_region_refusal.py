@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest import mock
+
 import pytest
 from app.services.evidence._clients import get_registry, reset_registry
 from app.services.evidence._guards import NonAuRegionError, assert_au_region
@@ -44,11 +46,101 @@ def test_non_au_region_refused_and_audit_logged():
     audit_rows = get_registry().get("evidence_audit").all()
     refusals = [r for r in audit_rows if r["kind"] == "non_au_signal_refused"]
     assert len(refusals) == 1
-    assert refusals[0]["payload"]["region"] == "eastus2"
+    assert refusals[0]["payload"]["rejected_region"] == "eastus2"
+    archived = get_registry().blob_archive.list_json(f"audit/{refusals[0]['audit_id']}/")
+    assert len(archived) == 1
+    assert archived[0][1]["payload_sha256"] == refusals[0]["payload_sha256"]
 
 
 def test_assert_au_region_helper_raises():
     with pytest.raises(NonAuRegionError):
         assert_au_region({"id": "x", "region": "westeurope"})
-    # No-op when region missing
-    assert_au_region({"id": "x"})
+    with pytest.raises(NonAuRegionError):
+        assert_au_region({"id": "missing-region"})
+
+
+def test_http_refusal_is_audited_before_422(monkeypatch):
+    monkeypatch.setenv("AMA_TEST_MODE", "1")
+    from app.main import create_app
+    from fastapi.testclient import TestClient
+
+    reset_registry()
+    with TestClient(create_app()) as client:
+        response = client.post(
+            "/api/v1/evidence/signals",
+            json=_signal_payload("westus"),
+            headers={"x-ama-correlation-id": "refusal-order"},
+        )
+        rows = get_registry().get("evidence_audit").all()
+
+    assert response.status_code == 422
+    assert response.json()["title"] == "non-au-region-refused"
+    assert response.headers["x-ama-correlation-id"] == "refusal-order"
+    assert [row["kind"] for row in rows] == ["non_au_signal_refused"]
+    assert get_registry().get("kpi_signals").all() == []
+
+
+def test_http_refusal_returns_503_when_locked_blob_write_fails(monkeypatch):
+    monkeypatch.setenv("AMA_TEST_MODE", "1")
+    from app.main import create_app
+    from fastapi.testclient import TestClient
+
+    reset_registry()
+    with TestClient(create_app()) as client:
+        registry = get_registry()
+        with mock.patch.object(
+            registry.blob_archive,
+            "create_json",
+            side_effect=ConnectionError("private backend detail"),
+        ):
+            response = client.post(
+                "/api/v1/evidence/signals",
+                json=_signal_payload("westus"),
+            )
+
+    assert response.status_code == 503
+    body = response.json()
+    assert body["title"] == "audit-write-unavailable"
+    assert "private backend detail" not in str(body)
+    assert get_registry().get("kpi_signals").all() == []
+
+
+def test_missing_region_is_durably_refused(monkeypatch):
+    monkeypatch.setenv("AMA_TEST_MODE", "1")
+    from app.main import create_app
+    from fastapi.testclient import TestClient
+
+    payload = _signal_payload("australiaeast")
+    payload.pop("region")
+    reset_registry()
+    with TestClient(create_app()) as client:
+        response = client.post("/api/v1/evidence/signals", json=payload)
+        refusal = get_registry().get("evidence_audit").all()[0]
+
+    assert response.status_code == 422
+    assert refusal["payload"]["rejected_region"] == "<missing>"
+
+
+@pytest.mark.parametrize(
+    ("confidence", "expected_band"),
+    [("0.49", "low"), ("0.50", "medium"), ("0.79", "medium"), ("0.80", "high")],
+)
+def test_confidence_band_boundaries(confidence, expected_band):
+    from app.services.evidence.models.signal import ConfidenceScore
+
+    assert ConfidenceScore(value=confidence).band == expected_band
+
+
+def test_low_confidence_requires_explicit_fidelity_flags():
+    from pydantic import ValidationError
+
+    reset_registry()
+    payload = _signal_payload("australiaeast")
+    payload["confidence"] = {"value": "0.49"}
+
+    with pytest.raises(ValidationError, match="advisory_only"):
+        signal_ingest.ingest_signal(payload)
+
+    payload["advisory_only"] = True
+    payload["reduced_fidelity"] = True
+    assert signal_ingest.ingest_signal(payload).confidence.band == "low"

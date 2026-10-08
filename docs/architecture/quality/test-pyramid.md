@@ -22,15 +22,17 @@ This view defines the five-tier test pyramid with relative volumes and tooling f
 
 | Tier | Relative Volume | Tooling | Example Test Target | Notes |
 | --- | --- | --- | --- | --- |
-| Unit | ~159 tests (~46%) | pytest | Individual agent functions, utility helpers | Fast feedback; no I/O |
-| Contract | ~50 tests (~14%) | pytest | API schema contracts, CAP/EDXL payload shapes | Pact-style consumer-driven |
-| Integration | ~80 tests (~23%) | pytest | DB reads/writes, external adapter calls | Requires testcontainers |
-| Simulation | ~30 tests (~9%) | simulation harness | Multi-agent scenario end-to-end in sandbox | Uses synthetic incident data |
-| E2E | ~20 tests (~6%) | Playwright | Full ops-dashboard user journeys | Browser-based; slow |
+| Unit | 209 source test files (2026-09-18 inventory) | pytest; Vitest for web unit/a11y suites | Individual agent functions, utility helpers | Widest tier; fast feedback |
+| Contract | 186 source test files (2026-09-18 inventory) | pytest | API schema contracts, CAP/EDXL payload shapes | Producer/consumer and schema invariants |
+| Integration | 160 source test files (2026-09-18 inventory) | pytest (+ selected infra fixtures) | DB reads/writes, adapter integration | Environment-dependent; not all use testcontainers |
+| Simulation | 30 source test files (2026-09-18 inventory) | pytest + simulation harness | Multi-agent scenario behaviors in sandbox | Synthetic incidents with deterministic fixtures |
+| E2E | 157 source test files under `tests/e2e` plus 30 web test files (2026-09-18 inventory) | pytest (backend) + Playwright/Vitest (web) | Full ops-dashboard journeys and backend-user flows | Narrowest tier; highest execution cost |
 
 ## FR Notes
 
 - **FR-025**: Five-tier test pyramid documented with volumes and tooling per tier.
+
+Count provenance: PowerShell inventory of source files (`.py`, `.ts`, `.tsx`, `.js`, `.jsx`) under the named roots on 2026-09-18. These are inventory counts, not pass/fail execution results; the Draw.io export remains pending.
 
 ## Related Pages
 

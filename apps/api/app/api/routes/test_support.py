@@ -40,7 +40,7 @@ def _load_identities() -> list[dict[str, Any]]:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="bootstrap_seed_data().identities is not a list",
         )
-    return identities  # type: ignore[return-value]
+    return identities
 
 
 def _load_hazard_scenarios() -> list[dict[str, Any]]:
@@ -48,7 +48,7 @@ def _load_hazard_scenarios() -> list[dict[str, Any]]:
 
     payload = bootstrap_seed_data(_seed_root())
     scenarios = payload.get("hazard_scenarios") or []
-    return scenarios if isinstance(scenarios, list) else []  # type: ignore[return-value]
+    return scenarios if isinstance(scenarios, list) else []
 
 
 def _audit_log(request: Request, audit_type: str, persona_id: str | None) -> None:
@@ -61,7 +61,7 @@ def _audit_log(request: Request, audit_type: str, persona_id: str | None) -> Non
 
     correlation_id = request.headers.get("x-correlation-id", "unknown")
     try:  # pragma: no cover - depends on optional pipeline component
-        from app.services.ingestion.audit_writer import write_audit  # type: ignore[import-not-found]
+        from app.services.ingestion.audit_writer import write_audit
 
         write_audit(
             audit_type=audit_type,

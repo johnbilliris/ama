@@ -82,3 +82,59 @@ def test_contributing_row_missing_metrics_fails(feature_value_schema, base_metad
     validator = validator_factory(feature_value_schema)
     errors = list(validator.iter_errors(artefact))
     assert errors, "Schema must require capstone_metrics for contributing rows"
+
+
+def test_spec_040_is_non_contributing_with_discoverable_exports(
+    feature_value_schema,
+    base_metadata,
+    validator_factory,
+):
+    row = _row("040-success-criteria", contributing=False)
+    row["evidence_exports"] = {
+        "capstone_attribution": False,
+        "measurement_method": "/api/v1/evidence/measurement-method",
+        "latest_scorecard": "/api/v1/evidence/scorecards/latest",
+        "audit_trace": "/api/v1/evidence/audit/{value_id}",
+        "media_type": "application/json",
+    }
+    artefact = {
+        "artefact_id": "feature_value_ledger",
+        "schema_version": "1.0.0",
+        "publication_id": "00000000-0000-0000-0000-000000000040",
+        "published_at_utc": "2026-09-24T00:00:00Z",
+        "published_by": "test",
+        "metadata": base_metadata,
+        "rows": [row],
+        "tradeoffs": [_tradeoff("ADR-040-001")],
+    }
+
+    errors = list(validator_factory(feature_value_schema).iter_errors(artefact))
+    assert not errors, f"Unexpected: {errors}"
+
+
+def test_spec_040_cannot_receive_capstone_metric_credit(
+    feature_value_schema,
+    base_metadata,
+    validator_factory,
+):
+    row = _row("040-success-criteria", contributing=True)
+    row["evidence_exports"] = {
+        "capstone_attribution": False,
+        "measurement_method": "/api/v1/evidence/measurement-method",
+        "latest_scorecard": "/api/v1/evidence/scorecards/latest",
+        "audit_trace": "/api/v1/evidence/audit/{value_id}",
+        "media_type": "application/json",
+    }
+    artefact = {
+        "artefact_id": "feature_value_ledger",
+        "schema_version": "1.0.0",
+        "publication_id": "00000000-0000-0000-0000-000000000041",
+        "published_at_utc": "2026-09-24T00:00:00Z",
+        "published_by": "test",
+        "metadata": base_metadata,
+        "rows": [row],
+        "tradeoffs": [_tradeoff("ADR-040-001")],
+    }
+
+    errors = list(validator_factory(feature_value_schema).iter_errors(artefact))
+    assert errors

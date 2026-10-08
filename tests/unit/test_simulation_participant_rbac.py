@@ -14,7 +14,7 @@ from __future__ import annotations
 import pytest
 from fastapi import HTTPException
 
-from apps.api.app.api.dependencies.rbac import require_simulation_participant
+from apps.api.app.api.dependencies.rbac import require_simulation_admin, require_simulation_participant
 from apps.api.app.core.auth import AuthenticatedPrincipal
 
 
@@ -72,3 +72,15 @@ async def test_non_participant_raises_permission_error() -> None:
         await require_simulation_participant(_principal("mallory"), "sim-x", repo)
     assert "mallory" in str(exc.value)
     assert "not a participant" in str(exc.value)
+
+
+@pytest.mark.parametrize("role", ["simulation.admin", "system-administrator"])
+def test_simulation_admin_roles_are_accepted(role: str) -> None:
+    principal = AuthenticatedPrincipal("admin", "agency", (), (role,))
+
+    assert require_simulation_admin(principal) is principal
+
+
+def test_non_admin_is_rejected() -> None:
+    with pytest.raises(PermissionError, match="administrator"):
+        require_simulation_admin(_principal("participant"))

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 from fastapi import APIRouter, Depends, Path, Query
 
 from .._correlation import correlation_id_dep
@@ -17,6 +19,8 @@ _SEEDED = False
 def _ensure_seed() -> None:
     global _SEEDED
     if _SEEDED:
+        return
+    if os.environ.get("AMA_TEST_MODE") != "1":
         return
     for entry in seed_register():
         publish(entry)

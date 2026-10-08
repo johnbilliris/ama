@@ -1,18 +1,30 @@
 interface DegradedModeBannerProps {
-  contradictedCount: number;
+  degradedSources?: Array<{
+    sourceId: string;
+    status: string;
+    reason: string;
+    since: string;
+  }>;
 }
 
-export function DegradedModeBanner({ contradictedCount }: DegradedModeBannerProps) {
-  if (contradictedCount === 0) {
+export function DegradedModeBanner({ degradedSources = [] }: DegradedModeBannerProps) {
+  if (degradedSources.length === 0) {
     return null;
   }
 
   return (
-    <section className="degraded-banner">
+    <section className="degraded-banner" data-testid="degraded-mode-banner">
       <strong>Reduced-function advisory</strong>
       <p className="degraded-copy">
-        {contradictedCount} contradicted or degraded signal(s) detected. Recommendations remain under manual review until corroborated.
+        {degradedSources.length} degraded source(s) detected. Recommendations remain under manual review until corroborated.
       </p>
+      <ul>
+        {degradedSources.map((source) => (
+          <li key={`${source.sourceId}-${source.since}`}>
+            {source.sourceId}: {source.status} ({source.reason})
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

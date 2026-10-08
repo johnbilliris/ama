@@ -55,7 +55,7 @@ async def list_playback_events(
     after_seq: int = 0,
     limit: int = 200,
     include_annotations: bool = True,
-) -> dict:
+) -> dict[str, object]:
     user_oid = _principal(request)
     try:
         return await _playback.get_events(
@@ -74,7 +74,7 @@ async def list_playback_snapshots(
     tenant_id: str,
     request: Request,
     before_sim_time: float | None = None,
-) -> dict:
+) -> dict[str, object]:
     user_oid = _principal(request)
     try:
         return await _playback.get_snapshots(
@@ -100,7 +100,7 @@ async def create_log_entry(
     tenant_id: str,
     body: CreateLogEntryRequest,
     request: Request,
-) -> dict:
+) -> dict[str, object]:
     """Persist a UI-emitted Event Log line to the ``sim-events`` container.
 
     The right-hand Event Log on the simulation dashboard previously held
@@ -146,7 +146,7 @@ async def create_annotation(
     tenant_id: str,
     body: CreateAnnotationRequest,
     request: Request,
-) -> dict:
+) -> dict[str, object]:
     user_oid = _principal(request)
     try:
         ann = await _annotations.create(
@@ -166,7 +166,7 @@ async def update_annotation(
     annotation_id: str,
     body: UpdateAnnotationRequest,
     request: Request,
-) -> dict:
+) -> dict[str, object]:
     user_oid = _principal(request)
     try:
         ann = await _annotations.update(

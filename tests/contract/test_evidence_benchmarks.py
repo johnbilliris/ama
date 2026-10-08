@@ -33,7 +33,9 @@ def test_benchmarks_jurisdiction_filter(client):
     r = client.get("/api/v1/evidence/benchmarks/response_time_p1?jurisdiction=NSW")
     assert r.status_code == 200
     rows = r.json()
-    assert all(row["jurisdiction"] == "NSW" for row in rows)
+    assert {row["jurisdiction"] for row in rows} == {"NSW", "AU"}
+    assert any(row["not_available"] for row in rows if row["jurisdiction"] == "NSW")
+    assert any(row["kind"] == "prototype_baseline" for row in rows)
 
 
 def test_benchmarks_not_available_with_prototype_sibling(client):
@@ -44,3 +46,32 @@ def test_benchmarks_not_available_with_prototype_sibling(client):
     has_proto = any(row["kind"] == "prototype_baseline" for row in rows)
     if has_unavail:
         assert has_proto, "FR-022 — not_available KPIs must surface a prototype_baseline sibling"
+
+
+def test_unknown_jurisdiction_retains_prototype_baseline(client):
+    response = client.get("/api/v1/evidence/benchmarks/response_time_p1?jurisdiction=UNKNOWN")
+
+    assert response.status_code == 200
+    rows = response.json()
+    assert len(rows) == 1
+    assert rows[0]["kind"] == "prototype_baseline"
+
+
+def test_saidi_and_saifi_are_separate_dimensioned_rows(client):
+    saidi = client.get("/api/v1/evidence/benchmarks/saidi").json()
+    saifi = client.get("/api/v1/evidence/benchmarks/saifi").json()
+
+    assert saidi[0]["target_unit"] == "minutes/customer/year"
+    assert saifi[0]["target_unit"] == "interruptions/customer/year"
+    assert saidi[0]["not_available"] is True
+    assert saifi[0]["not_available"] is True
+
+
+def test_airservices_arff_has_verified_three_minute_target(client):
+    response = client.get("/api/v1/evidence/benchmarks/airservices_arff_response")
+
+    row = response.json()[0]
+    assert float(row["target_value"]) == 180.0
+    assert row["target_unit"] == "seconds"
+    assert row["source_citation"]["organisation"] == "Airservices Australia"
+    assert "org" not in row["source_citation"]

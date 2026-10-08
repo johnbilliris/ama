@@ -69,8 +69,8 @@ class MonitoringDecisionRecord(BaseModel):
     confidence: float
     effective_confidence: float | None = None
     freshness_score: float | None = None
-    inputs: dict = Field(default_factory=dict)
-    output: dict = Field(default_factory=dict)
+    inputs: dict[str, object] = Field(default_factory=dict)
+    output: dict[str, object] = Field(default_factory=dict)
     agent_version: str = "0.1.0"
     reasoning_summary: str = ""
     llm_classification: str | None = None
@@ -130,32 +130,34 @@ class CreateMEFrameworkRequest(BaseModel):
 class SelectOutcomesRequest(BaseModel):
     """Request to select outcomes from the catalogue for a framework."""
 
-    outcomes: list[dict]  # [{catalogue_outcome_id, domain, objective_type, community_restatement?}]
+    outcomes: list[dict[str, object]]  # [{catalogue_outcome_id, domain, objective_type, community_restatement?}]
 
 
 class CreateProgramLogicRequest(BaseModel):
     """Request to create a program logic model for a framework."""
 
     model_type: str = "ex_ante"
-    resources_inputs: list[dict] = []
-    activities: list[dict] = []
-    outputs: list[dict] = []
-    intermediate_outcomes: list[dict] = []
-    final_outcomes: list[dict] = []
-    outcome_chain_links: list[dict] = []
+    resources_inputs: list[dict[str, object]] = []
+    activities: list[dict[str, object]] = []
+    outputs: list[dict[str, object]] = []
+    intermediate_outcomes: list[dict[str, object]] = []
+    final_outcomes: list[dict[str, object]] = []
+    outcome_chain_links: list[dict[str, object]] = []
     timeline_months: int | None = None
 
 
 class SetStandardsRequest(BaseModel):
     """Request to set standards of success for selected indicators."""
 
-    standards: list[dict]  # [{catalogue_outcome_id, indicator_id, threshold_value, threshold_operator, ...}]
+    standards: list[
+        dict[str, object]
+    ]  # [{catalogue_outcome_id, indicator_id, threshold_value, threshold_operator, ...}]
 
 
 class SetCollectionScheduleRequest(BaseModel):
     """Request to set an indicator data-collection schedule."""
 
-    schedules: list[dict]  # [{indicator_id, frequency, next_due_date}]
+    schedules: list[dict[str, object]]  # [{indicator_id, frequency, next_due_date}]
 
 
 class MonitoringReportResponse(BaseModel):
@@ -163,7 +165,7 @@ class MonitoringReportResponse(BaseModel):
 
     framework_id: str
     incident_id: str
-    indicators_status: list[dict]
+    indicators_status: list[dict[str, object]]
     overdue_indicators: list[str]
     staleness_warnings: list[str]
     generated_at: str
@@ -183,8 +185,8 @@ class EvaluationReportResponse(BaseModel):
 
     report_id: str
     framework_id: str
-    domain_findings: dict
+    domain_findings: dict[str, object]
     summary: str
-    recommendations: list[dict]
+    recommendations: list[dict[str, object]]
     generated_by: str
     created_at: str

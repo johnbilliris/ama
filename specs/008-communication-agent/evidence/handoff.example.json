@@ -1,0 +1,17 @@
+{
+  "handoffId": "quickstart-communication-001",
+  "incidentId": "incident-quickstart-001",
+  "sourceAgent": "risk_assessment",
+  "targetAgent": "communication",
+  "scopeKey": "incident-quickstart-001",
+  "confidence": 0.91,
+  "tenantId": "live",
+  "payload": {
+    "recommendationId": "recommendation-quickstart-001",
+    "assessmentId": "assessment-quickstart-001",
+    "summary": "Prepare a multilingual public warning",
+    "explanation": "The authoritative assessment exceeds the public-warning threshold",
+    "alert_type": "evacuation",
+    "warningTier": "Emergency Warning"
+  }
+}

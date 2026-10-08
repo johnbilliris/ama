@@ -1,7 +1,39 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+import { getApiBaseUrl } from "@/lib/api/base-url";
+import { simulationAuthHeaders } from "./simulation-auth";
+
+const API_BASE_URL = getApiBaseUrl();
 
 export const ALLOWED_WARP_SPEEDS = [1, 2, 5, 10, 24, 60] as const;
 export type WarpSpeed = typeof ALLOWED_WARP_SPEEDS[number];
+
+/**
+ * Curated scenario packs shipped in
+ * packages/domain/src/domain/seed/scenario_templates_australia.json.
+ * The API exposes no template-listing endpoint, so the IDs are mirrored here
+ * and validated server-side on seed (unknown IDs return an error).
+ */
+export const SCENARIO_TEMPLATES = [
+  {
+    template_id: "nsw-bushfire-multi-agency",
+    name: "NSW Blue Mountains Bushfire — Multi-Agency",
+    scenario_type: "Bushfire",
+  },
+  {
+    template_id: "qld-cyclone-multi-agency",
+    name: "QLD Cyclone — Multi-Agency",
+    scenario_type: "Cyclone",
+  },
+  {
+    template_id: "nsw-flood-riverine",
+    name: "NSW Hawkesbury-Nepean Riverine Flood",
+    scenario_type: "Flood",
+  },
+  {
+    template_id: "cross-jurisdiction-bushfire",
+    name: "VIC/NSW Border Bushfire — Cross-jurisdiction",
+    scenario_type: "Cross-jurisdiction",
+  },
+] as const;
 
 export interface SimulationSummary {
   tenant_id: string;
@@ -23,6 +55,14 @@ export interface SimulationListResponse {
   offset: number;
 }
 
+export interface SimulationParticipantAssignment {
+  oid: string;
+  persona_id?: string | null;
+  organisation_id?: string | null;
+  jurisdiction_id?: string | null;
+  role?: string | null;
+}
+
 export interface SimulationDetail {
   tenant_id: string;
   scenario_id: string;
@@ -34,11 +74,23 @@ export interface SimulationDetail {
   ttl_hours: number;
   expires_at: string;
   participants: string[];
+  participant_assignments?: SimulationParticipantAssignment[];
   jurisdictions: string[];
   resource_limits: { max_signals: number; max_recommendations: number; max_duration_hours: number };
-  resource_consumption: { signal_count: number; recommendation_count: number; storage_bytes: number; cache_keys: number };
+  // `cache_keys` is optional because the API omits it on older documents and
+  // never reports a measured namespace count — the UI must not imply one.
+  resource_consumption: {
+    signal_count: number;
+    recommendation_count: number;
+    storage_bytes: number;
+    cache_keys?: number | null;
+  };
   throttle_mode: string;
   throttle_quota_pct: number;
+  throttle_notice?: string | null;
+  throttle_changed_at?: string | null;
+  exercise_report_id?: string | null;
+  exercise_report_uri?: string | null;
   elapsed_seconds: number;
   // Feature 026 — server-owned clock
   warp_speed?: number;
@@ -48,6 +100,22 @@ export interface SimulationDetail {
   clock_paused?: boolean;
   playback_status?: string;
   last_resumed_at?: string | null;
+}
+
+export interface ExerciseReportData {
+  report_id: string;
+  tenant_id: string;
+  scenario_type: string;
+  generated_at: string;
+  exercise_timeline: { event_type: string; wall_clock_time: string; payload: Record<string, unknown> }[];
+  participating_organisations: string[];
+  participating_personas: string[];
+  signal_summary: { total: number; by_category: Record<string, number>; by_source: Record<string, number> };
+  recommendation_summary: { total: number; approved: number; rejected: number; escalated: number; timed_out: number; pending: number };
+  alert_summary: { total: number; published: number; blocked_simulation: number };
+  coordination_gaps: string[];
+  performance_metrics: { time_to_first_recommendation_s: number | null; time_to_alert_publication_s: number | null; coordination_coverage_pct: number | null };
+  benchmark_comparison: { metric: string; target: number; actual: number | null; passed: boolean; prior_actual: number | null; delta_from_prior: number | null }[];
 }
 
 export interface CreateSimulationPayload {
@@ -105,14 +173,23 @@ export interface ChangeWarpSpeedResponse extends SimulationClockResponse {
   previous_warp_speed: number;
 }
 
+/** Carries the HTTP status so callers can tell 403 from 404 from 409. */
+export class SimulationApiError extends Error {
+  constructor(readonly status: number, readonly body: string) {
+    super(`API ${status}: ${body}`);
+    this.name = "SimulationApiError";
+  }
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const auth = await simulationAuthHeaders();
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json", ...init?.headers },
+    headers: { "Content-Type": "application/json", ...auth, ...init?.headers },
     ...init,
   });
   if (!response.ok) {
     const body = await response.text();
-    throw new Error(`API ${response.status}: ${body}`);
+    throw new SimulationApiError(response.status, body);
   }
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
@@ -212,9 +289,17 @@ export async function seedReplay(
   });
 }
 
+export interface ParticipantAssignment {
+  oid: string;
+  persona?: string;
+  organisation_id?: string;
+  jurisdiction_id?: string;
+  role?: string;
+}
+
 export async function addParticipants(
   tenantId: string,
-  participants: { oid: string; persona: string }[],
+  participants: ParticipantAssignment[],
 ): Promise<{ tenant_id: string; participants: string[] }> {
   return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/participants`, {
     method: "POST",
@@ -224,4 +309,8 @@ export async function addParticipants(
 
 export async function getReport(tenantId: string): Promise<Record<string, unknown>> {
   return apiFetch(`/simulations/${encodeURIComponent(tenantId)}/report`);
+}
+
+export async function getReportById(reportId: string): Promise<ExerciseReportData> {
+  return apiFetch(`/simulations/reports/${encodeURIComponent(reportId)}`);
 }

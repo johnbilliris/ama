@@ -1,6 +1,12 @@
 import math
+import random
 from datetime import UTC, datetime
 from typing import Any
+
+from apps.ingestion.simulation.region_sampling import sample_point_in_target_region
+
+MODEL_VERSION = "flood-v1"
+MODEL_CONFIG_VERSION = "2026-09-16"
 
 
 class FloodGenerator:
@@ -13,18 +19,30 @@ class FloodGenerator:
         minor_threshold: float = 3.0,
         moderate_threshold: float = 5.0,
         major_threshold: float = 7.0,
+        rise_fraction: float = 0.35,
+        peak_fraction: float = 0.15,
+        recession_constant: float = 2.5,
     ) -> list[tuple[float, float]]:
         """Generate (time_offset_hours, water_level) tuples following a realistic flood curve."""
+        if duration_hours <= 0:
+            raise ValueError("duration_hours must be > 0")
+        if not (0 < rise_fraction < 1):
+            raise ValueError("rise_fraction must be in (0, 1)")
+        if not (0 < peak_fraction < 1):
+            raise ValueError("peak_fraction must be in (0, 1)")
+        if rise_fraction + peak_fraction >= 1:
+            raise ValueError("rise_fraction + peak_fraction must be < 1")
+        if not (minor_threshold < moderate_threshold < major_threshold):
+            raise ValueError("thresholds must satisfy minor < moderate < major")
+
         points: list[tuple[float, float]] = []
         steps = max(int(duration_hours * 2), 10)
-        rise_fraction = 0.35
-        peak_fraction = 0.15
 
         rise_steps = int(steps * rise_fraction)
         peak_steps = int(steps * peak_fraction)
         recession_steps = steps - rise_steps - peak_steps
 
-        base_level = minor_threshold * 0.3
+        base_level = max(0.0, minor_threshold * 0.3)
 
         # Rising limb
         for i in range(rise_steps):
@@ -43,7 +61,9 @@ class FloodGenerator:
         # Recession limb
         for i in range(recession_steps):
             t = i / max(recession_steps - 1, 1)
-            level = peak_level * math.exp(-2.5 * t) + base_level * (1 - math.exp(-2.5 * t))
+            level = peak_level * math.exp(-recession_constant * t) + base_level * (
+                1 - math.exp(-recession_constant * t)
+            )
             time_offset = ((rise_steps + peak_steps + i) / steps) * duration_hours
             points.append((round(time_offset, 2), round(level, 2)))
 
@@ -54,20 +74,38 @@ class FloodGenerator:
         time_offset: float = 0.0,
         water_level: float = 5.0,
         gauge_id: str = "gauge-001",
+        minor_threshold: float = 3.0,
+        moderate_threshold: float = 5.0,
+        major_threshold: float = 7.0,
+        topology_order: list[dict[str, Any]] | None = None,
+        target_region: dict[str, Any] | None = None,
+        jurisdiction_id: str = "NSW",
+        random_seed: int | None = None,
         location: list[float] | None = None,
         **_kwargs: Any,
     ) -> dict[str, Any]:
         """Generate a SignalEnvelope dict for a river gauge reading."""
         now = datetime.now(UTC).isoformat()
-        loc = location or [151.21, -33.86]
+        rng = random.Random(random_seed)
+        loc = location or sample_point_in_target_region(target_region, fallback=[151.21, -33.86], rng=rng)
+
+        if not (minor_threshold < moderate_threshold < major_threshold):
+            raise ValueError("thresholds must satisfy minor < moderate < major")
 
         severity = "below_minor"
-        if water_level >= 7.0:
+        if water_level >= major_threshold:
             severity = "major"
-        elif water_level >= 5.0:
+        elif water_level >= moderate_threshold:
             severity = "moderate"
-        elif water_level >= 3.0:
+        elif water_level >= minor_threshold:
             severity = "minor"
+
+        travel_offset_minutes = 0
+        if topology_order:
+            for entry in topology_order:
+                if isinstance(entry, dict) and str(entry.get("gaugeId")) == gauge_id:
+                    travel_offset_minutes = int(entry.get("travelOffsetMinutes", 0))
+                    break
 
         return {
             "source": {
@@ -78,6 +116,7 @@ class FloodGenerator:
             "category": "hydrology",
             "occurredAt": now,
             "receivedAt": now,
+            "jurisdictionId": jurisdiction_id,
             "location": {
                 "type": "Point",
                 "coordinates": loc,
@@ -87,7 +126,19 @@ class FloodGenerator:
                 "gaugeId": gauge_id,
                 "waterLevel": water_level,
                 "timeOffset": time_offset,
+                "travelOffsetMinutes": travel_offset_minutes,
+                "thresholds": {
+                    "minor": minor_threshold,
+                    "moderate": moderate_threshold,
+                    "major": major_threshold,
+                },
                 "severity": severity,
+                "modelVersion": MODEL_VERSION,
+                "modelConfigVersion": MODEL_CONFIG_VERSION,
+                "calibrationProvenance": {
+                    "status": "UNVERIFIED",
+                    "detail": "External calibration constants unavailable in repository; placeholder model only.",
+                },
             },
             "confidenceScore": 0.75,
             "freshnessScore": 0.90,

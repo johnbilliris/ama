@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from app.core.async_io import run_blocking
 from app.repositories.simulation_event_repository import SimulationEventRepository
 from app.repositories.simulation_repository import SimulationRepository
 
@@ -55,13 +56,14 @@ class PlaybackService:
         if not (tenant.created_by == requesting_user_oid or requesting_user_oid in tenant.participants):
             raise PermissionError("playback_access_denied")
 
-        events = self._events.list_events(
+        events = await run_blocking(
+            self._events.list_events,
             tenant_id,
             after_seq=after_seq,
             limit=limit,
             include_annotations=include_annotations,
         )
-        total = self._events.count_events(tenant_id)
+        total = await run_blocking(self._events.count_events, tenant_id)
         has_more = len(events) == limit and (events and events[-1].event_seq < total)
         next_cursor = events[-1].event_seq if events and has_more else None
         return {
@@ -86,6 +88,7 @@ class PlaybackService:
             raise PermissionError("playback_access_denied")
 
         if before_sim_time is not None:
-            snap = self._events.get_nearest_snapshot(tenant_id, before_sim_time)
+            snap = await run_blocking(self._events.get_nearest_snapshot, tenant_id, before_sim_time)
             return {"snapshots": [snap.model_dump(mode="json")] if snap else []}
-        return {"snapshots": [s.model_dump(mode="json") for s in self._events.list_snapshots(tenant_id)]}
+        snapshots = await run_blocking(self._events.list_snapshots, tenant_id)
+        return {"snapshots": [s.model_dump(mode="json") for s in snapshots]}

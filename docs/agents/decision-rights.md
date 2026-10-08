@@ -49,7 +49,7 @@
 | Draft alert message | ✓ | | Always reviewable |
 | Adapt to multilingual + accessibility | ✓ | | Per jurisdiction policy `language_priorities` |
 | Pass output through Content Safety | ✓ | | Mandatory |
-| **Publish** to channels | | → IC | Constitution NN-1 + V (warnings) |
+| **Publish** to channels (live) | | → IC | Constitution NN-1 + V (warnings); delegated drafting does not grant dispatch approval |
 | Issue de-escalation / all-clear | | → IC | Constitution V-A |
 
 ## Dependency Notifier Agent
@@ -66,6 +66,7 @@
 - **Autonomy-dial change**: same governance as kill-switch.
 - **Foundry carve-out registry mutation**: requires 2 approver signatures + OPA policy validation; deny-by-default if quorum missing.
 - **Documented bypass workflows** (`--coverage-bypass`, `--eval-bypass`, `--cosign-bypass`, `--auth-bypass`): all require Executive + Principal Engineer co-approval, time-boxed, audit-logged, page-routed.
+- **Rehearsal synthetic egress**: simulation outputs can be published only to synthetic channels and does not relax live IC approval for public dispatch.
 
 ## Review cadence
 

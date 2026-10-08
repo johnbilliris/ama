@@ -1,0 +1,114 @@
+{
+  "schema_version": "spec005-readiness-manifest-v1",
+  "status": "UNVERIFIED",
+  "revision": "REPLACE_WITH_GIT_SHA",
+  "environment": {
+    "name": "staging",
+    "region": "australiaeast",
+    "tenant_id": "live",
+    "agency_id": "nsw-ses"
+  },
+  "topology": {
+    "cache_sku": "Basic_C0",
+    "cache_sla_status": "UNVERIFIED",
+    "service_version": "REPLACE_WITH_DEPLOY_VERSION"
+  },
+  "fixture": {
+    "catalogue_source": "packages/domain/src/domain/seed/data_sources_australia.json",
+    "required_source_ids": [
+      "act-esa",
+      "agent-risk-assessments",
+      "aggregated-risk-scores",
+      "aidr",
+      "bom-aws-stations",
+      "bom-flood-warnings",
+      "bom-forecasts",
+      "bom-observations",
+      "bom-radar",
+      "bom-river-gauges",
+      "bom-warnings",
+      "ema",
+      "energy-networks-nsw",
+      "epa-air-quality",
+      "facebook-community",
+      "field-officer-reports",
+      "ga-earthquake-alerts",
+      "ga-sentinel-hotspots",
+      "ga-tsunami-warnings",
+      "himawari-satellite",
+      "historical-incidents-db",
+      "icon-ims",
+      "nsw-health",
+      "nsw-rfs-fires-near-me",
+      "nsw-ses-flood",
+      "nt-pfes",
+      "qld-health",
+      "qld-qfes",
+      "qld-ses-flood",
+      "reddit-australia",
+      "sa-cfs",
+      "sentinel-satellite",
+      "snap-send-solve",
+      "surf-life-saving",
+      "tas-tfs",
+      "tfnsw",
+      "tmr-qld",
+      "twitter-disaster",
+      "vic-cfa",
+      "vic-health",
+      "vic-ses-flood",
+      "vicroads",
+      "volunteer-bushfire-brigades",
+      "wa-dfes",
+      "water-authorities-nsw",
+      "webeoc-ims"
+    ]
+  },
+  "timestamps": {
+    "started_at": "1970-01-01T00:00:00Z",
+    "ended_at": "1970-01-01T00:00:00Z"
+  },
+  "participants": {
+    "denominator": 0,
+    "successful": 0
+  },
+  "reviewer": {
+    "name": "UNVERIFIED",
+    "role": "UNVERIFIED"
+  },
+  "scenarios": [
+    {"id": "quickstart-1", "outcome": "Not measured", "status": "UNVERIFIED", "reason": "Awaiting staged rehearsal evidence."},
+    {"id": "quickstart-2", "outcome": "Not measured", "status": "UNVERIFIED", "reason": "Awaiting staged rehearsal evidence."},
+    {"id": "quickstart-3", "outcome": "Not measured", "status": "UNVERIFIED", "reason": "Awaiting staged rehearsal evidence."},
+    {"id": "quickstart-4", "outcome": "Not measured", "status": "UNVERIFIED", "reason": "Awaiting staged rehearsal evidence."},
+    {"id": "quickstart-5", "outcome": "Not measured", "status": "UNVERIFIED", "reason": "Awaiting staged rehearsal evidence."},
+    {"id": "quickstart-6", "outcome": "Not measured", "status": "UNVERIFIED", "reason": "Awaiting staged rehearsal evidence."},
+    {"id": "quickstart-7", "outcome": "Not measured", "status": "UNVERIFIED", "reason": "Awaiting staged rehearsal evidence."},
+    {"id": "quickstart-8", "outcome": "Not measured", "status": "UNVERIFIED", "reason": "Awaiting staged rehearsal evidence."}
+  ],
+  "success_criteria": [
+    {"id": "SC-001", "status": "UNVERIFIED", "measured": "Not measured", "ratio": 0.0},
+    {"id": "SC-002", "status": "UNVERIFIED", "measured": "Not measured"},
+    {"id": "SC-003", "status": "UNVERIFIED", "measured": "Not measured"},
+    {"id": "SC-004", "status": "UNVERIFIED", "measured": "Not measured", "seconds": 0},
+    {"id": "SC-005", "status": "UNVERIFIED", "measured": "Not measured", "ratio": 0.0, "seconds": 0},
+    {"id": "SC-006", "status": "UNVERIFIED", "measured": "Not measured"}
+  ],
+  "artifacts": [
+    {
+      "kind": "readiness_snapshot",
+      "path": "specs/005-data-source-governance/evidence/readiness-snapshot.generated.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "kind": "staging_latency_outage",
+      "path": "specs/005-data-source-governance/evidence/lookup-latency-samples.staging.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "skip_reasons": [
+    "No authorized staging evidence run attached.",
+    "SC-004 and SC-005 require human panel/usability execution records.",
+    "SC-006 requires reconstructive audit replay with zero diff in an approved readiness run."
+  ]
+}

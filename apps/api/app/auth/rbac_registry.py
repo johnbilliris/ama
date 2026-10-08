@@ -58,6 +58,8 @@ _COMMON_PREFIXES: frozenset[str] = frozenset(
     {
         "/api/auth/whoami",
         "/api/audit/list",
+        "/api/incidents/",
+        "/api/v1/evidence",
     }
 )
 
@@ -66,11 +68,15 @@ _ROUTE_FAMILY_ALLOWLIST: Final[dict[str, frozenset[str]]] = {
     "incident-commander": _COMMON_PREFIXES
     | frozenset(
         {
+            "/api/data-sources",
+            "/api/governance",
+            "/api/recommendations/",
             "/api/outcomes/sc-001/evaluate",
             "/api/outcomes/sc-002/evaluate",
             "/api/outcomes/sc-003/evaluate",
             "/api/outcomes/sc-004/evaluate",
             "/api/outcomes/sc-005/evaluate",
+            "/api/alerts/",
             "/api/recovery/handover",
             "/api/offline/replay",
         }
@@ -78,6 +84,7 @@ _ROUTE_FAMILY_ALLOWLIST: Final[dict[str, frozenset[str]]] = {
     "planning-officer": _COMMON_PREFIXES
     | frozenset(
         {
+            "/api/recommendations/",
             "/api/outcomes/sc-001/evaluate",
             "/api/outcomes/sc-002/evaluate",
             "/api/offline/replay",
@@ -86,6 +93,7 @@ _ROUTE_FAMILY_ALLOWLIST: Final[dict[str, frozenset[str]]] = {
     "operations-officer": _COMMON_PREFIXES
     | frozenset(
         {
+            "/api/recommendations/",
             "/api/outcomes/sc-001/evaluate",
             "/api/outcomes/sc-002/evaluate",
             "/api/outcomes/sc-003/evaluate",
@@ -104,6 +112,7 @@ _ROUTE_FAMILY_ALLOWLIST: Final[dict[str, frozenset[str]]] = {
     | frozenset(
         {
             "/api/outcomes/sc-002/evaluate",
+            "/api/alerts/",
             "/api/offline/replay",
         }
     ),
@@ -115,7 +124,13 @@ _ROUTE_FAMILY_ALLOWLIST: Final[dict[str, frozenset[str]]] = {
             "/api/offline/replay",
         }
     ),
-    "observer-auditor": _COMMON_PREFIXES,
+    "observer-auditor": _COMMON_PREFIXES
+    | frozenset(
+        {
+            "/api/data-sources",
+            "/api/governance",
+        }
+    ),
     "risk-manager": _COMMON_PREFIXES
     | frozenset(
         {
@@ -128,22 +143,33 @@ _ROUTE_FAMILY_ALLOWLIST: Final[dict[str, frozenset[str]]] = {
         {
             "/api/outcomes/sc-005/evaluate",
             "/api/recovery/handover",
+            "/api/incidents/",
         }
     ),
     "executive-leader": _COMMON_PREFIXES
     | frozenset(
         {
+            "/api/data-sources",
+            "/api/governance",
+            "/api/alerts/",
+            "/api/recommendations/",
             "/api/outcomes/sc-001/evaluate",
             "/api/outcomes/sc-005/evaluate",
         }
     ),
     "system-administrator": frozenset(
         {
+            "/api/data-sources",
+            "/api/governance",
+            "/api/alerts/",
+            "/api/recommendations/",
             "/api/outcomes/",
             "/api/audit/list",
             "/api/auth/whoami",
+            "/api/incidents/",
             "/api/offline/replay",
             "/api/recovery/handover",
+            "/api/v1/evidence",
         }
     ),
 }

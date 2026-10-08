@@ -21,9 +21,15 @@ specs:
 
 ## Middleware stack diagram
 
-The diagram below shows the request path through the API middleware after
-spec-035 closure. Order is significant — it is enforced by the activation-mutex
-build gate ([scripts/verify-activation-mutex.ps1](../../scripts/verify-activation-mutex.ps1)).
+The diagram below shows the request path through the API middleware as actually
+registered in [apps/api/app/main.py](../../apps/api/app/main.py). In Starlette the
+**last** registered middleware is the **outermost** one, so the runtime request order
+is the reverse of the registration order. The spec-035 production-auth stack
+(`audit_appender`, `classifier_gateway`, `entra_auth`, `rbac_check`,
+`rate_limit_audit`) is registered only when `AMA_ENABLE_PRODUCTION_AUTH=1`; the
+activation-mutex build gate
+([scripts/verify-activation-mutex.ps1](../../scripts/verify-activation-mutex.ps1))
+enforces that this stack is not partially activated.
 
 ```mermaid
 flowchart LR
@@ -32,19 +38,20 @@ flowchart LR
     SW[Offline service worker<br/>T040 / T072]
     API[FastAPI app]
 
-    subgraph Middleware
+    subgraph Middleware["Runtime request order: outer to inner"]
         direction TB
-        AuthZ[Identity + RBAC<br/>auth/]
-        Cors[CORS]
-        Audit[Audit row append<br/>+ ama.audit.outcome span<br/>T078]
-        Classifier[Classifier mask<br/>T046]
-        CulturalSafety[Cultural-safety driver<br/>T053]
-        Carveout[Carve-out registry guard<br/>T070]
+        Audit[1 audit_appender<br/>sees the FINAL response<br/>+ ama.audit.outcome span<br/>T078]
+        Classifier[2 classifier_gateway<br/>mask T046]
+        Entra[3 entra_auth<br/>Entra JWT validation]
+        Rbac[4 rbac_check<br/>closed-set AppRole + persona scope]
+        RateLimit[5 rate_limit_audit]
+        Base[6 auth_middleware, tenant_middleware,<br/>CORS, resilience, error handler]
     end
 
     Client --> SovBanner --> SW -->|navigator.onLine| API
-    API --> AuthZ --> Cors --> Audit --> Classifier --> CulturalSafety --> Carveout
-    Carveout --> Domain[(Domain repositories)]
+    API --> Audit --> Classifier --> Entra --> Rbac --> RateLimit --> Base
+    Base --> Handler[Route handler]
+    Handler --> Domain[(Domain repositories)]
     Audit -. emits .-> AppInsights[(Azure Monitor<br/>span ama.audit.outcome)]
 ```
 
@@ -52,11 +59,16 @@ flowchart LR
 
 | Stage | Why this order |
 | --- | --- |
-| AuthZ first | All downstream stages assume an authenticated principal; spec-035 NN-1 / NN-2 closed-set role identity. |
-| Audit second | Every request that reaches handlers must produce an audit row; positioning Audit before mutating logic guarantees the audit row exists *before* the closed-set outcome is finalised. T078 enriches the active OTEL span with `ama.audit.outcome` at this stage. |
-| Classifier third | T046 mask runs *after* audit so the masked-field count is captured in the audit row. |
-| Cultural-safety fourth | T053 routes drafts to elders + materialises `cultural_safety_timeout_override` / `cultural_safety_held` outcomes (closed set). The decision feeds back into the audit row before downstream domain handlers run. |
-| Carve-out registry fifth | T070 surfaces stale-review entries to the SovereigntyBanner. The 90-day CI gate enforces this stays current. |
+| `audit_appender` outermost | It must observe the **final** response, after rate-limit and classifier rewrites. Because it is registered last it runs first on the request and last on the response. Authentication therefore happens *inside* audit, not before it. |
+| `classifier_gateway` second | T046 masking runs before identity resolution so masked-field accounting is available to the outer audit frame. |
+| `entra_auth` third | Validates the Entra JWT and populates `request.state.claims` for the next stage. |
+| `rbac_check` fourth | Consumes the claims from `entra_auth` and applies the closed-set AppRole and AIIMS-function checks to protected prefixes only. |
+| `rate_limit_audit` fifth | Runs closest to the handler so limits apply to requests that already passed authorisation. |
+| Base stack innermost | `auth_middleware`, `tenant_middleware`, CORS, resilience and the error handler are registered before the spec-035 stack and therefore sit inside it. CORS preflight is answered before the base auth/tenant checks. |
+
+> **Historical note**: earlier revisions of this page showed an
+> `AuthZ → CORS → Audit → Classifier` order. That ordering is superseded by the
+> registration order above; it is retained here only to explain the change.
 
 ## Offline replay flow
 

@@ -3,6 +3,13 @@
 **Input**: Design documents from `/specs/004-actor-github-agents/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
+## Scope Evolution Snapshot (2026-09-15)
+
+- Historical task checkboxes below reflect the original 31-agent implementation baseline and are intentionally preserved.
+- Historical scope snapshots: 27 (draft) → 31 (initial implementation baseline) → 35 (minimum target after clarification).
+- Current filesystem snapshot used for validation and maintenance: 85 active actor files, 12 workflow agents, 6 archived sector agents.
+- Do not reinterpret legacy task completion markers as proof that current expanded catalogue obligations are complete.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)

@@ -91,7 +91,7 @@ def _parse_yaml(text: str) -> dict[str, Any]:
     module without installing PyYAML.
     """
     try:
-        import yaml  # type: ignore[import-not-found]
+        import yaml
 
         return yaml.safe_load(text)
     except ModuleNotFoundError:
@@ -336,11 +336,14 @@ async def fan_out(
                         )
 
                 if candidates:
+                    raw_hazard_class = (
+                        trigger_signal.parameters.get("hazard_class")
+                        if isinstance(trigger_signal.parameters, dict)
+                        else None
+                    )
                     trigger = CascadeTrigger(
                         jurisdiction_code=trigger_signal.jurisdiction_code,
-                        hazard_class=trigger_signal.parameters.get("hazard_class")
-                        if isinstance(trigger_signal.parameters, dict)
-                        else None,
+                        hazard_class=raw_hazard_class if isinstance(raw_hazard_class, str) else None,
                         origin_cascade_id=parent_origin_cascade_id,
                     )
                     chosen = ladder_select(trigger=trigger, candidates=candidates)

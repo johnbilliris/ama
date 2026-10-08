@@ -11,8 +11,24 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
+from typing import TypedDict
 
 from risk_assessment.config import RiskAssessmentConfig
+
+
+class RiskSignal(TypedDict, total=False):
+    signal_id: str
+    confidence_score: float
+    freshness_score: float
+    source_kind: str
+    category: str
+    risk_direction: str
+    hazard_parameter: str
+    payload: object
+    provenance: dict[str, object]
+    disaster_type: str | None
+    evidence_state: str
+
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +64,7 @@ class ContradictionResult:
 
     detected: bool = False
     pairs: list[ContradictionPair] = field(default_factory=list)
-    details: list[dict] = field(default_factory=list)
+    details: list[dict[str, object]] = field(default_factory=list)
 
 
 class SignalCorrelator:
@@ -59,7 +75,7 @@ class SignalCorrelator:
 
     def compute_weighted_confidence(
         self,
-        signals: list[dict],
+        signals: list[RiskSignal],
     ) -> CorrelationResult:
         """Compute weighted confidence from a list of signal dicts.
 
@@ -103,6 +119,16 @@ class SignalCorrelator:
 
         all_stale = len(stale_ids) == len(signals)
 
+        if all_stale:
+            return CorrelationResult(
+                weighted_confidence=0.0,
+                stale_signal_ids=stale_ids,
+                source_kinds=source_kinds,
+                source_diversity=len(source_kinds),
+                all_stale=True,
+                signal_count=len(signals),
+            )
+
         if denominator <= 0.0:
             return CorrelationResult(
                 weighted_confidence=0.0,
@@ -140,7 +166,7 @@ class ContradictionDetector:
     def __init__(self, config: RiskAssessmentConfig | None = None) -> None:
         self._config = config or RiskAssessmentConfig()
 
-    def detect(self, signals: list[dict]) -> ContradictionResult:
+    def detect(self, signals: list[RiskSignal]) -> ContradictionResult:
         """Detect contradictions among signals.
 
         Each signal dict should have:
@@ -153,10 +179,10 @@ class ContradictionDetector:
             return ContradictionResult()
 
         pairs: list[ContradictionPair] = []
-        details: list[dict] = []
+        details: list[dict[str, object]] = []
 
         # Group signals by hazard parameter (default to "general" if not specified)
-        by_param: dict[str, list[dict]] = {}
+        by_param: dict[str, list[RiskSignal]] = {}
         for sig in signals:
             param = sig.get("hazard_parameter", "general")
             by_param.setdefault(param, []).append(sig)

@@ -1,0 +1,59 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "## Evidence Harness SLOs\n\nRolling horizon: 30 days. Alert evaluation window: 1 hour. Prototype evidence is advisory only."
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests | where timestamp > ago(30d) | where url has '/api/v1/evidence/' or url has '/api/healthz/evidence' | summarize availability_pct = 100.0 * countif(success == true) / count(), sample_count = count()",
+        "size": 0,
+        "title": "Availability SLO — target >= 99.5%",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "requests | where timestamp > ago(30d) | where name has '/api/v1/evidence/scenarios/' and name has '/replay' | summarize replay_success_pct = 100.0 * countif(success == true) / count(), sample_count = count()",
+        "size": 0,
+        "title": "Replay success SLO — target >= 98%",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "customEvents | where timestamp > ago(30d) | where name == 'evidence.signal.persisted' | extend occurred_at = todatetime(customDimensions['occurred_at']) | extend freshness_seconds = datetime_diff('second', timestamp, occurred_at) | summarize p95_freshness_seconds = percentile(freshness_seconds, 95), sample_count = count()",
+        "size": 0,
+        "title": "Evidence freshness SLO — target <= 60 seconds",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "customEvents | where timestamp > ago(1h) | where name in ('evidence.audit.mirror.failed', 'evidence.audit.mirror.lag') | summarize failures = countif(name == 'evidence.audit.mirror.failed'), max_lag_seconds = max(todouble(customDimensions['lag_seconds']))",
+        "size": 0,
+        "title": "Immutable audit mirror health",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components",
+        "visualization": "table"
+      }
+    }
+  ]
+}

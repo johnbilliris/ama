@@ -3,18 +3,27 @@
 import type { PropsWithChildren } from "react";
 import { useState } from "react";
 
-const NAV_LINKS = [
+const LIVE_NAV_LINKS = [
   { href: "/", label: "Disaster Map", icon: "🗺️" },
   { href: "/workspaces", label: "Workspaces", icon: "👥" },
   { href: "/sectors", label: "Sectors", icon: "🏛️" },
   { href: "/governance", label: "Governance", icon: "🛡️" },
-  { href: "/simulations", label: "Simulations", icon: "🔬" },
   { href: "/preparedness", label: "Preparedness", icon: "📋" },
   { href: "/help", label: "Help", icon: "❓" },
 ];
 
 export function AppShell({ children }: PropsWithChildren) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isDeveloperEnvironment =
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_ALLOW_ANONYMOUS_DEV_ACCESS === "1";
+  const navLinks = isDeveloperEnvironment
+    ? [
+        ...LIVE_NAV_LINKS.slice(0, -1),
+        { href: "/simulations", label: "Simulations", icon: "🧪" },
+        LIVE_NAV_LINKS.at(-1)!,
+      ]
+    : LIVE_NAV_LINKS;
 
   return (
     <div className="ama-app-shell">
@@ -28,7 +37,7 @@ export function AppShell({ children }: PropsWithChildren) {
           </a>
 
           <nav className={`ama-nav-links ${mobileMenuOpen ? "ama-nav-links--open" : ""}`} aria-label="Main navigation">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <a key={link.href} href={link.href} className="ama-nav-link">
                 <span className="ama-nav-link-icon" aria-hidden="true">{link.icon}</span>
                 {link.label}
@@ -63,7 +72,7 @@ export function AppShell({ children }: PropsWithChildren) {
             <span className="ama-footer-dot" aria-hidden="true">·</span>
             <a href="/preparedness">Preparedness</a>
             <span className="ama-footer-dot" aria-hidden="true">·</span>
-            <a href="/simulations">Simulations</a>
+            <a href="/help">Help</a>
           </div>
           <p className="ama-footer-copy">Built for the Azure Master Architect Program</p>
         </div>

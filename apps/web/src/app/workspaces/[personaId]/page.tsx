@@ -8,7 +8,9 @@ import {
   PersonaWorkspaceError,
   type PersonaWorkspacePayload,
 } from "../../../lib/api/personas";
-import { useParams } from "next/navigation";
+import { ConnectivityBanner } from "../../../components/offline/connectivity-banner";
+import { useI18n } from "../../../lib/i18n/runtime";
+import { useParams, useSearchParams } from "next/navigation";
 
 type LoadState =
   | { status: "loading" }
@@ -16,14 +18,22 @@ type LoadState =
   | { status: "error"; httpStatus: number; message: string };
 
 export default function WorkspacePage() {
+  const { t } = useI18n();
   const params = useParams<{ personaId: string }>();
+  const searchParams = useSearchParams();
   const personaId = params.personaId;
+  const incidentId = searchParams.get("incidentId") ?? "incident-001";
   const [state, setState] = useState<LoadState>({ status: "loading" });
+
+  async function refreshWorkspace() {
+    const workspace = await getPersonaWorkspace(personaId, incidentId);
+    setState({ status: "loaded", workspace });
+  }
 
   useEffect(() => {
     let cancelled = false;
     setState({ status: "loading" });
-    getPersonaWorkspace(personaId)
+    getPersonaWorkspace(personaId, incidentId)
       .then((workspace) => {
         if (!cancelled) setState({ status: "loaded", workspace });
       })
@@ -46,12 +56,12 @@ export default function WorkspacePage() {
     return () => {
       cancelled = true;
     };
-  }, [personaId]);
+  }, [personaId, incidentId]);
 
   if (state.status === "loading") {
     return (
       <div className="incident-page" role="status" aria-live="polite">
-        <p>Loading workspace…</p>
+        <p>{t("workspace.loading")}</p>
       </div>
     );
   }
@@ -61,16 +71,16 @@ export default function WorkspacePage() {
     return (
       <div className="incident-page" role="alert">
         <h1 className="text-xl font-semibold text-slate-900">
-          {isNotFound ? "Workspace not found" : "Workspace failed to load"}
+          {isNotFound ? t("workspace.notFound") : t("workspace.failed")}
         </h1>
         <p className="mt-2 text-sm text-slate-700">
           {isNotFound
-            ? `No persona with id "${personaId}" is registered. Pick a persona from the workspaces directory.`
+            ? t("workspace.notFoundBody", { personaId })
             : state.message}
         </p>
         <p className="mt-4">
           <Link className="text-blue-700 underline" href="/workspaces">
-            Back to workspaces
+            {t("common.backToWorkspaces")}
           </Link>
         </p>
       </div>
@@ -79,12 +89,19 @@ export default function WorkspacePage() {
 
   return (
     <div className="incident-page">
+      <ConnectivityBanner />
       <nav aria-label="Workspace breadcrumb" className="mb-3 text-sm">
         <Link className="text-blue-700 underline" href="/workspaces">
-          ← Back to workspaces
+          ← {t("common.backToWorkspaces")}
         </Link>
       </nav>
-      <PersonaWorkspace workspace={state.workspace} />
+      <PersonaWorkspace
+        workspace={state.workspace}
+        incidentId={incidentId}
+        tenantId="live"
+        mode="live"
+        onWorkspaceChanged={refreshWorkspace}
+      />
     </div>
   );
 }

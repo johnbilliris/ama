@@ -1,10 +1,4 @@
-"""Pillar B — Forward-impute missing canonical-chain timestamps (T-B04).
-
-Implements FR-008: when one of call/dispatch/arrival/control/clear is
-missing, forward-impute from the next adjacent event; tag
-`missing-timestamp` and `reduced-fidelity`. >10 % imputed rows triggers a
-`small_sample` flag and an auditor-signoff gate.
-"""
+# Forward imputation for the canonical incident timestamp chain.
 
 from __future__ import annotations
 
@@ -22,34 +16,41 @@ CHAIN_FIELDS = (
 
 
 def forward_impute(chain: CanonicalEventChain) -> CanonicalEventChain:
-    """Forward-impute None values from the next-adjacent populated timestamp."""
-    values = [getattr(chain, f) for f in CHAIN_FIELDS]
-    imputed: list[str] = []
-    for i in range(len(values)):
-        if values[i] is None:
-            for j in range(i + 1, len(values)):
-                if values[j] is not None:
-                    values[i] = values[j]
-                    imputed.append(CHAIN_FIELDS[i])
-                    break
-    if not imputed:
+    # A missing timestamp may only inherit the next available adjacent value.
+    values = [getattr(chain, field) for field in CHAIN_FIELDS]
+    newly_imputed: list[str] = []
+    for index, value in enumerate(values):
+        if value is not None:
+            continue
+        replacement = next((candidate for candidate in values[index + 1 :] if candidate is not None), None)
+        if replacement is not None:
+            values[index] = replacement
+            newly_imputed.append(CHAIN_FIELDS[index])
+
+    if not newly_imputed:
         return chain
-    new_chain = chain.model_copy(
+    imputed_fields = list(chain.imputed_fields)
+    imputed_fields.extend(field for field in newly_imputed if field not in imputed_fields)
+    return chain.model_copy(
         update={
-            **{f: v for f, v in zip(CHAIN_FIELDS, values)},
-            "imputed_fields": list({*chain.imputed_fields, *imputed}),
+            **dict(zip(CHAIN_FIELDS, values, strict=True)),
+            "imputed_fields": imputed_fields,
         }
     )
-    return new_chain
 
 
 def small_sample_share(chains: Iterable[CanonicalEventChain]) -> float:
     rows = list(chains)
     if not rows:
         return 0.0
-    return sum(1 for c in rows if c.imputed_fields) / len(rows)
+    return sum(bool(chain.imputed_fields) for chain in rows) / len(rows)
 
 
 def small_sample_gate(chains: Iterable[CanonicalEventChain], *, threshold: float = 0.10) -> bool:
-    """Return True when the imputed share exceeds the gate threshold."""
+    # Exactly ten percent is allowed; the gate is strictly greater than ten percent.
     return small_sample_share(chains) > threshold
+
+
+def interval_eligible(chains: Iterable[CanonicalEventChain]) -> list[CanonicalEventChain]:
+    # Imputed point values remain visible but never enter confidence calculations.
+    return [chain for chain in chains if not chain.imputed_fields]

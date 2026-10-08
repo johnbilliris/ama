@@ -1,5 +1,5 @@
 ---
-purpose: Azure resource topology showing the rg-ama resource group and all named deployed resources.
+purpose: Azure resource topology showing the branch-mapped resource group and the named platform resources.
 personas:
   - Technical-Build
 diagrams:
@@ -20,14 +20,10 @@ specs:
 
 ## Key Elements
 
-- `rg-ama` — Azure resource group boundary.
-- `ca-api` — Azure Container App for the coordination API.
-- `ca-agents` — Azure Container App for agent workloads.
-- `ca-ingest` — Azure Container App for ingestion workloads.
-- `cosmos-ama-zo6bb5` — Azure Cosmos DB account.
-- `app-ama-zo6bb5` — Azure App Service for web hosting.
-- `Azure AI Search` — search service.
-- `Service Bus` — messaging namespace.
-- `Event Hubs` — streaming namespace.
-- `Application Insights` — observability service.
-- `Key Vault` — secrets and certificate store.
+- Current CD resource-group naming: `rg-drh-<env>` (for `dev`, `staging`, `production`).
+- Historical architecture snapshot naming: `rg-ama` and resource aliases such as `ca-api`, `ca-agents`, `ca-ingest`.
+- `api`, `agents`, and `ingestion` are deployed as Azure Container Apps.
+- `web` is hosted on Azure App Service (`host: appservice` in `azure.yaml`).
+- Core platform dependencies: Cosmos DB, Azure AI Search, Service Bus, Event Hubs, Application Insights, Key Vault.
+
+The diagram includes intended release topology for orientation. Exact deployed resource instance names and gate enforcement status must be validated from CI run evidence and Azure inventory.

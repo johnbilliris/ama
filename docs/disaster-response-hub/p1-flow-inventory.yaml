@@ -1,0 +1,118 @@
+version: 1
+feature_id: 001-disaster-response-hub
+last_reviewed: 2026-10-04
+flows:
+  - flow_id: p1-shared-operating-picture
+    description: Incident dashboard and shared operating picture updates.
+    canonical_roles:
+      - Incident Commander
+      - Planning Officer
+      - Operations Officer
+      - Logistics Officer
+      - Public Information Officer
+      - Field Coordinator
+      - Resilience Planner
+      - Observer / Auditor
+    source_paths:
+      - apps/api/app/services/dashboard_service.py
+      - apps/api/app/api/routes/incidents.py
+      - apps/web/src/app/incidents/**
+      - apps/web/src/components/dashboard/**
+      - .github/workflows/ci.yml
+      - .github/workflows/cd.yml
+      - docs/disaster-response-hub/p1-flow-inventory.yaml
+      - docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml
+      - scripts/p1_release_training_gate.py
+      - tests/devops/test_ci_workflow_structure.py
+      - tests/devops/test_p1_training_release_gate.py
+    training_pack:
+      path: docs/disaster-response-hub/operator-runbooks.md
+      version: v1.0.0
+      locale:
+        - en-AU
+        - zh-Hans
+    operator_notes:
+      path: docs/disaster-response-hub/evaluation/baseline-metrics.md
+      version: v1.0.0
+      locale:
+        - en-AU
+    owner: product-owner-ba
+    last_reviewed: 2026-10-04
+    signed_by: johnbilliris
+    signed_at: 2026-10-04
+
+  - flow_id: p1-role-workspace-coordination
+    description: Persona workspace task coordination and dependency updates.
+    canonical_roles:
+      - Incident Commander
+      - Planning Officer
+      - Operations Officer
+      - Logistics Officer
+      - Public Information Officer
+      - Field Coordinator
+      - Resilience Planner
+      - Observer / Auditor
+    source_paths:
+      - apps/api/app/services/persona_workspace_service.py
+      - apps/api/app/services/task_orchestration_service.py
+      - apps/api/app/api/routes/personas.py
+      - apps/api/app/api/routes/tasks.py
+      - apps/web/src/app/workspaces/**
+      - apps/web/src/components/workspaces/**
+      - .github/workflows/ci.yml
+      - .github/workflows/cd.yml
+      - docs/disaster-response-hub/p1-flow-inventory.yaml
+      - docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml
+      - scripts/p1_release_training_gate.py
+      - tests/devops/test_ci_workflow_structure.py
+      - tests/devops/test_p1_training_release_gate.py
+    training_pack:
+      path: docs/disaster-response-hub/operator-runbooks.md
+      version: v1.0.0
+      locale:
+        - en-AU
+        - zh-Hans
+    operator_notes:
+      path: docs/disaster-response-hub/evaluation/post-exercise-survey.md
+      version: v1.0.0
+      locale:
+        - en-AU
+    owner: product-owner-ba
+    last_reviewed: 2026-10-04
+    signed_by: johnbilliris
+    signed_at: 2026-10-04
+
+  - flow_id: p1-public-alert-approval-dispatch
+    description: Human-approved public alert authoring and dispatch boundary.
+    canonical_roles:
+      - Incident Commander
+      - Planning Officer
+      - Public Information Officer
+      - Observer / Auditor
+    source_paths:
+      - apps/api/app/services/public_alert_service.py
+      - apps/api/app/api/routes/alerts.py
+      - apps/agents/communication/delivery.py
+      - apps/web/src/components/alerts/**
+      - .github/workflows/ci.yml
+      - .github/workflows/cd.yml
+      - docs/disaster-response-hub/p1-flow-inventory.yaml
+      - docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml
+      - scripts/p1_release_training_gate.py
+      - tests/devops/test_ci_workflow_structure.py
+      - tests/devops/test_p1_training_release_gate.py
+    training_pack:
+      path: docs/disaster-response-hub/operator-runbooks.md
+      version: v1.0.0
+      locale:
+        - en-AU
+        - zh-Hans
+    operator_notes:
+      path: docs/disaster-response-hub/evaluation/ux-rubric.md
+      version: v1.0.0
+      locale:
+        - en-AU
+    owner: product-owner-ba
+    last_reviewed: 2026-10-04
+    signed_by: johnbilliris
+    signed_at: 2026-10-04

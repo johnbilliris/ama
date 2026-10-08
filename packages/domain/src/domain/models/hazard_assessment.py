@@ -1,7 +1,16 @@
 from datetime import UTC, datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+AssessmentType = Literal[
+    "spread_prediction",
+    "impact_projection",
+    "route_risk",
+    "infrastructure_risk",
+    "community_impact",
+]
+AssessmentGenerationMethod = Literal["llm", "template_fallback", "safety_fallback"]
 
 
 class HazardMap(BaseModel):
@@ -16,15 +25,11 @@ class HazardMap(BaseModel):
 
 
 class HazardAssessment(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+
     hazard_assessment_id: str
     incident_id: str
-    assessment_type: Literal[
-        "spread_prediction",
-        "impact_projection",
-        "route_risk",
-        "infrastructure_risk",
-        "community_impact",
-    ]
+    assessment_type: AssessmentType
     input_signal_ids: list[str] = Field(default_factory=list)
     summary: str
     confidence_level: Literal["low", "medium", "high"]
@@ -37,7 +42,7 @@ class HazardAssessment(BaseModel):
     severity_level: Literal["low", "moderate", "high", "critical"] = "moderate"
     valid_until: datetime | None = None
     status: Literal["active", "superseded", "expired"] = "active"
-    generation_method: Literal["llm", "template_fallback", "safety_fallback"] = "llm"
+    generation_method: AssessmentGenerationMethod = "llm"
     model_deployment_id: str | None = None
     prompt_template_version: str = "1.0"
     configuration_version: str = ""
@@ -52,6 +57,8 @@ class HazardAssessment(BaseModel):
 
     @model_validator(mode="after")
     def _validate_valid_until(self) -> "HazardAssessment":
+        if not self.input_signal_ids:
+            raise ValueError("input_signal_ids must include at least one signal")
         if self.valid_until is not None and self.valid_until <= self.generated_at:
             raise ValueError("valid_until must be after generated_at")
         return self

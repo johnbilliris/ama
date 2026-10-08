@@ -49,3 +49,4 @@
 | `035-webapp-capstone-closure` | Webapp Capstone Closure | delivery-hygiene | — | +0.00 | — |
 | `036-foundry-rag-grounding` | Foundry RAG Grounding | capstone-contributing | lives-saved(+0.05) | +0.00 | — |
 | `036-sim-agent-extend` | Simulation Agent Extend | delivery-hygiene | — | +0.00 | — |
+| `040-success-criteria` | Measurable Success-Criteria Evidence Harness | delivery-hygiene | — | +0.00 | OpenAPI evidence exports; no capstone attribution |

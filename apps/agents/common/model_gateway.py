@@ -27,6 +27,7 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass
+from importlib import import_module
 from typing import Literal
 
 logger = logging.getLogger(__name__)
@@ -138,16 +139,28 @@ def _redact_pii_with_presidio(text: str) -> tuple[str, int] | None:
     """
     try:
         from presidio_analyzer import AnalyzerEngine  # noqa: PLC0415
-        from presidio_anonymizer import AnonymizerEngine  # noqa: PLC0415
+        from presidio_anonymizer.entities import RecognizerResult as AnonymizerRecognizerResult  # noqa: PLC0415
     except ImportError:
         return None
     try:
         analyzer = AnalyzerEngine()
-        anonymizer = AnonymizerEngine()
+        anonymizer_factory = getattr(import_module("presidio_anonymizer"), "AnonymizerEngine", None)
+        if anonymizer_factory is None:
+            return None
+        anonymizer = anonymizer_factory()
         results = analyzer.analyze(text=text, language="en")
         if not results:
             return text, 0
-        anonymized = anonymizer.anonymize(text=text, analyzer_results=results)
+        anonymizer_results = [
+            AnonymizerRecognizerResult(
+                entity_type=result.entity_type,
+                start=result.start,
+                end=result.end,
+                score=result.score,
+            )
+            for result in results
+        ]
+        anonymized = anonymizer.anonymize(text=text, analyzer_results=anonymizer_results)
         normalised = _normalise_presidio_tags(anonymized.text)
         return normalised, len(results)
     except Exception:  # noqa: BLE001 — presidio occasionally raises on malformed input

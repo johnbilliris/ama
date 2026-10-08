@@ -14,6 +14,7 @@ and no-change detection to avoid unnecessary version creation.
 
 from __future__ import annotations
 
+import json
 import logging
 import time
 from typing import Any
@@ -97,11 +98,14 @@ class DynamicReplanner:
         """
         triggers: list[str] = []
 
-        # (a) New road closure
-        if new_road_closures:
+        active_route_edges = {
+            str(edge_id) for route in (current_plan or {}).get("routes", []) for edge_id in route.get("waypoints", [])
+        }
+        relevant_closures = sorted(active_route_edges.intersection(new_road_closures or []))
+        if relevant_closures:
             triggers.append(
-                f"road_closure: {len(new_road_closures)} new closure(s) — "
-                f"{', '.join(new_road_closures[:5])}" + (" ..." if len(new_road_closures) > 5 else "")
+                f"road_closure: {len(relevant_closures)} active-route closure(s) — "
+                f"{', '.join(relevant_closures[:5])}" + (" ..." if len(relevant_closures) > 5 else "")
             )
 
         # (b) Hazard expansion > threshold %
@@ -188,39 +192,21 @@ class DynamicReplanner:
         total population, and confidence score.  Ignores metadata-only changes
         (timestamps, version numbers, summaries).
         """
-        # Route count change
-        old_routes = len(old_plan.get("routes", []))
-        new_routes = len(new_plan.get("routes", []))
-        if old_routes != new_routes:
-            return True
-
-        # Route IDs changed
-        old_route_ids = sorted(r.get("route_id", "") for r in old_plan.get("routes", []))
-        new_route_ids = sorted(r.get("route_id", "") for r in new_plan.get("routes", []))
-        if old_route_ids != new_route_ids:
-            return True
-
-        # Zone count or population change
-        old_zones = old_plan.get("zones", [])
-        new_zones = new_plan.get("zones", [])
-        if len(old_zones) != len(new_zones):
-            return True
+        for key in (
+            "routes",
+            "zones",
+            "transport_requirements",
+            "phases",
+            "zone_dispositions",
+            "shelter_in_place_zones",
+            "hazard_summary",
+        ):
+            if _canonical(old_plan.get(key)) != _canonical(new_plan.get(key)):
+                return True
 
         old_pop = old_plan.get("total_population", 0)
         new_pop = new_plan.get("total_population", 0)
         if old_pop != new_pop:
-            return True
-
-        # Transport requirement count change
-        old_transport = len(old_plan.get("transport_requirements", []))
-        new_transport = len(new_plan.get("transport_requirements", []))
-        if old_transport != new_transport:
-            return True
-
-        # Shelter-in-place zone changes
-        old_sip = sorted(old_plan.get("shelter_in_place_zones", []))
-        new_sip = sorted(new_plan.get("shelter_in_place_zones", []))
-        if old_sip != new_sip:
             return True
 
         # Confidence score change (>1% absolute)
@@ -269,3 +255,7 @@ class DynamicReplanner:
                 prefix = trigger.split(":")[0].strip()
                 seen_types[prefix] = trigger  # last one wins
         return list(seen_types.values())
+
+
+def _canonical(value: Any) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), default=str)

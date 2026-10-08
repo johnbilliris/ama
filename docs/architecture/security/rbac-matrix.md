@@ -13,14 +13,13 @@ specs:
 
 [→ Architecture index](../README.md)
 
-<!-- spec-cross-ref: spec-017 -->
-<!-- spec-cross-ref: spec-019 -->
-
 ![SEC-02 — RBAC Role/Permission Matrix](./rbac-matrix.png)
 
 ## Overview
 
-FR-017 requires explicit role and permission boundaries for all 10 AIIMS-aligned platform personas.
+FR-017 requires explicit role and permission boundaries for all 10 AIIMS-aligned platform personas. This includes the protected alert route family (`/api/alerts/`) enforced by production RBAC middleware when `AMA_ENABLE_PRODUCTION_AUTH=1`.
+
+Primary references: spec-017 and spec-019.
 
 ## Permission boundaries
 

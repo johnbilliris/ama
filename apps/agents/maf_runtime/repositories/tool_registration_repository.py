@@ -11,9 +11,21 @@ import logging
 import os
 from datetime import UTC, datetime
 from threading import Lock
-from typing import Any
+from typing import Any, TypedDict
 
 from ..errors import ToolRegistrationConflictError
+
+
+class ToolRegistrationDocument(TypedDict):
+    id: str
+    tool_name: str
+    address: str
+    pinned_major_version: int
+    bound_agents: list[str]
+    capability_description: str
+    registered_at: str
+    registered_by: str
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +45,7 @@ class ToolRegistrationRepository:
     ) -> None:
         self._db_name = database_name
         self._container_name = container_name
-        self._in_memory: dict[str, dict[str, Any]] = {}
+        self._in_memory: dict[str, ToolRegistrationDocument] = {}
         self._mem_lock = Lock()
 
         if cosmos_client is not None:
@@ -73,7 +85,7 @@ class ToolRegistrationRepository:
         bound_agents: list[str],
         capability_description: str,
         registered_by: str,
-    ) -> dict[str, Any]:
+    ) -> ToolRegistrationDocument:
         """Register a new (tool_name, major_version) tuple.
 
         Raises ToolRegistrationConflictError if an entry already exists for the pair.
@@ -87,7 +99,7 @@ class ToolRegistrationRepository:
                 correlation_id="tool-register",
                 details={"tool_name": tool_name, "major_version": major_version},
             )
-        doc = {
+        doc: ToolRegistrationDocument = {
             "id": composite_id,
             "tool_name": tool_name,
             "address": address,
@@ -105,7 +117,7 @@ class ToolRegistrationRepository:
                 self._in_memory[composite_id] = doc
         return doc
 
-    def get(self, tool_name: str, major_version: int) -> dict[str, Any] | None:
+    def get(self, tool_name: str, major_version: int) -> ToolRegistrationDocument | None:
         composite_id = self._composite_id(tool_name, major_version)
         container = self._container()
         if container is not None:
@@ -116,7 +128,7 @@ class ToolRegistrationRepository:
         with self._mem_lock:
             return self._in_memory.get(composite_id)
 
-    def get_for_agent(self, agent_name: str) -> list[dict[str, Any]]:
+    def get_for_agent(self, agent_name: str) -> list[ToolRegistrationDocument]:
         container = self._container()
         if container is not None:
             try:

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+from collections.abc import Callable
 from typing import Any, Literal
 
 import httpx
@@ -44,12 +45,12 @@ class SimAwareHttpClient:
         *,
         channel: SimChannel = "http",
         delivery_service: SyntheticDeliveryService | None = None,
-        tenant_resolver=None,
+        tenant_resolver: Callable[[], TenantContext | None] = get_current_tenant,
         timeout: float = 10.0,
     ) -> None:
         self._channel = channel
         self._delivery = delivery_service or get_synthetic_delivery_service()
-        self._tenant_resolver = tenant_resolver or get_current_tenant
+        self._tenant_resolver = tenant_resolver
         self._client = httpx.AsyncClient(timeout=timeout)
 
     async def __aenter__(self) -> SimAwareHttpClient:
@@ -65,9 +66,25 @@ class SimAwareHttpClient:
         try:
             tenant = self._tenant_resolver()
         except LookupError:
-            return
+            tenant = None
         if not isinstance(tenant, TenantContext):
-            return
+            payload_bytes = _serialize_payload(payload)
+            await self._delivery.record_blocked(
+                tenant_id="unresolved",
+                simulation_id="unresolved",
+                channel=self._channel,
+                audience=url,
+                payload_bytes=payload_bytes,
+                block_reason="http-wrapper-gate",
+                intended_url=url,
+            )
+            logger.warning(
+                "outbound.egress.blocked_missing_tenant channel=%s method=%s url=%s",
+                self._channel,
+                method,
+                url,
+            )
+            raise SimEgressBlocked(tenant_id="unresolved", url=url, channel=self._channel)
         if not tenant.is_simulation:
             return
         payload_bytes = _serialize_payload(payload)
@@ -90,6 +107,7 @@ class SimAwareHttpClient:
         raise SimEgressBlocked(tenant_id=tenant.tenant_id, url=url, channel=self._channel)
 
     async def get(self, url: str, **kwargs: Any) -> httpx.Response:
+        await self._guard("GET", url)
         return await self._client.get(url, **kwargs)
 
     async def post(self, url: str, *, json: Any = None, data: Any = None, **kwargs: Any) -> httpx.Response:

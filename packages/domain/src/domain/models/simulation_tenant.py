@@ -12,6 +12,20 @@ from packages.domain.src.domain.models.warp_speed_change import WarpSpeedChange
 
 TENANT_ID_PATTERN = re.compile(r"^sim-[a-z0-9-]{36}$")
 
+SimulationScenarioType = Literal[
+    "Bushfire",
+    "Flood",
+    "Cyclone",
+    "Severe Storm",
+    "Heatwave",
+    "Earthquake",
+    "Tsunami",
+    "Pandemic",
+    "Other",
+    "Cross-jurisdiction",
+]
+ThrottleMode = Literal["normal", "throttled", "incident-throttled"]
+
 VALID_STATUS_TRANSITIONS: dict[str, set[str]] = {
     "Provisioning": {"Active"},
     "Active": {"Paused", "Archiving"},
@@ -19,6 +33,9 @@ VALID_STATUS_TRANSITIONS: dict[str, set[str]] = {
     "Archiving": {"Archived"},
     "Archived": {"Deleted"},
 }
+
+#: Statuses that hold one of the configured concurrent-simulation slots (FR-010).
+CAPACITY_STATUSES: frozenset[str] = frozenset({"Provisioning", "Active", "Paused"})
 
 
 class ResourceLimits(BaseModel):
@@ -34,37 +51,69 @@ class ResourceConsumption(BaseModel):
     cache_keys: int = 0
 
 
+class ArchiveCleanupSummary(BaseModel):
+    """Counts observed while purging a tenant, plus the post-purge re-read result."""
+
+    signals_removed: int = 0
+    documents_removed: int = 0
+    events_removed: int = 0
+    cache_keys_removed: int = 0
+    residual_signals: int = 0
+    residual_documents: int = 0
+    residual_events: int = 0
+    verified: bool = False
+
+
+class SimulationParticipant(BaseModel):
+    oid: str
+    persona_id: str | None = None
+    organisation_id: str | None = None
+    jurisdiction_id: str | None = None
+    role: Literal["coordinator", "participant", "observer", "administrator"] = "participant"
+
+
 class SimulationTenant(BaseModel):
     id: str = ""
     tenant_id: str
     scenario_id: str
     scenario_run_id: str
-    scenario_type: Literal[
-        "Bushfire",
-        "Flood",
-        "Cyclone",
-        "Severe Storm",
-        "Heatwave",
-        "Earthquake",
-        "Tsunami",
-        "Pandemic",
-        "Other",
-        "Cross-jurisdiction",
-    ]
+    scenario_type: SimulationScenarioType
     scenario_template_id: str | None = None
     status: Literal["Provisioning", "Active", "Paused", "Archiving", "Archived", "Deleted"] = "Provisioning"
     created_by: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    last_activity_at: datetime | None = None
     ttl_hours: int = 72
     expires_at: datetime | None = None
+    expiry_notice_sent_at: datetime | None = None
+    expiry_lease_owner: str | None = None
+    expiry_lease_until: datetime | None = None
+    archive_lease_owner: str | None = None
+    archive_lease_until: datetime | None = None
+    # Set when namespace provisioning failed; the tenant no longer holds a concurrency slot.
+    provisioning_failed_at: datetime | None = None
     participants: list[str] = Field(default_factory=list)
+    participant_assignments: list[SimulationParticipant] = Field(default_factory=list)
     jurisdictions: list[str] = Field(default_factory=list)
     resource_limits: ResourceLimits = Field(default_factory=ResourceLimits)
     resource_consumption: ResourceConsumption = Field(default_factory=ResourceConsumption)
-    throttle_mode: Literal["normal", "throttled", "incident-throttled"] = "normal"
+    throttle_mode: ThrottleMode = "normal"
     throttle_quota_pct: int = 100
+    throttle_notice: str | None = None
+    throttle_changed_at: datetime | None = None
     exercise_report_uri: str | None = None
+    exercise_report_id: str | None = None
     archive_uri: str | None = None
+    archive_job_state: Literal[
+        "not_started",
+        "report_written",
+        "manifest_written",
+        "resources_purged",
+        "completed",
+    ] = "not_started"
+    archive_cleanup: ArchiveCleanupSummary | None = None
+    archived_at: datetime | None = None
+    delete_after: datetime | None = None
     document_type: str = "simulation_tenant"
 
     # Deprecated: legacy client-managed elapsed time. Retained for
@@ -96,10 +145,21 @@ class SimulationTenant(BaseModel):
     def model_post_init(self, __context: object) -> None:
         if not self.id:
             self.id = self.tenant_id
+        if self.last_activity_at is None:
+            self.last_activity_at = self.created_at
         if self.expires_at is None:
             from datetime import timedelta
 
-            self.expires_at = self.created_at + timedelta(hours=self.ttl_hours)
+            self.expires_at = self.last_activity_at + timedelta(hours=self.ttl_hours)
+        assigned_oids = {assignment.oid for assignment in self.participant_assignments}
+        for oid in self.participants:
+            if oid not in assigned_oids:
+                self.participant_assignments.append(
+                    SimulationParticipant(
+                        oid=oid,
+                        role="coordinator" if oid == self.created_by else "participant",
+                    )
+                )
 
     @field_validator("tenant_id")
     @classmethod
@@ -124,13 +184,16 @@ class SimulationTenant(BaseModel):
         allowed = VALID_STATUS_TRANSITIONS.get(self.status, set())
         return new_status in allowed
 
+    def occupies_capacity(self) -> bool:
+        return self.status in CAPACITY_STATUSES and self.provisioning_failed_at is None
+
     def transition_to(self, new_status: str, *, elapsed_seconds: float | None = None) -> "SimulationTenant":
         if not self.can_transition_to(new_status):
             raise ValueError(
                 f"Cannot transition from '{self.status}' to '{new_status}'. "
                 f"Allowed: {VALID_STATUS_TRANSITIONS.get(self.status, set())}"
             )
-        updates: dict = {"status": new_status}
+        updates: dict[str, object] = {"status": new_status}
         if elapsed_seconds is not None:
             updates["elapsed_seconds"] = elapsed_seconds
         return self.model_copy(update=updates)

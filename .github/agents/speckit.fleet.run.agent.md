@@ -1,4 +1,5 @@
 ---
+name: speckit.fleet.run
 description: 'Orchestrate a full feature lifecycle through all SpecKit phases with
   human-in-the-loop checkpoints: specify -> clarify -> plan -> checklist -> tasks
   -> analyze -> cross-model review -> implement -> verify -> CI. Detects partially

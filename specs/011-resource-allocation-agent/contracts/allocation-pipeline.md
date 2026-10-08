@@ -258,10 +258,12 @@ Recovery flush: Tier 3 → Tier 2 → Tier 1 in chronological order when Cosmos 
 Transport dispatch requests from the Evacuation Agent follow the same pipeline but with specific handling:
 
 1. **Stage 1**: Validate `source_agent == "evacuation"`, extract `transportRequirements` from payload
-2. **Stage 3**: Classify all transport demands as **Tier 1 (life safety)**; normalise priority (`immediate` → `critical`)
+2. **Stage 3**: Require stable `requirementId`; derive `demand_id` deterministically from incident scope plus requirement ID. Preserve individuals, pickup, destination resolution/route, origin zone, phase, considerations, count basis, and evacuation plan ID. Classify transport demands as **Tier 1 (life safety)** and normalise priority (`immediate` → `critical`).
 3. **Stage 5**: Match against transport-capable resources (vehicles with required capability tags)
 4. **Stage 7**: Include `evacuation_plan_id` and `transport_requirement_ids` in `Traceability`
 5. **Stage 9**: Audit with `transport_dispatched` decision type
+
+An unresolved evacuation transport requirement remains a pending demand with `destination_resolved=false`; allocation must not invent a destination or discard the demand. `dispatchAuthorized=false` is provenance from evacuation planning, not a dispatch instruction.
 
 ---
 

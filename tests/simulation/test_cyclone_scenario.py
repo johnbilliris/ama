@@ -1,3 +1,5 @@
+import pytest
+
 from apps.ingestion.simulation.generators.cyclone_generator import CycloneGenerator
 
 REQUIRED_ENVELOPE_KEYS = {
@@ -85,3 +87,26 @@ class TestCycloneSignalSchema:
         assert signal["category"] == "weather"
         assert signal["payload"]["cycloneCategory"] == 3
         assert signal["payload"]["windSpeedKmh"] == 180.0
+
+    def test_pressure_and_rmw_inputs_change_intensity(self) -> None:
+        gen = CycloneGenerator()
+        weaker = gen.generate_signal(
+            category=0,
+            central_pressure_hpa=995.0,
+            radius_max_wind_km=80.0,
+            wind_speed=0.0,
+        )
+        stronger = gen.generate_signal(
+            category=0,
+            central_pressure_hpa=930.0,
+            radius_max_wind_km=30.0,
+            wind_speed=0.0,
+            intensity_factor=1.3,
+        )
+        assert stronger["payload"]["windSpeedKmh"] > weaker["payload"]["windSpeedKmh"]
+        assert stronger["payload"]["cycloneCategory"] >= weaker["payload"]["cycloneCategory"]
+
+    def test_outside_region_is_rejected(self) -> None:
+        gen = CycloneGenerator()
+        with pytest.raises(ValueError, match="target_region must be a GeoJSON Polygon"):
+            gen.generate_signal(target_region={"type": "Point", "coordinates": [151.2, -33.8]})

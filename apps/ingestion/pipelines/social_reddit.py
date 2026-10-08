@@ -1,9 +1,14 @@
 import logging
+import os
 from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+from app.services.ingestion.exceptions import SourceUnavailable
+from app.services.ingestion.raw_artifact import RawArtifact, attach_raw_artifact
+
 from apps.api.app.services.ingestion.pipeline_base import IngestionPipelineBase
+from apps.ingestion.normalisers.timestamps import parse_epoch_milliseconds, to_utc_iso_z
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +30,7 @@ AUSTRALIAN_SUBREDDITS = [
 class RedditPipeline(IngestionPipelineBase):
     """Reddit JSON API polling for Australian disaster-related subreddits."""
 
-    def __init__(self, **kwargs: Any):
+    def __init__(self, endpoint_url: str | None = None, transport: Any = None, **kwargs: Any):
         super().__init__(
             pipeline_id="reddit-australia",
             data_source_ids=["reddit-australia"],
@@ -35,10 +40,34 @@ class RedditPipeline(IngestionPipelineBase):
             **kwargs,
         )
         self._subreddits = AUSTRALIAN_SUBREDDITS
+        self._endpoint_url = endpoint_url or "https://www.reddit.com"
+        self._transport = transport
+        self._active_poll_interval_seconds = 120
+        self._idle_poll_interval_seconds = 900
 
     async def poll_source(self) -> list[dict[str, Any]]:
-        # Production: Reddit JSON API (append .json to subreddit URLs).
-        return []
+        client_id = os.environ.get("REDDIT_CLIENT_ID", "").strip()
+        if not client_id:
+            raise SourceUnavailable("reddit-australia", "reddit client id is not configured", blocked=True)
+        if self._transport is None:
+            raise SourceUnavailable("reddit-australia", "reddit transport is not configured", blocked=True)
+
+        posts = await self._transport.poll(
+            endpoint_url=self._endpoint_url,
+            subreddits=list(self._subreddits),
+            requests_per_minute=60,
+        )
+        if isinstance(posts, tuple) and len(posts) == 3:
+            payloads, raw_bytes, content_type = posts
+            self.poll_interval_seconds = (
+                self._active_poll_interval_seconds if payloads else self._idle_poll_interval_seconds
+            )
+            artifact = RawArtifact(
+                raw_bytes=raw_bytes, content_type=content_type, source_uri=self._endpoint_url, file_format="json"
+            )
+            return [attach_raw_artifact(dict(item), artifact) for item in payloads]
+        self.poll_interval_seconds = self._active_poll_interval_seconds if posts else self._idle_poll_interval_seconds
+        return posts
 
     def normalise(self, raw_payload: dict[str, Any]) -> dict[str, Any]:
         now = datetime.now(UTC).isoformat()
@@ -57,7 +86,15 @@ class RedditPipeline(IngestionPipelineBase):
             category = "weather"
 
         created_utc = data.get("created_utc")
-        occurred_at = datetime.fromtimestamp(created_utc, tz=UTC).isoformat() if created_utc else now
+        if created_utc is None:
+            raise ValueError("Reddit payload missing required created_utc")
+        occurred_at = to_utc_iso_z(
+            parse_epoch_milliseconds(
+                int(float(created_utc) * 1000),
+                provider="reddit",
+                field="created_utc",
+            )
+        )
 
         return {
             "source": {
@@ -86,6 +123,7 @@ class RedditPipeline(IngestionPipelineBase):
             "provenance": {
                 "collectionMethod": "api_pull",
                 "sourceUri": f"https://www.reddit.com/r/{subreddit}/new.json",
+                "sourceTimestamp": occurred_at,
             },
         }
 

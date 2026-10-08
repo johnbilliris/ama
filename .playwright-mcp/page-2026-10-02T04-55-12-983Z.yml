@@ -1,0 +1,255 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - generic [ref=f1e4]:
+        - link "Autonomous Disaster Response Coordination Hub home" [ref=f1e5] [cursor=pointer]:
+          - /url: /
+          - generic [aria-hidden] [ref=f1e6]: ⚡
+          - generic [ref=f1e7]: Autonomous Disaster Response Coordination Hub
+        - navigation "Main navigation" [ref=f1e9]:
+          - link "Disaster Map" [ref=f1e10] [cursor=pointer]:
+            - /url: /
+            - generic [aria-hidden] [ref=f1e11]: 🗺️
+            - text: Disaster Map
+          - link "Workspaces" [ref=f1e12] [cursor=pointer]:
+            - /url: /workspaces
+            - generic [aria-hidden] [ref=f1e13]: 👥
+            - text: Workspaces
+          - link "Sectors" [ref=f1e14] [cursor=pointer]:
+            - /url: /sectors
+            - generic [aria-hidden] [ref=f1e15]: 🏛️
+            - text: Sectors
+          - link "Governance" [ref=f1e16] [cursor=pointer]:
+            - /url: /governance
+            - generic [aria-hidden] [ref=f1e17]: 🛡️
+            - text: Governance
+          - link "Preparedness" [ref=f1e18] [cursor=pointer]:
+            - /url: /preparedness
+            - generic [aria-hidden] [ref=f1e19]: 📋
+            - text: Preparedness
+          - link "Help" [ref=f1e20] [cursor=pointer]:
+            - /url: /help
+            - generic [aria-hidden] [ref=f1e21]: ❓
+            - text: Help
+    - main [ref=f1e22]:
+      - navigation "Language selection" [ref=f1e24]:
+        - generic [ref=f1e25]:
+          - generic [aria-hidden] [ref=f1e26]: 🌐
+          - combobox "Select language" [ref=f1e27]:
+            - option "English (Australia)" [selected]
+            - option "简体中文"
+            - option "العربية"
+            - option "Tiếng Việt"
+            - option "Ελληνικά"
+            - option "Italiano"
+      - generic [ref=f1e28]:
+        - link "Skip to help content" [ref=f1e29] [cursor=pointer]:
+          - /url: "#help-main"
+        - generic [ref=f1e31]:
+          - main [ref=f1e32]:
+            - generic [ref=f1e33]:
+              - generic [ref=f1e34]:
+                - paragraph [ref=f1e35]: Support
+                - heading "Help & reference" [level=1] [ref=f1e36]
+                - paragraph [ref=f1e37]: Quick links, doctrine references, and frequently asked questions for operators of the Autonomous Disaster Response Coordination Hub.
+                - note "Data residency" [ref=f1e38]: Hosted in Australia · AU data residency
+              - generic [ref=f1e39]:
+                - region [ref=f1e40]:
+                  - heading "Quick start" [level=2] [ref=f1e41]
+                  - list "Quick start destinations" [ref=f1e42]:
+                    - listitem [ref=f1e43]:
+                      - generic [ref=f1e44]:
+                        - generic [ref=f1e45]:
+                          - generic [aria-hidden] [ref=f1e46]: 🗺️
+                          - generic [ref=f1e47]:
+                            - paragraph [ref=f1e48]: Hub section
+                            - link "Disaster Map" [ref=f1e49] [cursor=pointer]:
+                              - /url: /
+                        - paragraph [ref=f1e50]: Operating picture across federated signals, warnings, and overlays.
+                        - generic [ref=f1e51]:
+                          - paragraph [ref=f1e52]: Help articles
+                          - list [ref=f1e53]:
+                            - listitem [ref=f1e54]:
+                              - link "Disaster mapper guide" [ref=f1e55] [cursor=pointer]:
+                                - /url: /help/articles/screen-by-screen/disaster-mapper
+                                - generic [aria-hidden] [ref=f1e56]: →
+                            - listitem [ref=f1e58]:
+                              - link "Multi-jurisdiction filter" [ref=f1e59] [cursor=pointer]:
+                                - /url: /help/articles/screen-by-screen/multi-jurisdiction-filter
+                                - generic [aria-hidden] [ref=f1e60]: →
+                    - listitem [ref=f1e62]:
+                      - generic [ref=f1e63]:
+                        - generic [ref=f1e64]:
+                          - generic [aria-hidden] [ref=f1e65]: 🧭
+                          - generic [ref=f1e66]:
+                            - paragraph [ref=f1e67]: Hub section
+                            - link "Workspaces" [ref=f1e68] [cursor=pointer]:
+                              - /url: /workspaces
+                        - paragraph [ref=f1e69]: Persona-driven operating views aligned to AIIMS functions.
+                        - generic [ref=f1e70]:
+                          - paragraph [ref=f1e71]: Help articles
+                          - list [ref=f1e72]:
+                            - listitem [ref=f1e73]:
+                              - link "Persona switcher" [ref=f1e74] [cursor=pointer]:
+                                - /url: /help/articles/screen-by-screen/persona-switcher
+                                - generic [aria-hidden] [ref=f1e75]: →
+                            - listitem [ref=f1e77]:
+                              - link "Getting started" [ref=f1e78] [cursor=pointer]:
+                                - /url: /help/articles/getting-started
+                                - generic [aria-hidden] [ref=f1e79]: →
+                    - listitem [ref=f1e81]:
+                      - generic [ref=f1e82]:
+                        - generic [ref=f1e83]:
+                          - generic [aria-hidden] [ref=f1e84]: 🏛️
+                          - generic [ref=f1e85]:
+                            - paragraph [ref=f1e86]: Hub section
+                            - link "Sectors" [ref=f1e87] [cursor=pointer]:
+                              - /url: /sectors
+                        - paragraph [ref=f1e88]: Jurisdiction- and sector-specific scenarios from the capstone success criteria.
+                        - generic [ref=f1e89]:
+                          - paragraph [ref=f1e90]: Help articles
+                          - list [ref=f1e91]:
+                            - listitem [ref=f1e92]:
+                              - link "Cross-border bushfire (NEMA)" [ref=f1e93] [cursor=pointer]:
+                                - /url: /help/articles/cross-border-bushfire-nema
+                                - generic [aria-hidden] [ref=f1e94]: →
+                    - listitem [ref=f1e96]:
+                      - generic [ref=f1e97]:
+                        - generic [ref=f1e98]:
+                          - generic [aria-hidden] [ref=f1e99]: 🛡️
+                          - generic [ref=f1e100]:
+                            - paragraph [ref=f1e101]: Hub section
+                            - link "Governance Dashboard" [ref=f1e102] [cursor=pointer]:
+                              - /url: /governance/dashboard
+                        - paragraph [ref=f1e103]: Constitutional gates, compliance, audit trail, readiness, recovery, and risk.
+                        - generic [ref=f1e104]:
+                          - paragraph [ref=f1e105]: Help articles
+                          - list [ref=f1e106]:
+                            - listitem [ref=f1e107]:
+                              - link "Governance dashboard tour" [ref=f1e108] [cursor=pointer]:
+                                - /url: /help/articles/screen-by-screen/governance-dashboard
+                                - generic [aria-hidden] [ref=f1e109]: →
+                            - listitem [ref=f1e111]:
+                              - link "Audit observer view" [ref=f1e112] [cursor=pointer]:
+                                - /url: /help/articles/screen-by-screen/audit-observer-view
+                                - generic [aria-hidden] [ref=f1e113]: →
+                            - listitem [ref=f1e115]:
+                              - link "Constitution principle V" [ref=f1e116] [cursor=pointer]:
+                                - /url: /help/articles/constitution-principle-v
+                                - generic [aria-hidden] [ref=f1e117]: →
+                    - listitem [ref=f1e119]:
+                      - generic [ref=f1e120]:
+                        - generic [ref=f1e121]:
+                          - generic [aria-hidden] [ref=f1e122]: 📋
+                          - generic [ref=f1e123]:
+                            - paragraph [ref=f1e124]: Hub section
+                            - link "Preparedness" [ref=f1e125] [cursor=pointer]:
+                              - /url: /preparedness
+                        - paragraph [ref=f1e126]: Pre-event jurisdiction coverage, frameworks, and coordination gaps.
+                        - generic [ref=f1e127]:
+                          - paragraph [ref=f1e128]: Help articles
+                          - list [ref=f1e129]:
+                            - listitem [ref=f1e130]:
+                              - link "Getting started" [ref=f1e131] [cursor=pointer]:
+                                - /url: /help/articles/getting-started
+                                - generic [aria-hidden] [ref=f1e132]: →
+                            - listitem [ref=f1e134]:
+                              - link "Accessibility how-to" [ref=f1e135] [cursor=pointer]:
+                                - /url: /help/articles/accessibility-how-to
+                                - generic [aria-hidden] [ref=f1e136]: →
+                - region [ref=f1e138]:
+                  - heading "Doctrine & reference" [level=2] [ref=f1e139]
+                  - list "External reference material" [ref=f1e140]:
+                    - listitem [ref=f1e141]:
+                      - generic [ref=f1e142]:
+                        - generic [ref=f1e143]:
+                          - generic [aria-hidden] [ref=f1e144]: 📦
+                          - generic [ref=f1e145]:
+                            - paragraph [ref=f1e146]: Reference
+                            - link "Source repository" [ref=f1e147] [cursor=pointer]:
+                              - /url: https://github.com/Azure/ama
+                        - paragraph [ref=f1e148]: Code, specs, contracts, and operator runbooks.
+                        - generic [ref=f1e149]:
+                          - paragraph [ref=f1e150]: Help articles
+                          - link "Visit reference" [ref=f1e151] [cursor=pointer]:
+                            - /url: https://github.com/Azure/ama
+                            - generic [aria-hidden] [ref=f1e152]: ↗
+                    - listitem [ref=f1e154]:
+                      - generic [ref=f1e155]:
+                        - generic [ref=f1e156]:
+                          - generic [aria-hidden] [ref=f1e157]: 📐
+                          - generic [ref=f1e158]:
+                            - paragraph [ref=f1e159]: Reference
+                            - link "Azure Well-Architected Framework" [ref=f1e160] [cursor=pointer]:
+                              - /url: https://learn.microsoft.com/azure/well-architected/
+                        - paragraph [ref=f1e161]: Reliability, security, cost, operational excellence, and performance pillars.
+                        - generic [ref=f1e162]:
+                          - paragraph [ref=f1e163]: Help articles
+                          - link "Visit reference" [ref=f1e164] [cursor=pointer]:
+                            - /url: https://learn.microsoft.com/azure/well-architected/
+                            - generic [aria-hidden] [ref=f1e165]: ↗
+                    - listitem [ref=f1e167]:
+                      - generic [ref=f1e168]:
+                        - generic [ref=f1e169]:
+                          - generic [aria-hidden] [ref=f1e170]: 📚
+                          - generic [ref=f1e171]:
+                            - paragraph [ref=f1e172]: Reference
+                            - link "Australian Institute for Disaster Resilience" [ref=f1e173] [cursor=pointer]:
+                              - /url: https://www.aidr.org.au/
+                        - paragraph [ref=f1e174]: AIDR handbooks, AIIMS doctrine, and PPRR guidance referenced by the hub.
+                        - generic [ref=f1e175]:
+                          - paragraph [ref=f1e176]: Help articles
+                          - link "Visit reference" [ref=f1e177] [cursor=pointer]:
+                            - /url: https://www.aidr.org.au/
+                            - generic [aria-hidden] [ref=f1e178]: ↗
+                - region [ref=f1e180]:
+                  - heading "Frequently asked questions" [level=2] [ref=f1e181]
+                  - generic [ref=f1e183]:
+                    - generic [ref=f1e184]:
+                      - term [ref=f1e185]: Where is my data hosted?
+                      - definition [ref=f1e186]: All telemetry, signals, and operator state are processed and stored in Azure Australia regions. The hub enforces an AU-region guardrail across every page.
+                    - generic [ref=f1e187]:
+                      - term [ref=f1e188]: How do I report an incident or escalate?
+                      - definition [ref=f1e189]: Open the Disaster Map, locate the relevant signal or sector, and use the Incident Commander workspace to raise an approval or warning. All decisions are captured to the audit trail.
+                    - generic [ref=f1e190]:
+                      - term [ref=f1e191]: What if I lose connectivity in the field?
+                      - definition [ref=f1e192]: Field Coordinator workspaces and sector pages run an offline subsystem that queues critical actions and syncs once connectivity is restored.
+                    - generic [ref=f1e193]:
+                      - term [ref=f1e194]: Where can I see system health and constitutional gates?
+                      - definition [ref=f1e195]: The Governance Dashboard surfaces all 10 constitutional gates, data freshness, degraded-mode posture, and compliance against AIDR + AIIMS principles.
+          - complementary [ref=f1e196]:
+            - generic [ref=f1e197]:
+              - heading "Help Assistant" [level=2] [ref=f1e198]
+              - paragraph [ref=f1e199]: Grounded in approved Hub documentation. Cites sources, refuses out-of-scope questions.
+            - log "Help chat" [ref=f1e201]:
+              - generic [ref=f1e202]: HELP ASSISTANT · Grounded in approved Hub documentation
+              - paragraph [ref=f1e205]:
+                - text: "Ask anything about using the Hub. Example:"
+                - emphasis [ref=f1e206]: “How do I escalate a cross-border bushfire to NEMA?”
+              - generic [ref=f1e207]:
+                - button "🚦 Get started" [ref=f1e208] [cursor=pointer]
+                - button "🗺 Map basics" [ref=f1e209] [cursor=pointer]
+                - button "📋 Audit" [ref=f1e210] [cursor=pointer]
+                - button "🛟 Offline" [ref=f1e211] [cursor=pointer]
+                - button "🔁 Simulation" [ref=f1e212] [cursor=pointer]
+              - generic [ref=f1e213]:
+                - textbox "Ask the help assistant" [ref=f1e214]:
+                  - /placeholder: Ask the help assistant…
+                - button "Send" [disabled] [ref=f1e215]
+    - contentinfo [ref=f1e216]:
+      - generic [ref=f1e217]:
+        - generic [ref=f1e218]:
+          - generic [aria-hidden] [ref=f1e219]: ⚡
+          - generic [ref=f1e220]: Autonomous Disaster Response Coordination Hub
+        - paragraph [ref=f1e221]: We acknowledge the Traditional Owners of Country throughout Australia and recognise their continuing connection to land, waters, and culture.
+        - generic [ref=f1e222]:
+          - link "Governance" [ref=f1e223] [cursor=pointer]:
+            - /url: /governance
+          - generic [aria-hidden] [ref=f1e224]: ·
+          - link "Preparedness" [ref=f1e225] [cursor=pointer]:
+            - /url: /preparedness
+          - generic [aria-hidden] [ref=f1e226]: ·
+          - link "Help" [ref=f1e227] [cursor=pointer]:
+            - /url: /help
+        - paragraph [ref=f1e228]: Built for the Azure Master Architect Program
+  - alert [ref=f1e229]

@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from packages.domain.src.domain.tenant_mode import classify_tenant_mode
 
 WarningTier = Literal["advice", "watch_and_act", "emergency_warning"]
 ColourCode = Literal["yellow", "orange", "red"]
@@ -28,8 +30,12 @@ WARNING_PRINCIPLE_KEYS: list[str] = [
 
 
 class PublicAlert(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+
     alert_id: str
     incident_id: str
+    tenant_id: str = "live"
+    mode: Literal["live", "rehearsal"] = "live"
     status: Literal["draft", "pending_approval", "approved", "published", "superseded", "cancelled"] = "draft"
     approval_mode: Literal["human_approved", "autonomous", "escalated"] = "human_approved"
     audience_segments: list[str] = Field(default_factory=list)
@@ -54,6 +60,11 @@ class PublicAlert(BaseModel):
 
     @model_validator(mode="after")
     def _validate_warning_fields(self) -> "PublicAlert":
+        derived_mode = classify_tenant_mode(self.tenant_id).value
+        if self.mode != derived_mode:
+            msg = f"mode '{self.mode}' does not match tenant_id '{self.tenant_id}'"
+            raise ValueError(msg)
+
         if self.warning_tier is not None:
             expected = TIER_COLOUR_MAP[self.warning_tier]
             if self.colour_code is not None and self.colour_code != expected:

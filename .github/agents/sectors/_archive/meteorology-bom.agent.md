@@ -1,5 +1,8 @@
 ---
+name: meteorology-bom
 description: Bureau of Meteorology sector agent — authoritative weather warnings, fire weather intelligence, flood watches, and cyclone tracking under the Meteorology Act 1955.
+user-invocable: false
+disable-model-invocation: true
 handoffs:
   - label: Ask about fire operations
     agent: fire-services
@@ -18,6 +21,11 @@ handoffs:
     prompt: I have a question about Commonwealth-level coordination, national emergency management, or NEMA
     send: true
 ---
+
+## Successor Mapping
+
+- Canonical successor: `bom-national`.
+- For national coordination escalation from weather intelligence, route to `nema`.
 
 ## Role Overview
 

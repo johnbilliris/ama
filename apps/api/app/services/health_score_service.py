@@ -9,11 +9,44 @@ Implements the weighted composite governance health score algorithm (R-004):
 
 import logging
 from datetime import UTC, datetime
+from typing import TypedDict
 
 from packages.domain.src.domain.models.governance_health_score import (
     DimensionScore,
     GovernanceHealthScore,
 )
+
+
+class ConstitutionalGate(TypedDict, total=False):
+    status: str
+
+
+class ReadinessData(TypedDict, total=False):
+    exercise_completion_rate: float
+    role_coverage_pct: float
+    plan_currency_pct: float
+
+
+class DataSourceStats(TypedDict, total=False):
+    total: int
+    compliant: int
+    partially_compliant: int
+
+
+class RecoveryDomainData(TypedDict, total=False):
+    completion_pct: float
+
+
+class RecoveryData(TypedDict, total=False):
+    has_active_recovery: bool
+    domains: list[RecoveryDomainData]
+
+
+class DimensionResult(TypedDict):
+    score: float
+    input_count: int
+    stale: bool
+
 
 logger = logging.getLogger("health_score_service")
 
@@ -32,10 +65,10 @@ class HealthScoreService:
     def calculate(
         self,
         *,
-        constitutional_gates: list[dict] | None = None,
-        readiness_data: dict | None = None,
-        data_source_stats: dict | None = None,
-        recovery_data: dict | None = None,
+        constitutional_gates: list[ConstitutionalGate] | None = None,
+        readiness_data: ReadinessData | None = None,
+        data_source_stats: DataSourceStats | None = None,
+        recovery_data: RecoveryData | None = None,
         tenant_id: str = "live",
         has_active_incident: bool = False,
     ) -> GovernanceHealthScore:
@@ -108,7 +141,7 @@ class HealthScoreService:
             has_active_incident=has_active_incident,
         )
 
-    def _calculate_constitutional_score(self, gates: list[dict]) -> dict:
+    def _calculate_constitutional_score(self, gates: list[ConstitutionalGate]) -> DimensionResult:
         """Score based on constitutional gate compliance.
 
         Gates with status 'assessment_pending' are excluded from the denominator.
@@ -127,7 +160,7 @@ class HealthScoreService:
         score = ((compliant + partial * 0.5) / len(assessed)) * 100
         return {"score": round(score, 2), "input_count": len(gates), "stale": False}
 
-    def _calculate_readiness_score(self, data: dict) -> dict:
+    def _calculate_readiness_score(self, data: ReadinessData) -> DimensionResult:
         """Score based on operational readiness metrics."""
         if not data:
             return {"score": 0.0, "input_count": 0, "stale": False}
@@ -152,7 +185,7 @@ class HealthScoreService:
         score = sum(components) / len(components)
         return {"score": round(score, 2), "input_count": len(components), "stale": False}
 
-    def _calculate_data_source_score(self, stats: dict) -> dict:
+    def _calculate_data_source_score(self, stats: DataSourceStats) -> DimensionResult:
         """Score based on data source governance compliance."""
         if not stats:
             return {"score": 0.0, "input_count": 0, "stale": False}
@@ -166,7 +199,7 @@ class HealthScoreService:
         score = ((compliant + partial * 0.5) / total) * 100
         return {"score": round(score, 2), "input_count": total, "stale": False}
 
-    def _calculate_recovery_score(self, data: dict) -> dict:
+    def _calculate_recovery_score(self, data: RecoveryData) -> DimensionResult:
         """Score based on recovery progress.
 
         No active recovery = 100% (nothing to recover from).

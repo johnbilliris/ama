@@ -45,3 +45,7 @@ resource azureMaps 'Microsoft.Maps/accounts@2024-07-01-preview' = {
 
 output azureMapsName string = azureMaps.name
 output azureMapsId string = azureMaps.id
+
+@description('Primary subscription key used by the development web client. Restrict browser use through CORS.')
+@secure()
+output azureMapsPrimaryKey string = azureMaps.listKeys().primaryKey

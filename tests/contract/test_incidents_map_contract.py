@@ -44,7 +44,8 @@ def _make_incident(
 
 
 @pytest.fixture
-def client():
+def client(monkeypatch):
+    monkeypatch.setenv("AMA_ALLOW_ANONYMOUS_INCIDENT_MAP", "1")
     app = create_app()
     _repo.seed(
         [

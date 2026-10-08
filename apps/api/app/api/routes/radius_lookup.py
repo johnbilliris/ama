@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import logging
 from datetime import UTC, datetime
+from typing import TypedDict
 
-from app.middleware.auth import authorize_admin, authorize_management
+from app.middleware.auth import AuthenticatedIdentity, authorize_admin, authorize_management
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -16,8 +17,16 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/admin/radius-lookup", tags=["radius-lookup"])
 
+
+class RadiusEntry(TypedDict):
+    hazard_type: str
+    radii: dict[str, float]
+    last_updated: str
+    updated_by: str
+
+
 # Seed data — in production, backed by Cosmos DB
-_SEED_RADII: dict[str, dict] = {
+_SEED_RADII: dict[str, RadiusEntry] = {
     "bushfire": {
         "hazard_type": "bushfire",
         "radii": {"1": 1000, "2": 2500, "3": 5000, "4": 7500, "5": 10000},
@@ -50,7 +59,7 @@ _SEED_RADII: dict[str, dict] = {
     },
 }
 
-_radius_store: dict[str, dict] = dict(_SEED_RADII)
+_radius_store: dict[str, RadiusEntry] = dict(_SEED_RADII)
 
 
 class RadiiUpdate(BaseModel):
@@ -63,13 +72,13 @@ class RadiusCreate(BaseModel):
 
 
 @router.get("", dependencies=[Depends(authorize_management)])
-async def list_radius_entries() -> dict:
+async def list_radius_entries() -> dict[str, list[RadiusEntry]]:
     """List all radius entries (Section 4a)."""
     return {"items": list(_radius_store.values())}
 
 
 @router.get("/{hazard_type}", dependencies=[Depends(authorize_management)])
-async def get_radius_entry(hazard_type: str) -> dict:
+async def get_radius_entry(hazard_type: str) -> RadiusEntry:
     """Get radius entry by hazard type (Section 4b)."""
     entry = _radius_store.get(hazard_type)
     if not entry:
@@ -81,8 +90,8 @@ async def get_radius_entry(hazard_type: str) -> dict:
 async def update_radius_entry(
     hazard_type: str,
     body: RadiiUpdate,
-    identity: dict = Depends(authorize_admin),
-) -> dict:
+    identity: AuthenticatedIdentity = Depends(authorize_admin),
+) -> RadiusEntry:
     """Update radius entry (Section 4c). Admin only."""
     entry = _radius_store.get(hazard_type)
     if not entry:
@@ -102,13 +111,13 @@ async def update_radius_entry(
 @router.post("", status_code=201, dependencies=[Depends(authorize_admin)])
 async def create_radius_entry(
     body: RadiusCreate,
-    identity: dict = Depends(authorize_admin),
-) -> dict:
+    identity: AuthenticatedIdentity = Depends(authorize_admin),
+) -> RadiusEntry:
     """Create new radius entry (Section 4d). Admin only."""
     if body.hazard_type in _radius_store:
         raise HTTPException(status_code=409, detail="Hazard type already exists")
 
-    entry = {
+    entry: RadiusEntry = {
         "hazard_type": body.hazard_type,
         "radii": body.radii,
         "last_updated": datetime.now(UTC).isoformat(),

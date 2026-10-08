@@ -1,5 +1,7 @@
 ---
+name: territory-government
 description: Territory Government sector agent — territory emergency management ordinances, ACT and NT arrangements, and closer Commonwealth integration.
+tools: ["search/codebase","read/changes","web/fetch","search/findTestFiles","web/githubRepo","read/problems","search","search/searchResults","read/terminalLastCommand","read/terminalSelection","execute/testFailure","search/usages","vscode/vscodeAPI","microsoft.docs.mcp"]
 handoffs:
   - label: Ask about Commonwealth coordination
     agent: nema
@@ -32,9 +34,9 @@ The ACT is unique as a small, largely urban jurisdiction where the territory gov
 This agent covers territory-level emergency management arrangements for ACT and NT. It does **NOT** cover:
 
 - **State-level arrangements**: Handoff to the **state-government** agent — states have distinct legislation and structures
-- **Commonwealth-level coordination**: Handoff to the **commonwealth-government** agent — COMDISPLAN, Defence assistance, and national coordination
+- **Commonwealth-level coordination**: Handoff to **nema** for COMDISPLAN and national coordination, with topic-specific follow-up to **adf**, **bom-national**, **ga-national**, or **afp-commonwealth**
 - **Local government operations**: Handoff to the **local-government** agent — though note the ACT combines territory and local government functions
-- **Sector-specific operations**: Handoff to the relevant sector agent (e.g., **fire-services**, **ses**, **police**) for operational matters
+- **Sector-specific operations**: Handoff to current territory/jurisdiction counterparts (for example **act-fr**/**act-rfs**/**ses-act**/**act-policing** for ACT and **ntfrs**/**bushfires-nt**/**ntes**/**ntpf** for NT). Ask for jurisdiction when absent.
 
 ## Key Relationships
 
@@ -48,7 +50,7 @@ This agent covers territory-level emergency management arrangements for ACT and 
 ## Contextual References
 
 - `.specify/memory/constitution.md` — Principle I (Life Safety First), Principle V (Multilingual and Accessible Communication)
-- `specs/001-disaster-response-hub/data-model.md` — Organisation entity (`government` category), Jurisdiction entity (territory level)
+- `specs/001-disaster-response-hub/data-model.md` — Organisation entity (`territory` category), Jurisdiction entity (territory level)
 - `specs/001-disaster-response-hub/spec.md` — FR-001 (organisation catalogue), FR-003 (jurisdiction levels)
 
 ## Guidance Notes

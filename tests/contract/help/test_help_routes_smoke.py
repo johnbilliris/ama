@@ -54,6 +54,26 @@ def test_articles_etag(client: TestClient) -> None:
     assert r2.status_code == 304
 
 
+def test_articles_get_nested_slug(client: TestClient) -> None:
+    slug = "screen-by-screen/multi-jurisdiction-filter"
+    help_repositories.upsert(
+        "help_articles",
+        "tenant-aaa",
+        {
+            "id": "a2",
+            "tenant_id": "tenant-aaa",
+            "slug": slug,
+            "title": "Multi-jurisdiction filter",
+            "updated_at": "2025-01-01T00:00:00Z",
+        },
+    )
+
+    response = client.get(f"/help/articles/{slug}", headers=HDR)
+
+    assert response.status_code == 200
+    assert response.json()["slug"] == slug
+
+
 def test_chat_sse_stream(client: TestClient) -> None:
     """Without live Foundry (HELP_FOUNDRY_LIVE!=1), the route MUST emit an honest
     refusal stream — never fake citations (FR-014, Constitution Principle I).

@@ -14,11 +14,15 @@ const SUPPORTED_LANGUAGES = [
 interface LanguageSwitcherProps {
   defaultLanguage?: string;
   onLanguageChange?: (code: string) => void;
+  ariaLabel?: string;
+  selectAriaLabel?: string;
 }
 
 export function LanguageSwitcher({
   defaultLanguage = "en-AU",
   onLanguageChange,
+  ariaLabel = "Language selection",
+  selectAriaLabel = "Select language",
 }: LanguageSwitcherProps) {
   const [activeLanguage, setActiveLanguage] = useState(defaultLanguage);
 
@@ -26,6 +30,10 @@ export function LanguageSwitcher({
     const code = event.target.value;
     setActiveLanguage(code);
     onLanguageChange?.(code);
+
+    if (onLanguageChange) {
+      return;
+    }
 
     const entry = SUPPORTED_LANGUAGES.find((lang) => lang.code === code);
     if (entry && "dir" in entry) {
@@ -37,14 +45,16 @@ export function LanguageSwitcher({
   }
 
   return (
-    <nav className="language-switcher" aria-label="Language selection">
+    <nav className="language-switcher" aria-label={ariaLabel}>
       <label className="language-switcher-label">
         <span className="language-switcher-icon" aria-hidden="true">🌐</span>
         <select
+          id="application-language"
+          name="applicationLanguage"
           className="language-switcher-select"
           value={activeLanguage}
           onChange={handleChange}
-          aria-label="Select language"
+          aria-label={selectAriaLabel}
         >
           {SUPPORTED_LANGUAGES.map((lang) => (
             <option key={lang.code} value={lang.code}>

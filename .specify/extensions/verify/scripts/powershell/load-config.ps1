@@ -1,4 +1,4 @@
-# load-config.ps1 — Load and validate the verify extension configuration.
+# load-config.ps1 - Load and validate the verify extension configuration.
 #
 # Reads report.max_findings from the YAML config file,
 # normalises YAML null sentinels, applies an optional environment
@@ -8,8 +8,8 @@
 # Usage:  load-config.ps1
 #
 # Exit codes:
-#   0 — configuration loaded successfully
-#   1 — config file missing, required value not set, or invalid value
+#   0 - configuration loaded successfully
+#   1 - config file missing, required value not set, or invalid value
 
 $configFile = ".specify/extensions/verify/verify-config.yml"
 $extensionFile = ".specify/extensions/verify/extension.yml"
@@ -19,7 +19,7 @@ if (-not (Test-Path $configFile)) {
     if (Test-Path $extensionFile) {
         $usingDefaults = $true
     } else {
-        Write-Host "❌ Error: Configuration not found at $configFile"
+        Write-Host "Error: Configuration not found at $configFile"
         Write-Host "Run 'specify extension add verify' to install and configure"
         exit 1
     }
@@ -63,19 +63,19 @@ if ($env:SPECKIT_VERIFY_MAX_FINDINGS -ne $null -and $env:SPECKIT_VERIFY_MAX_FIND
 # Validate configuration
 
 if (-not $maxFindings) {
-    Write-Host "❌ Error: Configuration value not set"
+    Write-Host "Error: Configuration value not set"
     Write-Host "Edit $configFile and set 'report.max_findings'"
     exit 1
 }
 
 if ($maxFindings -notmatch '^\d+$') {
-    Write-Host "❌ Error: 'report.max_findings' must be a positive integer, got '$maxFindings'"
+    Write-Host "Error: 'report.max_findings' must be a positive integer, got '$maxFindings'"
     Write-Host "Edit $configFile and set 'report.max_findings' to a number (e.g. 50)"
     exit 1
 }
 
 if ($usingDefaults) {
-    Write-Host "⚠️  No config file found; using defaults from extension.yml"
+    Write-Host "Warning: No config file found; using defaults from extension.yml"
 }
 
-Write-Host "📋 Configuration loaded: max_findings=$maxFindings"
+Write-Host "Configuration loaded: max_findings=$maxFindings"

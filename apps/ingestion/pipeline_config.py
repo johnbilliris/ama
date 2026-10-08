@@ -14,7 +14,10 @@ class IngestionPipelineConfig(BaseModel):
     circuit_breaker_backoff_initial_seconds: int = Field(default=30, ge=1)
     circuit_breaker_backoff_max_seconds: int = Field(default=300, ge=1)
     dedup_ttl_seconds: int = Field(default=0, ge=0)
+    max_records_per_cycle: int = Field(default=100, ge=1, le=5000)
+    scope: str = Field(default="live", min_length=1)
     enabled: bool = True
+    activation_blocker: str | None = None
 
     def effective_dedup_ttl(self) -> int:
         return self.dedup_ttl_seconds if self.dedup_ttl_seconds > 0 else self.poll_interval_seconds * 2

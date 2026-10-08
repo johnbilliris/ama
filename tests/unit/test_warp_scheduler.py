@@ -82,6 +82,26 @@ async def test_initialize_creates_scheduler_state(wiring):
     assert state.next_signal_index == 0
     assert state.scheduler_owner is not None
 
+    @pytest.mark.asyncio
+    async def test_initialize_persists_timeline_for_restart(wiring):
+        _, sim_repo, sig_repo, evt_repo, clock, recorder, scheduler = wiring
+        tenant = _tenant(10, sim_repo, clock)
+        await sim_repo.create(tenant)
+        timeline = _timeline(60, 120)
+        scheduler.initialize(tenant.tenant_id, timeline, warp_speed=10)
+
+        restarted = WarpScheduler(
+            signal_repository=sig_repo,
+            event_repository=evt_repo,
+            simulation_repository=sim_repo,
+            clock_service=clock,
+            event_recorder=recorder,
+        )
+
+        assert restarted.start_delivery_loop(tenant.tenant_id) is True
+        assert restarted.start_delivery_loop(tenant.tenant_id) is False
+        await restarted.stop_delivery_loop(tenant.tenant_id)
+
 
 @pytest.mark.asyncio
 async def test_next_delivery_delay_respects_warp(wiring):

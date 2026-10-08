@@ -1,0 +1,280 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Autonomous Disaster Response Coordination Hub home" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - generic [aria-hidden] [ref=e6]: ⚡
+          - generic [ref=e7]: Autonomous Disaster Response Coordination Hub
+        - navigation "Main navigation" [ref=e9]:
+          - link "Disaster Map" [ref=e10] [cursor=pointer]:
+            - /url: /
+            - generic [aria-hidden] [ref=e11]: 🗺️
+            - text: Disaster Map
+          - link "Workspaces" [ref=e12] [cursor=pointer]:
+            - /url: /workspaces
+            - generic [aria-hidden] [ref=e13]: 👥
+            - text: Workspaces
+          - link "Sectors" [ref=e14] [cursor=pointer]:
+            - /url: /sectors
+            - generic [aria-hidden] [ref=e15]: 🏛️
+            - text: Sectors
+          - link "Governance" [ref=e16] [cursor=pointer]:
+            - /url: /governance
+            - generic [aria-hidden] [ref=e17]: 🛡️
+            - text: Governance
+          - link "Preparedness" [ref=e18] [cursor=pointer]:
+            - /url: /preparedness
+            - generic [aria-hidden] [ref=e19]: 📋
+            - text: Preparedness
+          - link "Help" [ref=e20] [cursor=pointer]:
+            - /url: /help
+            - generic [aria-hidden] [ref=e21]: ❓
+            - text: Help
+    - main [ref=e22]:
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - searchbox "Search incidents by keyword" [ref=e28]
+              - button "Hide Filters" [expanded] [ref=e29] [cursor=pointer]
+            - paragraph [ref=e30]: Showing 0 incidents (loading more…)
+          - alert [ref=e31]:
+            - paragraph [ref=e32]: "Incidents map API error 500:"
+            - button "Retry" [ref=e33] [cursor=pointer]
+        - generic [ref=e34]:
+          - search "Filter incidents" [ref=e35]:
+            - generic [ref=e36]:
+              - group [ref=e37]:
+                - generic [ref=e38]:
+                  - text: Status
+                  - generic [ref=e39]:
+                    - button "All" [ref=e40] [cursor=pointer]
+                    - button "Clear" [ref=e41] [cursor=pointer]
+                - generic [ref=e42] [cursor=pointer]:
+                  - checkbox "monitoring Monitoring" [ref=e43]
+                  - img "monitoring" [ref=e44]: 👁️
+                  - text: Monitoring
+                - generic [ref=e45] [cursor=pointer]:
+                  - checkbox "active Active" [ref=e46]
+                  - img "active" [ref=e47]: 🚨
+                  - text: Active
+                - generic [ref=e48] [cursor=pointer]:
+                  - checkbox "stabilising Stabilising" [ref=e49]
+                  - img "stabilising" [ref=e50]: 🛠️
+                  - text: Stabilising
+                - generic [ref=e51] [cursor=pointer]:
+                  - checkbox "recovery Recovery" [ref=e52]
+                  - img "recovery" [ref=e53]: 🌱
+                  - text: Recovery
+                - generic [ref=e54] [cursor=pointer]:
+                  - checkbox "closed Closed" [ref=e55]
+                  - img "closed" [ref=e56]: ✅
+                  - text: Closed
+              - group "Date Range" [ref=e57]:
+                - generic [ref=e59]:
+                  - generic [ref=e60]:
+                    - text: From
+                    - combobox "From" [ref=e61]:
+                      - option "Any" [selected]
+                      - option "2000"
+                      - option "2001"
+                      - option "2002"
+                      - option "2003"
+                      - option "2004"
+                      - option "2005"
+                      - option "2006"
+                      - option "2007"
+                      - option "2008"
+                      - option "2009"
+                      - option "2010"
+                      - option "2011"
+                      - option "2012"
+                      - option "2013"
+                      - option "2014"
+                      - option "2015"
+                      - option "2016"
+                      - option "2017"
+                      - option "2018"
+                      - option "2019"
+                      - option "2020"
+                      - option "2021"
+                      - option "2022"
+                      - option "2023"
+                      - option "2024"
+                      - option "2025"
+                      - option "2026"
+                  - generic [ref=e62]:
+                    - text: To
+                    - combobox "To" [ref=e63]:
+                      - option "Any" [selected]
+                      - option "2000"
+                      - option "2001"
+                      - option "2002"
+                      - option "2003"
+                      - option "2004"
+                      - option "2005"
+                      - option "2006"
+                      - option "2007"
+                      - option "2008"
+                      - option "2009"
+                      - option "2010"
+                      - option "2011"
+                      - option "2012"
+                      - option "2013"
+                      - option "2014"
+                      - option "2015"
+                      - option "2016"
+                      - option "2017"
+                      - option "2018"
+                      - option "2019"
+                      - option "2020"
+                      - option "2021"
+                      - option "2022"
+                      - option "2023"
+                      - option "2024"
+                      - option "2025"
+                      - option "2026"
+              - group [ref=e64]:
+                - generic [ref=e65]:
+                  - text: Incident Type
+                  - generic [ref=e66]:
+                    - button "All" [ref=e67] [cursor=pointer]
+                    - button "Clear" [ref=e68] [cursor=pointer]
+                - generic [ref=e69] [cursor=pointer]:
+                  - checkbox "biosecurity Biosecurity" [ref=e70]
+                  - img "biosecurity" [ref=e71]: 🧬
+                  - text: Biosecurity
+                - generic [ref=e72] [cursor=pointer]:
+                  - checkbox "bushfire Bushfire" [ref=e73]
+                  - img "bushfire" [ref=e74]: 🔥
+                  - text: Bushfire
+                - generic [ref=e75] [cursor=pointer]:
+                  - checkbox "criminal Criminal" [ref=e76]
+                  - img "criminal" [ref=e77]: 🚨
+                  - text: Criminal
+                - generic [ref=e78] [cursor=pointer]:
+                  - checkbox "cyclone Cyclone" [ref=e79]
+                  - img "cyclone" [ref=e80]: 🌀
+                  - text: Cyclone
+                - generic [ref=e81] [cursor=pointer]:
+                  - checkbox "earthquake Earthquake" [ref=e82]
+                  - img "earthquake" [ref=e83]: 💥
+                  - text: Earthquake
+                - generic [ref=e84] [cursor=pointer]:
+                  - checkbox "environment Environment" [ref=e85]
+                  - img "environment" [ref=e86]: 🌿
+                  - text: Environment
+                - generic [ref=e87] [cursor=pointer]:
+                  - checkbox "extreme heat Extreme Heat" [ref=e88]
+                  - img "extreme heat" [ref=e89]: 🌡️
+                  - text: Extreme Heat
+                - generic [ref=e90] [cursor=pointer]:
+                  - checkbox "flood Flood" [ref=e91]
+                  - img "flood" [ref=e92]: 🌊
+                  - text: Flood
+                - generic [ref=e93] [cursor=pointer]:
+                  - checkbox "health Health" [ref=e94]
+                  - img "health" [ref=e95]: 🏥
+                  - text: Health
+                - generic [ref=e96] [cursor=pointer]:
+                  - checkbox "industrial Industrial" [ref=e97]
+                  - img "industrial" [ref=e98]: 🏭
+                  - text: Industrial
+                - generic [ref=e99] [cursor=pointer]:
+                  - checkbox "landslide Landslide" [ref=e100]
+                  - img "landslide" [ref=e101]: ⛰️
+                  - text: Landslide
+                - generic [ref=e102] [cursor=pointer]:
+                  - checkbox "maritime coastal Maritime Coastal" [ref=e103]
+                  - img "maritime coastal" [ref=e104]: ⚓
+                  - text: Maritime Coastal
+                - generic [ref=e105] [cursor=pointer]:
+                  - checkbox "other Other" [ref=e106]
+                  - img "other" [ref=e107]: ⚠️
+                  - text: Other
+                - generic [ref=e108] [cursor=pointer]:
+                  - checkbox "pandemic Pandemic" [ref=e109]
+                  - img "pandemic" [ref=e110]: 🦠
+                  - text: Pandemic
+                - generic [ref=e111] [cursor=pointer]:
+                  - checkbox "storm Storm" [ref=e112]
+                  - img "storm" [ref=e113]: ⛈️
+                  - text: Storm
+                - generic [ref=e114] [cursor=pointer]:
+                  - checkbox "tornado Tornado" [ref=e115]
+                  - img "tornado" [ref=e116]: 🌪️
+                  - text: Tornado
+                - generic [ref=e117] [cursor=pointer]:
+                  - checkbox "transport Transport" [ref=e118]
+                  - img "transport" [ref=e119]: 🚗
+                  - text: Transport
+                - generic [ref=e120] [cursor=pointer]:
+                  - checkbox "tsunami Tsunami" [ref=e121]
+                  - img "tsunami" [ref=e122]: 🌊
+                  - text: Tsunami
+                - generic [ref=e123] [cursor=pointer]:
+                  - checkbox "urban fire Urban Fire" [ref=e124]
+                  - img "urban fire" [ref=e125]: 🏠
+                  - text: Urban Fire
+              - group "Severity" [ref=e126]:
+                - generic [ref=e128] [cursor=pointer]:
+                  - checkbox "Advice Advice" [ref=e129]
+                  - img "Advice" [ref=e130]: ℹ️
+                  - text: Advice
+                - generic [ref=e131] [cursor=pointer]:
+                  - checkbox "Watch and Act Watch and Act" [ref=e132]
+                  - img "Watch and Act" [ref=e133]: ⚠️
+                  - text: Watch and Act
+                - generic [ref=e134] [cursor=pointer]:
+                  - checkbox "Emergency Warning Emergency Warning" [ref=e135]
+                  - img "Emergency Warning" [ref=e136]: 🚨
+                  - text: Emergency Warning
+              - group [ref=e137]:
+                - generic [ref=e138]:
+                  - text: PPRR Phase
+                  - generic [ref=e139]:
+                    - button "All" [ref=e140] [cursor=pointer]
+                    - button "Clear" [ref=e141] [cursor=pointer]
+                - generic [ref=e142] [cursor=pointer]:
+                  - checkbox "prevention Prevention" [ref=e143]
+                  - img "prevention" [ref=e144]: 🛡️
+                  - text: Prevention
+                - generic [ref=e145] [cursor=pointer]:
+                  - checkbox "preparedness Preparedness" [ref=e146]
+                  - img "preparedness" [ref=e147]: 📋
+                  - text: Preparedness
+                - generic [ref=e148] [cursor=pointer]:
+                  - checkbox "response Response" [ref=e149]
+                  - img "response" [ref=e150]: 🚒
+                  - text: Response
+                - generic [ref=e151] [cursor=pointer]:
+                  - checkbox "recovery Recovery" [ref=e152]
+                  - img "recovery" [ref=e153]: 🔄
+                  - text: Recovery
+              - button "Reset All Filters" [ref=e154] [cursor=pointer]
+          - generic [ref=e157]:
+            - application "Disaster incident map of Australia" [ref=e158]
+            - alert [ref=e159]:
+              - paragraph [ref=e160]: Map tiles could not be loaded.
+              - button "Retry" [ref=e161] [cursor=pointer]
+    - contentinfo [ref=e162]:
+      - generic [ref=e163]:
+        - generic [ref=e164]:
+          - generic [aria-hidden] [ref=e165]: ⚡
+          - generic [ref=e166]: Autonomous Disaster Response Coordination Hub
+        - paragraph [ref=e167]: We acknowledge the Traditional Owners of Country throughout Australia and recognise their continuing connection to land, waters, and culture.
+        - generic [ref=e168]:
+          - link "Governance" [ref=e169] [cursor=pointer]:
+            - /url: /governance
+          - generic [aria-hidden] [ref=e170]: ·
+          - link "Preparedness" [ref=e171] [cursor=pointer]:
+            - /url: /preparedness
+          - generic [aria-hidden] [ref=e172]: ·
+          - link "Help" [ref=e173] [cursor=pointer]:
+            - /url: /help
+        - paragraph [ref=e174]: Built for the Azure Master Architect Program
+  - button "Open Help Assistant" [ref=e175] [cursor=pointer]:
+    - generic [aria-hidden] [ref=e176]: 💬
+    - generic [ref=e177]: Help
+  - alert [ref=e178]

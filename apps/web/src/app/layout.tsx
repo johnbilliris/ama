@@ -2,6 +2,7 @@ import type { PropsWithChildren } from "react";
 import { AppShell } from "@ama/ui/components/layout/app-shell";
 
 import { HelpAssistantDock } from "@/components/help/HelpAssistantDock";
+import { LocaleShell } from "@/components/accessibility/locale-shell";
 import { HelpChatProvider } from "@/lib/help/chatStore";
 
 import "./globals.css";
@@ -20,6 +21,8 @@ export default function RootLayout({ children }: PropsWithChildren) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* The App Router root layout applies this font stylesheet to every page. */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
           rel="stylesheet"
@@ -27,7 +30,9 @@ export default function RootLayout({ children }: PropsWithChildren) {
       </head>
       <body>
         <HelpChatProvider>
-          <AppShell>{children}</AppShell>
+          <AppShell>
+            <LocaleShell>{children}</LocaleShell>
+          </AppShell>
           <HelpAssistantDock />
         </HelpChatProvider>
       </body>

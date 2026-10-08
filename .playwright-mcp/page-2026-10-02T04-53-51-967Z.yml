@@ -1,0 +1,73 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Autonomous Disaster Response Coordination Hub home" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - generic [aria-hidden] [ref=e6]: ⚡
+          - generic [ref=e7]: Autonomous Disaster Response Coordination Hub
+        - navigation "Main navigation" [ref=e9]:
+          - link "Disaster Map" [ref=e10] [cursor=pointer]:
+            - /url: /
+            - generic [aria-hidden] [ref=e11]: 🗺️
+            - text: Disaster Map
+          - link "Workspaces" [ref=e12] [cursor=pointer]:
+            - /url: /workspaces
+            - generic [aria-hidden] [ref=e13]: 👥
+            - text: Workspaces
+          - link "Sectors" [ref=e14] [cursor=pointer]:
+            - /url: /sectors
+            - generic [aria-hidden] [ref=e15]: 🏛️
+            - text: Sectors
+          - link "Governance" [ref=e16] [cursor=pointer]:
+            - /url: /governance
+            - generic [aria-hidden] [ref=e17]: 🛡️
+            - text: Governance
+          - link "Preparedness" [ref=e18] [cursor=pointer]:
+            - /url: /preparedness
+            - generic [aria-hidden] [ref=e19]: 📋
+            - text: Preparedness
+          - link "Help" [ref=e20] [cursor=pointer]:
+            - /url: /help
+            - generic [aria-hidden] [ref=e21]: ❓
+            - text: Help
+    - main [ref=e22]:
+      - navigation "Language selection" [ref=e24]:
+        - generic [ref=e25]:
+          - generic [aria-hidden] [ref=e26]: 🌐
+          - combobox "Select language" [ref=e27]:
+            - option "English (Australia)" [selected]
+            - option "简体中文"
+            - option "العربية"
+            - option "Tiếng Việt"
+            - option "Ελληνικά"
+            - option "Italiano"
+      - generic [ref=e28]:
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - searchbox "Search incidents by keyword" [ref=e33]
+            - button "Hide Filters" [expanded] [ref=e34] [cursor=pointer]
+          - paragraph [ref=e35]: Loading incidents…
+        - generic [ref=e38]:
+          - generic:
+            - paragraph: Loading incidents…
+    - contentinfo [ref=e39]:
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic [aria-hidden] [ref=e42]: ⚡
+          - generic [ref=e43]: Autonomous Disaster Response Coordination Hub
+        - paragraph [ref=e44]: We acknowledge the Traditional Owners of Country throughout Australia and recognise their continuing connection to land, waters, and culture.
+        - generic [ref=e45]:
+          - link "Governance" [ref=e46] [cursor=pointer]:
+            - /url: /governance
+          - generic [aria-hidden] [ref=e47]: ·
+          - link "Preparedness" [ref=e48] [cursor=pointer]:
+            - /url: /preparedness
+          - generic [aria-hidden] [ref=e49]: ·
+          - link "Help" [ref=e50] [cursor=pointer]:
+            - /url: /help
+        - paragraph [ref=e51]: Built for the Azure Master Architect Program
+  - button "Open Help Assistant" [ref=e52] [cursor=pointer]:
+    - generic [aria-hidden] [ref=e53]: 💬
+    - generic [ref=e54]: Help
+  - alert [ref=e55]

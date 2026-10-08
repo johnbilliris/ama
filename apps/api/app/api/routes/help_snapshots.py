@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import uuid4
 
 from app.api.routes.help_deps import CallerDep
@@ -37,7 +37,7 @@ class SnapshotPublishRequest(BaseModel):
 async def list_snapshots(
     caller: CallerDep,
     repos: Annotated[HelpRepositories, Depends(get_help_repositories)],
-):
+) -> list[dict[str, Any]]:
     return repos.list_snapshots(caller.tenant_id)
 
 
@@ -45,7 +45,7 @@ async def list_snapshots(
 async def publish(
     body: SnapshotPublishRequest,
     caller: CallerDep,
-):
+) -> dict[str, object]:
     identities = {a.identity for a in body.approvers}
     roles = [a.role for a in body.approvers]
     if len(identities) < 2:
@@ -96,7 +96,7 @@ async def publish(
 async def rollback(
     snapshot_id: str,
     caller: CallerDep,
-):
+) -> dict[str, str]:
     target = get(SNAPSHOT_RECORDS, "__global__", snapshot_id)
     if not target:
         raise HTTPException(status_code=404, detail={"code": "snapshot.not_found", "message": "snapshot not found"})

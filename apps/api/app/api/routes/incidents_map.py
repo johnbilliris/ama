@@ -8,7 +8,7 @@ Always excludes rehearsal-status incidents server-side.
 import logging
 import time
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, TypedDict
 
 from app.models.geojson import (
     SEVERITY_TO_AWS_TIER,
@@ -22,6 +22,25 @@ from app.repositories.incident_map_repository import IncidentMapRepository
 from fastapi import APIRouter, HTTPException, Query
 
 logger = logging.getLogger(__name__)
+
+
+class IncidentMapLocation(TypedDict, total=False):
+    coordinates: list[float]
+
+
+class IncidentMapDocument(TypedDict, total=False):
+    incident_id: str
+    location: IncidentMapLocation
+    severity: str
+    started_at: str | datetime
+    title: str
+    incident_type: str
+    status: str
+    affected_jurisdiction_ids: list[str]
+    participating_organisation_ids: list[str]
+    pprr_phase: str | None
+    incident_level: int
+
 
 router = APIRouter(prefix="/incidents", tags=["incidents"])
 
@@ -81,12 +100,12 @@ def _sanitise_keyword(keyword: str | None) -> str | None:
     return keyword or None
 
 
-def _to_feature(doc: dict) -> IncidentFeature:
+def _to_feature(doc: IncidentMapDocument) -> IncidentFeature:
     """Convert a Cosmos DB incident document to a GeoJSON Feature."""
     location = doc.get("location", {})
     severity = doc.get("severity", "advisory")
     started_at = doc.get("started_at", "")
-    if hasattr(started_at, "isoformat"):
+    if isinstance(started_at, datetime):
         started_at = started_at.isoformat()
 
     return IncidentFeature(

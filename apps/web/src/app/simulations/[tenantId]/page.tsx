@@ -12,11 +12,13 @@ import {
   type SimulationClockResponse,
 } from "@/lib/api/simulations";
 import { getPlaybackEvents, recordEventLogEntry, type PlaybackEvent } from "@/lib/api/simulation-playback";
-import { SimulationBanner } from "@/components/simulation-banner";
+import { useReportSimulationLifecycle } from "@/components/simulation-lifecycle";
 import { SimulationChatPane } from "@/components/simulation-chat-pane";
 import { SimulationMap, type ScenarioCard } from "@/components/simulation-map";
+import { SimulationPersonaWorkspace } from "@/components/simulation-persona-workspace";
 import { SimulationServerClock } from "@/components/simulation-server-clock";
 import { SimulationWarpControls } from "@/components/simulation-warp-controls";
+import { SIMULATION_REFRESH_INTERVAL_MS } from "@/lib/simulation-refresh";
 
 // ── PPRR phase derivation ──
 function derivePPRRPhase(status: string, scenarioSeeded: boolean): string {
@@ -33,17 +35,9 @@ const PPRR_COLOURS: Record<string, string> = {
   Recovery: "#22c55e",
 };
 
-// Refresh cadence for the right-hand Event Log when polling the
-// /playback/events endpoint. 8 s mirrors the existing clock poll cadence
-// without flooding Cosmos with reads.
-const EVENT_LOG_POLL_INTERVAL_MS = 8000;
-
-// ── Exercise objectives ──
-interface ExerciseObjective {
-  id: string;
-  text: string;
-  done: boolean;
-}
+// AUD-016 / US3-AS4 — shared exercise activity must become visible to other
+// participants within five seconds, so the event poll runs at that cadence.
+const EVENT_LOG_POLL_INTERVAL_MS = SIMULATION_REFRESH_INTERVAL_MS;
 
 interface EventLogEntry {
   /** Stable key — server `event_seq` (`server-<n>`) or local timestamp. */
@@ -100,10 +94,7 @@ export default function SimulationDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [scenarioCard, setScenarioCard] = useState<ScenarioCard | null>(null);
   const [eventLog, setEventLog] = useState<EventLogEntry[]>([]);
-  const [objectives, setObjectives] = useState<ExerciseObjective[]>([]);
-  const [newObj, setNewObj] = useState("");
   const [eventLogOpen, setEventLogOpen] = useState(true);
-  const [objectivesOpen, setObjectivesOpen] = useState(true);
   const [currentWarpSpeed, setCurrentWarpSpeed] = useState<number>(1);
   // Highest persisted event_seq we've already merged. Lets the polling
   // loop ask Cosmos only for new events rather than re-fetching the
@@ -206,6 +197,10 @@ export default function SimulationDashboardPage() {
 
   const pprr = derivePPRRPhase(tenant?.status ?? "", !!scenarioCard);
 
+  // AUD-018 — the /simulations layout owns the marker; publish the real
+  // lifecycle so it never advertises "Active" for an archived exercise.
+  useReportSimulationLifecycle(tenant?.status ?? null);
+
   if (error) {
     const isNotFound = /404/.test(error) || /not found/i.test(error);
     return (
@@ -234,6 +229,11 @@ export default function SimulationDashboardPage() {
           100,
       )
     : 0;
+
+  const cacheKeys = tenant.resource_consumption.cache_keys ?? null;
+  const assignments = tenant.participant_assignments ?? [];
+  const assignedOids = new Set(assignments.map((a) => a.oid));
+  const unassignedParticipants = tenant.participants.filter((oid) => !assignedOids.has(oid));
 
   const handlePause = async () => {
     const result = await pauseSimulation(tenant.tenant_id);
@@ -271,24 +271,8 @@ export default function SimulationDashboardPage() {
     setTimeout(() => void refreshPersistedEvents(), 1500);
   };
 
-  const addObjective = () => {
-    const text = newObj.trim();
-    if (!text) return;
-    setObjectives((prev) => [...prev, { id: crypto.randomUUID(), text, done: false }]);
-    setNewObj("");
-  };
-
-  const toggleObjective = (id: string) => {
-    setObjectives((prev) => prev.map((o) => (o.id === id ? { ...o, done: !o.done } : o)));
-  };
-
-  const removeObjective = (id: string) => {
-    setObjectives((prev) => prev.filter((o) => o.id !== id));
-  };
-
   return (
     <div className="sim-dashboard-page">
-      <SimulationBanner />
       <div className="sim-dashboard-wrap">
         <div className="sim-dashboard-layout">
           {/* ─────────────── LEFT: signals + tenant details ─────────────── */}
@@ -360,6 +344,15 @@ export default function SimulationDashboardPage() {
                   </dd>
                 </div>
               </dl>
+              {tenant.throttle_notice && (
+                <p
+                  role="status"
+                  data-testid="sim-throttle-notice"
+                  className="sim-panel-empty"
+                >
+                  {tenant.throttle_notice}
+                </p>
+              )}
             </section>
 
             <section className="sim-panel-section">
@@ -389,6 +382,33 @@ export default function SimulationDashboardPage() {
                 </div>
                 <div className="sim-meter">
                   <div className="sim-meter-row">
+                    <span>Cache keys</span>
+                    <span
+                      className="sim-meter-value"
+                      data-testid="sim-cache-keys"
+                      title={
+                        cacheKeys == null
+                          ? "The API did not report a simulation cache-key count."
+                          : "Count as reported by the simulation API."
+                      }
+                    >
+                      {cacheKeys == null
+                        ? "Not reported"
+                        : cacheKeys === 0
+                          ? "None reported"
+                          : cacheKeys}
+                    </span>
+                  </div>
+                </div>
+                <div className="sim-meter">
+                  <div className="sim-meter-row">
+                    <span>Throttle</span>
+                    <span className="sim-meter-value" data-testid="sim-throttle-status">
+                      {tenant.throttle_mode} · {tenant.throttle_quota_pct}% quota
+                    </span>
+                  </div>
+                </div>                <div className="sim-meter">
+                  <div className="sim-meter-row">
                     <span>Participants</span>
                     <span className="sim-meter-value">{tenant.participants.length}</span>
                   </div>
@@ -396,22 +416,11 @@ export default function SimulationDashboardPage() {
               </div>
             </section>
 
-            <section className="sim-panel-section">
-              <header className="sim-panel-header">
-                <h2>Participants ({tenant.participants.length})</h2>
-              </header>
-              {tenant.participants.length === 0 ? (
-                <p className="sim-panel-empty">No participants yet.</p>
-              ) : (
-                <ul className="sim-participant-list">
-                  {tenant.participants.map((p) => (
-                    <li key={p} title={p}>
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
+            <SimulationPersonaWorkspace
+              assignments={assignments}
+              unassignedParticipants={unassignedParticipants}
+              tenantId={tenantId}
+            />
 
             <section className="sim-panel-section">
               <header className="sim-panel-header">
@@ -453,6 +462,21 @@ export default function SimulationDashboardPage() {
                   >
                     ▶ Review Playback
                   </Link>
+                )}
+                {tenant.exercise_report_id ? (
+                  <Link
+                    href={`/simulations/reports/${tenant.exercise_report_id}`}
+                    className="sim-panel-backlink"
+                    data-testid="sim-report-link"
+                  >
+                    📄 View exercise report
+                  </Link>
+                ) : (
+                  ["Archived", "Archiving", "Completed"].includes(tenant.status) && (
+                    <span className="sim-panel-empty" data-testid="sim-report-pending">
+                      Exercise report not yet available.
+                    </span>
+                  )
                 )}
             </section>
 
@@ -498,75 +522,10 @@ export default function SimulationDashboardPage() {
               )}
             </section>
 
-            {/* ── Exercise Objectives ── */}
-            <section className="sim-panel-section">
-              <header
-                className="sim-panel-header sim-collapsible-header"
-                onClick={() => setObjectivesOpen((v) => !v)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && setObjectivesOpen((v) => !v)}
-                aria-expanded={objectivesOpen}
-              >
-                <h2>
-                  Exercise Objectives{" "}
-                  {objectives.length > 0 && (
-                    <span className="sim-obj-count">
-                      {objectives.filter((o) => o.done).length}/{objectives.length}
-                    </span>
-                  )}
-                </h2>
-                <span className="sim-collapse-icon">{objectivesOpen ? "▾" : "▸"}</span>
-              </header>
-              {objectivesOpen && (
-                <div className="sim-objectives">
-                  {objectives.length === 0 && (
-                    <p className="sim-panel-empty">Add learning goals for this exercise.</p>
-                  )}
-                  <ul className="sim-objectives-list">
-                    {objectives.map((obj) => (
-                      <li key={obj.id} className={obj.done ? "sim-obj-done" : ""}>
-                        <label className="sim-obj-label">
-                          <input
-                            type="checkbox"
-                            checked={obj.done}
-                            onChange={() => toggleObjective(obj.id)}
-                          />
-                          <span>{obj.text}</span>
-                        </label>
-                        <button
-                          type="button"
-                          className="sim-obj-remove"
-                          onClick={() => removeObjective(obj.id)}
-                          title="Remove objective"
-                          aria-label={`Remove objective: ${obj.text}`}
-                        >
-                          ×
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="sim-obj-add">
-                    <input
-                      type="text"
-                      value={newObj}
-                      onChange={(e) => setNewObj(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && addObjective()}
-                      placeholder="Add objective…"
-                      className="sim-obj-input"
-                    />
-                    <button
-                      type="button"
-                      onClick={addObjective}
-                      className="sim-obj-add-btn"
-                      disabled={!newObj.trim()}
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              )}
-            </section>
+            {/* AUD-016 — the browser-only "Exercise Objectives" list was removed.
+                It looked like durable coordination state but never persisted,
+                so it disappeared on reload and was invisible to other
+                participants. Reinstate only behind a server-backed store. */}
           </aside>
 
           {/* ─────────────── CENTER: affected-area map ─────────────── */}

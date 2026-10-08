@@ -6,3 +6,6 @@ fixtures/sim_replays/*.ndjson         binary
 fixtures/sim_replays/*.ndjson.sha256  binary
 docs/test-data/**/*.ndjson            binary
 docs/test-data/**/*.ndjson.sha256     binary
+
+# Keep architecture source hashes stable across Windows and Linux.
+docs/architecture/**/*.drawio         text eol=lf

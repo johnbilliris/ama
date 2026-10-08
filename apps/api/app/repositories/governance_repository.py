@@ -35,6 +35,7 @@ class GovernanceRepository:
     """
 
     def __init__(self, container: Any | None = None) -> None:
+        self._backend: _CosmosBackend | _InMemoryBackend
         if container is not None:
             self._backend = _CosmosBackend(container)
         elif os.environ.get("COSMOS_ENDPOINT"):
@@ -62,11 +63,19 @@ class GovernanceRepository:
     def save_assessment(self, assessment: ConstitutionalAssessment) -> ConstitutionalAssessment:
         return self._backend.save_assessment(assessment)
 
-    def get_assessments_for_source(self, data_source_id: str) -> list[ConstitutionalAssessment]:
-        return self._backend.get_assessments_for_source(data_source_id)
+    def get_assessments_for_source(
+        self,
+        data_source_id: str,
+        tenant_id: str | None = None,
+    ) -> list[ConstitutionalAssessment]:
+        return self._backend.get_assessments_for_source(data_source_id, tenant_id)
 
-    def get_current_assessments(self, data_source_id: str) -> list[ConstitutionalAssessment]:
-        return self._backend.get_current_assessments(data_source_id)
+    def get_current_assessments(
+        self,
+        data_source_id: str,
+        tenant_id: str | None = None,
+    ) -> list[ConstitutionalAssessment]:
+        return self._backend.get_current_assessments(data_source_id, tenant_id)
 
     # ------------------------------------------------------------------
     # AgentGovernanceAssignment
@@ -160,14 +169,30 @@ class _InMemoryBackend:
         return results
 
     def save_assessment(self, assessment: ConstitutionalAssessment) -> ConstitutionalAssessment:
-        self._assessments[assessment.assessment_id] = assessment
+        self._assessments[f"{assessment.tenant_id}:{assessment.assessment_id}"] = assessment
         return assessment
 
-    def get_assessments_for_source(self, data_source_id: str) -> list[ConstitutionalAssessment]:
-        return [a for a in self._assessments.values() if a.data_source_id == data_source_id]
+    def get_assessments_for_source(
+        self,
+        data_source_id: str,
+        tenant_id: str | None = None,
+    ) -> list[ConstitutionalAssessment]:
+        return [
+            assessment
+            for assessment in self._assessments.values()
+            if assessment.data_source_id == data_source_id and (tenant_id is None or assessment.tenant_id == tenant_id)
+        ]
 
-    def get_current_assessments(self, data_source_id: str) -> list[ConstitutionalAssessment]:
-        return [a for a in self.get_assessments_for_source(data_source_id) if a.is_current]
+    def get_current_assessments(
+        self,
+        data_source_id: str,
+        tenant_id: str | None = None,
+    ) -> list[ConstitutionalAssessment]:
+        return [
+            assessment
+            for assessment in self.get_assessments_for_source(data_source_id, tenant_id)
+            if assessment.is_current
+        ]
 
     def save_assignment(self, assignment: AgentGovernanceAssignment) -> AgentGovernanceAssignment:
         self._assignments[assignment.assignment_id] = assignment
@@ -330,27 +355,43 @@ class _CosmosBackend:
 
     def save_assessment(self, assessment: ConstitutionalAssessment) -> ConstitutionalAssessment:
         doc = assessment.model_dump(mode="json")
-        doc["id"] = assessment.assessment_id
+        doc["id"] = (
+            assessment.assessment_id
+            if assessment.tenant_id == "live"
+            else f"{assessment.tenant_id}:{assessment.assessment_id}"
+        )
         doc["partitionKey"] = assessment.data_source_id
         doc["type"] = _TYPE_ASSESSMENT
         self._upsert(doc)
         return assessment
 
-    def get_assessments_for_source(self, data_source_id: str) -> list[ConstitutionalAssessment]:
-        docs = self._query(
-            "SELECT * FROM c WHERE c.type = @type AND c.data_source_id = @dsid",
-            [{"name": "@type", "value": _TYPE_ASSESSMENT}, {"name": "@dsid", "value": data_source_id}],
-            partition_key=data_source_id,
-        )
+    def get_assessments_for_source(
+        self,
+        data_source_id: str,
+        tenant_id: str | None = None,
+    ) -> list[ConstitutionalAssessment]:
+        query = "SELECT * FROM c WHERE c.type = @type AND c.data_source_id = @dsid"
+        parameters: list[dict[str, object]] = [
+            {"name": "@type", "value": _TYPE_ASSESSMENT},
+            {"name": "@dsid", "value": data_source_id},
+        ]
+        if tenant_id is not None:
+            legacy_live_clause = " OR NOT IS_DEFINED(c.tenant_id)" if tenant_id == "live" else ""
+            query += f" AND (c.tenant_id = @tenant_id{legacy_live_clause})"
+            parameters.append({"name": "@tenant_id", "value": tenant_id})
+        docs = self._query(query, parameters, partition_key=data_source_id)
         return [ConstitutionalAssessment.model_validate(d) for d in docs]
 
-    def get_current_assessments(self, data_source_id: str) -> list[ConstitutionalAssessment]:
-        docs = self._query(
-            "SELECT * FROM c WHERE c.type = @type AND c.data_source_id = @dsid AND c.is_current = true",
-            [{"name": "@type", "value": _TYPE_ASSESSMENT}, {"name": "@dsid", "value": data_source_id}],
-            partition_key=data_source_id,
-        )
-        return [ConstitutionalAssessment.model_validate(d) for d in docs]
+    def get_current_assessments(
+        self,
+        data_source_id: str,
+        tenant_id: str | None = None,
+    ) -> list[ConstitutionalAssessment]:
+        return [
+            assessment
+            for assessment in self.get_assessments_for_source(data_source_id, tenant_id)
+            if assessment.is_current
+        ]
 
     # AgentGovernanceAssignment
 

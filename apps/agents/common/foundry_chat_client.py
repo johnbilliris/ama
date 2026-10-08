@@ -32,6 +32,7 @@ template (Constitution Principle I).
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import time
@@ -105,6 +106,7 @@ class FoundryResponse:
     usage_completion_tokens: int
     latency_ms: int
     safety_filter_triggered: bool
+    deployment_id: str
     raw: dict[str, Any]
 
 
@@ -165,6 +167,7 @@ class FoundryChatClient(Protocol):
         temperature: float | None = None,
         max_tokens: int | None = None,
         timeout_s: float = 60.0,
+        correlation_id: str | None = None,
     ) -> AsyncIterator[FoundryStreamChunk]: ...
 
 
@@ -360,35 +363,72 @@ class LiveFoundryChatClient:
     # ------------------------------------------------------------------ #
 
     def _apply_gateway(self, *, messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        """Run the data-minimisation gateway on user-role messages when the
-        deployment region is non-AU. Returns the (possibly redacted) messages.
+        """Run the data-minimisation gateway on supported text-bearing content.
+
+        For AU regions the gateway is explicitly bypassed.
+        For non-AU regions, every supported text payload is inspected and
+        redacted/denied before dispatch.
 
         Raises ``FoundryGatewayDenied`` if any deny rule fires.
         """
-        if self._region in AU_REGIONS or not self._region:
+        if self._region in AU_REGIONS:
             return messages
-        gateway = self._gateway_apply
-        if gateway is None:
-            try:
-                from common.model_gateway import apply as gateway  # noqa: PLC0415
-            except ImportError:  # pragma: no cover — gateway not yet wired
-                logger.warning(
-                    "model_gateway unavailable; falling back to passthrough for region %s",
-                    self._region,
-                )
-                return messages
+
+        if not self._region:
+            raise FoundryConfigurationError("AZURE_AI_PROJECT_REGION is required for non-AU gateway enforcement")
+
+        gateway = self._load_gateway()
         out: list[dict[str, Any]] = []
         for msg in messages:
-            role = msg.get("role")
-            content = msg.get("content")
-            if role == "user" and isinstance(content, str):
-                result = gateway(text=content, deployment_region=self._region)
-                if getattr(result, "gateway_decision", None) == "deny":
-                    raise FoundryGatewayDenied(getattr(result, "reason", "unknown"))
-                out.append({**msg, "content": result.transmitted_text})
-            else:
-                out.append(msg)
+            out.append(self._apply_gateway_to_message(msg=msg, gateway=gateway))
         return out
+
+    def _load_gateway(self) -> Callable[..., Any]:
+        gateway = self._gateway_apply
+        if gateway is not None:
+            return gateway
+        try:
+            from common.model_gateway import apply as resolved_gateway  # noqa: PLC0415
+        except ImportError as exc:  # pragma: no cover — dependency edge
+            raise FoundryConfigurationError("model_gateway is required for non-AU requests") from exc
+        self._gateway_apply = resolved_gateway
+        return resolved_gateway
+
+    def _apply_gateway_to_message(self, *, msg: dict[str, Any], gateway: Callable[..., Any]) -> dict[str, Any]:
+        transformed = dict(msg)
+        if "content" in transformed:
+            transformed["content"] = self._apply_gateway_to_content(
+                content=transformed["content"],
+                gateway=gateway,
+            )
+        return transformed
+
+    def _apply_gateway_to_content(self, *, content: Any, gateway: Callable[..., Any]) -> Any:
+        if isinstance(content, str):
+            return self._apply_gateway_to_text(content=content, gateway=gateway)
+
+        if isinstance(content, list):
+            rewritten: list[Any] = []
+            for item in content:
+                if isinstance(item, dict):
+                    updated = dict(item)
+                    text_value = updated.get("text")
+                    if isinstance(text_value, str):
+                        updated["text"] = self._apply_gateway_to_text(content=text_value, gateway=gateway)
+                    rewritten.append(updated)
+                elif isinstance(item, str):
+                    rewritten.append(self._apply_gateway_to_text(content=item, gateway=gateway))
+                else:
+                    rewritten.append(item)
+            return rewritten
+
+        return content
+
+    def _apply_gateway_to_text(self, *, content: str, gateway: Callable[..., Any]) -> str:
+        result = gateway(text=content, deployment_region=self._region)
+        if getattr(result, "gateway_decision", None) == "deny":
+            raise FoundryGatewayDenied(getattr(result, "reason", "unknown"))
+        return str(getattr(result, "transmitted_text", content))
 
     # ------------------------------------------------------------------ #
     # Sync chat completion (FR-RAG-FM-01, FR-RAG-FM-02).
@@ -411,6 +451,7 @@ class LiveFoundryChatClient:
         client = self._ensure_sync_client(deployment)
 
         kwargs: dict[str, Any] = {"model": deployment, "messages": guarded_messages}
+        kwargs["timeout"] = timeout_s
         if tools is not None:
             kwargs["tools"] = tools
         if temperature is not None:
@@ -445,6 +486,10 @@ class LiveFoundryChatClient:
             except Exception as exc:  # noqa: BLE001
                 latency_ms = int((time.perf_counter() - start) * 1000)
                 status = getattr(exc, "status_code", None) or getattr(exc, "code", None)
+                if isinstance(exc, TimeoutError) or "timed out" in str(exc).lower():
+                    raise FoundryTransportError(
+                        f"Foundry timeout after {latency_ms}ms (limit={timeout_s}s): {exc}"
+                    ) from exc
                 if status in (401, 403, 404):
                     raise FoundryConfigurationError(
                         f"Foundry deployment {deployment!r} returned {status}: {exc}"
@@ -464,6 +509,7 @@ class LiveFoundryChatClient:
             usage_completion_tokens=int(getattr(usage, "completion_tokens", 0) or 0),
             latency_ms=latency_ms,
             safety_filter_triggered=(finish_reason == "content_filter"),
+            deployment_id=deployment,
             raw={"deployment": deployment},
         )
 
@@ -480,8 +526,10 @@ class LiveFoundryChatClient:
         temperature: float | None = None,
         max_tokens: int | None = None,
         timeout_s: float = 60.0,
+        correlation_id: str | None = None,
     ) -> AsyncIterator[FoundryStreamChunk]:
         """Streaming chat completion. Used by the simulation Controller's SSE turn loop."""
+        _ = correlation_id
         deployment = self._resolve(model_key)
         guarded_messages = self._apply_gateway(messages=messages)
         client = self._ensure_async_client(deployment)
@@ -491,6 +539,7 @@ class LiveFoundryChatClient:
             "messages": guarded_messages,
             "stream": True,
         }
+        kwargs["timeout"] = timeout_s
         if tools is not None:
             kwargs["tools"] = tools
         if temperature is not None:
@@ -504,17 +553,34 @@ class LiveFoundryChatClient:
             else:
                 kwargs["max_tokens"] = max_tokens
 
+        deadline = time.monotonic() + timeout_s
         try:
-            stream = await client.complete(**kwargs)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise FoundryTransportError("Foundry stream deadline exceeded before dispatch")
+            stream = await asyncio.wait_for(client.complete(**kwargs), timeout=remaining)
         except FoundryGatewayDenied:
             raise
+        except TimeoutError as exc:
+            raise FoundryTransportError(f"Foundry stream timeout after {timeout_s}s") from exc
         except Exception as exc:  # noqa: BLE001
             status = getattr(exc, "status_code", None) or getattr(exc, "code", None)
             if status in (401, 403, 404):
                 raise FoundryConfigurationError(f"Foundry deployment {deployment!r} returned {status}: {exc}") from exc
             raise FoundryTransportError(f"Foundry stream transport error: {exc}") from exc
 
-        async for chunk in stream:
+        iterator = stream.__aiter__()
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise FoundryTransportError(f"Foundry stream timeout after {timeout_s}s")
+            try:
+                chunk = await asyncio.wait_for(iterator.__anext__(), timeout=remaining)
+            except StopAsyncIteration:
+                break
+            except TimeoutError as exc:
+                raise FoundryTransportError(f"Foundry stream timeout after {timeout_s}s") from exc
+
             choices = getattr(chunk, "choices", None) or []
             if not choices:
                 continue

@@ -30,9 +30,14 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
-from typing import Any
 from uuid import uuid4
 
+from common.foundry_chat_client import (
+    FoundryConfigurationError,
+    FoundryGatewayDenied,
+    FoundryTransportError,
+    LiveFoundryChatClient,
+)
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
@@ -105,96 +110,29 @@ class InvokeResponse(BaseModel):
     invocation_id: str
 
 
-def _resolve_deployment() -> str | None:
-    """Pick a chat-capable deployment for the dispatcher.
-
-    Resolution order:
-      1. ``AZURE_AI_SIMULATION_DEPLOYMENT`` — explicit per-tier env var
-         (preferred, set by Bicep). Bypasses the CSV map entirely.
-      2. CSV lookup by ``AZURE_AI_SIMULATION_MODEL_KEY`` /
-         ``AZURE_AI_REASONING_MODEL_KEY`` (first-write-wins).
-      3. First non-embedding entry in the CSV.
-
-    Mirrors
-    ``apps/api/app/services/simulation/controller_service.SimulationControllerService``
-    ``._resolve_simulation_deployment`` so the dispatcher targets the same
-    model + RAI policy bucket as the Controller.
-    """
-    explicit = os.getenv("AZURE_AI_SIMULATION_DEPLOYMENT") or os.getenv("AZURE_AI_REASONING_DEPLOYMENT")
-    if explicit:
-        return explicit
-
-    csv = os.getenv("AZURE_AI_PROJECT_DEPLOYMENTS", "")
-    if not csv:
-        return None
-
-    pairs: list[tuple[str, str]] = []
-    for entry in (e.strip() for e in csv.split(",") if e.strip()):
-        if "=" not in entry:
-            continue
-        key, name = entry.split("=", 1)
-        pairs.append((key.strip(), name.strip()))
-
-    target_key = os.getenv("AZURE_AI_SIMULATION_MODEL_KEY") or os.getenv("AZURE_AI_REASONING_MODEL_KEY")
-    if target_key:
-        # Multiple deployments may share the same key (Bicep currently
-        # collapses reasoning/drafting/simulation onto gpt-5.4@2026-03-05);
-        # prefer the simulation-tier deployment when the env points at it,
-        # otherwise the first match wins.
-        sim_match = next((n for k, n in pairs if k == target_key and n.endswith("-sim-ama")), None)
-        if sim_match:
-            return sim_match
-        first_match = next((n for k, n in pairs if k == target_key), None)
-        if first_match:
-            return first_match
-
-    return next((n for _, n in pairs if "embedding" not in n), None)
+def _resolve_model_key() -> str:
+    return os.getenv("AZURE_AI_SIMULATION_MODEL_KEY") or os.getenv("AZURE_AI_REASONING_MODEL_KEY") or "simulation"
 
 
-def _build_openai_client() -> Any:
-    """Construct an ``openai.AzureOpenAI`` client bound to the project endpoint.
-
-    We use ``openai.AzureOpenAI`` rather than ``azure-ai-inference`` because
-    the latter (as wired in ``apps/agents/common/foundry_chat_client.py``)
-    constructs URLs of the shape ``{endpoint}/chat/completions`` — which
-    404s against Azure-OpenAI-kind cognitive-services endpoints. The
-    AzureOpenAI SDK uses the correct ``/openai/deployments/<name>`` path.
-    AAD-only auth via ``DefaultAzureCredential`` (the agents Container App
-    has the Cognitive Services OpenAI User role assigned in Bicep).
-    """
+def _build_foundry_client() -> LiveFoundryChatClient | None:
     endpoint = os.getenv("AZURE_AI_PROJECT_ENDPOINT")
     if not endpoint:
         return None
     try:
-        from azure.identity import (
-            DefaultAzureCredential,
-            get_bearer_token_provider,
-        )
-        from openai import AzureOpenAI  # AMA-FM04: allow — see docstring above.
-
-        token_provider = get_bearer_token_provider(
-            DefaultAzureCredential(),
-            "https://cognitiveservices.azure.com/.default",
-        )
-        return AzureOpenAI(
-            azure_ad_token_provider=token_provider,
-            azure_endpoint=endpoint,
-            api_version=os.getenv("AZURE_AI_INFERENCE_API_VERSION", "2024-10-21"),
-        )
+        return LiveFoundryChatClient(endpoint=endpoint)
     except Exception:  # noqa: BLE001
-        logger.warning("Dispatcher Azure-OpenAI client unavailable; degraded stub replies in effect", exc_info=True)
+        logger.warning("Dispatcher Foundry client unavailable; degraded stub replies in effect", exc_info=True)
         return None
 
 
 def create_app() -> FastAPI:
     """FastAPI app factory used by the ``__main__`` runner and unit tests."""
     app = FastAPI(title="AMA Sub-Agent Dispatcher", version="1.0.0")
-    openai_client = _build_openai_client()
-    deployment = _resolve_deployment() if openai_client is not None else None
-    if openai_client is not None and deployment is None:
+    foundry_client = _build_foundry_client()
+    model_key = _resolve_model_key() if foundry_client is not None else None
+    if foundry_client is not None and model_key is None:
         logger.warning(
-            "Dispatcher could not resolve a chat deployment from "
-            "AZURE_AI_PROJECT_DEPLOYMENTS; degraded stub replies in effect"
+            "Dispatcher could not resolve a chat model key from environment; degraded stub replies in effect"
         )
 
     @app.get("/health")
@@ -202,7 +140,7 @@ def create_app() -> FastAPI:
         return {
             "status": "ok",
             "service": "sub-agent-dispatcher",
-            "llm": "ready" if (openai_client is not None and deployment) else "degraded",
+            "llm": "ready" if (foundry_client is not None and model_key) else "degraded",
         }
 
     @app.post("/{role}/invoke", response_model=InvokeResponse)
@@ -218,26 +156,35 @@ def create_app() -> FastAPI:
         summary = ""
         deployment_used: str | None = None
 
-        if openai_client is not None and deployment:
+        if foundry_client is not None and model_key:
             try:
-                # ``max_completion_tokens`` is the GPT-5+ family's parameter
-                # name (the older ``max_tokens`` returns 400 on these
-                # deployments — see x-ms-rai-invoked traces against
-                # gpt-5.4-sim-ama).
-                response = openai_client.chat.completions.create(
-                    model=deployment,
+                response = foundry_client.chat_complete(
+                    model_key=model_key,
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": body.question},
                     ],
-                    max_completion_tokens=int(os.getenv("SUBAGENT_LLM_MAX_TOKENS", "400")),
-                    timeout=float(os.getenv("SUBAGENT_LLM_TIMEOUT_S", "60")),
+                    max_tokens=int(os.getenv("SUBAGENT_LLM_MAX_TOKENS", "400")),
+                    timeout_s=float(os.getenv("SUBAGENT_LLM_TIMEOUT_S", "60")),
                 )
-                choices = getattr(response, "choices", None) or []
-                if choices:
-                    message = getattr(choices[0], "message", None)
-                    summary = (getattr(message, "content", "") or "").strip() if message else ""
-                deployment_used = deployment
+                summary = response.text.strip()
+                deployment_used = response.raw.get("deployment") if isinstance(response.raw, dict) else None
+            except FoundryGatewayDenied as exc:
+                logger.info(
+                    "subagent.gateway_denied role=%s tenant=%s invocation=%s reason=%s",
+                    role,
+                    body.tenant_id,
+                    invocation_id,
+                    exc.reason,
+                )
+                summary = "[classification-denied] payload blocked by sovereignty gateway"
+            except (FoundryConfigurationError, FoundryTransportError):
+                logger.exception(
+                    "subagent.foundry_error role=%s tenant=%s invocation=%s",
+                    role,
+                    body.tenant_id,
+                    invocation_id,
+                )
             except Exception:  # noqa: BLE001
                 logger.exception(
                     "subagent.llm_failed role=%s tenant=%s invocation=%s",

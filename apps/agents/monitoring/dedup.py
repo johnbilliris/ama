@@ -32,27 +32,29 @@ class SignalDeduplicator:
             else:
                 break
 
-    def is_duplicate(self, signal_id: str) -> bool:
+    def is_duplicate(self, signal_id: str, *, scope: str = "live") -> bool:
         """Atomically check and mark ``signal_id``.
 
         Returns True if ``signal_id`` was already seen within the dedup window.
         On first encounter, marks it as seen before returning False.
         """
         self._evict_expired()
-        if signal_id in self._cache:
+        key = f"{scope}:{signal_id}"
+        if key in self._cache:
             return True
         # Atomically mark on first encounter to prevent race conditions
-        self._cache[signal_id] = time.monotonic()
+        self._cache[key] = time.monotonic()
         while len(self._cache) > self._max_size:
             self._cache.popitem(last=False)
         return False
 
-    def mark_seen(self, signal_id: str) -> None:
+    def mark_seen(self, signal_id: str, *, scope: str = "live") -> None:
         """Record ``signal_id`` as seen now (kept for backward compatibility)."""
         self._evict_expired()
-        if signal_id in self._cache:
-            self._cache.move_to_end(signal_id)
-        self._cache[signal_id] = time.monotonic()
+        key = f"{scope}:{signal_id}"
+        if key in self._cache:
+            self._cache.move_to_end(key)
+        self._cache[key] = time.monotonic()
         while len(self._cache) > self._max_size:
             self._cache.popitem(last=False)
 

@@ -1,38 +1,77 @@
-<mxfile host="Electron" agent="spec-001-fallback">
+<mxfile host="Electron" agent="remediation-source-updated; export=pending-drawio">
   <diagram name="C4-L2" id="c4-l2-85dcd07c">
     <mxGraphModel dx="1158" dy="871" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="web" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#FFFFFF;fontSize=12;" value="Web&amp;#xa;Next.js" vertex="1">
-          <mxGeometry height="70" width="120" x="190" y="70" as="geometry" />
+        <mxCell id="web" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Web (apps/web)&#xa;Next.js on Azure App Service" vertex="1">
+          <mxGeometry height="70" width="160" x="170" y="70" as="geometry" />
         </mxCell>
-        <mxCell id="api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#FFFFFF;fontSize=12;" value="API&amp;#xa;FastAPI" vertex="1">
-          <mxGeometry height="70" width="120" x="390" y="70" as="geometry" />
+        <mxCell id="api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="API (apps/api)&#xa;FastAPI on Container Apps" vertex="1">
+          <mxGeometry height="70" width="160" x="390" y="70" as="geometry" />
         </mxCell>
-        <mxCell id="agents" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#FFFFFF;fontSize=12;" value="Agents Runtime&amp;#xa;5 agents" vertex="1">
-          <mxGeometry height="70" width="140" x="690" y="70" as="geometry" />
+        <mxCell id="agents" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;verticalAlign=top;" value="Agents Runtime (apps/agents) — five canonical agents" vertex="1">
+          <mxGeometry height="150" width="400" x="690" y="40" as="geometry" />
         </mxCell>
-        <mxCell id="ingest" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#FFFFFF;fontSize=12;" value="Ingest Service" vertex="1">
-          <mxGeometry height="70" width="120" x="630" y="380" as="geometry" />
+        <mxCell id="agent-alerting" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="communication-agent" vertex="1">
+          <mxGeometry height="40" width="120" x="700" y="75" as="geometry" />
         </mxCell>
-        <mxCell id="cosmos" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#FFFFFF;fontSize=12;" value="Cosmos DB" vertex="1">
-          <mxGeometry height="60" width="120" x="200" y="250" as="geometry" />
+        <mxCell id="agent-impact" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="risk-assessment-agent" vertex="1">
+          <mxGeometry height="40" width="120" x="830" y="75" as="geometry" />
         </mxCell>
-        <mxCell id="search" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#FFFFFF;fontSize=12;" value="AI Search" vertex="1">
-          <mxGeometry height="60" width="120" x="340" y="250" as="geometry" />
+        <mxCell id="agent-coord" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="resource-allocation-agent" vertex="1">
+          <mxGeometry height="40" width="120" x="960" y="75" as="geometry" />
         </mxCell>
-        <mxCell id="sb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#FFFFFF;fontSize=12;" value="Service Bus" vertex="1">
-          <mxGeometry height="60" width="120" x="480" y="250" as="geometry" />
+        <mxCell id="agent-evac" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="evacuation-agent" vertex="1">
+          <mxGeometry height="40" width="120" x="700" y="130" as="geometry" />
         </mxCell>
-        <mxCell id="eh" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#FFFFFF;fontSize=12;" value="Event Hubs" vertex="1">
-          <mxGeometry height="60" width="120" x="780" y="250" as="geometry" />
+        <mxCell id="agent-recovery" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="monitoring-agent" vertex="1">
+          <mxGeometry height="40" width="120" x="830" y="130" as="geometry" />
         </mxCell>
-        <mxCell id="ai" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#FFFFFF;fontSize=12;" value="Microsoft Foundry" vertex="1">
-          <mxGeometry height="60" width="140" x="620" y="250" as="geometry" />
+        <mxCell id="appinsights" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/devops/Application_Insights.svg;" value="Application Insights&#xa;OpenTelemetry traces, metrics, logs" vertex="1">
+          <mxGeometry height="64" width="64" x="960" y="250" as="geometry" />
         </mxCell>
-        <mxCell id="kv" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#FFFFFF;fontSize=12;" value="Key Vault" vertex="1">
-          <mxGeometry height="60" width="120" x="60" y="250" as="geometry" />
+        <mxCell id="l3trace" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;" value="L3 round trip: Web (component-web) -&gt; API (component-api) -&gt; Agents Runtime (component-agents) -&gt; API response -&gt; Web render. Ingest success path: Ingest Service (component-ingest) -&gt; Cosmos DB signals -&gt; consuming agent. Every L2 application links to its own L3 page; L4 code level is an explicit deferral." vertex="1">
+          <mxGeometry height="80" width="1030" x="60" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="ingest" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Ingest Service (apps/ingestion)&#xa;worker on Container Apps" vertex="1">
+          <mxGeometry height="70" width="170" x="600" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ai-api" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;dashed=1;" target="appinsights" value="telemetry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ai-agents" edge="1" parent="1" source="agents" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;dashed=1;" target="appinsights" value="telemetry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ai-ingest" edge="1" parent="1" source="ingest" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;dashed=1;" target="appinsights" value="telemetry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-api-agents" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;" target="agents" value="invoke agent / return recommendation">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-api-web" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;dashed=1;" target="web" value="HTTP response">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ingest-cosmos" edge="1" parent="1" source="ingest" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;" target="cosmos" value="persist normalised signal">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cosmos" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/databases/Azure_Cosmos_DB.svg;" value="Azure Cosmos DB" vertex="1">
+          <mxGeometry height="64" width="64" x="200" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="search" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/app_services/Search_Services.svg;" value="Azure AI Search" vertex="1">
+          <mxGeometry height="64" width="64" x="340" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="sb" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/integration/Service_Bus.svg;" value="Azure Service Bus" vertex="1">
+          <mxGeometry height="64" width="64" x="480" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="eh" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/analytics/Event_Hubs.svg;" value="Azure Event Hubs" vertex="1">
+          <mxGeometry height="64" width="64" x="800" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="ai" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/ai_machine_learning/Azure_OpenAI.svg;" value="Microsoft Foundry" vertex="1">
+          <mxGeometry height="64" width="64" x="650" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="kv" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/security/Key_Vaults.svg;" value="Azure Key Vault" vertex="1">
+          <mxGeometry height="64" width="64" x="60" y="250" as="geometry" />
         </mxCell>
         <mxCell id="e1" edge="1" parent="1" source="web" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#FFFFFF;" target="api">
           <mxGeometry relative="1" as="geometry">

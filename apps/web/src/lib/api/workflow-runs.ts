@@ -1,3 +1,4 @@
+import { getApiBaseUrl } from "@/lib/api/base-url";
 /**
  * Workflow Runs API client (T052).
  *
@@ -5,8 +6,7 @@
  * `cache: "no-store"` per the AMA repo convention for operator data.
  */
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+const API_BASE_URL = getApiBaseUrl();
 
 export type WorkflowRunStatus =
   | "Running"

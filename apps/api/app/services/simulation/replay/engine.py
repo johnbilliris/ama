@@ -56,7 +56,7 @@ async def replay_to_publisher(
             tenant_id=tenant_id,
             simulation_id=simulation_id,
             signal_id=str(rec.get("correlation_id") or sent),
-            kind=kind,  # type: ignore[arg-type]
+            kind=kind,
             correlation_id=str(rec.get("correlation_id") or ""),
             metadata={
                 "scenario_id": rec.get("scenario_id"),

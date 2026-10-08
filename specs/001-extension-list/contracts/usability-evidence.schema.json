@@ -1,0 +1,590 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ama.local/schemas/specify-extension-list-usability-evidence.schema.json",
+  "title": "Specify Extension List Usability Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "feature",
+    "privacy",
+    "allocation_algorithm",
+    "allocation_seed",
+    "task_variants",
+    "allocation_records",
+    "participants",
+    "excluded_participants",
+    "aggregates",
+    "review"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "feature": {
+      "const": "001-extension-list"
+    },
+    "privacy": {
+      "$ref": "#/$defs/privacyProtocol"
+    },
+    "allocation_algorithm": {
+      "const": "sha256-seeded-stratified-order-v1"
+    },
+    "allocation_seed": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "task_variants": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "allocation_records": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/allocationRecord"
+      }
+    },
+    "participants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "novice",
+        "experienced"
+      ],
+      "properties": {
+        "novice": {
+          "$ref": "#/$defs/noviceStratum"
+        },
+        "experienced": {
+          "$ref": "#/$defs/experiencedStratum"
+        }
+      }
+    },
+    "excluded_participants": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/excludedParticipant"
+      },
+      "uniqueItems": true
+    },
+    "aggregates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "included_participant_count",
+        "sc_001_success_count",
+        "sc_006_clear_count"
+      ],
+      "properties": {
+        "included_participant_count": {
+          "const": 20
+        },
+        "sc_001_success_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "sc_006_clear_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        }
+      }
+    },
+    "review": {
+      "$ref": "#/$defs/review"
+    }
+  },
+  "$defs": {
+    "noviceStratum": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/includedParticipant"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "spec_kit_workflows_last_6_months": {
+                "type": "integer",
+                "maximum": 2
+              },
+              "used_extension_management": {
+                "const": false
+              }
+            }
+          }
+        ]
+      }
+    },
+    "experiencedStratum": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/includedParticipant"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "spec_kit_workflows_last_6_months": {
+                "type": "integer",
+                "minimum": 5
+              },
+              "used_extension_management": {
+                "const": true
+              }
+            }
+          }
+        ]
+      }
+    },
+    "includedParticipant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "participant_id",
+        "is_adult",
+        "uses_cli_monthly",
+        "prior_feature_exposure",
+        "spec_kit_workflows_last_6_months",
+        "used_extension_management",
+        "task_variant",
+        "requested_accommodations",
+        "provided_accommodations",
+        "installed_answer_correct",
+        "enabled_answer_correct",
+        "elapsed_seconds",
+        "sc_001_success",
+        "sc_006_clarity_rating",
+        "consulted_installation_directories",
+        "attempted_extension_command",
+        "sc_006_clear"
+      ],
+      "properties": {
+        "participant_id": {
+          "$ref": "#/$defs/participantId"
+        },
+        "is_adult": {
+          "const": true
+        },
+        "uses_cli_monthly": {
+          "const": true
+        },
+        "prior_feature_exposure": {
+          "const": false
+        },
+        "spec_kit_workflows_last_6_months": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "used_extension_management": {
+          "type": "boolean"
+        },
+        "task_variant": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requested_accommodations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/accommodationCode"
+          },
+          "uniqueItems": true
+        },
+        "provided_accommodations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/accommodationCode"
+          },
+          "uniqueItems": true
+        },
+        "installed_answer_correct": {
+          "type": "boolean"
+        },
+        "enabled_answer_correct": {
+          "type": "boolean"
+        },
+        "elapsed_seconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sc_001_success": {
+          "type": "boolean"
+        },
+        "sc_006_clarity_rating": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "consulted_installation_directories": {
+          "type": "boolean"
+        },
+        "attempted_extension_command": {
+          "type": "boolean"
+        },
+        "sc_006_clear": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "sc_001_success": {
+                "const": true
+              }
+            },
+            "required": [
+              "sc_001_success"
+            ]
+          },
+          "then": {
+            "properties": {
+              "installed_answer_correct": {
+                "const": true
+              },
+              "enabled_answer_correct": {
+                "const": true
+              },
+              "elapsed_seconds": {
+                "type": "number",
+                "maximum": 30
+              }
+            }
+          },
+          "else": {
+            "anyOf": [
+              {
+                "properties": {
+                  "installed_answer_correct": {
+                    "const": false
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "enabled_answer_correct": {
+                    "const": false
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "elapsed_seconds": {
+                    "type": "number",
+                    "exclusiveMinimum": 30
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "sc_006_clear": {
+                "const": true
+              }
+            },
+            "required": [
+              "sc_006_clear"
+            ]
+          },
+          "then": {
+            "properties": {
+              "sc_006_clarity_rating": {
+                "type": "integer",
+                "minimum": 4
+              },
+              "consulted_installation_directories": {
+                "const": false
+              },
+              "attempted_extension_command": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "anyOf": [
+              {
+                "properties": {
+                  "sc_006_clarity_rating": {
+                    "type": "integer",
+                    "maximum": 3
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "consulted_installation_directories": {
+                    "const": true
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "attempted_extension_command": {
+                    "const": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "allocationRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "participant_id",
+        "experience_stratum",
+        "task_variant",
+        "allocation_position"
+      ],
+      "properties": {
+        "participant_id": {
+          "$ref": "#/$defs/participantId"
+        },
+        "experience_stratum": {
+          "enum": [
+            "novice",
+            "experienced"
+          ]
+        },
+        "task_variant": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allocation_position": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "excludedParticipant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "participant_id",
+        "experience_stratum",
+        "excluded_before_task_exposure",
+        "exclusion_reason",
+        "unavailable_accommodations",
+        "replacement_participant_id"
+      ],
+      "properties": {
+        "participant_id": {
+          "$ref": "#/$defs/participantId"
+        },
+        "experience_stratum": {
+          "enum": [
+            "novice",
+            "experienced"
+          ]
+        },
+        "excluded_before_task_exposure": {
+          "const": true
+        },
+        "exclusion_reason": {
+          "enum": [
+            "documented-technical-interruption",
+            "required-accommodation-unavailable"
+          ]
+        },
+        "unavailable_accommodations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/accommodationCode"
+          }
+        },
+        "replacement_participant_id": {
+          "$ref": "#/$defs/participantId"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "exclusion_reason": {
+                "const": "required-accommodation-unavailable"
+              }
+            },
+            "required": [
+              "exclusion_reason"
+            ]
+          },
+          "then": {
+            "properties": {
+              "unavailable_accommodations": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "unavailable_accommodations": {
+                "type": "array",
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "privacyProtocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "notice_version",
+        "notice_provided_at",
+        "consent_recorded_for_all_included_and_excluded",
+        "purpose_limitation",
+        "au_store_resource_id",
+        "reviewed_at",
+        "retention_delete_by",
+        "legal_hold_approved",
+        "verified_deletion_required",
+        "controller_role",
+        "no_direct_identifiers",
+        "reidentification_key_separated",
+        "recruitment_records_separated",
+        "least_privilege_named_study_team_access",
+        "immutable_access_audit",
+        "encrypted_in_transit",
+        "encrypted_at_rest",
+        "withdrawal_process_confirmed",
+        "breach_response_process_confirmed"
+      ],
+      "properties": {
+        "notice_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notice_provided_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "consent_recorded_for_all_included_and_excluded": {
+          "const": true
+        },
+        "purpose_limitation": {
+          "const": ["SC-001", "SC-006"]
+        },
+        "au_store_resource_id": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Storage/storageAccounts/[^/]+$"
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "retention_delete_by": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "legal_hold_approved": {
+          "type": "boolean"
+        },
+        "verified_deletion_required": {
+          "const": true
+        },
+        "controller_role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "no_direct_identifiers": {
+          "const": true
+        },
+        "reidentification_key_separated": {
+          "const": true
+        },
+        "recruitment_records_separated": {
+          "const": true
+        },
+        "least_privilege_named_study_team_access": {
+          "const": true
+        },
+        "immutable_access_audit": {
+          "const": true
+        },
+        "encrypted_in_transit": {
+          "const": true
+        },
+        "encrypted_at_rest": {
+          "const": true
+        },
+        "withdrawal_process_confirmed": {
+          "const": true
+        },
+        "breach_response_process_confirmed": {
+          "const": true
+        }
+      }
+    },
+    "accommodationCode": {
+      "enum": [
+        "visual-display",
+        "screen-reader",
+        "keyboard-input",
+        "hearing-support",
+        "communication-support",
+        "cognitive-access",
+        "mobility-access",
+        "scheduling-break",
+        "other-generic"
+      ]
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_identifier",
+        "reviewer_role",
+        "reviewed_at",
+        "decision",
+        "decision_reason_code"
+      ],
+      "properties": {
+        "reviewer_identifier": {
+          "type": "string",
+          "pattern": "^reviewer-[0-9a-f]{16}$"
+        },
+        "reviewer_role": {
+          "enum": ["privacy", "research-governance"]
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "decision": {
+          "enum": ["approved", "rejected"]
+        },
+        "decision_reason_code": {
+          "enum": ["study-verified", "study-rejected"]
+        }
+      }
+    },
+    "participantId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{2,63}$"
+    }
+  }
+}

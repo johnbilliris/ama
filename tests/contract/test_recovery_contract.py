@@ -11,7 +11,9 @@ from packages.domain.src.domain.models.incident import Incident
 
 
 @pytest.fixture()
-def client():
+def client(monkeypatch):
+    monkeypatch.setenv("AMA_ENVIRONMENT", "dev")
+    monkeypatch.setenv("AMA_ALLOW_ANONYMOUS_DEV_ACCESS", "1")
     app = create_app()
     with TestClient(app) as c:
         yield c

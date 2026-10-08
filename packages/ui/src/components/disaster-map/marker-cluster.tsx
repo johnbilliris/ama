@@ -159,12 +159,12 @@ export async function setupMarkerCluster(
     {
       radius: [
         "step",
-        ["get", "point_count"],
-        18, // default radius
+        ["coalesce", ["get", "point_count"], 0],
+        18,
         10,
-        24, // 10+ points
+        24,
         50,
-        32, // 50+ points
+        32,
       ] as unknown as number,
       color: "rgba(13, 107, 121, 0.7)",
       strokeColor: "rgba(13, 107, 121, 1)",

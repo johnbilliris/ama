@@ -1,4 +1,14 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+import { getApiBaseUrl } from "@/lib/api/base-url";
+const API_BASE_URL = getApiBaseUrl();
+
+export class SignalsApiError extends Error {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
 
 export interface SignalRecord {
   signal_id: string;
@@ -11,14 +21,30 @@ export interface SignalRecord {
   provenance: Record<string, unknown>;
 }
 
-export async function listSignals(incidentId: string): Promise<SignalRecord[]> {
+export interface SignalPage {
+  items: SignalRecord[];
+  total: number;
+}
+
+export async function listSignals(incidentId: string, signal?: AbortSignal): Promise<SignalRecord[]> {
   const response = await fetch(`${API_BASE_URL}/signals?incidentId=${incidentId}`, {
     cache: "no-store",
+    signal,
   });
 
   if (!response.ok) {
-    throw new Error("Failed to load incident signals");
+    throw new SignalsApiError(response.status, "Failed to load incident signals");
   }
 
-  return (await response.json()) as SignalRecord[];
+  const body: unknown = await response.json();
+  if (
+    !body ||
+    typeof body !== "object" ||
+    !Array.isArray((body as { items?: unknown }).items) ||
+    typeof (body as { total?: unknown }).total !== "number"
+  ) {
+    throw new Error("Signals API returned an unexpected response shape");
+  }
+
+  return (body as SignalPage).items;
 }

@@ -118,16 +118,16 @@ Unit tests run without any Azure services (all external dependencies are mocked)
 
 ```bash
 # From repository root
-uv run pytest tests/unit/test_communication_*.py -v
+uv run pytest tests/unit -k communication -v
 
 # Run with coverage
-uv run pytest tests/unit/test_communication_*.py -v --cov=apps/agents/communication
+uv run pytest tests/unit -k communication -v --cov=apps/agents/communication
 ```
 
 ### Expected Test Categories
 
 | Test File | What It Tests |
-|-----------|--------------|
+| --------- | ------------ |
 | `test_communication_models.py` | Pydantic v2 model validation, enum values, state transitions |
 | `test_communication_config.py` | Config loading from env vars, defaults, hash computation |
 | `test_communication_translator.py` | LLM translation, back-translation, template fallback |
@@ -150,10 +150,8 @@ cd apps/agents
 uv run python -m communication
 
 # Expected output:
-# INFO:     Communication Agent v0.1.0 starting on port 8084
-# INFO:     Template files loaded: 6 languages
-# INFO:     Dedup cache initialised (window=30min)
-# INFO:     Health endpoint ready: http://0.0.0.0:8084/health
+# INFO communication.runtime: Communication Agent service starting on port 8084
+# INFO uvicorn.error: Uvicorn running on http://0.0.0.0:8084
 ```
 
 ---
@@ -164,7 +162,8 @@ uv run python -m communication
 curl -s http://localhost:8084/health | python -m json.tool
 ```
 
-Expected response (without Azure services, shows degraded):
+Expected local response without Azure services is `degraded`; dependencies are reported as
+`not_configured`, never as healthy:
 
 ```json
 {
@@ -172,17 +171,17 @@ Expected response (without Azure services, shows degraded):
   "agent": "communication",
   "version": "0.1.0",
   "checks": {
-    "llm_connectivity": { "status": "unhealthy" },
-    "cosmos_connectivity": { "status": "unhealthy" },
-    "sms_service_status": { "status": "unhealthy" },
-    "push_service_status": { "status": "unhealthy" },
-    "broadcast_endpoint_status": { "status": "unhealthy" }
+    "llm_connectivity": { "status": "not_configured" },
+    "cosmos_connectivity": { "status": "not_configured" },
+    "sms_service_status": { "status": "not_configured" },
+    "push_service_status": { "status": "not_configured" },
+    "broadcast_endpoint_status": { "status": "not_configured" }
   },
   "operational": {
     "pending_approvals_count": 0,
     "active_deliveries_count": 0,
     "processing_queue_depth": 0,
-    "audit_store": "file",
+    "audit_store": "healthy",
     "dedup_cache_size": 0
   }
 }
@@ -190,33 +189,23 @@ Expected response (without Azure services, shows degraded):
 
 ---
 
-## 6. Verify Alert Drafting (Manual Test)
+## 6. Verify Alert Drafting
 
-With Azure OpenAI configured, test alert drafting via the existing stub:
-
-```python
-# test_draft.py — quick manual verification
-import asyncio
-from communication.agent import CommunicationAgent
-
-async def main():
-    agent = CommunicationAgent()
-    alert = agent.draft_alert(
-        incident_id="inc-test-001",
-        recommendation_id="rec-test-001"
-    )
-    print(f"Alert ID: {alert.alert_id}")
-    print(f"Status: {alert.status}")
-    print(f"Languages: {list(alert.content_blocks.keys())}")
-    for lang, text in alert.content_blocks.items():
-        print(f"  [{lang}]: {text[:80]}...")
-
-asyncio.run(main())
-```
+The runtime fails closed in staging and production unless Cosmos persistence is configured. Set the
+Entra, Cosmos, Service Bus, Foundry, and channel-provider settings from the deployment environment,
+then submit a real Risk Assessment handoff with a commander bearer token:
 
 ```bash
-uv run python test_draft.py
+curl -X POST http://localhost:8084/process-handoff \
+  -H "Authorization: Bearer ${AMA_ACCESS_TOKEN}" \
+  -H "Content-Type: application/json" \
+  --data @specs/008-communication-agent/evidence/handoff.example.json
 ```
+
+The referenced incident, recommendation, and assessment must already exist in their configured
+tenant partition. A successful response is not delivery evidence: approval and provider receipts
+must be inspected separately. Local mocked benchmarks must be labelled `local-mocked`; only an
+authorized staging run may substantiate latency, throughput, reach, or availability criteria.
 
 ---
 
@@ -266,7 +255,7 @@ curl http://localhost:8084/health
 ## Key Verification Checks
 
 | Check | Command | Expected |
-|-------|---------|----------|
+| ----- | ------- | -------- |
 | Health endpoint | `curl localhost:8084/health` | 200 with status object |
 | Unit tests pass | `uv run pytest tests/unit/test_communication_*.py` | All green |
 | Template loading | Agent startup logs | "Template files loaded: 6 languages" |
@@ -278,7 +267,7 @@ curl http://localhost:8084/health
 ## Troubleshooting
 
 | Problem | Cause | Fix |
-|---------|-------|-----|
+| ------- | ----- | --- |
 | `ModuleNotFoundError: communication` | Not running from `apps/agents/` | `cd apps/agents && uv run python -m communication` |
 | `LLM connectivity: unhealthy` | Azure OpenAI not configured | Set `AZURE_OPENAI_ENDPOINT` and authenticate via `az login` |
 | `Template file not found` | Missing `data/alert-templates/` | Create template files per data-model.md schema |

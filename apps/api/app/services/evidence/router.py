@@ -7,9 +7,26 @@ order remains explicit and importable in tests.
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
-router = APIRouter(prefix="/v1/evidence", tags=["evidence"])
+from ._problem_details import ProblemDetails
+from ._validation import reject_unknown_query_params
+
+router = APIRouter(
+    prefix="/v1/evidence",
+    tags=["evidence"],
+    dependencies=[Depends(reject_unknown_query_params)],
+    responses={
+        422: {
+            "model": ProblemDetails,
+            "description": "Request validation failed.",
+        },
+        503: {
+            "model": ProblemDetails,
+            "description": "A required evidence dependency is unavailable.",
+        },
+    },
+)
 
 
 def _wire() -> None:

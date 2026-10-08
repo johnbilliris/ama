@@ -11,6 +11,17 @@
 # requires before tagging the staging→prod cutover.
 name: staging-promotion
 
+env:
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+  UV_DEFAULT_INDEX: https://packagefeedproxy.microsoft.io/pypi/simple
+  PIP_CONFIG_FILE: /dev/null
+  PIP_EXTRA_INDEX_URL: ""
+  PIP_FIND_LINKS: ""
+  UV_INDEX: ""
+  UV_EXTRA_INDEX_URL: ""
+  UV_FIND_LINKS: ""
+  UV_NO_CONFIG: "1"
+
 # Cycle 3 / T-AA37 / Pass-1 Q3 (`spec.md:1016-1097`) — workflow-level
 # concurrency block to QUEUE common-path dispatches rather than execute
 # them in parallel. ``cancel-in-progress: false`` ensures every dispatch

@@ -1,5 +1,9 @@
+import asyncio
+from datetime import UTC, datetime, timedelta
+
 import pytest
 from app.repositories.simulation_repository import SimulationRepository
+from app.services.simulation_audit_writer import SimulationAuditWriter
 from app.services.simulation_service import SimulationService
 
 
@@ -23,8 +27,67 @@ class TestSimulationService:
             creator_oid="user-001",
         )
         assert tenant.tenant_id.startswith("sim-")
+        assert tenant.tenant_id == f"sim-{tenant.scenario_run_id}"
+        assert tenant.scenario_id == tenant.scenario_run_id
         assert tenant.status == "Active"
         assert "user-001" in tenant.participants
+        run = await repo.get_document(document_type="scenario_run", document_id=tenant.scenario_run_id)
+        assert run is not None
+        assert run["tenant_id"] == tenant.tenant_id
+
+    @pytest.mark.asyncio
+    async def test_failed_namespace_provisioning_never_reports_active(self, repo):
+        class _UnavailableRedis:
+            async def set(self, *args, **kwargs):  # noqa: ANN002, ANN003, ANN202, ARG002
+                raise ConnectionError("redis unavailable")
+
+        service = SimulationService(simulation_repository=repo, redis_client=_UnavailableRedis())
+
+        with pytest.raises(RuntimeError, match="namespace provisioning failed"):
+            await service.create_tenant(
+                scenario_type="Flood",
+                jurisdictions=["nsw"],
+                participants=["user-001"],
+                creator_oid="user-001",
+            )
+
+        tenants, total = await repo.list_by_status()
+        assert total == 1
+        assert tenants[0].status == "Provisioning"
+
+    def test_simulation_repository_requires_cosmos_in_production(self, monkeypatch):
+        monkeypatch.setenv("AMA_ENVIRONMENT", "production")
+        monkeypatch.delenv("COSMOS_ENDPOINT", raising=False)
+
+        with pytest.raises(RuntimeError, match="requires COSMOS_ENDPOINT"):
+            SimulationRepository()
+
+    def test_simulation_repository_uses_configured_cosmos_database(self, monkeypatch):
+        monkeypatch.setenv("AMA_ENVIRONMENT", "dev")
+        monkeypatch.setenv("COSMOS_DATABASE", "ama-eval")
+        requested_databases = []
+        container = object()
+
+        class _Database:
+            def get_container_client(self, container_name: str) -> object:
+                assert container_name == "simulation"
+                return container
+
+        class _CosmosClient:
+            def get_database_client(self, database_name: str) -> _Database:
+                requested_databases.append(database_name)
+                return _Database()
+
+        repository = SimulationRepository(cosmos_client=_CosmosClient())
+        assert repository._get_container() is container
+        assert requested_databases == ["ama-eval"]
+
+        explicit_repository = SimulationRepository(
+            cosmos_client=_CosmosClient(),
+            database_name="explicit-database",
+        )
+        explicit_repository._get_container()
+        assert requested_databases == ["ama-eval", "explicit-database"]
 
     @pytest.mark.asyncio
     async def test_create_tenant_validates_scenario_type(self, service):
@@ -73,6 +136,27 @@ class TestSimulationService:
         assert exc_info.value.status_code == 409
 
     @pytest.mark.asyncio
+    async def test_concurrent_creation_reserves_only_configured_capacity(self, service):
+        async def create(index: int):
+            try:
+                return await service.create_tenant(
+                    scenario_type="Flood",
+                    jurisdictions=[],
+                    participants=[f"user-{index}"],
+                    creator_oid=f"user-{index}",
+                )
+            except Exception as exc:  # noqa: BLE001
+                return exc
+
+        results = await asyncio.gather(*(create(index) for index in range(4)))
+
+        successes = [result for result in results if not isinstance(result, Exception)]
+        conflicts = [result for result in results if getattr(result, "status_code", None) == 409]
+        assert len(successes) == 3
+        assert len(conflicts) == 1
+        assert len(conflicts[0].detail["activeSimulationIds"]) == 3
+
+    @pytest.mark.asyncio
     async def test_get_tenant(self, service):
         tenant = await service.create_tenant(
             scenario_type="Cyclone",
@@ -97,6 +181,26 @@ class TestSimulationService:
         assert len(tenants) >= 1
 
     @pytest.mark.asyncio
+    async def test_list_tenants_filters_results_and_total_by_participant(self, service):
+        owned = await service.create_tenant(
+            scenario_type="Bushfire",
+            jurisdictions=[],
+            participants=["user-owned"],
+            creator_oid="user-owned",
+        )
+        await service.create_tenant(
+            scenario_type="Flood",
+            jurisdictions=[],
+            participants=["user-other"],
+            creator_oid="user-other",
+        )
+
+        tenants, total = await service.list_tenants(participant_oid="user-owned")
+
+        assert total == 1
+        assert [tenant.tenant_id for tenant in tenants] == [owned.tenant_id]
+
+    @pytest.mark.asyncio
     async def test_lifecycle_transitions(self, service, repo):
         tenant = await service.create_tenant(
             scenario_type="Bushfire",
@@ -116,3 +220,48 @@ class TestSimulationService:
         tenant = await repo.update(tenant)
         assert tenant.status == "Active"
         assert tenant.elapsed_seconds == 45.0
+
+    @pytest.mark.asyncio
+    async def test_expiry_notice_is_once_and_activity_extends_idle_ttl(self, repo):
+        audit = SimulationAuditWriter()
+        service = SimulationService(simulation_repository=repo, audit_writer=audit)
+        tenant = await service.create_tenant(
+            scenario_type="Flood",
+            jurisdictions=["nsw"],
+            participants=["user-001"],
+            creator_oid="user-001",
+        )
+        now = datetime.now(UTC)
+        tenant = await repo.update(
+            tenant.model_copy(
+                update={
+                    "last_activity_at": now - timedelta(hours=49),
+                    "expires_at": now + timedelta(hours=23),
+                    "expiry_notice_sent_at": None,
+                }
+            )
+        )
+
+        first = await service.run_expiry_tick(now)
+        second = await service.run_expiry_tick(now + timedelta(minutes=1))
+
+        assert first["notified"] == [tenant.tenant_id]
+        assert second["notified"] == []
+        touched = await repo.touch_activity(tenant.tenant_id, now + timedelta(hours=1))
+        assert touched.expiry_notice_sent_at is None
+        assert touched.expires_at == now + timedelta(hours=1 + tenant.ttl_hours)
+
+    @pytest.mark.asyncio
+    async def test_expiry_claim_allows_only_current_lease_owner(self, repo):
+        service = SimulationService(simulation_repository=repo)
+        tenant = await service.create_tenant(
+            scenario_type="Flood",
+            jurisdictions=["nsw"],
+            participants=["user-001"],
+            creator_oid="user-001",
+        )
+        now = datetime.now(UTC)
+
+        assert await repo.claim_expiry(tenant.tenant_id, "worker-a", now) is True
+        assert await repo.claim_expiry(tenant.tenant_id, "worker-b", now + timedelta(seconds=1)) is False
+        assert await repo.claim_expiry(tenant.tenant_id, "worker-a", now + timedelta(seconds=1)) is True

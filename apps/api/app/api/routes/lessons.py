@@ -12,6 +12,8 @@ from app.services.lessons_service import LessonsService
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from packages.domain.src.domain.models.lesson import AIIMSFunction, LessonSeverity, PPRRPhase
+
 router = APIRouter(prefix="/lessons", tags=["lessons"])
 
 _svc = LessonsService()
@@ -25,9 +27,9 @@ class CaptureInput(BaseModel):
     scenario_run_id: str | None = None
     title: str
     description: str
-    aiims_function: str | None = None
-    pprr_phase: str | None = None
-    severity: str = "medium"
+    aiims_function: AIIMSFunction | None = None
+    pprr_phase: PPRRPhase | None = None
+    severity: LessonSeverity = "medium"
     created_by: str = ""
     tags: list[str] = []
     originating_event_id: str | None = None
@@ -52,7 +54,7 @@ class FlagContradictoryInput(BaseModel):
 
 
 @router.post("/")
-async def capture_lesson(payload: CaptureInput) -> dict:
+async def capture_lesson(payload: CaptureInput) -> dict[str, object]:
     try:
         lesson = _svc.capture(
             incident_id=payload.incident_id,
@@ -78,7 +80,7 @@ async def list_lessons(
     aiims_function: str | None = None,
     pprr_phase: str | None = None,
     severity: str | None = None,
-) -> list[dict]:
+) -> list[dict[str, object]]:
     results = _svc.list_lessons(
         incident_id=incident_id,
         status=status,
@@ -90,17 +92,17 @@ async def list_lessons(
 
 
 @router.get("/trends")
-async def get_trends() -> dict:
+async def get_trends() -> dict[str, object]:
     return _svc.get_trends()
 
 
 @router.get("/verify-pr")
-async def verify_pr(pr_description: str) -> dict:
+async def verify_pr(pr_description: str) -> dict[str, object]:
     return _svc.verify_pr(pr_description)
 
 
 @router.get("/{lesson_id}")
-async def get_lesson(lesson_id: str) -> dict:
+async def get_lesson(lesson_id: str) -> dict[str, object]:
     lesson = _svc.get(lesson_id)
     if not lesson:
         raise HTTPException(status_code=404, detail=f"Lesson '{lesson_id}' not found")
@@ -108,7 +110,7 @@ async def get_lesson(lesson_id: str) -> dict:
 
 
 @router.put("/{lesson_id}/assign")
-async def assign_lesson(lesson_id: str, payload: AssignInput) -> dict:
+async def assign_lesson(lesson_id: str, payload: AssignInput) -> dict[str, object]:
     try:
         updated = _svc.assign(
             lesson_id=lesson_id,
@@ -121,7 +123,7 @@ async def assign_lesson(lesson_id: str, payload: AssignInput) -> dict:
 
 
 @router.put("/{lesson_id}/resolve")
-async def resolve_lesson(lesson_id: str, payload: ResolveInput) -> dict:
+async def resolve_lesson(lesson_id: str, payload: ResolveInput) -> dict[str, object]:
     try:
         updated = _svc.resolve(
             lesson_id=lesson_id,
@@ -137,7 +139,7 @@ async def resolve_lesson(lesson_id: str, payload: ResolveInput) -> dict:
 
 
 @router.put("/{lesson_id}/flag-contradictory")
-async def flag_contradictory(lesson_id: str, payload: FlagContradictoryInput) -> dict:
+async def flag_contradictory(lesson_id: str, payload: FlagContradictoryInput) -> dict[str, object]:
     try:
         updated = _svc.flag_contradictory(
             lesson_id=lesson_id,

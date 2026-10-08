@@ -81,6 +81,13 @@ class TestContentSafetyValidator:
     def validator(self):
         return ContentSafetyValidator(azure_client=None)
 
+    def test_cultural_check_rejects_stigmatising_audience_language(self, validator):
+        result = validator.validate_cultural("Evacuate normal people only from this area")
+
+        assert result.passed is False
+        assert result.validation_method == "cultural"
+        assert result.review_flag is True
+
     def test_empty_text_fails(self, validator):
         result = validator.validate(text="")
         assert not result.passed
@@ -108,6 +115,47 @@ class TestContentSafetyValidator:
         result = validator.validate(
             text="这是中文",
             expected_language="en-AU",
+        )
+        assert not result.passed
+        assert result.reason == "language_mismatch"
+
+    def test_rejects_obvious_english_substitution_for_ar_vi_el_it(self, validator):
+        english_text = "Emergency warning and evacuation now for the affected area"
+        for language in ("ar", "vi", "el", "it"):
+            result = validator.validate(text=english_text, expected_language=language)
+            assert not result.passed
+            assert result.reason == "language_mismatch"
+
+    def test_accepts_valid_samples_for_ar_vi_el_it(self, validator):
+        samples = {
+            "ar": "تحذير طارئ في المنطقة. يرجى الإخلاء الآن.",
+            "vi": "Cảnh báo khẩn cấp trong khu vực, hãy sơ tán ngay.",
+            "el": "Έκτακτη προειδοποίηση στην περιοχή, άμεση εκκένωση τώρα.",
+            "it": "Allerta di emergenza nella zona, evacuazione subito.",
+        }
+        for language, text in samples.items():
+            result = validator.validate(text=text, expected_language=language)
+            assert result.passed
+
+    def test_azure_success_still_enforces_language_validation(self):
+        class _Category:
+            severity = 0
+
+        class _AzureResponse:
+            hate_result = _Category()
+            self_harm_result = _Category()
+            sexual_result = _Category()
+            violence_result = _Category()
+
+        class _AzureClient:
+            def analyze_text(self, request):
+                _ = request
+                return _AzureResponse()
+
+        validator = ContentSafetyValidator(azure_client=_AzureClient())
+        result = validator.validate(
+            text="Emergency warning and evacuation now for the affected area",
+            expected_language="ar",
         )
         assert not result.passed
         assert result.reason == "language_mismatch"

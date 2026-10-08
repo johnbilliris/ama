@@ -101,7 +101,7 @@ def test_stage_provision_creates_resource_group_before_deployment(monkeypatch):
     assert str(_REPO_ROOT) not in commands[2]
     assert "<minimal-eval-runner-context>" in commands[2][-1]
     assert commands[3][:4] == ["az", "acr", "build", "--registry"]
-    assert commands[3][5:7] == ["--image", "ama-api:dev"]
+    assert commands[3][5:7] == ["--image", "ama/api:dev"]
     assert "<minimal-api-context>" in commands[3][-1]
     assert commands[4][:4] == ["az", "deployment", "group", "create"]
     assert "deployContainerJobs=true" in commands[4]
@@ -204,17 +204,27 @@ def test_eval_platform_provisions_foundry_account_with_curated_models():
     for marker in (
         "modelName: 'gpt-5.4'",
         "modelName: 'gpt-5.4-mini'",
-        "modelName: 'gpt-4o-mini'",
         "modelName: 'Phi-4'",
         "modelName: 'Llama-3.3-70B-Instruct'",
         "modelName: 'Mistral-Large-3'",
         "modelName: 'DeepSeek-V3.2'",
     ):
         assert marker in template, f"missing {marker} in eval-platform.bicep"
-    # runner identity must hold Cognitive Services OpenAI User on the foundry account
-    assert "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd" in template
+    # Azure AI Model Inference requires MaaS chat completions on the Foundry account.
+    assert "a97b65f3-24c7-4388-baec-2e87135dc908" in template
     assert "AZURE_AI_PROJECT_ENDPOINT" in template
     assert "AZURE_AI_PROJECT_DEPLOYMENTS" in template
+
+
+def test_eval_runner_can_upload_sample_traces():
+    template = _EVAL_PLATFORM_BICEP.read_text(encoding="utf-8")
+    runner_resource = template.split("resource jobs 'Microsoft.App/jobs@", 1)[1].split(
+        "// --- AMA API container",
+        1,
+    )[0]
+
+    assert "{ name: 'EVAL_STORAGE_ACCOUNT',     value: storage.name }" in runner_resource
+    assert "{ name: 'EVAL_TRACES_CONTAINER',    value: 'runs' }" in runner_resource
 
 
 def test_script_default_models_match_bicep_curated_set():
@@ -228,7 +238,6 @@ def test_script_default_models_match_bicep_curated_set():
     expected = {
         "gpt-5.4:2026-03-05",
         "gpt-5.4-mini:2026-03-17",
-        "gpt-4o-mini:2024-07-18",
         "Phi-4:7",
         "Llama-3.3-70B-Instruct:9",
         "Mistral-Large-3:1",
@@ -246,6 +255,7 @@ def test_script_max_cases_default_is_25():
     spec.loader.exec_module(module)
     args = module.parse_args(["--stage", "execute", "--env", "dev"])
     assert args.max_cases == 25
+    assert args.min_evaluated_samples is None
 
 
 def test_eval_platform_uses_valid_key_vault_name_pattern():
@@ -301,8 +311,9 @@ def test_eval_platform_emits_anonymous_env_var_only_in_dev():
 def test_eval_platform_api_image_repository_is_ama_api():
     template = _EVAL_PLATFORM_BICEP.read_text(encoding="utf-8")
 
-    assert "var apiImageRepository = 'ama-api'" in template
-    assert "var apiImageTag = env" in template
+    assert "var apiImageRepository = 'ama/api'" in template
+    assert "param apiImageTag string = env" in template
+    assert "param evalRunnerImageTag string = env" in template
 
 
 def test_provision_builds_api_image_into_acr(monkeypatch):
@@ -320,7 +331,7 @@ def test_provision_builds_api_image_into_acr(monkeypatch):
     script.stage_provision(ctx)
 
     api_build = next(
-        (c for c in commands if c[:4] == ["az", "acr", "build", "--registry"] and "ama-api:dev" in c),
+        (c for c in commands if c[:4] == ["az", "acr", "build", "--registry"] and "ama/api:dev" in c),
         None,
     )
     assert api_build is not None

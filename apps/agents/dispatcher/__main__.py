@@ -11,6 +11,15 @@ import os
 import uvicorn
 from dispatcher.agent import app
 
+from apps.console_logging import configure_console_logging, uvicorn_log_config
+
 if __name__ == "__main__":
+    configure_console_logging()
     port = int(os.getenv("PORT", "8080"))
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level=os.getenv("LOG_LEVEL", "info"))
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=port,
+        log_level=os.getenv("LOG_LEVEL", "info"),
+        log_config=uvicorn_log_config(),
+    )

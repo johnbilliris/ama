@@ -53,6 +53,7 @@ class SimulationEventRepository:
         self._events: dict[str, list[SimulationEvent]] = {}
         self._snapshots: dict[str, list[PlaybackSnapshot]] = {}
         self._scheduler_states: dict[str, SignalSchedulerState] = {}
+        self._scheduler_timelines: dict[str, list[dict[str, Any]]] = {}
 
         if cosmos_client is not None:
             self._client = cosmos_client
@@ -311,3 +312,57 @@ class SimulationEventRepository:
             logger.warning("save_scheduler_state: Cosmos write failed (%s)", exc)
             self._scheduler_states[state.tenant_id] = state
         return state
+
+    def save_scheduler_timeline(self, tenant_id: str, timeline: list[dict[str, Any]]) -> None:
+        document = {
+            "id": f"timeline-{tenant_id}",
+            "tenant_id": tenant_id,
+            "document_type": "signal_scheduler_timeline",
+            "timeline": timeline,
+        }
+        container = self._get_container()
+        if container is None:
+            self._scheduler_timelines[tenant_id] = list(timeline)
+            return
+        container.upsert_item(document)
+
+    def get_scheduler_timeline(self, tenant_id: str) -> list[dict[str, Any]]:
+        if tenant_id in self._scheduler_timelines:
+            return list(self._scheduler_timelines[tenant_id])
+        container = self._get_container()
+        if container is None:
+            return []
+        query = "SELECT * FROM c WHERE c.document_type = 'signal_scheduler_timeline' AND c.tenant_id = @tid"
+        items = list(
+            container.query_items(
+                query,
+                parameters=[{"name": "@tid", "value": tenant_id}],
+                partition_key=tenant_id,
+            )
+        )
+        if not items:
+            return []
+        timeline = items[0].get("timeline", [])
+        return list(timeline) if isinstance(timeline, list) else []
+
+    def delete_tenant(self, tenant_id: str) -> int:
+        container = self._get_container()
+        if container is None:
+            count = len(self._events.get(tenant_id, [])) + len(self._snapshots.get(tenant_id, []))
+            count += int(tenant_id in self._scheduler_states) + int(tenant_id in self._scheduler_timelines)
+            self._events.pop(tenant_id, None)
+            self._snapshots.pop(tenant_id, None)
+            self._scheduler_states.pop(tenant_id, None)
+            self._scheduler_timelines.pop(tenant_id, None)
+            return count
+        query = "SELECT c.id FROM c WHERE c.tenant_id = @tid"
+        documents = list(
+            container.query_items(
+                query,
+                parameters=[{"name": "@tid", "value": tenant_id}],
+                partition_key=tenant_id,
+            )
+        )
+        for document in documents:
+            container.delete_item(item=document["id"], partition_key=tenant_id)
+        return len(documents)

@@ -1,11 +1,22 @@
+import { getApiBaseUrl } from "@/lib/api/base-url";
+import { simulationAuthHeaders } from "@/lib/api/simulation-auth";
 /**
  * API client for GET /api/v1/incidents/map
  * Supports progressive loading: fetch page 1 immediately, then background-fetch
  * subsequent pages until features.length < page_size.
  */
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+const API_BASE_URL = getApiBaseUrl();
+
+function anonymousIncidentMapEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_ALLOW_ANONYMOUS_INCIDENT_MAP === "1";
+}
+
+async function incidentMapHeaders(): Promise<Record<string, string> | undefined> {
+  return anonymousIncidentMapEnabled()
+    ? undefined
+    : await simulationAuthHeaders();
+}
 
 /* ── Response types (matching GeoJSON FeatureCollection schema) ── */
 
@@ -67,6 +78,7 @@ export async function fetchIncidentsMapPage(
   filters: MapFilterParams = {},
   page = 1,
   pageSize = 200,
+  signal?: AbortSignal,
 ): Promise<IncidentFeatureCollection> {
   const params = new URLSearchParams();
   params.set("page", String(page));
@@ -83,7 +95,11 @@ export async function fetchIncidentsMapPage(
     params.set("year_end", String(filters.year_end));
 
   const url = `${API_BASE_URL}/incidents/map?${params.toString()}`;
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers: await incidentMapHeaders(),
+    signal,
+  });
 
   if (!response.ok) {
     const body = await response.text().catch(() => "");
@@ -121,7 +137,7 @@ export async function loadIncidentsProgressively(
   while (true) {
     if (signal?.aborted) return;
 
-    const result = await fetchIncidentsMapPage(filters, page, pageSize);
+    const result = await fetchIncidentsMapPage(filters, page, pageSize, signal);
     allFeatures = [...allFeatures, ...result.features];
     latestMetadata = result.metadata;
 

@@ -35,10 +35,6 @@ For the full set of guiding principles, see the [Project Constitution](.specify/
 
 ```mermaid
 graph TD
-    subgraph "Web Runtime · Next.js on App Service"
-        WEB[Dashboard & Operator UI]
-    end
-
     subgraph "API Runtime · FastAPI on Container Apps"
         API[Coordination API]
     end
@@ -55,8 +51,6 @@ graph TD
     API --> MON
     API --> RISK
     API --> EVAC
-    API --> RES
-    API --> COMMS
 
     subgraph "Azure Data Services"
         COSMOS[(Cosmos DB)]
@@ -106,28 +100,81 @@ git clone https://github.com/johnbilliris/ama.git
 cd ama
 ```
 
+### Docker Compose (Recommended)
+
+The complete application stack runs with the repository's
+[`compose.yaml`](compose.yaml). Compose builds and orchestrates five independent
+application images:
+
+```bash
+docker compose up --build
+```
+
+| Service | Image | URL |
+| --- | --- | --- |
+| Web | `ama/web:local` | <http://localhost:3000> |
+| API | `ama/api:local` | <http://localhost:8000/api/docs> |
+| Agent dispatcher | `ama/agents:local` | <http://localhost:8080/health> |
+| Evacuation agent | `ama/evacuation:local` | <http://localhost:8082/health> |
+| Ingestion | `ama/ingestion:local` | <http://localhost:8081/health> |
+
+No Azure credentials are required. Unconfigured Azure dependencies use the
+application's local in-memory or degraded-mode implementations. Redis and
+Azurite are available for targeted integration work through the optional
+`emulators` profile:
+
+```bash
+docker compose --profile emulators up --build
+```
+
+Useful lifecycle commands:
+
+```bash
+docker compose ps
+docker compose logs --follow api agents evacuation ingestion web
+docker compose down
+```
+
+### VS Code Dev Container (Optional)
+
+Install the VS Code **Dev Containers** extension and run **Dev Containers:
+Reopen in Container** to open a dedicated editor environment with Python 3.12,
+Node.js 24, pnpm, uv, Playwright, Azure CLI, and `azd`.
+
+The [`devcontainer.json`](.devcontainer/devcontainer.json) configuration is
+independent from [`compose.yaml`](compose.yaml): it is not an application
+service, is not used as the base for any application image, and does not start
+the stack automatically. Run `docker compose up --build` from its terminal when
+the application stack is needed.
+
+### Native Host Setup (Alternative)
+
 Install dependencies for all runtimes:
 
 ```bash
-# Python dependencies (API + Agents)
-uv sync
+# Python dependencies (API + Agents + Ingestion)
+uv sync --extra dev
 
 # Web dependencies
 pnpm install
 ```
 
-### Run Locally
+### Run Locally Without Docker
 
 Start each runtime in a separate terminal:
 
 ```bash
 # API runtime (FastAPI)
 cd apps/api
-uv run uvicorn main:app --reload --port 8000
+uv run uvicorn app.main:app --reload --port 8000
 
 # Agent runtime
 cd apps/agents
-uv run python -m agents
+uv run python -m dispatcher
+
+# Ingestion worker (run from the repository root)
+cd ../..
+uv run python -m apps.ingestion.worker
 
 # Web runtime (Next.js)
 cd apps/web
@@ -136,11 +183,23 @@ pnpm dev
 
 ### Deploy to Azure
 
-The deployment targets **Australia East** as the primary region. Follow the infrastructure setup in [`infra/`](infra/) to deploy all runtimes to Azure Container Apps and App Service:
+The deployment targets **Azure regions within Australia**, with Australia East as the primary region. Azure deployment is a separate, credentialed workflow; review [`infra/`](infra/) and the validation plan before provisioning:
 
 ```bash
-azd up
+azd provision --no-prompt
+azd deploy --no-prompt
 ```
+
+To build the deployment images without provisioning or deploying resources,
+run `azd package --no-prompt`. The command builds each container service as a
+multi-platform OCI image with
+`linux/amd64` and `linux/arm64` variants. Azure Container Apps pulls the AMD64
+variant, while ARM-based Docker Desktop selects the ARM64 variant from the same
+tag for native local execution. Multi-platform loading requires Docker Desktop's
+containerd image store, which is enabled by default in current releases.
+
+Do not run the provisioning or deployment commands as part of local development.
+They modify Azure resources in the selected `azd` environment.
 
 ## AIIMS Personas & Human Authority
 
@@ -159,7 +218,7 @@ This platform aligns with the Australasian Inter-Service Incident Management Sys
 ## Agents
 
 <details>
-<summary><strong>View all 5 agents and their responsibilities</strong></summary>
+<summary><strong>View the five core agents and their responsibilities</strong></summary>
 
 ### Monitoring Agent (`:8080`)
 
@@ -181,9 +240,9 @@ Tracks available resources across agencies — personnel, vehicles, medical supp
 
 Manages multi-channel alert distribution — SMS, email, radio, social media. Supports multilingual messaging for diverse communities and coordinates cross-agency communications.
 
-### Dependency Notifier Agent
+### Dependency Notifier
 
-Cross-agency dependency-graph notifier. Watches for upstream changes (e.g. weather, hydrology, road-closure) that would invalidate or escalate active recommendations, and pushes targeted notifications to the affected operators and partner agencies. Promoted to first-class agent per spec 032 (FR-AG04). See `apps/agents/dependency_notifier/`.
+Cross-agency dependency-graph notifier. This is an additional coordination capability, not one of the five core agents above. See `apps/agents/dependency_notifier/`.
 
 </details>
 
@@ -238,7 +297,7 @@ ama/
 
 | Layer | Technology | Purpose |
 | --- | --- | --- |
-| Web Runtime | Next.js 15, React, TypeScript | Operator dashboard and UI |
+| Web Runtime | Next.js 16.2.6, React, TypeScript | Operator dashboard and UI |
 | API Runtime | FastAPI, Python ≥ 3.12 | Coordination API and routing |
 | Agent Runtime | Python ≥ 3.12 | Autonomous agent processes |
 | Package Manager (JS) | pnpm 10.6.3 | Monorepo workspace management |
@@ -256,7 +315,7 @@ ama/
 | Azure Entra ID | Authentication and RBAC |
 | Azure Monitor + Application Insights | Observability and diagnostics |
 
-**Deployment Region**: Australia East (primary). All data remains within Australian Azure regions to meet data residency requirements.
+**Deployment Region**: Azure regions within Australia, with Australia East as the primary region. Regulated data remains in Australian regions. The Constitution permits only a registry-gated, approved inference-hosting exception; it does not permit offshore storage, secrets, telemetry, or audit data.
 
 ## Success Metrics
 
@@ -300,6 +359,7 @@ pwsh ./infra/scripts/azd-up-smoke-test.ps1 -BaseUrl https://prod-ama-api.example
 ```
 
 Cutover runbooks:
+
 - Game-day cadence: `docs/runbooks/036-foundry-rag-gameday.md`
 - Step-9 cutover: `docs/runbooks/036-foundry-rag-step9-cutover.md`
 
@@ -309,6 +369,7 @@ The Playwright capstone-coverage suite proves every capstone outcome × persona 
 
 ```pwsh
 pnpm install
+$env:AMA_SEED_MODE = "local"
 pwsh scripts/seed-database.ps1
 $env:AMA_TEST_SUPPORT = "1"
 pnpm --filter @ama/web exec playwright test --project=web-coverage-chromium --grep "@p1"
@@ -319,6 +380,7 @@ See `specs/034-webapp-capstone-coverage/quickstart.md` for the full developer on
 ### For Operators
 
 - [Operator Runbooks](docs/disaster-response-hub/operator-runbooks.md) — incident activation, alert publishing, degraded mode
+- [Demo Walkthrough](docs/disaster-response-hub/demo/walkthrough.md) — operator-facing demonstration flow
 - [Quickstart Guide](specs/001-disaster-response-hub/quickstart.md) — getting started with the platform
 
 See the [Project Constitution](.specify/memory/constitution.md) for complete life-safety principles, including the Incident Commander's final authority over all safety-critical decisions.
@@ -359,13 +421,13 @@ All pull requests targeting `main` are validated by the CI pipeline ([`.github/w
 Deployments follow a **branch-equals-environment** model (spec [031](specs/031-simplify-cicd-pipeline/spec.md)):
 
 | Branch | Triggers | Deploys to |
-|---|---|---|
+| --- | --- | --- |
 | `main` | `ci` | _(no deploy — integration only)_ |
 | `dev` | `ci` → `cd` | `rg-drh-dev` (Australia East) |
 | `staging` | `ci` → `cd` | `rg-drh-staging` (Australia East, with rollback) |
 | `production` | `ci` → `cd` | `rg-drh-production` (Australia East, with rollback) |
 
-Authentication uses a single `AZURE_CREDENTIALS` JSON secret per GitHub Environment — see [ADR-031](docs/aidr/decisions/adr-031-azure-credentials-mvp.md) for the rationale and the planned migration back to OIDC.
+Authentication uses a single `AZURE_CREDENTIALS` JSON secret per GitHub Environment — see [ADR-031](docs/corpus/aidr/decisions/adr-031-azure-credentials-mvp.md) for the time-bound rationale and migration context.
 
 Operator runbook for first-time setup, secret rotation, smoke testing, and troubleshooting: [`specs/031-simplify-cicd-pipeline/quickstart.md`](specs/031-simplify-cicd-pipeline/quickstart.md).
 

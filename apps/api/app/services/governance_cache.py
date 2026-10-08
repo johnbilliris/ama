@@ -33,7 +33,7 @@ class GovernanceCacheService:
     def put(self, data_source_id: str, chain: HandoffChainDefinition) -> None:
         self._store[data_source_id] = (chain, time.monotonic() + self._ttl)
 
-    def invalidate(self, data_source_id: str) -> None:
+    def invalidate(self, data_source_id: str, *, tenant_id: str | None = None) -> None:
         self._store.pop(data_source_id, None)
 
     def clear(self) -> None:

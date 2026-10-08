@@ -7,6 +7,8 @@ All endpoints must respond within 1 second (NFR target).
 from __future__ import annotations
 
 import time
+from collections.abc import Sized
+from typing import Literal, NotRequired, TypedDict
 
 from app.services.state_store import (
     AIIMS_ASSIGNMENTS,
@@ -17,10 +19,19 @@ from app.services.state_store import (
 )
 from fastapi import APIRouter
 
+
+class HealthServiceCheck(TypedDict):
+    service: str
+    status: Literal["healthy", "unhealthy"]
+    response_ms: float
+    entity_count: NotRequired[int]
+    error: NotRequired[str]
+
+
 router = APIRouter(prefix="/health/aidr", tags=["health"])
 
 
-def _check_service(store: dict, name: str) -> dict:
+def _check_service(store: Sized, name: str) -> HealthServiceCheck:
     """Check a single service store is accessible."""
     start = time.perf_counter()
     try:
@@ -43,7 +54,7 @@ def _check_service(store: dict, name: str) -> dict:
 
 
 @router.get("")
-def get_aidr_health():
+def get_aidr_health() -> dict[str, object]:
     """Aggregate health check for all AIDR services."""
     services = [
         _check_service(AIIMS_ASSIGNMENTS, "aiims"),
@@ -57,25 +68,25 @@ def get_aidr_health():
 
 
 @router.get("/aiims")
-def get_aiims_health():
+def get_aiims_health() -> HealthServiceCheck:
     return _check_service(AIIMS_ASSIGNMENTS, "aiims")
 
 
 @router.get("/evacuation")
-def get_evacuation_health():
+def get_evacuation_health() -> HealthServiceCheck:
     return _check_service(EVACUATION_STAGES, "evacuation")
 
 
 @router.get("/recovery")
-def get_recovery_health():
+def get_recovery_health() -> HealthServiceCheck:
     return _check_service(RECOVERY_TRACKERS, "recovery")
 
 
 @router.get("/lessons")
-def get_lessons_health():
+def get_lessons_health() -> HealthServiceCheck:
     return _check_service(LESSONS, "lessons")
 
 
 @router.get("/pprr")
-def get_pprr_health():
+def get_pprr_health() -> HealthServiceCheck:
     return _check_service(PPRR_CONTEXTS, "pprr")

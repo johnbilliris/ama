@@ -1,5 +1,16 @@
 name: web-coverage-iteration
 
+env:
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+  UV_DEFAULT_INDEX: https://packagefeedproxy.microsoft.io/pypi/simple
+  PIP_CONFIG_FILE: /dev/null
+  PIP_EXTRA_INDEX_URL: ""
+  PIP_FIND_LINKS: ""
+  UV_INDEX: ""
+  UV_EXTRA_INDEX_URL: ""
+  UV_FIND_LINKS: ""
+  UV_NO_CONFIG: "1"
+
 # Spec-034 FR-024 / Q5 — nightly tribunal cycle that drives the gap register
 # toward Closed within 3 cycles. Triggers:
 #   • cron at 02:00 AEST (16:00 UTC) every night.

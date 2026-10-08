@@ -15,6 +15,7 @@ Usage:
         --cosmos-endpoint https://cosmos-ama-zo6bb5.documents.azure.com:443/ \\
         --cosmos-database disaster-hub
 """
+
 from __future__ import annotations
 
 import argparse
@@ -44,8 +45,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--cosmos-database", default=os.environ.get("COSMOS_DATABASE", "disaster-hub"))
     p.add_argument(
         "--snapshot-id",
-        default=os.environ.get("HELP_SNAPSHOT_ID")
-        or f"snap-{datetime.now(UTC):%Y%m%dT%H%M%SZ}",
+        default=os.environ.get("HELP_SNAPSHOT_ID") or f"snap-{datetime.now(UTC):%Y%m%dT%H%M%SZ}",
     )
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args(argv)

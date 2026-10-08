@@ -1,3 +1,4 @@
+import asyncio
 import ftplib
 import logging
 from typing import Any
@@ -20,19 +21,18 @@ class BomRadarPipeline(IngestionPipelineBase):
             expected_update_seconds=300,
             **kwargs,
         )
-        self._known_files: set[str] = set()
 
     async def poll_source(self) -> list[dict[str, Any]]:
-        payloads: list[dict[str, Any]] = []
-        try:
+        def _fetch() -> list[dict[str, Any]]:
+            payloads: list[dict[str, Any]] = []
             ftp = ftplib.FTP("ftp.bom.gov.au", timeout=30)
             ftp.login()
             ftp.cwd("/anon/gen/radar/")
             files = ftp.nlst()
             png_files = [f for f in files if f.endswith(".png") and f.startswith("IDR")]
-            new_files = [f for f in png_files if f not in self._known_files]
 
-            for filename in new_files[:20]:
+            for filename in png_files:
+                provider_version = _get_mdtm(ftp, filename)
                 payloads.append(
                     {
                         "data_source_id": "bom-radar",
@@ -42,19 +42,33 @@ class BomRadarPipeline(IngestionPipelineBase):
                         "file_format": "png",
                         "source_uri": f"ftp://ftp.bom.gov.au/anon/gen/radar/{filename}",
                         "timestamp": filename,
+                        "provider_version": provider_version,
+                        "source_timezone": "Australia/Sydney",
                         "collection_method": "api_pull",
                         "source_kind": "sensor",
                     }
                 )
-                self._known_files.add(filename)
             ftp.quit()
+            return payloads
+
+        try:
+            return await asyncio.to_thread(_fetch)
         except Exception as exc:
             logger.error("BoM radar FTP poll failed: %s", exc)
             raise
-        return payloads
 
     def normalise(self, raw_payload: dict[str, Any]) -> dict[str, Any]:
         return normalise_binary_metadata(raw_payload)
 
     def compute_canonical_key(self, raw_payload: dict[str, Any]) -> str:
+        provider_version = str(raw_payload.get("provider_version", "")).strip()
+        if provider_version:
+            return f"bom-radar:{raw_payload.get('product_code', '')}:{provider_version}"
         return f"bom-radar:{raw_payload.get('product_code', '')}:{raw_payload.get('timestamp', '')}"
+
+
+def _get_mdtm(ftp: ftplib.FTP, filename: str) -> str:
+    try:
+        return ftp.sendcmd(f"MDTM {filename}").strip()
+    except Exception:
+        return ""

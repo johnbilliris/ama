@@ -14,6 +14,8 @@
 
 **Canonical fields**:
 
+The merged base contains **23 fields**: 10 FR-029/core identity fields, seven FR-028 domain fields, generation and tenant scope, and three storage timestamps/source fields. The earlier 22-field count omitted `incident_id`; the table below is authoritative. Implementations may add typed, queryable evidence fields without changing this canonical base.
+
 | Field | Type | Source |
 |-------|------|--------|
 | `id` | str (UUID) | FR-029 |
@@ -21,7 +23,7 @@
 | `plan_id` | str \| None | FR-029 |
 | `incident_id` | str | Derived |
 | `decision_type` | DecisionType enum | FR-029 |
-| `confidence_level` | float | FR-029 |
+| `confidence_raw` / `confidence_adjusted` | float | FR-029 confidence before/after explicit adjustments |
 | `processing_duration_ms` | float | FR-028/FR-029 |
 | `decision_rationale` | str | FR-029 |
 | `agent_version` | str | FR-029 |
@@ -32,7 +34,7 @@
 | `population_estimate` | int \| None | FR-028 — populated for plan_generated/plan_updated |
 | `transport_requests_count` | int \| None | FR-028 — populated for plan_generated/plan_updated |
 | `constraints_applied` | list[str] \| None | FR-028 — populated for plan_generated/plan_updated |
-| `replanning_triggers` | list[str] \| None | FR-028 — populated for plan_updated |
+| `replanning_triggers` | list[ReplanningTrigger] \| None | FR-028 — canonical names populated for plan_updated |
 | `generation_method` | str | Aligned with monitoring/risk assessment pattern |
 | `incident_scope_key` | str | Cosmos DB partition key |
 | `tenant_id` | str | live \| simulation |
@@ -41,6 +43,8 @@
 | `flush_source` | str \| None | direct \| memory_buffer \| file_buffer |
 
 **Rationale**: This follows the exact same pattern as risk assessment's `RiskAssessmentDecisionRecord` — shared structural fields (handoff_id, decision_type, confidence, processing_duration, agent_version, configuration_version, tenant_id, timestamp) with domain-specific optional fields. The merged schema eliminates the FR-028/FR-029 conflict while keeping domain-specific evacuation context available for post-incident review.
+
+Typed extensions include `operation_id`, upstream assessment/recommendation/signal IDs, route IDs, principal identity, disposition and content-safety evidence, expected/observed steps, per-stage durations, and completeness warnings. Plan generation/update records require matching plan identity/version and exact route/transport counts. Every append returns an accepted storage-tier receipt; required-stage reconciliation counts only accepted receipts.
 
 **Alternatives considered**:
 - **Two separate record types**: One for general audit, one for plan-specific details. Rejected — adds complexity, the monitoring/risk assessment agents use a single record type, and joins during post-incident review are unnecessary friction.
@@ -216,9 +220,9 @@
 **Decision**: Replicate the exact three-tier audit degradation pattern from `apps/agents/risk_assessment/audit.py` and `apps/agents/monitoring/audit.py`:
 
 1. **Tier 1 — Cosmos DB**: Primary append-only write via `create_item()`. Attempted first for every audit record.
-2. **Tier 2 — Memory buffer**: Bounded in-memory `deque` (default 10K records via `AUDIT_BUFFER_CAPACITY` env var). Activated when Cosmos DB `create_item()` raises any exception.
-3. **Tier 3 — File spill**: Local JSONL file (path from `AUDIT_BUFFER_FILE_PATH` env var, default `/var/log/evacuation-agent/audit-buffer.jsonl`). Activated when memory buffer is full.
-4. **Recovery flush**: Periodically (or on next successful Cosmos write), drain memory buffer first (oldest first), then file buffer, annotating each record with `buffered_at` (original buffer timestamp) and `flush_source` (`memory_buffer` or `file_buffer`).
+2. **Tier 2 — WAL-backed memory cache**: A bounded in-memory `deque` (default 10K records via `AUDIT_BUFFER_CAPACITY`) accelerates inspection, but acceptance occurs only after the record and its buffer metadata are fsynced to the local JSONL WAL.
+3. **Tier 3 — WAL-only overflow**: After the memory cache is full, additional records append to the same synchronized WAL at `AUDIT_BUFFER_FILE_PATH` (default `/app/var/evacuation-agent/audit-buffer.jsonl`). Disk, permission, or fsync failure is an explicit rejected receipt.
+4. **Recovery flush**: Drain the single WAL strictly oldest-first under the append/drain lock. Stop on the first failure or corrupt line and atomically retain the exact suffix. A 409 is success only after scoped identity/content reconciliation. Restart detects backlog before accepting newer direct writes, and healthy status returns only when no pending/corrupt/rejected state remains.
 5. **Status reporting**: `get_status()` returns `healthy` (Tier 1 active), `buffering` (Tier 2 active), or `degraded` (Tier 3 active).
 
 **Transition criteria**:

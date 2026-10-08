@@ -54,8 +54,7 @@ def _emit_table(counts: dict[str, int], groups: set[str]) -> tuple[int, int, lis
         roster = sorted(PERSONA_ROSTERS[group])
         group_in_manifest = "yes" if group in groups else "NO"
         print(
-            f"  domain_group={group:<16}  personas={len(roster):>2}  "
-            f"in_manifest={group_in_manifest}",
+            f"  domain_group={group:<16}  personas={len(roster):>2}  in_manifest={group_in_manifest}",
             file=sys.stderr,
         )
         for persona in roster:
@@ -115,8 +114,7 @@ def main(argv: list[str] | None = None) -> int:
     if missing_p or missing_g:
         if args.strict:
             print(
-                f"FAIL: {len(missing_p)} unbacked personas; "
-                f"{len(missing_g)} missing domain groups.",
+                f"FAIL: {len(missing_p)} unbacked personas; {len(missing_g)} missing domain groups.",
                 file=sys.stderr,
             )
             return 1

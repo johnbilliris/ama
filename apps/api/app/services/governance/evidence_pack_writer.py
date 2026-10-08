@@ -18,10 +18,23 @@ import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Protocol
 
 from .manual_row_ratio import compute_ratio, emit_metric
 
 logger = logging.getLogger(__name__)
+
+
+class CosmosWriter(Protocol):
+    def __call__(self, payload: dict[str, object]) -> object: ...
+
+
+class BlobWriter(Protocol):
+    def __call__(self, *, artefact_id: str, publication_id: str, payload: dict[str, object]) -> object: ...
+
+
+class AuditEventWriter(Protocol):
+    def __call__(self, **fields: str | float) -> object: ...
 
 
 @dataclass
@@ -37,9 +50,9 @@ def publish_artefact(
     sidecar_path: Path,
     *,
     published_by: str,
-    cosmos_writer=None,
-    blob_writer=None,
-    audit_writer=None,
+    cosmos_writer: CosmosWriter | None = None,
+    blob_writer: BlobWriter | None = None,
+    audit_writer: AuditEventWriter | None = None,
 ) -> PublishResult:
     """Publish a JSON sidecar through the three-layer append-only pipeline.
 
@@ -113,7 +126,7 @@ def append_audit_for_read(
     publication_id: str,
     actor_oid: str,
     manual_row_ratio: float,
-    audit_writer,
+    audit_writer: AuditEventWriter,
 ) -> None:
     """Audit a read of a `manual_row_ratio > 0.5` artefact (T035, NN-2)."""
     if manual_row_ratio > 0.5:

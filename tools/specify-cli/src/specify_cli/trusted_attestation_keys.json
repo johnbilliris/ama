@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "disposition": "synthetic-contract-pins-not-authorized-for-real-use",
+  "attestation_endpoint": "https://attestation.private.example.invalid/spec001/prewrite",
+  "managed_identity_scope": "api://ama-security-control-plane/.default",
+  "control_plane": {
+    "arm_resource_id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-spec001-au/providers/Microsoft.Web/sites/app-spec001-attestation",
+    "allowed_regions": [
+      "australiaeast",
+      "australiasoutheast"
+    ],
+    "public_network_access": "Disabled",
+    "default_network_action": "Deny",
+    "private_endpoint_id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-spec001-au/providers/Microsoft.Network/privateEndpoints/pe-spec001-attestation",
+    "private_dns_host": "attestation.private.example.invalid"
+  },
+  "key_vault": {
+    "arm_resource_id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-spec001-au/providers/Microsoft.KeyVault/vaults/kv-spec001-au",
+    "allowed_regions": [
+      "australiaeast",
+      "australiasoutheast"
+    ],
+    "public_network_access": "Disabled",
+    "default_network_action": "Deny",
+    "private_endpoint_id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-spec001-au/providers/Microsoft.Network/privateEndpoints/pe-spec001-key-vault",
+    "private_dns_host": "kv-spec001-au.vault.azure.net"
+  },
+  "signing_keys": [
+    {
+      "kid": "https://kv-spec001-au.vault.azure.net/keys/prewrite/00000000000000000000000000000001",
+      "algorithm": "ES256",
+      "public_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "axfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5RdiYwpY",
+        "y": "T-NC4v4af5uO5-tKfA-eFivOM1drMV7Oy7ZAaDe_UfU",
+        "use": "sig"
+      }
+    }
+  ]
+}

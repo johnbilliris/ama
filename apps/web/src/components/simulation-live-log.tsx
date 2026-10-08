@@ -144,7 +144,7 @@ export function SimulationLiveLog({
         setStreamed((prev) => [...prev, parsed]);
       } catch (err) {
         // Malformed events MUST NOT crash the live region — log and skip.
-        // eslint-disable-next-line no-console
+         
         console.warn("simulation-live-log: dropped malformed SSE event", err);
       }
     };

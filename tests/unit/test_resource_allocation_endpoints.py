@@ -14,13 +14,41 @@ from resource_allocation.agent import ResourceAllocationAgent, create_app
 from resource_allocation.config import ResourceAllocationConfig
 
 
+class _FakePlansStore:
+    def __init__(self):
+        self.docs = {
+            "rdp-inc001-v1": {
+                "id": "rdp-inc001-v1",
+                "status": "proposed",
+                "version": 1,
+                "_etag": "v1",
+            }
+        }
+
+    def read_item(self, item: str, partition_key: str):
+        if item != partition_key or item not in self.docs:
+            raise RuntimeError("404 NotFound")
+        return dict(self.docs[item])
+
+    def replace_item(self, item: str, body: dict, etag: str | None = None, match_condition: str | None = None):
+        if item not in self.docs:
+            raise RuntimeError("404 NotFound")
+        current = self.docs[item]
+        if etag is not None and etag != current.get("_etag"):
+            raise RuntimeError("412 PreconditionFailed")
+        next_doc = dict(body)
+        next_doc["_etag"] = f"v{int(current.get('version', 1)) + 1}"
+        self.docs[item] = next_doc
+        return dict(next_doc)
+
+
 class TestOverrideEndpoint:
     """Test the POST /override FastAPI endpoint."""
 
     @pytest.fixture
     def app(self):
         config = ResourceAllocationConfig()
-        agent = ResourceAllocationAgent(config=config)
+        agent = ResourceAllocationAgent(config=config, cosmos_plans_container=_FakePlansStore())
         return create_app(agent=agent, config=config)
 
     @pytest.fixture
@@ -86,6 +114,7 @@ class TestOverrideEndpoint:
         )
         assert response.status_code == 200
         assert response.json()["action_applied"] == "reassign"
+        assert response.json()["success"] is True
 
     def test_invalid_action_rejected(self, client):
         response = client.post(
@@ -112,6 +141,46 @@ class TestOverrideEndpoint:
             },
         )
         assert response.status_code == 400
+
+    def test_no_material_change_returns_success_false(self, client):
+        response = client.post(
+            "/override",
+            json={
+                "plan_id": "rdp-inc001-v1",
+                "action": "reassign",
+                "user_id": "cmd-001",
+                "role": "incident_commander",
+                "justification": "No effective plan delta",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json()["success"] is False
+
+    def test_unknown_plan_returns_404(self, client):
+        response = client.post(
+            "/override",
+            json={
+                "plan_id": "rdp-missing-v1",
+                "action": "approve",
+                "user_id": "cmd-001",
+                "role": "incident_commander",
+                "justification": "Plan missing",
+            },
+        )
+        assert response.status_code == 404
+
+    def test_unauthorized_role_returns_403(self, client):
+        response = client.post(
+            "/override",
+            json={
+                "plan_id": "rdp-inc001-v1",
+                "action": "approve",
+                "user_id": "cmd-001",
+                "role": "observer",
+                "justification": "Not allowed",
+            },
+        )
+        assert response.status_code == 403
 
     def test_override_returns_record_id(self, client):
         response = client.post(

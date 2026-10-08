@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "feature": "008-communication-agent",
+  "capturedAt": "2026-09-17",
+  "approvalStatus": "UNVERIFIED",
+  "operationalApproval": "UNVERIFIED",
+  "nativeLanguageReview": "UNVERIFIED",
+  "accessibilityReview": "UNVERIFIED",
+  "templates": [
+    {"locale": "ar", "path": "data/alert-templates/ar.json", "sha256": "fc97830b05b2de6f768310cac9e517234e76ef659e12ff45fc63df1c470903dd"},
+    {"locale": "el", "path": "data/alert-templates/el.json", "sha256": "52dc74b35969047049f49c699e130f1ec59d87f378852e470ccfe8e6c866d691"},
+    {"locale": "en-AU", "path": "data/alert-templates/en-AU.json", "sha256": "8684d79cc86f2f3d7d75443c265173a9dce318179231db42437f61b4830639a9"},
+    {"locale": "it", "path": "data/alert-templates/it.json", "sha256": "91d062385066e889396b11b5170e1edd36088b2d90d911212efcc8d8deae41a8"},
+    {"locale": "vi", "path": "data/alert-templates/vi.json", "sha256": "953244b18b7734474dcbd8bb70424d4297eeb81357b783f66f2fa13dc28e5527"},
+    {"locale": "zh-Hans", "path": "data/alert-templates/zh-Hans.json", "sha256": "30e3b5ff2309a0e1082ae676ae78dec4755773eaa84f632887f4510b03f298f6"}
+  ],
+  "note": "Hashes bind the reviewed source files only. They do not establish operational, native-language, accessibility, regulatory, or deployment approval."
+}
