@@ -796,14 +796,26 @@ load = [
     { name = "locust" },
     { name = "psutil" },
 ]
+windows-ci = [
+    { name = "ama-disaster-response-agents" },
+    { name = "ama-disaster-response-api" },
+    { name = "ama-eval-core" },
+    { name = "hypothesis" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
 
 [package.metadata]
 requires-dist = [
     { name = "ama-disaster-response-agents", marker = "extra == 'dev'", editable = "apps/agents" },
+    { name = "ama-disaster-response-agents", marker = "extra == 'windows-ci'", editable = "apps/agents" },
     { name = "ama-disaster-response-api", marker = "extra == 'dev'", editable = "apps/api" },
+    { name = "ama-disaster-response-api", marker = "extra == 'windows-ci'", editable = "apps/api" },
     { name = "ama-disaster-response-ingest-runner", marker = "extra == 'dev'", editable = "apps/ingest-runner" },
     { name = "ama-disaster-response-ingestion", marker = "extra == 'dev'", editable = "apps/ingestion" },
     { name = "ama-eval-core", marker = "extra == 'dev'", editable = "packages/eval-core" },
+    { name = "ama-eval-core", marker = "extra == 'windows-ci'", editable = "packages/eval-core" },
     { name = "ama-eval-dataset", marker = "extra == 'dev'", editable = "packages/eval-dataset" },
     { name = "ama-eval-runner", marker = "extra == 'dev'", editable = "apps/eval-runner" },
     { name = "azure-cosmos", specifier = ">=4.9.0" },
@@ -812,6 +824,7 @@ requires-dist = [
     { name = "cryptography", specifier = ">=50.0.0,<51" },
     { name = "fastapi", specifier = ">=0.138.0,<1" },
     { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.0" },
+    { name = "hypothesis", marker = "extra == 'windows-ci'", specifier = ">=6.0" },
     { name = "import-linter", marker = "extra == 'dev'", specifier = ">=2.0" },
     { name = "jsonschema", specifier = ">=4.21" },
     { name = "locust", marker = "extra == 'load'", specifier = ">=2.31,<3" },
@@ -822,7 +835,9 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.10.0" },
     { name = "pygments", specifier = ">=2.20.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3" },
+    { name = "pytest", marker = "extra == 'windows-ci'", specifier = ">=8.3" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24" },
+    { name = "pytest-asyncio", marker = "extra == 'windows-ci'", specifier = ">=0.24" },
     { name = "pytest-benchmark", marker = "extra == 'dev'", specifier = ">=5.1" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0" },
     { name = "pyyaml", specifier = ">=6.0" },
@@ -830,9 +845,10 @@ requires-dist = [
     { name = "requests", specifier = ">=2.33.0" },
     { name = "rfc8785", specifier = ">=0.1.4" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8.4" },
+    { name = "ruff", marker = "extra == 'windows-ci'", specifier = ">=0.8.4" },
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0.12" },
 ]
-provides-extras = ["dev", "load"]
+provides-extras = ["dev", "windows-ci", "load"]
 
 [[package]]
 name = "ama-disaster-response-ingest-runner"

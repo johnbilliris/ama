@@ -18,7 +18,6 @@ on:
       - dev
       - staging
       - production
-      - "[0-9][0-9][0-9]-*"
   pull_request:
     branches:
       - main
@@ -364,6 +363,7 @@ jobs:
     env:
       PIP_CONFIG_FILE: NUL
       PYTHONIOENCODING: utf-8
+      UV_CACHE_DIR: ${{ runner.temp }}\uv-cache
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
@@ -372,33 +372,39 @@ jobs:
           cache: pip
           cache-dependency-path: |
             .github/workflows/ci.yml
-            apps/api/pyproject.toml
-            apps/agents/pyproject.toml
-            packages/eval-core/pyproject.toml
-            apps/eval-runner/pyproject.toml
+            pyproject.toml
+            uv.lock
+      - name: Install uv
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check uv==0.11.21
+      - name: Cache uv packages
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ${{ env.UV_CACHE_DIR }}
+          key: ${{ runner.os }}-py3.12-uv-${{ hashFiles('uv.lock') }}
       - name: Install Python tooling and test dependencies
         shell: pwsh
         run: |
           $installTimer = [System.Diagnostics.Stopwatch]::StartNew()
-          python -m pip install --upgrade pip pytest pytest-asyncio hypothesis ruff -e apps/api -e apps/agents -e packages/eval-core
+          uv sync --locked --extra windows-ci --no-install-project
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Write-Host ("Core Python test dependencies installed in {0:n1}s" -f $installTimer.Elapsed.TotalSeconds)
       - name: Install eval gate package without runtime dependencies
         shell: pwsh
         run: |
           $installTimer = [System.Diagnostics.Stopwatch]::StartNew()
-          python -m pip install --no-deps -e apps/eval-runner
+          uv pip install --python .venv\Scripts\python.exe --no-deps -e apps/eval-runner
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Write-Host ("Eval gate package installed in {0:n1}s" -f $installTimer.Elapsed.TotalSeconds)
       - name: ruff check (Windows)
         shell: pwsh
-        run: ruff check apps tests packages
+        run: uv run --no-sync ruff check apps tests packages
       - name: pytest contract + integration (Windows)
         shell: pwsh
         run: |
           # Spec 036 / F-A10 / T218 — Windows runner mirrors the Linux contract+integration
           # sweep so packaging regressions surface on PRs (FR-RAG-TEST-01).
-          pytest tests/contract tests/integration -q --tb=line --maxfail=10
+          uv run --no-sync pytest tests/contract tests/integration -q --tb=line --maxfail=10
 
   # ---------------------------------------------------------------------------
   # Spec 036 / F-A10 / T220 + T222 — per-PR golden-set canonicalisation gate.
@@ -622,12 +628,29 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
+      - name: Cache Playwright browsers
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-pw-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
       - name: Install API package
         run: |
           python -m pip install -e apps/api
           python -m pip install -e apps/agents
+      - name: Configure reliable Ubuntu APT mirror
+        run: |
+          set -euo pipefail
+          if sudo grep -Rqs -- 'azure.archive.ubuntu.com' /etc/apt/sources.list.d; then
+            sudo grep -RIlZ -- 'azure.archive.ubuntu.com' /etc/apt/sources.list.d \
+              | sudo xargs -0r sed -i 's|azure.archive.ubuntu.com|archive.ubuntu.com|g'
+            echo "::notice::Using archive.ubuntu.com instead of the Azure APT mirror."
+          else
+            echo "::notice::No Azure APT mirror entries found; keeping the runner's configured mirror."
+          fi
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
+            | sudo tee /etc/apt/apt.conf.d/99ci-timeouts >/dev/null
       - name: Install Playwright Chromium
         run: pnpm --filter @ama/web exec playwright install --with-deps chromium
       - name: Assert Spec 040 evidence tests are collected
@@ -647,9 +670,9 @@ jobs:
         run: |
           set -euo pipefail
           LIST_OUTPUT="$(pnpm --filter @ama/web exec playwright test --list --project=chromium --project=mobile \
-            ../../tests/e2e/test_incident_commander_dashboard.spec.ts \
-            ../../tests/e2e/test_persona_workspace.spec.ts \
-            ../../tests/e2e/test_dashboard_decision_support.spec.ts)"
+            test_incident_commander_dashboard.spec.ts \
+            test_persona_workspace.spec.ts \
+            test_dashboard_decision_support.spec.ts)"
           echo "$LIST_OUTPUT"
           COLLECTED_COUNT="$(printf '%s\n' "$LIST_OUTPUT" | grep -E 'test_incident_commander_dashboard|test_persona_workspace|test_dashboard_decision_support' | wc -l)"
           if [ "${COLLECTED_COUNT}" -eq 0 ]; then

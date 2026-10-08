@@ -47,6 +47,15 @@ dev = [
   "types-pyyaml>=6.0.12",
   "pyyaml>=6.0",
 ]
+windows-ci = [
+  "ama-disaster-response-agents",
+  "ama-disaster-response-api",
+  "ama-eval-core",
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "hypothesis>=6.0",
+  "ruff>=0.8.4",
+]
 # Spec 036 / F-A10 / T219 + T224 — load-test extras (FR-RAG-TEST-02).
 load = [
   "locust>=2.31,<3",
