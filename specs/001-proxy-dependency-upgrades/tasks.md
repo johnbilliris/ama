@@ -349,7 +349,12 @@ All three tasks defer writes to the shared evidence ledger until sequential reco
 - **T024 `[ ]`** — full cross-context reconciliation remains open. Candidate A/B maps establish Linux/ARM64 repeatability only; Linux x64 and Windows x64 candidates, marker coverage, and independent pip/helper/container consumers have not been revalidated.
 - **T039 `[ ]` and T041 `[ ]`** — E21 adds two clean ARM64 install maps per uv lock and one Linux x64 map per lock; the required two clean Linux x64 candidate installs per context are still incomplete. **T040 `[ ]`** — the Windows x64 candidate `windows-ci` install and quality job were not started because GitHub reported an account-payment/spending-limit block.
 - **T045 `[ ]`** — candidate policy, lint/type/import, selected unit/equivalence/configuration, and isolation checks are recorded in E21. Hosted Linux x64 quality, benchmark, and coverage-ratchet checks passed; the full local ARM64 quality suite and benchmark selection retain the same failures as baseline. Windows x64 and remaining required checks are not complete.
-- **T052 and Phase 8 remain incomplete.** No PR outcome is final, the remaining npm/Action work is not authorized by E20, and the candidate lock changes have not been committed or pushed to draft PR #152.
+- **T052 and Phase 8 remain incomplete.** No PR outcome is final, the remaining npm/Action work is not authorized by E20, and the candidate lock changes are committed and pushed to draft, unmerged PR #152 (`150f9ad3`; E21 evidence update `eff69962`).
+
+### E22 status update — Next ARM64 SWC retrieval
+
+- **T011 `[ ]`** — E22 retrieved and SHA-512-verified both Next `16.3.8` ARM64 SWC archives via the approved proxy and successfully loaded the bindings on GNU and musl ARM64 Node 24.21.0. This closes the earlier ARM64 artifact-availability/native-load gap only. Final `vsblob.vsassets.io` host policy, full npm closure, other package families, and supported candidate app-build gates remain open.
+- **T020 `[X]`** — the execution allowlist remains the five Python uv-lock work items only. E22 does not clear NW-next's remaining source, closure, or compatibility holds and authorizes no npm manifest/lock edit.
 
 ## Notes
 
