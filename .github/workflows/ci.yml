@@ -41,6 +41,48 @@ jobs:
           python -m pip install pytest
           python -m pytest tests/policy -q
 
+  phase8-python-baseline-maps:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == '001-proxy-dependency-upgrades'
+    needs: python-package-source-policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Install uv from the approved Python proxy
+        run: python -m pip install --disable-pip-version-check uv==0.11.21
+      - name: Install and capture root locked environment
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/phase8-root-uv
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/phase8-python-baseline-maps"
+          python --version
+          uv --version
+          uv sync --locked --extra dev --extra load --no-cache --python 3.12 --no-python-downloads
+          uv pip list --python "$UV_PROJECT_ENVIRONMENT/bin/python" --format=freeze | LC_ALL=C sort -f > "$RUNNER_TEMP/phase8-python-baseline-maps/root-uv-map.txt"
+          sha256sum "$RUNNER_TEMP/phase8-python-baseline-maps/root-uv-map.txt"
+          grep -Ei '^(aiohttp|cryptography|h2|hpack|idna|mcp|msgpack|pyjwt|pydantic-settings|redis-entraid|setuptools|starlette|python-engineio|python-socketio|python-multipart)==' "$RUNNER_TEMP/phase8-python-baseline-maps/root-uv-map.txt"
+      - name: Install and capture agents locked environment
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/phase8-agents-uv
+        run: |
+          set -euo pipefail
+          uv sync --project apps/agents --locked --no-cache --python 3.12 --no-python-downloads
+          uv pip list --python "$UV_PROJECT_ENVIRONMENT/bin/python" --format=freeze | LC_ALL=C sort -f > "$RUNNER_TEMP/phase8-python-baseline-maps/agents-uv-map.txt"
+          sha256sum "$RUNNER_TEMP/phase8-python-baseline-maps/agents-uv-map.txt"
+          grep -Ei '^(aiohttp|cryptography|h2|hpack|idna|mcp|msgpack|pyjwt|pydantic-settings|redis-entraid|setuptools|starlette|python-engineio|python-socketio|python-multipart)==' "$RUNNER_TEMP/phase8-python-baseline-maps/agents-uv-map.txt"
+      - name: Upload locked Python baseline maps
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: phase8-python-baseline-maps
+          path: ${{ runner.temp }}/phase8-python-baseline-maps/
+          if-no-files-found: warn
+          retention-days: 7
+
   simulation-tenant-isolation:
     needs: python-package-source-policy
     runs-on: ubuntu-latest

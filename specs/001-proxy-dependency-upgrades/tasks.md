@@ -83,7 +83,7 @@ Every task line uses `- [ ] Tnnn [P?] [USn?] Description with file path`. `[P]` 
 - [ ] T006 **GATED — B-CONSUMER-BASE**. Planning did not establish installed baselines or repeatability for affected pip/helper/container recipes; a `uv.lock` cannot prove their resolution. Before dependency edits, reproduce and record the actual baseline resolutions for every affected consumer using its checked-in recipe: `C:\code\ama\.github\workflows\ci.yml`, `eval-pr-gate.yml`, applicable `spec\*.yml` and other affected workflow recipes; `C:\code\ama\scripts\install_pyproject_dependencies.py`; `C:\code\ama\apps\api\Dockerfile`, `apps\agents\Dockerfile`, `apps\ingestion\Dockerfile`, `apps\ingest-runner\Dockerfile`, `apps\eval-runner\Dockerfile`; and `C:\code\ama\.devcontainer\install-python-dependencies.py`. Record separate recipe/environment IDs and installed maps in `C:\code\ama\specs\001-proxy-dependency-upgrades\evidence.md`. Preserve independently newer results; do not impose root pins, add a global constraints file, or convert consumers to uv. Leave B-CONSUMER-BASE blocking any unresolved consumer decision.
 
 <!-- sequential -->
-- [ ] T007 Run the applicable repository quality checks against the unchanged, frozen baseline in the environments assigned by `C:\code\ama\specs\001-proxy-dependency-upgrades\quickstart.md` §4; record exact commands, selectors, versions, exit/status, and failure fingerprints in `C:\code\ama\specs\001-proxy-dependency-upgrades\evidence.md`. Classify each as `passed`, `failed`, `blocked`, `not-run`, or justified `not-applicable`; do not waive a pre-existing failure, infer a pass from a skipped credentialed test, or start version edits until required baseline/source gates are evidenced.
+- [X] T007 Run the applicable repository quality checks against the unchanged, frozen baseline in the environments assigned by `C:\code\ama\specs\001-proxy-dependency-upgrades\quickstart.md` §4; record exact commands, selectors, versions, exit/status, and failure fingerprints in `C:\code\ama\specs\001-proxy-dependency-upgrades\evidence.md`. Classify each as `passed`, `failed`, `blocked`, `not-run`, or justified `not-applicable`; do not waive a pre-existing failure, infer a pass from a skipped credentialed test, or start version edits until required baseline/source gates are evidenced. **E19: complete as baseline outcome capture only; the baseline is not all-green and T020 remains controlling.**
 
 **Checkpoint**: T003–T005 establish the scoped npm proxy settings; T006–T007 establish affected consumer baselines and unchanged-baseline check status. Do not close B-SOURCE-ENV from configuration alone: record approved-source behavior and keep any unverified boundary or artifact host blocked. If an environment, feed, baseline, or required tool is unavailable, record the concrete hold and block only its dependent scope; do not substitute a different environment.
 
@@ -333,6 +333,14 @@ All three tasks defer writes to the shared evidence ledger until sequential reco
 3. Complete two-clean-install pairs for every affected environment, then every applicable quality/security gate (T036–T048).
 4. Finish evidence consolidation, all 35 readiness checklist rows, and final input-integrity review (T049–T051), then finalize per-PR statuses in T052 only from that evidence.
 5. Complete the requirements/acceptance crosswalk and handover (T053–T054), then have the independent second maintainer complete T055. Keep SC-004/SC-009 pending until that review passes; report any unresolved scope as blocked/incomplete and do not claim whole-batch readiness.
+
+### E19 status update — hosted baseline matrix and T020 re-evaluation
+
+- **T002 `[ ]`** — still incomplete: hosted Linux x64 and Windows x64 rows are now evidenced; the Linux x64 root `uv.lock`, remaining helper/container and standalone-agents environments, Alpine/musl candidate coverage, and Action-runner rows are not.
+- **T006 `[ ]`** — still incomplete: Linux x64 pip/editable-install and Windows x64 root `windows-ci` results are recorded, but the full installed maps and other affected consumer recipes are not.
+- **T007 `[X]`** — baseline outcome capture is complete across the available local and hosted runs; failures, skipped jobs, blocked checks, and missing environments remain explicitly recorded and are not passes.
+- **T011 `[ ]`** and **T013 `[ ]`** — remain incomplete for npm artifact/source closure and Action runner/provenance gates, respectively.
+- **T020 `[X]`** — re-evaluated in E19; execution allowlist is empty. T021–T023 remain unchecked and were not started.
 
 ## Notes
 
