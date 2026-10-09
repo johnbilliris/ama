@@ -1164,21 +1164,30 @@ The new fresh Linux x64 maps close the exact baseline gap for the root and agent
 
 **T020 result after E20: non-empty allowlist for exactly five Python uv-lock work items.** T022 may update only root `uv.lock` for #111; T023 may update only `apps/agents/uv.lock` for #112, #136 (including hpack), #129, and #122. Do not edit declarations as a convenience; the approved targets are transitive resolutions in these lock contexts. No PR direction is final until T052's post-edit install, quality, security, and integrity checks pass. `T006` remains unchecked and `B-CONSUMER-BASE` remains open for independent pip/helper/container recipes; `T007` is complete as baseline result capture, not an all-green result. `T011` remains incomplete for npm/browser/redirect-host closure, `T013` remains incomplete for Actions, and the baseline story-selector failure and Next CVE remain recorded. T021 is excluded from this allowlist; only the Python lock scopes in T022–T023 may start.
 
-## E21 — Python lock candidates: ARM64 repeatability and quality checks
+## E21 — Python lock candidates: ARM64 repeatability, x64 maps, and quality checks
 
 Observed 2026-10-09 on branch `001-proxy-dependency-upgrades`, HEAD `d01cf1ed683e84ed2f837f54e5b6550da323c96e`, before publishing the candidate locks. The installed environments ran inside the existing Linux/ARM64 devcontainer: Linux `aarch64`, CPython 3.12.11, uv 0.11.21. The configured source was `https://packagefeedproxy.microsoft.io/pypi/simple`; `scripts/verify_python_package_sources.py` passed and confirmed that approved source. These runs supplement, but do not replace, the Linux x64 baseline maps in E20 or establish Windows x64 results.
 
 Each candidate pair used separate `UV_PROJECT_ENVIRONMENT` directories and `--no-cache`. Root A/B ran from `/workspace` with `uv sync --locked --extra dev --extra load --no-cache --python 3.12 --no-python-downloads`; standalone agents A/B ran from `/workspace/apps/agents` with `uv sync --project /workspace/apps/agents --locked --no-cache --python 3.12 --no-python-downloads`. Each installed map was generated with `uv pip list --python <run-env>/bin/python --format=freeze | LC_ALL=C sort -f`. `cmp` and SHA-256 confirmed that A and B were identical for each lock.
 
 | Candidate lock context | Installed rows per run | A/B installed-map SHA-256 | Full map |
-|---|---:|---|---|
+| --- | ---: | --- | --- |
 | Root, `dev` + `load`, Linux/ARM64 | 298 | `f7cb6864d61cf76042d427d42f4705b4fe8b4b37b574522d4ed6da8ee4df7d58` | [`e21-root-linux-arm64.txt`](./candidate-maps/e21-root-linux-arm64.txt) |
 | Standalone agents, Linux/ARM64 | 244 | `8cec5212cf59f90c3ccc8c373c58ac3862a62a09d707953abbcfde996b419ab5` | [`e21-agents-linux-arm64.txt`](./candidate-maps/e21-agents-linux-arm64.txt) |
 
 The candidate map hashes also match the persisted map-file hashes. `uv lock --check --no-cache` passed for both lockfiles (309 root and 251 agents locked packages resolved). Full sorted baseline-to-candidate installed-map comparison on the same ARM64 runtime found no unapproved changes:
 
+The feature-scoped `phase8-python-baseline-maps` job also completed successfully in CI run [`37903502768`](https://github.com/johnbilliris/ama/actions/runs/37903502768), on `ubuntu-24.04`, using the same approved proxy controls as E20. It produced one fresh no-cache locked candidate install per uv lock. Each candidate x64 map has the same number of rows as its E20 x64 baseline map; direct sorted comparison found only the authorized changes listed below. These are single-install x64 maps, not the required two-run x64 repeatability pair.
+
+| Candidate lock context | Installed rows | Map SHA-256 | Full map |
+| --- | ---: | --- | --- |
+| Root, Linux x64 | 302 | `1dc8fef140566f9b5e15cc7669de0f5e2de3de9e3775a6054abbef3144316441` | [`e21-root-linux-x64.txt`](./candidate-maps/e21-root-linux-x64.txt) |
+| Standalone agents, Linux x64 | 248 | `f2821283d8f081b91cff306a45080e87b1fba55bdedd5b4a2f5384683cdebce9` | [`e21-agents-linux-x64.txt`](./candidate-maps/e21-agents-linux-x64.txt) |
+
+The exact x64 root delta against E20 is `idna 3.11 → 3.15`. The exact agents delta is `h2 4.3.0 → 4.4.1`, `hpack 4.1.0 → 4.2.0`, `idna 3.11 → 3.15`, `pydantic-settings 2.14.1 → 2.14.2`, and `setuptools 82.0.1 → 83.0.0`; no other installed-map entry changed. E20 baseline and E21 candidate map hashes fingerprint complete installed-version maps, not package archives.
+
 | Lock scope | Exact installed-map delta | Protected versions unchanged |
-|---|---|---|
+| --- | --- | --- |
 | Root `uv.lock` | `idna 3.11 → 3.15` | `cryptography 50.0.1`, `msgpack 1.2.2`, `PyJWT 2.15.0`, `h2/hpack 4.4.1/4.2.0`, `pydantic-settings 2.15.0`, and `setuptools 84.0.0`. |
 | `apps/agents/uv.lock` | `h2 4.3.0 → 4.4.1`, `hpack 4.1.0 → 4.2.0`, `idna 3.11 → 3.15`, `pydantic-settings 2.14.1 → 2.14.2`, `setuptools 82.0.1 → 83.0.0`. | `cryptography 50.0.1`, `msgpack 1.2.2`, `PyJWT 2.15.0`, `aiohttp 3.14.3`, `pyasn1 0.6.4`, `mcp 1.30.0`, `python-engineio 4.14.0`, `python-socketio 5.17.0`, `starlette 1.7.0`, and `python-multipart 0.0.32`. |
 
@@ -1187,7 +1196,7 @@ Post-edit SHA-256: root `uv.lock` `402417e4a32c94235801644b63ee4ea174376fd6c4468
 ### Candidate checks
 
 | Candidate environment / check | Result |
-|---|---|
+| --- | --- |
 | Root source policy, `python /workspace/scripts/verify_python_package_sources.py` | **PASS** — approved Microsoft Python proxy confirmed. |
 | Root lock validity, `uv lock --check --no-cache`; agents equivalent | **PASS** — both existing lock graphs resolve without rewriting. |
 | Root candidate policy/equivalence tests, `pytest tests/policy tests/equivalence` | **PASS** — 18 passed. |
@@ -1197,5 +1206,10 @@ Post-edit SHA-256: root `uv.lock` `402417e4a32c94235801644b63ee4ea174376fd6c4468
 | Root candidate full Linux quality selection from Quickstart §4 | **FAIL, same baseline failures** — 5,820 passed, 2 failed, 19 skipped, 14 deselected, 32 warnings; exit 1 after 1,339.64 s. The two failures are `tests/integration/test_indexing_licence_inventory_lint.py::test_lint_detects_inventory_row_missing` and `::test_lint_detects_orphan_inventory_row`, both `PermissionError [Errno 1] Operation not permitted` from `shutil.copymode` on `/workspace/docs/corpus/INDEXING-LICENCE-INVENTORY.md`. E15's unchanged ARM64 baseline records the same two failures and counts; no failure was waived or fixed. |
 | Root candidate benchmark selection | **FAIL, same baseline failures** — 27 passed, 6 failed, 2 warnings. The same six tests also fail in the unchanged `/tmp/phase8-root-uv` baseline: `test_aiims_assignment_under_5s`, `test_pprr_transition_under_5s`, `test_recovery_dashboard_under_10s`, `test_concurrent_recovery_operations`, `test_api_dashboard_p95_concurrent`, and `test_pipeline_evacuation`. |
 | `uv pip check` against old and candidate root/agents environments | **FAIL, unchanged baseline metadata conflicts** — root: `redis-entraid 1.2.1` declares `PyJWT~=2.13.0` while the preserved security override installs `PyJWT 2.15.0`; agents: `agent-framework-mem0` declares `mem0ai<2` while the preserved patched-version override installs `mem0ai 2.0.2`. Both exact findings also occur in the respective pre-edit ARM64 environments. The overrides and installed protected versions were not weakened. |
+| Candidate GitHub Actions Linux x64 quality (`ci.yml` run `37903502768`) | **PASS** — quality job completed: 5,829 passed, 12 skipped, 14 deselected; equivalence 6 passed; Python coverage-ratchet phase A passed at 78.58% (floor 0%, no prior artifact); benchmark 33 passed. Source-policy, docs, and simulation-isolation jobs also passed. This is the existing CI pip/editable-install recipe, not a second uv-lock install. |
+| Candidate GitHub Actions Windows x64 / other gated jobs (`ci.yml` run `37903502768`) | **BLOCKED before start** — `quality-windows`, `accessibility-citation-card`, `golden-set-canonical`, `evidence-pack-publication-gate`, and `story-acceptance` jobs were not started; GitHub reported recent account payment failure or a spending-limit restriction. They have no candidate test result. `specify-cli-quality` was skipped by its change detector. Overall `ci.yml` run concluded failure because of these blocked jobs. |
+| Candidate security scan, run `37903502714` | **FAIL, unchanged baseline finding** — gitleaks and PSRule passed; Trivy found only `next 16.3.6`, HIGH `CVE-2026-94483`, fixed in `16.3.8`. No Next.js or npm files were changed in this Python-only candidate. |
+| Candidate eval PR gate, run `37903502727` | **PASS** — eval-gate job completed successfully. |
+| Markdownlint of `tasks.md` and `evidence.md` via the approved npm proxy | **INCOMPLETE** — 52 existing MD060 table-spacing diagnostics remain before the new E21 sections; no diagnostics were emitted for the updated E21 sections. |
 
-The Linux/ARM64 candidate results do not establish candidate Linux x64 or Windows x64 installation/quality. The Windows `windows-ci` lock candidate, its no-deps eval-runner step, the CI coverage ratchet (PowerShell is unavailable in this container), independent pip/helper/container recipes, and remaining npm/Action scopes were not run. T006/B-CONSUMER-BASE, T024, T039–T041, T045, and the final T052 disposition remain incomplete as recorded in `tasks.md`; no PR outcome is final.
+E21 has a repeatable two-install ARM64 map pair and one hosted Linux x64 candidate map per lock; it does not establish the required two clean x64 lock installs per context. The Linux x64 quality job and its coverage ratchet passed, but the Windows x64 `windows-ci` candidate install, no-deps eval-runner step, and Windows quality/coverage were not run because that job could not start. Independent pip/helper/container recipes and remaining npm/Action scopes also remain unmeasured or blocked. T006/B-CONSUMER-BASE, T024, T039–T041, T045, and the final T052 disposition remain incomplete as recorded in `tasks.md`; no PR outcome is final.
