@@ -167,3 +167,94 @@ Ubuntu quality/story/accessibility/security gates, Windows quality, standalone a
 | B-VALIDATION | All 33 | No clean installs/tests/security clearance; native/transitive coverage incomplete; cosign assets/signature and live/sovereign checks outstanding. | QA/DevOps/security owners: execute `quickstart.md` only after approval; record failures/unrun checks individually. |
 
 The first four blocker IDs hold five individual PRs. Cross-cutting blockers prevent any final readiness claim. A human can approve the Plan with holds intact; neither approval nor complete accounting silently excludes those PRs or authorises remote mutations.
+
+## Phase 8 provisional PR/work-item decision ledger (T019)
+
+**Status: provisional only.** This appendix preserves one direction for each of the 33 source PRs and a separately scoped direction for each of the 31 work items. Nothing below is a final outcome, artifact-closure claim, clean-install result, security clearance, or policy waiver. See `evidence.md` E6–E12 for the execution-start source/workflow hashes, per-environment holds, current proxy artifact observations, official Action identities, and open gates. The original E1 snapshot and R1 rows above are retained.
+
+**Count units remain distinct:**
+
+| Unit | P | F | R | H | Total |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Individual PR directions | 12 | 1 | 15 | 5 | 33 |
+| Scoped work-item directions | 12 | 1 | 13 | 5 | 31 |
+
+`NW-next` reconciles one aggregate provisional P work item (`16.3.8`) to three individually preserved source directions: #149 P, `16.3.6 → 16.3.8`, originally `apps\web`; #133 R, `16.2.6 → 16.2.11`, originally supplied as root-lock scope; #132 R, `16.2.6 → 16.2.11`, originally `apps\web`. Their current common revalidated resolution scope is the `apps\web` importer in the single root `pnpm-lock.yaml`. This count reconciliation does not finalize the work item.
+
+### Per-PR provisional source and direction records
+
+In every row, `scope` is the separately revalidated scope; the source PR's original supplied scope/target remain in R1 and `spec.md`. `Evidence/gaps` refers to the detailed E1/E2/E3/E4 and E6–E12 observation records, not an outcome certificate. All npm/Python evidence used the approved Microsoft proxy; all Action evidence used official upstream sources.
+
+| PR | Original proposed change | Revalidated scope and baseline | Candidate / rejected alternatives | Provisional direction and evidence gap |
+| --- | --- | --- | --- | --- |
+| #149 | Next `16.3.6 → 16.3.8` | NW web importer/root pnpm lock, baseline `16.3.6` | `16.3.8`; no older target substituted | **P**; proxy archive SRI checked, direct Linux x64 GNU/musl SWC and `@next/env` fetched; broader native/transitive and installs pending |
+| #150 | ESLint `9.39.4 → 10.12.0` | NW web importer/root pnpm lock, baseline `9.39.4` | Target absent; `10.11.0` fetched but excluded by ESLint-9-only react/import/jsx-a11y peers; no major-9 fallback | **H** B-ESLINT; retain baseline; compatible major-10 family or separately approved bounded scope change required |
+| #148 | jsdom `25.0.1 → 30.1.2` | NW web importer/root pnpm lock, baseline `25.0.1` | Target absent; `30.1.1` is highest lower stable same-major candidate observed | **F** provisional; archive SRI checked; requires Node `>=24.15.0` in major 24 and full transitive/runtime/test evidence; actual CI patch missing |
+| #147 | `@playwright/test` `1.59.1 → 1.63.0` | NW web importer/root pnpm lock; current trio `1.59.1` | Target trio `@playwright/test`/`playwright`/`playwright-core` `1.63.0`, coupled | **P**; package archives fetched; browser CDN/OS payload source not approved/retrieved and CI tests not run |
+| #146 | `@types/node` `22.13.10 → 26.6.4` | NW web importer/root pnpm lock, baseline `22.13.10`, Node 24 runtime | Exact target archive retrieved; no invented major-24 substitute | **H** B-TYPES; Node-24 surface/runtime compatibility assessment and tests missing |
+| #144 | MSAL React `5.3.2 → 5.7.2` | NW web importer/root lock; React `5.3.2`, browser `5.9.0`, common `16.5.2`/`16.14.1` | React `5.7.2` → browser `5.24.0` → common `16.14.2`; no public-feed bypass/React downgrade | **H** B-MSAL; direct archives/SRI and peers now observed; full source-host approval, auth tests and clean install remain open |
+| #133 | Next `16.2.6 → 16.2.11` | NW web importer/root lock; baseline Next `16.3.6` | Original older goal preserved; shared NW goal `16.3.8` belongs to #149 | **R** provisional; #133’s old target does not supersede current shared work-item goal; not a delivered retain outcome |
+| #137 | js-yaml `4.1.1 → 4.3.1` | NW web importer/root lock; baseline `4.1.1` | Exact `4.3.1` | **P**; archive matched proxy SHA-1 only (no SHA-512 SRI); stronger final provenance and YAML/build tests pending |
+| #132 | Next `16.2.6 → 16.2.11` | NW web importer/root lock; baseline Next `16.3.6` | Original older goal preserved; shared NW goal `16.3.8` belongs to #149 | **R** provisional; target and originally supplied `apps\web` scope retained; no delivered retain evidence |
+| #130 | UI Next `15.5.18 → 15.5.21` | NU UI importer/root lock, baseline `15.5.18`, independent of web Next 16 | Exact `15.5.21` | **P**; archive matched proxy SHA-1 only; full peer/native closure and UI workspace tests pending |
+| #135 | cryptography `46.0.7 → 50.0.0` | PR root uv lock, current `50.0.1`; `>=50.0.0,<51` | Retain `50.0.1`; target would be lower | **R** provisional; proxy wheels/hashes observed for multiple platforms; installed/quality/security evidence pending |
+| #136 | h2 `4.3.0 → 4.4.1` | PA agents uv lock, baseline `4.3.0`, hpack `4.1.0` | `4.4.1` plus required hpack `4.2.0`; hyperframe remains `6.1.0` | **P**; h2/hpack wheels, dependency ranges and hashes checked; separate agents clean install pending |
+| #111 | idna `3.11 → 3.15` | PR root uv lock, baseline `3.11` | Exact `3.15`; do not normalize API `3.20` or CLI `3.19` | **P**; wheel/proxy SHA and supported platform-neutral metadata checked; root installed map/quality pending |
+| #134 | aiohttp `3.13.5 → 3.14.3` | PA agents lock, baseline already `3.14.3` | Retain `3.14.3` | **R** provisional; x64/ARM64/Linux and Windows wheel hashes checked; install/runtime validation pending |
+| #121 | msgpack `1.1.2 → 1.2.1` | PR root uv lock, current `1.2.2` | Retain `1.2.2` | **R** provisional; Linux x64/ARM64 and Windows 3.12 wheels match proxy and lock hashes; installed/quality evidence pending |
+| #116 | PyJWT `2.12.1 → 2.13.0` | PR root uv lock, current `2.15.0`; `>=2.14.0,<3` | Retain `2.15.0` | **R** provisional; proxy wheel/lock hash checked; installed/security evidence pending |
+| #124 | engineio `4.13.1 → 4.13.2` | PR root uv lock, current `4.14.0` | Retain `4.14.0` | **R** provisional; proxy wheel/lock hash checked after separately recorded prior transient failure; install/quality evidence pending |
+| #123 | socketio `5.16.1 → 5.16.2` | PR root uv lock, current `5.17.0` | Retain `5.17.0` and engineio relation | **R** provisional; wheel/lock hash checked; full consumer validation pending |
+| #129 | setuptools `82.0.1 → 83.0.0` | PA agents uv lock, baseline `82.0.1`, root independently `84.0.0` | Exact agents target `83.0.0`; do not copy root `84.0.0` | **P**; proxy wheel/hash checked; install and agents regression checks pending |
+| #128 | pyasn1 `0.6.3 → 0.6.4` | PA agents uv lock, already `0.6.4` | Retain `0.6.4` | **R** provisional; proxy wheel/lock hash checked; independent validation pending |
+| #127 | mcp `1.27.1 → 1.28.1` | PA agents uv lock, current `1.30.0` | Retain `1.30.0`; do not downgrade | **R** provisional; wheel/lock hash checked; consumer tests pending |
+| #126 | socketio `5.16.1 → 5.16.2` | PA agents uv lock, current `5.17.0` | Retain `5.17.0`, separate from #123 | **R** provisional; wheel/lock hash checked; agents validation pending |
+| #125 | engineio `4.13.1 → 4.13.2` | PA agents uv lock, current `4.14.0` | Retain `4.14.0`, separate from #124 | **R** provisional; wheel/lock hash checked; agents validation pending |
+| #112 | idna `3.11 → 3.15` | PA agents uv lock, baseline `3.11` | Exact `3.15`, separate from root #111 | **P**; proxy wheel/hash checked; agents map/clean installation pending |
+| #120 | Starlette `1.0.0 → 1.3.1` | PA agents uv lock, current `1.7.0` | Retain `1.7.0`, not downgrade | **R** provisional; proxy wheel/lock hash checked; runtime regression evidence pending |
+| #115 | PyJWT `2.12.1 → 2.13.0` | PA agents uv lock, current `2.15.0`; `PyJWT[crypto]>=2.14.0,<3` | Retain `2.15.0` and security floor | **R** provisional; proxy wheel/lock hash checked; security/installation checks pending |
+| #122 | pydantic-settings `2.14.1 → 2.14.2` | PA agents uv lock, baseline `2.14.1`; root separately `2.15.0` | Exact agents target `2.14.2`, no root normalization | **P**; wheel hash and declared dependency floors checked against current agents pydantic/dotenv/typing-inspection versions; full install pending |
+| #117 | python-multipart `0.0.28 → 0.0.31` | PA agents uv lock, current `0.0.32` | Retain `0.0.32` | **R** provisional; proxy wheel/lock hash checked; agents install/test pending |
+| #145 | checkout v4 / old refs → v7 | 42 active uses; Ubuntu, Windows x64, sovereign Linux x64 | Exact proposed SHA `3d3c42e5aac5ba805825da76410c181273ba90b1` (v7.0.1); six v4 plus 32 v5.0.1 refs | **P** provisional; official SHA/tree/source and release ordering rechecked; runner minimums, fork/credential behavior and actual workflow tests pending |
+| #143 | upload-artifact v4 → v6 | Ten active uses; six already target, three v4.6.2 SHA and one v4 tag | Exact proposed SHA `b7c566a772e6b6bfb58ed0dc250532a479d7789f`; retain six target refs | **P** provisional; official SHA/tree/proposed source verified, v4 is its ancestor; runner/job behavior and clean evidence pending |
+| #105 | Gitleaks baseline SHA → proposed `ff98106e4c7b2bc287b24eaf42907196329070c7` | AC-gitleaks `security-scan.yml`; current pin `dcedce43c6f43de0b836d1fe38946645c9c638dc` | Proposed SHA only; no alternative release allowed | **H** B-ACTION-BASE; official target/source and v8.24.3 asset/checksum verified; baseline SHA is still unresolvable, so no-downgrade remains unproved |
+| #103 | Cosign baseline SHA → proposed `398d4b0eeef1380460a10c8013a76f728fb906ac` | AC-cosign `prompts-publish.yml`; current pin `f713795cb21599bc4e5c4b58cbad1da852d7eeb9` | Proposed SHA only; no alternative action release | **H** B-ACTION-BASE; target source verified and v2.5.2 plus requested v2.4.1 binary/signature/key verified; baseline SHA still unresolvable, pin remains unchanged |
+| #102 | create-or-update-comment v4 → v5 | AC-comment, one Ubuntu reference | Exact full SHA `e8674b075228eee787fea43ef493e45ece1004c9` | **P** provisional; official SHA/tree/v5 and v4 ancestry verified; no live comment or functional workflow run authorized |
+
+### Separately scoped provisional work-item directions (31 rows)
+
+| Work item | Revalidated scope / current resolution | Source PRs and targets preserved | Provisional work-item direction / gates |
+| --- | --- | --- | --- |
+| `NW-next` | `apps\web` importer/root pnpm lock; Next `16.3.6` | #149 `16.3.6→16.3.8`; #133 `16.2.6→16.2.11`; #132 `16.2.6→16.2.11` | **P** goal `16.3.8`; per-PR P/R/R remain as above; native/full source and install gates open |
+| `NW-eslint` | Web importer/root lock; ESLint `9.39.4` | #150 `9.39.4→10.12.0` | **H** B-ESLINT |
+| `NW-jsdom` | Web importer/root lock; jsdom `25.0.1` | #148 `25.0.1→30.1.2` | **F** tentative `30.1.1`; Node patch, source-host, transitive and tests open |
+| `NW-playwright` | Web importer/root lock; trio `1.59.1` | #147 `1.59.1→1.63.0` | **P** coupled trio `1.63.0`; browser and OS artifact source/tests open |
+| `NW-node-types` | Web importer/root lock; types `22.13.10`, Node runtime 24 | #146 `22.13.10→26.6.4` | **H** B-TYPES |
+| `NW-msal-react` | Web importer/root lock; React `5.3.2` / browser `5.9.0` / common variants | #144 `5.3.2→5.7.2` | **H** B-MSAL |
+| `NW-js-yaml` | Web importer/root lock; `4.1.1` | #137 `4.1.1→4.3.1` | **P** `4.3.1`; SHA-1-only record and tests pending |
+| `NU-next` | `packages\ui` importer/root lock; Next `15.5.18` | #130 `15.5.18→15.5.21` | **P** `15.5.21`; keep Next 15 distinct |
+| `PR-cryptography` | Root uv; `50.0.1`, floor `>=50.0.0,<51` | #135 `46.0.7→50.0.0` | **R** `50.0.1`; final installed/security evidence pending |
+| `PA-h2` | Agents uv; h2 `4.3.0`, hpack `4.1.0` | #136 `4.3.0→4.4.1` | **P** h2 `4.4.1` + hpack `4.2.0`; independent agents install pending |
+| `PR-idna` | Root uv; idna `3.11` | #111 `3.11→3.15` | **P** `3.15`, not API/CLI |
+| `PA-aiohttp` | Agents uv; `3.14.3` | #134 `3.13.5→3.14.3` | **R** `3.14.3`; completion not final |
+| `PR-msgpack` | Root uv; `1.2.2` | #121 `1.1.2→1.2.1` | **R** `1.2.2`; completion not final |
+| `PR-pyjwt` | Root uv; `2.15.0` and `>=2.14.0,<3` | #116 `2.12.1→2.13.0` | **R** `2.15.0`; completion not final |
+| `PR-engineio` | Root uv; `4.14.0` | #124 `4.13.1→4.13.2` | **R** `4.14.0`; completion not final |
+| `PR-socketio` | Root uv; `5.17.0` | #123 `5.16.1→5.16.2` | **R** `5.17.0`; completion not final |
+| `PA-setuptools` | Agents uv; `82.0.1`, root `84.0.0` | #129 `82.0.1→83.0.0` | **P** agents `83.0.0`; do not copy root value |
+| `PA-pyasn1` | Agents uv; `0.6.4` | #128 `0.6.3→0.6.4` | **R** `0.6.4`; completion not final |
+| `PA-mcp` | Agents uv; `1.30.0` | #127 `1.27.1→1.28.1` | **R** `1.30.0`; completion not final |
+| `PA-socketio` | Agents uv; `5.17.0` | #126 `5.16.1→5.16.2` | **R** `5.17.0`, distinct root |
+| `PA-engineio` | Agents uv; `4.14.0` | #125 `4.13.1→4.13.2` | **R** `4.14.0`, distinct root |
+| `PA-idna` | Agents uv; `3.11` | #112 `3.11→3.15` | **P** `3.15`, distinct root |
+| `PA-starlette` | Agents uv; `1.7.0` | #120 `1.0.0→1.3.1` | **R** `1.7.0`, no downgrade |
+| `PA-pyjwt` | Agents uv; `2.15.0`, `PyJWT[crypto]>=2.14.0,<3` | #115 `2.12.1→2.13.0` | **R** `2.15.0`; preserve floor |
+| `PA-settings` | Agents uv; `2.14.1`, root `2.15.0` | #122 `2.14.1→2.14.2` | **P** agents `2.14.2`, distinct root |
+| `PA-multipart` | Agents uv; `0.0.32` | #117 `0.0.28→0.0.31` | **R** `0.0.32`; no downgrade |
+| `AC-checkout` | 42 active refs; Ubuntu 40, Windows 1, sovereign Linux/x64 1 | #145 `v4→v7`, mixed verified v5/v4 baseline refs | **P** proposed full SHA only; runner/source/behavior gates open |
+| `AC-upload` | Ten active refs; six already proposed SHA, four v4.6.2 refs | #143 `v4→v6` | **P** proposed full SHA only where not already target; runner/job validation pending |
+| `AC-gitleaks` | `security-scan.yml`, one active ref | #105 old SHA → proposed SHA | **H** B-ACTION-BASE despite proposed action/asset evidence |
+| `AC-cosign` | `prompts-publish.yml`, one active ref | #103 old SHA → proposed SHA | **H** B-ACTION-BASE despite target and asset signature evidence |
+| `AC-comment` | `foundry-carveout-review.yml`, one active ref | #102 v4→v5 | **P** proposed full SHA; no live comment test |
+
+The work-item ledger deliberately does not join separately resolved Python scopes or web/UI importers. T019 **does not** close B-SOURCE-ENV, B-CONSUMER-BASE, B-ESLINT, B-TYPES, B-MSAL, B-ACTION-BASE, B-VALIDATION, or finalize any PR direction.

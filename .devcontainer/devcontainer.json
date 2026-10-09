@@ -12,7 +12,8 @@
   "containerEnv": {
     "AMA_ENABLE_PRODUCTION_AUTH": "0",
     "AMA_ENVIRONMENT": "dev",
-    "AMA_TEST_MODE": "1"
+    "AMA_TEST_MODE": "1",
+    "NPM_CONFIG_REGISTRY": "https://packagefeedproxy.microsoft.io/npm/"
   },
   "mounts": [
     "source=ama-devcontainer-uv-cache,target=/home/vscode/.cache/uv,type=volume",

@@ -95,6 +95,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
       # Spec-032 FR-T01 ratcheting coverage; phase A is no-regression.
       COVERAGE_PHASE: ${{ vars.COVERAGE_PHASE != '' && vars.COVERAGE_PHASE || 'A' }}
     outputs:
@@ -435,6 +436,8 @@ jobs:
   accessibility-citation-card:
     needs: [quality]
     runs-on: ubuntu-latest
+    env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
     timeout-minutes: 10
     continue-on-error: true # warn-only per F-A12.5; flip to false post-baseline.
     steps:
@@ -616,6 +619,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
       PYTHONPATH: ${{ github.workspace }}/packages/domain/src
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
@@ -732,6 +736,8 @@ jobs:
   # ---------------------------------------------------------------------------
   docs-arch:
     runs-on: ubuntu-latest
+    env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
