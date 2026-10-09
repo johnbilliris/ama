@@ -78,6 +78,27 @@ def test_windows_quality_job_uses_locked_uv_dependencies_and_cache() -> None:
     assert "Install eval gate package without runtime dependencies" in job
 
 
+def test_windows_candidate_map_job_uses_two_isolated_uncached_installs() -> None:
+    text = _ci_text()
+    job = text.split("  phase8-python-windows-candidate-maps:\n", 1)[1].split(
+        "\n  simulation-tenant-isolation:", 1
+    )[0]
+
+    assert (
+        "if: github.event_name == 'pull_request' && "
+        "github.event.pull_request.head.ref == '001-proxy-dependency-upgrades'"
+    ) in job
+    assert "needs: python-package-source-policy" in job
+    assert "runs-on: windows-latest" in job
+    assert "foreach ($runId in @('a', 'b'))" in job
+    assert "phase8-windows-root-$runId" in job
+    assert "uv sync --locked --extra windows-ci --no-install-project --no-cache" in job
+    assert "uv pip install --python $python --no-deps --no-cache -e apps/eval-runner" in job
+    assert "Compare-Object -ReferenceObject $mapA -DifferenceObject $mapB" in job
+    assert "name: phase8-python-windows-candidate-maps" in job
+    assert "actions/cache@" not in job
+
+
 def test_windows_ci_extra_excludes_eval_runner_runtime_dependencies() -> None:
     config_path = Path(__file__).resolve().parents[2] / "pyproject.toml"
     config = tomllib.loads(config_path.read_text(encoding="utf-8"))
