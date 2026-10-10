@@ -354,7 +354,7 @@ All three tasks defer writes to the shared evidence ledger until sequential reco
 
 ### E22 status update — Next ARM64 SWC retrieval
 
-- **T011 `[ ]`** — E22 retrieved and SHA-512-verified both Next `16.3.8` ARM64 SWC archives via the approved proxy and successfully loaded the bindings on GNU and musl ARM64 Node 24.21.0. E25 records the user's confirmation of organizational approval for observed `*.vsblob.vsassets.io` proxy redirects. Full npm closure, package integrity for all dependencies, Playwright browser/OS payloads, other package families, and supported candidate app-build gates remain open.
+- **T011 `[ ]`** — E22/E26 retrieved and SHA-512-verified all eight Next `16.3.8` SWC platform archives via the approved proxy; Linux ARM64 GNU/musl and Windows ARM64 bindings loaded successfully on diagnostic Node 24 hosts. E25 records the user's confirmation of organizational approval for observed `*.vsblob.vsassets.io` redirects. E26 records a clean-store 725-package scratch web-graph install and an integrity-preserving lock-delta audit. The remaining npm work-item graphs, Playwright browser/OS payloads, and supported candidate app-build gates remain open.
 - **T020 `[X]`** — the execution allowlist remains the five Python uv-lock work items only. E22 does not clear NW-next's remaining source, closure, or compatibility holds and authorizes no npm manifest/lock edit.
 
 ### E23 status update — Windows x64 candidate validation
@@ -373,6 +373,12 @@ All three tasks defer writes to the shared evidence ledger until sequential reco
 
 - **T011 `[ ]`** — E25 records Microsoft's published `*.vsassets.io` CDN guidance and the user's confirmation that the designated security/platform owner approves the observed `*.vsblob.vsassets.io` redirects for the Microsoft npm proxy. No ticket/reference was supplied or required at this time. This closes only that host-approval subgate; candidate/transitive artifact closure, integrity, compatibility, Playwright browser assets, and supported consumer checks remain pending.
 - **T020 `[X]`** — the allowlist remains limited to the five Python uv-lock work items until the remaining per-candidate T011 evidence is complete and the allowlist is explicitly reevaluated. No npm or Action edits are authorized by E25.
+
+### E26 status update — Next 16.3.8 source-closure analysis
+
+- **T011 `[ ]`** — NW-next now has user-approved redirect-host coverage, all eight optional SWC artifacts checked against proxy SHA-512 SRI, and a fresh scratch install of 725 web-workspace packages from the approved proxy. T011 remains incomplete for other npm items and final supported-environment application validation.
+- **T020 `[X]`** — the five Python lock contexts remain the only authorized edit scope. NW-next source/graph evidence improved, but the baseline story acceptance selector still fails; no Next declaration/lock edit is authorized pending correction of that selector and a passing rerun.
+- **T021 `[ ]`** — no npm manifest or shared lock was edited. The scratch resolver rewrote 319 unchanged integrity entries to weaker SHA-1 metadata; that raw lock was rejected. A scoped scratch merge preserving baseline integrity passed frozen validation but is not a repository candidate.
 
 ## Notes
 
