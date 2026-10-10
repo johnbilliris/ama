@@ -155,7 +155,16 @@ def test_story_acceptance_targets_original_specs() -> None:
     collection_step = job.split("- name: Assert story acceptance tests are collected", 1)[1].split(
         "- name: Run story acceptance tests", 1
     )[0]
-    assert "test_incident_commander_dashboard.spec.ts" in collection_step
-    assert "test_persona_workspace.spec.ts" in collection_step
-    assert "test_dashboard_decision_support.spec.ts" in collection_step
+    run_step = job.split("- name: Run story acceptance tests (chromium + mobile)", 1)[1]
+    story_specs = (
+        "test_incident_commander_dashboard.spec.ts",
+        "test_persona_workspace.spec.ts",
+        "test_dashboard_decision_support.spec.ts",
+    )
+
+    for story_spec in story_specs:
+        assert story_spec in collection_step
+        assert story_spec in run_step
+
     assert "../../tests/e2e/" not in collection_step
+    assert "../../tests/e2e/" not in run_step

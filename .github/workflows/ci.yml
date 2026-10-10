@@ -813,9 +813,9 @@ jobs:
           pnpm --filter @ama/web exec playwright test \
             --project=chromium \
             --project=mobile \
-            ../../tests/e2e/test_incident_commander_dashboard.spec.ts \
-            ../../tests/e2e/test_persona_workspace.spec.ts \
-            ../../tests/e2e/test_dashboard_decision_support.spec.ts
+            test_incident_commander_dashboard.spec.ts \
+            test_persona_workspace.spec.ts \
+            test_dashboard_decision_support.spec.ts
 
   evidence-pack-publication-gate:
     # Spec-037 (T046, RES-04, FR-008, FR-009, FR-037, FR-038, SC-002, SC-011)
