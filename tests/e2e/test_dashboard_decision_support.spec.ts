@@ -39,6 +39,7 @@ test("dashboard displays decision-support elements for incident commander", asyn
             status: "proposed",
           },
         ],
+        activeTasks: [],
         signalSummary: {
           authoritativeCount: 3,
           communityCount: 2,

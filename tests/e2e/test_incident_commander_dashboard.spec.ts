@@ -27,6 +27,7 @@ test("incident commander reviews the dashboard and publishes an alert", async ({
             status: "proposed",
           },
         ],
+        activeTasks: [],
         signalSummary: {
           authoritativeCount: 2,
           communityCount: 1,

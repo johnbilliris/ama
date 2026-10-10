@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("operator sees workspace tasks and updates status", async ({ page }) => {
-  await page.route("**/api/personas/persona-ops-001/workspace", async (route) => {
+  await page.route("**/api/personas/persona-ops-001/workspace**", async (route) => {
     await route.fulfill({
       json: {
         persona: {
