@@ -80,9 +80,7 @@ def test_windows_quality_job_uses_locked_uv_dependencies_and_cache() -> None:
 
 def test_windows_candidate_map_job_uses_two_isolated_uncached_installs() -> None:
     text = _ci_text()
-    job = text.split("  phase8-python-windows-candidate-maps:\n", 1)[1].split(
-        "\n  simulation-tenant-isolation:", 1
-    )[0]
+    job = text.split("  phase8-python-windows-candidate-maps:\n", 1)[1].split("\n  simulation-tenant-isolation:", 1)[0]
 
     assert (
         "if: github.event_name == 'pull_request' && "
