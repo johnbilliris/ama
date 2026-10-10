@@ -354,7 +354,7 @@ All three tasks defer writes to the shared evidence ledger until sequential reco
 
 ### E22 status update — Next ARM64 SWC retrieval
 
-- **T011 `[ ]`** — E22 retrieved and SHA-512-verified both Next `16.3.8` ARM64 SWC archives via the approved proxy and successfully loaded the bindings on GNU and musl ARM64 Node 24.21.0. This closes the earlier ARM64 artifact-availability/native-load gap only. Final `vsblob.vsassets.io` host policy, full npm closure, other package families, and supported candidate app-build gates remain open.
+- **T011 `[ ]`** — E22 retrieved and SHA-512-verified both Next `16.3.8` ARM64 SWC archives via the approved proxy and successfully loaded the bindings on GNU and musl ARM64 Node 24.21.0. E25 records the user's confirmation of organizational approval for observed `*.vsblob.vsassets.io` proxy redirects. Full npm closure, package integrity for all dependencies, Playwright browser/OS payloads, other package families, and supported candidate app-build gates remain open.
 - **T020 `[X]`** — the execution allowlist remains the five Python uv-lock work items only. E22 does not clear NW-next's remaining source, closure, or compatibility holds and authorizes no npm manifest/lock edit.
 
 ### E23 status update — Windows x64 candidate validation
@@ -368,6 +368,11 @@ All three tasks defer writes to the shared evidence ledger until sequential reco
 - **T039 `[X]`, T040 `[X]`, and T041 `[X]`** — corrected commit `57c6069c` repeated the Linux x64 candidate maps and Windows x64 candidate map pair; hashes match the full-map evidence recorded in E21/E23.
 - **T045 `[X]`** — `ci.yml` run `38007398993` passed Linux quality, Ruff format, coverage ratchet, benchmarks, and Windows `quality-windows`. Story acceptance still failed with the recorded `No tests found` selector issue; the security scan still reports the unchanged Next.js HIGH CVE.
 - **T024 `[ ]`, T006 `[ ]`, T011 `[ ]`, T013 `[ ]`, and T052** remain incomplete; no npm or Action dependency edits are authorized by the current T020 allowlist.
+
+### E25 status update — npm redirect-host approval
+
+- **T011 `[ ]`** — E25 records Microsoft's published `*.vsassets.io` CDN guidance and the user's confirmation that the designated security/platform owner approves the observed `*.vsblob.vsassets.io` redirects for the Microsoft npm proxy. No ticket/reference was supplied or required at this time. This closes only that host-approval subgate; candidate/transitive artifact closure, integrity, compatibility, Playwright browser assets, and supported consumer checks remain pending.
+- **T020 `[X]`** — the allowlist remains limited to the five Python uv-lock work items until the remaining per-candidate T011 evidence is complete and the allowlist is explicitly reevaluated. No npm or Action edits are authorized by E25.
 
 ## Notes
 
