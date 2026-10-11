@@ -257,7 +257,16 @@ jobs:
           docker pull --platform linux/amd64 "$ALPINE_BASE"
           docker image inspect "$ALPINE_BASE" > "$out/base-image.json"
           container=""
-          trap 'if [ -n "$container" ]; then docker rm -f "$container"; fi' EXIT
+          cleanup() {
+            status=$?
+            if [ -n "$container" ]; then
+              docker inspect "$container" > "$out/container-$run_id.json"
+              docker logs "$container" > "$out/server-$run_id.log" 2>&1
+              docker rm -f "$container"
+            fi
+            exit "$status"
+          }
+          trap cleanup EXIT
           for run_id in a b; do
             image="ama-next-x64:$GITHUB_RUN_ID-$run_id"
             builder="ama-next-x64-builder:$GITHUB_RUN_ID-$run_id"
@@ -283,7 +292,7 @@ jobs:
             docker run --rm --network=none --entrypoint sh "$builder" -c 'set -eu; cd /app/apps/web; node -e '\''const r=require("node:module").createRequire(require.resolve("next/package.json")); if(process.arch!=="x64"||require("next/package.json").version!=="16.3.8"||r("sharp").versions.sharp!=="0.35.5")throw new Error("Unexpected Alpine candidate"); console.log(JSON.stringify({node:process.version,arch:process.arch,next:require("next/package.json").version,sharp:r("sharp").versions.sharp,swcExports:Object.keys(r("@next/swc-linux-x64-musl")).length}));'\''; cat /etc/alpine-release' > "$out/runtime-$run_id.txt"
             container="ama-next-x64-smoke-$GITHUB_RUN_ID-$run_id"
             docker run --detach --name "$container" --publish 127.0.0.1:33124:3000 "$image"
-            curl --fail --silent --show-error --retry 20 --retry-connrefused --retry-delay 1 --max-time 5 http://127.0.0.1:33124/ > "$out/page-$run_id.html"
+            curl --fail --silent --show-error --retry 20 --retry-all-errors --retry-delay 1 --retry-max-time 60 --max-time 5 http://127.0.0.1:33124/ --output "$out/page-$run_id.html"
             grep -q '<!DOCTYPE html>' "$out/page-$run_id.html"
             css="$(node -e 'const fs=require("node:fs");const html=fs.readFileSync(process.argv[1],"utf8");const match=html.match(/href="(\/_next\/static\/[^"?]+\.css(?:\?[^"]*)?)"/);if(!match)throw new Error("No compiled stylesheet");process.stdout.write(match[1].replaceAll("&amp;","&"));' "$out/page-$run_id.html")"
             curl --fail --silent --show-error --max-time 10 "http://127.0.0.1:33124$css" > "$out/style-$run_id.css"

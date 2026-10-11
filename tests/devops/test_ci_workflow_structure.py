@@ -202,4 +202,8 @@ def test_feature_x64_validation_jobs_are_scoped_and_uncached() -> None:
     assert "--publish 127.0.0.1:33124:3000" in alpine_job
     assert 'cmp "$out/builder-expected-$run_id.txt" "$out/builder-input-$run_id.txt"' in alpine_job
     assert 'cmp "$out/map-a.txt" "$out/map-b.txt"' in alpine_job
+    assert "--retry 20 --retry-all-errors --retry-delay 1 --retry-max-time 60 --max-time 5" in alpine_job
+    assert "trap cleanup EXIT" in alpine_job
+    assert 'docker logs "$container" > "$out/server-$run_id.log" 2>&1' in alpine_job
+    assert 'exit "$status"' in alpine_job
     assert "docker push" not in alpine_job
