@@ -1523,3 +1523,42 @@ Both existing Container Apps executions report `Succeeded` and the same mutable 
 No full trace outputs or dataset content are added to repository evidence. The two run-specific trace manifests have local SHA-256 `f99a4f0eaf65820b2a9c21fb764b995216377d69b0990899991c7a60b46dec6b` and `0c95e97df01a7bb70e1632c82144fb5215d443ffbf7f30ba47a9495da25afd45`; these are read-observation identities, not publisher or historical image provenance. Temporary diagnostic copies are removed after the minimized findings are recorded.
 
 **Disposition**: current mandatory checks pass on `420dab50`, E34's failure remains recorded, and the scorer/dataset fit concern remains a separate review item. No threshold or safety expectation is waived and no corrective code change is authorized. T048 still requires its remaining applicable checks and final-candidate evidence; all other dependency/source/devcontainer/helper and T052 gates remain open. #152 remains draft and unmerged.
+
+## E36 — Remaining npm source recheck; integrity protections keep four scopes held
+
+The user approved a source-only recheck for NU-next, NW-js-yaml, NW-jsdom and the coupled NW-playwright trio at `ad398b448fb2ae6e846e957102a18b080588a38a`; no repository dependency, application or workflow edit was authorized or made. Queried full and lean metadata only through the approved npm proxy, followed its approved Microsoft feed/blob redirects, and retrieved 51 fresh archives covering **50 unique package/version identities** between `2026-10-11T13:14:00Z` and `13:23:54Z`. Identity, byte checksum, platform tags and engine declarations were checked against their archive metadata. Twenty unique artifacts have matching proxy SHA-512; thirty supply only matching proxy SHA-1. Locally computed SHA-256 is not presented as stronger publisher provenance.
+
+The generated `source-manifests/e36-npm-artifacts.json` records every unique artifact's package/version, exact proxy tarball URL, final host, UTC retrieval time, byte size, local SHA-256, published checksum, engine/dependency metadata and platform tags. SHA-256 `9fc6d8ff8c1570efc39ef35d794c52545ecde72b480eda5ca2321a1f88d329ad`. It contains no signed redirect queries, credentials, cached package contents or final upgrade outcomes.
+
+| Work item / preserved target | Fresh direct result | Eligibility result |
+| --- | --- | --- |
+| NU-next / #130, 15.5.21 | Next/env and all eight SWC variants retrieved and identity/platform verified; all target records publish SHA-1 only | **Held**: changed Next/env baseline entries use SHA-512. Strictly lower stable advancing 15.5.20 and 15.5.19 also lack published SHA-512 for Next/env; no integrity-preserving fallback is established. |
+| NW-js-yaml / #137, 4.3.1 | Archive matches proxy SHA-1; required `argparse ^2.0.1` is compatible with existing graph | **Held**: baseline 4.1.1 uses SHA-512. Advancing lower stable 4.3.0 and 4.2.0 are also SHA-1-only; no stronger-verified fallback is established. |
+| NW-playwright / #147, trio 1.63.0 | All three exact archives retrieved and coupled dependency identities verified; SHA-1 only | **Held**: each baseline 1.59.1 entry is SHA-512. Coupled lower stable 1.62.1, 1.62.0, 1.61.1, 1.61.0 and 1.60.0 are also SHA-1-only. Candidate Chromium/browser-source gates remain separate. |
+| NW-jsdom / #148, 30.1.2 | Exact target now exists in the successful **288-version** catalogue; fresh archive matches proxy SHA-512 and all 36 reachable transitive archives were retrieved | **Held**: the direct target is obtainable, but required transitive replacements lose the stronger baseline integrity described below; no eligible lower-major-30 fallback is established. |
+
+This supersedes the earlier observation that jsdom 30.1.2 is absent and that 30.1.1 is the preferred tentative fallback. The original PR target/baseline and planning counts remain frozen historical records. The current exact target is considered first, but presence alone does not authorize its edit or final selection.
+
+### jsdom transitive resolution and rejected scratch churn
+
+In a separate committed-manifest scratch workspace, changed only its jsdom declaration to exact 30.1.2 and asked pnpm 10.6.3 for an isolated `--lockfile-only --ignore-scripts` resolution through the approved proxy. Despite the lock-only request, pnpm materialized a scratch virtual-store tree (reported 695 package additions); no candidate lifecycle, application build/test or browser was executed. This is not clean-install/runtime validation and no scratch dependency file was applied to the repository.
+
+The raw scratch lock adds 28 package keys, removes 35 obsolete keys, changes 289 same-key metadata records and would replace **282 unchanged SHA-512 assertions with SHA-1**. That raw lock was rejected. The exact reachable jsdom closure has 36 package identities; twenty have proxy SHA-512 and sixteen SHA-1 only. Existing identical-version entries can retain their baseline assertions, but at least five required changed package identities have only weaker proxy provenance:
+
+| Required replacement | Protected baseline | Target proxy SHA-1 |
+| --- | --- | --- |
+| `entities@8.1.0` | 6.0.1, SHA-512 | `9632d69619ebdbe0cf0ef22f53088fe5a2163d86` |
+| `parse5@8.0.1` | 7.3.0, SHA-512 | `f43bcd2cd683efe084075333e9ce0da7d06da31e` |
+| `tough-cookie@6.0.2` | 5.1.2, SHA-512 | `7b1f22fcf2daf06c4ff9d53ec1845f44c6627062` |
+| `webidl-conversions@8.0.1` | 7.0.0, SHA-512 | `0657e571fe6f06fcb15ca50ed1fdbcb495cd1686` |
+| `whatwg-mimetype@5.0.0` | 4.0.0, SHA-512 | `d8232895dbd527ceaee74efd4162008fb8a8cf48` |
+
+The direct target and all 26 declared Node-engine ranges in its closure satisfy the observed Node 24.16.0 and 24.21.0 runtimes. `canvas ^3.2.3` and `@noble/hashes ^1.8.0 || ^2.0.0` are optional peers; neither was added to bypass an optional dependency. These metadata checks do not prove DOM/CSS/authentication or runtime behavior.
+
+Lower stable major-30 candidates are 30.1.1, 30.1.0, 30.0.1 and 30.0.0. All require `tough-cookie ^6.0.2`, whose allowed major-6 proxy catalogue has no later stable stronger assertion; 6.0.2 and the incompatible lower 6.0.0/6.0.1 records are SHA-1-only. The two 30.0.x direct records also lack SHA-512. An older jsdom candidate therefore does not provide a verified integrity-preserving workaround. No public registry, invented digest, downgraded companion or optional package is used to force eligibility.
+
+### Playwright browser boundary and next owners
+
+The retrieved 1.63.0 `browsers.json` declares Chromium/headless-shell revision **1243**, browser **153.0.8010.12** (not baseline revision 1217). Read-only source inspection identifies the Playwright CDN route for those archives; no candidate CLI or browser was executed, and the existing E25 Microsoft npm redirect approval does not grant browser-CDN approval. Browser/OS artifacts and publisher/source-policy evidence remain open independently of npm availability.
+
+Responsible next roles: package-feed/platform owner for stronger published integrity or approved equivalent provenance for all four scopes; security/platform owner for the distinct browser-source authorization; maintainers for subsequent scoped resolver, consumer compatibility and two-install/runtime evidence only after those gates clear. The current validated Next 16.3.8 and Python lock candidates remain untouched. T011, T021 and final T052 remain incomplete; no fallback or exact upgrade is finalized. Current CI `38141714556`, evaluation `38141714522` and security `38141714589` pass on `ad398b44`, but do not validate these unedited candidate graphs.

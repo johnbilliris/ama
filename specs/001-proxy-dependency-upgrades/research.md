@@ -258,3 +258,11 @@ In every row, `scope` is the separately revalidated scope; the source PR's origi
 | `AC-comment` | `foundry-carveout-review.yml`, one active ref | #102 v4→v5 | **P** proposed full SHA; no live comment test |
 
 The work-item ledger deliberately does not join separately resolved Python scopes or web/UI importers. T019 **does not** close B-SOURCE-ENV, B-CONSUMER-BASE, B-ESLINT, B-TYPES, B-MSAL, B-ACTION-BASE, B-VALIDATION, or finalize any PR direction.
+
+## R9 — Source-only recheck after E35 (E36)
+
+The preceding matrices and counts retain the approved planning snapshot. At `ad398b44`, the approved proxy now lists and retrieves exact jsdom 30.1.2 with SHA-512; 30.1.1 is no longer the preferred tentative fallback on absence grounds. Its complete 36-package graph was fetched, but required entities/parse5/tough-cookie/webidl/whatwg replacements publish only SHA-1 where their baselines are SHA-512. Every lower stable major-30 candidate shares the `tough-cookie ^6.0.2` requirement or a weak direct assertion, so no integrity-preserving fallback is established.
+
+UI Next 15.5.21/env/all SWC files, js-yaml 4.3.1 and the coupled Playwright 1.63.0 archives are retrievable but SHA-1-only; bounded lower stable advancing candidates do not resolve the stronger baseline-provenance hold. Candidate Playwright requires Chromium 1243/153.0.8010.12; its browser-source authorization remains separate from Microsoft npm blob-redirect approval.
+
+All four work items remain blocked/incomplete for source/security eligibility. No repository manifest or lock changed; the raw scratch jsdom lock was rejected for 282 unchanged SHA-512-to-SHA-1 rewrites and required weak changed entries. E36 and `source-manifests/e36-npm-artifacts.json` contain exact retrievals and next owners. These observations supersede only current availability/eligibility assumptions, not original PR scope/targets, historical planning distributions, policy or final delivery status.
