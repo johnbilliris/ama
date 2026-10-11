@@ -1609,3 +1609,114 @@ The existing helper regression suite passes **2 tests**. The diagnostic wrapper 
 Current head `1ebc0be3` CI `38175222502` and security `38175222470` pass, but its automatic evaluation `38175222500` again fails the unchanged must-include threshold (`0.857 < 0.900`, 25 overall samples; correlated run `01EPDB2K044XR7EKVNS8WCCKFH`). No evaluation was rerun or scoring policy changed in this batch; E35's diagnosis does not waive this distinct failed run.
 
 All task-owned helper containers and temporary archive/cache/graph copies are removed after evidence capture; existing user containers, volumes and image remain unchanged. T006/T038/T048/T052 and whole-batch readiness remain incomplete. #152 stays draft and unmerged.
+
+## E38 — Read-only Action recheck resolves annotated-tag baselines, not readiness
+
+The user approved a read-only official Action provenance, required-asset and runner assessment at `15f3967911d833630ad20420c692b4f9a9f6bccd`, then separately approved recording these findings and correcting current research/task/readiness wording. The investigation used official GitHub sources and already-installed local verification tooling. It changed no repository dependency, Action pin, workflow, permission, runner, trigger or application file; no workflow was dispatched, comment posted, signing/publication performed, evaluation rerun, commit created or push made. This documentation permission does not extend T020.
+
+### Baseline correction: tag objects are not missing commits
+
+E4/E12 and their subsequent hold records queried the two baseline identifiers as commits, obtaining 404/422 responses. Those responses are preserved as historical observations, but the inference that the baseline sources were unresolvable was incorrect. The official Git tag-object endpoints resolve both identifiers:
+
+| PR / official repository | Existing annotated tag object | Tag | Peeled commit, exactly the proposed target | Tag verification | Peeled-commit verification |
+| --- | --- | --- | --- | --- | --- |
+| #105 `gitleaks/gitleaks-action` | `dcedce43c6f43de0b836d1fe38946645c9c638dc` | `v2` | `ff98106e4c7b2bc287b24eaf42907196329070c7` | `verified: false`, `unsigned` | `verified: true`, `valid` |
+| #103 `sigstore/cosign-installer` | `f713795cb21599bc4e5c4b58cbad1da852d7eeb9` | `v3` | `398d4b0eeef1380460a10c8013a76f728fb906ac` | `verified: false`, `bad_cert` | `verified: true`, `valid` |
+
+Reproduction uses `gh api repos/<official-repository>/git/tags/<baseline-object>`, the corresponding `git/ref/tags/v2` or `v3`, and `git/commits/<peeled-commit>`; compare the peeled baseline with the proposed commit. Both comparisons are **identical, zero ahead / zero behind**. This is equivalent-source tag-object-to-full-commit canonicalization, not an upgrade, downgrade or newer-baseline claim. Do not describe either tag signature as valid, or confuse these tag-verification limitations with the independently verified Cosign binary signature below.
+
+Both baseline-object codeload archives were freshly retrieved and every file matched the complete proposed-commit Git blob map:
+
+| Official baseline archive URL | UTC retrieval | Bytes | Archive SHA-256 | Result |
+| --- | --- | ---: | --- | --- |
+| `https://codeload.github.com/gitleaks/gitleaks-action/tar.gz/dcedce43c6f43de0b836d1fe38946645c9c638dc` | `2026-10-11T22:01:02Z` | 1,082,784 | `e4de1ee31c79f71fd451265f96644b2f59af5bebf5494bc1f68df7f0373127cd` | 17/17 source blobs identical |
+| `https://codeload.github.com/sigstore/cosign-installer/tar.gz/f713795cb21599bc4e5c4b58cbad1da852d7eeb9` | `2026-10-11T22:01:04Z` | 10,277 | `85ccde711bdfb3aedc1768e5bea7b25c03a9abf6e8066a71c73c43fe48290a57` | 6/6 source blobs identical |
+
+The baseline-object and commit-addressed archive digests differ; archive bytes are not the source-equivalence test. Exact per-file Git identities establish equivalence. **B-ACTION-BASE is resolved for these two source identities by this evidence**, not by a policy waiver. Their pins remain unchanged and their work-item/final validation gates remain incomplete.
+
+### Five proposed sources freshly verified
+
+Each exact commit's recursive official tree was complete and non-truncated. Every archive file, including packaged runtime code, matched its official `blob <length>\0<bytes>` Git identity, with zero missing blobs or mismatches. All five commit-verification results are `verified: true`, `valid`.
+
+| Official repository | Exact proposed commit | Official tree |
+| --- | --- | --- |
+| `actions/checkout` | `3d3c42e5aac5ba805825da76410c181273ba90b1` | `150e70ecad5ebf06a559a01ea3a56d9a3236d2b1` |
+| `actions/upload-artifact` | `b7c566a772e6b6bfb58ed0dc250532a479d7789f` | `bb934e399202b45ca0a0ebc508adefb58bb2ae3b` |
+| `gitleaks/gitleaks-action` | `ff98106e4c7b2bc287b24eaf42907196329070c7` | `50087d01bbbe89f68a29e3e53220f419c44eb3ee` |
+| `sigstore/cosign-installer` | `398d4b0eeef1380460a10c8013a76f728fb906ac` | `c13729074d183d43da2e2165e5c8800f5373eba1` |
+| `peter-evans/create-or-update-comment` | `e8674b075228eee787fea43ef493e45ece1004c9` | `a6727213ab218c2973cc12c8d2b35bb7f5c72911` |
+
+Exact source URL for each row: `https://codeload.github.com/<official-repository>/tar.gz/<exact-proposed-commit>`; final host remains `codeload.github.com`, with no redirect.
+
+| Repository | UTC retrieval on 2026-10-11 | Bytes | Archive SHA-256 | Verified blobs |
+| --- | --- | ---: | --- | ---: |
+| `actions/checkout` | `21:55:30Z` | 476,180 | `b59292069298c7be5ffd9c636431a229faff70ece00e0c24fd31baeb7b309fa3` | 101/101 |
+| `actions/upload-artifact` | `21:55:38Z` | 1,983,928 | `ac4d02cada05aaf668c77eb6770b6d9cd037277da84bf0ad4b2846b5124a47b0` | 208/208 |
+| `gitleaks/gitleaks-action` | `21:55:46Z` | 1,082,765 | `3f88235e0914861be223a8584e376ab9c686f41bd77655852c4c12cbc71f73fa` | 17/17 |
+| `sigstore/cosign-installer` | `21:55:53Z` | 10,243 | `5fd270b570f7ac92a4065186c997d3ac0b7351c7c36a7defd85cd109bd93dd3f` | 6/6 |
+| `peter-evans/create-or-update-comment` | `21:56:00Z` | 340,086 | `4a652e05b844b8be883938916496d26bc5e22528bc1c0f87ad7198cbab22eed7` | 27/27 |
+
+Official checkout releases again establish stable `v7.0.1 > v5.0.1 / v4.4.0`; the existing `93cb6efe18208431cddfb8368fd83d5badbf9bfd` pin is v5.0.1 despite its stale v5.0.0 comments. The v5.0.1-to-v7.0.1 comparison is diverged (34 ahead / 1 behind), not ancestry proof. A moving current v5 tag is not the pinned baseline. Upload v4 resolves to `ea165f8d65b6e75b540449e92b4886f43607fa02`, an ancestor of the proposed v6 commit (43 ahead / zero behind); comment v4 `71345be0265236311c031f5c7866368bd1eff043` is an ancestor of proposed v5 (112 / zero). No timestamp or lexical SHA ordering was used.
+
+### Required release assets freshly retrieved, without executing them
+
+Gitleaks's verified source defaults to 8.24.3. Cosign's verified installer pins bootstrap v2.5.2, while `prompts-publish.yml` explicitly requests v2.4.1; both requirements remain unchanged.
+
+| Official source URL | UTC retrieval on 2026-10-11 | Bytes | Actual SHA-256 | Verification |
+| --- | --- | ---: | --- | --- |
+| `https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_checksums.txt` | `21:59:42Z` | 1,099 | `eefa9ab1ee69571248a6fa070a2a7de0837dd9eb72745d131f8766206aac8ac2` | Fresh official checksum file |
+| `https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz` | `21:59:44Z` | 5,796,002 | `9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c` | Matches exact filename in that checksum file |
+| `https://github.com/sigstore/cosign/releases/download/v2.5.2/cosign-linux-amd64` | `21:59:51Z` | 132,561,156 | `bcfeae05557a9f313ee4392d2f335d0ff69ebbfd232019e3736fb04999fe1734` | Matches bootstrap hash pinned in verified installer source |
+| `https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64` | `21:59:57Z` | 109,799,549 | `8b24b946dd5809c6bd93de08033bcf6bc0ed7d336b7785787c080f574b89249b` | Detached ECDSA/SHA-256 signature verifies against pinned release key |
+| `https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64.sig` | `21:59:59Z` | 96 | `2cd598f53ffff67995a6354efdaa07ce4c88bd2da03f742ab2e257e3ecf3a186` | Fresh detached signature, decoded locally for verification |
+| `https://raw.githubusercontent.com/sigstore/cosign/v2.4.1/release/release-cosign.pub` | `22:00:00Z` | 178 | `f4cea466e5e887a45da5031757fa1d32655d83420639dc1758749b744179f126` | Matches release-key hash pinned in verified installer source |
+
+Release redirects stayed on `release-assets.githubusercontent.com`; the public key remained on `raw.githubusercontent.com`. No signed redirect query or credential is recorded. Existing local `cryptography` verified the detached signature over the exact v2.4.1 binary using ECDSA with prehashed SHA-256; no downloaded binary, installer, signing command or publication action was executed. This refreshes E12's asset/signature sub-gate, not a Cosign functional-workflow result.
+
+### Current occurrence drift preserves the frozen inventory
+
+The current YAML has **63 selected Action references in the same 25 workflow files**: 46 checkout, 14 upload and one each Gitleaks, Cosign and comment. E10's original 55-reference record remains historical. The eight additional references belong only to the four previously authorized feature-validation jobs in `ci.yml`, each adding one checkout and one already-target upload:
+
+| Validation job | Runner label | Checkout | Upload step / artifact |
+| --- | --- | --- | --- |
+| `phase8-python-baseline-maps` | `ubuntu-24.04` | `93cb6efe18208431cddfb8368fd83d5badbf9bfd` | `Upload locked Python baseline maps` / `phase8-python-baseline-maps` |
+| `phase8-python-windows-candidate-maps` | `windows-latest` | Same pinned v5.0.1 | `Upload Windows x64 candidate maps` / `phase8-python-windows-candidate-maps` |
+| `phase8-node-x64-candidate-maps` | `ubuntu-24.04` | Same pinned v5.0.1 | `Upload Ubuntu x64 candidate evidence` / `phase8-node-x64-candidate-maps` |
+| `phase8-alpine-x64-candidate-builds` | `ubuntu-24.04` | Same pinned v5.0.1 | `Upload Alpine x64 candidate evidence` / `phase8-alpine-x64-candidate-builds` |
+
+All four upload references use `b7c566a772e6b6bfb58ed0dc250532a479d7789f`. Checkout now has 36 v5.0.1 pins and ten v4 tags; upload has ten target pins, three `ea165f8d...` pins and one v4 tag. **33 source PRs / 31 work items do not change.** Original provisional distribution tables are not recomputed as final outcomes.
+
+Only four original upload uses remain non-target: `ci.yml#accessibility-citation-card` JUnit, `corpus-ingest.yml#ingest` corpus-build manifest and offline-cache bundle, and `simulation-load-test.yml#locust-load-test` Locust reports. Their exact names, paths, retention settings, conditions and no-file behavior remain those recorded in E10/current YAML; no additional artifact upload is proposed.
+
+### Runner evidence and bounded behavior assessment
+
+Checkout/upload/comment targets use Node 24; Gitleaks uses Node 20; Cosign is composite. Checkout/upload require runner >=2.327.1, and authenticated Git from a Docker container action requires checkout runner >=2.329.0. Read-only logs and job APIs bind actual hosted observations to this head:
+
+| Run / job | Observed environment | Result and limitation |
+| --- | --- | --- |
+| `38177525616` / `114583044373`, `phase8-node-x64-candidate-maps` | Runner 2.337.0; Ubuntu 24.04.5; image `ubuntu-24.04`, `20261004.327.1` | Success; existing exact upload target executes and produces its artifact. Checkout is still v5.0.1, not proposed v7. |
+| `38177525616` / `114584735798`, `quality-windows` | Runner 2.337.0; Windows Server 2025; image `windows-2025-vs2026`, `20260925.250.1` | Success; runner prerequisite evidenced, proposed checkout v7 not executed. |
+| `38177525616` / `114584736818`, `specify-cli-quality` | Labels `[self-hosted, ama-au-sovereign, azure-au, linux, x64]`; runner ID/group null | Skipped; no actual sovereign identity/version/availability evidence. Repository-visible runner API returns zero registered runners, not proof about every possible organization-level runner. |
+| `38177525575` / `114582951854`, `gitleaks` | Runner 2.337.0; current annotated-tag-object reference; Gitleaks 8.24.3 | Success with binary cache hit; equivalent source executes, but this is not an uncached candidate installation. |
+
+Reproduction: `gh run view <run-id> --job <job-id> --log`, `gh api repos/johnbilliris/ama/actions/runs/<run-id>/jobs`, and `gh api repos/johnbilliris/ama/actions/runners`. Capture only prerequisite/status lines, not complete credential-bearing logs.
+
+All 63 existing references supply input names accepted by the proposed Action metadata. That structural check does not establish runtime or application compatibility. Verified checkout `src/unsafe-pr-checkout-helper.ts` refuses matching fork PR code in privileged `pull_request_target`/PR-origin `workflow_run` contexts by default; it returns for a non-PR upstream event. The only selected privileged-trigger checkouts are `cd.yml` deploy/rollback with explicit upstream head SHA; deploy already requires a successful upstream `push`. No unsafe opt-in is set or proposed, no CD job was executed, and this source reading is not a functional fork/rollback test.
+
+Preserve all nine explicit `persist-credentials: false` settings. The newer implementation stores persisted credentials separately under `RUNNER_TEMP`; do not add credentials, change the remaining defaults or weaken cleanup. Upload's immutable artifacts, existing names/retention/no-file conditions, hidden-file default false and overwrite default false remain unchanged; supported input names and existing successful target uploads do not prove every unrun artifact producer.
+
+Verified comment `src/main.ts` accepts `body-path || body-file`; the existing deprecated `body-file` remains supported. `foundry-carveout-review.yml` is dispatch-only while its comment job requires `pull_request`, so it remains dormant; no trigger/input/permission migration or live comment is authorized. `prompts-publish.yml` remains dispatch-only with its write/OIDC permissions and explicit Cosign v2.4.1; do not dispatch it for validation.
+
+### Current gate disposition and next owners
+
+| Scope / gate | Current disposition | Owner / next action |
+| --- | --- | --- |
+| #105 / #103 baseline provenance, B-ACTION-BASE | Resolved by official annotated-tag peeling and exact source equivalence; tag-signature limitations retained | Repository/security maintainer reviews the recorded signature distinctions; any equivalent full-commit canonicalization requires its own explicit T020/pin-edit approval. |
+| Required Gitleaks/Cosign release assets | Fresh checksum/bootstrap/key/signature checks pass | Revalidate exact assets for final-input uncached retrieval pairs; source success alone is not installer/job readiness. |
+| #145 / AC-checkout | Hosted runner minima evidenced; sovereign runner and proposed functional checks remain blocked/not-run | Sovereign/DevOps maintainer supplies authoritative runner identity, version and readiness; preserve all labels and arrange only separately authorized bounded validation. |
+| #143 / AC-upload and #102 / AC-comment | Input/source assessment recorded; four original upload changes and comment pin remain unimplemented | DevOps maintainer reviews a scoped allowlist and applicable final checks; do not enable dormant jobs or post a live comment. |
+| T013 / T044 / T048 / T050 / T052 | Incomplete; no final Action outcomes or batch readiness | Complete applicable final-input/source/runner/functional/checklist evidence after human gates; independent maintainer acceptance remains required. |
+
+At this head CI `38177525616`, security `38177525575` and evaluation `38177525580` all conclude success. These already-triggered runs were read, not rerun; they do not erase E34/E37's failed evaluations, E37's helper compatibility failure or other npm/consumer holds. T017/T018 stay checked only as updated hold/provenance-record tasks. T020 still allows only the previously approved Python edits and retention/validation of NW-next; no Action pin edits are authorized. Phase 8 remains active, Phases 9/10 remain pending, and #152 remains open, draft and unmerged.
+
+After durable evidence recording, the exact task-owned source/archive/binary downloads and temporary verification scripts were removed. Only minimized observation/identity JSON remains in session storage; no shared cache, user container, unrelated file or generated web instruction file was removed.
