@@ -1359,3 +1359,22 @@ The unchanged Chromium/mobile projects collect **6 tests in 3 files**. All **6 p
 The stock Playwright installer downloaded the exact baseline Chrome Headless Shell 147.0.7727.15/revision 1217 archive from `https://cdn.playwright.dev/builds/cft/147.0.7727.15/win64/chrome-headless-shell-win64.zip`, but its Node extraction stalled. Stopped only that installer and used native `Expand-Archive` on the same downloaded archive in an isolated session cache; no browser/channel substitute or package/config change was used. Archive SHA-256 `ad99bcd8fe297495052db112f5ee3f89bde9f5fdc5cd892812a3824dc6461bdb` is local byte identity, not publisher provenance. This baseline diagnostic run does not close the separate Playwright 1.63.0 browser/source gate.
 
 **Still pending**: commit/push approval for these test/evidence changes, a hosted Linux x64 story rerun, and the applicable reproducibility/build/quality gates. T021, T036–T038 and T052 remain incomplete; no final NW-next outcome or full-batch readiness is claimed.
+
+## E29 — Passing hosted story checkpoint
+
+The user approved committing and pushing the five E28 test/evidence files to the existing draft PR. Commit `25d7553cf55051de237dff7fa7f8c72e92a6f12f` contains exactly the three story specs plus `tasks.md` and `evidence.md`; it adds no application, dependency, Action-pin or workflow changes. The Next candidate hashes remain those recorded in E28.
+
+| Hosted gate on `25d7553c` | Run | Result |
+| --- | --- | --- |
+| CI | [38097965762](https://github.com/johnbilliris/ama/actions/runs/38097965762) | **PASS**: all applicable jobs; specify-cli quality intentionally skipped by the unchanged path condition. |
+| Story acceptance | [job 114349456342](https://github.com/johnbilliris/ama/actions/runs/38097965762/job/114349456342) | **PASS**: all 5 evidence tests (32.4 s), 6 collected story cases in 3 files, and all 6 Chromium/mobile executions (22.3 s). |
+| Evaluation | [38097965818](https://github.com/johnbilliris/ama/actions/runs/38097965818) | **PASS** |
+| Security | [38097965765](https://github.com/johnbilliris/ama/actions/runs/38097965765) | **PASS**: Trivy, Gitleaks and PSRule. |
+| Linux Python quality | [job 114347812195](https://github.com/johnbilliris/ama/actions/runs/38097965762/job/114347812195) | **PASS**: 5,829 passed, 12 skipped, 14 deselected; existing coverage ratchet passed; 33 benchmarks passed. |
+| Windows Python quality | [job 114349456237](https://github.com/johnbilliris/ama/actions/runs/38097965762/job/114349456237) | **PASS**: 2,498 passed, 27 skipped. |
+
+The story runner reports GitHub runner 2.337.0, Ubuntu 24.04, Node 24.21.0 x64 and Python 3.12.15 x64. The unmodified browser installation retrieved Chrome Headless Shell 147.0.7727.15/revision 1217 from the configured Playwright CDN Linux64 route. Both the five-test evidence guard and the original three-spec Chromium/mobile story guard passed before their execution steps. No project, spec, timeout or quality threshold was removed or relaxed.
+
+This passing hosted run resolves the stale-selector/mock story blocker for the retained Next 16.3.8 candidate. It does not imply approval or reproducibility evidence for Playwright 1.63.0, close browser publisher/source-policy evidence merely because a download succeeded, or substitute the dev-server stories for production builds. T036–T038, T046–T048 and final T052 remain incomplete for their broader requirements. #152 remains open, draft and unmerged; other npm/Action candidates still require their own evidence and edit gates.
+
+The diagnostic browser archive/cache and watch artifacts were removed by their exact session-owned paths. Generated tracked Next/Playwright state was restored; unrelated untracked `apps/web/AGENTS.md` and `apps/web/CLAUDE.md` were not committed or deleted.
