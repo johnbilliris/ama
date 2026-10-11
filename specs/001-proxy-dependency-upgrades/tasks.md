@@ -212,10 +212,14 @@ Every task line uses `- [ ] Tnnn [P?] [USn?] Description with file path`. `[P]` 
 
 **E31 partial checkpoint**: two independent native Debian/glibc ARM64 installs download all 726 packages with zero reuse and produce identical 2,014-row full dependency maps and protected hashes. All 174 web tests and the full type/lint/production checks pass twice. This is not the required Ubuntu x64 pair; T036 remains open.
 
+**E32 pending execution**: the user authorized the branch-only `phase8-node-x64-candidate-maps` job to capture the required Ubuntu x64 pair. Local workflow/helper checks pass; no hosted installation or map is claimed until the committed job executes successfully.
+
 <!-- sequential -->
 - [ ] T037 [US4] For `C:\code\ama\apps\web\Dockerfile`, perform two cache-empty Alpine web builds from the same recorded base-image digest and architecture; record musl SWC/sharp/native artifact retrieval, resolved versions, source/integrity, and unchanged repository inputs in `C:\code\ama\specs\001-proxy-dependency-upgrades\evidence.md`. Do not deploy, float the base image between runs, or substitute GNU/Linux results for musl.
 
 **E31 partial checkpoint**: two no-cache native ARM64 builds from one pinned Alpine digest pass, including 726 fresh package downloads each, all 38 static pages, matching 26-package runtime maps and actual healthy HTTP/CSS startup. The separate x64 build fails in QEMU's Next worker; no x64 image is claimed. Required x64/publication and remaining source/final-candidate gates keep T037 open.
+
+**E32 pending execution**: the authorized branch-only `phase8-alpine-x64-candidate-builds` job performs two fixed-digest no-cache builds, exact installed-map/hash comparisons and local runtime/native-binding checks. Its results are not yet available; T037 stays incomplete.
 
 <!-- sequential -->
 - [ ] T038 [US4] On each affected supported architecture, perform two isolated devcontainer runs using the checked-in aggregate recipe in `C:\code\ama\.devcontainer\devcontainer.json` and `install-python-dependencies.py`; include its Python helper and frozen pnpm install, distinct empty caches, and actual registry settings. Record installed maps, architecture, sources, hashes, and each run ID in `C:\code\ama\specs\001-proxy-dependency-upgrades\evidence.md`; do not claim ARM64 coverage from x64.

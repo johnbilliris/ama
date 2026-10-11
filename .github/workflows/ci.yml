@@ -154,6 +154,162 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  phase8-node-x64-candidate-maps:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == '001-proxy-dependency-upgrades' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: python-package-source-policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
+        with:
+          version: 10.6.3
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24.21.0"
+      - name: Install and validate two clean Ubuntu x64 copies
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/phase8-node-x64-candidate-maps"
+          mkdir -p "$out"
+          git rev-parse HEAD > "$out/checkout.txt"
+          node --version
+          pnpm --version
+          uname -m
+          getconf GNU_LIBC_VERSION
+          git archive HEAD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc apps/web packages/domain packages/ui tests/e2e > "$RUNNER_TEMP/phase8-node-source.tar"
+          sha256sum "$RUNNER_TEMP/phase8-node-source.tar" > "$out/source-archive.txt"
+          for run_id in a b; do
+            copy="$RUNNER_TEMP/phase8-node-$run_id"
+            mkdir "$copy"
+            tar -xf "$RUNNER_TEMP/phase8-node-source.tar" -C "$copy"
+            (
+              cd "$copy"
+              export NPM_CONFIG_STORE_DIR="$RUNNER_TEMP/phase8-node-store-$run_id"
+              export NPM_CONFIG_CACHE="$RUNNER_TEMP/phase8-npm-cache-$run_id"
+              test ! -e node_modules
+              test ! -e "$NPM_CONFIG_STORE_DIR"
+              pnpm config get registry
+              pnpm store path
+              sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc apps/web/package.json packages/domain/package.json packages/ui/package.json apps/web/next.config.ts apps/web/vitest.config.ts apps/web/tsconfig.json > "$out/input-$run_id-before.txt"
+              pnpm install --frozen-lockfile --store-dir "$NPM_CONFIG_STORE_DIR" --reporter=append-only 2>&1 | tee "$out/install-$run_id.log"
+              pnpm --recursive list --depth Infinity --json > "$out/graph-$run_id.json"
+              node "$GITHUB_WORKSPACE/scripts/ci/capture_node_dependency_map.mjs" "$out/graph-$run_id.json" "$out/map-$run_id.txt" "$copy"
+              sha256sum "$out/graph-$run_id.json" > "$out/graph-$run_id.sha256"
+              gzip "$out/graph-$run_id.json"
+              pnpm --filter @ama/web exec node -e 'const r=require("node:module").createRequire(require.resolve("next/package.json")); if(process.arch!=="x64"||require("next/package.json").version!=="16.3.8"||r("sharp").versions.sharp!=="0.35.5")throw new Error("Unexpected candidate runtime"); console.log("GNU x64 SWC exports",Object.keys(r("@next/swc-linux-x64-gnu")).length)'
+              pnpm --filter @ama/domain run typecheck
+              pnpm --filter @ama/domain build
+              pnpm --filter @ama/web lint
+              pnpm --filter @ama/web exec tsc --noEmit
+              pnpm --filter @ama/web test
+              pnpm --filter @ama/web build
+              sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc apps/web/package.json packages/domain/package.json packages/ui/package.json apps/web/next.config.ts apps/web/vitest.config.ts apps/web/tsconfig.json > "$out/input-$run_id-after.txt"
+              cmp "$out/input-$run_id-before.txt" "$out/input-$run_id-after.txt"
+            )
+          done
+          cmp "$out/map-a.txt" "$out/map-b.txt"
+          cmp "$out/input-a-before.txt" "$out/input-b-before.txt"
+          sha256sum "$out/map-a.txt" "$out/map-b.txt"
+      - name: Upload Ubuntu x64 candidate evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: phase8-node-x64-candidate-maps
+          path: ${{ runner.temp }}/phase8-node-x64-candidate-maps/
+          if-no-files-found: error
+          retention-days: 7
+
+  phase8-alpine-x64-candidate-builds:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == '001-proxy-dependency-upgrades' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: python-package-source-policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      ALPINE_BASE: node:24-alpine@sha256:83f1c388c31fb2e51f7cbd4dea949b96260798c98f206e8e4696bc93bd964e3a
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24.21.0"
+      - name: Build and inspect two cache-empty Alpine x64 candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/phase8-alpine-x64-candidate-builds"
+          context="$RUNNER_TEMP/phase8-alpine-context"
+          pinned="$RUNNER_TEMP/phase8-alpine.Dockerfile"
+          mkdir -p "$out" "$context"
+          git rev-parse HEAD > "$out/checkout.txt"
+          git archive HEAD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc .dockerignore apps/web packages/domain packages/ui | tar -x -C "$context"
+          test "$(grep -c '^FROM node:24-alpine AS ' apps/web/Dockerfile)" -eq 2
+          sed "s|^FROM node:24-alpine AS |FROM $ALPINE_BASE AS |" apps/web/Dockerfile > "$pinned"
+          sha256sum apps/web/Dockerfile "$pinned" > "$out/dockerfile-hashes.txt"
+          docker pull --platform linux/amd64 "$ALPINE_BASE"
+          docker image inspect "$ALPINE_BASE" > "$out/base-image.json"
+          container=""
+          trap 'if [ -n "$container" ]; then docker rm -f "$container"; fi' EXIT
+          for run_id in a b; do
+            image="ama-next-x64:$GITHUB_RUN_ID-$run_id"
+            builder="ama-next-x64-builder:$GITHUB_RUN_ID-$run_id"
+            (
+              cd "$context"
+              sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc apps/web/package.json packages/domain/package.json packages/ui/package.json > "$out/input-$run_id-before.txt"
+            )
+            docker build --no-cache --platform linux/amd64 --progress plain --tag "$image" --file "$pinned" "$context" 2>&1 | tee "$out/build-$run_id.log"
+            # Inspect the completed builder via its cached stages; no new install is allowed here.
+            docker build --platform linux/amd64 --target builder --progress plain --tag "$builder" --file "$pinned" "$context" 2>&1 | tee "$out/inspect-build-$run_id.log"
+            if grep -Eq '^#[0-9]+ [0-9]+(\.[0-9]+)? ' "$out/inspect-build-$run_id.log"; then
+              echo "Builder inspection unexpectedly executed a command instead of reusing the completed build." >&2
+              exit 1
+            fi
+            docker image inspect "$image" "$builder" > "$out/images-$run_id.json"
+            docker run --rm --network=none --entrypoint sh "$builder" -c 'set -eu; cd /app; sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml apps/web/package.json packages/domain/package.json packages/ui/package.json' > "$out/builder-input-$run_id.txt"
+            (
+              cd "$context"
+              sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml apps/web/package.json packages/domain/package.json packages/ui/package.json > "$out/builder-expected-$run_id.txt"
+            )
+            cmp "$out/builder-expected-$run_id.txt" "$out/builder-input-$run_id.txt"
+            docker run --rm --network=none --mount "type=bind,source=$GITHUB_WORKSPACE/scripts/ci/capture_node_dependency_map.mjs,target=/capture-map.mjs,readonly" --entrypoint sh "$builder" -c 'set -eu; cd /app; pnpm --recursive list --depth Infinity --json > /tmp/graph.json; node /capture-map.mjs /tmp/graph.json - /app' > "$out/map-$run_id.txt"
+            docker run --rm --network=none --entrypoint sh "$builder" -c 'set -eu; cd /app/apps/web; node -e '\''const r=require("node:module").createRequire(require.resolve("next/package.json")); if(process.arch!=="x64"||require("next/package.json").version!=="16.3.8"||r("sharp").versions.sharp!=="0.35.5")throw new Error("Unexpected Alpine candidate"); console.log(JSON.stringify({node:process.version,arch:process.arch,next:require("next/package.json").version,sharp:r("sharp").versions.sharp,swcExports:Object.keys(r("@next/swc-linux-x64-musl")).length}));'\''; cat /etc/alpine-release' > "$out/runtime-$run_id.txt"
+            container="ama-next-x64-smoke-$GITHUB_RUN_ID-$run_id"
+            docker run --detach --name "$container" --publish 127.0.0.1:33124:3000 "$image"
+            curl --fail --silent --show-error --retry 20 --retry-connrefused --retry-delay 1 --max-time 5 http://127.0.0.1:33124/ > "$out/page-$run_id.html"
+            grep -q '<!DOCTYPE html>' "$out/page-$run_id.html"
+            css="$(node -e 'const fs=require("node:fs");const html=fs.readFileSync(process.argv[1],"utf8");const match=html.match(/href="(\/_next\/static\/[^"?]+\.css(?:\?[^"]*)?)"/);if(!match)throw new Error("No compiled stylesheet");process.stdout.write(match[1].replaceAll("&amp;","&"));' "$out/page-$run_id.html")"
+            curl --fail --silent --show-error --max-time 10 "http://127.0.0.1:33124$css" > "$out/style-$run_id.css"
+            test -s "$out/style-$run_id.css"
+            docker inspect "$container" > "$out/container-$run_id.json"
+            docker logs "$container" > "$out/server-$run_id.log" 2>&1
+            docker rm -f "$container"
+            container=""
+            (
+              cd "$context"
+              sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc apps/web/package.json packages/domain/package.json packages/ui/package.json > "$out/input-$run_id-after.txt"
+            )
+            cmp "$out/input-$run_id-before.txt" "$out/input-$run_id-after.txt"
+          done
+          cmp "$out/map-a.txt" "$out/map-b.txt"
+          cmp "$out/input-a-before.txt" "$out/input-b-before.txt"
+          sha256sum "$out/map-a.txt" "$out/map-b.txt"
+      - name: Upload Alpine x64 candidate evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: phase8-alpine-x64-candidate-builds
+          path: ${{ runner.temp }}/phase8-alpine-x64-candidate-builds/
+          if-no-files-found: error
+          retention-days: 7
+
   simulation-tenant-isolation:
     needs: python-package-source-policy
     runs-on: ubuntu-latest

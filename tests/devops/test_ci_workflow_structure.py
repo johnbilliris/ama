@@ -168,3 +168,38 @@ def test_story_acceptance_targets_original_specs() -> None:
 
     assert "../../tests/e2e/" not in collection_step
     assert "../../tests/e2e/" not in run_step
+
+
+def test_feature_x64_validation_jobs_are_scoped_and_uncached() -> None:
+    text = _ci_text()
+    node_job = text.split("  phase8-node-x64-candidate-maps:\n", 1)[1].split(
+        "\n  phase8-alpine-x64-candidate-builds:", 1
+    )[0]
+    alpine_job = text.split("  phase8-alpine-x64-candidate-builds:\n", 1)[1].split(
+        "\n  simulation-tenant-isolation:", 1
+    )[0]
+    for job in (node_job, alpine_job):
+        assert "github.event_name == 'pull_request'" in job
+        assert "github.event.pull_request.head.ref == '001-proxy-dependency-upgrades'" in job
+        assert "github.event.pull_request.head.repo.full_name == github.repository" in job
+        assert "runs-on: ubuntu-24.04" in job
+        assert "contents: read" in job
+        assert "NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/" in job
+        assert 'node-version: "24.21.0"' in job
+        assert "for run_id in a b; do" in job
+        assert "actions/cache@" not in job
+        assert "continue-on-error" not in job
+        assert "if-no-files-found: error" in job
+    assert "phase8-node-store-$run_id" in node_job
+    assert "pnpm install --frozen-lockfile --store-dir" in node_job
+    assert 'test ! -e "$NPM_CONFIG_STORE_DIR"' in node_job
+    assert "pnpm --filter @ama/web test" in node_job
+    assert 'cmp "$out/map-a.txt" "$out/map-b.txt"' in node_job
+    assert (
+        "ALPINE_BASE: node:24-alpine@sha256:83f1c388c31fb2e51f7cbd4dea949b96260798c98f206e8e4696bc93bd964e3a"
+    ) in alpine_job
+    assert "docker build --no-cache --platform linux/amd64" in alpine_job
+    assert "--publish 127.0.0.1:33124:3000" in alpine_job
+    assert 'cmp "$out/builder-expected-$run_id.txt" "$out/builder-input-$run_id.txt"' in alpine_job
+    assert 'cmp "$out/map-a.txt" "$out/map-b.txt"' in alpine_job
+    assert "docker push" not in alpine_job
