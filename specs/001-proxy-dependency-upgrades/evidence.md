@@ -1562,3 +1562,50 @@ Lower stable major-30 candidates are 30.1.1, 30.1.0, 30.0.1 and 30.0.0. All requ
 The retrieved 1.63.0 `browsers.json` declares Chromium/headless-shell revision **1243**, browser **153.0.8010.12** (not baseline revision 1217). Read-only source inspection identifies the Playwright CDN route for those archives; no candidate CLI or browser was executed, and the existing E25 Microsoft npm redirect approval does not grant browser-CDN approval. Browser/OS artifacts and publisher/source-policy evidence remain open independently of npm availability.
 
 Responsible next roles: package-feed/platform owner for stronger published integrity or approved equivalent provenance for all four scopes; security/platform owner for the distinct browser-source authorization; maintainers for subsequent scoped resolver, consumer compatibility and two-install/runtime evidence only after those gates clear. The current validated Next 16.3.8 and Python lock candidates remain untouched. T011, T021 and final T052 remain incomplete; no fallback or exact upgrade is finalized. Current CI `38141714556`, evaluation `38141714522` and security `38141714589` pass on `ad398b44`, but do not validate these unedited candidate graphs.
+
+## E37 — Paired development-helper installs repeat; baseline compatibility conflict persists
+
+The user approved the development-container/Python-helper reproducibility batch at `1ebc0be3f1987ff4dd6c03e8cd7faaacdd252804`. Repeated the checked-in aggregate dependency helper and its editable/post-create pnpm sequence in two new task-owned containers from the existing pinned development image `sha256:38fa26b3b2f646e394be205573c2b2f11d432ffbc7dfb60f897c6a0c8a8d4042`. No repository dependency, helper, Dockerfile, workflow, override or security floor changed.
+
+The native image reports Debian 12/Linux ARM64, Python 3.12.11, uv 0.11.21, Node 24.21.0 and pnpm 10.6.3. Each copy uses the same committed-source archive, SHA-256 `35b73fcfcaefd6f8cb0753fc8f53cb9089101c52fa9d405d73df34cb4cfec8dc`, a distinct container-local source tree, standard `python -m venv` bootstrap and separate empty uv/npm/pnpm caches. Bootstrap contains only image-provided pip 25.0.1; no installed application packages or the original image's `/opt/venv` dependencies are reused. `UV_NO_CACHE=1` applies to both helper invocations, and the helper enforces the approved PyPI proxy while clearing secondary sources.
+
+| Exact-bootstrap run | Container ID | UTC start / finish | Result |
+| --- | --- | --- | --- |
+| A | `080ada8caaefb9fd21519f3bc6d94bb991513257f6f8b3f4155da84356e855ba` | `2026-10-11T21:24:59Z` / `21:29:03Z` | Dependency/helper/editable/pnpm sequence passes; separate dependency check fails |
+| B | `dda0a774bcf337237472054d24c8988347f3389610e483500b198272aa361849` | `2026-10-11T21:24:59Z` / `21:29:06Z` | Same |
+
+Both execute `.devcontainer/install-python-dependencies.py --mode dependencies`, including the existing security overrides and mem0ai step, then `--mode editables` for all eight checked-in local packages. Their fresh aggregate resolution installs 291 packages and all eight editable packages; final maps contain **300 entries**, including bootstrap pip. The following installed range resolutions are observations of this independent helper context, not changes to or inferred outcomes for root/agents uv locks:
+
+| Package | Both helper runs |
+| --- | --- |
+| cryptography / PyJWT / redis-entraid | 50.0.2 / 2.15.1 / 1.2.1 |
+| mem0ai / idna | 2.2.1 / 3.20 |
+| h2 / hpack | 4.4.1 / 4.2.0 |
+| pydantic-settings / setuptools | 2.15.0 / 84.0.0 |
+| aiohttp / msgpack | 3.14.4 / 1.2.3 |
+| python-engineio / python-socketio | 4.14.0 / 5.17.0 |
+| Starlette / python-multipart | 1.7.0 / 0.0.32 |
+
+The Python maps are byte-identical, SHA-256 `69d04536b55a72008667878adb13d0da824009ec195652320951d936844d5530`, persisted in `candidate-maps/e37-devcontainer-python-arm64.txt`. Both exact JSON package maps match SHA-256 `e837b9f654e22923845ee6f47528b7ca582284e414cd831c6071c059eab8cb9a`. All eight editable locations point to each isolated `/validation` copy. Two earlier diagnostic runs omitted bootstrap pip and produced 299 entries; they are not counted as the exact recipe pair and were repeated with the standard venv bootstrap rather than concealing that difference.
+
+Both `CI=true pnpm install --frozen-lockfile` post-create repetitions download **726 packages with zero reuse** from the approved npm proxy. Their 2,014-row canonical Node maps match each other and the existing E31/E34 map, SHA-256 `5a77853da97b9259c8b8fc4b721d5b04e88eaeeecd45a56bf87eae5dad6b8894`. Next remains 16.3.8; GNU ARM64 SWC loads with 60 exports and Sharp remains 0.35.5. The raw Node graphs also match the previously recorded `6d966d10f17cc9b53e61fdde5640139cbfb9aba92f98c536f55317f9e06ca9dd`. No browser installer was executed or cached browser treated as source evidence.
+
+Protected manifests, locks, helper and development configuration are unchanged before/after and between runs. The common 19-row input map is `candidate-maps/e37-devcontainer-inputs-arm64.txt`, SHA-256 `a42d90314ab0680a3e01fbefa593d910424c72fed510c28980ab231129dee153`. Exported CRLF lock/helper fingerprints differ from committed LF bytes as already distinguished in E31/E34; normalized contents match exactly. These ranged helper installations do not use, rewrite or replace any uv lock.
+
+### Compatibility and remaining gate disposition
+
+The subsequent `uv pip check` fails identically in both environments:
+
+```text
+Checked 300 packages
+Found 1 incompatibility
+redis-entraid requires pyjwt~=2.13.0, but 2.15.1 is installed
+```
+
+The original unchanged development image reports the same sole incompatibility with PyJWT 2.15.1. This is the documented existing metadata conflict behind the preserved `pyjwt>=2.14.0,<3` security override, not a newly introduced dependency regression. Its exact diagnostic is persisted in `candidate-maps/e37-devcontainer-compatibility-arm64.txt`, SHA-256 `49581dadb5f133d6686e61ba64350fca3d48d940b4cad03c2b6544b76eafe337`. The compatibility failure remains recorded and is not waived; no lower PyJWT, removed override or success-shaped check result was used.
+
+The existing helper regression suite passes **2 tests**. The diagnostic wrapper uses root-owned fresh paths instead of the developer's persistent volumes; it does not rebuild the development image/features or reproduce IDE/user permissions. Tool-version commands report Azure CLI 2.91.0 and azd 1.35.1; Azure CLI's separate Python runtime is not substituted for helper Python 3.12.11. T038 therefore has repeatable native aggregate/pnpm installation evidence, not an all-green full devcontainer rebuild or compatibility verdict. Other independent pip/container recipes and final-candidate/source checks remain open.
+
+Current head `1ebc0be3` CI `38175222502` and security `38175222470` pass, but its automatic evaluation `38175222500` again fails the unchanged must-include threshold (`0.857 < 0.900`, 25 overall samples; correlated run `01EPDB2K044XR7EKVNS8WCCKFH`). No evaluation was rerun or scoring policy changed in this batch; E35's diagnosis does not waive this distinct failed run.
+
+All task-owned helper containers and temporary archive/cache/graph copies are removed after evidence capture; existing user containers, volumes and image remain unchanged. T006/T038/T048/T052 and whole-batch readiness remain incomplete. #152 stays draft and unmerged.
