@@ -185,10 +185,12 @@ pnpm --filter @ama/web exec playwright test --project=evidence
 pnpm --filter @ama/web exec playwright test --list --project=chromium --project=mobile \
   test_incident_commander_dashboard.spec.ts test_persona_workspace.spec.ts test_dashboard_decision_support.spec.ts
 pnpm --filter @ama/web exec playwright test --project=chromium --project=mobile \
-  /workspace/tests/e2e/test_incident_commander_dashboard.spec.ts \
-  /workspace/tests/e2e/test_persona_workspace.spec.ts \
-  /workspace/tests/e2e/test_dashboard_decision_support.spec.ts
+  test_incident_commander_dashboard.spec.ts \
+  test_persona_workspace.spec.ts \
+  test_dashboard_decision_support.spec.ts
 ```
+
+Use the same spec basenames for collection and execution, matching the corrected `ci.yml` step; Playwright's configured `testDir` already selects `tests/e2e`.
 
 Retain the existing collection assertions: at least five evidence tests and non-zero story acceptance collection. Other applicable help/web-coverage/axe projects remain their own validation records; a filtered run does not prove the whole Playwright suite.
 

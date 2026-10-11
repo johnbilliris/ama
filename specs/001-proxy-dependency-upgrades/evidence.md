@@ -1378,3 +1378,27 @@ The story runner reports GitHub runner 2.337.0, Ubuntu 24.04, Node 24.21.0 x64 a
 This passing hosted run resolves the stale-selector/mock story blocker for the retained Next 16.3.8 candidate. It does not imply approval or reproducibility evidence for Playwright 1.63.0, close browser publisher/source-policy evidence merely because a download succeeded, or substitute the dev-server stories for production builds. T036–T038, T046–T048 and final T052 remain incomplete for their broader requirements. #152 remains open, draft and unmerged; other npm/Action candidates still require their own evidence and edit gates.
 
 The diagnostic browser archive/cache and watch artifacts were removed by their exact session-owned paths. Generated tracked Next/Playwright state was restored; unrelated untracked `apps/web/AGENTS.md` and `apps/web/CLAUDE.md` were not committed or deleted.
+
+## E30 — Local web quality and production-bundle diagnostics
+
+The user approved the next bounded validation batch for the retained Next 16.3.8 candidate without application or dependency edits. Ran the existing commands at `02ac17b2d7f7099e1c93ba992602c8e524710826` on Windows ARM64, Node 24.16.0, pnpm 10.6.3, TypeScript 6.0.3 and Vitest 4.1.6. These runs reuse the installed workspace and are diagnostic quality evidence, not fresh-install or canonical Ubuntu/Alpine evidence.
+
+| Command / stage | Result |
+| --- | --- |
+| `pnpm --filter @ama/domain run typecheck` | **PASS** |
+| `pnpm --filter @ama/domain build` | **PASS** |
+| `pnpm --filter @ama/web lint` | **PASS**, unchanged full ESLint selection |
+| `pnpm --filter @ama/web exec tsc --noEmit` | **PASS**, unchanged full compiler configuration |
+| `pnpm --filter @ama/web test` | **PASS**, 36 files and 174 tests (24.88 s), including the configured unit/integration/accessibility selections and authentication/API contracts |
+| `pnpm --filter @ama/web build` — webpack compilation/type/static generation | **PASS**, Next 16.3.8, all 38 static pages generated |
+| Same build command — initial postbuild packaging | **FAIL**, Windows `EPERM` renaming `standalone-deploy/node_modules/next_tmp_11856` to `node_modules/next`; the overall initial build command exited 1 |
+| `pnpm --filter @ama/web run postbuild` — one unchanged retry | **PASS**, produced the existing hoisted deploy bundle without helper or configuration changes |
+| Actual deploy-bundle startup and compiled asset requests | **PASS**, `next start` bound only to `127.0.0.1:33123`, served HTTP 200 HTML (9,522 bytes) and its actual compiled CSS (64,784 bytes); the task-owned server was stopped |
+
+The complete Vitest command already includes `tests/a11y/**/*.test.{ts,tsx}` and the configured `tests/web` selection, so it covers the separate a11y script's selection without substituting a filtered suite or rerunning it unnecessarily. React `act` warnings were recorded; no tests failed and no warning/rule suppression was added. Compilation also emitted the existing dynamic-require warning. The unchanged production entrypoint logs Next's `output: standalone` warning; its successful local HTML/asset responses do not establish Linux deployment compatibility.
+
+Verified `apps/web/.next/standalone-deploy` contains the matching Next 16.3.8 package, BUILD_ID `aJRfTQunvOaR4LlMgVt0-`, compiled root page and static assets, with zero symbolic links in its `node_modules`. The existing postbuild removed its intended test/config/dev artifacts and `.env.local`. The successful packaging retry reports 341 packages added and 334 reused store artifacts; this is not an empty-store installation. `NPM_CONFIG_REGISTRY` was explicitly set to the approved Microsoft proxy, with no public source fallback.
+
+Before/after hashes match for root/workspace/web/domain/UI manifests, `pnpm-lock.yaml`, `.npmrc`, web `tsconfig.json`, `next-env.d.ts` and Vitest configuration. In particular the web manifest and pnpm lock retain E28's SHA-256 values `df8945e061217e29cfebe0250bee6517872bff075699afef5362251750f0fa1b` and `23aaa097bc4293f4528495990fc1d2ef6a914cc45a49393c804c6b02f2bc34a9`. The only generated tracked change was the compiler's `tsconfig.tsbuildinfo`, which was restored after validation. No application, dependency, source-policy, workflow or build-helper code changed in this batch.
+
+**Remaining gates**: T046 remains incomplete for canonical Ubuntu x64/full-candidate evidence. Two clean root-pnpm installations (T036), cache-empty pinned Alpine builds (T037), devcontainer repetition (T038), remaining artifact/source policy and applicable final checks still need their own evidence. Docker is unavailable on the local host; no supported Linux/Alpine result is inferred from these Windows diagnostics. The initial `EPERM` failure remains recorded rather than reported as an all-green first build. T052 and the overall batch remain incomplete.
