@@ -7,7 +7,7 @@
 
 This is planning research, not an installation or security attestation. Research used existing local parsers/tooling, read-only `gh api` calls for exactly the supplied PRs, approved proxy metadata, and direct artifact retrieval into session scratch. No research agents, application tests, package installs, PR mutations or later-phase agents were invoked.
 
-**Current evidence addenda**: R1 and the T019 matrices preserve their historical planning/execution-start observations and distributions. R9/E36 supersede affected npm availability assumptions; R5 and R10/E38 correct Action baseline-object/reference/runner observations. R11/E39 records the subsequently approved two-pin candidate; the rest of the Action scope and all final outcomes remain gated.
+**Current evidence addenda**: R1 and the T019 matrices preserve historical observations/distributions. R9/E36 supersede affected npm availability assumptions; R5 and R10/E38 correct Action provenance. R11/E39 records the approved two-pin candidate; R12/E40 records its committed hosted results. Remaining scopes and final outcomes stay gated.
 
 ## R1 — Reconcile proposals against resolved, independent scopes
 
@@ -292,3 +292,9 @@ After `d89079bc`, the user approved only #105/#103 canonicalization and its narr
 Two distinct uncached local official-source/asset replicas match complete 17/6-blob Git trees and all six required assets, including bootstrap/key hashes and the v2.4.1 detached signature. Scoped 40-input map SHA-256: `a351c13024ed87f26a4343f0fe54cf748abef8cec3d254aeb88adaec93ee7c74`; it is not the T035 final union. An initial verifier incorrectly selected the legacy `<v0.6.0` key assignment; the verified source's actual v2.4.1 branch is now checked explicitly, with the failed attempt retained and excluded from the fresh passing pair.
 
 The focused 39-case contract selection has **37 passed / two failed** both on this candidate and an immutable eight-file `d89079bc` baseline export. Full normalized testcase profiles match: missing CD `max_hallucination_rate` expectation and missing CI P1-gate text are pre-existing contract failures, not waived or fixed in this two-pin scope. No native installer/signing/job execution or candidate commit/push is claimed. T030 remains partial; broader Action/final validation and independent acceptance remain open. Inventory counts and historical direction distributions are unchanged.
+
+## R12 — Committed candidate's automatic hosted results (E40)
+
+The separately authorized checkpoint `2ba7d7cca0ca0f07d3829ceb2218f86920f3ab10` contains only the two equivalent full-commit references and E39 records. Automatic CI `38182299804`, security `38182299793` and evaluation `38182299794` all pass. Gitleaks job `114597227543` explicitly executes `ff98106e4c7b2bc287b24eaf42907196329070c7` on runner 2.337.0 with binary 8.24.3 and no leaks; its binary cache hit is retained as a limitation, not an uncached hosted install claim.
+
+The hosted quality, evidence/story, paired Node/Alpine and Python-map jobs pass; canonical Node maps retain `5a77853da97b9259c8b8fc4b721d5b04e88eaeeecd45a56bf87eae5dad6b8894`. Existing automatic evaluation `01P204TNJQKZD1DBVKPV1EB6V2` reports gate_passed true, 25 evaluated samples and no reasons. The sovereign job remains skipped and Cosign installer/signing unrun. E39's two failed baseline contracts, earlier evaluation/helper failures and final-union/source/acceptance gaps remain open; no global task or final PR outcome is closed. E40's recording authorization is documentation-only.

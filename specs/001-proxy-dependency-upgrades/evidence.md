@@ -1794,3 +1794,47 @@ The exact two-reference byte/YAML audit, unchanged protected inputs, fresh paire
 T030 is partial: only the explicitly authorized two-pin subset is applied; its other refs and the remaining serialized Action chain stay pending. T013/T035/T044/T048/T050/T052 remain incomplete for their broader/final-input, sovereign, functional, contract and checklist requirements. The fixed 33-PR/31-work-item inventory, 63-reference count, historical provisional distributions, 55 task IDs/statuses and 35 unassessed checklist items are unchanged. No final PR outcome or whole-batch readiness is claimed, and #152 remains draft and unmerged. Further changes and commit/push require the next separate human gate.
 
 The exact task-owned replica downloads, immutable baseline export/archive and temporary verifier were removed after recording. Only minimized input/source/asset/diagnostic records and the two JUnit/comparison records remain in session storage; no shared resources or generated web instruction files were removed.
+
+## E40 — Automatic hosted checks pass on the committed two-pin candidate
+
+The user separately approved committing/pushing E39's two-pin partial candidate, producing `2ba7d7cca0ca0f07d3829ceb2218f86920f3ab10`, then approved read-only collection of its already-triggered checks and this documentation record. The six-file commit contains only the two Action references and four feature records; all 40 committed LF-normalized inputs match E39. #152 remains open, draft and unmerged.
+
+No workflow was manually dispatched or rerun, no new inference request was issued by the assistant, and no agent-authored comment, signing, publication or deployment occurred. The existing PR-triggered workflows ran automatically after the authorized push. Read-only `gh run watch`, run/job APIs and narrowly selected log payloads supplied the following actual outcomes:
+
+| Workflow / run | Run head | Started / last updated UTC on 2026-10-11 | Terminal result |
+| --- | --- | --- | --- |
+| CI `38182299804` | `2ba7d7cc` | `22:55:09Z` / `23:11:17Z` | Success: 13 successful jobs, one skipped sovereign job |
+| security-scan `38182299793` | Same full candidate head | `22:55:09Z` / `22:56:25Z` | Success: Gitleaks, Trivy filesystem and PSRule jobs |
+| eval-pr-gate `38182299794` | Same full candidate head | `22:55:09Z` / `23:00:50Z` | Success: the existing automatic evaluation gate |
+
+### Exact full-commit Gitleaks execution, with cache limitation
+
+Security job `114597227543` started `22:55:12Z` and completed successfully at `22:55:33Z`. Its download log explicitly identifies `gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7` and the same full resolved SHA; this is an observed candidate-reference execution, not inferred from the old equivalent tag.
+
+The hosted runner reports **2.337.0**, image `ubuntu-24.04` / `20261004.327.1`, runner ID `1000006301`, GitHub Actions group 0 and label `ubuntu-latest`. The job reports Gitleaks **8.24.3**, a `gitleaks-cache-8.24.3-linux-x64` cache hit and **no leaks found**. This demonstrates successful exact-commit execution but is **not** an uncached hosted binary installation; E39's distinct fresh official source/asset replicas remain separate evidence. Cosign's dispatch-only installer/signing workflow was not executed.
+
+### Hosted quality and provisional pairs
+
+| CI job / ID | Observed successful result |
+| --- | --- |
+| `quality` / `114597321601` | Existing lint/type and quality steps pass; six equivalence cases; 5,829 Python cases passed, 12 skipped and 14 deselected; unchanged phase-A unit coverage 78.58%; 33 benchmark cases passed. |
+| `quality-windows` / `114598953806` | Runner 2.337.0, image `windows-2025-vs2026`; 2,498 contract/integration cases passed and 27 skipped. |
+| `story-acceptance` / `114598953848` | Five evidence cases collected and **five passed**; six Chromium/mobile story cases collected and **six passed**. |
+| `phase8-node-x64-candidate-maps` / `114597321574` | Both separate installs download 726 packages with zero reuse; all 174 web cases pass in each copy, with the existing type/lint/build steps successful. Both canonical maps retain SHA-256 `5a77853da97b9259c8b8fc4b721d5b04e88eaeeecd45a56bf87eae5dad6b8894`. |
+| `phase8-alpine-x64-candidate-builds` / `114597321522` | Both cache-empty native x64 builds pass with Next 16.3.8, existing packaging/runtime assertions and the same canonical map hash above. |
+| Other applicable CI jobs | Python source policy, Linux/Windows Python maps, isolation, documentation, golden-set, evidence-pack and citation-card accessibility jobs conclude success. |
+| `specify-cli-quality` / `114598954789` | **Skipped**; the required `[self-hosted, ama-au-sovereign, azure-au, linux, x64]` labels remain unchanged. No actual sovereign runner readiness is established. |
+
+These are results of the existing jobs associated with the recorded PR run/head, not completion of the final T035 union or all source/environment gates. PR merge checkouts and their recorded validation inputs remain distinct from the branch-head identity where applicable; no new candidate installation was synthesized from a cached local environment.
+
+### Automatic evaluation outcome, not a waiver of earlier failures
+
+The existing driver submitted correlated run **`01P204TNJQKZD1DBVKPV1EB6V2`** at `22:57:04Z`. At `23:00:45Z`, its actual log payload reports `gate_passed: true`, `evaluated_samples: 25`, `reasons: []`, followed by `final_status: succeeded`. No unreported must-include fraction is inferred from that overall verdict, and no scorer, prompt, model, dataset, threshold, Azure setting or inference command changed in this read-only batch.
+
+This passing automatic evaluation does not erase E34/E37's genuine failed runs, the scoring concerns recorded in E35, or the helper's redis-entraid/PyJWT compatibility failure. Likewise the successful CI workflow does not run or waive E39's separate 39-case DevOps selection: its two reproduced baseline contract failures remain **failed** and require their own reviewed disposition.
+
+### Scope and next-owner boundary
+
+Gitleaks's exact full-commit hosted execution sub-gate is now evidenced. The unrun Cosign installer/signing context, sovereign runner identity/version/readiness, other Action targets, remaining npm provenance/browser/type/peer gates, independent consumers, final candidate union and independent acceptance remain open. T013/T030/T035/T044/T048/T050/T052 and Phase 8 are not globally complete; no final PR outcome or whole-batch readiness is claimed.
+
+The 33-PR/31-work-item inventory, 63 selected Action references, task/checklist statuses and protected workflow/dependency inputs remain unchanged in this documentation-only record. Minimized readback observations remain in session storage, SHA-256 `18f1dea4f567a6b27d5a332021b91ea7f2d17526d526a91f3ba5bdb9431fc27d`; the two exact completed watcher logs were removed. Committing/pushing this record and any next implementation batch require separate human gates.
