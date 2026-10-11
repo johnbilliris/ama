@@ -1720,3 +1720,77 @@ Verified comment `src/main.ts` accepts `body-path || body-file`; the existing de
 At this head CI `38177525616`, security `38177525575` and evaluation `38177525580` all conclude success. These already-triggered runs were read, not rerun; they do not erase E34/E37's failed evaluations, E37's helper compatibility failure or other npm/consumer holds. T017/T018 stay checked only as updated hold/provenance-record tasks. T020 still allows only the previously approved Python edits and retention/validation of NW-next; no Action pin edits are authorized. Phase 8 remains active, Phases 9/10 remain pending, and #152 remains open, draft and unmerged.
 
 After durable evidence recording, the exact task-owned source/archive/binary downloads and temporary verification scripts were removed. Only minimized observation/identity JSON remains in session storage; no shared cache, user container, unrelated file or generated web instruction file was removed.
+
+## E39 — Approved two-pin canonicalization; source pairs pass, baseline contract failures persist
+
+After documentation checkpoint `d89079bc3151170d53d891a8dbeeaa9ccd934233`, the user explicitly approved only the Gitleaks/Cosign full-commit canonicalization, including a scoped exception to the original nine-batch Action order and corresponding T020/T030 updates. This permits the two-reference candidate and bounded validation, not a new commit/push, workflow dispatch, comment, signing, publication or deployment.
+
+| Workflow / step / source PR | Pre-edit annotated tag object | Candidate verified full commit |
+| --- | --- | --- |
+| `security-scan.yml#gitleaks`, step `gitleaks`, #105 | `dcedce43c6f43de0b836d1fe38946645c9c638dc` | `ff98106e4c7b2bc287b24eaf42907196329070c7` |
+| `prompts-publish.yml#sign`, step `Install cosign`, #103 | `f713795cb21599bc4e5c4b58cbad1da852d7eeb9` | `398d4b0eeef1380460a10c8013a76f728fb906ac` |
+
+These are E38's **identical source commits**, not new Action versions or newer-baseline claims. Gitleaks remains Node 20/default binary 8.24.3; Cosign remains composite/bootstrap v2.5.2 with explicit requested v2.4.1. No checkout/upload/comment or other Action ref, trigger, permission, runner, credential setting, input, binary release, scan threshold, dormant job or non-pin workflow byte changed.
+
+### Exact scoped inputs, not the final T035 union
+
+Forty pre-edit inputs were captured: all 25 selected workflow files plus 15 dependency/lock/source/helper/development inputs. Replacing each new SHA with its old SHA exactly recovers that workflow's pre-edit byte hash; the other **38 inputs remain byte-identical**. Both parsed YAML mappings also match the expected one-scalar replacement. The scoped candidate's canonical map is the sorted 40 rows `<repository-relative Windows path>\t<LF-normalized SHA-256>\n`, SHA-256 **`a351c13024ed87f26a4343f0fe54cf748abef8cec3d254aeb88adaec93ee7c74`**. This is not the final whole-batch T035 input set.
+
+| Workflow | Baseline actual/committed CRLF SHA-256 | Candidate actual CRLF SHA-256 |
+| --- | --- | --- |
+| `prompts-publish.yml` | `a2d28059950eeceecdeb367b00f969b8d5c57dc27450aff49c1b79db39d92263` | `94dc6225ac49052c6e03f3e6c4724ebad10f6ebcb306d651039ecf9a03566bdf` |
+| `security-scan.yml` | `bec69dce9e2819f57c69a884b0f555594b2b70bc556d78c549bd0b9f2acd2152` | `598dfa74b40375937b069749f85562779ffcf133ddc1415a43f6f87a06a79791` |
+
+| Workflow | Baseline LF-normalized SHA-256 | Candidate LF-normalized SHA-256 |
+| --- | --- | --- |
+| `prompts-publish.yml` | `2fa02f3b5104edbc7ea66b793601b23d93e5f976ec12a09a3077312d27eb7db7` | `aa0d7353e39bcc2840c5d24cc94ea93dc431fdf9c46f75f5847936e32977e9a6` |
+| `security-scan.yml` | `6b14c1581b9923d988d89470758c83b1618461ca772eec6734a100c776214631` | `0770181dc2832f80a2deaac52181740197982e3f172534771107a9c3ed11e56a` |
+
+The first input collector incorrectly assumed all committed blobs were LF. `amend-loop-coupling.yml` is committed CRLF and was byte-identical to its worktree; normalization of both sides, while retaining raw/committed/normalized hashes, corrected that diagnostic assumption. No input drift or repository content repair was needed.
+
+### Two fresh official-source/asset replicas
+
+The verifier runs on Windows ARM64/Python 3.14.6 with existing cryptography 50.0.1. This is local official-source retrieval and integrity/signature evidence for the Linux x64 requirements, **not** native Linux binary/installer execution or a live Action-job result. A and B use distinct initially empty task-owned directories and fresh requests with no local artifact reuse.
+
+| Run ID | UTC start / finish on 2026-10-11 | Scoped input | Result |
+| --- | --- | --- | --- |
+| `e39-two-pin-source-a` | `22:43:08Z` / `22:43:41Z` | Common 40-input SHA-256 above | Both complete source trees and all six required release assets verify |
+| `e39-two-pin-source-b` | `22:43:41Z` / `22:44:15Z` | Same, unchanged before/after | Identical source/asset URLs, final hosts, sizes and hashes; all verification results pass |
+
+Each replica re-reads the official baseline tag object, exact commit and complete non-truncated Git tree. Gitleaks source matches all **17/17** blobs in tree `50087d01bbbe89f68a29e3e53220f419c44eb3ee`; Cosign matches all **6/6** in `c13729074d183d43da2e2165e5c8800f5373eba1`. Both commit verifications remain valid; the old Gitleaks tag remains unsigned and Cosign tag bad_cert. Exact official retrievals follow:
+
+| Official URL | A / B UTC retrieval on 2026-10-11 | Identical SHA-256 | Verification |
+| --- | --- | --- | --- |
+| `https://codeload.github.com/gitleaks/gitleaks-action/tar.gz/ff98106e4c7b2bc287b24eaf42907196329070c7` | `22:43:19Z` / `22:43:52Z` | `3f88235e0914861be223a8584e376ab9c686f41bd77655852c4c12cbc71f73fa` | Complete official Git blob identity, not archive hash alone |
+| `https://codeload.github.com/sigstore/cosign-installer/tar.gz/398d4b0eeef1380460a10c8013a76f728fb906ac` | `22:43:27Z` / `22:44:01Z` | `5fd270b570f7ac92a4065186c997d3ac0b7351c7c36a7defd85cd109bd93dd3f` | Complete official Git blob identity |
+| `https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_checksums.txt` | `22:43:29Z` / `22:44:04Z` | `eefa9ab1ee69571248a6fa070a2a7de0837dd9eb72745d131f8766206aac8ac2` | Fresh official checksum file |
+| `https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz` | `22:43:32Z` / `22:44:05Z` | `9991e0b2903da4c8f6122b5c3186448b927a5da4deef1fe45271c3793f4ee29c` | Matches exact archive name in each official checksum file |
+| `https://github.com/sigstore/cosign/releases/download/v2.5.2/cosign-linux-amd64` | `22:43:36Z` / `22:44:09Z` | `bcfeae05557a9f313ee4392d2f335d0ff69ebbfd232019e3736fb04999fe1734` | Matches bootstrap hash pinned in each verified source |
+| `https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64` | `22:43:39Z` / `22:44:13Z` | `8b24b946dd5809c6bd93de08033bcf6bc0ed7d336b7785787c080f574b89249b` | Detached ECDSA/SHA-256 signature verifies against selected pinned P-256 release key |
+| `https://github.com/sigstore/cosign/releases/download/v2.4.1/cosign-linux-amd64.sig` | `22:43:41Z` / `22:44:15Z` | `2cd598f53ffff67995a6354efdaa07ce4c88bd2da03f742ab2e257e3ecf3a186` | Fresh detached signature in each replica |
+| `https://raw.githubusercontent.com/sigstore/cosign/v2.4.1/release/release-cosign.pub` | `22:43:41Z` / `22:44:15Z` | `f4cea466e5e887a45da5031757fa1d32655d83420639dc1758749b744179f126` | Matches requested-release branch's pinned key hash in each source |
+
+Byte sizes match E38 exactly. Source archives remain on `codeload.github.com`; release assets redirect only to `release-assets.githubusercontent.com`; the key stays on `raw.githubusercontent.com`. No credential or signed redirect query is recorded, no package/tool was installed and no downloaded binary was executed.
+
+**Initial verifier failure retained**: an earlier attempt reported a Cosign key-hash mismatch because its first-match regex selected the installer's legacy `<v0.6.0` key hash `4aa4bd19530a4929d758a9896255aef2c82f1a3a9f4b000034c6df4307c14f9e`. Verified `action.yml` blob `e3f111772a13d7f261725bbcc44f3a9f58e4f6fa`, lines 237–244, selects the `release/release-cosign.pub` / `f4cea...` else branch for explicit v2.4.1. The corrected session verifier applies that exact conditional, checks both a legacy v0.5.0 case and v2.4.1, and rejects a changed/unrecognized branch. Fresh downloaded key bytes already matched the correct pinned hash; no upstream source or trust check was weakened. That failed attempt is excluded from the passing pair count; its downloads were removed before both corrected replicas.
+
+### Focused contracts: actual baseline and candidate both fail two unchanged expectations
+
+Command on the candidate: `python -m pytest tests\devops\test_ci_workflow_structure.py tests\devops\test_cd_workflow.py tests\devops\test_release_gates_workflow_semantics.py -q --tb=short`. Initial execution and the subsequent JUnit capture both return exit 1: **37 passed / two failed**.
+
+For an actual baseline replay, exported exactly those three tests, their DevOps conftest, `pyproject.toml` and the referenced `ci.yml`, `cd.yml`, `dr-drill.yml` from `d89079bc` with `git archive --format=zip`; the eight-file archive SHA-256 is `1c7412b4bbc1dc0ac12150f1cb7282159f88910edd4b9df5d0c038f7cbf25474`. Running the same selected tests using the same existing Python environment in the isolated export (with `--confcutdir` limited to that export) also returns exit 1: **37 passed / two failed**. Every one of the 39 testcase outcomes and normalized failure messages matches, not just aggregate counts.
+
+| Failing contract | Baseline and candidate fingerprint | Scope / next owner |
+| --- | --- | --- |
+| `test_cd_workflow.py::TestCDQualityAndRollbackWiring::test_quality_gate_job_uses_reusable_eval_gate` | Unchanged CD quality-gate `with` block has no `max_hallucination_rate`; test expects `0.02` and receives `None` | DevOps/evaluation-contract maintainer reviews workflow/contract alignment in a separately authorized scope; neither threshold nor test is changed here. |
+| `test_release_gates_workflow_semantics.py::test_ci_wires_feature_evidence_binding_and_p1_gate` | Unchanged CI source lacks expected `p1-training-release-gate` text | CI/release-contract maintainer reviews the expectation/gate in a separate scope; no gate is added, removed or waived by the pin change. |
+
+The baseline JUnit SHA-256 is `aa4143cacd36849730f8081f53b5a27d56924e8a5ab274a5092b43605a6f3c55`; candidate JUnit is `43bf723265f11540ef874e3ee5f75a50647f87a45a9f900324229d3e119f1ad1`; normalized case comparison is `fcf71a1572567a75f7a65bd1aa83f2771defd01dc327d8fdc2316e363a6e3eaa`. These prove baseline matching, **not an all-green contract gate**. All three unchanged reference workflows/tests retain their original hashes; no assertion, selector or protection was edited to force a pass.
+
+### Partial checkpoint and remaining gates
+
+The exact two-reference byte/YAML audit, unchanged protected inputs, fresh paired Git-source/checksum/key/signature checks pass. The focused workflow-contract command remains **failed**, with the two reproduced baseline expectations retained as readiness findings. No proposed full-commit Gitleaks job, Cosign installer or signing workflow was executed for this uncommitted candidate; E38's existing equivalent-source cached scan is still separate evidence.
+
+T030 is partial: only the explicitly authorized two-pin subset is applied; its other refs and the remaining serialized Action chain stay pending. T013/T035/T044/T048/T050/T052 remain incomplete for their broader/final-input, sovereign, functional, contract and checklist requirements. The fixed 33-PR/31-work-item inventory, 63-reference count, historical provisional distributions, 55 task IDs/statuses and 35 unassessed checklist items are unchanged. No final PR outcome or whole-batch readiness is claimed, and #152 remains draft and unmerged. Further changes and commit/push require the next separate human gate.
+
+The exact task-owned replica downloads, immutable baseline export/archive and temporary verifier were removed after recording. Only minimized input/source/asset/diagnostic records and the two JUnit/comparison records remain in session storage; no shared resources or generated web instruction files were removed.
