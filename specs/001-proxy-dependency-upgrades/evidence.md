@@ -1462,3 +1462,32 @@ Hosted checks use committed LF `.npmrc` SHA-256 `9773ed1a7dd1c6ecf9b1c1983e564e4
 Alpine x64 **build A passed** its no-cache compilation/packaging, cached builder inspection, input comparison and complete installed map (same 2,014-row hash). Node 24.21.0 x64, Next 16.3.8, Sharp 0.35.5 and musl SWC (60 exports) were verified on Alpine 3.24.2. Its first immediate loopback request then failed with `curl (56) Recv failure: Connection reset by peer`; no populated HTML response or second build was produced. The successful Ubuntu job and Alpine build A do not turn that smoke failure or missing build B into a pass.
 
 The user authorized a validation-only startup correction: retain the same required HTTP/compiled-CSS assertions, retry startup transport errors for at most 60 seconds, and always capture the current container's inspection/server logs before cleanup while preserving the failing exit status. No application, dependency, base-image or acceptance requirement changed. **26 focused tests**, Ruff lint/format and LF Bash syntax pass locally. Commit/push approval and a successful paired Alpine rerun remain pending; T037 and final T052 stay incomplete.
+
+## E34 — Both native x64 pairs pass; current evaluation gate fails
+
+The user approved the four-file bounded-readiness checkpoint `0d3356e4813cdad6d396558113d4d0efb9da012a`. CI run [38137793633](https://github.com/johnbilliris/ama/actions/runs/38137793633), PR merge checkout `6f60d92f6a76f56753da9d904b01d96eca9733a1`, **passes every applicable job**, including both new native x64 jobs and the unchanged story acceptance (5 evidence tests, all 6 Chromium/mobile stories). The specify-cli job remains skipped by its unchanged condition. Security run `38137793646` passes Trivy, Gitleaks and PSRule. **Evaluation run `38137793629` fails**, as detailed below; this is not an all-green final candidate.
+
+### Ubuntu x64 reproduction pair
+
+Both separate copies/stores again download all **726 packages with zero reuse**, pass domain/web type/lint checks, all **174 web tests** and production build/postbuild. The paired 2,014-row installed maps are identical and match E31/E33's canonical edge map `candidate-maps/e31-node-debian-arm64.txt`, SHA-256 `5a77853da97b9259c8b8fc4b721d5b04e88eaeeecd45a56bf87eae5dad6b8894`. The before/after and cross-run protected-input maps match, SHA-256 `611719f4ea578c9a2ee83afb52dd4287389162fff34e5fa8a4a3f5cc96d2bacf`, persisted in `candidate-maps/e34-node-inputs-x64.txt`.
+
+Source archive SHA-256 is `e319210763d996dad34b2fee1690807b8e807fb9b32918ec979647f326f2c7ba`. This archive/candidate ID differs from E31's local export; the committed LF input fingerprints are recorded rather than conflated with Windows CRLF exports.
+
+### Native Alpine x64 reproduction pair
+
+Both no-cache builds from the same pinned x64 base `83f1c388c31fb2e51f7cbd4dea949b96260798c98f206e8e4696bc93bd964e3a` succeed: **726 fresh downloads, zero reuse** each, all 38 static pages, unchanged postbuild, cached-only builder inspection, exact builder/input comparisons and native SWC/Sharp loading. The same required startup HTTP and compiled-CSS checks succeed after the bounded connection-reset retries; no assertion was skipped. Both run the repository's non-root `appuser`/`server.js` production image locally on the hosted runner.
+
+| Alpine x64 artifact | Run A | Run B |
+| --- | --- | --- |
+| Runtime image ID | `sha256:9610b0954373abe4e34bfa88f8dc4401eb39585134a141210ea52e0b6796b7b7` | `sha256:219d5117e3d54b044396b8d7bf8ff88001b97088b76d28495d97fe03c7825839` |
+| Builder image ID | `sha256:06937c61e44275b76222ce0b00490b39b4a05d1f28a8586db3451d6a8df93565` | `sha256:d6e858fc703f23ac15f9c384b46b59873ef21c7499a81de7166018dcbcc97fa1` |
+| Native identity | Node 24.21.0 x64, Alpine 3.24.2, Next 16.3.8, Sharp 0.35.5, musl SWC 60 exports | Same |
+| Production response | HTTP 200 HTML (9,523 bytes), HTTP 200 compiled CSS (64,784 bytes) | Same |
+
+All four Ubuntu/Alpine builder maps match the same 2,014-row hash; physical platform-specific binding execution is verified separately and is not inferred solely from pnpm's complete optional-dependency graph. The two Alpine context before/after maps match SHA-256 `9bf69ebd37d58cfb4ac65882158fa479dd16564b872183df3e2a56e25cd0d072`, persisted in `candidate-maps/e34-alpine-inputs-x64.txt`; each actual builder manifest/lock hash matches its expected context hash. The hosted recipe's LF hash is `b69d8cc3721280b5efd882ff5588e98d607535286a42634f98e9427dc6598145`; pinned scratch recipe hash is `9508d8d97e13bb7c26afcb932bfc8d224c8f0ff83ec51bc588ea24a4f9ccaebe`. The local Windows recipe hash in E31 differs only by line endings. Production readiness was verified with actual responses; container inspection captured the health-check scheduler still at `starting`, so no completed Docker health-check pass is inferred for this short smoke run.
+
+### Mandatory evaluation failure remains blocking
+
+Correlated evaluation `01Q3WA45MTEDT60CTR40451DCG` completed on the existing evaluation platform with **25 evaluated samples**, but its scorecard gate reports `gpt-5.4-mini@2026-03-17: must-include=0.857 < threshold 0.900` and exits 20. Unit/lint/configuration steps passed; the failure is the required content-quality threshold, not a package download, missing tool, startup transport error or skipped evaluation. The gate has no correlated baseline run in this output. No causal dependency regression, transient explanation or waiver is inferred; prior passing evaluations remain distinct historical results.
+
+T036/T037/T046 now have passing provisional native x64 reproduction/quality evidence, but T035's final union, complete devcontainer/helper repetition, remaining package/Action/source gates and final T052 reconciliation are still incomplete. T048's current mandatory evaluation failure requires its own investigation/decision before final readiness. No threshold, allowlist, model, prompt, application or dependency was changed to make this score pass; #152 remains draft and unmerged.
