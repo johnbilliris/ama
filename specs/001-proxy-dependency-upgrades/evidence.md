@@ -1306,3 +1306,56 @@ The fresh proxy packuments for `@swc/helpers@0.5.23` and protected `postcss@8.5.
 The E20 NW-next artifact/source blockers for the `*.vsblob.vsassets.io` host pattern, Linux/ARM64 SWC availability, and web dependency graph are now addressed by E25/E26 evidence. Candidate-graph peer/engine checks and lock-preservation analysis also pass. **NW-next remains excluded from the edit allowlist for now** because E20 explicitly treated the baseline story-acceptance failure as blocking its web scope: CI continues to report `Error: No tests found` for the configured Chromium/mobile story execution. The collection guard passes using spec basenames, while the run step supplies `../../tests/e2e/...` paths even though `apps/web/playwright.config.cts` sets `testDir` to `../../tests/e2e`; this path mismatch is a likely cause, not yet modified or confirmed by a passing rerun.
 
 T020 remains limited to the five Python uv-lock work items. The scratch Next 16.3.8 lock and frozen source-install experiment are not authorization to edit `apps/web/package.json` or `pnpm-lock.yaml`. No production dependency file was changed. The remaining NW-next gate is to restore and pass the existing story acceptance selector without weakening its projects/spec list, then reevaluate T020 before any manifest/lock edit; normal T036–T048 candidate builds/tests remain post-edit gates.
+
+## E27 — Hosted story acceptance rerun after fixture corrections
+
+Observed on commit `c457f4e9`:
+
+| Gate | Run | Result |
+| --- | --- | --- |
+| CI | [38031775712](https://github.com/johnbilliris/ama/actions/runs/38031775712) | **FAIL** only at `story-acceptance`; quality, Windows quality, Linux/Windows candidate maps, simulation isolation, evidence publication, accessibility, and golden-set jobs passed. |
+| Evaluation | [38031775724](https://github.com/johnbilliris/ama/actions/runs/38031775724) | **PASS** |
+| Security | [38031775737](https://github.com/johnbilliris/ama/actions/runs/38031775737) | **FAIL**: one unchanged Next.js finding, `CVE-2026-94483` (HIGH; installed 16.3.6, fixed in 16.3.8); Gitleaks and PSRule passed. |
+
+The story collection guard now passes and the unmodified six Chromium/mobile selections execute, so the earlier `No tests found` failure is resolved. The E2E-only changes in `c457f4e9` also remove the prior `activeTasks` runtime exception and permit the workspace mock to match its query-bearing route. Six execution failures remain:
+
+- Four strict-mode failures across the two projects: each title locator matches both the incident hero `<h1 class="incident-hero-title">` and the shared operating picture `<h1 class="sop-title">`. The existing visibility assertion needs to target the intended incident hero without weakening the story.
+- Two workspace failures: the test waits for the nonexistent accessible button name `Start selected task`, while the rendered localized label is `Start`. The test's task-status mock also targets `/api/tasks/{id}/status`, whereas `updateTaskStatus` sends `PATCH /api/tasks/{id}`; the request assertion has not yet been reached.
+- The run logs two `404` responses for `GET /api/alerts/alert-rec-001`; the test does not reach its later alert assertions, so whether this is another mock mismatch remains unverified.
+
+These are test/runtime observations on the existing dependency graph, not evidence that a Next candidate was installed or exercised. `apps/web/package.json` and `pnpm-lock.yaml` remain unchanged, and NW-next remains excluded from T020 pending a passing hosted story run and explicit T020 reevaluation. The focused workflow-structure regression suite passed locally (15 tests); local Playwright execution was unavailable because the required headless Chromium binary was not installed.
+
+## E28 — Retained Next candidate and corrected story contracts
+
+On resume, the branch already contained `d5117a7f` (`fix: upgrade Next.js to 16.3.8`), newer than the E27 checkpoint. This pre-existing commit changes only `apps/web/package.json` and `pnpm-lock.yaml`; it was not created by this resumed correction pass. The user then explicitly selected **Retain Next candidate and correct the E2E tests**, authorizing retention of this candidate, evidence reconciliation and test-only corrections. No earlier approval is inferred. This supersedes E26/E27's NW-next edit exclusion only for the existing candidate; other npm choices remain held and #152 remains draft.
+
+| Existing candidate gate | Run | Result |
+| --- | --- | --- |
+| CI on `d5117a7f` | [38032821276](https://github.com/johnbilliris/ama/actions/runs/38032821276) | **FAIL** only at story acceptance: four duplicate-heading failures and two stale-button timeouts. All other applicable jobs passed; specify-cli quality was skipped. |
+| Evaluation | [38032821272](https://github.com/johnbilliris/ama/actions/runs/38032821272) | **PASS** |
+| Security | [38032821198](https://github.com/johnbilliris/ama/actions/runs/38032821198) | **PASS**: Trivy, Gitleaks and PSRule. The previously failing Next finding is no longer reported by this scan. |
+
+### Candidate lock preservation
+
+Compared the parsed parent/current pnpm locks. Only the web Next importer and the ten `next`/`@next/env`/SWC package and snapshot keys change from 16.3.6 to 16.3.8. Every unchanged importer, package, snapshot and top-level setting is identical; all ten new package records retain SHA-512 and the approved proxy's `ms-feed-25.pkgs.visualstudio.com` tarball paths. Package metadata is unchanged apart from resolution identity, and the Next snapshot changes only its exact Next/env/SWC versions. UI Next stays at 15.5.18; Sharp 0.35.5, PostCSS 8.5.28, source-map-js 1.2.2 and unrelated integrity/security constraints remain intact. E11/E22/E26 provide the candidate artifact evidence; no new package source or dependency choice was introduced in this correction pass.
+
+Current candidate file SHA-256:
+
+| File | SHA-256 |
+| --- | --- |
+| `apps/web/package.json` | `df8945e061217e29cfebe0250bee6517872bff075699afef5362251750f0fa1b` |
+| `pnpm-lock.yaml` | `23aaa097bc4293f4528495990fc1d2ef6a914cc45a49393c804c6b02f2bc34a9` |
+
+### Story-only corrections and diagnostic validation
+
+Changed only the same three story specs, without changing the selected projects, assertions' substantive intent, application code, or workflow thresholds:
+
+- Both dashboard fixtures now satisfy `DashboardPayload`, include the commander actor and approval-action metadata, and scope their title assertion to the incident hero. The decision-support test also supplies the required alert draft and asserts that the approval button is enabled.
+- The publication test reuses a typed draft, checks loaded headline content, asserts the actual mutation methods/actor/content payloads, and verifies the ordered draft → approve → publish → acknowledged-delivery sequence.
+- The workspace mock matches the exact pathname regardless of query string and checks the incident query. The test uses the current `Start` label and `PATCH /api/tasks/{id}` contract, validates the optimistic version/actor/status payload, then checks the persisted `in_progress` state after the workspace reload. It does not rely on the removed `Last update` message.
+
+The unchanged Chromium/mobile projects collect **6 tests in 3 files**. All **6 passed in 44.0 seconds** locally with installed Next 16.3.8, Playwright 1.59.1, Node 24.16.0 `win32/arm64` and the existing Python 3.14.6 virtual environment. This is diagnostic Windows ARM64 execution, not the supported Linux x64/Python 3.12 or Alpine production-build evidence. The focused workflow regression suite passed **15 tests**, ESLint reported no errors on the three specs, and strict TypeScript checking of the specs/imported contracts passed with the existing web compiler options and Node types.
+
+The stock Playwright installer downloaded the exact baseline Chrome Headless Shell 147.0.7727.15/revision 1217 archive from `https://cdn.playwright.dev/builds/cft/147.0.7727.15/win64/chrome-headless-shell-win64.zip`, but its Node extraction stalled. Stopped only that installer and used native `Expand-Archive` on the same downloaded archive in an isolated session cache; no browser/channel substitute or package/config change was used. Archive SHA-256 `ad99bcd8fe297495052db112f5ee3f89bde9f5fdc5cd892812a3824dc6461bdb` is local byte identity, not publisher provenance. This baseline diagnostic run does not close the separate Playwright 1.63.0 browser/source gate.
+
+**Still pending**: commit/push approval for these test/evidence changes, a hosted Linux x64 story rerun, and the applicable reproducibility/build/quality gates. T021, T036–T038 and T052 remain incomplete; no final NW-next outcome or full-batch readiness is claimed.
