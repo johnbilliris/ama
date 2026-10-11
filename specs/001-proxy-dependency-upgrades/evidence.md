@@ -1491,3 +1491,35 @@ All four Ubuntu/Alpine builder maps match the same 2,014-row hash; physical plat
 Correlated evaluation `01Q3WA45MTEDT60CTR40451DCG` completed on the existing evaluation platform with **25 evaluated samples**, but its scorecard gate reports `gpt-5.4-mini@2026-03-17: must-include=0.857 < threshold 0.900` and exits 20. Unit/lint/configuration steps passed; the failure is the required content-quality threshold, not a package download, missing tool, startup transport error or skipped evaluation. The gate has no correlated baseline run in this output. No causal dependency regression, transient explanation or waiver is inferred; prior passing evaluations remain distinct historical results.
 
 T036/T037/T046 now have passing provisional native x64 reproduction/quality evidence, but T035's final union, complete devcontainer/helper repetition, remaining package/Action/source gates and final T052 reconciliation are still incomplete. T048's current mandatory evaluation failure requires its own investigation/decision before final readiness. No threshold, allowlist, model, prompt, application or dependency was changed to make this score pass; #152 remains draft and unmerged.
+
+## E35 — Read-only evaluation diagnosis and separate passing comparison
+
+The user authorized read-only diagnosis of E34's evaluation failure, then approved recording these findings without evaluator, dataset, prompt, model, threshold, application or dependency changes. No evaluation or inference was submitted or rerun during this diagnosis. The already-triggered documentation-head evaluation [38139543503](https://github.com/johnbilliris/ama/actions/runs/38139543503) completed successfully at `420dab500451686aadcc1e5440af4aee32d9a131`; that head's CI `38139543501` and security `38139543504` also passed. The failed E34 evaluation remains a distinct retained result, not a waived or overwritten run.
+
+| Existing correlated run | E34 failure | Documentation-head comparison |
+| --- | --- | --- |
+| Run ID | `01Q3WA45MTEDT60CTR40451DCG` | `01DWQQWHHAGSZRANXM9MFE4GHZ` |
+| Must-include applicable cases | 21 | 21 |
+| Cases satisfying every required phrase | 18 | 20 |
+| Must-include pass rate | 0.8571, below 0.900 | 0.9524, above 0.900 |
+| Mean fractional phrase score | 0.9048 | 0.9762 |
+| Gate result | Fail, exit 20 | Pass |
+| Retrieved scorecard SHA-256 | `9d8baf04268d389fe71f9f1951c00306154c5e5dd808ceabe4a33f69a7b9dea0` | `ed17d26d798ea5d7e83eb0a20665816f1780fabede5ead2b06ee47fdcc0494af` |
+
+Both runs contain the same 25 synthetic case IDs, byte-equivalent stored input values, `disaster-response-core@1.1.3`, `disaster-core-v1`, policy 1.0.0, `gpt-5.4-mini@2026-03-17`, Australia East, `pr-fast-subset` and the actual job argument `--max-cases 25`. Four prompt-injection cases exclude must-include through their metric-applicability lists; therefore its denominator is 21, not 25. `gate.py:89-98` checks the distribution pass rate rather than the mean fractional score, while the reported 25 evaluated samples are the maximum count across required metrics. `run_llm_evaluation.py:1302-1305` supplies `baseline=None`; neither verdict establishes a baseline-relative dependency regression.
+
+Read only the two run-specific trace prefixes and the existing synthetic dataset version. The dataset blob was last modified on 2026-10-06, before both runs; downloaded SHA-256 `0ca4731564bf349d2a909702a95f23f1e66c27ccfe42f70903d510549152b925`. All 21 applicable must-include results in each stored run replay exactly with the unchanged local deterministic rule. Only three cases differ:
+
+| Case | Failed-run score | Comparison score | Evidence-backed diagnosis |
+| --- | --- | --- | --- |
+| `case-floo-000041` | 1/2 phrases | 2/2 phrases | The failed output's higher-part-of-the-house wording is not recognized by the required higher-ground literal/aliases/pattern; the comparison's safe-higher-place wording is recognized. This demonstrates phrasing sensitivity, not a proven absence of the underlying concept. |
+| `case-stru-000027` | 1/2 phrases | 2/2 phrases | The comparison is credited for evacuation through the broad `move away` alias, matching movement away from smoke rather than explicitly verifying an evacuation action. This exposes a potential false positive; the correct scenario-specific expectation requires qualified review. |
+| `case-stor-000035` | 0/2 phrases | 1/2 phrases | The power-line scenario inherits the storm requirement to shelter indoors. Neither output matches it, so this case still fails in the passing run; the comparison additionally matches following instructions. Whether the generic expectation fits this scenario is unresolved. |
+
+These findings implicate output variation and evaluator/dataset semantic fit; they do not demonstrate that the dependency upgrade changed evaluation behavior or authorize adding broad aliases to obtain a pass. The aggregate threshold permits the later run's one remaining failed case, so a passing overall gate does not resolve that case's scoring-quality concern.
+
+Both existing Container Apps executions report `Succeeded` and the same mutable `eval-runner:dev` image tag. The current API revision is healthy and predates both evaluations; Azure Resource Health returns `UnsupportedResourceType` for these app/job types, not an availability verdict. Historical resolved image digests, full system prompts and effective inference parameters are not retained in the inspected run records. Current source defaults are not proof of the historical settings; these limits prevent a stronger causal or deterministic-reproducibility claim.
+
+No full trace outputs or dataset content are added to repository evidence. The two run-specific trace manifests have local SHA-256 `f99a4f0eaf65820b2a9c21fb764b995216377d69b0990899991c7a60b46dec6b` and `0c95e97df01a7bb70e1632c82144fb5215d443ffbf7f30ba47a9495da25afd45`; these are read-observation identities, not publisher or historical image provenance. Temporary diagnostic copies are removed after the minimized findings are recorded.
+
+**Disposition**: current mandatory checks pass on `420dab50`, E34's failure remains recorded, and the scorer/dataset fit concern remains a separate review item. No threshold or safety expectation is waived and no corrective code change is authorized. T048 still requires its remaining applicable checks and final-candidate evidence; all other dependency/source/devcontainer/helper and T052 gates remain open. #152 remains draft and unmerged.
