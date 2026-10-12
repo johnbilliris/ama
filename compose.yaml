@@ -12,6 +12,7 @@ services:
       AGENTS_BASE_URL: http://agents:8080
       AMA_ENABLE_PRODUCTION_AUTH: "0"
       AMA_ENVIRONMENT: dev
+      AMA_ALLOW_ANONYMOUS_INCIDENT_MAP: "1"
       AMA_TEST_MODE: "1"
       API_HOST: 0.0.0.0
       API_PORT: "8000"
@@ -117,6 +118,7 @@ services:
       target: runtime
       args:
         API_PROXY_UPSTREAM: http://api:8000/api
+        NEXT_PUBLIC_ALLOW_ANONYMOUS_INCIDENT_MAP: "1"
         NEXT_PUBLIC_API_BASE_URL: /api
         NEXT_PUBLIC_ENVIRONMENT: development
         NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/

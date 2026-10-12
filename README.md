@@ -187,8 +187,19 @@ The deployment targets **Azure regions within Australia**, with Australia East a
 
 ```bash
 azd provision --no-prompt
-azd deploy --no-prompt
 ```
+
+The container services use the repository root as their remote build context,
+which also contains the generated web deployment bundle. Limit `azd` to one
+concurrent operation while packaging and publishing these services:
+
+```powershell
+$env:AZD_CONCURRENCY_MAX = "1"
+azd deploy --no-prompt
+Remove-Item Env:AZD_CONCURRENCY_MAX
+```
+
+On Bash, use `AZD_CONCURRENCY_MAX=1 azd deploy --no-prompt`.
 
 To build the deployment images without provisioning or deploying resources,
 run `azd package --no-prompt`. The command builds each container service as a

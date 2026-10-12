@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import type { AlertDraftPayload } from "../../apps/web/src/lib/api/alerts";
+import type { DashboardPayload } from "../../apps/web/src/lib/api/dashboard";
 
 test("dashboard displays decision-support elements for incident commander", async ({ page }) => {
   await page.route("**/api/incidents/incident-001/dashboard", async (route) => {
@@ -10,6 +12,7 @@ test("dashboard displays decision-support elements for incident commander", asyn
           incidentType: "flood",
           status: "active",
           severity: "warning",
+          actorPersonaId: "persona-ic-001",
         },
         participatingOrganisations: [
           {
@@ -31,6 +34,7 @@ test("dashboard displays decision-support elements for incident commander", asyn
             type: "public_alert",
             summary: "Issue prepare-to-evacuate alert",
             status: "proposed",
+            approvalAction: { allowed: true, requiresPersona: true },
           },
           {
             recommendation_id: "rec-002",
@@ -39,6 +43,7 @@ test("dashboard displays decision-support elements for incident commander", asyn
             status: "proposed",
           },
         ],
+        activeTasks: [],
         signalSummary: {
           authoritativeCount: 3,
           communityCount: 2,
@@ -52,7 +57,7 @@ test("dashboard displays decision-support elements for incident commander", asyn
             },
           ],
         },
-      },
+      } satisfies DashboardPayload,
     });
   });
 
@@ -86,10 +91,26 @@ test("dashboard displays decision-support elements for incident commander", asyn
     });
   });
 
+  await page.route("**/api/alerts/alert-rec-001", async (route) => {
+    await route.fulfill({
+      json: {
+        alert_id: "alert-rec-001",
+        incident_id: "incident-001",
+        status: "draft",
+        audience_segments: ["community"],
+        languages: ["en-AU"],
+        channel_set: ["sms"],
+        content_blocks: { headline: "Prepare to evacuate", body: "Follow SES directions" },
+      } satisfies AlertDraftPayload,
+    });
+  });
+
   await page.goto("/incidents/incident-001");
 
   // Decision-support element: incident title and status
-  await expect(page.getByRole("heading", { name: "NSW Flood Response" })).toBeVisible();
+  await expect(
+    page.locator(".incident-hero").getByRole("heading", { name: "NSW Flood Response", exact: true }),
+  ).toBeVisible();
 
   // Decision-support element: signal health panel with trust indicators
   await expect(page.locator(".source-health-label").filter({ hasText: "Authoritative" })).toBeVisible();
@@ -105,4 +126,5 @@ test("dashboard displays decision-support elements for incident commander", asyn
 
   // Decision-support element: approval action available
   await expect(page.getByRole("button", { name: "Approve and publish alert" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Approve and publish alert" })).toBeEnabled();
 });

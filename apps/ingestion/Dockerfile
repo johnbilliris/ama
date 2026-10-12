@@ -10,6 +10,7 @@ ENV PIP_CONFIG_FILE=/dev/null \
     UV_NO_CONFIG=1
 
 WORKDIR /app
+COPY pyproject.toml ./pyproject.toml
 COPY apps/ingestion/pyproject.toml ./apps/ingestion/
 COPY apps/ingestion/ ./apps/ingestion/
 COPY apps/api/pyproject.toml ./apps/api/
@@ -18,8 +19,14 @@ COPY apps/agents/ ./apps/agents/
 COPY apps/__init__.py ./apps/__init__.py
 COPY apps/console_logging.py ./apps/console_logging.py
 COPY packages/ ./packages/
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir ./packages/eval-core ./apps/api ./apps/ingestion
+RUN pip install --no-cache-dir --upgrade pip "uv==0.11.21" && \
+    python -c "import tomllib; from pathlib import Path; overrides=tomllib.loads(Path('pyproject.toml').read_text())['tool']['uv']['override-dependencies']; Path('/tmp/uv-overrides.txt').write_text('\n'.join(overrides) + '\n')" && \
+    uv --no-config pip install --system --no-cache \
+      --default-index https://packagefeedproxy.microsoft.io/pypi/simple \
+      --overrides /tmp/uv-overrides.txt \
+      ./packages/eval-core ./apps/api ./apps/ingestion && \
+    pip uninstall --yes uv && \
+    rm /tmp/uv-overrides.txt
 
 FROM python:3.12-slim AS runtime
 

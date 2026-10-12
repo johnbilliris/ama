@@ -45,6 +45,8 @@ jobs:
   deploy:
     name: Deploy to ${{ github.event.workflow_run.head_branch }}
     runs-on: ubuntu-latest
+    env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push'
@@ -276,6 +278,8 @@ jobs:
         run: azd provision --no-prompt
 
       - name: Deploy services
+        env:
+          AZD_CONCURRENCY_MAX: "1"
         run: azd deploy --no-prompt
 
       - name: Verify deployed container images
