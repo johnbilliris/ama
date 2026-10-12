@@ -22,7 +22,7 @@ COPY packages/ ./packages/
 RUN pip install --no-cache-dir --upgrade pip "uv==0.11.21" && \
     python -c "import tomllib; from pathlib import Path; overrides=tomllib.loads(Path('pyproject.toml').read_text())['tool']['uv']['override-dependencies']; Path('/tmp/uv-overrides.txt').write_text('\n'.join(overrides) + '\n')" && \
     uv --no-config pip install --system --no-cache \
-      --default-index "$UV_DEFAULT_INDEX" \
+      --default-index https://packagefeedproxy.microsoft.io/pypi/simple \
       --overrides /tmp/uv-overrides.txt \
       ./packages/eval-core ./apps/api ./apps/ingestion && \
     pip uninstall --yes uv && \
