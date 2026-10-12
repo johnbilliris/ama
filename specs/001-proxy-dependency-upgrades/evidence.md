@@ -1887,3 +1887,49 @@ Vite 8.0.12 accepts `@types/node ^20.19.0 || >=22.12.0`; Vitest 4.1.6 accepts `^
 #146 / NW-node-types remains **held/incomplete** under B-TYPES plus the required-companion source/integrity gap. Dependency/feed maintainer: supply acceptable stronger approved published provenance for the required companion or a newly eligible same-major graph. Frontend maintainer: then assess the actual candidate type-provider/consumer graph and run its unchanged Node-24 quality checks after the scoped edit/install gate. Do not weaken integrity, skip library/consumer checks, invent a different-major fallback or change runtime as a shortcut.
 
 T011/T015/T020/T021/T036/T046/T052 retain their existing statuses and authorization boundaries. All 33 PRs/31 work items, original directions and other holds remain unchanged. Raw task-owned archives/declaration copies, the two full catalogue copies and temporary verifier were removed; minimized findings remain in session storage, SHA-256 `7e6b5891eb39d88b436a3c75cb7035b813915d85e8a30824f36c4ec1f5c89e4e`. No candidate pin/version or repository file changed during assessment; this subsequent recording permission covers documentation only, not commit/push or installation.
+
+## E42 — MSAL sources clear; actual authentication-consumer readiness remains open
+
+The user approved read-only #144 source/consumer research at `20df2c06ba1b813a0fd775b12d9b321cdfe74894`, then separately approved this record. The original PR remains open at frozen head `ab07c81f375e752fe78328144d9062900bb699ab`, base `62d249dc1205644fed934ea167df56695e92b3d2`, proposing React 5.3.2 to 5.7.2 only in `apps\web\package.json`. No source-PR scope/target drift, package install, dependency/application/configuration edit, live sign-in, credential use or identity-registration change occurred.
+
+### Complete changed-package source graph, with stronger assertions preserved
+
+The exact planned graph is `@azure/msal-react 5.7.2` with peer browser `^5.24.0`, browser **5.24.0** with exact dependency common **16.14.2**, and no further required dependencies in React/common. Successful scoped proxy catalogues supplied these exact records; actual archives were retrieved and package identities, versions, published SHA-512 and SHA-1 assertions verified.
+
+| Exact package | Proxy-supplied artifact URL | UTC retrieval on 2026-10-12 | Bytes / local SHA-256 |
+| --- | --- | --- | --- |
+| `@azure/msal-react@5.7.2` | `https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@azure/msal-react/-/msal-react-5.7.2.tgz` | `00:29:43Z` | 33,603 / `ca7cc13809abb515fe64c29568da4afa79f97f50a33dda2a32d06fb08ad67a66` |
+| `@azure/msal-browser@5.24.0` | `https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@azure/msal-browser/-/msal-browser-5.24.0.tgz` | `00:29:45Z` | 2,406,967 / `ee4b1ac1dd31b333616f4f3fd731dd13b8ee8f6de7c6014308866335f16f1609` |
+| `@azure/msal-common@16.14.2` | `https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@azure/msal-common/-/msal-common-16.14.2.tgz` | `00:29:46Z` | 482,736 / `f8fd433f9da534a8d9ffc62cbe36a4c35399503ec53c2e6f33e09c1aef58ab48` |
+
+Published SHA-512 assertions, in the same order, are `sha512-xxwNH2dp77ACHuPFG+a9LTPinz7s+Xoh66Vvz/pWeyPMSXT0p+I4p9UXWpLWzY8qKBxJWbhyLwAtoaqVFiakHQ==`, `sha512-jS1stt81tslcVZi7fqVD+g6vr8w/IWqFl/vAB2dx/6EOroQDuCR4+z0o3C+d6a/GpLATvdoO+kwnDcYzsBXKQA==`, and `sha512-HOBR0Gfo39TMrkxNG8k6cfjRkrRjXZc3JQs3ebMWQc9S4cihuknMYra3sgmzbZB752oQBqBN9+WF7c826p2vIQ==`. Archive file counts are 80 / 1,441 / 683. No candidate SDK code was executed.
+
+Final hosts were `6bavsblobprodcus442.vsblob.vsassets.io`, `w3xvsblobprodcus414.vsblob.vsassets.io` and `7kwvsblobprodcus429.vsblob.vsassets.io`, respectively, inside the E25-approved redirect pattern. No public package feed or signed redirect query was used/recorded. This refreshes the E12 common-access sub-gate and establishes approved-source retrieval/integrity for the three changed packages, not a clean installation or final security verdict.
+
+SemVer 7.8.5 confirms existing React **19.2.6** satisfies `^16.8.0 || ^17 || ^18 || ^19.2.1` and Node **24.16.0** satisfies React package engine `>=20`. Browser 5.24.0 satisfies the new wrapper peer; current 5.9.0 does **not**, so the proposal cannot be applied as a React-only lock change.
+
+Keep independent contexts distinct: baseline browser 5.9.0 uses common 16.5.2, whereas unchanged MSAL Node 6.0.1 requires common 16.14.1 and older browser 2.39.0 requires common 13.3.3. A later candidate must not normalize these unrelated instances or update MSAL Node; web/UI peers and unrelated lock records remain protected.
+
+### Actual consumer/API assessment, not inferred React-wrapper adoption
+
+The reviewed app has no MSAL React API/provider imports. Its active helper is standalone `@azure/msal-browser` in `src\lib\auth\entra-msal.ts`, consumed by alerts and simulation authentication transports. Preserve the current tenant/authority/client/audience resolution, delegated `access_as_user` scope, origin-based callback, sessionStorage choice, account selection, awaited initialization, silent-first/popup fallback, SSR guards and error behavior. No environment values or credentials were read.
+
+The six used public declarations match installed browser 5.9.0 and retrieved 5.24.0 exactly: `initialize`, `getAllAccounts`, `loginPopup`, `acquireTokenSilent`, `acquireTokenPopup`, and `logoutPopup`. Configuration still accepts string redirect/cache fields and exports the same interaction-required error type. Both browser declarations refine the generic common result's nullable account to non-null `AccountInfo`; the generic common type alone is not an observed application type regression.
+
+The [official MSAL React FAQ](https://learn.microsoft.com/entra/msal/javascript/react/faq) supports browser-only authentication and describes provider-context rules when using the React wrapper; it is not a reason to introduce that unused wrapper here. Its “latest v3” wording is not exact 5.7.2 version evidence; the retrieved package metadata/declarations supply the actual peer/API observations.
+
+### Redirect bridge is an existing readiness/evidence gap
+
+The [official v5 redirect-bridge guide](https://learn.microsoft.com/entra/msal/javascript/browser/redirect-bridge) requires a dedicated callback that broadcasts responses, avoids interfering routing/provider logic, is not served with COOP headers, and exactly matches the registered Entra redirect URI. Those are lifecycle/identity prerequisites, not permission to change a registration.
+
+Actual source comparison establishes that **installed 5.9.0 already uses the bridge**: `dist/interaction_client/PopupClient.mjs:161` and `SilentIframeClient.mjs:213` call `waitForBridgeResponse`. The target popup response path delegates through its response hook to `waitForBridgeResponse`, and its silent iframe path does the same. Do not attribute this requirement solely to the upgrade or substitute method-name equality for authentication proof.
+
+The reviewed helper sets `redirectUri` to the application origin, and searches of the app/test surfaces find no dedicated redirect-bridge implementation. Authoritative deployed callback/registration behavior was not inspected under the no-credential/no-identity-change boundary. This is a **pre-existing consumer readiness/evidence gap**, not proof that a live login failed or a newly introduced regression. Frontend/identity owners must resolve it or supply the relevant authoritative evidence in a separately approved scope; no bridge route, headers, redirect URI or identity configuration was altered.
+
+`simulation-api-auth.test.ts` mocks the helper, not the MSAL SDK. Its header/configuration/failure-propagation assertions do not validate SDK startup, popup/iframe response exchange, silent refresh, account/cache behavior or sign-out. No actual candidate install, typecheck/build/test, two-clean-install pair or live authentication was run in this batch. Those gates remain required after source/consumer decisions and explicit candidate authorization.
+
+### Current disposition and next owners
+
+The three-package source-access, published-integrity and declared peer sub-gates are evidenced. **B-MSAL / #144 remains incomplete** for actual consumer/authentication readiness and final validation; T020 is not expanded and no version changes are authorized by this record. Dependency/frontend owners review only the scoped three-package candidate and independent lock contexts; frontend/identity owners address bridge/registered-callback evidence through its own explicit gate. Do not downgrade React, use public packages, bypass the callback requirement or treat mocked-helper/baseline passes as new-SDK evidence.
+
+All 33 PRs/31 work items, task/checklist statuses, original observations and other holds remain unchanged. Raw task-owned archives/declarations, package-metadata copies and temporary verifier were removed after minimized findings capture, SHA-256 `c45d8b0f2878a60c94010ab0b2b489f427a24fe77e0eb55e5ede6ea113ea88c5`. This recording permission covers documentation only; commit/push, package installation, dependency or identity changes require separate gates.
