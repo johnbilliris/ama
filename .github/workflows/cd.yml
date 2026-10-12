@@ -278,6 +278,8 @@ jobs:
         run: azd provision --no-prompt
 
       - name: Deploy services
+        env:
+          AZD_CONCURRENCY_MAX: "1"
         run: azd deploy --no-prompt
 
       - name: Verify deployed container images
