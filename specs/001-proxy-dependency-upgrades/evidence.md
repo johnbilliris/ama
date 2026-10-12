@@ -1838,3 +1838,52 @@ This passing automatic evaluation does not erase E34/E37's genuine failed runs, 
 Gitleaks's exact full-commit hosted execution sub-gate is now evidenced. The unrun Cosign installer/signing context, sovereign runner identity/version/readiness, other Action targets, remaining npm provenance/browser/type/peer gates, independent consumers, final candidate union and independent acceptance remain open. T013/T030/T035/T044/T048/T050/T052 and Phase 8 are not globally complete; no final PR outcome or whole-batch readiness is claimed.
 
 The 33-PR/31-work-item inventory, 63 selected Action references, task/checklist statuses and protected workflow/dependency inputs remain unchanged in this documentation-only record. Minimized readback observations remain in session storage, SHA-256 `18f1dea4f567a6b27d5a332021b91ea7f2d17526d526a91f3ba5bdb9431fc27d`; the two exact completed watcher logs were removed. Committing/pushing this record and any next implementation batch require separate human gates.
+
+## E41 — Node-types target is available; required companion provenance holds the graph
+
+At documentation head `802f350abc658f5f266119b263efe98a355366d0`, the user approved a read-only #146 source/Node-24-consumer assessment, then separately approved this record. Source PR #146 remains open at frozen head `b2238f8fc57f89635ca10d2790a044a2555f9ffa`, base `62d249dc1205644fed934ea167df56695e92b3d2`, changing only `apps\web\package.json` from `@types/node 22.13.10` to proposed `26.6.4`. No inventory or target drift was found.
+
+No dependency, lock, configuration, application, workflow or runtime changed, and no package was installed. The baseline remains **@types/node 22.13.10 / undici-types 6.20.0**, with both entries protected by SHA-512 in the root lock. Downloaded declarations were inspected as source data, not installed or executed.
+
+### Approved-proxy retrieval and exact companion requirement
+
+Exact version endpoints for the scoped target and `undici-types/8.9.0` returned 404, while successful full catalogues and real artifact retrievals establish availability. These endpoint errors are not evidence that either package is absent. Both `https://packagefeedproxy.microsoft.io/npm/@types%2fnode` and the raw scoped catalogue returned the exact target; companion metadata came from the same proxy's `undici-types` catalogue.
+
+| Package / required relationship | Exact proxy-supplied artifact URL | UTC retrieval on 2026-10-11 | Bytes / local SHA-256 | Published assertion and result |
+| --- | --- | --- | --- | --- |
+| `@types/node@26.6.4`, requires `undici-types ~8.9.0` | `https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@types/node/-/node-26.6.4.tgz` | `23:45:23Z` | 471,018 / `bf2dbf11cfccd34681fc4d5e4d150afce77fd6610224757dbe6c92c8e5149700` | Proxy SHA-512 `sha512-ldVPDCzj7fsaGZrLB0NuHuTvJcsNasysBAqMolr/cgxrLd1xbqxIr3XJiPnHHJUCxj5sNF1vnRj9aWnrVh5Jcg==` matches; archive identity/version verified. |
+| `undici-types@8.9.0`, only observed stable match for that range | `https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/undici-types/-/undici-types-8.9.0.tgz` | `23:45:24Z` | 29,764 / `3a587851ccbf1021b20eac8a38eb819d7e2a1ab77aa477cb24cae5473a3e78c6` | Published SHA-1 `e240d97c8b5d85e5347ce73d25865c7906c1ec9f` matches; no published SRI observed; archive identity/version verified. |
+
+Final hosts were `m4wvsblobprodcus459.vsblob.vsassets.io` and `79pvsblobprodcus44.vsblob.vsassets.io`, respectively, under the E25-approved proxy redirect pattern. No public package feed, credential or signed redirect query was used/recorded. The target has 92 files and the companion 48; neither ships JavaScript runtime files or install scripts, and the companion has no further declared dependencies.
+
+The target's strong published assertion does not authenticate its separately downloaded companion. Replacing SHA-512-protected 6.20.0 with a SHA-1-only 8.9.0 record would weaken the existing graph protection. A locally computed SHA-256/SHA-512 is not stronger publisher provenance and is not used to clear this hold.
+
+### Fifteen lower stable major-26 candidates, no eligible fallback established
+
+The existing repository SemVer 7.8.5 implementation ordered every catalogue-observed stable major-26 version below 26.6.4 and above the verified 22.13.10 baseline. No dependency/tool was installed to perform the selection.
+
+| Candidates, descending within each group | Observed parent provenance | Required companion / eligibility finding |
+| --- | --- | --- |
+| 26.6.3, 26.6.2, 26.6.1, 26.6.0 | Published SHA-512 | All require `~8.9.0`; only 8.9.0 is observed, with the same SHA-1-only protection gap. |
+| 26.5.1, 26.5.0 | SHA-1 only, no SRI | Same `~8.9.0` companion gap, plus weaker parent assertions. |
+| 26.4.1, 26.4.0, 26.3.0, 26.2.0, 26.1.2, 26.1.1, 26.1.0, 26.0.1, 26.0.0 | SHA-1 only, no SRI | Require `~8.3.0`; observed 8.3.0 also lacks SRI, and parent provenance already fails the stronger-baseline requirement. |
+
+These 15 rows are metadata eligibility observations, **not claims that all lower archives were retrieved**. No integrity-preserving eligible major-26 fallback is established from the observed approved-source assertions. Do not deliver a major-24 substitute or migrate Node to 26 to escape the recorded policy/validation gates.
+
+### Node 24 assessment is useful but not a candidate compatibility pass
+
+The current analysis host runs Node **24.16.0 ARM64** and TypeScript **6.0.3**. Target metadata declares TypeScript 5.6 minimum with separate <=5.6/<=5.7 trees; its default entry documents 5.8+. The current compiler meets that default-entry minimum. Both packages are declarations only and have no runtime-engine requirement; a typings major does not itself install or execute Node 26.
+
+The existing web config is strict, uses DOM/ES2022 libraries and `apps\web\node_modules\@types`, includes Next-generated types and the web-coverage E2E support code, and retains `skipLibCheck: true`. The shared Node type provider also appears in Next, Vite, Vitest and Sharp peer snapshots, including the independent UI consumer; an eventual lock change is not just one isolated declaration edit.
+
+Read-only tracing finds production primarily using `process.env` and web/DOM interfaces. Existing explicit configuration/test/reporter imports use conventional fs/path/crypto/child-process/url/module APIs. All 13 inspected exports exist on observed Node 24.16.0; no write or subprocess-export function was invoked by that availability probe. Representative locations are `next.config.ts:2`, `vitest.config.ts:9`, `__tests__\setup.ts:6`, web-coverage `carveoutRegistry.fixture.ts:8-9`, `correlationId.fixture.ts:9`, and `coverage-reporter.ts:40-43`.
+
+Vite 8.0.12 accepts `@types/node ^20.19.0 || >=22.12.0`; Vitest 4.1.6 accepts `^20.0.0 || ^22.0.0 || >=24.0.0`. Both ranges admit 26.6.4 and their engine ranges admit observed Node 24.16.0. However the candidate declarations also reference `node:ffi`, absent from that observed runtime; no current project usage was found. These bounded API/peer/compiler observations do not prove the complete new declaration surface safe, nor guarantee future Node-26-specific calls cannot compile under Node 24.
+
+**Not run**: candidate dependency substitution, typecheck, build, unit/integration/browser tests or two clean installs with these new types. No such candidate installation was authorized; the baseline's prior passing checks are not new-types evidence. Full Node-24 consumer validation remains required after source eligibility and explicit candidate authorization.
+
+### Hold and next owners
+
+#146 / NW-node-types remains **held/incomplete** under B-TYPES plus the required-companion source/integrity gap. Dependency/feed maintainer: supply acceptable stronger approved published provenance for the required companion or a newly eligible same-major graph. Frontend maintainer: then assess the actual candidate type-provider/consumer graph and run its unchanged Node-24 quality checks after the scoped edit/install gate. Do not weaken integrity, skip library/consumer checks, invent a different-major fallback or change runtime as a shortcut.
+
+T011/T015/T020/T021/T036/T046/T052 retain their existing statuses and authorization boundaries. All 33 PRs/31 work items, original directions and other holds remain unchanged. Raw task-owned archives/declaration copies, the two full catalogue copies and temporary verifier were removed; minimized findings remain in session storage, SHA-256 `7e6b5891eb39d88b436a3c75cb7035b813915d85e8a30824f36c4ec1f5c89e4e`. No candidate pin/version or repository file changed during assessment; this subsequent recording permission covers documentation only, not commit/push or installation.
