@@ -18,7 +18,7 @@ def test_compose_forwards_ingestion_cycle_limit_without_hiding_empty_values() ->
     compose = yaml.safe_load(Path("compose.yaml").read_text(encoding="utf-8"))
     environment = compose["services"]["ingestion"]["environment"]
 
-    assert environment["INGESTION_MAX_RECORDS_PER_CYCLE"] == "${INGESTION_MAX_RECORDS_PER_CYCLE-100}"
+    assert environment["INGESTION_MAX_RECORDS_PER_CYCLE"] == "${INGESTION_MAX_RECORDS_PER_CYCLE}"
 
 
 def test_compose_allows_ingestion_shutdown_and_lease_cleanup() -> None:

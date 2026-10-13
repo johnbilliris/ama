@@ -48,8 +48,10 @@ the limit for every pipeline in a worker. When absent, each pipeline retains its
 configured value. Empty, non-integer, or out-of-range values fail startup before any
 pipeline is launched. The effective limit is logged for each started pipeline.
 
-Local Compose forwards this setting from the shell or root `.env`, defaulting to
-100 only when unset. For example, set `INGESTION_MAX_RECORDS_PER_CYCLE=250` in `.env`
+Local Compose forwards this setting from the shell or root `.env` without a
+Compose default. It must be explicitly set for Compose ingestion: an unset
+variable is forwarded as an empty value, which fails worker startup validation.
+For example, set `INGESTION_MAX_RECORDS_PER_CYCLE=250` in `.env`
 and recreate ingestion with `docker compose up -d --build --no-deps ingestion`.
 Changing the limit does not clear or truncate existing backlog snapshots.
 Direct Python launches require the variable in the process environment; the worker
