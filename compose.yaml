@@ -145,10 +145,12 @@ services:
       dockerfile: apps/ingestion/Dockerfile
       target: runtime
     init: true
+    stop_grace_period: 45s
     environment:
       <<: *cosmos-environment
       AMA_ENVIRONMENT: dev
       PORT: "8081"
+      INGESTION_MAX_RECORDS_PER_CYCLE: ${INGESTION_MAX_RECORDS_PER_CYCLE}
       REDIS_URL: redis://redis:6379/0
       STORAGE_ACCOUNT_NAME: devstoreaccount1
       # Azurite's public development key is only valid for this local emulator.

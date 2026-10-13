@@ -4,13 +4,7 @@ from pathlib import Path
 from apps.api.app.services.dashboard_service import DashboardService
 
 SEED_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "packages"
-    / "domain"
-    / "src"
-    / "domain"
-    / "seed"
-    / "disasters_australia.json"
+    Path(__file__).resolve().parents[2] / "packages" / "domain" / "src" / "domain" / "seed" / "disasters_australia.json"
 )
 
 

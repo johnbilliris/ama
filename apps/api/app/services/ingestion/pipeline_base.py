@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import logging
+import random
 import time
 from abc import ABC, abstractmethod
 from collections import deque
@@ -11,6 +12,7 @@ from uuid import uuid4
 
 from app.services.privacy_classification import classify_payload
 from app.services.signal_accepted_workflow import publish_signal_accepted
+from azure.core.exceptions import ResourceExistsError
 from opentelemetry import trace
 
 from apps.ingestion import telemetry as tel
@@ -188,6 +190,7 @@ class IngestionPipelineBase(ABC):
         self._backlog_pending = False
         self._backlog_retry = False
         self._running = False
+        self._stop_event = asyncio.Event()
         self._metrics = PipelineMetrics(pipeline_id)
 
     @abstractmethod
@@ -204,18 +207,31 @@ class IngestionPipelineBase(ABC):
 
     async def run(self) -> None:
         self._running = True
+        self._stop_event.clear()
         logger.info("Pipeline %s starting", self.pipeline_id)
         while self._running:
+            delay: float = self.poll_interval_seconds
             try:
                 await self._poll_cycle()
+                delay = 1 if self._backlog_pending and not self._backlog_retry else self.poll_interval_seconds
+            except ResourceExistsError as exc:
+                self._backlog_retry = True
+                if getattr(exc, "error_code", None) == "LeaseAlreadyPresent":
+                    delay = random.uniform(5, 15)
+                    logger.info("Pipeline %s backlog lease is held; retrying in %.1fs", self.pipeline_id, delay)
+                else:
+                    logger.exception("Pipeline %s poll cycle error", self.pipeline_id)
             except Exception:
                 self._backlog_retry = True
                 logger.exception("Pipeline %s poll cycle error", self.pipeline_id)
-            delay = 1 if self._backlog_pending and not self._backlog_retry else self.poll_interval_seconds
-            await asyncio.sleep(delay)
+            try:
+                await asyncio.wait_for(self._stop_event.wait(), timeout=delay)
+            except TimeoutError:
+                pass
 
     async def stop(self) -> None:
         self._running = False
+        self._stop_event.set()
         logger.info("Pipeline %s stopping", self.pipeline_id)
 
     async def _poll_cycle(self) -> None:

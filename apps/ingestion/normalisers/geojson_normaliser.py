@@ -103,9 +103,7 @@ def normalise_geojson_feature(
     occurred_at, publication_or_update = _parse_geojson_timestamps(
         props,
         source_timezone=source_timezone,
-        max_future_seconds=(
-            VIC_CFA_MAX_FUTURE_SECONDS if state_key == "vic-cfa" else 900
-        ),
+        max_future_seconds=(VIC_CFA_MAX_FUTURE_SECONDS if state_key == "vic-cfa" else 900),
     )
 
     return {

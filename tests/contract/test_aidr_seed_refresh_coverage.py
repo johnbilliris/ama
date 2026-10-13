@@ -3,13 +3,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 SEED_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "packages"
-    / "domain"
-    / "src"
-    / "domain"
-    / "seed"
-    / "disasters_australia.json"
+    Path(__file__).resolve().parents[2] / "packages" / "domain" / "src" / "domain" / "seed" / "disasters_australia.json"
 )
 HEATWAVE_ID = "aidr-2349-health-national-heatwave-2012"
 HEATWAVE_DETAILS = (

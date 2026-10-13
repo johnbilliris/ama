@@ -43,6 +43,22 @@ Compose sets `AZURITE_BLOB_CONNECTION_STRING` to select the local Azurite endpoi
 ## Bounded, Resumable Ingestion
 
 Each pipeline processes at most `max_records_per_cycle` records per cycle (default: 100).
+Set `INGESTION_MAX_RECORDS_PER_CYCLE` to an integer from **1 to 5000** to override
+the limit for every pipeline in a worker. When absent, each pipeline retains its
+configured value. Empty, non-integer, or out-of-range values fail startup before any
+pipeline is launched. The effective limit is logged for each started pipeline.
+
+Local Compose forwards this setting from the shell or root `.env`, defaulting to
+100 only when unset. For example, set `INGESTION_MAX_RECORDS_PER_CYCLE=250` in `.env`
+and recreate ingestion with `docker compose up -d --build --no-deps ingestion`.
+Changing the limit does not clear or truncate existing backlog snapshots.
+Direct Python launches require the variable in the process environment; the worker
+does not load `.env` itself. Azure-hosted workers read the same variable from their
+container environment, but automatic Bicep parameter wiring is not implemented:
+the spec-006 governance records currently block IaC edits pending inherited-policy
+verification. Runtime changes require a worker restart or a new container revision.
+This is a per-pipeline cycle limit, not a worker-wide rate limit or download-size cap.
+
 Excess records are retained, not truncated. The worker requires Blob Storage and
 persists the entire fetched source snapshot under `raw-payloads/ingestion-backlog/`,
 with a separate cursor checkpoint keyed by tenant scope and pipeline identity.
@@ -51,7 +67,12 @@ worker restart or container recreation. Local durability uses the existing Azuri
 data volume; removing that volume removes the backlog.
 
 A renewable blob lease permits only one replica to advance a pipeline checkpoint at
-a time. Uploaded snapshots whose initial checkpoint write was interrupted are
+a time. A `LeaseAlreadyPresent` response is expected contention: the worker logs
+an informational message and retries after a jittered 5-15 seconds, independently
+of the source polling interval. It never breaks another worker's lease. Other
+storage errors remain explicit poll-cycle errors. Leases last 60 seconds and are
+renewed every 20 seconds; an abruptly terminated worker's lease expires naturally.
+Uploaded snapshots whose initial checkpoint write was interrupted are
 discovered and recovered. The cursor advances only after successful handling;
 dependency failures and unfinished dedup claims leave the record pending for retry.
 If the snapshot upload fails, the running worker retains the fetched records in
@@ -76,6 +97,12 @@ not source download size: adapters still fetch a full snapshot, cached in memory
 while it drains. Worker startup fails explicitly if `STORAGE_ACCOUNT_NAME` is absent
 rather than silently downgrade durability. Directly constructed pipelines used by
 tests or other callers can omit a backlog store; those use an in-memory backlog only.
+
+Shutdown wakes pipelines waiting between cycles and gives active cycles one shared
+30-second completion window. Remaining tasks are cancelled together and awaited
+so lease-release cleanup runs before shutdown completes. Local Compose grants the
+ingestion container 45 seconds before forced termination; abrupt termination can
+still leave leases until expiry, without discarding the persisted backlog.
 
 Rolling metrics retain their existing one-hour windows. Expired entries are removed
 from the oldest end of each deque without scanning or rebuilding the retained history.

@@ -40,9 +40,7 @@ def test_non_himawari_binary_feed_still_requires_a_timestamped_filename() -> Non
     mdtm = modified_at.strftime("%Y%m%d%H%M%S")
 
     with pytest.raises(TimestampParseError, match="filename_timestamp"):
-        normalise_binary_metadata(
-            _himawari_payload(provider_version=f"213 {mdtm}", data_source_id="bom-radar")
-        )
+        normalise_binary_metadata(_himawari_payload(provider_version=f"213 {mdtm}", data_source_id="bom-radar"))
 
 
 def test_himawari_undated_alias_without_valid_mdtm_is_rejected() -> None:

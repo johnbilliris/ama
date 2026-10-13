@@ -11,7 +11,7 @@ from urllib.parse import urlsplit
 from jsonschema import Draft202012Validator
 
 from apps.console_logging import configure_console_logging
-from apps.ingestion.pipeline_config import IngestionPipelineConfig
+from apps.ingestion.pipeline_config import IngestionPipelineConfig, resolve_pipeline_configs
 from packages.domain.src.domain.repositories.signal_repository import SignalRepository
 
 if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
@@ -171,6 +171,7 @@ class PipelineWorker:
         self._replica_id = os.environ.get("CONTAINER_APP_REPLICA_NAME", "local")
 
     async def start(self, configs: list[IngestionPipelineConfig], pipeline_factory: Any = None) -> None:
+        configs = resolve_pipeline_configs(configs)
         self._running = True
         logger.info("Pipeline worker starting with %d pipeline configs", len(configs))
 
@@ -185,7 +186,12 @@ class PipelineWorker:
                 continue
             self._pipelines[config.pipeline_id] = pipeline
             self._tasks[config.pipeline_id] = asyncio.create_task(pipeline.run(), name=f"pipeline-{config.pipeline_id}")
-            logger.info("Started pipeline %s (interval=%ds)", config.pipeline_id, config.poll_interval_seconds)
+            logger.info(
+                "Started pipeline %s (interval=%ds, max_records_per_cycle=%d)",
+                config.pipeline_id,
+                config.poll_interval_seconds,
+                config.max_records_per_cycle,
+            )
 
         loop = asyncio.get_event_loop()
         for sig in (signal.SIGTERM, signal.SIGINT):
@@ -204,14 +210,20 @@ class PipelineWorker:
             await pipeline.stop()
             logger.info("Pipeline %s stop requested", pipeline_id)
 
-        for pipeline_id, task in self._tasks.items():
-            try:
-                await asyncio.wait_for(task, timeout=30)
-            except TimeoutError:
-                task.cancel()
-                logger.warning("Pipeline %s forcibly cancelled after timeout", pipeline_id)
-            except Exception:
-                logger.exception("Pipeline %s error during shutdown", pipeline_id)
+        if self._tasks:
+            _, pending = await asyncio.wait(self._tasks.values(), timeout=30)
+            for pipeline_id, task in self._tasks.items():
+                if task in pending:
+                    task.cancel()
+                    logger.warning("Pipeline %s forcibly cancelled after timeout", pipeline_id)
+            results = await asyncio.gather(*self._tasks.values(), return_exceptions=True)
+            for pipeline_id, result in zip(self._tasks, results, strict=True):
+                if isinstance(result, BaseException) and not isinstance(result, asyncio.CancelledError):
+                    logger.error(
+                        "Pipeline %s error during shutdown",
+                        pipeline_id,
+                        exc_info=(type(result), result, result.__traceback__),
+                    )
 
         logger.info("Pipeline worker stopped")
 

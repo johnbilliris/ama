@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import logging
 from collections import deque
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
@@ -18,8 +19,9 @@ from apps.api.app.services.ingestion.pipeline_base import (
     PipelineProcessingResult,
 )
 from apps.ingestion.backlog import BlobIngestionBacklog
-from apps.ingestion.pipeline_config import IngestionPipelineConfig
+from apps.ingestion.pipeline_config import IngestionPipelineConfig, resolve_pipeline_configs
 from apps.ingestion.pipeline_factory import create_pipeline
+from apps.ingestion.worker import PipelineWorker
 
 
 class _Container:
@@ -254,6 +256,181 @@ async def test_only_one_replica_can_hold_a_pipeline_checkpoint_lease() -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("error_code", ["LeaseAlreadyPresent", "ContainerAlreadyExists", None])
+async def test_lease_contention_uses_short_retry_but_other_storage_errors_remain_errors(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture, error_code: str | None
+) -> None:
+    pipeline = _Pipeline(None, [])
+    pipeline.poll_interval_seconds = 3600
+    error = ResourceExistsError("storage conflict")
+    error.error_code = error_code
+    cycles = 0
+
+    async def poll_cycle() -> None:
+        nonlocal cycles
+        cycles += 1
+        if cycles == 1:
+            raise error
+        await pipeline.stop()
+
+    pipeline._poll_cycle = poll_cycle
+    wait_for = asyncio.wait_for
+    delays = []
+
+    async def quick_wait(awaitable, *, timeout):
+        delays.append(timeout)
+        return await wait_for(awaitable, timeout=0.001)
+
+    monkeypatch.setattr("apps.api.app.services.ingestion.pipeline_base.asyncio.wait_for", quick_wait)
+    jitter = Mock(return_value=10)
+    monkeypatch.setattr("apps.api.app.services.ingestion.pipeline_base.random.uniform", jitter)
+    with caplog.at_level(logging.INFO):
+        await pipeline.run()
+
+    assert cycles == 2
+    assert pipeline._backlog_retry is True
+    if error_code == "LeaseAlreadyPresent":
+        jitter.assert_called_once_with(5, 15)
+        assert delays[0] == 10
+        assert "backlog lease is held" in caplog.text
+        assert not any(record.levelno >= logging.ERROR for record in caplog.records)
+    else:
+        jitter.assert_not_called()
+        assert delays[0] == 3600
+        assert any(record.levelno == logging.ERROR and record.exc_info for record in caplog.records)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("contended", [False, True])
+async def test_stop_wakes_pipelines_waiting_for_source_poll_or_lease(contended: bool) -> None:
+    pipeline = _Pipeline(None, [])
+    pipeline.poll_interval_seconds = 3600
+    polled = asyncio.Event()
+
+    async def poll_source() -> list[dict]:
+        polled.set()
+        return []
+
+    pipeline.poll_source = poll_source
+    if contended:
+
+        async def poll_cycle() -> None:
+            polled.set()
+            error = ResourceExistsError("lease held")
+            error.error_code = "LeaseAlreadyPresent"
+            raise error
+
+        pipeline._poll_cycle = poll_cycle
+    worker = PipelineWorker()
+    worker._running = True
+    worker._pipelines = {pipeline.pipeline_id: pipeline}
+    task = asyncio.create_task(pipeline.run())
+    worker._tasks = {pipeline.pipeline_id: task}
+    try:
+        await asyncio.wait_for(polled.wait(), timeout=1)
+        await asyncio.wait_for(worker.stop(), timeout=1)
+        assert task.done()
+        assert not task.cancelled()
+    finally:
+        if not task.done():
+            task.cancel()
+        await asyncio.gather(task, return_exceptions=True)
+
+
+@pytest.mark.asyncio
+async def test_graceful_shutdown_finishes_cycle_and_releases_lease() -> None:
+    container = _Container()
+    pipeline = _Pipeline(BlobIngestionBacklog(container), _payloads(2))
+    processing = asyncio.Event()
+    finish = asyncio.Event()
+    process = pipeline._process_payload
+
+    async def delayed_process(raw: dict) -> PipelineProcessingResult:
+        processing.set()
+        await finish.wait()
+        return await process(raw)
+
+    pipeline._process_payload = delayed_process
+    worker = PipelineWorker()
+    worker._running = True
+    worker._pipelines = {pipeline.pipeline_id: pipeline}
+    task = asyncio.create_task(pipeline.run())
+    worker._tasks = {pipeline.pipeline_id: task}
+    stopping = None
+    try:
+        await asyncio.wait_for(processing.wait(), timeout=2)
+        stopping = asyncio.create_task(worker.stop())
+        await asyncio.sleep(0)
+        assert not worker._running
+        assert not stopping.done()
+        assert container.leases
+        finish.set()
+        await asyncio.wait_for(stopping, timeout=2)
+
+        assert pipeline.processed == [0, 1]
+        assert not task.cancelled()
+        assert not container.leases
+        assert not any("/batches/" in name for name in container.data)
+        checkpoint = next(json.loads(data) for name, data in container.data.items() if name.endswith("checkpoint.json"))
+        assert checkpoint["offset"] == 2
+    finally:
+        tasks = [task] + ([stopping] if stopping is not None else [])
+        for pending in tasks:
+            if not pending.done():
+                pending.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+
+
+@pytest.mark.asyncio
+async def test_shutdown_shares_deadline_and_awaits_all_lease_cleanup(monkeypatch: pytest.MonkeyPatch) -> None:
+    container = _Container()
+    worker = PipelineWorker()
+    worker._running = True
+    started = []
+
+    for index in range(3):
+        pipeline = _Pipeline(BlobIngestionBacklog(container), _payloads(2))
+        pipeline.pipeline_id = f"source-{index}"
+        processing = asyncio.Event()
+        started.append(processing)
+
+        async def process(raw: dict, event: asyncio.Event = processing) -> PipelineProcessingResult:
+            event.set()
+            await asyncio.Event().wait()
+            raise AssertionError("stalled processing should be cancelled")
+
+        pipeline._process_payload = process
+        worker._pipelines[pipeline.pipeline_id] = pipeline
+        worker._tasks[pipeline.pipeline_id] = asyncio.create_task(pipeline.run())
+
+    try:
+        await asyncio.wait_for(asyncio.gather(*(event.wait() for event in started)), timeout=2)
+        assert len(container.leases) == 3
+        wait = asyncio.wait
+        deadlines = []
+
+        async def quick_wait(tasks, *, timeout):
+            deadlines.append(timeout)
+            return await wait(tasks, timeout=0.01)
+
+        monkeypatch.setattr("apps.ingestion.worker.asyncio.wait", quick_wait)
+        await asyncio.wait_for(worker.stop(), timeout=2)
+
+        assert deadlines == [30]
+        assert all(task.done() and task.cancelled() for task in worker._tasks.values())
+        assert not container.leases
+        checkpoints = [json.loads(data) for name, data in container.data.items() if name.endswith("checkpoint.json")]
+        assert len(checkpoints) == 3
+        assert all(state["offset"] == 0 and state["total"] == 2 for state in checkpoints)
+        assert len([name for name in container.data if "/batches/" in name]) == 3
+    finally:
+        for task in worker._tasks.values():
+            if not task.done():
+                task.cancel()
+        await asyncio.gather(*worker._tasks.values(), return_exceptions=True)
+
+
+@pytest.mark.asyncio
 async def test_dedup_claim_is_busy_until_committed_or_expired() -> None:
     dedup = DedupService()
     assert await dedup.claim_status("key", 60) == "claimed"
@@ -419,7 +596,9 @@ async def test_unrecognised_outcome_is_not_acknowledged() -> None:
 
 
 @pytest.mark.asyncio
-async def test_factory_wires_configured_limit_and_durable_backlog() -> None:
+@pytest.mark.parametrize("limit", [1, 3, 5])
+async def test_factory_wires_configured_limit_and_durable_backlog(monkeypatch: pytest.MonkeyPatch, limit: int) -> None:
+    monkeypatch.setenv("INGESTION_MAX_RECORDS_PER_CYCLE", str(limit))
     container = _Container()
     store = BlobIngestionBacklog(container)
     config = IngestionPipelineConfig(
@@ -431,13 +610,15 @@ async def test_factory_wires_configured_limit_and_durable_backlog() -> None:
         endpoint_url="https://example.com",
         endpoint_format="json",
     )
-    pipeline = create_pipeline(config, backlog_store=store)
+    resolved = resolve_pipeline_configs([config])[0]
+    pipeline = create_pipeline(resolved, backlog_store=store)
     pipeline.poll_source = AsyncMock(return_value=_payloads(7))
     pipeline._process_payload = AsyncMock(return_value=PipelineProcessingResult(True, "accepted"))
     assert pipeline.backlog_store is store
-    for count in (3, 6, 7):
+    assert pipeline.max_records_per_cycle == limit
+    for offset in range(0, 7, limit):
         await pipeline._poll_cycle()
-        assert pipeline._process_payload.await_count == count
+        assert pipeline._process_payload.await_count == min(offset + limit, 7)
     pipeline.poll_source.assert_awaited_once()
 
 

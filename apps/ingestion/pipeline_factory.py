@@ -298,5 +298,4 @@ def create_pipeline(config: IngestionPipelineConfig, **extra_kwargs: Any) -> Any
     pipeline.source_class = str(config.source_class)
     pipeline.endpoint_format = config.endpoint_format
     pipeline.config_identity = config.pipeline_id
-    pipeline.max_records_per_cycle = int(config.max_records_per_cycle)
     return pipeline

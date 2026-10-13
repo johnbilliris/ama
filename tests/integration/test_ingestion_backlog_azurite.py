@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import subprocess
@@ -10,7 +11,10 @@ from pathlib import Path
 from uuid import uuid4
 
 import pytest
+from azure.core.exceptions import ResourceExistsError
 from azure.storage.blob import BlobServiceClient
+
+from apps.ingestion.backlog import BlobIngestionBacklog
 
 _CHILD = """
 import asyncio
@@ -84,6 +88,39 @@ def test_bounded_snapshot_survives_three_separate_worker_processes() -> None:
                 {"processed": [2, 3], "polls": 0},
                 {"processed": [4], "polls": 0},
             ]
+            assert not any("/batches/" in blob.name for blob in container.list_blobs())
+        finally:
+            container.delete_container()
+
+
+@pytest.mark.integration
+def test_real_lease_contention_preserves_snapshot_and_resumes_after_release() -> None:
+    connection = os.environ.get("AMA_INGESTION_BACKLOG_TEST_CONNECTION_STRING")
+    if not connection:
+        pytest.skip("Set AMA_INGESTION_BACKLOG_TEST_CONNECTION_STRING to a local Azurite endpoint")
+    with BlobServiceClient.from_connection_string(connection, api_version="2025-11-05") as service:
+        container = service.get_container_client(f"ingestion-backlog-test-{uuid4().hex}")
+        container.create_container()
+        try:
+
+            async def exercise() -> None:
+                owner = BlobIngestionBacklog(container)
+                contender = BlobIngestionBacklog(container)
+                async with owner.open("live", "contention-test") as batch:
+                    await batch.stage([{"id": 0}, {"id": 1}])
+                    with pytest.raises(ResourceExistsError) as caught:
+                        async with contender.open("live", "contention-test"):
+                            pytest.fail("contender acquired a held lease")
+                    assert caught.value.error_code == "LeaseAlreadyPresent"
+                    assert batch.offset == 0
+                    assert batch.pending == 2
+                async with contender.open("live", "contention-test") as resumed:
+                    assert resumed.payloads == [{"id": 0}, {"id": 1}]
+                    assert resumed.offset == 0
+                    await resumed.commit(2)
+                    await resumed.cleanup()
+
+            asyncio.run(exercise())
             assert not any("/batches/" in blob.name for blob in container.list_blobs())
         finally:
             container.delete_container()
