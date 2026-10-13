@@ -19,9 +19,12 @@ def _resolve_cosmos_credential(
         return credential
 
     if async_client:
-        from azure.identity.aio import DefaultAzureCredential
-    else:
-        from azure.identity import DefaultAzureCredential
+        from azure.identity.aio import DefaultAzureCredential as AsyncDefaultAzureCredential
+
+        return AsyncDefaultAzureCredential()
+
+    from azure.identity import DefaultAzureCredential
+
     return DefaultAzureCredential()
 
 
