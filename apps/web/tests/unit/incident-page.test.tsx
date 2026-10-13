@@ -89,4 +89,50 @@ describe("IncidentPage", () => {
 
     view.unmount();
   });
+
+  it("renders the complete AIDR introduction and required attribution", async () => {
+    const introduction = "First explanatory paragraph.\n\nSecond paragraph with <script>text</script>.";
+    getIncidentDashboard.mockResolvedValue({
+      incident: {
+        incidentId: "aidr-2349-health-national-heatwave-2012",
+        title: "Health - National Heatwave, 2012",
+        incidentType: "health",
+        status: "closed",
+        severity: "watch",
+        introduction,
+        sourceUrl: "https://knowledge.aidr.org.au/resources/health-national-heatwave-2012/",
+      },
+      participatingOrganisations: [],
+      activeRecommendations: [],
+      activeTasks: [],
+      signalSummary: {
+        authoritativeCount: 0,
+        communityCount: 0,
+        contradictedCount: 0,
+      },
+    });
+    listSignals.mockResolvedValue([]);
+
+    const view = render(<IncidentPage />);
+
+    expect(await screen.findByRole("heading", { name: "Health - National Heatwave, 2012" }))
+      .toBeInTheDocument();
+    expect(document.querySelectorAll(".incident-description-text p")).toHaveLength(2);
+    expect(screen.getByText("First explanatory paragraph.")).toBeInTheDocument();
+    expect(screen.getByText("Second paragraph with <script>text</script>.")).toBeInTheDocument();
+    expect(document.querySelector(".incident-description-text script")).toBeNull();
+    expect(
+      screen.getByText(
+        "Obtained from the Australian Institute for Disaster Resilience, © Commonwealth of Australia 2026.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Australian Disaster Resilience Knowledge Hub (AIDR)" }),
+    ).toHaveAttribute(
+      "href",
+      "https://knowledge.aidr.org.au/resources/health-national-heatwave-2012/",
+    );
+
+    view.unmount();
+  });
 });

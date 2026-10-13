@@ -151,11 +151,16 @@ async def get_incidents_map(
     pprr_phases_list = _parse_csv(pprr_phase, VALID_PPRR, "pprr_phase")
     kw = _sanitise_keyword(keyword)
 
-    # Validate year range
     if year_start is not None and year_end is not None and year_start > year_end:
-        raise HTTPException(
-            status_code=400,
-            detail="year_start must be less than or equal to year_end",
+        return IncidentFeatureCollection(
+            features=[],
+            metadata=IncidentMapMetadata(
+                total=0,
+                unmapped_count=0,
+                page=page,
+                page_size=page_size,
+                fetched_at=datetime.now(UTC).isoformat(),
+            ),
         )
 
     filter_kwargs = dict(

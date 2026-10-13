@@ -2,7 +2,10 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export function GET() {
-  const subscriptionKey = process.env.AZURE_MAPS_SUBSCRIPTION_KEY;
+  // Keep the local fallback runtime-configurable instead of inlining it at build time.
+  const subscriptionKey =
+    process.env.AZURE_MAPS_SUBSCRIPTION_KEY ||
+    process.env["NEXT_PUBLIC_AZURE_MAPS_KEY"];
 
   if (!subscriptionKey) {
     return Response.json(

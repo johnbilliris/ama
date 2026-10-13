@@ -75,7 +75,12 @@ def _probe_cosmos() -> ProbeResult:
     host = _extract_host(endpoint)
     if not host:
         return "unavailable"
-    return "healthy" if _tcp_reachable(host, 443, _health_probe_timeout_seconds()) else "unavailable"
+    try:
+        parsed = urlparse(endpoint if "://" in endpoint else f"tcp://{endpoint}")
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    except ValueError:
+        return "unavailable"
+    return "healthy" if _tcp_reachable(host, port, _health_probe_timeout_seconds()) else "unavailable"
 
 
 def _probe_redis() -> ProbeResult:

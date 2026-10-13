@@ -6,6 +6,7 @@ import signal
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from jsonschema import Draft202012Validator
 
@@ -41,10 +42,9 @@ def _build_signal_repository() -> tuple[SignalRepository, str | None]:
         return SignalRepository(), None
 
     try:
-        from azure.cosmos.aio import CosmosClient
-        from azure.identity.aio import DefaultAzureCredential
+        from apps.api.app.core.cosmos import create_async_cosmos_client
 
-        client = CosmosClient(endpoint, credential=DefaultAzureCredential())
+        client = create_async_cosmos_client(endpoint)
     except Exception as exc:
         return SignalRepository(), str(exc)
     return SignalRepository(cosmos_client=client), None
@@ -56,6 +56,101 @@ def _load_and_compile_schema(schema_path: Path) -> Draft202012Validator:
         raise ValueError(f"Signal envelope schema must use v1 ID {SIGNAL_ENVELOPE_V1_SCHEMA_ID}")
     Draft202012Validator.check_schema(schema)
     return Draft202012Validator(schema)
+
+
+_LOCAL_DEVELOPMENT_ENVIRONMENTS = frozenset({"dev", "development", "local", "test"})
+_LOCAL_REDIS_HOSTS = frozenset({"redis", "localhost", "127.0.0.1", "::1", "ama-local-redis-1"})
+
+
+def _build_raw_payload_blob_store() -> Any | None:
+    account_name = os.environ.get("STORAGE_ACCOUNT_NAME")
+    azurite_connection_string = os.environ.get("AZURITE_BLOB_CONNECTION_STRING")
+
+    if azurite_connection_string:
+        environment = (os.environ.get("AMA_ENVIRONMENT") or os.environ.get("ENVIRONMENT") or "").lower()
+        if environment not in _LOCAL_DEVELOPMENT_ENVIRONMENTS:
+            raise RuntimeError("AZURITE_BLOB_CONNECTION_STRING is only supported in local development environments")
+        if not account_name:
+            raise RuntimeError("STORAGE_ACCOUNT_NAME is required when using Azurite")
+
+    if not account_name:
+        return None
+
+    from apps.ingestion.blob_store import RawPayloadBlobStore
+
+    if azurite_connection_string:
+        logger.info("Configuring local Azurite blob storage for account %s", account_name)
+        return RawPayloadBlobStore(account_name, connection_string=azurite_connection_string)
+
+    logger.info("Configuring Azure blob storage for account %s using managed identity", account_name)
+    return RawPayloadBlobStore(account_name)
+
+
+def _build_dedup_redis_client() -> Any | None:
+    redis_url = os.environ.get("REDIS_URL")
+    if redis_url:
+        environment = (os.environ.get("AMA_ENVIRONMENT") or os.environ.get("ENVIRONMENT") or "").lower()
+        if environment not in _LOCAL_DEVELOPMENT_ENVIRONMENTS:
+            raise RuntimeError("REDIS_URL is only supported in local development environments")
+
+        parsed_url = urlsplit(redis_url)
+        try:
+            redis_port = parsed_url.port
+        except ValueError as exc:
+            raise ValueError("Local REDIS_URL must use redis://<local-host>:6379/<db>") from exc
+        if (
+            parsed_url.scheme != "redis"
+            or parsed_url.hostname not in _LOCAL_REDIS_HOSTS
+            or redis_port not in (None, 6379)
+            or parsed_url.username is not None
+            or parsed_url.password is not None
+        ):
+            raise ValueError("Local REDIS_URL must use redis://<local-host>:6379/<db> without credentials")
+
+        import redis as redis_lib
+
+        redis_client = redis_lib.Redis.from_url(
+            redis_url,
+            decode_responses=True,
+            socket_timeout=5,
+            socket_connect_timeout=5,
+        )
+        try:
+            redis_client.ping()
+        except redis_lib.exceptions.RedisError:
+            logger.warning("Failed to connect local Redis for dedup — using in-memory fallback", exc_info=True)
+            return None
+        logger.info("Redis dedup backend connected at %s (local development)", parsed_url.hostname)
+        return redis_client
+
+    redis_host = os.environ.get("REDIS_HOST")
+    if not redis_host:
+        return None
+
+    try:
+        import redis as redis_lib
+        from redis_entraid.cred_provider import create_from_managed_identity
+        from redis_entraid.identity_provider import ManagedIdentityType
+
+        credential_provider = create_from_managed_identity(
+            identity_type=ManagedIdentityType.SYSTEM_ASSIGNED,
+            resource="https://redis.azure.com/.default",
+        )
+        redis_client = redis_lib.Redis(
+            host=redis_host,
+            port=int(os.environ.get("REDIS_PORT", "10000")),
+            ssl=True,
+            decode_responses=True,
+            credential_provider=credential_provider,
+            socket_timeout=5,
+            socket_connect_timeout=5,
+        )
+        redis_client.ping()
+        logger.info("Redis dedup backend connected at %s (Entra ID auth)", redis_host)
+        return redis_client
+    except Exception:
+        logger.warning("Failed to connect Redis for dedup — using in-memory fallback", exc_info=True)
+        return None
 
 
 class PipelineWorker:
@@ -241,6 +336,7 @@ if __name__ == "__main__":
     # Suppress noisy INFO-level HTTP request/response logging from SDKs.
     # These log every request (including 4xx/5xx) at INFO, masking real issues.
     logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("azure.cosmos._cosmos_http_logging_policy").setLevel(logging.WARNING)
     logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.WARNING)
     logging.getLogger("azure.monitor.opentelemetry.exporter").setLevel(logging.WARNING)
 
@@ -275,52 +371,20 @@ if __name__ == "__main__":
     from apps.ingestion.pipeline_configs import PIPELINE_CONFIGS
     from apps.ingestion.pipeline_factory import create_pipeline
 
-    # Build blob storage client when STORAGE_ACCOUNT_NAME is available (Azure)
-    _blob_store = None
-    _storage_account = os.environ.get("STORAGE_ACCOUNT_NAME")
-    if _storage_account:
-        try:
-            from apps.ingestion.blob_store import RawPayloadBlobStore
+    _blob_store = _build_raw_payload_blob_store()
+    if _blob_store is None:
+        raise RuntimeError("Durable ingestion requires STORAGE_ACCOUNT_NAME and an available raw-payloads container")
 
-            _blob_store = RawPayloadBlobStore(_storage_account)
-            logger.info("Blob store initialised for account %s", _storage_account)
-        except Exception:
-            logger.warning("Failed to initialise blob store", exc_info=True)
-    else:
-        logger.info("STORAGE_ACCOUNT_NAME not set — raw payload archival disabled")
+    from apps.ingestion.backlog import BlobIngestionBacklog
+
+    _backlog_store = BlobIngestionBacklog(_blob_store._container)
 
     # Build dedup service (uses Redis when available, falls back to local dict)
     from apps.api.app.services.ingestion.audit_writer import AuditWriter
     from apps.api.app.services.ingestion.dedup_service import DedupService
     from apps.api.app.services.ingestion.incident_association import IncidentAssociationService
 
-    _redis_client = None
-    _redis_host = os.environ.get("REDIS_HOST")
-    if _redis_host:
-        try:
-            import redis as redis_lib
-            from redis_entraid.cred_provider import create_from_managed_identity
-            from redis_entraid.identity_provider import ManagedIdentityType
-
-            credential_provider = create_from_managed_identity(
-                identity_type=ManagedIdentityType.SYSTEM_ASSIGNED,
-                resource="https://redis.azure.com/.default",
-            )
-            _redis_client = redis_lib.Redis(
-                host=_redis_host,
-                port=int(os.environ.get("REDIS_PORT", "10000")),
-                ssl=True,
-                decode_responses=True,
-                credential_provider=credential_provider,
-                socket_timeout=5,
-                socket_connect_timeout=5,
-            )
-            _redis_client.ping()
-            logger.info("Redis dedup backend connected at %s (Entra ID auth)", _redis_host)
-        except Exception:
-            logger.warning("Failed to connect Redis for dedup — using in-memory fallback", exc_info=True)
-            _redis_client = None
-
+    _redis_client = _build_dedup_redis_client()
     _dedup_service = DedupService(redis_client=_redis_client)
     logger.info("Dedup service initialised (redis=%s)", _redis_client is not None)
     _signal_repository, _signal_repository_error = _build_signal_repository()
@@ -348,6 +412,7 @@ if __name__ == "__main__":
             audit_writer=_audit_writer,
             incident_association=_incident_association,
             schema=_signal_schema or None,
+            backlog_store=_backlog_store,
         )
 
     async def _run() -> None:

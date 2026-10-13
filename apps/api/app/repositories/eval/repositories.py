@@ -64,7 +64,7 @@ def _strip_system_fields(d: dict[str, Any], *extra: str) -> dict[str, Any]:
 
 
 def _build_container(name: str) -> Any:
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]

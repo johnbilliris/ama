@@ -44,7 +44,7 @@ class IncidentModeRepository:
         if cosmos_client is not None:
             self._client = cosmos_client
         elif os.environ.get("COSMOS_ENDPOINT"):
-            from azure.cosmos import CosmosClient
+            from app.core.cosmos import create_cosmos_client as CosmosClient
             from azure.identity import DefaultAzureCredential
 
             self._client = CosmosClient(os.environ["COSMOS_ENDPOINT"], credential=DefaultAzureCredential())

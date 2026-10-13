@@ -13,6 +13,9 @@ from apps.ingestion.normalisers.timestamps import (
 
 logger = logging.getLogger(__name__)
 
+# VicEmergency includes forecast event timestamps up to 24 hours ahead.
+VIC_CFA_MAX_FUTURE_SECONDS = 24 * 60 * 60
+
 ALERT_LEVEL_CONFIDENCE: dict[str, float] = {
     "Emergency Warning": 0.95,
     "Watch and Act": 0.85,
@@ -97,7 +100,13 @@ def normalise_geojson_feature(
     if not source_uri:
         raise ValueError("GeoJSON payload missing required source_uri")
 
-    occurred_at, publication_or_update = _parse_geojson_timestamps(props, source_timezone=source_timezone)
+    occurred_at, publication_or_update = _parse_geojson_timestamps(
+        props,
+        source_timezone=source_timezone,
+        max_future_seconds=(
+            VIC_CFA_MAX_FUTURE_SECONDS if state_key == "vic-cfa" else 900
+        ),
+    )
 
     return {
         "source": {
@@ -130,7 +139,12 @@ def normalise_geojson_feature(
     }
 
 
-def _parse_geojson_timestamps(properties: dict[str, Any], *, source_timezone: str) -> tuple[str, str]:
+def _parse_geojson_timestamps(
+    properties: dict[str, Any],
+    *,
+    source_timezone: str,
+    max_future_seconds: int,
+) -> tuple[str, str]:
     publication_or_update = _parse_one(
         [
             ("updated", properties.get("updated")),
@@ -141,6 +155,7 @@ def _parse_geojson_timestamps(properties: dict[str, Any], *, source_timezone: st
         ],
         provider="geojson",
         source_timezone=source_timezone,
+        max_future_seconds=max_future_seconds,
     )
 
     occurred = _parse_one(
@@ -156,6 +171,7 @@ def _parse_geojson_timestamps(properties: dict[str, Any], *, source_timezone: st
         provider="geojson",
         fallback_iso=publication_or_update,
         source_timezone=source_timezone,
+        max_future_seconds=max_future_seconds,
     )
     return occurred, publication_or_update
 
@@ -166,6 +182,7 @@ def _parse_one(
     provider: str,
     fallback_iso: str | None = None,
     source_timezone: str,
+    max_future_seconds: int,
 ) -> str:
     for field, value in candidates:
         if value is None or str(value).strip() == "":
@@ -174,10 +191,24 @@ def _parse_one(
         try:
             if field == "pubDate":
                 try:
-                    return to_utc_iso_z(parse_rfc822_timestamp(text, provider=provider, field=field))
+                    return to_utc_iso_z(
+                        parse_rfc822_timestamp(
+                            text,
+                            provider=provider,
+                            field=field,
+                            max_future_seconds=max_future_seconds,
+                        )
+                    )
                 except TimestampParseError:
                     try:
-                        return to_utc_iso_z(parse_iso_timestamp(text, provider=provider, field=field))
+                        return to_utc_iso_z(
+                            parse_iso_timestamp(
+                                text,
+                                provider=provider,
+                                field=field,
+                                max_future_seconds=max_future_seconds,
+                            )
+                        )
                     except TimestampParseError:
                         return to_utc_iso_z(
                             parse_local_timestamp(
@@ -186,13 +217,35 @@ def _parse_one(
                                 source_timezone=source_timezone,
                                 provider=provider,
                                 field=field,
+                                max_future_seconds=max_future_seconds,
                             )
                         )
             if field == "time" and text.isdigit():
-                return to_utc_iso_z(parse_epoch_milliseconds(text, provider=provider, field=field))
+                return to_utc_iso_z(
+                    parse_epoch_milliseconds(
+                        text,
+                        provider=provider,
+                        field=field,
+                        max_future_seconds=max_future_seconds,
+                    )
+                )
             if text.isdigit() and len(text) >= 12:
-                return to_utc_iso_z(parse_epoch_milliseconds(text, provider=provider, field=field))
-            return to_utc_iso_z(parse_iso_timestamp(text, provider=provider, field=field))
+                return to_utc_iso_z(
+                    parse_epoch_milliseconds(
+                        text,
+                        provider=provider,
+                        field=field,
+                        max_future_seconds=max_future_seconds,
+                    )
+                )
+            return to_utc_iso_z(
+                parse_iso_timestamp(
+                    text,
+                    provider=provider,
+                    field=field,
+                    max_future_seconds=max_future_seconds,
+                )
+            )
         except TimestampParseError:
             continue
     if fallback_iso is not None:

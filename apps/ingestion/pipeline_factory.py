@@ -275,6 +275,7 @@ def create_pipeline(config: IngestionPipelineConfig, **extra_kwargs: Any) -> Any
         "circuit_breaker_backoff_initial": config.circuit_breaker_backoff_initial_seconds,
         "circuit_breaker_backoff_max": config.circuit_breaker_backoff_max_seconds,
         "dedup_ttl_seconds": config.effective_dedup_ttl(),
+        "max_records_per_cycle": config.max_records_per_cycle,
         "scope": config.scope,
         **binding.static_kwargs,
         **extra_kwargs,

@@ -103,8 +103,8 @@ cd ama
 ### Docker Compose (Recommended)
 
 The complete application stack runs with the repository's
-[`compose.yaml`](compose.yaml). Compose builds and orchestrates five independent
-application images:
+[`compose.yaml`](compose.yaml). Compose builds and orchestrates the application
+images, a persistent Cosmos DB emulator, and an idempotent seed job:
 
 ```bash
 docker compose up --build
@@ -117,11 +117,20 @@ docker compose up --build
 | Agent dispatcher | `ama/agents:local` | <http://localhost:8080/health> |
 | Evacuation agent | `ama/evacuation:local` | <http://localhost:8082/health> |
 | Ingestion | `ama/ingestion:local` | <http://localhost:8081/health> |
+| Cosmos DB emulator | `mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-latest` | <http://localhost:8085> |
+| Cosmos Data Explorer | — | <http://localhost:1234> |
 
-No Azure credentials are required. Unconfigured Azure dependencies use the
-application's local in-memory or degraded-mode implementations. Redis and
-Azurite are available for targeted integration work through the optional
-`emulators` profile:
+No Azure credentials are required for the Cosmos emulator or seed job. Azure
+Maps tiles require `NEXT_PUBLIC_AZURE_MAPS_KEY` in `apps/web/.env.local`; Compose
+passes that optional file to the web container at runtime. Without the key, the
+map data is available but the basemap tiles cannot render. The Cosmos emulator
+stores data in the `cosmos-data` Docker volume, and the seed job provisions the
+local containers and loads the repository's reference data before the API and
+ingestion services start. `docker compose down` preserves this volume;
+`docker compose down -v` removes it. The vNext emulator does not enforce
+authentication and is only for local development/testing; it does not validate
+Azure authentication or authorization. Redis and Azurite remain available
+through the optional `emulators` profile:
 
 ```bash
 docker compose --profile emulators up --build
@@ -131,7 +140,7 @@ Useful lifecycle commands:
 
 ```bash
 docker compose ps
-docker compose logs --follow api agents evacuation ingestion web
+docker compose logs --follow cosmos cosmos-seed api agents evacuation ingestion web
 docker compose down
 ```
 

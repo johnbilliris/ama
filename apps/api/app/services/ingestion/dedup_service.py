@@ -2,7 +2,7 @@ import asyncio
 import hashlib
 import logging
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, Literal
 
 from app.middleware.resilience import retry_transient_dependency_call
 
@@ -60,6 +60,9 @@ class DedupService:
             self._local_cache.pop(key, None)
 
     async def try_claim(self, key: str, ttl_seconds: int | None = None) -> bool:
+        return await self.claim_status(key, ttl_seconds) == "claimed"
+
+    async def claim_status(self, key: str, ttl_seconds: int | None = None) -> Literal["claimed", "duplicate", "busy"]:
         ttl = ttl_seconds or self._default_ttl
         redis_key = key if key.startswith("dedup:") else f"dedup:{key}"
 
@@ -69,7 +72,10 @@ class DedupService:
                 if self._redis_warned:
                     logger.info("Redis dedup connection restored")
                     self._redis_warned = False
-                return claimed
+                if claimed:
+                    return "claimed"
+                value = await asyncio.to_thread(self._redis_get, self._redis, redis_key)
+                return "busy" if value in (None, "claim", b"claim") else "duplicate"
             except Exception:
                 if not self._redis_warned:
                     logger.warning("Redis unavailable for dedup claim — falling back to local expiry cache")
@@ -77,9 +83,9 @@ class DedupService:
 
         self._prune_local_cache()
         if redis_key in self._local_cache:
-            return False
+            return "busy" if self._local_cache[redis_key][0] == "claim" else "duplicate"
         self._local_cache[redis_key] = ("claim", datetime.now(UTC) + timedelta(seconds=ttl))
-        return True
+        return "claimed"
 
     async def commit(self, key: str, signal_id: str, ttl_seconds: int | None = None) -> None:
         ttl = ttl_seconds or self._default_ttl
