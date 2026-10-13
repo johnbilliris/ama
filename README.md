@@ -129,7 +129,17 @@ local containers and loads the repository's reference data before the API and
 ingestion services start. `docker compose down` preserves this volume;
 `docker compose down -v` removes it. The vNext emulator does not enforce
 authentication and is only for local development/testing; it does not validate
-Azure authentication or authorization. Redis and Azurite remain available
+Azure authentication or authorization.
+
+Compose includes a dummy Cosmos signing key and Azurite's published development
+key, so local startup needs no secret provisioning. `.gitleaks.toml` allows only
+those exact values in `compose.yaml`; `trivy-secret.yaml` allows only the exact
+published Azurite key. Other credentials remain subject to scanning. The
+security workflow checks these exceptions against synthetic replacement keys
+with the same scanner versions used by its gates. These settings are only for
+local emulators, never for Azure deployments.
+
+Redis and Azurite remain available
 through the optional `emulators` profile:
 
 ```bash

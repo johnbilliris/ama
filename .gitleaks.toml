@@ -12,3 +12,16 @@ regexes = [
   '''Idempotency-Key:\s+[A-Za-z0-9._:-]+''',
   '''idem-key-123456''',
 ]
+
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "Local Cosmos signing placeholder and published Azurite development key."
+condition = "AND"
+paths = ['''^compose\.yaml$''']
+regexTarget = "secret"
+regexes = [
+  '''^bG9jYWwtY29zbW9zLWVtdWxhdG9yLW9ubHk=$''',
+  '''^Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==$''',
+]

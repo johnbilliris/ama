@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 from urllib.parse import urlparse
 
-
 SEED_PATH = (
     Path(__file__).resolve().parents[2]
     / "packages"
