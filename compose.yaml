@@ -1,6 +1,52 @@
 name: ama-local
 
+x-cosmos-environment: &cosmos-environment
+  COSMOS_ENDPOINT: http://cosmos:8081
+  COSMOS_DATABASE: disaster-hub
+  COSMOS_AUTH_MODE: key
+  # This valid base64 dummy key is only for SDK request signing; emulator vNext does not enforce auth.
+  COSMOS_KEY: bG9jYWwtY29zbW9zLWVtdWxhdG9yLW9ubHk=
+
 services:
+  cosmos:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-latest
+    command: ["--protocol", "http"]
+    ports:
+      - "127.0.0.1:8085:8081"
+      - "127.0.0.1:1234:1234"
+    volumes:
+      - cosmos-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - http://127.0.0.1:8080/ready
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 60s
+
+  cosmos-seed:
+    image: ama/api:local
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runtime
+    environment: *cosmos-environment
+    depends_on:
+      cosmos:
+        condition: service_healthy
+    command:
+      - python
+      - scripts/seed_loader.py
+      - --cosmos-endpoint
+      - http://cosmos:8081
+      - --cosmos-database
+      - disaster-hub
+      - --ensure-local-cosmos-schema
+
   api:
     image: ama/api:local
     build:
@@ -9,13 +55,18 @@ services:
       target: runtime
     init: true
     environment:
+      <<: *cosmos-environment
       AGENTS_BASE_URL: http://agents:8080
       AMA_ENABLE_PRODUCTION_AUTH: "0"
       AMA_ENVIRONMENT: dev
+      AMA_ALLOW_ANONYMOUS_DEV_ACCESS: "1"
       AMA_ALLOW_ANONYMOUS_INCIDENT_MAP: "1"
       AMA_TEST_MODE: "1"
       API_HOST: 0.0.0.0
       API_PORT: "8000"
+    depends_on:
+      cosmos-seed:
+        condition: service_completed_successfully
     ports:
       - "127.0.0.1:8000:8000"
     healthcheck:
@@ -94,9 +145,24 @@ services:
       dockerfile: apps/ingestion/Dockerfile
       target: runtime
     init: true
+    stop_grace_period: 45s
     environment:
+      <<: *cosmos-environment
       AMA_ENVIRONMENT: dev
       PORT: "8081"
+      INGESTION_MAX_RECORDS_PER_CYCLE: ${INGESTION_MAX_RECORDS_PER_CYCLE}
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_ACCOUNT_NAME: devstoreaccount1
+      # Azurite's public development key is only valid for this local emulator.
+      AZURITE_BLOB_CONNECTION_STRING: >-
+        DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+    depends_on:
+      cosmos-seed:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      azurite:
+        condition: service_healthy
     ports:
       - "127.0.0.1:8081:8081"
     healthcheck:
@@ -123,6 +189,9 @@ services:
         NEXT_PUBLIC_ENVIRONMENT: development
         NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
     init: true
+    env_file:
+      - path: apps/web/.env.local
+        required: false
     environment:
       API_PROXY_UPSTREAM: http://api:8000/api
       NEXT_TELEMETRY_DISABLED: "1"
@@ -146,7 +215,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    profiles: ["emulators"]
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "127.0.0.1:6379:6379"
@@ -160,7 +228,6 @@ services:
 
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.35.0
-    profiles: ["emulators"]
     command:
       - azurite
       - --blobHost
@@ -189,5 +256,6 @@ services:
 
 volumes:
   azurite-data:
+  cosmos-data:
   evacuation-data:
   redis-data:

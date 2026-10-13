@@ -11,20 +11,41 @@ from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
+AZURITE_BLOB_API_VERSION = "2025-11-05"
+
 
 class RawPayloadBlobStore:
     """Archives raw ingestion payloads into Azure Blob Storage (raw-payloads container).
 
-    Uses ``DefaultAzureCredential`` (managed identity in Azure, Azure CLI locally).
+    Uses an Azurite connection string locally and managed identity in Azure.
     """
 
-    def __init__(self, account_name: str, container_name: str = "raw-payloads") -> None:
-        from azure.identity import DefaultAzureCredential
+    def __init__(
+        self,
+        account_name: str,
+        container_name: str = "raw-payloads",
+        *,
+        connection_string: str | None = None,
+    ) -> None:
         from azure.storage.blob import BlobServiceClient
 
-        account_url = f"https://{account_name}.blob.core.windows.net"
-        credential = DefaultAzureCredential()
-        self._client = BlobServiceClient(account_url, credential=credential)
+        if connection_string:
+            from azure.core.exceptions import ResourceExistsError
+
+            self._client = BlobServiceClient.from_connection_string(
+                connection_string,
+                api_version=AZURITE_BLOB_API_VERSION,
+            )
+            for name in dict.fromkeys((container_name, "audit")):
+                try:
+                    self._client.get_container_client(name).create_container()
+                except ResourceExistsError:
+                    pass
+        else:
+            from azure.identity import ManagedIdentityCredential
+
+            account_url = f"https://{account_name}.blob.core.windows.net"
+            self._client = BlobServiceClient(account_url, credential=ManagedIdentityCredential())
         self._container = self._client.get_container_client(container_name)
 
     async def store_raw_payload(

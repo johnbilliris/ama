@@ -41,6 +41,7 @@ COPY apps/ingestion/ ./apps/ingestion/
 COPY apps/agents/ ./apps/agents/
 COPY packages/ ./packages/
 COPY apps/api/app/ ./apps/api/app/
+COPY apps/console_logging.py ./apps/console_logging.py
 
 USER appuser
 EXPOSE 8081

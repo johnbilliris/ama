@@ -71,6 +71,22 @@ def test_health_returns_healthy_for_reachable_configured_dependencies(
     }
 
 
+def test_cosmos_probe_uses_http_endpoint_port(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("COSMOS_ENDPOINT", "http://cosmos:8081")
+    reached: list[tuple[str, int]] = []
+
+    def _reachable(host: str, port: int, timeout_seconds: float) -> bool:  # noqa: ARG001
+        reached.append((host, port))
+        return True
+
+    monkeypatch.setattr(health_api, "_tcp_reachable", _reachable)
+
+    assert health_api._probe_cosmos() == "healthy"
+    assert reached == [("cosmos", 8081)]
+
+
 def test_health_marks_configured_probe_exception_unavailable(
     client: TestClient,
     monkeypatch: pytest.MonkeyPatch,

@@ -11,6 +11,7 @@ __pycache__/
 .mypy_cache
 .pytest039/
 .pnpm-store
+.playwright-mcp/
 .ruff_cache/
 .venv/
 venv/

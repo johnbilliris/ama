@@ -19,7 +19,7 @@ param environment string = 'prod'
 param tags object
 
 @description('Allowed CORS origins for the web frontend')
-param corsAllowedOrigins array = []
+param corsAllowedOrigins array = environment == 'dev' ? ['http://localhost:3000', 'http://127.0.0.1:3000'] : []
 
 // ── Azure Maps account ──
 
@@ -34,9 +34,11 @@ resource azureMaps 'Microsoft.Maps/accounts@2024-07-01-preview' = {
   properties: {
     disableLocalAuth: environment != 'dev'
     cors: {
-      corsRules: [for origin in corsAllowedOrigins: {
-        allowedOrigins: [origin]
-      }]
+      corsRules: empty(corsAllowedOrigins) ? [] : [
+        {
+          allowedOrigins: corsAllowedOrigins
+        }
+      ]
     }
   }
 }

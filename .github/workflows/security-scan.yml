@@ -29,6 +29,10 @@ jobs:
         uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.x
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: "8.24.3"
+          GITLEAKS_CONFIG: .gitleaks.toml
+      - name: Verify Gitleaks emulator exceptions
+        run: python3 scripts/verify_emulator_secret_exceptions.py gitleaks
 
   psrule-bicep:
     runs-on: ubuntu-latest
@@ -58,6 +62,8 @@ jobs:
           persist-credentials: false
       - name: Trivy filesystem scan (Dockerfile + IaC)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_SECRET_CONFIG: trivy-secret.yaml
         with:
           version: v0.75.0
           scan-type: fs
@@ -65,3 +71,5 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"
+      - name: Verify Trivy emulator exceptions
+        run: python3 scripts/verify_emulator_secret_exceptions.py trivy

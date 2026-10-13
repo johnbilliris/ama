@@ -25,6 +25,7 @@ import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 # Spec-039 (T032): make `packages.*` importable when this script is run as
 # `python scripts/seed_loader.py` from the repo root (the azd postprovision
@@ -188,9 +189,7 @@ def _build_cosmos_client(endpoint: str):
     try:
         from azure.cosmos import CosmosClient
     except ImportError as exc:
-        raise RuntimeError(
-            "azure-cosmos is required when --cosmos-endpoint is provided"
-        ) from exc
+        raise RuntimeError("azure-cosmos is required when --cosmos-endpoint is provided") from exc
 
     key = os.environ.get("COSMOS_KEY")
     if key:
@@ -201,10 +200,49 @@ def _build_cosmos_client(endpoint: str):
         from azure.identity import DefaultAzureCredential
     except ImportError as exc:
         raise RuntimeError(
-            "azure-identity is required when --cosmos-endpoint is provided"
-            " (or set COSMOS_KEY for key-based auth)"
+            "azure-identity is required when --cosmos-endpoint is provided (or set COSMOS_KEY for key-based auth)"
         ) from exc
     return CosmosClient(endpoint, credential=DefaultAzureCredential())
+
+
+LOCAL_COSMOS_CONTAINER_SPECS = (
+    ("seed", ("/kind",), "Hash"),
+    ("signals", ("/scope", "/jurisdictionId", "/dataSourceId"), "MultiHash"),
+    ("recovery-catalogue", ("/domain",), "Hash"),
+    ("coordination_tasks", ("/assigned_organisation_id",), "Hash"),
+    ("help_articles", ("/tenant_id",), "Hash"),
+    ("simulation", ("/scenario_id",), "Hash"),
+)
+
+
+def _ensure_local_cosmos_schema(endpoint: str, database_name: str) -> None:
+    parsed = urlparse(endpoint)
+    if parsed.scheme != "http" or parsed.hostname not in {"cosmos", "localhost", "127.0.0.1", "::1"}:
+        raise ValueError("--ensure-local-cosmos-schema requires an HTTP endpoint on the local emulator")
+
+    try:
+        from azure.cosmos.partition_key import PartitionKey
+    except ImportError as exc:
+        raise RuntimeError("azure-cosmos is required to provision the local Cosmos schema") from exc
+
+    client = _build_cosmos_client(endpoint)
+    database = client.create_database_if_not_exists(id=database_name)
+    for container_name, partition_paths, kind in LOCAL_COSMOS_CONTAINER_SPECS:
+        paths = list(partition_paths)
+        path: str | list[str] = paths[0] if len(paths) == 1 else paths
+        container = database.create_container_if_not_exists(
+            id=container_name,
+            partition_key=PartitionKey(path=path, kind=kind),
+        )
+        partition_key = container.read().get("partitionKey", {})
+        actual_paths = partition_key.get("paths", [])
+        actual_kind = partition_key.get("kind")
+        if actual_paths != paths or actual_kind != kind:
+            raise RuntimeError(
+                f"Local Cosmos container {container_name!r} has partition key "
+                f"{actual_kind!r} {actual_paths!r}; expected {kind!r} {paths!r}"
+            )
+    print(f"  Provisioned local Cosmos database {database_name!r} and required containers")
 
 
 def seed_cosmos(endpoint: str, database: str, data: dict[str, list[dict]]) -> None:
@@ -385,10 +423,7 @@ def seed_coordination_tasks(endpoint: str, database: str, records: list[dict]) -
         org_id = record.get("assigned_organisation_id")
         if not task_id or not org_id:
             failed += 1
-            print(
-                f"    ERROR: coordination_tasks row missing task_id or "
-                f"assigned_organisation_id: {record}"
-            )
+            print(f"    ERROR: coordination_tasks row missing task_id or assigned_organisation_id: {record}")
             continue
         doc = {**record, "id": task_id}
         try:
@@ -400,10 +435,7 @@ def seed_coordination_tasks(endpoint: str, database: str, records: list[dict]) -
 
     print(f"  Seeded {upserted:>4} coordination_tasks into {COORDINATION_TASKS_CONTAINER}")
     if failed:
-        raise RuntimeError(
-            f"Failed to upsert {failed} coordination_tasks records into "
-            f"{COORDINATION_TASKS_CONTAINER}"
-        )
+        raise RuntimeError(f"Failed to upsert {failed} coordination_tasks records into {COORDINATION_TASKS_CONTAINER}")
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -538,10 +570,7 @@ def seed_help_articles(endpoint: str, database: str, records: list[dict]) -> Non
 
     print(f"  Seeded {upserted:>4} help_articles into {HELP_ARTICLES_CONTAINER}")
     if failed:
-        raise RuntimeError(
-            f"Failed to upsert {failed} help_articles records into "
-            f"{HELP_ARTICLES_CONTAINER}"
-        )
+        raise RuntimeError(f"Failed to upsert {failed} help_articles records into {HELP_ARTICLES_CONTAINER}")
 
 
 def _content_hash(record: dict) -> str:
@@ -563,9 +592,7 @@ def _existing_hash(container, doc_id: str) -> str | None:
     return existing.get("_content_hash") if isinstance(existing, dict) else None
 
 
-def seed_spec039_subdirectories(
-    cosmos_client, database_name: str
-) -> dict[str, dict[str, int]]:
+def seed_spec039_subdirectories(cosmos_client, database_name: str) -> dict[str, dict[str, int]]:
     """Spec-039 T032 — load the nine new subdirectory catalogues with full
     fictitious-marker / PSPF / PII enforcement and content-hash idempotency.
 
@@ -609,8 +636,7 @@ def seed_spec039_subdirectories(
                     if hits:
                         detectors = sorted({h.detector for h in hits})
                         raise SeedRejectedError(
-                            f"{json_path.name}: record {record.get('id')!r} "
-                            f"matched PII detectors {detectors} (FR-045)"
+                            f"{json_path.name}: record {record.get('id')!r} matched PII detectors {detectors} (FR-045)"
                         )
                 loaded_records.append(record)
 
@@ -646,6 +672,11 @@ def main() -> None:
     parser.add_argument("--cosmos-database", default="disaster-hub", help="Cosmos DB database name")
     parser.add_argument("--storage-account", default="", help="Azure Storage account name")
     parser.add_argument("--dry-run", action="store_true", help="Validate seed data without writing")
+    parser.add_argument(
+        "--ensure-local-cosmos-schema",
+        action="store_true",
+        help="Create and verify the local emulator database and required containers",
+    )
     args = parser.parse_args()
 
     print("Loading seed data...")
@@ -668,13 +699,13 @@ def main() -> None:
         return
 
     if args.cosmos_endpoint:
+        if args.ensure_local_cosmos_schema:
+            _ensure_local_cosmos_schema(args.cosmos_endpoint, args.cosmos_database)
         seed_cosmos(args.cosmos_endpoint, args.cosmos_database, data)
         if catalogue_data:
             seed_catalogue(args.cosmos_endpoint, args.cosmos_database, catalogue_data)
         if coordination_tasks:
-            seed_coordination_tasks(
-                args.cosmos_endpoint, args.cosmos_database, coordination_tasks
-            )
+            seed_coordination_tasks(args.cosmos_endpoint, args.cosmos_database, coordination_tasks)
         if help_articles:
             seed_help_articles(args.cosmos_endpoint, args.cosmos_database, help_articles)
         # Spec-039 T032/T034: load the new subdirectory catalogues with
@@ -690,4 +721,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

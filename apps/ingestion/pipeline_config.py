@@ -1,3 +1,4 @@
+import os
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -21,3 +22,19 @@ class IngestionPipelineConfig(BaseModel):
 
     def effective_dedup_ttl(self) -> int:
         return self.dedup_ttl_seconds if self.dedup_ttl_seconds > 0 else self.poll_interval_seconds * 2
+
+
+def resolve_pipeline_configs(configs: list[IngestionPipelineConfig]) -> list[IngestionPipelineConfig]:
+    """Apply the worker-wide environment override without mutating source configurations."""
+    limit = os.environ.get("INGESTION_MAX_RECORDS_PER_CYCLE")
+    if limit is None:
+        return configs
+
+    try:
+        cycle_limit = int(limit)
+        return [
+            IngestionPipelineConfig.model_validate({**config.model_dump(), "max_records_per_cycle": cycle_limit})
+            for config in configs
+        ]
+    except ValueError as exc:
+        raise ValueError("INGESTION_MAX_RECORDS_PER_CYCLE must be an integer between 1 and 5000") from exc

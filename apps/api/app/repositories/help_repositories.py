@@ -67,7 +67,7 @@ def _cosmos_enabled() -> bool:
 
 def _container(container: str) -> Any:
     """Return the live Cosmos container client (only when configured)."""
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]

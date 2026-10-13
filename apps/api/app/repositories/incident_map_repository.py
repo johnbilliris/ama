@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 def _build_container() -> Any:
     """Create a Cosmos DB container client from environment variables."""
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]
