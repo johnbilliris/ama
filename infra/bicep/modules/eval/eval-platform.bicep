@@ -302,8 +302,8 @@ resource foundry 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
 
 @description('Curated chat-completion models deployed for the eval runner. Mix of OpenAI + Foundry catalogue.')
 var foundryModelDeployments = [
-  { name: 'gpt-5-4',                modelName: 'gpt-5.4',                  modelVersion: '2026-03-05', format: 'OpenAI',    sku: 'GlobalStandard', capacity: 10 }
-  { name: 'gpt-5-4-mini',           modelName: 'gpt-5.4-mini',             modelVersion: '2026-03-17', format: 'OpenAI',    sku: 'GlobalStandard', capacity: 10 }
+  { name: 'gpt-5-6',                modelName: 'gpt-5.6',                  modelVersion: '2026-03-05', format: 'OpenAI',    sku: 'GlobalStandard', capacity: 10 }
+  { name: 'gpt-5-6-mini',           modelName: 'gpt-5.6-mini',             modelVersion: '2026-03-17', format: 'OpenAI',    sku: 'GlobalStandard', capacity: 10 }
   { name: 'phi-4',                  modelName: 'Phi-4',                    modelVersion: '7',          format: 'Microsoft', sku: 'GlobalStandard', capacity: 1  }
   { name: 'llama-3-3-70b-instruct', modelName: 'Llama-3.3-70B-Instruct',   modelVersion: '9',          format: 'Meta',      sku: 'GlobalStandard', capacity: 1  }
   { name: 'mistral-large-3',        modelName: 'Mistral-Large-3',          modelVersion: '1',          format: 'Mistral AI',sku: 'GlobalStandard', capacity: 1  }

@@ -87,7 +87,7 @@ def _run() -> EvaluationRun:
         mode="ad-hoc",
         datasetId="d",
         datasetVersion="1.0.0",
-        models=[ModelUnderTest(modelId="gpt-5.4", version="2026-03-05")],
+        models=[ModelUnderTest(modelId="gpt-5.6", version="2026-03-05")],
         metricSetVersion="disaster-core-v1",
         policyVersion="1.0.0",
         estimatedCostAud=0.0,
@@ -97,9 +97,9 @@ def _run() -> EvaluationRun:
 
 
 def test_parse_deployment_map_handles_csv():
-    parsed = _parse_deployment_map("gpt-5.4@2026-03-05=gpt-5-4 , gpt-4o-mini@2024-07-18 = gpt-4o-mini")
+    parsed = _parse_deployment_map("gpt-5.6@2026-03-05=gpt-5-6 , gpt-4o-mini@2024-07-18 = gpt-4o-mini")
     assert parsed == {
-        "gpt-5.4@2026-03-05": "gpt-5-4",
+        "gpt-5.6@2026-03-05": "gpt-5-6",
         "gpt-4o-mini@2024-07-18": "gpt-4o-mini",
     }
 
@@ -116,7 +116,7 @@ def test_foundry_client_raises_when_endpoint_missing(monkeypatch):
     client = FoundryClient()
 
     with pytest.raises(FoundryConfigurationError, match="AZURE_AI_INFERENCE_ENDPOINT"):
-        client.complete(model_id="gpt-5.4", messages=[{"role": "user", "content": "hi"}], version="2026-03-05")
+        client.complete(model_id="gpt-5.6", messages=[{"role": "user", "content": "hi"}], version="2026-03-05")
 
 
 def test_foundry_client_raises_when_deployment_unknown(monkeypatch):
@@ -127,12 +127,12 @@ def test_foundry_client_raises_when_deployment_unknown(monkeypatch):
     client._client = MagicMock()  # noqa: SLF001
 
     with pytest.raises(FoundryConfigurationError, match="no Foundry deployment configured"):
-        client.complete(model_id="gpt-5.4", messages=[{"role": "user", "content": "hi"}], version="2026-03-05")
+        client.complete(model_id="gpt-5.6", messages=[{"role": "user", "content": "hi"}], version="2026-03-05")
 
 
 def test_foundry_client_uses_deployment_for_known_model(monkeypatch):
     monkeypatch.setenv("AZURE_AI_INFERENCE_ENDPOINT", "https://aoai.example/models")
-    monkeypatch.setenv("AZURE_AI_PROJECT_DEPLOYMENTS", "gpt-5.4@2026-03-05=my-gpt5")
+    monkeypatch.setenv("AZURE_AI_PROJECT_DEPLOYMENTS", "gpt-5.6@2026-03-05=my-gpt5")
 
     captured: dict = {}
 
@@ -150,11 +150,11 @@ def test_foundry_client_uses_deployment_for_known_model(monkeypatch):
         )
 
     client = FoundryClient(chat_complete=fake_chat)
-    out = client.complete(model_id="gpt-5.4", messages=[{"role": "user", "content": "hi"}], version="2026-03-05")
+    out = client.complete(model_id="gpt-5.6", messages=[{"role": "user", "content": "hi"}], version="2026-03-05")
     assert out.text == "hi back"
     # When chat_complete fake is used, deployment is None (FakeClient doesn't run lookup)
     # but deployment_for resolves correctly via deployment_for() helper:
-    assert client.deployment_for("gpt-5.4", "2026-03-05") == "my-gpt5"
+    assert client.deployment_for("gpt-5.6", "2026-03-05") == "my-gpt5"
 
 
 def test_foundry_client_uses_model_inference_endpoint(monkeypatch):
@@ -168,7 +168,7 @@ def test_foundry_client_uses_model_inference_endpoint(monkeypatch):
 
     client = FoundryClient(
         endpoint=endpoint,
-        deployments={"gpt-5.4@2026-03-05": "my-gpt5"},
+        deployments={"gpt-5.6@2026-03-05": "my-gpt5"},
     )
 
     assert client._ensure_client() is constructed_client  # noqa: SLF001
@@ -182,13 +182,13 @@ def test_foundry_client_uses_model_inference_endpoint(monkeypatch):
 def test_foundry_client_raises_when_inference_request_fails():
     client = FoundryClient(
         endpoint="https://aoai.example.services.ai.azure.com/models",
-        deployments={"gpt-5.4@2026-03-05": "my-gpt5"},
+        deployments={"gpt-5.6@2026-03-05": "my-gpt5"},
     )
     client._client = MagicMock()  # noqa: SLF001
     client._client.complete.side_effect = RuntimeError("resource not found")  # noqa: SLF001
 
     with pytest.raises(FoundryInferenceError, match="deployment my-gpt5") as exc_info:
-        client.complete(model_id="gpt-5.4", messages=[{"role": "user", "content": "hi"}], version="2026-03-05")
+        client.complete(model_id="gpt-5.6", messages=[{"role": "user", "content": "hi"}], version="2026-03-05")
 
     assert isinstance(exc_info.value.__cause__, RuntimeError)
 
@@ -196,7 +196,7 @@ def test_foundry_client_raises_when_inference_request_fails():
 def test_foundry_client_marks_provider_content_filter_as_refusal():
     client = FoundryClient(
         endpoint="https://aoai.example.services.ai.azure.com/models",
-        deployments={"gpt-5.4-mini@2026-03-17": "gpt-5-4-mini"},
+        deployments={"gpt-5.6-mini@2026-03-17": "gpt-5-6-mini"},
     )
     client._client = MagicMock()  # noqa: SLF001
     blocked = RuntimeError("(content_filter) response blocked by policy")
@@ -204,7 +204,7 @@ def test_foundry_client_marks_provider_content_filter_as_refusal():
     client._client.complete.side_effect = blocked  # noqa: SLF001
 
     result = client.complete(
-        model_id="gpt-5.4-mini",
+        model_id="gpt-5.6-mini",
         version="2026-03-17",
         messages=[{"role": "user", "content": "unsafe request"}],
     )
@@ -218,7 +218,7 @@ def test_foundry_client_marks_provider_content_filter_as_refusal():
 def test_foundry_client_uses_max_completion_tokens_for_gpt5():
     client = FoundryClient(
         endpoint="https://aoai.example.services.ai.azure.com/models",
-        deployments={"gpt-5.4-mini@2026-03-17": "gpt-5-4-mini"},
+        deployments={"gpt-5.6-mini@2026-03-17": "gpt-5-6-mini"},
     )
     client._client = MagicMock()  # noqa: SLF001
     completion = MagicMock()
@@ -229,14 +229,14 @@ def test_foundry_client_uses_max_completion_tokens_for_gpt5():
     client._client.complete.return_value = completion  # noqa: SLF001
 
     result = client.complete(
-        model_id="gpt-5.4-mini",
+        model_id="gpt-5.6-mini",
         version="2026-03-17",
         messages=[{"role": "user", "content": "What should I do?"}],
     )
 
     assert result.text == "Evacuate now."
     client._client.complete.assert_called_once_with(  # noqa: SLF001
-        model="gpt-5-4-mini",
+        model="gpt-5-6-mini",
         messages=[{"role": "user", "content": "What should I do?"}],
         temperature=0.2,
         max_tokens=None,
@@ -267,7 +267,7 @@ def test_foundry_client_retries_rate_limited_requests(monkeypatch):
 
     client = FoundryClient(
         endpoint="https://aoai.example.services.ai.azure.com/models",
-        deployments={"gpt-5.4@2026-03-05": "my-gpt5"},
+        deployments={"gpt-5.6@2026-03-05": "my-gpt5"},
     )
     client._client = MagicMock()  # noqa: SLF001
     client._wait_for_request_slot = MagicMock()  # noqa: SLF001
@@ -284,7 +284,7 @@ def test_foundry_client_retries_rate_limited_requests(monkeypatch):
     monkeypatch.setattr("ama_eval.foundry_client.time.sleep", sleeps.append)
 
     result = client.complete(
-        model_id="gpt-5.4",
+        model_id="gpt-5.6",
         version="2026-03-05",
         messages=[{"role": "user", "content": "Help."}],
     )

@@ -103,7 +103,7 @@ def test_pr_fast_execute_posts_bounded_correlated_run_and_gates_scorecard(monkey
             metric_set="disaster-core-v1",
             min_evaluated_samples=2,
             mode="pr-fast-subset",
-            models="gpt-5.4-mini:2026-03-17",
+            models="gpt-5.6-mini:2026-03-17",
             output_dir=str(tmp_path),
             poll_seconds=0,
             timeout_minutes=1,
@@ -130,7 +130,7 @@ def test_pr_fast_execute_posts_bounded_correlated_run_and_gates_scorecard(monkey
         if url.endswith("/api/eval/runs/r1/scorecard"):
             return SimpleNamespace(
                 status_code=200,
-                json=lambda: {"runId": "r1", "perModel": {"gpt-5.4-mini@2026-03-17": passing_metrics}},
+                json=lambda: {"runId": "r1", "perModel": {"gpt-5.6-mini@2026-03-17": passing_metrics}},
             )
         raise AssertionError(f"unexpected eval GET: {url}")
 
@@ -150,7 +150,7 @@ def test_pr_fast_execute_posts_bounded_correlated_run_and_gates_scorecard(monkey
             "datasetVersion": "1.1.3",
             "models": [
                 {
-                    "modelId": "gpt-5.4-mini",
+                    "modelId": "gpt-5.6-mini",
                     "version": "2026-03-17",
                     "deploymentRegion": "australiaeast",
                     "sku": "GlobalStandard",
@@ -350,7 +350,7 @@ def test_gate_fails_when_sample_floor_is_not_met():
     }
 
     verdict = evaluate_gate(
-        {"runId": "r1", "perModel": {"gpt-5.4-mini@2026-03-17": metrics}},
+        {"runId": "r1", "perModel": {"gpt-5.6-mini@2026-03-17": metrics}},
         baseline=None,
         thresholds=GateThresholds(minEvaluatedSamples=3),
     )

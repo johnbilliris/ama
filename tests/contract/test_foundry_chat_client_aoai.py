@@ -55,8 +55,8 @@ def test_endpoint_for_appends_openai_deployments_path_on_aoai() -> None:
         endpoint="https://ama-aif-zo6bb5.cognitiveservices.azure.com/",
         deployments={},
     )
-    assert client._endpoint_for("gpt-5.4-sim-ama") == (
-        "https://ama-aif-zo6bb5.cognitiveservices.azure.com/openai/deployments/gpt-5.4-sim-ama"
+    assert client._endpoint_for("gpt-5.6-sim-ama") == (
+        "https://ama-aif-zo6bb5.cognitiveservices.azure.com/openai/deployments/gpt-5.6-sim-ama"
     )
 
 
@@ -70,11 +70,11 @@ def test_endpoint_for_leaves_foundry_project_endpoint_unchanged() -> None:
 
 def test_endpoint_for_does_not_double_append_when_already_per_deployment() -> None:
     client = LiveFoundryChatClient(
-        endpoint="https://ama-aif-zo6bb5.cognitiveservices.azure.com/openai/deployments/gpt-5.4-sim-ama",
+        endpoint="https://ama-aif-zo6bb5.cognitiveservices.azure.com/openai/deployments/gpt-5.6-sim-ama",
         deployments={},
     )
-    assert client._endpoint_for("gpt-5.4-sim-ama") == (
-        "https://ama-aif-zo6bb5.cognitiveservices.azure.com/openai/deployments/gpt-5.4-sim-ama"
+    assert client._endpoint_for("gpt-5.6-sim-ama") == (
+        "https://ama-aif-zo6bb5.cognitiveservices.azure.com/openai/deployments/gpt-5.6-sim-ama"
     )
 
 
@@ -82,21 +82,21 @@ def test_endpoint_for_does_not_double_append_when_already_per_deployment() -> No
 
 
 def test_resolve_honours_simulation_tier_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("AZURE_AI_SIMULATION_DEPLOYMENT", "gpt-5.4-sim-ama")
+    monkeypatch.setenv("AZURE_AI_SIMULATION_DEPLOYMENT", "gpt-5.6-sim-ama")
     client = LiveFoundryChatClient(
         endpoint="https://ama-aif-zo6bb5.cognitiveservices.azure.com/",
-        deployments={"gpt-5.4@2026-03-05": "gpt-5.4-ama"},
+        deployments={"gpt-5.6@2026-03-05": "gpt-5.6-ama"},
     )
-    assert client._resolve("simulation") == "gpt-5.4-sim-ama"
+    assert client._resolve("simulation") == "gpt-5.6-sim-ama"
 
 
 def test_resolve_falls_back_to_csv_when_tier_env_var_unset(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("AZURE_AI_REASONING_DEPLOYMENT", raising=False)
     client = LiveFoundryChatClient(
         endpoint="https://ama-aif-zo6bb5.cognitiveservices.azure.com/",
-        deployments={"gpt-5.4@2026-03-05": "gpt-5.4-ama"},
+        deployments={"gpt-5.6@2026-03-05": "gpt-5.6-ama"},
     )
-    assert client._resolve("gpt-5.4@2026-03-05") == "gpt-5.4-ama"
+    assert client._resolve("gpt-5.6@2026-03-05") == "gpt-5.6-ama"
 
 
 # ---------------------------------------------------------------- CSV parser
@@ -105,11 +105,11 @@ def test_resolve_falls_back_to_csv_when_tier_env_var_unset(monkeypatch: pytest.M
 def test_parse_deployment_map_first_write_wins() -> None:
     """Three tiers may share a key; the first entry MUST win, deterministically."""
     csv = (
-        "gpt-5.4@2026-03-05=gpt-5.4-ama,"
-        "gpt-5.4@2026-03-05=gpt-5.4-mini-ama,"
-        "gpt-5.4@2026-03-05=gpt-5.4-sim-ama,"
+        "gpt-5.6@2026-03-05=gpt-5.6-ama,"
+        "gpt-5.6@2026-03-05=gpt-5.6-mini-ama,"
+        "gpt-5.6@2026-03-05=gpt-5.6-sim-ama,"
         "text-embedding-3-large@1=text-embedding-3-large-ama"
     )
     parsed = _parse_deployment_map(csv)
-    assert parsed["gpt-5.4@2026-03-05"] == "gpt-5.4-ama"
+    assert parsed["gpt-5.6@2026-03-05"] == "gpt-5.6-ama"
     assert parsed["text-embedding-3-large@1"] == "text-embedding-3-large-ama"

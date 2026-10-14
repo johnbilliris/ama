@@ -197,16 +197,16 @@
     "foundryInferenceEndpoint": "[format('https://{0}.services.ai.azure.com/models', variables('foundryAccountName'))]",
     "foundryModelDeployments": [
       {
-        "name": "gpt-5-4",
-        "modelName": "gpt-5.4",
+        "name": "gpt-5-6",
+        "modelName": "gpt-5.6",
         "modelVersion": "2026-03-05",
         "format": "OpenAI",
         "sku": "GlobalStandard",
         "capacity": 10
       },
       {
-        "name": "gpt-5-4-mini",
-        "modelName": "gpt-5.4-mini",
+        "name": "gpt-5-6-mini",
+        "modelName": "gpt-5.6-mini",
         "modelVersion": "2026-03-17",
         "format": "OpenAI",
         "sku": "GlobalStandard",
