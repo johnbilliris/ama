@@ -60,7 +60,7 @@ def _section_non_empty(body: str, section: str, ordered: list[str]) -> bool:
     return bool(content)
 
 
-def validate_repo(root: Path, expected_count: int | None = 103) -> list[str]:
+def validate_repo(root: Path, expected_count: int | None = 104) -> list[str]:
     errors: list[str] = []
     agents_root = root / ".github" / "agents"
     files = sorted(agents_root.rglob("*.agent.md"))
