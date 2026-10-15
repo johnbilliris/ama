@@ -202,8 +202,8 @@ def test_eval_platform_provisions_foundry_account_with_curated_models():
     assert "kind: 'AIServices'" in template
     # 7-model curated set per user choice
     for marker in (
-        "modelName: 'gpt-5.6'",
-        "modelName: 'gpt-5.6-mini'",
+        "modelName: 'gpt-5.6-sol'",
+        "modelName: 'gpt-5.6-luna'",
         "modelName: 'Phi-4'",
         "modelName: 'Llama-3.3-70B-Instruct'",
         "modelName: 'Mistral-Large-3'",
@@ -236,8 +236,8 @@ def test_script_default_models_match_bicep_curated_set():
     spec.loader.exec_module(module)
 
     expected = {
-        "gpt-5.6:2026-03-05",
-        "gpt-5.6-mini:2026-03-17",
+        "gpt-5.6-sol:2026-07-09",
+        "gpt-5.6-luna:2026-07-09",
         "Phi-4:7",
         "Llama-3.3-70B-Instruct:9",
         "Mistral-Large-3:1",

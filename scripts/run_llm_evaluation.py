@@ -104,8 +104,8 @@ API_BUILD_CONTEXT_PATHS = [
 ]
 
 DEFAULT_MODELS = [
-    "gpt-5.6:2026-03-05",
-    "gpt-5.6-mini:2026-03-17",
+    "gpt-5.6-sol:2026-07-09",
+    "gpt-5.6-luna:2026-07-09",
     "Phi-4:7",
     "Llama-3.3-70B-Instruct:9",
     "Mistral-Large-3:1",

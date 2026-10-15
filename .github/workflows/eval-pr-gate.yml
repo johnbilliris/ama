@@ -179,7 +179,7 @@ jobs:
             --stage execute \
             --env dev \
             --mode "$AZURE_RUN_MODE" \
-            --models "gpt-5.6-mini:2026-03-17" \
+            --models "gpt-5.6-luna:2026-07-09" \
             --max-cases "$MAX_EVAL_CASES" \
             --min-evaluated-samples "$MIN_EVALUATED_SAMPLES" \
             --change-ref "PR-${PR_NUMBER}" \
