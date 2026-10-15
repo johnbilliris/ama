@@ -69,9 +69,12 @@ def test_acr_build_contexts_include_every_required_source_directory() -> None:
     assert Path("apps/console_logging.py") in module.EVAL_RUNNER_BUILD_CONTEXT_PATHS
     assert {
         Path("scripts/install_pyproject_dependencies.py"),
+        Path("scripts/seed_loader.py"),
+        Path("scripts/_pii_detector.py"),
         Path("apps/console_logging.py"),
         Path("apps/agents"),
         Path("apps/ingestion"),
+        Path("apps/web/src/content/help"),
         Path("docs/risk-register"),
         Path("docs/governance-hub/adoption-roadmap"),
         Path("docs/governance-hub/executive-kpi"),
