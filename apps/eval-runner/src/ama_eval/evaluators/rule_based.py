@@ -62,6 +62,11 @@ _MUST_INCLUDE_PATTERNS = {
         r".{0,25}\b(?:ground|place|level|floor|paddock)\b",
         flags=re.IGNORECASE,
     ),
+    "do not move": re.compile(
+        r"\b(?:do not|don't|never|must not|should not)\b[^.!?;]{0,50}\bmove\b"
+        r"[^.!?;]{0,25}\b(?:person|body|remains)\b",
+        flags=re.IGNORECASE,
+    ),
     "move upwind": re.compile(
         r"\b(?:move|stay|keep|head|get|go|walk|evacuate|evacuating)\b.{0,120}\bupwind\b",
         flags=re.IGNORECASE,
@@ -168,6 +173,7 @@ _MUST_INCLUDE_ALIASES = {
         "highest safe level",
         "highest safe place",
         "upper floor",
+        "safe higher level",
         "move upstairs",
         "go upstairs",
         "highest safe floor",

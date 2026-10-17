@@ -58,6 +58,8 @@ def test_must_include_accepts_safety_equivalents_from_pr_eval() -> None:
         ("move upwind", "Move everyone away, moving upwind from the spill."),
         ("do not move", "Do not enter the car, touch or move the person."),
         ("move upwind", "Evacuate everyone upwind and away from the cool store."),
+        ("do not move", "Do not enter the rubble or move the person."),
+        ("move to higher ground", "Move everyone, including pets, to a safe higher level."),
     )
 
     for required, output in cases:
