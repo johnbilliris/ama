@@ -79,6 +79,7 @@ EVAL_RUNNER_BUILD_CONTEXT_PATHS = [
     Path("apps") / "console_logging.py",
     Path("apps") / "api" / "__init__.py",
     Path("apps") / "api" / "app" / "__init__.py",
+    Path("apps") / "api" / "app" / "core",
     Path("apps") / "api" / "app" / "repositories" / "__init__.py",
     Path("apps") / "api" / "app" / "repositories" / "eval",
 ]
@@ -756,6 +757,8 @@ def stage_preflight(ctx: RunContext) -> None:
         run_cmd(
             stage,
             [
+                "python",
+                "-m",
                 "ruff",
                 "check",
                 "packages/eval-core/",
@@ -1093,11 +1096,20 @@ def stage_publish(ctx: RunContext) -> None:
     if not DATASET_MANIFEST.exists():
         fail(stage, f"dataset manifest missing: {DATASET_MANIFEST}", EXIT_PUBLISH)
 
+    dataset_test_paths = [
+        str(REPO_ROOT / "packages" / "eval-core" / "src"),
+        str(REPO_ROOT / "packages" / "eval-dataset" / "src"),
+    ]
+    existing_pythonpath = os.environ.get("PYTHONPATH")
+    if existing_pythonpath:
+        dataset_test_paths.append(existing_pythonpath)
+
     run_cmd(
         stage,
         ["python", "-m", "pytest", "packages/eval-dataset/tests/", "-q"],
         dry_run=ctx.dry_run,
         capture=True,
+        env={"PYTHONPATH": os.pathsep.join(dataset_test_paths)},
     )
 
     if ctx.dry_run:

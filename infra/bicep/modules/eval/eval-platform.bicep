@@ -62,6 +62,11 @@ param schedulerCron string = '0 18 * * 0'
 @maxLength(2)
 param keyVaultNameSalt string = ''
 
+@minValue(400)
+@maxValue(1000000)
+@description('The throughput for the container')
+param throughput int = 400
+
 @description('Tags applied to every resource')
 param tags object = {
   feature: '030-llm-eval-framework'
@@ -74,7 +79,7 @@ var resourceTags = union(tags, env == 'dev' ? { SecurityControl: 'Ignore' } : {}
 var nameSuffix = '${env}-${uniqueString(resourceGroup().id)}'
 var shortUniqueSuffix = take(uniqueString(resourceGroup().id), 6)
 var storageEnvSegment = env == 'production' ? 'prod' : env
-var storageAccountName = take('stamaeval${storageEnvSegment}${uniqueString(resourceGroup().id)}', 24)
+var storageAccountName = '${take('stamaeval${storageEnvSegment}${uniqueString(resourceGroup().id)}', 23)}2'
 var keyVaultName = 'kv-amaeval-${storageEnvSegment}-${shortUniqueSuffix}${keyVaultNameSalt}'
 var logAnalyticsWorkspaceName = take('log-ama-eval-${nameSuffix}', 63)
 var containerRegistryName = 'acramaeval${storageEnvSegment}${shortUniqueSuffix}'
@@ -102,6 +107,7 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = {
     publicNetworkAccess: dataPlanePublicNetworkAccess
     minimalTlsVersion: 'Tls12'
     disableLocalAuth: true
+    enableFreeTier: env == 'dev'
     backupPolicy: {
       type: 'Periodic'
       periodicModeProperties: {
@@ -143,6 +149,9 @@ resource cosmosContainers 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/co
       partitionKey: { paths: [ c.partitionKey ], kind: 'Hash' }
       indexingPolicy: { indexingMode: 'consistent' }
       conflictResolutionPolicy: { mode: 'LastWriterWins', conflictResolutionPath: '/_ts' }
+    }
+    options: {
+      throughput: throughput
     }
   }
 }]
@@ -191,7 +200,7 @@ resource blobContainers 'Microsoft.Storage/storageAccounts/blobServices/containe
   properties: {
     publicAccess: 'None'
     immutableStorageWithVersioning: {
-      enabled: true
+      enabled: env != 'dev'
     }
   }
 }]
@@ -200,7 +209,7 @@ resource blobImmutabilityPolicies 'Microsoft.Storage/storageAccounts/blobService
   parent: blobContainers[i]
   name: 'default'
   properties: {
-    immutabilityPeriodSinceCreationInDays: 2555
+    immutabilityPeriodSinceCreationInDays: env == 'dev' ? 0 : 2555
     allowProtectedAppendWrites: true
   }
 }]
@@ -486,6 +495,7 @@ resource apiAcrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (d
   scope: containerRegistry
   properties: {
     roleDefinitionId: acrPullRoleDefinitionId
+    #disable-next-line BCP318
     principalId: apiIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -496,6 +506,7 @@ resource apiStorageBlob 'Microsoft.Authorization/roleAssignments@2022-04-01' = i
   scope: storage
   properties: {
     roleDefinitionId: storageBlobDataContributorRoleId
+    #disable-next-line BCP318
     principalId: apiIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -506,6 +517,7 @@ resource apiKvSecretsUser 'Microsoft.Authorization/roleAssignments@2022-04-01' =
   scope: kv
   properties: {
     roleDefinitionId: keyVaultSecretsUserRoleId
+    #disable-next-line BCP318
     principalId: apiIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -516,6 +528,7 @@ resource cosmosSqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleA
   name: cosmosBuiltinDataContributorId
   properties: {
     roleDefinitionId: '${cosmos.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002'
+    #disable-next-line BCP318
     principalId: apiIdentity.properties.principalId
     scope: cosmos.id
   }
@@ -572,6 +585,7 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = if (deployAp
               { name: 'EVAL_EVIDENCE_SIGNING_KEY',              value: 'eval-signing-key' }
               { name: 'ENTRA_TENANT_ID',                        value: entraTenantId }
               { name: 'ENTRA_AUDIENCE',                         value: entraAudience }
+              #disable-next-line BCP318
               { name: 'AZURE_CLIENT_ID',                        value: apiIdentity.properties.clientId }
               { name: 'AZURE_SUBSCRIPTION_ID',                  value: subscription().subscriptionId }
               { name: 'EVAL_RUNNER_JOB_RESOURCE_GROUP',         value: resourceGroup().name }
@@ -624,8 +638,24 @@ resource apiJobsOperator 'Microsoft.Authorization/roleAssignments@2022-04-01' = 
   scope: resourceGroup()
   properties: {
     roleDefinitionId: containerAppsJobsOperatorRoleId
+    #disable-next-line BCP318
     principalId: apiIdentity.properties.principalId
     principalType: 'ServicePrincipal'
+  }
+}
+
+var monitoringMetricsPublisherRoleId = '3913510d-42f4-4e42-8a64-420c390055eb'
+
+module apiAppInsightsMetricsPublisher 'br/public:avm/ptn/authorization/resource-role-assignment:0.1.2' = if (deployApi) {
+  name: 'api-appinsights-metrics-publisher-${env}'
+  params: {
+    #disable-next-line BCP318
+    principalId: apiIdentity.properties.principalId
+    resourceId: appInsights.id
+    roleDefinitionId: monitoringMetricsPublisherRoleId
+    principalType: 'ServicePrincipal'
+    description: 'Allow the AMA API managed identity to publish telemetry to Application Insights.'
+    enableTelemetry: false
   }
 }
 
@@ -643,6 +673,7 @@ output runnerIdentityResourceId string = runnerIdentity.id
 output runnerIdentityPrincipalId string = runnerIdentity.properties.principalId
 output runnerIdentityClientId string = runnerIdentity.properties.clientId
 output containerAppsEnvironmentId string = cae.id
+#disable-next-line BCP318
 output apiFqdn string = deployApi ? apiContainerApp.properties.configuration.ingress.fqdn : ''
 output foundryAccountName string = foundry.name
 output foundryEndpoint string = foundry.properties.endpoint

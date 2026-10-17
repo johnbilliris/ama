@@ -254,7 +254,6 @@ def test_foundry_client_uses_max_completion_tokens_for_gpt5():
     client._client.complete.assert_called_once_with(  # noqa: SLF001
         model="gpt-5-6-luna",
         messages=[{"role": "user", "content": "What should I do?"}],
-        temperature=0.2,
         max_tokens=None,
         model_extras={"max_completion_tokens": 512},
     )

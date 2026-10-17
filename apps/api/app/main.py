@@ -23,7 +23,7 @@ if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
 
         configure_azure_monitor(
             enable_live_metrics=True,
-            credential=ManagedIdentityCredential(),
+            credential=ManagedIdentityCredential(client_id=os.environ["AZURE_CLIENT_ID"]),
         )
     except Exception:
         logging.getLogger(__name__).warning("Failed to configure Azure Monitor", exc_info=True)
