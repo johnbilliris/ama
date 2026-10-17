@@ -57,7 +57,7 @@ jobs:
           jq -n --arg head_sha "$HEAD_SHA" --argjson changed "$changed" \
             '{head_sha: $head_sha, changed: $changed}' > eval-runner-changes.json
       - name: Publish eval runner change scope for CD
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: eval-runner-changes
           path: eval-runner-changes.json
@@ -113,7 +113,7 @@ jobs:
           grep -Ei '^(aiohttp|cryptography|h2|hpack|idna|mcp|msgpack|pyjwt|pydantic-settings|redis-entraid|setuptools|starlette|python-engineio|python-socketio|python-multipart)==' "$RUNNER_TEMP/phase8-python-baseline-maps/agents-uv-map.txt"
       - name: Upload locked Python baseline maps
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: phase8-python-baseline-maps
           path: ${{ runner.temp }}/phase8-python-baseline-maps/
@@ -184,7 +184,7 @@ jobs:
           }
       - name: Upload Windows x64 candidate maps
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: phase8-python-windows-candidate-maps
           path: ${{ runner.temp }}\phase8-python-windows-candidate-maps\
@@ -256,7 +256,7 @@ jobs:
           sha256sum "$out/map-a.txt" "$out/map-b.txt"
       - name: Upload Ubuntu x64 candidate evidence
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: phase8-node-x64-candidate-maps
           path: ${{ runner.temp }}/phase8-node-x64-candidate-maps/
@@ -349,7 +349,7 @@ jobs:
           sha256sum "$out/map-a.txt" "$out/map-b.txt"
       - name: Upload Alpine x64 candidate evidence
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: phase8-alpine-x64-candidate-builds
           path: ${{ runner.temp }}/phase8-alpine-x64-candidate-builds/
@@ -596,7 +596,7 @@ jobs:
         run: pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q
 
       - name: upload-benchmark-results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always() && steps.perf-benchmark.outcome == 'success'
         with:
           name: benchmark-results
@@ -604,7 +604,7 @@ jobs:
           retention-days: 30
 
       - name: upload-coverage-results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always() && steps.python-test.outcome == 'success'
         with:
           name: coverage-results
@@ -782,7 +782,7 @@ jobs:
             --reporter=default --reporter=junit --outputFile.junit=axe-junit.xml
       - name: Upload junit report
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: spec-036-axe-junit
           path: apps/web/axe-junit.xml
@@ -848,7 +848,7 @@ jobs:
 #             --shard=${{ matrix.shard }}/4
 #       - name: Upload partial trace
 #         if: always()
-#         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+#         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
 #         with:
 #           name: web-coverage-shard-${{ matrix.shard }}
 #           path: |
@@ -890,7 +890,7 @@ jobs:
 #         run: ./scripts/web-coverage/verify-trace-determinism.ps1
 #       - name: Upload canonical artefacts
 #         if: always()
-#         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+#         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
 #         with:
 #           name: web-coverage-canonical
 #           path: |
