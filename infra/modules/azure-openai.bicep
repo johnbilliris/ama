@@ -27,19 +27,19 @@ param tags object
 
 // Model configuration
 @description('Reasoning-tier model name')
-param reasoningModelName string = 'gpt-5.4'
+param reasoningModelName string = 'gpt-5.6'
 
 @description('Reasoning-tier model version')
 param reasoningModelVersion string = '2026-03-05'
 
 @description('Drafting-tier model name')
-param draftingModelName string = 'gpt-5.4'
+param draftingModelName string = 'gpt-5.6'
 
 @description('Drafting-tier model version')
 param draftingModelVersion string = '2026-03-05'
 
 @description('Simulation Controller model name (used by the Simulation chat endpoint).')
-param simulationModelName string = 'gpt-5.4'
+param simulationModelName string = 'gpt-5.6'
 
 @description('Simulation Controller model version.')
 param simulationModelVersion string = '2026-03-05'
@@ -173,7 +173,7 @@ resource simulationRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2
 
 resource reasoningDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: openAiAccount
-  name: 'gpt-5.4-${envPrefix}'
+  name: 'gpt-5.6-${envPrefix}'
   sku: {
     name: modelDeploymentSku
     capacity: reasoningTpmQuota
@@ -190,7 +190,7 @@ resource reasoningDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
 
 resource draftingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: openAiAccount
-  name: 'gpt-5.4-mini-${envPrefix}'
+  name: 'gpt-5.6-mini-${envPrefix}'
   sku: {
     name: modelDeploymentSku
     capacity: draftingTpmQuota
@@ -210,7 +210,7 @@ resource draftingDeployment 'Microsoft.CognitiveServices/accounts/deployments@20
 // quota so a runaway simulation cannot starve real-incident agents.
 resource simulationDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: openAiAccount
-  name: 'gpt-5.4-sim-${envPrefix}'
+  name: 'gpt-5.6-sim-${envPrefix}'
   sku: {
     name: modelDeploymentSku
     capacity: simulationTpmQuota
@@ -319,7 +319,7 @@ output embeddingModelKey string = '${embeddingModelName}@${embeddingModelVersion
 // Per-tier deployment model-key outputs — the simulation Controller and
 // agent llm clients pick the deployment by `<modelName>@<version>` from
 // the AZURE_AI_PROJECT_DEPLOYMENTS CSV. Until tiers diverge, all three
-// resolve to the same key (gpt-5.4@2026-03-05) — the CSV lookup picks
+// resolve to the same key (gpt-5.6@2026-03-05) — the CSV lookup picks
 // the first matching entry, which is the reasoning deployment.
 output reasoningDeploymentModelKey string = '${reasoningModelName}@${reasoningModelVersion}'
 output draftingDeploymentModelKey string = '${draftingModelName}@${draftingModelVersion}'

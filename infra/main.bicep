@@ -1296,7 +1296,7 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: openAiDeployments.outputs.azureAiProjectDeployments }
             // The simulation chat client + agent llm clients pick the deployment
             // by `<modelName>@<version>` key. All three GPT tiers currently use
-            // the same model+version (gpt-5.4@2026-03-05), so a single key
+            // the same model+version (gpt-5.6@2026-03-05), so a single key
             // matches; if tiers diverge, keep the keys aligned with the per-
             // deployment outputs in `infra/modules/azure-openai.bicep`.
             { name: 'AZURE_AI_REASONING_MODEL_KEY', value: '${openAiDeployments.outputs.reasoningDeploymentModelKey}' }

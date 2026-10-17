@@ -50,7 +50,7 @@ _PROMPT_PATH = Path(__file__).with_name("controller_prompt.md")
 
 # Rolling-window cap on prior turns replayed to the model. Each assistant
 # response is ~600 chars on average, so 40 turns ≈ 24 k chars (~6 k tokens)
-# — well inside gpt-5.4's 128 k context window and leaves headroom for the
+# — well inside gpt-5.6's 128 k context window and leaves headroom for the
 # system prompt (~4 k chars) and new user message.
 _MAX_HISTORY_TURNS = 40
 
