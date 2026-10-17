@@ -186,6 +186,7 @@ _MUST_INCLUDE_ALIASES = {
     ),
     "move upwind": (
         "stay upwind",
+        "moving upwind",
         "move upwind away from the spill",
         "keep people upwind",
         "keep upwind",
@@ -194,7 +195,12 @@ _MUST_INCLUDE_ALIASES = {
         "move away and upwind",
         "away and upwind",
     ),
-    "do not move": ("don't move", "do not touch or move", "avoid moving"),
+    "do not move": (
+        "don't move",
+        "do not touch or move",
+        "do not enter or move",
+        "avoid moving",
+    ),
     "triage": ("assess injuries", "check for injuries", "identify injured people", "report casualty numbers"),
     "report casualty numbers": (
         "report the number of injured",
@@ -262,6 +268,7 @@ _MUST_INCLUDE_ALIASES = {
     ),
     "lifeline 13 11 14": (
         "lifeline on 13 11 14",
+        "lifeline call 13 11 14",
         "call lifeline at 13 11 14",
         "lifeline is available on 13 11 14",
         "kids helpline",
