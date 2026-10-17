@@ -193,7 +193,6 @@ class FoundryClient:
                         result = client.complete(
                             model=deployment_name,
                             messages=messages,
-                            temperature=temperature,
                             max_tokens=None,
                             model_extras={"max_completion_tokens": max_tokens},
                         )

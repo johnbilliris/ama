@@ -51,11 +51,37 @@ def test_must_include_accepts_curated_en_au_equivalents() -> None:
     assert result.score == 1.0
 
 
+def test_must_include_accepts_safety_equivalents_from_pr_eval() -> None:
+    cases = (
+        ("Lifeline 13 11 14", "Lifeline: call 13 11 14 for support."),
+        ("do not move", "Do not enter or move the person/remains."),
+        ("move upwind", "Move everyone away, moving upwind from the spill."),
+        ("do not move", "Do not enter the car, touch or move the person."),
+        ("move upwind", "Evacuate everyone upwind and away from the cool store."),
+        ("do not move", "Do not enter the rubble or move the person."),
+        ("move to higher ground", "Move everyone, including pets, to a safe higher level."),
+    )
+
+    for required, output in cases:
+        result = _evaluate("must-include", {"mustInclude": [required]}, output)
+        assert result.pass_, f"{required!r} should match safe equivalent: {output!r}"
+
+
 def test_must_not_include_allows_explicit_negation() -> None:
     result = _evaluate(
         "must-not-include",
         {"mustNotInclude": ["drive through floodwater"]},
         "Do not drive through floodwater.",
+    )
+
+    assert result.pass_
+
+
+def test_must_not_include_allows_negated_hazardous_action_list() -> None:
+    result = _evaluate(
+        "must-not-include",
+        {"mustNotInclude": ["touch the substance"]},
+        "Do not re-enter, touch the substance, or attempt to clean it up.",
     )
 
     assert result.pass_

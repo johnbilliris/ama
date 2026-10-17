@@ -69,9 +69,12 @@ def test_acr_build_contexts_include_every_required_source_directory() -> None:
     assert Path("apps/console_logging.py") in module.EVAL_RUNNER_BUILD_CONTEXT_PATHS
     assert {
         Path("scripts/install_pyproject_dependencies.py"),
+        Path("scripts/seed_loader.py"),
+        Path("scripts/_pii_detector.py"),
         Path("apps/console_logging.py"),
         Path("apps/agents"),
         Path("apps/ingestion"),
+        Path("apps/web/src/content/help"),
         Path("docs/risk-register"),
         Path("docs/governance-hub/adoption-roadmap"),
         Path("docs/governance-hub/executive-kpi"),
@@ -103,7 +106,7 @@ def test_pr_fast_execute_posts_bounded_correlated_run_and_gates_scorecard(monkey
             metric_set="disaster-core-v1",
             min_evaluated_samples=2,
             mode="pr-fast-subset",
-            models="gpt-5.4-mini:2026-03-17",
+            models="gpt-5.6-luna:2026-07-09",
             output_dir=str(tmp_path),
             poll_seconds=0,
             timeout_minutes=1,
@@ -130,7 +133,7 @@ def test_pr_fast_execute_posts_bounded_correlated_run_and_gates_scorecard(monkey
         if url.endswith("/api/eval/runs/r1/scorecard"):
             return SimpleNamespace(
                 status_code=200,
-                json=lambda: {"runId": "r1", "perModel": {"gpt-5.4-mini@2026-03-17": passing_metrics}},
+                json=lambda: {"runId": "r1", "perModel": {"gpt-5.6-luna@2026-07-09": passing_metrics}},
             )
         raise AssertionError(f"unexpected eval GET: {url}")
 
@@ -150,8 +153,8 @@ def test_pr_fast_execute_posts_bounded_correlated_run_and_gates_scorecard(monkey
             "datasetVersion": "1.1.3",
             "models": [
                 {
-                    "modelId": "gpt-5.4-mini",
-                    "version": "2026-03-17",
+                    "modelId": "gpt-5.6-luna",
+                    "version": "2026-07-09",
                     "deploymentRegion": "australiaeast",
                     "sku": "GlobalStandard",
                 }
@@ -350,7 +353,7 @@ def test_gate_fails_when_sample_floor_is_not_met():
     }
 
     verdict = evaluate_gate(
-        {"runId": "r1", "perModel": {"gpt-5.4-mini@2026-03-17": metrics}},
+        {"runId": "r1", "perModel": {"gpt-5.6-luna@2026-07-09": metrics}},
         baseline=None,
         thresholds=GateThresholds(minEvaluatedSamples=3),
     )

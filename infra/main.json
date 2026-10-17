@@ -37607,7 +37607,7 @@
             },
             "reasoningModelName": {
               "type": "string",
-              "defaultValue": "gpt-5.4",
+              "defaultValue": "gpt-5.6",
               "metadata": {
                 "description": "Reasoning-tier model name"
               }
@@ -37621,7 +37621,7 @@
             },
             "draftingModelName": {
               "type": "string",
-              "defaultValue": "gpt-5.4",
+              "defaultValue": "gpt-5.6",
               "metadata": {
                 "description": "Drafting-tier model name"
               }
@@ -37635,7 +37635,7 @@
             },
             "simulationModelName": {
               "type": "string",
-              "defaultValue": "gpt-5.4",
+              "defaultValue": "gpt-5.6",
               "metadata": {
                 "description": "Simulation Controller model name (used by the Simulation chat endpoint)."
               }
@@ -37761,7 +37761,7 @@
                 "contentFilters": "[variables('emDomainContentFilters')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-{0}', parameters('envPrefix')))]"
+                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.6-{0}', parameters('envPrefix')))]"
               ]
             },
             {
@@ -37774,13 +37774,13 @@
                 "contentFilters": "[variables('emDomainContentFilters')]"
               },
               "dependsOn": [
-                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-mini-{0}', parameters('envPrefix')))]"
+                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.6-mini-{0}', parameters('envPrefix')))]"
               ]
             },
             {
               "type": "Microsoft.CognitiveServices/accounts/deployments",
               "apiVersion": "2024-10-01",
-              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-{0}', parameters('envPrefix')))]",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.6-{0}', parameters('envPrefix')))]",
               "sku": {
                 "name": "[parameters('modelDeploymentSku')]",
                 "capacity": "[parameters('reasoningTpmQuota')]"
@@ -37800,7 +37800,7 @@
             {
               "type": "Microsoft.CognitiveServices/accounts/deployments",
               "apiVersion": "2024-10-01",
-              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-mini-{0}', parameters('envPrefix')))]",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.6-mini-{0}', parameters('envPrefix')))]",
               "sku": {
                 "name": "[parameters('modelDeploymentSku')]",
                 "capacity": "[parameters('draftingTpmQuota')]"
@@ -37820,7 +37820,7 @@
             {
               "type": "Microsoft.CognitiveServices/accounts/deployments",
               "apiVersion": "2024-10-01",
-              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-sim-{0}', parameters('envPrefix')))]",
+              "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.6-sim-{0}', parameters('envPrefix')))]",
               "sku": {
                 "name": "[parameters('modelDeploymentSku')]",
                 "capacity": "[parameters('simulationTpmQuota')]"
@@ -37853,7 +37853,7 @@
                 }
               },
               "dependsOn": [
-                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-sim-{0}', parameters('envPrefix')))]"
+                "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.6-sim-{0}', parameters('envPrefix')))]"
               ]
             },
             {
@@ -37900,15 +37900,15 @@
           "outputs": {
             "reasoningDeploymentName": {
               "type": "string",
-              "value": "[format('gpt-5.4-{0}', parameters('envPrefix'))]"
+              "value": "[format('gpt-5.6-{0}', parameters('envPrefix'))]"
             },
             "draftingDeploymentName": {
               "type": "string",
-              "value": "[format('gpt-5.4-mini-{0}', parameters('envPrefix'))]"
+              "value": "[format('gpt-5.6-mini-{0}', parameters('envPrefix'))]"
             },
             "simulationDeploymentName": {
               "type": "string",
-              "value": "[format('gpt-5.4-sim-{0}', parameters('envPrefix'))]"
+              "value": "[format('gpt-5.6-sim-{0}', parameters('envPrefix'))]"
             },
             "embeddingDeploymentName": {
               "type": "string",
@@ -37932,7 +37932,7 @@
             },
             "azureAiProjectDeployments": {
               "type": "string",
-              "value": "[format('{0}@{1}={2},{3}@{4}={5},{6}@{7}={8},{9}@{10}={11}', parameters('reasoningModelName'), parameters('reasoningModelVersion'), format('gpt-5.4-{0}', parameters('envPrefix')), parameters('draftingModelName'), parameters('draftingModelVersion'), format('gpt-5.4-mini-{0}', parameters('envPrefix')), parameters('simulationModelName'), parameters('simulationModelVersion'), format('gpt-5.4-sim-{0}', parameters('envPrefix')), parameters('embeddingModelName'), parameters('embeddingModelVersion'), format('{0}-{1}', parameters('embeddingModelName'), parameters('envPrefix')))]"
+              "value": "[format('{0}@{1}={2},{3}@{4}={5},{6}@{7}={8},{9}@{10}={11}', parameters('reasoningModelName'), parameters('reasoningModelVersion'), format('gpt-5.6-{0}', parameters('envPrefix')), parameters('draftingModelName'), parameters('draftingModelVersion'), format('gpt-5.6-mini-{0}', parameters('envPrefix')), parameters('simulationModelName'), parameters('simulationModelVersion'), format('gpt-5.6-sim-{0}', parameters('envPrefix')), parameters('embeddingModelName'), parameters('embeddingModelVersion'), format('{0}-{1}', parameters('embeddingModelName'), parameters('envPrefix')))]"
             },
             "embeddingModelKey": {
               "type": "string",

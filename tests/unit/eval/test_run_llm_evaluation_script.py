@@ -46,6 +46,35 @@ def test_run_cmd_resolves_azure_cli_cmd_shim(monkeypatch):
     assert executed == [[r"C:\Program Files\Microsoft SDKs\Azure\CLI2\wbin\az.CMD", "version"]]
 
 
+def test_stage_preflight_runs_ruff_with_python_module(monkeypatch):
+    script = _load_script()
+    commands: list[list[str]] = []
+    ctx = script.RunContext(
+        env=script.ENVIRONMENTS["dev"],
+        args=SimpleNamespace(dry_run=False, skip_baseline=False),
+    )
+
+    def fake_run_cmd(stage: str, cmd: list[str], **_kwargs):
+        commands.append(cmd)
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+
+    monkeypatch.setattr(script, "run_cmd", fake_run_cmd)
+    monkeypatch.setattr(script, "az_json", lambda *_args: {"id": "subscription-id", "name": "test"})
+
+    script.stage_preflight(ctx)
+
+    assert [
+        "python",
+        "-m",
+        "ruff",
+        "check",
+        "packages/eval-core/",
+        "packages/eval-dataset/",
+        "apps/eval-runner/",
+        "tests/unit/eval/",
+    ] in commands
+
+
 def test_stage_provision_creates_resource_group_before_deployment(monkeypatch):
     script = _load_script()
     commands: list[list[str]] = []
@@ -141,6 +170,7 @@ def test_build_eval_runner_image_uses_minimal_temporary_context(monkeypatch):
     script.build_eval_runner_image(ctx, "provision", "acramaevaldevxpm32u")
 
     assert prepared_contexts == [build_root]
+    assert Path("apps/api/app/core") in script.EVAL_RUNNER_BUILD_CONTEXT_PATHS
     assert commands == [
         [
             "az",
@@ -160,10 +190,9 @@ def test_build_eval_runner_image_uses_minimal_temporary_context(monkeypatch):
 def test_eval_platform_storage_account_name_is_capped():
     template = _EVAL_PLATFORM_BICEP.read_text(encoding="utf-8")
 
-    assert "var storageAccountName = take(" in template
-    assert ", 24)" in template
+    assert "var storageAccountName = '${take(" in template
+    assert ", 23)}2'" in template
     assert "name: storageAccountName" in template
-    assert "name: 'stamaeval${replace(nameSuffix, '-', '')}'" not in template
 
 
 def test_eval_platform_creates_observability_resources_on_demand():
@@ -202,8 +231,8 @@ def test_eval_platform_provisions_foundry_account_with_curated_models():
     assert "kind: 'AIServices'" in template
     # 7-model curated set per user choice
     for marker in (
-        "modelName: 'gpt-5.4'",
-        "modelName: 'gpt-5.4-mini'",
+        "modelName: 'gpt-5.6-sol'",
+        "modelName: 'gpt-5.6-luna'",
         "modelName: 'Phi-4'",
         "modelName: 'Llama-3.3-70B-Instruct'",
         "modelName: 'Mistral-Large-3'",
@@ -236,8 +265,8 @@ def test_script_default_models_match_bicep_curated_set():
     spec.loader.exec_module(module)
 
     expected = {
-        "gpt-5.4:2026-03-05",
-        "gpt-5.4-mini:2026-03-17",
+        "gpt-5.6-sol:2026-07-09",
+        "gpt-5.6-luna:2026-07-09",
         "Phi-4:7",
         "Llama-3.3-70B-Instruct:9",
         "Mistral-Large-3:1",
@@ -848,6 +877,33 @@ def test_stage_execute_omits_authorization_header_when_anonymous(monkeypatch):
     assert all("Authorization" not in (g["headers"] or {}) for g in captured_gets), captured_gets
     # Exactly one POST to /api/eval/runs went out.
     assert any(p["url"].endswith("/api/eval/runs") for p in captured_posts)
+
+
+def test_stage_publish_adds_workspace_packages_to_dataset_test_path(monkeypatch):
+    script = _load_script()
+    ctx = script.RunContext(
+        env=script.ENVIRONMENTS["dev"],
+        args=SimpleNamespace(dry_run=True),
+    )
+    commands: list[tuple[str, list[str], dict]] = []
+
+    def fake_run_cmd(stage: str, cmd: list[str], **kwargs):
+        commands.append((stage, cmd, kwargs))
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+
+    monkeypatch.setenv("PYTHONPATH", "existing")
+    monkeypatch.setattr(script, "_resolve_api_base_url", lambda *_args: None)
+    monkeypatch.setattr(script, "run_cmd", fake_run_cmd)
+
+    script.stage_publish(ctx)
+
+    _, command, kwargs = commands[0]
+    assert command == ["python", "-m", "pytest", "packages/eval-dataset/tests/", "-q"]
+    assert kwargs["env"]["PYTHONPATH"].split(script.os.pathsep) == [
+        str(_REPO_ROOT / "packages" / "eval-core" / "src"),
+        str(_REPO_ROOT / "packages" / "eval-dataset" / "src"),
+        "existing",
+    ]
 
 
 def test_stage_execute_sends_dev_bearer_when_anonymous_mode_off(monkeypatch):
