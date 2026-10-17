@@ -1235,7 +1235,6 @@ components:
         target_value:
           anyOf:
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,14}|(?=[\d.]{1,19}0*$)\d{0,14}\.\d{0,4}0*$)
           - type: 'null'
           title: Target Value
         target_unit:
@@ -1342,7 +1341,6 @@ components:
         expected_magnitude_value:
           anyOf:
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,14}|(?=[\d.]{1,19}0*$)\d{0,14}\.\d{0,4}0*$)
           - type: 'null'
           title: Expected Magnitude Value
         expected_magnitude_unit:
@@ -1454,7 +1452,6 @@ components:
             maximum: 1.0
             minimum: 0.0
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,1}|(?=[\d.]{1,4}0*$)\d{0,1}\.\d{0,2}0*$)
           title: Value
       additionalProperties: false
       type: object
@@ -1465,7 +1462,6 @@ components:
       properties:
         value:
           type: string
-          pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,1}|(?=[\d.]{1,4}0*$)\d{0,1}\.\d{0,2}0*$)
           title: Value
       additionalProperties: false
       type: object
@@ -1518,7 +1514,6 @@ components:
           - type: 'null'
         imputation_share:
           type: string
-          pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,1}|(?=[\d.]{1,6}0*$)\d{0,1}\.\d{0,4}0*$)
           title: Imputation Share
           default: '0'
         auditor_signoff_id:
@@ -1644,7 +1639,6 @@ components:
             maximum: 1.0
             exclusiveMinimum: 0.1
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*\d*\.?\d*$
           title: Imputation Share
         approval_id:
           type: string
@@ -1737,13 +1731,11 @@ components:
           anyOf:
           - type: number
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,14}|(?=[\d.]{1,19}0*$)\d{0,14}\.\d{0,4}0*$)
           title: Target Value
         alert_threshold:
           anyOf:
           - type: number
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,14}|(?=[\d.]{1,19}0*$)\d{0,14}\.\d{0,4}0*$)
           title: Alert Threshold
         baseline_source:
           type: string
@@ -1880,11 +1872,9 @@ components:
           title: Refresh Cadence
         target_value:
           type: string
-          pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,14}|(?=[\d.]{1,19}0*$)\d{0,14}\.\d{0,4}0*$)
           title: Target Value
         alert_threshold:
           type: string
-          pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,14}|(?=[\d.]{1,19}0*$)\d{0,14}\.\d{0,4}0*$)
           title: Alert Threshold
         baseline_source:
           type: string
@@ -1991,37 +1981,31 @@ components:
         baseline_value:
           anyOf:
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,20}|(?=[\d.]{1,25}0*$)\d{0,20}\.\d{0,4}0*$)
           - type: 'null'
           title: Baseline Value
         ama_assisted_value:
           anyOf:
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,20}|(?=[\d.]{1,25}0*$)\d{0,20}\.\d{0,4}0*$)
           - type: 'null'
           title: Ama Assisted Value
         absolute_delta:
           anyOf:
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,20}|(?=[\d.]{1,25}0*$)\d{0,20}\.\d{0,4}0*$)
           - type: 'null'
           title: Absolute Delta
         percent_delta:
           anyOf:
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,8}|(?=[\d.]{1,13}0*$)\d{0,8}\.\d{0,4}0*$)
           - type: 'null'
           title: Percent Delta
         confidence_band_low:
           anyOf:
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,20}|(?=[\d.]{1,25}0*$)\d{0,20}\.\d{0,4}0*$)
           - type: 'null'
           title: Confidence Band Low
         confidence_band_high:
           anyOf:
           - type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,20}|(?=[\d.]{1,25}0*$)\d{0,20}\.\d{0,4}0*$)
           - type: 'null'
           title: Confidence Band High
         confidence_method:
@@ -2461,7 +2445,6 @@ components:
         confidence_values:
           items:
             type: string
-            pattern: ^(?!^[-+.]*$)[+-]?0*(?:\d{0,1}|(?=[\d.]{1,6}0*$)\d{0,1}\.\d{0,4}0*$)
           type: array
           title: Confidence Values
         signal_ids:

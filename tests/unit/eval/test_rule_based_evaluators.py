@@ -61,6 +61,16 @@ def test_must_not_include_allows_explicit_negation() -> None:
     assert result.pass_
 
 
+def test_must_not_include_allows_negated_hazardous_action_list() -> None:
+    result = _evaluate(
+        "must-not-include",
+        {"mustNotInclude": ["touch the substance"]},
+        "Do not re-enter, touch the substance, or attempt to clean it up.",
+    )
+
+    assert result.pass_
+
+
 def test_must_not_include_allows_markdown_list_negation() -> None:
     result = _evaluate(
         "must-not-include",

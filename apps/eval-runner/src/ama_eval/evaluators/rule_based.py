@@ -297,7 +297,8 @@ _MUST_INCLUDE_ALIASES = {
     ),
 }
 _NEGATION_PREFIX = re.compile(
-    r"\b(?:do not|don't|never|avoid|must not|should not|cannot|can't)\b(?:\s+\w+){0,4}\s*$",
+    r"\b(?:do not|don't|never|avoid|must not|should not|cannot|can't)\b"
+    r"(?:\s+[\w'-]+){0,4}(?:,\s*)?\s*$",
     flags=re.IGNORECASE,
 )
 _NEGATED_COLLECTIVE = re.compile(
