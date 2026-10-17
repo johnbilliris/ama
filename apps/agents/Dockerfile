@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 ENV PIP_CONFIG_FILE=/dev/null \
     PIP_INDEX_URL=https://packagefeedproxy.microsoft.io/pypi/simple \
     PIP_EXTRA_INDEX_URL= \
@@ -33,7 +33,7 @@ RUN pip install --no-cache-dir --no-deps ./apps/agents && \
     # (verified — no `import mem0*` in apps/, packages/, tests/).
     pip install --no-cache-dir --no-deps --upgrade "mem0ai>=2.0.0b2"
 
-FROM python:3.12-slim AS runtime-base
+FROM python:3.14-slim AS runtime-base
 
 LABEL com.azure.containerizationassist.createdby="containerization-assist"
 
