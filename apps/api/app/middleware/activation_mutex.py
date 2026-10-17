@@ -2,9 +2,7 @@
 
 Guarantees that the API process refuses to serve traffic if BOTH
 ``ACTIVATION_SIMULATION`` and ``ACTIVATION_PRODUCTION`` env vars are truthy.
-The CI gate is the first defence (see
-[`.github/workflows/spec-035-gate.yml`](../../../../.github/workflows/spec-035-gate.yml));
-this module is the lifespan invariant — defence-in-depth.
+This module enforces the invariant during application startup.
 
 When violation is detected:
 1. Append an audit row with ``outcome = activation_mutex_violation`` if

@@ -1,9 +1,8 @@
 """CLI for emitting the offline-cache bundle manifest (Spec 036 T136).
 
-Wraps :mod:`ama_ingest.offline_bundle.build_offline_bundle` so the
-``corpus-ingest.yml`` workflow can produce the dual-signed
-``manifest.json`` artefact deterministically from the existing
-``corpus_build.manifest.json`` produced by the ingest job.
+Wraps :mod:`ama_ingest.offline_bundle.build_offline_bundle` to produce the
+dual-signed ``manifest.json`` artefact deterministically from an existing
+``corpus_build.manifest.json``.
 
 Usage::
 
@@ -13,8 +12,8 @@ Usage::
         --embedding-model-id text-embedding-3-large \\
         --output artifacts/offline-cache/manifest.json
 
-The CLI does NOT sign — signatures are attached by the surrounding workflow
-step using cosign keyless + age (FR-RAG-LS-02 / R-07).
+The CLI does not sign. Callers that publish bundles must attach signatures
+using cosign keyless + age (FR-RAG-LS-02 / R-07).
 """
 
 from __future__ import annotations

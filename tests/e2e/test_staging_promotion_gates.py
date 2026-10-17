@@ -14,7 +14,7 @@ This is a CONTRACT test — it loads the canonical KQL templates from
   ``infra/bicep/modules/simulation-app-insights-alerts.bicep`` so
   what-if drift between KQL and alert rules is caught at CI time.
 
-The release-gate procedure relies on this test as the static gate.
+This test validates the release-gate contract independently of deployment.
 """
 
 from __future__ import annotations

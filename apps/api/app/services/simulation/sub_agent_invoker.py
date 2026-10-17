@@ -5,9 +5,8 @@ Spec-036 / T-B08 / T-B12 / T-B14 (FR-002 migration step 4):
 * :func:`production_invoker` is now the only adapter factory — it wires the
   real adapters under :mod:`apps.api.app.services.simulation.sub_agents`.
 * The legacy ``default_invoker`` stub block has been **deleted** per T-B14
-  (FR-002 migration step 4). The trip-wire literal documented in
-  ``tools.simulation_stub_sweep.TRIP_WIRE`` no longer appears anywhere
-  in the production code path.
+  (FR-002 migration step 4). The obsolete stub marker no longer appears
+  anywhere in the production code path.
 * The ``invoke`` method applies a soft-ack at ``T+5 s`` (FR-006) and a
   hard timeout at ``T+120 s``, falling back to a degraded reply on timeout.
 * Kebab-case role aliases (``risk-assessment``, ``resource-allocation``)

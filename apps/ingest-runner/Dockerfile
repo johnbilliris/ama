@@ -1,6 +1,5 @@
 # Spec 036 — corpus ingest Container Apps Job (FR-RAG-IDX-01..05; R-08).
-# Scaffolded by T002. Used by infra/main.bicep Container Apps Job wiring (T050)
-# and the corpus-ingest workflow (T053).
+# Scaffolded by T002. Used by the Container Apps Job wired in infra/main.bicep (T050).
 #
 # Build context **must be the repository root** (not apps/ingest-runner/) so that
 # COPY can pick up:

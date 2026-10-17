@@ -11,7 +11,7 @@
 //
 // This module ships alongside the legacy `observability-alerts.bicep`
 // (T-J07) which covers the plan.md SLIs 1-5. ADR-036-008 SLIs are the
-// FR-063 staging-promotion gates and are evaluated by
+// FR-063 release gates and are evaluated by
 // `tests/e2e/test_staging_promotion_gates.py`.
 //
 // Canonical references:
@@ -193,8 +193,7 @@ resource sliZ5DegradedRate 'Microsoft.Insights/scheduledQueryRules@2024-01-01-pr
   }
 }
 
-// Output the alert rule ids so the staging-promotion workflow can poll
-// them via Azure Monitor REST API for the FR-063 gate.
+// Output alert rule ids for Azure Monitor queries used by the FR-063 release gate.
 output sliAlertRuleIds object = {
   z1Latency: sliZ1Latency.id
   z2GapFree: sliZ2GapFree.id
