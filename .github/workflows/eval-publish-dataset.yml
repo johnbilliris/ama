@@ -32,7 +32,7 @@ jobs:
       DATASET_PATH: ${{ github.event.inputs.dataset_path || 'packages/eval-dataset/data/dataset-disaster-core-1.0.0' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0 (raised from v4)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0 (raised from v4)
 
       - name: Set up Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0 (raised from v5)

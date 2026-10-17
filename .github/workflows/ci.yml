@@ -32,7 +32,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
         with:
           fetch-depth: 0
       - name: Detect eval runner changes across the push
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
@@ -129,7 +129,7 @@ jobs:
       PIP_CONFIG_FILE: NUL
       PYTHONIOENCODING: utf-8
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
@@ -202,7 +202,7 @@ jobs:
       NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
         with:
           version: 10.6.3
@@ -274,7 +274,7 @@ jobs:
       ALPINE_BASE: node:24-alpine@sha256:83f1c388c31fb2e51f7cbd4dea949b96260798c98f206e8e4696bc93bd964e3a
       NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24.21.0"
@@ -361,7 +361,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
@@ -416,7 +416,7 @@ jobs:
     outputs:
       specify-cli-changed: ${{ steps.specify-cli-changes.outputs.changed }}
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
         with:
           fetch-depth: 0
       - name: Detect specify-cli changes
@@ -622,7 +622,7 @@ jobs:
       PIP_NO_INDEX: "1"
       UV_OFFLINE: "1"
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - name: Verify sovereign session prerequisites
         shell: bash
         env:
@@ -680,7 +680,7 @@ jobs:
       PIP_CONFIG_FILE: NUL
       PYTHONIOENCODING: utf-8
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
@@ -741,7 +741,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
@@ -765,7 +765,7 @@ jobs:
     timeout-minutes: 10
     continue-on-error: true # warn-only per F-A12.5; flip to false post-baseline.
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
         with:
           version: 10.6.3
@@ -803,7 +803,7 @@ jobs:
 #       matrix:
 #         shard: [1, 2, 3, 4]
 #     steps:
-#       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+#       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
 #       # pnpm must be installed BEFORE setup-node, because setup-node@v5 reads
 #       # `packageManager` from package.json and pre-warms its pnpm cache; if
 #       # pnpm is not on PATH yet, setup-node fails with "Unable to locate
@@ -862,7 +862,7 @@ jobs:
 #     runs-on: ubuntu-latest
 #     timeout-minutes: 10
 #     steps:
-#       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+#       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
 #       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
 #         with:
 #           python-version: "3.12"
@@ -904,7 +904,7 @@ jobs:
 #     runs-on: ubuntu-latest
 #     timeout-minutes: 5
 #     steps:
-#       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+#       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
 #       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
 #         with:
 #           python-version: "3.12"
@@ -946,7 +946,7 @@ jobs:
       NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
       PYTHONPATH: ${{ github.workspace }}/packages/domain/src
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
       - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
         with:
           version: 10.6.3
@@ -1064,7 +1064,7 @@ jobs:
       NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
