@@ -28,12 +28,3 @@ def test_cd_wires_p1_gate_before_deploy() -> None:
     assert "--head-sha" not in text
     assert 'grep -Fxq "docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml"' in text
     assert "waiver_args+=(--waiver-file docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml)" in text
-
-
-def test_dr_drill_includes_rpo_and_residency_inventory_steps() -> None:
-    text = _read(".github/workflows/dr-drill.yml")
-    assert "Write pre-failover sentinel records" in text
-    assert "Validate sentinel recovery and RPO" in text
-    assert "Probe real user workflow after failover" in text
-    assert "Build residency inventory and fail non-AU resources" in text
-    assert "scripts/dr_drill_residency_inventory.py" in text

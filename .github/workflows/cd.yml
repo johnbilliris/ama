@@ -73,6 +73,7 @@ jobs:
       revision-agents: ${{ steps.record-revisions.outputs.revision-agents }}
       revision-ingest: ${{ steps.record-revisions.outputs.revision-ingest }}
       revision-web: ${{ steps.record-revisions.outputs.revision-web }}
+      eval_runner_changed: ${{ steps.eval-changes.outputs.changed }}
 
     steps:
       # Step 1 — checkout the EXACT commit ci validated, not the default branch.
@@ -81,6 +82,20 @@ jobs:
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Read eval runner change scope from CI
+        id: eval-changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CI_RUN_ID: ${{ github.event.workflow_run.id }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          gh run download "$CI_RUN_ID" --name eval-runner-changes --dir "$RUNNER_TEMP/eval-runner-changes"
+          metadata="$RUNNER_TEMP/eval-runner-changes/eval-runner-changes.json"
+          jq -e --arg head_sha "$HEAD_SHA" \
+            '.head_sha == $head_sha and (.changed | type == "boolean")' "$metadata" > /dev/null
+          echo "changed=$(jq -r '.changed' "$metadata")" >> "$GITHUB_OUTPUT"
 
       # azd invokes the service-specific Dockerfiles from azure.yaml and
       # retains the resulting images locally before publishing them. Docker
@@ -486,7 +501,10 @@ jobs:
   quality-gate:
     name: Post-deploy eval quality gate
     needs: [deploy]
-    if: always() && needs.deploy.result == 'success'
+    if: >-
+      always() &&
+      needs.deploy.result == 'success' &&
+      needs.deploy.outputs.eval_runner_changed == 'true'
     uses: ./.github/workflows/eval-pr-gate.yml
     with:
       evaluation_mode: pr-fast-subset

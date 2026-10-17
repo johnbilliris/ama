@@ -119,8 +119,8 @@ def _ingest_to_visibility_request(profile: str) -> None:
     incident_id = _incident_id()
     signal = {
         "source": {
-            "dataSourceId": "dr-drill-slo",
-            "name": "dr-drill-slo",
+            "dataSourceId": "failover-drill-slo",
+            "name": "failover-drill-slo",
             "kind": "authoritative",
         },
         "incidentId": incident_id,
@@ -137,8 +137,8 @@ def _ingest_to_visibility_request(profile: str) -> None:
         "freshnessScore": 1.0,
         "validationStatus": "pending",
         "provenance": {
-            "collectionMethod": "dr-drill",
-            "sourceUri": "dr-drill://slo",
+            "collectionMethod": "failover-drill",
+            "sourceUri": "failover-drill://slo",
         },
     }
     posted = _request_json("POST", "/api/signals", body=signal, network_profile=profile)
