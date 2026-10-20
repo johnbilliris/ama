@@ -32,6 +32,31 @@ def compile_bicep(command: str, path: Path) -> dict:
     return json.loads(result.stdout)
 
 
+@pytest.mark.parametrize("environment", ["staging", "production"])
+def test_non_dev_parameters_require_their_own_explicit_model_profile(monkeypatch, environment):
+    variable = f"AMA_{environment.upper()}_MODEL_PARAMETERS"
+    path = ROOT / "infra" / "parameters" / f"{environment}.bicepparam"
+    monkeypatch.delenv(variable, raising=False)
+    with pytest.raises(subprocess.CalledProcessError) as error:
+        compile_bicep("build-params", path)
+    assert variable in error.value.stderr
+
+    profile = {}
+    for tier in TIERS:
+        profile[f"{tier}ModelName"] = f"synthetic-{environment}-{tier}"
+        profile[f"{tier}ModelVersion"] = f"synthetic-{environment}-version"
+        profile[f"{tier}VersionUpgradeOption"] = "NoAutoUpgrade"
+    profile["embeddingVersionUpgradeOption"] = "OnceNewDefaultVersionAvailable"
+    profile["deploymentOperatingStates"] = {
+        tier: {"currentCapacity": index, "deploymentState": "Paused"}
+        for index, tier in enumerate((*TIERS, "embedding"), 1)
+    }
+    monkeypatch.setenv(variable, json.dumps(profile))
+    result = compile_bicep("build-params", path)
+    compiled = json.loads(result["parametersJson"])["parameters"]
+    assert {name: compiled[name]["value"] for name in profile} == profile
+
+
 class ArmExpressions:
     """Fail-closed evaluator for the pure expressions emitted by this wrapper."""
 

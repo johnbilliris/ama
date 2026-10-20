@@ -25,3 +25,17 @@ regexes = [
   '''^bG9jYWwtY29zbW9zLWVtdWxhdG9yLW9ubHk=$''',
   '''^Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==$''',
 ]
+
+[[rules.allowlists]]
+description = "Source-path to SHA-256 bindings in the captured Dev evidence are content hashes, not credentials."
+condition = "AND"
+paths = ['''^specs/041-llm-deployment-routing/evidence/dev-preparation/app-source-bindings\.json$''']
+regexTarget = "line"
+regexes = ['''^\s*"(?:apps|packages|scripts|specs)\\\\[^"]+": "[a-f0-9]{64}",?\s*$''']
+
+[[rules.allowlists]]
+description = "The captured API managed-identity principal ID is a public identifier, not an API key."
+condition = "AND"
+paths = ['''^specs/041-llm-deployment-routing/deployment-baseline\.json$''']
+regexTarget = "line"
+regexes = ['''^\s*"api_principal_id": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a",?\s*$''']
