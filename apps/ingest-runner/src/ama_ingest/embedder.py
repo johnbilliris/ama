@@ -160,10 +160,11 @@ class FoundryEmbedder:
         if "api_key" in (locals() or {}):  # defence-in-depth, mirrors chat seam
             pass  # api_key is not a kwarg of __init__; explicit guard below.
         self._endpoint = endpoint or os.environ.get("AZURE_AI_PROJECT_ENDPOINT")
+        configured_deployments = _parse_deployment_map(os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS"))
         self._deployments = (
-            deployments
-            if deployments is not None
-            else _parse_deployment_map(os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS"))
+            configured_deployments
+            if deployments is None
+            else _validated_deployment_map(deployments.items(), source="deployments")
         )
         self._cred = credential
         self._client: Any | None = None
@@ -322,17 +323,41 @@ class FoundryEmbedder:
 # --------------------------------------------------------------------------- #
 
 
-def _parse_deployment_map(raw: str | None) -> dict[str, str]:
-    """Parse the same ``modelId@version=deploymentName`` CSV the chat seam uses."""
+def _validated_deployment_map(pairs: Iterable[tuple[str, str]], *, source: str) -> dict[str, str]:
     out: dict[str, str] = {}
-    if not raw:
-        return out
-    for entry in (e.strip() for e in raw.split(",") if e.strip()):
-        if "=" not in entry:
-            continue
-        key, name = entry.split("=", 1)
-        out[key.strip()] = name.strip()
+    for position, (key, name) in enumerate(pairs, start=1):
+        if not isinstance(key, str) or not key.strip() or not isinstance(name, str) or not name.strip():
+            raise EmbedderConfigurationError(
+                f"{source} entry {position}: routing key and destination must be non-empty"
+            )
+        key, name = key.strip(), name.strip()
+        if key in out and out[key] != name:
+            raise EmbedderConfigurationError(
+                f"{source}: conflicting routing key {key!r} designates both {out[key]!r} and {name!r}; "
+                "configure one destination per key"
+            )
+        out[key] = name
     return out
+
+
+def _parse_deployment_map(raw: str | None) -> dict[str, str]:
+    """Validate compatibility CSV locally, independently of chat-tier settings."""
+    source = "AZURE_AI_PROJECT_DEPLOYMENTS"
+    if raw is None:
+        return {}
+    if not isinstance(raw, str):
+        raise EmbedderConfigurationError(f"{source} must be a CSV string")
+    if not raw.strip():
+        return {}
+    pairs: list[tuple[str, str]] = []
+    for position, entry in enumerate(raw.split(","), start=1):
+        if entry.count("=") != 1:
+            raise EmbedderConfigurationError(
+                f"{source} entry {position}: expected one non-empty routing-key=deployment-name pair"
+            )
+        key, name = entry.split("=")
+        pairs.append((key, name))
+    return _validated_deployment_map(pairs, source=source)
 
 
 def deterministic_stub_embedder(*, dims: int = EMBEDDING_DIMS) -> EmbedFn:

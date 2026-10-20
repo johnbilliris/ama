@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any
+from typing import Any, Literal
 
 import httpx
 from app.services.simulation.sub_agent_invoker import SubAgentReply
@@ -19,17 +19,12 @@ logger = logging.getLogger(__name__)
 # transport via the ``http_client`` parameter.
 AGENTS_BASE_URL = os.getenv("AGENTS_BASE_URL", "http://agents.internal")
 
-# Default model deployment per adapter (FR-060). The values must remain in
-# lock-step with the Foundry carve-out registry under
-# ``data/governance/foundry_carveout_registry.json``.
-MODEL_DEPLOYMENT_BY_ROLE: dict[str, str] = {
-    "monitoring": "gpt-4o-mini-australiaeast",
-    "planning": "gpt-4o-mini-australiaeast",
-    "risk-assessment": "gpt-4o-australiaeast",
-    "communication": "gpt-4o-mini-australiaeast",
-    "evacuation": "gpt-4o-australiaeast",
-    "resource-allocation": "gpt-4o-mini-australiaeast",
-}
+
+def _nullable_string(payload: dict[str, Any], key: str) -> str | None:
+    value = payload.get(key)
+    if value is not None and not isinstance(value, str):
+        raise ValueError(f"Invalid dispatcher {key}")
+    return value
 
 
 async def call_agent(
@@ -75,7 +70,6 @@ async def call_agent(
             citations=[],
             degraded=True,
             error="service_unavailable",
-            model_deployment=MODEL_DEPLOYMENT_BY_ROLE.get(role),
         )
 
     if resp.status_code == 503:
@@ -85,7 +79,6 @@ async def call_agent(
             citations=[],
             degraded=True,
             error="service_unavailable",
-            model_deployment=MODEL_DEPLOYMENT_BY_ROLE.get(role),
         )
     if resp.status_code == 429:
         return SubAgentReply(
@@ -94,7 +87,6 @@ async def call_agent(
             citations=[],
             degraded=True,
             error="rate_limit_exhausted",
-            model_deployment=MODEL_DEPLOYMENT_BY_ROLE.get(role),
         )
     if resp.status_code >= 400:
         logger.warning("sub_agent.bad_status role=%s status=%s", role, resp.status_code)
@@ -104,7 +96,6 @@ async def call_agent(
             citations=[],
             degraded=True,
             error=f"http_{resp.status_code}",
-            model_deployment=MODEL_DEPLOYMENT_BY_ROLE.get(role),
         )
 
     payload = resp.json()
@@ -112,8 +103,24 @@ async def call_agent(
     safe, bad = filter_citations(raw_citations, tenant_id=tenant_id)
     summary = str(payload.get("summary", "")).strip()
     prompt_hash = payload.get("prompt_hash")
-    model_deployment = payload.get("model_deployment", MODEL_DEPLOYMENT_BY_ROLE.get(role))
+    model_deployment = _nullable_string(payload, "model_deployment")
     invocation_id = payload.get("invocation_id") or payload.get("sub_agent_invocation_id")
+    attempted = payload.get("inference_attempted")
+    if attempted is not None and type(attempted) is not bool:
+        raise ValueError("Invalid dispatcher inference_attempted")
+    outcome: Literal["succeeded", "failed", "not_attempted", "unknown"] | None = payload.get(
+        "inference_outcome", "unknown"
+    )
+    if outcome not in ("succeeded", "failed", "not_attempted", "unknown", None):
+        raise ValueError("Invalid dispatcher inference_outcome")
+    model_id = _nullable_string(payload, "model_id")
+    model_version = _nullable_string(payload, "model_version")
+    remote_error = _nullable_string(payload, "error")
+    degraded = payload.get("degraded", False)
+    if type(degraded) is not bool:
+        raise ValueError("Invalid dispatcher degraded")
+    if "inference_attempted" in payload and attempted is not True:
+        model_deployment = model_id = model_version = None
 
     if bad:
         # FR-007: never return live-tenant citations. Audit emission lives
@@ -134,6 +141,10 @@ async def call_agent(
             prompt_hash=prompt_hash,
             model_deployment=model_deployment,
             sub_agent_invocation_id=invocation_id,
+            model_id=model_id,
+            model_version=model_version,
+            inference_attempted=attempted,
+            inference_outcome=outcome,
         )
 
     return SubAgentReply(
@@ -143,4 +154,10 @@ async def call_agent(
         prompt_hash=prompt_hash,
         model_deployment=model_deployment,
         sub_agent_invocation_id=invocation_id,
+        degraded=degraded,
+        error=remote_error,
+        model_id=model_id,
+        model_version=model_version,
+        inference_attempted=attempted,
+        inference_outcome=outcome,
     )

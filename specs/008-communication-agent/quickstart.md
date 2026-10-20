@@ -241,7 +241,7 @@ uv run pytest tests/simulation/test_flood_alert_scenario.py -v
 
 ```bash
 # From repository root
-docker build -t communication-agent -f apps/agents/Dockerfile --target communication .
+docker build --platform linux/arm64 -t communication-agent -f apps/agents/Dockerfile --target communication .
 
 # Run
 docker run -p 8084:8084 --env-file apps/agents/.env communication-agent

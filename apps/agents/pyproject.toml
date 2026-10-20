@@ -30,15 +30,8 @@ dependencies = [
   "azure-iot-device>=2.12.0",
   "httpx>=0.27.0",
   "PyJWT[crypto]>=2.14.0,<3",
-  # Pin to the meta `agent-framework` so agent_framework/__init__.py and
-  # agent_framework.observability are populated (provided by the meta wheel,
-  # not by agent-framework-core which only ships the namespace).
-  # The transitive `agent-framework-mem0 → mem0ai<2` triggers Dependabot
-  # GHSA "Improper Input Validation" (low; patched in 2.0.0b2). mem0 is
-  # never imported in our source — verified via grep — so we override the
-  # transitive constraint via [tool.uv] below + install via uv in the
-  # Dockerfile.
-  "agent-framework>=1.2.2",
+  # The umbrella package enables core[all], installing unused provider runtimes.
+  "agent-framework-core>=1.19.0,<2",
   "agent-framework-openai>=1.2.2",
   "agent-framework-azure-cosmos>=1.0.0b260429",
   "mcp>=1.28.1,<2",
@@ -60,14 +53,6 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["common", "dispatcher", "monitoring", "risk_assessment", "evacuation", "resource_allocation", "communication", "maf_runtime"]
-
-[tool.uv]
-# Force the patched mem0ai (Dependabot GHSA, low; mem0 is unused in our
-# source). agent-framework-mem0 1.0.0b260507 still pins `mem0ai>=1.0.0,<2`
-# upstream, so we override the transitive constraint here.
-override-dependencies = [
-  "mem0ai>=2.0.0b2",
-]
 
 [[tool.uv.index]]
 name = "microsoft-package-feed-proxy"

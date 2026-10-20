@@ -1,6 +1,11 @@
 # Autonomous Disaster Response Agent Coordination Hub Constitution
 <!-- System Constitution for an Australia-focused, multi-agency, multi-agent disaster response coordination platform. -->
 
+> **Current environment inventory (2026-10-20): DEV ONLY.**
+> No staging or production environment exists. No staging or production
+> baseline exists. References to those environments describe future intent,
+> not deployed targets. Section VIII-B governs how this fact is reported.
+
 ## Core Principles
 
 ### I. Primacy of Life and Harm Reduction
@@ -202,6 +207,39 @@ Recovery agents MUST address all four recovery environments:
 - Azure-native services preferred (Azure AI, Azure OpenAI, Cosmos DB,
   Event Grid, Service Bus, Azure Maps, Azure Communication Services)
 
+### VIII-A. Local Container Build Architecture
+
+- ALL local image builds MUST target only `linux/arm64`, including application,
+  job, test, preparation and Dev Container images. Local AMD64, emulated AMD64
+  and multi-platform builds are prohibited.
+- Local Compose, Bake, Dev Container and manual build commands MUST select
+  ARM64 explicitly, independently of the host or builder default.
+- Container Apps deployment images remain `linux/amd64` and MUST be built
+  remotely in ACR or native hosted CI. Deployment compatibility is not an
+  exception to the local ARM64 rule. Shared Dockerfiles MUST remain
+  architecture-neutral.
+- Historical evidence and deployed image digests MUST remain truthful.
+  This requirement does not authorise image replacement or deployment.
+
+### VIII-B. Current Environments and Baseline Availability
+
+- **Dev is the only currently established deployment environment. Staging and
+  production do not exist, and neither has an environment baseline.**
+- Staging/production parameter files, pipeline stages, specifications and task
+  entries MUST NOT be treated as evidence that those environments exist.
+- Plans, implementation reports and acceptance records MUST distinguish
+  current Dev scope from future staging/production work. Work requiring those
+  absent environments MUST be identified as deferred or not applicable to
+  current Dev acceptance, not as existing targets awaiting baseline collection
+  or access. This does not establish all-environment acceptance or waive any
+  applicable Dev quality, security, approval or deployment gate.
+- Agents MUST NOT invent staging/production baselines, copy Dev observations
+  as their baselines, or provision either environment merely to complete a task.
+  Establishing a future environment requires explicit authorisation and its
+  own governance discovery, observed baseline and applicable approvals.
+- This inventory MUST be updated when an additional environment is explicitly
+  approved and established; future readiness MUST NOT be claimed in advance.
+
 ## Emergency Management Framework Alignment
 
 ### PPRR Lifecycle
@@ -312,10 +350,19 @@ The platform SHALL embody the shared responsibility model:
 | Outcomes, Activities and Indicators     | 2020 | FR-015–024, VII-B            |
 
 ---
-*Version 1.2.0 · Last Amended 2026-04-26*
+*Version 1.4.0 · Last Amended 2026-10-20*
 
 ## Amendment History
 
+- **1.4.0 (2026-10-20)** — Explicit project-lead clarification: Dev is the only
+  established environment; staging/production environments and baselines do
+  not exist. Added a prominent inventory notice and mandatory distinction
+  between current Dev acceptance and deferred future-environment work,
+  without waiving applicable gates or authorising provisioning.
+- **1.3.0 (2026-10-20)** — Explicit user-approved requirement: all local image
+  builds are ARM64 only. Container Apps AMD64 artifacts are built remotely;
+  existing cloud resources, deployment identities and historical evidence
+  are unchanged.
 - **1.2.0 (2026-04-26)** — Added a bounded carve-out under
   Non-Negotiable #2 (Data sovereignty) permitting Microsoft Foundry
   model-hosting endpoints in non-AU regions, conditioned on a named

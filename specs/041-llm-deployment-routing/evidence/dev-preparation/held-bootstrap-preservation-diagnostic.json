@@ -1,0 +1,74 @@
+{
+  "expected_shape_reconstructed_exactly": false,
+  "reconstructed_expected_sha256": "a85e36838b68687754429f61bf63f7aba24a0fe8dd124aa29b0cd9692e80e386",
+  "stored_expected_sha256": "59be622fccf473d7cd6d92156c56f571c7c2a4c921ecb55cf7c958f3389d66bd",
+  "difference_paths_only": [
+    ".properties.configuration.identitySettings (presence)",
+    ".properties.configuration.runtime (presence)",
+    ".properties.template.containers[0].probes[0].failureThreshold (value)",
+    ".properties.template.containers[0].probes[0].httpGet.path (value)",
+    ".properties.template.containers[0].probes[0].type (value)",
+    ".properties.template.containers[0].probes[1].httpGet.path (value)",
+    ".properties.template.containers[0].probes[1].type (value)",
+    ".properties.template.containers[0].probes[2].failureThreshold (value)",
+    ".properties.template.containers[0].probes[2].httpGet.path (value)",
+    ".properties.template.containers[0].probes[2].type (value)",
+    ".properties.template.scale.cooldownPeriod (value)",
+    ".properties.template.scale.pollingInterval (value)"
+  ],
+  "probe_response": [
+    {
+      "type": "Liveness",
+      "failureThreshold": 3,
+      "httpGet": {
+        "path": "/api/health/liveness",
+        "port": 8000,
+        "scheme": "HTTP"
+      },
+      "initialDelaySeconds": 1,
+      "periodSeconds": 5,
+      "successThreshold": 1,
+      "timeoutSeconds": 2
+    },
+    {
+      "type": "Readiness",
+      "failureThreshold": 3,
+      "httpGet": {
+        "path": "/api/health/readiness",
+        "port": 8000,
+        "scheme": "HTTP"
+      },
+      "initialDelaySeconds": 1,
+      "periodSeconds": 5,
+      "successThreshold": 1,
+      "timeoutSeconds": 2
+    },
+    {
+      "type": "Startup",
+      "failureThreshold": 30,
+      "httpGet": {
+        "path": "/api/health/startup",
+        "port": 8000,
+        "scheme": "HTTP"
+      },
+      "initialDelaySeconds": 1,
+      "periodSeconds": 5,
+      "successThreshold": 1,
+      "timeoutSeconds": 2
+    }
+  ],
+  "registry_response_fields": [
+    [
+      "identity",
+      "passwordSecretRef",
+      "server",
+      "username"
+    ]
+  ],
+  "protected_comparison": {
+    "comparison": "PASS",
+    "deployments": 4,
+    "foundry_writes": 0,
+    "account_controls_identity_tags_rai_and_diagnostics": "unchanged"
+  }
+}

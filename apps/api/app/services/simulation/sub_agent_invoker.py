@@ -20,7 +20,7 @@ import logging
 import os
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     import httpx
@@ -45,6 +45,24 @@ class SubAgentReply:
     prompt_hash: str | None = None
     model_deployment: str | None = None
     sub_agent_invocation_id: str | None = None
+    model_id: str | None = None
+    model_version: str | None = None
+    inference_attempted: bool | None = None
+    inference_outcome: Literal["succeeded", "failed", "not_attempted", "unknown"] | None = "unknown"
+
+    def provenance(self) -> dict[str, object]:
+        """Project remote evidence without treating agent correlation as model proof."""
+        return {
+            "model_deployment": self.model_deployment,
+            "model_id": self.model_id,
+            "model_version": self.model_version,
+            "inference_attempted": self.inference_attempted,
+            "inference_outcome": self.inference_outcome,
+            "sub_agent_invocation_id": self.sub_agent_invocation_id,
+            "prompt_hash": self.prompt_hash,
+            "degraded": self.degraded,
+            "error": self.error,
+        }
 
 
 SubAgentFn = Callable[[str, str], Awaitable[SubAgentReply]]
@@ -102,6 +120,8 @@ class SubAgentInvoker:
                 citations=[],
                 degraded=True,
                 error="unknown_sub_agent",
+                inference_attempted=False,
+                inference_outcome="not_attempted",
             )
         hard_timeout = timeout_s if timeout_s is not None else self._hard_timeout_seconds
         soft_ack_task = asyncio.create_task(self._emit_soft_ack(sub_agent))

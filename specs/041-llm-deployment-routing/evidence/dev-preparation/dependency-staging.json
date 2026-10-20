@@ -1,0 +1,40 @@
+{
+  "operation": "041-dev-dependency-remediation",
+  "applications": {
+    "agents": {
+      "revision_name": "ca-agents-dev--llm041-deps-20261020t042938",
+      "request_started_at": "2026-10-20T04:32:44.006611+00:00",
+      "patch_sha256": "b9c9223dc0bba557686f2ccf5b5a48edde2768c10eae0b80c367b4c2241ba7be",
+      "expected_normalized_sha256": "d67f3453c497efc046bbbbf0948358ccb1158cfe261c1f84232552b79c663d85",
+      "request_sent": true,
+      "verified": true,
+      "provisioning_state": "Succeeded",
+      "observed_normalized_sha256": "d67f3453c497efc046bbbbf0948358ccb1158cfe261c1f84232552b79c663d85",
+      "candidate_business_traffic": 0
+    },
+    "api": {
+      "revision_name": "ca-api-dev--llm041-deps-20261020t042938",
+      "request_started_at": "2026-10-20T04:33:33.879074+00:00",
+      "patch_sha256": "ba63745c83968beebd5095dfb058413b5e5665d6c3650d2a4d3cc04013a7c2fa",
+      "expected_normalized_sha256": "716e5eb8b33a8852acd6fda3d1c45495b9c5af689e73a1c8d622b74041531ff7",
+      "request_sent": true,
+      "verified": true,
+      "provisioning_state": "Succeeded",
+      "observed_normalized_sha256": "716e5eb8b33a8852acd6fda3d1c45495b9c5af689e73a1c8d622b74041531ff7",
+      "candidate_business_traffic": 0
+    }
+  },
+  "complete": true,
+  "business_promotion": false,
+  "foundry_writes": 0,
+  "inference_requests": 0,
+  "agents_revision_url": "https://ca-agents-dev--llm041-deps-20261020t042938.internal.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io",
+  "completed_at": "2026-10-20T04:34:14.858442+00:00",
+  "protected_comparison": {
+    "comparison": "PASS",
+    "deployments": 4,
+    "foundry_writes": 0,
+    "account_controls_identity_tags_rai_and_diagnostics": "unchanged"
+  },
+  "startup_and_inference_acceptance": "pending; not inferred from successful provisioning"
+}

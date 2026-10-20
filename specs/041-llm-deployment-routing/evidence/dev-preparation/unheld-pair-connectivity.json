@@ -1,0 +1,6 @@
+{
+  "exact_pair_binding": true,
+  "api_adapter_uses_exact_agents_revision": true,
+  "agents_readiness_http": 200,
+  "business_invocations": 0
+}

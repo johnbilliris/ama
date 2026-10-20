@@ -1,0 +1,32 @@
+{
+  "operation": "041-dev-unheld-zero-traffic-validation",
+  "max_requests_per_tier": 3,
+  "max_total_requests": 9,
+  "max_tokens_per_request": 512,
+  "business_data": false,
+  "tools": false,
+  "reservations": [
+    {
+      "tier": "reasoning",
+      "maximum_wire_requests": 1,
+      "reserved_at": "2026-10-20T03:42:30.114978+00:00"
+    },
+    {
+      "tier": "drafting",
+      "maximum_wire_requests": 1,
+      "reserved_at": "2026-10-20T03:42:30.114978+00:00"
+    }
+  ],
+  "results": [
+    {
+      "app": "api",
+      "tiers": [
+        "reasoning",
+        "drafting"
+      ],
+      "outcome": "unknown; reservation remains consumed",
+      "diagnostic_error_type": "WebSocketBadStatusException"
+    }
+  ],
+  "complete": false
+}

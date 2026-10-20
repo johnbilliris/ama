@@ -27,11 +27,7 @@ COPY data/road-networks/ ./data/road-networks/
 COPY data/population/ ./data/population/
 COPY packages/ ./packages/
 RUN pip install --no-cache-dir --no-deps ./apps/agents && \
-    # Dependabot GHSA mem0ai (Improper Input Validation, patched 2.0.0b2).
-    # agent-framework-mem0 1.0.0b260507 still pins mem0ai<2 upstream, so
-    # overlay the patched build with --no-deps. mem0 is unused at runtime
-    # (verified — no `import mem0*` in apps/, packages/, tests/).
-    pip install --no-cache-dir --no-deps --upgrade "mem0ai>=2.0.0b2"
+    pip check
 
 FROM python:3.12-slim AS runtime-base
 
@@ -68,7 +64,7 @@ ENV PYTHONPATH="/app:/app/packages/domain/src"
 ENV AUDIT_BUFFER_FILE_PATH="/app/var/evacuation-agent/audit-buffer.jsonl"
 
 RUN python -m uvicorn --version && \
-    python -c "import agent_framework, dispatcher.agent, evacuation.runtime"
+    python -c "import agent_framework.observability, dispatcher.agent, evacuation.runtime; from agent_framework import Agent, InMemoryCheckpointStorage, MCPStreamableHTTPTool; from agent_framework_openai import OpenAIChatClient; from agent_framework_azure_cosmos import CosmosCheckpointStorage"
 
 USER appuser
 
@@ -78,7 +74,7 @@ ENV AMA_AGENTS_RUNTIME=dispatcher
 ENV PORT=8080
 
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -fsS http://localhost:8080/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -fsS http://localhost:8080/health/liveness || exit 1
 
 CMD ["python", "-m", "dispatcher"]
 
@@ -95,6 +91,6 @@ CMD ["python", "-m", "evacuation"]
 FROM runtime-base AS runtime
 
 EXPOSE 8080 8082 8084
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD sh -c 'if [ "${AMA_AGENTS_RUNTIME:-dispatcher}" = "evacuation" ]; then curl -fsS "http://localhost:${PORT:-8082}/ready"; else curl -fsS "http://localhost:${PORT:-8080}/health"; fi' || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD sh -c 'case "${AMA_AGENTS_RUNTIME:-dispatcher}" in evacuation) curl -fsS "http://localhost:${PORT:-8082}/ready" ;; dispatcher) curl -fsS "http://localhost:${PORT:-8080}/health/liveness" ;; *) curl -fsS "http://localhost:${PORT:-8080}/health" ;; esac' || exit 1
 
-CMD ["sh", "-c", "case \"${AMA_AGENTS_RUNTIME:-dispatcher}\" in maf_runtime) python -m maf_runtime.workflow.builder ${MAF_INCIDENT_FIXTURE:+--incident-fixture \"$MAF_INCIDENT_FIXTURE\"} ;; communication) python -m communication ;; evacuation) python -m evacuation ;; dispatcher) python -m dispatcher ;; *) echo \"Unsupported AMA_AGENTS_RUNTIME: $AMA_AGENTS_RUNTIME\" >&2; exit 64 ;; esac"]
+CMD ["sh", "-c", "case \"${AMA_AGENTS_RUNTIME:-dispatcher}\" in maf_runtime) exec python -m maf_runtime.workflow.builder ${MAF_INCIDENT_FIXTURE:+--incident-fixture \"$MAF_INCIDENT_FIXTURE\"} ;; communication) exec python -m communication ;; evacuation) exec python -m evacuation ;; dispatcher) exec python -m dispatcher ;; *) echo \"Unsupported AMA_AGENTS_RUNTIME: $AMA_AGENTS_RUNTIME\" >&2; exit 64 ;; esac"]

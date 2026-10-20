@@ -1,0 +1,54 @@
+{
+  "operation": "041-dev-application-only-held-bootstrap",
+  "revision_suffix": "llm041-held-20261020t010013",
+  "approved_scope": "immutable pair and two ACR-scoped AcrPull grants",
+  "applications": {
+    "api": {
+      "tag": "llm041-held-20261020t010013",
+      "local_image_reference": "sha256:caff7fe867c17363684ed78fa652425960d74e0c32ebac2681bf4d71c38c5b98",
+      "approved_config_digest": "sha256:c42aff32ee93a012a6bbd5869c0279ed461b6ebe4c200de147b387be0b3dd0f8",
+      "manifest_digest": "sha256:caff7fe867c17363684ed78fa652425960d74e0c32ebac2681bf4d71c38c5b98",
+      "platform_manifest_digest": "sha256:170d27a5bde8b59fba331d386828e99b55a3499b14505dc354ddba487e16e063",
+      "verified_config_digest": "sha256:c42aff32ee93a012a6bbd5869c0279ed461b6ebe4c200de147b387be0b3dd0f8",
+      "image": "crdevw3uq6w.azurecr.io/ama/api@sha256:caff7fe867c17363684ed78fa652425960d74e0c32ebac2681bf4d71c38c5b98",
+      "registry_manifest_verified": true
+    },
+    "agents": {
+      "tag": "llm041-held-20261020t010013",
+      "local_image_reference": "sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "approved_config_digest": "sha256:ac7290a1e0a6eb1a40788743effee0ca4335afd1c6e6e9b551196af027327a97",
+      "manifest_digest": "sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "platform_manifest_digest": "sha256:05ce1eba08436789c064de0e6f007739397fd0f09bb8d1842bb586a8801ac729",
+      "verified_config_digest": "sha256:ac7290a1e0a6eb1a40788743effee0ca4335afd1c6e6e9b551196af027327a97",
+      "image": "crdevw3uq6w.azurecr.io/ama/agents@sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "registry_manifest_verified": true
+    }
+  },
+  "complete": true,
+  "role_assignments": [
+    {
+      "app": "api",
+      "principal_id": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a",
+      "assignment_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w/providers/Microsoft.Authorization/roleAssignments/ead398cc-d50f-5d59-8c96-86c063718d7e",
+      "role": "AcrPull",
+      "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w"
+    },
+    {
+      "app": "agents",
+      "principal_id": "0b986a72-f194-41f5-8f6b-ea070229aaeb",
+      "assignment_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w/providers/Microsoft.Authorization/roleAssignments/2da1f246-507e-53a2-bf70-304ca35f783d",
+      "role": "AcrPull",
+      "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w"
+    }
+  ],
+  "completed_at": "2026-10-20T01:08:19.889340+00:00",
+  "protected_comparison": {
+    "comparison": "PASS",
+    "deployments": 4,
+    "foundry_writes": 0,
+    "account_controls_identity_tags_rai_and_diagnostics": "unchanged"
+  },
+  "application_updates": 0,
+  "credentials_persisted": false,
+  "release_ready": false
+}
