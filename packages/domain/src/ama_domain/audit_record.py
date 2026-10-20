@@ -148,6 +148,8 @@ class AuditRecord(BaseModel):
     model_id: str = Field(..., min_length=1)
     model_version: str = Field(..., min_length=1)
     deployment_alias: str = Field(..., min_length=1)
+    inference_attempted: bool | None = Field(default=None, strict=True)
+    inference_outcome: Literal["succeeded", "failed", "not_attempted", "unknown"] | None = None
     embedding_model_id: str | None = None
     corpus_build_sha: str | None = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     retrieved_chunks: list[RetrievedChunkRef] = Field(default_factory=list)

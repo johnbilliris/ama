@@ -1,0 +1,12 @@
+{
+  "sources": {
+    "apps/ingestion/redis_client.py": "e64f4dbb05b22a502246f8e0c0383eabecd84818ecd75e78c2342b6eb0e4eeaf",
+    "apps/ingestion/worker.py": "671b56cdbfd6ce2d8179336b5dc764ac1de83d7f343982b99a03e3370463f9c7",
+    "apps/api/app/services/ingestion/pipeline_status_store.py": "411f5224d835e1ec9e4d643d2a10eeec57fe5438c407ae5813cab06d47e3343a"
+  },
+  "versions": {
+    "redis": "8.1.0",
+    "redis-entraid": "1.2.2",
+    "PyJWT": "2.15.1"
+  }
+}

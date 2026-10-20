@@ -1,0 +1,49 @@
+{
+  "operation": "041-dev-unheld-zero-traffic-validation",
+  "observed_at": "2026-10-20T03:17:42.659088+00:00",
+  "revision_suffix": "llm041-val-20261020t031734",
+  "agents_revision_url": "https://ca-agents-dev--llm041-val-20261020t031734.internal.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io",
+  "applications": {
+    "api": {
+      "app": "api",
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-api-dev",
+      "method": "PATCH",
+      "content_type": "application/json",
+      "api_version": "2025-07-01",
+      "source_sha256": "dc9be59da37e3fc4efce39247a5cdf2b7a35730b3d250521beb54071db3d1e85",
+      "patch_sha256": "e1f9a0ab9ee80fd64a1645d0c9d0103faea76e91a72351201ccbb01a7dc63bf6",
+      "expected_sha256": "de11e69dd2b87847917ed850fd7387a4f5cb047c2703c2f27a30b6df0743c9a3",
+      "secret_definitions_submitted": false,
+      "business_hold": false,
+      "agents_revision_url": "https://ca-agents-dev--llm041-val-20261020t031734.internal.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io",
+      "candidate_traffic_weight": 0,
+      "arm_what_if_equivalence_claimed": false,
+      "execution_authorised": false
+    },
+    "agents": {
+      "app": "agents",
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-agents-dev",
+      "method": "PATCH",
+      "content_type": "application/json",
+      "api_version": "2025-07-01",
+      "source_sha256": "d006807a8f612938289b20fc0ef5467e054078050cf0f90f09c105f8ef0a372f",
+      "patch_sha256": "dd37f21801980bd62f98ab8824ef21a89964707d042f9e791d3398e8b38098cb",
+      "expected_sha256": "5847bacb5ce281fe060b38c3db17133372ee3e1c4649cc2cac3e33498ff993ae",
+      "secret_definitions_submitted": false,
+      "business_hold": false,
+      "candidate_traffic_weight": 0,
+      "arm_what_if_equivalence_claimed": false,
+      "execution_authorised": false
+    }
+  },
+  "protected_comparison": {
+    "comparison": "PASS",
+    "deployments": 4,
+    "foundry_writes": 0,
+    "account_controls_identity_tags_rai_and_diagnostics": "unchanged"
+  },
+  "secret_values_persisted": false,
+  "deployment_performed": false,
+  "normal_startup_writes_authorised": true,
+  "business_promotion": false
+}

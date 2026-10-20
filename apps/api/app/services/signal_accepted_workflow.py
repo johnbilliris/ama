@@ -13,6 +13,7 @@ from app.services.dead_letter_service import DeadLetterService
 from app.services.event_bus import EventBus, EventEnvelope
 from app.services.operational_store import OperationalStore
 from app.services.public_alert_service import stamp_alert_content_version
+from pydantic import PrivateAttr
 
 from packages.domain.src.domain.models.public_alert import PublicAlert
 from packages.domain.src.domain.models.recommendation import Recommendation
@@ -24,6 +25,40 @@ from packages.domain.src.domain.tenant_mode import is_live_tenant
 _AGENTS_PATH = Path(__file__).resolve().parents[3] / "agents"
 if str(_AGENTS_PATH) not in sys.path:
     sys.path.insert(0, str(_AGENTS_PATH))
+
+from common.foundry_chat_client import InferenceAttemptEvidence  # noqa: E402
+
+
+class _WorkflowRecommendation(Recommendation):
+    _inference_calls: tuple[InferenceAttemptEvidence, ...] = PrivateAttr(default=())
+
+
+class _WorkflowAlert(PublicAlert):
+    _inference_calls: tuple[InferenceAttemptEvidence, ...] = PrivateAttr(default=())
+
+
+def _workflow_calls(workflow_doc: dict[str, Any], step: str) -> tuple[InferenceAttemptEvidence, ...]:
+    calls = workflow_doc.get("_inference_calls")
+    if not isinstance(calls, dict):
+        return ()
+    step_calls = calls.get(step)
+    if not isinstance(step_calls, (list, tuple)):
+        return ()
+    return tuple(call for call in step_calls if isinstance(call, InferenceAttemptEvidence))
+
+
+def _actual_usage(evidence: InferenceAttemptEvidence) -> dict[str, int] | None:
+    usage = {}
+    if evidence.usage_prompt_tokens is not None:
+        usage["input_tokens"] = evidence.usage_prompt_tokens
+    if evidence.usage_completion_tokens is not None:
+        usage["output_tokens"] = evidence.usage_completion_tokens
+    return usage or None
+
+
+def _last_submitted(calls: tuple[InferenceAttemptEvidence, ...]) -> InferenceAttemptEvidence | None:
+    return next((call for call in reversed(calls) if call.inference_attempted is True), None)
+
 
 _TRUSTED_TIERS: frozenset[str] = frozenset(
     {
@@ -336,7 +371,10 @@ def _build_recommendation(event: SignalAcceptedEvent, workflow_doc: dict[str, An
         f"supporting_signals={','.join(signal_ids)}; evidence_sha={evidence_sha}."
     )
 
-    return Recommendation(
+    calls = _workflow_calls(workflow_doc, "risk_assessment")
+    last = _last_submitted(calls)
+    identity = last.resolved_identity if last else None
+    recommendation = _WorkflowRecommendation(
         recommendation_id=_recommendation_id(event),
         incident_id=event.incident_id or "",
         type="public_alert",
@@ -348,11 +386,13 @@ def _build_recommendation(event: SignalAcceptedEvent, workflow_doc: dict[str, An
         confidence_score=confidence_score,
         proposed_by_agent="maf_runtime",
         generation_method=generation_method,
-        model_deployment_id=(str(risk_output.get("model_id")) if risk_output.get("model_id") else None),
-        token_usage=None,
+        model_deployment_id=identity.deployment_name if identity else None,
+        token_usage=_actual_usage(last) if last else None,
         tenant_id=event.tenant_id,
         incident_scope_key=event.scope,
     )
+    recommendation._inference_calls = calls
+    return recommendation
 
 
 def _build_draft_alert(
@@ -419,7 +459,10 @@ def _build_draft_alert(
         sort_keys=True,
     )
 
-    alert = PublicAlert(
+    calls = _workflow_calls(workflow_doc, "communication")
+    last = _last_submitted(calls)
+    identity = last.resolved_identity if last else None
+    alert = _WorkflowAlert(
         alert_id=_alert_id(event),
         incident_id=event.incident_id or "",
         tenant_id=event.tenant_id,
@@ -431,11 +474,10 @@ def _build_draft_alert(
         channel_set=channel_set,
         content_blocks=flattened_blocks,
         generation_method=generation_method,
-        model_deployment_id=(
-            str(communication.get("model_deployment_id")) if communication.get("model_deployment_id") else None
-        ),
+        model_deployment_id=identity.deployment_name if identity else None,
         content_safety_result=content_safety_result,
     )
+    alert._inference_calls = calls
     stamp_alert_content_version(alert)
     return alert
 
@@ -489,43 +531,39 @@ def _emit_llm_call_timeline_events(
     timeline_bucket = state_store.TIMELINE_EVENTS.bucket_for(event.tenant_id)
     incident_key = event.incident_id or event.scope
 
-    if recommendation.generation_method == "llm":
-        timeline_bucket.setdefault(incident_key, []).append(
-            TimelineEvent(
-                event_id=f"evt-{uuid4().hex}",
-                incident_id=incident_key,
-                event_type="llm_call",
-                summary="Risk recommendation generated via llm",
-                actor="signal_accepted_workflow",
-                tenant_id=event.tenant_id,
-                correlation_id=event.correlation_id,
-                payload={
-                    "source_agent": "risk_assessment",
-                    "target_agent": "communication",
-                    "model_deployment_id": recommendation.model_deployment_id,
-                    "generation_method": recommendation.generation_method,
-                },
+    emitted: set[str] = set()
+    for output, source, target in (
+        (recommendation, "risk_assessment", "communication"),
+        (draft_alert, "communication", "public_alert_draft"),
+    ):
+        for evidence in getattr(output, "_inference_calls", ()):
+            if evidence.inference_attempted is not True or evidence.call_id in emitted:
+                continue
+            emitted.add(evidence.call_id)
+            identity = evidence.resolved_identity
+            timeline_bucket.setdefault(incident_key, []).append(
+                TimelineEvent(
+                    event_id=f"evt-{uuid4().hex}",
+                    incident_id=incident_key,
+                    event_type="llm_call",
+                    summary=f"{source} model request",
+                    actor="signal_accepted_workflow",
+                    tenant_id=event.tenant_id,
+                    correlation_id=event.correlation_id,
+                    payload={
+                        "source_agent": source,
+                        "target_agent": target,
+                        "call_id": evidence.call_id,
+                        "inference_attempted": evidence.inference_attempted,
+                        "inference_outcome": evidence.inference_outcome,
+                        "model_deployment_id": identity.deployment_name if identity else None,
+                        "model_id": identity.model_id if identity else None,
+                        "model_version": identity.model_version if identity else None,
+                        "actual_token_usage": _actual_usage(evidence),
+                        "generation_method": output.generation_method,
+                    },
+                )
             )
-        )
-
-    if draft_alert.generation_method == "llm":
-        timeline_bucket.setdefault(incident_key, []).append(
-            TimelineEvent(
-                event_id=f"evt-{uuid4().hex}",
-                incident_id=incident_key,
-                event_type="llm_call",
-                summary="Communication draft generated via llm",
-                actor="signal_accepted_workflow",
-                tenant_id=event.tenant_id,
-                correlation_id=event.correlation_id,
-                payload={
-                    "source_agent": "communication",
-                    "target_agent": "public_alert_draft",
-                    "model_deployment_id": draft_alert.model_deployment_id,
-                    "generation_method": draft_alert.generation_method,
-                },
-            )
-        )
 
 
 async def publish_signal_accepted(event: SignalAcceptedEvent) -> Recommendation | None:

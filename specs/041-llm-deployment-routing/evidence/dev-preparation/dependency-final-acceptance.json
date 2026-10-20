@@ -1,0 +1,111 @@
+{
+  "observed_at": "2026-10-20T04:52:11.855562+00:00",
+  "applications": {
+    "agents": {
+      "revision_name": "ca-agents-dev--llm041-deps-20261020t044249",
+      "fqdn": "ca-agents-dev--llm041-deps-20261020t044249.internal.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io",
+      "health_state": "Healthy",
+      "active": true,
+      "traffic": [
+        {
+          "revisionName": "ca-agents-dev--pm412va",
+          "weight": 100
+        }
+      ],
+      "configuration_preserved": true,
+      "replicas": [
+        {
+          "name": "ca-agents-dev--llm041-deps-20261020t044249-7686cfb8b4-c5pn4",
+          "running_state": "Running",
+          "containers": [
+            {
+              "name": "agents",
+              "ready": true,
+              "started": true,
+              "restartCount": 0
+            }
+          ]
+        },
+        {
+          "name": "ca-agents-dev--llm041-deps-20261020t044249-7686cfb8b4-xxw6w",
+          "running_state": "Running",
+          "containers": [
+            {
+              "name": "agents",
+              "ready": true,
+              "started": true,
+              "restartCount": 0
+            }
+          ]
+        }
+      ]
+    },
+    "api": {
+      "revision_name": "ca-api-dev--llm041-deps-20261020t044249",
+      "fqdn": "ca-api-dev--llm041-deps-20261020t044249.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io",
+      "health_state": "Healthy",
+      "active": true,
+      "traffic": [
+        {
+          "revisionName": "ca-api-dev--n6l54uy",
+          "weight": 100
+        }
+      ],
+      "configuration_preserved": true,
+      "replicas": [
+        {
+          "name": "ca-api-dev--llm041-deps-20261020t044249-68778774d9-6qjwj",
+          "running_state": "Running",
+          "containers": [
+            {
+              "name": "api",
+              "ready": true,
+              "started": true,
+              "restartCount": 0
+            }
+          ]
+        },
+        {
+          "name": "ca-api-dev--llm041-deps-20261020t044249-68778774d9-qj5mw",
+          "running_state": "Running",
+          "containers": [
+            {
+              "name": "api",
+              "ready": true,
+              "started": true,
+              "restartCount": 0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "protected_comparison": {
+    "comparison": "PASS",
+    "deployments": 4,
+    "foundry_writes": 0,
+    "account_controls_identity_tags_rai_and_diagnostics": "unchanged"
+  },
+  "existing_pull_roles": [
+    {
+      "assignment_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w/providers/Microsoft.Authorization/roleAssignments/ead398cc-d50f-5d59-8c96-86c063718d7e",
+      "comparison": "PASS"
+    },
+    {
+      "assignment_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w/providers/Microsoft.Authorization/roleAssignments/2da1f246-507e-53a2-bf70-304ca35f783d",
+      "comparison": "PASS"
+    }
+  ],
+  "new_grants": 0,
+  "foundry_resource_writes": 0,
+  "application_secret_values_requested": false,
+  "application_secret_definitions_submitted": false,
+  "documents_uploaded": 0,
+  "business_promotion": false,
+  "dependency_checks": "dependency-runtime-checks-v2.json",
+  "inference": "dependency-inference.json",
+  "unchanged_agents_retrieval_check": "dependency-unchanged-agents-retrieval.json",
+  "aggregate_reserved_maximum": 8,
+  "business_readiness_not_claimed": "Empty corpus is structural availability only, not grounded content acceptance",
+  "completed_at": "2026-10-20T04:52:53.358627+00:00"
+}

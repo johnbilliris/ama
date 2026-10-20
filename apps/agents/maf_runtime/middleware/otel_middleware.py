@@ -61,7 +61,20 @@ class OtelMiddleware(AgentMiddleware):
             if parent_trace_id:
                 _set_attribute(span, "workflow.parent_trace_id", str(parent_trace_id))
             _set_attribute(span, "ai.agent.name", self._agent_name)
-            await call_next()
+            try:
+                await call_next()
+            finally:
+                from common.inference_observation import observed_calls
+
+                calls = observed_calls.get()
+                if calls:
+                    evidence = calls[-1]
+                    _set_attribute(span, "inference_attempted", evidence.inference_attempted)
+                    _set_attribute(span, "inference_outcome", evidence.inference_outcome)
+                    if evidence.inference_attempted is True and evidence.resolved_identity:
+                        _set_attribute(span, "model_id", evidence.resolved_identity.model_id)
+                        _set_attribute(span, "model_version", evidence.resolved_identity.model_version)
+                        _set_attribute(span, "deployment_alias", evidence.resolved_identity.deployment_name)
 
 
 __all__ = ["OtelMiddleware"]

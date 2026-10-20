@@ -21,15 +21,15 @@ This test pins:
 * ``_resolve`` honours ``AZURE_AI_<TIER>_DEPLOYMENT`` overrides for the
   recognised tier aliases (the workaround for the CSV-key collision when
   multiple tiers share a model key).
-* ``_parse_deployment_map`` is first-write-wins (so the CSV order is
-  deterministic — the simulation Controller and the inference seam see
-  the same lookup result).
+* ``_parse_deployment_map`` rejects conflicting duplicates with an actionable
+  diagnostic; identical repeats preserve the independent embedding mapping.
 """
 
 from __future__ import annotations
 
 import pytest
 from common.foundry_chat_client import (
+    FoundryConfigurationError,
     LiveFoundryChatClient,
     _parse_deployment_map,
 )
@@ -83,6 +83,9 @@ def test_endpoint_for_does_not_double_append_when_already_per_deployment() -> No
 
 def test_resolve_honours_simulation_tier_env_var(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("AZURE_AI_SIMULATION_DEPLOYMENT", "gpt-5.6-sim-ama")
+    monkeypatch.setenv("AZURE_AI_REASONING_DEPLOYMENT", "gpt-5.6-ama")
+    monkeypatch.setenv("AZURE_AI_DRAFTING_DEPLOYMENT", "gpt-5.6-mini-ama")
+    monkeypatch.setenv("AZURE_AI_PROJECT_REGION", "australiaeast")
     client = LiveFoundryChatClient(
         endpoint="https://ama-aif-zo6bb5.cognitiveservices.azure.com/",
         deployments={"gpt-5.6@2026-03-05": "gpt-5.6-ama"},
@@ -92,6 +95,7 @@ def test_resolve_honours_simulation_tier_env_var(monkeypatch: pytest.MonkeyPatch
 
 def test_resolve_falls_back_to_csv_when_tier_env_var_unset(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("AZURE_AI_REASONING_DEPLOYMENT", raising=False)
+    monkeypatch.setenv("AZURE_AI_PROJECT_REGION", "australiaeast")
     client = LiveFoundryChatClient(
         endpoint="https://ama-aif-zo6bb5.cognitiveservices.azure.com/",
         deployments={"gpt-5.6@2026-03-05": "gpt-5.6-ama"},
@@ -102,14 +106,20 @@ def test_resolve_falls_back_to_csv_when_tier_env_var_unset(monkeypatch: pytest.M
 # ---------------------------------------------------------------- CSV parser
 
 
-def test_parse_deployment_map_first_write_wins() -> None:
-    """Three tiers may share a key; the first entry MUST win, deterministically."""
-    csv = (
-        "gpt-5.6@2026-03-05=gpt-5.6-ama,"
-        "gpt-5.6@2026-03-05=gpt-5.6-mini-ama,"
-        "gpt-5.6@2026-03-05=gpt-5.6-sim-ama,"
-        "text-embedding-3-large@1=text-embedding-3-large-ama"
+@pytest.mark.parametrize("destinations", [("live-a", "simulation-b"), ("simulation-b", "live-a")])
+def test_parse_deployment_map_rejects_conflicts_in_either_order(destinations: tuple[str, str]) -> None:
+    first, second = destinations
+    with pytest.raises(FoundryConfigurationError) as error:
+        _parse_deployment_map(f"model@opaque={first},model@opaque={second}")
+    assert "model@opaque" in str(error.value)
+    assert first in str(error.value)
+    assert second in str(error.value)
+    assert "AZURE_AI_PROJECT_DEPLOYMENTS" in str(error.value)
+
+
+def test_parse_deployment_map_preserves_identical_duplicates_and_embedding() -> None:
+    parsed = _parse_deployment_map(
+        "model@opaque=live-a,model@opaque=live-a,text-embedding-3-large@1=text-embedding-3-large-ama"
     )
-    parsed = _parse_deployment_map(csv)
-    assert parsed["gpt-5.6@2026-03-05"] == "gpt-5.6-ama"
+    assert parsed["model@opaque"] == "live-a"
     assert parsed["text-embedding-3-large@1"] == "text-embedding-3-large-ama"

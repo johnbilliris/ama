@@ -1,0 +1,39 @@
+{
+  "prepared_at": "2026-10-19T22:16:05.354037+00:00",
+  "authority": "Current user: Continue local remediation only; keep deployment blocked",
+  "scope": {
+    "tenant": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+    "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+    "resource_group": "ama",
+    "account_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w",
+    "account_name": "cog-dev-w3uq6w",
+    "account_kind": "AIServices",
+    "account_sku": "S0",
+    "environment": "dev",
+    "region": "australiaeast",
+    "endpoint": "https://dev-aif-w3uq6w.cognitiveservices.azure.com/"
+  },
+  "local_comparison": "PASS complete non-null diagnostic category and retention snapshot; application source and LLM CSV unchanged",
+  "source_digest": "e548ccab8843833450972304ec035016325a104cd329130601f073c481a19625",
+  "application_images": {
+    "api": "sha256:5bbd6497c7c74c0aa8e11a67326c8bfffc1f68ca4c894b30344e4e8dbd6474cb",
+    "agents": "sha256:2bee5de4feeb4794253f62d4769799c05a83debb0798120fab0b3bc8ffd3cd1f"
+  },
+  "files": {
+    "diagnostics-reconciled.template.json": "39ba5288504bf9e2415286f92e6cc9939e79223b3b6bd5a0b2d89379ff080a66",
+    "diagnostics-reconciled.parameters.json": "fa9823a07048a7af711fe35b536aeabf35b90755c2d53e516777ea5c34d2b140",
+    "diagnostics-main-dev.parameters.json": "1123813c256943d462d2119fc50cd4e3af6e57d980ee94081be3c26cb6d82034",
+    "validation-refresh.json": "727390b7d44a32899c4079ede1e386a86249086e79fd9f150436df3d0114f987",
+    "candidate-bindings.json": "d433a6b80fd7e72898bcc2af40f3a90e308a177715a08e68d6a855754325a1e9"
+  },
+  "supersedes_for_new_candidate": "Original template/parameter binding only; retain original approved preview files as historical evidence",
+  "original_what_if_applies_to_corrected_candidate": false,
+  "new_what_if_requires_reapproval": true,
+  "new_what_if_performed": false,
+  "rai_action_omission_resolved": false,
+  "deployment_returned_field_omissions_resolved": false,
+  "strict_carveout_resolved": false,
+  "registry_approval_evidence_supplied": false,
+  "release_ready": false,
+  "cloud_mutations_performed": false
+}

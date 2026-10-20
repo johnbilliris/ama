@@ -1,0 +1,17 @@
+{
+  "started_at": "2026-10-20T04:26:36.618679+00:00",
+  "complete": true,
+  "documents_uploaded": 0,
+  "index_creation_requested": true,
+  "alias_creation_requested": true,
+  "index_verified": true,
+  "completed_at": "2026-10-20T04:26:56.133249+00:00",
+  "alias": {
+    "name": "corpus",
+    "indexes": [
+      "corpus-v1"
+    ]
+  },
+  "schema_sha256": "524bdcd6af684168ff1c238197f6f353b57ddcbdadfa28c94894e55477f4a977",
+  "search_service_configuration_preserved": true
+}

@@ -1,5 +1,7 @@
 targetScope = 'resourceGroup'
 
+import { deploymentOperatingStatesType } from './modules/azure-openai.bicep'
+
 /*
 Reference archive migrated from .bicep-planning-files/INFRA.disaster-response-hub.md
 Goal: disaster-response-hub-infrastructure
@@ -119,6 +121,78 @@ param developerIpAddress string = ''
 @description('Azure OpenAI model deployment SKU. Use GlobalStandard for dev/staging (draws from global capacity pool) and Standard for production (regional capacity).')
 @allowed(['Standard', 'GlobalStandard'])
 param openAiDeploymentSku string = 'GlobalStandard'
+
+@description('Reasoning deployment name; purpose/environment default is only for new resources.')
+param reasoningDeploymentName string = 'reasoning-${environmentName}'
+
+@description('Explicit reasoning model ID.')
+@minLength(1)
+param reasoningModelName string
+
+@description('Explicit reasoning model version.')
+@minLength(1)
+param reasoningModelVersion string
+
+@description('Drafting deployment name; purpose/environment default is only for new resources.')
+param draftingDeploymentName string = 'drafting-${environmentName}'
+
+@description('Explicit drafting model ID.')
+@minLength(1)
+param draftingModelName string
+
+@description('Explicit drafting model version.')
+@minLength(1)
+param draftingModelVersion string
+
+@description('Simulation deployment name; purpose/environment default is only for new resources.')
+param simulationDeploymentName string = 'simulation-${environmentName}'
+
+@description('Explicit simulation model ID.')
+@minLength(1)
+param simulationModelName string
+
+@description('Explicit simulation model version.')
+@minLength(1)
+param simulationModelVersion string
+
+@description('Approved reasoning capacity in thousands of tokens per minute.')
+@minValue(1)
+param reasoningTpmQuota int = 30
+
+@description('Approved drafting capacity in thousands of tokens per minute.')
+@minValue(1)
+param draftingTpmQuota int = 60
+
+@description('Approved simulation capacity in thousands of tokens per minute.')
+@minValue(1)
+param simulationTpmQuota int = 20
+
+@description('Approved reasoning SKU, with no regional substitution.')
+param reasoningDeploymentSku string = openAiDeploymentSku
+
+@description('Approved drafting SKU, with no regional substitution.')
+param draftingDeploymentSku string = openAiDeploymentSku
+
+@description('Approved simulation SKU, with no regional substitution.')
+param simulationDeploymentSku string = openAiDeploymentSku
+
+@description('Approved reasoning upgrade behavior.')
+param reasoningVersionUpgradeOption string
+
+@description('Approved drafting upgrade behavior.')
+param draftingVersionUpgradeOption string
+
+@description('Approved simulation upgrade behavior.')
+param simulationVersionUpgradeOption string
+
+@description('Approved unchanged embedding upgrade behavior.')
+param embeddingVersionUpgradeOption string
+
+@description('Explicit approved operating states for all four existing model deployments.')
+param deploymentOperatingStates deploymentOperatingStatesType
+
+@description('Approved Foundry diagnostic log and metric snapshots; empty preserves module defaults.')
+param openAiDiagnosticSettings object = {}
 
 @description('When true, restricts Cosmos DB network access to Azure Portal and Azure-services IPs only. Set to true for production; leave false for dev/staging to allow fully open public access.')
 param restrictNetworkAccess bool = true
@@ -1180,21 +1254,21 @@ resource apiContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
             { name: 'AZURE_AI_PROJECT_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: openAiDeployments.outputs.azureAiProjectDeployments }
-            // Per-tier deployment keys — the simulation Controller uses
-            // `AZURE_AI_SIMULATION_MODEL_KEY` to pick the right deployment
-            // out of the CSV map; without it the lookup falls back to
-            // ``gpt-4o`` and raises ``openai_unavailable``.
-            { name: 'AZURE_AI_REASONING_MODEL_KEY', value: '${openAiDeployments.outputs.reasoningDeploymentModelKey}' }
-            { name: 'AZURE_AI_DRAFTING_MODEL_KEY', value: '${openAiDeployments.outputs.draftingDeploymentModelKey}' }
+            { name: 'AZURE_AI_PROJECT_REGION', value: location }
+            { name: 'AZURE_AI_REASONING_MODEL_ID', value: reasoningModelName }
+            { name: 'AZURE_AI_REASONING_MODEL_VERSION', value: reasoningModelVersion }
+            { name: 'AZURE_AI_DRAFTING_MODEL_ID', value: draftingModelName }
+            { name: 'AZURE_AI_DRAFTING_MODEL_VERSION', value: draftingModelVersion }
+            { name: 'AZURE_AI_SIMULATION_MODEL_ID', value: simulationModelName }
+            { name: 'AZURE_AI_SIMULATION_MODEL_VERSION', value: simulationModelVersion }
+            { name: 'EMBEDDING_DEPLOYMENT_NAME', value: openAiDeployments.outputs.embeddingDeploymentName }
+            { name: 'AZURE_AI_REASONING_MODEL_KEY', value: openAiDeployments.outputs.reasoningDeploymentModelKey }
+            { name: 'AZURE_AI_DRAFTING_MODEL_KEY', value: openAiDeployments.outputs.draftingDeploymentModelKey }
             {
               name: 'AZURE_AI_SIMULATION_MODEL_KEY'
-              value: '${openAiDeployments.outputs.simulationDeploymentModelKey}'
+              value: openAiDeployments.outputs.simulationDeploymentModelKey
             }
-            // Per-tier deployment-name env vars. The CSV map collapses
-            // multiple tiers onto the same `<modelId>@<version>` key (until
-            // tiers diverge — see azure-openai.bicep), so callers MUST
-            // prefer these explicit env vars when they need a specific
-            // tier (the simulation Controller's RAI policy bucket, etc.).
+            // Destination and model identity are independent; shared chat coordinates are omitted from the CSV.
             { name: 'AZURE_AI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
             { name: 'AZURE_AI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
             { name: 'AZURE_AI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
@@ -1294,21 +1368,21 @@ resource agentsContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
             // Spec 036 / ADR-20 — Foundry is the canonical chat plane.
             { name: 'AZURE_AI_PROJECT_ENDPOINT', value: openAi.properties.endpoint }
             { name: 'AZURE_AI_PROJECT_DEPLOYMENTS', value: openAiDeployments.outputs.azureAiProjectDeployments }
-            // The simulation chat client + agent llm clients pick the deployment
-            // by `<modelName>@<version>` key. All three GPT tiers currently use
-            // the same model+version (gpt-5.6@2026-03-05), so a single key
-            // matches; if tiers diverge, keep the keys aligned with the per-
-            // deployment outputs in `infra/modules/azure-openai.bicep`.
-            { name: 'AZURE_AI_REASONING_MODEL_KEY', value: '${openAiDeployments.outputs.reasoningDeploymentModelKey}' }
-            { name: 'AZURE_AI_DRAFTING_MODEL_KEY', value: '${openAiDeployments.outputs.draftingDeploymentModelKey}' }
+            { name: 'AZURE_AI_PROJECT_REGION', value: location }
+            { name: 'AZURE_AI_REASONING_MODEL_ID', value: reasoningModelName }
+            { name: 'AZURE_AI_REASONING_MODEL_VERSION', value: reasoningModelVersion }
+            { name: 'AZURE_AI_DRAFTING_MODEL_ID', value: draftingModelName }
+            { name: 'AZURE_AI_DRAFTING_MODEL_VERSION', value: draftingModelVersion }
+            { name: 'AZURE_AI_SIMULATION_MODEL_ID', value: simulationModelName }
+            { name: 'AZURE_AI_SIMULATION_MODEL_VERSION', value: simulationModelVersion }
+            { name: 'EMBEDDING_DEPLOYMENT_NAME', value: openAiDeployments.outputs.embeddingDeploymentName }
+            { name: 'AZURE_AI_REASONING_MODEL_KEY', value: openAiDeployments.outputs.reasoningDeploymentModelKey }
+            { name: 'AZURE_AI_DRAFTING_MODEL_KEY', value: openAiDeployments.outputs.draftingDeploymentModelKey }
             {
               name: 'AZURE_AI_SIMULATION_MODEL_KEY'
-              value: '${openAiDeployments.outputs.simulationDeploymentModelKey}'
+              value: openAiDeployments.outputs.simulationDeploymentModelKey
             }
-            // Per-tier deployment-name env vars (matches apiContainerApp).
-            // Sub-agent dispatcher + LLMClient consumers use these to
-            // bypass the CSV map, which collapses tiers onto the same
-            // model key today.
+            // Keep the same complete identity/configuration contract as the API.
             { name: 'AZURE_AI_REASONING_DEPLOYMENT', value: openAiDeployments.outputs.reasoningDeploymentName }
             { name: 'AZURE_AI_DRAFTING_DEPLOYMENT', value: openAiDeployments.outputs.draftingDeploymentName }
             { name: 'AZURE_AI_SIMULATION_DEPLOYMENT', value: openAiDeployments.outputs.simulationDeploymentName }
@@ -1581,7 +1655,28 @@ module openAiDeployments './modules/azure-openai.bicep' = {
     envPrefix: environmentName
     tags: tags
     logAnalyticsWorkspaceId: monitoring.outputs.logAnalyticsId
+    diagnosticSettings: openAiDiagnosticSettings
     modelDeploymentSku: openAiDeploymentSku
+    reasoningDeploymentName: reasoningDeploymentName
+    reasoningModelName: reasoningModelName
+    reasoningModelVersion: reasoningModelVersion
+    draftingDeploymentName: draftingDeploymentName
+    draftingModelName: draftingModelName
+    draftingModelVersion: draftingModelVersion
+    simulationDeploymentName: simulationDeploymentName
+    simulationModelName: simulationModelName
+    simulationModelVersion: simulationModelVersion
+    reasoningTpmQuota: reasoningTpmQuota
+    draftingTpmQuota: draftingTpmQuota
+    simulationTpmQuota: simulationTpmQuota
+    reasoningDeploymentSku: reasoningDeploymentSku
+    draftingDeploymentSku: draftingDeploymentSku
+    simulationDeploymentSku: simulationDeploymentSku
+    reasoningVersionUpgradeOption: reasoningVersionUpgradeOption
+    draftingVersionUpgradeOption: draftingVersionUpgradeOption
+    simulationVersionUpgradeOption: simulationVersionUpgradeOption
+    embeddingVersionUpgradeOption: embeddingVersionUpgradeOption
+    deploymentOperatingStates: deploymentOperatingStates
   }
 }
 

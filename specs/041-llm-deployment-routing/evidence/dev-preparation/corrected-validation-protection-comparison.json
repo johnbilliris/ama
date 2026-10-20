@@ -1,0 +1,17 @@
+{
+  "compared_at": "2026-10-19T22:36:36.284189+00:00",
+  "observed_at": "2026-10-19T22:35:42.590688+00:00",
+  "comparison": {
+    "target": true,
+    "account_controls": true,
+    "identity": true,
+    "tags": true,
+    "deployments": true,
+    "rai": true,
+    "diagnostics": true,
+    "policy_assignments": true,
+    "rbac": true,
+    "services": true
+  },
+  "release_ready": false
+}

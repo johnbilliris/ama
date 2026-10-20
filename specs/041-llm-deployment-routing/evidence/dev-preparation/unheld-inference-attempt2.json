@@ -1,0 +1,104 @@
+{
+  "operation": "041-dev-unheld-zero-traffic-validation",
+  "max_requests_per_tier": 3,
+  "max_total_requests": 9,
+  "max_tokens_per_request": 512,
+  "business_data": false,
+  "tools": false,
+  "previous_ledger": "unheld-inference.json",
+  "previous_reservations_retained": [
+    {
+      "tier": "reasoning",
+      "maximum_wire_requests": 1,
+      "reserved_at": "2026-10-20T03:42:30.114978+00:00"
+    },
+    {
+      "tier": "drafting",
+      "maximum_wire_requests": 1,
+      "reserved_at": "2026-10-20T03:42:30.114978+00:00"
+    }
+  ],
+  "reservations": [
+    {
+      "tier": "reasoning",
+      "maximum_wire_requests": 1,
+      "reserved_at": "2026-10-20T03:44:46.684377+00:00"
+    },
+    {
+      "tier": "drafting",
+      "maximum_wire_requests": 1,
+      "reserved_at": "2026-10-20T03:44:46.684377+00:00"
+    },
+    {
+      "tier": "simulation",
+      "maximum_wire_requests": 1,
+      "reserved_at": "2026-10-20T03:44:58.716322+00:00"
+    }
+  ],
+  "results": [
+    {
+      "app": "api",
+      "tier": "reasoning",
+      "app_principal_verified": true,
+      "deployment": "gpt-5.4-dev",
+      "configured_model_id": "gpt-5.4",
+      "configured_model_version": "2026-03-05",
+      "token_cap": 128,
+      "tools": false,
+      "sdk_retries": 0,
+      "succeeded": true,
+      "inference_attempted": true,
+      "inference_outcome": "succeeded",
+      "provider_model": "gpt-5.4-2026-03-05",
+      "prompt_tokens": 24,
+      "completion_tokens": 4,
+      "finish_reason": "stop",
+      "latency_ms": 1727,
+      "wire_requests": 1
+    },
+    {
+      "app": "api",
+      "tier": "drafting",
+      "app_principal_verified": true,
+      "deployment": "gpt-5.4-mini-dev",
+      "configured_model_id": "gpt-5.4",
+      "configured_model_version": "2026-03-05",
+      "token_cap": 128,
+      "tools": false,
+      "sdk_retries": 0,
+      "succeeded": true,
+      "inference_attempted": true,
+      "inference_outcome": "succeeded",
+      "provider_model": "gpt-5.4-2026-03-05",
+      "prompt_tokens": 24,
+      "completion_tokens": 4,
+      "finish_reason": "stop",
+      "latency_ms": 1404,
+      "wire_requests": 1
+    },
+    {
+      "app": "agents",
+      "tier": "simulation",
+      "app_principal_verified": true,
+      "deployment": "gpt-5.4-sim-dev",
+      "configured_model_id": "gpt-5.4",
+      "configured_model_version": "2026-03-05",
+      "token_cap": 128,
+      "tools": false,
+      "sdk_retries": 0,
+      "succeeded": true,
+      "inference_attempted": true,
+      "inference_outcome": "succeeded",
+      "provider_model": "gpt-5.4-2026-03-05",
+      "prompt_tokens": 24,
+      "completion_tokens": 4,
+      "finish_reason": "stop",
+      "latency_ms": 1428,
+      "wire_requests": 1
+    }
+  ],
+  "complete": true,
+  "completed_at": "2026-10-20T03:45:08.450401+00:00",
+  "wire_requests": 3,
+  "all_succeeded": true
+}
