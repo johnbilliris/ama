@@ -545,7 +545,7 @@ jobs:
       - name: Install Bicep CLI for compiled deployment contracts
         uses: anthony-c-martin/setup-bicep@faf8170f496c10a2ea75977d2e77024131331404 # v1
         with:
-          version: 0.48.1
+          version: 0.46.1
 
       # Spec-032 FR-Q03 — formatting gate.
       - name: python-format-check
@@ -730,7 +730,7 @@ jobs:
       - name: Install Bicep CLI for compiled deployment contracts
         uses: anthony-c-martin/setup-bicep@faf8170f496c10a2ea75977d2e77024131331404 # v1
         with:
-          version: 0.48.1
+          version: 0.46.1
       - name: pytest contract + integration (Windows)
         shell: pwsh
         env:
