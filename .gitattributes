@@ -13,3 +13,6 @@ docs/architecture/**/*.drawio         text eol=lf
 # Preserve verified upstream AVM source and license byte hashes on Windows.
 infra/modules/vendor/avm-cognitive-services-deployment-0.18.0/main.bicep text eol=lf
 infra/modules/vendor/avm-cognitive-services-deployment-0.18.0/LICENSE text eol=lf
+
+# loadTextContent embeds this verbatim; committed ARM artifacts contain CRLF.
+infra/bicep/modules/evidence-harness-slo-workbook.json text eol=crlf
