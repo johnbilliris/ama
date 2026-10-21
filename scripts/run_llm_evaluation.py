@@ -79,6 +79,7 @@ EVAL_RUNNER_BUILD_CONTEXT_PATHS = [
     Path("apps") / "console_logging.py",
     Path("apps") / "api" / "__init__.py",
     Path("apps") / "api" / "app" / "__init__.py",
+    Path("apps") / "api" / "app" / "core",
     Path("apps") / "api" / "app" / "repositories" / "__init__.py",
     Path("apps") / "api" / "app" / "repositories" / "eval",
 ]
@@ -90,11 +91,14 @@ API_BUILD_CONTEXT_PATHS = [
     API_DOCKERFILE_RELATIVE,
     Path("apps") / "__init__.py",
     Path("apps") / "console_logging.py",
+    Path("scripts") / "seed_loader.py",
+    Path("scripts") / "_pii_detector.py",
     Path("apps") / "api" / "pyproject.toml",
     Path("scripts") / "install_pyproject_dependencies.py",
     Path("apps") / "api" / "app",
     Path("apps") / "agents",
     Path("apps") / "ingestion",
+    Path("apps") / "web" / "src" / "content" / "help",
     Path("packages"),
     Path("docs") / "risk-register",
     Path("docs") / "governance-hub" / "adoption-roadmap",
@@ -104,8 +108,8 @@ API_BUILD_CONTEXT_PATHS = [
 ]
 
 DEFAULT_MODELS = [
-    "gpt-5.4:2026-03-05",
-    "gpt-5.4-mini:2026-03-17",
+    "gpt-5.6-sol:2026-07-09",
+    "gpt-5.6-luna:2026-07-09",
     "Phi-4:7",
     "Llama-3.3-70B-Instruct:9",
     "Mistral-Large-3:1",
@@ -753,6 +757,8 @@ def stage_preflight(ctx: RunContext) -> None:
         run_cmd(
             stage,
             [
+                "python",
+                "-m",
                 "ruff",
                 "check",
                 "packages/eval-core/",
@@ -1090,11 +1096,20 @@ def stage_publish(ctx: RunContext) -> None:
     if not DATASET_MANIFEST.exists():
         fail(stage, f"dataset manifest missing: {DATASET_MANIFEST}", EXIT_PUBLISH)
 
+    dataset_test_paths = [
+        str(REPO_ROOT / "packages" / "eval-core" / "src"),
+        str(REPO_ROOT / "packages" / "eval-dataset" / "src"),
+    ]
+    existing_pythonpath = os.environ.get("PYTHONPATH")
+    if existing_pythonpath:
+        dataset_test_paths.append(existing_pythonpath)
+
     run_cmd(
         stage,
         ["python", "-m", "pytest", "packages/eval-dataset/tests/", "-q"],
         dry_run=ctx.dry_run,
         capture=True,
+        env={"PYTHONPATH": os.pathsep.join(dataset_test_paths)},
     )
 
     if ctx.dry_run:

@@ -1,0 +1,24 @@
+{
+  "STORAGE_ACCOUNT_NAME": {
+    "succeeded": false,
+    "account": "stdevw3uq6w2",
+    "error_type": "HttpResponseError",
+    "status": 403,
+    "code": "AuthorizationPermissionMismatch"
+  },
+  "AMA_EVIDENCE_STORAGE_ACCOUNT_NAME": {
+    "succeeded": false,
+    "account": "stdevw3uq6w2",
+    "error_type": "HttpResponseError",
+    "status": 403,
+    "code": "AuthorizationPermissionMismatch"
+  },
+  "COSMOS_DATABASE": {
+    "succeeded": true,
+    "database": "disaster-hub"
+  },
+  "AMA_EVIDENCE_COSMOS_DATABASE": {
+    "succeeded": true,
+    "database": "disaster-hub"
+  }
+}

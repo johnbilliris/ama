@@ -1,0 +1,28 @@
+{
+  "observed_at": "2026-10-20T00:32:50.764533+00:00",
+  "scope": "read-only ACR role metadata including inherited; no principal names/secret values",
+  "applications": {
+    "ca-api-dev": {
+      "principal_id": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a",
+      "acr_pull_assignment_found": false,
+      "matching_assignments": [
+        {
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.Authorization/roleAssignments/08ff305f-6128-542c-8974-203c57fffa5a",
+          "role_definition_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/1407120a-92aa-4202-b7e9-c0e197c71c8f",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama"
+        }
+      ]
+    },
+    "ca-agents-dev": {
+      "principal_id": "0b986a72-f194-41f5-8f6b-ea070229aaeb",
+      "acr_pull_assignment_found": false,
+      "matching_assignments": [
+        {
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.Authorization/roleAssignments/8340714f-4244-5f0e-8613-826ea9a18312",
+          "role_definition_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/1407120a-92aa-4202-b7e9-c0e197c71c8f",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama"
+        }
+      ]
+    }
+  }
+}

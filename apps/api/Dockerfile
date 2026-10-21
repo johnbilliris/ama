@@ -38,6 +38,9 @@ COPY apps/__init__.py ./apps/
 COPY apps/agents/ ./apps/agents/
 COPY apps/ingestion/ ./apps/ingestion/
 COPY apps/console_logging.py ./apps/console_logging.py
+COPY scripts/seed_loader.py ./scripts/seed_loader.py
+COPY scripts/_pii_detector.py ./scripts/_pii_detector.py
+COPY apps/web/src/content/help/ ./apps/web/src/content/help/
 # Spec-037 — bundle the 5 evidence-pack artefact JSON files for the read-only
 # /governance/evidence-pack/* routes (FR-021). The runtime cache in Cosmos +
 # immutable archive in Blob (PD-037-04) is a Step-9-deferred enhancement.
@@ -54,6 +57,6 @@ RUN python -m uvicorn --version && \
 
 USER appuser
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -f http://localhost:8000/api/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -f http://localhost:8000/api/health/liveness || exit 1
 
 CMD ["uvicorn", "app.main:app", "--app-dir", "/app/apps/api", "--host", "0.0.0.0", "--port", "8000"]

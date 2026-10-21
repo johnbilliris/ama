@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import yaml
+
 from tools.foundry_carveout_eval_summary import main as eval_main
 from tools.foundry_carveout_prompt_hash_diff import _format_diff, _index_by_model_id
 
@@ -17,9 +19,14 @@ def test_workflow_invokes_prompt_hash_diff_and_eval_summary() -> None:
     assert "peter-evans/create-or-update-comment" in text
 
 
-def test_workflow_triggers_on_pr_paths() -> None:
+def test_workflow_remains_manual_and_retains_guarded_pr_comment_inputs() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
-    assert "pull_request:" in text
+    workflow = yaml.safe_load(text)
+    triggers = workflow.get("on", workflow.get(True))
+    assert set(triggers) == {"workflow_dispatch"}
+    comment_job = workflow["jobs"]["prompt-hash-diff-comment"]
+    assert comment_job["if"] == "github.event_name == 'pull_request'"
+    assert comment_job["permissions"] == {"pull-requests": "write", "contents": "read"}
     assert "data/governance/foundry_carveout_registry.json" in text
     assert "packages/eval-dataset/data/telemetry_injection_v1/cases.jsonl" in text
 

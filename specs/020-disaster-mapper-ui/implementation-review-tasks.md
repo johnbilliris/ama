@@ -1076,7 +1076,7 @@ UNVERIFIED until actual records meet AUD-020-025/AUD-020-026.
 | CHK010 | [ ] | PARTIAL | [Both layouts start open](../../apps/web/src/app/page.tsx#L87); no approved per-layout initial state in local requirements. | AUD-020-016, AUD-020-026 |
 | CHK011 | [ ] | PARTIAL | [Source ordering](../../packages/ui/src/components/disaster-map/filter-panel.tsx#L164) is Status, Date, Type, Severity, Phase; formal ordering/delegation not closed. | AUD-020-026 |
 | CHK012 | [ ] | IMPLEMENTED | [R-007](research.md#L1) explicitly says all filters unset means show all; hook has corresponding defaults. Formal review still unverified. | AUD-020-014, AUD-020-026 |
-| CHK013 | [ ] | PARTIAL | [API inverted-year 400](../../apps/api/app/api/routes/incidents_map.py#L136) is defined; user-facing correction and UI constraints need completion. | AUD-020-013, AUD-020-015 |
+| CHK013 | [ ] | PARTIAL | [API inverted-year empty 200 response](../../apps/api/app/api/routes/incidents_map.py#L154) is defined; user-facing correction and UI constraints need completion. | AUD-020-013, AUD-020-015 |
 | CHK014 | [ ] | IMPLEMENTED | [Year select elements](../../packages/ui/src/components/disaster-map/filter-panel.tsx#L199) implement selectors specified by T017. | AUD-020-015 |
 | CHK015 | [ ] | CONFLICT | Dynamic earliest year is in [assumptions](spec.md#L206)/T017, but [source starts 2000](../../packages/ui/src/components/disaster-map/filter-panel.tsx#L125). | AUD-020-015 |
 | CHK016 | [ ] | IMPLEMENTED | [R-007 defaults](research.md#L1) and [empty CSV checked state](../../packages/ui/src/components/disaster-map/use-disaster-map-filters.ts#L203) define no selected type restriction. | AUD-020-026 |

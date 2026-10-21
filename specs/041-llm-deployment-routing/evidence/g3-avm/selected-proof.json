@@ -1,0 +1,155 @@
+{
+  "selectedVersion": "0.18.0",
+  "observedAtUtc": "2026-10-19T13:02:21.498661+00:00",
+  "publicRequests": [
+    {
+      "observedAtUtc": "2026-10-19T13:02:21.830776+00:00",
+      "url": "https://mcr.microsoft.com/v2/bicep/avm/res/cognitive-services/account/manifests/0.18.0",
+      "file": "selected-oci-manifest.json",
+      "sha256": "46982b96fd9dd36089aaa6b6b440562d9a8ba0fc60b3002222201f630d8695b9",
+      "bytes": 1152,
+      "status": 200,
+      "date": "Mon, 19 Oct 2026 13:02:20 GMT",
+      "dockerContentDigest": "sha256:46982b96fd9dd36089aaa6b6b440562d9a8ba0fc60b3002222201f630d8695b9"
+    },
+    {
+      "observedAtUtc": "2026-10-19T13:02:22.422653+00:00",
+      "url": "https://mcr.microsoft.com/v2/bicep/avm/res/cognitive-services/account/blobs/sha256:78c8c1899a3a408a96a94b625d79164efcbba3d7f95d99bdc23c20b23d089976",
+      "file": "selected-root-template.json.txt",
+      "sha256": "78c8c1899a3a408a96a94b625d79164efcbba3d7f95d99bdc23c20b23d089976",
+      "bytes": 116708,
+      "status": 200,
+      "date": "Mon, 19 Oct 2026 13:02:21 GMT",
+      "dockerContentDigest": null
+    },
+    {
+      "observedAtUtc": "2026-10-19T13:02:23.595730+00:00",
+      "url": "https://mcr.microsoft.com/v2/bicep/avm/res/cognitive-services/account/blobs/sha256:dffcff2af477628e3ede3df9d3c76aa6ac7b143c6dc479a97caf6dae6e02c9ed",
+      "file": "selected-source.tar.gz",
+      "sha256": "dffcff2af477628e3ede3df9d3c76aa6ac7b143c6dc479a97caf6dae6e02c9ed",
+      "bytes": 20001,
+      "status": 200,
+      "date": "Mon, 19 Oct 2026 13:02:22 GMT",
+      "dockerContentDigest": null
+    },
+    {
+      "observedAtUtc": "2026-10-19T13:02:25.894663+00:00",
+      "url": "https://raw.githubusercontent.com/Azure/bicep-registry-modules/f1070229a704c42897f07bdc19913cba26895bae/avm/res/cognitive-services/account/deployment/main.bicep",
+      "file": "selected-commit-child.bicep.txt",
+      "sha256": "a0d007d0f61a143949c0d0acb771f59c9bc96f72db4d952fc03dc8a4d1834aa1",
+      "bytes": 1755,
+      "status": 200,
+      "date": "Mon, 19 Oct 2026 13:02:25 GMT",
+      "dockerContentDigest": null
+    },
+    {
+      "observedAtUtc": "2026-10-19T13:02:26.188196+00:00",
+      "url": "https://raw.githubusercontent.com/Azure/bicep-registry-modules/f1070229a704c42897f07bdc19913cba26895bae/avm/res/cognitive-services/account/main.bicep",
+      "file": "selected-commit-root.bicep.txt",
+      "sha256": "7f900d418abb0b567c68b350f57b70e8e6b4cc61f778e8b630582c12b534b87d",
+      "bytes": 30905,
+      "status": 200,
+      "date": "Mon, 19 Oct 2026 13:02:25 GMT",
+      "dockerContentDigest": null
+    },
+    {
+      "observedAtUtc": "2026-10-19T13:02:26.510670+00:00",
+      "url": "https://raw.githubusercontent.com/Azure/bicep-registry-modules/f1070229a704c42897f07bdc19913cba26895bae/LICENSE",
+      "file": "selected-LICENSE.txt",
+      "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+      "bytes": 1141,
+      "status": 200,
+      "date": "Mon, 19 Oct 2026 13:02:25 GMT",
+      "dockerContentDigest": null
+    }
+  ],
+  "manifestDigest": "sha256:46982b96fd9dd36089aaa6b6b440562d9a8ba0fc60b3002222201f630d8695b9",
+  "archiveMembers": [
+    "__metadata.json",
+    "files/_cache_/br/mcr.microsoft.com/bicep$avm$res$network$private-endpoint/0.11.1$/main.json",
+    "files/_cache_/br/mcr.microsoft.com/bicep$avm$utl$types$avm-common-types/0.6.0$/main.json",
+    "files/_cache_/br/mcr.microsoft.com/bicep$avm$utl$types$avm-common-types/0.6.1$/main.json",
+    "files/deployment/main.bicep",
+    "files/main.bicep",
+    "files/modules/keyVaultExport.bicep"
+  ],
+  "tagRef": {
+    "ref": "refs/tags/avm/res/cognitive-services/account/0.18.0",
+    "node_id": "REF_kwDOGrDB7doAM3JlZnMvdGFncy9hdm0vcmVzL2NvZ25pdGl2ZS1zZXJ2aWNlcy9hY2NvdW50LzAuMTguMA",
+    "url": "https://api.github.com/repos/Azure/bicep-registry-modules/git/refs/tags/avm/res/cognitive-services/account/0.18.0",
+    "object": {
+      "sha": "f1070229a704c42897f07bdc19913cba26895bae",
+      "type": "commit",
+      "url": "https://api.github.com/repos/Azure/bicep-registry-modules/git/commits/f1070229a704c42897f07bdc19913cba26895bae"
+    }
+  },
+  "childSourceByteIdentical": true,
+  "extraction": {
+    "parentSymbol": "cognitiveService_deployments",
+    "jsonPointer": "/resources/cognitiveService_deployments/properties/template",
+    "serialization": "Python json.dumps(sort_keys=True,separators=(comma,colon)), UTF-8, one LF",
+    "sha256": "3afc13d3e759487c5dc6713aaf5b774b1b56beb6e7d53738d94816bbce949988"
+  },
+  "standalonePublicationProbe": {
+    "url": "https://mcr.microsoft.com/v2/bicep/avm/res/cognitive-services/account/deployment/tags/list",
+    "status": 404,
+    "observedAtUtc": "2026-10-19T13:02:27.134025+00:00"
+  },
+  "files": [
+    {
+      "file": "selected-child-template.json.txt",
+      "sha256": "3afc13d3e759487c5dc6713aaf5b774b1b56beb6e7d53738d94816bbce949988",
+      "bytes": 2541
+    },
+    {
+      "file": "selected-commit-child.bicep.txt",
+      "sha256": "a0d007d0f61a143949c0d0acb771f59c9bc96f72db4d952fc03dc8a4d1834aa1",
+      "bytes": 1755
+    },
+    {
+      "file": "selected-commit-root.bicep.txt",
+      "sha256": "7f900d418abb0b567c68b350f57b70e8e6b4cc61f778e8b630582c12b534b87d",
+      "bytes": 30905
+    },
+    {
+      "file": "selected-LICENSE.txt",
+      "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+      "bytes": 1141
+    },
+    {
+      "file": "selected-oci-manifest.json",
+      "sha256": "46982b96fd9dd36089aaa6b6b440562d9a8ba0fc60b3002222201f630d8695b9",
+      "bytes": 1152
+    },
+    {
+      "file": "selected-published-child.bicep.txt",
+      "sha256": "a0d007d0f61a143949c0d0acb771f59c9bc96f72db4d952fc03dc8a4d1834aa1",
+      "bytes": 1755
+    },
+    {
+      "file": "selected-published-root.bicep.txt",
+      "sha256": "88886e2687f8f8e27bd2b4ac357de1afdad50d2fdd659570ec993712efa94449",
+      "bytes": 30903
+    },
+    {
+      "file": "selected-root-template.json.txt",
+      "sha256": "78c8c1899a3a408a96a94b625d79164efcbba3d7f95d99bdc23c20b23d089976",
+      "bytes": 116708
+    },
+    {
+      "file": "selected-source-metadata.json",
+      "sha256": "c0feac38c68017cde426ce3f5c0f5d9a84b4f847c96f8bc823e2e754234711e9",
+      "bytes": 2915
+    },
+    {
+      "file": "selected-source.tar.gz",
+      "sha256": "dffcff2af477628e3ede3df9d3c76aa6ac7b143c6dc479a97caf6dae6e02c9ed",
+      "bytes": 20001
+    },
+    {
+      "file": "selected-tag-ref.json",
+      "sha256": "aba1fa0f5800320fc8418fc943599ab0220ce98803cef0c17411e5188a32747b",
+      "bytes": 526
+    }
+  ]
+}

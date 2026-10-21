@@ -133,7 +133,7 @@ uv run pytest tests/integration/ -k "risk_assessment" -v
 
 ```bash
 # Build
-docker build -t risk-assessment-agent -f apps/agents/Dockerfile .
+docker build --platform linux/arm64 -t risk-assessment-agent -f apps/agents/Dockerfile .
 
 # Run
 docker run -p 8081:8081 --env-file apps/agents/.env risk-assessment-agent

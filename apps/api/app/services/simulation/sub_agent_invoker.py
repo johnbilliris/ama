@@ -5,9 +5,8 @@ Spec-036 / T-B08 / T-B12 / T-B14 (FR-002 migration step 4):
 * :func:`production_invoker` is now the only adapter factory — it wires the
   real adapters under :mod:`apps.api.app.services.simulation.sub_agents`.
 * The legacy ``default_invoker`` stub block has been **deleted** per T-B14
-  (FR-002 migration step 4). The trip-wire literal documented in
-  ``tools.simulation_stub_sweep.TRIP_WIRE`` no longer appears anywhere
-  in the production code path.
+  (FR-002 migration step 4). The obsolete stub marker no longer appears
+  anywhere in the production code path.
 * The ``invoke`` method applies a soft-ack at ``T+5 s`` (FR-006) and a
   hard timeout at ``T+120 s``, falling back to a degraded reply on timeout.
 * Kebab-case role aliases (``risk-assessment``, ``resource-allocation``)
@@ -21,7 +20,7 @@ import logging
 import os
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     import httpx
@@ -46,6 +45,24 @@ class SubAgentReply:
     prompt_hash: str | None = None
     model_deployment: str | None = None
     sub_agent_invocation_id: str | None = None
+    model_id: str | None = None
+    model_version: str | None = None
+    inference_attempted: bool | None = None
+    inference_outcome: Literal["succeeded", "failed", "not_attempted", "unknown"] | None = "unknown"
+
+    def provenance(self) -> dict[str, object]:
+        """Project remote evidence without treating agent correlation as model proof."""
+        return {
+            "model_deployment": self.model_deployment,
+            "model_id": self.model_id,
+            "model_version": self.model_version,
+            "inference_attempted": self.inference_attempted,
+            "inference_outcome": self.inference_outcome,
+            "sub_agent_invocation_id": self.sub_agent_invocation_id,
+            "prompt_hash": self.prompt_hash,
+            "degraded": self.degraded,
+            "error": self.error,
+        }
 
 
 SubAgentFn = Callable[[str, str], Awaitable[SubAgentReply]]
@@ -103,6 +120,8 @@ class SubAgentInvoker:
                 citations=[],
                 degraded=True,
                 error="unknown_sub_agent",
+                inference_attempted=False,
+                inference_outcome="not_attempted",
             )
         hard_timeout = timeout_s if timeout_s is not None else self._hard_timeout_seconds
         soft_ack_task = asyncio.create_task(self._emit_soft_ack(sub_agent))

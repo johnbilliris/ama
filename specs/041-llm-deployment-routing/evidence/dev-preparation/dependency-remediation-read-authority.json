@@ -1,0 +1,14 @@
+{
+  "approval_reference": "dependency-remediation-approval.json",
+  "window_start": "2026-10-20T03:58:10Z",
+  "window_end": "2026-10-20T07:56:00Z",
+  "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+  "resource_group": "ama",
+  "account": "cog-dev-w3uq6w",
+  "region": "australiaeast",
+  "allowed": [
+    "refresh target and protection metadata, effective policy semantics and existing app revisions"
+  ],
+  "max_observation_age_seconds": 3600,
+  "release_approved": false
+}

@@ -160,14 +160,21 @@ def test_aud015_catalogue_is_generated_and_bijective() -> None:
     archived = [e for e in entries if e.tier == "archived"]
 
     assert len(actors) == 85
-    assert len(workflows) == 12
+    assert len(workflows) == 14
     assert len(archived) == 6
 
     actor_ids = [e.agent_id for e in actors]
     assert len(actor_ids) == len(set(actor_ids)), "active actor IDs must be unique"
 
     workflow_ids = {e.agent_id for e in workflows}
-    assert {"speckit.fleet.review", "speckit.fleet.run", "speckit.verify.run"}.issubset(workflow_ids)
+    required_workflow_ids = {
+        "speckit.converge",
+        "speckit.fleet.review",
+        "speckit.fleet.run",
+        "speckit.fleet.yolo",
+        "speckit.verify.run",
+    }
+    assert required_workflow_ids.issubset(workflow_ids)
 
     for e in actors:
         p = ROOT / e.file_path

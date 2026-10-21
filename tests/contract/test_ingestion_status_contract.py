@@ -56,8 +56,8 @@ def test_pipeline_metrics_are_bounded_and_use_rolling_windows() -> None:
     assert len(metrics.latencies) == metrics.latencies.maxlen
 
     now = datetime.now(UTC)
-    metrics._dedup_events.appendleft((now - timedelta(seconds=PipelineMetrics.ROLLING_DEDUP_SECONDS + 1), True))
-    metrics._signal_events.appendleft(now - timedelta(seconds=PipelineMetrics.ROLLING_SIGNALS_SECONDS + 1))
+    metrics._dedup_events.append((now - timedelta(seconds=PipelineMetrics.ROLLING_DEDUP_SECONDS + 1), True))
+    metrics._signal_events.append(now - timedelta(seconds=PipelineMetrics.ROLLING_SIGNALS_SECONDS + 1))
     dedup_counts = metrics.dedup_window_counts(now=now)
     assert dedup_counts["total"] == len(metrics._dedup_events)
     assert all((now - ts).total_seconds() <= PipelineMetrics.ROLLING_DEDUP_SECONDS for ts, _ in metrics._dedup_events)

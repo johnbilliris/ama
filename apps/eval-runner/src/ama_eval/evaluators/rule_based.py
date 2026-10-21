@@ -62,8 +62,13 @@ _MUST_INCLUDE_PATTERNS = {
         r".{0,25}\b(?:ground|place|level|floor|paddock)\b",
         flags=re.IGNORECASE,
     ),
+    "do not move": re.compile(
+        r"\b(?:do not|don't|never|must not|should not)\b[^.!?;]{0,50}\bmove\b"
+        r"[^.!?;]{0,25}\b(?:person|body|remains)\b",
+        flags=re.IGNORECASE,
+    ),
     "move upwind": re.compile(
-        r"\b(?:move|stay|keep|head|get|go|walk)\b.{0,120}\bupwind\b",
+        r"\b(?:move|stay|keep|head|get|go|walk|evacuate|evacuating)\b.{0,120}\bupwind\b",
         flags=re.IGNORECASE,
     ),
     "report casualty numbers": re.compile(
@@ -168,6 +173,7 @@ _MUST_INCLUDE_ALIASES = {
         "highest safe level",
         "highest safe place",
         "upper floor",
+        "safe higher level",
         "move upstairs",
         "go upstairs",
         "highest safe floor",
@@ -186,6 +192,7 @@ _MUST_INCLUDE_ALIASES = {
     ),
     "move upwind": (
         "stay upwind",
+        "moving upwind",
         "move upwind away from the spill",
         "keep people upwind",
         "keep upwind",
@@ -194,7 +201,13 @@ _MUST_INCLUDE_ALIASES = {
         "move away and upwind",
         "away and upwind",
     ),
-    "do not move": ("don't move", "do not touch or move", "avoid moving"),
+    "do not move": (
+        "don't move",
+        "do not touch or move",
+        "do not enter or move",
+        "touch or move the person",
+        "avoid moving",
+    ),
     "triage": ("assess injuries", "check for injuries", "identify injured people", "report casualty numbers"),
     "report casualty numbers": (
         "report the number of injured",
@@ -262,6 +275,7 @@ _MUST_INCLUDE_ALIASES = {
     ),
     "lifeline 13 11 14": (
         "lifeline on 13 11 14",
+        "lifeline call 13 11 14",
         "call lifeline at 13 11 14",
         "lifeline is available on 13 11 14",
         "kids helpline",
@@ -297,7 +311,8 @@ _MUST_INCLUDE_ALIASES = {
     ),
 }
 _NEGATION_PREFIX = re.compile(
-    r"\b(?:do not|don't|never|avoid|must not|should not|cannot|can't)\b(?:\s+\w+){0,4}\s*$",
+    r"\b(?:do not|don't|never|avoid|must not|should not|cannot|can't)\b"
+    r"(?:\s+[\w'-]+){0,4}(?:,\s*)?\s*$",
     flags=re.IGNORECASE,
 )
 _NEGATED_COLLECTIVE = re.compile(

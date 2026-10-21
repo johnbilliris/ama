@@ -1,0 +1,2465 @@
+{
+  "changes": [
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/microsoft.alertsmanagement/smartDetectorAlertRules/Failure Anomalies - appi-dev",
+        "location": "global",
+        "name": "Failure Anomalies - appi-dev",
+        "resourceGroup": "ama",
+        "type": "microsoft.alertsmanagement/smartDetectorAlertRules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/microsoft.alertsmanagement/smartDetectorAlertRules/Failure Anomalies - appi-dev",
+        "location": "global",
+        "name": "Failure Anomalies - appi-dev",
+        "resourceGroup": "ama",
+        "type": "microsoft.alertsmanagement/smartDetectorAlertRules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/microsoft.alertsmanagement/smartDetectorAlertRules/Failure Anomalies - appi-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-agents-dev",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "ca-agents-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "agents",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/containerApps"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-agents-dev",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "ca-agents-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "agents",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/containerApps"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-agents-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-api-dev",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "ca-api-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "api",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/containerApps"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-api-dev",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "ca-api-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "api",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/containerApps"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-api-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-evacuation-dev",
+        "identity": {
+          "type": "UserAssigned",
+          "userAssignedIdentities": {
+            "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-dev-evacuation": {}
+          }
+        },
+        "kind": "containerapps",
+        "location": "australiaeast",
+        "name": "ca-evacuation-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "evacuation",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/containerApps"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-evacuation-dev",
+        "identity": {
+          "type": "UserAssigned",
+          "userAssignedIdentities": {
+            "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-dev-evacuation": {}
+          }
+        },
+        "kind": "containerapps",
+        "location": "australiaeast",
+        "name": "ca-evacuation-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "evacuation",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/containerApps"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-evacuation-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-ingest-dev",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "ca-ingest-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "ingestion",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/containerApps"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-ingest-dev",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "ca-ingest-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "ingestion",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/containerApps"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-ingest-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/jobs/caj-ingest-runner-dev",
+        "identity": {
+          "type": "UserAssigned",
+          "userAssignedIdentities": {
+            "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-ingest-runner-dev": {}
+          }
+        },
+        "location": "australiaeast",
+        "name": "caj-ingest-runner-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "ingest-runner",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/jobs"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/jobs/caj-ingest-runner-dev",
+        "identity": {
+          "type": "UserAssigned",
+          "userAssignedIdentities": {
+            "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-ingest-runner-dev": {}
+          }
+        },
+        "location": "australiaeast",
+        "name": "caj-ingest-runner-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "ingest-runner",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/jobs"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/jobs/caj-ingest-runner-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/managedEnvironments/cae-dev",
+        "location": "australiaeast",
+        "name": "cae-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/managedEnvironments"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/managedEnvironments/cae-dev",
+        "location": "australiaeast",
+        "name": "cae-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.App/managedEnvironments"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/managedEnvironments/cae-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Cache/redisEnterprise/redis-dev-w3uq6w",
+        "identity": {
+          "type": "None"
+        },
+        "kind": "v2",
+        "location": "australiaeast",
+        "name": "redis-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "Balanced_B0"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Cache/redisEnterprise"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Cache/redisEnterprise/redis-dev-w3uq6w",
+        "identity": {
+          "type": "None"
+        },
+        "kind": "v2",
+        "location": "australiaeast",
+        "name": "redis-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "Balanced_B0"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Cache/redisEnterprise"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Cache/redisEnterprise/redis-dev-w3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "kind": "AIServices",
+        "location": "australiaeast",
+        "name": "cog-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "S0"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.CognitiveServices/accounts"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "kind": "AIServices",
+        "location": "australiaeast",
+        "name": "cog-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "S0"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.CognitiveServices/accounts"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2026-05-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-dev",
+        "name": "gpt-5.4-dev",
+        "properties": {
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-5.4",
+            "version": "2026-03-05"
+          },
+          "raiPolicyName": "reasoning-em-domain-dev",
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 30,
+          "name": "GlobalStandard"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      "before": {
+        "apiVersion": "2026-05-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-dev",
+        "name": "gpt-5.4-dev",
+        "properties": {
+          "currentCapacity": 30,
+          "deploymentState": "Running",
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-5.4",
+            "version": "2026-03-05"
+          },
+          "raiPolicyName": "reasoning-em-domain-dev",
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 30,
+          "name": "GlobalStandard"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      "changeType": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": 30,
+          "children": null,
+          "path": "properties.currentCapacity",
+          "propertyChangeType": "Delete"
+        },
+        {
+          "after": null,
+          "before": "Running",
+          "children": null,
+          "path": "properties.deploymentState",
+          "propertyChangeType": "Delete"
+        }
+      ],
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2026-05-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-mini-dev",
+        "name": "gpt-5.4-mini-dev",
+        "properties": {
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-5.4",
+            "version": "2026-03-05"
+          },
+          "raiPolicyName": "drafting-em-domain-dev",
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 60,
+          "name": "GlobalStandard"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      "before": {
+        "apiVersion": "2026-05-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-mini-dev",
+        "name": "gpt-5.4-mini-dev",
+        "properties": {
+          "currentCapacity": 60,
+          "deploymentState": "Running",
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-5.4",
+            "version": "2026-03-05"
+          },
+          "raiPolicyName": "drafting-em-domain-dev",
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 60,
+          "name": "GlobalStandard"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      "changeType": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": 60,
+          "children": null,
+          "path": "properties.currentCapacity",
+          "propertyChangeType": "Delete"
+        },
+        {
+          "after": null,
+          "before": "Running",
+          "children": null,
+          "path": "properties.deploymentState",
+          "propertyChangeType": "Delete"
+        }
+      ],
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-mini-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2026-05-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-sim-dev",
+        "name": "gpt-5.4-sim-dev",
+        "properties": {
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-5.4",
+            "version": "2026-03-05"
+          },
+          "raiPolicyName": "sim-em-domain-dev",
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 20,
+          "name": "GlobalStandard"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      "before": {
+        "apiVersion": "2026-05-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-sim-dev",
+        "name": "gpt-5.4-sim-dev",
+        "properties": {
+          "currentCapacity": 20,
+          "deploymentState": "Running",
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-5.4",
+            "version": "2026-03-05"
+          },
+          "raiPolicyName": "sim-em-domain-dev",
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 20,
+          "name": "GlobalStandard"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      "changeType": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": 20,
+          "children": null,
+          "path": "properties.currentCapacity",
+          "propertyChangeType": "Delete"
+        },
+        {
+          "after": null,
+          "before": "Running",
+          "children": null,
+          "path": "properties.deploymentState",
+          "propertyChangeType": "Delete"
+        }
+      ],
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-sim-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2026-05-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/text-embedding-3-large-dev",
+        "name": "text-embedding-3-large-dev",
+        "properties": {
+          "model": {
+            "format": "OpenAI",
+            "name": "text-embedding-3-large",
+            "version": "1"
+          },
+          "raiPolicyName": "Microsoft.DefaultV2",
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 60,
+          "name": "Standard"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      "before": {
+        "apiVersion": "2026-05-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/text-embedding-3-large-dev",
+        "name": "text-embedding-3-large-dev",
+        "properties": {
+          "currentCapacity": 60,
+          "deploymentState": "Running",
+          "model": {
+            "format": "OpenAI",
+            "name": "text-embedding-3-large",
+            "version": "1"
+          },
+          "raiPolicyName": "Microsoft.DefaultV2",
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 60,
+          "name": "Standard"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      "changeType": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": 60,
+          "children": null,
+          "path": "properties.currentCapacity",
+          "propertyChangeType": "Delete"
+        },
+        {
+          "after": null,
+          "before": "Running",
+          "children": null,
+          "path": "properties.deploymentState",
+          "propertyChangeType": "Delete"
+        }
+      ],
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/text-embedding-3-large-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2021-05-01-preview",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/providers/Microsoft.Insights/diagnosticSettings/openai-diagnostics",
+        "name": "openai-diagnostics",
+        "properties": {
+          "logs": [
+            {
+              "category": "RequestResponse",
+              "enabled": true,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "Audit",
+              "enabled": true,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "AzureOpenAIRequestUsage",
+              "enabled": false,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "Trace",
+              "enabled": false,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "ManagedNetworkEvent",
+              "enabled": false,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            }
+          ],
+          "metrics": [
+            {
+              "category": "AllMetrics",
+              "enabled": true,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            }
+          ],
+          "workspaceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.OperationalInsights/workspaces/log-dev"
+        },
+        "resourceGroup": "ama",
+        "type": "Microsoft.Insights/diagnosticSettings"
+      },
+      "before": {
+        "apiVersion": "2021-05-01-preview",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/providers/Microsoft.Insights/diagnosticSettings/openai-diagnostics",
+        "name": "openai-diagnostics",
+        "properties": {
+          "logs": [
+            {
+              "category": "RequestResponse",
+              "enabled": true,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "Audit",
+              "enabled": true,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "AzureOpenAIRequestUsage",
+              "enabled": false,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "Trace",
+              "enabled": false,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "ManagedNetworkEvent",
+              "enabled": false,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            }
+          ],
+          "metrics": [
+            {
+              "category": "AllMetrics",
+              "enabled": true,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            }
+          ],
+          "workspaceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.OperationalInsights/workspaces/log-dev"
+        },
+        "resourceGroup": "ama",
+        "type": "Microsoft.Insights/diagnosticSettings"
+      },
+      "changeType": "NoChange",
+      "delta": [],
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/providers/Microsoft.Insights/diagnosticSettings/openai-diagnostics",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-10-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/drafting-em-domain-dev",
+        "name": "drafting-em-domain-dev",
+        "properties": {
+          "basePolicyName": "Microsoft.DefaultV2",
+          "contentFilters": [
+            {
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Prompt"
+            },
+            {
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking"
+        },
+        "resourceGroup": "ama",
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      "before": {
+        "apiVersion": "2024-10-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/drafting-em-domain-dev",
+        "name": "drafting-em-domain-dev",
+        "properties": {
+          "basePolicyName": "Microsoft.DefaultV2",
+          "contentFilters": [
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking"
+        },
+        "resourceGroup": "ama",
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      "changeType": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": null,
+          "children": [
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "0",
+              "propertyChangeType": "Modify"
+            },
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "1",
+              "propertyChangeType": "Modify"
+            }
+          ],
+          "path": "properties.contentFilters",
+          "propertyChangeType": "Array"
+        }
+      ],
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/drafting-em-domain-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-10-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/reasoning-em-domain-dev",
+        "name": "reasoning-em-domain-dev",
+        "properties": {
+          "basePolicyName": "Microsoft.DefaultV2",
+          "contentFilters": [
+            {
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Prompt"
+            },
+            {
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking"
+        },
+        "resourceGroup": "ama",
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      "before": {
+        "apiVersion": "2024-10-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/reasoning-em-domain-dev",
+        "name": "reasoning-em-domain-dev",
+        "properties": {
+          "basePolicyName": "Microsoft.DefaultV2",
+          "contentFilters": [
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking"
+        },
+        "resourceGroup": "ama",
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      "changeType": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": null,
+          "children": [
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "0",
+              "propertyChangeType": "Modify"
+            },
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "1",
+              "propertyChangeType": "Modify"
+            }
+          ],
+          "path": "properties.contentFilters",
+          "propertyChangeType": "Array"
+        }
+      ],
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/reasoning-em-domain-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "apiVersion": "2024-10-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/sim-em-domain-dev",
+        "name": "sim-em-domain-dev",
+        "properties": {
+          "basePolicyName": "Microsoft.DefaultV2",
+          "contentFilters": [
+            {
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Prompt"
+            },
+            {
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking"
+        },
+        "resourceGroup": "ama",
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      "before": {
+        "apiVersion": "2024-10-01",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/sim-em-domain-dev",
+        "name": "sim-em-domain-dev",
+        "properties": {
+          "basePolicyName": "Microsoft.DefaultV2",
+          "contentFilters": [
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking"
+        },
+        "resourceGroup": "ama",
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      "changeType": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": null,
+          "children": [
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "0",
+              "propertyChangeType": "Modify"
+            },
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "1",
+              "propertyChangeType": "Modify"
+            }
+          ],
+          "path": "properties.contentFilters",
+          "propertyChangeType": "Array"
+        }
+      ],
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/sim-em-domain-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cs-dev-w3uq6w",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "kind": "ContentSafety",
+        "location": "australiaeast",
+        "name": "cs-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "S0"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.CognitiveServices/accounts"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cs-dev-w3uq6w",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "kind": "ContentSafety",
+        "location": "australiaeast",
+        "name": "cs-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "S0"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.CognitiveServices/accounts"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cs-dev-w3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w",
+        "location": "australiaeast",
+        "name": "crdevw3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "Basic",
+          "tier": "Basic"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.ContainerRegistry/registries"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w",
+        "location": "australiaeast",
+        "name": "crdevw3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "Basic",
+          "tier": "Basic"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.ContainerRegistry/registries"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Devices/IotHubs/iot-dev-w3uq6w",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "iot-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 1,
+          "name": "S1",
+          "tier": "Standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Devices/IotHubs"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Devices/IotHubs/iot-dev-w3uq6w",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "iot-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 1,
+          "name": "S1",
+          "tier": "Standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Devices/IotHubs"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Devices/IotHubs/iot-dev-w3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-dev-w3uq6w",
+        "identity": {
+          "type": "None"
+        },
+        "kind": "GlobalDocumentDB",
+        "location": "australiaeast",
+        "name": "cosmos-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.DocumentDB/databaseAccounts"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-dev-w3uq6w",
+        "identity": {
+          "type": "None"
+        },
+        "kind": "GlobalDocumentDB",
+        "location": "australiaeast",
+        "name": "cosmos-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.DocumentDB/databaseAccounts"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-dev-w3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.EventGrid/systemTopics/iot-dev-w3uq6w-events",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "iot-dev-w3uq6w-events",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.EventGrid/systemTopics"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.EventGrid/systemTopics/iot-dev-w3uq6w-events",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "iot-dev-w3uq6w-events",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.EventGrid/systemTopics"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.EventGrid/systemTopics/iot-dev-w3uq6w-events",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.EventGrid/systemTopics/stdevw3uq6w2-19f1ccf0-f3b2-466b-b991-870feda0a239",
+        "location": "australiaeast",
+        "name": "stdevw3uq6w2-19f1ccf0-f3b2-466b-b991-870feda0a239",
+        "resourceGroup": "ama",
+        "type": "Microsoft.EventGrid/systemTopics"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.EventGrid/systemTopics/stdevw3uq6w2-19f1ccf0-f3b2-466b-b991-870feda0a239",
+        "location": "australiaeast",
+        "name": "stdevw3uq6w2-19f1ccf0-f3b2-466b-b991-870feda0a239",
+        "resourceGroup": "ama",
+        "type": "Microsoft.EventGrid/systemTopics"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.EventGrid/systemTopics/stdevw3uq6w2-19f1ccf0-f3b2-466b-b991-870feda0a239",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/actiongroups/ag-dev",
+        "location": "global",
+        "name": "ag-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/actiongroups"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/actiongroups/ag-dev",
+        "location": "global",
+        "name": "ag-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/actiongroups"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/actiongroups/ag-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/microsoft.insights/actiongroups/Application Insights Smart Detection",
+        "location": "global",
+        "name": "Application Insights Smart Detection",
+        "resourceGroup": "ama",
+        "type": "microsoft.insights/actiongroups"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/microsoft.insights/actiongroups/Application Insights Smart Detection",
+        "location": "global",
+        "name": "Application Insights Smart Detection",
+        "resourceGroup": "ama",
+        "type": "microsoft.insights/actiongroups"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/microsoft.insights/actiongroups/Application Insights Smart Detection",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/components/appi-dev",
+        "kind": "web",
+        "location": "australiaeast",
+        "name": "appi-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/components"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/components/appi-dev",
+        "kind": "web",
+        "location": "australiaeast",
+        "name": "appi-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/components"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/components/appi-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/metricalerts/alert-errors-dev",
+        "location": "global",
+        "name": "alert-errors-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/metricalerts"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/metricalerts/alert-errors-dev",
+        "location": "global",
+        "name": "alert-errors-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/metricalerts"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/metricalerts/alert-errors-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/metricalerts/alert-latency-dev",
+        "location": "global",
+        "name": "alert-latency-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/metricalerts"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/metricalerts/alert-latency-dev",
+        "location": "global",
+        "name": "alert-latency-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/metricalerts"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/metricalerts/alert-latency-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/metricalerts/alert-search-capacity-srch-dev-w3uq6w",
+        "location": "global",
+        "name": "alert-search-capacity-srch-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/metricalerts"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/metricalerts/alert-search-capacity-srch-dev-w3uq6w",
+        "location": "global",
+        "name": "alert-search-capacity-srch-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/metricalerts"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/metricalerts/alert-search-capacity-srch-dev-w3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-audit-buffer-capacity-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-audit-buffer-capacity-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-audit-buffer-capacity-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-audit-buffer-capacity-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-audit-buffer-capacity-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-audit-degradation-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-audit-degradation-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-audit-degradation-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-audit-degradation-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-audit-degradation-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-capacity-limit-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-capacity-limit-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-capacity-limit-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-capacity-limit-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-capacity-limit-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-congestion-risk-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-congestion-risk-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-congestion-risk-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-congestion-risk-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-congestion-risk-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-emergency-escalation-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-emergency-escalation-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-emergency-escalation-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-emergency-escalation-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-emergency-escalation-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-llm-unavailable-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-llm-unavailable-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-llm-unavailable-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-llm-unavailable-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-llm-unavailable-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-no-plans-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-no-plans-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-no-plans-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-no-plans-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-no-plans-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-plan-sla-critical-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-plan-sla-critical-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-plan-sla-critical-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-plan-sla-critical-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-plan-sla-critical-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-plan-sla-warning-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-plan-sla-warning-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-plan-sla-warning-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-plan-sla-warning-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-plan-sla-warning-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-replan-sla-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-replan-sla-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-replan-sla-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-replan-sla-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-replan-sla-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-road-data-stale-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-road-data-stale-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-road-data-stale-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-road-data-stale-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-road-data-stale-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-shelter-rate-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-shelter-rate-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-shelter-rate-dev",
+        "kind": "LogAlert",
+        "location": "australiaeast",
+        "name": "alert-evac-shelter-rate-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-evac-shelter-rate-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-sim-errors-dev",
+        "location": "australiaeast",
+        "name": "alert-sim-errors-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-sim-errors-dev",
+        "location": "australiaeast",
+        "name": "alert-sim-errors-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/scheduledqueryrules"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/scheduledqueryrules/alert-sim-errors-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/workbooks/07bc6a3c-26c7-59ac-83d9-29cb1ea5caf9",
+        "kind": "shared",
+        "location": "australiaeast",
+        "name": "07bc6a3c-26c7-59ac-83d9-29cb1ea5caf9",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "hidden-title": "help-slis",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/workbooks"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/workbooks/07bc6a3c-26c7-59ac-83d9-29cb1ea5caf9",
+        "kind": "shared",
+        "location": "australiaeast",
+        "name": "07bc6a3c-26c7-59ac-83d9-29cb1ea5caf9",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "hidden-title": "help-slis",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Insights/workbooks"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/workbooks/07bc6a3c-26c7-59ac-83d9-29cb1ea5caf9",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-dev-evacuation",
+        "location": "australiaeast",
+        "name": "id-dev-evacuation",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-dev-evacuation",
+        "location": "australiaeast",
+        "name": "id-dev-evacuation",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-dev-evacuation",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-ingest-runner-dev",
+        "location": "australiaeast",
+        "name": "id-ingest-runner-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-ingest-runner-dev",
+        "location": "australiaeast",
+        "name": "id-ingest-runner-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-ingest-runner-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Maps/accounts/maps-dev",
+        "kind": "Gen2",
+        "location": "global",
+        "name": "maps-dev",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "G2",
+          "tier": "Standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Maps/accounts"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Maps/accounts/maps-dev",
+        "kind": "Gen2",
+        "location": "global",
+        "name": "maps-dev",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "G2",
+          "tier": "Standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Maps/accounts"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Maps/accounts/maps-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.OperationalInsights/workspaces/log-dev",
+        "location": "australiaeast",
+        "name": "log-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.OperationalInsights/workspaces"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.OperationalInsights/workspaces/log-dev",
+        "location": "australiaeast",
+        "name": "log-dev",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.OperationalInsights/workspaces"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.OperationalInsights/workspaces/log-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Search/searchServices/srch-dev-w3uq6w",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "srch-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Search/searchServices"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Search/searchServices/srch-dev-w3uq6w",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "location": "australiaeast",
+        "name": "srch-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Search/searchServices"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Search/searchServices/srch-dev-w3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ServiceBus/namespaces/sb-corpus-dev-w3uq6w",
+        "location": "australiaeast",
+        "name": "sb-corpus-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "Standard",
+          "tier": "Standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.ServiceBus/namespaces"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ServiceBus/namespaces/sb-corpus-dev-w3uq6w",
+        "location": "australiaeast",
+        "name": "sb-corpus-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "Standard",
+          "tier": "Standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.ServiceBus/namespaces"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ServiceBus/namespaces/sb-corpus-dev-w3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ServiceBus/namespaces/sb-evac-dev-w3uq6w",
+        "location": "australiaeast",
+        "name": "sb-evac-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "Standard",
+          "tier": "Standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.ServiceBus/namespaces"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ServiceBus/namespaces/sb-evac-dev-w3uq6w",
+        "location": "australiaeast",
+        "name": "sb-evac-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "Standard",
+          "tier": "Standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.ServiceBus/namespaces"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ServiceBus/namespaces/sb-evac-dev-w3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Storage/storageAccounts/stdevw3uq6w2",
+        "kind": "StorageV2",
+        "location": "australiaeast",
+        "name": "stdevw3uq6w2",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "Standard_LRS",
+          "tier": "Standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Storage/storageAccounts"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Storage/storageAccounts/stdevw3uq6w2",
+        "kind": "StorageV2",
+        "location": "australiaeast",
+        "name": "stdevw3uq6w2",
+        "resourceGroup": "ama",
+        "sku": {
+          "name": "Standard_LRS",
+          "tier": "Standard"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Storage/storageAccounts"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Storage/storageAccounts/stdevw3uq6w2",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Web/serverFarms/plan-dev",
+        "kind": "linux",
+        "location": "australiaeast",
+        "name": "plan-dev",
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 1,
+          "family": "F",
+          "name": "F1",
+          "size": "F1",
+          "tier": "Free"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Web/serverFarms"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Web/serverFarms/plan-dev",
+        "kind": "linux",
+        "location": "australiaeast",
+        "name": "plan-dev",
+        "resourceGroup": "ama",
+        "sku": {
+          "capacity": 1,
+          "family": "F",
+          "name": "F1",
+          "size": "F1",
+          "tier": "Free"
+        },
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Web/serverFarms"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Web/serverFarms/plan-dev",
+      "symbolicName": null,
+      "unsupportedReason": null
+    },
+    {
+      "after": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Web/sites/app-dev-w3uq6w",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "kind": "app,linux",
+        "location": "australiaeast",
+        "name": "app-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "web",
+          "hidden-link: /app-insights-resource-id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/components/appi-dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Web/sites"
+      },
+      "before": {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Web/sites/app-dev-w3uq6w",
+        "identity": {
+          "type": "SystemAssigned"
+        },
+        "kind": "app,linux",
+        "location": "australiaeast",
+        "name": "app-dev-w3uq6w",
+        "resourceGroup": "ama",
+        "tags": {
+          "SecurityControl": "Ignore",
+          "azd-env-name": "dev",
+          "azd-service-name": "web",
+          "hidden-link: /app-insights-resource-id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Insights/components/appi-dev",
+          "project": "disaster-response-hub"
+        },
+        "type": "Microsoft.Web/sites"
+      },
+      "changeType": "Ignore",
+      "delta": null,
+      "deploymentId": null,
+      "extension": null,
+      "identifiers": null,
+      "resourceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Web/sites/app-dev-w3uq6w",
+      "symbolicName": null,
+      "unsupportedReason": null
+    }
+  ],
+  "diagnostics": null,
+  "error": null,
+  "potentialChanges": null,
+  "status": "Succeeded"
+}

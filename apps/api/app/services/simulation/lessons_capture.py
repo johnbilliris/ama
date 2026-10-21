@@ -228,6 +228,10 @@ def _build_sub_agent_responses(
                 "started_at": inv.started_at,
                 "ended_at": inv.ended_at,
                 "model_deployment": inv.model_deployment,
+                "model_id": inv.model_id,
+                "model_version": inv.model_version,
+                "inference_attempted": inv.inference_attempted,
+                "inference_outcome": inv.inference_outcome,
             }
         )
     # Stable ordering: started_at asc, then invocation_id asc.

@@ -107,20 +107,39 @@ def _parse_binary_timestamp(raw_payload: dict[str, Any], source_timezone: str) -
         return to_utc_iso_z(parse_iso_timestamp(text, provider="binary_metadata", field="product_timestamp"))
 
     filename = raw_payload.get("timestamp") or raw_payload.get("product_code") or raw_payload.get("source_uri")
-    return to_utc_iso_z(
-        parse_bom_filename_timestamp(
-            filename,
-            source_timezone=source_timezone,
-            provider="binary_metadata",
-            field="filename_timestamp",
+    try:
+        return to_utc_iso_z(
+            parse_bom_filename_timestamp(
+                filename,
+                source_timezone=source_timezone,
+                provider="binary_metadata",
+                field="filename_timestamp",
+            )
         )
-    )
+    except TimestampParseError as filename_error:
+        if (
+            raw_payload.get("data_source_id") != "himawari-satellite"
+            or filename_error.reason != "no YYYYMMDDHHMM or YYYYMMDDHHMMSS token in filename"
+        ):
+            raise
+
+        try:
+            provider_timestamp = _parse_provider_version_timestamp(raw_payload)
+        except TimestampParseError:
+            provider_timestamp = None
+        if provider_timestamp is not None:
+            return provider_timestamp
+        raise filename_error
 
 
 def _parse_provider_update_timestamp(raw_payload: dict[str, Any], source_timezone: str, *, fallback: str) -> str:
+    return _parse_provider_version_timestamp(raw_payload) or fallback
+
+
+def _parse_provider_version_timestamp(raw_payload: dict[str, Any]) -> str | None:
     provider_version = raw_payload.get("provider_version")
     if provider_version is None or str(provider_version).strip() == "":
-        return fallback
+        return None
     token = str(provider_version).strip().split()[-1]
     if token.isdigit() and len(token) == 14:
         return to_utc_iso_z(
@@ -134,4 +153,4 @@ def _parse_provider_update_timestamp(raw_payload: dict[str, Any], source_timezon
     try:
         return to_utc_iso_z(parse_iso_timestamp(token, provider="binary_metadata", field="provider_version"))
     except TimestampParseError:
-        return fallback
+        return None

@@ -14,6 +14,18 @@ def test_eval_gate_has_required_triggers(eval_pr_gate_workflow):
     assert "workflow_call" in trigger
 
 
+def test_eval_gate_automatic_pr_runs_only_cover_eval_runner(eval_pr_gate_workflow):
+    trigger = eval_pr_gate_workflow["on"]
+    assert trigger["pull_request"]["paths"] == ["apps/eval-runner/**"]
+    assert "paths" not in trigger["workflow_dispatch"]
+    assert "paths" not in trigger["workflow_call"]
+
+
+def test_eval_gate_checks_out_the_validated_commit_when_called_by_cd(eval_pr_gate_workflow):
+    checkout = eval_pr_gate_workflow["jobs"]["eval-gate"]["steps"][0]
+    assert checkout["with"]["ref"] == "${{ github.event.workflow_run.head_sha || github.sha }}"
+
+
 def test_eval_gate_workflow_call_exposes_explicit_inputs_outputs(eval_pr_gate_workflow):
     call = eval_pr_gate_workflow["on"]["workflow_call"]
     inputs = call.get("inputs", {})
