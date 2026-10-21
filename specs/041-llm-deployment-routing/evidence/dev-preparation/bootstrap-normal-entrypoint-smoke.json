@@ -1,0 +1,52 @@
+{
+  "checked_at": "2026-10-20T00:38:31.035391+00:00",
+  "scope": "network-isolated normal-entrypoint packaging/containment; not live dependency readiness",
+  "applications": [
+    {
+      "app": "api",
+      "local_image_id": "sha256:caff7fe867c17363684ed78fa652425960d74e0c32ebac2681bf4d71c38c5b98",
+      "normal_entrypoint": [
+        "uvicorn",
+        "app.main:app",
+        "--app-dir",
+        "/app/apps/api",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000"
+      ],
+      "network": "none",
+      "published_ports": false,
+      "startup": "initialized_and_held",
+      "readiness_http_status": 503,
+      "business_http_status": 503,
+      "liveness_http_status": 200,
+      "shutdown_exit_code": 0,
+      "shutdown_seconds": 0.813,
+      "registry_manifest_verified": false,
+      "result": "PASS normal-entrypoint held startup; live, not ready; business blocked"
+    },
+    {
+      "app": "agents",
+      "local_image_id": "sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "normal_entrypoint": [
+        "python",
+        "-m",
+        "dispatcher"
+      ],
+      "network": "none",
+      "published_ports": false,
+      "startup": "initialized_and_held",
+      "readiness_http_status": 503,
+      "business_http_status": 503,
+      "liveness_http_status": 200,
+      "shutdown_exit_code": 0,
+      "shutdown_seconds": 0.703,
+      "registry_manifest_verified": false,
+      "result": "PASS normal-entrypoint held startup; live, not ready; business blocked"
+    }
+  ],
+  "azure_operations": 0,
+  "inference": false,
+  "release_ready": false
+}

@@ -6,12 +6,12 @@ import signal
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
 
 from jsonschema import Draft202012Validator
 
 from apps.console_logging import configure_console_logging
 from apps.ingestion.pipeline_config import IngestionPipelineConfig, resolve_pipeline_configs
+from apps.ingestion.redis_client import build_redis_client
 from packages.domain.src.domain.repositories.signal_repository import SignalRepository
 
 if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
@@ -59,7 +59,6 @@ def _load_and_compile_schema(schema_path: Path) -> Draft202012Validator:
 
 
 _LOCAL_DEVELOPMENT_ENVIRONMENTS = frozenset({"dev", "development", "local", "test"})
-_LOCAL_REDIS_HOSTS = frozenset({"redis", "localhost", "127.0.0.1", "::1", "ama-local-redis-1"})
 
 
 def _build_raw_payload_blob_store() -> Any | None:
@@ -87,70 +86,18 @@ def _build_raw_payload_blob_store() -> Any | None:
 
 
 def _build_dedup_redis_client() -> Any | None:
-    redis_url = os.environ.get("REDIS_URL")
-    if redis_url:
-        environment = (os.environ.get("AMA_ENVIRONMENT") or os.environ.get("ENVIRONMENT") or "").lower()
-        if environment not in _LOCAL_DEVELOPMENT_ENVIRONMENTS:
-            raise RuntimeError("REDIS_URL is only supported in local development environments")
+    import redis
 
-        parsed_url = urlsplit(redis_url)
-        try:
-            redis_port = parsed_url.port
-        except ValueError as exc:
-            raise ValueError("Local REDIS_URL must use redis://<local-host>:6379/<db>") from exc
-        if (
-            parsed_url.scheme != "redis"
-            or parsed_url.hostname not in _LOCAL_REDIS_HOSTS
-            or redis_port not in (None, 6379)
-            or parsed_url.username is not None
-            or parsed_url.password is not None
-        ):
-            raise ValueError("Local REDIS_URL must use redis://<local-host>:6379/<db> without credentials")
-
-        import redis as redis_lib
-
-        redis_client = redis_lib.Redis.from_url(
-            redis_url,
-            decode_responses=True,
-            socket_timeout=5,
-            socket_connect_timeout=5,
-        )
-        try:
-            redis_client.ping()
-        except redis_lib.exceptions.RedisError:
-            logger.warning("Failed to connect local Redis for dedup — using in-memory fallback", exc_info=True)
-            return None
-        logger.info("Redis dedup backend connected at %s (local development)", parsed_url.hostname)
-        return redis_client
-
-    redis_host = os.environ.get("REDIS_HOST")
-    if not redis_host:
+    redis_client = build_redis_client()
+    if redis_client is None:
         return None
-
     try:
-        import redis as redis_lib
-        from redis_entraid.cred_provider import create_from_managed_identity
-        from redis_entraid.identity_provider import ManagedIdentityType
-
-        credential_provider = create_from_managed_identity(
-            identity_type=ManagedIdentityType.SYSTEM_ASSIGNED,
-            resource="https://redis.azure.com/.default",
-        )
-        redis_client = redis_lib.Redis(
-            host=redis_host,
-            port=int(os.environ.get("REDIS_PORT", "10000")),
-            ssl=True,
-            decode_responses=True,
-            credential_provider=credential_provider,
-            socket_timeout=5,
-            socket_connect_timeout=5,
-        )
         redis_client.ping()
-        logger.info("Redis dedup backend connected at %s (Entra ID auth)", redis_host)
-        return redis_client
-    except Exception:
-        logger.warning("Failed to connect Redis for dedup — using in-memory fallback", exc_info=True)
+    except redis.exceptions.RedisError as exc:
+        logger.warning("Redis dedup connection failed (%s); using in-memory fallback", type(exc).__name__)
         return None
+    logger.info("Redis dedup backend connected")
+    return redis_client
 
 
 class PipelineWorker:

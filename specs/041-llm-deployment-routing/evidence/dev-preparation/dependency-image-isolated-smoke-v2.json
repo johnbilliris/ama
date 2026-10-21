@@ -1,0 +1,6 @@
+{
+  "/api/health/liveness": 200,
+  "/api/health/startup": 200,
+  "/api/health/readiness": 503,
+  "/api/simulations": 503
+}

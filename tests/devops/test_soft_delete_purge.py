@@ -104,5 +104,6 @@ def test_azd_hooks_are_purge_only_and_never_reset_active_resources() -> None:
     assert 'account",\n                "list-deleted' in script
     assert 'account",\n                "list"' not in script
     assert 'account",\n                "delete"' not in script
-    assert main_bicep.count("enabled: environmentTier != 'dev'") == 2
+    assert "deleteRetentionPolicy: {\n      enabled: true\n      days: 7" in main_bicep
+    assert "containerDeleteRetentionPolicy: {\n      enabled: true\n      days: 7" in main_bicep
     assert "enableSpec035Hardening && environmentTier != 'dev'" in main_bicep

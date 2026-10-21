@@ -1,0 +1,83 @@
+{
+  "observed_at": "2026-10-20T04:52:11.855562+00:00",
+  "applications": {
+    "agents": {
+      "revision_name": "ca-agents-dev--llm041-deps-20261020t044249",
+      "fqdn": "ca-agents-dev--llm041-deps-20261020t044249.internal.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io",
+      "health_state": "Healthy",
+      "active": true,
+      "traffic": [
+        {
+          "revisionName": "ca-agents-dev--pm412va",
+          "weight": 100
+        }
+      ],
+      "configuration_preserved": true,
+      "replicas": [
+        {
+          "name": "ca-agents-dev--llm041-deps-20261020t044249-7686cfb8b4-c5pn4",
+          "running_state": "Running",
+          "containers": [
+            {
+              "name": "agents",
+              "ready": true,
+              "started": true,
+              "restartCount": 0
+            }
+          ]
+        },
+        {
+          "name": "ca-agents-dev--llm041-deps-20261020t044249-7686cfb8b4-xxw6w",
+          "running_state": "Running",
+          "containers": [
+            {
+              "name": "agents",
+              "ready": true,
+              "started": true,
+              "restartCount": 0
+            }
+          ]
+        }
+      ]
+    },
+    "api": {
+      "revision_name": "ca-api-dev--llm041-deps-20261020t044249",
+      "fqdn": "ca-api-dev--llm041-deps-20261020t044249.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io",
+      "health_state": "Healthy",
+      "active": true,
+      "traffic": [
+        {
+          "revisionName": "ca-api-dev--n6l54uy",
+          "weight": 100
+        }
+      ],
+      "configuration_preserved": true,
+      "replicas": [
+        {
+          "name": "ca-api-dev--llm041-deps-20261020t044249-68778774d9-6qjwj",
+          "running_state": "Running",
+          "containers": [
+            {
+              "name": "api",
+              "ready": true,
+              "started": true,
+              "restartCount": 0
+            }
+          ]
+        },
+        {
+          "name": "ca-api-dev--llm041-deps-20261020t044249-68778774d9-qj5mw",
+          "running_state": "Running",
+          "containers": [
+            {
+              "name": "api",
+              "ready": true,
+              "started": true,
+              "restartCount": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

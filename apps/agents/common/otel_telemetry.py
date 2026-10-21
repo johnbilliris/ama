@@ -29,7 +29,10 @@ import uuid
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from common.foundry_chat_client import InferenceAttemptEvidence
 
 logger = logging.getLogger(__name__)
 
@@ -129,6 +132,8 @@ def foundry_inference_span(
     *,
     correlation_id: str,
     model_id: str | None = None,
+    model_version: str | None = None,
+    deployment_alias: str | None = None,
 ) -> Iterator[RecordedSpan]:
     """T235 — wraps the Foundry inference call (FR-RAG-OBS-01 + Plan §F-A11.2).
 
@@ -139,7 +144,7 @@ def foundry_inference_span(
     span = RecordedSpan(
         name="foundry.inference",
         correlation_id=correlation_id,
-        attributes={"model_id": model_id},
+        attributes={"model_id": model_id, "model_version": model_version, "deployment_alias": deployment_alias},
     )
     started = time.perf_counter()
     try:
@@ -152,7 +157,35 @@ def foundry_inference_span(
         elapsed_ms = (time.perf_counter() - started) * 1000.0
         span.duration_ms = elapsed_ms
         span.histograms.setdefault("foundry_inference_latency_ms", elapsed_ms)
-        _emit(span)
+        if span.attributes.get("inference_attempted", True) is True:
+            _emit(span)
+
+
+def record_inference_evidence(evidence: InferenceAttemptEvidence) -> None:
+    """Emit one model-call projection only after a transport handoff was proved."""
+    if evidence.inference_attempted is not True:
+        return
+    identity = evidence.resolved_identity
+    span = RecordedSpan(
+        name="foundry.inference",
+        correlation_id=evidence.correlation_id,
+        attributes={
+            "call_id": evidence.call_id,
+            "model_id": identity.model_id if identity else None,
+            "model_version": identity.model_version if identity else None,
+            "deployment_alias": identity.deployment_name if identity else None,
+            "inference_attempted": True,
+            "inference_outcome": evidence.inference_outcome,
+            "usage_prompt_tokens": evidence.usage_prompt_tokens,
+            "usage_completion_tokens": evidence.usage_completion_tokens,
+        },
+    )
+    span.duration_ms = evidence.latency_ms or 0
+    span.histograms["foundry_inference_latency_ms"] = span.duration_ms
+    if evidence.inference_outcome == "failed":
+        span.error = evidence.error_code
+        span.counters["foundry_inference_error_rate"] = 1
+    _emit(span)
 
 
 @contextmanager
@@ -230,6 +263,7 @@ __all__ = [
     "emit_metric",
     "evaluate_p95_alert",
     "foundry_inference_span",
+    "record_inference_evidence",
     "get_recorder",
     "ingest_span",
     "retrieval_span",

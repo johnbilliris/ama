@@ -1,0 +1,2642 @@
+{
+  "observed_at": "2026-10-20T03:13:00.137326+00:00",
+  "completed_at": "2026-10-20T03:13:29.408946+00:00",
+  "approval_reference": "resumed-validation-approval.json",
+  "max_observation_age_seconds": 3600,
+  "reapproval_on_changed_bindings": true,
+  "literal_environment_values": "withheld; names and secret references only",
+  "target": {
+    "tenant": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+    "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+    "resource_group": "ama",
+    "account_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w",
+    "account_name": "cog-dev-w3uq6w",
+    "account_kind": "AIServices",
+    "account_sku": "S0",
+    "environment": "dev",
+    "region": "australiaeast",
+    "endpoint": "https://dev-aif-w3uq6w.cognitiveservices.azure.com/"
+  },
+  "comparison": "PASS model/protection and exact held-state invariants",
+  "application_state_reference": "held-bootstrap-staging.json",
+  "account_controls": {
+    "disableLocalAuth": true,
+    "publicNetworkAccess": "Enabled",
+    "networkAcls": null,
+    "privateEndpointConnections": [],
+    "encryption": null,
+    "restrictOutboundNetworkAccess": null,
+    "endpoint": "https://dev-aif-w3uq6w.cognitiveservices.azure.com/",
+    "customSubDomainName": "dev-aif-w3uq6w"
+  },
+  "identity": {
+    "principalId": "8f509bbc-44c8-4280-a3ed-9cfc053c95f7",
+    "tenantId": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+    "type": "SystemAssigned"
+  },
+  "tags": {
+    "SecurityControl": "Ignore",
+    "azd-env-name": "dev",
+    "project": "disaster-response-hub"
+  },
+  "deployments": {
+    "value": [
+      {
+        "etag": "\"b924f269-4160-45ba-a2f3-7934bdf260f4\"",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-dev",
+        "name": "gpt-5.4-dev",
+        "properties": {
+          "capabilities": {
+            "agentsV2": "true",
+            "area": "APAC",
+            "assistants": "true",
+            "chatCompletion": "true",
+            "responses": "true"
+          },
+          "currentCapacity": 30,
+          "deploymentState": "Running",
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-5.4",
+            "version": "2026-03-05"
+          },
+          "provisioningState": "Succeeded",
+          "raiPolicyName": "reasoning-em-domain-dev",
+          "rateLimits": [
+            {
+              "count": 300,
+              "key": "request",
+              "renewalPeriod": 60
+            },
+            {
+              "count": 30000,
+              "key": "token",
+              "renewalPeriod": 60
+            }
+          ],
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "sku": {
+          "capacity": 30,
+          "name": "GlobalStandard"
+        },
+        "systemData": {
+          "createdAt": "2026-10-12T21:32:32.3476597Z",
+          "createdBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "createdByType": "User",
+          "lastModifiedAt": "2026-10-12T21:32:32.3476597Z",
+          "lastModifiedBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "lastModifiedByType": "User"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      {
+        "etag": "\"da58081b-0b06-46b9-9709-d7fc3414f548\"",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-mini-dev",
+        "name": "gpt-5.4-mini-dev",
+        "properties": {
+          "capabilities": {
+            "agentsV2": "true",
+            "area": "APAC",
+            "assistants": "true",
+            "chatCompletion": "true",
+            "responses": "true"
+          },
+          "currentCapacity": 60,
+          "deploymentState": "Running",
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-5.4",
+            "version": "2026-03-05"
+          },
+          "provisioningState": "Succeeded",
+          "raiPolicyName": "drafting-em-domain-dev",
+          "rateLimits": [
+            {
+              "count": 600,
+              "key": "request",
+              "renewalPeriod": 60
+            },
+            {
+              "count": 60000,
+              "key": "token",
+              "renewalPeriod": 60
+            }
+          ],
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "sku": {
+          "capacity": 60,
+          "name": "GlobalStandard"
+        },
+        "systemData": {
+          "createdAt": "2026-10-12T21:32:34.7538999Z",
+          "createdBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "createdByType": "User",
+          "lastModifiedAt": "2026-10-12T21:32:34.7538999Z",
+          "lastModifiedBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "lastModifiedByType": "User"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      {
+        "etag": "\"03706e7d-de28-4566-ae68-205f77e6dd02\"",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-sim-dev",
+        "name": "gpt-5.4-sim-dev",
+        "properties": {
+          "capabilities": {
+            "agentsV2": "true",
+            "area": "APAC",
+            "assistants": "true",
+            "chatCompletion": "true",
+            "responses": "true"
+          },
+          "currentCapacity": 20,
+          "deploymentState": "Running",
+          "model": {
+            "format": "OpenAI",
+            "name": "gpt-5.4",
+            "version": "2026-03-05"
+          },
+          "provisioningState": "Succeeded",
+          "raiPolicyName": "sim-em-domain-dev",
+          "rateLimits": [
+            {
+              "count": 200,
+              "key": "request",
+              "renewalPeriod": 60
+            },
+            {
+              "count": 20000,
+              "key": "token",
+              "renewalPeriod": 60
+            }
+          ],
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "sku": {
+          "capacity": 20,
+          "name": "GlobalStandard"
+        },
+        "systemData": {
+          "createdAt": "2026-10-12T21:32:37.3007627Z",
+          "createdBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "createdByType": "User",
+          "lastModifiedAt": "2026-10-12T21:32:37.3007627Z",
+          "lastModifiedBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "lastModifiedByType": "User"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      },
+      {
+        "etag": "\"acf14057-7019-4818-ae0a-198d1036ea2f\"",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/text-embedding-3-large-dev",
+        "name": "text-embedding-3-large-dev",
+        "properties": {
+          "capabilities": {
+            "area": "APAC",
+            "embeddings": "true",
+            "embeddingsMaxInputs": "2048"
+          },
+          "currentCapacity": 60,
+          "deploymentState": "Running",
+          "model": {
+            "format": "OpenAI",
+            "name": "text-embedding-3-large",
+            "version": "1"
+          },
+          "provisioningState": "Succeeded",
+          "raiPolicyName": "Microsoft.DefaultV2",
+          "rateLimits": [
+            {
+              "count": 60,
+              "key": "request",
+              "renewalPeriod": 10
+            },
+            {
+              "count": 60000,
+              "key": "token",
+              "renewalPeriod": 60
+            }
+          ],
+          "versionUpgradeOption": "OnceNewDefaultVersionAvailable"
+        },
+        "sku": {
+          "capacity": 60,
+          "name": "Standard"
+        },
+        "systemData": {
+          "createdAt": "2026-10-12T21:32:39.6601757Z",
+          "createdBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "createdByType": "User",
+          "lastModifiedAt": "2026-10-12T21:32:39.6601757Z",
+          "lastModifiedBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "lastModifiedByType": "User"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/deployments"
+      }
+    ]
+  },
+  "rai": {
+    "value": [
+      {
+        "etag": "\"f70496b4-bb10-4aa5-9176-e0f7ef76e8f4\"",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/reasoning-em-domain-dev",
+        "name": "reasoning-em-domain-dev",
+        "properties": {
+          "basePolicyName": "Microsoft.DefaultV2",
+          "contentFilters": [
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking",
+          "type": "UserManaged"
+        },
+        "systemData": {
+          "createdAt": "2026-10-12T21:32:32.0663383Z",
+          "createdBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "createdByType": "User",
+          "lastModifiedAt": "2026-10-12T21:32:32.0663383Z",
+          "lastModifiedBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "lastModifiedByType": "User"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      {
+        "etag": "\"7a45ec4b-fcf8-456e-9cfb-5ba2028711bb\"",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/drafting-em-domain-dev",
+        "name": "drafting-em-domain-dev",
+        "properties": {
+          "basePolicyName": "Microsoft.DefaultV2",
+          "contentFilters": [
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking",
+          "type": "UserManaged"
+        },
+        "systemData": {
+          "createdAt": "2026-10-12T21:32:34.4883183Z",
+          "createdBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "createdByType": "User",
+          "lastModifiedAt": "2026-10-12T21:32:34.4883183Z",
+          "lastModifiedBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "lastModifiedByType": "User"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      {
+        "etag": "\"2aacdfb9-e38d-4187-aca2-a76f07af3651\"",
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/sim-em-domain-dev",
+        "name": "sim-em-domain-dev",
+        "properties": {
+          "basePolicyName": "Microsoft.DefaultV2",
+          "contentFilters": [
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "High",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking",
+          "type": "UserManaged"
+        },
+        "systemData": {
+          "createdAt": "2026-10-12T21:32:36.9883037Z",
+          "createdBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "createdByType": "User",
+          "lastModifiedAt": "2026-10-12T21:32:36.9883037Z",
+          "lastModifiedBy": "admin@mngenvmcap035973.onmicrosoft.com",
+          "lastModifiedByType": "User"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/Microsoft.Default",
+        "name": "Microsoft.Default",
+        "properties": {
+          "contentFilters": [
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Hate",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Hate",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Sexual",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Sexual",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Selfharm",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Selfharm",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking",
+          "type": "SystemManaged"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/Microsoft.DefaultV2",
+        "name": "Microsoft.DefaultV2",
+        "properties": {
+          "contentFilters": [
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Hate",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Hate",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Sexual",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Sexual",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Selfharm",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Selfharm",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Jailbreak",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Protected Material Text",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": false,
+              "enabled": true,
+              "name": "Protected Material Code",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking",
+          "type": "SystemManaged"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/Microsoft.MAIDefault",
+        "name": "Microsoft.MAIDefault",
+        "properties": {
+          "contentFilters": [
+            {
+              "action": "NONE",
+              "blocking": false,
+              "enabled": true,
+              "name": "Hate",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": false,
+              "enabled": true,
+              "name": "Hate",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": false,
+              "enabled": true,
+              "name": "Sexual",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": false,
+              "enabled": true,
+              "name": "Sexual",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": false,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": false,
+              "enabled": true,
+              "name": "Violence",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": false,
+              "enabled": true,
+              "name": "Selfharm",
+              "severityThreshold": "Medium",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": false,
+              "enabled": true,
+              "name": "Selfharm",
+              "severityThreshold": "Medium",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Jailbreak",
+              "source": "Prompt"
+            },
+            {
+              "action": "NONE",
+              "blocking": true,
+              "enabled": true,
+              "name": "Protected Material Text",
+              "source": "Completion"
+            },
+            {
+              "action": "NONE",
+              "blocking": false,
+              "enabled": true,
+              "name": "Protected Material Code",
+              "source": "Completion"
+            }
+          ],
+          "mode": "Blocking",
+          "type": "SystemManaged"
+        },
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies"
+      }
+    ]
+  },
+  "diagnostics": {
+    "value": [
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/microsoft.cognitiveservices/accounts/cog-dev-w3uq6w/providers/microsoft.insights/diagnosticSettings/openai-diagnostics",
+        "identity": null,
+        "kind": null,
+        "location": "australiaeast",
+        "name": "openai-diagnostics",
+        "properties": {
+          "eventHubAuthorizationRuleId": null,
+          "eventHubName": null,
+          "logAnalyticsDestinationType": null,
+          "logs": [
+            {
+              "category": "RequestResponse",
+              "categoryGroup": null,
+              "enabled": true,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "Audit",
+              "categoryGroup": null,
+              "enabled": true,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "AzureOpenAIRequestUsage",
+              "categoryGroup": null,
+              "enabled": false,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "Trace",
+              "categoryGroup": null,
+              "enabled": false,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            },
+            {
+              "category": "ManagedNetworkEvent",
+              "categoryGroup": null,
+              "enabled": false,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            }
+          ],
+          "metrics": [
+            {
+              "category": "AllMetrics",
+              "enabled": true,
+              "retentionPolicy": {
+                "days": 0,
+                "enabled": false
+              }
+            }
+          ],
+          "serviceBusRuleId": null,
+          "storageAccountId": null,
+          "workspaceId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.OperationalInsights/workspaces/log-dev"
+        },
+        "tags": null,
+        "type": "Microsoft.Insights/diagnosticSettings"
+      }
+    ]
+  },
+  "policy_assignments": {
+    "value": [
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policyAssignments/MCAPSGovDenyPolicies",
+        "name": "MCAPSGovDenyPolicies",
+        "properties": {
+          "definitionVersion": "1.*.*",
+          "description": "https://aka.ms/fdpowiki",
+          "displayName": "MCAPSGov Deny Policies",
+          "enforcementMode": "Default",
+          "instanceId": "d757b63f-c9e3-4996-95ac-5eb937b0944a",
+          "metadata": {
+            "Version": "20261008-1",
+            "createdBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+            "createdOn": "2026-10-10T01:02:54.1022896Z",
+            "updatedBy": null,
+            "updatedOn": null
+          },
+          "nonComplianceMessages": [
+            {
+              "message": "To learn more about the MCAPS deny policies and ensure compliance, please refer to the following wiki: https://aka.ms/AzPolicyWiki."
+            }
+          ],
+          "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policySetDefinitions/MCAPSGovDenyPolicies",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3"
+        },
+        "systemData": {
+          "createdAt": "2026-10-10T01:02:54.0563483Z",
+          "createdBy": "a1a9c5b6-7a4f-4288-89ab-6805873f65d1",
+          "createdByType": "Application",
+          "lastModifiedAt": "2026-10-10T01:02:54.0563483Z",
+          "lastModifiedBy": "a1a9c5b6-7a4f-4288-89ab-6805873f65d1",
+          "lastModifiedByType": "Application"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policyAssignments/sys.mfa-write",
+        "name": "sys.mfa-write",
+        "properties": {
+          "assignmentType": "SystemHidden",
+          "definitionVersion": "1.*.*",
+          "displayName": "Microsoft Azure Multi Factor Authentication Enforcement for Resource Write Actions",
+          "enforcementMode": "Default",
+          "instanceId": "20a879a8-3c0f-4831-ba34-3042cac19a74",
+          "metadata": {
+            "createdBy": "92702998-1381-4b0d-afd7-b78a55cf3de9",
+            "createdOn": "2026-09-09T16:56:56.2047489Z",
+            "updatedBy": "92702998-1381-4b0d-afd7-b78a55cf3de9",
+            "updatedOn": "2026-09-14T19:56:35.9367915Z"
+          },
+          "nonComplianceMessages": [
+            {
+              "message": "You are receiving this error because you tried to create, update or delete Azure resources without authenticating through MFA. User accounts must be authenticated through MFA to manage your resources. To resolve this error, go to https://aka.ms/MFAforAzure"
+            }
+          ],
+          "parameters": {
+            "effect": {
+              "value": "Deny"
+            }
+          },
+          "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/54f51f64-eaa5-44cf-8674-830bcfd14d21",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3"
+        },
+        "systemData": {
+          "createdAt": "2026-09-09T16:56:56.1729887Z",
+          "createdBy": "2d215f00-80d1-4f4b-a6c8-28080dfafc81",
+          "createdByType": "Application",
+          "lastModifiedAt": "2026-09-14T19:56:35.9100984Z",
+          "lastModifiedBy": "2d215f00-80d1-4f4b-a6c8-28080dfafc81",
+          "lastModifiedByType": "Application"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policyAssignments/sys.mfa-delete",
+        "name": "sys.mfa-delete",
+        "properties": {
+          "assignmentType": "SystemHidden",
+          "definitionVersion": "1.*.*",
+          "displayName": "Microsoft Azure Multi Factor Authentication Enforcement for Resource Delete Actions",
+          "enforcementMode": "Default",
+          "instanceId": "85ca6d1a-3661-4d17-a446-6d09dd15e76c",
+          "metadata": {
+            "createdBy": "92702998-1381-4b0d-afd7-b78a55cf3de9",
+            "createdOn": "2026-09-09T16:59:41.6976938Z",
+            "updatedBy": "92702998-1381-4b0d-afd7-b78a55cf3de9",
+            "updatedOn": "2026-09-14T19:59:13.3746164Z"
+          },
+          "nonComplianceMessages": [
+            {
+              "message": "You are receiving this error because you tried to create, update or delete Azure resources without authenticating through MFA. User accounts must be authenticated through MFA to manage your resources. To resolve this error, go to https://aka.ms/MFAforAzure"
+            }
+          ],
+          "parameters": {
+            "effect": {
+              "value": "DenyAction"
+            }
+          },
+          "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f69cd8b8-9a6e-46b4-be84-244e8b127944",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3"
+        },
+        "systemData": {
+          "createdAt": "2026-09-09T16:59:41.6532689Z",
+          "createdBy": "2d215f00-80d1-4f4b-a6c8-28080dfafc81",
+          "createdByType": "Application",
+          "lastModifiedAt": "2026-09-14T19:59:13.3450922Z",
+          "lastModifiedBy": "2d215f00-80d1-4f4b-a6c8-28080dfafc81",
+          "lastModifiedByType": "Application"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policyAssignments/01778a01bb054427a3114150",
+        "name": "01778a01bb054427a3114150",
+        "properties": {
+          "definitionVersion": "1.*.*",
+          "displayName": "Block Azure RM Resource Creation",
+          "enforcementMode": "Default",
+          "instanceId": "327f59cc-8b3e-4bc9-9042-f87ce5c5ae89",
+          "metadata": {
+            "assignedBy": "MOD Administrator",
+            "createdBy": "e127dc9b-6556-4e9f-9bc0-8fa2be14ff81",
+            "createdOn": "2026-08-14T00:33:57.0766917Z",
+            "parameterScopes": {},
+            "updatedBy": null,
+            "updatedOn": null
+          },
+          "nonComplianceMessages": [],
+          "notScopes": [],
+          "parameters": {},
+          "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policyDefinitions/06ee7d35-50fa-4ed0-b54b-02893b688a58",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3"
+        },
+        "systemData": {
+          "createdAt": "2026-08-14T00:33:56.9999617Z",
+          "createdBy": "9d0b50c2-e9ec-404d-8b4d-28662857d597",
+          "createdByType": "Application",
+          "lastModifiedAt": "2026-08-14T00:33:56.9999617Z",
+          "lastModifiedBy": "9d0b50c2-e9ec-404d-8b4d-28662857d597",
+          "lastModifiedByType": "Application"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policyAssignments/sys.blockwesteurope",
+        "name": "sys.blockwesteurope",
+        "properties": {
+          "assignmentType": "SystemHidden",
+          "definitionVersion": "1.*.*",
+          "displayName": "Microsoft Azure region access restriction blocking West Europe region",
+          "enforcementMode": "Default",
+          "instanceId": "00000000-0000-0000-0000-000000000000",
+          "metadata": {
+            "createdBy": null,
+            "createdOn": "2026-08-14T00:34:37.6441392Z",
+            "updatedBy": null,
+            "updatedOn": null
+          },
+          "nonComplianceMessages": [
+            {
+              "message": "The selected region is currently not accepting new customers: https://aka.ms/locationineligible"
+            }
+          ],
+          "policyDefinitionId": "/PROVIDERS/MICROSOFT.AUTHORIZATION/POLICYDEFINITIONS/7509877F-D414-4D79-8D1F-D600EA78D087",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policyAssignments/Azure_Security_Baseline",
+        "name": "Azure_Security_Baseline",
+        "properties": {
+          "definitionVersion": "57.*.*",
+          "description": "Azure Security Baseline",
+          "displayName": "Azure Security Baseline",
+          "enforcementMode": "Default",
+          "instanceId": "7b9a3982-2ca2-4509-8541-09e784a3753a",
+          "metadata": {
+            "createdBy": "e127dc9b-6556-4e9f-9bc0-8fa2be14ff81",
+            "createdOn": "2026-08-14T00:38:30.2973761Z",
+            "updatedBy": null,
+            "updatedOn": null
+          },
+          "parameters": {
+            "disableUnrestrictedNetworkToStorageAccountMonitoringEffect": {
+              "value": "Audit"
+            },
+            "fTPSOnlyShouldBeRequiredInYourAPIAppMonitoringEffect": {
+              "value": "Disabled"
+            },
+            "fTPSOnlyShouldBeRequiredInYourFunctionAppMonitoringEffect": {
+              "value": "Disabled"
+            },
+            "fTPSShouldBeRequiredInYourWebAppMonitoringEffect": {
+              "value": "Disabled"
+            },
+            "keysExpirationSetEffect": {
+              "value": "Audit"
+            },
+            "networkSecurityGroupsOnSubnetsMonitoringEffect": {
+              "value": "AuditIfNotExists"
+            },
+            "secretsExpirationSetEffect": {
+              "value": "Audit"
+            },
+            "vnetEnableDDoSProtectionMonitoringEffect": {
+              "value": "Disabled"
+            },
+            "windowsWebServersShouldBeConfiguredToUseSecureCommunicationProtocolsMinimumTLSVersion": {
+              "value": "1.2"
+            }
+          },
+          "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3"
+        },
+        "systemData": {
+          "createdAt": "2026-08-14T00:38:29.5223989Z",
+          "createdBy": "9d0b50c2-e9ec-404d-8b4d-28662857d597",
+          "createdByType": "Application",
+          "lastModifiedAt": "2026-08-14T00:38:29.5223989Z",
+          "lastModifiedBy": "9d0b50c2-e9ec-404d-8b4d-28662857d597",
+          "lastModifiedByType": "Application"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policyAssignments/MCAPSGovAuditPolicies",
+        "name": "MCAPSGovAuditPolicies",
+        "properties": {
+          "definitionVersion": "1.*.*",
+          "description": "https://aka.ms/fdpowiki",
+          "displayName": "MCAPSGov Audit Policies",
+          "enforcementMode": "Default",
+          "instanceId": "ba3a1b85-a04f-45f8-82dd-d33b675dc4b7",
+          "metadata": {
+            "Version": "20261008-1",
+            "createdBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+            "createdOn": "2026-10-10T01:02:56.5209658Z",
+            "updatedBy": null,
+            "updatedOn": null
+          },
+          "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policySetDefinitions/MCAPSGovAuditPolicies",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3"
+        },
+        "systemData": {
+          "createdAt": "2026-10-10T01:02:56.420625Z",
+          "createdBy": "a1a9c5b6-7a4f-4288-89ab-6805873f65d1",
+          "createdByType": "Application",
+          "lastModifiedAt": "2026-10-10T01:02:56.420625Z",
+          "lastModifiedBy": "a1a9c5b6-7a4f-4288-89ab-6805873f65d1",
+          "lastModifiedByType": "Application"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policyAssignments/MCAPSGovDeployPolicies",
+        "identity": {
+          "principalId": "c97a1f9c-5914-4b85-b54a-43ef63223abb",
+          "tenantId": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "type": "SystemAssigned"
+        },
+        "location": "eastus",
+        "name": "MCAPSGovDeployPolicies",
+        "properties": {
+          "definitionVersion": "1.*.*",
+          "description": "https://aka.ms/fdpowiki",
+          "displayName": "MCAPSGov Deploy and Modify Policies",
+          "enforcementMode": "Default",
+          "instanceId": "f3dafbc0-7f57-4e3e-95e3-1da4a542355b",
+          "metadata": {
+            "Version": "20261008-1",
+            "createdBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+            "createdOn": "2026-10-10T01:02:57.788158Z",
+            "updatedBy": null,
+            "updatedOn": null
+          },
+          "policyDefinitionId": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/policySetDefinitions/MCAPSGovDeployPolicies",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3"
+        },
+        "systemData": {
+          "createdAt": "2026-10-10T01:02:56.4598634Z",
+          "createdBy": "a1a9c5b6-7a4f-4288-89ab-6805873f65d1",
+          "createdByType": "Application",
+          "lastModifiedAt": "2026-10-10T01:02:56.4598634Z",
+          "lastModifiedBy": "a1a9c5b6-7a4f-4288-89ab-6805873f65d1",
+          "lastModifiedByType": "Application"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/policyAssignments/DataProtectionSecurityCenter",
+        "name": "DataProtectionSecurityCenter",
+        "properties": {
+          "definitionVersion": "3.*.*",
+          "description": "This policy assignment was automatically created by Azure Security Center",
+          "displayName": "ASC DataProtection (subscription: 74a25c57-d6e4-446e-8c99-7f5ace60011b)",
+          "enforcementMode": "Default",
+          "instanceId": "f49c2d7b-b012-4496-af72-04e8a1e3a60a",
+          "metadata": {
+            "assignedBy": "Security Center",
+            "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+            "createdOn": "2026-08-15T06:07:07.1212347Z",
+            "updatedBy": null,
+            "updatedOn": null
+          },
+          "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/9cb3cc7a-b39b-4b82-bc89-e5a5d9ff7b97",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b"
+        },
+        "systemData": {
+          "createdAt": "2026-08-15T06:07:07.0778006Z",
+          "createdBy": "c6a56072-045f-46b8-803c-668d5e309365",
+          "createdByType": "Application",
+          "lastModifiedAt": "2026-08-15T06:07:07.0778006Z",
+          "lastModifiedBy": "c6a56072-045f-46b8-803c-668d5e309365",
+          "lastModifiedByType": "Application"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/policyAssignments/OpenSourceRelationalDatabasesProtectionSecurityCenter",
+        "name": "OpenSourceRelationalDatabasesProtectionSecurityCenter",
+        "properties": {
+          "definitionVersion": "1.*.*",
+          "description": "This policy assignment was automatically created by Azure Security Center",
+          "displayName": "ASC OpenSourceRelationalDatabasesProtection (subscription: 74a25c57-d6e4-446e-8c99-7f5ace60011b)",
+          "enforcementMode": "Default",
+          "instanceId": "45e5f79e-f09e-4c1c-a026-9eb30fc5c2a7",
+          "metadata": {
+            "assignedBy": "Security Center",
+            "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+            "createdOn": "2026-08-15T06:07:39.0235587Z",
+            "updatedBy": null,
+            "updatedOn": null
+          },
+          "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/e77fc0b3-f7e9-4c58-bc13-cb753ed8e46e",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b"
+        },
+        "systemData": {
+          "createdAt": "2026-08-15T06:07:38.9716632Z",
+          "createdBy": "c6a56072-045f-46b8-803c-668d5e309365",
+          "createdByType": "Application",
+          "lastModifiedAt": "2026-08-15T06:07:38.9716632Z",
+          "lastModifiedBy": "c6a56072-045f-46b8-803c-668d5e309365",
+          "lastModifiedByType": "Application"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/policyAssignments/SqlVmAndArcSqlServersProtection",
+        "identity": {
+          "principalId": "13bf5123-9970-4d5f-aca1-6387311badc9",
+          "tenantId": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "type": "SystemAssigned"
+        },
+        "location": "westeurope",
+        "name": "SqlVmAndArcSqlServersProtection",
+        "properties": {
+          "definitionVersion": "1.*.*",
+          "description": "This initiative enables Defender for SQL on SQL VMs and Arc-enabled SQL Servers",
+          "displayName": "Defender for SQL Servers on Machines provisioning (subscription: 74a25c57-d6e4-446e-8c99-7f5ace60011b)",
+          "enforcementMode": "Default",
+          "instanceId": "336e9691-845c-4b00-aa89-cbf18645f25e",
+          "metadata": {
+            "assignedBy": "Security Center",
+            "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+            "createdOn": "2026-08-15T06:07:50.9627133Z",
+            "updatedBy": "24634722-975d-468a-a278-d84603f9c8f1",
+            "updatedOn": "2026-09-01T06:11:35.7775296Z"
+          },
+          "policyDefinitionId": "/providers/Microsoft.Authorization/policySetDefinitions/c1529623-9fc2-45bc-b84b-b14cd0b7484e",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b"
+        },
+        "systemData": {
+          "createdAt": "2026-08-15T06:07:48.6033431Z",
+          "createdBy": "c6a56072-045f-46b8-803c-668d5e309365",
+          "createdByType": "Application",
+          "lastModifiedAt": "2026-09-01T06:11:35.578005Z",
+          "lastModifiedBy": "af9507c8-06fb-492a-b409-9df48cd9b1c6",
+          "lastModifiedByType": "Application"
+        },
+        "type": "Microsoft.Authorization/policyAssignments"
+      }
+    ]
+  },
+  "rbac": {
+    "value": [
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/111b6206-753a-48e0-99bd-570b8471965e",
+        "name": "111b6206-753a-48e0-99bd-570b8471965e",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "",
+          "createdOn": "2026-08-14T00:34:38.5729081Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "e127dc9b-6556-4e9f-9bc0-8fa2be14ff81",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "",
+          "updatedOn": "2026-08-14T00:34:38.5729081Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/5bfa0f80-29bd-4d2f-92b0-7ca24fa0a81a",
+        "name": "5bfa0f80-29bd-4d2f-92b0-7ca24fa0a81a",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "e127dc9b-6556-4e9f-9bc0-8fa2be14ff81",
+          "createdOn": "2026-08-14T00:34:44.4257126Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "f5305d97-d9b5-45bb-8452-d0c2a5381c49",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "e127dc9b-6556-4e9f-9bc0-8fa2be14ff81",
+          "updatedOn": "2026-08-14T00:34:44.4257126Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/da112966-88b0-4499-acd0-e207d5ea3696",
+        "name": "da112966-88b0-4499-acd0-e207d5ea3696",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "e127dc9b-6556-4e9f-9bc0-8fa2be14ff81",
+          "createdOn": "2026-08-14T00:34:48.3433380Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "principalType": "User",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "e127dc9b-6556-4e9f-9bc0-8fa2be14ff81",
+          "updatedOn": "2026-08-14T00:34:48.3433380Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/e6f9527f-008c-4505-94cc-7340a6f45764",
+        "name": "e6f9527f-008c-4505-94cc-7340a6f45764",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "createdOn": "2026-08-15T06:07:31.0187024Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "0dba0b5e-b2e4-4672-9b77-180d1ebd1eb3",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/1e241071-0855-49ea-94dc-649edcd759de",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "updatedOn": "2026-08-15T06:07:31.0187024Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/00a24725-e0b1-463a-9b4e-382b37db2597",
+        "name": "00a24725-e0b1-463a-9b4e-382b37db2597",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "createdOn": "2026-08-15T06:07:31.1864977Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "0dba0b5e-b2e4-4672-9b77-180d1ebd1eb3",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/0f641de8-0b88-4198-bdef-bd8b45ceba96",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "updatedOn": "2026-08-15T06:07:31.1864977Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/25a18669-056e-c304-cbde-4ecee76ddd61",
+        "name": "25a18669-056e-c304-cbde-4ecee76ddd61",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "0dba0b5e-b2e4-4672-9b77-180d1ebd1eb3",
+          "createdOn": "2026-08-15T06:07:39.5926544Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "24332e38-91de-4f12-aa3c-15146daa3d2a",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/1e7ca9b1-60d1-4db8-a914-f2ca1ff27c40",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "0dba0b5e-b2e4-4672-9b77-180d1ebd1eb3",
+          "updatedOn": "2026-08-15T06:07:39.5926544Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/63cf9e71-4b10-492a-a5ff-188ed48e5223",
+        "name": "63cf9e71-4b10-492a-a5ff-188ed48e5223",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "createdOn": "2026-08-15T06:07:55.2341828Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "13bf5123-9970-4d5f-aca1-6387311badc9",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "updatedOn": "2026-08-15T06:07:55.2341828Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/f1395490-00a5-421d-ab13-adb78d431104",
+        "name": "f1395490-00a5-421d-ab13-adb78d431104",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "createdOn": "2026-08-15T06:07:58.6526592Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "13bf5123-9970-4d5f-aca1-6387311badc9",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/f1a07417-d97a-45cb-824c-7a7467783830",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "updatedOn": "2026-08-15T06:07:58.6526592Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/13c863f2-aec5-436e-9c11-2934091ddf51",
+        "name": "13c863f2-aec5-436e-9c11-2934091ddf51",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "createdOn": "2026-08-15T06:08:02.2635550Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "13bf5123-9970-4d5f-aca1-6387311badc9",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "updatedOn": "2026-08-15T06:08:02.2635550Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/e47db643-62e5-4c48-ba3c-166fd8373eb3",
+        "name": "e47db643-62e5-4c48-ba3c-166fd8373eb3",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "createdOn": "2026-08-15T06:08:14.0060694Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "3204eef6-6eb1-4df5-b765-5a49f08031d6",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/c5c82243-e78e-43f9-8428-793bba85b28e",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "updatedOn": "2026-08-15T06:08:14.0060694Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/aee17112-0439-4871-89bd-45dea5e165d6",
+        "name": "aee17112-0439-4871-89bd-45dea5e165d6",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "createdOn": "2026-08-15T06:08:18.2893489Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "3204eef6-6eb1-4df5-b765-5a49f08031d6",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/d5a2ae44-610b-4500-93be-660a0c5f5ca6",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "updatedOn": "2026-08-15T06:08:18.2893489Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/fadfc69e-ef33-4f84-89a5-888466e6976c",
+        "name": "fadfc69e-ef33-4f84-89a5-888466e6976c",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "createdOn": "2026-08-15T06:08:20.3375092Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "3204eef6-6eb1-4df5-b765-5a49f08031d6",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/ada52afe-776a-4b4d-a8f2-55670d3d8178",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "updatedOn": "2026-08-15T06:08:20.3375092Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/5ef56c8c-7e3b-45d6-9978-12c358c1a8da",
+        "name": "5ef56c8c-7e3b-45d6-9978-12c358c1a8da",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "createdOn": "2026-08-15T06:08:20.3456745Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "3204eef6-6eb1-4df5-b765-5a49f08031d6",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/7e559ce2-48d7-4b27-9128-fa1b247f1308",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "updatedOn": "2026-08-15T06:08:20.3456745Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/ae2b97c5-f78a-4808-b010-1e3056f0e2ca",
+        "name": "ae2b97c5-f78a-4808-b010-1e3056f0e2ca",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "createdOn": "2026-08-15T06:08:20.9606676Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "3204eef6-6eb1-4df5-b765-5a49f08031d6",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/5e93ba01-8f92-4c7a-b12a-801e3df23824",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "updatedOn": "2026-08-15T06:08:20.9606676Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/c973253e-d1b3-446b-bbbc-2c8993cddc8b",
+        "name": "c973253e-d1b3-446b-bbbc-2c8993cddc8b",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "createdOn": "2026-09-01T06:11:01.9834938Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "6df25546-cf16-4c22-97ac-c6a8b7cb8dc2",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/d24ecba3-c1f4-40fa-a7bb-4588a071e8fd",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "updatedOn": "2026-09-01T06:11:01.9834938Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/617fb8fa-c686-4045-a5a9-0dc50b84af76",
+        "name": "617fb8fa-c686-4045-a5a9-0dc50b84af76",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "createdOn": "2026-09-01T06:11:17.5349060Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "f8fc05bd-59b5-4919-983d-09db9acbdad0",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8480c0f0-4509-4229-9339-7c10018cb8c4",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "updatedOn": "2026-09-01T06:11:17.5349060Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/5eb7627b-a4df-4ad6-8413-f50cd1d1a4a3",
+        "name": "5eb7627b-a4df-4ad6-8413-f50cd1d1a4a3",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "createdOn": "2026-09-01T06:11:21.2113908Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "f8fc05bd-59b5-4919-983d-09db9acbdad0",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/c5c82243-e78e-43f9-8428-793bba85b28e",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "updatedOn": "2026-09-01T06:11:21.2113908Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/42b39e0a-78ae-449e-bf2a-6da4afab0de8",
+        "name": "42b39e0a-78ae-449e-bf2a-6da4afab0de8",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "createdOn": "2026-09-01T06:11:24.1729972Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "f8fc05bd-59b5-4919-983d-09db9acbdad0",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/d5a2ae44-610b-4500-93be-660a0c5f5ca6",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "updatedOn": "2026-09-01T06:11:24.1729972Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/d397010d-12ee-4347-a4e7-1679de4c3456",
+        "name": "d397010d-12ee-4347-a4e7-1679de4c3456",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "createdOn": "2026-09-01T06:11:27.7729453Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "f8fc05bd-59b5-4919-983d-09db9acbdad0",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/6f91a4f9-10ee-4b95-b8cd-96ee73c5968d",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "updatedOn": "2026-09-01T06:11:27.7729453Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/7df11545-a204-419b-9758-de930bc9de3d",
+        "name": "7df11545-a204-419b-9758-de930bc9de3d",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "createdOn": "2026-09-01T06:11:30.4446732Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "f8fc05bd-59b5-4919-983d-09db9acbdad0",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/68ac31b4-936a-4046-a6d2-ba6f8a757bf6",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "24634722-975d-468a-a278-d84603f9c8f1",
+          "updatedOn": "2026-09-01T06:11:30.4446732Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/87646bbd-8907-47a4-931c-b1a7c294b967",
+        "name": "87646bbd-8907-47a4-931c-b1a7c294b967",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "f8fc05bd-59b5-4919-983d-09db9acbdad0",
+          "createdOn": "2026-09-01T06:11:42.4185372Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "24332e38-91de-4f12-aa3c-15146daa3d2a",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/0b6ca2e8-2cdc-4bd6-b896-aa3d8c21fc35",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "f8fc05bd-59b5-4919-983d-09db9acbdad0",
+          "updatedOn": "2026-09-01T06:11:42.4185372Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/645cee99-c3fe-4b7a-9fb9-4963621a6cab",
+        "name": "645cee99-c3fe-4b7a-9fb9-4963621a6cab",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-09-03T04:39:06.2204034Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "principalType": "User",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/53ca6127-db72-4b80-b1b0-d745d6d5456d",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-09-03T04:39:06.2204034Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.Authorization/roleAssignments/df22396b-9a32-562a-8fde-897229d6d273",
+        "name": "df22396b-9a32-562a-8fde-897229d6d273",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:31:58.5772118Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "9432bcc0-9934-4e03-ab2c-7db8dd8f7923",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/7ca78c08-252a-4471-8644-bb5ff32d4ba0",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:31:58.5772118Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.Authorization/roleAssignments/6237bc84-4438-524d-b1b0-7a7d0003ef9c",
+        "name": "6237bc84-4438-524d-b1b0-7a7d0003ef9c",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:31:57.8625840Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "9432bcc0-9934-4e03-ab2c-7db8dd8f7923",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8ebe5a00-799e-43f5-93ac-243d3dce84a7",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:31:57.8625840Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.Authorization/roleAssignments/53645d7f-9dff-549f-b2e2-c0cd40e26a97",
+        "name": "53645d7f-9dff-549f-b2e2-c0cd40e26a97",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:32:13.2597715Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "9432bcc0-9934-4e03-ab2c-7db8dd8f7923",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/69a216fc-b8fb-44d8-bc22-1f3c2cd27a39",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:32:13.2597715Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/providers/Microsoft.Authorization/roleAssignments/c57c8f0a-8ce0-50da-86d4-791e0bfd1737",
+        "name": "c57c8f0a-8ce0-50da-86d4-791e0bfd1737",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:32:18.8601561Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "9432bcc0-9934-4e03-ab2c-7db8dd8f7923",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/a97b65f3-24c7-4388-baec-2e87135dc908",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:32:18.8601561Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.Authorization/roleAssignments/08ff305f-6128-542c-8974-203c57fffa5a",
+        "name": "08ff305f-6128-542c-8974-203c57fffa5a",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:49:04.3325762Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/1407120a-92aa-4202-b7e9-c0e197c71c8f",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:49:04.3325762Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/providers/Microsoft.Authorization/roleAssignments/79c86703-5c5a-5e0e-8740-8e1aaac84dcf",
+        "name": "79c86703-5c5a-5e0e-8740-8e1aaac84dcf",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:49:04.0006046Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/5e0bd9bd-7b93-4f28-af87-19fc36ad61bd",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:49:04.0006046Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/providers/Microsoft.Authorization/roleAssignments/4a1302e2-b1fc-5e9a-9970-004f77982ccc",
+        "name": "4a1302e2-b1fc-5e9a-9970-004f77982ccc",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:49:38.2723156Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "0b986a72-f194-41f5-8f6b-ea070229aaeb",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/5e0bd9bd-7b93-4f28-af87-19fc36ad61bd",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:49:38.2723156Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.Authorization/roleAssignments/8340714f-4244-5f0e-8613-826ea9a18312",
+        "name": "8340714f-4244-5f0e-8613-826ea9a18312",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:49:38.3986791Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "0b986a72-f194-41f5-8f6b-ea070229aaeb",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/1407120a-92aa-4202-b7e9-c0e197c71c8f",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:49:38.3986791Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/7cd14cbd-3603-4d73-b889-b30b5f37869e",
+        "name": "7cd14cbd-3603-4d73-b889-b30b5f37869e",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-09-28T03:08:23.5323680Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "15031f5a-0b06-4376-b1ae-524be1ef063a",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-09-28T03:08:23.5323680Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleAssignments/1292bbde-e07a-4fd2-889d-d2a719b0c046",
+        "name": "1292bbde-e07a-4fd2-889d-d2a719b0c046",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-09-28T04:24:54.3973674Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "15031f5a-0b06-4376-b1ae-524be1ef063a",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/f58310d9-a9f6-439a-9e8d-f62e7b41a168",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-09-28T04:24:54.3973674Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.Authorization/roleAssignments/e6190115-595c-5c5f-8cb3-cf8f0d288e87",
+        "name": "e6190115-595c-5c5f-8cb3-cf8f0d288e87",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:49:53.5337276Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "33f4642f-49e9-4c44-bc0b-83948654cdce",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/5e0bd9bd-7b93-4f28-af87-19fc36ad61bd",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:49:53.5337276Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.Authorization/roleAssignments/75e0f830-55ec-5651-88a1-d9f6b03350e6",
+        "name": "75e0f830-55ec-5651-88a1-d9f6b03350e6",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:49:53.7656143Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "33f4642f-49e9-4c44-bc0b-83948654cdce",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/3913510d-42f4-4e42-8a64-420c390055eb",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:49:53.7656143Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama/providers/Microsoft.Authorization/roleAssignments/d5645f07-2e51-5b6d-a566-cc9b2cbc4053",
+        "name": "d5645f07-2e51-5b6d-a566-cc9b2cbc4053",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-10-12T21:49:55.2940461Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "33f4642f-49e9-4c44-bc0b-83948654cdce",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourcegroups/ama",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-10-12T21:49:55.2940461Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/7568d9d9-0789-411e-8515-96711101dedd",
+        "name": "7568d9d9-0789-411e-8515-96711101dedd",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "2ad50c3a-caf5-4743-8874-026b690958f6",
+          "createdOn": "2026-08-03T13:34:47.4877659Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "e127dc9b-6556-4e9f-9bc0-8fa2be14ff81",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "2ad50c3a-caf5-4743-8874-026b690958f6",
+          "updatedOn": "2026-08-03T13:34:47.4877659Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/34079737-af15-4569-8a5e-956411566821",
+        "name": "34079737-af15-4569-8a5e-956411566821",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "2ad50c3a-caf5-4743-8874-026b690958f6",
+          "createdOn": "2026-08-03T13:34:48.9509283Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "e127dc9b-6556-4e9f-9bc0-8fa2be14ff81",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "2ad50c3a-caf5-4743-8874-026b690958f6",
+          "updatedOn": "2026-08-03T13:34:48.9509283Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/126d18cc-85b8-4676-946f-b3647732d7db",
+        "name": "126d18cc-85b8-4676-946f-b3647732d7db",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "2ad50c3a-caf5-4743-8874-026b690958f6",
+          "createdOn": "2026-08-03T13:34:50.9954119Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "a8328138-c02c-49ef-9eda-672141d877cd",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "2ad50c3a-caf5-4743-8874-026b690958f6",
+          "updatedOn": "2026-08-03T13:34:50.9954119Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/2676e4ce-7efc-4144-97b9-0589c81b7f48",
+        "name": "2676e4ce-7efc-4144-97b9-0589c81b7f48",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "72133411-64c0-4a97-9ec1-336a6fcf9ae2",
+          "createdOn": "2026-08-14T00:33:44.9889040Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "f5305d97-d9b5-45bb-8452-d0c2a5381c49",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "72133411-64c0-4a97-9ec1-336a6fcf9ae2",
+          "updatedOn": "2026-08-14T00:33:44.9889040Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/f7436fd5-f031-4f10-9056-b5f3c41a0798",
+        "name": "f7436fd5-f031-4f10-9056-b5f3c41a0798",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "72133411-64c0-4a97-9ec1-336a6fcf9ae2",
+          "createdOn": "2026-08-14T00:33:48.8748599Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "principalType": "User",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "72133411-64c0-4a97-9ec1-336a6fcf9ae2",
+          "updatedOn": "2026-08-14T00:33:48.8748599Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/34b2756d-c435-4efe-959e-f6a1276a71d2",
+        "name": "34b2756d-c435-4efe-959e-f6a1276a71d2",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "72133411-64c0-4a97-9ec1-336a6fcf9ae2",
+          "createdOn": "2026-08-14T00:33:50.7221384Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "principalType": "User",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "72133411-64c0-4a97-9ec1-336a6fcf9ae2",
+          "updatedOn": "2026-08-14T00:33:50.7221384Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/295fa41d-0ebb-4480-9699-761aa18561da",
+        "name": "295fa41d-0ebb-4480-9699-761aa18561da",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "f5305d97-d9b5-45bb-8452-d0c2a5381c49",
+          "createdOn": "2026-08-14T01:17:13.7753721Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "80db596c-1fae-454c-b703-af3edafeb204",
+          "principalType": "User",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "f5305d97-d9b5-45bb-8452-d0c2a5381c49",
+          "updatedOn": "2026-08-14T01:17:13.7753721Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/e2504607-7261-5c0a-a1ee-4e03ba489e96",
+        "name": "e2504607-7261-5c0a-a1ee-4e03ba489e96",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "f5305d97-d9b5-45bb-8452-d0c2a5381c49",
+          "createdOn": "2026-08-15T00:42:07.1714599Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "ca99f26d-b7cc-41f6-8f5b-8c8d12db94ca",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "f5305d97-d9b5-45bb-8452-d0c2a5381c49",
+          "updatedOn": "2026-08-15T00:42:07.1714599Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/93619a63-8929-40f2-90db-020c3a904454",
+        "name": "93619a63-8929-40f2-90db-020c3a904454",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "f5305d97-d9b5-45bb-8452-d0c2a5381c49",
+          "createdOn": "2026-08-18T09:23:58.5900408Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "f5305d97-d9b5-45bb-8452-d0c2a5381c49",
+          "updatedOn": "2026-08-18T09:23:58.5900408Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/749b9703-790e-54cf-8640-a7f5659e1983",
+        "name": "749b9703-790e-54cf-8640-a7f5659e1983",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+          "createdOn": "2026-08-22T10:00:48.9413141Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "fee53c75-1cb7-4eff-b1bf-e1fc39a1e9c9",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+          "updatedOn": "2026-08-22T10:00:48.9413141Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/4312e402-d551-5453-9334-e32ef38048b1",
+        "name": "4312e402-d551-5453-9334-e32ef38048b1",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+          "createdOn": "2026-09-01T01:01:21.3414711Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "24634722-975d-468a-a278-d84603f9c8f1",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+          "updatedOn": "2026-09-01T01:01:21.3414711Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/a931b73b-a5a4-53ee-9683-f25a3a55422d",
+        "name": "a931b73b-a5a4-53ee-9683-f25a3a55422d",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+          "createdOn": "2026-09-01T08:19:08.5908634Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "63bfa917-e20f-46a0-8c4f-5489e71be2ed",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+          "updatedOn": "2026-09-01T08:19:08.5908634Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/e9e39a62-219b-4018-a4b2-21b82eee6806",
+        "name": "e9e39a62-219b-4018-a4b2-21b82eee6806",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-09-03T03:12:42.6540413Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "113dfe08-83a7-4bac-8f03-fa574027dc70",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-09-03T03:12:42.6540413Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/31201b33-af87-4225-a6a9-67b9bc5517f2",
+        "name": "31201b33-af87-4225-a6a9-67b9bc5517f2",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "createdOn": "2026-09-03T03:12:42.6823361Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "113dfe08-83a7-4bac-8f03-fa574027dc70",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "d6bf76ac-2954-4515-a50f-675ff184ab76",
+          "updatedOn": "2026-09-03T03:12:42.6823361Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      },
+      {
+        "id": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3/providers/Microsoft.Authorization/roleAssignments/6194214a-06ea-5207-9dd6-2546e2854e95",
+        "name": "6194214a-06ea-5207-9dd6-2546e2854e95",
+        "properties": {
+          "condition": null,
+          "conditionVersion": null,
+          "createdBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+          "createdOn": "2026-10-10T01:03:01.0097935Z",
+          "delegatedManagedIdentityResourceId": null,
+          "description": null,
+          "principalId": "c97a1f9c-5914-4b85-b54a-43ef63223abb",
+          "principalType": "ServicePrincipal",
+          "roleDefinitionId": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+          "scope": "/providers/Microsoft.Management/managementGroups/8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+          "updatedBy": "bc5ea449-364c-4f4b-baad-edc2883c57eb",
+          "updatedOn": "2026-10-10T01:03:01.0097935Z"
+        },
+        "type": "Microsoft.Authorization/roleAssignments"
+      }
+    ]
+  },
+  "services": {
+    "ca-api-dev": {
+      "identity": {
+        "principalId": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a",
+        "tenantId": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+        "type": "SystemAssigned"
+      },
+      "latestRevisionName": "ca-api-dev--llm041-held-20261020t010013",
+      "configuration": {
+        "activeRevisionsMode": "Multiple",
+        "dapr": null,
+        "identitySettings": [],
+        "ingress": {
+          "additionalPortMappings": null,
+          "allowInsecure": false,
+          "clientCertificateMode": null,
+          "corsPolicy": null,
+          "customDomains": null,
+          "exposedPort": 0,
+          "external": true,
+          "fqdn": "ca-api-dev.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io",
+          "ipSecurityRestrictions": null,
+          "stickySessions": null,
+          "targetPort": 8000,
+          "traffic": [
+            {
+              "revisionName": "ca-api-dev--n6l54uy",
+              "weight": 100
+            }
+          ],
+          "transport": "Auto"
+        },
+        "maxInactiveRevisions": 100,
+        "registries": [
+          {
+            "identity": "system",
+            "passwordSecretRef": "",
+            "server": "crdevw3uq6w.azurecr.io",
+            "username": ""
+          }
+        ],
+        "runtime": null,
+        "service": null
+      },
+      "revisions": [
+        {
+          "name": "ca-api-dev--n6l54uy",
+          "healthState": "Unhealthy",
+          "runningState": "ActivationFailed",
+          "active": true,
+          "containers": [
+            {
+              "name": "api",
+              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
+              "env": [
+                {
+                  "name": "AMA_ENVIRONMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_ALLOW_ANONYMOUS_DEV_ACCESS",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_ALLOW_ANONYMOUS_INCIDENT_MAP",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_ENABLE_INCIDENT_MAP_AUTH",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_ENTRA_TENANT_ID",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_ENTRA_AUDIENCE",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "COSMOS_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "COSMOS_DATABASE",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "STORAGE_ACCOUNT_NAME",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_EVIDENCE_COSMOS_DATABASE",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_EVIDENCE_STORAGE_ACCOUNT_NAME",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "REDIS_HOST",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "REDIS_PORT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_PROJECT_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_PROJECT_DEPLOYMENTS",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_SEARCH_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "RETRIEVAL_INDEX_ALIAS",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AGENTS_BASE_URL",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "OTEL_SERVICE_NAME",
+                  "literal_value_withheld": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ca-api-dev--llm041-held-20261020t010013",
+          "healthState": "Unhealthy",
+          "runningState": "ActivationFailed",
+          "active": true,
+          "containers": [
+            {
+              "name": "api",
+              "image": "crdevw3uq6w.azurecr.io/ama/api@sha256:caff7fe867c17363684ed78fa652425960d74e0c32ebac2681bf4d71c38c5b98",
+              "env": [
+                {
+                  "name": "AMA_ENVIRONMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_ALLOW_ANONYMOUS_DEV_ACCESS",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_ALLOW_ANONYMOUS_INCIDENT_MAP",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_ENABLE_INCIDENT_MAP_AUTH",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_ENTRA_TENANT_ID",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_ENTRA_AUDIENCE",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "COSMOS_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "COSMOS_DATABASE",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "STORAGE_ACCOUNT_NAME",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_EVIDENCE_COSMOS_DATABASE",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_EVIDENCE_STORAGE_ACCOUNT_NAME",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "REDIS_HOST",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "REDIS_PORT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_PROJECT_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_PROJECT_DEPLOYMENTS",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_SEARCH_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "RETRIEVAL_INDEX_ALIAS",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AGENTS_BASE_URL",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "OTEL_SERVICE_NAME",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_MODEL_ID",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_MODEL_VERSION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_MODEL_ID",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_MODEL_VERSION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_MODEL_ID",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_MODEL_VERSION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_BOOTSTRAP_HOLD",
+                  "literal_value_withheld": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "ca-agents-dev": {
+      "identity": {
+        "principalId": "0b986a72-f194-41f5-8f6b-ea070229aaeb",
+        "tenantId": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+        "type": "SystemAssigned"
+      },
+      "latestRevisionName": "ca-agents-dev--llm041-held-20261020t010013",
+      "configuration": {
+        "activeRevisionsMode": "Multiple",
+        "dapr": null,
+        "identitySettings": [],
+        "ingress": {
+          "additionalPortMappings": null,
+          "allowInsecure": false,
+          "clientCertificateMode": null,
+          "corsPolicy": null,
+          "customDomains": null,
+          "exposedPort": 0,
+          "external": false,
+          "fqdn": "ca-agents-dev.internal.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io",
+          "ipSecurityRestrictions": null,
+          "stickySessions": null,
+          "targetPort": 8080,
+          "traffic": [
+            {
+              "revisionName": "ca-agents-dev--pm412va",
+              "weight": 100
+            }
+          ],
+          "transport": "Auto"
+        },
+        "maxInactiveRevisions": 100,
+        "registries": [
+          {
+            "identity": "system",
+            "passwordSecretRef": "",
+            "server": "crdevw3uq6w.azurecr.io",
+            "username": ""
+          }
+        ],
+        "runtime": null,
+        "service": null
+      },
+      "revisions": [
+        {
+          "name": "ca-agents-dev--pm412va",
+          "healthState": "Unhealthy",
+          "runningState": "ActivationFailed",
+          "active": true,
+          "containers": [
+            {
+              "name": "agents",
+              "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
+              "env": [
+                {
+                  "name": "COSMOS_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "COSMOS_DATABASE",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "STORAGE_ACCOUNT_NAME",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "REDIS_HOST",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "REDIS_PORT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_PROJECT_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_PROJECT_DEPLOYMENTS",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_SEARCH_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "RETRIEVAL_INDEX_ALIAS",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_MONITORING",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_RISK_ASSESSMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_EVACUATION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_RESOURCE_ALLOCATION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_COMMUNICATION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "API_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "OTEL_SERVICE_NAME",
+                  "literal_value_withheld": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ca-agents-dev--llm041-held-20261020t010013",
+          "healthState": "Unhealthy",
+          "runningState": "ActivationFailed",
+          "active": true,
+          "containers": [
+            {
+              "name": "agents",
+              "image": "crdevw3uq6w.azurecr.io/ama/agents@sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+              "env": [
+                {
+                  "name": "COSMOS_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "COSMOS_DATABASE",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "STORAGE_ACCOUNT_NAME",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "REDIS_HOST",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "REDIS_PORT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_PROJECT_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_PROJECT_DEPLOYMENTS",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_MODEL_KEY",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_DEPLOYMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_SEARCH_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "RETRIEVAL_INDEX_ALIAS",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_MONITORING",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_RISK_ASSESSMENT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_EVACUATION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_RESOURCE_ALLOCATION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "FEATURE_FOUNDRY_RAG_COMMUNICATION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "API_ENDPOINT",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "OTEL_SERVICE_NAME",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_MODEL_ID",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_REASONING_MODEL_VERSION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_MODEL_ID",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_DRAFTING_MODEL_VERSION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_MODEL_ID",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AZURE_AI_SIMULATION_MODEL_VERSION",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_BOOTSTRAP_HOLD",
+                  "literal_value_withheld": true
+                },
+                {
+                  "name": "AMA_AGENTS_RUNTIME",
+                  "literal_value_withheld": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "release_ready": false
+}

@@ -21,10 +21,10 @@ Cross-references:
 ## Summary
 
 - Schema version: `1.0.0`
-- Total entries: **135**
+- Total entries: **136**
 - `alert-template`: 8
 - `generator`: 14
-- `mock`: 41
+- `mock`: 42
 - `simulator-feed-shape`: 13
 - `synthetic`: 59
 
@@ -104,6 +104,7 @@ Cross-references:
 | `tests-fixtures-golden-set-v1-json` | `tests/fixtures/golden-set-v1.json` | `cross-sector` | observer-auditor | `OFFICIAL` | `CC-BY-4.0` | no |
 | `tests-fixtures-jurisdiction-boundaries-au-minimal-wkt` | `tests/fixtures/jurisdiction_boundaries/au_minimal.wkt` | `cross-sector` | observer-auditor, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
 | `tests-fixtures-jurisdiction-boundaries-vic-minimal-geojson` | `tests/fixtures/jurisdiction_boundaries/vic_minimal.geojson` | `cross-sector` | observer-auditor, planning-officer | `OFFICIAL` | `CC-BY-4.0` | no |
+| `tests-fixtures-llm-deployment-provenance-json` | `tests/fixtures/llm_deployment_provenance.json` | `cross-sector` | observer-auditor | `OFFICIAL` | `CC-BY-4.0` | no |
 | `tools-lint-data-indigenous-denylist-txt` | `tools/lint/data/indigenous_denylist.txt` | `cross-sector` | observer-auditor, public-information-officer | `OFFICIAL` | `proprietary-fictitious-internal` | **YES** |
 
 ## Category: `simulator-feed-shape`
