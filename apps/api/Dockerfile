@@ -10,6 +10,9 @@ ENV PIP_CONFIG_FILE=/dev/null \
     UV_NO_CONFIG=1
 
 WORKDIR /app
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends build-essential && \
+    rm -rf /var/lib/apt/lists/*
 COPY apps/api/pyproject.toml ./apps/api/
 COPY scripts/install_pyproject_dependencies.py ./scripts/
 RUN pip install --no-cache-dir --upgrade pip && \

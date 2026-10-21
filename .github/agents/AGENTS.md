@@ -6,8 +6,8 @@ disable-model-invocation: true
 
 # Actor Agent Catalogue
 
-**Last Updated**: 2026-10-14
-**Totals**: 85 active actor files (10 operational, 58 sector, 17 technical); 13 workflow agents; 6 archived sector agents
+**Last Updated**: 2026-10-21
+**Totals**: 85 active actor files (10 operational, 58 sector, 17 technical); 14 workflow agents; 6 archived sector agents
 
 This file is generated from `.github/agents/**/*.agent.md` frontmatter and body headings.
 Do not hand-edit tables; run `python scripts/generate_agents_catalogue.py --write`.
@@ -113,6 +113,7 @@ Do not hand-edit tables; run `python scripts/generate_agents_catalogue.py --writ
 | Speckit.converge | speckit.converge | .github/agents/speckit.converge.agent.md | workflow | Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it. |  |
 | Pre-Implementation Review | speckit.fleet.review | .github/agents/speckit.fleet.review.agent.md | workflow | Cross-model evaluation of plan.md and tasks.md before implementation. Reviews feasibility, completeness, dependency ordering, risk, and parallelization correctness using a different model than was used to generate the artifacts. |  |
 | Speckit.fleet.run | speckit.fleet.run | .github/agents/speckit.fleet.run.agent.md | workflow | Orchestrate a full feature lifecycle through all SpecKit phases with human-in-the-loop checkpoints: specify -> clarify -> plan -> checklist -> tasks -> analyze -> cross-model review -> implement -> verify -> CI. Detects partially complete features and resumes from the right phase. |  |
+| Speckit.fleet.yolo | speckit.fleet.yolo | .github/agents/speckit.fleet.yolo.agent.md | workflow | Orchestrate a full feature lifecycle through all SpecKit phases: specify -> clarify -> plan -> checklist -> tasks -> analyze -> cross-model review -> implement -> verify -> CI. Detects partially complete features and resumes from the right phase. |  |
 | Speckit.implement | speckit.implement | .github/agents/speckit.implement.agent.md | workflow | Execute the implementation plan by processing and executing all tasks defined in tasks.md |  |
 | Speckit.plan | speckit.plan | .github/agents/speckit.plan.agent.md | workflow | Execute the implementation planning workflow using the plan template to generate design artifacts. | speckit.tasks, speckit.checklist |
 | Speckit.specify | speckit.specify | .github/agents/speckit.specify.agent.md | workflow | Create or update the feature specification from a natural language feature description. | speckit.plan, speckit.clarify |

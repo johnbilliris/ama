@@ -8,6 +8,9 @@
     "environmentName": {
       "value": "dev"
     },
+    "environmentTier": {
+      "value": "dev"
+    },
     "location": {
       "value": "australiaeast"
     },
