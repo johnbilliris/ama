@@ -3556,6 +3556,7 @@
         "lng": 145.774
       },
       "capacity_persons": 3000,
+      "current_occupancy_persons": 0,
       "accessibility_features": [
         "wheelchair_accessible",
         "medical_facilities"
@@ -3575,6 +3576,7 @@
         "lng": 145.452
       },
       "capacity_persons": 1000,
+      "current_occupancy_persons": 0,
       "accessibility_features": [
         "wheelchair_accessible"
       ],
@@ -3592,6 +3594,7 @@
         "lng": 145.487
       },
       "capacity_persons": 2000,
+      "current_occupancy_persons": 0,
       "accessibility_features": [
         "wheelchair_accessible",
         "medical_facilities",
@@ -3611,6 +3614,7 @@
         "lng": 146.031
       },
       "capacity_persons": 1500,
+      "current_occupancy_persons": 0,
       "accessibility_features": [
         "wheelchair_accessible",
         "medical_facilities"
@@ -3630,6 +3634,7 @@
         "lng": 145.425
       },
       "capacity_persons": 2500,
+      "current_occupancy_persons": 0,
       "accessibility_features": [
         "wheelchair_accessible",
         "helicopter_landing"

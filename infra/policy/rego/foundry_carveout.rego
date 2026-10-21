@@ -10,8 +10,7 @@ package main
 # Allow-list of Australian regions for FR-RAG-CV-04 data-residency.
 au_regions := {"australiaeast", "australiasoutheast"}
 
-# A registry row is well-formed when it carries a non-placeholder approver
-# duo, both data-minimisation flags, and an AU region.
+# Approval-count exceptions do not waive data minimisation or AU region controls.
 deny_foundry_carveout[msg] {
     deployment := input.deployments[_]
     not deployment.data_minimisation_required
@@ -38,11 +37,35 @@ deny_foundry_carveout[msg] {
 default_min_approvers_prod := 3
 default_min_approvers_dev := 2
 
-min_approvers_prod := input.min_approvers_prod {
+valid_quorum_waiver {
+    waiver := input.quorum_waiver
+    object.keys(waiver) == {"scope", "approved_by", "approval_reference", "expires_on"}
+    waiver.scope == "all_environments"
+    is_string(waiver.approved_by)
+    count(trim_space(waiver.approved_by)) >= 3
+    not regex.match("(?i)[<>]|\\btodo\\b|^approver-", waiver.approved_by)
+    is_string(waiver.approval_reference)
+    count(trim_space(waiver.approval_reference)) >= 30
+    regex.match("^\\d{4}-\\d{2}-\\d{2}$", waiver.expires_on)
+    expiry := time.parse_rfc3339_ns(sprintf("%sT23:59:59.999999999Z", [waiver.expires_on]))
+    time.now_ns() <= expiry
+}
+
+deny_foundry_carveout[msg] {
+    object.keys(input)[_] == "quorum_waiver"
+    not valid_quorum_waiver
+    msg := "Invalid or expired quorum_waiver; normal approval floors apply."
+}
+
+min_approvers_prod := 1 {
+    valid_quorum_waiver
+} else := input.min_approvers_prod {
     input.min_approvers_prod
 } else := default_min_approvers_prod
 
-min_approvers_dev := input.min_approvers_dev {
+min_approvers_dev := 1 {
+    valid_quorum_waiver
+} else := input.min_approvers_dev {
     input.min_approvers_dev
 } else := default_min_approvers_dev
 

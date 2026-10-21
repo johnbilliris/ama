@@ -568,6 +568,11 @@
     "data_type": "json_observations",
     "update_frequency": "event_driven",
     "geographic_coverage": "national",
+    "input_source_ids": [
+      "bom-warnings",
+      "ga-earthquakes",
+      "nsw-rfs-fires-near-me"
+    ],
     "trust_tier": "tier_7_derived_computed",
     "status": "available"
   },
@@ -581,6 +586,11 @@
     "data_type": "json_observations",
     "update_frequency": "event_driven",
     "geographic_coverage": "national",
+    "input_source_ids": [
+      "agent-risk-assessments",
+      "ga-earthquakes",
+      "vic-emergency"
+    ],
     "trust_tier": "tier_7_derived_computed",
     "status": "available"
   },
@@ -594,6 +604,10 @@
     "data_type": "json_observations",
     "update_frequency": "daily",
     "geographic_coverage": "national",
+    "input_source_ids": [
+      "bom-warnings",
+      "nsw-ses-alerts"
+    ],
     "trust_tier": "tier_7_derived_computed",
     "status": "available"
   }

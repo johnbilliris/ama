@@ -207,6 +207,7 @@ class TestAssessmentStatusTransition:
             hazard_assessment_id="ha-001",
             incident_id="inc-001",
             assessment_type="spread_prediction",
+            input_signal_ids=["sig-001"],
             summary="Initial assessment",
             confidence_level="high",
             status="active",

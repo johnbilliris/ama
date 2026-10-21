@@ -11,14 +11,25 @@ FRs: FR-029 | Research: R-008
 
 import logging
 import os
-from typing import Any
+from typing import Any, TypedDict
+
+
+class RecoveryCatalogueDocument(TypedDict, total=False):
+    id: str
+    kind: str
+    domain: str
+    outcome_id: str
+    activity_id: str
+    indicator_id: str
+    objective_type: str
+
 
 logger = logging.getLogger(__name__)
 
 
 def _build_cosmos_client() -> Any:
     """Build a CosmosClient from the ``COSMOS_ENDPOINT`` env var."""
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]
@@ -37,7 +48,7 @@ class RecoveryCatalogueRepository:
     def __init__(self, cosmos_client: Any = None, database_name: str = "disaster-hub"):
         self._db_name = database_name
         self._container_name = "recovery-catalogue"
-        self._in_memory: dict[str, dict[str, Any]] = {}
+        self._in_memory: dict[str, RecoveryCatalogueDocument] = {}
 
         if cosmos_client is not None:
             self._client = cosmos_client
@@ -63,7 +74,7 @@ class RecoveryCatalogueRepository:
     # Outcomes
     # ------------------------------------------------------------------
 
-    async def get_outcome(self, outcome_id: str, domain: str) -> dict | None:
+    async def get_outcome(self, outcome_id: str, domain: str) -> RecoveryCatalogueDocument | None:
         """Read a single outcome by id with partition key ``domain``."""
         container = self._get_container()
         if container:
@@ -78,7 +89,7 @@ class RecoveryCatalogueRepository:
         domain: str | None = None,
         objective_type: str | None = None,
         limit: int = 100,
-    ) -> list[dict]:
+    ) -> list[RecoveryCatalogueDocument]:
         """Query outcomes with optional domain and objective-type filters."""
         container = self._get_container()
         if container:
@@ -111,7 +122,7 @@ class RecoveryCatalogueRepository:
     # Activities & Indicators for a given outcome
     # ------------------------------------------------------------------
 
-    async def get_activities_for_outcome(self, outcome_id: str, domain: str) -> list[dict]:
+    async def get_activities_for_outcome(self, outcome_id: str, domain: str) -> list[RecoveryCatalogueDocument]:
         """Return all activity documents linked to a specific outcome."""
         container = self._get_container()
         if container:
@@ -124,7 +135,7 @@ class RecoveryCatalogueRepository:
             d for d in self._in_memory.values() if d.get("kind") == "activity" and d.get("outcome_id") == outcome_id
         ]
 
-    async def get_indicators_for_outcome(self, outcome_id: str, domain: str) -> list[dict]:
+    async def get_indicators_for_outcome(self, outcome_id: str, domain: str) -> list[RecoveryCatalogueDocument]:
         """Return all indicator documents linked to a specific outcome."""
         container = self._get_container()
         if container:
@@ -141,7 +152,7 @@ class RecoveryCatalogueRepository:
     # Domain summary
     # ------------------------------------------------------------------
 
-    async def get_domain_summary(self, domain: str) -> dict:
+    async def get_domain_summary(self, domain: str) -> dict[str, str | int]:
         """Return counts of outcomes, activities, and indicators for a domain."""
         container = self._get_container()
         if container:
@@ -150,7 +161,7 @@ class RecoveryCatalogueRepository:
                 {"name": "@domain", "value": domain},
             ]
             rows = list(container.query_items(query, parameters=params, partition_key=domain))
-            summary = {"domain": domain, "outcomes": 0, "activities": 0, "indicators": 0}
+            summary: dict[str, str | int] = {"domain": domain, "outcomes": 0, "activities": 0, "indicators": 0}
             for row in rows:
                 kind = row.get("kind", "")
                 if kind in summary:
@@ -158,18 +169,19 @@ class RecoveryCatalogueRepository:
             return summary
         # In-memory fallback
         domain_items = [d for d in self._in_memory.values() if d.get("domain") == domain]
-        return {
+        memory_summary: dict[str, str | int] = {
             "domain": domain,
             "outcomes": sum(1 for d in domain_items if d.get("kind") == "outcome"),
             "activities": sum(1 for d in domain_items if d.get("kind") == "activity"),
             "indicators": sum(1 for d in domain_items if d.get("kind") == "indicator"),
         }
+        return memory_summary
 
     # ------------------------------------------------------------------
     # Seed / upsert
     # ------------------------------------------------------------------
 
-    async def upsert_catalogue_item(self, item_doc: dict) -> dict:
+    async def upsert_catalogue_item(self, item_doc: RecoveryCatalogueDocument) -> RecoveryCatalogueDocument:
         """Upsert a single catalogue item — used by the seed loader."""
         container = self._get_container()
         if container:

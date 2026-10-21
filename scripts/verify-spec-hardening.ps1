@@ -15,7 +15,8 @@
 
 [CmdletBinding()]
 param(
-  [switch]$Quiet
+  [switch]$Quiet,
+  [string]$FeatureId
 )
 
 # Stub guard — until T046 lands, retain T003's zero-exit behaviour.
@@ -43,6 +44,10 @@ try {
   $Spec027      = 'specs/027-spec-hardening/spec.md'
   $GapRegister  = 'specs/shared/gap-id-register.md'
   $EvidenceDir  = 'specs/001-disaster-response-hub/evidence'
+  $Plan001      = 'specs/001-disaster-response-hub/plan.md'
+  $Quickstart001= 'specs/001-disaster-response-hub/quickstart.md'
+  $RegionalDoc  = 'docs/disaster-response-hub/regional-adaptation-asia-pacific.md'
+  $Codeowners   = '.github/CODEOWNERS'
   $MissingFiles = @($Spec001, $Spec027, $GapRegister) | Where-Object { -not (Test-Path $_) }
   if ($MissingFiles.Count -gt 0) {
     Write-Error "verify-spec-hardening: required file(s) missing: $($MissingFiles -join ', ')"
@@ -148,18 +153,116 @@ try {
       $cells = @(($row -split '\|') | ForEach-Object { $_.Trim() } | Where-Object { $_.Length -gt 0 })
       if ($cells.Count -lt 6) { continue }
       $deltaId=$cells[0]; $target=$cells[3]; $block=$cells[4]; $stat=$cells[5]
-      if ($block -eq 'plan' -and $stat -ne 'Resolved' -and $target -and $target -ne 'unassigned') {
+      $featureMatches = [string]::IsNullOrWhiteSpace($FeatureId) -or $target -eq $FeatureId
+      if ($block -eq 'plan' -and $stat -ne 'Resolved' -and $target -and $target -ne 'unassigned' -and $featureMatches) {
         $planPath = "specs/$target/plan.md"
-        if (Test-Path $planPath) {
+        if ([string]::IsNullOrWhiteSpace($FeatureId) -and (Test-Path $planPath)) {
           $violations.Add("(e) plan-phase ordering: $deltaId targets $target whose plan.md exists yet delta is $stat (blocking_phase=plan)") | Out-Null
+        } elseif (-not (Test-Path $planPath)) {
+          $violations.Add("(e) plan-phase ordering: $deltaId targets $target and remains $stat (blocking_phase=plan)") | Out-Null
         }
       }
     }
   }
 
+  # ---- Invariant (f): no absolute no-code portability guarantee ------------
+  if (Test-Path $RegionalDoc) {
+    $regionalText = Get-Content $RegionalDoc -Raw
+    if ($regionalText -match '(?im)no\s+code\s+changes?\s+are\s+needed|no\s+code\s+change\s+needed') {
+      $violations.Add('(f) regional portability wording: absolute no-code guarantee remains in regional adaptation doc') | Out-Null
+    }
+  } else {
+    $violations.Add("(f) regional portability wording: required doc missing: $RegionalDoc") | Out-Null
+  }
+
+  # ---- Invariant (g): alternate mode must be rehearsal-only non-egress -----
+  if (Test-Path $Quickstart001) {
+    $quickstartText = Get-Content $Quickstart001 -Raw
+    $altModeLines = [regex]::Matches($quickstartText, '(?im)^- .*alternate mode.*$')
+    foreach ($line in $altModeLines) {
+      if ($line.Value -notmatch '(?i)rehearsal' -or $line.Value -notmatch '(?i)non-egress') {
+        $violations.Add("(g) quickstart approval boundary: alternate mode line must be rehearsal-only and non-egress: $($line.Value.Trim())") | Out-Null
+      }
+    }
+  } else {
+    $violations.Add("(g) quickstart approval boundary: required file missing: $Quickstart001") | Out-Null
+  }
+
+  # ---- Invariant (h): SC-003 and ASM-081 persona parity --------------------
+  function Normalize-RoleList {
+    param([string]$Raw)
+    if ([string]::IsNullOrWhiteSpace($Raw)) { return @() }
+    return @(
+      ($Raw -split ',') |
+      ForEach-Object { ($_ -replace '\s+', ' ').Trim().ToLowerInvariant() } |
+      Where-Object { $_ } |
+      Sort-Object -Unique
+    )
+  }
+
+  $sc003Match = [regex]::Match(
+    $spec001Text,
+    '(?s)SC-003.*?\((?<roles>Incident[^\)]*|Planning[^\)]*|Operations[^\)]*|Logistics[^\)]*|Public Information[^\)]*|Field Coordinator[^\)]*|Resilience Planner[^\)]*|Observer / Auditor[^\)]*)\)'
+  )
+  $asm081Match = [regex]::Match(
+    $spec001Text,
+    '(?s)ASM-081.*?\((?<roles>Incident[^\)]*|Planning[^\)]*|Operations[^\)]*|Logistics[^\)]*|Public Information[^\)]*|Field Coordinator[^\)]*|Resilience Planner[^\)]*|Observer / Auditor[^\)]*)\)'
+  )
+
+  if (-not $sc003Match.Success -or -not $asm081Match.Success) {
+    $violations.Add('(h) persona parity: unable to parse SC-003 and ASM-081 canonical role lists') | Out-Null
+  } else {
+    $scRoles = Normalize-RoleList -Raw $sc003Match.Groups['roles'].Value
+    $asmRoles = Normalize-RoleList -Raw $asm081Match.Groups['roles'].Value
+    if ($scRoles.Count -ne $asmRoles.Count -or (Compare-Object -ReferenceObject $scRoles -DifferenceObject $asmRoles)) {
+      $violations.Add("(h) persona parity: SC-003 roles [$($scRoles -join '; ')] differ from ASM-081 roles [$($asmRoles -join '; ')]") | Out-Null
+    }
+  }
+
+  # ---- Invariant (i): plan PASS must be qualified when plan blockers open ---
+  if (Test-Path $Plan001) {
+    $planText = Get-Content $Plan001 -Raw
+    $hasOpenPlanBlocker = [regex]::Matches($spec001Text, '(?m)^\|\s*OD-\d{3}\s*\|.*?\|\s*plan\s*\|\s*Open\s*\|').Count -gt 0
+    if ($hasOpenPlanBlocker) {
+      $unqualifiedPasses = [regex]::Matches(
+        $planText,
+        '(?im)^- \*\*[^\*]+\*\*: PASS\.(?! \(design intent only; not acceptance evidence while Open Delta blockers remain\)\s*$)'
+      )
+      foreach ($passLine in $unqualifiedPasses) {
+        $violations.Add("(i) plan PASS qualification: unqualified PASS line while Open plan blocker exists: $($passLine.Value.Trim())") | Out-Null
+      }
+    }
+  } else {
+    $violations.Add("(i) plan PASS qualification: required file missing: $Plan001") | Out-Null
+  }
+
+  # ---- Invariant (j): CODEOWNERS explicit ownership visibility --------------
+  if (Test-Path $Codeowners) {
+    $codeownersLines = Get-Content $Codeowners
+    $uncommentedOwners = @(
+      $codeownersLines |
+      Where-Object { $_ -notmatch '^\s*#' } |
+      Where-Object { $_ -match '^\s*\S+\s+@\S+' }
+    )
+    if ($uncommentedOwners.Count -eq 0) {
+      $violations.Add('(j) CODEOWNERS visibility: no uncommented owner rules found') | Out-Null
+    }
+    $specOwner = $uncommentedOwners | Where-Object { $_ -match '^\s*specs/001-disaster-response-hub/\s+@\S+' }
+    if (-not $specOwner) {
+      $violations.Add('(j) CODEOWNERS visibility: specs/001-disaster-response-hub has no uncommented owner rule') | Out-Null
+    }
+    $legacyFallbackComment = $codeownersLines | Where-Object { $_ -match 'if team .* does not yet exist.*interim' }
+    $fallbackLine = $codeownersLines | Where-Object { $_ -match '^\s*#\s*specs/001-disaster-response-hub/\s+@' }
+    if ($legacyFallbackComment -and $fallbackLine) {
+      $violations.Add('(j) CODEOWNERS visibility: legacy fallback prose claims automatic interim ownership while fallback line is commented out') | Out-Null
+    }
+  } else {
+    $violations.Add("(j) CODEOWNERS visibility: required file missing: $Codeowners") | Out-Null
+  }
+
   # ---- Report --------------------------------------------------------------
   if ($violations.Count -eq 0) {
-    if (-not $Quiet) { Write-Output 'verify-spec-hardening: OK (5 invariants pass)' }
+    if (-not $Quiet) { Write-Output 'verify-spec-hardening: OK (10 invariants pass)' }
     exit 0
   }
   Write-Output 'verify-spec-hardening: FAILED'

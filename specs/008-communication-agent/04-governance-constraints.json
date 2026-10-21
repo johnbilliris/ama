@@ -1,0 +1,28 @@
+{
+  "spec": "008-communication-agent",
+  "generatedAt": "2026-09-16T23:47:42Z",
+  "status": "GOVERNANCE-BLOCKED",
+  "discovery": {
+    "subscription": {
+      "name": "AI Impact Analyzer",
+      "id": "879c3e12-a379-45c7-b1b1-5a44f3cc2713"
+    },
+    "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+    "method": "azure-policy-assignment-list-scoped-and-subscription-wide",
+    "subscriptionWideAssignments": 0,
+    "subscriptionScopedAssignments": 0,
+    "managementGroupInheritedAssignments": "UNVERIFIED",
+    "portalParity": "UNVERIFIED",
+    "policyEffects": "UNVERIFIED"
+  },
+  "blockedFindings": [
+    {
+      "id": "AUD-008-031",
+      "requiredChange": "Integrate the communication runtime and apply policy-cleared least-privilege identity, Cosmos, Service Bus, scaling, and regional configuration"
+    }
+  ],
+  "notes": [
+    "Zero API assignments is not treated as proof of zero effective policy.",
+    "No Bicep or deployment change is authorized while Portal parity and inheritance remain unverified."
+  ]
+}

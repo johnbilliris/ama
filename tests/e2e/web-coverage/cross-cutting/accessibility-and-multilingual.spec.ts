@@ -15,29 +15,68 @@ const ROUTES: Array<{ key: string; goto: (page: import("@playwright/test").Page)
   { key: "workspaces", goto: async (p) => new WorkspacesPage(p).goto() },
   { key: "governance-dashboard", goto: async (p) => new GovernanceDashboardPage(p).goto() },
   { key: "simulations", goto: async (p) => new SimulationsPage(p).goto() },
+  {
+    key: "incident-review",
+    goto: async (p) => {
+      await p.goto("/incidents/incident-001");
+    },
+  },
+  {
+    key: "incident-review-error",
+    goto: async (p) => {
+      await p.goto("/incidents/not-a-real-incident");
+    },
+  },
+  {
+    key: "persona-task",
+    goto: async (p) => {
+      await p.goto("/workspaces/public-information-officer?incidentId=incident-001");
+    },
+  },
+  {
+    key: "preparedness",
+    goto: async (p) => {
+      await p.goto("/preparedness");
+    },
+  },
 ];
 
 const REQUIRED_LANGUAGES = ["en", "zh-Hans", "aus-x-atsi-placeholder"];
+const UI_LOCALES = ["en-AU", "zh-Hans"];
 
 for (const route of ROUTES) {
-  test(
-    `WCAG 2.2 AA on ${route.key} ` +
-      `@persona:public-information-officer @outcome:1 @hazard:bushfire+extreme-heat ` +
-      `@fr:FR-014 @clause:V-C @p1`,
-    async ({ resolvePersona, page, correlationId }) => {
-      const persona = await resolvePersona("public-information-officer");
-      await page.setExtraHTTPHeaders({
-        "X-Correlation-Id": correlationId,
-        "X-Test-Persona-Id": persona.persona_id,
-      });
-      await route.goto(page);
-      const results = await buildAxe(page).analyze();
-      expect(
-        results.violations,
-        results.violations.map((v) => `${v.id}: ${v.help}`).join("\n"),
-      ).toEqual([]);
-    },
-  );
+  for (const locale of UI_LOCALES) {
+    test(
+      `WCAG 2.2 AA on ${route.key} locale=${locale} ` +
+        `@persona:public-information-officer @outcome:1 @hazard:bushfire+extreme-heat ` +
+        `@fr:FR-014 @clause:V-C @p1`,
+      async ({ resolvePersona, page, correlationId }) => {
+        const persona = await resolvePersona("public-information-officer");
+        await page.addInitScript(([loc]) => {
+          window.localStorage.setItem("ama.locale", loc);
+          document.cookie = `ama-locale=${encodeURIComponent(loc)}; path=/; samesite=lax`;
+        }, [locale]);
+        await page.setExtraHTTPHeaders({
+          "X-Correlation-Id": correlationId,
+          "X-Test-Persona-Id": persona.persona_id,
+        });
+        await route.goto(page);
+        await expect(page.locator("html")).toHaveAttribute("lang", locale);
+        const results = await buildAxe(page).analyze();
+        expect(
+          results.violations,
+          results.violations.map((v) => `${v.id}: ${v.help}`).join("\n"),
+        ).toEqual([]);
+
+        await page.keyboard.press("Tab");
+        const focusedTag = await page.evaluate(() => document.activeElement?.tagName ?? "");
+        expect(focusedTag).not.toBe("");
+
+        const liveRegionCount = await page.locator("[role='status'], [role='alert'], [aria-live]").count();
+        expect(liveRegionCount).toBeGreaterThan(0);
+      },
+    );
+  }
 }
 
 test(

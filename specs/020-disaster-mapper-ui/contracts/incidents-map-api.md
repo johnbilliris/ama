@@ -38,7 +38,7 @@ GET /api/v1/incidents/map
 - `severity` accepts a comma-separated list of valid `Severity` enum values if provided; each value is validated individually
 - `status` accepts a comma-separated list of valid operational statuses (not `rehearsal`) if provided; each value is validated individually
 - `pprr_phase` accepts a comma-separated list of valid `PprrPhase` enum values if provided; each value is validated individually
-- `year_start` ≤ `year_end` when both are provided
+- When both year bounds are provided and `year_start` > `year_end`, return `200 OK` with an empty `FeatureCollection`, `total=0`, and `unmapped_count=0`. Preserve the requested `page` and `page_size` and include `fetched_at`; do not query the repository.
 - `keyword` max length: 200 characters; sanitised to prevent injection
 - `page` ≥ 1
 - `page_size` between 1 and 500 (inclusive)

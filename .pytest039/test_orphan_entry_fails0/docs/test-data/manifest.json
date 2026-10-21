@@ -1,0 +1,31 @@
+{
+  "entries": [
+    {
+      "category": "synthetic",
+      "content_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "created_or_updated": "2026-05-11",
+      "cultural_review_required": false,
+      "dataset_version": "n/a",
+      "domain_group": "operational",
+      "fictitious": true,
+      "id": "orphan-entry",
+      "licence": "CC-BY-4.0",
+      "name": "Orphan path entry",
+      "path": "packages/domain/src/domain/seed/does_not_exist.json",
+      "persona_bindings": [
+        "incident-commander"
+      ],
+      "pii": false,
+      "pspf": "OFFICIAL",
+      "record_count": 0,
+      "refresh_policy": "static",
+      "residency": "AU",
+      "snapshot_date": "n/a",
+      "source_url": "n/a",
+      "version": "1.0.0",
+      "volume_tier": "n/a"
+    }
+  ],
+  "generated_at": "2026-05-11T00:00:00Z",
+  "schema_version": "1.0.0"
+}

@@ -17,18 +17,22 @@ same corpus as the live agents (FR-RAG-SIM-01..06).
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
+import inspect
 import json
 import logging
 import os
 import re
 import uuid
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator, AsyncIterator
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from ama_domain.retrieval import RetrievedChunk
+from app.core.async_io import run_blocking
 from app.repositories.sim_chat_history_repository import (
     SimChatHistoryRepository,
     default_history_repo,
@@ -36,8 +40,13 @@ from app.repositories.sim_chat_history_repository import (
 from app.services.simulation.controller_tools import ALLOW_LIST, TOOL_SCHEMAS
 from app.services.simulation.rate_limiter import RateLimiter, get_rate_limiter
 from app.services.simulation.sub_agent_invoker import SubAgentInvoker, default_invoker
+from common.inference_observation import RequestObservation, observe_openai_transport
+from common.llm_config import DeploymentResolver, FoundryConfigurationError, OperationalTier, ResolvedDeployment
 
 from packages.domain.src.domain.models.sim_chat_turn import SimChatTurn
+
+if TYPE_CHECKING:
+    from openai.types.chat import ChatCompletionMessageParam, ChatCompletionMessageToolCallParam
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +54,7 @@ _PROMPT_PATH = Path(__file__).with_name("controller_prompt.md")
 
 # Rolling-window cap on prior turns replayed to the model. Each assistant
 # response is ~600 chars on average, so 40 turns ≈ 24 k chars (~6 k tokens)
-# — well inside gpt-5.4's 128 k context window and leaves headroom for the
+# — well inside gpt-5.6's 128 k context window and leaves headroom for the
 # system prompt (~4 k chars) and new user message.
 _MAX_HISTORY_TURNS = 40
 
@@ -114,6 +123,7 @@ class SimulationControllerService:
         event_recorder: Any = None,
         clock_service: Any = None,
         simulation_repository: Any = None,
+        scenario_seeding_service: Any = None,
         retrieval_service: Any = None,
         audit_writer: Any = None,
     ) -> None:
@@ -123,6 +133,7 @@ class SimulationControllerService:
         self._event_recorder = event_recorder
         self._clock = clock_service
         self._sim_repo = simulation_repository
+        self._scenario_seeding = scenario_seeding_service
         self._prompt_text = _PROMPT_PATH.read_text(encoding="utf-8")
         self._prompt_hash = hashlib.sha256(self._prompt_text.encode("utf-8")).hexdigest()
         # Spec 036 FR-RAG-SIM-01..06: optional retrieval client + audit writer.
@@ -131,6 +142,27 @@ class SimulationControllerService:
         # when the caller did not inject one.
         self._retrieval = retrieval_service or _build_default_retrieval_service()
         self._audit_writer = audit_writer
+        settings = dict(os.environ)
+        self._foundry_endpoint = settings.get("AZURE_AI_PROJECT_ENDPOINT")
+        self._foundry_configured = (
+            self._foundry_endpoint is not None
+            or bool(settings.get("AZURE_AI_PROJECT_DEPLOYMENTS"))
+            or any(
+                key.startswith(("AZURE_AI_REASONING_", "AZURE_AI_DRAFTING_", "AZURE_AI_SIMULATION_"))
+                for key in settings
+            )
+        )
+        self._deployment_region = settings.get("AZURE_AI_PROJECT_REGION", "").lower()
+        self._api_version = settings.get("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
+        self._backend = settings.get("SIM_CONTROLLER_MODE", "").lower()
+        self._routing_resolver: DeploymentResolver | None = None
+        self._routing_error: FoundryConfigurationError | None = None
+        try:
+            self._routing_resolver = DeploymentResolver.from_environment(
+                settings, configuration_revision="simulation-controller-snapshot"
+            )
+        except FoundryConfigurationError as exc:
+            self._routing_error = exc
 
     async def _current_sim_seconds(self, tenant_id: str) -> float:
         """Best-effort lookup of current simulated time for the tenant."""
@@ -266,7 +298,14 @@ class SimulationControllerService:
             logger.warning("sim_chat_history_persist_failed: %s", exc)
             return None
 
-    def _load_history_messages(self, tenant_id: str) -> list[dict[str, Any]]:
+    async def _persist_turn_async(self, **kwargs: Any) -> SimChatTurn | None:
+        """Offloaded variant — chat history writes must not stall the SSE loop."""
+        return await run_blocking(self._persist_turn, **kwargs)
+
+    async def _maybe_record_tool_invocation_async(self, **kwargs: Any) -> None:
+        await run_blocking(self._maybe_record_tool_invocation, **kwargs)
+
+    def _load_history_messages(self, tenant_id: str) -> list[ChatCompletionMessageParam]:
         """Return prior turns formatted as OpenAI chat messages.
 
         Only ``user``, ``assistant`` and ``system`` roles are replayed — ``tool``
@@ -278,48 +317,22 @@ class SimulationControllerService:
         except Exception as exc:  # pragma: no cover
             logger.warning("sim_chat_history_load_failed: %s", exc)
             return []
-        out: list[dict[str, Any]] = []
+        out: list[ChatCompletionMessageParam] = []
         for t in turns:
             if t.role in ("user", "assistant", "system"):
                 out.append({"role": t.role, "content": t.content})
         return out
 
-    def _resolve_simulation_deployment(self) -> str | None:
-        """Resolve the simulation deployment name from the Foundry env vars.
+    async def _load_history_messages_async(self, tenant_id: str) -> list[ChatCompletionMessageParam]:
+        """Offloaded variant — history replay reads must not stall the SSE loop."""
+        return await run_blocking(self._load_history_messages, tenant_id)
 
-        Spec 036 / ADR-20 hard cutover: the controller reads
-        ``AZURE_AI_PROJECT_DEPLOYMENTS`` (CSV of
-        ``modelId@version=deploymentName``) and matches the simulation /
-        reasoning model key. Returns ``None`` when the deployment cannot be
-        resolved — the caller surfaces ``openai_unavailable`` rather than
-        falling back to a legacy env var.
-
-        Resolution order (post tier-env-var fix):
-          1. ``AZURE_AI_SIMULATION_DEPLOYMENT`` — explicit per-tier
-             deployment name set by Bicep. Wins because the CSV map can
-             collapse multiple tiers onto the same model key when several
-             deployments share ``<modelName>@<version>``.
-          2. CSV lookup by ``AZURE_AI_SIMULATION_MODEL_KEY`` (or the
-             reasoning key) — first-write-wins per the parser.
-        """
-        explicit = os.environ.get("AZURE_AI_SIMULATION_DEPLOYMENT")
-        if explicit:
-            return explicit
-
-        csv = os.environ.get("AZURE_AI_PROJECT_DEPLOYMENTS", "")
-        model_key = (
-            os.environ.get("AZURE_AI_SIMULATION_MODEL_KEY")
-            or os.environ.get("AZURE_AI_REASONING_MODEL_KEY")
-            or "gpt-4o"
-        )
-        if csv:
-            for entry in (e.strip() for e in csv.split(",") if e.strip()):
-                if "=" not in entry:
-                    continue
-                key, name = entry.split("=", 1)
-                if key.strip() == model_key:
-                    return name.strip()
-        return None
+    def _resolve_simulation_deployment(self) -> ResolvedDeployment:
+        """Resolve explicit, isolated simulation routing from the frozen snapshot."""
+        if self._routing_error is not None:
+            raise self._routing_error
+        assert self._routing_resolver is not None
+        return self._routing_resolver.resolve(OperationalTier.SIMULATION)
 
     async def stream_turn(
         self,
@@ -330,6 +343,20 @@ class SimulationControllerService:
         user_message: str,
         mode: str | None = None,
     ) -> AsyncIterator[ChatEvent]:
+        if self._sim_repo is not None:
+            tenant = await self._sim_repo.get_by_tenant_id(tenant_id)
+            if tenant is None:
+                yield ChatEvent("error", {"code": "not_found", "message": "Simulation tenant not found."})
+                return
+            if tenant.status != "Active" or tenant.clock_paused:
+                yield ChatEvent(
+                    "error",
+                    {
+                        "code": "lifecycle_state_conflict",
+                        "message": f"Simulation is {tenant.status.lower()}; resume it before sending chat commands.",
+                    },
+                )
+                return
         if not self._rl.check_and_consume(tenant_id=tenant_id, user_oid=user_oid):
             yield ChatEvent(
                 "error",
@@ -343,7 +370,7 @@ class SimulationControllerService:
 
         # Persist the user message BEFORE streaming the reply so the history
         # is consistent even if the assistant stream is aborted mid-flight.
-        self._persist_turn(
+        await self._persist_turn_async(
             tenant_id=tenant_id,
             simulation_id=simulation_id,
             role="user",
@@ -353,7 +380,7 @@ class SimulationControllerService:
 
         if refusal is not None:
             yield ChatEvent("turn.delta", {"turn_id": turn_id, "delta": refusal})
-            self._persist_turn(
+            await self._persist_turn_async(
                 tenant_id=tenant_id,
                 simulation_id=simulation_id,
                 role="assistant",
@@ -361,13 +388,19 @@ class SimulationControllerService:
             )
             yield ChatEvent(
                 "turn.end",
-                {"turn_id": turn_id, "content_hash": _sha256(refusal), "refused": True},
+                {
+                    "turn_id": turn_id,
+                    "content_hash": _sha256(refusal),
+                    "refused": True,
+                    "inference_attempted": False,
+                    "inference_outcome": "not_attempted",
+                },
             )
             return
 
-        backend = (mode or os.getenv("SIM_CONTROLLER_MODE", "")).lower()
+        backend = (mode or self._backend).lower()
         if not backend:
-            backend = "foundry" if os.getenv("AZURE_AI_PROJECT_ENDPOINT") else "offline"
+            backend = "foundry" if self._foundry_configured else "offline"
 
         if backend in ("foundry", "azure"):
             async for ev in self._stream_from_azure(
@@ -436,10 +469,10 @@ class SimulationControllerService:
                 {
                     "tool_call_id": tool_call_id,
                     "outcome": "ok" if not reply.degraded else "error",
-                    "result": {"summary": reply.summary, "citations": reply.citations},
+                    "result": {"summary": reply.summary, "citations": reply.citations, **reply.provenance()},
                 },
             )
-            self._maybe_record_tool_invocation(
+            await self._maybe_record_tool_invocation_async(
                 tenant_id=tenant_id,
                 sim_seconds=await self._current_sim_seconds(tenant_id),
                 tool_name=f"query_sub_agent:{intent['sub_agent']}",
@@ -447,7 +480,7 @@ class SimulationControllerService:
             )
             # Audit trail: persist the tool round-trip as a tool-role turn so
             # operators can reconstruct which sub-agent informed the response.
-            self._persist_turn(
+            await self._persist_turn_async(
                 tenant_id=tenant_id,
                 simulation_id=simulation_id,
                 role="tool",
@@ -471,7 +504,7 @@ class SimulationControllerService:
             )
 
         assistant_text = "".join(assistant_parts)
-        self._persist_turn(
+        await self._persist_turn_async(
             tenant_id=tenant_id,
             simulation_id=simulation_id,
             role="assistant",
@@ -480,12 +513,50 @@ class SimulationControllerService:
         )
         yield ChatEvent(
             "turn.end",
-            {"turn_id": turn_id, "content_hash": _sha256(assistant_text)},
+            {
+                "turn_id": turn_id,
+                "content_hash": _sha256(assistant_text),
+                "inference_attempted": False,
+                "inference_outcome": "not_attempted",
+            },
         )
 
-    async def _stream_from_azure(
-        self, *, turn_id: str, tenant_id: str, simulation_id: str, user_message: str
-    ) -> AsyncIterator[ChatEvent]:  # pragma: no cover
+    async def _stream_from_azure(self, **kwargs: Any) -> AsyncIterator[ChatEvent]:
+        resources: list[Any] = []
+        events = self._stream_from_azure_request(resources=resources, **kwargs)
+        try:
+            async for event in events:
+                yield event
+        finally:
+            await events.aclose()
+            for resource in reversed(resources):
+                close = getattr(resource, "close", None)
+                if callable(close):
+                    try:
+                        result = close()
+                        if inspect.isawaitable(result):
+                            await result
+                    except Exception:
+                        logger.warning("sim_controller_resource_close_failed", exc_info=True)
+
+    async def _stream_from_azure_request(
+        self, *, turn_id: str, tenant_id: str, simulation_id: str, user_message: str, resources: list[Any]
+    ) -> AsyncGenerator[ChatEvent, None]:  # pragma: no cover
+        try:
+            resolved = self._resolve_simulation_deployment()
+        except FoundryConfigurationError as exc:
+            logger.warning("Simulation Controller Foundry configuration error: %s", exc)
+            yield ChatEvent(
+                "error",
+                {
+                    "code": "openai_unavailable",
+                    "message": str(exc),
+                    "inference_attempted": False,
+                    "inference_outcome": "not_attempted",
+                },
+            )
+            return
+
         # Spec 036 / ADR-20 hard cutover: the simulation controller backs onto
         # Microsoft Foundry exclusively. The endpoint and deployment are
         # resolved from ``AZURE_AI_PROJECT_*`` env vars; the
@@ -501,32 +572,19 @@ class SimulationControllerService:
         except Exception:
             yield ChatEvent(
                 "error",
-                {"code": "openai_sdk_missing", "message": "openai SDK not installed."},
-            )
-            return
-
-        endpoint = os.environ.get("AZURE_AI_PROJECT_ENDPOINT")
-
-        deployment = self._resolve_simulation_deployment()
-        api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
-        if not (endpoint and deployment):
-            missing = (
-                "AZURE_AI_PROJECT_ENDPOINT"
-                if not endpoint
-                else "AZURE_AI_PROJECT_DEPLOYMENTS (or AZURE_AI_SIMULATION_MODEL_KEY)"
-            )
-            yield ChatEvent(
-                "error",
                 {
-                    "code": "openai_unavailable",
-                    "message": f"Foundry chat endpoint is not fully configured (missing {missing}).",
+                    "code": "openai_sdk_missing",
+                    "message": "openai SDK not installed.",
+                    "inference_attempted": False,
+                    "inference_outcome": "not_attempted",
                 },
             )
             return
 
+        deployment = resolved.deployment_name
         client_kwargs: dict[str, Any] = {
-            "azure_endpoint": endpoint,
-            "api_version": api_version,
+            "azure_endpoint": resolved.endpoint,
+            "api_version": self._api_version,
         }
         # AAD-only auth (FR-RAG-FM-04). Managed identity in Container Apps;
         # az/azd login locally. The token scope is the cognitive-services
@@ -538,6 +596,7 @@ class SimulationControllerService:
             )
 
             credential = DefaultAzureCredential(exclude_interactive_browser_credential=True)
+            resources.append(credential)
             client_kwargs["azure_ad_token_provider"] = get_bearer_token_provider(
                 credential, "https://cognitiveservices.azure.com/.default"
             )
@@ -546,6 +605,8 @@ class SimulationControllerService:
                 "error",
                 {
                     "code": "openai_client_init_failed",
+                    "inference_attempted": False,
+                    "inference_outcome": "not_attempted",
                     "message": (
                         f"Foundry credential unavailable. Ensure managed identity or az login is configured: {exc}"
                     ),
@@ -554,27 +615,62 @@ class SimulationControllerService:
             return
         try:
             client = AsyncAzureOpenAI(**client_kwargs)
+            resources.append(client)
         except Exception as exc:
-            yield ChatEvent("error", {"code": "openai_client_init_failed", "message": str(exc)})
+            yield ChatEvent(
+                "error",
+                {
+                    "code": "openai_client_init_failed",
+                    "message": str(exc),
+                    "inference_attempted": False,
+                    "inference_outcome": "not_attempted",
+                },
+            )
             return
 
         # Spec 036 FR-RAG-CV-03: data-minimisation gateway for non-AU
         # deployments. AU deployments bypass redaction (data residency holds);
         # non-AU deployments redact PII / deny PSPF-marked / sensitive
         # operational content **before** the message hits Foundry.
-        deployment_region = os.environ.get("AZURE_AI_PROJECT_REGION", "australiaeast").lower()
+        deployment_region = self._deployment_region
         forwarded_message = user_message
         try:
-            from common.model_gateway import apply as gateway_apply  # type: ignore[import-not-found]
+            from common.model_gateway import apply as gateway_apply
         except Exception:
-            gateway_apply = None  # type: ignore[assignment]
+            gateway_apply = None
+        if gateway_apply is None and deployment_region not in ("australiaeast", "australiasoutheast"):
+            yield ChatEvent(
+                "error",
+                {
+                    "code": "gateway_unavailable",
+                    "message": "Data-minimisation gateway unavailable.",
+                    "inference_attempted": False,
+                    "inference_outcome": "not_attempted",
+                },
+            )
+            return
         if gateway_apply is not None:
-            decision = gateway_apply(text=user_message, deployment_region=deployment_region)
+            try:
+                decision = gateway_apply(text=user_message, deployment_region=deployment_region)
+            except Exception:
+                logger.warning("sim_gateway_failed_before_submission", exc_info=True)
+                yield ChatEvent(
+                    "error",
+                    {
+                        "code": "gateway_unavailable",
+                        "message": "Data-minimisation gateway failed.",
+                        "inference_attempted": False,
+                        "inference_outcome": "not_attempted",
+                    },
+                )
+                return
             if decision.gateway_decision == "deny":
                 yield ChatEvent(
                     "error",
                     {
                         "code": "gateway_denied",
+                        "inference_attempted": False,
+                        "inference_outcome": "not_attempted",
                         "message": f"Data-minimisation gateway denied the request: {decision.reason}",
                     },
                 )
@@ -584,8 +680,8 @@ class SimulationControllerService:
         # Replay the rolling window of prior turns so the model has conversational
         # memory across requests. Ordering is [system, ...prior turns (oldest
         # first), current user message].
-        messages: list[dict[str, Any]] = [{"role": "system", "content": self._prompt_text}]
-        messages.extend(self._load_history_messages(tenant_id))
+        messages: list[ChatCompletionMessageParam] = [{"role": "system", "content": self._prompt_text}]
+        messages.extend(await self._load_history_messages_async(tenant_id))
         messages.append({"role": "user", "content": forwarded_message})
 
         # Spec 036 FR-RAG-SIM-01: retrieve grounding chunks BEFORE the first
@@ -594,14 +690,14 @@ class SimulationControllerService:
         # when retrieval returns non-empty results. Empty results emit a
         # ``citations: []`` SSE event with the operator-verification note
         # (FR-RAG-SIM-03).
-        retrieved_chunks: list[Any] = []
+        retrieved_chunks: list[RetrievedChunk] = []
         retrieval_result: Any = None
         sim_corpus_build_sha: str | None = None
         sim_embedding_model_id: str | None = None
         sim_retrieval_index_name: str | None = None
         if self._retrieval is not None:
             try:
-                from ama_domain import (  # type: ignore[import-not-found]
+                from ama_domain import (
                     RetrievalRequest,
                 )
 
@@ -642,30 +738,87 @@ class SimulationControllerService:
                 "Grounding context (cite by jurisdiction/topic/page; do not invent sources):",
             ]
             for c in retrieved_chunks[:5]:
-                jurisdiction = getattr(c, "jurisdiction", "")
-                jurisdiction = getattr(jurisdiction, "value", jurisdiction)
                 context_lines.append(
-                    f"- [{jurisdiction}/{getattr(c, 'topic', '')}#p{getattr(c, 'page', '')}]"
-                    f" {(getattr(c, 'text', '') or getattr(c, 'summary', '') or '')[:280]}"
+                    f"- [{c.jurisdiction.value}/{c.topic}#p{c.page}] {(c.text or c.summary or '')[:280]}"
                 )
             messages[-1]["content"] = "\n".join(context_lines) + "\n\n---\n\n" + forwarded_message
 
         collected_all: list[str] = []
+        audit_context = {
+            "tenant_id": tenant_id,
+            "chunks": retrieved_chunks,
+            "corpus_build_sha": sim_corpus_build_sha,
+            "embedding_model_id": sim_embedding_model_id,
+            "retrieval_index_name": sim_retrieval_index_name,
+        }
+        last_observation: RequestObservation | None = None
+        all_submitted = True
 
         # OpenAI tool-calling is a two-step dance: model emits tool_calls (often
         # with no text), client executes them, client sends the results back in
         # a fresh completion so the model can write the natural-language reply.
         # We loop up to 3 rounds to let multi-tool plans complete, then stop.
         for _ in range(3):
+            observation = RequestObservation(correlation_id=turn_id, resolved=resolved)
+            last_observation = observation
+            observation.observable = observe_openai_transport(client)
+            prompt_sha = _sha256(
+                json.dumps({"messages": messages, "tools": TOOL_SCHEMAS}, sort_keys=True, separators=(",", ":"))
+            )
+            round_text: list[str] = []
+            tool_acc: dict[int, dict[str, Any]] = {}
             try:
-                stream = await client.chat.completions.create(
-                    model=deployment,
-                    messages=messages,
-                    tools=TOOL_SCHEMAS,
-                    tool_choice="auto",
-                    stream=True,
-                )
-            except Exception as exc:
+                observation.ready = True
+                with observation.bind():
+                    stream = await client.chat.completions.create(
+                        model=deployment,
+                        messages=messages,
+                        tools=TOOL_SCHEMAS,
+                        tool_choice="auto",
+                        stream=True,
+                        extra_headers={"x-ms-client-request-id": observation.call_id},
+                    )
+                iterator = stream.__aiter__()
+                while True:
+                    try:
+                        with observation.bind():
+                            chunk = await iterator.__anext__()
+                    except StopAsyncIteration:
+                        break
+                    observation.usage(getattr(chunk, "usage", None))
+                    if not chunk.choices:
+                        continue
+                    observation.terminal = observation.terminal or bool(
+                        getattr(chunk.choices[0], "finish_reason", None)
+                    )
+                    delta = chunk.choices[0].delta
+                    if delta is None:
+                        continue
+                    content = delta.content
+                    if isinstance(content, str) and content:
+                        round_text.append(content)
+                        observation.text += content
+                        yield ChatEvent(
+                            "turn.delta",
+                            {"turn_id": turn_id, "delta": content},
+                        )
+                    tcs = getattr(delta, "tool_calls", None)
+                    if tcs:
+                        for tc in tcs:
+                            idx = getattr(tc, "index", 0) or 0
+                            slot = tool_acc.setdefault(idx, {"id": None, "name": None, "arguments": ""})
+                            if getattr(tc, "id", None):
+                                slot["id"] = tc.id
+                            fn = getattr(tc, "function", None)
+                            if fn is not None:
+                                if getattr(fn, "name", None):
+                                    slot["name"] = fn.name
+                                if getattr(fn, "arguments", None):
+                                    slot["arguments"] += fn.arguments
+            except BaseException as exc:
+                observation.attach_failure(exc)
+                if isinstance(exc, (asyncio.CancelledError, GeneratorExit, KeyboardInterrupt, SystemExit)):
+                    raise
                 # Distinguish Azure content-filter blocks (ResponsibleAIPolicyViolation)
                 # from generic availability failures. The UI shows different friendly
                 # copy per code; the full technical detail is logged server-side and
@@ -680,40 +833,20 @@ class SimulationControllerService:
                     code,
                     deployment,
                 )
-                yield ChatEvent("error", {"code": code, "message": exc_str})
+                evidence = observation.evidence()
+                yield ChatEvent(
+                    "error",
+                    {
+                        "code": code,
+                        "message": exc_str,
+                        "inference_attempted": evidence.inference_attempted,
+                        "inference_outcome": evidence.inference_outcome,
+                    },
+                )
                 return
-
-            round_text: list[str] = []
-            # Streamed tool_calls arrive as fragments keyed by `index`; name is
-            # sent once, arguments arrive as a token-by-token JSON string. We
-            # reassemble into a complete list before execution.
-            tool_acc: dict[int, dict[str, Any]] = {}
-
-            async for chunk in stream:
-                if not chunk.choices:
-                    continue
-                delta = chunk.choices[0].delta
-                if delta is None:
-                    continue
-                if getattr(delta, "content", None):
-                    round_text.append(delta.content)
-                    yield ChatEvent(
-                        "turn.delta",
-                        {"turn_id": turn_id, "delta": delta.content},
-                    )
-                tcs = getattr(delta, "tool_calls", None)
-                if tcs:
-                    for tc in tcs:
-                        idx = getattr(tc, "index", 0) or 0
-                        slot = tool_acc.setdefault(idx, {"id": None, "name": None, "arguments": ""})
-                        if getattr(tc, "id", None):
-                            slot["id"] = tc.id
-                        fn = getattr(tc, "function", None)
-                        if fn is not None:
-                            if getattr(fn, "name", None):
-                                slot["name"] = fn.name
-                            if getattr(fn, "arguments", None):
-                                slot["arguments"] += fn.arguments
+            finally:
+                await self._write_observed_inference(observation, prompt_sha=prompt_sha, context=audit_context)
+            all_submitted = all_submitted and observation.submitted
 
             text_this_round = "".join(round_text)
             collected_all.append(text_this_round)
@@ -721,7 +854,7 @@ class SimulationControllerService:
             if not tool_acc:
                 break  # model finished with a natural-language reply.
 
-            assembled_calls = [
+            assembled_calls: list[ChatCompletionMessageToolCallParam] = [
                 {
                     "id": slot["id"] or f"call_{idx}",
                     "type": "function",
@@ -779,7 +912,7 @@ class SimulationControllerService:
                 # Surface card.scenario for the map + chat UI.
                 if name == "seed_scenario" and isinstance(result.get("card"), dict):
                     yield ChatEvent("card.scenario", result["card"])
-                    self._persist_turn(
+                    await self._persist_turn_async(
                         tenant_id=tenant_id,
                         simulation_id=simulation_id,
                         role="tool",
@@ -798,7 +931,7 @@ class SimulationControllerService:
                 tool_label = name
                 if name == "query_sub_agent" and isinstance(args.get("sub_agent"), str):
                     tool_label = f"query_sub_agent:{args['sub_agent']}"
-                self._maybe_record_tool_invocation(
+                await self._maybe_record_tool_invocation_async(
                     tenant_id=tenant_id,
                     sim_seconds=await self._current_sim_seconds(tenant_id),
                     tool_name=tool_label,
@@ -813,12 +946,12 @@ class SimulationControllerService:
                 )
 
         assistant_text = "".join(collected_all)
-        self._persist_turn(
+        await self._persist_turn_async(
             tenant_id=tenant_id,
             simulation_id=simulation_id,
             role="assistant",
             content=assistant_text,
-            model=deployment,
+            model=deployment if all_submitted else None,
         )
 
         # Spec 036 FR-RAG-SIM-02 / FR-RAG-SIM-03: emit a ``citation`` SSE
@@ -845,84 +978,100 @@ class SimulationControllerService:
             elif retrieved_chunks:
                 citation_dicts = []
                 for c in retrieved_chunks[:5]:
-                    licence = getattr(c, "licence_mode", None)
-                    licence = getattr(licence, "value", licence) or "metadata-only"
-                    jurisdiction = getattr(c, "jurisdiction", "")
-                    jurisdiction = getattr(jurisdiction, "value", jurisdiction)
+                    licence = c.licence_mode.value
                     cit = {
-                        "jurisdiction": jurisdiction,
-                        "topic": getattr(c, "topic", ""),
-                        "page": getattr(c, "page", 0),
-                        "source_url": getattr(c, "source_url", ""),
-                        "rendered_url": getattr(c, "rendered_url", ""),
-                        "sha256_of_chunk": getattr(c, "sha256_of_chunk", ""),
+                        "jurisdiction": c.jurisdiction.value,
+                        "topic": c.topic,
+                        "page": c.page,
+                        "source_url": c.source_url,
+                        "rendered_url": c.rendered_url,
+                        "sha256_of_chunk": c.sha256_of_chunk,
                         "licence_mode": licence,
-                        "confidence": float(getattr(c, "confidence", 0.0) or 0.0),
+                        "confidence": c.confidence,
                     }
                     if licence == "full-text":
-                        cit["snippet"] = (getattr(c, "text", "") or "")[:300]
+                        cit["snippet"] = (c.text or "")[:300]
                     citation_dicts.append(cit)
                 yield ChatEvent(
                     "citation",
                     {"turn_id": turn_id, "citations": citation_dicts},
                 )
 
-                # FR-RAG-SIM-04 / R-13: write the extended audit record. The
-                # writer is best-effort — failure must never break the SSE
-                # stream.
-                if self._audit_writer is not None:
-                    try:
-                        from common.audit import (  # noqa: PLC0415
-                            make_inference_record,
-                        )
-
-                        prompt_sha = hashlib.sha256(forwarded_message.encode("utf-8")).hexdigest()
-                        record = make_inference_record(
-                            agent_name="SimulationController",
-                            prompt_sha=prompt_sha,
-                            model_id=deployment,
-                            model_version=os.environ.get("AZURE_AI_PROJECT_MODEL_VERSION", "unknown"),
-                            deployment_alias=deployment,
-                            output_text_hash=_sha256(assistant_text),
-                            output_tokens=len(assistant_text.split()),
-                            tenant_id=tenant_id,
-                            correlation_id=turn_id,
-                            rag_used=True,
-                            embedding_model_id=sim_embedding_model_id or "unknown",
-                            corpus_build_sha=sim_corpus_build_sha or "unknown",
-                            retrieved_chunks=[
-                                {
-                                    "chunk_id": getattr(c, "chunk_id", ""),
-                                    "sha256_of_chunk": getattr(c, "sha256_of_chunk", ""),
-                                    "jurisdiction": (
-                                        getattr(c, "jurisdiction", "").value
-                                        if hasattr(getattr(c, "jurisdiction", ""), "value")
-                                        else getattr(c, "jurisdiction", "")
-                                    ),
-                                    "topic": getattr(c, "topic", ""),
-                                    "page": getattr(c, "page", 0),
-                                    "licence_mode": (
-                                        getattr(c, "licence_mode", "").value
-                                        if hasattr(getattr(c, "licence_mode", ""), "value")
-                                        else getattr(c, "licence_mode", "")
-                                    ),
-                                    "confidence": float(getattr(c, "confidence", 0.0) or 0.0),
-                                }
-                                for c in retrieved_chunks
-                            ],
-                            citations=citation_dicts,
-                            retrieval_index_name=sim_retrieval_index_name,
-                        )
-                        await self._audit_writer.write(record)
-                    except Exception as exc:  # noqa: BLE001
-                        logger.warning("sim_audit_write_failed turn_id=%s err=%s", turn_id, exc)
         except Exception as exc:  # noqa: BLE001 — never break the SSE stream
             logger.warning("sim_citation_emit_failed turn_id=%s err=%s", turn_id, exc)
 
         yield ChatEvent(
             "turn.end",
-            {"turn_id": turn_id, "content_hash": _sha256(assistant_text)},
+            {
+                "turn_id": turn_id,
+                "content_hash": _sha256(assistant_text),
+                "inference_attempted": last_observation.evidence().inference_attempted if last_observation else False,
+                "inference_outcome": last_observation.evidence().inference_outcome
+                if last_observation
+                else "not_attempted",
+            },
         )
+
+    async def _write_observed_inference(
+        self, observation: RequestObservation, *, prompt_sha: str, context: dict[str, Any]
+    ) -> None:
+        """Persist each proved request before a later tool round can fail."""
+        from common.otel_telemetry import record_inference_evidence
+
+        record_inference_evidence(observation.evidence())
+        if self._audit_writer is None:
+            return
+        from common.audit import make_observed_inference_record
+
+        evidence = observation.evidence()
+        chunks = context["chunks"]
+        citations = []
+        for chunk in chunks:
+            citation = {
+                "jurisdiction": chunk.jurisdiction.value,
+                "topic": chunk.topic,
+                "page": chunk.page,
+                "source_url": chunk.source_url,
+                "rendered_url": chunk.rendered_url,
+                "sha256_of_chunk": chunk.sha256_of_chunk,
+                "licence_mode": chunk.licence_mode.value,
+                "confidence": chunk.confidence,
+            }
+            if chunk.licence_mode.value == "full-text":
+                citation["snippet"] = (chunk.text or "")[:300]
+            citations.append(citation)
+        try:
+            record = make_observed_inference_record(
+                evidence=evidence,
+                agent_name="SimulationController",
+                prompt_sha=prompt_sha,
+                output_text_hash=evidence.output_text_hash or _sha256(""),
+                output_tokens=evidence.usage_completion_tokens or 0,
+                tenant_id=context["tenant_id"],
+                rag_used=bool(chunks),
+                rag_optout_reason="scenario-execution",
+                adr_pointer="docs/decisions/036-foundry-rag-grounding/06-rag-optout-scenario-execution.md",
+                embedding_model_id=context["embedding_model_id"],
+                corpus_build_sha=context["corpus_build_sha"],
+                retrieval_index_name=context["retrieval_index_name"],
+                citations=citations,
+                retrieved_chunks=[
+                    {
+                        "chunk_id": c.chunk_id,
+                        "sha256_of_chunk": c.sha256_of_chunk,
+                        "jurisdiction": c.jurisdiction.value,
+                        "topic": c.topic,
+                        "page": c.page,
+                        "licence_mode": c.licence_mode.value,
+                        "confidence": c.confidence,
+                    }
+                    for c in chunks
+                ],
+            )
+            if record is not None:
+                await self._audit_writer.write(record)
+        except Exception:
+            logger.exception("sim_audit_write_failed call_id=%s", evidence.call_id)
 
     async def _execute_tool(
         self,
@@ -953,6 +1102,7 @@ class SimulationControllerService:
                 "outcome": "ok" if not reply.degraded else "error",
                 "summary": reply.summary,
                 "citations": reply.citations,
+                **reply.provenance(),
             }
         if name == "draft_warning_sim":
             level = str(args.get("level", "advice")).upper().replace("_", " ")
@@ -1019,19 +1169,21 @@ class SimulationControllerService:
             "created_at": datetime.now(UTC).isoformat(),
         }
 
-        # Schedule best-effort synthetic ingestion so the Signals meter ticks
-        # up during the exercise. Non-blocking; errors are swallowed.
-        try:
-            import asyncio
+        if self._scenario_seeding is None:
+            return {
+                "outcome": "error",
+                "card": card,
+                "ingestion_started": False,
+                "error": "Scenario seeding service is unavailable",
+            }
 
-            asyncio.create_task(_ingest_synthetic_signals(tenant_id))
-        except Exception:
-            logger.exception("sim_synthetic_ingestion_schedule_failed")
+        seed_result = await self._scenario_seeding.seed_for_hazard(tenant_id, hazard)
 
         return {
             "outcome": "ok",
             "card": card,
             "ingestion_started": True,
+            **seed_result,
         }
 
 
@@ -1076,29 +1228,6 @@ def _geocode_au(location_name: str) -> tuple[float, float, int] | None:
         if k in key or key in k:
             return v
     return None
-
-
-async def _ingest_synthetic_signals(tenant_id: str) -> None:
-    """Bump the simulation's signal counter a few times so the left-panel
-    meter animates during the exercise. Best-effort: routes that use a
-    different repository instance will simply see no increment.
-    """
-    import asyncio
-
-    try:
-        from app.api.routes.simulations import _repo  # shared singleton
-    except Exception:
-        return
-    try:
-        for _ in range(5):
-            await asyncio.sleep(2.0)
-            tenant = await _repo.get_by_tenant_id(tenant_id)
-            if tenant is None or tenant.status not in ("Active", "Paused"):
-                return
-            tenant.resource_consumption.signal_count += 1
-            await _repo.update(tenant)
-    except Exception:
-        logger.exception("sim_synthetic_ingestion_failed tenant=%s", tenant_id)
 
 
 def _sha256(text: str) -> str:

@@ -48,6 +48,48 @@ class Persona:
     organisation_id: str | None = None
     jurisdiction_id: str | None = None
     display_name: str | None = None
+    role: str | None = None
+    decision_rights: list[str] = field(default_factory=list)
+    information_needs: list[str] = field(default_factory=list)
+    communication_pathways: list[str] = field(default_factory=list)
+
+
+def _canonical_role(label: str | None, aiims_function: str | None, persona_id: str) -> str:
+    value = (label or "").strip().lower().replace("/", "_").replace("-", " ")
+    if "incident commander" in value:
+        return "incident_commander"
+    if "operations" in value:
+        return "operations_officer"
+    if "planning" in value:
+        return "planning_officer"
+    if "logistics" in value:
+        return "logistics_officer"
+    if "public information" in value:
+        return "public_information_officer"
+    if "field coordinator" in value:
+        return "field_coordinator"
+    if "observer" in value or "auditor" in value:
+        return "observer_auditor"
+    if "executive" in value:
+        return "executive_leader"
+    if "risk" in value:
+        return "risk_manager"
+    if "liaison" in value:
+        return "liaison_officer"
+
+    if aiims_function == "control":
+        return "incident_commander"
+    if aiims_function == "operations":
+        return "operations_officer"
+    if aiims_function == "planning":
+        return "planning_officer"
+    if aiims_function == "logistics":
+        return "logistics_officer"
+    if aiims_function == "public-information":
+        return "public_information_officer"
+    if "field" in persona_id:
+        return "field_coordinator"
+    return "operations_officer"
 
 
 @dataclass
@@ -70,6 +112,10 @@ class PersonaRegistryRepository:
                     organisation_id=raw.get("organisation_id"),
                     jurisdiction_id=raw.get("jurisdiction_id"),
                     display_name=raw.get("display_name"),
+                    role=_canonical_role(raw.get("role"), raw.get("aiims_function"), pid),
+                    decision_rights=list(raw.get("permissions", [])),
+                    information_needs=["incident_summary", "task_dependency_status"],
+                    communication_pathways=["agency_channel", "incident_channel"],
                 )
         return cls(_index=index)
 

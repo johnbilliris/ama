@@ -13,3 +13,7 @@ def _cached_load(seed_root: str) -> dict[str, Any]:
 class SeedService:
     def load(self, seed_root: Path) -> dict[str, Any]:
         return _cached_load(str(seed_root))
+
+    def load_default(self) -> dict[str, Any]:
+        seed_root = Path(__file__).resolve().parents[4] / "packages" / "domain" / "src" / "domain" / "seed"
+        return self.load(seed_root)

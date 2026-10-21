@@ -27,8 +27,8 @@ from communication.models import (
 
 
 class TestAlertStatus:
-    def test_has_exactly_ten_values(self):
-        assert len(AlertStatus) == 10
+    def test_has_exactly_eleven_values(self):
+        assert len(AlertStatus) == 11
 
     def test_all_expected_values_present(self):
         expected = {
@@ -39,6 +39,7 @@ class TestAlertStatus:
             "delivering",
             "delivered",
             "partially_delivered",
+            "delivery_failed",
             "superseded",
             "expired",
             "cancelled",
@@ -80,11 +81,20 @@ class TestChannelType:
 
 
 class TestDeliveryStatus:
-    def test_has_exactly_five_values(self):
-        assert len(DeliveryStatus) == 5
+    def test_has_exactly_eight_values(self):
+        assert len(DeliveryStatus) == 8
 
     def test_all_expected_values_present(self):
-        expected = {"pending", "in_progress", "delivered", "failed", "retrying"}
+        expected = {
+            "pending",
+            "in_progress",
+            "delivered",
+            "failed",
+            "retrying",
+            "skipped",
+            "unconfigured",
+            "accepted",
+        }
         assert {e.value for e in DeliveryStatus} == expected
 
 
@@ -164,13 +174,14 @@ class TestSegmentPriority:
 
 
 class TestCommunicationDecisionType:
-    def test_has_exactly_eighteen_values(self):
-        assert len(CommunicationDecisionType) == 18
+    def test_has_exactly_twenty_values(self):
+        assert len(CommunicationDecisionType) == 20
 
     def test_all_expected_values_present(self):
         expected = {
             "handoff_received",
             "handoff_rejected",
+            "data_retrieved",
             "duplicate_discarded",
             "alert_drafted",
             "content_safety_evaluated",
@@ -187,6 +198,7 @@ class TestCommunicationDecisionType:
             "content_safety_failure",
             "health_status_changed",
             "template_fallback",
+            "audit_finalised",
         }
         assert {e.value for e in CommunicationDecisionType} == expected
 
@@ -223,6 +235,7 @@ class TestAlertStatusTransitions:
         assert VALID_STATUS_TRANSITIONS[AlertStatus.delivering] == {
             AlertStatus.delivered,
             AlertStatus.partially_delivered,
+            AlertStatus.delivery_failed,
         }
 
     def test_delivered_transitions(self):
@@ -373,6 +386,7 @@ class TestDeliveryRecord:
             alert_version=1,
             channel=ChannelType.sms,
             audience_segment_id="seg-1",
+            tenant_id="live",
         )
         assert record.retry_backoff_intervals == [1.0, 2.0, 4.0]
 
@@ -382,6 +396,7 @@ class TestDeliveryRecord:
             alert_version=1,
             channel=ChannelType.push,
             audience_segment_id="seg-1",
+            tenant_id="live",
         )
         assert record.delivery_status == DeliveryStatus.pending
 
@@ -392,6 +407,7 @@ class TestDeliveryRecord:
                 alert_version=0,
                 channel=ChannelType.sms,
                 audience_segment_id="seg-1",
+                tenant_id="live",
             )
 
 
@@ -406,6 +422,7 @@ class TestPublicAlert:
             alert_id="ca-inc1-v1",
             incident_id="inc1",
             version=1,
+            tenant_id="live",
         )
         defaults.update(overrides)
         return PublicAlert(**defaults)
@@ -528,6 +545,8 @@ class TestCommunicationDecisionRecord:
     def test_required_fields(self):
         record = CommunicationDecisionRecord(
             decision_type=CommunicationDecisionType.handoff_received,
+            correlation_id="handoff-1",
+            tenant_id="live",
         )
         assert record.decision_type == CommunicationDecisionType.handoff_received
         assert record.id is not None
@@ -535,6 +554,8 @@ class TestCommunicationDecisionRecord:
     def test_confidence_clamped_above_one(self):
         record = CommunicationDecisionRecord(
             decision_type=CommunicationDecisionType.alert_drafted,
+            correlation_id="alert-1",
+            tenant_id="live",
             confidence=1.5,
         )
         assert record.confidence == 1.0
@@ -542,6 +563,8 @@ class TestCommunicationDecisionRecord:
     def test_confidence_clamped_below_zero(self):
         record = CommunicationDecisionRecord(
             decision_type=CommunicationDecisionType.alert_drafted,
+            correlation_id="alert-1",
+            tenant_id="live",
             confidence=-0.5,
         )
         assert record.confidence == 0.0
@@ -549,12 +572,16 @@ class TestCommunicationDecisionRecord:
     def test_confidence_none_stays_none(self):
         record = CommunicationDecisionRecord(
             decision_type=CommunicationDecisionType.handoff_received,
+            correlation_id="handoff-1",
+            tenant_id="live",
         )
         assert record.confidence is None
 
     def test_default_values(self):
         record = CommunicationDecisionRecord(
             decision_type=CommunicationDecisionType.handoff_received,
+            correlation_id="handoff-1",
+            tenant_id="live",
         )
         assert record.agent_version == "0.1.0"
         assert record.tenant_id == "live"
@@ -562,7 +589,14 @@ class TestCommunicationDecisionRecord:
 
     def test_missing_decision_type_raises(self):
         with pytest.raises(Exception):
-            CommunicationDecisionRecord()
+            CommunicationDecisionRecord(correlation_id="missing-decision", tenant_id="live")
+
+    def test_missing_tenant_id_raises(self):
+        with pytest.raises(Exception):
+            CommunicationDecisionRecord(
+                decision_type=CommunicationDecisionType.handoff_received,
+                correlation_id="handoff-1",
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -574,6 +608,8 @@ class TestAuditBufferEntry:
     def test_wraps_record(self):
         record = CommunicationDecisionRecord(
             decision_type=CommunicationDecisionType.handoff_received,
+            correlation_id="handoff-1",
+            tenant_id="live",
         )
         entry = AuditBufferEntry(record=record)
         assert entry.record.decision_type == CommunicationDecisionType.handoff_received

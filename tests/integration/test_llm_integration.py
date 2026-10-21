@@ -170,5 +170,5 @@ class TestLLMSuccessPath:
             prompt="test",
             template_text="fallback",
         )
-        assert result["token_usage"]["input_tokens"] == 100
-        assert result["token_usage"]["output_tokens"] == 50
+        assert result["actual_token_usage"]["input_tokens"] == 100
+        assert result["actual_token_usage"]["output_tokens"] == 50

@@ -85,7 +85,7 @@ def _get_aggregation() -> DashboardAggregationService:
 
 # --- Role-to-widget mapping configuration (US7) ---
 
-ROLE_WIDGET_CONFIGS: dict[str, dict] = {
+ROLE_WIDGET_CONFIGS: dict[str, dict[str, object]] = {
     "incident_controller": {
         "default_view": "executive_summary",
         "widgets": [
@@ -497,6 +497,8 @@ def _resolve_widget_layout(roles: list[str]) -> tuple[list[WidgetDefinition], st
     primary_role = sorted_roles[0]
     primary_config = ROLE_WIDGET_CONFIGS.get(primary_role, {})
     default_view = primary_config.get("default_view", "executive_summary")
+    if not isinstance(default_view, str):
+        raise ValueError("Dashboard default_view must be a string")
 
     # Merge widgets from all roles (union, ordered by primary first)
     seen_ids: set[str] = set()
@@ -504,10 +506,18 @@ def _resolve_widget_layout(roles: list[str]) -> tuple[list[WidgetDefinition], st
 
     for role in sorted_roles:
         config = ROLE_WIDGET_CONFIGS.get(role, {})
-        for w in config.get("widgets", []):
-            if w["widget_id"] not in seen_ids:
-                seen_ids.add(w["widget_id"])
-                merged.append(WidgetDefinition(**{**w, "priority": len(merged) + 1}))
+        raw_widgets = config.get("widgets", [])
+        if not isinstance(raw_widgets, list):
+            raise ValueError(f"Dashboard widgets for role {role!r} must be a list")
+        for widget in raw_widgets:
+            if not isinstance(widget, dict):
+                raise ValueError(f"Dashboard widget for role {role!r} must be an object")
+            widget_id = widget.get("widget_id")
+            if not isinstance(widget_id, str):
+                raise ValueError(f"Dashboard widget for role {role!r} is missing a string widget_id")
+            if widget_id not in seen_ids:
+                seen_ids.add(widget_id)
+                merged.append(WidgetDefinition.model_validate({**widget, "priority": len(merged) + 1}))
 
     return merged, default_view
 
@@ -720,6 +730,12 @@ async def create_audit_export(
     jurisdiction_id: str | None = Query(None, description="Filter by jurisdiction ID"),
 ) -> AuditExportJobResponse:
     """POST /governance/dashboard/audit/export — start async export."""
+    country_code = body.filter_params.get("country_code", "AU")
+    if country_code != "AU" or body.filter_params.get("scope") == "mixed":
+        raise HTTPException(status_code=403, detail="You are not authorized to perform this action")
+    if body.filter_params.get("include_history") is True and body.filter_params.get("legal_hold") is not True:
+        raise HTTPException(status_code=409, detail="Request conflicts with current resource state")
+
     tenant_id = _get_tenant_id(request)
     user_id = request.headers.get("X-User-Id", "anonymous")
 

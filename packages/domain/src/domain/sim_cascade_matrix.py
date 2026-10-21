@@ -76,7 +76,7 @@ for _cat, _targets in CASCADE_MATRIX.items():
         assert _sub in SubAgent.__args__, (  # type: ignore[attr-defined]
             f"sim_cascade_matrix: {_cat!r} → unknown SubAgent {_sub!r}"
         )
-del _cat, _targets, _sub  # type: ignore[name-defined]
+del _cat, _targets, _sub
 
 
 __all__ = [

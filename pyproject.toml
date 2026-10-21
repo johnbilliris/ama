@@ -8,10 +8,12 @@ version = "0.1.0"
 description = "Workspace metadata for the Autonomous Disaster Response Coordination Hub"
 requires-python = ">=3.12"
 dependencies = [
+  "fastapi>=0.138.0,<1",
+  "pydantic>=2.10.0",
   "azure-cosmos>=4.9.0",
   "azure-storage-blob>=12.24.0",
   "azure-identity>=1.19.0",
-  "cryptography>=46.0.7",
+  "cryptography>=50.0.0,<51",
   "Pygments>=2.20.0",
   "requests>=2.33.0",
   # Spec-037 (T002, RES-01, FR-009) — JSON Schema draft 2020-12 validation
@@ -25,15 +27,34 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "ama-disaster-response-agents",
+  "ama-disaster-response-api",
+  "ama-disaster-response-ingest-runner",
+  "ama-disaster-response-ingestion",
+  "ama-eval-core",
+  "ama-eval-dataset",
+  "ama-eval-runner",
   "pytest>=8.3",
   "pytest-cov>=6.0",
   "pytest-asyncio>=0.24",
   "pytest-benchmark>=5.1",
+  "hypothesis>=6.0",
   "ruff>=0.8.4",
-  "mypy>=1.13",
+  "mypy==2.0.0",
   "import-linter>=2.0",
   "pre-commit>=4.0",
+  "pre-commit-hooks>=5.0",
+  "types-pyyaml>=6.0.12",
   "pyyaml>=6.0",
+]
+windows-ci = [
+  "ama-disaster-response-agents",
+  "ama-disaster-response-api",
+  "ama-eval-core",
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "hypothesis>=6.0",
+  "ruff>=0.8.4",
 ]
 # Spec 036 / F-A10 / T219 + T224 — load-test extras (FR-RAG-TEST-02).
 load = [
@@ -41,8 +62,31 @@ load = [
   "psutil>=6.0,<8",
 ]
 
+[tool.uv]
+package = false
+override-dependencies = [
+  # redis-entraid 1.2.1 excludes newer PyJWT 2.x releases even though it uses
+  # compatible public APIs; force the security-patched version across the workspace.
+  "pyjwt>=2.14.0,<3",
+]
+
+[tool.uv.sources]
+ama-disaster-response-agents = { path = "apps/agents", editable = true }
+ama-disaster-response-api = { path = "apps/api", editable = true }
+ama-disaster-response-ingest-runner = { path = "apps/ingest-runner", editable = true }
+ama-disaster-response-ingestion = { path = "apps/ingestion", editable = true }
+ama-eval-core = { path = "packages/eval-core", editable = true }
+ama-eval-dataset = { path = "packages/eval-dataset", editable = true }
+ama-eval-runner = { path = "apps/eval-runner", editable = true }
+
+[[tool.uv.index]]
+name = "microsoft-package-feed-proxy"
+url = "https://packagefeedproxy.microsoft.io/pypi/simple"
+default = true
+
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"
+pythonpath = ["packages/domain/src"]
 asyncio_mode = "strict"
 markers = [
   "integration: integration tests requiring mock external services (Cosmos DB, Service Bus)",
@@ -61,6 +105,7 @@ markers = [
   "contract: contract tests proving schema / API parity (Spec 036 / F-A10 / T223)",
   "e2e: end-to-end tests requiring deployed infra (Spec 036 / F-A10 / T223)",
   "load: load / stress harnesses (Spec 036 / F-A10 / T223)",
+  "spec007_isolation: required simulation tenant-isolation behavioral release gate.",
 ]
 
 # ────────────────────────────────────────────────────────────────────────────────
@@ -93,6 +138,8 @@ ignore_missing_imports = true
 disallow_untyped_decorators = false
 warn_return_any = false
 files = ["apps", "packages"]
+exclude = "(^|[/\\\\])tests([/\\\\]|$)"
+explicit_package_bases = true
 
 [[tool.mypy.overrides]]
 module = ["tests.*"]

@@ -10,6 +10,7 @@
  */
 
 export type LanguagePackId =
+  | "en-AU"
   | "en"
   | "zh-Hans"
   | "ar"
@@ -35,12 +36,20 @@ export interface LanguagePack {
 
 export const LANGUAGE_PACKS: Readonly<Record<LanguagePackId, LanguagePack>> =
   Object.freeze({
+    "en-AU": {
+      id: "en-AU",
+      display_name: "English (Australia)",
+      community_label: "English (Australia)",
+      jurisdictions: ["AU"],
+      fallback_chain: ["en"],
+      reviewer_required: false,
+    },
     en: {
       id: "en",
       display_name: "English",
       community_label: "English",
       jurisdictions: ["AU"],
-      fallback_chain: [],
+      fallback_chain: ["en-AU"],
       reviewer_required: false,
     },
     "zh-Hans": {

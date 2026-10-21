@@ -17,20 +17,32 @@ import { openDB, type IDBPDatabase } from "idb";
 
 export type Tier = "life-safety" | "routine";
 
+export type QueueMode = "live" | "rehearsal";
+
 export interface QueueEntry {
   persona_id: string;
   client_correlation_id: string;
   tier: Tier;
+  method: "POST" | "PATCH" | "PUT";
   route: string;
+  actor_id: string;
+  tenant_id: string;
+  incident_id: string;
+  mode: QueueMode;
+  expires_ts: string;
   payload: unknown;
   captured_ts: string; // ISO-8601 with milliseconds, UTC
+  attempts: number;
+  lease_until_ts?: string | null;
 }
+
+const DEFAULT_REPLAY_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
 export type EnqueueResult =
   | { status: "queued"; entry: QueueEntry }
   | { status: "deduped"; entry: QueueEntry }
   | { status: "displaced"; entry: QueueEntry; displaced: QueueEntry }
-  | { status: "rejected"; entry: QueueEntry; reason: "overflow" };
+  | { status: "rejected"; entry: QueueEntry; reason: "overflow" | "crypto_unavailable" };
 
 const DB_NAME = "ama-offline-queue";
 const DB_VERSION = 1;
@@ -86,10 +98,9 @@ async function loadOrCreateKey(db: IDBPDatabase): Promise<CryptoKey | null> {
 }
 
 async function encryptPayload(
-  key: CryptoKey | null,
+  key: CryptoKey,
   payload: unknown,
-): Promise<{ iv: ArrayBuffer; ciphertext: ArrayBuffer } | { plain: unknown }> {
-  if (!key) return { plain: payload };
+): Promise<{ iv: ArrayBuffer; ciphertext: ArrayBuffer }> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const enc = new TextEncoder().encode(JSON.stringify(payload ?? null));
   const ciphertext = await crypto.subtle.encrypt(
@@ -101,10 +112,10 @@ async function encryptPayload(
 }
 
 async function decryptPayload(
-  key: CryptoKey | null,
-  blob: { iv?: ArrayBuffer; ciphertext?: ArrayBuffer; plain?: unknown },
+  key: CryptoKey,
+  blob: { iv?: ArrayBuffer; ciphertext?: ArrayBuffer },
 ): Promise<unknown> {
-  if (!key || !blob.iv || !blob.ciphertext) return blob.plain ?? null;
+  if (!blob.iv || !blob.ciphertext) return null;
   const dec = await crypto.subtle.decrypt(
     { name: "AES-GCM", iv: new Uint8Array(blob.iv) },
     key,
@@ -118,16 +129,28 @@ interface StoredRow {
   persona_id: string;
   client_correlation_id: string;
   tier: Tier;
+  method: "POST" | "PATCH" | "PUT";
   route: string;
+  actor_id: string;
+  tenant_id: string;
+  incident_id: string;
+  mode: QueueMode;
+  expires_ts: string;
+  attempts: number;
+  lease_until_ts?: string | null;
+  retry_after_ts?: string | null;
+  last_error?: string | null;
   captured_ts: string;
-  blob: { iv?: ArrayBuffer; ciphertext?: ArrayBuffer; plain?: unknown };
+  blob: { iv?: ArrayBuffer; ciphertext?: ArrayBuffer };
 }
 
 export interface OfflineQueueStore {
   enqueue(entry: QueueEntry): Promise<EnqueueResult>;
   list(): Promise<QueueEntry[]>;
   size(): Promise<number>;
-  drainBatch(maxBatch: number): Promise<QueueEntry[]>;
+  leaseBatch(maxBatch: number, leaseMs: number): Promise<QueueEntry[]>;
+  ack(actor_id: string, client_correlation_id: string): Promise<void>;
+  nack(actor_id: string, client_correlation_id: string, reason: string, backoffMs?: number): Promise<void>;
   remove(persona_id: string, client_correlation_id: string): Promise<void>;
   clear(): Promise<void>;
   close(): void;
@@ -144,14 +167,51 @@ export async function createOfflineQueueStore(): Promise<OfflineQueueStore> {
     return all.sort((a, b) => a.captured_ts.localeCompare(b.captured_ts));
   }
 
+  function nowIso(): string {
+    return new Date().toISOString();
+  }
+
+  function isExpired(row: StoredRow, now: string): boolean {
+    return row.expires_ts <= now;
+  }
+
+  function isLeased(row: StoredRow, now: string): boolean {
+    return typeof row.lease_until_ts === "string" && row.lease_until_ts > now;
+  }
+
+  function isBackoffPending(row: StoredRow, now: string): boolean {
+    return typeof row.retry_after_ts === "string" && row.retry_after_ts > now;
+  }
+
+  async function pruneExpired(): Promise<void> {
+    const now = nowIso();
+    const rows = await readAllRows();
+    for (const row of rows) {
+      if (isExpired(row, now)) {
+        await db.delete(STORE, row.id!);
+      }
+    }
+  }
+
   async function rowToEntry(row: StoredRow): Promise<QueueEntry> {
+    if (key === null) {
+      throw new Error("offline_queue_crypto_required");
+    }
     return {
       persona_id: row.persona_id,
       client_correlation_id: row.client_correlation_id,
       tier: row.tier,
+      method: row.method,
       route: row.route,
+      actor_id: row.actor_id,
+      tenant_id: row.tenant_id,
+      incident_id: row.incident_id,
+      mode: row.mode,
+      expires_ts: row.expires_ts,
       payload: await decryptPayload(key, row.blob),
       captured_ts: row.captured_ts,
+      attempts: row.attempts,
+      lease_until_ts: row.lease_until_ts ?? null,
     };
   }
 
@@ -161,69 +221,124 @@ export async function createOfflineQueueStore(): Promise<OfflineQueueStore> {
     },
 
     async size() {
+      await pruneExpired();
       return db.count(STORE);
     },
 
     async list() {
+      await pruneExpired();
       const rows = await readAllRows();
       return Promise.all(rows.map(rowToEntry));
     },
 
     async enqueue(entry: QueueEntry): Promise<EnqueueResult> {
+      const normalizedEntry: QueueEntry = {
+        ...entry,
+        expires_ts: entry.expires_ts || new Date(Date.now() + DEFAULT_REPLAY_EXPIRY_MS).toISOString(),
+        attempts: Number.isFinite(entry.attempts) ? Math.max(0, entry.attempts) : 0,
+      };
+
+      if (key === null) {
+        return { status: "rejected", entry: normalizedEntry, reason: "crypto_unavailable" };
+      }
+
+      await pruneExpired();
       const rows = await readAllRows();
 
       const dup = rows.find(
         (r) =>
           r.persona_id === entry.persona_id &&
-          r.client_correlation_id === entry.client_correlation_id,
+          r.client_correlation_id === normalizedEntry.client_correlation_id,
       );
-      if (dup) return { status: "deduped", entry };
+      if (dup) return { status: "deduped", entry: normalizedEntry };
 
       if (rows.length >= cap) {
-        if (entry.tier !== "life-safety") {
-          return { status: "rejected", entry, reason: "overflow" };
+        if (normalizedEntry.tier !== "life-safety") {
+          return { status: "rejected", entry: normalizedEntry, reason: "overflow" };
         }
         const oldestRoutine = rows.find((r) => r.tier === "routine");
         if (!oldestRoutine) {
-          return { status: "rejected", entry, reason: "overflow" };
+          return { status: "rejected", entry: normalizedEntry, reason: "overflow" };
         }
         await db.delete(STORE, oldestRoutine.id!);
-        const blob = await encryptPayload(key, entry.payload);
+        const blob = await encryptPayload(key, normalizedEntry.payload);
         await db.add(STORE, {
-          persona_id: entry.persona_id,
-          client_correlation_id: entry.client_correlation_id,
-          tier: entry.tier,
-          route: entry.route,
-          captured_ts: entry.captured_ts,
+          persona_id: normalizedEntry.persona_id,
+          client_correlation_id: normalizedEntry.client_correlation_id,
+          tier: normalizedEntry.tier,
+          method: normalizedEntry.method,
+          route: normalizedEntry.route,
+          actor_id: normalizedEntry.actor_id,
+          tenant_id: normalizedEntry.tenant_id,
+          incident_id: normalizedEntry.incident_id,
+          mode: normalizedEntry.mode,
+          expires_ts: normalizedEntry.expires_ts,
+          attempts: normalizedEntry.attempts,
+          captured_ts: normalizedEntry.captured_ts,
           blob,
         } as StoredRow);
         const displaced = await rowToEntry(oldestRoutine);
-        return { status: "displaced", entry, displaced };
+        return { status: "displaced", entry: normalizedEntry, displaced };
       }
 
-      const blob = await encryptPayload(key, entry.payload);
+      const blob = await encryptPayload(key, normalizedEntry.payload);
       await db.add(STORE, {
-        persona_id: entry.persona_id,
-        client_correlation_id: entry.client_correlation_id,
-        tier: entry.tier,
-        route: entry.route,
-        captured_ts: entry.captured_ts,
+        persona_id: normalizedEntry.persona_id,
+        client_correlation_id: normalizedEntry.client_correlation_id,
+        tier: normalizedEntry.tier,
+        method: normalizedEntry.method,
+        route: normalizedEntry.route,
+        actor_id: normalizedEntry.actor_id,
+        tenant_id: normalizedEntry.tenant_id,
+        incident_id: normalizedEntry.incident_id,
+        mode: normalizedEntry.mode,
+        expires_ts: normalizedEntry.expires_ts,
+        attempts: normalizedEntry.attempts,
+        captured_ts: normalizedEntry.captured_ts,
         blob,
       } as StoredRow);
-      return { status: "queued", entry };
+      return { status: "queued", entry: normalizedEntry };
     },
 
-    async drainBatch(maxBatch: number): Promise<QueueEntry[]> {
+    async leaseBatch(maxBatch: number, leaseMs: number): Promise<QueueEntry[]> {
+      await pruneExpired();
       const rows = await readAllRows();
-      const lifeSafety = rows.filter((r) => r.tier === "life-safety");
-      const routine = rows.filter((r) => r.tier === "routine");
+      const now = nowIso();
+      const leaseUntil = new Date(Date.now() + Math.max(1000, leaseMs)).toISOString();
+      const leaseable = rows.filter((r) => !isLeased(r, now) && !isBackoffPending(r, now));
+      const lifeSafety = leaseable.filter((r) => r.tier === "life-safety");
+      const routine = leaseable.filter((r) => r.tier === "routine");
       const ordered = [...lifeSafety, ...routine].slice(0, maxBatch);
-      const drained: QueueEntry[] = [];
+      const leased: QueueEntry[] = [];
       for (const row of ordered) {
-        drained.push(await rowToEntry(row));
-        await db.delete(STORE, row.id!);
+        row.lease_until_ts = leaseUntil;
+        row.retry_after_ts = null;
+        await db.put(STORE, row);
+        leased.push(await rowToEntry(row));
       }
-      return drained;
+      return leased;
+    },
+
+    async ack(actor_id, client_correlation_id) {
+      const rows = await readAllRows();
+      for (const row of rows) {
+        if (row.actor_id === actor_id && row.client_correlation_id === client_correlation_id) {
+          await db.delete(STORE, row.id!);
+        }
+      }
+    },
+
+    async nack(actor_id, client_correlation_id, reason, backoffMs = 0) {
+      const rows = await readAllRows();
+      for (const row of rows) {
+        if (row.actor_id === actor_id && row.client_correlation_id === client_correlation_id) {
+          row.attempts += 1;
+          row.lease_until_ts = null;
+          row.last_error = reason;
+          row.retry_after_ts = backoffMs > 0 ? new Date(Date.now() + backoffMs).toISOString() : null;
+          await db.put(STORE, row);
+        }
+      }
     },
 
     async remove(persona_id, client_correlation_id) {

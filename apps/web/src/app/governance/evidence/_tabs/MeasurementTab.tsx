@@ -1,29 +1,56 @@
-/**
- * Spec-038 Measurement Method tab — live fetch (T-AMD-15).
- * Fetches from GET /api/v1/evidence/measurement-method on mount.
- */
 "use client";
-import { useEffect, useState } from "react";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getMeasurementMethod } from "../../../../lib/api/evidence";
 
 export default function MeasurementTab() {
-  const [content, setContent] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [content, setContent] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback((signal?: AbortSignal) => {
+    setLoading(true);
+    setError("");
+    void getMeasurementMethod(signal)
+      .then(setContent)
+      .catch((reason: unknown) => {
+        if ((reason as Error).name !== "AbortError") setError(String(reason));
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
-    fetch("/api/v1/evidence/measurement-method?format=markdown")
-      .then((r) => {
-        if (!r.ok) { setError(`HTTP ${r.status}`); return null; }
-        return r.json();
-      })
-      .then((d) => d && setContent(d.content ?? JSON.stringify(d)))
-      .catch((e) => setError(String(e)));
-  }, []);
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
+
+  const sections = useMemo(
+    () => content.split("\n").filter((line) => line.startsWith("## ")),
+    [content],
+  );
 
   return (
     <div data-testid="evidence-measurement-tab">
-      {error && <p role="alert" className="text-red-600">Failed to load: {error}</p>}
-      {!content && !error && <p>Loading Measurement Method…</p>}
-      {content && <pre className="whitespace-pre-wrap text-sm">{content}</pre>}
+      {loading ? <p role="status">Loading measurement method…</p> : null}
+      {error ? (
+        <div role="alert">
+          <p>Failed to load the measurement method: {error}</p>
+          <button type="button" onClick={() => load()}>Retry</button>
+        </div>
+      ) : null}
+      {content ? (
+        <div className="grid gap-4 lg:grid-cols-[16rem_1fr]">
+          <nav aria-label="Measurement method contents">
+            <ul>
+              {sections.map((section) => (
+                <li key={section}>{section.replace(/^## /, "")}</li>
+              ))}
+            </ul>
+          </nav>
+          <article className="prose whitespace-pre-wrap">{content}</article>
+        </div>
+      ) : null}
     </div>
   );
 }

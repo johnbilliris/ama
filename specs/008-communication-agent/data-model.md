@@ -152,7 +152,7 @@ Delivery tracking entity — one record per alert × segment × channel combinat
 | `channel` | `ChannelType` enum | Required | `sms`, `push`, `emergency_broadcast` |
 | `audience_segment_id` | `str` | FK to AudienceSegment | Target segment |
 | `language_used` | `str` | One of supported languages | Language delivered |
-| `delivery_status` | `DeliveryStatus` enum | Required | `pending`, `in_progress`, `delivered`, `failed`, `retrying` |
+| `delivery_status` | `DeliveryStatus` enum | Required | `pending`, `in_progress`, `accepted`, `delivered`, `failed`, `retrying`, `skipped`, `unconfigured` |
 | `attempt_count` | `int` | 0–max_retries+1, default: 0 | Number of attempts made |
 | `max_retries` | `int` | Default: 3 | Maximum retry count |
 | `retry_backoff_intervals` | `list[float]` | Default: `[1.0, 2.0, 4.0]` | Exponential backoff intervals (seconds) |

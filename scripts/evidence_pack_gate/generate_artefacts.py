@@ -700,6 +700,7 @@ SPECS = [
     ("036-foundry-rag-grounding", "Foundry RAG Grounding", True,
      [("lives-saved", 0.05, "+", 0.0)]),
     ("036-sim-agent-extend", "Simulation Agent Extend", False, []),
+    ("040-success-criteria", "Measurable Success-Criteria Evidence Harness", False, []),
 ]
 
 
@@ -730,6 +731,14 @@ def build_feature_value_ledger() -> dict:
                     {"kind": "spec", "ref": "specs/037-capstone-evidence-pack/spec.md",
                      "section": "Adoption Roadmap waves WAVE-04 / WAVE-05 (LGA + volunteer)"}
                 ]
+        if spec_id == "040-success-criteria":
+            row["evidence_exports"] = {
+                "capstone_attribution": False,
+                "measurement_method": "/api/v1/evidence/measurement-method",
+                "latest_scorecard": "/api/v1/evidence/scorecards/latest",
+                "audit_trace": "/api/v1/evidence/audit/{value_id}",
+                "media_type": "application/json",
+            }
         rows.append(row)
 
     # Tradeoffs (T060): one row per existing ADR + the 4 new spec-037 ADRs

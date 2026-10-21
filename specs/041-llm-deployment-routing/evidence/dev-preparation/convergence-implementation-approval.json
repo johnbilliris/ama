@@ -1,0 +1,37 @@
+{
+  "approver": "johnbilliris",
+  "request": "implement the five tasks  T053–T057",
+  "preservation_approach": "approve raw bicep",
+  "scope_decision": "Narrow first-party deployment child using the existing parent, plus the RAI API/representation update needed to preserve complete observed semantics; leave pinned vendor unchanged",
+  "dev_validation_scope": true,
+  "first_post_approval_clock": "2026-10-20T06:48:18.5154702+00:00",
+  "authority_ends_at": "2026-10-20T10:00:00Z",
+  "window_note": "Conservative end inside the approved four-hour scope; the clock is a post-response observation, not an asserted exact approval timestamp.",
+  "target": {
+    "tenant": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+    "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+    "resource_group": "ama",
+    "account": "cog-dev-w3uq6w",
+    "region": "australiaeast",
+    "environment": "dev"
+  },
+  "credentials": "Existing CLI credentials; explicitly select the target subscription",
+  "allowed": [
+    "Refresh Dev baseline, protection and effective governance metadata",
+    "Prepare and locally validate the narrow preservation composition",
+    "ARM validation and What-If of the bounded preservation candidate"
+  ],
+  "excluded": [
+    "Pinned vendor modification",
+    "Account-root rewrite or unrelated root-template changes",
+    "Secret-value operations",
+    "Deployment or resource writes",
+    "Inference or inference-budget renewal",
+    "IAM or policy changes",
+    "Traffic changes",
+    "Staging or production collection or inferred baselines"
+  ],
+  "other_target_evidence": "Not supplied; staging and production remain blocked.",
+  "existing_max_observation_age_seconds": 3600,
+  "release_approved": false
+}

@@ -1,23 +1,37 @@
 # Architecture Known Gaps
 
 > Maintained as part of spec-001 (FR-023). CI fails if any row has an empty Follow-up Task Ref.
-> See [quickstart.md](../../../specs/001-arch-docs-refresh/quickstart.md) for how to add an entry.
+> See [quickstart.md](../../specs/001-arch-docs-refresh/quickstart.md) for how to add an entry.
 
 ## Open Gaps
 
 | Area/Spec | Gap Description | Follow-up Task Ref | Date Identified | Status |
 | --- | --- | --- | --- | --- |
-| BICEP-DEP-01 | Bicep module dependency graph deferred; requires auto-generation tooling from `infra/bicep/`; not hand-authored | <https://github.com/johnbilliris/ama/issues/new?title=BICEP-DEP-01+Bicep+module+dependency+graph> | 2026-05-11 | Open |
-| DUPE-036 | Two `036-*` spec directories observed; counted as one shipped spec for cross-ref purposes; deduplication handled by `check_spec_cross_refs.py` prefix logic | `tasks.md#T061` | 2026-05-11 | Open |
-| CAP-MIG-01 | `capacity-model.md` at repo root not yet migrated to `deployment/` or `governance/` subdir; kept in place with front-matter banner per FR-005 | `tasks.md#T067` | 2026-05-11 | Open |
-| COSM-MIG-01 | Root-level `cosmos-partitioning.md` not yet migrated; superseded by `deployment/cosmos-partitioning.md` (T060); root copy kept with redirect banner | `tasks.md#T068` | 2026-05-11 | Open |
-| MDW-MIG-01 | Root-level `spec-035-middleware-and-offline.md` not yet migrated to a named view-type subdir; kept with front-matter banner per FR-005 | `tasks.md#T069` | 2026-05-11 | Open |
-| FOUNDRY-REGION | Specific non-AU Foundry inference regions not hard-coded in SEC-01 diagram; mechanism-zone label used per FR-016 and constitution NN-2; registry at `infra/parameters/foundry-carveout.yaml` is authoritative | `tasks.md#T044` | 2026-05-11 | Open |
-| SPEC-037 | spec-037 has no confirmed architecture page home; to be mapped during implementation or formally archived if no matching component exists | `tasks.md#T064` | 2026-05-11 | Open |
-| C4-L4 | C4 Level 4 (Code) diagrams deferred; to be added only if L3 Component diagrams lack sufficient clarity for any container; per spec assumption | `tasks.md#T071` | 2026-05-11 | Open |
-| LYCHEE-CFG | `.lychee.toml` exclude patterns for spec deep-link anchor fragments not yet authored; RSK-03 mitigation pending; lychee may emit false positives on `specs/036-*/spec.md#fr-*` anchors | `tasks.md#T063` | 2026-05-11 | Open |
-| WCAG-AUDIT-FULL | WCAG coverage map limited to documenting already-implemented accessibility features; full independent audit deferred to a separate accessibility sprint per RQ-10 | `tasks.md#T054` | 2026-05-11 | Open |
-| SPEC-RANGE-VERIFY | Spec numbers 002–009, 011–014, 016, 018, 021, 023, 026–027, 031–034 require verified architecture citation homes; RSK-06 mitigation — if `check_spec_cross_refs.py` reports any missing after Phase 10, add individual known-gaps entries per spec | `tasks.md#T064` | 2026-05-11 | Open |
+| BICEP-DEP-01 | Bicep module dependency graph deferred; requires auto-generation tooling from `infra/bicep/`; not hand-authored | specs/001-arch-docs-refresh/implementation-review-tasks.md#L311 | 2026-05-11 | Open |
+| DUPE-036 | Two `036-*` spec directories observed; counted as one shipped spec for cross-ref purposes; deduplication handled by `check_spec_cross_refs.py` prefix logic | specs/001-arch-docs-refresh/tasks.md#L196 | 2026-05-11 | Open |
+| CAP-MIG-01 | `capacity-model.md` at repo root not yet migrated to `deployment/` or `governance/` subdir; kept in place with front-matter banner per FR-005 | specs/001-arch-docs-refresh/tasks.md#L213 | 2026-05-11 | Open |
+| COSM-MIG-01 | Root-level `cosmos-partitioning.md` not yet migrated; superseded by `deployment/cosmos-partitioning.md` (T060); root copy kept with redirect banner | specs/001-arch-docs-refresh/tasks.md#L214 | 2026-05-11 | Open |
+| MDW-MIG-01 | Root-level `spec-035-middleware-and-offline.md` not yet migrated to a named view-type subdir; kept with front-matter banner per FR-005 | specs/001-arch-docs-refresh/tasks.md#L215 | 2026-05-11 | Open |
+| FOUNDRY-REGION | Specific non-AU Foundry inference regions not hard-coded in SEC-01 diagram; mechanism-zone label used per FR-016 and constitution NN-2; registry at `infra/parameters/foundry-carveout.yaml` is authoritative | specs/001-arch-docs-refresh/tasks.md#L153 | 2026-05-11 | Open |
+| C4-L4 | C4 Level 4 (Code) diagrams deferred; to be added only if L3 Component diagrams lack sufficient clarity for any container; per spec assumption | specs/001-arch-docs-refresh/tasks.md#L217 | 2026-05-11 | Open |
+| LYCHEE-CFG | `.lychee.toml` exclude patterns for spec deep-link anchor fragments not yet authored; RSK-03 mitigation pending; lychee may emit false positives on `specs/036-*/spec.md#fr-*` anchors | specs/001-arch-docs-refresh/tasks.md#L198 | 2026-05-11 | Open |
+| WCAG-AUDIT-FULL | WCAG coverage map limited to documenting already-implemented accessibility features; full independent audit deferred to a separate accessibility sprint per RQ-10 | specs/001-arch-docs-refresh/tasks.md#L163 | 2026-05-11 | Open |
+| SPEC-011 | Architecture citation home deferred pending follow-up remediation for spec-011 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-012 | Architecture citation home deferred pending follow-up remediation for spec-012 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-013 | Architecture citation home deferred pending follow-up remediation for spec-013 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-016 | Architecture citation home deferred pending follow-up remediation for spec-016 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-018 | Architecture citation home deferred pending follow-up remediation for spec-018 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-021 | Architecture citation home deferred pending follow-up remediation for spec-021 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-023 | Architecture citation home deferred pending follow-up remediation for spec-023 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-026 | Architecture citation home deferred pending follow-up remediation for spec-026 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-027 | Architecture citation home deferred pending follow-up remediation for spec-027 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-031 | Architecture citation home deferred pending follow-up remediation for spec-031 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-033 | Architecture citation home deferred pending follow-up remediation for spec-033 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-034 | Architecture citation home deferred pending follow-up remediation for spec-034 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| SPEC-037 | Architecture citation home deferred pending follow-up remediation for spec-037 mapping quality | specs/001-arch-docs-refresh/implementation-review-tasks.md#L264 | 2026-09-14 | Open |
+| DRAWIO-EXPORT-01 | Diagram sources remediated on 2026-09-15 but PNGs were NOT re-exported: the draw.io desktop CLI is absent from this environment, so `.github/skills/drawio-mcp-diagramming/scripts/render_drawio.py` exits 1 with "'drawio' not found on PATH". Existing PNGs are preserved and are now older than their sources; every changed source records `agent="remediation-source-updated; export=pending-drawio"` | specs/001-arch-docs-refresh/implementation-review-tasks.md#L311 | 2026-09-15 | Open |
+| DRAWIO-FALLBACK-01 | Fallback-authored sources previously carried `agent="spec-001-fallback"`; remediated sources now declare the export-pending provenance instead. Sources still not exported from the draw.io authoring tool, so 150-DPI / white-background / label-fidelity criteria remain unproven | specs/001-arch-docs-refresh/implementation-review-tasks.md#L311 | 2026-09-15 | Open |
+| AZURE2-ICON-RENDER | Azure2 image styles (`img/lib/azure2/...`) were added from the confirmed offline catalog to all ten Azure-bearing named sources, but icon rendering has not been visually confirmed in a draw.io host because no export was possible in this environment | specs/001-arch-docs-refresh/implementation-review-tasks.md#L311 | 2026-09-15 | Open |
 
 ## Resolved Gaps
 

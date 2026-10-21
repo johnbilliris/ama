@@ -143,7 +143,7 @@ describe("SimulationLiveLog SSE wiring (T-V03)", () => {
       });
     });
     // Stub global EventSource so tests can introspect.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     (globalThis as any).EventSource = ctorSpy as unknown as typeof EventSource;
     const { unmount } = render(
       <SimulationLiveLog

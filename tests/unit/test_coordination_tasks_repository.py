@@ -139,6 +139,8 @@ class _StubContainer:
     ) -> list[dict[str, Any]]:
         params = {p["name"]: p["value"] for p in parameters}
         rows = list(self.docs.values())
+        if "@scope" in params:
+            rows = [r for r in rows if r["scope"] == params["@scope"]]
         if "@oid" in params:
             rows = [r for r in rows if r["assigned_organisation_id"] == params["@oid"]]
         if "@pid" in params:
@@ -165,7 +167,8 @@ class TestCosmosBackend:
         task = _make("t1", "p1", "org1")
         repo.upsert(task)
         assert len(stub.upserts) == 1
-        assert stub.upserts[0]["id"] == "t1"
+        assert stub.upserts[0]["id"] == "live:t1"
+        assert stub.upserts[0]["scope"] == "live"
         assert state_store.TASKS["t1"] is task
 
     def test_get_uses_partition_key_when_provided(self) -> None:
@@ -201,6 +204,18 @@ class TestCosmosBackend:
     def test_is_cosmos_backed_is_true(self) -> None:
         repo = CoordinationTasksRepository(container=_StubContainer())
         assert repo.is_cosmos_backed is True
+
+    def test_same_task_id_is_isolated_by_tenant_scope(self) -> None:
+        stub = _StubContainer()
+        live_repo = CoordinationTasksRepository(container=stub, tenant_id="live")
+        sim_repo = CoordinationTasksRepository(container=stub, tenant_id="sim-drill")
+
+        live_repo.upsert(_make("t1", "p1", "org1", title="Live task"))
+        sim_repo.upsert(_make("t1", "p1", "org1", title="Simulation task"))
+
+        assert live_repo.get("t1", "org1").title == "Live task"
+        assert sim_repo.get("t1", "org1").title == "Simulation task"
+        assert {doc["id"] for doc in stub.upserts} == {"live:t1", "sim-drill:t1"}
 
 
 # ---------------------------------------------------------------------------

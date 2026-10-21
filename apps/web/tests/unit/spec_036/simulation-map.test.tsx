@@ -20,7 +20,7 @@ import {
 } from "@/lib/sse/map-overlay-events";
 
 function baseEvent(layerType: MapOverlayLayerType): MapOverlayEvent {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const skeleton: any = {
     event_type: "map.overlay.created",
     sim_id: "sim-1",

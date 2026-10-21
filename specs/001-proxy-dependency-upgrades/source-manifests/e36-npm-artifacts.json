@@ -1,0 +1,1068 @@
+[
+  {
+    "name": "@asamuzakjp/css-color",
+    "version": "7.1.3",
+    "fetchedUtc": "2026-10-11T13:22:30.111147+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@asamuzakjp/css-color/-/css-color-7.1.3.tgz",
+    "finalHost": "iqdvsblobprodcus430.vsblob.vsassets.io",
+    "bytes": 75531,
+    "sha256": "881a5c0772bcf0a03858a909a9c9555add94e9606ff59fd9a1b46553ac32cb50",
+    "proxyIntegrity": "sha512-1t1U8Cm3RBl9vh3RAZhjkPaduzLSvQJRToRrxpGR/eDRW99mOREleuu+mWfiFa795bUzjwht7NgphCKTs2ianQ==",
+    "proxyShasum": "720bdbf76f28c359deb9cc4be07331b838777b1c",
+    "engines": {
+      "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+    },
+    "dependencies": {
+      "@csstools/css-calc": "^3.4.2",
+      "@csstools/css-color-parser": "^4.2.5",
+      "@csstools/css-parser-algorithms": "^4.0.2",
+      "@csstools/css-tokenizer": "^4.0.2",
+      "lru-cache": "^11.5.3"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@asamuzakjp/dom-selector",
+    "version": "9.2.4",
+    "fetchedUtc": "2026-10-11T13:22:33.535307+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@asamuzakjp/dom-selector/-/dom-selector-9.2.4.tgz",
+    "finalHost": "zz3vsblobprodcus468.vsblob.vsassets.io",
+    "bytes": 65121,
+    "sha256": "783680be337b8ccc08d6f25c50b81f17e4d423d120886869f7df04e6b5e3cb5c",
+    "proxyIntegrity": "sha512-YnVzxDxLaqL0t7Q4wfcgHZjg55Wm6y5EaO7Bhu3q9J7wq/8iw3PhsnWiOQhYekx4VexnbkgWpTT6n+QIV7kczw==",
+    "proxyShasum": "aa0bda9fb491fbbb7ed11ceb66a8044bb8f5e910",
+    "engines": {
+      "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+    },
+    "dependencies": {
+      "bidi-js": "^1.1.0",
+      "css-tree": "^3.2.1",
+      "is-potential-custom-element-name": "^1.0.1",
+      "lru-cache": "^11.5.3"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@bramus/specificity",
+    "version": "2.4.2",
+    "fetchedUtc": "2026-10-11T13:22:35.864809+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@bramus/specificity/-/specificity-2.4.2.tgz",
+    "finalHost": "q0svsblobprodcus418.vsblob.vsassets.io",
+    "bytes": 162212,
+    "sha256": "1d8f1edc5d3ed985ea71dfce73b28af075995b3a292fe0f63f813e57cccd8e20",
+    "proxyIntegrity": null,
+    "proxyShasum": "aa8db8eb173fdee7324f82284833106adeecc648",
+    "engines": {},
+    "dependencies": {
+      "css-tree": "^3.0.0"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@csstools/color-helpers",
+    "version": "6.1.2",
+    "fetchedUtc": "2026-10-11T13:22:37.606442+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@csstools/color-helpers/-/color-helpers-6.1.2.tgz",
+    "finalHost": "vk5vsblobprodcus49.vsblob.vsassets.io",
+    "bytes": 10722,
+    "sha256": "23fbce9d140e7611c37d3e92e862d2ed871731aa56ceba37c9e008588d5bf7b2",
+    "proxyIntegrity": "sha512-grhRy3OKmniaAEKXMjua5z/EODX0MSqBGjunw8+j/3HQjOnahs2AGhvEOIYVUWcU6ScApbhLhVrQTX8XqrMrow==",
+    "proxyShasum": "41d1c66d9e5885a750d6512c786b3c45d5de3034",
+    "engines": {
+      "node": ">=20.19.0"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@csstools/css-calc",
+    "version": "3.4.3",
+    "fetchedUtc": "2026-10-11T13:22:40.485268+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@csstools/css-calc/-/css-calc-3.4.3.tgz",
+    "finalHost": "tqtvsblobprodcus420.vsblob.vsassets.io",
+    "bytes": 14353,
+    "sha256": "6de4a93bc8b000a510d4dc77acb85953dbf50a21fc46f5ab68e09a5d2206805f",
+    "proxyIntegrity": "sha512-iex20d8CHVkyvg6B7UKV7uHnI2Bqo9g+EFfT9E0y+GvTvhZ/DwONJ+9aKb1dlqm0ZiGsL5RXjp0fCoJYnkeDjA==",
+    "proxyShasum": "f3708018243c508ed9fca99835d3b03e9112cf95",
+    "engines": {
+      "node": ">=20.19.0"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@csstools/css-color-parser",
+    "version": "4.2.6",
+    "fetchedUtc": "2026-10-11T13:22:42.390805+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@csstools/css-color-parser/-/css-color-parser-4.2.6.tgz",
+    "finalHost": "65dvsblobprodcus412.vsblob.vsassets.io",
+    "bytes": 13622,
+    "sha256": "12f8b0b236e74b80cde06752bf4bbcdd2249794726a90634493e1de3ee4bfda6",
+    "proxyIntegrity": "sha512-iiPQ3iRWwnJkeEn6RIu6SJPr7hYrLz6XZ9s/QZl+2/LI5KQVjpl2fdmDSZKuD4xP6GMmMPgHFFXg6k1Wkz0Trg==",
+    "proxyShasum": "14dcf86f96d8f0708fec000b49fc39ab2e34f4b4",
+    "engines": {
+      "node": ">=20.19.0"
+    },
+    "dependencies": {
+      "@csstools/color-helpers": "^6.1.2",
+      "@csstools/css-calc": "^3.4.3"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@csstools/css-parser-algorithms",
+    "version": "4.0.2",
+    "fetchedUtc": "2026-10-11T13:22:45.160560+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@csstools/css-parser-algorithms/-/css-parser-algorithms-4.0.2.tgz",
+    "finalHost": "p6jvsblobprodcus439.vsblob.vsassets.io",
+    "bytes": 9153,
+    "sha256": "18f8eaea8d271e281bdd93a3a0b3b1a313879f37147ae3170da3b5ef12a85eb6",
+    "proxyIntegrity": "sha512-40cSKyMvK+tq4qz6Awrlye2WGuOKt3FwPgtGg6KTfbHOWNw+Rk1rzbAtZnZ6IBhsY491HLRnDXwoyBAijmmILA==",
+    "proxyShasum": "689445621dae9f2114db2bee2190d3b4513a2d3c",
+    "engines": {
+      "node": ">=20.19.0"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@csstools/css-syntax-patches-for-csstree",
+    "version": "1.1.15",
+    "fetchedUtc": "2026-10-11T13:22:47.292896+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@csstools/css-syntax-patches-for-csstree/-/css-syntax-patches-for-csstree-1.1.15.tgz",
+    "finalHost": "85evsblobprodcus416.vsblob.vsassets.io",
+    "bytes": 20006,
+    "sha256": "47ec40a8a7bf32a5d22eb64477d2204c6e782b9ee5d4cfcfbc0c66c49036d07b",
+    "proxyIntegrity": "sha512-J0u7HkVl2nzSlhsiTOp4AmwcUQ3D+mGEEKfBy/7To5/y7F2OHwyLrXfrhR0SMgr4p5Lo+eaMVSeai24zUcBIxA==",
+    "proxyShasum": "2255da5042c77e6ba3faf1995188404b6fc22361",
+    "engines": {},
+    "dependencies": {},
+    "peerDependenciesMeta": {
+      "css-tree": {
+        "optional": true
+      }
+    },
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@csstools/css-tokenizer",
+    "version": "4.0.2",
+    "fetchedUtc": "2026-10-11T13:22:49.858932+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@csstools/css-tokenizer/-/css-tokenizer-4.0.2.tgz",
+    "finalHost": "ej8vsblobprodcus489.vsblob.vsassets.io",
+    "bytes": 10505,
+    "sha256": "1af7c4bfb45888f31f014c606b858a75ca8f3b98c61859e27ca26d94dfc6a36f",
+    "proxyIntegrity": "sha512-OoKoR0f76dCY666JlcbhmVTs2drYj1GUXZTYTcbUgJjh9Nv41aFfZ21bPQTERm5+L5cBDo466NltB2lplS5GBw==",
+    "proxyShasum": "7c11bbc7e2912a7def676d72ba6e00895aadc0d5",
+    "engines": {
+      "node": ">=20.19.0"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@exodus/bytes",
+    "version": "1.16.0",
+    "fetchedUtc": "2026-10-11T13:22:51.608855+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@exodus/bytes/-/bytes-1.16.0.tgz",
+    "finalHost": "65dvsblobprodcus412.vsblob.vsassets.io",
+    "bytes": 145999,
+    "sha256": "bc5282c79f68d01e1516385aee4ffbe6ba955f023e685f3cf2fd3ffcb00c8841",
+    "proxyIntegrity": "sha512-IcpW84uEn3N7ETtNZMlxKhfl6Pec8rUNGOTBtWbK1FKhJxIFAptZyVrvVRVBimAJxJCgc3PxepxkdWWG4DVzfA==",
+    "proxyShasum": "954c9d9dd7eec15b966b2e8f2d883c04295b720c",
+    "engines": {
+      "node": "^20.19.0 || ^22.12.0 || >=24.0.0"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {
+      "@noble/hashes": {
+        "optional": true
+      }
+    },
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@next/env",
+    "version": "15.5.21",
+    "fetchedUtc": "2026-10-11T13:14:14.342295+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@next/env/-/env-15.5.21.tgz",
+    "finalHost": "2k1vsblobprodcus453.vsblob.vsassets.io",
+    "bytes": 4768,
+    "sha256": "e8e0cb59ab1a828f74fd9876ab845ba5cb04cbcdba1f74c28c6a1b30e60dc75a",
+    "proxyIntegrity": null,
+    "proxyShasum": "782aa4d6b08ddfd12ac7e17ca85b7ee1b61c500b",
+    "engines": {},
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "@next/swc-darwin-arm64",
+    "version": "15.5.21",
+    "fetchedUtc": "2026-10-11T13:14:29.919115+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@next/swc-darwin-arm64/-/swc-darwin-arm64-15.5.21.tgz",
+    "finalHost": "5zbvsblobprodcus417.vsblob.vsassets.io",
+    "bytes": 42443210,
+    "sha256": "b97671f8872fbf68384bbbc1cbb3fe8220c5311c5d6b3c24cce8f7bce1eb9eef",
+    "proxyIntegrity": null,
+    "proxyShasum": "bac5a07fc86a50555e0bab64fc7446605b028df4",
+    "engines": {
+      "node": ">= 10"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": [
+      "darwin"
+    ],
+    "cpu": [
+      "arm64"
+    ],
+    "libc": null
+  },
+  {
+    "name": "@next/swc-darwin-x64",
+    "version": "15.5.21",
+    "fetchedUtc": "2026-10-11T13:14:47.256617+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@next/swc-darwin-x64/-/swc-darwin-x64-15.5.21.tgz",
+    "finalHost": "04gvsblobprodcus471.vsblob.vsassets.io",
+    "bytes": 43050279,
+    "sha256": "590b8687419c54194e55f44951fdd1a974ca7b8f1bc3f98a0dce482216b95c00",
+    "proxyIntegrity": null,
+    "proxyShasum": "b369644e8e5f0b3b51469542fc7d724c23762946",
+    "engines": {
+      "node": ">= 10"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": [
+      "darwin"
+    ],
+    "cpu": [
+      "x64"
+    ],
+    "libc": null
+  },
+  {
+    "name": "@next/swc-linux-arm64-gnu",
+    "version": "15.5.21",
+    "fetchedUtc": "2026-10-11T13:15:02.806693+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@next/swc-linux-arm64-gnu/-/swc-linux-arm64-gnu-15.5.21.tgz",
+    "finalHost": "2k1vsblobprodcus453.vsblob.vsassets.io",
+    "bytes": 44221790,
+    "sha256": "41a8f880ca7f6cdda8e3707fbfcce9c066c966b453ad8da14d6866f9ed01d24a",
+    "proxyIntegrity": null,
+    "proxyShasum": "90d8033f1411b1f1cd834d8d0b13daa6c1e978ac",
+    "engines": {
+      "node": ">= 10"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": [
+      "linux"
+    ],
+    "cpu": [
+      "arm64"
+    ],
+    "libc": [
+      "glibc"
+    ]
+  },
+  {
+    "name": "@next/swc-linux-arm64-musl",
+    "version": "15.5.21",
+    "fetchedUtc": "2026-10-11T13:15:21.389661+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@next/swc-linux-arm64-musl/-/swc-linux-arm64-musl-15.5.21.tgz",
+    "finalHost": "c1dvsblobprodcus423.vsblob.vsassets.io",
+    "bytes": 43550099,
+    "sha256": "555ea2f0b9b3ddabdf61240374aea30d0cdcb72d18c721bc3b4edaa2ec6280c0",
+    "proxyIntegrity": null,
+    "proxyShasum": "fa3359b5d8e50d24a47d3f24fd663dd29b751abb",
+    "engines": {
+      "node": ">= 10"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": [
+      "linux"
+    ],
+    "cpu": [
+      "arm64"
+    ],
+    "libc": [
+      "musl"
+    ]
+  },
+  {
+    "name": "@next/swc-linux-x64-gnu",
+    "version": "15.5.21",
+    "fetchedUtc": "2026-10-11T13:15:26.040792+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-15.5.21.tgz",
+    "finalHost": "4gpvsblobprodcus446.vsblob.vsassets.io",
+    "bytes": 47551738,
+    "sha256": "7e68c89633c6d42f9feaebd59b8b7ebf9764e578691f97d2e4c5b92d81954ec1",
+    "proxyIntegrity": null,
+    "proxyShasum": "8df24c447815a9d7c71c86209607fb2340275837",
+    "engines": {
+      "node": ">= 10"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": [
+      "linux"
+    ],
+    "cpu": [
+      "x64"
+    ],
+    "libc": [
+      "glibc"
+    ]
+  },
+  {
+    "name": "@next/swc-linux-x64-musl",
+    "version": "15.5.21",
+    "fetchedUtc": "2026-10-11T13:15:34.086120+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@next/swc-linux-x64-musl/-/swc-linux-x64-musl-15.5.21.tgz",
+    "finalHost": "v1dvsblobprodcus482.vsblob.vsassets.io",
+    "bytes": 47479914,
+    "sha256": "ebeb094ea13d170bf85e067fba9cefcfe3ba0d9461ab80c95b5b56173dd207e9",
+    "proxyIntegrity": null,
+    "proxyShasum": "eec68325de1fa0c708c031754bd0310d145d9424",
+    "engines": {
+      "node": ">= 10"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": [
+      "linux"
+    ],
+    "cpu": [
+      "x64"
+    ],
+    "libc": [
+      "musl"
+    ]
+  },
+  {
+    "name": "@next/swc-win32-arm64-msvc",
+    "version": "15.5.21",
+    "fetchedUtc": "2026-10-11T13:15:50.291190+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@next/swc-win32-arm64-msvc/-/swc-win32-arm64-msvc-15.5.21.tgz",
+    "finalHost": "6jvvsblobprodcus460.vsblob.vsassets.io",
+    "bytes": 38396943,
+    "sha256": "ca2203dd1cc9af108999153733ddbb816b1afea3bd776c2d630b34b01b745c75",
+    "proxyIntegrity": null,
+    "proxyShasum": "d5fdddb7a96bc549ce2581a50c44bb9b44db0942",
+    "engines": {
+      "node": ">= 10"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": [
+      "win32"
+    ],
+    "cpu": [
+      "arm64"
+    ],
+    "libc": null
+  },
+  {
+    "name": "@next/swc-win32-x64-msvc",
+    "version": "15.5.21",
+    "fetchedUtc": "2026-10-11T13:16:07.175146+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@next/swc-win32-x64-msvc/-/swc-win32-x64-msvc-15.5.21.tgz",
+    "finalHost": "2kavsblobprodcus46.vsblob.vsassets.io",
+    "bytes": 46743038,
+    "sha256": "1a003c004c03d1413d98fabd1f7e2caa520e4393e6627fd9a4593b27f2ffc6c0",
+    "proxyIntegrity": null,
+    "proxyShasum": "762363d4aaa353775b3c7a03e202f9eb0b1dca9e",
+    "engines": {
+      "node": ">= 10"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": [
+      "win32"
+    ],
+    "cpu": [
+      "x64"
+    ],
+    "libc": null
+  },
+  {
+    "name": "@playwright/test",
+    "version": "1.63.0",
+    "fetchedUtc": "2026-10-11T13:14:08.009022+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@playwright/test/-/test-1.63.0.tgz",
+    "finalHost": "8wivsblobprodcus487.vsblob.vsassets.io",
+    "bytes": 8749,
+    "sha256": "fc594f36b7b4aafece614ec6852ad728423215a76edd0a2a1821bb0c49539c4e",
+    "proxyIntegrity": null,
+    "proxyShasum": "808020c46e8b6b91f9d628cd0ebcbb32bdfd8b6c",
+    "engines": {
+      "node": ">=20"
+    },
+    "dependencies": {
+      "playwright": "1.63.0"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "bidi-js",
+    "version": "1.1.0",
+    "fetchedUtc": "2026-10-11T13:22:53.651492+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/bidi-js/-/bidi-js-1.1.0.tgz",
+    "finalHost": "hw8vsblobprodcus472.vsblob.vsassets.io",
+    "bytes": 47353,
+    "sha256": "8a89fce4e2b00c5141929ecde8336e955901e8fa2c7f01c6b5c9732639dd4175",
+    "proxyIntegrity": null,
+    "proxyShasum": "c92efafe3fce3b9fdd30ba67bdddf0dd4d424af7",
+    "engines": {},
+    "dependencies": {
+      "require-from-string": "^2.0.2"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "css-tree",
+    "version": "3.2.1",
+    "fetchedUtc": "2026-10-11T13:22:56.376922+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/css-tree/-/css-tree-3.2.1.tgz",
+    "finalHost": "6jvvsblobprodcus460.vsblob.vsassets.io",
+    "bytes": 316943,
+    "sha256": "4c06bfe733d006103a4c070dcf8e0a3b2eb6b6a83e20e21c32d2d3b9c3ffae0a",
+    "proxyIntegrity": null,
+    "proxyShasum": "86cac7011561272b30e6b1e042ba6ce047aa7518",
+    "engines": {
+      "node": "^10 || ^12.20.0 || ^14.13.0 || >=15.0.0"
+    },
+    "dependencies": {
+      "mdn-data": "2.27.1",
+      "source-map-js": "^1.2.1"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "data-urls",
+    "version": "8.0.0",
+    "fetchedUtc": "2026-10-11T13:22:58.871729+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/data-urls/-/data-urls-8.0.0.tgz",
+    "finalHost": "yrxvsblobprodcus449.vsblob.vsassets.io",
+    "bytes": 3732,
+    "sha256": "8a63ac9cde6d1c8e207769473c4cc5d19d5623f320431864a683bd368652da20",
+    "proxyIntegrity": "sha512-JQUCCK+/CAGbGGx618PlFZMXH81Jtj7t73CHv9dd/zVWvxgGT2zLFRjnKb+Ng46GIwcy+f7f88qd4duqllK+WQ==",
+    "proxyShasum": "d4e925beae8249dbe99a1defed36cebb9cc7a84c",
+    "engines": {
+      "node": "^22.14.0 || >=24.0.0"
+    },
+    "dependencies": {
+      "whatwg-mimetype": "^5.0.0",
+      "whatwg-url": "^17.1.2"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "decimal.js",
+    "version": "10.6.0",
+    "fetchedUtc": "2026-10-11T13:23:00.825934+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/decimal.js/-/decimal.js-10.6.0.tgz",
+    "finalHost": "cluvsblobprodcus456.vsblob.vsassets.io",
+    "bytes": 69924,
+    "sha256": "433210122e8149972f64054c54b0ce0872e5f15a3c5835aab57ff1a8e6d071b1",
+    "proxyIntegrity": null,
+    "proxyShasum": "e649a43e3ab953a72192ff5983865e509f37ed9a",
+    "engines": {},
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "entities",
+    "version": "8.1.0",
+    "fetchedUtc": "2026-10-11T13:23:02.823414+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/entities/-/entities-8.1.0.tgz",
+    "finalHost": "6puvsblobprodcus437.vsblob.vsassets.io",
+    "bytes": 100412,
+    "sha256": "e9a27d66db0d0a6f2d76454219d94f5729ae2a29f08ab06c92e5f6eaa37cbe68",
+    "proxyIntegrity": null,
+    "proxyShasum": "9632d69619ebdbe0cf0ef22f53088fe5a2163d86",
+    "engines": {
+      "node": ">=20.19.0"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "html-encoding-sniffer",
+    "version": "7.0.0",
+    "fetchedUtc": "2026-10-11T13:23:04.605016+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/html-encoding-sniffer/-/html-encoding-sniffer-7.0.0.tgz",
+    "finalHost": "dx9vsblobprodcus480.vsblob.vsassets.io",
+    "bytes": 5202,
+    "sha256": "eb8d28f85e3fff74434b29557c4fc66b6039f8f92d3e812492426a54c8368a7a",
+    "proxyIntegrity": "sha512-UikN5yr7xsCDAq87Or5or0PAlD3HJJOKVzM05az588WnpDJ4Ux7a2A53Qi6gofGg2/EtvF/H4hCi/TXfCW4Y6w==",
+    "proxyShasum": "cf995009e50fa6f90d74906ab5137f8ee9b7c9d8",
+    "engines": {
+      "node": "^22.13.0 || >=24.0.0"
+    },
+    "dependencies": {
+      "@exodus/bytes": "^1.15.1"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "is-potential-custom-element-name",
+    "version": "1.0.1",
+    "fetchedUtc": "2026-10-11T13:23:06.867053+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/is-potential-custom-element-name/-/is-potential-custom-element-name-1.0.1.tgz",
+    "finalHost": "pyfvsblobprodcus422.vsblob.vsassets.io",
+    "bytes": 1905,
+    "sha256": "b6e425bb136422af133754814046a640c1573349755c63130c424abcee398621",
+    "proxyIntegrity": null,
+    "proxyShasum": "171ed6f19e3ac554394edf78caa05784a45bebb5",
+    "engines": {},
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "js-yaml",
+    "version": "4.3.1",
+    "fetchedUtc": "2026-10-11T13:14:00.114064+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/js-yaml/-/js-yaml-4.3.1.tgz",
+    "finalHost": "ckfvsblobprodcus45.vsblob.vsassets.io",
+    "bytes": 226859,
+    "sha256": "08d6282b77a3e7242061f6dd5516c019b25c53041ad267bca3b790d79ddd5f34",
+    "proxyIntegrity": null,
+    "proxyShasum": "01216c001d67f48e2cd560d708c7af21090a3848",
+    "engines": {},
+    "dependencies": {
+      "argparse": "^2.0.1"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "jsdom",
+    "version": "30.1.2",
+    "fetchedUtc": "2026-10-11T13:23:09.864673+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/jsdom/-/jsdom-30.1.2.tgz",
+    "finalHost": "vk5vsblobprodcus49.vsblob.vsassets.io",
+    "bytes": 553073,
+    "sha256": "5634f03d26472f1966670b3a8be4c7cbb22b363c23e4af772e3c5a0540816a29",
+    "proxyIntegrity": "sha512-0FFE/jE1rppmVfUrJUgxqXjcwolZYIGtAgj1pTussMhNZxIxi7W/PvfWaMNroGi2B36X1IKHbexpZ9DhkoOPiQ==",
+    "proxyShasum": "28ef0482cab9724692c9dffcec3a6a6ae8a8f91e",
+    "engines": {
+      "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+    },
+    "dependencies": {
+      "@asamuzakjp/css-color": "^7.1.3",
+      "@asamuzakjp/dom-selector": "^9.2.4",
+      "@bramus/specificity": "^2.4.2",
+      "@csstools/css-syntax-patches-for-csstree": "^1.1.15",
+      "@exodus/bytes": "^1.16.0",
+      "css-tree": "^3.2.1",
+      "data-urls": "^8.0.0",
+      "decimal.js": "^10.6.0",
+      "html-encoding-sniffer": "^7.0.0",
+      "is-potential-custom-element-name": "^1.0.1",
+      "lru-cache": "^11.5.3",
+      "parse5": "^8.0.1",
+      "saxes": "^6.0.0",
+      "tough-cookie": "^6.0.2",
+      "undici": "^8.11.2",
+      "w3c-xmlserializer": "^6.0.0",
+      "webidl-conversions": "^8.0.1",
+      "whatwg-mimetype": "^5.0.0",
+      "whatwg-url": "^17.2.0",
+      "xml-name-validator": "^5.0.0"
+    },
+    "peerDependenciesMeta": {
+      "canvas": {
+        "optional": true
+      }
+    },
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "lru-cache",
+    "version": "11.5.3",
+    "fetchedUtc": "2026-10-11T13:23:12.452135+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/lru-cache/-/lru-cache-11.5.3.tgz",
+    "finalHost": "bbtvsblobprodcus481.vsblob.vsassets.io",
+    "bytes": 697866,
+    "sha256": "d18739bbd7d0091d30d2cca58e120c8b70ac09a5a21aa4b2b3e9afb2dc4084d8",
+    "proxyIntegrity": "sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg==",
+    "proxyShasum": "a7767b4034e35269562d2b9da2b185b5df70c421",
+    "engines": {
+      "node": "20 || >=22"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "mdn-data",
+    "version": "2.27.1",
+    "fetchedUtc": "2026-10-11T13:23:15.126327+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/mdn-data/-/mdn-data-2.27.1.tgz",
+    "finalHost": "x4jvsblobprodcus462.vsblob.vsassets.io",
+    "bytes": 102934,
+    "sha256": "63985bd4ce64e9a0142d70465c3a7f54c488f3ef6da3f9512d54a728cde46870",
+    "proxyIntegrity": null,
+    "proxyShasum": "e37b9c50880b75366c4d40ac63d9bbcacdb61f0e",
+    "engines": {},
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "next",
+    "version": "15.5.21",
+    "fetchedUtc": "2026-10-11T13:14:10.639706+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/next/-/next-15.5.21.tgz",
+    "finalHost": "jzpvsblobprodcus470.vsblob.vsassets.io",
+    "bytes": 30999743,
+    "sha256": "ffc133c1448abb813f09df98dbdc6b8e58dfcd90a0088193ac67d6a1d506d13b",
+    "proxyIntegrity": null,
+    "proxyShasum": "43355e37f9d1ed8cf96018aa57f84ea2ec213f7b",
+    "engines": {
+      "node": "^18.18.0 || ^19.8.0 || >= 20.0.0"
+    },
+    "dependencies": {
+      "@next/env": "15.5.21",
+      "@swc/helpers": "0.5.15",
+      "caniuse-lite": "^1.0.30001579",
+      "postcss": "8.4.31",
+      "styled-jsx": "5.1.6"
+    },
+    "peerDependenciesMeta": {
+      "babel-plugin-react-compiler": {
+        "optional": true
+      },
+      "sass": {
+        "optional": true
+      },
+      "@opentelemetry/api": {
+        "optional": true
+      },
+      "@playwright/test": {
+        "optional": true
+      }
+    },
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "parse5",
+    "version": "8.0.1",
+    "fetchedUtc": "2026-10-11T13:23:17.098711+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/parse5/-/parse5-8.0.1.tgz",
+    "finalHost": "bsovsblobprodcus457.vsblob.vsassets.io",
+    "bytes": 56234,
+    "sha256": "d94ec8606e3cef24b8ec001ac121df5d7938f015be69615da27b53a082f86832",
+    "proxyIntegrity": null,
+    "proxyShasum": "f43bcd2cd683efe084075333e9ce0da7d06da31e",
+    "engines": {},
+    "dependencies": {
+      "entities": "^8.0.0"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "playwright-core",
+    "version": "1.63.0",
+    "fetchedUtc": "2026-10-11T13:14:17.062896+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/playwright-core/-/playwright-core-1.63.0.tgz",
+    "finalHost": "tqtvsblobprodcus420.vsblob.vsassets.io",
+    "bytes": 3123044,
+    "sha256": "208593d4e1bcd8f8fe5f869cad1cc332dc7f1d70dc1d58c102dc3ac36e30f26c",
+    "proxyIntegrity": null,
+    "proxyShasum": "e57665bc32846c213ac39a1e4d5bc6228e76b376",
+    "engines": {
+      "node": ">=20"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "playwright",
+    "version": "1.63.0",
+    "fetchedUtc": "2026-10-11T13:14:12.856894+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/playwright/-/playwright-1.63.0.tgz",
+    "finalHost": "q8avsblobprodcus427.vsblob.vsassets.io",
+    "bytes": 899597,
+    "sha256": "195a5ee9bfed7c6e9c03965950e32e5e4dbedaa02e740e5a530eb4b87dae050c",
+    "proxyIntegrity": null,
+    "proxyShasum": "99b56f9f69b1b70c44f00bf84b2fe52348ae2511",
+    "engines": {
+      "node": ">=20"
+    },
+    "dependencies": {
+      "playwright-core": "1.63.0"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "punycode",
+    "version": "2.3.1",
+    "fetchedUtc": "2026-10-11T13:23:19.737229+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/punycode/-/punycode-2.3.1.tgz",
+    "finalHost": "dx9vsblobprodcus480.vsblob.vsassets.io",
+    "bytes": 7603,
+    "sha256": "e4ce59f9fbac44349abab87279ab658f6b4614916bec5e088ae3be9323e193bb",
+    "proxyIntegrity": null,
+    "proxyShasum": "027422e2faec0b25e1549c3e1bd8309b9133b6e5",
+    "engines": {
+      "node": ">=6"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "require-from-string",
+    "version": "2.0.2",
+    "fetchedUtc": "2026-10-11T13:23:21.838526+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/require-from-string/-/require-from-string-2.0.2.tgz",
+    "finalHost": "7kwvsblobprodcus429.vsblob.vsassets.io",
+    "bytes": 1816,
+    "sha256": "cb694a4965908f7775a0c757f00cf4e624d193cd71d77988fbcca0f597b88d82",
+    "proxyIntegrity": null,
+    "proxyShasum": "89a7fdd938261267318eafe14f9c32e598c36909",
+    "engines": {
+      "node": ">=0.10.0"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "saxes",
+    "version": "6.0.0",
+    "fetchedUtc": "2026-10-11T13:23:24.320060+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/saxes/-/saxes-6.0.0.tgz",
+    "finalHost": "awcvsblobprodcus447.vsblob.vsassets.io",
+    "bytes": 35374,
+    "sha256": "1cdf52fbbe1ccbd175c365d2b8e63f46e590e74aff23fa6a44a6ec51522e96db",
+    "proxyIntegrity": null,
+    "proxyShasum": "fe5b4a4768df4f14a201b1ba6a65c1f3d9988cc5",
+    "engines": {
+      "node": ">=v12.22.7"
+    },
+    "dependencies": {
+      "xmlchars": "^2.2.0"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "source-map-js",
+    "version": "1.2.2",
+    "fetchedUtc": "2026-10-11T13:23:26.107620+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/source-map-js/-/source-map-js-1.2.2.tgz",
+    "finalHost": "1p4vsblobprodcus466.vsblob.vsassets.io",
+    "bytes": 36349,
+    "sha256": "05c8cf8e7c3a6b56cada7668fe9342b10f4b625efc92aba9ba05b9e8fe4d71a3",
+    "proxyIntegrity": "sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==",
+    "proxyShasum": "79fb88d97535a21cb27162cb05d211b67acea4ab",
+    "engines": {
+      "node": ">=0.10.0"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "tldts-core",
+    "version": "7.4.16",
+    "fetchedUtc": "2026-10-11T13:23:28.469800+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/tldts-core/-/tldts-core-7.4.16.tgz",
+    "finalHost": "sagvsblobprodcus435.vsblob.vsassets.io",
+    "bytes": 83645,
+    "sha256": "0bd1e72ecd706b9f9319ca8376e2a2c490cd3a8beeeb040fc0f567942122b964",
+    "proxyIntegrity": "sha512-MDolfaSJtlSK5Y0A1xl3277ekubZwobpBjugknDizI9O5Rm60a1m8k4ICK+MRsCDzPygT81mp3BBf5RKDlFRfA==",
+    "proxyShasum": "f4b1711fd30e5d9a742d94f6b391d8649acc8ae1",
+    "engines": {},
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "tldts",
+    "version": "7.4.16",
+    "fetchedUtc": "2026-10-11T13:23:32.662668+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/tldts/-/tldts-7.4.16.tgz",
+    "finalHost": "iqdvsblobprodcus430.vsblob.vsassets.io",
+    "bytes": 681258,
+    "sha256": "694949891f53d102662d7314d6958a16f549daefff7bb1b577e2e2adc0dfac0e",
+    "proxyIntegrity": "sha512-QwBER5KMR86IIjpIiO7H/Z3IMJPsZ1A6RKPAqzTTgOyUQUSt9FdnKcqhTaJmkY6HVrgouZHZR0ncK5QxvmnQeg==",
+    "proxyShasum": "0bb8768d14c7f540dbf38256ae88e637b08937d9",
+    "engines": {},
+    "dependencies": {
+      "tldts-core": "^7.4.16"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "tough-cookie",
+    "version": "6.0.2",
+    "fetchedUtc": "2026-10-11T13:23:34.283614+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/tough-cookie/-/tough-cookie-6.0.2.tgz",
+    "finalHost": "srpvsblobprodcus467.vsblob.vsassets.io",
+    "bytes": 159373,
+    "sha256": "9f8413255be6492501f0d9344034aa517d578afd5e7114ebb26627eee9a62670",
+    "proxyIntegrity": null,
+    "proxyShasum": "7b1f22fcf2daf06c4ff9d53ec1845f44c6627062",
+    "engines": {
+      "node": ">=16"
+    },
+    "dependencies": {
+      "tldts": "^7.0.5"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "tr46",
+    "version": "7.0.0",
+    "fetchedUtc": "2026-10-11T13:23:37.529891+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/tr46/-/tr46-7.0.0.tgz",
+    "finalHost": "4uyvsblobprodcus425.vsblob.vsassets.io",
+    "bytes": 65623,
+    "sha256": "71ae6e18972e8cccfb5fe09a5e1a47ad2897e8e13c9c10029168e8fa4a03c71d",
+    "proxyIntegrity": "sha512-BcDSDW+SIGWVOns1Zm6Yg91q9AEj7eaID0QDY9oIqJD1A8dscNwMcl9Sms2DeuWCNov1X0/oXanHGYQBSLwZsg==",
+    "proxyShasum": "af39140d4a8860868de4e16477a4a946bda03a62",
+    "engines": {
+      "node": "^22.14.0 || >=24.0.0"
+    },
+    "dependencies": {
+      "punycode": "^2.3.1"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "undici",
+    "version": "8.11.2",
+    "fetchedUtc": "2026-10-11T13:23:40.150266+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/undici/-/undici-8.11.2.tgz",
+    "finalHost": "65dvsblobprodcus412.vsblob.vsassets.io",
+    "bytes": 468958,
+    "sha256": "c69bf79440dfb262c7a43e35803731b2cfd7e6d264cfda6c54410d60f59bb8d7",
+    "proxyIntegrity": "sha512-u4UB2/IrKdU6lFxumHmmo1a3fCQO5tzQllRorfoRS63txhrB7xTpSn1PftwC4qEHkOaqP95fCWW4lJzwErwzhQ==",
+    "proxyShasum": "b8f6f6504384ae535c8e46f8403fd8075f011d46",
+    "engines": {
+      "node": ">=22.19.0"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "w3c-xmlserializer",
+    "version": "6.0.0",
+    "fetchedUtc": "2026-10-11T13:23:43.082409+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/w3c-xmlserializer/-/w3c-xmlserializer-6.0.0.tgz",
+    "finalHost": "awcvsblobprodcus447.vsblob.vsassets.io",
+    "bytes": 5340,
+    "sha256": "39f71a0e53077678990e1d339a1d9f18c5212737e349fbbd61da37c3e97286a1",
+    "proxyIntegrity": "sha512-4Nsy8K5Tr6SPDH9jhKJOHf7ChDrc1zufZTVSF7x72hwuEXBqxqk9G6cK+K2NRUtB3iELRJqjXb4JPDMBjMTl2Q==",
+    "proxyShasum": "27c0747e0091ada8cdb513c3645362e71fc50d82",
+    "engines": {
+      "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+    },
+    "dependencies": {
+      "xml-name-validator": "^5.0.0"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "webidl-conversions",
+    "version": "8.0.1",
+    "fetchedUtc": "2026-10-11T13:23:45.329947+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/webidl-conversions/-/webidl-conversions-8.0.1.tgz",
+    "finalHost": "on3vsblobprodcus41.vsblob.vsassets.io",
+    "bytes": 7326,
+    "sha256": "016809c2063e0f2066d11deec4fa7d563455b454fab66c3563ab5b52cccbb9e9",
+    "proxyIntegrity": null,
+    "proxyShasum": "0657e571fe6f06fcb15ca50ed1fdbcb495cd1686",
+    "engines": {
+      "node": ">=20"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "whatwg-mimetype",
+    "version": "5.0.0",
+    "fetchedUtc": "2026-10-11T13:23:47.255835+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/whatwg-mimetype/-/whatwg-mimetype-5.0.0.tgz",
+    "finalHost": "m4wvsblobprodcus459.vsblob.vsassets.io",
+    "bytes": 10895,
+    "sha256": "381cefd6ed7b22bff38372719eb71c037b7554ad798ab71b8fd605763c37aed8",
+    "proxyIntegrity": null,
+    "proxyShasum": "d8232895dbd527ceaee74efd4162008fb8a8cf48",
+    "engines": {
+      "node": ">=20"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "whatwg-url",
+    "version": "17.2.0",
+    "fetchedUtc": "2026-10-11T13:23:49.943579+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/whatwg-url/-/whatwg-url-17.2.0.tgz",
+    "finalHost": "df1vsblobprodcus485.vsblob.vsassets.io",
+    "bytes": 24820,
+    "sha256": "ab894f902a7f95caf23adf25c0f1625a9f8aba0c652b0117d227965d12b95709",
+    "proxyIntegrity": "sha512-IhLIHNcBrzIixC5XXsbr4DxdjajyA5vQ5RwGZMtrUp+GbtE5Nrsge9QKau7jXrC0aTXLYGV0xiW7Tb4YS2aomw==",
+    "proxyShasum": "8f9c121df5006111de3a3541241d2dbaf1c544e9",
+    "engines": {
+      "node": "^22.14.0 || >=24.0.0"
+    },
+    "dependencies": {
+      "@exodus/bytes": "^1.16.0",
+      "tr46": "^7.0.0",
+      "webidl-conversions": "^8.0.1"
+    },
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "xml-name-validator",
+    "version": "5.0.0",
+    "fetchedUtc": "2026-10-11T13:23:52.080064+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/xml-name-validator/-/xml-name-validator-5.0.0.tgz",
+    "finalHost": "7kwvsblobprodcus429.vsblob.vsassets.io",
+    "bytes": 4678,
+    "sha256": "3d40b1428dae32a6328ea20543abaafb72101a2652a95f43ec8757fef213f0be",
+    "proxyIntegrity": null,
+    "proxyShasum": "82be9b957f7afdacf961e5980f1bf227c0bf7673",
+    "engines": {
+      "node": ">=18"
+    },
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  },
+  {
+    "name": "xmlchars",
+    "version": "2.2.0",
+    "fetchedUtc": "2026-10-11T13:23:54.081993+00:00",
+    "tarball": "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/xmlchars/-/xmlchars-2.2.0.tgz",
+    "finalHost": "39gvsblobprodcus478.vsblob.vsassets.io",
+    "bytes": 11752,
+    "sha256": "bdf900298963e4bd95b76aa95e96d29f05687e6ae662d617061778267b576da8",
+    "proxyIntegrity": null,
+    "proxyShasum": "060fe1bcb7f9c76fe2a17db86a9bc3ab894210cb",
+    "engines": {},
+    "dependencies": {},
+    "peerDependenciesMeta": {},
+    "os": null,
+    "cpu": null,
+    "libc": null
+  }
+]

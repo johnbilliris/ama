@@ -56,32 +56,49 @@ tests
 - Shared operating picture loads in under 2 seconds on a throttled mobile browser profile.
 - A first coordinated action plan is visible within 10 minutes of incident activation in rehearsal.
 - Role-specific workspaces show only relevant tasks while preserving dependency visibility.
-- No public alert is published without a recorded approval decision unless the configuration explicitly allows an alternate mode.
+- No public alert is published without a recorded approval decision. Rehearsal-only paths may exercise non-egress synthetic delivery receipts for test coverage, and those paths never authorize public dispatch.
 - Degraded-source mode clearly marks stale or untrusted signals without removing the rest of the operating picture.
 
 ## Validated Results
 
-The following validations have been confirmed through automated test execution:
+Validation status: Unverified
+Revision: Pending
+Acceptance evidence artifact: Pending
+Supplemental historical artifact: docs/disaster-response-hub/evaluation/quickstart-rehearsal-results-2026-03-16.md (supplemental only; not acceptance evidence for this feature revision)
+
+The sections below are validation targets and harness scope only. They are not acceptance claims until revision-bound evidence is attached.
 
 ### Python test suite (14 tests)
-- ✅ Contract tests: signal ingestion, dashboard, alert lifecycle, persona workspace, preparedness catalog
-- ✅ Integration tests: provenance scoring, recommendation guardrails, tenant isolation, cross-agency access control, degraded-mode behavior
-- ✅ Simulation tests: bushfire, flood, and cyclone preparedness replays
+
+- Status: Pending verification
+- Method: Automated test execution in controlled environment
+- Cohort: N/A (software-only)
+- Denominator: Pending until revision-bound run set is attached
+- Results: Unverified for acceptance
 
 ### Playwright e2e suite (3 tests)
-- ✅ Incident commander dashboard with alert approval workflow
-- ✅ Persona workspace with task status updates
-- ✅ Dashboard decision-support validation (signal health, degraded banner, agency list, approval action)
+
+- Status: Pending verification
+- Method: Browser automation
+- Cohort: N/A (software-only)
+- Denominator: Pending until revision-bound run set is attached
+- Results: Unverified for acceptance
 
 ### Exercise metrics validation
-- ✅ SC-004 coordinated response time comparison (baseline vs hub-enabled)
-- ✅ SC-006 resource deployment efficiency comparison
-- ✅ SC-007 UX evaluation dimension scoring and coverage validation
+
+- Status: Pending verification
+- Method: Paired exercise measurement
+- Cohort: Pending external participant validation
+- Denominator: Pending
+- Results: Unverified for acceptance
 
 ### Quickstart rehearsal flow
-- ✅ Multi-jurisdiction flood rehearsal: signal ingestion → dashboard → approval → alert publish
-- ✅ Preparedness rehearsal: organisation catalog → framework review → scenario replay → gap analysis
-- ✅ Cross-agency isolation: persona workspace filtering and unauthorized access rejection
+
+- Status: Pending verification
+- Method: Scenario rehearsal runbook
+- Cohort: Pending external participant validation
+- Denominator: Pending
+- Results: Unverified for acceptance
 
 ## Final Validation Guidance
 

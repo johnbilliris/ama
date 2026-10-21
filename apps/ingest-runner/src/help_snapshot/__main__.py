@@ -6,6 +6,8 @@ import argparse
 import logging
 import sys
 
+from apps.console_logging import configure_console_logging
+
 from . import alias_swinger, audit_emitters, embedder, pspf_guard, source_loaders
 
 logger = logging.getLogger("help_snapshot")
@@ -17,7 +19,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--snapshot-id", required=True)
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args(argv)
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    configure_console_logging()
 
     sources = source_loaders.load_sources(args.manifest)
     safe = pspf_guard.enforce_official_ceiling(sources)

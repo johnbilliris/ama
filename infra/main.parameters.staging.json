@@ -3,6 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "environmentName":       { "value": "drh-staging" },
+    "environmentTier":       { "value": "staging" },
     "location":              { "value": "australiaeast" },
     "principalType":         { "value": "ServicePrincipal" },
     "developerIpAddress":    { "value": "" },

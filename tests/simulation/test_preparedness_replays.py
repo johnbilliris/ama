@@ -8,6 +8,7 @@ from app.services.rehearsal_orchestrator import RehearsalOrchestrator
         ("Bushfire State Drill", "bushfire", ["vic"]),
         ("Flood Corridor Exercise", "flood", ["nsw"]),
         ("Cyclone Multi-Agency Review", "cyclone", ["commonwealth"]),
+        ("Severe Storm Metro Drill", "severe_storm", ["nsw"]),
     ],
 )
 def test_preparedness_replays_cover_australian_hazard_types(
@@ -20,3 +21,15 @@ def test_preparedness_replays_cover_australian_hazard_types(
     assert scenario_run.scenario_type == scenario_type
     assert scenario_run.jurisdiction_ids == jurisdiction_ids
     assert scenario_run.generated_findings
+    assert scenario_run.event_trace
+
+
+def test_preparedness_replay_cancel_and_restart() -> None:
+    orchestrator = RehearsalOrchestrator()
+    run = orchestrator.run("Restart Drill", "flood", ["nsw"])
+    cancelled = orchestrator.cancel(run.scenario_run_id)
+    assert cancelled.status == "cancelled"
+
+    restarted = orchestrator.restart(run.scenario_run_id)
+    assert restarted.scenario_run_id != run.scenario_run_id
+    assert restarted.status == "completed"

@@ -56,18 +56,33 @@ def test_indicator_definition_rejects_extra_fields():
 
 
 def test_signal_rejects_extra_fields(client):
-    """Signal POST with extra fields returns 422 (T-AMD-19)."""
+    """Replay POST with extra fields returns the evidence 422 envelope."""
     payload = {
-        "id": "signal-test",
-        "scenario_id": "cyclone",
         "seed": "123",
-        "mode": "baseline",
-        "kpi_id": "lives_saved",
-        "capability_id": "cap-001",
+        "run_pair_id": "signal-test",
         "unexpected_extra": "should fail",
     }
-    resp = client.post("/api/v1/evidence/signals", json=payload)
-    assert resp.status_code in (404, 422), f"Expected 404 or 422, got {resp.status_code}"
+    resp = client.post("/api/v1/evidence/scenarios/cyclone/replay", json=payload)
+    assert resp.status_code == 422
+    body = resp.json()
+    assert body["title"] == "request-body-extra-fields"
+    assert body["instance"] == "/api/v1/evidence/scenarios/cyclone/replay"
+    assert body["ama_advisory_only"] is True
+    assert resp.headers["x-ama-correlation-id"]
+
+
+def test_unknown_query_field_rejected(client):
+    resp = client.get("/api/v1/evidence/kpi-ladder?unsupported=true")
+
+    assert resp.status_code == 422
+    body = resp.json()
+    assert body["title"] == "request-body-extra-fields"
+    assert body["errors"] == [
+        {
+            "field": "query.unsupported",
+            "reason": "Extra inputs are not permitted",
+        }
+    ]
 
 
 def test_audit_entry_rejects_extra_fields():

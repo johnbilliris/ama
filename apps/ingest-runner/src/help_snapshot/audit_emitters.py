@@ -8,10 +8,10 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 try:
-    from app.observability.audit import emit_audit_event  # type: ignore[import-not-found]
+    from app.observability.audit import emit_audit_event
 except Exception:  # pragma: no cover
 
-    def emit_audit_event(name: str, payload: dict[str, Any]) -> None:  # type: ignore[misc]
+    def emit_audit_event(name: str, payload: dict[str, Any]) -> None:
         logger.info("AUDIT(stub) %s %s", name, payload)
 
 

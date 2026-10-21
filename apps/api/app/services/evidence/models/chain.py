@@ -1,24 +1,38 @@
-"""Pillar D — Causal Chain (T-D03, FR-017..FR-019)."""
-
 from __future__ import annotations
 
-from typing import Literal
+from decimal import Decimal
+from typing import Annotated, Literal
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, condecimal, field_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
+
+Decimal4 = Annotated[Decimal, Field(max_digits=18, decimal_places=4)]
 
 
 class Assumption(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    text: str
-    resolved: bool = False  # FR-019
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{2,63}$")
+    text: str = Field(min_length=1)
+    resolved: bool = False
+    review_state: Literal["pending", "validated", "rejected"] = "pending"
+    validation_method: str = Field(min_length=1)
+    evidence_required: str = Field(min_length=1)
+    owner_role: str = Field(min_length=1)
+    review_due_at: AwareDatetime | None = None
+
+    @model_validator(mode="after")
+    def align_resolution_state(self) -> Assumption:
+        if self.resolved != (self.review_state == "validated"):
+            raise ValueError("resolved must be true only when review_state is validated")
+        return self
 
 
 class ThreatToValidity(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    text: str
+    text: str = Field(min_length=1)
     severity: Literal["low", "medium", "high"]
+    mitigation: str = Field(min_length=1)
 
 
 class CausalChain(BaseModel):
@@ -28,18 +42,23 @@ class CausalChain(BaseModel):
     capability_id: str
     capability_name: str
     version: int = Field(ge=1)
+    claim: str = Field(min_length=1)
     kpis_moved: list[str] = Field(min_length=1)
-    expected_magnitude_value: condecimal(max_digits=18, decimal_places=4)
-    expected_magnitude_unit: str
+    magnitude_status: Literal["source_grounded", "hypothesis"]
+    expected_magnitude_value: Decimal4 | None = None
+    expected_magnitude_unit: str | None = None
     assumptions: list[Assumption] = Field(min_length=1)
     threats_to_validity: list[ThreatToValidity] = Field(min_length=1)
-    originating_spec_path: str
+    originating_spec_path: str = Field(pattern=r"^specs/[0-9]{3}[^/]*/spec\.md$")
+    originating_requirement: str = Field(pattern=r"^(FR|SC)(-[A-Z]+)*-[0-9]+[a-z]?$")
     created_at: AwareDatetime
     superseded_by: str | None = None
 
-    @field_validator("originating_spec_path")
-    @classmethod
-    def _spec_path(cls, v: str) -> str:
-        if not v.startswith("specs/"):
-            raise ValueError("originating_spec_path must start with 'specs/'")
-        return v
+    @model_validator(mode="after")
+    def validate_magnitude(self) -> CausalChain:
+        if self.magnitude_status == "source_grounded":
+            if self.expected_magnitude_value is None or not self.expected_magnitude_unit:
+                raise ValueError("source-grounded magnitudes require value and unit")
+        elif self.expected_magnitude_value is not None:
+            raise ValueError("hypothesis magnitudes must not publish unsupported numeric values")
+        return self

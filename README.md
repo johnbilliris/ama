@@ -35,10 +35,6 @@ For the full set of guiding principles, see the [Project Constitution](.specify/
 
 ```mermaid
 graph TD
-    subgraph "Web Runtime · Next.js on App Service"
-        WEB[Dashboard & Operator UI]
-    end
-
     subgraph "API Runtime · FastAPI on Container Apps"
         API[Coordination API]
     end
@@ -55,8 +51,6 @@ graph TD
     API --> MON
     API --> RISK
     API --> EVAC
-    API --> RES
-    API --> COMMS
 
     subgraph "Azure Data Services"
         COSMOS[(Cosmos DB)]
@@ -106,28 +100,130 @@ git clone https://github.com/johnbilliris/ama.git
 cd ama
 ```
 
+### Docker Compose (Recommended)
+
+The complete application stack runs with the repository's
+[`compose.yaml`](compose.yaml). Compose builds and orchestrates the application
+images, a persistent Cosmos DB emulator, and an idempotent seed job:
+
+**All locally built images must be ARM64 (`linux/arm64`) only.** Compose pins
+that platform for every buildable service, regardless of the host architecture
+or `DOCKER_DEFAULT_PLATFORM`. Pulled third-party emulator images are not local
+builds. Do not build AMD64 or multi-platform deployment images on this machine.
+
+```bash
+docker compose up --build
+```
+
+To build every local image, including both job runners and the Dev Container,
+without starting services:
+
+```bash
+docker buildx bake -f docker-bake.json
+```
+
+Select individual targets by name, for example
+`docker buildx bake -f docker-bake.json api agents`. The Bake definition uses
+only `linux/arm64` and loads local tags without publishing. For any manual
+`docker build` or `docker buildx build`, explicitly pass
+`--platform linux/arm64`; never rely on a builder default or override the local
+platform. New VS Code terminals and the Dev Container also set
+`DOCKER_DEFAULT_PLATFORM=linux/arm64`.
+
+To check every local Dockerfile without building or replacing image tags,
+override the normal Docker exporter with a cache-only exporter:
+
+```bash
+docker buildx bake -f docker-bake.json --check --set "*.output=type=cacheonly"
+```
+
+| Service | Image | URL |
+| --- | --- | --- |
+| Web | `ama/web:local` | <http://localhost:3000> |
+| API | `ama/api:local` | <http://localhost:8000/api/docs> |
+| Agent dispatcher | `ama/agents:local` | <http://localhost:8080/health> |
+| Evacuation agent | `ama/evacuation:local` | <http://localhost:8082/health> |
+| Ingestion | `ama/ingestion:local` | <http://localhost:8081/health> |
+| Cosmos DB emulator | `mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-latest` | <http://localhost:8085> |
+| Cosmos Data Explorer | — | <http://localhost:1234> |
+
+No Azure credentials are required for the Cosmos emulator or seed job. Azure
+Maps tiles require `NEXT_PUBLIC_AZURE_MAPS_KEY` in `apps/web/.env.local`; Compose
+passes that optional file to the web container at runtime. Without the key, the
+map data is available but the basemap tiles cannot render. The Cosmos emulator
+stores data in the `cosmos-data` Docker volume, and the seed job provisions the
+local containers and loads the repository's reference data before the API and
+ingestion services start. `docker compose down` preserves this volume;
+`docker compose down -v` removes it. The vNext emulator does not enforce
+authentication and is only for local development/testing; it does not validate
+Azure authentication or authorization.
+
+Compose includes a dummy Cosmos signing key and Azurite's published development
+key, so local startup needs no secret provisioning. `.gitleaks.toml` allows only
+those exact values in `compose.yaml`; `trivy-secret.yaml` allows only the exact
+published Azurite key. Other credentials remain subject to scanning. The
+security workflow checks these exceptions against synthetic replacement keys
+with the same scanner versions used by its gates. These settings are only for
+local emulators, never for Azure deployments.
+
+Redis and Azurite remain available
+through the optional `emulators` profile:
+
+```bash
+docker compose --profile emulators up --build
+```
+
+Useful lifecycle commands:
+
+```bash
+docker compose ps
+docker compose logs --follow cosmos cosmos-seed api agents evacuation ingestion web
+docker compose down
+```
+
+### VS Code Dev Container (Optional)
+
+Install the VS Code **Dev Containers** extension and run **Dev Containers:
+Reopen in Container** to open a dedicated editor environment with Python 3.12,
+Node.js 24, pnpm, uv, Playwright, Azure CLI, and `azd`.
+
+The Dev Container's build and run configuration explicitly select
+`linux/arm64`; nested local Docker builds default to that architecture too.
+
+The [`devcontainer.json`](.devcontainer/devcontainer.json) configuration is
+independent from [`compose.yaml`](compose.yaml): it is not an application
+service, is not used as the base for any application image, and does not start
+the stack automatically. Run `docker compose up --build` from its terminal when
+the application stack is needed.
+
+### Native Host Setup (Alternative)
+
 Install dependencies for all runtimes:
 
 ```bash
-# Python dependencies (API + Agents)
-uv sync
+# Python dependencies (API + Agents + Ingestion)
+uv sync --extra dev
 
 # Web dependencies
 pnpm install
 ```
 
-### Run Locally
+### Run Locally Without Docker
 
 Start each runtime in a separate terminal:
 
 ```bash
 # API runtime (FastAPI)
 cd apps/api
-uv run uvicorn main:app --reload --port 8000
+uv run uvicorn app.main:app --reload --port 8000
 
 # Agent runtime
 cd apps/agents
-uv run python -m agents
+uv run python -m dispatcher
+
+# Ingestion worker (run from the repository root)
+cd ../..
+uv run python -m apps.ingestion.worker
 
 # Web runtime (Next.js)
 cd apps/web
@@ -136,11 +232,37 @@ pnpm dev
 
 ### Deploy to Azure
 
-The deployment targets **Australia East** as the primary region. Follow the infrastructure setup in [`infra/`](infra/) to deploy all runtimes to Azure Container Apps and App Service:
+The deployment targets **Azure regions within Australia**, with Australia East as the primary region. Azure deployment is a separate, credentialed workflow; review [`infra/`](infra/) and the validation plan before provisioning:
 
 ```bash
-azd up
+azd provision --no-prompt
 ```
+
+The container services use the repository root as their remote build context,
+which also contains the generated web deployment bundle. Limit `azd` to one
+concurrent operation while packaging and publishing these services:
+
+```powershell
+$env:AZD_CONCURRENCY_MAX = "1"
+azd deploy --no-prompt
+Remove-Item Env:AZD_CONCURRENCY_MAX
+```
+
+On Bash, use `AZD_CONCURRENCY_MAX=1 azd deploy --no-prompt`.
+
+Azure Container Apps requires `linux/amd64` deployment images. Those images
+must be built remotely in ACR or native hosted CI, never locally; `azure.yaml`
+keeps `remoteBuild: true` and `platform: linux/amd64` for its container services.
+Local ARM64 images must not be substituted for Container Apps deployment
+artifacts, and deployment requirements do not permit a local AMD64 exception.
+
+`azd package --no-prompt` is a credentialed remote packaging operation under
+that configuration, not an offline or local development build. It can submit
+ACR build work even without provisioning runtime resources. Use the local Bake
+or Compose commands above for local images instead.
+
+Do not run the provisioning or deployment commands as part of local development.
+They modify Azure resources in the selected `azd` environment.
 
 ## AIIMS Personas & Human Authority
 
@@ -159,7 +281,7 @@ This platform aligns with the Australasian Inter-Service Incident Management Sys
 ## Agents
 
 <details>
-<summary><strong>View all 5 agents and their responsibilities</strong></summary>
+<summary><strong>View the five core agents and their responsibilities</strong></summary>
 
 ### Monitoring Agent (`:8080`)
 
@@ -181,9 +303,9 @@ Tracks available resources across agencies — personnel, vehicles, medical supp
 
 Manages multi-channel alert distribution — SMS, email, radio, social media. Supports multilingual messaging for diverse communities and coordinates cross-agency communications.
 
-### Dependency Notifier Agent
+### Dependency Notifier
 
-Cross-agency dependency-graph notifier. Watches for upstream changes (e.g. weather, hydrology, road-closure) that would invalidate or escalate active recommendations, and pushes targeted notifications to the affected operators and partner agencies. Promoted to first-class agent per spec 032 (FR-AG04). See `apps/agents/dependency_notifier/`.
+Cross-agency dependency-graph notifier. This is an additional coordination capability, not one of the five core agents above. See `apps/agents/dependency_notifier/`.
 
 </details>
 
@@ -238,7 +360,7 @@ ama/
 
 | Layer | Technology | Purpose |
 | --- | --- | --- |
-| Web Runtime | Next.js 15, React, TypeScript | Operator dashboard and UI |
+| Web Runtime | Next.js 16.2.6, React, TypeScript | Operator dashboard and UI |
 | API Runtime | FastAPI, Python ≥ 3.12 | Coordination API and routing |
 | Agent Runtime | Python ≥ 3.12 | Autonomous agent processes |
 | Package Manager (JS) | pnpm 10.6.3 | Monorepo workspace management |
@@ -256,7 +378,7 @@ ama/
 | Azure Entra ID | Authentication and RBAC |
 | Azure Monitor + Application Insights | Observability and diagnostics |
 
-**Deployment Region**: Australia East (primary). All data remains within Australian Azure regions to meet data residency requirements.
+**Deployment Region**: Azure regions within Australia, with Australia East as the primary region. Regulated data remains in Australian regions. The Constitution permits only a registry-gated, approved inference-hosting exception; it does not permit offshore storage, secrets, telemetry, or audit data.
 
 ## Success Metrics
 
@@ -300,6 +422,7 @@ pwsh ./infra/scripts/azd-up-smoke-test.ps1 -BaseUrl https://prod-ama-api.example
 ```
 
 Cutover runbooks:
+
 - Game-day cadence: `docs/runbooks/036-foundry-rag-gameday.md`
 - Step-9 cutover: `docs/runbooks/036-foundry-rag-step9-cutover.md`
 
@@ -309,6 +432,7 @@ The Playwright capstone-coverage suite proves every capstone outcome × persona 
 
 ```pwsh
 pnpm install
+$env:AMA_SEED_MODE = "local"
 pwsh scripts/seed-database.ps1
 $env:AMA_TEST_SUPPORT = "1"
 pnpm --filter @ama/web exec playwright test --project=web-coverage-chromium --grep "@p1"
@@ -319,6 +443,7 @@ See `specs/034-webapp-capstone-coverage/quickstart.md` for the full developer on
 ### For Operators
 
 - [Operator Runbooks](docs/disaster-response-hub/operator-runbooks.md) — incident activation, alert publishing, degraded mode
+- [Demo Walkthrough](docs/disaster-response-hub/demo/walkthrough.md) — operator-facing demonstration flow
 - [Quickstart Guide](specs/001-disaster-response-hub/quickstart.md) — getting started with the platform
 
 See the [Project Constitution](.specify/memory/constitution.md) for complete life-safety principles, including the Incident Commander's final authority over all safety-critical decisions.
@@ -359,13 +484,13 @@ All pull requests targeting `main` are validated by the CI pipeline ([`.github/w
 Deployments follow a **branch-equals-environment** model (spec [031](specs/031-simplify-cicd-pipeline/spec.md)):
 
 | Branch | Triggers | Deploys to |
-|---|---|---|
+| --- | --- | --- |
 | `main` | `ci` | _(no deploy — integration only)_ |
 | `dev` | `ci` → `cd` | `rg-drh-dev` (Australia East) |
 | `staging` | `ci` → `cd` | `rg-drh-staging` (Australia East, with rollback) |
 | `production` | `ci` → `cd` | `rg-drh-production` (Australia East, with rollback) |
 
-Authentication uses a single `AZURE_CREDENTIALS` JSON secret per GitHub Environment — see [ADR-031](docs/aidr/decisions/adr-031-azure-credentials-mvp.md) for the rationale and the planned migration back to OIDC.
+Authentication uses a single `AZURE_CREDENTIALS` JSON secret per GitHub Environment — see [ADR-031](docs/corpus/aidr/decisions/adr-031-azure-credentials-mvp.md) for the time-bound rationale and migration context.
 
 Operator runbook for first-time setup, secret rotation, smoke testing, and troubleshooting: [`specs/031-simplify-cicd-pipeline/quickstart.md`](specs/031-simplify-cicd-pipeline/quickstart.md).
 

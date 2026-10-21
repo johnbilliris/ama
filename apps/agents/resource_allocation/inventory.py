@@ -255,7 +255,7 @@ class ResourceInventoryManager:
         resource.last_status_update = datetime.now(UTC)
         return True
 
-    def compute_utilisation(self) -> dict:
+    def compute_utilisation(self) -> dict[str, int | float]:
         """Compute utilisation metrics.
 
         Returns totals, assigned/available counts, utilisation %, and flagged counts.

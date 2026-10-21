@@ -47,13 +47,18 @@ def test_seed_includes_panel_routing_personas() -> None:
     assert not missing, f"Seed missing tasks for panel personas: {missing}"
 
 
-def test_workspace_route_returns_seeded_tasks_when_lifespan_runs() -> None:
+def test_workspace_route_returns_seeded_tasks_when_lifespan_runs(monkeypatch) -> None:
     reset_state()
     reset_seed_cache()
+    monkeypatch.setenv("AMA_ENVIRONMENT", "dev")
+    monkeypatch.setenv("AMA_ALLOW_ANONYMOUS_DEV_ACCESS", "1")
     # Using ``with TestClient(create_app())`` triggers the FastAPI lifespan
     # which in turn invokes the workspace seeder.
     with TestClient(create_app()) as client:
-        response = client.get("/api/personas/incident-commander/workspace")
+        incident_id = next(
+            task.incident_id for task in TASKS.values() if task.assigned_persona_id == "incident-commander"
+        )
+        response = client.get(f"/api/personas/incident-commander/workspace?incidentId={incident_id}")
         assert response.status_code == 200, response.text
         payload = response.json()
         assert payload["persona"]["persona_id"] == "incident-commander"

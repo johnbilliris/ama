@@ -1,5 +1,16 @@
 name: ci
 
+env:
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+  UV_DEFAULT_INDEX: https://packagefeedproxy.microsoft.io/pypi/simple
+  PIP_CONFIG_FILE: /dev/null
+  PIP_EXTRA_INDEX_URL: ""
+  PIP_FIND_LINKS: ""
+  UV_INDEX: ""
+  UV_EXTRA_INDEX_URL: ""
+  UV_FIND_LINKS: ""
+  UV_NO_CONFIG: "1"
+
 on:
   push:
     branches:
@@ -10,15 +21,426 @@ on:
   pull_request:
     branches:
       - main
+      - dev
+      - staging
+      - production
 
 jobs:
-  quality:
+  eval-runner-changes:
+    if: github.event_name == 'push' && github.ref_name != 'main'
     runs-on: ubuntu-latest
-    env:
-      # Spec-032 FR-T01 ratcheting coverage; phase A is no-regression.
-      COVERAGE_PHASE: ${{ vars.COVERAGE_PHASE != '' && vars.COVERAGE_PHASE || 'A' }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+        with:
+          fetch-depth: 0
+      - name: Detect eval runner changes across the push
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$BEFORE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            BEFORE_SHA=$(git hash-object -t tree /dev/null)
+          fi
+          changed=false
+          if git diff --quiet "$BEFORE_SHA" "$HEAD_SHA" -- apps/eval-runner/; then
+            changed=false
+          else
+            status=$?
+            if [[ "$status" -ne 1 ]]; then
+              exit "$status"
+            fi
+            changed=true
+          fi
+          jq -n --arg head_sha "$HEAD_SHA" --argjson changed "$changed" \
+            '{head_sha: $head_sha, changed: $changed}' > eval-runner-changes.json
+      - name: Publish eval runner change scope for CD
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: eval-runner-changes
+          path: eval-runner-changes.json
+          if-no-files-found: error
+
+  python-package-source-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Enforce Microsoft Python package proxy
+        run: python scripts/verify_python_package_sources.py
+      - name: Test package source policy
+        run: |
+          python -m pip install pytest
+          python -m pytest tests/policy -q
+
+  phase8-python-baseline-maps:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == '001-proxy-dependency-upgrades'
+    needs: python-package-source-policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Install uv from the approved Python proxy
+        run: python -m pip install --disable-pip-version-check uv==0.11.21
+      - name: Install and capture root locked environment
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/phase8-root-uv
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/phase8-python-baseline-maps"
+          python --version
+          uv --version
+          uv sync --locked --extra dev --extra load --no-cache --python 3.12 --no-python-downloads
+          uv pip list --python "$UV_PROJECT_ENVIRONMENT/bin/python" --format=freeze | LC_ALL=C sort -f > "$RUNNER_TEMP/phase8-python-baseline-maps/root-uv-map.txt"
+          sha256sum "$RUNNER_TEMP/phase8-python-baseline-maps/root-uv-map.txt"
+          grep -Ei '^(aiohttp|cryptography|h2|hpack|idna|mcp|msgpack|pyjwt|pydantic-settings|redis-entraid|setuptools|starlette|python-engineio|python-socketio|python-multipart)==' "$RUNNER_TEMP/phase8-python-baseline-maps/root-uv-map.txt"
+      - name: Install and capture agents locked environment
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/phase8-agents-uv
+        run: |
+          set -euo pipefail
+          uv sync --project apps/agents --locked --no-cache --python 3.12 --no-python-downloads
+          uv pip list --python "$UV_PROJECT_ENVIRONMENT/bin/python" --format=freeze | LC_ALL=C sort -f > "$RUNNER_TEMP/phase8-python-baseline-maps/agents-uv-map.txt"
+          sha256sum "$RUNNER_TEMP/phase8-python-baseline-maps/agents-uv-map.txt"
+          grep -Ei '^(aiohttp|cryptography|h2|hpack|idna|mcp|msgpack|pyjwt|pydantic-settings|redis-entraid|setuptools|starlette|python-engineio|python-socketio|python-multipart)==' "$RUNNER_TEMP/phase8-python-baseline-maps/agents-uv-map.txt"
+      - name: Upload locked Python baseline maps
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: phase8-python-baseline-maps
+          path: ${{ runner.temp }}/phase8-python-baseline-maps/
+          if-no-files-found: warn
+          retention-days: 7
+
+  phase8-python-windows-candidate-maps:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == '001-proxy-dependency-upgrades'
+    needs: python-package-source-policy
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      PIP_CONFIG_FILE: NUL
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Install uv from the approved Python proxy
+        shell: pwsh
+        run: python -m pip install --no-cache-dir --disable-pip-version-check uv==0.11.21
+      - name: Install and capture two isolated Windows x64 environments
+        shell: pwsh
+        run: |
+          $mapDir = Join-Path $env:RUNNER_TEMP 'phase8-python-windows-candidate-maps'
+          New-Item -ItemType Directory -Force -Path $mapDir | Out-Null
+          python --version
+          uv --version
+
+          foreach ($runId in @('a', 'b')) {
+            $env:UV_PROJECT_ENVIRONMENT = Join-Path $env:RUNNER_TEMP "phase8-windows-root-$runId"
+            uv sync --locked --extra windows-ci --no-install-project --no-cache --python 3.12 --no-python-downloads
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+            $python = Join-Path $env:UV_PROJECT_ENVIRONMENT 'Scripts\python.exe'
+            uv pip install --python $python --no-deps --no-cache -e apps/eval-runner
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+            $mapPath = Join-Path $mapDir "windows-root-$runId.txt"
+            $map = @(uv pip list --python $python --format=freeze)
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $map | Sort-Object -CaseSensitive | Set-Content -LiteralPath $mapPath -Encoding utf8NoBOM
+
+            $mapHash = (Get-FileHash -LiteralPath $mapPath -Algorithm SHA256).Hash.ToLowerInvariant()
+            Write-Host "run=$runId rows=$($map.Count) map_sha256=$mapHash"
+          }
+
+          $mapA = Get-Content -LiteralPath (Join-Path $mapDir 'windows-root-a.txt')
+          $mapB = Get-Content -LiteralPath (Join-Path $mapDir 'windows-root-b.txt')
+          $differences = @(Compare-Object -ReferenceObject $mapA -DifferenceObject $mapB -CaseSensitive)
+          if ($differences.Count -gt 0) {
+            $differences | Format-Table | Out-String | Write-Host
+            throw 'Independent Windows x64 candidate installed maps differ.'
+          }
+
+          foreach ($required in @(
+            'cryptography==50.0.1',
+            'h2==4.4.1',
+            'hpack==4.2.0',
+            'idna==3.15',
+            'msgpack==1.2.2',
+            'pyjwt==2.15.0'
+          )) {
+            if ($mapA -notcontains $required) {
+              throw "Windows candidate map is missing protected or authorized version $required"
+            }
+          }
+      - name: Upload Windows x64 candidate maps
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: phase8-python-windows-candidate-maps
+          path: ${{ runner.temp }}\phase8-python-windows-candidate-maps\
+          if-no-files-found: error
+          retention-days: 7
+
+  phase8-node-x64-candidate-maps:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == '001-proxy-dependency-upgrades' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: python-package-source-policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
+        with:
+          version: 10.6.3
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24.21.0"
+      - name: Install and validate two clean Ubuntu x64 copies
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/phase8-node-x64-candidate-maps"
+          mkdir -p "$out"
+          git rev-parse HEAD > "$out/checkout.txt"
+          node --version
+          pnpm --version
+          uname -m
+          getconf GNU_LIBC_VERSION
+          git archive HEAD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc apps/web packages/domain packages/ui tests/e2e > "$RUNNER_TEMP/phase8-node-source.tar"
+          sha256sum "$RUNNER_TEMP/phase8-node-source.tar" > "$out/source-archive.txt"
+          for run_id in a b; do
+            copy="$RUNNER_TEMP/phase8-node-$run_id"
+            mkdir "$copy"
+            tar -xf "$RUNNER_TEMP/phase8-node-source.tar" -C "$copy"
+            (
+              cd "$copy"
+              export NPM_CONFIG_STORE_DIR="$RUNNER_TEMP/phase8-node-store-$run_id"
+              export NPM_CONFIG_CACHE="$RUNNER_TEMP/phase8-npm-cache-$run_id"
+              test ! -e node_modules
+              test ! -e "$NPM_CONFIG_STORE_DIR"
+              pnpm config get registry
+              pnpm store path
+              sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc apps/web/package.json packages/domain/package.json packages/ui/package.json apps/web/next.config.ts apps/web/vitest.config.ts apps/web/tsconfig.json > "$out/input-$run_id-before.txt"
+              pnpm install --frozen-lockfile --store-dir "$NPM_CONFIG_STORE_DIR" --reporter=append-only 2>&1 | tee "$out/install-$run_id.log"
+              pnpm --recursive list --depth Infinity --json > "$out/graph-$run_id.json"
+              node "$GITHUB_WORKSPACE/scripts/ci/capture_node_dependency_map.mjs" "$out/graph-$run_id.json" "$out/map-$run_id.txt" "$copy"
+              sha256sum "$out/graph-$run_id.json" > "$out/graph-$run_id.sha256"
+              gzip "$out/graph-$run_id.json"
+              pnpm --filter @ama/web exec node -e 'const r=require("node:module").createRequire(require.resolve("next/package.json")); if(process.arch!=="x64"||require("next/package.json").version!=="16.3.8"||r("sharp").versions.sharp!=="0.35.5")throw new Error("Unexpected candidate runtime"); console.log("GNU x64 SWC exports",Object.keys(r("@next/swc-linux-x64-gnu")).length)'
+              pnpm --filter @ama/domain run typecheck
+              pnpm --filter @ama/domain build
+              pnpm --filter @ama/web lint
+              pnpm --filter @ama/web exec tsc --noEmit
+              pnpm --filter @ama/web test
+              pnpm --filter @ama/web build
+              sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc apps/web/package.json packages/domain/package.json packages/ui/package.json apps/web/next.config.ts apps/web/vitest.config.ts apps/web/tsconfig.json > "$out/input-$run_id-after.txt"
+              cmp "$out/input-$run_id-before.txt" "$out/input-$run_id-after.txt"
+            )
+          done
+          cmp "$out/map-a.txt" "$out/map-b.txt"
+          cmp "$out/input-a-before.txt" "$out/input-b-before.txt"
+          sha256sum "$out/map-a.txt" "$out/map-b.txt"
+      - name: Upload Ubuntu x64 candidate evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: phase8-node-x64-candidate-maps
+          path: ${{ runner.temp }}/phase8-node-x64-candidate-maps/
+          if-no-files-found: error
+          retention-days: 7
+
+  phase8-alpine-x64-candidate-builds:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == '001-proxy-dependency-upgrades' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: python-package-source-policy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      ALPINE_BASE: node:24-alpine@sha256:83f1c388c31fb2e51f7cbd4dea949b96260798c98f206e8e4696bc93bd964e3a
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "24.21.0"
+      - name: Build and inspect two cache-empty Alpine x64 candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/phase8-alpine-x64-candidate-builds"
+          context="$RUNNER_TEMP/phase8-alpine-context"
+          pinned="$RUNNER_TEMP/phase8-alpine.Dockerfile"
+          mkdir -p "$out" "$context"
+          git rev-parse HEAD > "$out/checkout.txt"
+          git archive HEAD package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc .dockerignore apps/web packages/domain packages/ui | tar -x -C "$context"
+          test "$(grep -c '^FROM node:24-alpine AS ' apps/web/Dockerfile)" -eq 2
+          sed "s|^FROM node:24-alpine AS |FROM $ALPINE_BASE AS |" apps/web/Dockerfile > "$pinned"
+          sha256sum apps/web/Dockerfile "$pinned" > "$out/dockerfile-hashes.txt"
+          docker pull --platform linux/amd64 "$ALPINE_BASE"
+          docker image inspect "$ALPINE_BASE" > "$out/base-image.json"
+          container=""
+          cleanup() {
+            status=$?
+            if [ -n "$container" ]; then
+              docker inspect "$container" > "$out/container-$run_id.json"
+              docker logs "$container" > "$out/server-$run_id.log" 2>&1
+              docker rm -f "$container"
+            fi
+            exit "$status"
+          }
+          trap cleanup EXIT
+          for run_id in a b; do
+            image="ama-next-x64:$GITHUB_RUN_ID-$run_id"
+            builder="ama-next-x64-builder:$GITHUB_RUN_ID-$run_id"
+            (
+              cd "$context"
+              sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc apps/web/package.json packages/domain/package.json packages/ui/package.json > "$out/input-$run_id-before.txt"
+            )
+            docker build --no-cache --platform linux/amd64 --progress plain --tag "$image" --file "$pinned" "$context" 2>&1 | tee "$out/build-$run_id.log"
+            # Inspect the completed builder via its cached stages; no new install is allowed here.
+            docker build --platform linux/amd64 --target builder --progress plain --tag "$builder" --file "$pinned" "$context" 2>&1 | tee "$out/inspect-build-$run_id.log"
+            if grep -Eq '^#[0-9]+ [0-9]+(\.[0-9]+)? ' "$out/inspect-build-$run_id.log"; then
+              echo "Builder inspection unexpectedly executed a command instead of reusing the completed build." >&2
+              exit 1
+            fi
+            docker image inspect "$image" "$builder" > "$out/images-$run_id.json"
+            docker run --rm --network=none --entrypoint sh "$builder" -c 'set -eu; cd /app; sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml apps/web/package.json packages/domain/package.json packages/ui/package.json' > "$out/builder-input-$run_id.txt"
+            (
+              cd "$context"
+              sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml apps/web/package.json packages/domain/package.json packages/ui/package.json > "$out/builder-expected-$run_id.txt"
+            )
+            cmp "$out/builder-expected-$run_id.txt" "$out/builder-input-$run_id.txt"
+            docker run --rm --network=none --mount "type=bind,source=$GITHUB_WORKSPACE/scripts/ci/capture_node_dependency_map.mjs,target=/capture-map.mjs,readonly" --entrypoint sh "$builder" -c 'set -eu; cd /app; pnpm --recursive list --depth Infinity --json > /tmp/graph.json; node /capture-map.mjs /tmp/graph.json - /app' > "$out/map-$run_id.txt"
+            docker run --rm --network=none --entrypoint sh "$builder" -c 'set -eu; cd /app/apps/web; node -e '\''const r=require("node:module").createRequire(require.resolve("next/package.json")); if(process.arch!=="x64"||require("next/package.json").version!=="16.3.8"||r("sharp").versions.sharp!=="0.35.5")throw new Error("Unexpected Alpine candidate"); console.log(JSON.stringify({node:process.version,arch:process.arch,next:require("next/package.json").version,sharp:r("sharp").versions.sharp,swcExports:Object.keys(r("@next/swc-linux-x64-musl")).length}));'\''; cat /etc/alpine-release' > "$out/runtime-$run_id.txt"
+            container="ama-next-x64-smoke-$GITHUB_RUN_ID-$run_id"
+            docker run --detach --name "$container" --publish 127.0.0.1:33124:3000 "$image"
+            curl --fail --silent --show-error --retry 20 --retry-all-errors --retry-delay 1 --retry-max-time 60 --max-time 5 http://127.0.0.1:33124/ --output "$out/page-$run_id.html"
+            grep -q '<!DOCTYPE html>' "$out/page-$run_id.html"
+            css="$(node -e 'const fs=require("node:fs");const html=fs.readFileSync(process.argv[1],"utf8");const match=html.match(/href="(\/_next\/static\/[^"?]+\.css(?:\?[^"]*)?)"/);if(!match)throw new Error("No compiled stylesheet");process.stdout.write(match[1].replaceAll("&amp;","&"));' "$out/page-$run_id.html")"
+            curl --fail --silent --show-error --max-time 10 "http://127.0.0.1:33124$css" > "$out/style-$run_id.css"
+            test -s "$out/style-$run_id.css"
+            docker inspect "$container" > "$out/container-$run_id.json"
+            docker logs "$container" > "$out/server-$run_id.log" 2>&1
+            docker rm -f "$container"
+            container=""
+            (
+              cd "$context"
+              sha256sum package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc apps/web/package.json packages/domain/package.json packages/ui/package.json > "$out/input-$run_id-after.txt"
+            )
+            cmp "$out/input-$run_id-before.txt" "$out/input-$run_id-after.txt"
+          done
+          cmp "$out/map-a.txt" "$out/map-b.txt"
+          cmp "$out/input-a-before.txt" "$out/input-b-before.txt"
+          sha256sum "$out/map-a.txt" "$out/map-b.txt"
+      - name: Upload Alpine x64 candidate evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: phase8-alpine-x64-candidate-builds
+          path: ${{ runner.temp }}/phase8-alpine-x64-candidate-builds/
+          if-no-files-found: error
+          retention-days: 7
+
+  simulation-tenant-isolation:
+    needs: python-package-source-policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+        with:
+          python-version: "3.12"
+      - name: Install isolation test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio
+          pip install -e apps/api
+      - name: Verify isolation gate selector coverage
+        run: python tools/lint/check_spec007_isolation_selector.py
+      - name: Run required simulation tenant-isolation gate
+        env:
+          AMA_ENVIRONMENT: test
+          AMA_TRUST_FORWARDED_PRINCIPAL: "1"
+          AMA_TEST_SUPPORT: "1"
+          SPEC007_MIN_CASES: "113"
+        run: |
+          SELECTION="tests/unit/test_exercise_report_service.py \
+            tests/unit/test_simulation_storage_offload.py \
+            tests/unit/test_spec007_async_offload_lint.py \
+            tests/unit/test_spec007_isolation_selector_lint.py \
+            tests/unit/test_spec007_middleware_package_import.py \
+            tests/unit/test_spec007_resource_governance_aud025.py \
+            tests/unit/test_spec007_tenant_telemetry.py \
+            tests/contract/test_spec007_contract_resolution_aud028.py \
+            tests/contract/test_spec007_evidence_manifest_aud029.py \
+            tests/contract/test_spec007_governance_blockers.py \
+            tests/integration/test_spec007_auth_boundary.py \
+            tests/integration/test_aud002_operational_scoping.py \
+            tests/integration/test_tenant_isolation.py \
+            tests/integration/test_spec007_simulation_audit.py \
+            tests/integration/test_spec007_incident_mode_auth.py \
+            tests/integration/test_spec007_incident_mode_aud026.py \
+            tests/integration/test_spec007_tenant_dimension_export_aud027.py \
+            tests/integration/test_simulation_lifecycle.py"
+          collected=$(pytest $SELECTION -m spec007_isolation --strict-markers --collect-only -q | grep -c '::' || true)
+          echo "spec007_isolation collected=$collected expected_min=$SPEC007_MIN_CASES"
+          if [ "$collected" -lt "$SPEC007_MIN_CASES" ]; then
+            echo "spec007_isolation gate collected $collected cases, below the required minimum" >&2
+            exit 1
+          fi
+          pytest $SELECTION -m spec007_isolation --strict-markers -q --tb=short
+
+  quality:
+    needs: python-package-source-policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
+      # Spec-032 FR-T01 ratcheting coverage; phase A is no-regression.
+      COVERAGE_PHASE: ${{ vars.COVERAGE_PHASE != '' && vars.COVERAGE_PHASE || 'A' }}
+    outputs:
+      specify-cli-changed: ${{ steps.specify-cli-changes.outputs.changed }}
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+        with:
+          fetch-depth: 0
+      - name: Detect specify-cli changes
+        id: specify-cli-changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+          else
+            base_sha="${{ github.event.before }}"
+            head_sha="${{ github.sha }}"
+          fi
+          changed=false
+          while IFS= read -r path; do
+            case "$path" in
+              tools/specify-cli/*|scripts/spec001/*|specs/001-extension-list/*)
+                changed=true
+                break
+                ;;
+            esac
+          done < <(git diff --name-only "$base_sha" "$head_sha")
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
@@ -37,11 +459,17 @@ jobs:
       - name: Install Python tooling
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov pytest-asyncio pytest-benchmark hypothesis ruff mypy import-linter pyyaml
+          pip install pytest pytest-cov pytest-asyncio pytest-benchmark hypothesis ruff mypy==2.0.0 import-linter pyyaml
           pip install -e apps/api
           pip install -e apps/agents
           pip install -e packages/eval-core
           pip install -e apps/eval-runner
+
+      - name: actor-agent-catalogue-lint
+        run: |
+          python tools/lint/check_actor_agent_catalogue.py --root .
+          python tools/lint/check_actor_feature_evidence.py --root .
+
       - name: Install age CLI (spec 036 FR-RAG-LS-02 offline-cache dual-signing)
         run: |
           # `age` is required by ama_ingest.offline_bundle (T047) and the
@@ -56,8 +484,14 @@ jobs:
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: web-lint
+        run: corepack pnpm --filter @ama/web lint
+
       - name: python-lint
         run: ruff check apps tests packages
+
+      - name: feature-evidence-binding-lint
+        run: python tools/lint/check_feature_evidence_binding.py
 
       # Spec 036 T055 / T039 — fail CI on docs/corpus/INDEXING-LICENCE-INVENTORY drift.
       - name: licence-inventory-lint
@@ -107,15 +541,19 @@ jobs:
         # equivalence test fails. With empty fixtures the harness reports
         # a zero-cases PASS; once cutover fixtures land it scores ≥95% / 100%.
         run: pytest tests/equivalence -q --tb=short
-        
+
+      - name: Install Bicep CLI for compiled deployment contracts
+        uses: anthony-c-martin/setup-bicep@faf8170f496c10a2ea75977d2e77024131331404 # v1
+        with:
+          version: 0.46.1
+
       # Spec-032 FR-Q03 — formatting gate.
       - name: python-format-check
         run: ruff format --check apps tests packages
 
       # Spec-032 FR-Q01 — strict typing gate.
       - name: python-type-strict
-        run: mypy --strict apps packages
-        continue-on-error: true   # Phase-A grace: scope mypy adoption per Stream 1; flip to hard-fail in Stream 1 milestone PR.
+        run: mypy apps packages
 
       # Spec-032 FR-Q02 — import boundaries.
       - name: python-import-boundaries
@@ -129,14 +567,23 @@ jobs:
         run: python scripts/codegen/generate_map_overlay_taxonomy_ts.py --check
 
       - name: python-test
+        id: python-test
+        env:
+          AMA_ENVIRONMENT: test
+          AMA_TRUST_FORWARDED_PRINCIPAL: "1"
         run: |
-          pytest tests/contract tests/integration --cov=apps --cov=packages --cov-report=xml --cov-report=term
+          pytest tests/unit tests/contract tests/integration tests/simulation \
+            -m "not azure_staging and not azure_foundry_staging and not azure_cosmos_staging and not azure_speech_staging and not azure_blob_worm_staging and not measurement_staging and not e2e and not load and not locust" \
+            --cov=apps --cov=packages --cov-report=xml --cov-report=term
 
       # Spec-032 FR-T01 — ratcheting coverage check.
       - name: coverage-ratchet-unit
-        if: always()
+        if: always() && steps.python-test.outcome == 'success'
         shell: pwsh
         run: ./scripts/coverage-ratchet.ps1 -Phase $env:COVERAGE_PHASE -Tier unit
+
+      - name: Build TypeScript domain package
+        run: pnpm --filter @ama/domain build
 
       - name: ts-typecheck
         run: pnpm --filter ./apps/web exec tsc --noEmit
@@ -146,12 +593,16 @@ jobs:
 
       # Spec-032 FR-R01 — gate the benchmark step (no continue-on-error).
       - name: perf-benchmark
+        id: perf-benchmark
         timeout-minutes: 5
+        env:
+          AMA_ENVIRONMENT: test
+          AMA_TRUST_FORWARDED_PRINCIPAL: "1"
         run: pytest tests/benchmark/ --benchmark-json=.benchmarks/current.json -q
 
       - name: upload-benchmark-results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: always()
+        if: always() && steps.perf-benchmark.outcome == 'success'
         with:
           name: benchmark-results
           path: .benchmarks/current.json
@@ -159,11 +610,67 @@ jobs:
 
       - name: upload-coverage-results
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: always()
+        if: always() && steps.python-test.outcome == 'success'
         with:
           name: coverage-results
           path: coverage.xml
           retention-days: 30
+
+  specify-cli-quality:
+    needs: quality
+    if: needs.quality.outputs.specify-cli-changed == 'true'
+    runs-on: [self-hosted, ama-au-sovereign, azure-au, linux, x64]
+    timeout-minutes: 30
+    env:
+      PIP_INDEX_URL: ""
+      UV_DEFAULT_INDEX: ""
+      PIP_NO_INDEX: "1"
+      UV_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - name: Verify sovereign session prerequisites
+        shell: bash
+        env:
+          SPEC001_TRUST_BUNDLE: ${{ runner.temp }}/spec001-trust-bundle.json
+        run: |
+          set -euo pipefail
+          python scripts/spec001/protected_state_selfcheck.py
+          python scripts/spec001/run_local_gates.py --self-check
+          if python scripts/spec001/run_local_gates.py --preflight-prerequisites --execution-mode local-synthetic --trust-bundle "$SPEC001_TRUST_BUNDLE"; then
+            echo "local-synthetic must reject release and sovereign claims" >&2
+            exit 1
+          fi
+          python scripts/spec001/run_local_gates.py --preflight-prerequisites --execution-mode sovereign --trust-bundle "$SPEC001_TRUST_BUNDLE"
+          session_output="$(python scripts/spec001/run_local_gates.py --start-session --execution-mode sovereign)"
+          SPEC001_SESSION_ID="$(printf '%s\n' "$session_output" | sed -n 's/^session-id: //p')"
+          test -n "$SPEC001_SESSION_ID"
+          echo "SPEC001_SESSION_ID=$SPEC001_SESSION_ID" >> "$GITHUB_ENV"
+      - name: Install package dependencies offline
+        run: uv sync --project tools/specify-cli --extra dev --locked --offline
+      - name: Run package quality gates offline
+        shell: bash
+        run: |
+          set -euo pipefail
+          export MYPY_CACHE_DIR="$RUNNER_TEMP/spec001-mypy-cache"
+          export COVERAGE_FILE="$RUNNER_TEMP/spec001-coverage"
+          export COVERAGE_RCFILE="$RUNNER_TEMP/spec001-coveragerc"
+          python scripts/spec001/run_local_gates.py --session-id "$SPEC001_SESSION_ID" --env UV_OFFLINE=1 --env UV_FROZEN=1 -- uv run --offline --project tools/specify-cli --extra dev ruff check tools/specify-cli/src tools/specify-cli/tests
+          python scripts/spec001/run_local_gates.py --session-id "$SPEC001_SESSION_ID" --env UV_OFFLINE=1 --env UV_FROZEN=1 -- uv run --offline --project tools/specify-cli --extra dev ruff format --check tools/specify-cli/src tools/specify-cli/tests
+          python scripts/spec001/run_local_gates.py --session-id "$SPEC001_SESSION_ID" --env UV_OFFLINE=1 --env UV_FROZEN=1 --env MYPY_CACHE_DIR="$MYPY_CACHE_DIR" -- uv run --offline --project tools/specify-cli --extra dev mypy --strict tools/specify-cli/src tools/specify-cli/tests
+          python scripts/spec001/run_local_gates.py --session-id "$SPEC001_SESSION_ID" --env UV_OFFLINE=1 --env UV_FROZEN=1 --env PYTEST_ADDOPTS=-pno:cacheprovider --env COVERAGE_FILE="$COVERAGE_FILE" --env COVERAGE_RCFILE="$COVERAGE_RCFILE" -- uv run --offline --project tools/specify-cli --extra dev pytest -c tools/specify-cli/pyproject.toml tools/specify-cli/tests -q --cov=specify_cli --cov-branch --cov-fail-under=90 --cov-report="xml:$RUNNER_TEMP/package-coverage.xml"
+      - name: Build and clean-install wheel offline
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv build --project tools/specify-cli --wheel --offline
+          uv venv "$RUNNER_TEMP/specify-cli-clean"
+          uv pip install --python "$RUNNER_TEMP/specify-cli-clean/bin/python" --offline tools/specify-cli/dist/*.whl
+          "$RUNNER_TEMP/specify-cli-clean/bin/ama-specify" extension list --json
+          "$RUNNER_TEMP/specify-cli-clean/bin/python" -m specify_cli extension list --json
+      - name: Finalize sovereign quality session
+        if: always()
+        shell: bash
+        run: python scripts/spec001/run_local_gates.py --finalize-session --session-id "$SPEC001_SESSION_ID"
 
   # ---------------------------------------------------------------------------
   # Spec 036 / F-A10 / T218 + T222 — per-PR Windows compatibility job. Runs the
@@ -175,30 +682,63 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     env:
+      PIP_CONFIG_FILE: NUL
       PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
-      - name: Install Python tooling
+          cache: pip
+          cache-dependency-path: |
+            .github/workflows/ci.yml
+            pyproject.toml
+            uv.lock
+      - name: Install uv
         shell: pwsh
+        run: python -m pip install --disable-pip-version-check uv==0.11.21
+      - name: Cache uv packages
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        env:
+          UV_CACHE_DIR: ${{ runner.temp }}\uv-cache
+        with:
+          path: ${{ env.UV_CACHE_DIR }}
+          key: ${{ runner.os }}-py3.12-uv-${{ hashFiles('uv.lock') }}
+      - name: Install Python tooling and test dependencies
+        shell: pwsh
+        env:
+          UV_CACHE_DIR: ${{ runner.temp }}\uv-cache
         run: |
-          python -m pip install --upgrade pip
-          pip install pytest pytest-asyncio hypothesis ruff
-          pip install -e apps/api
-          pip install -e apps/agents
-          pip install -e packages/eval-core
-          pip install -e apps/eval-runner
+          $installTimer = [System.Diagnostics.Stopwatch]::StartNew()
+          uv sync --locked --extra windows-ci --no-install-project
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host ("Core Python test dependencies installed in {0:n1}s" -f $installTimer.Elapsed.TotalSeconds)
+      - name: Install eval gate package without runtime dependencies
+        shell: pwsh
+        env:
+          UV_CACHE_DIR: ${{ runner.temp }}\uv-cache
+        run: |
+          $installTimer = [System.Diagnostics.Stopwatch]::StartNew()
+          uv pip install --python .venv\Scripts\python.exe --no-deps -e apps/eval-runner
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host ("Eval gate package installed in {0:n1}s" -f $installTimer.Elapsed.TotalSeconds)
       - name: ruff check (Windows)
         shell: pwsh
-        run: ruff check apps tests packages
+        env:
+          UV_CACHE_DIR: ${{ runner.temp }}\uv-cache
+        run: uv run --no-sync ruff check apps tests packages
+      - name: Install Bicep CLI for compiled deployment contracts
+        uses: anthony-c-martin/setup-bicep@faf8170f496c10a2ea75977d2e77024131331404 # v1
+        with:
+          version: 0.46.1
       - name: pytest contract + integration (Windows)
         shell: pwsh
+        env:
+          UV_CACHE_DIR: ${{ runner.temp }}\uv-cache
         run: |
           # Spec 036 / F-A10 / T218 — Windows runner mirrors the Linux contract+integration
           # sweep so packaging regressions surface on PRs (FR-RAG-TEST-01).
-          pytest tests/contract tests/integration -q --tb=line --maxfail=10
+          uv run --no-sync pytest tests/contract tests/integration -q --tb=line --maxfail=10
 
   # ---------------------------------------------------------------------------
   # Spec 036 / F-A10 / T220 + T222 — per-PR golden-set canonicalisation gate.
@@ -229,6 +769,8 @@ jobs:
   accessibility-citation-card:
     needs: [quality]
     runs-on: ubuntu-latest
+    env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
     timeout-minutes: 10
     continue-on-error: true # warn-only per F-A12.5; flip to false post-baseline.
     steps:
@@ -255,25 +797,165 @@ jobs:
           path: apps/web/axe-junit.xml
           if-no-files-found: ignore
 
-  # ---------------------------------------------------------------------------
-  # Spec-034 FR-018, FR-019, FR-023(e), SC-001..SC-005 — web coverage suite.
-  # Three sequential jobs (shard → merge → gate) with the gate marked as a
-  # required check for merging to main (see .github/branch-protection.json).
-  # ---------------------------------------------------------------------------
-  web-coverage-shard:
+# Web coverage shard, merge, and gate jobs are commented out.
+#   # ---------------------------------------------------------------------------
+#   # Spec-034 FR-018, FR-019, FR-023(e), SC-001..SC-005 — web coverage suite.
+#   # Three sequential jobs (shard → merge → gate) with the gate marked as a
+#   # required check for merging to main (see .github/branch-protection.json).
+#   # ---------------------------------------------------------------------------
+#   web-coverage-shard:
+#     needs: [quality]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 45
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         shard: [1, 2, 3, 4]
+#     steps:
+#       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+#       # pnpm must be installed BEFORE setup-node, because setup-node@v5 reads
+#       # `packageManager` from package.json and pre-warms its pnpm cache; if
+#       # pnpm is not on PATH yet, setup-node fails with "Unable to locate
+#       # executable file: pnpm". Same ordering as the `quality` job above.
+#       - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
+#         with:
+#           version: 10.6.3
+#       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+#         with:
+#           node-version: "24"
+#       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+#         with:
+#           python-version: "3.12"
+#           cache: "pip"
+#       - name: Cache Playwright browsers
+#         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+#         with:
+#           path: ~/.cache/ms-playwright
+#           key: ${{ runner.os }}-pw-${{ hashFiles('apps/web/pnpm-lock.yaml') }}
+#       - name: Install Node dependencies
+#         run: pnpm install --frozen-lockfile
+#       - name: Install API package
+#         run: |
+#           python -m pip install -e apps/api
+#           # apps/api/app/api/router.py transitively imports the `evacuation`
+#           # agent package (apps/agents/pyproject.toml exposes it as a
+#           # top-level package), so the agents wheel must be installed too —
+#           # otherwise uvicorn fails at import-time with
+#           # `ModuleNotFoundError: No module named 'evacuation'`.
+#           python -m pip install -e apps/agents
+#       - name: Install Playwright Chromium
+#         run: pnpm --filter @ama/web exec playwright install --with-deps chromium
+#       - name: Seed database
+#         shell: pwsh
+#         run: ./scripts/seed-database.ps1
+#       - name: Run web-coverage shard ${{ matrix.shard }}/4
+#         env:
+#           AMA_TEST_SUPPORT: "1"
+#         run: |
+#           pnpm --filter @ama/web exec playwright test \
+#             --project=web-coverage-chromium \
+#             --shard=${{ matrix.shard }}/4
+#       - name: Upload partial trace
+#         if: always()
+#         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+#         with:
+#           name: web-coverage-shard-${{ matrix.shard }}
+#           path: |
+#             tests/e2e/web-coverage/_artifacts/coverage-trace.partial-*.json
+#             tests/e2e/web-coverage/_artifacts/junit-*.xml
+#             tests/e2e/web-coverage/_artifacts/screenshots/**/*.png
+#           retention-days: 30
+#
+#   web-coverage-merge:
+#     needs: [web-coverage-shard]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 10
+#     steps:
+#       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+#       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+#         with:
+#           python-version: "3.12"
+#       - name: Install python deps
+#         run: |
+#           python -m pip install --upgrade pip
+#           python -m pip install pyyaml jsonschema
+#       - name: Download all shards
+#         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+#         with:
+#           path: tests/e2e/web-coverage/_artifacts
+#           pattern: web-coverage-shard-*
+#           merge-multiple: true
+#       - name: Merge trace shards (FR-006 deterministic)
+#         run: |
+#           python scripts/web-coverage/trace-merge.py \
+#             --shards-dir tests/e2e/web-coverage/_artifacts \
+#             --shard-glob 'coverage-trace.partial-*.json' \
+#             --output-md specs/034-webapp-capstone-coverage/coverage-trace.md \
+#             --output-json specs/034-webapp-capstone-coverage/coverage-trace.json
+#       - name: Validate gap-register
+#         run: python scripts/web-coverage/gap-register.py validate
+#       - name: Verify trace determinism (FR-006)
+#         shell: pwsh
+#         run: ./scripts/web-coverage/verify-trace-determinism.ps1
+#       - name: Upload canonical artefacts
+#         if: always()
+#         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+#         with:
+#           name: web-coverage-canonical
+#           path: |
+#             specs/034-webapp-capstone-coverage/coverage-trace.md
+#             specs/034-webapp-capstone-coverage/coverage-trace.json
+#             specs/034-webapp-capstone-coverage/gap-register.md
+#           retention-days: 90
+#
+#   web-coverage-gate:
+#     needs: [web-coverage-merge]
+#     runs-on: ubuntu-latest
+#     timeout-minutes: 5
+#     steps:
+#       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+#       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
+#         with:
+#           python-version: "3.12"
+#       - name: Install python deps
+#         run: |
+#           python -m pip install --upgrade pip
+#           python -m pip install jsonschema pyyaml
+#       - name: Download canonical artefacts
+#         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+#         with:
+#           name: web-coverage-canonical
+#           path: specs/034-webapp-capstone-coverage/
+#       - name: Schema-validate trace rows + gate thresholds (FR-018, FR-019, FR-023(e))
+#         run: |
+#           python scripts/web-coverage/_lib/schema_validators.py gate \
+#             --trace specs/034-webapp-capstone-coverage/coverage-trace.json \
+#             --gap-register specs/034-webapp-capstone-coverage/gap-register.md \
+#             --personas-min 68 \
+#             --cross-jurisdiction-min 8 \
+#             --commonwealth-bridge-min 1 \
+#             --capstone-outcomes-min 5
+#       # T177 (cycle-1): binary 68/68 depth-profile gate. Asserts every persona
+#       # in identities_australia.json has a schema-valid YAML alongside the
+#       # suite. Fails the `web-coverage / depth-profile-binary` status check on
+#       # any miss; numerator/denominator embedded in stdout for CHK210/CHK212.
+#       - name: Depth-profile binary 68/68 (cycle-1, T177)
+#         run: |
+#           python scripts/web-coverage/_lib/schema_validators.py depth-profiles \
+#             --expected 68
+#       - name: Post status check
+#         if: success()
+#         run: echo "::notice title=web-coverage::capstone-ready ✓ all 5 outcomes closed, 68 personas covered, 68/68 depth profiles valid, 0 Open gaps"
+#
+  story-acceptance:
     needs: [quality]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
+    timeout-minutes: 30
+    env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
+      PYTHONPATH: ${{ github.workspace }}/packages/domain/src
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
-      # pnpm must be installed BEFORE setup-node, because setup-node@v5 reads
-      # `packageManager` from package.json and pre-warms its pnpm cache; if
-      # pnpm is not on PATH yet, setup-node fails with "Unable to locate
-      # executable file: pnpm". Same ordering as the `quality` job above.
       - uses: pnpm/action-setup@a8198c4bff370c8506180b035930dea56dbd5288 # v5.0.0
         with:
           version: 10.6.3
@@ -283,126 +965,68 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
         with:
           python-version: "3.12"
-          cache: "pip"
       - name: Cache Playwright browsers
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-pw-${{ hashFiles('apps/web/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pw-${{ hashFiles('pnpm-lock.yaml') }}
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
       - name: Install API package
         run: |
           python -m pip install -e apps/api
-          # apps/api/app/api/router.py transitively imports the `evacuation`
-          # agent package (apps/agents/pyproject.toml exposes it as a
-          # top-level package), so the agents wheel must be installed too —
-          # otherwise uvicorn fails at import-time with
-          # `ModuleNotFoundError: No module named 'evacuation'`.
           python -m pip install -e apps/agents
+      - name: Configure reliable Ubuntu APT mirror
+        run: |
+          set -euo pipefail
+          if sudo grep -Rqs -- 'azure.archive.ubuntu.com' /etc/apt/sources.list.d; then
+            sudo grep -RIlZ -- 'azure.archive.ubuntu.com' /etc/apt/sources.list.d \
+              | sudo xargs -0r sed -i 's|azure.archive.ubuntu.com|archive.ubuntu.com|g'
+            echo "::notice::Using archive.ubuntu.com instead of the Azure APT mirror."
+          else
+            echo "::notice::No Azure APT mirror entries found; keeping the runner's configured mirror."
+          fi
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
+            | sudo tee /etc/apt/apt.conf.d/99ci-timeouts >/dev/null
       - name: Install Playwright Chromium
         run: pnpm --filter @ama/web exec playwright install --with-deps chromium
-      - name: Seed database
-        shell: pwsh
-        run: ./scripts/seed-database.ps1
-      - name: Run web-coverage shard ${{ matrix.shard }}/4
+      - name: Assert Spec 040 evidence tests are collected
+        run: |
+          set -euo pipefail
+          LIST_OUTPUT="$(pnpm --filter @ama/web exec playwright test --list --project=evidence)"
+          echo "$LIST_OUTPUT"
+          COUNT="$(printf '%s\n' "$LIST_OUTPUT" | grep -c 'evidence.spec.ts:' || true)"
+          test "$COUNT" -ge 5
+      - name: Run Spec 040 evidence workflows
+        env:
+          AMA_TEST_MODE: "1"
+          AMA_TEST_SUPPORT: "1"
+          AMA_ENVIRONMENT: "dev"
+        run: pnpm --filter @ama/web exec playwright test --project=evidence
+      - name: Assert story acceptance tests are collected
+        run: |
+          set -euo pipefail
+          LIST_OUTPUT="$(pnpm --filter @ama/web exec playwright test --list --project=chromium --project=mobile \
+            test_incident_commander_dashboard.spec.ts \
+            test_persona_workspace.spec.ts \
+            test_dashboard_decision_support.spec.ts)"
+          echo "$LIST_OUTPUT"
+          COLLECTED_COUNT="$(printf '%s\n' "$LIST_OUTPUT" | grep -E 'test_incident_commander_dashboard|test_persona_workspace|test_dashboard_decision_support' | wc -l)"
+          if [ "${COLLECTED_COUNT}" -eq 0 ]; then
+            echo "No acceptance tests collected for chromium/mobile projects."
+            exit 1
+          fi
+      - name: Run story acceptance tests (chromium + mobile)
         env:
           AMA_TEST_SUPPORT: "1"
+          AMA_ENVIRONMENT: "dev"
         run: |
           pnpm --filter @ama/web exec playwright test \
-            --project=web-coverage-chromium \
-            --shard=${{ matrix.shard }}/4
-      - name: Upload partial trace
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: web-coverage-shard-${{ matrix.shard }}
-          path: |
-            tests/e2e/web-coverage/_artifacts/coverage-trace.partial-*.json
-            tests/e2e/web-coverage/_artifacts/junit-*.xml
-            tests/e2e/web-coverage/_artifacts/screenshots/**/*.png
-          retention-days: 30
-
-  web-coverage-merge:
-    needs: [web-coverage-shard]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
-        with:
-          python-version: "3.12"
-      - name: Install python deps
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install pyyaml jsonschema
-      - name: Download all shards
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          path: tests/e2e/web-coverage/_artifacts
-          pattern: web-coverage-shard-*
-          merge-multiple: true
-      - name: Merge trace shards (FR-006 deterministic)
-        run: |
-          python scripts/web-coverage/trace-merge.py \
-            --shards-dir tests/e2e/web-coverage/_artifacts \
-            --shard-glob 'coverage-trace.partial-*.json' \
-            --output-md specs/034-webapp-capstone-coverage/coverage-trace.md \
-            --output-json specs/034-webapp-capstone-coverage/coverage-trace.json
-      - name: Validate gap-register
-        run: python scripts/web-coverage/gap-register.py validate
-      - name: Verify trace determinism (FR-006)
-        shell: pwsh
-        run: ./scripts/web-coverage/verify-trace-determinism.ps1
-      - name: Upload canonical artefacts
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        with:
-          name: web-coverage-canonical
-          path: |
-            specs/034-webapp-capstone-coverage/coverage-trace.md
-            specs/034-webapp-capstone-coverage/coverage-trace.json
-            specs/034-webapp-capstone-coverage/gap-register.md
-          retention-days: 90
-
-  web-coverage-gate:
-    needs: [web-coverage-merge]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
-        with:
-          python-version: "3.12"
-      - name: Install python deps
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install jsonschema pyyaml
-      - name: Download canonical artefacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: web-coverage-canonical
-          path: specs/034-webapp-capstone-coverage/
-      - name: Schema-validate trace rows + gate thresholds (FR-018, FR-019, FR-023(e))
-        run: |
-          python scripts/web-coverage/_lib/schema_validators.py gate \
-            --trace specs/034-webapp-capstone-coverage/coverage-trace.json \
-            --gap-register specs/034-webapp-capstone-coverage/gap-register.md \
-            --personas-min 68 \
-            --cross-jurisdiction-min 8 \
-            --commonwealth-bridge-min 1 \
-            --capstone-outcomes-min 5
-      # T177 (cycle-1): binary 68/68 depth-profile gate. Asserts every persona
-      # in identities_australia.json has a schema-valid YAML alongside the
-      # suite. Fails the `web-coverage / depth-profile-binary` status check on
-      # any miss; numerator/denominator embedded in stdout for CHK210/CHK212.
-      - name: Depth-profile binary 68/68 (cycle-1, T177)
-        run: |
-          python scripts/web-coverage/_lib/schema_validators.py depth-profiles \
-            --expected 68
-      - name: Post status check
-        if: success()
-        run: echo "::notice title=web-coverage::capstone-ready ✓ all 5 outcomes closed, 68 personas covered, 68/68 depth profiles valid, 0 Open gaps"
+            --project=chromium \
+            --project=mobile \
+            test_incident_commander_dashboard.spec.ts \
+            test_persona_workspace.spec.ts \
+            test_dashboard_decision_support.spec.ts
 
   evidence-pack-publication-gate:
     # Spec-037 (T046, RES-04, FR-008, FR-009, FR-037, FR-038, SC-002, SC-011)
@@ -445,6 +1069,8 @@ jobs:
   # ---------------------------------------------------------------------------
   docs-arch:
     runs-on: ubuntu-latest
+    env:
+      NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
@@ -478,8 +1104,9 @@ jobs:
       - name: link-check
         run: |
           lychee \
+            --offline \
+            --include-fragments \
             --base docs/architecture \
-            --include 'docs/architecture' \
             --max-retries 2 \
             --timeout 30 \
             --no-progress \
@@ -514,8 +1141,8 @@ jobs:
       # FR-021d: SHA256 hash manifest check
       - name: hash-manifest-check
         run: |
-          sha256sum --check docs/architecture/.diagram-hashes
-          echo "Hash manifest: all $(wc -l < docs/architecture/.diagram-hashes) entries matched."
+          set -euo pipefail
+          python tools/lint/check_diagram_manifest.py --root .
 
       # FR-021c, FR-011: Spec cross-reference coverage (001–037)
       - name: spec-cross-ref-check

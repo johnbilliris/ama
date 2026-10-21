@@ -1,0 +1,46 @@
+{
+  "version": "2026-09-16",
+  "feature": "006-data-ingestion-storage",
+  "excluded": [
+    {
+      "scenarioType": "bushfire",
+      "dataSourceId": "historical-incidents-db",
+      "reason": "Historical datasets are only activated through historical_overlay_path and are not part of baseline parametric generation."
+    },
+    {
+      "scenarioType": "flood",
+      "dataSourceId": "historical-incidents-db",
+      "reason": "Historical datasets are only activated through historical_overlay_path and are not part of baseline parametric generation."
+    },
+    {
+      "scenarioType": "cyclone",
+      "dataSourceId": "historical-incidents-db",
+      "reason": "Historical datasets are only activated through historical_overlay_path and are not part of baseline parametric generation."
+    },
+    {
+      "scenarioType": "severe_storm",
+      "dataSourceId": "historical-incidents-db",
+      "reason": "Historical datasets are only activated through historical_overlay_path and are not part of baseline parametric generation."
+    },
+    {
+      "scenarioType": "bushfire",
+      "dataSourceId": "aggregated-risk-scores",
+      "reason": "Derived downstream analytics are not authoritative upstream source feeds for simulation generation."
+    },
+    {
+      "scenarioType": "flood",
+      "dataSourceId": "aggregated-risk-scores",
+      "reason": "Derived downstream analytics are not authoritative upstream source feeds for simulation generation."
+    },
+    {
+      "scenarioType": "cyclone",
+      "dataSourceId": "aggregated-risk-scores",
+      "reason": "Derived downstream analytics are not authoritative upstream source feeds for simulation generation."
+    },
+    {
+      "scenarioType": "severe_storm",
+      "dataSourceId": "aggregated-risk-scores",
+      "reason": "Derived downstream analytics are not authoritative upstream source feeds for simulation generation."
+    }
+  ]
+}

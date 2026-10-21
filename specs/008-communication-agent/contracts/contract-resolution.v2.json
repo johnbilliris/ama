@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "2.0",
+  "feature": "008-communication-agent",
+  "resolvedAt": "2026-09-17",
+  "resolutions": {
+    "supersession": "Persist the replacement first; supersede the predecessor only after confirmed replacement delivery.",
+    "deduplication": "Reserve by tenant and handoff while processing; mark complete only after durable effects; semantic duplicate identity includes incident, authoritative assessment, and change type.",
+    "deliveryFailure": "Use delivery_failed when every actionable channel fails or is unconfigured; accepted remains delivering until confirmed.",
+    "healthVocabulary": "Dependency checks use healthy, unhealthy, or not_configured; audit storage reports healthy, buffering, or degraded; overall unhealthy returns HTTP 503.",
+    "pipelineBudget": "Stages 1 through 9 total 40 seconds; stages 4 through 7 total 24 seconds; the 60-second end-to-end budget leaves 20 seconds for queue and orchestration overhead.",
+    "smsTruncation": "Preserve the action and help URL; truncate descriptive body first; calculate segments using GSM-7 or UCS-2 encoding.",
+    "embeddingOutage": "Retain otherwise-safe generated text, record back-translation as unmeasured, and do not apply a fabricated quality penalty.",
+    "escalation": "Spec 018 is authoritative: Emergency Warning uses 5 minutes, lower tiers use 15 minutes, and exhaustion never auto-approves.",
+    "configurationInventory": "The implementation and generated configuration reference are authoritative; documentation must not assert a fixed variable count.",
+    "templateSelection": "Template identity requires language_code, hazard_type, severity, and alert_type; an explicitly labelled approved generic alias may cover a missing hazard-specific combination.",
+    "runtime": "The standalone FastAPI communication service is the compatibility runtime; MAF may invoke it through an adapter but must not replace its safety, approval, persistence, or delivery boundaries."
+  },
+  "approval": {
+    "status": "IMPLEMENTATION_DECISION",
+    "humanGovernanceApproval": "UNVERIFIED"
+  }
+}

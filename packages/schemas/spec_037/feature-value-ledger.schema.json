@@ -77,6 +77,24 @@
           "type": "array",
           "items": { "$ref": "#/$defs/BackCitation" }
         },
+        "evidence_exports": {
+          "type": "object",
+          "required": [
+            "capstone_attribution",
+            "measurement_method",
+            "latest_scorecard",
+            "audit_trace",
+            "media_type"
+          ],
+          "properties": {
+            "capstone_attribution": { "const": false },
+            "measurement_method": { "type": "string" },
+            "latest_scorecard": { "type": "string" },
+            "audit_trace": { "type": "string" },
+            "media_type": { "const": "application/json" }
+          },
+          "additionalProperties": false
+        },
         "cross_link_to_metric_trace": { "$ref": "#/$defs/BackCitation" },
         "provenance": { "$ref": "#/$defs/Provenance" }
       },
@@ -84,6 +102,16 @@
         {
           "if": { "properties": { "tag": { "const": "capstone-contributing" } }, "required": ["tag"] },
           "then": { "required": ["capstone_metrics"], "properties": { "capstone_metrics": { "minItems": 1 } } }
+        },
+        {
+          "if": { "properties": { "spec_id": { "const": "040-success-criteria" } }, "required": ["spec_id"] },
+          "then": {
+            "required": ["evidence_exports"],
+            "properties": {
+              "tag": { "const": "delivery-hygiene" },
+              "capstone_metrics": false
+            }
+          }
         }
       ],
       "additionalProperties": false

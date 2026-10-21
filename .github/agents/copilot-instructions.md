@@ -1,5 +1,7 @@
 ---
 description: "AMA development guidelines and project conventions shared with all agents."
+user-invocable: false
+disable-model-invocation: true
 ---
 
 # AMA Development Guidelines
@@ -13,7 +15,7 @@ Autonomous Disaster Response Coordination Hub — a monorepo for Australian emer
 ```text
 apps/
   api/          # FastAPI backend (Python 3.12)
-  web/          # Next.js 16 frontend (TypeScript 5.8, React 19)
+  web/          # Next.js 16.3.6 frontend (TypeScript 6.0.3, React 19)
   agents/       # AI agent runtime modules
   ingestion/    # Data ingestion pipelines
 packages/
@@ -36,7 +38,18 @@ specs/          # Feature specifications (speckit workflow)
 docs/           # Project documentation
 ```
 
-## Active Technologies
+## Current Runtime Pins (authoritative)
+
+- Python 3.12 in CI; project packages require Python 3.12 or newer.
+- TypeScript 6.0.3, Next.js 16.3.6, and React 19.2.6 from `apps/web/package.json`.
+- Mypy 2.0.0 in the Python quality workflow; strict behavior is configured in root `pyproject.toml`.
+- Python dependency ranges are declared in each package's `pyproject.toml`; they are not exact runtime pins.
+
+## Historical Feature Stack Log (not current pins)
+
+The entries below record feature-era stack descriptions and are not authoritative
+for current package versions. Use the runtime pins above and package manifests
+when describing the current stack.
 - Python 3.11+ (agents, API), TypeScript/Next.js 14 (web dashboard) + FastAPI, Pydantic, Azure OpenAI SDK, Azure AI Content Safety SDK, Azure Service Bus SDK, numpy, shapely (025-agent-spec-compliance)
 - Azure Cosmos DB (assessments, plans, dead-letters), Azure Blob Storage (audit) (025-agent-spec-compliance)
 - Python 3.11+ (agents, API), TypeScript 5.x (Next.js dashboard) + FastAPI, Pydantic, Shapely, azure-ai-contentsafety, azure-iot-device, azure-cosmos, httpx, numpy, Next.js 14 (025-agent-spec-compliance)

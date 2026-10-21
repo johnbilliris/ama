@@ -7,6 +7,10 @@ param location string
 @description('Environment name for resource naming')
 param envPrefix string
 
+@description('Deployment environment tier used to select the workspace retention period.')
+@allowed(['dev', 'staging', 'prod'])
+param environmentTier string
+
 @description('Email recipient for alert notifications')
 param actionGroupEmail string = 'ops@example.com'
 
@@ -16,6 +20,12 @@ param actionGroupWebhook string = 'https://example.com/alerts'
 @description('Tags applied to all resources')
 param tags object
 
+@description('Default analytics retention in days; development uses the 30-day workspace minimum.')
+var logAnalyticsRetentionInDays = environmentTier == 'dev' ? 30 : 90
+
+@description('Minimum supported analytics retention in days for development custom log tables.')
+var customLogRetentionInDays = environmentTier == 'dev' ? 4 : 90
+
 // ── Log Analytics workspace ──
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
@@ -24,8 +34,26 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   tags: tags
   properties: {
     sku: { name: 'PerGB2018' }
-    retentionInDays: 90
+    retentionInDays: logAnalyticsRetentionInDays
     features: { enableLogAccessUsingOnlyResourcePermissions: true }
+  }
+}
+
+resource containerAppConsoleLogsTable 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = {
+  parent: logAnalytics
+  name: 'ContainerAppConsoleLogs_CL'
+  properties: {
+    retentionInDays: customLogRetentionInDays
+    totalRetentionInDays: customLogRetentionInDays
+  }
+}
+
+resource containerAppSystemLogsTable 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = {
+  parent: logAnalytics
+  name: 'ContainerAppSystemLogs_CL'
+  properties: {
+    retentionInDays: customLogRetentionInDays
+    totalRetentionInDays: customLogRetentionInDays
   }
 }
 

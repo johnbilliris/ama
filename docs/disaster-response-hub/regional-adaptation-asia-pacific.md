@@ -4,7 +4,9 @@
 
 The capstone brief asks: *"How will the disaster response agent coordination hub adapt to Asia's diverse disaster types (typhoons in Philippines, earthquakes in Japan, floods in Bangladesh), multilingual emergency alerts across regional languages/dialects, varying government response protocols, and strict location data privacy laws?"*
 
-This document maps every extensibility point in the current platform to the three target countries and explains the configuration changes required. No code changes are needed — the architecture was designed for multi-jurisdiction deployment from the outset.
+This document maps every extensibility point in the current platform to the three target countries and explains the configuration changes required.
+
+This document is design-time adaptation guidance only. It does not override v1 scope boundaries in `specs/001-disaster-response-hub/spec.md` and does not close OD-001, HYP-006, or SCP-080. Any non-Australian deployment claim requires its own amendment lane, role validation, and release evidence.
 
 ## Architecture Extensibility Summary
 

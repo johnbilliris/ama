@@ -59,6 +59,19 @@ def _make_demand(
 
 
 class TestGreedyAssignment:
+    def test_excludes_incompatible_subtypes_from_mixed_pool(self):
+        matcher = ResourceMatcher()
+        resources = [
+            _make_resource("near-minibus", lat=-33.871, lon=151.211, sub_type="minibus"),
+            _make_resource("far-ambulance", lat=-34.0, lon=151.5, sub_type="ambulance"),
+        ]
+        demands = [_make_demand("ambulance-demand", sub_type="ambulance")]
+
+        assignments, shortfalls = matcher.match_demands(demands, resources)
+
+        assert len(shortfalls) == 0
+        assert [assignment.resource_id for assignment in assignments] == ["far-ambulance"]
+
     def test_assigns_closest_resource(self):
         matcher = ResourceMatcher()
         resources = [

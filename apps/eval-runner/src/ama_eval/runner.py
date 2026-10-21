@@ -14,14 +14,15 @@ import sys
 from datetime import UTC, datetime
 from typing import Any
 
+from ama_eval_core.models import EvaluationCase, SampleTrace
+
+from apps.console_logging import configure_console_logging
+
 logger = logging.getLogger(__name__)
 
 
 def _setup_logging() -> None:
-    logging.basicConfig(
-        level=os.environ.get("LOG_LEVEL", "INFO"),
-        format="%(asctime)s %(levelname)s %(name)s %(message)s",
-    )
+    configure_console_logging(level=os.environ.get("LOG_LEVEL", "INFO"))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -95,9 +96,10 @@ def main(argv: list[str] | None = None) -> int:
         )
 
         run = run_repo.get_run(args.run_id)
-        if not run:
+        if run is None:
             logger.error("run %s not found (item id=run:%s pk=%s)", args.run_id, args.run_id, args.run_id)
             return 1
+        evaluation_run = run
 
         cases = ds_repo.list_cases(args.dataset_id, version=args.dataset_version)
         if not cases:
@@ -107,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
         # Honour datasetSubset.maxCases on the run if --max-cases not passed
         run_max_cases = None
         try:
-            run_max_cases = run.datasetSubset.maxCases if run.datasetSubset else None
+            run_max_cases = evaluation_run.datasetSubset.maxCases if evaluation_run.datasetSubset else None
         except AttributeError:
             run_max_cases = None
         effective_max = args.max_cases or run_max_cases
@@ -120,13 +122,17 @@ def main(argv: list[str] | None = None) -> int:
 
         client = FoundryClient()
 
-        def _foundry_call(model_id: str, messages: list[dict], parameters: dict) -> Any:
+        def _foundry_call(
+            model_id: str,
+            messages: list[dict[str, str]],
+            parameters: dict[str, Any],
+        ) -> Any:
             from .evaluators.base import ModelOutput
 
             # The orchestrator passes ModelUnderTest.parameters via **kwargs;
             # `version` is needed by FoundryClient to look up the deployment.
             target_version = next(
-                (m.version for m in run.models if m.modelId == model_id),
+                (m.version for m in evaluation_run.models if m.modelId == model_id),
                 None,
             )
             r = client.complete(
@@ -146,7 +152,7 @@ def main(argv: list[str] | None = None) -> int:
 
         ctx = OrchestratorContext(
             cases=cases,
-            run=run,
+            run=evaluation_run,
             audit_emit=lambda **kw: audit.emit_action(**kw),
             foundry_call=_foundry_call,
         )
@@ -170,7 +176,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1  # hard failure surfaces in API run document
 
 
-def _load_cases_from_blob(dataset_id: str, version: str) -> list:
+def _load_cases_from_blob(dataset_id: str, version: str) -> list[EvaluationCase]:
     """Load cases from the dataset cases.jsonl blob. Returns [] when storage env vars missing or blob absent."""
     account = os.environ.get("EVAL_BLOB_ACCOUNT") or os.environ.get("EVAL_STORAGE_ACCOUNT")
     container_name = os.environ.get("EVAL_DATASETS_CONTAINER", "datasets")
@@ -199,7 +205,7 @@ def _load_cases_from_blob(dataset_id: str, version: str) -> list:
         return []
 
 
-def _upload_traces(run_id: str, traces: list) -> None:
+def _upload_traces(run_id: str, traces: list[SampleTrace]) -> None:
     """Upload SampleTrace records to Azure Blob Storage. No-op when env not configured."""
     if not os.environ.get("EVAL_TRACES_CONTAINER"):
         return

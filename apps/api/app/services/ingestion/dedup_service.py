@@ -1,6 +1,10 @@
+import asyncio
 import hashlib
 import logging
-from typing import Any
+from datetime import UTC, datetime, timedelta
+from typing import Any, Literal
+
+from app.middleware.resilience import retry_transient_dependency_call
 
 logger = logging.getLogger(__name__)
 
@@ -16,35 +20,123 @@ class DedupService:
     def __init__(self, redis_client: Any = None, default_ttl_seconds: int = 120):
         self._redis = redis_client
         self._default_ttl = default_ttl_seconds
-        self._local_cache: dict[str, str] = {}
+        self._local_cache: dict[str, tuple[str, datetime]] = {}
+        self._max_local_entries = 50000
         self._redis_warned = False  # suppress repeated warnings
 
-    async def check(self, dedup_hash: str) -> bool:
+    @staticmethod
+    @retry_transient_dependency_call
+    def _redis_get(redis_client: Any, key: str) -> Any:
+        return redis_client.get(key)
+
+    @staticmethod
+    @retry_transient_dependency_call
+    def _redis_set(redis_client: Any, key: str, value: str, ttl: int) -> None:
+        redis_client.set(key, value, ex=ttl)
+
+    @staticmethod
+    @retry_transient_dependency_call
+    def _redis_set_nx(redis_client: Any, key: str, value: str, ttl: int) -> bool:
+        return bool(redis_client.set(key, value, nx=True, ex=ttl))
+
+    @staticmethod
+    @retry_transient_dependency_call
+    def _redis_delete(redis_client: Any, key: str) -> None:
+        redis_client.delete(key)
+
+    def _prune_local_cache(self) -> None:
+        now = datetime.now(UTC)
+        expired = [k for k, (_, expiry) in self._local_cache.items() if expiry <= now]
+        for key in expired:
+            self._local_cache.pop(key, None)
+
+        if len(self._local_cache) <= self._max_local_entries:
+            return
+
+        # Drop oldest-expiring keys first to keep local fallback bounded.
+        ordered = sorted(self._local_cache.items(), key=lambda item: item[1][1])
+        trim_count = len(self._local_cache) - self._max_local_entries
+        for key, _ in ordered[:trim_count]:
+            self._local_cache.pop(key, None)
+
+    async def try_claim(self, key: str, ttl_seconds: int | None = None) -> bool:
+        return await self.claim_status(key, ttl_seconds) == "claimed"
+
+    async def claim_status(self, key: str, ttl_seconds: int | None = None) -> Literal["claimed", "duplicate", "busy"]:
+        ttl = ttl_seconds or self._default_ttl
+        redis_key = key if key.startswith("dedup:") else f"dedup:{key}"
+
         if self._redis:
             try:
-                result = self._redis.get(f"dedup:{dedup_hash}")
-                return result is not None
+                claimed = await asyncio.to_thread(self._redis_set_nx, self._redis, redis_key, "claim", ttl)
+                if self._redis_warned:
+                    logger.info("Redis dedup connection restored")
+                    self._redis_warned = False
+                if claimed:
+                    return "claimed"
+                value = await asyncio.to_thread(self._redis_get, self._redis, redis_key)
+                return "busy" if value in (None, "claim", b"claim") else "duplicate"
             except Exception:
                 if not self._redis_warned:
-                    logger.warning("Redis unavailable for dedup — falling back to local cache")
+                    logger.warning("Redis unavailable for dedup claim — falling back to local expiry cache")
                     self._redis_warned = True
-        return dedup_hash in self._local_cache
 
-    async def store(self, dedup_hash: str, signal_id: str, ttl_seconds: int | None = None) -> None:
+        self._prune_local_cache()
+        if redis_key in self._local_cache:
+            return "busy" if self._local_cache[redis_key][0] == "claim" else "duplicate"
+        self._local_cache[redis_key] = ("claim", datetime.now(UTC) + timedelta(seconds=ttl))
+        return "claimed"
+
+    async def commit(self, key: str, signal_id: str, ttl_seconds: int | None = None) -> None:
         ttl = ttl_seconds or self._default_ttl
-        value = signal_id
+        redis_key = key if key.startswith("dedup:") else f"dedup:{key}"
         if self._redis:
             try:
-                self._redis.set(f"dedup:{dedup_hash}", value, ex=ttl)
+                await asyncio.to_thread(self._redis_set, self._redis, redis_key, signal_id, ttl)
                 if self._redis_warned:
                     logger.info("Redis dedup connection restored")
                     self._redis_warned = False
                 return
             except Exception:
                 if not self._redis_warned:
-                    logger.warning("Redis unavailable for dedup — falling back to local cache")
+                    logger.warning("Redis unavailable for dedup commit — falling back to local expiry cache")
                     self._redis_warned = True
-        self._local_cache[dedup_hash] = value
+
+        self._prune_local_cache()
+        self._local_cache[redis_key] = (signal_id, datetime.now(UTC) + timedelta(seconds=ttl))
+
+    async def release(self, key: str) -> None:
+        redis_key = key if key.startswith("dedup:") else f"dedup:{key}"
+        if self._redis:
+            try:
+                await asyncio.to_thread(self._redis_delete, self._redis, redis_key)
+                if self._redis_warned:
+                    logger.info("Redis dedup connection restored")
+                    self._redis_warned = False
+                return
+            except Exception:
+                if not self._redis_warned:
+                    logger.warning("Redis unavailable for dedup release — falling back to local expiry cache")
+                    self._redis_warned = True
+
+        self._prune_local_cache()
+        self._local_cache.pop(redis_key, None)
+
+    async def check(self, dedup_hash: str) -> bool:
+        redis_key = dedup_hash if dedup_hash.startswith("dedup:") else f"dedup:{dedup_hash}"
+        if self._redis:
+            try:
+                result = await asyncio.to_thread(self._redis_get, self._redis, redis_key)
+                return result is not None
+            except Exception:
+                if not self._redis_warned:
+                    logger.warning("Redis unavailable for dedup check — falling back to local expiry cache")
+                    self._redis_warned = True
+        self._prune_local_cache()
+        return redis_key in self._local_cache
+
+    async def store(self, dedup_hash: str, signal_id: str, ttl_seconds: int | None = None) -> None:
+        await self.commit(dedup_hash, signal_id, ttl_seconds)
 
     @staticmethod
     def compute_hash(canonical_key: str) -> str:

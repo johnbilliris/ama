@@ -18,7 +18,7 @@ _KISTERS_TS_PARAMS: dict[str, str] = {
     "format": "json",
     "parametertype_name": "Water Course Level",
     "ts_name": "DMQaQc.Merged.AsStored*",
-    "returnfields": "station_no,station_name,ts_id,ts_name",
+    "returnfields": "station_no,station_name,station_latitude,station_longitude,ts_id,ts_name,parametertype_name",
     "station_no": "2100*",
 }
 
@@ -26,8 +26,15 @@ _KISTERS_TS_PARAMS: dict[str, str] = {
 class RiverGaugePipeline(IngestionPipelineBase):
     """Polls BoM Water Data Online for river gauge JSON observations."""
 
-    def __init__(self, endpoint_url: str | None = None, **kwargs: Any):
+    def __init__(
+        self,
+        endpoint_url: str | None = None,
+        flood_thresholds: dict[str, dict[str, float]] | None = None,
+        **kwargs: Any,
+    ):
         self._endpoint_url = endpoint_url or BOM_WATER_URL
+        self._station_metadata_cache: dict[str, dict[str, float]] = {}
+        self._flood_thresholds = flood_thresholds or {}
         super().__init__(
             pipeline_id="bom-river-gauges",
             data_source_ids=["bom-river-gauges"],
@@ -49,9 +56,33 @@ class RiverGaugePipeline(IngestionPipelineBase):
             return []
 
         payloads: list[dict[str, Any]] = []
-        # Use first 10 gauges to keep poll lightweight
-        for row in ts_list[1:11]:
-            station_no, station_name, ts_id, _ts_name = row[0], row[1], row[2], row[3]
+        for row in ts_list[1:]:
+            station_no = row[0]
+            station_name = row[1] if len(row) > 1 else ""
+            station_latitude = row[2] if len(row) > 2 else None
+            station_longitude = row[3] if len(row) > 3 else None
+            ts_id = row[4] if len(row) > 4 else None
+            ts_name = row[5] if len(row) > 5 else ""
+            parameter_type = row[6] if len(row) > 6 else ts_name
+            if ts_id is None:
+                continue
+
+            metadata: dict[str, float] = {}
+            try:
+                if (
+                    station_latitude not in (None, "")
+                    and station_longitude not in (None, "")
+                    and isinstance(station_latitude, (int, float, str))
+                    and isinstance(station_longitude, (int, float, str))
+                ):
+                    metadata["latitude"] = float(station_latitude)
+                    metadata["longitude"] = float(station_longitude)
+            except (TypeError, ValueError):
+                metadata = {}
+            if metadata:
+                self._station_metadata_cache[str(station_no)] = metadata
+            else:
+                metadata = dict(self._station_metadata_cache.get(str(station_no), {}))
             try:
                 async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
                     val_params = {
@@ -67,7 +98,7 @@ class RiverGaugePipeline(IngestionPipelineBase):
                     vresp.raise_for_status()
                     vdata = vresp.json()
                     readings = vdata[0].get("data", []) if vdata else []
-                    for reading in readings[-5:]:
+                    for reading in readings:
                         payloads.append(
                             {
                                 "observations": {
@@ -76,6 +107,7 @@ class RiverGaugePipeline(IngestionPipelineBase):
                                             "timestamp": reading[0],
                                             "value": reading[1],
                                             "quality": reading[2] if len(reading) > 2 else "",
+                                            "parametertype": parameter_type,
                                             "gauge_id": station_no,
                                             "station_name": station_name,
                                         }
@@ -85,12 +117,14 @@ class RiverGaugePipeline(IngestionPipelineBase):
                                 "source_kind": "sensor",
                                 "source_uri": self._endpoint_url,
                                 "collection_method": "sensor_network",
+                                "station_metadata": metadata,
+                                "flood_thresholds": self._flood_thresholds.get(str(station_no), {}),
                             }
                         )
             except Exception as exc:
                 logger.warning("Failed to fetch ts_id %s for station %s: %s", ts_id, station_no, exc)
 
-        return payloads[:50]
+        return payloads
 
     def normalise(self, raw_payload: dict[str, Any]) -> dict[str, Any]:
         envelope = normalise_json_observation(raw_payload)

@@ -80,7 +80,7 @@ apps/
 │       │   ├── cosmos_scope.py            # MODIFY — add simulation partition scope
 │       │   └── governance_repository.py   # EXISTING — governance data access
 │       └── validators/
-│           └── signal_envelope.py         # MODIFY — add simulation_run_id to provenance
+│           └── signal_envelope.py         # MODIFY — add simulationRunId to provenance
 ├── agents/
 │   └── monitoring/
 │       └── agent.py                       # MODIFY — add retrospective incident association (FR-019b),
@@ -141,7 +141,7 @@ packages/
 │           └── signal_repository.py     # NEW — Cosmos DB signal persistence (FR-025). In shared
 │                                        #        packages/domain so both API and ingestion worker import it
 ├── schemas/
-│   └── signal-envelope.schema.json      # MODIFY — extend provenance with simulation_run_id (FR-002a)
+│   └── signal-envelope.schema.json      # MODIFY — extend provenance with simulationRunId (FR-002a)
 └── ui/                                   # NO CHANGES
 
 infra/

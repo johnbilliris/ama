@@ -1,0 +1,147 @@
+[
+  {
+    "policy_set_id": "policy-commonwealth",
+    "data_residency_region": "australiaeast",
+    "allowed_location_precision_meters": 250,
+    "retention_days": 365,
+    "retention_rules": [
+      "operational_signals_max_30_days",
+      "audit_records_min_365_days"
+    ],
+    "language_requirements": [
+      "en-AU"
+    ],
+    "cross_agency_sharing_rules": [
+      "commonwealth_coordination",
+      "major_incident_mutual_aid"
+    ]
+  },
+  {
+    "policy_set_id": "policy-nsw",
+    "data_residency_region": "australiasoutheast",
+    "allowed_location_precision_meters": 100,
+    "retention_days": 365,
+    "retention_rules": [
+      "operational_signals_max_30_days",
+      "incident_task_history_min_180_days"
+    ],
+    "language_requirements": [
+      "en-AU"
+    ],
+    "cross_agency_sharing_rules": [
+      "state_response_coordination"
+    ]
+  },
+  {
+    "policy_set_id": "policy-vic",
+    "data_residency_region": "australiasoutheast",
+    "allowed_location_precision_meters": 100,
+    "retention_days": 365,
+    "retention_rules": [
+      "operational_signals_max_30_days",
+      "incident_task_history_min_180_days"
+    ],
+    "language_requirements": [
+      "en-AU"
+    ],
+    "cross_agency_sharing_rules": [
+      "state_response_coordination"
+    ]
+  },
+  {
+    "policy_set_id": "policy-qld",
+    "data_residency_region": "australiaeast",
+    "allowed_location_precision_meters": 100,
+    "retention_days": 365,
+    "retention_rules": [
+      "operational_signals_max_30_days",
+      "incident_task_history_min_180_days"
+    ],
+    "language_requirements": [
+      "en-AU"
+    ],
+    "cross_agency_sharing_rules": [
+      "state_response_coordination"
+    ]
+  },
+  {
+    "policy_set_id": "policy-sa",
+    "data_residency_region": "australiaeast",
+    "allowed_location_precision_meters": 100,
+    "retention_days": 365,
+    "retention_rules": [
+      "operational_signals_max_30_days",
+      "incident_task_history_min_180_days"
+    ],
+    "language_requirements": [
+      "en-AU"
+    ],
+    "cross_agency_sharing_rules": [
+      "state_response_coordination"
+    ]
+  },
+  {
+    "policy_set_id": "policy-wa",
+    "data_residency_region": "australiaeast",
+    "allowed_location_precision_meters": 100,
+    "retention_days": 365,
+    "retention_rules": [
+      "operational_signals_max_30_days",
+      "incident_task_history_min_180_days"
+    ],
+    "language_requirements": [
+      "en-AU"
+    ],
+    "cross_agency_sharing_rules": [
+      "state_response_coordination"
+    ]
+  },
+  {
+    "policy_set_id": "policy-tas",
+    "data_residency_region": "australiasoutheast",
+    "allowed_location_precision_meters": 100,
+    "retention_days": 365,
+    "retention_rules": [
+      "operational_signals_max_30_days",
+      "incident_task_history_min_180_days"
+    ],
+    "language_requirements": [
+      "en-AU"
+    ],
+    "cross_agency_sharing_rules": [
+      "state_response_coordination"
+    ]
+  },
+  {
+    "policy_set_id": "policy-act",
+    "data_residency_region": "australiasoutheast",
+    "allowed_location_precision_meters": 100,
+    "retention_days": 365,
+    "retention_rules": [
+      "operational_signals_max_30_days",
+      "incident_task_history_min_180_days"
+    ],
+    "language_requirements": [
+      "en-AU"
+    ],
+    "cross_agency_sharing_rules": [
+      "territory_response_coordination"
+    ]
+  },
+  {
+    "policy_set_id": "policy-nt",
+    "data_residency_region": "australiaeast",
+    "allowed_location_precision_meters": 100,
+    "retention_days": 365,
+    "retention_rules": [
+      "operational_signals_max_30_days",
+      "incident_task_history_min_180_days"
+    ],
+    "language_requirements": [
+      "en-AU"
+    ],
+    "cross_agency_sharing_rules": [
+      "territory_response_coordination"
+    ]
+  }
+]

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import logging
 import os
+from importlib import import_module
 from threading import Lock
 
 logger = logging.getLogger(__name__)
@@ -79,10 +80,16 @@ def setup_observability_once(
         # don't ship the helper and it's optional (Azure Monitor's auto-instrumentation
         # already covers the common cases).
         try:  # pragma: no cover - exercised at runtime only
-            from agent_framework.observability import setup_observability  # type: ignore[import-not-found]
-
-            setup_observability()
-            logger.info("agent_framework.observability.setup_observability() registered")
+            observability_module = import_module("agent_framework.observability")
+            setup_observability = getattr(observability_module, "setup_observability", None)
+            if callable(setup_observability):
+                setup_observability()
+                logger.info("agent_framework.observability.setup_observability() registered")
+            else:
+                logger.info(
+                    "agent_framework.observability.setup_observability not available in this SDK build; "
+                    "Azure Monitor auto-instrumentation will cover MAF spans."
+                )
         except ImportError:
             logger.info(
                 "agent_framework.observability.setup_observability not available in this SDK build; "

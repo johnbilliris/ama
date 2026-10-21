@@ -3,7 +3,23 @@ from datetime import UTC, datetime
 from app.services.exercise_metrics_service import ExerciseKPI, ExerciseMetricsService
 
 
-def test_exercise_metrics_comparison_passes_all_criteria() -> None:
+def _participant_rows(favourable_rate: float, count: int = 20) -> list[dict[str, float]]:
+    favourable = int(count * favourable_rate)
+    rows: list[dict[str, float]] = []
+    for i in range(count):
+        score = 4.0 if i < favourable else 3.0
+        rows.append(
+            {
+                "clarity": score,
+                "scanability": score,
+                "distinctiveness": score,
+                "decision_confidence": score,
+            }
+        )
+    return rows
+
+
+def test_exercise_metrics_comparison_all_criteria_keys_present_and_overall_false_on_sc005() -> None:
     service = ExerciseMetricsService()
 
     baseline = ExerciseKPI(
@@ -18,6 +34,8 @@ def test_exercise_metrics_comparison_passes_all_criteria() -> None:
         time_to_assignment_minutes=38,
         resource_utilization_ratio=0.62,
         unfilled_priority_requests=4,
+        org_type_count=3,
+        persona_type_count=5,
     )
 
     hub = ExerciseKPI(
@@ -36,6 +54,7 @@ def test_exercise_metrics_comparison_passes_all_criteria() -> None:
         ux_scanability_mean=4.5,
         ux_distinctiveness_mean=4.1,
         ux_decision_confidence_mean=4.3,
+        ux_participant_scores=_participant_rows(0.9),
         participant_count=12,
         org_type_count=3,
         persona_type_count=5,
@@ -45,23 +64,115 @@ def test_exercise_metrics_comparison_passes_all_criteria() -> None:
     service.record(hub)
 
     comparison = service.compare("EX-001", "EX-002")
+    criteria = comparison["criteria"]
+    prefix = "001-disaster-response-hub"
 
-    # SC-004: 45min → 18min = 60% improvement (≥50% required)
-    assert comparison["sc004_response_time"]["passes"] is True
-    assert comparison["sc004_response_time"]["improvement_percent"] == 60.0
+    assert len(criteria) == 7
+    assert criteria[f"{prefix}:SC-004"]["passes"] is True
+    assert criteria[f"{prefix}:SC-004"]["details"]["improvement_percent"] == 60.0
 
-    # SC-005: 6h → 2.5h = 3.5h earlier (≥24h required — this is a scenario exercise, won't pass)
-    assert comparison["sc005_evacuation_timing"]["hours_earlier"] == 3.5
+    assert criteria[f"{prefix}:SC-005"]["details"]["hours_earlier"] == 3.5
+    assert criteria[f"{prefix}:SC-005"]["status"] == "fail"
 
-    # SC-006: 38min → 14min = 63.2% improvement (≥30% required)
-    assert comparison["sc006_resource_efficiency"]["passes"] is True
+    expected_sc006 = (0.4 * 63.1578947368) + (0.3 * 30.6451612903) + (0.3 * 75.0)
+    assert criteria[f"{prefix}:SC-006"]["details"]["weighted_composite_percent"] == round(expected_sc006, 1)
+    assert criteria[f"{prefix}:SC-006"]["passes"] is True
 
-    # SC-007: All dimensions ≥4.0, coverage met
-    assert comparison["sc007_ux_evaluation"]["all_dimensions_above_4"] is True
-    assert comparison["sc007_ux_evaluation"]["coverage_met"] is True
+    assert criteria[f"{prefix}:SC-007"]["details"]["coverage_met"] is True
+    assert criteria[f"{prefix}:SC-007"]["passes"] is True
+    assert comparison["overall_pass"] is False
 
 
 def test_exercise_metrics_missing_record_returns_error() -> None:
     service = ExerciseMetricsService()
     result = service.compare("missing-1", "missing-2")
     assert result["error"] == "Missing exercise record"
+
+
+def test_exercise_metrics_rejects_mismatched_cohort() -> None:
+    service = ExerciseMetricsService()
+    service.record(
+        ExerciseKPI(
+            exercise_id="BASE-1",
+            scenario_type="flood",
+            jurisdiction_id="nsw",
+            organisation_ids=["ses-nsw"],
+            run_type="baseline",
+            timestamp_activation=datetime(2026, 3, 9, 9, 0, tzinfo=UTC),
+        )
+    )
+    service.record(
+        ExerciseKPI(
+            exercise_id="HUB-1",
+            scenario_type="cyclone",
+            jurisdiction_id="qld",
+            organisation_ids=["ses-qld"],
+            run_type="hub_enabled",
+            timestamp_activation=datetime(2026, 3, 9, 9, 0, tzinfo=UTC),
+        )
+    )
+    result = service.compare("BASE-1", "HUB-1")
+    assert result["error"] == "Mismatched baseline/hub cohort"
+
+
+def test_sc007_uses_participant_favourable_proportion_not_means() -> None:
+    service = ExerciseMetricsService()
+    baseline = ExerciseKPI(
+        exercise_id="BASE-UX",
+        scenario_type="flood",
+        jurisdiction_id="nsw",
+        organisation_ids=["ses-nsw"],
+        run_type="baseline",
+        timestamp_activation=datetime(2026, 3, 9, 9, 0, tzinfo=UTC),
+        org_type_count=3,
+        persona_type_count=5,
+    )
+    hub = ExerciseKPI(
+        exercise_id="HUB-UX",
+        scenario_type="flood",
+        jurisdiction_id="nsw",
+        organisation_ids=["ses-nsw"],
+        run_type="hub_enabled",
+        timestamp_activation=datetime(2026, 3, 9, 9, 0, tzinfo=UTC),
+        ux_clarity_mean=4.8,
+        ux_scanability_mean=4.8,
+        ux_distinctiveness_mean=4.8,
+        ux_decision_confidence_mean=4.8,
+        ux_participant_scores=_participant_rows(0.8),
+        participant_count=20,
+        org_type_count=3,
+        persona_type_count=5,
+    )
+    service.record(baseline)
+    service.record(hub)
+    result = service.compare("BASE-UX", "HUB-UX")
+    sc007 = result["criteria"]["001-disaster-response-hub:SC-007"]
+    assert sc007["status"] == "fail"
+
+
+def test_overall_false_when_any_required_sc_missing() -> None:
+    service = ExerciseMetricsService()
+    service.record(
+        ExerciseKPI(
+            exercise_id="BASE-MISS",
+            scenario_type="flood",
+            jurisdiction_id="nsw",
+            organisation_ids=["ses-nsw"],
+            run_type="baseline",
+            timestamp_activation=datetime(2026, 3, 9, 9, 0, tzinfo=UTC),
+        )
+    )
+    service.record(
+        ExerciseKPI(
+            exercise_id="HUB-MISS",
+            scenario_type="flood",
+            jurisdiction_id="nsw",
+            organisation_ids=["ses-nsw"],
+            run_type="hub_enabled",
+            timestamp_activation=datetime(2026, 3, 9, 9, 0, tzinfo=UTC),
+        )
+    )
+    result = service.compare("BASE-MISS", "HUB-MISS")
+    assert result["overall_pass"] is False
+    incomplete = [v for v in result["criteria"].values() if v["status"] == "incomplete"]
+    assert incomplete

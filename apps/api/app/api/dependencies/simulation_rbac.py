@@ -27,7 +27,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from typing import Any, Final
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from fastapi import HTTPException, Path, Request
 
@@ -144,7 +144,7 @@ async def _emit_rbac_denial_audit(
 
 async def require_simulation_coordinator(
     request: Request,
-    sim_id: str = Path(..., min_length=1, description="Simulation ID"),
+    sim_id: str | UUID = Path(..., description="Simulation ID"),
 ) -> CoordinatorPrincipal:
     """Validate coordinator-role membership for a simulation route.
 
@@ -158,6 +158,7 @@ async def require_simulation_coordinator(
     fires (audit-envelope.md §6.3 cross-references).
     """
 
+    sim_id = str(sim_id)
     request_correlation_id = (request.headers.get("X-Request-Correlation-Id") if request else None) or str(uuid4())
 
     claims = _claims_from_request(request)

@@ -61,12 +61,14 @@ def embed_chunks(
 
 
 def _embed(text: str) -> list[float]:  # pragma: no cover — exercised by integration tests
-    try:
-        from apps.agents.common.foundry_query_embedder import embed_query  # type: ignore[import-not-found]
+    from common.async_bridge import run_async
 
-        return embed_query(text)
-    except Exception:  # noqa: BLE001
+    from apps.agents.common.foundry_query_embedder import build_query_embedder
+
+    embed_query = build_query_embedder()
+    if embed_query is None:
         return [0.0] * EMBED_DIM
+    return run_async(embed_query(text))
 
 
 __all__ = ["embed_chunks", "EMBED_DIM"]

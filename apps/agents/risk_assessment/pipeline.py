@@ -16,15 +16,24 @@ Each stage produces audit records (RiskAssessmentDecisionRecord) and emits metri
 
 from __future__ import annotations
 
+import inspect
 import logging
 import time
+from collections.abc import Awaitable, Callable
+from typing import Protocol
 
 from common.async_bridge import run_async
 from common.handoffs import AgentHandoffEvent, deliver_handoff_with_retry
 from risk_assessment.agent import RiskAssessmentAgent
 from risk_assessment.audit import AuditWriter
 from risk_assessment.config import RiskAssessmentConfig
-from risk_assessment.correlation import ContradictionDetector, ContradictionResult, CorrelationResult, SignalCorrelator
+from risk_assessment.correlation import (
+    ContradictionDetector,
+    ContradictionResult,
+    CorrelationResult,
+    RiskSignal,
+    SignalCorrelator,
+)
 from risk_assessment.dedup import HandoffDeduplicator
 from risk_assessment.extrapolation import ExtrapolationResult, extrapolate_hazard_trend
 from risk_assessment.models import DecisionType, RiskAssessmentDecisionRecord
@@ -38,9 +47,40 @@ from packages.domain.src.domain.models.recommendation import Recommendation
 logger = logging.getLogger(__name__)
 
 
+class RiskAssessmentContainer(Protocol):
+    def read_item(self, *, item: str, partition_key: str) -> dict[str, object]: ...
+
+    def create_item(self, *, body: dict[str, object]) -> object: ...
+
+
+def _persist_dead_letter_entry(handoff: AgentHandoffEvent) -> str:
+    from app.services.dead_letter_service import DeadLetterService
+
+    entry = DeadLetterService().create_entry(
+        entry_type="handoff_failure",
+        correlation_id=f"handoff:{handoff.handoff_id}",
+        original_payload=handoff.model_dump(mode="json"),
+        failure_reason=handoff.failure_reason or "handoff delivery exhausted",
+        failure_code="MAX_RETRIES_EXCEEDED",
+        source_service=handoff.source_agent,
+        target_service=handoff.target_agent,
+        tenant_scope_key=handoff.scope_key,
+        incident_id=handoff.incident_id,
+        retry_count=max(handoff.retry_count, 0),
+    )
+    return entry.entry_id
+
+
 def _build_scope_key(tenant_id: str, incident_id: str) -> str:
     """Build the Cosmos DB partition key."""
     return f"{tenant_id}:{incident_id}"
+
+
+def _signal_float(raw: dict[str, object], field: str, alternate: str, default: float) -> float:
+    value = raw.get(field, raw.get(alternate, default))
+    if isinstance(value, (int, float, str, bytes)):
+        return float(value)
+    raise TypeError(f"Signal field '{field}' must be numeric")
 
 
 class AssessmentProcessingPipeline:
@@ -56,11 +96,11 @@ class AssessmentProcessingPipeline:
         version_counter: VersionCounter | None = None,
         audit_writer: AuditWriter | None = None,
         agent: RiskAssessmentAgent | None = None,
-        signal_store: object | None = None,
-        assessment_store: object | None = None,
-        recommendation_store: object | None = None,
-        deliver_fn=None,
-        on_dead_letter_fn=None,
+        signal_store: RiskAssessmentContainer | None = None,
+        assessment_store: RiskAssessmentContainer | None = None,
+        recommendation_store: RiskAssessmentContainer | None = None,
+        deliver_fn: Callable[[AgentHandoffEvent], Awaitable[None]] | None = None,
+        on_dead_letter_fn: Callable[[AgentHandoffEvent], str] | None = None,
     ) -> None:
         self._config = config or RiskAssessmentConfig()
         self._deduplicator = deduplicator or HandoffDeduplicator(
@@ -76,7 +116,7 @@ class AssessmentProcessingPipeline:
         self._assessment_store = assessment_store
         self._recommendation_store = recommendation_store
         self._deliver_fn = deliver_fn
-        self._on_dead_letter_fn = on_dead_letter_fn or (lambda h: f"dl-{h.handoff_id}")
+        self._on_dead_letter_fn = on_dead_letter_fn or _persist_dead_letter_entry
 
         # Counters for metrics
         self._handoff_count = 0
@@ -170,7 +210,7 @@ class AssessmentProcessingPipeline:
         self,
         handoff: AgentHandoffEvent,
         tenant_id: str,
-    ) -> list[dict]:
+    ) -> list[RiskSignal]:
         # RAG-OPTOUT [FR-RAG-NS-03]: GA seismic-feed signals are authoritative; doctrine grounding moves to the downstream assessment call. ADR: docs/decisions/036-foundry-rag-grounding/03-rag-optout-ga-live.md  # noqa: E501
         """Stage 2: Retrieve signals from signal store.
 
@@ -186,43 +226,84 @@ class AssessmentProcessingPipeline:
             signal_ids = signal_summary.get("signal_ids", [])
         if not signal_ids:
             signal_ids = payload.get("signal_ids", [])
+        stored_signal_refs = payload.get("stored_signal_refs", [])
+        if not isinstance(stored_signal_refs, list):
+            stored_signal_refs = []
+        evidence_snapshot = payload.get("evidence_snapshot", {})
+        snapshot_signals = evidence_snapshot.get("signals", []) if isinstance(evidence_snapshot, dict) else []
 
         # Extract signal info directly from the handoff payload for immediate use
         category = str(payload.get("category", signal_summary.get("category", "fire")))
         source_kind = str(payload.get("sourceKind", signal_summary.get("sourceKind", "authoritative")))
 
-        signals: list[dict] = []
+        signals: list[RiskSignal] = []
         missing_count = 0
 
         if self._signal_store is not None:
-            for sid in signal_ids:
-                try:
-                    sig = self._signal_store.read_item(item=sid, partition_key=handoff.incident_id)
-                    signals.append(self._normalize_signal(sig))
-                except Exception:
-                    missing_count += 1
-                    logger.warning("Signal %s not retrievable", sid)
+            used_hpk_refs = False
+            if hasattr(self._signal_store, "get_by_hpk") and stored_signal_refs:
+                used_hpk_refs = True
+                for ref in stored_signal_refs:
+                    if not isinstance(ref, dict):
+                        continue
+                    sid = str(ref.get("signal_id") or "").strip()
+                    scope = str(ref.get("scope") or tenant_id).strip() or tenant_id
+                    jurisdiction_id = str(ref.get("jurisdiction_id") or "national").strip() or "national"
+                    data_source_id = str(ref.get("data_source_id") or "").strip()
+                    if not sid or not data_source_id:
+                        missing_count += 1
+                        continue
+                    try:
+                        maybe_sig = self._signal_store.get_by_hpk(
+                            signal_id=sid,
+                            scope=scope,
+                            jurisdiction_id=jurisdiction_id,
+                            data_source_id=data_source_id,
+                        )
+                        sig = run_async(maybe_sig) if inspect.isawaitable(maybe_sig) else maybe_sig
+                        if sig is None:
+                            raise KeyError(sid)
+                        signals.append(self._normalize_signal(sig))
+                    except Exception:
+                        missing_count += 1
+                        logger.warning("Signal %s not retrievable via exact reference", sid)
+
+            if not used_hpk_refs:
+                for sid in signal_ids:
+                    try:
+                        sig = self._signal_store.read_item(item=sid, partition_key=handoff.incident_id)
+                        signals.append(self._normalize_signal(sig))
+                    except Exception:
+                        missing_count += 1
+                        logger.warning("Signal %s not retrievable", sid)
         elif signal_ids:
-            # No signal store — build synthetic signal entries from handoff payload
+            # No signal store — use bounded handoff snapshot evidence for traceability.
+            snapshot_by_id = {
+                str(item.get("signal_id")): item
+                for item in snapshot_signals
+                if isinstance(item, dict) and item.get("signal_id")
+            }
             for sid in signal_ids:
+                snapshot = snapshot_by_id.get(sid, {})
                 signals.append(
                     {
                         "signal_id": sid,
                         "confidence_score": handoff.confidence,
                         "freshness_score": 1.0,
-                        "source_kind": source_kind,
-                        "category": category,
+                        "source_kind": snapshot.get("source_kind", source_kind),
+                        "category": snapshot.get("category", category),
                         "risk_direction": "increasing",
                         "hazard_parameter": "general",
-                        "payload": {},
-                        "provenance": {},
+                        "payload": snapshot.get("payload", {}),
+                        "provenance": snapshot.get("provenance", {}),
+                        "evidence_state": "snapshot",
                     }
                 )
         else:
-            # No signal IDs provided — use handoff payload as a synthetic signal
+            # No signal IDs provided — explicit unevidenced state (never a synthetic signal id).
             signals.append(
                 {
-                    "signal_id": f"synth-{handoff.handoff_id}",
+                    "signal_id": "unevidenced",
                     "confidence_score": handoff.confidence,
                     "freshness_score": 1.0,
                     "source_kind": source_kind,
@@ -231,6 +312,7 @@ class AssessmentProcessingPipeline:
                     "hazard_parameter": "general",
                     "payload": payload,
                     "provenance": {},
+                    "evidence_state": "unevidenced",
                 }
             )
 
@@ -255,19 +337,24 @@ class AssessmentProcessingPipeline:
 
         return signals
 
-    def _normalize_signal(self, raw: dict) -> dict:
+    def _normalize_signal(self, raw: dict[str, object]) -> RiskSignal:
         """Normalize a raw signal document to the expected dict format."""
+        provenance_value = raw.get("provenance", {})
+        if not isinstance(provenance_value, dict):
+            raise TypeError("Signal provenance must be a mapping")
+        disaster_type = raw.get("disaster_type")
         return {
-            "signal_id": raw.get("signal_id", raw.get("id", "unknown")),
-            "confidence_score": float(raw.get("confidence_score", raw.get("confidenceScore", 0.0))),
-            "freshness_score": float(raw.get("freshness_score", raw.get("freshnessScore", 1.0))),
-            "source_kind": raw.get("source_kind", raw.get("sourceKind", "social")),
-            "category": raw.get("category", "fire"),
-            "risk_direction": raw.get("risk_direction", raw.get("riskDirection", "increasing")),
-            "hazard_parameter": raw.get("hazard_parameter", "general"),
+            "signal_id": str(raw.get("signal_id", raw.get("id", "unknown"))),
+            "confidence_score": _signal_float(raw, "confidence_score", "confidenceScore", 0.0),
+            "freshness_score": _signal_float(raw, "freshness_score", "freshnessScore", 1.0),
+            "source_kind": str(raw.get("source_kind", raw.get("sourceKind", "social"))),
+            "category": str(raw.get("category", "fire")),
+            "risk_direction": str(raw.get("risk_direction", raw.get("riskDirection", "increasing"))),
+            "hazard_parameter": str(raw.get("hazard_parameter", "general")),
             "payload": raw.get("payload", {}),
-            "provenance": raw.get("provenance", {}),
-            "disaster_type": raw.get("disaster_type"),
+            "provenance": {str(key): value for key, value in provenance_value.items()},
+            "disaster_type": disaster_type if isinstance(disaster_type, str) else None,
+            "evidence_state": str(raw.get("evidence_state", "retrieved")),
         }
 
     # ------------------------------------------------------------------
@@ -276,8 +363,8 @@ class AssessmentProcessingPipeline:
 
     def _correlate_signals(
         self,
-        signals: list[dict],
-    ):
+        signals: list[RiskSignal],
+    ) -> CorrelationResult:
         """Stage 3: Compute weighted confidence from multi-source signals."""
         return self._correlator.compute_weighted_confidence(signals)
 
@@ -287,11 +374,11 @@ class AssessmentProcessingPipeline:
 
     def _detect_contradictions(
         self,
-        signals: list[dict],
+        signals: list[RiskSignal],
         handoff_id: str,
         tenant_id: str,
         incident_id: str,
-    ):
+    ) -> ContradictionResult:
         """Stage 4: Detect contradictory signals."""
         result = self._contradiction_detector.detect(signals)
 
@@ -326,7 +413,7 @@ class AssessmentProcessingPipeline:
 
     def _extrapolate_trend(
         self,
-        signals: list[dict],
+        signals: list[RiskSignal],
         handoff_id: str,
         tenant_id: str,
         incident_id: str,
@@ -377,7 +464,7 @@ class AssessmentProcessingPipeline:
     def _generate_assessment(
         self,
         handoff: AgentHandoffEvent,
-        signals: list[dict],
+        signals: list[RiskSignal],
         correlation: CorrelationResult,
         contradiction: ContradictionResult,
         tenant_id: str,
@@ -462,7 +549,7 @@ class AssessmentProcessingPipeline:
         self,
         handoff: AgentHandoffEvent,
         assessment: HazardAssessment,
-        signals: list[dict],
+        signals: list[RiskSignal],
         tenant_id: str,
     ) -> list[Recommendation]:
         """Stage 7: Generate recommendations from assessment."""
@@ -515,6 +602,8 @@ class AssessmentProcessingPipeline:
         assessment: HazardAssessment,
         recommendations: list[Recommendation],
         tenant_id: str,
+        *,
+        all_stale: bool = False,
     ) -> list[AgentHandoffEvent]:
         """Stage 8: Evaluate and deliver downstream escalation handoffs.
 
@@ -522,6 +611,12 @@ class AssessmentProcessingPipeline:
         """
         scope_key = _build_scope_key(tenant_id, handoff.incident_id)
         handoffs: list[AgentHandoffEvent] = []
+
+        if all_stale:
+            logger.info(
+                "Suppressing downstream escalation for all-stale assessment %s", assessment.hazard_assessment_id
+            )
+            return handoffs
 
         # Block simulation → live escalation
         if tenant_id != "live" and tenant_id.startswith("sim"):
@@ -649,7 +744,7 @@ class AssessmentProcessingPipeline:
         self,
         handoff: AgentHandoffEvent,
         tenant_id: str | None = None,
-    ) -> dict:
+    ) -> dict[str, object]:
         """Process a handoff through all 9 pipeline stages.
 
         Returns a result dict with assessment, recommendations, and handoffs.
@@ -658,7 +753,7 @@ class AssessmentProcessingPipeline:
         start = time.perf_counter()
         effective_tenant = tenant_id or handoff.tenant_id
 
-        result: dict = {
+        result: dict[str, object] = {
             "handoff_id": handoff.handoff_id,
             "assessment": None,
             "recommendations": [],
@@ -781,6 +876,7 @@ class AssessmentProcessingPipeline:
                     assessment,
                     recommendations,
                     effective_tenant,
+                    all_stale=correlation.all_stale,
                 )
                 result["handoffs"] = downstream_handoffs
 

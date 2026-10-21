@@ -20,8 +20,8 @@ specs:
 
 | Container | Partition key | Rationale |
 | --- | --- | --- |
-| `signals` | `/tenant_id` | Tenant-scoped read/write |
-| `incidents` | `/tenant_id` | Tenant-scoped |
+| `signals` | `/scope`, `/jurisdictionId`, `/dataSourceId` (hierarchical) | Scope- and jurisdiction-filtered read/write |
+| `incidents` | Application-specific; verify against the owning container declaration | Do not infer a tenant partition from the UI scope alone |
 | `recommendations` | `/incident_id` | Recommendations cluster around incidents |
 | `audit_segments` | `/segment_id` | Even distribution; range queries by `incident_id` secondary |
 | `timeline_events` | `/incident_id` | Replay by incident |

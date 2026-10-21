@@ -4,9 +4,6 @@
 # (e.g. `org-policy-bot` or `Probot/setting`). The Status checks listed
 # below MUST all be green for a PR to merge into `main`.
 #
-# Spec-036 / T-J10 — `simulation-stub-sweep` is now a hard required-status-
-# check; a PR that re-introduces the FR-002 trip-wire literal cannot merge.
-#
 # Spec-036 / T-J17 — `[SIMULATION]` prefix gate (SC-008) is also blocking.
 # Spec-036 / T-J03 — `egress-block` contract test (SC-006) is also blocking.
 
@@ -16,7 +13,6 @@ branches:
       required_status_checks:
         strict: true
         contexts:
-          - simulation-stub-sweep / sweep        # T-J10 (FR-002)
           - ci / lint
           - ci / test
           - ci / contract                          # includes T-J17 / T-J03

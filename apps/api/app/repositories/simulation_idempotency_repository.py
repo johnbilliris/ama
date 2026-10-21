@@ -53,7 +53,10 @@ import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import PurePosixPath
+from types import ModuleType
 from typing import Any, Final, Literal
+
+from app.core.async_io import run_blocking
 
 logger = logging.getLogger(__name__)
 
@@ -71,10 +74,13 @@ LifecycleState = Literal["active", "paused", "aborted", "ended"]
 # ---- T-O03 / T-O09 RFC 8785 JCS canonicalisation -----------------------
 
 
+_rfc8785_pkg: ModuleType | None = None
 try:  # pragma: no cover - install-time branch
-    import rfc8785 as _rfc8785_pkg  # type: ignore[import-not-found]
-except Exception:  # pragma: no cover - fallback for envs without rfc8785
-    _rfc8785_pkg = None  # type: ignore[assignment]
+    import rfc8785 as _rfc8785_module
+except ImportError:  # pragma: no cover - fallback for envs without rfc8785
+    pass
+else:
+    _rfc8785_pkg = _rfc8785_module
 
 
 def _rfc8785_canonical_json(body: Any) -> bytes:
@@ -182,7 +188,7 @@ class IdempotencyCacheUnavailable(RuntimeError):
 
 
 def _build_cosmos_client() -> Any:
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]
@@ -374,7 +380,7 @@ class IdempotencyCacheRepository:
         container = self._get_container()
         if container is not None:
             try:
-                doc = container.read_item(item=cache_doc_id, partition_key=sim_id)
+                doc = await run_blocking(container.read_item, item=cache_doc_id, partition_key=sim_id)
             except Exception as exc:
                 # T-O08 — distinguish "not found" (azure.cosmos.exceptions
                 # CosmosResourceNotFoundError) from genuine transport
@@ -398,7 +404,7 @@ class IdempotencyCacheRepository:
         container = self._get_container()
         if container is not None:
             try:
-                container.upsert_item(_entry_to_doc(entry))
+                await run_blocking(container.upsert_item, _entry_to_doc(entry))
             except Exception as exc:
                 logger.error(
                     "idempotency_cache.store_failed cache_doc=%s err=%s",

@@ -49,7 +49,7 @@ class BomObservationsPipeline(IngestionPipelineBase):
 
         observations = data.get("observations", {}).get("data", [])
         payloads = []
-        for obs in observations[:20]:
+        for obs in observations:
             payloads.append(
                 {
                     "observations": {"data": [obs]},

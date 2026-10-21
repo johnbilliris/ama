@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "feature": "001-extension-list",
+  "privacy": {
+    "notice_version": "<approved-notice-version>",
+    "notice_provided_at": "<rfc3339-timestamp>",
+    "consent_recorded_for_all_included_and_excluded": true,
+    "purpose_limitation": ["SC-001", "SC-006"],
+    "au_store_resource_id": "<authorized-au-storage-account-resource-id>",
+    "reviewed_at": "<rfc3339-timestamp>",
+    "retention_delete_by": "<rfc3339-timestamp-no-later-than-90-days>",
+    "legal_hold_approved": false,
+    "verified_deletion_required": true,
+    "controller_role": "<authorized-controller-role>",
+    "no_direct_identifiers": true,
+    "reidentification_key_separated": true,
+    "recruitment_records_separated": true,
+    "least_privilege_named_study_team_access": true,
+    "immutable_access_audit": true,
+    "encrypted_in_transit": true,
+    "encrypted_at_rest": true,
+    "withdrawal_process_confirmed": true,
+    "breach_response_process_confirmed": true
+  },
+  "allocation_algorithm": "sha256-seeded-stratified-order-v1",
+  "allocation_seed": "<64-lowercase-hex>",
+  "task_variants": ["installed", "enabled"],
+  "allocation_records": [],
+  "participants": {"novice": [], "experienced": []},
+  "excluded_participants": [],
+  "review": {
+    "reviewer_identifier": "reviewer-<16-lowercase-hex>",
+    "reviewer_role": "<privacy-or-research-governance>",
+    "reviewed_at": "<rfc3339-timestamp>",
+    "decision": "<approved-or-rejected>",
+    "decision_reason_code": "<study-verified-or-study-rejected>"
+  }
+}

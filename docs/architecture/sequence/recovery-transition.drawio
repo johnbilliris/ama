@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2026-05-11T00:00:00.000Z" agent="spec-001-fallback" version="24.0.0">
+<mxfile host="app.diagrams.net" modified="2026-09-15T00:00:00.000Z" agent="remediation-source-updated; export=pending-drawio" version="24.0.0">
   <diagram name="SEQ-04" id="seq04-fallback">
-    <mxGraphModel dx="1214" dy="686" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1214" dy="686" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="900" math="0" shadow="0">
       <root>
       <mxCell id="0"/>
       <mxCell id="1" parent="0"/>
@@ -13,13 +13,13 @@
       <mxCell id="4" value="Normalisation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;" vertex="1" parent="1">
         <mxGeometry x="700" y="180" width="180" height="80" as="geometry"/>
       </mxCell>
-      <mxCell id="5" value="Operations + Public Information<br>maintain life-safety tempo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
+      <mxCell id="5" value="Operations + Public Information&lt;br&gt;maintain life-safety tempo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
         <mxGeometry x="90" y="320" width="240" height="80" as="geometry"/>
       </mxCell>
-      <mxCell id="6" value="Planning + Logistics +<br>Resilience Planner restore services" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
+      <mxCell id="6" value="Planning + Logistics +&lt;br&gt;Resilience Planner restore services" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
         <mxGeometry x="380" y="320" width="240" height="80" as="geometry"/>
       </mxCell>
-      <mxCell id="7" value="Incident Commander + Executive Leader<br>close recovery actions and steady-state reporting" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
+      <mxCell id="7" value="Incident Commander + Executive Leader&lt;br&gt;close recovery actions and steady-state reporting" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
         <mxGeometry x="670" y="320" width="280" height="90" as="geometry"/>
       </mxCell>
       <mxCell id="8" value="transition criteria met" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="2" target="3">
@@ -36,6 +36,57 @@
       </mxCell>
       <mxCell id="12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="4" target="7">
         <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="20" value="Response / Recovery overlap window — recovery activities begin while late response activities continue. Transition is condition-driven, not a clean cutover." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;dashed=1;strokeWidth=2;verticalAlign=top;" vertex="1" parent="1">
+        <mxGeometry x="240" y="120" width="360" height="330" as="geometry"/>
+      </mxCell>
+      <mxCell id="21" value="Managed handover — named outgoing Incident Controller formally transfers accountability to a named Recovery Coordinator against documented transition criteria, with a signed handover record written to the audit ledger." style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="300" y="460" width="300" height="120" as="geometry"/>
+      </mxCell>
+      <mxCell id="22" value="Four recovery environments" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+        <mxGeometry x="40" y="610" width="440" height="200" as="geometry"/>
+      </mxCell>
+      <mxCell id="23" value="Social&#xa;people, safety, wellbeing, housing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="55" y="645" width="200" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="24" value="Built&#xa;housing stock, essential infrastructure, transport" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="265" y="645" width="200" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="25" value="Economic&#xa;business continuity, employment, supply chains" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="55" y="725" width="200" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="26" value="Natural&#xa;land, water, biodiversity, cultural landscape" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="265" y="725" width="200" height="70" as="geometry"/>
+      </mxCell>
+      <mxCell id="27" value="Six national principles for disaster recovery" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+        <mxGeometry x="520" y="610" width="460" height="200" as="geometry"/>
+      </mxCell>
+      <mxCell id="28" value="1. Understand the context" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="535" y="645" width="210" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="29" value="2. Recognise complexity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="755" y="645" width="210" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="30" value="3. Use community-led approaches" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="535" y="700" width="210" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="31" value="4. Coordinate all activities" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="755" y="700" width="210" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="32" value="5. Communicate effectively" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="535" y="755" width="210" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="33" value="6. Recognise and build capacity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+        <mxGeometry x="755" y="755" width="210" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="34" value="concurrent operation, not abrupt shutdown" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#d6b656;strokeWidth=2;" edge="1" parent="1" source="5" target="6">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="35" value="accountability transfer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#b85450;strokeWidth=2;" edge="1" parent="1" source="21" target="3">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+      <mxCell id="36" value="recovery programmes are planned and reported across all four environments against all six principles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+        <mxGeometry x="40" y="830" width="940" height="40" as="geometry"/>
       </mxCell>
       </root>
     </mxGraphModel>

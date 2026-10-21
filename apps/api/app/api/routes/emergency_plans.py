@@ -6,6 +6,7 @@ Delegates to ``EmergencyPlanService`` for business logic and
 FRs: FR-001–007 | Research: R-002
 """
 
+from app.repositories.emergency_plan_repository import PlanDocumentRecord
 from app.services.emergency_plan_service import EmergencyPlanService
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -46,7 +47,7 @@ class TransitionInput(BaseModel):
 
 
 @router.post("", status_code=201)
-async def create_plan(payload: CreatePlanInput) -> dict:
+async def create_plan(payload: CreatePlanInput) -> PlanDocumentRecord:
     plan = await service.create_plan(
         title=payload.title,
         region_id=payload.region_id,
@@ -61,18 +62,18 @@ async def create_plan(payload: CreatePlanInput) -> dict:
 
 
 @router.get("")
-async def list_plans(region_id: str | None = None, lifecycle_state: str | None = None) -> list[dict]:
+async def list_plans(region_id: str | None = None, lifecycle_state: str | None = None) -> list[PlanDocumentRecord]:
     return await service.list_plans(region_id=region_id, lifecycle_state=lifecycle_state)
 
 
 @router.get("/by-region/{region_id}/hierarchy")
-async def get_hierarchy(region_id: str) -> dict:
+async def get_hierarchy(region_id: str) -> dict[str, object]:
     plans = await service.get_hierarchy(region_id)
     return {"region_id": region_id, "plans": plans}
 
 
 @router.get("/{plan_id}")
-async def get_plan(plan_id: str, region_id: str = "") -> dict:
+async def get_plan(plan_id: str, region_id: str = "") -> PlanDocumentRecord:
     plan = await service.get_plan(plan_id, region_id)
     if plan is None:
         raise HTTPException(status_code=404, detail=f"Plan '{plan_id}' not found")
@@ -80,7 +81,9 @@ async def get_plan(plan_id: str, region_id: str = "") -> dict:
 
 
 @router.put("/{plan_id}/sections/{section_slug}")
-async def update_section(plan_id: str, section_slug: str, payload: UpdateSectionInput, region_id: str = "") -> dict:
+async def update_section(
+    plan_id: str, section_slug: str, payload: UpdateSectionInput, region_id: str = ""
+) -> PlanDocumentRecord:
     try:
         return await service.update_section(plan_id, region_id, section_slug, payload.title, payload.content)
     except KeyError as exc:
@@ -90,7 +93,7 @@ async def update_section(plan_id: str, section_slug: str, payload: UpdateSection
 
 
 @router.post("/{plan_id}/transition")
-async def transition_plan(plan_id: str, payload: TransitionInput, region_id: str = "") -> dict:
+async def transition_plan(plan_id: str, payload: TransitionInput, region_id: str = "") -> dict[str, object]:
     try:
         return await service.transition_plan(plan_id, region_id, payload.target_state, payload.user_role)
     except KeyError as exc:
@@ -100,14 +103,14 @@ async def transition_plan(plan_id: str, payload: TransitionInput, region_id: str
 
 
 @router.get("/by-incident/{incident_id}")
-async def get_plans_for_incident(incident_id: str):
+async def get_plans_for_incident(incident_id: str) -> dict[str, object]:
     """Find emergency plans relevant to an incident's region."""
     # Would query by region linked to the incident
     return {"incident_id": incident_id, "plans": [], "message": "Query plans by incident region"}
 
 
 @router.get("/{plan_id}/completeness")
-async def get_completeness(plan_id: str, region_id: str = "") -> dict:
+async def get_completeness(plan_id: str, region_id: str = "") -> dict[str, object]:
     try:
         return await service.get_completeness(plan_id, region_id)
     except KeyError as exc:

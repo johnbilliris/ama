@@ -407,29 +407,25 @@ re-opened.
   subscriptions); post-deploy validation script (rejected —
   validates after the breach).
 
-### D21. Per-operation `Strong` consistency + bounded 3-retry backoff (AMD-07 / FR-044 / R2-Q2)
+### D21. Session source + locked-Blob acknowledgement with bounded retries (AMD-07 / FR-044 / R2-Q2)
 
-- **Decision**: The audit write that precedes every AU-refusal HTTP
-  response uses Cosmos SDK request-options override
-  `consistency_level=Strong` on `create_item` (per-operation; the
-  account-level default `Session` remains for non-audit containers
-  per `eval-platform.bicep` precedent). Transient 5xx / 429 are
-  retried 3 times with 250 ms / 1 s / 4 s exponential backoff. On
-  retry exhaustion the API returns HTTP `503` with a `ProblemDetails`
-  body referencing FR-044. The audit Cosmos account is single-region
-  (`australiaeast`) so per-op `Strong` is compatible (multi-region
-  Strong is forbidden by Cosmos).
-- **Rationale**: Per-op Strong gives the durable-before-respond
-  guarantee the spec requires while preserving Session consistency
-  for the rest of the harness (FR-034 reuse invariant). The retry
-  budget (~5.25 s worst case) is bounded well below the FR-046 ≤60 s
-  freshness SLO so the retry policy cannot independently breach the
-  SLO budget (CHK107).
-- **Alternatives considered**: Account-level Strong (rejected —
-  breaks portfolio-wide Session default and forbids the
-  australiasoutheast paired DR); silent retry forever (rejected —
-  unbounded blocking); fail-fast with no retry (rejected — too
-  brittle for transient 429).
+- **Decision (superseded 2026-09-24)**: A Session account cannot be
+  strengthened to Strong per request; consistency overrides may only retain
+  or weaken the account contract. The refusal path therefore performs a
+  create-only write to the existing Session Cosmos source followed by a
+  synchronous create-only upload to locked Blob. The 4xx refusal is returned
+  only after both receipts are captured. Three total attempts are allowed for
+  transient 408/429/5xx or transport failures, with waits of 250 ms and 1 s,
+  a 4 s I/O budget, and a 5.5 s end-to-end ceiling.
+- **Rationale**: Cosmos write acknowledgement and a Session token establish a
+  committed source version and read-your-writes, not immutable evidence or a
+  one-off Strong contract. Locked Blob is the immutable receipt required by
+  FR-044 while Session preserves the approved two-region AU availability
+  topology.
+- **Alternatives considered**: A dedicated Strong account (rejected for this
+  implementation because two-region Strong has a single write region and lower
+  write availability); Cosmos acknowledgement alone (rejected because it is
+  mutable); unbounded retry (rejected).
 
 ### D22. `/healthz/evidence` critical vs non-critical banding (AMD-08 / FR-045 / SC-020(b) / R1-Q1)
 
@@ -554,7 +550,9 @@ re-opened.
   (KPI Ladder, Measurement Method, Replay Scorecard, Causal Chains,
   Benchmarks, Audit Trace, Public Information) MUST fetch live data
   from its corresponding `/api/v1/evidence/*` endpoint **on mount**
-  (not lazy / manual-refresh / deferred-until-tab-focus). Tabs MUST
+  (not lazy / manual-refresh / deferred-until-tab-focus). Replay uses
+  a read-only latest-scorecard GET on mount; its POST is reserved for
+  explicit user action. Tabs MUST
   surface all four state badges — `degraded`, `small-sample`,
   `manual`, `reduced-fidelity` — explicitly. Stub or placeholder
   content (e.g., "populated by Phase 4") is forbidden in any merged
@@ -564,7 +562,8 @@ re-opened.
   lookup latency targets. Explicit state badges are the operator's
   only signal that a value is not at full fidelity (FR-027 / FR-032
   / FR-028 invariants).
-- **Alternatives considered**: Lazy fetch on first interaction
+- **Alternatives considered**: POST replay on mount (rejected because it
+  creates duplicate persisted runs and audit side effects); lazy fetch on first interaction
   (rejected — defeats the "live data on mount" contract);
   conditional badge rendering only when a state is set (already the
   behaviour — but absence MUST also be testable, hence the

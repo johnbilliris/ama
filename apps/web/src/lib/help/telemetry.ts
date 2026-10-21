@@ -20,7 +20,7 @@ type AppInsights = {
 };
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+   
   interface Window {
     appInsights?: AppInsights;
   }
@@ -31,7 +31,7 @@ export function trackHelpEvent(event: HelpTelemetryEvent): void {
   const ai = window.appInsights;
   if (!ai?.trackEvent) {
     // dev fallback — surface in console so a11y/e2e harness can assert
-    // eslint-disable-next-line no-console
+     
     console.debug("[help.telemetry]", event);
     return;
   }

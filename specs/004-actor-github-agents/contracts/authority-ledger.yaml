@@ -1,0 +1,606 @@
+schemaVersion: 1
+asOfDate: '2026-09-15'
+owner: specs/004-actor-github-agents
+reviewPolicy:
+  legalReviewRequired: true
+  staleAfterDays: 180
+  statusValues:
+  - VERIFIED
+  - UNVERIFIED
+  - HISTORICAL
+assertions:
+- key: commonwealth-nema-establishing-instrument
+  actor: nema
+  jurisdiction: commonwealth
+  instrumentOrAgency: Commonwealth emergency-management establishing instrument
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: NEMA coordinates Commonwealth disaster support, but exact establishing
+    statute wording remains UNVERIFIED until primary-source review.
+  reviewer: repository-audit
+  status: UNVERIFIED
+- key: qld-qfes-successor
+  actor: state-government
+  jurisdiction: qld
+  instrumentOrAgency: Queensland Fire Department
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use Queensland Fire Department naming in active guidance; treat
+    QFES wording as historical unless dated source confirms a context.
+  reviewer: repository-audit
+  status: UNVERIFIED
+- key: nsw-resilience-successor
+  actor: state-government
+  jurisdiction: nsw
+  instrumentOrAgency: NSW emergency-management coordination successor to Resilience
+    NSW
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Resilience NSW is historical; current successor wording must
+    remain qualified until primary-source verification is attached.
+  reviewer: repository-audit
+  status: UNVERIFIED
+- key: qld-ldmg-chair-vs-ldc
+  actor: local-government
+  jurisdiction: qld
+  instrumentOrAgency: Disaster Management Act 2003 (Qld) role separation
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Mayor/LDMG chair and Local Disaster Coordinator are distinct
+    appointments; do not collapse roles.
+  reviewer: repository-audit
+  status: UNVERIFIED
+- key: authority-act-ambulance
+  actor: act-ambulance
+  jurisdiction: act
+  instrumentOrAgency: Emergencies Act 2004 (ACT)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-act-esa
+  actor: act-esa
+  jurisdiction: act
+  instrumentOrAgency: Emergencies Act 2004 (ACT)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-act-fr
+  actor: act-fr
+  jurisdiction: act
+  instrumentOrAgency: Emergencies Act 2004 (ACT)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-act-policing
+  actor: act-policing
+  jurisdiction: act
+  instrumentOrAgency: Australian Federal Police Act 1979
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-act-rfs
+  actor: act-rfs
+  jurisdiction: act
+  instrumentOrAgency: Emergencies Act 2004 (ACT)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-afp-act
+  actor: afp-act
+  jurisdiction: act
+  instrumentOrAgency: Australian Federal Police Act 1979
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-ses-act
+  actor: ses-act
+  jurisdiction: act
+  instrumentOrAgency: Emergencies Act 2004 (ACT)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-abf
+  actor: abf
+  jurisdiction: commonwealth
+  instrumentOrAgency: Australian Border Force Act 2015
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-adf
+  actor: adf
+  jurisdiction: commonwealth
+  instrumentOrAgency: Defence Act 1903
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-afp-commonwealth
+  actor: afp-commonwealth
+  jurisdiction: commonwealth
+  instrumentOrAgency: Australian Federal Police Act 1979
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-arc
+  actor: arc
+  jurisdiction: commonwealth
+  instrumentOrAgency: No legislative basis in seed
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-asa
+  actor: asa
+  jurisdiction: commonwealth
+  instrumentOrAgency: Air Services Act 1995
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-bom-national
+  actor: bom-national
+  jurisdiction: commonwealth
+  instrumentOrAgency: Meteorology Act 1955
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-ga-national
+  actor: ga-national
+  jurisdiction: commonwealth
+  instrumentOrAgency: National Measurement Act 1960
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-nema
+  actor: nema
+  jurisdiction: commonwealth
+  instrumentOrAgency: National Emergency Declaration Act 2020
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-rfds
+  actor: rfds
+  jurisdiction: commonwealth
+  instrumentOrAgency: No legislative basis in seed
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-sja-national
+  actor: sja-national
+  jurisdiction: commonwealth
+  instrumentOrAgency: No legislative basis in seed
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-surf-lifesaving
+  actor: surf-lifesaving
+  jurisdiction: commonwealth
+  instrumentOrAgency: No legislative basis in seed
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-frnsw
+  actor: frnsw
+  jurisdiction: nsw
+  instrumentOrAgency: Fire and Rescue NSW Act 1989
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-mrnsw
+  actor: mrnsw
+  jurisdiction: nsw
+  instrumentOrAgency: Marine Rescue NSW Act 2022
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-nsw-ambulance
+  actor: nsw-ambulance
+  jurisdiction: nsw
+  instrumentOrAgency: Health Services Act 1997 (NSW)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-nsw-rfs
+  actor: nsw-rfs
+  jurisdiction: nsw
+  instrumentOrAgency: Rural Fires Act 1997 (NSW)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-nswpf
+  actor: nswpf
+  jurisdiction: nsw
+  instrumentOrAgency: State Emergency and Rescue Management Act 1989 (NSW)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-ses-nsw
+  actor: ses-nsw
+  jurisdiction: nsw
+  instrumentOrAgency: State Emergency Service Act 1989 (NSW)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-bushfires-nt
+  actor: bushfires-nt
+  jurisdiction: nt
+  instrumentOrAgency: Bushfires Management Act 2016 (NT)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-ntes
+  actor: ntes
+  jurisdiction: nt
+  instrumentOrAgency: Emergency Management Act 2013 (NT)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-ntfrs
+  actor: ntfrs
+  jurisdiction: nt
+  instrumentOrAgency: Fire and Emergency Act 1996 (NT)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-ntpf
+  actor: ntpf
+  jurisdiction: nt
+  instrumentOrAgency: Police Administration Act 1978 (NT)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-sja-nt
+  actor: sja-nt
+  jurisdiction: nt
+  instrumentOrAgency: No legislative basis in seed
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-qas
+  actor: qas
+  jurisdiction: qld
+  instrumentOrAgency: Ambulance Service Act 1991 (Qld)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-qfd
+  actor: qfd
+  jurisdiction: qld
+  instrumentOrAgency: Fire and Emergency Services Act 1990 (Qld)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-qps
+  actor: qps
+  jurisdiction: qld
+  instrumentOrAgency: Disaster Management Act 2003 (Qld)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-ses-qld
+  actor: ses-qld
+  jurisdiction: qld
+  instrumentOrAgency: Fire and Emergency Services Act 1990 (Qld)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-saas
+  actor: saas
+  jurisdiction: sa
+  instrumentOrAgency: SA Ambulance Service Act 1992
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-sacfs
+  actor: sacfs
+  jurisdiction: sa
+  instrumentOrAgency: Fire and Emergency Services Act 2005 (SA)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-samfs
+  actor: samfs
+  jurisdiction: sa
+  instrumentOrAgency: Fire and Emergency Services Act 2005 (SA)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-sapol
+  actor: sapol
+  jurisdiction: sa
+  instrumentOrAgency: Emergency Management Act 2004 (SA)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-ses-sa
+  actor: ses-sa
+  jurisdiction: sa
+  instrumentOrAgency: Fire and Emergency Services Act 2005 (SA)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-at
+  actor: at
+  jurisdiction: tas
+  instrumentOrAgency: Ambulance Service Act 1982 (Tas)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-ses-tas
+  actor: ses-tas
+  jurisdiction: tas
+  instrumentOrAgency: Emergency Management Act 2006 (Tas)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-taspol
+  actor: taspol
+  jurisdiction: tas
+  instrumentOrAgency: Emergency Management Act 2006 (Tas)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-tfs
+  actor: tfs
+  jurisdiction: tas
+  instrumentOrAgency: Fire Service Act 1979 (Tas)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-av
+  actor: av
+  jurisdiction: vic
+  instrumentOrAgency: Ambulance Services Act 1986 (Vic)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-cfa-vic
+  actor: cfa-vic
+  jurisdiction: vic
+  instrumentOrAgency: Country Fire Authority Act 1958 (Vic)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-frv
+  actor: frv
+  jurisdiction: vic
+  instrumentOrAgency: Fire Rescue Victoria Act 1958
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-ses-vic
+  actor: ses-vic
+  jurisdiction: vic
+  instrumentOrAgency: Victoria State Emergency Service Act 2005
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-vicpol
+  actor: vicpol
+  jurisdiction: vic
+  instrumentOrAgency: Emergency Management Act 2013 (Vic)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-dfes-wa
+  actor: dfes-wa
+  jurisdiction: wa
+  instrumentOrAgency: Fire and Emergency Services Act 1998 (WA)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-sja-wa
+  actor: sja-wa
+  jurisdiction: wa
+  instrumentOrAgency: No legislative basis in seed
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED
+- key: authority-wapol
+  actor: wapol
+  jurisdiction: wa
+  instrumentOrAgency: Emergency Management Act 2005 (WA)
+  primarySourceUrl: null
+  effectiveDate: null
+  reviewDate: '2026-09-15'
+  permittedAssertion: Use only qualified authority wording for this actor until legal/sector
+    review marks this assertion VERIFIED.
+  reviewer: external-qualified-review-required
+  status: UNVERIFIED

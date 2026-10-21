@@ -154,7 +154,7 @@ class TestBushfireEscalationToCommunication:
         """
         delivered_handoffs: list[AgentHandoffEvent] = []
 
-        def mock_deliver(h: AgentHandoffEvent) -> None:
+        async def mock_deliver(h: AgentHandoffEvent) -> None:
             delivered_handoffs.append(h)
 
         handoff = _build_fire_handoff(confidence=0.95)
@@ -185,7 +185,7 @@ class TestBushfireAuditTrailComplete:
         """All 8 stages produce audit records."""
         delivered_handoffs: list[AgentHandoffEvent] = []
 
-        def mock_deliver(h: AgentHandoffEvent) -> None:
+        async def mock_deliver(h: AgentHandoffEvent) -> None:
             delivered_handoffs.append(h)
 
         handoff = _build_fire_handoff(confidence=0.85)

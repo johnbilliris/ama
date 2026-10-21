@@ -1,0 +1,47 @@
+{
+  "operation": "041-dev-application-only-held-bootstrap",
+  "applications": {
+    "api": {
+      "patch_sha256": "ef0ab730431a544dbcaa9f0948422e2943f5007167c1b3a7e3400bfdeddff5fe",
+      "expected_normalized_sha256": "59be622fccf473d7cd6d92156c56f571c7c2a4c921ecb55cf7c958f3389d66bd",
+      "request_started_at": "2026-10-20T01:23:56.130805+00:00",
+      "revision_name": "ca-api-dev--llm041-held-20261020t010013",
+      "request_sent": true,
+      "verified": true,
+      "provisioning_state": "Succeeded",
+      "observed_normalized_sha256": "59be622fccf473d7cd6d92156c56f571c7c2a4c921ecb55cf7c958f3389d66bd",
+      "initial_observed_normalized_sha256": "d0a3990697c91b7d6857074c9bd0f25eb3bd49d21a041094b8720daf651cedd1",
+      "configuration_preservation": "PASS",
+      "reconciliation": "probe-type ordering only; exact original prewrite hash matches",
+      "candidate_business_traffic": 0,
+      "held_readiness_503_expected": true
+    },
+    "agents": {
+      "patch_sha256": "e0ec80526b4e74b7d54e5f741bd6b96d8e934765087027b1d25b3b6237986105",
+      "expected_normalized_sha256": "b7583b09d61a2492ae202df4df4801d0f74f317c0394ecd7a5de7af498f30854",
+      "request_started_at": "2026-10-20T01:32:34.794019+00:00",
+      "revision_name": "ca-agents-dev--llm041-held-20261020t010013",
+      "request_sent": true,
+      "verified": true,
+      "provisioning_state": "Succeeded",
+      "observed_normalized_sha256": "b7583b09d61a2492ae202df4df4801d0f74f317c0394ecd7a5de7af498f30854",
+      "configuration_preservation": "PASS",
+      "revision_health": "None",
+      "revision_running_state": "Activating",
+      "candidate_business_traffic": 0,
+      "held_readiness_503_expected": true
+    }
+  },
+  "complete": true,
+  "business_hold": true,
+  "release_ready": false,
+  "foundry_writes": 0,
+  "completed_at": "2026-10-20T01:32:51.681868+00:00",
+  "protected_comparison": {
+    "comparison": "PASS",
+    "deployments": 4,
+    "foundry_writes": 0,
+    "account_controls_identity_tags_rai_and_diagnostics": "unchanged"
+  },
+  "acceptance": "held revisions staged; no business activation/readiness or healthy rollback asserted"
+}

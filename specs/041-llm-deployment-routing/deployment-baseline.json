@@ -1,0 +1,344 @@
+{
+  "artifact_type": "observed_environment_baseline_report_not_release_input",
+  "feature": "041-llm-deployment-routing",
+  "state": "observed",
+  "reconciliation_status": "differences_documented_unresolved_pending_user_approval",
+  "gates": {
+    "G0": "user_declared_scoped_read_only_collection_only",
+    "G1": "OBSERVED_NOT_APPROVED",
+    "G2": "PARTIAL_STOP",
+    "target_readiness": "STOP",
+    "activation": "NOT_AUTHORIZED",
+    "provisioning": "NOT_AUTHORIZED"
+  },
+  "collection_authority": {
+    "reference": "Current requesting-user fleet instruction for this bounded collection run",
+    "declared_source": "User states approved G0 metadata reads using existing CLI credentials for this run",
+    "approver_identity": null,
+    "approval_timestamp": null,
+    "window_start": "2026-10-19T09:15:34Z",
+    "window_end": "2026-10-19T17:15:34Z",
+    "credentials": "Existing Azure CLI credentials; no account set, token output, key or secret request",
+    "allowed_operations": [
+      "Target ARM account, deployments, RAI definitions, inherited account RBAC and diagnostics metadata",
+      "Target API/agents app, revision, replica and sanitized environment metadata",
+      "Target ACR metadata/repository enumeration; manifest lookup only if an applicable repository exists",
+      "Explicitly referenced diagnostic workspace and AU persistence resource metadata"
+    ],
+    "excluded_operations": [
+      "Cloud mutations, provisioning, What-If, build, push, pull or blob access",
+      "Inference, activation, traffic switch, promotion, rollback or retirement",
+      "Portal actions, other-subscription inventory, dependency installs, workflows, delegation and commits"
+    ]
+  },
+  "observation": {
+    "started_at": "2026-10-19T09:39:41.560683Z",
+    "completed_at": "2026-10-19T10:28:14.830829Z",
+    "source_head": "a9a7949674ef1090a16049a4e53549f402042083",
+    "source_worktree": "dirty_preserved",
+    "approved_freshness_policy": null,
+    "baseline_approval": null,
+    "candidate_configuration_digest": null,
+    "compiled_iac_parameter_revision": null,
+    "complete_secret_bearing_configuration_digest": null,
+    "digest_blocker": "Plaintext Application Insights connection strings sanitized before output/persistence; no secret-derived digest created",
+    "deployment_repeat_observation_equal_including_etags": true,
+    "final_app_revision_bindings_unchanged": true,
+    "binding_time": "2026-10-19T10:28:10.828939Z"
+  },
+  "target": {
+    "tenant": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+    "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+    "resource_group": "ama",
+    "account_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w",
+    "account_name": "cog-dev-w3uq6w",
+    "account_kind": "AIServices",
+    "account_sku": "S0",
+    "environment": "dev",
+    "region": "australiaeast",
+    "endpoint": "https://dev-aif-w3uq6w.cognitiveservices.azure.com/"
+  },
+  "deployments": [
+    {
+      "observed_tier_association": "reasoning",
+      "deployment_name": "gpt-5.4-dev",
+      "model": {"name": "gpt-5.4", "version": "2026-03-05", "format": "OpenAI"},
+      "sku": "GlobalStandard",
+      "capacity": 30,
+      "current_capacity": 30,
+      "rai_policy_name": "reasoning-em-domain-dev",
+      "version_upgrade_option": "OnceNewDefaultVersionAvailable",
+      "provisioning_state": "Succeeded",
+      "rate_limits": [
+        {"key": "request", "count": 300, "renewal_period_seconds": 60},
+        {"key": "token", "count": 30000, "renewal_period_seconds": 60}
+      ]
+    },
+    {
+      "observed_tier_association": "drafting",
+      "deployment_name": "gpt-5.4-mini-dev",
+      "model": {"name": "gpt-5.4", "version": "2026-03-05", "format": "OpenAI"},
+      "sku": "GlobalStandard",
+      "capacity": 60,
+      "current_capacity": 60,
+      "rai_policy_name": "drafting-em-domain-dev",
+      "version_upgrade_option": "OnceNewDefaultVersionAvailable",
+      "provisioning_state": "Succeeded",
+      "rate_limits": [
+        {"key": "request", "count": 600, "renewal_period_seconds": 60},
+        {"key": "token", "count": 60000, "renewal_period_seconds": 60}
+      ]
+    },
+    {
+      "observed_tier_association": "simulation",
+      "deployment_name": "gpt-5.4-sim-dev",
+      "model": {"name": "gpt-5.4", "version": "2026-03-05", "format": "OpenAI"},
+      "sku": "GlobalStandard",
+      "capacity": 20,
+      "current_capacity": 20,
+      "rai_policy_name": "sim-em-domain-dev",
+      "version_upgrade_option": "OnceNewDefaultVersionAvailable",
+      "provisioning_state": "Succeeded",
+      "rate_limits": [
+        {"key": "request", "count": 200, "renewal_period_seconds": 60},
+        {"key": "token", "count": 20000, "renewal_period_seconds": 60}
+      ]
+    },
+    {
+      "observed_tier_association": "embedding_lookup_not_chat_tier",
+      "deployment_name": "text-embedding-3-large-dev",
+      "model": {"name": "text-embedding-3-large", "version": "1", "format": "OpenAI"},
+      "sku": "Standard",
+      "capacity": 60,
+      "current_capacity": 60,
+      "rai_policy_name": "Microsoft.DefaultV2",
+      "version_upgrade_option": "OnceNewDefaultVersionAvailable",
+      "provisioning_state": "Succeeded",
+      "dimensions": null,
+      "dimensions_status": "Not returned by deployment/account-model metadata; no inference performed",
+      "rate_limits": [
+        {"key": "request", "count": 60, "renewal_period_seconds": 10},
+        {"key": "token", "count": 60000, "renewal_period_seconds": 60}
+      ]
+    }
+  ],
+  "rai": {
+    "raw_evidence": "041-baseline-rai-policies.json",
+    "base_policy": "Microsoft.DefaultV2",
+    "base_policy_type": "SystemManaged",
+    "mode": "Blocking",
+    "base_filters": [
+      {"name": "Hate", "source": "Prompt", "severityThreshold": "Medium", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Hate", "source": "Completion", "severityThreshold": "Medium", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Sexual", "source": "Prompt", "severityThreshold": "Medium", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Sexual", "source": "Completion", "severityThreshold": "Medium", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Violence", "source": "Prompt", "severityThreshold": "Medium", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Violence", "source": "Completion", "severityThreshold": "Medium", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Selfharm", "source": "Prompt", "severityThreshold": "Medium", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Selfharm", "source": "Completion", "severityThreshold": "Medium", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Jailbreak", "source": "Prompt", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Protected Material Text", "source": "Completion", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Protected Material Code", "source": "Completion", "enabled": true, "blocking": false, "action": "NONE"}
+    ],
+    "custom_policy_names": ["reasoning-em-domain-dev", "drafting-em-domain-dev", "sim-em-domain-dev"],
+    "custom_policy_type": "UserManaged",
+    "identical_overrides_per_custom_policy": [
+      {"name": "Violence", "source": "Prompt", "severityThreshold": "High", "enabled": true, "blocking": true, "action": "NONE"},
+      {"name": "Violence", "source": "Completion", "severityThreshold": "High", "enabled": true, "blocking": true, "action": "NONE"}
+    ],
+    "effective_configuration": "For each custom chat policy, base filters composed with overrides by name/source; embedding uses unmodified base",
+    "runtime_enforcement_verified": false,
+    "indirect_attack_filter_in_observed_base": false
+  },
+  "account_controls": {
+    "managed_identity": {
+      "type": "SystemAssigned",
+      "principal_id": "8f509bbc-44c8-4280-a3ed-9cfc053c95f7",
+      "tenant_id": "8ae9933a-1eb0-4922-8ecf-c71a136feff3"
+    },
+    "disable_local_auth": true,
+    "public_network_access": "Enabled",
+    "private_endpoint_connections": [],
+    "network_acls_status": "not_returned",
+    "encryption_customization_status": "not_returned",
+    "outbound_restriction_status": "not_returned",
+    "rbac_raw_evidence": "041-baseline-account-rbac.json",
+    "returned_direct_inherited_assignment_count": 50,
+    "api_principal_id": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a",
+    "agents_principal_id": "0b986a72-f194-41f5-8f6b-ea070229aaeb",
+    "both_app_identities_account_role": {
+      "name": "Cognitive Services OpenAI User",
+      "id": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd",
+      "condition": null
+    },
+    "diagnostics": {
+      "name": "openai-diagnostics",
+      "logs_enabled": ["RequestResponse", "Audit"],
+      "logs_disabled": ["AzureOpenAIRequestUsage", "Trace", "ManagedNetworkEvent"],
+      "metrics_enabled": ["AllMetrics"],
+      "per_setting_retention_enabled": false,
+      "per_setting_retention_days": 0,
+      "workspace_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.OperationalInsights/workspaces/log-dev",
+      "workspace_region": "australiaeast",
+      "workspace_retention_days": 30,
+      "raw_evidence": "041-baseline-account-diagnostics.json"
+    },
+    "residency": {
+      "observed_account_and_workspace_region": "australiaeast",
+      "cosmos_account": "cosmos-dev-w3uq6w",
+      "cosmos_locations": ["Australia East"],
+      "storage_account": "stdevw3uq6w2",
+      "storage_primary_location": "australiaeast",
+      "storage_secondary_location": null,
+      "storage_sku": "Standard_LRS",
+      "au_only_inference_claimed": false,
+      "note": "Preserve existing GlobalStandard chat SKU; AU persistence placement is not proof of AU-only inference or exhaustive residency compliance",
+      "raw_evidence": ["041-baseline-persistence-cosmos.json", "041-baseline-persistence-storage.json", "041-baseline-log-workspace.json"]
+    }
+  },
+  "services": {
+    "api": {
+      "app_name": "ca-api-dev",
+      "active_revision": "ca-api-dev--n6l54uy",
+      "latest_revision": "ca-api-dev--n6l54uy",
+      "latest_ready_revision_pointer": "ca-api-dev--n6l54uy",
+      "traffic_weight": 100,
+      "revision_count": 1,
+      "revision_health": "Unhealthy",
+      "revision_running_state": "ActivationFailed",
+      "replicas": 2,
+      "ready_containers_observed": 0,
+      "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
+      "immutable_running_image_sha256": null,
+      "image_digest_status": "Not exposed by ARM revision/replica metadata; not substituted from mutable tag",
+      "configuration_digest": null,
+      "sanitized_app_and_revision_environment_equal": true,
+      "complete_nonsecret_environment_and_secret_refs_evidence": [
+        "041-baseline-ca-api-dev-application.json",
+        "041-baseline-ca-api-dev-revisions.json"
+      ],
+      "sensitive_plaintext_environment_withheld": ["APPLICATIONINSIGHTS_CONNECTION_STRING"],
+      "registry_password_secret_ref": "acr-password",
+      "ingress_external": true,
+      "ingress_target_port": 8000,
+      "allow_insecure_ingress": false,
+      "anonymous_dev_access": "1",
+      "anonymous_incident_map": "1",
+      "incident_map_auth": "0",
+      "entra_tenant_id": "",
+      "entra_audience": ""
+    },
+    "agents": {
+      "app_name": "ca-agents-dev",
+      "active_revision": "ca-agents-dev--pm412va",
+      "latest_revision": "ca-agents-dev--pm412va",
+      "latest_ready_revision_pointer": "ca-agents-dev--pm412va",
+      "traffic_weight": 100,
+      "revision_count": 1,
+      "revision_health": "Unhealthy",
+      "revision_running_state": "ActivationFailed",
+      "replicas": 2,
+      "ready_containers_observed": 0,
+      "image": "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest",
+      "immutable_running_image_sha256": null,
+      "image_digest_status": "Not exposed by ARM revision/replica metadata; containerd ID is not image SHA256",
+      "configuration_digest": null,
+      "sanitized_app_and_revision_environment_equal": true,
+      "complete_nonsecret_environment_and_secret_refs_evidence": [
+        "041-baseline-ca-agents-dev-application.json",
+        "041-baseline-ca-agents-dev-revisions.json"
+      ],
+      "sensitive_plaintext_environment_withheld": ["APPLICATIONINSIGHTS_CONNECTION_STRING"],
+      "registry_password_secret_ref": "acr-password",
+      "ingress_external": false,
+      "ingress_target_port": 8080,
+      "allow_insecure_ingress": false
+    }
+  },
+  "shared_observed_routing_environment": {
+    "AZURE_AI_PROJECT_ENDPOINT": "https://dev-aif-w3uq6w.cognitiveservices.azure.com/",
+    "AZURE_AI_PROJECT_DEPLOYMENTS": "gpt-5.4@2026-03-05=gpt-5.4-dev,gpt-5.4@2026-03-05=gpt-5.4-mini-dev,gpt-5.4@2026-03-05=gpt-5.4-sim-dev,text-embedding-3-large@1=text-embedding-3-large-dev",
+    "AZURE_AI_REASONING_MODEL_KEY": "gpt-5.4@2026-03-05",
+    "AZURE_AI_DRAFTING_MODEL_KEY": "gpt-5.4@2026-03-05",
+    "AZURE_AI_SIMULATION_MODEL_KEY": "gpt-5.4@2026-03-05",
+    "AZURE_AI_REASONING_DEPLOYMENT": "gpt-5.4-dev",
+    "AZURE_AI_DRAFTING_DEPLOYMENT": "gpt-5.4-mini-dev",
+    "AZURE_AI_SIMULATION_DEPLOYMENT": "gpt-5.4-sim-dev",
+    "independent_model_id_version_environment_fields_present": false,
+    "direct_embedding_environment_fields_present": false,
+    "embedding_csv_entry_present": true,
+    "strict_csv_valid": false,
+    "defect": "Same gpt-5.4@2026-03-05 key designates three different deployments; strict configuration must reject all orderings"
+  },
+  "acr": {
+    "name": "crdevw3uq6w",
+    "login_server": "crdevw3uq6w.azurecr.io",
+    "region": "australiaeast",
+    "admin_user_enabled": true,
+    "anonymous_pull_enabled": false,
+    "public_network_access": "Enabled",
+    "role_assignment_mode": "LegacyRegistryPermissions",
+    "observed_repositories": [],
+    "matching_manifest_lookup": "Not applicable: apps specify MCR images and authorized target ACR repository list is empty",
+    "image_blobs_accessed": false
+  },
+  "rollback": {
+    "observed_current_pair": ["ca-api-dev--n6l54uy", "ca-agents-dev--pm412va"],
+    "verified_compatible_healthy_pair": null,
+    "retained_previous_pair": null,
+    "status": "BLOCKED",
+    "defects": [
+      "Both only-returned revisions unhealthy/ActivationFailed with mutable placeholder image",
+      "Ambiguous legacy routing CSV and known pre-P1 simulation misrouting risk",
+      "No immutable running image identity or complete approved configuration binding"
+    ],
+    "note": "Do not infer placeholder image runs current repository routing code; no inference or traffic was exercised"
+  },
+  "repository_reconciliation": [
+    {"path": "infra\\main.bicep", "difference": "Nine explicit chat name/model/version selections not exposed or passed through", "decision": "unresolved_no_authoring"},
+    {"path": "infra\\modules\\azure-openai.bicep", "difference": "Default chat model gpt-5.6 and hardcoded gpt-5.6 deployment names disagree with actual gpt-5.4 deployments", "decision": "preserve_actual_resources_no_default_substitution"},
+    {"path": "infra\\main.parameters.dev.json", "difference": "environmentName drh-dev differs from observed dev; no reviewed per-tier selections", "decision": "not_proven_to_be_live_deployment_input"},
+    {"path": "infra\\main.parameters.json", "difference": "Unresolved environment interpolation; actual compiled/substituted revision unavailable", "decision": "candidate_binding_missing"},
+    {"path": "infra\\modules\\azure-openai.bicep", "difference": "Nominal SKU/capacity and custom RAI base/Violence overrides agree; upgrade and embedding RAI properties omitted", "decision": "preserve_full_observed_values_no_approval_inferred"},
+    {"path": "infra\\main.bicep", "difference": "Both producers omit independent model IDs/versions and emit conflicting coordinate CSV", "decision": "strict_reader_activation_blocked_image_and_config_are_release_unit"}
+  ],
+  "governance_reference": {
+    "path": "specs\\041-llm-deployment-routing\\04-governance-constraints.json",
+    "status": "PARTIAL_STOP",
+    "effective_assignments": 11,
+    "subscription_direct": 3,
+    "management_group_inherited": 8,
+    "portal_parity": "UNKNOWN_sign_in_required_no_portal_actions",
+    "new_governance_discovery_performed": false
+  },
+  "blockers": [
+    "G1 approval and approved freshness/invalidation policy absent; no invented approver/TTL",
+    "Target-bound candidate image/configuration and compiled IaC/parameter bindings absent",
+    "Secret-bearing exact configuration digest intentionally blocked by sanitization",
+    "Immutable running image SHA256 unavailable from authorized metadata; ACR empty and images are MCR mutable tags",
+    "Both only-returned active revisions unhealthy; no verified healthy compatible rollback pair",
+    "Embedding runtime dimensions and runtime effective-policy enforcement not established without inference",
+    "G2 Portal parity not verified; AVM preservation proof and reviewed What-If absent",
+    "New resource/model selections and G4/G5a/G5b/G6 execution/traffic authority absent"
+  ],
+  "evidence": {
+    "directory": "C:\\Users\\prbillir\\.copilot\\session-state\\6cfd864e-5202-418c-8388-236f4576ce64\\files",
+    "manifest": "041-baseline-evidence-manifest.json",
+    "manifest_sha256": "192bf1724d64bd029533933a093f5d19ed862c5fa7f673657048e1d5e8d37698",
+    "raw_capture_count": 24,
+    "commands_timestamps_raw_file_sha256": "All recorded per capture in manifest and individual evidence wrappers",
+    "hash_semantics": "Hashes identify persisted sanitized evidence, not secret-bearing original cloud payloads",
+    "limited_headers": "Final captures allowlist Date, ETag, x-ms-request-id, x-ms-correlation-request-id, x-ms-routing-request-id only",
+    "source_file_sha256_bindings": "Recorded in manifest",
+    "portable_raw_evidence_in_repository": false
+  },
+  "completion": {
+    "cloud_mutations": false,
+    "inference": false,
+    "bicep_edits_build_or_what_if": false,
+    "secrets_requested_or_persisted": false,
+    "task_markers_changed": false,
+    "existing_dirty_implementation_preserved": true,
+    "next_action": "STOP_return_report_no_handoff"
+  }
+}

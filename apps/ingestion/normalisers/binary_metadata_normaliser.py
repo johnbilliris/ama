@@ -2,6 +2,14 @@ import logging
 from datetime import UTC, datetime
 from typing import Any
 
+from apps.ingestion.normalisers.timestamps import (
+    TimestampParseError,
+    parse_bom_filename_timestamp,
+    parse_bom_local_timestamp,
+    parse_iso_timestamp,
+    to_utc_iso_z,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,8 +23,13 @@ def normalise_binary_metadata(raw_payload: dict[str, Any]) -> dict[str, Any]:
     data_source_id = raw_payload.get("data_source_id", "unknown")
     source_name = raw_payload.get("source_name", "Satellite/Radar")
     product_type = raw_payload.get("product_type", "radar")
-    source_uri = raw_payload.get("source_uri", "")
-    timestamp = raw_payload.get("timestamp", datetime.now(UTC).isoformat())
+    source_uri = str(raw_payload.get("source_uri", "")).strip()
+    if not source_uri:
+        raise ValueError("Binary metadata payload missing required source_uri")
+
+    source_timezone = str(raw_payload.get("source_timezone", "Australia/Sydney"))
+    occurred_timestamp = _parse_binary_timestamp(raw_payload, source_timezone)
+    provider_timestamp = _parse_provider_update_timestamp(raw_payload, source_timezone, fallback=occurred_timestamp)
 
     coverage_bbox = raw_payload.get("coverage_bbox", [112.0, -44.0, 154.0, -10.0])
     coverage_polygon = raw_payload.get("coverage_polygon")
@@ -54,7 +67,7 @@ def normalise_binary_metadata(raw_payload: dict[str, Any]) -> dict[str, Any]:
             "kind": raw_payload.get("source_kind", "sensor"),
         },
         "category": category,
-        "occurredAt": timestamp,
+        "occurredAt": occurred_timestamp,
         "receivedAt": datetime.now(UTC).isoformat(),
         "jurisdictionId": raw_payload.get("jurisdiction_id", "national"),
         "location": location,
@@ -64,6 +77,7 @@ def normalise_binary_metadata(raw_payload: dict[str, Any]) -> dict[str, Any]:
             "binaryAssetUri": source_uri,
             "coverageBbox": coverage_bbox,
             "productCode": raw_payload.get("product_code", ""),
+            "publicationTimestamp": provider_timestamp,
             "resolution": raw_payload.get("resolution"),
         },
         "confidenceScore": 0.75,
@@ -72,6 +86,71 @@ def normalise_binary_metadata(raw_payload: dict[str, Any]) -> dict[str, Any]:
         "provenance": {
             "collectionMethod": raw_payload.get("collection_method", "satellite_downlink"),
             "sourceUri": source_uri,
-            "sourceTimestamp": timestamp,
+            "sourceTimestamp": provider_timestamp,
         },
     }
+
+
+def _parse_binary_timestamp(raw_payload: dict[str, Any], source_timezone: str) -> str:
+    explicit = raw_payload.get("product_timestamp")
+    if explicit is not None and str(explicit).strip() != "":
+        text = str(explicit).strip()
+        if len(text) == 14 and text.isdigit():
+            return to_utc_iso_z(
+                parse_bom_local_timestamp(
+                    text,
+                    source_timezone=source_timezone,
+                    provider="binary_metadata",
+                    field="product_timestamp",
+                )
+            )
+        return to_utc_iso_z(parse_iso_timestamp(text, provider="binary_metadata", field="product_timestamp"))
+
+    filename = raw_payload.get("timestamp") or raw_payload.get("product_code") or raw_payload.get("source_uri")
+    try:
+        return to_utc_iso_z(
+            parse_bom_filename_timestamp(
+                filename,
+                source_timezone=source_timezone,
+                provider="binary_metadata",
+                field="filename_timestamp",
+            )
+        )
+    except TimestampParseError as filename_error:
+        if (
+            raw_payload.get("data_source_id") != "himawari-satellite"
+            or filename_error.reason != "no YYYYMMDDHHMM or YYYYMMDDHHMMSS token in filename"
+        ):
+            raise
+
+        try:
+            provider_timestamp = _parse_provider_version_timestamp(raw_payload)
+        except TimestampParseError:
+            provider_timestamp = None
+        if provider_timestamp is not None:
+            return provider_timestamp
+        raise filename_error
+
+
+def _parse_provider_update_timestamp(raw_payload: dict[str, Any], source_timezone: str, *, fallback: str) -> str:
+    return _parse_provider_version_timestamp(raw_payload) or fallback
+
+
+def _parse_provider_version_timestamp(raw_payload: dict[str, Any]) -> str | None:
+    provider_version = raw_payload.get("provider_version")
+    if provider_version is None or str(provider_version).strip() == "":
+        return None
+    token = str(provider_version).strip().split()[-1]
+    if token.isdigit() and len(token) == 14:
+        return to_utc_iso_z(
+            parse_bom_local_timestamp(
+                token,
+                source_timezone="UTC",
+                provider="binary_metadata",
+                field="provider_version",
+            )
+        )
+    try:
+        return to_utc_iso_z(parse_iso_timestamp(token, provider="binary_metadata", field="provider_version"))
+    except TimestampParseError:
+        return None

@@ -9,9 +9,36 @@ the OTel proxy/noop implementations.
 from opentelemetry import metrics, trace
 
 SERVICE_NAME = "ingestion"
+UNKNOWN_TENANT = "unknown"
 
 tracer = trace.get_tracer(SERVICE_NAME)
 meter = metrics.get_meter(SERVICE_NAME)
+
+
+def current_tenant_id(default: str = UNKNOWN_TENANT) -> str:
+    """Resolve the ambient tenant scope for metric dimensions.
+
+    Background work that never bound a scope is reported as ``unknown`` so that
+    per-tenant dashboards never silently attribute it to live operations.
+    """
+    try:
+        from app.core.tenant_context import get_current_tenant
+    except Exception:  # noqa: BLE001 - ingestion may run without the API package
+        return default
+    try:
+        return get_current_tenant().tenant_id
+    except LookupError:
+        return default
+
+
+def tenant_attributes(
+    attributes: dict[str, str | bool | int | float] | None = None,
+    tenant_id: str | None = None,
+) -> dict[str, str | bool | int | float]:
+    merged = dict(attributes or {})
+    merged["tenant_id"] = (tenant_id or "").strip() or current_tenant_id()
+    return merged
+
 
 # ── Pipeline metrics ──
 
@@ -51,6 +78,12 @@ validation_failures_counter = meter.create_counter(
     unit="1",
 )
 
+persistence_failures = meter.create_counter(
+    name="ingestion.persistence_failures",
+    description="Signal persistence failures before commit",
+    unit="1",
+)
+
 circuit_breaker_trips = meter.create_counter(
     name="ingestion.circuit_breaker_trips",
     description="Circuit breaker trip events",
@@ -67,6 +100,12 @@ poll_duration = meter.create_histogram(
     name="ingestion.poll_duration_ms",
     description="Duration of source poll operations in milliseconds",
     unit="ms",
+)
+
+logical_partition_utilization = meter.create_up_down_counter(
+    name="ingestion.logical_partition_utilization_percent",
+    description="Sampled logical partition utilization percentage (0-100)",
+    unit="%",
 )
 
 # ── Simulation metrics ──

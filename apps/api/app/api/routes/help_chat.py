@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import AsyncIterator
 from dataclasses import asdict
 from typing import Annotated, Literal
 from uuid import uuid4
@@ -56,7 +57,7 @@ async def chat_ask(
     body: ChatAskRequest,
     caller: CallerDep,
     repos: Annotated[HelpRepositories, Depends(get_help_repositories)],
-):
+) -> StreamingResponse:
     session_id = body.session_id or str(uuid4())
     snapshot_id = repos.active_snapshot_id(caller.tenant_id) or "snapshot-bootstrap"
     persona_id = body.persona_id or caller.persona_id
@@ -83,7 +84,7 @@ async def chat_ask(
             },
         )
 
-        async def deny_stream():
+        async def deny_stream() -> AsyncIterator[str]:
             yield _sse(
                 "meta",
                 {
@@ -138,7 +139,7 @@ async def chat_ask(
         snapshot_id=snapshot_id,
     )
 
-    async def stream():
+    async def stream() -> AsyncIterator[str]:
         yield _sse(
             "meta",
             {
@@ -157,7 +158,7 @@ async def chat_ask(
         if _FOUNDRY_LIVE:
             from apps.agents.help_assistant.agent import run_chat_turn
 
-            event_iter = run_chat_turn(turn_input)
+            event_iter = await run_chat_turn(turn_input)
         else:
             event_iter = run_chat_turn_cosmos_grounded(
                 turn_input,
@@ -169,7 +170,11 @@ async def chat_ask(
             payload = event.payload if hasattr(event, "payload") else asdict(event)
             yield _sse(event.kind, payload)
             if event.kind == "done":
-                last_audit_id = payload.get("audit_entry_id")
+                audit_id = payload.get("audit_entry_id")
+                if audit_id is not None:
+                    if not isinstance(audit_id, str):
+                        raise TypeError("Chat audit_entry_id must be a string")
+                    last_audit_id = audit_id
 
         # Persist audit entry produced by the agent (single source of truth).
         from app.repositories.help_repositories import append_chat_audit_entry as _append_audit
@@ -178,7 +183,7 @@ async def chat_ask(
             run_chat_turn_offline, "last_audit_entry", None
         )
         audit_entry_id: str | None = last_audit_id
-        full_audit_payload: dict = {
+        full_audit_payload: dict[str, object] = {
             "tenant_id": caller.tenant_id,
             "actor_id": caller.user_id,
             "session_id": session_id,
@@ -213,7 +218,7 @@ async def chat_ask(
     return StreamingResponse(stream(), media_type="text/event-stream")
 
 
-def _sse(event: str, payload: dict) -> str:
+def _sse(event: str, payload: dict[str, object]) -> str:
     return f"event: {event}\ndata: {json.dumps(payload, separators=(',', ':'))}\n\n"
 
 
@@ -222,7 +227,7 @@ async def chat_feedback(
     body: ChatFeedbackRequest,
     caller: CallerDep,
     repos: Annotated[HelpRepositories, Depends(get_help_repositories)],
-):
+) -> dict[str, str]:
     backlog_id = str(uuid4())
     repos.enqueue_feedback(
         tenant_id=caller.tenant_id,
@@ -247,7 +252,7 @@ async def chat_session(
     session_id: str,
     caller: CallerDep,
     repos: Annotated[HelpRepositories, Depends(get_help_repositories)],
-):
+) -> dict[str, object]:
     session = repos.get_chat_session(tenant_id=caller.tenant_id, session_id=session_id, user_id=caller.user_id)
     if not session:
         raise HTTPException(status_code=404, detail={"code": "session.not_found", "message": "session not found"})

@@ -1,0 +1,251 @@
+{
+  "schema_version": "spec005-readiness-replay-v1",
+  "generated_at": "2026-09-16T00:37:42.514366+00:00",
+  "input_snapshot": "specs/005-data-source-governance/evidence/readiness-snapshot.generated.json",
+  "replayed_state": {
+    "sources": [],
+    "assessments": [],
+    "assignments": [],
+    "chains": []
+  },
+  "unsupported_events": [
+    {
+      "audit_entry_id": "audit-3c2f73134274426e9cc4505f544bd103",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-311d9dbe46944824a2e1bf9a52264795",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-d8dddb1a875945bbaed0c3cb12d41e7a",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-74aaf660540a4b5689c4bd35a5d5a94e",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-b1d2775588f744daafafb0825af87bf6",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-9f20f5e8306d4533a6917526990a30f8",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-c70bf83d16c640e393beffd40fb88888",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-b1e719b8cbda444db9756dd1a563e1b6",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-e98a481016364588acd068ac84656ea6",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-64c5b2c56bf8416ab9e261ac1ffb2289",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-84bf7d7b4b034fa5b511d4882c87c6e9",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-5917bbb0cc33464fa53fafc1ba571031",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-fe0cd0d8f5864bff865ab403a1c647cc",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-be6aa8aaaa5c4673a64e94247f2d3fbc",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-5d18ff13b0794efeba17be027ca6c45a",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-6f16f2fd035f43d5a62ccceb7a04a788",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-c21ea2dbbb2046fe8bb5631cc5698d7f",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-d8daa0c43b934d548b6398fdd701ef2f",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-57fdff5941ea4eb39ea115aa2298931e",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-f80a2d3f49854b65ad8799864be7b635",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-bd91b336cac64b9e9bcfdd081253777e",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-5926e38ef53b4cf584692292d465c02c",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-b2a06f25b3c6426e8e009d8ab8e5439f",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-e9e85e4cc80d4d4c97cda24a35d1a8d9",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-d7d9766d2b694d6b9a7a099a1f8cb1b5",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-5118c94b683d4fc6b1e89853c8936be6",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-5f9c315b72fa476dbda0d9b0943ca9c1",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-a81b261f73f04239a21494e58f338189",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-0ea6885a88a845879ae5cb9c939d1add",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-ba5d6cefa99f43e993bae8bdb59b32ad",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-3e39b278dfd34ef6a2ccff06253cb2ee",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-138ec22f06c149e3a170f93da5e43a16",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-7ffeceb204bc4dd0a30257f0667216d5",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-48c28064dc4d477fb0b85ed8128d6d8a",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-ea894e211a0d4e2a9119fd926a9970fe",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-8f676840f5914231a172de16ee81b5b3",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-b26e607dd83f4043bec07bb9ac572d39",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-aa66190050694320833967f12333affb",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-fad60a883c164d56862fa9c22c9803bb",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-baced85b29bd45c6bec26496d12d329e",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-c81c799052fc4e4c95c72f4f154fdb84",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-d828372e88c74cfba5dec49235b81ff2",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-90f092caef3d4eb181db8d6ce8fad7fb",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-ba1610ed5dce4f36a595017949e3f501",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-8230884d36ce47e58727a721cbc1d5ac",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    },
+    {
+      "audit_entry_id": "audit-1a256f863714437e8507ef5281a91493",
+      "action": "registered",
+      "reason": "missing_after_payload"
+    }
+  ],
+  "exact_diff": {
+    "sources": {
+      "expected_sha256": "d4ac14f67817b5d7492e1692ef2d5b059d9a1fe675032b9f7537b1be1dd5ea55",
+      "actual_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "expected_count": 46,
+      "actual_count": 0
+    }
+  }
+}

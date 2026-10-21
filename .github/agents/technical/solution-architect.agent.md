@@ -1,5 +1,7 @@
 ---
+name: solution-architect
 description: Solution architect agent — system design, Azure architecture governance, NFR enforcement, and cross-cutting technical decisions for the disaster response hub.
+tools: ["search/codebase","read/changes","web/fetch","search/findTestFiles","web/githubRepo","read/problems","search","search/searchResults","read/terminalLastCommand","read/terminalSelection","execute/testFailure","search/usages","vscode/vscodeAPI","microsoft.docs.mcp"]
 handoffs:
   - label: Ask about code conventions
     agent: software-developer
@@ -80,7 +82,8 @@ This agent covers system-level architecture and design governance. It does **NOT
 
 ## Contextual References
 
-- `.specify/memory/constitution.md` — All 6 principles, especially VI (Azure AU-region), I (Life Safety), II (Multi-Agent Coordination)
+- `.specify/memory/constitution.md` — Current governing principles I-VIII, II-A, and non-negotiable requirements
+- `specs/004-actor-github-agents/contracts/constitutional-grounding.md` — Shared constitutional mapping and AU carve-out guardrails for actor guidance
 - `specs/001-disaster-response-hub/data-model.md` — Full entity model: Organisation, Persona, Incident, Signal, Recommendation
 - `specs/001-disaster-response-hub/plan.md` — Technical context, technology stack, project structure
 - `docs/disaster-response-hub/architecture.md` — System architecture documentation
@@ -98,11 +101,29 @@ Every architectural decision must satisfy:
 3. **Data Trust**: Every signal carries provenance; prefer authoritative sources (BoM, Geoscience Australia)
 4. **Privacy & Compliance**: Australian data residency; role-based access; configurable jurisdictional policies
 5. **Multilingual & Accessible**: Alerts must support multiple languages and delivery channels
-6. **Azure AU Only**: All deployments must target Azure regions within Australia
+6. **VIII + Non-Negotiable Data Sovereignty**: AU residency is mandatory for persistence, telemetry, and secrets; non-AU model-hosting inference is only allowed via the bounded, approved carve-out process
+
+### Inherited NFR Ownership Map (spec 001)
+
+| NFR | Governing target (spec 001) | Technical owner(s) | Validation method |
+|---|---|---|---|
+| NFR-001 | WCAG 2.2 AA + EN 301 549 + DDA 1992; keyboard completion >=95% on P1 flows | ux-designer, accessibility-tester, qa-test-engineer | axe-core + manual AT walkthrough per release |
+| NFR-002 | PII classification, retention bounds, erasure <=30 days, AU residency, APP-8 register for cross-border | security-engineer, data-engineer, compliance-auditor | classification reports + erasure SLA dashboard + privacy review |
+| NFR-003 | Phishing-resistant MFA, short-lived sessions, HSM-backed secrets, accepted threat model | security-engineer, infrastructure-devops | identity policy checks + secret scanning + quarterly threat-model sign-off |
+| NFR-004 | Availability >=99.9%, RTO <=1h, RPO <=15m, AI quality rollback <=10m | sre-engineer, infrastructure-devops | Azure Monitor SLO dashboards + DR game-day + rollback drill |
+| NFR-005 | p95 refresh <=3s online / <=10s at 64 kbps; ingest->visibility <=60s; action round-trip <=2s | sre-engineer, qa-test-engineer | percentile telemetry by network profile + load/benchmark reports |
+| NFR-006 | 100% CAP 1.2 and EDXL-DE 2.0 conformance; Sendai mapping present | api-architect, qa-test-engineer | CI schema-validation gate + conformance sample pack |
+| NFR-007 | Provenance tiers {authoritative, verified-community, unverified} and explicit UI distinction | ai-ml-engineer, data-engineer, ux-designer | provenance assertions + UI conformance audit |
+| NFR-008 | 100% decision logging <=1s; append-only audit; sampled replay <=5m | sre-engineer, compliance-auditor | daily audit-integrity hash check + monthly replay drill |
+| NFR-009 | 100% allowed-locations policy compliance; no out-of-region backups | infrastructure-devops, security-engineer | Azure Policy report + monthly residency attestation |
+| NFR-010 | Unit cost variance <=20% month-on-month against approved envelope | azure-principal-architect, sre-engineer | cost workbook + unit-cost telemetry per rehearsal |
+| NFR-011 | P1-flow release training artefacts updated <=5 business days | product-owner-ba, principal-engineer | release checklist evidence gate |
+| NFR-012 | Immutable safety-critical audit retention >=7 years + annual successful restore drill | compliance-auditor, security-engineer, sre-engineer | retention policy evidence + annual restore report |
+| NFR-013 | v1 locales `en-AU` + `zh-Hans`; RTL readiness documented | ux-designer, accessibility-tester, public-information-officer | localization checklist + native-speaker review workflow |
 
 ### Technology Stack
-- **API/Agent Runtime**: Python 3.12, FastAPI, Pydantic v2, Microsoft Agent Framework for Python
-- **Web UI**: TypeScript 5.6, Next.js 15, React 19, Tailwind CSS
+- **API/Agent Runtime**: Refer to `pyproject.toml` (`requires-python >=3.12`) for the active Python floor and runtime dependencies
+- **Web UI**: Refer to `apps/web/package.json` for pinned Next.js/TypeScript/React versions (currently Next.js 16.2.6, TypeScript 6.0.3, React 19.2.6)
 - **Data**: Azure Cosmos DB (operational state), Azure Blob Storage (audit artifacts), Azure Cache for Redis (dashboard caching)
 - **Messaging**: Azure Event Hubs or Service Bus for inter-agent communication
 - **Identity**: Azure Entra ID with RBAC

@@ -24,8 +24,10 @@ UINT64_MAX: Final[int] = (1 << 64) - 1
 def _coerce(name: str, value: object) -> int | None:
     if value is None or value == "":
         return None
+    if not isinstance(value, (int, float, str, bytes)):
+        raise ValueError(f"{name}: not an integer: {value!r}")
     try:
-        n = int(value)  # type: ignore[arg-type]
+        n = int(value)
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{name}: not an integer: {value!r}") from exc
     if n < 0 or n > UINT64_MAX:

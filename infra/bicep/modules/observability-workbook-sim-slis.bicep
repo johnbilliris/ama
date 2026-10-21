@@ -1,5 +1,5 @@
 // Cycle 2 / T-AA18 / A2-02 — Azure Monitor workbook: simulation SLIs
-// dashboard with the new "SC-013 staging-promotion" row group containing
+// dashboard with the "SC-013 release gate" row group containing
 // Z6 + Z7. The workbook is a serialised JSON template (Microsoft.Insights/
 // workbooks). Operators access it via the Azure portal or pinned to a
 // shared dashboard.
@@ -42,7 +42,7 @@ resource simSlisWorkbook 'Microsoft.Insights/workbooks@2023-06-01' = {
         {
           type: 1
           content: {
-            json: '## Simulation SLIs — spec-036 Cycle 2\\n\\n### SC-013 staging-promotion\\n\\nThis row group surfaces SLI-Z6 + SLI-Z7. Both gates must pass over a trailing 24 h window with sample_count ≥ 30 (CLT floor) for staging promotion to proceed.'
+            json: '## Simulation SLIs — spec-036 Cycle 2\\n\\n### SC-013 release gate\\n\\nThis row group surfaces SLI-Z6 + SLI-Z7. Both gates must pass over a trailing 24 h window with sample_count ≥ 30 (CLT floor) for a release to proceed.'
           }
         }
         {

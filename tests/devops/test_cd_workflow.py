@@ -1,16 +1,8 @@
-"""Tests for CD workflow YAML syntax and structure validation.
-
-Validates that .github/workflows/cd.yml is well-formed YAML with
-the correct trigger, permissions, and top-level structure.
-
-Covers: T012 (workflow syntax), T013 (job structure)
-"""
+"""Tests for CD workflow structure and reliability gate wiring."""
 
 from __future__ import annotations
 
 import yaml
-
-# ── T012: Workflow syntax validation ─────────────────────────────────────────
 
 
 class TestCDWorkflowSyntax:
@@ -47,14 +39,12 @@ class TestCDWorkflowSyntax:
         types = wr.get("types", [])
         assert "completed" in types, f"workflow_run must include 'completed' type, got {types}"
 
-    def test_cd_workflow_trigger_main_branch(self, cd_workflow):
+    def test_cd_workflow_trigger_branch_filters(self, cd_workflow):
         wr = cd_workflow["on"]["workflow_run"]
         branches = wr.get("branches", [])
-        assert "main" in branches, f"workflow_run must filter to 'main' branch, got {branches}"
-
-    def test_cd_workflow_permissions_oidc(self, cd_workflow):
-        perms = cd_workflow.get("permissions", {})
-        assert perms.get("id-token") == "write", "id-token permission must be 'write'"
+        assert set(branches) == {"dev", "staging", "production"}, (
+            f"workflow_run must filter to dev/staging/production, got {branches}"
+        )
 
     def test_cd_workflow_permissions_contents(self, cd_workflow):
         perms = cd_workflow.get("permissions", {})
@@ -69,52 +59,68 @@ class TestCDWorkflowSyntax:
         assert perms.get("actions") == "read", "actions permission must be 'read'"
 
 
-# ── T013: Deployment job structure ───────────────────────────────────────────
+class TestCDQualityAndRollbackWiring:
+    """Validate post-deploy quality gate and rollback flow semantics."""
 
+    def test_deploy_job_exists(self, cd_workflow):
+        assert "deploy" in cd_workflow["jobs"], "deploy job must exist in CD workflow"
 
-class TestDeployStagingJobStructure:
-    """Validate deploy-staging job structure and configuration."""
+    def test_deploy_outputs_health_and_target(self, cd_workflow):
+        outputs = cd_workflow["jobs"]["deploy"].get("outputs", {})
+        assert "health_passed" in outputs
+        assert "target_env" in outputs
+        assert "resource_group" in outputs
 
-    def test_deploy_staging_job_exists(self, cd_workflow):
-        assert "deploy-staging" in cd_workflow["jobs"], "deploy-staging job must exist in CD workflow"
+    def test_quality_gate_job_uses_reusable_eval_gate(self, cd_workflow, eval_pr_gate_workflow):
+        quality = cd_workflow["jobs"].get("quality-gate", {})
+        assert quality.get("uses") == "./.github/workflows/eval-pr-gate.yml"
+        assert quality.get("needs") == ["deploy"]
+        with_block = quality.get("with", {})
+        assert with_block.get("min_evaluated_samples") == 1
+        assert with_block.get("evaluation_mode") == "pr-fast-subset"
+        assert with_block.get("evaluation_region") == "australiaeast"
+        assert with_block.get("max_cases") == 200
+        declared_inputs = eval_pr_gate_workflow["on"]["workflow_call"]["inputs"]
+        assert set(with_block) <= set(declared_inputs)
+        gate_steps = eval_pr_gate_workflow["jobs"]["eval-gate"]["steps"]
+        failure_step = next(step for step in gate_steps if step.get("name") == "Fail job if eval failed")
+        assert "steps.evaluation.outputs.gate_passed != 'true'" in failure_step["if"]
+        assert "exit 1" in failure_step["run"]
 
-    def test_deploy_staging_environment(self, cd_workflow):
-        job = cd_workflow["jobs"]["deploy-staging"]
-        assert job.get("environment") == "staging", (
-            f"deploy-staging must use 'staging' environment, got '{job.get('environment')}'"
-        )
+    def test_rollback_job_exists_and_depends_on_deploy_and_quality(self, cd_workflow):
+        rollback = cd_workflow["jobs"].get("rollback", {})
+        assert rollback.get("needs") == ["deploy", "quality-gate"]
+        assert rollback.get("environment") == "${{ needs.deploy.outputs.target_env }}"
 
-    def test_deploy_staging_concurrency_group(self, cd_workflow):
-        job = cd_workflow["jobs"]["deploy-staging"]
-        concurrency = job.get("concurrency", {})
-        assert concurrency.get("group") == "deploy-staging", (
-            f"Concurrency group must be 'deploy-staging', got '{concurrency.get('group')}'"
-        )
+    def test_rollback_condition_is_health_or_quality_failure(self, cd_workflow):
+        rollback = cd_workflow["jobs"]["rollback"]
+        condition = rollback.get("if", "")
+        assert "needs.deploy.outputs.health_passed != 'true'" in condition
+        assert "needs.quality-gate.result == 'failure'" in condition
+        assert "needs.deploy.outputs.target_env != 'dev'" in condition
 
-    def test_deploy_staging_concurrency_no_cancel(self, cd_workflow):
-        job = cd_workflow["jobs"]["deploy-staging"]
-        concurrency = job.get("concurrency", {})
-        assert concurrency.get("cancel-in-progress") is False, "deploy-staging must not cancel in-progress deployments"
+    def test_rollback_script_failure_is_not_ignored(self, cd_workflow_path):
+        content = cd_workflow_path.read_text(encoding="utf-8")
+        assert "- name: Execute rollback script" in content
+        assert "continue-on-error: true" not in content
 
-    def test_deploy_staging_success_condition(self, cd_workflow):
-        job = cd_workflow["jobs"]["deploy-staging"]
-        condition = job.get("if", "")
-        assert "workflow_run.conclusion" in condition, "deploy-staging must check workflow_run.conclusion"
-        assert "success" in condition, "deploy-staging must check for 'success' conclusion"
+    def test_cd_does_not_reintroduce_retired_progressive_delivery(self, cd_workflow_path):
+        content = cd_workflow_path.read_text(encoding="utf-8").lower()
+        assert "progressive-delivery" not in content
 
-    def test_deploy_staging_runs_on_ubuntu(self, cd_workflow):
-        job = cd_workflow["jobs"]["deploy-staging"]
-        assert job.get("runs-on") == "ubuntu-latest", (
-            f"deploy-staging must run on ubuntu-latest, got '{job.get('runs-on')}'"
-        )
+    def test_cd_does_not_purge_soft_deleted_resources(self, cd_workflow_path):
+        content = cd_workflow_path.read_text(encoding="utf-8").lower()
+        assert "account purge" not in content
+        assert "separately approved" in content
 
-    def test_deploy_staging_has_outputs(self, cd_workflow):
-        job = cd_workflow["jobs"]["deploy-staging"]
-        outputs = job.get("outputs", {})
-        assert "deployment-status" in outputs, "deploy-staging must output 'deployment-status'"
+    def test_cd_supports_local_multi_platform_azd_images(self, cd_workflow):
+        steps = cd_workflow["jobs"]["deploy"]["steps"]
+        docker_setup = next(step for step in steps if step.get("name") == "Set up multi-platform Docker image store")
+        qemu_setup = next(step for step in steps if step.get("name") == "Set up QEMU")
+        deploy = next(step for step in steps if step.get("name") == "Deploy services")
 
-    def test_deploy_staging_has_timeout(self, cd_workflow):
-        job = cd_workflow["jobs"]["deploy-staging"]
-        timeout = job.get("timeout-minutes")
-        assert timeout is not None, "deploy-staging must have a timeout"
-        assert timeout <= 30, f"deploy-staging timeout should be ≤30 min, got {timeout}"
+        assert docker_setup["uses"].startswith("docker/setup-docker-action@")
+        daemon_config = yaml.safe_load(docker_setup["with"]["daemon-config"])
+        assert daemon_config["features"]["containerd-snapshotter"] is True
+        assert qemu_setup["uses"].startswith("docker/setup-qemu-action@")
+        assert steps.index(docker_setup) < steps.index(qemu_setup) < steps.index(deploy)

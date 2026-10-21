@@ -1,0 +1,91 @@
+{
+  "schema_version": "spec005-quickstart-rehearsal-v1",
+  "status": "UNVERIFIED",
+  "revision": "REPLACE_WITH_GIT_SHA",
+  "reviewer": {
+    "name": "UNVERIFIED",
+    "role": "UNVERIFIED"
+  },
+  "participant": {
+    "name": "UNVERIFIED",
+    "role": "UNVERIFIED"
+  },
+  "steps": [
+    {
+      "id": "quickstart-1",
+      "title": "Seed catalogue bootstrap",
+      "status": "UNVERIFIED",
+      "outcome": "Not measured",
+      "started_at": "1970-01-01T00:00:00Z",
+      "ended_at": "1970-01-01T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "id": "quickstart-2",
+      "title": "Constitutional assessment workflow",
+      "status": "UNVERIFIED",
+      "outcome": "Not measured",
+      "started_at": "1970-01-01T00:00:00Z",
+      "ended_at": "1970-01-01T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "id": "quickstart-3",
+      "title": "Agent assignment workflow",
+      "status": "UNVERIFIED",
+      "outcome": "Not measured",
+      "started_at": "1970-01-01T00:00:00Z",
+      "ended_at": "1970-01-01T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "id": "quickstart-4",
+      "title": "Shared responsibility source",
+      "status": "UNVERIFIED",
+      "outcome": "Not measured",
+      "started_at": "1970-01-01T00:00:00Z",
+      "ended_at": "1970-01-01T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "id": "quickstart-5",
+      "title": "Non-compliant source blocking",
+      "status": "UNVERIFIED",
+      "outcome": "Not measured",
+      "started_at": "1970-01-01T00:00:00Z",
+      "ended_at": "1970-01-01T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "id": "quickstart-6",
+      "title": "Grace period scenario",
+      "status": "UNVERIFIED",
+      "outcome": "Not measured",
+      "started_at": "1970-01-01T00:00:00Z",
+      "ended_at": "1970-01-01T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "id": "quickstart-7",
+      "title": "Governance gap identification",
+      "status": "UNVERIFIED",
+      "outcome": "Not measured",
+      "started_at": "1970-01-01T00:00:00Z",
+      "ended_at": "1970-01-01T00:00:00Z",
+      "artifacts": []
+    },
+    {
+      "id": "quickstart-8",
+      "title": "Functional-domain precedence",
+      "status": "UNVERIFIED",
+      "outcome": "Not measured",
+      "started_at": "1970-01-01T00:00:00Z",
+      "ended_at": "1970-01-01T00:00:00Z",
+      "artifacts": []
+    }
+  ],
+  "notes": [
+    "Historical T056/T057 checkmarks remain authored snapshots.",
+    "Do not mark PASS without reviewer-attributed evidence and artifact hashes."
+  ]
+}

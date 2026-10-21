@@ -1,0 +1,16 @@
+{
+  "refresh_observed_at": "2026-10-19T13:13:17.862389+00:00",
+  "comparisons": {
+    "all_50_inherited_and_direct_rbac_assignments": "PASS ids/role/principal/scope/conditions identical",
+    "all_11_policy_assignment_bindings": "PASS ids/definitions/scopes/parameters/enforcement/exclusions/selectors/overrides identical",
+    "diagnostic_destination_categories_and_retention": "PASS identical",
+    "rai_default_v2_mode_and_all_11_base_filters": "PASS identical to accepted baseline",
+    "target_relevant_and_initiative_definitions": "PASS all 27 semantic comparisons; see policy-definition-refresh.json",
+    "both_app_identities_configuration_and_nonsecret_environment": "PASS identical including ingress/auth flags/registry refs/traffic and all sanitized nonsecret environment/secretRefs"
+  },
+  "reference_sha256": {
+    "041-baseline-account-rbac.json": "956c305c314d27789476fb91ff7032cc78e039f6c1ac7f9f4659b80fa46376b0",
+    "041-governance-live-policy.json": "3182d685379129528088fb87d49670afef46819a241724e108a0a426f91adad5",
+    "041-baseline-account-diagnostics.json": "00a5b71ada95f2e489d508a51f528f129509bb90ff20b4c1b7e1c21e1c0232f5"
+  }
+}

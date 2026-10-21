@@ -2,14 +2,90 @@ name: eval-pr-gate
 
 on:
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number for manual dispatch context"
+        required: false
+        type: number
+      evaluation_mode:
+        description: "Evaluation mode"
+        required: false
+        type: choice
+        options: [pr-fast-subset, ad-hoc, progressive-delivery-full]
+        default: pr-fast-subset
+      evaluation_region:
+        description: "Azure region used by the evaluation platform"
+        required: false
+        type: string
+        default: australiaeast
+      min_evaluated_samples:
+        description: "Minimum scorecard sample count required for a passing PR evaluation"
+        required: false
+        type: number
+      max_cases:
+        description: "Maximum dataset cases evaluated by the PR-fast subset"
+        required: false
+        type: number
+        default: 25
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "apps/eval-runner/**"
+  workflow_call:
+    inputs:
+      pr_number:
+        description: "PR number for evaluation context"
+        required: false
+        type: number
+      evaluation_mode:
+        description: "Evaluation mode forwarded to eval runner"
+        required: false
+        type: string
+        default: pr-fast-subset
+      evaluation_region:
+        description: "Azure region used by the evaluation runner"
+        required: false
+        type: string
+        default: australiaeast
+      min_evaluated_samples:
+        description: "Minimum number of evaluated samples required"
+        required: false
+        type: number
+      max_cases:
+        description: "Maximum dataset cases evaluated by the PR-fast subset"
+        required: false
+        type: number
+        default: 25
+    outputs:
+      evaluation_status:
+        description: "Runner terminal status"
+        value: ${{ jobs.eval-gate.outputs.evaluation_status }}
+      gate_passed:
+        description: "Whether the quality gate passed"
+        value: ${{ jobs.eval-gate.outputs.gate_passed }}
+      evaluated_samples:
+        description: "Evaluated sample count"
+        value: ${{ jobs.eval-gate.outputs.evaluated_samples }}
+      run_id:
+        description: "Correlated evaluation run ID"
+        value: ${{ jobs.eval-gate.outputs.run_id }}
 
 permissions:
   contents: read
   pull-requests: write
 
 env:
-  AZURE_RUN_MODE: pr-fast-subset
-  EVAL_RUN_REGION: australiaeast
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+  UV_DEFAULT_INDEX: https://packagefeedproxy.microsoft.io/pypi/simple
+  PIP_CONFIG_FILE: /dev/null
+  PIP_EXTRA_INDEX_URL: ""
+  PIP_FIND_LINKS: ""
+  UV_INDEX: ""
+  UV_EXTRA_INDEX_URL: ""
+  UV_FIND_LINKS: ""
+  UV_NO_CONFIG: "1"
+  AZURE_RUN_MODE: ${{ inputs.evaluation_mode || 'pr-fast-subset' }}
+  EVAL_RUN_REGION: ${{ inputs.evaluation_region || 'australiaeast' }}
 
 jobs:
   eval-gate:
@@ -18,9 +94,19 @@ jobs:
     # Per spec 031 / FR-019a: PR evals run against dev infrastructure; the
     # AZURE_CREDENTIALS secret resolves from the `dev` GitHub Environment.
     environment: dev
+    env:
+      EVAL_RUNNER_JOB_NAME: ${{ vars.EVAL_RUNNER_JOB_NAME || 'caj-eval-runner-dev' }}
+      EVAL_RG: ${{ vars.EVAL_RG || 'rg-ama-eval-dev' }}
+    outputs:
+      evaluation_status: ${{ steps.evaluation.outputs.evaluation_status }}
+      gate_passed: ${{ steps.evaluation.outputs.gate_passed }}
+      evaluated_samples: ${{ steps.evaluation.outputs.evaluated_samples }}
+      run_id: ${{ steps.evaluation.outputs.run_id }}
     steps:
       - name: Checkout
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.0.0
@@ -30,26 +116,34 @@ jobs:
       - name: Install eval framework
         run: |
           pip install -e packages/eval-core
+          pip install -e packages/eval-dataset
           pip install -e apps/eval-runner
           pip install -e apps/api
           pip install pytest ruff
 
       - name: Lint
         run: |
-          ruff check packages/eval-core/ apps/eval-runner/ tests/unit/eval/
+          ruff check packages/eval-core/ packages/eval-dataset/ apps/eval-runner/ tests/unit/eval/
 
       - name: Run unit tests
         run: |
-          python -m pytest packages/eval-core/tests/ tests/unit/eval/ -q
+          python -m pytest packages/eval-core/tests/ packages/eval-dataset/tests/ tests/unit/eval/ -q
 
-      - name: Check eval runner configuration
+      - name: Resolve evaluation context
+        id: eval-context
+        run: |
+          set -euo pipefail
+          pr_number="${{ github.event.pull_request.number || inputs.pr_number || github.event.inputs.pr_number || 0 }}"
+          echo "pr-number=${pr_number}" >> "$GITHUB_OUTPUT"
+
+      - name: Check eval runner configuration (fail-closed)
         id: eval-config
         run: |
-          if [ -n "${{ vars.EVAL_RUNNER_JOB_NAME }}" ] && [ -n "${{ vars.EVAL_RG }}" ]; then
+          if [ -n "$EVAL_RUNNER_JOB_NAME" ] && [ -n "$EVAL_RG" ]; then
             echo "configured=true" >> "$GITHUB_OUTPUT"
           else
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Skipping Container Apps eval runner because EVAL_RUNNER_JOB_NAME or EVAL_RG is not configured."
+            echo "::error::EVAL_RUNNER_JOB_NAME and EVAL_RG must be configured; missing metrics cannot pass the gate."
+            exit 1
           fi
 
       - name: Azure login
@@ -58,49 +152,61 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Trigger Container Apps Job
+      - name: Verify eval platform is provisioned
         if: steps.eval-config.outputs.configured == 'true'
-        id: trigger
         run: |
           set -euo pipefail
-          RUN_ID=$(az containerapp job start \
-            --name "${{ vars.EVAL_RUNNER_JOB_NAME }}" \
-            --resource-group "${{ vars.EVAL_RG }}" \
-            --env-vars "RUN_MODE=$AZURE_RUN_MODE" "PR_NUMBER=${{ github.event.pull_request.number }}" \
-            --query "properties.startTime" -o tsv)
-          echo "run_started_at=$RUN_ID" >> "$GITHUB_OUTPUT"
+          az containerapp job show \
+            --name "$EVAL_RUNNER_JOB_NAME" \
+            --resource-group "$EVAL_RG" \
+            --query "properties.provisioningState" -o tsv
+          api_fqdn=$(az deployment group show \
+            --name eval-platform \
+            --resource-group "$EVAL_RG" \
+            --query "properties.outputs.apiFqdn.value" -o tsv)
+          if [ -z "$api_fqdn" ]; then
+            echo "::error::Eval API deployment output apiFqdn is missing."
+            exit 1
+          fi
 
-      - name: Poll for verdict
+      - name: Run correlated PR evaluation and scorecard gate
         if: steps.eval-config.outputs.configured == 'true'
-        id: verdict
+        id: evaluation
+        env:
+          EVAL_REGION: ${{ env.EVAL_RUN_REGION }}
+          PR_NUMBER: ${{ steps.eval-context.outputs.pr-number }}
+          MIN_EVALUATED_SAMPLES: ${{ inputs.min_evaluated_samples || github.event.inputs.min_evaluated_samples || inputs.max_cases || github.event.inputs.max_cases || 25 }}
+          MAX_EVAL_CASES: ${{ inputs.max_cases || github.event.inputs.max_cases || 25 }}
         run: |
           set -euo pipefail
-          for i in $(seq 1 60); do
-            VERDICT=$(az containerapp job execution list \
-              --name "${{ vars.EVAL_RUNNER_JOB_NAME }}" \
-              --resource-group "${{ vars.EVAL_RG }}" \
-              --query "[0].properties.template.containers[0].command" -o tsv || echo "running")
-            STATUS=$(az containerapp job execution list \
-              --name "${{ vars.EVAL_RUNNER_JOB_NAME }}" \
-              --resource-group "${{ vars.EVAL_RG }}" \
-              --query "[0].properties.status" -o tsv || echo "Running")
-            if [ "$STATUS" = "Succeeded" ] || [ "$STATUS" = "Failed" ]; then
-              echo "status=$STATUS" >> "$GITHUB_OUTPUT"
-              break
-            fi
-            sleep 30
-          done
+          python scripts/run_llm_evaluation.py \
+            --stage execute \
+            --env dev \
+            --mode "$AZURE_RUN_MODE" \
+            --models "gpt-5.6-luna:2026-07-09" \
+            --max-cases "$MAX_EVAL_CASES" \
+            --min-evaluated-samples "$MIN_EVALUATED_SAMPLES" \
+            --change-ref "PR-${PR_NUMBER}" \
+            --poll-seconds 15 \
+            --timeout-minutes 30 \
+            --output-dir "$RUNNER_TEMP/eval-out"
 
       - name: Comment PR with scorecard summary
-        if: always()
+        if: always() && github.event_name == 'pull_request'
         continue-on-error: true
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.x
         with:
           script: |
-            const status = "${{ steps.verdict.outputs.status }}" || "skipped";
+            const status = "${{ steps.evaluation.outputs.evaluation_status }}" || "${{ steps.evaluation.outcome }}" || "not run";
+            const gate = "${{ steps.evaluation.outputs.gate_passed }}" || "false";
+            const samples = "${{ steps.evaluation.outputs.evaluated_samples }}" || "0";
+            const runId = "${{ steps.evaluation.outputs.run_id }}" || "unavailable";
             const body = `## LLM eval gate\n\n` +
               `Status: **${status}**\n\n` +
-              `_Triggered for PR #${context.issue.number}; full scorecard published to artifact storage._`;
+              `Gate passed: **${gate}**\n` +
+              `Evaluated samples: **${samples}**\n` +
+              `Run ID: \`${runId}\`\n` +
+              `_Triggered for PR #${context.issue.number}; gate evaluated the correlated scorecard._`;
             github.rest.issues.createComment({
               owner: context.repo.owner, repo: context.repo.repo,
               issue_number: context.issue.number,
@@ -108,7 +214,7 @@ jobs:
             });
 
       - name: Fail job if eval failed
-        if: steps.verdict.outputs.status == 'Failed'
+        if: always() && (steps.eval-config.outcome != 'success' || steps.evaluation.outcome != 'success' || steps.evaluation.outputs.gate_passed != 'true')
         run: |
-          echo "::error::eval-runner reported failure — see linked scorecard artifact."
+          echo "::error::eval-runner or scorecard quality gate failed."
           exit 1

@@ -10,7 +10,7 @@ import logging
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from app.repositories.me_framework_repository import MEFrameworkRepository
+from app.repositories.me_framework_repository import MEFrameworkDocument, MEFrameworkRepository
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +28,11 @@ class MEFrameworkPlatformService:
         program_name: str,
         affected_community_definition: str = "",
         created_by: str = "",
-    ) -> dict:
+    ) -> MEFrameworkDocument:
         """Create a new M&E framework and persist to Cosmos DB."""
         framework_id = f"mef-{uuid4().hex[:12]}"
         now = datetime.now(UTC).isoformat()
-        framework_doc = {
+        framework_doc: MEFrameworkDocument = {
             "framework_id": framework_id,
             "id": framework_id,
             "document_type": "me_framework",
@@ -58,7 +58,7 @@ class MEFrameworkPlatformService:
         }
         return await self._repo.create_framework(framework_doc)
 
-    async def get_framework(self, framework_id: str, incident_id: str) -> dict | None:
+    async def get_framework(self, framework_id: str, incident_id: str) -> MEFrameworkDocument | None:
         """Retrieve a framework by ID and incident partition key."""
         return await self._repo.get_framework(framework_id, incident_id)
 
@@ -66,7 +66,7 @@ class MEFrameworkPlatformService:
         self,
         incident_id: str | None = None,
         status: str | None = None,
-    ) -> list[dict]:
+    ) -> list[MEFrameworkDocument]:
         """List frameworks with optional filters."""
         return await self._repo.list_frameworks(incident_id=incident_id, status=status)
 
@@ -74,8 +74,8 @@ class MEFrameworkPlatformService:
         self,
         framework_id: str,
         incident_id: str,
-        outcomes: list[dict],
-    ) -> dict:
+        outcomes: list[dict[str, object]],
+    ) -> MEFrameworkDocument:
         """Update selected outcomes on a framework."""
         fw = await self._repo.get_framework(framework_id, incident_id)
         if not fw:
@@ -88,15 +88,15 @@ class MEFrameworkPlatformService:
         self,
         framework_id: str,
         incident_id: str,
-        logic_data: dict,
-    ) -> dict:
+        logic_data: dict[str, object],
+    ) -> MEFrameworkDocument:
         """Create a program logic model and link it to the framework."""
         fw = await self._repo.get_framework(framework_id, incident_id)
         if not fw:
             raise ValueError(f"Framework {framework_id} not found")
         model_id = f"plm-{uuid4().hex[:12]}"
         now = datetime.now(UTC).isoformat()
-        logic_doc = {
+        logic_doc: MEFrameworkDocument = {
             "model_id": model_id,
             "id": model_id,
             "document_type": "program_logic",
@@ -115,8 +115,8 @@ class MEFrameworkPlatformService:
         self,
         framework_id: str,
         incident_id: str,
-        standards: list[dict],
-    ) -> dict:
+        standards: list[dict[str, object]],
+    ) -> MEFrameworkDocument:
         """Set standards of success on a framework."""
         fw = await self._repo.get_framework(framework_id, incident_id)
         if not fw:
@@ -129,8 +129,8 @@ class MEFrameworkPlatformService:
         self,
         framework_id: str,
         incident_id: str,
-        schedules: list[dict],
-    ) -> dict:
+        schedules: list[dict[str, object]],
+    ) -> MEFrameworkDocument:
         """Set the indicator collection schedule and activate if needed."""
         fw = await self._repo.get_framework(framework_id, incident_id)
         if not fw:
@@ -145,7 +145,7 @@ class MEFrameworkPlatformService:
         self,
         framework_id: str,
         incident_id: str,
-    ) -> dict:
+    ) -> dict[str, object]:
         """Generate a monitoring report snapshot."""
         fw = await self._repo.get_framework(framework_id, incident_id)
         if not fw:
@@ -160,7 +160,7 @@ class MEFrameworkPlatformService:
             "generated_at": datetime.now(UTC).isoformat(),
         }
 
-    def validate_program_logic(self, logic_doc: dict) -> tuple[bool, list[str]]:
+    def validate_program_logic(self, logic_doc: MEFrameworkDocument) -> tuple[bool, list[str]]:
         """Validate outcome chain completeness and AIDR compliance."""
         issues: list[str] = []
         # Check all elements are connected
@@ -193,14 +193,14 @@ class MEFrameworkPlatformService:
         period_end: str,
         generated_by: str = "manual",
         created_by: str = "",
-    ) -> dict:
+    ) -> MEFrameworkDocument:
         """Generate and persist an evaluation report."""
         fw = await self._repo.get_framework(framework_id, incident_id)
         if not fw:
             raise ValueError(f"Framework {framework_id} not found")
         report_id = f"er-{uuid4().hex[:12]}"
         now = datetime.now(UTC).isoformat()
-        domain_findings = {}
+        domain_findings: dict[str, dict[str, object]] = {}
         for domain in fw.get("active_evaluation_domains", []):
             domain_findings[domain] = {
                 "evaluation_domain": domain,
@@ -208,7 +208,7 @@ class MEFrameworkPlatformService:
                 "findings": [],
                 "evidence_references": [],
             }
-        report_doc = {
+        report_doc: MEFrameworkDocument = {
             "report_id": report_id,
             "id": report_id,
             "document_type": "evaluation_report",

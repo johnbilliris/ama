@@ -28,7 +28,7 @@ class SupportHandoffRecord(BaseModel):
 async def get_handoff(
     caller: CallerDep,
     repos: Annotated[HelpRepositories, Depends(get_help_repositories)],
-):
+) -> dict[str, object]:
     row = repos.get_support_handoff(caller.tenant_id)
     if not row:
         raise HTTPException(
@@ -42,7 +42,7 @@ async def put_handoff(
     body: SupportHandoffRecord,
     caller: CallerDep,
     repos: Annotated[HelpRepositories, Depends(get_help_repositories)],
-):
+) -> dict[str, object]:
     row = body.model_dump()
     row["tenant_id"] = caller.tenant_id
     row["id"] = row.get("id") or caller.tenant_id

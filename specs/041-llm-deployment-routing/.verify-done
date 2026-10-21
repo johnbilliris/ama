@@ -1,0 +1,33 @@
+timestamp: 2026-10-19T06:51:51.2269068Z
+scope: local candidate only; not release approval
+remediation_iterations: 1
+local_findings_fixed: 2
+local_findings_new: 0
+local_findings_remaining: 0
+local_verdict: PASS after independent read-only re-verification
+tasks_complete: 50/52
+external_partial_tasks: T027,T030; Dev portions implemented, staging/production acceptance absent
+release_verdict: BLOCKED; carve-out now passes offline under explicit user-approved waiver; preservation, fresh live evidence and paired release gates remain unresolved
+latest_regression: 1313 passed; 4 unchanged pre-existing audit-type failures
+reverification: 17 focused tests passed; additional executor/facade/SDK probe passed
+historical_fingerprints: 50/50 unchanged
+commits: none; user declined
+infrastructure_checkpoint: local Dev compiler/contracts and PSRule passed; not independent post-IaC re-verification
+live_validation_checkpoint: ARM validation PASS; What-If 8 Modify,45 Ignore,0 resource Create/Delete; review BLOCKED
+live_validation_evidence: evidence/dev-preparation/validation-review.json
+activation: NOT PERFORMED; no image publication, inference, cloud resource mutation or traffic change
+local_diagnostic_remediation: PASS 48 compiler/configuration tests; build/lint; Ruff; Dev PSRule 797 Pass/0 Fail
+corrected_candidate_binding: evidence/dev-preparation/diagnostics-remediation-bindings.json
+corrected_candidate_live_validation: ARM validation PASS; corrected What-If performed and reviewed; release BLOCKED
+latest_user_scope: explicit additional-approver waiver approved for all environments through 2030-11-20; not a deployment or preservation waiver
+corrected_live_preview: 2026-10-19T22:40Z; 7 Modify/1 NoChange/45 Ignore; diagnostics NoChange; strict carve-out FAILED exit 4
+corrected_live_evidence: evidence/dev-preparation/corrected-validation-review.json
+operational_g3: BLOCKED; exact API exposes omitted capacity/state inputs, unchanged child lacks them
+carveout_validator_fix: proposed underlying-model matching; original replay cleared embedding, and the later explicit waiver/model registration now clears all four Dev aliases offline
+carveout_fix_validation: 10 new regression cases pass; combined 27 passed/1 unchanged pre-existing invalid positive fixture failure
+carveout_fix_evidence: evidence/dev-preparation/model-identity-carveout-replay.json
+current_quorum_waiver: all environments; sole authoriser johnbilliris; inclusive expiry 2030-11-20 UTC; normal floors retained
+current_model_registration: gpt-5.4 for Dev; sole approver johnbilliris; separate model review deadline 2027-04-08
+current_carveout_result: strict offline real-preview replay PASS; actual OPA PASS; OPA after expiry DENY
+current_carveout_tests: 64 passed; same one pre-existing invalid positive security fixture failure
+current_carveout_evidence: evidence/dev-preparation/single-approver-waiver-replay.json

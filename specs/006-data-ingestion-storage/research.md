@@ -21,7 +21,7 @@
 **Rationale**: National signals (BoM national warnings, GA earthquake alerts) must be discoverable by jurisdiction-scoped dashboard queries. Cosmos DB hierarchical partition keys (3 levels: scope/jurisdictionId/dataSourceId) enable efficient container management while supporting both national-scope and jurisdiction-scope queries. National signals are stored with `scope=national` and fan-out records created for each affected jurisdiction's partition at ingestion time. This ensures that a NSW dashboard query returns all NSW-relevant signals (both NSW-specific and national) from a single logical partition without cross-partition queries.
 
 **Partition key design**:
-- Level 1: `scope` — values: `live`, `sim_{runId}` (simulation isolation per FR-029)
+- Level 1: `scope` — values: `live`, `sim-{runId}` (simulation isolation per FR-029)
 - Level 2: `jurisdictionId` — values: `national`, `nsw`, `vic`, `qld`, `sa`, `wa`, `tas`, `nt`, `act`
 - Level 3: `dataSourceId` — values: the data source identifier from the seed catalogue
 
@@ -33,9 +33,9 @@ For national signals, the ingestion pipeline creates the primary record in the `
 - Full signal replication to every jurisdiction partition: rejected because it multiplies storage by 8× for every national signal and creates write amplification during high-volume events.
 - Cross-partition queries at read time: rejected because Cosmos DB cross-partition queries are significantly more expensive in RU consumption and latency, violating the ≤500ms p95 target.
 
-## Decision: Extend SignalEnvelope schema with `simulation_run_id` in provenance only; `incidentId` already exists
+## Decision: Extend SignalEnvelope schema with `simulationRunId` in provenance only; `incidentId` already exists
 
-**Rationale**: Code review reveals the SignalEnvelope JSON schema already includes `incidentId` as an optional string at root level, and the Signal Pydantic model already has `incident_id`. The only schema extension needed is adding `simulation_run_id` to the `provenance` object. Since provenance currently has `additionalProperties: false`, this requires a targeted schema change. The `binaryAssetUri` field naturally fits within `payload` (which allows additionalProperties).
+**Rationale**: Code review reveals the SignalEnvelope JSON schema already includes `incidentId` as an optional string at root level, and the Signal Pydantic model already has `incident_id`. The only schema extension needed is adding `simulationRunId` to the `provenance` object. Since provenance currently has `additionalProperties: false`, this requires a targeted schema change. The `binaryAssetUri` field naturally fits within `payload` (which allows additionalProperties).
 
 **Changes required**:
 - `signal-envelope.schema.json`: Add `"simulationRunId": { "type": "string" }` to `provenance.properties`. No change needed for `incidentId` (already present) or `binaryAssetUri` (goes in payload).
@@ -44,7 +44,7 @@ For national signals, the ingestion pipeline creates the primary record in the `
 
 **Alternatives considered**:
 
-- Adding `simulation_run_id` at root level: rejected because it's a provenance attribute (how the signal was collected), not a signal characteristic. Keeping it in provenance maintains semantic consistency.
+- Adding `simulationRunId` at root level: rejected because it's a provenance attribute (how the signal was collected), not a signal characteristic. Keeping it in provenance maintains semantic consistency.
 - Changing provenance to allow additionalProperties: rejected because explicit schema fields with documentation are more discoverable and validate at ingestion time.
 
 ## Decision: Content-hash deduplication using Redis with source-specific canonical keys
@@ -73,7 +73,7 @@ Hash entries expire after 2× the source's FTP delete-time or expected update fr
 
 ## Decision: Simulation framework as a specialised signal generator with same-pipeline injection
 
-**Rationale**: FR-037 and FR-037a require simulated signals to flow through the same ingestion pipelines as real signals. The simulation runner generates synthetic source payloads and submits them to the same normalisation pipeline, with `provenance.collectionMethod=simulation` and `provenance.simulationRunId` set. This ensures simulated signals pass identical schema validation, deduplication (skipped for simulation), and incident association logic. Simulation isolation is enforced at the storage partition level via the `sim_{runId}` scope prefix.
+**Rationale**: FR-037 and FR-037a require simulated signals to flow through the same ingestion pipelines as real signals. The simulation runner generates synthetic source payloads and submits them to the same normalisation pipeline, with `provenance.collectionMethod=simulation` and `provenance.simulationRunId` set. This ensures simulated signals pass identical schema validation, deduplication (skipped for simulation), and incident association logic. Simulation isolation is enforced at the storage partition level via the `sim-{runId}` scope prefix.
 
 **Alternatives considered**:
 

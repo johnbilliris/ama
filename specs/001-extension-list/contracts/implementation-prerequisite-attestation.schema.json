@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ama:specify:contracts:implementation-prerequisite-attestation",
+  "title": "Extension list sovereign prerequisite attestation",
+  "description": "Closed signed claims plus compact-JWS, digest, and immutable replay wrappers for the sovereign validation/release preflight. Local-synthetic development never requests or fabricates this artifact. The decoded JWS payload must equal claims exactly.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claims",
+    "compact_jws",
+    "attestation_digest",
+    "replay_protection"
+  ],
+  "properties": {
+    "claims": { "$ref": "#/$defs/attestationClaims" },
+    "compact_jws": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+    },
+    "attestation_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "replay_protection": { "$ref": "#/$defs/replayProtection" }
+  },
+  "$defs": {
+    "azureResourceId": {
+      "type": "string",
+      "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/[^/]+/[^/]+/[^/]+$"
+    },
+    "location": { "enum": ["australiaeast", "australiasoutheast"] },
+    "uuid": { "type": "string", "format": "uuid" },
+    "attestationClaims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "feature",
+        "execution_mode",
+        "issuer",
+        "audience",
+        "algorithm",
+        "key_id",
+        "jti",
+        "challenge_id",
+        "nonce",
+        "requested_at",
+        "issued_at",
+        "not_before",
+        "expires_at",
+        "repository_digest",
+        "branch",
+        "audit_ledger",
+        "execution_vm",
+        "package_cache",
+        "private_dependencies"
+      ],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "feature": { "const": "001-extension-list" },
+        "execution_mode": { "const": "sovereign" },
+        "issuer": { "const": "ama-security-control-plane" },
+        "audience": { "const": "spec001-extension-list-sovereign-preflight" },
+        "algorithm": { "const": "ES256" },
+        "key_id": {
+          "type": "string",
+          "pattern": "^https://[A-Za-z0-9-]+\\.vault\\.azure\\.net/keys/[A-Za-z0-9-]+/[A-Za-z0-9]+$"
+        },
+        "jti": { "$ref": "#/$defs/uuid" },
+        "challenge_id": { "$ref": "#/$defs/uuid" },
+        "nonce": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "issued_at": { "type": "string", "format": "date-time" },
+        "not_before": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "repository_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "branch": { "const": "001-extension-list" },
+        "audit_ledger": { "$ref": "#/$defs/auditLedger" },
+        "execution_vm": { "$ref": "#/$defs/executionVm" },
+        "package_cache": { "$ref": "#/$defs/packageCache" },
+        "private_dependencies": { "$ref": "#/$defs/privateDependencies" }
+      }
+    },
+    "preflightRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "feature",
+        "execution_mode",
+        "challenge_id",
+        "nonce",
+        "requested_at",
+        "repository_digest",
+        "branch"
+      ],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "feature": { "const": "001-extension-list" },
+        "execution_mode": { "const": "sovereign" },
+        "challenge_id": { "$ref": "#/$defs/uuid" },
+        "nonce": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "repository_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "branch": { "const": "001-extension-list" }
+      }
+    },
+    "preflightResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compact_jws"],
+      "properties": {
+        "compact_jws": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+        }
+      }
+    },
+    "replayProtection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "marker_blob_uri",
+        "marker_created",
+        "marker_created_at",
+        "marker_retain_until",
+        "immutability_policy_mode"
+      ],
+      "properties": {
+        "marker_blob_uri": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://[a-z0-9]{3,24}\\.blob\\.core\\.windows\\.net/[a-z0-9-]+/spec001-extension-list/preflight-jti/[0-9a-f-]+$"
+        },
+        "marker_created": { "const": true },
+        "marker_created_at": { "type": "string", "format": "date-time" },
+        "marker_retain_until": { "type": "string", "format": "date-time" },
+        "immutability_policy_mode": { "const": "Locked" }
+      }
+    },
+    "auditLedger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "storage_account_resource_id",
+        "container_scope",
+        "location",
+        "public_network_access",
+        "default_network_action",
+        "private_endpoint_state",
+        "immutability_policy_mode",
+        "managed_identity_principal_id",
+        "coordinator_ready"
+      ],
+      "properties": {
+        "storage_account_resource_id": { "$ref": "#/$defs/azureResourceId" },
+        "container_scope": { "type": "string", "minLength": 1 },
+        "location": { "$ref": "#/$defs/location" },
+        "public_network_access": { "const": "Disabled" },
+        "default_network_action": { "const": "Deny" },
+        "private_endpoint_state": { "const": "Approved" },
+        "immutability_policy_mode": { "const": "Locked" },
+        "managed_identity_principal_id": { "$ref": "#/$defs/uuid" },
+        "coordinator_ready": { "const": true }
+      }
+    },
+    "executionVm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource_id",
+        "vm_id",
+        "location",
+        "os",
+        "architecture",
+        "encrypted_ephemeral_storage",
+        "owner_authenticated_ipc"
+      ],
+      "properties": {
+        "resource_id": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Compute/virtualMachines/[^/]+$"
+        },
+        "vm_id": { "$ref": "#/$defs/uuid" },
+        "location": { "$ref": "#/$defs/location" },
+        "os": { "enum": ["windows", "ubuntu"] },
+        "architecture": { "const": "x64" },
+        "encrypted_ephemeral_storage": { "const": true },
+        "owner_authenticated_ipc": { "const": true }
+      }
+    },
+    "packageCache": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cache_digest", "authorized_au_mirror", "offline_ready"],
+      "properties": {
+        "cache_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "authorized_au_mirror": { "const": true },
+        "offline_ready": { "const": true }
+      }
+    },
+    "privateDependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalog_stores_ready",
+        "evidence_store_ready",
+        "study_store_ready",
+        "role_enumeration_ready",
+        "control_plane_verified",
+        "control_plane_resource_id",
+        "control_plane_location",
+        "control_plane_public_network_access",
+        "control_plane_private_endpoint_state",
+        "signing_key_vault_verified",
+        "signing_key_vault_resource_id",
+        "signing_key_vault_location",
+        "signing_key_vault_public_network_access",
+        "signing_key_vault_private_endpoint_state",
+        "signing_key_enabled",
+        "signing_key_expires_at",
+        "pseudonymous_reviewer_store_ready"
+      ],
+      "properties": {
+        "catalog_stores_ready": { "const": true },
+        "evidence_store_ready": { "const": true },
+        "study_store_ready": { "const": true },
+        "role_enumeration_ready": { "const": true },
+        "control_plane_verified": { "const": true },
+        "control_plane_resource_id": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Web/sites/[^/]+$"
+        },
+        "control_plane_location": { "$ref": "#/$defs/location" },
+        "control_plane_public_network_access": { "const": "Disabled" },
+        "control_plane_private_endpoint_state": { "const": "Approved" },
+        "signing_key_vault_verified": { "const": true },
+        "signing_key_vault_resource_id": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.KeyVault/vaults/[^/]+$"
+        },
+        "signing_key_vault_location": { "$ref": "#/$defs/location" },
+        "signing_key_vault_public_network_access": { "const": "Disabled" },
+        "signing_key_vault_private_endpoint_state": { "const": "Approved" },
+        "signing_key_enabled": { "const": true },
+        "signing_key_expires_at": { "type": "string", "format": "date-time" },
+        "pseudonymous_reviewer_store_ready": { "const": true }
+      }
+    }
+  }
+}

@@ -1,3 +1,9 @@
+import json
+from pathlib import Path
+
+import pytest
+from jsonschema import Draft202012Validator, FormatChecker
+
 from apps.ingestion.simulation.generators.flood_generator import FloodGenerator
 
 REQUIRED_ENVELOPE_KEYS = {
@@ -72,6 +78,18 @@ class TestFloodHydrograph:
         # Recession should occur after peak
         assert peak_idx < len(levels) - 1
 
+    def test_nondefault_hydrograph_config_changes_curve(self) -> None:
+        gen = FloodGenerator()
+        baseline = gen.generate_hydrograph(duration_hours=24.0, peak_level=7.0)
+        tuned = gen.generate_hydrograph(
+            duration_hours=24.0,
+            peak_level=7.0,
+            rise_fraction=0.5,
+            peak_fraction=0.05,
+            recession_constant=1.2,
+        )
+        assert baseline != tuned
+
 
 class TestFloodSignalSchema:
     def test_generated_signals_pass_schema_validation(self) -> None:
@@ -82,6 +100,10 @@ class TestFloodSignalSchema:
             gauge_id="test-gauge-001",
             location=[150.0, -34.0],
         )
+
+        schema = json.loads(Path("packages/schemas/signal-envelope.schema.json").read_text(encoding="utf-8"))
+        validator = Draft202012Validator(schema=schema, format_checker=FormatChecker())
+        validator.validate(signal)
 
         # Verify all required SignalEnvelope keys
         for key in REQUIRED_ENVELOPE_KEYS:
@@ -109,3 +131,18 @@ class TestFloodSignalSchema:
         # Verify payload content
         assert signal["payload"]["waterLevel"] == 7.5
         assert signal["payload"]["gaugeId"] == "test-gauge-001"
+
+    def test_topology_travel_offsets_follow_order(self) -> None:
+        gen = FloodGenerator()
+        topology = [
+            {"gaugeId": "upstream", "travelOffsetMinutes": 0},
+            {"gaugeId": "downstream", "travelOffsetMinutes": 45},
+        ]
+        upstream = gen.generate_signal(gauge_id="upstream", topology_order=topology)
+        downstream = gen.generate_signal(gauge_id="downstream", topology_order=topology)
+        assert upstream["payload"]["travelOffsetMinutes"] < downstream["payload"]["travelOffsetMinutes"]
+
+    def test_outside_region_is_rejected(self) -> None:
+        gen = FloodGenerator()
+        with pytest.raises(ValueError, match="target_region must be a GeoJSON Polygon"):
+            gen.generate_signal(target_region={"type": "Point", "coordinates": [151.21, -33.86]})

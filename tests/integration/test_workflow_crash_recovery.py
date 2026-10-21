@@ -28,7 +28,20 @@ def _make_workflow_with_in_memory_publisher() -> tuple[AmaWorkflow, _ServiceBusP
     repo = WorkflowRunRepository()
     publisher = _ServiceBusPublisher()
     gate = HitlGateExecutor(repo=repo, publisher=publisher)
-    workflow = AmaWorkflow(repo=repo, hitl_gate=gate)
+
+    class _SuccessfulStep:
+        async def execute_step(self, _input_payload: Any, **_kwargs: Any) -> dict[str, str]:
+            return {"status": "complete"}
+
+    workflow = AmaWorkflow(
+        repo=repo,
+        hitl_gate=gate,
+        monitoring_executor=_SuccessfulStep(),
+        risk_executor=_SuccessfulStep(),
+        evacuation_executor=_SuccessfulStep(),
+        resource_executor=_SuccessfulStep(),
+        communication_executor=_SuccessfulStep(),
+    )
     return workflow, publisher
 
 
@@ -38,6 +51,7 @@ def test_happy_path_run_pauses_at_hitl_with_no_publish_until_gate() -> None:
     final = asyncio.run(
         wf.run_incident(
             incident={"incident_id": "INC-happy-1", "category": "fire"},
+            tenant_id="live",
             created_by="test",
         )
     )
@@ -52,8 +66,12 @@ def test_two_concurrent_incidents_run_independently() -> None:
 
     async def _both() -> list[Any]:
         return await asyncio.gather(
-            wf.run_incident(incident={"incident_id": "INC-conc-A", "category": "fire"}, created_by="t"),
-            wf.run_incident(incident={"incident_id": "INC-conc-B", "category": "weather"}, created_by="t"),
+            wf.run_incident(
+                incident={"incident_id": "INC-conc-A", "category": "fire"}, tenant_id="live", created_by="t"
+            ),
+            wf.run_incident(
+                incident={"incident_id": "INC-conc-B", "category": "weather"}, tenant_id="live", created_by="t"
+            ),
         )
 
     docs = asyncio.run(_both())
@@ -81,6 +99,7 @@ def test_workflow_failure_path_transitions_to_failed() -> None:
         asyncio.run(
             wf.run_incident(
                 incident={"incident_id": "INC-fail-1", "category": "fire"},
+                tenant_id="live",
                 created_by="t",
             )
         )

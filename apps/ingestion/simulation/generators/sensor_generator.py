@@ -24,6 +24,8 @@ class SensorGenerator:
         base_value: float = 25.0,
         variation: float = 5.0,
         station_id: str = "sim-station-001",
+        source_id: str = "bom-aws-stations",
+        source_type: str = "json_observations",
         location: list[float] | None = None,
         **_kwargs: Any,
     ) -> dict[str, Any]:
@@ -42,7 +44,7 @@ class SensorGenerator:
 
         return {
             "source": {
-                "dataSourceId": "bom-aws-stations",
+                "dataSourceId": source_id,
                 "name": f"Sensor {station_id}",
                 "kind": "sensor",
             },
@@ -57,6 +59,7 @@ class SensorGenerator:
             "payload": {
                 "stationId": station_id,
                 "sensorType": sensor_type,
+                "sourceType": source_type,
                 "value": value,
                 "unit": _get_unit(sensor_type),
             },

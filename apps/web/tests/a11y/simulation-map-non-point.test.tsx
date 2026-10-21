@@ -12,7 +12,7 @@
  *     (per WCAG SC 4.1.3 — overlays are informational, not urgent).
  *
  * This is the fast in-vitest gate; the page-level axe sweep lives
- * at `apps/web/tests/a11y/simulation-watermark.spec.ts`.
+ * at `tests/e2e/web-coverage/cross-cutting/simulation-watermark.spec.ts`.
  */
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";

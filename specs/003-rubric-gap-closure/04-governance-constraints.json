@@ -1,0 +1,32 @@
+{
+  "status": "UNVERIFIED_QUERY_RESULT",
+  "gate": "BLOCKED",
+  "discoveredAt": "2026-09-15",
+  "discoveryMethod": "Azure Policy assignment API through Azure MCP",
+  "subscription": {
+    "displayName": "AI Impact Analyzer",
+    "subscriptionId": "879c3e12-a379-45c7-b1b1-5a44f3cc2713",
+    "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+  },
+  "queries": [
+    {
+      "scope": "/subscriptions/879c3e12-a379-45c7-b1b1-5a44f3cc2713",
+      "assignmentCount": 0
+    },
+    {
+      "scope": null,
+      "assignmentCount": 0
+    }
+  ],
+  "portalValidation": {
+    "status": "UNVERIFIED",
+    "assignmentCount": null,
+    "matchesApi": null
+  },
+  "managementGroupInheritance": "UNVERIFIED",
+  "constraints": [],
+  "deploymentBlockers": [
+    "Effective Azure Policy assignments, including management-group inheritance, are not verified.",
+    "Azure Portal assignment count parity has not been confirmed."
+  ]
+}

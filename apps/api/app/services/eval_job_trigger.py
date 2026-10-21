@@ -10,8 +10,10 @@ vars unset).
 
 from __future__ import annotations
 
+import json
 import logging
 import os
+from io import BytesIO
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -23,17 +25,17 @@ def _runner_image() -> str | None:
     return os.environ.get("EVAL_RUNNER_JOB_IMAGE")
 
 
-def _runner_target() -> tuple[str | None, str | None, str | None]:
-    return (
-        os.environ.get("AZURE_SUBSCRIPTION_ID"),
-        os.environ.get("EVAL_RUNNER_JOB_RESOURCE_GROUP"),
-        os.environ.get("EVAL_RUNNER_JOB_NAME"),
-    )
+def _runner_target() -> tuple[str, str, str] | None:
+    subscription_id = os.environ.get("AZURE_SUBSCRIPTION_ID")
+    resource_group = os.environ.get("EVAL_RUNNER_JOB_RESOURCE_GROUP")
+    job_name = os.environ.get("EVAL_RUNNER_JOB_NAME")
+    if not subscription_id or not resource_group or not job_name:
+        return None
+    return subscription_id, resource_group, job_name
 
 
 def is_configured() -> bool:
-    sub, rg, job = _runner_target()
-    return all((sub, rg, job, _runner_image()))
+    return _runner_target() is not None and bool(_runner_image())
 
 
 def start_run_execution(
@@ -49,11 +51,12 @@ def start_run_execution(
     local dev or test). Failures are logged and swallowed so the API still
     returns the queued run; the reconciler picks up stuck queued runs."""
 
-    if not is_configured():
+    target = _runner_target()
+    if target is None or not _runner_image():
         logger.info("eval runner job not configured; skipping execution start for run %s", run_id)
         return None
 
-    subscription_id, resource_group, job_name = _runner_target()
+    subscription_id, resource_group, job_name = target
     try:
         from azure.identity import DefaultAzureCredential
         from azure.mgmt.appcontainers import ContainerAppsAPIClient
@@ -119,7 +122,13 @@ def start_run_execution(
         ],
     }
     try:
-        poller = client.jobs.begin_start(resource_group, job_name, template=template)
+        request_body = BytesIO(json.dumps(template).encode("utf-8"))
+        poller = client.jobs.begin_start(
+            resource_group,
+            job_name,
+            request_body,
+            content_type="application/json",
+        )
         result = poller.result()
         execution_name = getattr(result, "name", None)
         logger.info("started runner job execution %s for run %s", execution_name, run_id)

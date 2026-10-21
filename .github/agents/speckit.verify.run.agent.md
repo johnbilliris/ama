@@ -1,4 +1,5 @@
 ---
+name: speckit.verify.run
 description: Perform a non-destructive post-implementation verification gate validating
   the implementation against spec.md, plan.md, tasks.md, and constitution.md.
 scripts:

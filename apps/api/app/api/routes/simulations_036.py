@@ -161,7 +161,9 @@ class LifecycleAck(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def _validate_sim_id(sim_id: str) -> UUID:
+def _validate_sim_id(sim_id: str | UUID) -> UUID:
+    if isinstance(sim_id, UUID):
+        return sim_id
     try:
         return UUID(sim_id)
     except ValueError as exc:
@@ -586,14 +588,14 @@ async def abort_simulation_036(
 
 
 @router.post(
-    "/{sim_id}/pause",
+    "/{sim_id:uuid}/pause",
     response_model=LifecycleAck,
     operation_id="pauseSimulation",
     status_code=status.HTTP_200_OK,
 )
 async def pause_simulation_036(
     request: Request,
-    sim_id: str = Path(..., min_length=1),
+    sim_id: UUID = Path(...),
     principal: CoordinatorPrincipal = Depends(require_simulation_coordinator),
 ) -> LifecycleAck:
     """Direct-REST pause (T-E02, FR-059).
@@ -610,22 +612,22 @@ async def pause_simulation_036(
         get_simulation_state_repository,
     )
 
-    _validate_sim_id(sim_id)
+    sim_id_text = str(_validate_sim_id(sim_id))
     audit = get_audit_writer()
 
     # T-P03 — durable state transition with ETag conditional replace.
     try:
         state_repo = get_simulation_state_repository()
         try:
-            current = await state_repo.read(sim_id)
-            await state_repo.update_state(sim_id, "paused", current.etag)
+            current = await state_repo.read(sim_id_text)
+            await state_repo.update_state(sim_id_text, "paused", current.etag)
         except UnknownSimulationError:
-            await state_repo.bootstrap(sim_id)
-            current = await state_repo.read(sim_id)
-            await state_repo.update_state(sim_id, "paused", current.etag)
+            await state_repo.bootstrap(sim_id_text)
+            current = await state_repo.read(sim_id_text)
+            await state_repo.update_state(sim_id_text, "paused", current.etag)
         except ETagConflictError as exc:
             # T-P03 — surface 412 → 409 conflict per error-responses.md.
-            logger.warning("pause.state_etag_conflict sim=%s — concurrent transition", sim_id)
+            logger.warning("pause.state_etag_conflict sim=%s — concurrent transition", sim_id_text)
             raise HTTPException(
                 status_code=409,
                 detail={
@@ -649,12 +651,12 @@ async def pause_simulation_036(
     except HTTPException:
         raise
     except Exception:  # noqa: BLE001
-        logger.exception("pause.state_persist_failed sim=%s", sim_id)
+        logger.exception("pause.state_persist_failed sim=%s", sim_id_text)
 
     try:
         await audit.write(
             "lifecycle.paused",
-            simulation_id=sim_id,
+            simulation_id=sim_id_text,
             actor="lifecycle_endpoint",
             details={
                 "attempted_action": "chat_turn",
@@ -662,19 +664,19 @@ async def pause_simulation_036(
             },
         )
     except Exception:
-        logger.exception("audit.lifecycle_paused_write_failed sim=%s", sim_id)
+        logger.exception("audit.lifecycle_paused_write_failed sim=%s", sim_id_text)
     return LifecycleAck(state="paused")
 
 
 @router.post(
-    "/{sim_id}/resume",
+    "/{sim_id:uuid}/resume",
     response_model=LifecycleAck,
     operation_id="resumeSimulation",
     status_code=status.HTTP_200_OK,
 )
 async def resume_simulation_036(
     request: Request,
-    sim_id: str = Path(..., min_length=1),
+    sim_id: UUID = Path(...),
     principal: CoordinatorPrincipal = Depends(require_simulation_coordinator),
 ) -> LifecycleAck:
     """Direct-REST resume (T-E03, FR-059).
@@ -691,19 +693,19 @@ async def resume_simulation_036(
         get_simulation_state_repository,
     )
 
-    _validate_sim_id(sim_id)
+    sim_id_text = str(_validate_sim_id(sim_id))
     audit = get_audit_writer()
 
     # T-P03 — durable state transition.
     try:
         state_repo = get_simulation_state_repository()
         try:
-            current = await state_repo.read(sim_id)
-            await state_repo.update_state(sim_id, "active", current.etag)
+            current = await state_repo.read(sim_id_text)
+            await state_repo.update_state(sim_id_text, "active", current.etag)
         except UnknownSimulationError:
-            await state_repo.bootstrap(sim_id)
+            await state_repo.bootstrap(sim_id_text)
         except ETagConflictError as exc:
-            logger.warning("resume.state_etag_conflict sim=%s — concurrent transition", sim_id)
+            logger.warning("resume.state_etag_conflict sim=%s — concurrent transition", sim_id_text)
             raise HTTPException(
                 status_code=409,
                 detail={
@@ -726,12 +728,12 @@ async def resume_simulation_036(
     except HTTPException:
         raise
     except Exception:  # noqa: BLE001
-        logger.exception("resume.state_persist_failed sim=%s", sim_id)
+        logger.exception("resume.state_persist_failed sim=%s", sim_id_text)
 
     try:
         await audit.write(
             "lifecycle.resumed",
-            simulation_id=sim_id,
+            simulation_id=sim_id_text,
             actor="lifecycle_endpoint",
             details={
                 "coordinator_user_id": principal.user_id,
@@ -739,7 +741,7 @@ async def resume_simulation_036(
             },
         )
     except Exception:
-        logger.exception("audit.lifecycle_resumed_write_failed sim=%s", sim_id)
+        logger.exception("audit.lifecycle_resumed_write_failed sim=%s", sim_id_text)
     return LifecycleAck(state="active")
 
 
@@ -840,7 +842,14 @@ async def read_simulation_outcome_036(
 
     # Coarse RBAC: middleware should have enrolled the role; we double-check
     # to keep the contract crisp. Production wiring happens in the auth layer.
-    user_roles = getattr(getattr(request, "state", object()), "roles", set()) or set()
+    raw_roles = getattr(getattr(request, "state", object()), "roles", None)
+    user_roles: set[str] = set()
+    if isinstance(raw_roles, (list, tuple, set, frozenset)):
+        if any(not isinstance(role, str) for role in raw_roles):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid simulation roles")
+        user_roles.update(raw_roles)
+    elif raw_roles:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid simulation roles")
     if user_roles and "simulation.read" not in user_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

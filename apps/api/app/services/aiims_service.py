@@ -55,7 +55,7 @@ class AiimsService:
         AIIMS_ASSIGNMENTS[assignment.assignment_id] = assignment
         return assignment
 
-    def get_structure(self, incident_id: str) -> dict:
+    def get_structure(self, incident_id: str) -> dict[str, object]:
         """Return COP display: all active assignments + coverage for an incident."""
         if incident_id not in INCIDENTS:
             msg = f"Incident '{incident_id}' not found"
@@ -102,7 +102,7 @@ class AiimsService:
         new_level: int,
         rationale: str,
         authorising_user: str,
-    ) -> dict:
+    ) -> dict[str, object]:
         """Change the incident level and record a TimelineEvent."""
         if incident_id not in INCIDENTS:
             msg = f"Incident '{incident_id}' not found"
@@ -118,7 +118,7 @@ class AiimsService:
             msg = f"Incident is already at level {new_level}"
             raise ValueError(msg)
 
-        incident.incident_level = new_level  # type: ignore[assignment]
+        incident.incident_level = new_level
 
         payload = build_incident_level_change_payload(
             previous_level=previous_level,

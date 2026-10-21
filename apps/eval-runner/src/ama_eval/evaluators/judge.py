@@ -7,10 +7,27 @@ import logging
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Protocol
 
 from .base import EvalInput, EvalResult, ModelOutput
 
 logger = logging.getLogger(__name__)
+
+
+class FoundryJudgeResponse(Protocol):
+    text: str | None
+
+
+class FoundryJudgeClient(Protocol):
+    def complete(
+        self,
+        *,
+        model_id: str,
+        messages: list[dict[str, str]],
+        temperature: float,
+        max_tokens: int,
+    ) -> FoundryJudgeResponse: ...
+
 
 _JUDGE_PROMPT_TEMPLATE = """You are an expert evaluator of LLM outputs for a Disaster Response Coordination assistant.
 
@@ -45,7 +62,7 @@ class JudgeEvaluator:
     metric_id: str
     family: str
     tier: str
-    judge_fn: Callable[[str, str, str, str], dict]
+    judge_fn: Callable[[str, str, str, str], dict[str, object]]
 
     def evaluate(self, inp: EvalInput, out: ModelOutput) -> EvalResult:
         if not out.text:
@@ -57,7 +74,10 @@ class JudgeEvaluator:
                 str(inp.expected_behaviour),
                 out.text,
             )
-            score = float(verdict.get("score", 0))
+            raw_score = verdict.get("score", 0)
+            if not isinstance(raw_score, (int, float, str)):
+                raise ValueError("Judge response score must be numeric")
+            score = float(raw_score)
             rationale = str(verdict.get("rationale", ""))
         except Exception as exc:
             logger.exception("judge invocation failed: %s", exc)
@@ -71,8 +91,12 @@ class JudgeEvaluator:
         )
 
 
-def make_foundry_judge(client, judge_model_id: str = "gpt-4o", judge_model_version: str = "2024-11-20"):
-    def _judge(metric: str, inp: str, expected: str, output: str) -> dict:
+def make_foundry_judge(
+    client: FoundryJudgeClient,
+    judge_model_id: str = "gpt-4o",
+    judge_model_version: str = "2024-11-20",
+) -> Callable[[str, str, str, str], dict[str, object]]:
+    def _judge(metric: str, inp: str, expected: str, output: str) -> dict[str, object]:
         prompt = _JUDGE_PROMPT_TEMPLATE.format(metric=metric, input=inp, expected=expected, output=output)
         resp = client.complete(
             model_id=judge_model_id,
@@ -86,13 +110,16 @@ def make_foundry_judge(client, judge_model_id: str = "gpt-4o", judge_model_versi
         text = resp.text or "{}"
         m = re.search(r"\{[^{}]*\"score\"[^{}]*\}", text)
         if m:
-            return json.loads(m.group(0))
+            verdict = json.loads(m.group(0))
+            if not isinstance(verdict, dict):
+                raise ValueError("Judge response JSON must be an object")
+            return verdict
         return {"score": 0, "rationale": "parse-failed"}
 
     return _judge
 
 
-def register_judge_evaluators(judge_fn) -> None:
+def register_judge_evaluators(judge_fn: Callable[[str, str, str, str], dict[str, object]]) -> None:
     from . import base as _base
 
     for metric_id in _QUALITY_METRICS:

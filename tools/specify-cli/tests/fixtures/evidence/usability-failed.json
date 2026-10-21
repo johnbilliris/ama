@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "feature": "001-extension-list",
+  "privacy": {
+    "notice_version": "synthetic-v1",
+    "notice_provided_at": "2026-09-21T00:00:00Z",
+    "consent_recorded_for_all_included_and_excluded": true,
+    "purpose_limitation": ["SC-001", "SC-006"],
+    "au_store_resource_id": "/subscriptions/synthetic/resourceGroups/rg/providers/Microsoft.Storage/storageAccounts/study",
+    "reviewed_at": "2026-09-22T00:00:00Z",
+    "retention_delete_by": "2026-12-20T00:00:00Z",
+    "legal_hold_approved": false,
+    "verified_deletion_required": true,
+    "controller_role": "research-governance",
+    "no_direct_identifiers": true,
+    "reidentification_key_separated": true,
+    "recruitment_records_separated": true,
+    "least_privilege_named_study_team_access": true,
+    "immutable_access_audit": true,
+    "encrypted_in_transit": true,
+    "encrypted_at_rest": true,
+    "withdrawal_process_confirmed": true,
+    "breach_response_process_confirmed": true
+  },
+  "allocation_algorithm": "sha256-seeded-stratified-order-v1",
+  "allocation_seed": "1111111111111111111111111111111111111111111111111111111111111111",
+  "task_variants": ["installed", "enabled"],
+  "allocation_records": [
+    {"participant_id": "synthetic-novice-08", "experience_stratum": "novice", "task_variant": "installed", "allocation_position": 1},
+    {"participant_id": "synthetic-novice-05", "experience_stratum": "novice", "task_variant": "enabled", "allocation_position": 2},
+    {"participant_id": "synthetic-novice-01", "experience_stratum": "novice", "task_variant": "installed", "allocation_position": 3},
+    {"participant_id": "synthetic-novice-03", "experience_stratum": "novice", "task_variant": "enabled", "allocation_position": 4},
+    {"participant_id": "synthetic-novice-04", "experience_stratum": "novice", "task_variant": "installed", "allocation_position": 5},
+    {"participant_id": "synthetic-novice-07", "experience_stratum": "novice", "task_variant": "enabled", "allocation_position": 6},
+    {"participant_id": "synthetic-novice-02", "experience_stratum": "novice", "task_variant": "installed", "allocation_position": 7},
+    {"participant_id": "synthetic-novice-09", "experience_stratum": "novice", "task_variant": "enabled", "allocation_position": 8},
+    {"participant_id": "synthetic-novice-00", "experience_stratum": "novice", "task_variant": "installed", "allocation_position": 9},
+    {"participant_id": "synthetic-novice-06", "experience_stratum": "novice", "task_variant": "enabled", "allocation_position": 10},
+    {"participant_id": "synthetic-experienced-00", "experience_stratum": "experienced", "task_variant": "installed", "allocation_position": 1},
+    {"participant_id": "synthetic-experienced-09", "experience_stratum": "experienced", "task_variant": "enabled", "allocation_position": 2},
+    {"participant_id": "synthetic-experienced-03", "experience_stratum": "experienced", "task_variant": "installed", "allocation_position": 3},
+    {"participant_id": "synthetic-experienced-01", "experience_stratum": "experienced", "task_variant": "enabled", "allocation_position": 4},
+    {"participant_id": "synthetic-experienced-05", "experience_stratum": "experienced", "task_variant": "installed", "allocation_position": 5},
+    {"participant_id": "synthetic-experienced-07", "experience_stratum": "experienced", "task_variant": "enabled", "allocation_position": 6},
+    {"participant_id": "synthetic-experienced-08", "experience_stratum": "experienced", "task_variant": "installed", "allocation_position": 7},
+    {"participant_id": "synthetic-experienced-02", "experience_stratum": "experienced", "task_variant": "enabled", "allocation_position": 8},
+    {"participant_id": "synthetic-experienced-06", "experience_stratum": "experienced", "task_variant": "installed", "allocation_position": 9},
+    {"participant_id": "synthetic-experienced-04", "experience_stratum": "experienced", "task_variant": "enabled", "allocation_position": 10}
+  ],
+  "participants": {
+    "novice": [
+      {"participant_id": "synthetic-novice-08", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 1, "used_extension_management": false, "task_variant": "installed", "requested_accommodations": ["screen-reader"], "provided_accommodations": ["screen-reader"], "installed_answer_correct": false, "enabled_answer_correct": true, "elapsed_seconds": 31.0, "sc_001_success": false, "sc_006_clarity_rating": 3, "consulted_installation_directories": true, "attempted_extension_command": false, "sc_006_clear": false},
+      {"participant_id": "synthetic-novice-05", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 1, "used_extension_management": false, "task_variant": "enabled", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": false, "elapsed_seconds": 10.0, "sc_001_success": false, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": true, "sc_006_clear": false},
+      {"participant_id": "synthetic-novice-01", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 1, "used_extension_management": false, "task_variant": "installed", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 3, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": false},
+      {"participant_id": "synthetic-novice-03", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 1, "used_extension_management": false, "task_variant": "enabled", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-novice-04", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 1, "used_extension_management": false, "task_variant": "installed", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-novice-07", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 1, "used_extension_management": false, "task_variant": "enabled", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-novice-02", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 1, "used_extension_management": false, "task_variant": "installed", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-novice-09", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 1, "used_extension_management": false, "task_variant": "enabled", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-novice-00", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 1, "used_extension_management": false, "task_variant": "installed", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-novice-06", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 1, "used_extension_management": false, "task_variant": "enabled", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true}
+    ],
+    "experienced": [
+      {"participant_id": "synthetic-experienced-00", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 6, "used_extension_management": true, "task_variant": "installed", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-experienced-09", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 6, "used_extension_management": true, "task_variant": "enabled", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-experienced-03", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 6, "used_extension_management": true, "task_variant": "installed", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-experienced-01", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 6, "used_extension_management": true, "task_variant": "enabled", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-experienced-05", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 6, "used_extension_management": true, "task_variant": "installed", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-experienced-07", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 6, "used_extension_management": true, "task_variant": "enabled", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-experienced-08", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 6, "used_extension_management": true, "task_variant": "installed", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-experienced-02", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 6, "used_extension_management": true, "task_variant": "enabled", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-experienced-06", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 6, "used_extension_management": true, "task_variant": "installed", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true},
+      {"participant_id": "synthetic-experienced-04", "is_adult": true, "uses_cli_monthly": true, "prior_feature_exposure": false, "spec_kit_workflows_last_6_months": 6, "used_extension_management": true, "task_variant": "enabled", "requested_accommodations": [], "provided_accommodations": [], "installed_answer_correct": true, "enabled_answer_correct": true, "elapsed_seconds": 10.0, "sc_001_success": true, "sc_006_clarity_rating": 5, "consulted_installation_directories": false, "attempted_extension_command": false, "sc_006_clear": true}
+    ]
+  },
+  "excluded_participants": [
+    {"participant_id": "synthetic-excluded-00", "experience_stratum": "novice", "excluded_before_task_exposure": true, "exclusion_reason": "documented-technical-interruption", "unavailable_accommodations": [], "replacement_participant_id": "synthetic-novice-08"}
+  ],
+  "aggregates": {"included_participant_count": 20, "sc_001_success_count": 18, "sc_006_clear_count": 17},
+  "review": {"reviewer_identifier": "reviewer-fedcba9876543210", "reviewer_role": "research-governance", "reviewed_at": "2026-09-22T00:00:00Z", "decision": "rejected", "decision_reason_code": "study-rejected"}
+}

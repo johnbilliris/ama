@@ -1,35 +1,41 @@
 "use client";
 
 import { useDeferredValue, useState } from "react";
+import { useI18n } from "../../lib/i18n/runtime";
 
 interface AlertLanguagePreviewProps {
   contentBlocks: Record<string, string>;
   languages: string[];
 }
 
-const PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>> = {
-  "en-AU": { headline: "Prepare to evacuate if directed.", body: "Follow emergency services instructions." },
-  "zh-Hans": { headline: "如果指示，请准备撤离。", body: "请遵循紧急服务部门的指示。" },
-  "ar": { headline: "استعد للإخلاء إذا طُلب منك ذلك.", body: "اتبع تعليمات خدمات الطوارئ." },
-  "vi": { headline: "Chuẩn bị sơ tán nếu được chỉ đạo.", body: "Làm theo hướng dẫn của dịch vụ khẩn cấp." },
-};
-
 export function AlertLanguagePreview({ contentBlocks, languages }: AlertLanguagePreviewProps) {
+  const { t } = useI18n();
   const availableLanguages = languages.length > 0 ? languages : ["en-AU"];
   const [selectedLanguage, setSelectedLanguage] = useState(availableLanguages[0]);
   const deferredLanguage = useDeferredValue(selectedLanguage);
 
-  const translated = PLACEHOLDER_TRANSLATIONS[deferredLanguage] ?? contentBlocks;
+  const fallbackLocale = availableLanguages.includes("en-AU") ? "en-AU" : availableLanguages[0];
+  const fallbackHeadline = contentBlocks[`headline__${fallbackLocale}`] ?? contentBlocks.headline ?? "—";
+  const fallbackBody = contentBlocks[`body__${fallbackLocale}`] ?? contentBlocks.body ?? "";
+  const requestedHeadline = contentBlocks[`headline__${deferredLanguage}`];
+  const requestedBody = contentBlocks[`body__${deferredLanguage}`];
+  const requestedVersion = contentBlocks[`contentVersion__${deferredLanguage}`];
+  const canonicalVersion = contentBlocks.contentVersion;
+  const hasVariant = typeof requestedHeadline === "string" || typeof requestedBody === "string";
+
+  const headline = hasVariant ? requestedHeadline ?? fallbackHeadline : fallbackHeadline;
+  const body = hasVariant ? requestedBody ?? fallbackBody : fallbackBody;
+  const direction = deferredLanguage === "ar" || deferredLanguage === "he" ? "rtl" : "ltr";
 
   return (
     <section className="alert-language-preview" aria-label="Alert language preview">
       <header className="alert-language-preview-header">
-        <h3 className="alert-language-preview-title">Multilingual alert preview</h3>
+        <h3 className="alert-language-preview-title">{t("alerts.previewTitle")}</h3>
         <select
           className="alert-language-preview-select"
           value={selectedLanguage}
           onChange={(event: { target: { value: string } }) => setSelectedLanguage(event.target.value)}
-          aria-label="Select preview language"
+          aria-label={t("alerts.previewSelect")}
         >
           {availableLanguages.map((lang) => (
             <option key={lang} value={lang}>
@@ -38,11 +44,24 @@ export function AlertLanguagePreview({ contentBlocks, languages }: AlertLanguage
           ))}
         </select>
       </header>
-      <div className="alert-language-preview-body" dir={deferredLanguage === "ar" ? "rtl" : "ltr"}>
+      <div className="alert-language-preview-body" dir={direction}>
+        {!hasVariant ? (
+          <p className="alert-composer-status" role="status">
+            {t("alerts.translationMissing", { locale: deferredLanguage, fallbackLocale })}
+          </p>
+        ) : null}
+        {requestedVersion && canonicalVersion && requestedVersion !== canonicalVersion ? (
+          <p className="alert-composer-status" role="alert">
+            {t("alerts.translationVersionMismatch", {
+              requestedVersion,
+              actualVersion: canonicalVersion,
+            })}
+          </p>
+        ) : null}
         <p className="alert-language-preview-headline">
-          <strong>{translated.headline ?? contentBlocks.headline ?? "—"}</strong>
+          <strong>{headline}</strong>
         </p>
-        <p className="alert-language-preview-text">{translated.body ?? contentBlocks.body ?? ""}</p>
+        <p className="alert-language-preview-text">{body}</p>
       </div>
     </section>
   );

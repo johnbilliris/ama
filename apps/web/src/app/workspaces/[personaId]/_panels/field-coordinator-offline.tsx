@@ -25,16 +25,15 @@ export function FieldCoordinatorOffline(
   props: FieldCoordinatorOfflineProps,
 ): React.ReactElement {
   const { pollIntervalMs = 1500 } = props;
-  const [online, setOnline] = React.useState(
-    typeof navigator !== "undefined" ? navigator.onLine : true,
-  );
+  const [online, setOnline] = React.useState(true);
   const [size, setSize] = React.useState(0);
   const [cap, setCap] = React.useState(500);
   const [replay, setReplay] = React.useState<{
     active: boolean;
     drained: number;
     failed: number;
-  }>({ active: false, drained: 0, failed: 0 });
+    needsReview: number;
+  }>({ active: false, drained: 0, failed: 0, needsReview: 0 });
   const storeRef = React.useRef<OfflineQueueStore | null>(null);
 
   React.useEffect(() => {
@@ -58,6 +57,7 @@ export function FieldCoordinatorOffline(
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
+    setOnline(navigator.onLine);
     const goOnline = () => setOnline(true);
     const goOffline = () => setOnline(false);
     window.addEventListener("online", goOnline);
@@ -89,32 +89,95 @@ export function FieldCoordinatorOffline(
   const replayNow = React.useCallback(async () => {
     const s = storeRef.current;
     if (!s) return;
-    setReplay({ active: true, drained: 0, failed: 0 });
+    setReplay({ active: true, drained: 0, failed: 0, needsReview: 0 });
     let drained = 0;
     let failed = 0;
+    let needsReview = 0;
+    let repeatedFailures = 0;
+
+    const isManualReapprovalRoute = (route: string): boolean => {
+      return /\/api\/alerts\/.+\/(publish|deliver)$/.test(route) || /\/api\/recommendations\/.+\/approvals$/.test(route);
+    };
+
+    const backoffMsFor = (attempts: number): number => {
+      const exp = Math.min(5, Math.max(1, attempts + 1));
+      return 1000 * 2 ** exp;
+    };
+
     for (;;) {
-      const batch = await s.drainBatch(50);
+      const batch = await s.leaseBatch(50, 30_000);
       if (batch.length === 0) break;
       for (const entry of batch) {
+        if (isManualReapprovalRoute(entry.route)) {
+          await s.nack(
+            entry.actor_id,
+            entry.client_correlation_id,
+            "requires_explicit_reapproval",
+            backoffMsFor(entry.attempts),
+          );
+          needsReview += 1;
+          continue;
+        }
+
         try {
           const res = await fetch(entry.route, {
-            method: "POST",
+            method: entry.method,
             headers: {
               "content-type": "application/json",
               "x-replay-captured-ts": entry.captured_ts,
               "x-correlation-id": entry.client_correlation_id,
+              "x-offline-actor-id": entry.actor_id,
+              "x-offline-tenant-id": entry.tenant_id,
+              "x-offline-incident-id": entry.incident_id,
+              "x-offline-mode": entry.mode,
+              "x-replay-attempt": String(entry.attempts + 1),
             },
             body: JSON.stringify(entry.payload),
           });
-          if (res.ok) drained += 1;
-          else failed += 1;
+          if (res.ok) {
+            repeatedFailures = 0;
+            drained += 1;
+            await s.ack(entry.actor_id, entry.client_correlation_id);
+          } else if ([401, 403, 409].includes(res.status)) {
+            repeatedFailures = 0;
+            needsReview += 1;
+            await s.nack(
+              entry.actor_id,
+              entry.client_correlation_id,
+              `operator_review_required_http_${res.status}`,
+              backoffMsFor(entry.attempts),
+            );
+          } else {
+            repeatedFailures += 1;
+            failed += 1;
+            await s.nack(
+              entry.actor_id,
+              entry.client_correlation_id,
+              `retryable_http_${res.status}`,
+              backoffMsFor(entry.attempts),
+            );
+          }
         } catch {
+          repeatedFailures += 1;
           failed += 1;
+          await s.nack(
+            entry.actor_id,
+            entry.client_correlation_id,
+            "network_failure",
+            backoffMsFor(entry.attempts),
+          );
+        }
+
+        if (repeatedFailures >= 3) {
+          break;
         }
       }
-      setReplay({ active: true, drained, failed });
+      setReplay({ active: true, drained, failed, needsReview });
+      if (repeatedFailures >= 3) {
+        break;
+      }
     }
-    setReplay({ active: false, drained, failed });
+    setReplay({ active: false, drained, failed, needsReview });
     setSize(await s.size());
   }, []);
 
@@ -158,9 +221,9 @@ export function FieldCoordinatorOffline(
         >
           {replay.active ? "Replaying…" : "Replay queued requests"}
         </button>
-        {replay.drained || replay.failed ? (
+        {replay.drained || replay.failed || replay.needsReview ? (
           <span className="text-xs text-slate-700">
-            drained {replay.drained}, failed {replay.failed}
+            drained {replay.drained}, failed {replay.failed}, review {replay.needsReview}
           </span>
         ) : null}
       </div>

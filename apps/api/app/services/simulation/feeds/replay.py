@@ -40,6 +40,7 @@ if str(_REPO) not in sys.path:
 from scripts.generators._seed_contract import resolve_seed  # noqa: E402
 
 from ._canonical import SimulatedClock  # noqa: E402
+from ._models import CanonicalRecord  # noqa: E402
 
 # Map single-feed scenario id -> (module_name, jurisdiction).
 SCENARIOS: dict[str, tuple[str, str]] = {
@@ -76,7 +77,7 @@ def _default_out_dir() -> Path:
     return _REPO / "fixtures" / "sim_replays"
 
 
-def _emit_records(scenario: str, seed: int, count: int):
+def _emit_records(scenario: str, seed: int, count: int) -> list[CanonicalRecord]:
     if scenario in DEMO_SCENARIOS:
         # Demo scenario — orchestrator decides record count; ``count`` ignored.
         mod = importlib.import_module(f"apps.api.app.services.simulation.feeds.scenarios.{DEMO_SCENARIOS[scenario]}")

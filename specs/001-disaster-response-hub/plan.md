@@ -26,25 +26,27 @@ Build an Australia-focused disaster response coordination hub that delivers a re
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-### Pre-Research Gate Review
+### Pre-Research Gate Review (design-time intent)
 
-- **Life Safety First**: PASS. Safety-critical workflows require approval checkpoints, operator override, conservative fallback on low-confidence data, and rationale on every recommendation.
-- **Multi-Agent Coordination With Clear Roles**: PASS. The design uses explicit specialist agents for monitoring, risk assessment, evacuation, resource allocation, and communication, with deterministic orchestration and typed handoff envelopes.
-- **Data Trust, Provenance, and Freshness**: PASS. Signal ingestion is authoritative-first and preserves provenance, freshness, confidence, contradiction status, and reproducibility metadata.
-- **Privacy, Security, and Regional Policy Compliance**: PASS. The architecture uses Entra ID-backed RBAC, Australia-resident Azure regions, jurisdiction-aware data-sharing policy checks, encryption, auditable access, and agency- and region-scoped isolation boundaries for data, cache, and messaging paths.
-- **Multilingual, Accessible, and Actionable Communication**: PASS. Public communication workflows include language variants, accessibility metadata, channel-specific delivery rules, and approval logging.
-- **Cloud Platform**: PASS. All services are planned for Azure, with deployment limited to Australian Azure regions.
-- **Quality Gates and Operational Readiness**: PASS. TDD is mandatory, and the feature requires simulation, replay, rollback planning, and manual takeover runbooks.
+- **Life Safety First**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Multi-Agent Coordination With Clear Roles**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Data Trust, Provenance, and Freshness**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Privacy, Security, and Regional Policy Compliance**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Multilingual, Accessible, and Actionable Communication**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Cloud Platform**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Quality Gates and Operational Readiness**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
 
-### Post-Design Gate Review
+### Post-Design Gate Review (design-time intent)
 
-- **Life Safety First**: PASS. The data model introduces explicit `Recommendation`, `ApprovalDecision`, and `PublicAlert` state transitions that prevent unsafe autonomous publication.
-- **Multi-Agent Coordination With Clear Roles**: PASS. Contracts separate ingestion, coordination, approval, alerting, and rehearsal concerns, while the plan enforces explicit handoffs instead of hidden shared-state mutation.
-- **Data Trust, Provenance, and Freshness**: PASS. `Signal`, `DataSource`, `HazardAssessment`, and contract schemas capture trust and freshness fields needed for downstream decisioning.
-- **Privacy, Security, and Regional Policy Compliance**: PASS. `JurisdictionPolicy`, `Persona`, and contract request envelopes preserve authorization, residency, and sensitivity boundaries, and implementation must enforce agency- and region-scoped isolation through scoped tenant context, partitioning, and cross-boundary access controls.
-- **Multilingual, Accessible, and Actionable Communication**: PASS. `PublicAlert` and quickstart rehearsal flows cover channel targeting, language variants, accessibility attributes, and approval mode logging.
-- **Cloud Platform**: PASS. The structure and quickstart assume Azure App Service, Azure Container Apps, Azure Cosmos DB, Azure Blob Storage, and Azure Cache for Redis in Australian regions.
-- **Quality Gates and Operational Readiness**: PASS. Quickstart and contracts include scenario replay coverage for bushfire, flood, cyclone, and degraded-source failure paths.
+- **Life Safety First**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Multi-Agent Coordination With Clear Roles**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Data Trust, Provenance, and Freshness**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Privacy, Security, and Regional Policy Compliance**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Multilingual, Accessible, and Actionable Communication**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Cloud Platform**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+- **Quality Gates and Operational Readiness**: PASS (design intent only; not acceptance evidence while Open Delta blockers remain).
+
+Open delta note: OD-001 remains Open and blocks any interpretation of the plan PASS lines as resolved acceptance.
 
 ## Project Structure
 

@@ -8,6 +8,16 @@
 
 ## Metrics (Azure Monitor / Application Insights)
 
+The runtime calls `configure_azure_monitor` during application composition when
+`APPLICATIONINSIGHTS_CONNECTION_STRING` is present. Export authenticates with `DefaultAzureCredential`, including the
+configured user-assigned managed identity through `AZURE_CLIENT_ID`. The deployed Application Insights and Log
+Analytics resources remain in the selected Australian region. Without a connection string, OpenTelemetry instruments
+remain local no-ops and do not affect planning.
+
+Per-handoff measurements include `incident_id` and `tenant_id`. Per-zone/category measurements add `zone` or
+`category`. Completed-plan and replan signals are emitted only after persistence, audit acceptance, and handoff
+completion succeed; route, transport, and safety stage counters continue to describe completed stage work.
+
 ### Processing Metrics
 
 | Metric | Type | Unit | Description |
@@ -80,9 +90,22 @@
 |--------|------|------|-------------|
 | `evacuation.handoff_success_rate` | Gauge | ratio | Successfully processed vs total handoffs received |
 
+`handoff_success_rate` is the process-lifetime ratio of fully completed handoffs to all intake attempts, including
+rejections, duplicates, and raised persistence failures in the denominator. `override_rate` is the process-lifetime
+ratio of unique commander-modified committed plans to unique committed plans observed by the process. Both reset on
+process restart. `active_plans_gauge` publishes the committed repository-backed active count where Cosmos querying is
+available. Audit tier values are exactly `1=Cosmos`, `2=memory/WAL buffering`, and `3=file-spill, corruption, or
+rejected-write degradation`.
+
 ---
 
 ## Alerting Thresholds
+
+The twelve rules are instantiated by `infra/bicep/modules/evacuation-alerts.bicep` through the pinned Azure Verified
+Module `avm/res/insights/scheduled-query-rule:0.6.0`. They are scoped to the existing Australia-hosted Application
+Insights component and invoke the existing operations action group. Counter queries follow Azure Monitor's
+delta-temporality guidance and sum `todouble(value)` over each rule window. Live alert-firing evidence remains a later
+`V-TELEMETRY` staging approval; local gates compile the templates and verify names, thresholds, windows, and KQL text.
 
 | Alert | Condition | Severity | Action |
 |-------|-----------|----------|--------|
@@ -129,8 +152,9 @@ evacuation.process_handoff (root)
 ├── evacuation.estimate_timeline
 │   └── evacuation.compute_phase (per phase)
 ├── evacuation.generate_summary
-│   ├── evacuation.llm_call (or .template_fallback)
+│   ├── evacuation.llm_call (when model commentary is enabled)
 │   └── evacuation.content_safety_check
+│   └── evacuation.template_render
 ├── evacuation.assign_version
 ├── evacuation.persist_plan
 └── evacuation.write_audit
@@ -151,6 +175,10 @@ evacuation.replan (root)
 └── evacuation.write_audit
 ```
 
+The initial root carries `correlation_id=handoff_id`, `handoff_id`, `incident_id`, `tenant_id`, and `source_agent`.
+The replan root carries `correlation_id=update_id` (or a deterministic replan correlation), `update_id`, `incident_id`,
+and `tenant_id`. Recording-tracer tests assert that the documented child spans have these roots as parents.
+
 ---
 
 ## Custom Events
@@ -169,3 +197,8 @@ evacuation.replan (root)
 | `VersionConflict` | Optimistic concurrency retry | incident_id, retry_count |
 | `RouteConflict` | Congestion risk detected | plan_id, route_id, utilisation_pct |
 | `TimeDeficitDetected` | Clearance > hazard window | plan_id, zone, deficit_minutes |
+
+Events attach to the active recording span. If an endpoint or failure path has no recording parent, the helper creates
+a short `evacuation.event.<EventName>` span and records the event there; events are never discarded merely because the
+caller lacks an active span. Route-conflict and time-deficit events are emitted after plan persistence so `plan_id` is
+the real committed identifier, while their counters remain attached to the route/timeline stage that detected them.

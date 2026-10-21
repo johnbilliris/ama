@@ -31,11 +31,11 @@ class ProvisionedDeployment:
 class ProvisionContext:
     run: EvaluationRun
     policy: ProvisioningPolicy
-    az_run: Callable[[Sequence[str]], dict] = field(default=lambda args: _real_az(args))
+    az_run: Callable[[Sequence[str]], dict[str, object]] = field(default=lambda args: _real_az(args))
     audit_emit: Callable[..., None] = field(default=lambda **_: None)
 
 
-def _real_az(args: Sequence[str]) -> dict:
+def _real_az(args: Sequence[str]) -> dict[str, object]:
     """Default az shell invocation. Returns parsed JSON output, or raises."""
     import json
 

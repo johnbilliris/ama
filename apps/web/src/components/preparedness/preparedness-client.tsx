@@ -122,6 +122,12 @@ export function PreparednessClient({ initialJurisdictionParam }: PreparednessCli
 
   function handleSelectionChange(ids: string[]) {
     const filtered = ids.filter((id) => validIds.includes(id));
+    abortRef.current?.abort();
+    requestIdRef.current += 1;
+    setOrganisations([]);
+    setFrameworks([]);
+    setError(null);
+    setIsLoading(filtered.length > 0);
     setSelectedIds(filtered);
 
     const params = new URLSearchParams(searchParams.toString());

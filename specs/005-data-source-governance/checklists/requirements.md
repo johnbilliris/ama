@@ -44,7 +44,18 @@
 - [x] Re-review grace period defined for previously approved sources that fail re-review (FR-012b)
 - [x] Observability signals required for registry operations (NFR-005)
 
-## Notes
+## Current Status Dispositions (2026-09-15)
+
+The checked items above are historical specification-review claims, not proof of
+runtime readiness or human approval. The date identifies the existing
+implementation-review baseline, not a newly executed review.
+
+| Claim | Current status | Disposition |
+| --- | --- | --- |
+| Feature meets measurable outcomes defined in Success Criteria | UNVERIFIED | No feature-scoped measured rehearsal or independent acceptance record establishes the six success criteria. |
+| Registry security and access control requirements are defined (FR-015, FR-016) | DEFINED; implementation PARTIAL | Requirements are authored; the implementation review retains authorization, lifecycle, and audit findings. A checked specification item does not close those findings. |
+
+## Historical Notes
 
 - Spec is ready for `/speckit.clarify` or `/speckit.plan`.
 - FR-009a defines the governance-registry query contract for agent routing data. FR-009b explicitly declares agent runtime refactoring as a downstream dependency, not a deliverable of this spec. The Out of Scope section confirms this boundary.

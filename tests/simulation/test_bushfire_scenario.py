@@ -1,3 +1,5 @@
+import pytest
+
 from apps.ingestion.simulation.generators.fire_generator import FireGenerator
 
 REQUIRED_ENVELOPE_KEYS = {
@@ -71,3 +73,14 @@ class TestFireSignalSchema:
         assert signal["category"] == "fire"
         assert signal["payload"]["ffdi"] == 75.0
         assert signal["payload"]["severity"] == "extreme"
+
+    def test_wind_bearing_changes_spread_vector(self) -> None:
+        gen = FireGenerator()
+        east = gen.generate_signal(ffdi=60.0, wind_bearing_degrees=90.0)
+        south = gen.generate_signal(ffdi=60.0, wind_bearing_degrees=180.0)
+        assert east["payload"]["spreadVector"] != south["payload"]["spreadVector"]
+
+    def test_outside_region_is_rejected(self) -> None:
+        gen = FireGenerator()
+        with pytest.raises(ValueError, match="target_region must be a GeoJSON Polygon"):
+            gen.generate_signal(target_region={"type": "LineString", "coordinates": [[1, 2], [3, 4]]})

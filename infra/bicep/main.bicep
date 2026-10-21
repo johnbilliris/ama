@@ -1,3 +1,5 @@
+// LEGACY TEMPLATE: azd deploys infra/main.bicep. Keep this tree only for
+// historical consumers until they migrate to the authoritative entry point.
 targetScope = 'resourceGroup'
 
 @description('Deployment location')
@@ -80,11 +82,11 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2023-11-15' = {
     ipRules: [
       { ipAddressOrRange: developerIpAddress }  // developer machine
       { ipAddressOrRange: '0.0.0.0' }           // allow Azure services (Container Apps)
-      { ipAddressOrRange: '104.42.195.92' }     // Azure Portal
-      { ipAddressOrRange: '40.76.54.131' }      // Azure Portal
-      { ipAddressOrRange: '52.176.6.30' }       // Azure Portal
-      { ipAddressOrRange: '52.169.50.45' }      // Azure Portal
-      { ipAddressOrRange: '52.187.184.26' }     // Azure Portal
+      // Azure Public portal middleware addresses.
+      { ipAddressOrRange: '13.91.105.215' }
+      { ipAddressOrRange: '4.210.172.107' }
+      { ipAddressOrRange: '13.88.56.148' }
+      { ipAddressOrRange: '40.91.218.243' }
     ]
     locations: [
       {

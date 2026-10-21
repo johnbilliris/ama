@@ -67,7 +67,7 @@ def scrub(
                 counts[name] = n
     if os.getenv("USE_PRESIDIO") == "1":
         try:
-            from presidio_analyzer import (  # type: ignore[import-not-found]
+            from presidio_analyzer import (
                 AnalyzerEngine,
             )
 

@@ -60,7 +60,7 @@ class SesFloodPipeline(IngestionPipelineBase):
 
         features = data.get("features", [])
         payloads: list[dict[str, Any]] = []
-        for feature in features[:100]:
+        for feature in features:
             feature["data_source_id"] = self._config["data_source_id"]
             feature["source_name"] = self._config["name"]
             feature["source_kind"] = "authoritative"

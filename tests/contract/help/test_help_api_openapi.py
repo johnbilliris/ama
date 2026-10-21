@@ -27,7 +27,7 @@ def _app() -> FastAPI:
 def test_every_contract_path_has_a_route() -> None:
     spec = yaml.safe_load(CONTRACT.read_text(encoding="utf-8"))
     expected = set(spec.get("paths", {}).keys())
-    actual = {r.path for r in _app().routes if hasattr(r, "path")}
+    actual = set(_app().openapi()["paths"].keys())
     # paths in contract are listed without the /api/v1 prefix
     missing = []
     for ep in expected:

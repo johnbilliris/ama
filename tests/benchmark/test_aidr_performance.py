@@ -13,7 +13,13 @@ from packages.domain.src.domain.models.incident import Incident
 @pytest.fixture
 def client():
     app = create_app()
-    with TestClient(app) as c:
+    with TestClient(
+        app,
+        headers={
+            "X-MS-CLIENT-PRINCIPAL-ID": "benchmark-user",
+            "X-MS-CLIENT-PRINCIPAL-NAME": "benchmark-agency",
+        },
+    ) as c:
         yield c
     reset_state()
 

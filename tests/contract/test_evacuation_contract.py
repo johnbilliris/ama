@@ -11,9 +11,19 @@ from packages.domain.src.domain.models.incident import Incident
 
 
 @pytest.fixture()
-def client():
+def client(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("AMA_ENABLE_PRODUCTION_AUTH", "0")
+    monkeypatch.setenv("AMA_ENVIRONMENT", "test")
+    monkeypatch.setenv("AMA_TEST_SUPPORT", "1")
+    monkeypatch.setenv("AMA_TRUST_FORWARDED_PRINCIPAL", "1")
     app = create_app()
-    with TestClient(app) as c:
+    with TestClient(
+        app,
+        headers={
+            "X-MS-CLIENT-PRINCIPAL-ID": "ic-user",
+            "X-MS-CLIENT-PRINCIPAL-NAME": "agency-test",
+        },
+    ) as c:
         yield c
     reset_state()
 

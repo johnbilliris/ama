@@ -5,7 +5,7 @@
 # known-good revision and verifies health after rollback.
 #
 # Exit codes:
-#   0 — Rollback completed successfully (or first-run bootstrap — nothing to roll back)
+#   0 — Rollback completed successfully
 #   1 — Rollback failed: one or more services could not be restored
 #   2 — Invalid arguments or missing required parameters
 #   3 — Azure CLI not available or authentication failure
@@ -373,12 +373,11 @@ main() {
     first_run_all_skipped=false
   fi
 
-  # Handle first-run bootstrap (no previous revisions exist)
+  # Never treat an unresolved target set as a successful rollback. A genuine
+  # first deployment must be handled by an explicit, separately authorized flow.
   if [[ "${first_run_all_skipped}" == "true" && "${DRY_RUN}" != "true" ]]; then
-    log "INFO: First deployment detected — no previous revisions to roll back to."
-    log "INFO: This is expected for initial bootstrap. Exiting with success."
-    log "✅ Rollback skipped (first-run bootstrap)"
-    exit 0
+    log_err "CRITICAL: No known-good rollback target was resolved; refusing to report successful restoration"
+    exit 1
   fi
 
   # Handle rollback failures

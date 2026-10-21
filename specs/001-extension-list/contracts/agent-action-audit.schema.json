@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ama:specify:contracts:agent-action-audit",
+  "title": "Extension list minimized agent action audit record",
+  "description": "Closed, privacy-minimized record used by both the owner-only ephemeral local-development journal and the immutable AU-resident sovereign ledger. It contains provenance and rationale codes but no command output, inventory values, human data, secrets, absolute paths, or free text.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "feature",
+    "execution_mode",
+    "audit_sink",
+    "ledger_partition",
+    "event_id",
+    "session_id",
+    "session_manifest_digest",
+    "sequence",
+    "append_position_bytes",
+    "recorded_at",
+    "actor_principal_id",
+    "phase",
+    "intent_event_id",
+    "action",
+    "task_id",
+    "rationale_code",
+    "outcome",
+    "target",
+    "target_digest",
+    "previous_event_digest",
+    "event_digest"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "feature": {
+      "const": "001-extension-list"
+    },
+    "execution_mode": {
+      "enum": ["local-synthetic", "sovereign"]
+    },
+    "audit_sink": {
+      "enum": ["ephemeral-local", "immutable-au"]
+    },
+    "ledger_partition": {
+      "description": "Per-session partition. The UUID suffix must equal session_id.",
+      "type": "string",
+      "pattern": "^spec001-extension-list/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "session_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "session_manifest_digest": {
+      "description": "SHA-256 over RFC 8785 canonical JSON UTF-8 bytes of the session's protected/bootstrap manifest; constant for every record in one segment.",
+      "$ref": "#/$defs/sha256"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 49000
+    },
+    "append_position_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor_principal_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "phase": {
+      "enum": ["intent", "result"]
+    },
+    "intent_event_id": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "action": {
+      "enum": [
+        "session.start",
+        "task.edit",
+        "command.execute",
+        "decision.record",
+        "validation.complete",
+        "external.collect",
+        "external.finalize",
+        "session.finalize"
+      ]
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^(?:T[0-9]{3}|BOOTSTRAP|RUNTIME)$"
+    },
+    "rationale_code": {
+      "$ref": "#/$defs/rationaleCode"
+    },
+    "outcome": {
+      "enum": ["started", "succeeded", "failed", "blocked"]
+    },
+    "target": {
+      "$ref": "#/$defs/targetDescriptor"
+    },
+    "target_digest": {
+      "description": "SHA-256 over RFC 8785 canonical JSON UTF-8 bytes of target.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "previous_event_digest": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "event_digest": {
+      "description": "SHA-256 over RFC 8785 canonical JSON UTF-8 bytes of this record with event_digest omitted.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "execution_mode": { "const": "local-synthetic" } },
+        "required": ["execution_mode"]
+      },
+      "then": {
+        "properties": { "audit_sink": { "const": "ephemeral-local" } }
+      },
+      "else": {
+        "properties": { "audit_sink": { "const": "immutable-au" } }
+      }
+    },
+    {
+      "if": {
+        "properties": { "sequence": { "const": 1 } },
+        "required": ["sequence"]
+      },
+      "then": {
+        "properties": {
+          "append_position_bytes": { "const": 0 },
+          "previous_event_digest": { "type": "null" }
+        }
+      },
+      "else": {
+        "properties": {
+          "previous_event_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "phase": { "const": "intent" } },
+        "required": ["phase"]
+      },
+      "then": {
+        "properties": {
+          "intent_event_id": { "type": "null" },
+          "outcome": { "const": "started" },
+          "target": {
+            "type": "object",
+            "properties": {
+              "post_state_digest": { "type": "null" }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "intent_event_id": { "type": "string", "format": "uuid" },
+          "outcome": { "enum": ["succeeded", "failed", "blocked"] },
+          "target": {
+            "type": "object",
+            "properties": {
+              "post_state_digest": { "$ref": "#/$defs/sha256" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "targetDescriptor": {
+      "description": "Version 1 privacy-minimized action target.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "descriptor_version",
+        "kind",
+        "identifier_digest",
+        "pre_state_digest",
+        "post_state_digest"
+      ],
+      "properties": {
+        "descriptor_version": { "const": "1.0" },
+        "kind": {
+          "enum": [
+            "repository-file",
+            "command",
+            "decision",
+            "validation",
+            "session",
+            "runtime-request",
+            "external-write"
+          ]
+        },
+        "identifier_digest": { "$ref": "#/$defs/sha256" },
+        "pre_state_digest": {
+          "description": "SHA-256 over RFC 8785 canonical JSON UTF-8 bytes of the kind-specific pre-state object.",
+          "$ref": "#/$defs/sha256"
+        },
+        "post_state_digest": {
+          "description": "Null only for intent. For result, SHA-256 over the kind-specific post-state object; unchanged or unexecuted results repeat pre_state_digest.",
+          "anyOf": [
+            { "$ref": "#/$defs/sha256" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "rationaleCode": {
+      "description": "Versioned rationale-code registry for schema_version 1.0.",
+      "enum": [
+        "bootstrap-safety",
+        "ci-quality-gate",
+        "package-contract",
+        "feature-implementation",
+        "test-red",
+        "test-green",
+        "schema-validation",
+        "privacy-validation",
+        "sovereignty-validation",
+        "external-handoff",
+        "runtime-list-request",
+        "session-finalization"
+      ]
+    }
+  }
+}

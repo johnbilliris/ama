@@ -121,6 +121,7 @@ class TestSizeLimitValidation:
                 "version": "1.0",
                 "region": "Test",
                 "coordinate_system": "WGS84",
+                "last_updated": "2026-04-16T00:00:00Z",
             },
             "nodes": nodes,
             "edges": [],
@@ -222,16 +223,83 @@ class TestStalenessDetection:
         assert loader.is_stale() is True
 
     def test_not_stale_after_load(self):
-        loader = RoadNetworkLoader(staleness_hours=6)
+        loader = RoadNetworkLoader(
+            staleness_hours=6,
+            now=lambda: datetime(2026, 4, 16, 1, tzinfo=UTC),
+        )
         loader.load(SAMPLE_FILE)
         assert loader.is_stale() is False
 
     def test_stale_when_load_time_old(self):
-        loader = RoadNetworkLoader(staleness_hours=6)
+        reference_time = datetime(2026, 4, 16, 6, tzinfo=UTC)
+        loader = RoadNetworkLoader(
+            staleness_hours=6,
+            now=lambda: reference_time,
+        )
         loader.load(SAMPLE_FILE)
-        # Simulate old load time
-        loader._loaded_at = datetime.now(UTC) - timedelta(hours=7)
+        assert loader.is_stale() is False
+
+        reference_time += timedelta(microseconds=1)
         assert loader.is_stale() is True
+
+    def test_reloading_stale_source_does_not_reset_freshness(self):
+        reference_time = datetime(2026, 4, 17, tzinfo=UTC)
+        loader = RoadNetworkLoader(
+            staleness_hours=6,
+            now=lambda: reference_time,
+        )
+
+        loader.load(SAMPLE_FILE)
+        first_loaded_at = loader.loaded_at
+        loader.load(SAMPLE_FILE)
+
+        assert loader.loaded_at >= first_loaded_at
+        assert loader.source_updated_at == datetime(2026, 4, 16, tzinfo=UTC)
+        assert loader.is_stale() is True
+
+    def test_failed_refresh_preserves_fresh_last_known_good(self, tmp_path):
+        reference_time = datetime(2026, 4, 16, 1, tzinfo=UTC)
+        loader = RoadNetworkLoader(
+            staleness_hours=6,
+            now=lambda: reference_time,
+        )
+        loader.load(SAMPLE_FILE)
+        version = loader.get_version()
+        invalid = tmp_path / "invalid.json"
+        invalid.write_text("{not-json", encoding="utf-8")
+
+        with pytest.raises(json.JSONDecodeError):
+            loader.load(str(invalid))
+
+        assert loader.is_loaded is True
+        assert loader.get_version() == version
+        assert loader.is_stale() is False
+        assert loader.last_refresh_failed is True
+        assert loader.refresh_failure_reason
+
+    def test_failed_initial_load_leaves_no_cache(self, tmp_path):
+        invalid = tmp_path / "invalid.json"
+        invalid.write_text("{not-json", encoding="utf-8")
+        loader = RoadNetworkLoader()
+
+        with pytest.raises(json.JSONDecodeError):
+            loader.load(str(invalid))
+
+        assert loader.is_loaded is False
+        assert loader.last_refresh_failed is True
+
+    def test_future_source_timestamp_is_rejected_atomically(self, tmp_path):
+        source = json.loads(open(SAMPLE_FILE, encoding="utf-8").read())
+        source["metadata"]["last_updated"] = "2026-04-16T02:00:00Z"
+        path = tmp_path / "future.json"
+        path.write_text(json.dumps(source), encoding="utf-8")
+        loader = RoadNetworkLoader(now=lambda: datetime(2026, 4, 16, 1, tzinfo=UTC))
+
+        with pytest.raises(ValueError, match="future"):
+            loader.load(str(path))
+
+        assert loader.is_loaded is False
+        assert loader.last_refresh_failed is True
 
 
 # ---------------------------------------------------------------------------
@@ -257,6 +325,59 @@ class TestGetVersion:
         l2 = RoadNetworkLoader()
         l2.load(SAMPLE_FILE)
         assert l1.get_version() == l2.get_version()
+
+    def test_formatting_and_collection_order_do_not_change_hash(self, tmp_path):
+        source = json.loads(open(SAMPLE_FILE, encoding="utf-8").read())
+        reordered = dict(source)
+        reordered["nodes"] = list(reversed(source["nodes"]))
+        reordered["edges"] = list(reversed(source["edges"]))
+        reordered["assembly_areas"] = list(reversed(source["assembly_areas"]))
+        path = tmp_path / "reordered.json"
+        path.write_text(json.dumps(reordered, indent=4), encoding="utf-8")
+
+        original = RoadNetworkLoader()
+        original.load(SAMPLE_FILE)
+        changed_format = RoadNetworkLoader()
+        changed_format.load(str(path))
+
+        assert original.get_version() == changed_format.get_version()
+
+    def test_material_network_change_changes_hash(self, tmp_path):
+        source = json.loads(open(SAMPLE_FILE, encoding="utf-8").read())
+        source["edges"][0]["capacity_vehicles_per_hour"] += 1
+        path = tmp_path / "changed.json"
+        path.write_text(json.dumps(source), encoding="utf-8")
+
+        original = RoadNetworkLoader()
+        original.load(SAMPLE_FILE)
+        changed = RoadNetworkLoader()
+        changed.load(str(path))
+
+        assert original.get_version() != changed.get_version()
+
+    def test_closure_state_changes_effective_version(self):
+        loader = RoadNetworkLoader()
+        loader.load(SAMPLE_FILE)
+        original_version = loader.get_version()
+        edge_id = loader.get_all_edges()[0].id
+
+        loader.apply_closure(edge_id, "flood_cut")
+        closed_version = loader.get_version()
+        loader.remove_closure(edge_id)
+
+        assert closed_version != original_version
+        assert loader.get_version() == original_version
+
+    def test_effective_capacity_override_changes_snapshot_version(self):
+        loader = RoadNetworkLoader()
+        loader.load(SAMPLE_FILE)
+        edge = loader.get_all_edges()[0]
+        override = edge.model_dump()
+        override["capacity_vehicles_per_hour"] -= 1
+
+        effective = loader.effective_copy([override])
+
+        assert effective.get_version() != loader.get_version()
 
 
 # ---------------------------------------------------------------------------

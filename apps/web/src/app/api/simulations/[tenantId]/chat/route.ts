@@ -1,3 +1,4 @@
+import { getServerApiBaseUrl } from "@/lib/api/base-url";
 /**
  * Streaming pass-through for the Simulation Controller SSE chat endpoint.
  *
@@ -10,10 +11,7 @@
 
 import type { NextRequest } from "next/server";
 
-const UPSTREAM =
-  process.env.API_PROXY_UPSTREAM ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:8000/api";
+const UPSTREAM = getServerApiBaseUrl();
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";

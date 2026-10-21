@@ -201,6 +201,7 @@ def run_gate(repo_root: Path | None = None, *, dry_run: bool = False) -> GateRun
     repo_root = (repo_root or _REPO_ROOT).resolve()
     failures: list[str] = []
     artefacts: list[Path] = []
+    discovered_ids: list[str] = []
 
     for rel in _DEFAULT_ARTEFACT_ROOTS:
         root = repo_root / rel
@@ -212,8 +213,19 @@ def run_gate(repo_root: Path | None = None, *, dry_run: bool = False) -> GateRun
             except json.JSONDecodeError as e:
                 failures.append(f"{sidecar}: invalid JSON: {e}")
                 continue
-            if payload.get("artefact_id") in _ARTEFACT_TO_SCHEMA:
+            artefact_id = payload.get("artefact_id")
+            if artefact_id in _ARTEFACT_TO_SCHEMA:
+                discovered_ids.append(artefact_id)
                 artefacts.append(sidecar)
+
+    expected_ids = set(_ARTEFACT_TO_SCHEMA)
+    counts = {artefact_id: discovered_ids.count(artefact_id) for artefact_id in expected_ids}
+    missing = sorted(artefact_id for artefact_id, count in counts.items() if count == 0)
+    duplicates = sorted(artefact_id for artefact_id, count in counts.items() if count > 1)
+    if missing:
+        failures.append(f"POPULATION missing canonical artefacts: {', '.join(missing)}")
+    if duplicates:
+        failures.append(f"POPULATION duplicate canonical artefacts: {', '.join(duplicates)}")
 
     for art in artefacts:
         s = validate_schema(art)

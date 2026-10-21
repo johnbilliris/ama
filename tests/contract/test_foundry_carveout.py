@@ -19,10 +19,13 @@ c. 3-approver prod payload        → empty deny set, exit 0.
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import shutil
 import subprocess
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 REGO_PATH = ROOT / "infra" / "policy" / "rego" / "foundry_carveout.rego"
@@ -44,6 +47,22 @@ def _python_eval_quorum(payload: dict) -> list[str]:
     deny: list[str] = []
     min_prod = int(payload.get("min_approvers_prod", 3))
     min_dev = int(payload.get("min_approvers_dev", 2))
+    if "quorum_waiver" in payload:
+        waiver = payload["quorum_waiver"]
+        try:
+            expiry = dt.date.fromisoformat(waiver["expires_on"])
+        except (KeyError, TypeError, ValueError):
+            return ["Invalid quorum_waiver"]
+        if (
+            set(waiver) != {"scope", "approved_by", "approval_reference", "expires_on"}
+            or waiver["scope"] != "all_environments"
+            or len(waiver["approved_by"].strip()) < 3
+            or any(value in waiver["approved_by"].lower() for value in ("<", ">", "todo"))
+            or len(waiver["approval_reference"].strip()) < 30
+            or expiry < dt.datetime.now(dt.UTC).date()
+        ):
+            return ["Invalid or expired quorum_waiver"]
+        min_prod = min_dev = 1
     for d in payload.get("deployments", []) or []:
         env = str(d.get("environment", "prod")).lower()
         approvers = d.get("approver_identities") or []
@@ -172,6 +191,27 @@ def test_three_approver_prod_payload_passes() -> None:
     payload = _payload([_row(env="prod", approvers=["alice", "bob", "compliance-auditor"])])
     deny = _eval_with_opa_or_python(payload)
     assert deny == [], f"expected empty deny set for 3-approver prod row, got {deny!r}"
+
+
+@pytest.mark.parametrize("environment", ["dev", "staging", "prod"])
+@pytest.mark.parametrize("expiry_case", ["expired", "malformed", "future"])
+def test_policy_waiver_is_explicit_and_time_bounded(environment: str, expiry_case: str) -> None:
+    payload = _payload([_row(env=environment, approvers=["project-lead"])])
+    expiry = {
+        "expired": "2000-01-01",
+        "malformed": "not-a-date",
+        "future": (dt.datetime.now(dt.UTC).date() + dt.timedelta(days=60)).isoformat(),
+    }[expiry_case]
+    payload["quorum_waiver"] = {
+        "scope": "all_environments",
+        "approved_by": "project-lead",
+        "approval_reference": "Synthetic explicit project-lead waiver for all environments.",
+        "expires_on": expiry,
+    }
+    deny = _eval_with_opa_or_python(payload)
+    assert bool(deny) == (expiry_case != "future"), deny
+    del payload["quorum_waiver"]
+    assert _eval_with_opa_or_python(payload), "Removing the waiver must restore the normal quorum"
 
 
 def test_rego_file_carries_environment_discriminator() -> None:

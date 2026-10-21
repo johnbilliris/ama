@@ -1,0 +1,12 @@
+completed_at: 2026-09-24T02:48:55.062Z
+verdict: PASS_WITH_WARNINGS
+critical: 0
+high: 1
+medium: 2
+low: 1
+tasks: 134/134
+requirements: 47/47
+local_implementation: PASS
+pr_gate: pending
+sovereign_gate: pending external AU validation/release prerequisites
+attribution_gap: retained after prior local custody loss
