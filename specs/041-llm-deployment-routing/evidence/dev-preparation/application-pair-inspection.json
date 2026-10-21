@@ -1,0 +1,85 @@
+{
+  "observed_at": "2026-10-20T00:26:07.063665+00:00",
+  "authority_reference": "specs\\041-llm-deployment-routing\\evidence\\dev-preparation\\resumed-validation-approval.json",
+  "target_subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+  "login_server": "crdevw3uq6w.azurecr.io",
+  "scope": "application-only preparation; zero Foundry writes",
+  "secrets_persisted": false,
+  "deployment_performed": false,
+  "release_ready": false,
+  "applications": {
+    "api": {
+      "source_sha256": "74162339731761ea236576e125f567b6ea8bd720298cec6b00d43cdf3384c572",
+      "revision_mode": "Single",
+      "revision": "ca-api-dev--n6l54uy",
+      "identity_type": "SystemAssigned",
+      "container_names": [
+        "api"
+      ],
+      "environment_names": [
+        "AGENTS_BASE_URL",
+        "AMA_ALLOW_ANONYMOUS_DEV_ACCESS",
+        "AMA_ALLOW_ANONYMOUS_INCIDENT_MAP",
+        "AMA_ENABLE_INCIDENT_MAP_AUTH",
+        "AMA_ENTRA_AUDIENCE",
+        "AMA_ENTRA_TENANT_ID",
+        "AMA_ENVIRONMENT",
+        "AMA_EVIDENCE_COSMOS_DATABASE",
+        "AMA_EVIDENCE_STORAGE_ACCOUNT_NAME",
+        "APPLICATIONINSIGHTS_CONNECTION_STRING",
+        "AZURE_AI_DRAFTING_DEPLOYMENT",
+        "AZURE_AI_DRAFTING_MODEL_KEY",
+        "AZURE_AI_PROJECT_DEPLOYMENTS",
+        "AZURE_AI_PROJECT_ENDPOINT",
+        "AZURE_AI_REASONING_DEPLOYMENT",
+        "AZURE_AI_REASONING_MODEL_KEY",
+        "AZURE_AI_SIMULATION_DEPLOYMENT",
+        "AZURE_AI_SIMULATION_MODEL_KEY",
+        "AZURE_SEARCH_ENDPOINT",
+        "COSMOS_DATABASE",
+        "COSMOS_ENDPOINT",
+        "OTEL_SERVICE_NAME",
+        "REDIS_HOST",
+        "REDIS_PORT",
+        "RETRIEVAL_INDEX_ALIAS",
+        "STORAGE_ACCOUNT_NAME"
+      ],
+      "registry_identity_configured": false
+    },
+    "agents": {
+      "source_sha256": "aeb775b6b78df1c0040e8d9993b4d8207b33edac209ef86acf9eaf4885ba83ed",
+      "revision_mode": "Single",
+      "revision": "ca-agents-dev--pm412va",
+      "identity_type": "SystemAssigned",
+      "container_names": [
+        "agents"
+      ],
+      "environment_names": [
+        "API_ENDPOINT",
+        "APPLICATIONINSIGHTS_CONNECTION_STRING",
+        "AZURE_AI_DRAFTING_DEPLOYMENT",
+        "AZURE_AI_DRAFTING_MODEL_KEY",
+        "AZURE_AI_PROJECT_DEPLOYMENTS",
+        "AZURE_AI_PROJECT_ENDPOINT",
+        "AZURE_AI_REASONING_DEPLOYMENT",
+        "AZURE_AI_REASONING_MODEL_KEY",
+        "AZURE_AI_SIMULATION_DEPLOYMENT",
+        "AZURE_AI_SIMULATION_MODEL_KEY",
+        "AZURE_SEARCH_ENDPOINT",
+        "COSMOS_DATABASE",
+        "COSMOS_ENDPOINT",
+        "FEATURE_FOUNDRY_RAG_COMMUNICATION",
+        "FEATURE_FOUNDRY_RAG_EVACUATION",
+        "FEATURE_FOUNDRY_RAG_MONITORING",
+        "FEATURE_FOUNDRY_RAG_RESOURCE_ALLOCATION",
+        "FEATURE_FOUNDRY_RAG_RISK_ASSESSMENT",
+        "OTEL_SERVICE_NAME",
+        "REDIS_HOST",
+        "REDIS_PORT",
+        "RETRIEVAL_INDEX_ALIAS",
+        "STORAGE_ACCOUNT_NAME"
+      ],
+      "registry_identity_configured": false
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "approver": "current user",
+  "scope_approval": "Approve — validate bounded Dev Foundry template only",
+  "renewal_approval": "Approve — same scope for the next two hours",
+  "window_start": "2026-10-19T21:49:52Z",
+  "window_end": "2026-10-19T23:43:19Z",
+  "window_basis": "Conservative interval within two hours of the observed pre-renewal clock; not an exact user-message timestamp",
+  "tenant": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+  "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+  "resource_group": "ama",
+  "account": "cog-dev-w3uq6w",
+  "region": "australiaeast",
+  "credentials": "existing signed-in CLI credentials; explicit subscription on every operation",
+  "allowed": [
+    "refresh metadata, effective policy semantics and existing application revision evidence",
+    "strict carve-out validation",
+    "ARM validation and What-If of the exact bounded Foundry candidate"
+  ],
+  "template_sha256": "694566b23dfeebdb32f330795b074c49f7eec2591987e92750cdc68d9c443f3c",
+  "parameters_sha256": "d96c2f010bebdc04634e764e6cda5639e2df8ec05ec92cec86bf726a3c4de0d7",
+  "max_observation_age_seconds": 3600,
+  "changed_bindings_require_reconciliation_and_reapproval": true,
+  "excluded": [
+    "deployment or provisioning",
+    "image publication",
+    "inference",
+    "traffic changes",
+    "permission or policy changes",
+    "full root template deployment"
+  ],
+  "release_approved": false
+}

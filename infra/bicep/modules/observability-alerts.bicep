@@ -189,7 +189,7 @@ output sliOverlayLatencyId string = sliOverlayLatency.id
 output sliEgressBlockId string = sliEgressBlock.id
 
 // ---------------------------------------------------------------------------
-// Cycle 2 / T-AA18 / A2-02 — staging-promotion gate alerts (Z6 + Z7).
+// Cycle 2 / T-AA18 / A2-02 — release-gate alerts (Z6 + Z7).
 //
 // These alerts are INFORMATIONAL (severity 3 — warn-only Slack via the
 // shared action group). The breach action is implemented by

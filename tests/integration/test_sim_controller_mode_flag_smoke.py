@@ -16,10 +16,10 @@ from pathlib import Path
 import pytest
 
 from tests.staging_gates import azure_staging_enabled
-from tools.simulation_stub_sweep import TRIP_WIRE
 
 REPO = Path(__file__).resolve().parents[2]
 MAIN_BICEP = REPO / "infra" / "bicep" / "main.bicep"
+TRIP_WIRE = "simulated reply (no data source wired in this environment)"
 
 
 def test_main_bicep_pins_sim_controller_mode_production() -> None:

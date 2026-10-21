@@ -680,6 +680,7 @@ class AzureSearchRetrievalService:
             endpoint=self.endpoint,
             index_name=self.index_alias,
             credential=cred,
+            api_version="2024-05-01-preview",
         )
         return self.search_client
 

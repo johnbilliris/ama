@@ -30,21 +30,24 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
+from typing import Literal
 from uuid import uuid4
 
+from common.bootstrap import BootstrapHoldMiddleware, bootstrap_hold_requested
 from common.foundry_chat_client import (
     FoundryConfigurationError,
     FoundryGatewayDenied,
     FoundryTransportError,
     LiveFoundryChatClient,
 )
-from fastapi import FastAPI, HTTPException
+from common.llm_config import DeploymentResolver, OperationalTier
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
 # Canonical kebab-case role set — must stay in lock-step with
-# ``apps/api/app/services/simulation/sub_agents/_base.py``::``MODEL_DEPLOYMENT_BY_ROLE``.
+# API sub-agent adapters; role membership is independent of model identity.
 _ROLES: frozenset[str] = frozenset(
     {
         "monitoring",
@@ -108,32 +111,62 @@ class InvokeResponse(BaseModel):
     prompt_hash: str | None = None
     model_deployment: str | None = None
     invocation_id: str
+    model_id: str | None = None
+    model_version: str | None = None
+    inference_attempted: bool | None = None
+    inference_outcome: Literal["succeeded", "failed", "not_attempted", "unknown"] | None = "unknown"
+    degraded: bool = False
+    error: str | None = None
 
 
 def _resolve_model_key() -> str:
-    return os.getenv("AZURE_AI_SIMULATION_MODEL_KEY") or os.getenv("AZURE_AI_REASONING_MODEL_KEY") or "simulation"
+    return OperationalTier.SIMULATION.value
 
 
 def _build_foundry_client() -> LiveFoundryChatClient | None:
-    endpoint = os.getenv("AZURE_AI_PROJECT_ENDPOINT")
-    if not endpoint:
-        return None
-    try:
-        return LiveFoundryChatClient(endpoint=endpoint)
-    except Exception:  # noqa: BLE001
-        logger.warning("Dispatcher Foundry client unavailable; degraded stub replies in effect", exc_info=True)
-        return None
+    resolver = DeploymentResolver.from_environment(configuration_revision="dispatcher-snapshot")
+    resolver.resolve(OperationalTier.SIMULATION)
+    return LiveFoundryChatClient(resolver=resolver)
 
 
 def create_app() -> FastAPI:
     """FastAPI app factory used by the ``__main__`` runner and unit tests."""
     app = FastAPI(title="AMA Sub-Agent Dispatcher", version="1.0.0")
-    foundry_client = _build_foundry_client()
+    held = bootstrap_hold_requested()
+    configuration_error: str | None = None
+    try:
+        foundry_client = None if held else _build_foundry_client()
+    except FoundryConfigurationError as exc:
+        configuration_error = str(exc)
+        foundry_client = None
+        logger.warning("Dispatcher Foundry configuration error; degraded replies in effect: %s", exc)
     model_key = _resolve_model_key() if foundry_client is not None else None
-    if foundry_client is not None and model_key is None:
-        logger.warning(
-            "Dispatcher could not resolve a chat model key from environment; degraded stub replies in effect"
+    if held:
+        logger.warning("Dispatcher bootstrap hold active; business invocation disabled")
+        app.add_middleware(
+            BootstrapHoldMiddleware,
+            allowed_paths=frozenset({"/health/liveness", "/health/startup", "/health/readiness"}),
         )
+
+    @app.get("/health/liveness")
+    async def liveness() -> dict[str, str]:
+        return {"status": "healthy", "service": "sub-agent-dispatcher"}
+
+    @app.get("/health/startup")
+    async def startup() -> dict[str, object]:
+        return {"status": "held" if held else "started", "initialized": True}
+
+    @app.get("/health/readiness")
+    async def readiness(response: Response) -> dict[str, object]:
+        ready = not held and foundry_client is not None and model_key is not None
+        response.status_code = 200 if ready else 503
+        return {
+            "status": "held" if held else ("ready" if ready else "configuration_error"),
+            "ready": ready,
+            "check_scope": "startup_and_routing_configuration",
+            "dependency_authorization_verified": False,
+            "inference_attempted": False,
+        }
 
     @app.get("/health")
     async def health() -> dict[str, str]:
@@ -155,6 +188,17 @@ def create_app() -> FastAPI:
 
         summary = ""
         deployment_used: str | None = None
+        request_configuration_error = configuration_error
+        from common.foundry_chat_client import InferenceAttemptEvidence
+
+        evidence = InferenceAttemptEvidence(
+            call_id=str(uuid4()),
+            correlation_id=invocation_id,
+            inference_attempted=False,
+            inference_outcome="not_attempted",
+        )
+        error = "configuration_error" if configuration_error else None
+        degraded = False
 
         if foundry_client is not None and model_key:
             try:
@@ -166,10 +210,22 @@ def create_app() -> FastAPI:
                     ],
                     max_tokens=int(os.getenv("SUBAGENT_LLM_MAX_TOKENS", "400")),
                     timeout_s=float(os.getenv("SUBAGENT_LLM_TIMEOUT_S", "60")),
+                    correlation_id=invocation_id,
                 )
                 summary = response.text.strip()
-                deployment_used = response.raw.get("deployment") if isinstance(response.raw, dict) else None
+                evidence = response.attempt_evidence or InferenceAttemptEvidence(
+                    call_id=str(uuid4()),
+                    correlation_id=invocation_id,
+                )
+                if evidence.inference_attempted is True:
+                    deployment_used = response.deployment_id
+                if response.safety_filter_triggered:
+                    summary = ""
+                    error = "content_filter"
             except FoundryGatewayDenied as exc:
+                evidence = getattr(exc, "attempt_evidence", evidence)
+                error = "gateway_denied"
+                degraded = True
                 logger.info(
                     "subagent.gateway_denied role=%s tenant=%s invocation=%s reason=%s",
                     role,
@@ -178,14 +234,31 @@ def create_app() -> FastAPI:
                     exc.reason,
                 )
                 summary = "[classification-denied] payload blocked by sovereignty gateway"
-            except (FoundryConfigurationError, FoundryTransportError):
+            except FoundryConfigurationError as exc:
+                evidence = getattr(exc, "attempt_evidence", evidence)
+                error = "configuration_error"
+                request_configuration_error = str(exc)
+                logger.exception(
+                    "subagent.foundry_config_error role=%s tenant=%s invocation=%s",
+                    role,
+                    body.tenant_id,
+                    invocation_id,
+                )
+            except FoundryTransportError as exc:
+                evidence = getattr(exc, "attempt_evidence", evidence)
+                error = "transport_error"
                 logger.exception(
                     "subagent.foundry_error role=%s tenant=%s invocation=%s",
                     role,
                     body.tenant_id,
                     invocation_id,
                 )
-            except Exception:  # noqa: BLE001
+            except Exception as exc:  # noqa: BLE001
+                evidence = getattr(exc, "attempt_evidence", None) or InferenceAttemptEvidence(
+                    call_id=str(uuid4()),
+                    correlation_id=invocation_id,
+                )
+                error = "llm_error"
                 logger.exception(
                     "subagent.llm_failed role=%s tenant=%s invocation=%s",
                     role,
@@ -194,6 +267,8 @@ def create_app() -> FastAPI:
                 )
 
         if not summary:
+            degraded = True
+            error = error or "empty_completion"
             # Deterministic, simulation-marked stub. Returned only when the
             # LLM is unavailable or returned an empty completion — keeps the
             # Controller's tool round-trip useful instead of erroring.
@@ -201,7 +276,11 @@ def create_app() -> FastAPI:
                 f"[{role}] (degraded) No grounded answer available; consider the "
                 f"following operational frame: {body.question.strip()[:200]}"
             )
+            if request_configuration_error:
+                summary += f" [configuration-error] {request_configuration_error}"
 
+        if evidence.inference_attempted is True and evidence.resolved_identity:
+            deployment_used = evidence.resolved_identity.deployment_name
         logger.info(
             "subagent.invoke role=%s tenant=%s invocation=%s deployment=%s len=%d",
             role,
@@ -217,6 +296,16 @@ def create_app() -> FastAPI:
             prompt_hash=prompt_hash,
             model_deployment=deployment_used,
             invocation_id=invocation_id,
+            model_id=evidence.resolved_identity.model_id
+            if evidence.inference_attempted is True and evidence.resolved_identity
+            else None,
+            model_version=evidence.resolved_identity.model_version
+            if evidence.inference_attempted is True and evidence.resolved_identity
+            else None,
+            inference_attempted=evidence.inference_attempted,
+            inference_outcome=evidence.inference_outcome,
+            degraded=degraded,
+            error=error,
         )
 
     return app

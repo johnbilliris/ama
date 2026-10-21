@@ -1,17 +1,66 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "languageVersion": "2.0",
   "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.39.26.7824",
-      "templateHash": "9218557975815398679"
+      "version": "0.46.1.21595",
+      "templateHash": "4950756573253397390"
+    }
+  },
+  "definitions": {
+    "deploymentOperatingStatesType": {
+      "type": "object",
+      "properties": {
+        "reasoning": {
+          "$ref": "#/definitions/deploymentOperatingState"
+        },
+        "drafting": {
+          "$ref": "#/definitions/deploymentOperatingState"
+        },
+        "simulation": {
+          "$ref": "#/definitions/deploymentOperatingState"
+        },
+        "embedding": {
+          "$ref": "#/definitions/deploymentOperatingState"
+        }
+      },
+      "metadata": {
+        "__bicep_export!": true,
+        "description": "Explicit approved operating states for all existing deployments, including embedding."
+      }
     },
-    "deprecated": "036-foundry-rag-grounding",
-    "deprecationReason": "Replaced by Foundry-hosted models per spec 036; kept for canary fallback (FR-RAG-FM-06). Delete in E1.",
-    "replacedBy": "apps/agents/common/foundry_chat_client.py + infra/modules/ai-search-blue-green.bicep"
+    "deploymentOperatingState": {
+      "type": "object",
+      "properties": {
+        "currentCapacity": {
+          "type": "int",
+          "minValue": 0
+        },
+        "deploymentState": {
+          "type": "string",
+          "allowedValues": [
+            "Paused",
+            "Running"
+          ]
+        }
+      },
+      "metadata": {
+        "description": "Observed deployment operating state, independent of requested SKU capacity.",
+        "__bicep_imported_from!": {
+          "sourceTemplate": "cognitive-services-deployment-preservation.bicep"
+        }
+      }
+    }
   },
   "parameters": {
+    "deploymentOperatingStates": {
+      "$ref": "#/definitions/deploymentOperatingStatesType",
+      "metadata": {
+        "description": "Required observed capacities and Running/Paused states; no inferred defaults."
+      }
+    },
     "openAiAccountName": {
       "type": "string",
       "metadata": {
@@ -42,44 +91,89 @@
     },
     "reasoningModelName": {
       "type": "string",
-      "defaultValue": "gpt-5.4",
+      "minLength": 1,
       "metadata": {
         "description": "Reasoning-tier model name"
       }
     },
     "reasoningModelVersion": {
       "type": "string",
-      "defaultValue": "2026-03-05",
+      "minLength": 1,
       "metadata": {
         "description": "Reasoning-tier model version"
       }
     },
     "draftingModelName": {
       "type": "string",
-      "defaultValue": "gpt-5.4",
+      "minLength": 1,
       "metadata": {
         "description": "Drafting-tier model name"
       }
     },
     "draftingModelVersion": {
       "type": "string",
-      "defaultValue": "2026-03-05",
+      "minLength": 1,
       "metadata": {
         "description": "Drafting-tier model version"
       }
     },
     "simulationModelName": {
       "type": "string",
-      "defaultValue": "gpt-5.4",
+      "minLength": 1,
       "metadata": {
         "description": "Simulation Controller model name (used by the Simulation chat endpoint)."
       }
     },
     "simulationModelVersion": {
       "type": "string",
-      "defaultValue": "2026-03-05",
+      "minLength": 1,
       "metadata": {
         "description": "Simulation Controller model version."
+      }
+    },
+    "reasoningDeploymentName": {
+      "type": "string",
+      "defaultValue": "[format('reasoning-{0}', parameters('envPrefix'))]",
+      "metadata": {
+        "description": "Existing reasoning deployment name. Purpose/environment default is for new resources only."
+      }
+    },
+    "draftingDeploymentName": {
+      "type": "string",
+      "defaultValue": "[format('drafting-{0}', parameters('envPrefix'))]",
+      "metadata": {
+        "description": "Existing drafting deployment name. Purpose/environment default is for new resources only."
+      }
+    },
+    "simulationDeploymentName": {
+      "type": "string",
+      "defaultValue": "[format('simulation-{0}', parameters('envPrefix'))]",
+      "metadata": {
+        "description": "Existing simulation deployment name. Purpose/environment default is for new resources only."
+      }
+    },
+    "reasoningVersionUpgradeOption": {
+      "type": "string",
+      "metadata": {
+        "description": "Explicit approved reasoning version upgrade behavior."
+      }
+    },
+    "draftingVersionUpgradeOption": {
+      "type": "string",
+      "metadata": {
+        "description": "Explicit approved drafting version upgrade behavior."
+      }
+    },
+    "simulationVersionUpgradeOption": {
+      "type": "string",
+      "metadata": {
+        "description": "Explicit approved simulation version upgrade behavior."
+      }
+    },
+    "embeddingVersionUpgradeOption": {
+      "type": "string",
+      "metadata": {
+        "description": "Explicit approved embedding version upgrade behavior."
       }
     },
     "reasoningTpmQuota": {
@@ -106,6 +200,28 @@
         "description": "Simulation Controller TPM quota (K). Dev=20, Prod=80. Isolated quota so an exercise cannot starve live agents."
       }
     },
+    "embeddingModelName": {
+      "type": "string",
+      "defaultValue": "text-embedding-3-large",
+      "metadata": {
+        "description": "Embedding model name (Spec 036 FR-RAG-IDX-02 — corpus chunks → 3072-dim vectors)."
+      }
+    },
+    "embeddingModelVersion": {
+      "type": "string",
+      "defaultValue": "1",
+      "metadata": {
+        "description": "Embedding model version."
+      }
+    },
+    "embeddingTpmQuota": {
+      "type": "int",
+      "defaultValue": 60,
+      "minValue": 1,
+      "metadata": {
+        "description": "Embedding deployment TPM quota (K). Sized for full corpus rebuild headroom."
+      }
+    },
     "modelDeploymentSku": {
       "type": "string",
       "defaultValue": "GlobalStandard",
@@ -115,6 +231,27 @@
       ],
       "metadata": {
         "description": "Model deployment SKU — GlobalStandard for dev/staging (draws from global capacity pool), Standard for production (regional capacity)"
+      }
+    },
+    "reasoningDeploymentSku": {
+      "type": "string",
+      "defaultValue": "[parameters('modelDeploymentSku')]",
+      "metadata": {
+        "description": "Approved reasoning SKU; defaults to the explicitly selected shared SKU."
+      }
+    },
+    "draftingDeploymentSku": {
+      "type": "string",
+      "defaultValue": "[parameters('modelDeploymentSku')]",
+      "metadata": {
+        "description": "Approved drafting SKU; defaults to the explicitly selected shared SKU."
+      }
+    },
+    "simulationDeploymentSku": {
+      "type": "string",
+      "defaultValue": "[parameters('modelDeploymentSku')]",
+      "metadata": {
+        "description": "Approved simulation SKU; defaults to the explicitly selected shared SKU."
       }
     },
     "agentPrincipalIds": {
@@ -129,6 +266,13 @@
       "metadata": {
         "description": "Log Analytics workspace ID for diagnostic settings"
       }
+    },
+    "diagnosticSettings": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Approved diagnostic log and metric snapshots; omitted fields retain the existing module defaults."
+      }
     }
   },
   "variables": {
@@ -138,25 +282,64 @@
         "source": "Prompt",
         "enabled": true,
         "blocking": true,
-        "severityThreshold": "High"
+        "severityThreshold": "High",
+        "action": "NONE"
       },
       {
         "name": "Violence",
         "source": "Completion",
         "enabled": true,
         "blocking": true,
-        "severityThreshold": "High"
+        "severityThreshold": "High",
+        "action": "NONE"
       }
     ],
     "reasoningRaiPolicyName": "[format('reasoning-em-domain-{0}', parameters('envPrefix'))]",
     "draftingRaiPolicyName": "[format('drafting-em-domain-{0}', parameters('envPrefix'))]",
     "simulationRaiPolicyName": "[format('sim-em-domain-{0}', parameters('envPrefix'))]",
-    "cognitiveServicesOpenAiUserRoleId": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd"
+    "cognitiveServicesOpenAiUserRoleId": "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd",
+    "selections": [
+      {
+        "model": "[parameters('reasoningModelName')]",
+        "version": "[parameters('reasoningModelVersion')]",
+        "deployment": "[parameters('reasoningDeploymentName')]"
+      },
+      {
+        "model": "[parameters('draftingModelName')]",
+        "version": "[parameters('draftingModelVersion')]",
+        "deployment": "[parameters('draftingDeploymentName')]"
+      },
+      {
+        "model": "[parameters('simulationModelName')]",
+        "version": "[parameters('simulationModelVersion')]",
+        "deployment": "[parameters('simulationDeploymentName')]"
+      },
+      {
+        "model": "[parameters('embeddingModelName')]",
+        "version": "[parameters('embeddingModelVersion')]",
+        "deployment": "[format('{0}-{1}', parameters('embeddingModelName'), parameters('envPrefix'))]"
+      }
+    ],
+    "tierAliases": [
+      "[format('reasoning={0}', parameters('reasoningDeploymentName'))]",
+      "[format('drafting={0}', parameters('draftingDeploymentName'))]",
+      "[format('simulation={0}', parameters('simulationDeploymentName'))]"
+    ],
+    "legacyCoordinates": "[flatten(map(variables('selections'), lambda('selection', createArray(createObject('key', format('{0}@{1}', lambdaVariables('selection').model, lambdaVariables('selection').version), 'deployment', lambdaVariables('selection').deployment), createObject('key', lambdaVariables('selection').model, 'deployment', lambdaVariables('selection').deployment)))))]",
+    "coordinateGroups": "[groupBy(variables('legacyCoordinates'), lambda('coordinate', lambdaVariables('coordinate').key))]",
+    "uniqueCoordinates": "[filter(items(variables('coordinateGroups')), lambda('entry', equals(length(union(map(lambdaVariables('entry').value, lambda('coordinate', lambdaVariables('coordinate').deployment)), createArray())), 1)))]",
+    "distinctCoordinates": "[filter(variables('uniqueCoordinates'), lambda('entry', not(contains(variables('tierAliases'), format('{0}={1}', lambdaVariables('entry').key, first(lambdaVariables('entry').value).deployment)))))]"
   },
-  "resources": [
-    {
-      "type": "Microsoft.CognitiveServices/accounts/raiPolicies",
+  "resources": {
+    "openAiAccount": {
+      "existing": true,
+      "type": "Microsoft.CognitiveServices/accounts",
       "apiVersion": "2024-10-01",
+      "name": "[parameters('openAiAccountName')]"
+    },
+    "reasoningRaiPolicy": {
+      "type": "Microsoft.CognitiveServices/accounts/raiPolicies",
+      "apiVersion": "2026-05-01",
       "name": "[format('{0}/{1}', parameters('openAiAccountName'), variables('reasoningRaiPolicyName'))]",
       "properties": {
         "basePolicyName": "Microsoft.DefaultV2",
@@ -164,9 +347,9 @@
         "contentFilters": "[variables('emDomainContentFilters')]"
       }
     },
-    {
+    "draftingRaiPolicy": {
       "type": "Microsoft.CognitiveServices/accounts/raiPolicies",
-      "apiVersion": "2024-10-01",
+      "apiVersion": "2026-05-01",
       "name": "[format('{0}/{1}', parameters('openAiAccountName'), variables('draftingRaiPolicyName'))]",
       "properties": {
         "basePolicyName": "Microsoft.DefaultV2",
@@ -174,12 +357,12 @@
         "contentFilters": "[variables('emDomainContentFilters')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-{0}', parameters('envPrefix')))]"
+        "reasoningDeployment"
       ]
     },
-    {
+    "simulationRaiPolicy": {
       "type": "Microsoft.CognitiveServices/accounts/raiPolicies",
-      "apiVersion": "2024-10-01",
+      "apiVersion": "2026-05-01",
       "name": "[format('{0}/{1}', parameters('openAiAccountName'), variables('simulationRaiPolicyName'))]",
       "properties": {
         "basePolicyName": "Microsoft.DefaultV2",
@@ -187,77 +370,17 @@
         "contentFilters": "[variables('emDomainContentFilters')]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('openAiAccountName'), format('gpt-5.4-mini-{0}', parameters('envPrefix')))]"
+        "draftingDeployment"
       ]
     },
-    {
-      "type": "Microsoft.CognitiveServices/accounts/deployments",
-      "apiVersion": "2024-10-01",
-      "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-{0}', parameters('envPrefix')))]",
-      "sku": {
-        "name": "[parameters('modelDeploymentSku')]",
-        "capacity": "[parameters('reasoningTpmQuota')]"
-      },
-      "properties": {
-        "model": {
-          "format": "OpenAI",
-          "name": "[parameters('reasoningModelName')]",
-          "version": "[parameters('reasoningModelVersion')]"
-        },
-        "raiPolicyName": "[variables('reasoningRaiPolicyName')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.CognitiveServices/accounts/raiPolicies', parameters('openAiAccountName'), variables('reasoningRaiPolicyName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.CognitiveServices/accounts/deployments",
-      "apiVersion": "2024-10-01",
-      "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-mini-{0}', parameters('envPrefix')))]",
-      "sku": {
-        "name": "[parameters('modelDeploymentSku')]",
-        "capacity": "[parameters('draftingTpmQuota')]"
-      },
-      "properties": {
-        "model": {
-          "format": "OpenAI",
-          "name": "[parameters('draftingModelName')]",
-          "version": "[parameters('draftingModelVersion')]"
-        },
-        "raiPolicyName": "[variables('draftingRaiPolicyName')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.CognitiveServices/accounts/raiPolicies', parameters('openAiAccountName'), variables('draftingRaiPolicyName'))]"
-      ]
-    },
-    {
-      "type": "Microsoft.CognitiveServices/accounts/deployments",
-      "apiVersion": "2024-10-01",
-      "name": "[format('{0}/{1}', parameters('openAiAccountName'), format('gpt-5.4-sim-{0}', parameters('envPrefix')))]",
-      "sku": {
-        "name": "[parameters('modelDeploymentSku')]",
-        "capacity": "[parameters('simulationTpmQuota')]"
-      },
-      "properties": {
-        "model": {
-          "format": "OpenAI",
-          "name": "[parameters('simulationModelName')]",
-          "version": "[parameters('simulationModelVersion')]"
-        },
-        "raiPolicyName": "[variables('simulationRaiPolicyName')]"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.CognitiveServices/accounts/raiPolicies', parameters('openAiAccountName'), variables('simulationRaiPolicyName'))]"
-      ]
-    },
-    {
+    "openAiRoleAssignment": {
       "copy": {
         "name": "openAiRoleAssignment",
         "count": "[length(parameters('agentPrincipalIds'))]"
       },
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2022-04-01",
-      "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('openAiAccountName'))]",
+      "scope": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName'))]",
       "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')), parameters('agentPrincipalIds')[copyIndex()], variables('cognitiveServicesOpenAiUserRoleId'))]",
       "properties": {
         "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('cognitiveServicesOpenAiUserRoleId'))]",
@@ -265,44 +388,762 @@
         "principalType": "ServicePrincipal"
       }
     },
-    {
+    "openAiDiagnostics": {
       "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2021-05-01-preview",
-      "scope": "[format('Microsoft.CognitiveServices/accounts/{0}', parameters('openAiAccountName'))]",
+      "scope": "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName'))]",
       "name": "openai-diagnostics",
       "properties": {
         "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
-        "logs": [
-          {
-            "category": "RequestResponse",
-            "enabled": true
-          },
-          {
-            "category": "Audit",
-            "enabled": true
-          }
-        ],
-        "metrics": [
-          {
-            "category": "AllMetrics",
-            "enabled": true
-          }
-        ]
+        "logs": "[coalesce(tryGet(parameters('diagnosticSettings'), 'logs'), createArray(createObject('category', 'RequestResponse', 'enabled', true()), createObject('category', 'Audit', 'enabled', true())))]",
+        "metrics": "[coalesce(tryGet(parameters('diagnosticSettings'), 'metrics'), createArray(createObject('category', 'AllMetrics', 'enabled', true())))]"
       }
+    },
+    "reasoningDeployment": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "reasoning-model-deployment",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "accountName": {
+            "value": "[parameters('openAiAccountName')]"
+          },
+          "name": {
+            "value": "[parameters('reasoningDeploymentName')]"
+          },
+          "sku": {
+            "value": {
+              "name": "[parameters('reasoningDeploymentSku')]",
+              "capacity": "[parameters('reasoningTpmQuota')]"
+            }
+          },
+          "model": {
+            "value": {
+              "format": "OpenAI",
+              "name": "[parameters('reasoningModelName')]",
+              "version": "[parameters('reasoningModelVersion')]"
+            }
+          },
+          "raiPolicyName": {
+            "value": "[variables('reasoningRaiPolicyName')]"
+          },
+          "versionUpgradeOption": {
+            "value": "[parameters('reasoningVersionUpgradeOption')]"
+          },
+          "operatingState": {
+            "value": "[parameters('deploymentOperatingStates').reasoning]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.46.1.21595",
+              "templateHash": "6423030120594307295"
+            },
+            "description": "First-party existing-parent deployment preservation; approved exception recorded in feature 041 avm-compatibility.md."
+          },
+          "definitions": {
+            "deploymentOperatingState": {
+              "type": "object",
+              "properties": {
+                "currentCapacity": {
+                  "type": "int",
+                  "minValue": 0
+                },
+                "deploymentState": {
+                  "type": "string",
+                  "allowedValues": [
+                    "Paused",
+                    "Running"
+                  ]
+                }
+              },
+              "metadata": {
+                "__bicep_export!": true,
+                "description": "Observed deployment operating state, independent of requested SKU capacity."
+              }
+            }
+          },
+          "parameters": {
+            "accountName": {
+              "type": "string",
+              "minLength": 2,
+              "metadata": {
+                "description": "Existing parent Cognitive Services account ARM name."
+              }
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "metadata": {
+                "description": "Existing model deployment name."
+              }
+            },
+            "model": {
+              "type": "object",
+              "properties": {
+                "format": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              },
+              "metadata": {
+                "description": "Explicit model identity, including the approved version."
+              }
+            },
+            "sku": {
+              "type": "object",
+              "metadata": {
+                "__bicep_resource_derived_type!": {
+                  "source": "Microsoft.CognitiveServices/accounts/deployments@2025-06-01#properties/sku"
+                },
+                "description": "Explicit approved deployment SKU and requested capacity."
+              }
+            },
+            "raiPolicyName": {
+              "type": "string",
+              "minLength": 1,
+              "metadata": {
+                "description": "Explicit approved RAI policy attachment."
+              }
+            },
+            "versionUpgradeOption": {
+              "type": "string",
+              "allowedValues": [
+                "OnceNewDefaultVersionAvailable",
+                "OnceCurrentVersionExpired",
+                "NoAutoUpgrade"
+              ],
+              "metadata": {
+                "description": "Explicit approved model version-upgrade behavior."
+              }
+            },
+            "operatingState": {
+              "$ref": "#/definitions/deploymentOperatingState",
+              "metadata": {
+                "description": "Required observed operating state; never derived from SKU or defaulted to Running."
+              }
+            }
+          },
+          "resources": {
+            "account": {
+              "existing": true,
+              "type": "Microsoft.CognitiveServices/accounts",
+              "apiVersion": "2025-06-01",
+              "name": "[parameters('accountName')]"
+            },
+            "deployment": {
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2026-05-01",
+              "name": "[format('{0}/{1}', parameters('accountName'), parameters('name'))]",
+              "sku": "[parameters('sku')]",
+              "properties": {
+                "model": "[parameters('model')]",
+                "raiPolicyName": "[parameters('raiPolicyName')]",
+                "versionUpgradeOption": "[parameters('versionUpgradeOption')]",
+                "currentCapacity": "[parameters('operatingState').currentCapacity]",
+                "deploymentState": "[parameters('operatingState').deploymentState]"
+              }
+            }
+          },
+          "outputs": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Preserved deployment name."
+              },
+              "value": "[parameters('name')]"
+            },
+            "resourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Preserved deployment resource ID."
+              },
+              "value": "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('accountName'), parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "reasoningRaiPolicy"
+      ]
+    },
+    "draftingDeployment": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "drafting-model-deployment",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "accountName": {
+            "value": "[parameters('openAiAccountName')]"
+          },
+          "name": {
+            "value": "[parameters('draftingDeploymentName')]"
+          },
+          "sku": {
+            "value": {
+              "name": "[parameters('draftingDeploymentSku')]",
+              "capacity": "[parameters('draftingTpmQuota')]"
+            }
+          },
+          "model": {
+            "value": {
+              "format": "OpenAI",
+              "name": "[parameters('draftingModelName')]",
+              "version": "[parameters('draftingModelVersion')]"
+            }
+          },
+          "raiPolicyName": {
+            "value": "[variables('draftingRaiPolicyName')]"
+          },
+          "versionUpgradeOption": {
+            "value": "[parameters('draftingVersionUpgradeOption')]"
+          },
+          "operatingState": {
+            "value": "[parameters('deploymentOperatingStates').drafting]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.46.1.21595",
+              "templateHash": "6423030120594307295"
+            },
+            "description": "First-party existing-parent deployment preservation; approved exception recorded in feature 041 avm-compatibility.md."
+          },
+          "definitions": {
+            "deploymentOperatingState": {
+              "type": "object",
+              "properties": {
+                "currentCapacity": {
+                  "type": "int",
+                  "minValue": 0
+                },
+                "deploymentState": {
+                  "type": "string",
+                  "allowedValues": [
+                    "Paused",
+                    "Running"
+                  ]
+                }
+              },
+              "metadata": {
+                "__bicep_export!": true,
+                "description": "Observed deployment operating state, independent of requested SKU capacity."
+              }
+            }
+          },
+          "parameters": {
+            "accountName": {
+              "type": "string",
+              "minLength": 2,
+              "metadata": {
+                "description": "Existing parent Cognitive Services account ARM name."
+              }
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "metadata": {
+                "description": "Existing model deployment name."
+              }
+            },
+            "model": {
+              "type": "object",
+              "properties": {
+                "format": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              },
+              "metadata": {
+                "description": "Explicit model identity, including the approved version."
+              }
+            },
+            "sku": {
+              "type": "object",
+              "metadata": {
+                "__bicep_resource_derived_type!": {
+                  "source": "Microsoft.CognitiveServices/accounts/deployments@2025-06-01#properties/sku"
+                },
+                "description": "Explicit approved deployment SKU and requested capacity."
+              }
+            },
+            "raiPolicyName": {
+              "type": "string",
+              "minLength": 1,
+              "metadata": {
+                "description": "Explicit approved RAI policy attachment."
+              }
+            },
+            "versionUpgradeOption": {
+              "type": "string",
+              "allowedValues": [
+                "OnceNewDefaultVersionAvailable",
+                "OnceCurrentVersionExpired",
+                "NoAutoUpgrade"
+              ],
+              "metadata": {
+                "description": "Explicit approved model version-upgrade behavior."
+              }
+            },
+            "operatingState": {
+              "$ref": "#/definitions/deploymentOperatingState",
+              "metadata": {
+                "description": "Required observed operating state; never derived from SKU or defaulted to Running."
+              }
+            }
+          },
+          "resources": {
+            "account": {
+              "existing": true,
+              "type": "Microsoft.CognitiveServices/accounts",
+              "apiVersion": "2025-06-01",
+              "name": "[parameters('accountName')]"
+            },
+            "deployment": {
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2026-05-01",
+              "name": "[format('{0}/{1}', parameters('accountName'), parameters('name'))]",
+              "sku": "[parameters('sku')]",
+              "properties": {
+                "model": "[parameters('model')]",
+                "raiPolicyName": "[parameters('raiPolicyName')]",
+                "versionUpgradeOption": "[parameters('versionUpgradeOption')]",
+                "currentCapacity": "[parameters('operatingState').currentCapacity]",
+                "deploymentState": "[parameters('operatingState').deploymentState]"
+              }
+            }
+          },
+          "outputs": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Preserved deployment name."
+              },
+              "value": "[parameters('name')]"
+            },
+            "resourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Preserved deployment resource ID."
+              },
+              "value": "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('accountName'), parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "draftingRaiPolicy"
+      ]
+    },
+    "simulationDeployment": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "simulation-model-deployment",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "accountName": {
+            "value": "[parameters('openAiAccountName')]"
+          },
+          "name": {
+            "value": "[parameters('simulationDeploymentName')]"
+          },
+          "sku": {
+            "value": {
+              "name": "[parameters('simulationDeploymentSku')]",
+              "capacity": "[parameters('simulationTpmQuota')]"
+            }
+          },
+          "model": {
+            "value": {
+              "format": "OpenAI",
+              "name": "[parameters('simulationModelName')]",
+              "version": "[parameters('simulationModelVersion')]"
+            }
+          },
+          "raiPolicyName": {
+            "value": "[variables('simulationRaiPolicyName')]"
+          },
+          "versionUpgradeOption": {
+            "value": "[parameters('simulationVersionUpgradeOption')]"
+          },
+          "operatingState": {
+            "value": "[parameters('deploymentOperatingStates').simulation]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.46.1.21595",
+              "templateHash": "6423030120594307295"
+            },
+            "description": "First-party existing-parent deployment preservation; approved exception recorded in feature 041 avm-compatibility.md."
+          },
+          "definitions": {
+            "deploymentOperatingState": {
+              "type": "object",
+              "properties": {
+                "currentCapacity": {
+                  "type": "int",
+                  "minValue": 0
+                },
+                "deploymentState": {
+                  "type": "string",
+                  "allowedValues": [
+                    "Paused",
+                    "Running"
+                  ]
+                }
+              },
+              "metadata": {
+                "__bicep_export!": true,
+                "description": "Observed deployment operating state, independent of requested SKU capacity."
+              }
+            }
+          },
+          "parameters": {
+            "accountName": {
+              "type": "string",
+              "minLength": 2,
+              "metadata": {
+                "description": "Existing parent Cognitive Services account ARM name."
+              }
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "metadata": {
+                "description": "Existing model deployment name."
+              }
+            },
+            "model": {
+              "type": "object",
+              "properties": {
+                "format": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              },
+              "metadata": {
+                "description": "Explicit model identity, including the approved version."
+              }
+            },
+            "sku": {
+              "type": "object",
+              "metadata": {
+                "__bicep_resource_derived_type!": {
+                  "source": "Microsoft.CognitiveServices/accounts/deployments@2025-06-01#properties/sku"
+                },
+                "description": "Explicit approved deployment SKU and requested capacity."
+              }
+            },
+            "raiPolicyName": {
+              "type": "string",
+              "minLength": 1,
+              "metadata": {
+                "description": "Explicit approved RAI policy attachment."
+              }
+            },
+            "versionUpgradeOption": {
+              "type": "string",
+              "allowedValues": [
+                "OnceNewDefaultVersionAvailable",
+                "OnceCurrentVersionExpired",
+                "NoAutoUpgrade"
+              ],
+              "metadata": {
+                "description": "Explicit approved model version-upgrade behavior."
+              }
+            },
+            "operatingState": {
+              "$ref": "#/definitions/deploymentOperatingState",
+              "metadata": {
+                "description": "Required observed operating state; never derived from SKU or defaulted to Running."
+              }
+            }
+          },
+          "resources": {
+            "account": {
+              "existing": true,
+              "type": "Microsoft.CognitiveServices/accounts",
+              "apiVersion": "2025-06-01",
+              "name": "[parameters('accountName')]"
+            },
+            "deployment": {
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2026-05-01",
+              "name": "[format('{0}/{1}', parameters('accountName'), parameters('name'))]",
+              "sku": "[parameters('sku')]",
+              "properties": {
+                "model": "[parameters('model')]",
+                "raiPolicyName": "[parameters('raiPolicyName')]",
+                "versionUpgradeOption": "[parameters('versionUpgradeOption')]",
+                "currentCapacity": "[parameters('operatingState').currentCapacity]",
+                "deploymentState": "[parameters('operatingState').deploymentState]"
+              }
+            }
+          },
+          "outputs": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Preserved deployment name."
+              },
+              "value": "[parameters('name')]"
+            },
+            "resourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Preserved deployment resource ID."
+              },
+              "value": "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('accountName'), parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "simulationRaiPolicy"
+      ]
+    },
+    "embeddingDeployment": {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "embedding-model-deployment",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "accountName": {
+            "value": "[parameters('openAiAccountName')]"
+          },
+          "name": {
+            "value": "[format('{0}-{1}', parameters('embeddingModelName'), parameters('envPrefix'))]"
+          },
+          "sku": {
+            "value": {
+              "name": "Standard",
+              "capacity": "[parameters('embeddingTpmQuota')]"
+            }
+          },
+          "model": {
+            "value": {
+              "format": "OpenAI",
+              "name": "[parameters('embeddingModelName')]",
+              "version": "[parameters('embeddingModelVersion')]"
+            }
+          },
+          "raiPolicyName": {
+            "value": "Microsoft.DefaultV2"
+          },
+          "versionUpgradeOption": {
+            "value": "[parameters('embeddingVersionUpgradeOption')]"
+          },
+          "operatingState": {
+            "value": "[parameters('deploymentOperatingStates').embedding]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "languageVersion": "2.0",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.46.1.21595",
+              "templateHash": "6423030120594307295"
+            },
+            "description": "First-party existing-parent deployment preservation; approved exception recorded in feature 041 avm-compatibility.md."
+          },
+          "definitions": {
+            "deploymentOperatingState": {
+              "type": "object",
+              "properties": {
+                "currentCapacity": {
+                  "type": "int",
+                  "minValue": 0
+                },
+                "deploymentState": {
+                  "type": "string",
+                  "allowedValues": [
+                    "Paused",
+                    "Running"
+                  ]
+                }
+              },
+              "metadata": {
+                "__bicep_export!": true,
+                "description": "Observed deployment operating state, independent of requested SKU capacity."
+              }
+            }
+          },
+          "parameters": {
+            "accountName": {
+              "type": "string",
+              "minLength": 2,
+              "metadata": {
+                "description": "Existing parent Cognitive Services account ARM name."
+              }
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "metadata": {
+                "description": "Existing model deployment name."
+              }
+            },
+            "model": {
+              "type": "object",
+              "properties": {
+                "format": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              },
+              "metadata": {
+                "description": "Explicit model identity, including the approved version."
+              }
+            },
+            "sku": {
+              "type": "object",
+              "metadata": {
+                "__bicep_resource_derived_type!": {
+                  "source": "Microsoft.CognitiveServices/accounts/deployments@2025-06-01#properties/sku"
+                },
+                "description": "Explicit approved deployment SKU and requested capacity."
+              }
+            },
+            "raiPolicyName": {
+              "type": "string",
+              "minLength": 1,
+              "metadata": {
+                "description": "Explicit approved RAI policy attachment."
+              }
+            },
+            "versionUpgradeOption": {
+              "type": "string",
+              "allowedValues": [
+                "OnceNewDefaultVersionAvailable",
+                "OnceCurrentVersionExpired",
+                "NoAutoUpgrade"
+              ],
+              "metadata": {
+                "description": "Explicit approved model version-upgrade behavior."
+              }
+            },
+            "operatingState": {
+              "$ref": "#/definitions/deploymentOperatingState",
+              "metadata": {
+                "description": "Required observed operating state; never derived from SKU or defaulted to Running."
+              }
+            }
+          },
+          "resources": {
+            "account": {
+              "existing": true,
+              "type": "Microsoft.CognitiveServices/accounts",
+              "apiVersion": "2025-06-01",
+              "name": "[parameters('accountName')]"
+            },
+            "deployment": {
+              "type": "Microsoft.CognitiveServices/accounts/deployments",
+              "apiVersion": "2026-05-01",
+              "name": "[format('{0}/{1}', parameters('accountName'), parameters('name'))]",
+              "sku": "[parameters('sku')]",
+              "properties": {
+                "model": "[parameters('model')]",
+                "raiPolicyName": "[parameters('raiPolicyName')]",
+                "versionUpgradeOption": "[parameters('versionUpgradeOption')]",
+                "currentCapacity": "[parameters('operatingState').currentCapacity]",
+                "deploymentState": "[parameters('operatingState').deploymentState]"
+              }
+            }
+          },
+          "outputs": {
+            "name": {
+              "type": "string",
+              "metadata": {
+                "description": "Preserved deployment name."
+              },
+              "value": "[parameters('name')]"
+            },
+            "resourceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Preserved deployment resource ID."
+              },
+              "value": "[resourceId('Microsoft.CognitiveServices/accounts/deployments', parameters('accountName'), parameters('name'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "simulationDeployment"
+      ]
     }
-  ],
+  },
   "outputs": {
     "reasoningDeploymentName": {
       "type": "string",
-      "value": "[format('gpt-5.4-{0}', parameters('envPrefix'))]"
+      "value": "[reference('reasoningDeployment').outputs.name.value]"
     },
     "draftingDeploymentName": {
       "type": "string",
-      "value": "[format('gpt-5.4-mini-{0}', parameters('envPrefix'))]"
+      "value": "[reference('draftingDeployment').outputs.name.value]"
     },
     "simulationDeploymentName": {
       "type": "string",
-      "value": "[format('gpt-5.4-sim-{0}', parameters('envPrefix'))]"
+      "value": "[reference('simulationDeployment').outputs.name.value]"
+    },
+    "embeddingDeploymentName": {
+      "type": "string",
+      "value": "[reference('embeddingDeployment').outputs.name.value]"
     },
     "reasoningRaiPolicyName": {
       "type": "string",
@@ -318,7 +1159,39 @@
     },
     "openAiEndpoint": {
       "type": "string",
-      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')), '2024-10-01').endpoint]"
+      "value": "[reference('openAiAccount').endpoint]"
+    },
+    "azureAiProjectDeployments": {
+      "type": "string",
+      "metadata": {
+        "description": "One compatibility CSV for every application consumer."
+      },
+      "value": "[join(concat(variables('tierAliases'), map(variables('distinctCoordinates'), lambda('entry', format('{0}={1}', lambdaVariables('entry').key, first(lambdaVariables('entry').value).deployment)))), ',')]"
+    },
+    "embeddingModelKey": {
+      "type": "string",
+      "value": "[format('{0}@{1}', parameters('embeddingModelName'), parameters('embeddingModelVersion'))]"
+    },
+    "reasoningDeploymentModelKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Reasoning model identity, not a destination alias."
+      },
+      "value": "[format('{0}@{1}', parameters('reasoningModelName'), parameters('reasoningModelVersion'))]"
+    },
+    "draftingDeploymentModelKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Drafting model identity, not a destination alias."
+      },
+      "value": "[format('{0}@{1}', parameters('draftingModelName'), parameters('draftingModelVersion'))]"
+    },
+    "simulationDeploymentModelKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Simulation model identity, not a destination alias."
+      },
+      "value": "[format('{0}@{1}', parameters('simulationModelName'), parameters('simulationModelVersion'))]"
     }
   }
 }

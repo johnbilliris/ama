@@ -192,7 +192,7 @@ uv run pytest tests/integration/ -k "evacuation" -v
 
 ```bash
 # Build
-docker build -t evacuation-agent -f apps/agents/Dockerfile .
+docker build --platform linux/arm64 -t evacuation-agent -f apps/agents/Dockerfile .
 
 # Run
 docker run -p 8082:8082 -e AMA_AGENTS_RUNTIME=evacuation --env-file apps/agents/.env evacuation-agent
@@ -227,7 +227,7 @@ secure module parameter used only by the environment storage binding and is not 
 python -m pytest tests/devops/test_evacuation_runtime_bicep.py -q
 
 # Static Docker validation
-docker buildx build --check -f apps/agents/Dockerfile .
+docker buildx build --platform linux/arm64 --check -f apps/agents/Dockerfile .
 
 # Compile source configuration
 az bicep build --file infra/bicep/modules/evacuation-runtime.bicep

@@ -1,3 +1,5 @@
+from datetime import UTC, datetime, timedelta
+
 import pytest
 
 from apps.ingestion.normalisers.geojson_normaliser import (
@@ -5,6 +7,7 @@ from apps.ingestion.normalisers.geojson_normaliser import (
     normalise_geojson_collection,
     normalise_geojson_feature,
 )
+from apps.ingestion.normalisers.timestamps import TimestampParseError
 
 NSW_RFS_SAMPLE = {
     "type": "FeatureCollection",
@@ -219,6 +222,75 @@ class TestGeoJSONNormaliser:
         vic_env = normalise_geojson(vic_sample)
         assert set(nsw_env.keys()) == set(vic_env.keys())
         assert set(nsw_env["source"].keys()) == set(vic_env["source"].keys())
+
+    def test_vic_cfa_accepts_timestamps_up_to_24_hours_in_the_future(self):
+        future = (datetime.now(UTC) + timedelta(hours=24)).replace(microsecond=0)
+        timestamp = future.isoformat().replace("+00:00", "Z")
+        feature = {
+            "type": "Feature",
+            "id": "vic-forecast-001",
+            "geometry": {"type": "Point", "coordinates": [145.0, -37.8]},
+            "properties": {
+                "name": "Forecast fire",
+                "type": "Bush Fire",
+                "created": timestamp,
+                "updated": timestamp,
+            },
+        }
+        context = {
+            "data_source_id": "vic-cfa",
+            "source_name": "CFA Victoria",
+            "source_kind": "authoritative",
+            "source_uri": "https://www.emergency.vic.gov.au/public/osom-geojson.json",
+            "jurisdiction_id": "vic",
+            "state_key": "vic-cfa",
+        }
+
+        envelope = normalise_geojson_feature(feature, context)
+
+        assert envelope["occurredAt"] == timestamp
+        assert envelope["provenance"]["sourceTimestamp"] == timestamp
+
+    def test_vic_cfa_rejects_timestamps_more_than_24_hours_in_the_future(self):
+        future = (datetime.now(UTC) + timedelta(hours=25)).replace(microsecond=0)
+        timestamp = future.isoformat().replace("+00:00", "Z")
+        feature = {
+            "type": "Feature",
+            "id": "vic-forecast-002",
+            "geometry": {"type": "Point", "coordinates": [145.0, -37.8]},
+            "properties": {"created": timestamp, "updated": timestamp},
+        }
+        context = {
+            "data_source_id": "vic-cfa",
+            "source_name": "CFA Victoria",
+            "source_kind": "authoritative",
+            "source_uri": "https://www.emergency.vic.gov.au/public/osom-geojson.json",
+            "jurisdiction_id": "vic",
+            "state_key": "vic-cfa",
+        }
+
+        with pytest.raises(TimestampParseError, match="timestamp"):
+            normalise_geojson_feature(feature, context)
+
+    def test_other_geojson_feeds_keep_the_15_minute_future_limit(self):
+        future = (datetime.now(UTC) + timedelta(hours=1)).replace(microsecond=0)
+        timestamp = future.isoformat().replace("+00:00", "Z")
+        feature = {
+            "type": "Feature",
+            "id": "nsw-fire-future-001",
+            "geometry": {"type": "Point", "coordinates": [150.0, -33.0]},
+            "properties": {"created": timestamp, "updated": timestamp},
+        }
+        context = {
+            "data_source_id": "nsw-rfs-fires-near-me",
+            "source_name": "NSW Rural Fire Service",
+            "source_kind": "authoritative",
+            "source_uri": "https://www.rfs.nsw.gov.au/feeds/majorIncidents.json",
+            "jurisdiction_id": "nsw",
+        }
+
+        with pytest.raises(TimestampParseError, match="timestamp"):
+            normalise_geojson_feature(feature, context)
 
     def test_ga_hotspot_datetime_is_normalised(self):
         feature = {

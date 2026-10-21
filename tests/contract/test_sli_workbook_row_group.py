@@ -1,7 +1,7 @@
 """Wave C / T-AA18 — workbook row-group contract test.
 
 Asserts that ``infra/bicep/modules/observability-workbook-sim-slis.bicep``
-contains a "SC-013 staging-promotion" row group with the Z6 and Z7 KQL
+contains a "SC-013 release gate" row group with the Z6 and Z7 KQL
 queries.
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
@@ -29,7 +29,7 @@ def test_workbook_module_exists(bicep_text: str) -> None:
 
 
 def test_workbook_row_group_named_sc_013_staging_promotion(bicep_text: str) -> None:
-    assert "SC-013 staging-promotion" in bicep_text
+    assert "SC-013 release gate" in bicep_text
 
 
 def test_workbook_contains_z6_and_z7_queries(bicep_text: str) -> None:

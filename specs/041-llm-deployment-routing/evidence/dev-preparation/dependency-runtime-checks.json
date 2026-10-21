@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-10-20T04:35:12.646216+00:00",
+  "checks": {
+    "exact_pair": {
+      "succeeded": true,
+      "details": {
+        "exact_pair_binding": true,
+        "agents_readiness_http": 200
+      }
+    },
+    "actual_redis_client": {
+      "succeeded": false,
+      "error_type": "RequestTokenErr",
+      "http_status": null
+    },
+    "configured_search_alias": {
+      "succeeded": false,
+      "error_type": "ResourceNotFoundError",
+      "http_status": 404
+    }
+  },
+  "business_invocations": 0,
+  "documents_uploaded": 0
+}

@@ -6,8 +6,8 @@ The ``LEGACY_AZURE_OPENAI=1`` rollback flag has been removed; the
 ``AZURE_OPENAI_*`` env-var compat seam is no longer set in production
 Bicep. The legacy SDK initialiser (``_init_legacy_client``) and its
 retry helpers are preserved as a hermetic-test fallback that activates
-ONLY when no chat-complete seam is injected and ``AZURE_AI_PROJECT_ENDPOINT``
-is unset (i.e. unit-test paths that pre-seed ``AZURE_OPENAI_*`` to
+ONLY when no chat-complete seam is injected and no Foundry routing is
+configured (i.e. unit-test paths that pre-seed ``AZURE_OPENAI_*`` to
 exercise the SDK shape without provisioning Foundry).
 """
 
@@ -25,6 +25,7 @@ from common.llm_config import LLMClientConfig
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 if TYPE_CHECKING:
+    from common.inference_observation import RequestObservation
     from openai import (
         AzureOpenAI,  # AMA-FM04: allow — type-only for the hermetic fallback; production uses the Foundry seam.
     )
@@ -76,20 +77,20 @@ class LLMClient:
         self._chat_complete: _ChatCompleteCallable | None = chat_complete
         # ``_client`` is the legacy Azure-OpenAI SDK handle, retained as a
         # hermetic test fallback when no chat-complete seam is configured
-        # AND ``AZURE_AI_PROJECT_ENDPOINT`` is unset. Production NEVER hits
+        # AND no Foundry routing is configured. Production NEVER hits
         # this branch — Bicep sets ``AZURE_AI_PROJECT_ENDPOINT`` and the
         # Foundry seam is wired below.
         self._client: AzureOpenAI | None = None
 
         # Selection (post-cutover, ADR-20 §Q-P6-03):
         #   1. Caller-injected ``chat_complete`` kwarg wins (test seam).
-        #   2. ``AZURE_AI_PROJECT_ENDPOINT`` configured → Foundry seam.
+        #   2. Foundry routing configured → Foundry seam, including invalid settings.
         #   3. Test-only fallback → legacy Azure-OpenAI SDK (only when
         #      ``AZURE_OPENAI_ENDPOINT`` is set in the test environment).
         if chat_complete is not None:
             return
 
-        if self._config.foundry_endpoint:
+        if self._config.foundry_configured:
             self._init_foundry_seam()
             return
 
@@ -102,27 +103,17 @@ class LLMClient:
     # ------------------------------------------------------------------ #
 
     def _init_foundry_seam(self) -> None:
-        """Wire to ``LiveFoundryChatClient.chat_complete`` (T016)."""
-        try:
-            from common.foundry_chat_client import LiveFoundryChatClient  # noqa: PLC0415
+        """Wire the captured routing snapshot to the Foundry seam."""
+        from common.foundry_chat_client import LiveFoundryChatClient  # noqa: PLC0415
 
-            client = LiveFoundryChatClient(
-                endpoint=self._config.foundry_endpoint or self._config.endpoint,
-                deployments=self._config.foundry_deployment_map(),
-                region=self._config.foundry_region,
-            )
-            self._chat_complete = client.chat_complete
-        except Exception:  # noqa: BLE001
-            logger.warning(
-                "Failed to initialise Foundry chat client; legacy fallback retained",
-                exc_info=True,
-            )
+        client = LiveFoundryChatClient(resolver=self._config.deployment_resolver())
+        self._chat_complete = client.chat_complete
 
     def _init_legacy_client(self) -> None:
         """Hermetic test fallback — initialises the Azure-OpenAI SDK directly.
 
         Only triggered when no chat-complete seam is injected and
-        ``AZURE_AI_PROJECT_ENDPOINT`` is unset. Production never enters this
+        no Foundry routing is configured. Production never enters this
         path (Bicep always sets ``AZURE_AI_PROJECT_ENDPOINT``).
         """
         endpoint = self._config.endpoint
@@ -165,7 +156,39 @@ class LLMClient:
         timeout_seconds: float = 30.0,
         deadline_monotonic: float | None = None,
         temperature: float = 0.0,
-    ) -> dict[str, object]:
+    ) -> dict[str, Any]:
+        """Generate a response without losing local or unavailable attempt evidence."""
+        from common.inference_observation import RequestObservation
+
+        observation = RequestObservation(correlation_id=correlation_id or _request_correlation_id.get() or uuid4().hex)
+        try:
+            return self._generate_response(
+                observation=observation,
+                purpose=purpose,
+                prompt=prompt,
+                correlation_id=correlation_id,
+                max_output_tokens=max_output_tokens,
+                timeout_seconds=timeout_seconds,
+                deadline_monotonic=deadline_monotonic,
+                temperature=temperature,
+            )
+        except BaseException as exc:
+            if getattr(exc, "attempt_evidence", None) is None:
+                observation.attach_failure(exc)
+            raise
+
+    def _generate_response(
+        self,
+        *,
+        purpose: str,
+        prompt: str,
+        correlation_id: str | None = None,
+        max_output_tokens: int = 300,
+        timeout_seconds: float = 30.0,
+        deadline_monotonic: float | None = None,
+        temperature: float = 0.0,
+        observation: RequestObservation,
+    ) -> dict[str, Any]:
         """Send a prompt to the LLM and return the response with metadata.
 
         Args:
@@ -196,6 +219,7 @@ class LLMClient:
         if self._chat_complete is not None:
             model_key = self._model_key_for(purpose)
             try:
+                observation.ready = True
                 response = self._chat_complete(
                     messages=[
                         {
@@ -225,6 +249,7 @@ class LLMClient:
             deployment = self._deployment_for(purpose)
             if not deployment:
                 raise RuntimeError(f"Missing deployment configuration for purpose '{purpose}'")
+            observation.ready = True
             response = self._call_llm_with_retry(
                 deployment=deployment,
                 prompt=prompt,
@@ -258,8 +283,16 @@ class LLMClient:
             input_tokens = int(getattr(usage, "prompt_tokens", 0) or 0)
             output_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
 
+        evidence = getattr(response, "attempt_evidence", None) or observation.evidence()
+        identity = evidence.resolved_identity
+        log_message = (
+            "llm_call correlation_id=%s deployment_id=%s latency_ms=%s input_tokens=%s output_tokens=%s"
+            if evidence.inference_attempted is True
+            else "llm_response_unverified correlation_id=%s configured_deployment_id=%s latency_ms=%s "
+            "observed_input_tokens=%s observed_output_tokens=%s inference_attempted=null inference_outcome=unknown"
+        )
         logger.info(
-            "llm_call correlation_id=%s deployment_id=%s latency_ms=%s input_tokens=%s output_tokens=%s",
+            log_message,
             resolved_correlation_id,
             deployment,
             elapsed_ms,
@@ -276,6 +309,9 @@ class LLMClient:
                 "input_tokens": input_tokens,
                 "output_tokens": output_tokens,
             },
+            "attempt_evidence": evidence,
+            "model_id": identity.model_id if identity else None,
+            "model_version": identity.model_version if identity else None,
         }
 
     # ------------------------------------------------------------------ #

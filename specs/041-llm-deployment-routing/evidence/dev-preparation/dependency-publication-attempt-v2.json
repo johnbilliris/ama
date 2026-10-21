@@ -1,0 +1,8 @@
+{
+  "complete": false,
+  "started_at": "2026-10-20T04:45:30.862345+00:00",
+  "tag": "llm041-deps-20261020t044530",
+  "approved_config_digest": "sha256:92ead4b0319461877c595728a79ca117fe31176e0d28dcabeeb4730a364228da",
+  "local_image_index": "sha256:8b974c16194de865a16e18cd77cc49c252cd374c296e3a3783c60fb3b2e0b9b2",
+  "push_requested": true
+}

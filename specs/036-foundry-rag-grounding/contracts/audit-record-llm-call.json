@@ -22,6 +22,12 @@
   ],
   "additionalProperties": false,
   "properties": {
+    "inference_attempted": {
+      "type": ["boolean", "null"]
+    },
+    "inference_outcome": {
+      "enum": ["succeeded", "failed", "not_attempted", "unknown", null]
+    },
     "call_id": {
       "type": "string",
       "format": "uuid",

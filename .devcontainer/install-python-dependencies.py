@@ -4,6 +4,7 @@ import argparse
 import os
 import re
 import subprocess
+import tempfile
 import tomllib
 from pathlib import Path
 
@@ -70,6 +71,26 @@ def collect_dependencies() -> list[str]:
     return list(dict.fromkeys([*dependencies, *ADDITIONAL_DEV_DEPENDENCIES]))
 
 
+def collect_uv_overrides() -> tuple[str, ...]:
+    with Path("pyproject.toml").open("rb") as pyproject:
+        config = tomllib.load(pyproject)
+    tool_config = config.get("tool", {})
+    if not isinstance(tool_config, dict):
+        raise TypeError("tool must be a table")
+    uv_config = tool_config.get("uv", {})
+    if not isinstance(uv_config, dict):
+        raise TypeError("tool.uv must be a table")
+    raw_overrides = uv_config.get("override-dependencies", [])
+    if not isinstance(raw_overrides, list):
+        raise TypeError("tool.uv.override-dependencies must be a list")
+    overrides: list[str] = []
+    for override in raw_overrides:
+        if not isinstance(override, str):
+            raise TypeError("tool.uv.override-dependencies entries must be strings")
+        overrides.append(override)
+    return tuple(overrides)
+
+
 def package_source_environment() -> dict[str, str]:
     environment = os.environ.copy()
     environment.update(
@@ -88,26 +109,36 @@ def package_source_environment() -> dict[str, str]:
     return environment
 
 
-def run_uv(python: Path, *arguments: str) -> None:
-    subprocess.run(
-        [
-            "uv",
-            "--no-config",
-            "pip",
-            "install",
-            "--default-index",
-            PROXY_INDEX_URL,
-            "--python",
-            str(python),
-            *arguments,
-        ],
-        check=True,
-        env=package_source_environment(),
-    )
+def run_uv(python: Path, *arguments: str, overrides: tuple[str, ...] = ()) -> None:
+    command = [
+        "uv",
+        "--no-config",
+        "pip",
+        "install",
+        "--default-index",
+        PROXY_INDEX_URL,
+    ]
+    override_path: Path | None = None
+    if overrides:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", suffix=".txt", delete=False) as override_file:
+            override_file.write("\n".join(overrides))
+            override_file.write("\n")
+        override_path = Path(override_file.name)
+        command.extend(("--overrides", str(override_path)))
+    command.extend(("--python", str(python), *arguments))
+    try:
+        subprocess.run(
+            command,
+            check=True,
+            env=package_source_environment(),
+        )
+    finally:
+        if override_path is not None:
+            override_path.unlink(missing_ok=True)
 
 
 def install_dependencies(python: Path) -> None:
-    run_uv(python, *collect_dependencies())
+    run_uv(python, *collect_dependencies(), overrides=collect_uv_overrides())
     run_uv(
         python,
         "--no-deps",

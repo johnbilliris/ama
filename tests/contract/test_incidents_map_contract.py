@@ -5,6 +5,8 @@ error responses, pagination metadata, unmapped count, and severity-to-AWS-tier
 mapping.
 """
 
+from unittest.mock import AsyncMock
+
 import pytest
 from app.api.routes.incidents_map import _repo
 from app.main import create_app
@@ -182,6 +184,32 @@ class TestQueryParameters:
         data = resp.json()
         assert data["metadata"]["total"] == 1
 
+    @pytest.mark.parametrize("year_start,year_end", [(2025, 2020), (2024, 2023)])
+    def test_reversed_year_range_returns_empty_feature_collection(
+        self, client: TestClient, monkeypatch: pytest.MonkeyPatch, year_start: int, year_end: int
+    ):
+        query_incidents = AsyncMock()
+        count_unmapped = AsyncMock()
+        monkeypatch.setattr(_repo, "query_incidents", query_incidents)
+        monkeypatch.setattr(_repo, "count_unmapped", count_unmapped)
+
+        resp = client.get(
+            "/api/incidents/map",
+            params={"year_start": year_start, "year_end": year_end, "page": 2, "page_size": 50},
+        )
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["type"] == "FeatureCollection"
+        assert data["features"] == []
+        assert data["metadata"]["total"] == 0
+        assert data["metadata"]["unmapped_count"] == 0
+        assert data["metadata"]["page"] == 2
+        assert data["metadata"]["page_size"] == 50
+        assert data["metadata"]["fetched_at"]
+        query_incidents.assert_not_awaited()
+        count_unmapped.assert_not_awaited()
+
 
 # ── Pagination tests ──
 
@@ -234,10 +262,6 @@ class TestErrorResponses:
 
     def test_invalid_pprr_returns_400(self, client: TestClient):
         resp = client.get("/api/incidents/map?pprr_phase=invalid")
-        assert resp.status_code == 400
-
-    def test_year_start_gt_year_end_returns_400(self, client: TestClient):
-        resp = client.get("/api/incidents/map?year_start=2025&year_end=2020")
         assert resp.status_code == 400
 
     def test_page_zero_returns_422(self, client: TestClient):

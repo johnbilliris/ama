@@ -43,7 +43,7 @@ def _build_container() -> Any:
     managed identity is preferred. Returns ``None`` on any failure so the
     repository can transparently fall back to the in-memory backend.
     """
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]

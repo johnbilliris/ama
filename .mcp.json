@@ -13,6 +13,13 @@
     },
     "ppt-mcp": {
       "command": "mcp-ppt"
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "tools": [
+        "*"
+      ]
     }
   }
 }

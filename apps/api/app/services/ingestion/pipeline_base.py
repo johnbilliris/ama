@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import logging
+import random
 import time
 from abc import ABC, abstractmethod
 from collections import deque
@@ -11,6 +12,7 @@ from uuid import uuid4
 
 from app.services.privacy_classification import classify_payload
 from app.services.signal_accepted_workflow import publish_signal_accepted
+from azure.core.exceptions import ResourceExistsError
 from opentelemetry import trace
 
 from apps.ingestion import telemetry as tel
@@ -153,6 +155,8 @@ class IngestionPipelineBase(ABC):
         schema_validator: Any = None,
         scope: str = "live",
         allow_simulation_scope: bool = False,
+        max_records_per_cycle: int = 100,
+        backlog_store: Any = None,
     ):
         if scope.startswith("sim-") and not allow_simulation_scope:
             raise ValueError("Simulation scope requires allow_simulation_scope=True")
@@ -178,7 +182,15 @@ class IngestionPipelineBase(ABC):
         self.schema = schema
         self.schema_validator = schema_validator
         self.scope = scope
+        if max_records_per_cycle < 1:
+            raise ValueError("max_records_per_cycle must be positive")
+        self.max_records_per_cycle = max_records_per_cycle
+        self.backlog_store = backlog_store
+        self._pending_payloads: deque[dict[str, Any]] = deque()
+        self._backlog_pending = False
+        self._backlog_retry = False
         self._running = False
+        self._stop_event = asyncio.Event()
         self._metrics = PipelineMetrics(pipeline_id)
 
     @abstractmethod
@@ -195,22 +207,107 @@ class IngestionPipelineBase(ABC):
 
     async def run(self) -> None:
         self._running = True
+        self._stop_event.clear()
         logger.info("Pipeline %s starting", self.pipeline_id)
         while self._running:
+            delay: float = self.poll_interval_seconds
             try:
                 await self._poll_cycle()
+                delay = 1 if self._backlog_pending and not self._backlog_retry else self.poll_interval_seconds
+            except ResourceExistsError as exc:
+                self._backlog_retry = True
+                if getattr(exc, "error_code", None) == "LeaseAlreadyPresent":
+                    delay = random.uniform(5, 15)
+                    logger.info("Pipeline %s backlog lease is held; retrying in %.1fs", self.pipeline_id, delay)
+                else:
+                    logger.exception("Pipeline %s poll cycle error", self.pipeline_id)
             except Exception:
+                self._backlog_retry = True
                 logger.exception("Pipeline %s poll cycle error", self.pipeline_id)
-            await asyncio.sleep(self.poll_interval_seconds)
+            try:
+                await asyncio.wait_for(self._stop_event.wait(), timeout=delay)
+            except TimeoutError:
+                pass
 
     async def stop(self) -> None:
         self._running = False
+        self._stop_event.set()
         logger.info("Pipeline %s stopping", self.pipeline_id)
 
     async def _poll_cycle(self) -> None:
+        self._backlog_retry = False
+        if self.backlog_store is not None:
+            async with self.backlog_store.open(self.scope, self.pipeline_id) as batch:
+                if not batch.pending:
+                    await batch.cleanup()
+                    if not await batch.recover():
+                        if not self._pending_payloads:
+                            raw_payloads = await self._fetch_payloads()
+                            if raw_payloads is None:
+                                return
+                            self._pending_payloads.extend(raw_payloads)
+                        previous_name = batch.name
+                        try:
+                            await batch.stage(list(self._pending_payloads))
+                        finally:
+                            # Once uploaded, the snapshot is recoverable even if its cursor write fails.
+                            if batch.name != previous_name:
+                                self._pending_payloads.clear()
+                self._backlog_pending = bool(batch.pending)
+                end = min(batch.offset + self.max_records_per_cycle, batch.total)
+                offset = batch.offset
+                for index in range(batch.offset, end):
+                    result = await self._process_pending_payload(batch.payloads[index])
+                    if result is None or result.status in {"degraded", "busy"}:
+                        self._backlog_retry = True
+                        break
+                    if result.status not in {"accepted", "deduplicated", "rejected", "blocked"}:
+                        raise ValueError(f"Unexpected ingestion processing status: {result.status}")
+                    if result.status in {"rejected", "blocked"}:
+                        await batch.retain_rejection(index, result.reason, result.status)
+                    offset = index + 1
+                if offset != batch.offset:
+                    processed = offset - batch.offset
+                    await batch.commit(offset)
+                    logger.info(
+                        "Pipeline %s batch processed %d records, %d pending",
+                        self.pipeline_id,
+                        processed,
+                        batch.total - offset,
+                    )
+                self._backlog_pending = bool(batch.pending)
+                await batch.cleanup()
+            return
+
+        if not self._pending_payloads:
+            raw_payloads = await self._fetch_payloads()
+            if raw_payloads is None:
+                return
+            self._pending_payloads.extend(raw_payloads)
+        for _ in range(min(self.max_records_per_cycle, len(self._pending_payloads))):
+            result = await self._process_pending_payload(self._pending_payloads[0])
+            if result is None or result.status in {"degraded", "busy"}:
+                self._backlog_retry = True
+                break
+            if result.status not in {"accepted", "deduplicated", "rejected", "blocked"}:
+                raise ValueError(f"Unexpected ingestion processing status: {result.status}")
+            self._pending_payloads.popleft()
+        self._backlog_pending = bool(self._pending_payloads)
+
+    async def _process_pending_payload(self, raw: dict[str, Any]) -> PipelineProcessingResult | None:
+        try:
+            result = await self._process_payload(raw)
+            if result.status == "degraded":
+                logger.warning("Pipeline %s dependency failure; retaining record for retry", self.pipeline_id)
+            return result
+        except Exception:
+            logger.exception("Pipeline %s payload processing error; retaining record for retry", self.pipeline_id)
+            return None
+
+    async def _fetch_payloads(self) -> list[dict[str, Any]] | None:
         if not self.circuit_breaker.should_allow_request():
             self._metrics.record_poll("circuit_open")
-            return
+            return None
 
         with tel.tracer.start_as_current_span(
             "ingestion.poll_cycle",
@@ -232,25 +329,14 @@ class IngestionPipelineBase(ABC):
                 span.set_status(trace.StatusCode.ERROR, str(exc))
                 span.record_exception(exc)
                 logger.warning("Pipeline %s poll failed: %s", self.pipeline_id, exc)
-                return
+                return None
             finally:
                 tel.poll_duration.record(
                     (time.monotonic() - poll_start) * 1000,
                     {"pipeline.id": self.pipeline_id},
                 )
 
-            for raw in raw_payloads:
-                try:
-                    await self._process_payload(raw)
-                except Exception:
-                    logger.exception("Pipeline %s payload processing error", self.pipeline_id)
-
-            if raw_payloads:
-                logger.info(
-                    "Pipeline %s cycle complete: %d payloads processed",
-                    self.pipeline_id,
-                    len(raw_payloads),
-                )
+            return raw_payloads
 
     async def _process_payload(self, raw_payload: dict[str, Any]) -> PipelineProcessingResult:
         start_time = time.monotonic()
@@ -279,7 +365,16 @@ class IngestionPipelineBase(ABC):
         dedup_claimed = False
 
         if self.dedup_service:
-            if hasattr(self.dedup_service, "try_claim"):
+            if hasattr(self.dedup_service, "claim_status"):
+                claim_status = await self.dedup_service.claim_status(dedup_hash, self.dedup_ttl_seconds)
+                if claim_status == "busy":
+                    logger.warning(
+                        "Pipeline %s payload has an unfinished dedup claim; retaining for retry", self.pipeline_id
+                    )
+                    return PipelineProcessingResult(False, "busy", "canonical payload is still being processed")
+                claimed = claim_status == "claimed"
+                dedup_claimed = claimed
+            elif hasattr(self.dedup_service, "try_claim"):
                 claimed = await self.dedup_service.try_claim(dedup_hash, self.dedup_ttl_seconds)
                 dedup_claimed = claimed
             else:
@@ -302,11 +397,16 @@ class IngestionPipelineBase(ABC):
         signal_id = f"sig-{uuid4().hex[:12]}"
         raw_blob_uri = None
         if self.blob_storage:
-            raw_blob_uri = await self.blob_storage.store_raw_payload(
-                data_source_id=data_source_id,
-                signal_id=signal_id,
-                payload=raw_payload,
-            )
+            try:
+                raw_blob_uri = await self.blob_storage.store_raw_payload(
+                    data_source_id=data_source_id,
+                    signal_id=signal_id,
+                    payload=raw_payload,
+                )
+            except BaseException:
+                if dedup_claimed and hasattr(self.dedup_service, "release"):
+                    await self.dedup_service.release(dedup_hash)
+                raise
 
         try:
             envelope = self.normalise(raw_payload)
@@ -673,10 +773,10 @@ class PipelineMetrics:
     def _prune_events(self, now: datetime) -> None:
         dedup_cutoff = now - timedelta(seconds=self.ROLLING_DEDUP_SECONDS)
         signal_cutoff = now - timedelta(seconds=self.ROLLING_SIGNALS_SECONDS)
-        self._dedup_events = deque(
-            (event_time, hit) for event_time, hit in self._dedup_events if event_time >= dedup_cutoff
-        )
-        self._signal_events = deque(event_time for event_time in self._signal_events if event_time >= signal_cutoff)
+        while self._dedup_events and self._dedup_events[-1][0] < dedup_cutoff:
+            self._dedup_events.pop()
+        while self._signal_events and self._signal_events[-1] < signal_cutoff:
+            self._signal_events.pop()
 
     def dedup_window_counts(self, *, now: datetime | None = None) -> dict[str, int | float]:
         now = now or datetime.now(UTC)

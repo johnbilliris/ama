@@ -1,0 +1,39 @@
+{
+  "operation": "041-dev-application-only-held-bootstrap",
+  "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+  "resource_group": "ama",
+  "region": "australiaeast",
+  "approval_reference": "Current user's explicit structured response: apiPullGrant=true, agentsPullGrant=true, publishAndStage=true, acceptPatchValidation=true",
+  "applications": {
+    "api": {
+      "name": "ca-api-dev",
+      "principal_id": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a",
+      "local_image_id": "sha256:c42aff32ee93a012a6bbd5869c0279ed461b6ebe4c200de147b387be0b3dd0f8"
+    },
+    "agents": {
+      "name": "ca-agents-dev",
+      "principal_id": "0b986a72-f194-41f5-8f6b-ea070229aaeb",
+      "local_image_id": "sha256:ac7290a1e0a6eb1a40788743effee0ca4335afd1c6e6e9b551196af027327a97"
+    }
+  },
+  "registry": "crdevw3uq6w.azurecr.io",
+  "repositories": ["ama/api", "ama/agents"],
+  "role": "AcrPull",
+  "role_scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w",
+  "registry_identity": "system",
+  "revision_mode": "Multiple",
+  "business_hold": true,
+  "candidate_business_traffic": 0,
+  "validation_method": "exact JSON Merge PATCH review and pre/post preservation checks; no ARM PUT What-If equivalence claimed",
+  "excluded": [
+    "Foundry writes",
+    "secret-value retrieval or replacement",
+    "broader role grants",
+    "inference",
+    "business startup seeding",
+    "clearing bootstrap hold",
+    "business traffic promotion",
+    "full-root provisioning",
+    "staging or production"
+  ]
+}

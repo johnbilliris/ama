@@ -1,0 +1,9 @@
+{
+  "Id": "sha256:5bbd6497c7c74c0aa8e11a67326c8bfffc1f68ca4c894b30344e4e8dbd6474cb",
+  "RepoDigests": [
+    "ama041-api@sha256:5bbd6497c7c74c0aa8e11a67326c8bfffc1f68ca4c894b30344e4e8dbd6474cb"
+  ],
+  "Created": "2026-10-19T13:27:12.446925968Z",
+  "Architecture": "amd64",
+  "Os": "linux"
+}
