@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 
@@ -26,6 +27,24 @@ def _domain_module() -> Any:
     import importlib
 
     return importlib.import_module("ama_domain")
+
+
+def test_live_search_client_supports_the_configured_corpus_alias(monkeypatch: pytest.MonkeyPatch) -> None:
+    import azure.search.documents.aio
+
+    constructor = Mock()
+    monkeypatch.setattr(azure.search.documents.aio, "SearchClient", constructor)
+    credential = Mock()
+    service = _retrieval_module().AzureSearchRetrievalService(
+        endpoint="https://search.example.test", credential=credential, index_alias="corpus"
+    )
+    assert service._ensure_search_client() is constructor.return_value
+    constructor.assert_called_once_with(
+        endpoint="https://search.example.test",
+        index_name="corpus",
+        credential=credential,
+        api_version="2024-05-01-preview",
+    )
 
 
 # --------------------------------------------------------------------------- #

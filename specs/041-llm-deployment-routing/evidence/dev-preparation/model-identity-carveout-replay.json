@@ -1,0 +1,20 @@
+{
+  "checked_at": "2026-10-19T23:08:14.133044+00:00",
+  "scope": "offline replay of unchanged captured real Dev What-If; no Azure request",
+  "script_sha256": "8729e79a4fdce02813cc49163212e5667c60e95baed9e4a5aa283a371f5e3028",
+  "preview_sha256": "fa2390577409f4617c0b764d95cf03e60c3e6e088b969eaa87c07543d84e01f5",
+  "registry_sha256": "4419c21cb23604479a45f5e8e477e30252338fc84c6605022ee892b5a2b086e0",
+  "exit_code": 4,
+  "alias_matching_bug": "FIXED; proposed after.properties.model.name is authoritative",
+  "embedding_deployment": "PASS; text-embedding-3-large-dev resolves to approved text-embedding-3-large",
+  "remaining_unapproved_model": "gpt-5.4",
+  "affected_aliases": [
+    "gpt-5.4-dev",
+    "gpt-5.4-mini-dev",
+    "gpt-5.4-sim-dev"
+  ],
+  "approvals_added": false,
+  "release_ready": false,
+  "test_result": "27 passed; one unchanged baseline failure test_valid_deployment_passes uses eastus and a 2030 review date",
+  "cloud_mutations_performed": false
+}

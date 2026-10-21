@@ -1,0 +1,15 @@
+{
+  "packagefeedproxy.microsoft.io": {
+    "status": "resolved",
+    "addresses": [
+      "150.171.109.25"
+    ]
+  },
+  "y9gvsblobprodcus440.vsblob.vsassets.io": {
+    "status": "resolved",
+    "addresses": [
+      "150.171.73.16",
+      "150.171.74.16"
+    ]
+  }
+}

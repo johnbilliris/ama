@@ -92,6 +92,14 @@ def main() -> None:
         ),
     ]
     if scanner == "gitleaks":
+        evidence_root = "specs/041-llm-deployment-routing/"
+        bindings_path = evidence_root + "evidence/dev-preparation/app-source-bindings.json"
+        principal_path = evidence_root + "deployment-baseline.json"
+        bindings = json.dumps(
+            {"files": {r"apps\agents\common\token_budget.py": hashlib.sha256(b"synthetic-source").hexdigest()}},
+            indent=2,
+        )
+        principal = json.dumps({"api_principal_id": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a"}, indent=2)
         cases.extend(
             [
                 (
@@ -101,12 +109,29 @@ def main() -> None:
                     {"generic-api-key"},
                 ),
                 ("emulator-values-outside-compose", "other.yaml", compose, {"generic-api-key"}),
+                ("source-hash-binding", bindings_path, bindings, set()),
+                ("source-hash-outside-evidence", "other.json", bindings, {"generic-api-key"}),
+                (
+                    "credential-in-evidence",
+                    bindings_path,
+                    json.dumps({"api_key": synthetic_key}, indent=2),
+                    {"generic-api-key"},
+                ),
+                ("public-principal-id", principal_path, principal, set()),
+                (
+                    "credential-in-baseline",
+                    principal_path,
+                    json.dumps({"api_key": synthetic_key}, indent=2),
+                    {"generic-api-key"},
+                ),
             ]
         )
     for name, filename, content, expected_rules in cases:
         with tempfile.TemporaryDirectory(prefix=f"{scanner}-{name}-") as temporary:
             directory = Path(temporary)
-            (directory / filename).write_text(content, encoding="utf-8")
+            target = directory / filename
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(content, encoding="utf-8")
             scan(scanner, directory, expected_rules)
         print(f"{scanner}: {name} passed")
 

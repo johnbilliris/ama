@@ -20,7 +20,12 @@ The provisional directions are **12 proposed-target, one fallback, 15 retain/sup
 **Primary Dependencies**: Existing pnpm 10.6.3 workspace; Next.js 16.3.6 web / 15.5.18 UI development dependency; React 19.2.6; ESLint 9.39.4; Playwright 1.59.1; FastAPI/Pydantic/Azure SDK dependency graphs. No new technology or automation framework. Exact candidates and companions are in `research.md`.  
 **Storage**: Version-controlled Markdown batch evidence only; downloaded public artifacts remain in session scratch. No new database, service, telemetry store or cloud resource.  
 **Testing**: Existing pytest/coverage/benchmark, ruff, mypy 2.0.0, import-linter, TypeScript compiler, Vitest/axe, Playwright, source-policy checks, workflow contract tests, CodeQL, gitleaks and Trivy. Commands and applicability are in `quickstart.md`.  
-**Target Platform**: Ubuntu GitHub-hosted runners, Windows x64 Python CI, Python 3.12 Linux container builds, Node 24 glibc development/CI and the existing Alpine web Dockerfile. Preserve the current `linux/amd64` azd publication target; do not infer a multiarch deployment from stale comments.  
+**Target Platform**: Ubuntu GitHub-hosted runners, Windows x64 Python CI,
+Python 3.12 Linux container builds, Node 24 glibc development/CI and the existing
+Alpine web Dockerfile. ALL local image builds must target only `linux/arm64`;
+local AMD64/emulated AMD64/multi-platform builds are prohibited. Preserve the
+current `linux/amd64` azd publication target with remote builds in ACR or native
+hosted CI; do not infer a multiarch deployment from stale comments.
 **Project Type**: One-off dependency maintenance of an existing monorepo; no new public or internal application interface.  
 **Performance Goals**: Preserve the existing benchmark gate, coverage ratchet, build behaviour and safety-critical application behaviour; no new numerical SLA.  
 **Constraints**: npm/Python artifacts only through their approved Microsoft proxies; official upstream exception only for Actions; no downgrade, weakened overrides, suppressed checks, unrelated upgrades, broad runtime migration, package-manager migration or remote mutations.  

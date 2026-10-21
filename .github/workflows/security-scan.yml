@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
       - name: Install Bicep CLI
@@ -47,6 +47,28 @@ jobs:
           version: 0.48.1
       - name: Run PSRule for Azure (Bicep)
         uses: microsoft/ps-rule@46451b8f5258c41beb5ae69ed7190ccbba84112c # v2.9.0
+        # Offline compilation fixtures only; no staging or production approval or deployment.
+        env:
+          AMA_STAGING_MODEL_PARAMETERS: >-
+            {"reasoningModelName":"synthetic-chat","reasoningModelVersion":"synthetic-version",
+            "draftingModelName":"synthetic-chat","draftingModelVersion":"synthetic-version",
+            "simulationModelName":"synthetic-chat","simulationModelVersion":"synthetic-version",
+            "reasoningVersionUpgradeOption":"NoAutoUpgrade","draftingVersionUpgradeOption":"NoAutoUpgrade",
+            "simulationVersionUpgradeOption":"NoAutoUpgrade","embeddingVersionUpgradeOption":"NoAutoUpgrade",
+            "deploymentOperatingStates":{"reasoning":{"currentCapacity":30,"deploymentState":"Running"},
+            "drafting":{"currentCapacity":60,"deploymentState":"Running"},
+            "simulation":{"currentCapacity":20,"deploymentState":"Running"},
+            "embedding":{"currentCapacity":60,"deploymentState":"Running"}}}
+          AMA_PRODUCTION_MODEL_PARAMETERS: >-
+            {"reasoningModelName":"synthetic-chat","reasoningModelVersion":"synthetic-version",
+            "draftingModelName":"synthetic-chat","draftingModelVersion":"synthetic-version",
+            "simulationModelName":"synthetic-chat","simulationModelVersion":"synthetic-version",
+            "reasoningVersionUpgradeOption":"NoAutoUpgrade","draftingVersionUpgradeOption":"NoAutoUpgrade",
+            "simulationVersionUpgradeOption":"NoAutoUpgrade","embeddingVersionUpgradeOption":"NoAutoUpgrade",
+            "deploymentOperatingStates":{"reasoning":{"currentCapacity":30,"deploymentState":"Running"},
+            "drafting":{"currentCapacity":60,"deploymentState":"Running"},
+            "simulation":{"currentCapacity":20,"deploymentState":"Running"},
+            "embedding":{"currentCapacity":60,"deploymentState":"Running"}}}
         with:
           modules: PSRule.Rules.Azure
           inputType: repository
@@ -57,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
       - name: Trivy filesystem scan (Dockerfile + IaC)

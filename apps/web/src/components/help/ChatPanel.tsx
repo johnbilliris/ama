@@ -8,6 +8,8 @@
  * share one conversation that survives cross-route navigation.
  */
 import { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { useHelpChat, type HelpChatMessage } from "@/lib/help/chatStore";
 
@@ -126,7 +128,7 @@ function MessageBubble({ message }: { message: HelpChatMessage }) {
       ? "whitespace-pre-wrap bg-blue-600 text-white"
       : message.refusalReason
         ? "bg-amber-100 text-amber-900"
-        : "sim-chat-markdown bg-gray-100 text-gray-900");
+        : "bg-gray-100 text-gray-900");
 
   return (
     <div className={alignClass} style={alignStyle}>
@@ -135,15 +137,29 @@ function MessageBubble({ message }: { message: HelpChatMessage }) {
         {message.refusalReason ? (
           <RefusalCard reason={message.refusalReason} />
         ) : message.content ? (
-          <p className="whitespace-pre-wrap">
-            {message.content}
-            {(message.citations ?? []).map((c, j) => (
-              <CitationBadge key={`${c.source_id}-${j}`} index={j + 1} citation={c} />
-            ))}
-          </p>
+          isUser ? (
+            <p className="whitespace-pre-wrap">{message.content}</p>
+          ) : (
+            <div className="sim-chat-markdown">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+            </div>
+          )
         ) : (
           <span className="text-gray-400">…</span>
         )}
+        {!isUser && message.citations && message.citations.length > 0 ? (
+          <section aria-label="Sources" className="mt-2 border-t border-gray-300 pt-2">
+            <h3 className="mb-1 text-xs font-semibold text-gray-700">Sources</h3>
+            <ol className="list-decimal space-y-1 pl-5">
+              {message.citations.map((citation, index) => (
+                <li key={`${citation.source_id}-${citation.anchor}-${index}`} className="text-xs">
+                  <CitationBadge index={index + 1} citation={citation} />
+                  <span className="ml-1 text-gray-700">{citation.source_title}</span>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ) : null}
       </div>
     </div>
   );

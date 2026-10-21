@@ -1,5 +1,10 @@
 # Planning Evidence — 2026-10-09
 
+**Local build policy amendment, 2026-10-20:** subsequent local image builds
+must target only `linux/arm64`. Historical local AMD64 attempts below remain
+unchanged observations, not approved commands to repeat. AMD64 deployment
+artifacts must be built remotely in ACR or native hosted CI.
+
 **Feature**: `C:\code\ama\specs\001-proxy-dependency-upgrades`  
 **Repository/branch**: `johnbilliris/ama`, `001-proxy-dependency-upgrades`  
 **Decision record**: `research.md`; record design: `data-model.md`

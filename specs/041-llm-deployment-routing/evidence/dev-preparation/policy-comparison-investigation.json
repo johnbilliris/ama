@@ -1,0 +1,31 @@
+{
+  "parameters": {
+    "old": {
+      "effect": {
+        "type": "String",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "new": {
+      "effect": {
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit",
+        "metadata": {
+          "description": "The desired effect of the policy",
+          "displayName": "Effect"
+        },
+        "type": "String"
+      }
+    }
+  },
+  "resolution": "Descriptive parameter metadata only: original sanitized capture omitted metadata. Policy rule, allowed values, effect default and all 27 canonical semantic comparisons match. No binding drift or waiver."
+}

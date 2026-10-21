@@ -30,6 +30,7 @@ services:
 
   cosmos-seed:
     image: ama/api:local
+    platform: linux/arm64
     build:
       context: .
       dockerfile: apps/api/Dockerfile
@@ -49,6 +50,7 @@ services:
 
   api:
     image: ama/api:local
+    platform: linux/arm64
     build:
       context: .
       dockerfile: apps/api/Dockerfile
@@ -84,6 +86,7 @@ services:
 
   agents:
     image: ama/agents:local
+    platform: linux/arm64
     build:
       context: .
       dockerfile: apps/agents/Dockerfile
@@ -111,6 +114,7 @@ services:
 
   evacuation:
     image: ama/evacuation:local
+    platform: linux/arm64
     build:
       context: .
       dockerfile: apps/agents/Dockerfile
@@ -140,6 +144,7 @@ services:
 
   ingestion:
     image: ama/ingestion:local
+    platform: linux/arm64
     build:
       context: .
       dockerfile: apps/ingestion/Dockerfile
@@ -178,6 +183,7 @@ services:
 
   web:
     image: ama/web:local
+    platform: linux/arm64
     build:
       context: .
       dockerfile: apps/web/Dockerfile

@@ -1,0 +1,31 @@
+{
+  "observed_at": "2026-10-20T03:44:21.218180+00:00",
+  "application": "api",
+  "scope": "metadata/read authorization only; no business document contents or writes",
+  "checks": {
+    "cosmos_database_metadata": {
+      "succeeded": false,
+      "authorization_verified": false,
+      "error_type": "ServiceRequestTimeoutError",
+      "http_status": null
+    },
+    "blob_account_metadata": {
+      "succeeded": false,
+      "authorization_verified": false,
+      "error_type": "HttpResponseError",
+      "http_status": 403
+    },
+    "search_configured_index_count_no_documents": {
+      "succeeded": false,
+      "authorization_verified": false,
+      "error_type": "ResourceNotFoundError",
+      "http_status": 404
+    },
+    "redis_existing_configuration_ping": {
+      "succeeded": false,
+      "authorization_verified": false,
+      "error_type": "AuthenticationError",
+      "http_status": null
+    }
+  }
+}

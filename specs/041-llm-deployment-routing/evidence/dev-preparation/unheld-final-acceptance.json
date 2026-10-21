@@ -1,0 +1,50 @@
+{
+  "observed_at": "2026-10-20T03:53:32.631434+00:00",
+  "stage": "unheld-staging-v2.json",
+  "applications": {
+    "agents": {
+      "revision": "ca-agents-dev--llm041-val-20261020t033002",
+      "healthy": true,
+      "preservation_sha256": "f7b95a066854481eea7078b4292383019a1664c04a6518761b1011c675c16b89",
+      "traffic": [
+        {
+          "revisionName": "ca-agents-dev--pm412va",
+          "weight": 100
+        }
+      ],
+      "candidate_traffic": 0
+    },
+    "api": {
+      "revision": "ca-api-dev--llm041-val-20261020t033002",
+      "healthy": true,
+      "preservation_sha256": "e60acf06547df0c43990e6d7e980901fb59c0eebe7af1aa6d5614c6800ea9131",
+      "traffic": [
+        {
+          "revisionName": "ca-api-dev--n6l54uy",
+          "weight": 100
+        }
+      ],
+      "candidate_traffic": 0
+    }
+  },
+  "inference_evidence": "unheld-inference-attempt2.json",
+  "business_release_ready": false,
+  "business_promotion": false,
+  "application_secret_values_requested": false,
+  "application_secret_definitions_submitted": false,
+  "new_grants": 0,
+  "foundry_resource_writes": 0,
+  "protected_comparison": {
+    "comparison": "PASS",
+    "deployments": 4,
+    "foundry_writes": 0,
+    "account_controls_identity_tags_rai_and_diagnostics": "unchanged"
+  },
+  "completed_at": "2026-10-20T03:53:48.788502+00:00",
+  "runtime_dependency_checks": {
+    "cosmos_database_metadata": "PASS with 15-second bound; initial 5-second timeout was inconclusive",
+    "actual_blob_audit_and_evidence_container_metadata": "PASS; account-info 403 is not proof that application Blob access is denied",
+    "redis_existing_application_client": "FAIL anonymous client; same identity Entra-authenticated PING succeeds",
+    "search_configured_corpus": "FAIL HTTP404; authenticated metadata confirms zero indexes"
+  }
+}

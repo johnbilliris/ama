@@ -1,0 +1,87 @@
+{
+  "group": {
+    "default": {
+      "targets": [
+        "api",
+        "agents",
+        "evacuation",
+        "ingestion",
+        "ingest-runner",
+        "eval-runner",
+        "web",
+        "devcontainer"
+      ]
+    }
+  },
+  "target": {
+    "api": {
+      "context": ".",
+      "dockerfile": "apps/api/Dockerfile",
+      "target": "runtime",
+      "platforms": ["linux/arm64"],
+      "tags": ["ama/api:local"],
+      "output": ["type=docker"]
+    },
+    "agents": {
+      "context": ".",
+      "dockerfile": "apps/agents/Dockerfile",
+      "target": "dispatcher-runtime",
+      "platforms": ["linux/arm64"],
+      "tags": ["ama/agents:local"],
+      "output": ["type=docker"]
+    },
+    "evacuation": {
+      "context": ".",
+      "dockerfile": "apps/agents/Dockerfile",
+      "target": "evacuation-runtime",
+      "platforms": ["linux/arm64"],
+      "tags": ["ama/evacuation:local"],
+      "output": ["type=docker"]
+    },
+    "ingestion": {
+      "context": ".",
+      "dockerfile": "apps/ingestion/Dockerfile",
+      "target": "runtime",
+      "platforms": ["linux/arm64"],
+      "tags": ["ama/ingestion:local"],
+      "output": ["type=docker"]
+    },
+    "ingest-runner": {
+      "context": ".",
+      "dockerfile": "apps/ingest-runner/Dockerfile",
+      "platforms": ["linux/arm64"],
+      "tags": ["ama/ingest-runner:local"],
+      "output": ["type=docker"]
+    },
+    "eval-runner": {
+      "context": ".",
+      "dockerfile": "apps/eval-runner/Dockerfile",
+      "platforms": ["linux/arm64"],
+      "tags": ["ama/eval-runner:local"],
+      "output": ["type=docker"]
+    },
+    "web": {
+      "context": ".",
+      "dockerfile": "apps/web/Dockerfile",
+      "target": "runtime",
+      "args": {
+        "API_PROXY_UPSTREAM": "http://api:8000/api",
+        "NEXT_PUBLIC_ALLOW_ANONYMOUS_INCIDENT_MAP": "1",
+        "NEXT_PUBLIC_API_BASE_URL": "/api",
+        "NEXT_PUBLIC_ENVIRONMENT": "development",
+        "NPM_CONFIG_REGISTRY": "https://packagefeedproxy.microsoft.io/npm/"
+      },
+      "platforms": ["linux/arm64"],
+      "tags": ["ama/web:local"],
+      "output": ["type=docker"]
+    },
+    "devcontainer": {
+      "context": ".",
+      "dockerfile": ".devcontainer/Dockerfile",
+      "target": "development",
+      "platforms": ["linux/arm64"],
+      "tags": ["ama/devcontainer:local"],
+      "output": ["type=docker"]
+    }
+  }
+}

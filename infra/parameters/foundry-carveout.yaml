@@ -1,24 +1,41 @@
 # Foundry Carve-Out Registry (FR-AI03a, ADR-033, spec 036 FR-RAG-CV-01..04)
 #
-# Lists every Foundry model deployment used by the AMA platform. CD MUST
-# refuse to deploy any deployment NOT present here, any deployment whose
+# Lists underlying Foundry model identifiers, not deployment aliases. CD MUST
+# refuse to deploy any model NOT present here, any deployment whose
 # region falls outside Australian data-residency (australiaeast,
 # australiasoutheast), and any deployment whose review_date is past or more
 # than 12 months in the future.
 #
-# Mutations require two distinct approver_identities and a fresh review_date.
+# Normal approval floors remain in force unless the explicit, unexpired
+# quorum_waiver below applies. Model review windows are not waived.
 # Validated by:
 #   - infra/policy/rego/foundry_carveout.rego (OPA, T025)
 #   - scripts/verify-carveout.ps1 (CD step, T024 / T026)
 
 version: 1
-last_reviewed: 2026-05-08
+last_reviewed: 2026-10-20
 reviewer_quorum: 2
 
-# Spec 036 T027 — production carve-out rows for the Foundry migration.
-# All deployments are in Australia East (FR-RAG-CV-04). Approver identities
-# are two real handles (project lead + security/compliance reviewer).
+quorum_waiver:
+  scope: all_environments
+  approved_by: johnbilliris
+  approval_reference: "Project-lead instruction on 2026-10-20: skip the second approver requirement; confirmed scope All environments and reviewDeadline 2030-11-20."
+  expires_on: 2030-11-20
+
+# The spec-041 Dev row uses the explicit waiver. Existing spec-036
+# approval records below it are retained unchanged.
 deployments:
+  - model_name: gpt-5.4
+    region: australiaeast
+    environment: dev
+    purpose: production
+    business_justification: "Spec 041 preserves the existing Dev reasoning, drafting and simulation deployments hosting gpt-5.4; project-lead approval and the explicit quorum waiver apply. This does not attest to AU-only GlobalStandard inference or authorise deployment."
+    approver_identities:
+      - johnbilliris
+    review_date: 2027-04-08
+    data_minimisation_required: true
+    classification_filter_required: true
+
   - model_name: gpt-4o-mini
     region: australiaeast
     purpose: production
@@ -51,4 +68,3 @@ deployments:
     review_date: 2027-04-08
     data_minimisation_required: true
     classification_filter_required: true
-

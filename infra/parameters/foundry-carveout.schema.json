@@ -1,13 +1,29 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "FoundryCarveOutRegistry",
-  "description": "Carve-out registry for non-AU Foundry model deployments. Enforces Constitution Non-Negotiable #2. Spec 036 F-A4 (Pass 2 Q-P2-03 / FR-RAG-CV-01) added the registry-root keys `min_approvers_prod` (default 3) + `min_approvers_dev` (default 2) and the per-row `environment` enum so the OPA rego at `infra/policy/rego/foundry_carveout.rego` can apply an environment-aware approver-count floor. Schema-level `minItems: 2` is retained for backward compatibility with spec-032 registries; the prod 3-approver floor is enforced by OPA at runtime.",
+  "description": "Foundry model carve-out registry. Normal quorum floors remain 3 for prod and 2 for dev/staging. An explicitly authorised quorum_waiver permits one approver across all environments until expires_on; PowerShell and OPA enforce expiry at runtime. Model review windows, regions and data-protection controls are not waived.",
   "type": "object",
   "required": ["version", "last_reviewed", "reviewer_quorum", "deployments"],
   "properties": {
     "version": { "type": "integer", "minimum": 1 },
     "last_reviewed": { "type": "string", "format": "date" },
     "reviewer_quorum": { "type": "integer", "minimum": 2 },
+    "quorum_waiver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "approved_by", "approval_reference", "expires_on"],
+      "properties": {
+        "scope": { "const": "all_environments" },
+        "approved_by": { "type": "string", "minLength": 3 },
+        "approval_reference": { "type": "string", "minLength": 30 },
+        "expires_on": {
+          "description": "Inclusive UTC expiry date for the approval-count exception only; does not extend model review_date.",
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      }
+    },
     "min_approvers_prod": {
       "description": "Spec 036 F-A4 NEW key. Minimum approver_identities count for `environment == \"prod\"` rows. Default 3 per FR-RAG-CV-01 + Pass 2 Q-P2-03.",
       "type": "integer",
@@ -35,7 +51,11 @@
           "classification_filter_required"
         ],
         "properties": {
-          "model_name": { "type": "string", "minLength": 3 },
+          "model_name": {
+            "description": "Underlying model identifier from the proposed deployment's properties.model.name; not its deployment alias.",
+            "type": "string",
+            "minLength": 3
+          },
           "region": { "type": "string", "minLength": 4 },
           "environment": {
             "description": "Spec 036 F-A4 NEW field. Discriminator for the environment-aware quorum rule. Optional for backward compatibility with spec-032 rows; OPA treats a missing value as dev/staging.",
@@ -49,7 +69,7 @@
           "business_justification": { "type": "string", "minLength": 30 },
           "approver_identities": {
             "type": "array",
-            "minItems": 2,
+            "minItems": 1,
             "items": { "type": "string", "minLength": 3 }
           },
           "review_date": { "type": "string", "format": "date" },
@@ -58,5 +78,17 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "not": { "required": ["quorum_waiver"] } },
+      "then": {
+        "properties": {
+          "deployments": {
+            "items": { "properties": { "approver_identities": { "minItems": 2 } } }
+          }
+        }
+      }
+    }
+  ]
 }
