@@ -111,7 +111,7 @@ def get_shared_capacity_ledger() -> _SharedCapacityLedger:
 
 def _build_cosmos_client() -> Any:
     """Build a CosmosClient from the ``COSMOS_ENDPOINT`` env var."""
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]

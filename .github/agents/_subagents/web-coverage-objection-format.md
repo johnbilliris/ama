@@ -32,8 +32,8 @@
    - **Operational-panel veto** on any objection touching safety-critical
      clauses {I, IV, NN-1, NN-2, QG-1}.
    - **Override** if >= 50% + 1 of all 85 agents sustain a veto.
-4. Resolutions emit `specs/034-.../diffs/cycle-{N}/{gap_id}.md` PR stubs that
-   `web-coverage-iteration.yml` opens as a single follow-up PR per night.
+4. Resolutions emit `specs/034-.../diffs/cycle-{N}/{gap_id}.md` PR stubs.
+   Review and submit validated stubs through the normal pull-request process.
 
 ## Anti-patterns
 

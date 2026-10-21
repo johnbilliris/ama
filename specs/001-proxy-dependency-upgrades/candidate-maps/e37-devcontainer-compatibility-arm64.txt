@@ -1,0 +1,4 @@
+Using Python 3.12.11 environment at: /fresh-python
+Checked 300 packages in 35ms
+Found 1 incompatibility
+The package `redis-entraid` requires `pyjwt~=2.13.0`, but `2.15.1` is installed

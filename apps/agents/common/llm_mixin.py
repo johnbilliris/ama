@@ -4,9 +4,12 @@ import logging
 import time
 from typing import Any as _Any
 from typing import Protocol, TypedDict
+from uuid import uuid4
 
 from common.circuit_breaker import CircuitBreaker
 from common.content_safety import ContentSafetyValidator
+from common.foundry_chat_client import InferenceAttemptEvidence
+from common.inference_observation import observed_calls
 from common.llm_client import LLMClient
 from common.llm_config import LLMClientConfig
 from common.token_budget import Tokenizer, create_tokenizer
@@ -31,6 +34,9 @@ class LLMGenerationResponse(TypedDict, total=False):
     requires_human_review: bool
     output_truncated: bool
     error_reason: str
+    attempt_evidence: InferenceAttemptEvidence | None
+    model_id: str | None
+    model_version: str | None
 
 
 class ConfidenceGatingResult(TypedDict):
@@ -247,6 +253,8 @@ class LLMCallMixin:
                 error_reason="circuit_breaker_open",
             )
 
+        evidence: InferenceAttemptEvidence | None = None
+        actual_usage: dict[str, int] | None = None
         try:
             response = self._llm_client.generate_response(
                 purpose=purpose,
@@ -257,6 +265,9 @@ class LLMCallMixin:
                 deadline_monotonic=deadline_monotonic,
                 temperature=temperature,
             )
+            evidence = response.get("attempt_evidence")
+            if not isinstance(evidence, InferenceAttemptEvidence):
+                evidence = InferenceAttemptEvidence(call_id=str(uuid4()), correlation_id=correlation_id or uuid4().hex)
             text = str(response.get("text", "")).strip()
 
             token_usage = response.get("token_usage", {"input_tokens": 0, "output_tokens": 0})
@@ -265,6 +276,8 @@ class LLMCallMixin:
             model_deployment_id = raw_model_deployment_id if isinstance(raw_model_deployment_id, str) else None
             input_tokens = int(token_usage.get("input_tokens", 0))
             output_tokens = int(token_usage.get("output_tokens", 0))
+            if evidence.inference_attempted is True:
+                actual_usage = {"input_tokens": input_tokens, "output_tokens": output_tokens}
 
             # Track budget
             self._track_budget(deployment_id, input_tokens, output_tokens)
@@ -280,7 +293,11 @@ class LLMCallMixin:
             )
             text = str(budgeted["text"])
             retained_usage = budgeted["retained_token_usage"]
-            actual_usage = budgeted["actual_token_usage"]
+            if actual_usage is None:
+                actual_usage = budgeted["actual_token_usage"]
+            invoked_identity = evidence.resolved_identity if evidence.inference_attempted is True else None
+            if evidence.inference_attempted is not True:
+                model_deployment_id = None
 
             # Structured output validation (FR-018 / T007b)
             if response_model is not None:
@@ -301,6 +318,7 @@ class LLMCallMixin:
                         token_usage=token_usage,
                         actual_token_usage=actual_usage,
                         deployment_id=deployment_id,
+                        attempt_evidence=evidence,
                     )
 
             # Content safety validation
@@ -352,6 +370,9 @@ class LLMCallMixin:
                     "correlation_id": correlation_id,
                     "requires_human_review": True,
                     "output_truncated": False,
+                    "attempt_evidence": evidence,
+                    "model_id": invoked_identity.model_id if invoked_identity else None,
+                    "model_version": invoked_identity.model_version if invoked_identity else None,
                 }
 
             # Success path — apply confidence gating
@@ -371,9 +392,20 @@ class LLMCallMixin:
                 "correlation_id": correlation_id,
                 "requires_human_review": safety.review_flag or gating["requires_human_review"],
                 "output_truncated": bool(budgeted["output_truncated"]),
+                "attempt_evidence": evidence,
+                "model_id": invoked_identity.model_id if invoked_identity else None,
+                "model_version": invoked_identity.model_version if invoked_identity else None,
             }
 
         except Exception as error:
+            evidence = (
+                evidence
+                or getattr(error, "attempt_evidence", None)
+                or InferenceAttemptEvidence(
+                    call_id=str(uuid4()),
+                    correlation_id=correlation_id or uuid4().hex,
+                )
+            )
             self._circuit_breaker.record_failure()
             logger.warning(
                 "LLM generation failed; falling back to template: %s (correlation_id=%s, circuit_breaker_state=%s)",
@@ -386,7 +418,13 @@ class LLMCallMixin:
                 circuit_breaker_state=self._circuit_breaker.state.value,
                 correlation_id=correlation_id,
                 error_reason=str(error),
+                actual_token_usage=actual_usage,
+                attempt_evidence=evidence,
             )
+        finally:
+            calls = observed_calls.get()
+            if calls is not None and evidence is not None:
+                calls.append(evidence)
 
     def _template_fallback_response(
         self,
@@ -398,8 +436,24 @@ class LLMCallMixin:
         token_usage: dict[str, int] | None = None,
         actual_token_usage: dict[str, int] | None = None,
         deployment_id: str | None = None,
+        attempt_evidence: InferenceAttemptEvidence | None = None,
     ) -> LLMGenerationResponse:
         """Build a template fallback response with confidence reduction."""
+        evidence = attempt_evidence or InferenceAttemptEvidence(
+            call_id=str(uuid4()),
+            correlation_id=correlation_id or uuid4().hex,
+            inference_attempted=False,
+            inference_outcome="not_attempted",
+        )
+        identity = evidence.resolved_identity if evidence.inference_attempted is True else None
+        deployment_id = identity.deployment_name if identity else None
+        if evidence.inference_attempted is True:
+            usage = {}
+            if evidence.usage_prompt_tokens is not None:
+                usage["input_tokens"] = evidence.usage_prompt_tokens
+            if evidence.usage_completion_tokens is not None:
+                usage["output_tokens"] = evidence.usage_completion_tokens
+            actual_token_usage = usage or actual_token_usage
         return {
             "text": template_text,
             "generation_method": "template_fallback",
@@ -413,6 +467,9 @@ class LLMCallMixin:
             "output_truncated": False,
             "error_reason": error_reason,
             "correlation_id": correlation_id,
+            "attempt_evidence": evidence,
+            "model_id": identity.model_id if identity else None,
+            "model_version": identity.model_version if identity else None,
         }
 
     def _apply_confidence_gating(self, confidence: float, generation_method: str) -> ConfidenceGatingResult:

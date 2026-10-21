@@ -33,7 +33,7 @@ def _lookup_cosmos_incident(incident_id: str) -> dict[str, Any] | None:
     if not endpoint:
         return None
     try:
-        from azure.cosmos import CosmosClient
+        from app.core.cosmos import create_cosmos_client as CosmosClient
         from azure.identity import DefaultAzureCredential
 
         database = os.environ.get("COSMOS_DATABASE", "disaster-hub")

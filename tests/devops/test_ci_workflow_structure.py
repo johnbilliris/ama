@@ -78,6 +78,25 @@ def test_windows_quality_job_uses_locked_uv_dependencies_and_cache() -> None:
     assert "Install eval gate package without runtime dependencies" in job
 
 
+def test_windows_candidate_map_job_uses_two_isolated_uncached_installs() -> None:
+    text = _ci_text()
+    job = text.split("  phase8-python-windows-candidate-maps:\n", 1)[1].split("\n  simulation-tenant-isolation:", 1)[0]
+
+    assert (
+        "if: github.event_name == 'pull_request' && "
+        "github.event.pull_request.head.ref == '001-proxy-dependency-upgrades'"
+    ) in job
+    assert "needs: python-package-source-policy" in job
+    assert "runs-on: windows-latest" in job
+    assert "foreach ($runId in @('a', 'b'))" in job
+    assert "phase8-windows-root-$runId" in job
+    assert "uv sync --locked --extra windows-ci --no-install-project --no-cache" in job
+    assert "uv pip install --python $python --no-deps --no-cache -e apps/eval-runner" in job
+    assert "Compare-Object -ReferenceObject $mapA -DifferenceObject $mapB" in job
+    assert "name: phase8-python-windows-candidate-maps" in job
+    assert "actions/cache@" not in job
+
+
 def test_windows_ci_extra_excludes_eval_runner_runtime_dependencies() -> None:
     config_path = Path(__file__).resolve().parents[2] / "pyproject.toml"
     config = tomllib.loads(config_path.read_text(encoding="utf-8"))
@@ -136,7 +155,55 @@ def test_story_acceptance_targets_original_specs() -> None:
     collection_step = job.split("- name: Assert story acceptance tests are collected", 1)[1].split(
         "- name: Run story acceptance tests", 1
     )[0]
-    assert "test_incident_commander_dashboard.spec.ts" in collection_step
-    assert "test_persona_workspace.spec.ts" in collection_step
-    assert "test_dashboard_decision_support.spec.ts" in collection_step
+    run_step = job.split("- name: Run story acceptance tests (chromium + mobile)", 1)[1]
+    story_specs = (
+        "test_incident_commander_dashboard.spec.ts",
+        "test_persona_workspace.spec.ts",
+        "test_dashboard_decision_support.spec.ts",
+    )
+
+    for story_spec in story_specs:
+        assert story_spec in collection_step
+        assert story_spec in run_step
+
     assert "../../tests/e2e/" not in collection_step
+    assert "../../tests/e2e/" not in run_step
+
+
+def test_feature_x64_validation_jobs_are_scoped_and_uncached() -> None:
+    text = _ci_text()
+    node_job = text.split("  phase8-node-x64-candidate-maps:\n", 1)[1].split(
+        "\n  phase8-alpine-x64-candidate-builds:", 1
+    )[0]
+    alpine_job = text.split("  phase8-alpine-x64-candidate-builds:\n", 1)[1].split(
+        "\n  simulation-tenant-isolation:", 1
+    )[0]
+    for job in (node_job, alpine_job):
+        assert "github.event_name == 'pull_request'" in job
+        assert "github.event.pull_request.head.ref == '001-proxy-dependency-upgrades'" in job
+        assert "github.event.pull_request.head.repo.full_name == github.repository" in job
+        assert "runs-on: ubuntu-24.04" in job
+        assert "contents: read" in job
+        assert "NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/" in job
+        assert 'node-version: "24.21.0"' in job
+        assert "for run_id in a b; do" in job
+        assert "actions/cache@" not in job
+        assert "continue-on-error" not in job
+        assert "if-no-files-found: error" in job
+    assert "phase8-node-store-$run_id" in node_job
+    assert "pnpm install --frozen-lockfile --store-dir" in node_job
+    assert 'test ! -e "$NPM_CONFIG_STORE_DIR"' in node_job
+    assert "pnpm --filter @ama/web test" in node_job
+    assert 'cmp "$out/map-a.txt" "$out/map-b.txt"' in node_job
+    assert (
+        "ALPINE_BASE: node:24-alpine@sha256:83f1c388c31fb2e51f7cbd4dea949b96260798c98f206e8e4696bc93bd964e3a"
+    ) in alpine_job
+    assert "docker build --no-cache --platform linux/amd64" in alpine_job
+    assert "--publish 127.0.0.1:33124:3000" in alpine_job
+    assert 'cmp "$out/builder-expected-$run_id.txt" "$out/builder-input-$run_id.txt"' in alpine_job
+    assert 'cmp "$out/map-a.txt" "$out/map-b.txt"' in alpine_job
+    assert "--retry 20 --retry-all-errors --retry-delay 1 --retry-max-time 60 --max-time 5" in alpine_job
+    assert "trap cleanup EXIT" in alpine_job
+    assert 'docker logs "$container" > "$out/server-$run_id.log" 2>&1' in alpine_job
+    assert 'exit "$status"' in alpine_job
+    assert "docker push" not in alpine_job

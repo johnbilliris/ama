@@ -39,7 +39,7 @@ class JurisdictionGovernancePolicyRepository:
         if not endpoint:
             return None
         try:
-            from azure.cosmos import CosmosClient
+            from app.core.cosmos import create_cosmos_client as CosmosClient
 
             client = CosmosClient(endpoint, credential=DefaultAzureCredential())
             db = client.get_database_client(database)

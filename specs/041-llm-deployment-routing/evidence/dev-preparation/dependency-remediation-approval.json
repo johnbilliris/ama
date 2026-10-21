@@ -1,0 +1,32 @@
+{
+  "decision": "Approve bounded dependency remediation",
+  "recordedAt": "2026-10-20T03:58:10Z",
+  "authorityEndsAt": "2026-10-20T07:56:00Z",
+  "windowNote": "Conservative end within four hours of the pre-approval clock observation; recordedAt is not an asserted exact user-response timestamp.",
+  "subscriptionId": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+  "resourceGroup": "ama",
+  "region": "australiaeast",
+  "approved": [
+    "Implement and test API Redis Entra authentication",
+    "Provision missing empty corpus using repository schema on srch-dev-w3uq6w",
+    "Build and publish updated API image",
+    "Stage newly matched zero-business-traffic pair using existing agents image",
+    "Bounded dependency verification and remaining original synthetic inference budget"
+  ],
+  "excluded": [
+    "New IAM grants",
+    "Foundry resource changes",
+    "Secret-value retrieval or replacement",
+    "Document ingestion",
+    "Destructive cleanup",
+    "Business-route invocation",
+    "Traffic promotion"
+  ],
+  "inferenceReservationsAlreadyConsumed": 5,
+  "maximumAggregateInferenceReservations": 9,
+  "remainingByTier": {
+    "reasoning": 1,
+    "drafting": 1,
+    "simulation": 2
+  }
+}

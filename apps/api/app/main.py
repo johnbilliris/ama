@@ -3,27 +3,24 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from app.api.dependencies.governance_composition import initialize_governance_composition
-from app.api.dependencies.simulation_composition import simulation_repository_proxy
-from app.api.router import api_router
 from app.core.env_contract import EnvironmentContractError, validate_runtime_environment
 from app.core.settings import get_settings
-from app.middleware.activation_mutex import activation_mutex_lifespan
 from app.middleware.error_handler import add_error_handler_middleware
 from app.middleware.resilience import add_resilience_middleware
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from apps.agents.common.bootstrap import BootstrapHoldMiddleware, bootstrap_hold_requested
 from apps.console_logging import configure_console_logging
 
-if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
+if not bootstrap_hold_requested() and os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
     try:
         from azure.identity import ManagedIdentityCredential
         from azure.monitor.opentelemetry import configure_azure_monitor
 
         configure_azure_monitor(
             enable_live_metrics=True,
-            credential=ManagedIdentityCredential(),
+            credential=ManagedIdentityCredential(client_id=os.environ["AZURE_CLIENT_ID"]),
         )
     except Exception:
         logging.getLogger(__name__).warning("Failed to configure Azure Monitor", exc_info=True)
@@ -33,6 +30,20 @@ configure_console_logging()
 
 @asynccontextmanager
 async def _composed_lifespan(app: FastAPI) -> AsyncIterator[None]:
+    app.state.startup_complete = False
+    if app.state.bootstrap_held:
+        logging.getLogger(__name__).warning(
+            "Bootstrap hold active; business initialization and startup writes suppressed"
+        )
+        app.state.startup_complete = True
+        try:
+            yield
+        finally:
+            app.state.startup_complete = False
+        return
+
+    from app.api.dependencies.governance_composition import initialize_governance_composition
+    from app.middleware.activation_mutex import activation_mutex_lifespan
     from app.services.evidence._clients import close_registry, initialize_registry
 
     try:
@@ -43,8 +54,10 @@ async def _composed_lifespan(app: FastAPI) -> AsyncIterator[None]:
     initialize_registry()
     try:
         async with activation_mutex_lifespan(app):
+            app.state.startup_complete = True
             yield
     finally:
+        app.state.startup_complete = False
         close_registry()
 
 
@@ -57,6 +70,23 @@ def create_app() -> FastAPI:
         openapi_url=f"{settings.api_prefix}/openapi.json",
         lifespan=_composed_lifespan,
     )
+    app.state.bootstrap_held = bootstrap_hold_requested()
+    app.state.startup_complete = False
+    if app.state.bootstrap_held:
+        from app.api.health import router as health_router
+
+        app.include_router(health_router, prefix=settings.api_prefix)
+        app.add_middleware(
+            BootstrapHoldMiddleware,
+            allowed_paths=frozenset(
+                f"{settings.api_prefix}/health/{name}" for name in ("liveness", "startup", "readiness")
+            ),
+        )
+        return app
+
+    from app.api.dependencies.simulation_composition import simulation_repository_proxy
+    from app.api.router import api_router
+
     add_error_handler_middleware(app)
     add_resilience_middleware(app)
 

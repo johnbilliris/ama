@@ -9,7 +9,7 @@ from inspect import iscoroutinefunction
 from urllib.parse import urlparse
 
 from app.observability.tenant_telemetry import telemetry_status
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, Response
 
 router = APIRouter(tags=["system"])
 logger = logging.getLogger(__name__)
@@ -75,7 +75,12 @@ def _probe_cosmos() -> ProbeResult:
     host = _extract_host(endpoint)
     if not host:
         return "unavailable"
-    return "healthy" if _tcp_reachable(host, 443, _health_probe_timeout_seconds()) else "unavailable"
+    try:
+        parsed = urlparse(endpoint if "://" in endpoint else f"tcp://{endpoint}")
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    except ValueError:
+        return "unavailable"
+    return "healthy" if _tcp_reachable(host, port, _health_probe_timeout_seconds()) else "unavailable"
 
 
 def _probe_redis() -> ProbeResult:
@@ -150,6 +155,46 @@ async def liveness() -> dict[str, object]:
     return {
         "status": "healthy",
         "version": "0.2.0",
+    }
+
+
+@router.get("/health/startup")
+async def startup(request: Request, response: Response) -> dict[str, object]:
+    initialized = getattr(request.app.state, "startup_complete", False)
+    held = getattr(request.app.state, "bootstrap_held", False)
+    response.status_code = 200 if initialized else 503
+    return {"status": "held" if held else ("started" if initialized else "starting"), "initialized": initialized}
+
+
+@router.get("/health/readiness")
+async def readiness(request: Request, response: Response) -> dict[str, object]:
+    if getattr(request.app.state, "bootstrap_held", False):
+        response.status_code = 503
+        return {"status": "held", "ready": False}
+    if not getattr(request.app.state, "startup_complete", False):
+        response.status_code = 503
+        return {"status": "starting", "ready": False}
+
+    from common.llm_config import DeploymentResolver, FoundryConfigurationError, OperationalTier
+
+    try:
+        resolver = DeploymentResolver.from_environment(configuration_revision="api-readiness")
+        for tier in OperationalTier:
+            resolver.resolve(tier)
+    except FoundryConfigurationError:
+        logger.warning("API readiness blocked by invalid LLM routing configuration")
+        response.status_code = 503
+        return {"status": "configuration_error", "ready": False}
+    dependencies = {name: await _dependency_status(name, env_name) for name, env_name in _DEPENDENCY_ENV_KEYS.items()}
+    ready = all(status == "healthy" for status in dependencies.values())
+    response.status_code = 200 if ready else 503
+    return {
+        "status": "ready" if ready else "dependencies_unavailable",
+        "ready": ready,
+        "dependencies": dependencies,
+        "check_scope": "startup_routing_and_tcp_connectivity",
+        "dependency_authorization_verified": False,
+        "inference_attempted": False,
     }
 
 

@@ -8,7 +8,7 @@
 |---|---|---|---|---|
 | **LLM rehearsal** | Quarterly (Q1, Q2, Q3, Q4) | AI/ML Engineer + PIO persona | Run the spec-030 eval harness against latest model set; SME walkthrough of 50 sample recommendations | `quickstart-rehearsal-results-{date}.md` + scorecard delta |
 | **Chaos gameday** | Biannual (Apr, Oct) | Chaos Engineer + SRE | Azure Chaos Studio: Container App restart on monitoring agent; Cosmos throttling on audit container; AOAI region drop; Service Bus DLQ inundation | `chaos-gameday-{date}.md` + SLO impact report |
-| **DR/BCP failover drill** | Quarterly (staging) | Infra/DevOps + SRE | Force Australia East primary unhealthy; verify Australia Southeast picks up within RTO | `dr-drill-{date}.md` + RPO/RTO measurements |
+| **DR/BCP failover drill** | Quarterly (staging) | Infra/DevOps + SRE | Force Australia East primary unhealthy; verify Australia Southeast picks up within RTO | `failover-drill-{date}.md` + RPO/RTO measurements |
 | **Multi-jurisdiction tabletop** | Annual (Aug) | Resilience Planner + Operational personas | Cross-state coordination scenario with NEMA + 3 state agencies | After-Action Review |
 | **Public-network probe** | Continuous (CI workflow) | Security Engineer | All data planes refuse public IP probes | Telemetry + page-on-success |
 | **Eval-baseline regression** | Per PR (CI gate) | AI/ML Engineer | Eval scorecards meet/exceed published baselines | PR pass/fail |

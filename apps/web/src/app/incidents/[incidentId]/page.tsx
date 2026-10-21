@@ -15,6 +15,9 @@ import { listSignals, type SignalRecord } from "../../../lib/api/signals";
 import { ConnectivityBanner } from "../../../components/offline/connectivity-banner";
 import { useI18n } from "../../../lib/i18n/runtime";
 
+const AIDR_REPRODUCTION_YEAR = 2026;
+const AIDR_SOURCE_URL_PATTERN = /^https:\/\/knowledge\.aidr\.org\.au(?:[/?#]|$)/i;
+
 /* ── Stat card helper ── */
 function StatCard({ value, label }: { value: string | number; label: string }) {
   return (
@@ -249,7 +252,7 @@ export default function IncidentPage() {
           <section className="incident-description">
             <h2 className="incident-section-title">About this Incident</h2>
             <div className="incident-description-text">
-              {inc.introduction.split("\n").map((para, i) => (
+              {inc.introduction.split(/\r?\n\s*\r?\n/).map((para, i) => (
                 <p key={i}>{para}</p>
               ))}
             </div>
@@ -271,6 +274,12 @@ export default function IncidentPage() {
                 Australian Disaster Resilience Knowledge Hub (AIDR)
               </a>
             </p>
+            {AIDR_SOURCE_URL_PATTERN.test(inc.sourceUrl) ? (
+              <p>
+                Obtained from the Australian Institute for Disaster Resilience, © Commonwealth of Australia{" "}
+                {AIDR_REPRODUCTION_YEAR}.
+              </p>
+            ) : null}
           </section>
         )}
 

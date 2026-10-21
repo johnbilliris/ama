@@ -15,8 +15,8 @@
 | `contract`    | Schema / API parity (mirrored to `packages/schemas`) | Per-PR (`tests/contract/`)               |
 | `integration` | Mocked external services (Cosmos, Service Bus, ...)  | Per-PR (`tests/integration/`)            |
 | `e2e`         | End-to-end against deployed infra or in-proc double  | Nightly (`tests/e2e/`)                   |
-| `load`        | Locust / stress harnesses                            | Weekly (`tests/load/`, FR-RAG-TEST-02)   |
-| `simulation`  | Multi-day scenario simulations                       | Quarterly chaos game-day                 |
+| `load`        | Locust / stress harnesses                            | On demand (`tests/load/`, FR-RAG-TEST-02) |
+| `simulation`  | Multi-day scenario simulations                       | Operational schedule                     |
 
 Markers are configured in `pyproject.toml::[tool.pytest.ini_options].markers`
 and re-checked by `ruff check` (none today, but the marker string is the
@@ -30,8 +30,8 @@ single source of truth).
 unit             ✓                              –                  –
 contract         ✓                              –                  –
 integration      ✓                              –                  –
-e2e (in-proc)    ✓ (T221 in-proc body)          –                  ✓ (full body)
-e2e (staging)    –                              –                  ✓ (`AMA_E2E_AGAINST_STAGING=1`)
+e2e (in-proc)    ✓ (T221 in-proc body)          –                  –
+e2e (staging)    –                              –                  –
 load burst       –                              –                  –
 ```
 
@@ -41,10 +41,8 @@ CI workflow file mapping:
   `quality-windows` (Windows contract+integration), `golden-set-canonical`
   (T220 lint).
 
-- `.github/workflows/spec-036-blue-green-e2e.yml` — nightly blue-green E2E
-  against staging.
-- `.github/workflows/corpus-ingest.yml` — daily drift detection (cron
-  `0 14 * * *` UTC; T213).
+Staging E2E, load, and corpus-ingest checks remain available for explicit
+execution; no scheduled workflow currently runs them.
 
 ## Where to add tests
 
