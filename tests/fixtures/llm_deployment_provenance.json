@@ -1,0 +1,45 @@
+{
+  "synthetic_only": true,
+  "old_dispatcher": {
+    "summary": "Synthetic historical reply",
+    "citations": [],
+    "prompt_hash": null,
+    "model_deployment": null,
+    "invocation_id": "synthetic-old-invocation"
+  },
+  "new_dispatcher": {
+    "summary": "Synthetic completed reply",
+    "citations": [],
+    "prompt_hash": null,
+    "model_deployment": "synthetic-exercise-s",
+    "model_id": "synthetic-chat",
+    "model_version": "opaque-release/+041",
+    "inference_attempted": true,
+    "inference_outcome": "succeeded",
+    "invocation_id": "synthetic-new-invocation"
+  },
+  "new_not_attempted": {
+    "summary": "Synthetic degraded reply",
+    "citations": [],
+    "prompt_hash": null,
+    "model_deployment": null,
+    "model_id": null,
+    "model_version": null,
+    "inference_attempted": false,
+    "inference_outcome": "not_attempted",
+    "error": "foundry_config_error",
+    "degraded": true,
+    "invocation_id": "synthetic-no-call"
+  },
+  "new_unknown": {
+    "summary": "Synthetic unavailable remote evidence",
+    "citations": [],
+    "prompt_hash": null,
+    "model_deployment": null,
+    "model_id": null,
+    "model_version": null,
+    "inference_attempted": null,
+    "inference_outcome": "unknown",
+    "invocation_id": "synthetic-unknown-invocation"
+  }
+}

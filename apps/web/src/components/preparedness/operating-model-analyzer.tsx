@@ -6,6 +6,7 @@ import type { JurisdictionSummary } from "../../lib/api/jurisdictions";
 import type { PreparednessFramework } from "../../lib/api/frameworks";
 import type { PreparednessOrganisation } from "../../lib/api/organisations";
 import { replayPreparednessScenario, type ScenarioRunPayload } from "../../lib/api/scenarios";
+import { useI18n } from "../../lib/i18n/runtime";
 
 function formatLabel(value: string): string {
   return value
@@ -43,6 +44,7 @@ export function OperatingModelAnalyzer({
   replayStale,
   onReplayComplete,
 }: OperatingModelAnalyzerProps) {
+  const { t } = useI18n();
   const [orgCatalogueOpen, setOrgCatalogueOpen] = useState(true);
   const [fwCatalogueOpen, setFwCatalogueOpen] = useState(true);
   const [scenarioType, setScenarioType] = useState("flood");
@@ -82,7 +84,7 @@ export function OperatingModelAnalyzer({
         setScenarioRun(result);
         onReplayComplete();
       })
-      .catch((err: Error) => setReplayError(err.message || "Rehearsal replay failed. The API may be temporarily unavailable."))
+      .catch((err: Error) => setReplayError(err.message || t("preparedness.replayFailed")))
       .finally(() => setReplaying(false));
   }
 
@@ -279,7 +281,7 @@ export function OperatingModelAnalyzer({
       <section className="preparedness-replay-panel">
         <div className="preparedness-replay-controls">
           <label className="preparedness-field">
-            <span>Scenario type</span>
+            <span>{t("preparedness.scenarioType")}</span>
             <select
               className="preparedness-select"
               value={scenarioType}
@@ -288,6 +290,7 @@ export function OperatingModelAnalyzer({
               <option value="flood">Flood</option>
               <option value="bushfire">Bushfire</option>
               <option value="cyclone">Cyclone</option>
+              <option value="severe_storm">Severe storm</option>
             </select>
           </label>
           <button
@@ -297,24 +300,24 @@ export function OperatingModelAnalyzer({
             disabled={replaying || noJurisdictions}
             title={noJurisdictions ? "Select at least one jurisdiction to run a rehearsal replay" : undefined}
           >
-            {replaying ? "Running…" : "Run rehearsal replay"}
+            {replaying ? t("preparedness.running") : t("preparedness.runReplay")}
           </button>
           {noJurisdictions && (
-            <span className="preparedness-meta">Select at least one jurisdiction to run a rehearsal replay.</span>
+            <span className="preparedness-meta">{t("preparedness.selectJurisdiction")}</span>
           )}
         </div>
 
         {replayStale && (
           <div className="preparedness-stale-notice" role="status">
-            <p>Replay results were generated for different jurisdictions. Run a new replay for updated results.</p>
+            <p>{t("preparedness.resultsStale")}</p>
           </div>
         )}
 
         {replayError && (
           <div className="preparedness-error" role="alert">
-            <p><strong>Rehearsal replay failed:</strong> {replayError}</p>
+            <p><strong>{t("preparedness.replayFailed")}</strong> {replayError}</p>
             <button type="button" className="preparedness-button" onClick={handleReplay} disabled={replaying || noJurisdictions}>
-              Retry
+              {t("common.retry")}
             </button>
           </div>
         )}
@@ -335,7 +338,7 @@ export function OperatingModelAnalyzer({
             <h2 className="preparedness-panel-title">Coordination gaps</h2>
             <ul className="preparedness-list">
               {deferredScenarioRun.coordination_gap_summary.length === 0 ? (
-                <li className="preparedness-list-item">No blocking gaps detected for the selected rehearsal.</li>
+                <li className="preparedness-list-item">{t("preparedness.noGaps")}</li>
               ) : (
                 deferredScenarioRun.coordination_gap_summary.map((gap) => (
                   <li key={gap} className="preparedness-list-item">

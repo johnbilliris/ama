@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ama:specify:contracts:external-validation-status",
+  "title": "Extension list non-persisted external validation handoff",
+  "description": "Optional shape contract for an in-memory or terminal-minimized handoff object. It is never instantiated or stored in the repository. Pending-external remains prose in the specification, handoff, and checklist; completed status and evidence remain only in authorized AU-resident external stores.",
+  "type": "array",
+  "minItems": 2,
+  "maxItems": 2,
+  "uniqueItems": true,
+  "allOf": [
+    {
+      "contains": {
+        "type": "object",
+        "properties": {
+          "validation": {
+            "const": "sovereign-external-platform"
+          }
+        },
+        "required": ["validation"]
+      },
+      "minContains": 1,
+      "maxContains": 1
+    },
+    {
+      "contains": {
+        "type": "object",
+        "properties": {
+          "validation": {
+            "const": "human-study"
+          }
+        },
+        "required": ["validation"]
+      },
+      "minContains": 1,
+      "maxContains": 1
+    }
+  ],
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "validation",
+      "status",
+      "reason",
+      "evidence_path",
+      "validated_at"
+    ],
+    "properties": {
+      "validation": {
+        "enum": ["sovereign-external-platform", "human-study"]
+      },
+      "status": {
+        "const": "pending-external"
+      },
+      "reason": {
+        "type": "string",
+        "minLength": 1
+      },
+      "evidence_path": {
+        "type": "null"
+      },
+      "validated_at": {
+        "type": "null"
+      }
+    }
+  }
+}

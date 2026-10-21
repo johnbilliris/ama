@@ -1,124 +1,149 @@
-/**
- * Spec-038 KPI Ladder tab — live fetch + risk-adjusted side-by-side (T-AMD-15, T-AMD-16).
- *
- * Fetches from GET /api/v1/evidence/kpi-ladder on mount.
- * Renders Raw / Risk-adjusted (L×C) columns side-by-side per FR-041.
- * Shows provenance chip + ManualSignoffBadge when auditor_signoff_required=true.
- */
 "use client";
-import { useEffect, useState } from "react";
-import PublicInformationChannels from "./PublicInformationChannels";
 
-interface RiskAdjustment {
-  likelihood: number;
-  consequence: number;
-  provenance: "auto" | "manual";
-  auditor_signoff_required: boolean;
-}
+import type { IndicatorDefinition, KpiLadderView } from "@ama/domain";
+import { useCallback, useEffect, useState } from "react";
+import { getKpiLadder } from "../../../../lib/api/evidence";
 
-interface IndicatorDefinition {
-  id: string;
-  kpi_id: string;
-  name: string;
-  kind: "leading" | "lagging";
-  target_value: number;
-  unit: string;
-  risk_adjustment: RiskAdjustment;
-  provenance: string;
-  life_safety_tier: string;
-}
+const CAPSTONE_OPTIONS = [
+  ["", "All capstone criteria"],
+  ["SC-CAP-015-001", "Lives saved"],
+  ["SC-CAP-015-002", "Response time"],
+  ["SC-CAP-015-003", "Evacuation lead time"],
+  ["SC-CAP-015-004", "Logistics efficiency"],
+  ["SC-CAP-015-005", "Economic loss reduction"],
+] as const;
 
-type Badge = "degraded" | "small-sample" | "manual" | "reduced-fidelity";
-
-function StateBadge({ badge }: { badge: Badge }) {
-  const styles: Record<Badge, string> = {
-    degraded: "bg-orange-100 text-orange-800",
-    "small-sample": "bg-yellow-100 text-yellow-800",
-    manual: "bg-purple-100 text-purple-800",
-    "reduced-fidelity": "bg-gray-200 text-gray-700",
-  };
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${styles[badge]}`}
-      role="status"
-    >
-      {badge}
-    </span>
-  );
-}
-
-function riskAdjusted(value: number, ra: RiskAdjustment): number {
-  return value * ((ra.likelihood * ra.consequence) / 25);
+function riskAdjusted(value: number, indicator: IndicatorDefinition): number {
+  const risk = indicator.risk_adjustment;
+  if (!risk) return value;
+  const { likelihood, consequence } = risk;
+  return value * ((likelihood * consequence) / 25);
 }
 
 export default function KpiLadderTab() {
-  const [data, setData] = useState<{ groups: { leading: IndicatorDefinition[]; lagging: IndicatorDefinition[] }[] } | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [degraded, setDegraded] = useState(false);
+  const [data, setData] = useState<KpiLadderView | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [includeRiskAdjusted, setIncludeRiskAdjusted] = useState(true);
+  const [capstoneScId, setCapstoneScId] = useState("");
+
+  const load = useCallback(
+    (signal?: AbortSignal) => {
+      setLoading(true);
+      setError("");
+      void getKpiLadder(
+        includeRiskAdjusted,
+        capstoneScId || null,
+        signal,
+      )
+        .then(setData)
+        .catch((reason: unknown) => {
+          if ((reason as Error).name !== "AbortError") setError(String(reason));
+        })
+        .finally(() => setLoading(false));
+    },
+    [capstoneScId, includeRiskAdjusted],
+  );
 
   useEffect(() => {
-    fetch("/api/v1/evidence/kpi-ladder")
-      .then((r) => {
-        if (!r.ok) { setError(`HTTP ${r.status}`); return null; }
-        if (r.headers.get("x-ama-degraded") === "true") setDegraded(true);
-        return r.json();
-      })
-      .then((d) => d && setData(d))
-      .catch((e) => setError(String(e)));
-  }, []);
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
-  const allIndicators: IndicatorDefinition[] = data
-    ? data.groups.flatMap((g) => [...g.leading, ...g.lagging])
-    : [];
+  const indicators = data?.groups.flatMap((group) => [
+    ...group.leading,
+    ...group.lagging,
+  ]) ?? [];
 
   return (
     <div data-testid="evidence-kpi-ladder-tab">
-      {degraded && <StateBadge badge="degraded" />}
-      {error && <p role="alert" className="text-red-600">Failed to load: {error}</p>}
-      {!data && !error && <p>Loading KPI Ladder…</p>}
-      {data && (
-        <table aria-label="KPI Ladder" className="w-full text-sm">
-          <thead>
-            <tr>
-              <th>KPI</th><th>Kind</th><th>Unit</th>
-              <th>Raw target</th>
-              <th>Risk-adjusted (L×C)</th>
-              <th>Provenance</th>
-              <th>Life-safety tier</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allIndicators.map((ind) => (
-              <tr key={ind.id}>
-                <td>{ind.name}</td>
-                <td>{ind.kind}</td>
-                <td>{ind.unit}</td>
-                <td>{ind.target_value}</td>
-                <td>
-                  {riskAdjusted(ind.target_value, ind.risk_adjustment).toFixed(2)}
-                  {" "}
-                  <span className="text-xs text-gray-500">
-                    (L={ind.risk_adjustment.likelihood}×C={ind.risk_adjustment.consequence})
-                  </span>
-                </td>
-                <td>
-                  {ind.risk_adjustment.provenance === "manual" && (
-                    <StateBadge badge="manual" />
-                  )}
-                  {ind.risk_adjustment.auditor_signoff_required && (
-                    <span className="ml-1 text-xs text-purple-700" aria-label="Manual signoff required">
-                      ⚠ signoff required
-                    </span>
-                  )}
-                </td>
-                <td>{ind.life_safety_tier}</td>
-              </tr>
+      <div className="mb-4 flex flex-wrap gap-4">
+        <label>
+          Criterion{" "}
+          <select
+            value={capstoneScId}
+            onChange={(event) => setCapstoneScId(event.target.value)}
+          >
+            {CAPSTONE_OPTIONS.map(([value, label]) => (
+              <option key={value || "all"} value={value}>{label}</option>
             ))}
-          </tbody>
-        </table>
-      )}
-      <PublicInformationChannels jurisdiction="AU" />
+          </select>
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={includeRiskAdjusted}
+            onChange={(event) => setIncludeRiskAdjusted(event.target.checked)}
+          />{" "}
+          Show risk-adjusted values
+        </label>
+      </div>
+      {loading ? <p role="status">Loading KPI ladder…</p> : null}
+      {error ? (
+        <div role="alert">
+          <p>Failed to load the KPI ladder: {error}</p>
+          <button type="button" onClick={() => load()}>Retry</button>
+        </div>
+      ) : null}
+      {!loading && !error && indicators.length === 0 ? (
+        <p>No published indicators match this criterion.</p>
+      ) : null}
+      {indicators.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table aria-label="KPI ladder" className="w-full text-sm">
+            <thead>
+              <tr>
+                <th>KPI</th>
+                <th>Kind</th>
+                <th>Formula</th>
+                <th>Unit</th>
+                <th>Owner</th>
+                <th>Cadence</th>
+                <th>Target</th>
+                <th>Alert</th>
+                <th>Baseline</th>
+                <th>Provenance</th>
+                <th>Confidence rule</th>
+                <th>Risk-adjusted target</th>
+              </tr>
+            </thead>
+            <tbody>
+              {indicators.map((indicator) => {
+                const target = Number(indicator.target_value);
+                return (
+                  <tr key={indicator.id}>
+                    <td>{indicator.name}</td>
+                    <td>{indicator.kind}</td>
+                    <td>{indicator.formula}</td>
+                    <td>{indicator.unit}</td>
+                    <td>{indicator.owner_role}</td>
+                    <td>{indicator.refresh_cadence}</td>
+                    <td>{target}</td>
+                    <td>{Number(indicator.alert_threshold)}</td>
+                    <td>{indicator.baseline_source}</td>
+                    <td>
+                      {indicator.provenance}
+                      {indicator.risk_adjustment?.provenance === "manual" ? (
+                        <span role="status" className="ml-1">manual</span>
+                      ) : null}
+                    </td>
+                    <td>
+                      {indicator.confidence_band_rule.method} ·{" "}
+                      {indicator.confidence_band_rule.min_resamples}
+                    </td>
+                    <td>
+                      {includeRiskAdjusted
+                        ? riskAdjusted(target, indicator).toFixed(2)
+                        : "Hidden"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
     </div>
   );
 }
-

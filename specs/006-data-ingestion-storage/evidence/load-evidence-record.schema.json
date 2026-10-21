@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.gov.au/specs/006/evidence/load-evidence-record.schema.json",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "feature",
+    "aud",
+    "revision",
+    "command",
+    "environment",
+    "topology",
+    "fixtures",
+    "durationSeconds",
+    "denominator",
+    "rawSamples",
+    "rawSha256",
+    "threshold",
+    "outcome"
+  ],
+  "properties": {
+    "schemaVersion": {"type": "string"},
+    "feature": {"type": "string", "const": "006-data-ingestion-storage"},
+    "aud": {"type": "string", "enum": ["AUD-041"]},
+    "revision": {"type": "string", "minLength": 7},
+    "command": {"type": "string", "minLength": 1},
+    "environment": {
+      "type": "object",
+      "required": ["name", "stagingOptIn", "python"],
+      "properties": {
+        "name": {"type": "string", "enum": ["local", "staging"]},
+        "stagingOptIn": {"type": "boolean"},
+        "python": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "topology": {
+      "type": "object",
+      "required": ["workerReplicas", "apiReplicas", "loadUsers"],
+      "properties": {
+        "workerReplicas": {"type": "integer", "minimum": 1},
+        "apiReplicas": {"type": "integer", "minimum": 1},
+        "loadUsers": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": true
+    },
+    "fixtures": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "durationSeconds": {"type": "number", "minimum": 0},
+    "denominator": {"type": "integer", "minimum": 0},
+    "rawSamples": {
+      "type": "array",
+      "items": {"type": "number", "minimum": 0}
+    },
+    "rawSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "threshold": {
+      "type": "object",
+      "required": ["metric", "operator", "value", "computed"],
+      "properties": {
+        "metric": {"type": "string", "enum": ["sc001_latency_p95_seconds", "sc002_throughput_per_hour"]},
+        "operator": {"type": "string", "enum": ["<=", ">="]},
+        "value": {"type": "number"},
+        "computed": {"type": "number"}
+      },
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "required": ["status", "measuredValue", "reason"],
+      "properties": {
+        "status": {"type": "string", "enum": ["PASS", "FAIL", "UNVERIFIED", "NOT_MEASURED"]},
+        "measuredValue": {"type": "number"},
+        "reason": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -2,7 +2,46 @@
 useDefault = true
 
 [allowlist]
-description = "Spec 036 idempotency-cache contract documents an opaque Idempotency-Key header example, not a credential."
+description = "Opaque idempotency examples in the contract and deterministic privacy test are test data, not credentials."
 regexTarget = "match"
-paths = ['''^specs/036-sim-agent-extend/contracts/idempotency-cache\.md$''']
-regexes = ['''Idempotency-Key:\s+[A-Za-z0-9._:-]+''']
+paths = [
+  '''^specs/036-sim-agent-extend/contracts/idempotency-cache\.md$''',
+  '''^tests/contract/test_privacy_act_sar\.py$''',
+]
+regexes = [
+  '''Idempotency-Key:\s+[A-Za-z0-9._:-]+''',
+  '''idem-key-123456''',
+]
+
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "Local Cosmos signing placeholder and published Azurite development key."
+condition = "AND"
+paths = ['''^compose\.yaml$''']
+regexTarget = "secret"
+regexes = [
+  '''^bG9jYWwtY29zbW9zLWVtdWxhdG9yLW9ubHk=$''',
+  '''^Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==$''',
+]
+
+[[rules.allowlists]]
+description = "Source-path to SHA-256 bindings in the captured Dev evidence are content hashes, not credentials."
+condition = "AND"
+paths = ['''^specs/041-llm-deployment-routing/evidence/dev-preparation/app-source-bindings\.json$''']
+regexTarget = "line"
+regexes = ['''^\s*"(?:apps|packages|scripts|specs)\\\\[^"]+": "[a-f0-9]{64}",?\s*$''']
+
+[[rules.allowlists]]
+description = "The captured API principal ID and its exact scanner regression fixture are public identifiers."
+condition = "AND"
+paths = [
+  '''^specs/041-llm-deployment-routing/deployment-baseline\.json$''',
+  '''^scripts/verify_emulator_secret_exceptions\.py$''',
+]
+regexTarget = "line"
+regexes = [
+  '''^\s*"api_principal_id": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a",?\s*$''',
+  '''^\s*principal = json\.dumps\(\{"api_principal_id": "7dc8a9f2-1bdc-41c8-9481-aea97b09717a"\}, indent=2\)\s*$''',
+]

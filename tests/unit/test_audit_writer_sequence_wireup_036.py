@@ -20,13 +20,12 @@ import asyncio
 from datetime import UTC, datetime
 
 import pytest
-
-from apps.api.app.repositories.simulation_sequence_repository import (
+from app.repositories.simulation_sequence_repository import (
     DLQ_SEQUENCE_NUMBER,
     SequenceAllocationExhausted,
     SimulationSequenceRepository,
 )
-from apps.api.app.services.simulation.audit_writer import (
+from app.services.simulation.audit_writer import (
     AuditDLQEntry,
     AuditWriter,
     get_audit_dlq_buffer,

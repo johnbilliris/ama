@@ -43,8 +43,8 @@ if (-not $floors[$Phase].ContainsKey($Tier)) {
 $floor = [double]$floors[$Phase][$Tier]
 
 if (-not (Test-Path $CoverageXmlPath)) {
-  Write-Warning "coverage XML not found at $CoverageXmlPath; skipping ratchet check."
-  exit 0
+  Write-Error "coverage XML not found at $CoverageXmlPath; failing ratchet check."
+  exit 1
 }
 
 [xml]$xml = Get-Content $CoverageXmlPath

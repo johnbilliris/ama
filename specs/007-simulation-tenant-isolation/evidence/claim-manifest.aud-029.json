@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "feature": "007-simulation-tenant-isolation",
+  "audit": "AUD-029",
+  "capturedAt": "2026-09-16",
+  "attribution": {
+    "mode": "uncommitted-worktree",
+    "commitClaimed": false,
+    "baseCommit": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
+    "branch": "001-extension-list",
+    "worktreeDirty": true,
+    "note": "Results were produced from a modified worktree. No commit is claimed; baseCommit is the checkout point only."
+  },
+  "claims": [
+    {
+      "claimId": "AUTH-TENANT-STORAGE-BEHAVIOR",
+      "status": "VERIFIED",
+      "artifact": "tests/integration/test_spec007_auth_boundary.py",
+      "method": "required spec007_isolation CI marker"
+    },
+    {
+      "claimId": "LIFECYCLE-ARCHIVE-REPORT-BEHAVIOR",
+      "status": "VERIFIED",
+      "artifact": "tests/integration/test_simulation_lifecycle.py",
+      "method": "service and storage failure behavior"
+    },
+    {
+      "claimId": "POLICY-WORM-DEPLOYMENT",
+      "status": "DEFERRED",
+      "artifact": "specs/007-simulation-tenant-isolation/implementation-review-tasks.md",
+      "reason": "Azure Policy Portal parity and immutable storage deployment are unverified"
+    },
+    {
+      "claimId": "SC-NFR-MEASUREMENTS",
+      "status": "DEFERRED",
+      "artifact": "specs/007-simulation-tenant-isolation/implementation-review-tasks.md",
+      "reason": "Authorized staging load, latency, reclamation, and usability runs are not present"
+    },
+    {
+      "claimId": "BROWSER-USABILITY-A11Y",
+      "status": "DEFERRED",
+      "artifact": "tests/e2e/web-coverage/cross-cutting/simulation-live-boundary.spec.ts",
+      "reason": "Browser server and Playwright execution were unavailable in this run"
+    }
+  ]
+}

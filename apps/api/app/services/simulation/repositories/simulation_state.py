@@ -56,7 +56,7 @@ class SimulationLifecycleState(BaseModel):
 
 
 def _build_cosmos_client() -> Any:
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]
@@ -96,7 +96,7 @@ class SimulationStateRepository:
     def _validate_state(new_state: object) -> LifecycleState:
         if new_state not in _VALID_STATES:
             raise ValueError(f"Unknown lifecycle state {new_state!r}; expected one of {_VALID_STATES!r}")
-        return new_state  # type: ignore[return-value]
+        return new_state
 
     async def bootstrap(self, simulation_id: str) -> SimulationLifecycleState:
         """Initialise the lifecycle-state document for a new simulation."""

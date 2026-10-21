@@ -11,6 +11,7 @@ import {
 import { PlaybackTimeline } from "@/components/playback-timeline";
 import { PlaybackControls } from "@/components/playback-controls";
 import { PlaybackAnnotationPanel } from "@/components/playback-annotation-panel";
+import { useReportSimulationLifecycle } from "@/components/simulation-lifecycle";
 
 export default function PlaybackPage() {
   const { tenantId } = useParams<{ tenantId: string }>();
@@ -93,6 +94,10 @@ export default function PlaybackPage() {
     },
     [totalDuration],
   );
+
+  // AUD-018 — keep the layout-owned marker truthful on the playback route,
+  // including while the tenant fetch is still in flight or has failed.
+  useReportSimulationLifecycle(tenant?.status ?? null);
 
   if (loading) return <div className="p-6">Loading playback…</div>;
   if (error) {

@@ -11,6 +11,7 @@ Implements:
 from __future__ import annotations
 
 import math
+from typing import TypedDict
 
 from resource_allocation.config import ResourceAllocationConfig
 
@@ -65,11 +66,20 @@ def get_availability_factor(status: str, config: ResourceAllocationConfig) -> fl
     return config.availability_factor_for(status)
 
 
+class ScoreRationale(TypedDict):
+    capability_match: float
+    distance_km: float
+    distance_factor: float
+    availability_factor: float
+    priority_weight: float
+    final_score: float
+
+
 def compute_score(
     resource: object,
     demand: object,
     config: ResourceAllocationConfig,
-) -> tuple[float, dict]:
+) -> tuple[float, ScoreRationale]:
     """Compute the composite matching score for a resource against a demand.
 
     Returns (score, rationale_dict) where rationale_dict contains all scoring components.
@@ -114,7 +124,7 @@ def compute_score(
     # Final score
     score = cap_match * distance_factor * avail_factor * priority_weight
 
-    rationale = {
+    rationale: ScoreRationale = {
         "capability_match": cap_match,
         "distance_km": distance_km,
         "distance_factor": distance_factor,

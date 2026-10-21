@@ -177,7 +177,10 @@ export function FilterPanel({
           {OPERATIONAL_STATUSES.map((s) => (
             <label key={s} className="disaster-mapper-checkbox">
               <input
+                id={`incident-status-${s}`}
+                name="incidentStatus"
                 type="checkbox"
+                value={s}
                 checked={csvHasValue(filters.status, s)}
                 onChange={() => toggleStatus(s)}
               />
@@ -194,6 +197,8 @@ export function FilterPanel({
             <label>
               From
               <select
+                id="incident-year-start"
+                name="incidentYearStart"
                 value={filters.year_start ?? ""}
                 onChange={(e) =>
                   onFilterChange(
@@ -213,6 +218,8 @@ export function FilterPanel({
             <label>
               To
               <select
+                id="incident-year-end"
+                name="incidentYearEnd"
                 value={filters.year_end ?? ""}
                 onChange={(e) =>
                   onFilterChange(
@@ -248,7 +255,10 @@ export function FilterPanel({
           {INCIDENT_TYPES.map((t) => (
             <label key={t} className="disaster-mapper-checkbox">
               <input
+                id={`incident-type-${t}`}
+                name="incidentType"
                 type="checkbox"
+                value={t}
                 checked={csvHasValue(filters.type, t)}
                 onChange={() => toggleType(t)}
               />
@@ -268,7 +278,10 @@ export function FilterPanel({
             return (
               <label key={tier.label} className="disaster-mapper-checkbox">
                 <input
+                  id={`incident-severity-${tier.label.toLowerCase().replaceAll(" ", "-")}`}
+                  name="incidentSeverity"
                   type="checkbox"
+                  value={tier.label}
                   checked={checked}
                   onChange={() => toggleSeverity(tier.values)}
                 />
@@ -295,7 +308,10 @@ export function FilterPanel({
           {PPRR_PHASES.map((p) => (
             <label key={p} className="disaster-mapper-checkbox">
               <input
+                id={`incident-pprr-phase-${p}`}
+                name="incidentPprrPhase"
                 type="checkbox"
+                value={p}
                 checked={csvHasValue(filters.pprr_phase, p)}
                 onChange={() => togglePhase(p)}
               />

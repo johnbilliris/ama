@@ -16,16 +16,89 @@ five named MAF Agents do not change.
 from __future__ import annotations
 
 import logging
+import uuid
 from functools import lru_cache
 from typing import Any
 
+from agent_framework import ChatMiddleware, ChatResponse
 from agent_framework_openai import OpenAIChatClient
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-from common.llm_config import LLMClientConfig
+from common.inference_observation import (
+    RequestObservation,
+    observation_correlation_id,
+    observe_openai_transport,
+    observed_calls,
+)
+from common.llm_config import FoundryConfigurationError, LLMClientConfig, ResolvedDeployment
 
 logger = logging.getLogger(__name__)
 
 _AOAI_TOKEN_SCOPE = "https://cognitiveservices.azure.com/.default"
+
+
+class _RequestEvidenceMiddleware(ChatMiddleware):
+    """Observe a chat request independently of its enclosing agent/tool outcome."""
+
+    def __init__(self, resolved: ResolvedDeployment) -> None:
+        self._resolved = resolved
+
+    async def process(self, context: Any, call_next: Any) -> None:
+        calls = observed_calls.get()
+        observation = RequestObservation(
+            correlation_id=observation_correlation_id.get()
+            or (context.metadata or {}).get("audit_correlation_id")
+            or uuid.uuid4().hex,
+            resolved=self._resolved,
+            stamp_header=True,
+        )
+        observation.observable = observe_openai_transport(getattr(context.client, "client", None))
+        from maf_runtime.middleware.audit_middleware import fingerprint
+
+        observation.prompt_sha = fingerprint({"messages": context.messages, "options": context.options})
+        recorded = False
+
+        def capture(value: Any, *, terminal: bool = False) -> Any:
+            observation.usage(getattr(value, "usage_details", None))
+            raw = getattr(value, "raw_representation", None)
+            observation.usage(getattr(getattr(raw, "response", raw), "usage", None))
+            text = getattr(value, "text", "")
+            if isinstance(text, str):
+                observation.text += text
+            finish = getattr(value, "finish_reason", None)
+            status = getattr(getattr(raw, "response", raw), "status", None)
+            if str(finish) in ("error", "failed") or status == "failed":
+                observation.failed = True
+            observed_terminal = (terminal and status not in ("queued", "in_progress")) or bool(finish)
+            observation.terminal = observation.terminal or observed_terminal
+            return value
+
+        def record() -> None:
+            nonlocal recorded
+            if recorded:
+                return
+            recorded = True
+            evidence = observation.evidence()
+            if calls is not None:
+                calls.append(evidence)
+            from common.otel_telemetry import record_inference_evidence
+
+            record_inference_evidence(evidence)
+
+        observation.ready = True
+        try:
+            with observation.bind():
+                await call_next()
+            if context.stream:
+                context.result.with_pull_context_manager(observation.bind)
+                context.result.with_transform_hook(capture)
+                context.result.with_cleanup_hook(record)
+            else:
+                capture(context.result, terminal=isinstance(context.result, ChatResponse))
+                record()
+        except BaseException as exc:
+            observation.attach_failure(exc)
+            record()
+            raise
 
 
 @lru_cache(maxsize=1)
@@ -44,37 +117,16 @@ def _shared_token_provider() -> Any:
     return get_bearer_token_provider(_shared_credential(), _AOAI_TOKEN_SCOPE)
 
 
-def _resolve_endpoint_and_deployment(
+def _resolve_deployment(
     cfg: LLMClientConfig,
     model_tier: str,
-) -> tuple[str, str]:
-    """Return ``(endpoint, deployment)`` for the Foundry chat plane.
-
-    Lookup order (post-cutover):
-      1. ``AZURE_AI_PROJECT_ENDPOINT`` is the canonical endpoint.
-      2. ``cfg.endpoint`` (``AZURE_OPENAI_ENDPOINT``) is an opt-in
-         test-only fallback — production Bicep no longer sets this var.
-      3. Deployment is resolved via ``AZURE_AI_PROJECT_DEPLOYMENTS``
-         indexed by ``cfg.foundry_model_key_for(model_tier)``; if absent,
-         the legacy per-tier deployment env var is honoured for tests
-         that exercise this seam directly.
-    """
-    foundry_endpoint = cfg.foundry_endpoint or cfg.endpoint
-    if not foundry_endpoint:
-        raise ValueError(
-            "AZURE_AI_PROJECT_ENDPOINT is not configured; refusing to build an "
-            "OpenAIChatClient (spec 036 / ADR-20 hard cutover — Foundry only)."
-        )
-
-    model_key = cfg.foundry_model_key_for(model_tier)
-    deployment_map = cfg.foundry_deployment_map()
-    deployment = deployment_map.get(model_key) or cfg.deployment_for(model_tier)
-    if not deployment:
-        raise ValueError(
-            f"No Foundry deployment is mapped for tier {model_tier!r} (model key {model_key!r}). "
-            f"Set AZURE_AI_PROJECT_DEPLOYMENTS='{model_key}=<deployment-name>'."
-        )
-    return foundry_endpoint, deployment
+) -> ResolvedDeployment:
+    """Resolve the captured Foundry target, retaining the public ValueError boundary."""
+    try:
+        resolved = cfg.deployment_resolver(allow_test_endpoint=True).resolve(model_tier)
+    except FoundryConfigurationError as exc:
+        raise ValueError(f"Invalid Foundry configuration for tier {model_tier!r}: {exc}") from exc
+    return resolved
 
 
 def build_azure_openai_chat_client(
@@ -86,8 +138,7 @@ def build_azure_openai_chat_client(
     """Build an ``OpenAIChatClient`` configured for Foundry + Entra ID.
 
     Args:
-        model_tier: ``"reasoning"`` or ``"drafting"``; selects the deployment via
-            ``LLMClientConfig.foundry_model_key_for(...)``.
+        model_tier: ``"reasoning"`` or ``"drafting"``; selects the captured tier destination.
         config: optional ``LLMClientConfig`` override (used by tests).
         middleware: optional MAF chat middleware (e.g., the audit middleware
             from T020). Per-Agent middleware is preferred — pass middleware on
@@ -101,7 +152,10 @@ def build_azure_openai_chat_client(
             requested tier.
     """
     cfg = config or LLMClientConfig()
-    endpoint, deployment = _resolve_endpoint_and_deployment(cfg, model_tier)
+    resolved = _resolve_deployment(cfg, model_tier)
+    endpoint, deployment = resolved.endpoint, resolved.deployment_name
+    evidence_middleware = _RequestEvidenceMiddleware(resolved)
+    chat_middleware = [evidence_middleware, *(middleware or [])]
 
     logger.info(
         "Building OpenAIChatClient",
@@ -117,7 +171,7 @@ def build_azure_openai_chat_client(
         azure_endpoint=endpoint,
         api_version=cfg.api_version,
         credential=_shared_token_provider(),
-        middleware=middleware,
+        middleware=chat_middleware,
     )
 
 

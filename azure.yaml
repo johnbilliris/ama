@@ -12,10 +12,44 @@ infra:
 
 # ---------- Hooks ----------
 hooks:
+  preprovision:
+    windows:
+      shell: pwsh
+      run: python ./scripts/purge_soft_deleted_dev_resources.py
+      interactive: false
+      continueOnError: false
+    posix:
+      shell: sh
+      run: python3 ./scripts/purge_soft_deleted_dev_resources.py
+      interactive: false
+      continueOnError: false
+
+  predown:
+    windows:
+      shell: pwsh
+      run: pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -File ./scripts/remove-evidence-immutability-policy.ps1
+      interactive: false
+      continueOnError: false
+    posix:
+      shell: sh
+      run: sh ./scripts/remove-evidence-immutability-policy.sh
+      interactive: false
+      continueOnError: false
+  postdown:
+    windows:
+      shell: pwsh
+      run: python ./scripts/purge_soft_deleted_dev_resources.py
+      interactive: false
+      continueOnError: false
+    posix:
+      shell: sh
+      run: python3 ./scripts/purge_soft_deleted_dev_resources.py
+      interactive: false
+      continueOnError: false
   postprovision:
     windows:
       shell: pwsh
-      run: ./scripts/seed-database.ps1
+      run: pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -File ./scripts/seed-database.ps1
       interactive: true
       continueOnError: false
     posix:
@@ -33,7 +67,10 @@ services:
     docker:
       path: ./Dockerfile
       context: ../..
-      remoteBuild: false
+      platform: linux/amd64
+      registry: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}
+      image: ama/api
+      remoteBuild: true
 
   agents:
     project: ./apps/agents
@@ -42,7 +79,22 @@ services:
     docker:
       path: ./Dockerfile
       context: ../..
-      remoteBuild: false
+      platform: linux/amd64
+      registry: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}
+      image: ama/agents
+      remoteBuild: true
+
+  evacuation:
+    project: ./apps/agents
+    language: python
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: ../..
+      platform: linux/amd64
+      registry: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}
+      image: ama/evacuation
+      remoteBuild: true
 
   ingestion:
     project: ./apps/ingestion
@@ -51,7 +103,22 @@ services:
     docker:
       path: ./Dockerfile
       context: ../..
-      remoteBuild: false
+      platform: linux/amd64
+      registry: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}
+      image: ama/ingestion
+      remoteBuild: true
+
+  ingest-runner:
+    project: .
+    language: docker
+    host: containerapp
+    docker:
+      path: ./apps/ingest-runner/Dockerfile
+      context: .
+      platform: linux/amd64
+      registry: ${AZURE_CONTAINER_REGISTRY_ENDPOINT}
+      image: ama/ingest-runner
+      remoteBuild: true
 
   web:
     project: ./apps/web
@@ -60,14 +127,6 @@ services:
     dist: .next/standalone-deploy
     config:
       packageManager: pnpm
-    hooks:
-      prepackage:
-        windows:
-          shell: pwsh
-          run: pnpm run build
-        posix:
-          shell: sh
-          run: pnpm run build
 
 # ---------- Pipeline ----------
 pipeline:

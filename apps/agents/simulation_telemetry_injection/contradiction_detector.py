@@ -46,9 +46,13 @@ def _detect_direction_conflict(candidate: SyntheticSignal, prior: SyntheticSigna
 
 
 def _detect_value_conflict(candidate: SyntheticSignal, prior: SyntheticSignal) -> bool:
+    candidate_value = candidate.parameters.get("value")
+    prior_value = prior.parameters.get("value")
+    if not isinstance(candidate_value, (int, float, str)) or not isinstance(prior_value, (int, float, str)):
+        return False
     try:
-        c_val = float(candidate.parameters.get("value"))
-        p_val = float(prior.parameters.get("value"))
+        c_val = float(candidate_value)
+        p_val = float(prior_value)
     except (TypeError, ValueError):
         return False
     if p_val == 0:

@@ -13,11 +13,20 @@ class TestTriggerConditions:
         rp = DynamicReplanner()
         triggers = rp.evaluate_triggers(
             incident_id="inc-1",
-            current_plan={},
+            current_plan={"routes": [{"waypoints": ["edge-1", "edge-2"]}]},
             new_road_closures=["edge-1", "edge-2"],
         )
         assert len(triggers) == 1
         assert "road_closure" in triggers[0]
+
+    def test_unrelated_road_closure_does_not_trigger(self):
+        rp = DynamicReplanner()
+        triggers = rp.evaluate_triggers(
+            incident_id="inc-1",
+            current_plan={"routes": [{"waypoints": ["edge-active"]}]},
+            new_road_closures=["edge-unrelated"],
+        )
+        assert triggers == []
 
     def test_hazard_expansion_trigger(self):
         rp = DynamicReplanner()
@@ -38,6 +47,17 @@ class TestTriggerConditions:
         )
         assert len(triggers) == 0
 
+    def test_hazard_expansion_at_threshold_does_not_trigger(self):
+        rp = DynamicReplanner()
+        assert (
+            rp.evaluate_triggers(
+                incident_id="inc-1",
+                current_plan={},
+                hazard_area_change_pct=10.0,
+            )
+            == []
+        )
+
     def test_progress_delay_trigger(self):
         rp = DynamicReplanner()
         triggers = rp.evaluate_triggers(
@@ -56,6 +76,17 @@ class TestTriggerConditions:
             progress_delay_pct=20.0,  # < 30% threshold
         )
         assert len(triggers) == 0
+
+    def test_progress_delay_at_threshold_does_not_trigger(self):
+        rp = DynamicReplanner()
+        assert (
+            rp.evaluate_triggers(
+                incident_id="inc-1",
+                current_plan={},
+                progress_delay_pct=30.0,
+            )
+            == []
+        )
 
     def test_severity_escalation_trigger(self):
         rp = DynamicReplanner()
@@ -153,6 +184,12 @@ class TestNoChangeDetection:
         new = {"routes": [{"route_id": "r-1"}, {"route_id": "r-2"}]}
         assert rp.detect_material_change(old, new) is True
 
+    def test_same_route_id_with_changed_path_is_detected(self):
+        rp = DynamicReplanner()
+        old = {"routes": [{"route_id": "r-1", "waypoints": ["edge-1"]}]}
+        new = {"routes": [{"route_id": "r-1", "waypoints": ["edge-2"]}]}
+        assert rp.detect_material_change(old, new) is True
+
     def test_population_change_detected(self):
         rp = DynamicReplanner()
         old = {"total_population": 5000, "routes": [], "zones": []}
@@ -188,7 +225,7 @@ class TestMultiTriggerMerging:
         rp = DynamicReplanner()
         triggers = rp.evaluate_triggers(
             incident_id="inc-1",
-            current_plan={},
+            current_plan={"routes": [{"waypoints": ["edge-1"]}]},
             new_road_closures=["edge-1"],
             hazard_area_change_pct=15.0,
             manual_trigger=True,

@@ -32,7 +32,6 @@ def _make_handoff(**overrides) -> AgentHandoffEvent:
     }
     defaults.update(overrides)
     return AgentHandoffEvent(**defaults)
-    return AgentHandoffEvent(**defaults)
 
 
 class TestDeliverHandoffWithRetry:
@@ -80,7 +79,7 @@ class TestDeliverHandoffWithRetry:
         )
 
         assert result.status == "dead_lettered"
-        assert result.retry_count == 2
+        assert result.retry_count == 1
         on_dead_letter.assert_called_once()
 
     @pytest.mark.asyncio

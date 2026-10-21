@@ -1,4 +1,4 @@
-<mxfile host="Electron" agent="spec-001-fallback">
+<mxfile host="Electron" agent="remediation-source-updated; export=pending-drawio">
   <diagram name="C4-L1" id="c4-l1-3c4895ce">
     <mxGraphModel dx="799" dy="601" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
       <root>
@@ -22,14 +22,14 @@
         <mxCell id="user" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Browser / Mobile&amp;#xa;End User" vertex="1">
           <mxGeometry height="70" width="140" x="660" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="aoai" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Microsoft Foundry" vertex="1">
-          <mxGeometry height="60" width="140" x="660" y="170" as="geometry" />
+        <mxCell id="aoai" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/ai_machine_learning/Azure_OpenAI.svg;" value="Microsoft Foundry" vertex="1">
+          <mxGeometry height="64" width="64" x="690" y="170" as="geometry" />
         </mxCell>
-        <mxCell id="maps" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Azure Maps" vertex="1">
-          <mxGeometry height="60" width="140" x="660" y="270" as="geometry" />
+        <mxCell id="maps" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/iot/Azure_Maps_Accounts.svg;" value="Azure Maps" vertex="1">
+          <mxGeometry height="64" width="64" x="690" y="280" as="geometry" />
         </mxCell>
-        <mxCell id="acs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Azure&lt;div&gt;Communication&lt;/div&gt;&lt;div&gt;Services&lt;/div&gt;" vertex="1">
-          <mxGeometry height="60" width="140" x="660" y="370" as="geometry" />
+        <mxCell id="acs" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/other/Azure_Communication_Services.svg;" value="Azure Communication Services" vertex="1">
+          <mxGeometry height="64" width="64" x="690" y="390" as="geometry" />
         </mxCell>
         <mxCell id="e1" edge="1" parent="1" source="bom" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#FFFFFF;">
           <mxGeometry relative="1" as="geometry">

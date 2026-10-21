@@ -8,9 +8,14 @@ Bug fixes applied:
 """
 
 import asyncio
+import json
 import logging
 import os
 from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING, Protocol
+from uuid import uuid4
+
+from apps.console_logging import configure_console_logging, uvicorn_log_config
 
 if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
     try:
@@ -27,7 +32,16 @@ if os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"):
 from app.validators.signal_envelope import SignalEnvelope
 from common.content_safety import ContentSafetyValidator
 from common.handoffs import AgentHandoffEvent, build_handoff
+from common.llm_client import LLMClient
+from monitoring.audit import AuditWriter
 from monitoring.config import MonitoringConfig
+from monitoring.freshness import DataFreshnessTracker
+
+from packages.domain.src.domain.models.signal import Signal
+
+if TYPE_CHECKING:
+    from fastapi import FastAPI
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -35,13 +49,38 @@ logger = logging.getLogger(__name__)
 ESCALATION_CATEGORIES = {"fire", "weather", "hydrology", "earthquake", "tsunami"}
 
 
+class Tier2Decision(BaseModel):
+    decision: str
+    rationale: str
+    decision_id: str
+
+
+class _SignalRepository(Protocol):
+    async def query_unassociated(
+        self,
+        jurisdiction_id: str,
+        since: datetime | None = None,
+        *,
+        scope: str,
+    ) -> list[Signal]: ...
+
+    async def update_incident_id(
+        self,
+        signal_id: str,
+        incident_id: str,
+        *,
+        scope: str,
+        expected_incident_id: str | None = None,
+    ) -> bool: ...
+
+
 class MonitoringAgent:
     """Core monitoring agent with LLM-powered misinformation detection."""
 
     def __init__(
         self,
-        signal_repository=None,
-        llm_client=None,
+        signal_repository: _SignalRepository | None = None,
+        llm_client: LLMClient | None = None,
         config: MonitoringConfig | None = None,
         content_safety: ContentSafetyValidator | None = None,
     ):
@@ -86,11 +125,40 @@ class MonitoringAgent:
 
         return base_summary
 
+    @staticmethod
+    def _evidence_snapshot(envelope: SignalEnvelope, signal_id: str | None) -> dict[str, object]:
+        payload = envelope.payload or {}
+        provenance = envelope.provenance.model_dump(mode="json") if envelope.provenance else {}
+        allowlisted_payload = {
+            "hazard_type": payload.get("hazard_type"),
+            "severity": payload.get("severity"),
+            "severity_level": payload.get("severity_level"),
+            "location_name": payload.get("location_name"),
+            "summary": str(payload.get("summary", ""))[:240],
+        }
+        allowlisted_provenance = {
+            "sourceUri": provenance.get("sourceUri"),
+            "collectionMethod": provenance.get("collectionMethod"),
+            "sourceTimestamp": provenance.get("sourceTimestamp"),
+        }
+        return {
+            "signal_id": signal_id,
+            "category": envelope.category,
+            "source_kind": envelope.source.kind,
+            "occurred_at": envelope.occurredAt.isoformat(),
+            "received_at": envelope.receivedAt.isoformat(),
+            "payload": allowlisted_payload,
+            "provenance": allowlisted_provenance,
+        }
+
     def build_high_risk_handoff(
         self,
         envelope: SignalEnvelope,
+        *,
+        tier2_decision: Tier2Decision,
         suspicious_penalty: float = 0.0,
         tenant_id: str = "live",
+        signal_id: str | None = None,
     ) -> AgentHandoffEvent | None:
         """Build a handoff event if the signal meets escalation criteria.
 
@@ -101,6 +169,22 @@ class MonitoringAgent:
         effective_confidence = envelope.confidenceScore * envelope.freshnessScore
         effective_confidence -= suspicious_penalty
         effective_confidence = max(0.0, effective_confidence)
+
+        if envelope.validationStatus not in {"validated", "pending", "escalated"}:
+            return None
+
+        blocked_decisions = {
+            "misinformation",
+            "held_for_review",
+            "llm_timeout",
+            "llm_unavailable",
+            "malformed_response",
+        }
+        if tier2_decision.decision in blocked_decisions:
+            return None
+
+        if envelope.validationStatus == "escalated" and tier2_decision.decision not in {"credible", "suspicious"}:
+            return None
 
         is_high_risk = (
             envelope.category in ESCALATION_CATEGORIES
@@ -113,17 +197,60 @@ class MonitoringAgent:
             incident_id=envelope.incidentId,
             source_agent="monitoring",
             target_agent="risk_assessment",
-            scope_key=envelope.incidentId,
+            scope_key=f"{tenant_id}:{envelope.incidentId}",
             payload={
                 "category": envelope.category,
                 "sourceKind": envelope.source.kind,
                 "signalSummary": self.summarize_signal(envelope),
+                "signal_ids": [signal_id] if signal_id else [],
+                "stored_signal_refs": (
+                    [
+                        {
+                            "signal_id": signal_id,
+                            "scope": tenant_id,
+                            "jurisdiction_id": envelope.jurisdictionId or "national",
+                            "data_source_id": envelope.source.dataSourceId,
+                        }
+                    ]
+                    if signal_id
+                    else []
+                ),
+                "tier2_decision": tier2_decision.model_dump(mode="json"),
+                "evidence_snapshot": {
+                    "signals": [self._evidence_snapshot(envelope, signal_id)],
+                },
             },
             confidence=effective_confidence,
             tenant_id=tenant_id,
         )
 
-    async def evaluate_escalated_signal(self, envelope: SignalEnvelope) -> str:
+    @staticmethod
+    def _parse_tier2_response(response: dict[str, object]) -> tuple[str, str]:
+        allowed = {"credible", "suspicious", "misinformation"}
+        raw_decision = response.get("decision")
+        if isinstance(raw_decision, str) and raw_decision.strip().lower() in allowed:
+            rationale = str(response.get("rationale") or "structured_decision")
+            return raw_decision.strip().lower(), rationale
+
+        text = str(response.get("text", "")).strip()
+        lowered = text.lower()
+        if lowered in allowed:
+            return lowered, "exact_text_decision"
+
+        try:
+            parsed = json.loads(text)
+        except Exception:
+            return "malformed_response", "unparseable_classifier_response"
+
+        if not isinstance(parsed, dict):
+            return "malformed_response", "non_object_classifier_response"
+        decision = str(parsed.get("decision", "")).strip().lower()
+        if decision not in allowed:
+            return "malformed_response", "invalid_classifier_decision"
+        rationale = str(parsed.get("rationale") or "structured_json_decision")
+        return decision, rationale
+
+    async def evaluate_escalated_signal(self, envelope: SignalEnvelope) -> Tier2Decision:
         """Tier 2 LLM-based evaluation with async timeout and fail-safe-CLOSED.
 
         T020 bug fix: uses correct LLM client signature (purpose + prompt).
@@ -134,7 +261,11 @@ class MonitoringAgent:
         Returns one of: credible, suspicious, misinformation, held_for_review, llm_unavailable.
         """
         if not self._llm_client:
-            return "llm_unavailable"
+            return Tier2Decision(
+                decision="llm_unavailable",
+                rationale="llm client not configured",
+                decision_id=f"tier2-{uuid4().hex[:12]}",
+            )
 
         try:
             # T020 bug fix: correct call signature
@@ -157,30 +288,29 @@ class MonitoringAgent:
                 timeout=self._config.llm_eval_timeout_seconds,
             )
 
-            result_text = response.get("text", "").strip().lower()
-
-            # Parse classification
-            if "misinformation" in result_text:
-                return "misinformation"
-            if "suspicious" in result_text:
-                return "suspicious"  # T025
-            if "credible" in result_text:
-                return "credible"
-
-            # T024: Unexpected response → fail-safe-CLOSED
-            logger.warning(
-                "LLM returned unexpected response '%s', holding for review (fail-safe-CLOSED)",
-                result_text,
+            decision, rationale = self._parse_tier2_response(response)
+            if decision == "malformed_response":
+                logger.warning("LLM returned malformed classifier response; failing closed")
+            return Tier2Decision(
+                decision=decision,
+                rationale=rationale,
+                decision_id=f"tier2-{uuid4().hex[:12]}",
             )
-            return "held_for_review"
 
         except TimeoutError:
-            # T024: Timeout → fail-safe-CLOSED
             logger.warning("LLM evaluation timed out, holding for review (fail-safe-CLOSED)")
-            return "llm_timeout"
+            return Tier2Decision(
+                decision="llm_timeout",
+                rationale="classifier timeout",
+                decision_id=f"tier2-{uuid4().hex[:12]}",
+            )
         except Exception:
             logger.warning("LLM evaluation failed, holding for review")
-            return "llm_unavailable"
+            return Tier2Decision(
+                decision="llm_unavailable",
+                rationale="classifier unavailable",
+                decision_id=f"tier2-{uuid4().hex[:12]}",
+            )
 
     async def retrospective_associate(
         self,
@@ -202,11 +332,18 @@ class MonitoringAgent:
         unassociated = await self._signal_repository.query_unassociated(
             jurisdiction_id=jurisdiction_id,
             since=cutoff,
-            tenant_id=tenant_id,  # T046: tenant isolation
+            scope=tenant_id,
         )
         count = 0
         for signal in unassociated:
-            await self._signal_repository.update_incident_id(signal.signal_id, incident_id)
+            updated = await self._signal_repository.update_incident_id(
+                signal.signal_id,
+                incident_id,
+                scope=tenant_id,
+                expected_incident_id=None,
+            )
+            if not updated:
+                continue
             count += 1
             logger.info(
                 "Retrospectively associated signal %s with incident %s (tenant=%s)",
@@ -224,10 +361,10 @@ class MonitoringAgent:
 
 def create_app(
     agent: MonitoringAgent | None = None,
-    audit_writer=None,
-    freshness_tracker=None,
+    audit_writer: AuditWriter | None = None,
+    freshness_tracker: DataFreshnessTracker | None = None,
     config: MonitoringConfig | None = None,
-):
+) -> "FastAPI":
     """Create the FastAPI application with health and association endpoints."""
     from fastapi import FastAPI, HTTPException
     from monitoring.me_framework_service import MEFrameworkService
@@ -255,7 +392,7 @@ def create_app(
         status: str
         agent_version: str
         timestamp: str
-        checks: dict
+        checks: dict[str, object]
 
     class AssociationRequest(PydanticBaseModel):
         incident_id: str
@@ -311,8 +448,10 @@ def create_app(
 
         # Overall status determination
         overall = "healthy"
-        if llm_status == "offline" or audit_status == "degraded":
+        if audit_status == "degraded" or (llm_status == "offline" and llm_agent is None):
             overall = "unhealthy"
+        elif llm_status == "offline":
+            overall = "degraded"
         elif any(x != "healthy" for x in [llm_status, freshness_summary, queue_status, audit_status]):
             overall = "degraded"
 
@@ -401,7 +540,7 @@ def create_app(
     # ------------------------------------------------------------------
 
     @app.post("/me-framework", status_code=201)
-    async def create_me_framework(request: CreateMEFrameworkRequest) -> dict:
+    async def create_me_framework(request: CreateMEFrameworkRequest) -> dict[str, object]:
         """Create a new M&E framework for a recovery programme."""
         svc = app.state.me_framework_service
         framework = svc.create_framework(
@@ -413,7 +552,7 @@ def create_app(
         return framework
 
     @app.get("/me-framework/{framework_id}")
-    async def get_me_framework(framework_id: str) -> dict:
+    async def get_me_framework(framework_id: str) -> dict[str, object]:
         """Retrieve an M&E framework by ID."""
         svc = app.state.me_framework_service
         framework = svc.get_framework(framework_id)
@@ -422,7 +561,7 @@ def create_app(
         return framework
 
     @app.post("/me-framework/{framework_id}/outcomes")
-    async def select_outcomes(framework_id: str, request: SelectOutcomesRequest) -> dict:
+    async def select_outcomes(framework_id: str, request: SelectOutcomesRequest) -> dict[str, object]:
         """Select outcomes from the catalogue for a framework."""
         svc = app.state.me_framework_service
         try:
@@ -431,7 +570,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/me-framework/{framework_id}/program-logic", status_code=201)
-    async def create_program_logic(framework_id: str, request: CreateProgramLogicRequest) -> dict:
+    async def create_program_logic(framework_id: str, request: CreateProgramLogicRequest) -> dict[str, object]:
         """Create a program logic model for a framework."""
         svc = app.state.me_framework_service
         try:
@@ -440,7 +579,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/me-framework/{framework_id}/standards")
-    async def set_standards(framework_id: str, request: SetStandardsRequest) -> dict:
+    async def set_standards(framework_id: str, request: SetStandardsRequest) -> dict[str, object]:
         """Set standards of success for framework indicators."""
         svc = app.state.me_framework_service
         try:
@@ -449,7 +588,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/me-framework/{framework_id}/collection-schedule")
-    async def set_collection_schedule(framework_id: str, request: SetCollectionScheduleRequest) -> dict:
+    async def set_collection_schedule(framework_id: str, request: SetCollectionScheduleRequest) -> dict[str, object]:
         """Set the data-collection schedule for framework indicators."""
         svc = app.state.me_framework_service
         try:
@@ -458,7 +597,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.get("/me-framework/{framework_id}/monitoring-report")
-    async def get_monitoring_report(framework_id: str) -> dict:
+    async def get_monitoring_report(framework_id: str) -> dict[str, object]:
         """Generate a monitoring report for the framework."""
         svc = app.state.me_framework_service
         try:
@@ -467,7 +606,7 @@ def create_app(
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.post("/me-framework/{framework_id}/evaluation", status_code=201)
-    async def create_evaluation(framework_id: str, request: CreateEvaluationRequest) -> dict:
+    async def create_evaluation(framework_id: str, request: CreateEvaluationRequest) -> dict[str, object]:
         """Generate an evaluation report for the framework."""
         svc = app.state.me_framework_service
         try:
@@ -493,12 +632,14 @@ def create_app(
         lagging_indicator_ids: list[str]
 
     @app.get("/catalogue/outcomes")
-    async def list_catalogue_outcomes(domain: str | None = None, objective_type: str | None = None) -> list[dict]:
+    async def list_catalogue_outcomes(
+        domain: str | None = None, objective_type: str | None = None
+    ) -> list[dict[str, object]]:
         """List all recovery outcomes with optional domain/objective-type filter."""
         return app.state.catalogue_service.list_outcomes(domain=domain, objective_type=objective_type)
 
     @app.get("/catalogue/outcomes/{outcome_id}")
-    async def get_catalogue_outcome(outcome_id: str) -> dict:
+    async def get_catalogue_outcome(outcome_id: str) -> dict[str, object]:
         """Retrieve a single outcome by ID."""
         result = app.state.catalogue_service.get_outcome(outcome_id)
         if not result:
@@ -506,12 +647,12 @@ def create_app(
         return result
 
     @app.get("/catalogue/domains/{domain}/summary")
-    async def get_catalogue_domain_summary(domain: str) -> dict:
+    async def get_catalogue_domain_summary(domain: str) -> dict[str, object]:
         """Return aggregate counts for a recovery domain."""
         return app.state.catalogue_service.get_domain_summary(domain)
 
     @app.get("/catalogue/evaluation-questions/{domain}")
-    async def get_catalogue_evaluation_questions(domain: str) -> dict:
+    async def get_catalogue_evaluation_questions(domain: str) -> dict[str, object]:
         """Retrieve evaluation questions for a domain."""
         result = app.state.catalogue_service.get_evaluation_questions(domain)
         if not result:
@@ -519,7 +660,7 @@ def create_app(
         return result
 
     @app.post("/catalogue/suggest-activities")
-    async def suggest_catalogue_activities(request: SuggestActivitiesRequest) -> list[dict]:
+    async def suggest_catalogue_activities(request: SuggestActivitiesRequest) -> list[dict[str, object]]:
         """Suggest catalogue activities that address lagging indicators."""
         return app.state.catalogue_service.suggest_activities(request.lagging_indicator_ids)
 
@@ -534,27 +675,27 @@ def create_app(
     )
 
     class CrossDomainRequest(PydanticBaseModel):
-        indicator_data: list[dict]
+        indicator_data: list[dict[str, object]]
 
     class RecommendationsRequest(PydanticBaseModel):
         lagging_indicator_ids: list[str]
 
     class CommunitySummaryRequest(PydanticBaseModel):
-        indicator_data: list[dict]
+        indicator_data: list[dict[str, object]]
         domain_filter: str | None = None
 
     @app.post("/analysis/cross-domain")
-    async def analysis_cross_domain(request: CrossDomainRequest) -> dict:
+    async def analysis_cross_domain(request: CrossDomainRequest) -> dict[str, object]:
         """Analyse cross-domain correlations in recovery indicator data."""
         return app.state.analysis_service.analyse_cross_domain_correlations(request.indicator_data)
 
     @app.post("/analysis/recommendations")
-    async def analysis_recommendations(request: RecommendationsRequest) -> list[dict]:
+    async def analysis_recommendations(request: RecommendationsRequest) -> list[dict[str, object]]:
         """Recommend AIDR catalogue activities for lagging indicators."""
         return app.state.analysis_service.recommend_activities(request.lagging_indicator_ids)
 
     @app.post("/analysis/community-summary")
-    async def analysis_community_summary(request: CommunitySummaryRequest) -> dict:
+    async def analysis_community_summary(request: CommunitySummaryRequest) -> dict[str, object]:
         """Generate a plain-language recovery summary for community communication."""
         return app.state.analysis_service.generate_community_summary(
             request.indicator_data,
@@ -571,12 +712,7 @@ def create_app(
 if __name__ == "__main__":
     import uvicorn
 
-    _fmt = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
-    _console = logging.StreamHandler()
-    _console.setFormatter(_fmt)
-    root = logging.getLogger()
-    root.addHandler(_console)
-    root.setLevel(logging.INFO)
+    configure_console_logging()
 
     _PORT = int(os.environ.get("PORT", "8080"))
     _config = MonitoringConfig()
@@ -585,4 +721,4 @@ if __name__ == "__main__":
     app = create_app(agent=_agent, config=_config)
 
     logger.info("Monitoring Agent health server starting on port %d", _PORT)
-    uvicorn.run(app, host="0.0.0.0", port=_PORT, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=_PORT, log_level="info", log_config=uvicorn_log_config())

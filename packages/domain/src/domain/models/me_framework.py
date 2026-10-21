@@ -21,7 +21,7 @@ EvaluationDomain = Literal[
 RecoveryDomain = Literal["overarching", "social", "economic", "built", "natural"]
 ObjectiveType = Literal["sustainability", "resilience"]
 
-ALL_EVALUATION_DOMAINS: list[str] = [
+ALL_EVALUATION_DOMAINS: list[EvaluationDomain] = [
     "governance",
     "community_engagement",
     "effectiveness",

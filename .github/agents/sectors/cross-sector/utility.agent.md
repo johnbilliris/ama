@@ -1,5 +1,7 @@
 ---
+name: utility
 description: Utility sector agent — energy, water, and telecommunications essential services restoration, priority reconnection, and infrastructure damage assessment.
+tools: ["search/codebase","read/changes","web/fetch","search/findTestFiles","web/githubRepo","read/problems","search","search/searchResults","read/terminalLastCommand","read/terminalSelection","execute/testFailure","search/usages","vscode/vscodeAPI","microsoft.docs.mcp"]
 handoffs:
   - label: Ask about transport infrastructure
     agent: transport
@@ -37,9 +39,9 @@ This agent covers utility operations and essential services restoration. It does
 
 - **Road and rail infrastructure**: Handoff to the **transport** agent — road and rail closures, transport infrastructure assessment, and evacuation transport
 - **Local government infrastructure**: Handoff to the **local-government** agent — council roads, drainage, and community facilities
-- **Fire safety around power lines**: Handoff to the **fire-services** agent — fire services manage fire zones; utilities de-energise on request
+- **Fire safety around power lines**: Handoff to the relevant jurisdiction fire counterpart (for example **frnsw**, **nsw-rfs**, **frv**, **cfa-vic**, **qfd**, **dfes-wa**, **tfs**, **sacfs**, **samfs**, **act-fr**, **act-rfs**, **ntfrs**, **bushfires-nt**) — fire agencies manage fire zones; utilities de-energise on request
 - **Incident-level coordination**: Handoff to the **incident-commander** agent for cross-agency prioritisation of utility restoration
-- **Telecommunications regulation**: Handoff to the **commonwealth-government** agent — Commonwealth regulates telecommunications
+- **Telecommunications regulation**: Handoff to **nema** for national coordination, then to the relevant Commonwealth specialist agency where needed
 
 ## Key Relationships
 
@@ -53,7 +55,7 @@ This agent covers utility operations and essential services restoration. It does
 ## Contextual References
 
 - `.specify/memory/constitution.md` — Principle I (Life Safety First), Principle III (Data-Driven Triage)
-- `specs/001-disaster-response-hub/data-model.md` — Organisation entity (`utility` category), Infrastructure entity
+- `specs/001-disaster-response-hub/data-model.md` — Organisation entity (`utility` category), Signal and CoordinationTask entities
 - `specs/001-disaster-response-hub/spec.md` — FR-001 (organisation catalogue), FR-002 (operating frameworks)
 
 ## Guidance Notes

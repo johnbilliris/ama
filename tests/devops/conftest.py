@@ -28,6 +28,12 @@ def cd_workflow_path(repo_root: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
+def eval_pr_gate_workflow_path(repo_root: Path) -> Path:
+    """Return the path to the eval PR gate workflow file."""
+    return repo_root / ".github" / "workflows" / "eval-pr-gate.yml"
+
+
+@pytest.fixture(scope="session")
 def drift_workflow_path(repo_root: Path) -> Path:
     """Return the path to the drift-detection workflow file."""
     return repo_root / ".github" / "workflows" / "drift-detection.yml"
@@ -81,6 +87,13 @@ def _normalize_yaml_keys(data: dict) -> dict:
 def cd_workflow(cd_workflow_path: Path) -> dict:
     """Parse and return the CD workflow YAML as a dict."""
     raw = yaml.safe_load(cd_workflow_path.read_text(encoding="utf-8"))
+    return _normalize_yaml_keys(raw)
+
+
+@pytest.fixture(scope="session")
+def eval_pr_gate_workflow(eval_pr_gate_workflow_path: Path) -> dict:
+    """Parse and return the eval PR gate workflow YAML as a dict."""
+    raw = yaml.safe_load(eval_pr_gate_workflow_path.read_text(encoding="utf-8"))
     return _normalize_yaml_keys(raw)
 
 

@@ -1,0 +1,26 @@
+{
+  "prepared_at": "2026-10-20T07:07:08.032731+00:00",
+  "target": {
+    "tenant": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+    "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+    "resource_group": "ama",
+    "account": "cog-dev-w3uq6w",
+    "region": "australiaeast",
+    "environment": "dev"
+  },
+  "approval": "convergence-implementation-approval.json",
+  "scope": "ARM validation and What-If only; bounded existing-parent preservation wrapper",
+  "sha256": {
+    "specs/041-llm-deployment-routing/evidence/dev-preparation/convergence-deployments.template.json": "2b261032d7699d36fec354aacffa36251bf615d4540df8a34f10535b432a302d",
+    "specs/041-llm-deployment-routing/evidence/dev-preparation/convergence-deployments.parameters.json": "56c2ce17a78efc80879eaf0be6ebf986432ebf6304a5286145e64222f2d59bc6",
+    "specs/041-llm-deployment-routing/evidence/dev-preparation/convergence-preservation-baseline.json": "3fabaaffd300ff6c676dc5142b93f6d795e0ee6b51c96437a275172cec0d48e8",
+    "specs/041-llm-deployment-routing/evidence/dev-preparation/convergence-implementation-approval.json": "15e45385694044c4dbb3ad24be6341b75d9f1d55d75cab740a8b39fb2c925290",
+    "specs/041-llm-deployment-routing/evidence/dev-preparation/deployments.bicepparam": "275538cd97bbc6c97dcc6a36fc4568f2999d59304f0791666da7bf04bcfa0e7f",
+    "infra/modules/azure-openai.bicep": "cfcafbc1b08f7ee1a0250c3bfce38d539f197a0583bd91818238a900395c1ba4",
+    "infra/modules/cognitive-services-deployment-preservation.bicep": "fe458646910713a4584f9da4899ff841eebf287ebaab58e3484eb9659199a233"
+  },
+  "resource_writes": false,
+  "inference": false,
+  "traffic_changes": false,
+  "release_approved": false
+}

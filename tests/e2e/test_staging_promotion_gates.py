@@ -14,7 +14,7 @@ This is a CONTRACT test — it loads the canonical KQL templates from
   ``infra/bicep/modules/simulation-app-insights-alerts.bicep`` so
   what-if drift between KQL and alert rules is caught at CI time.
 
-The release-gate procedure relies on this test as the static gate.
+This test validates the release-gate contract independently of deployment.
 """
 
 from __future__ import annotations
@@ -49,28 +49,34 @@ CANONICAL_IDS = [
     "SLI-Z7",  # Cycle 2 / T-AA16 / A2-02 — map-overlay drift error budget
 ]
 
+
 @pytest.fixture(scope="module")
 def sli_doc() -> dict:
     return json.loads(SLI_JSON.read_text(encoding="utf-8"))
 
+
 def test_sli_json_exists() -> None:
     assert SLI_JSON.is_file(), f"missing {SLI_JSON}"
+
 
 def test_sli_count_is_five(sli_doc: dict) -> None:
     assert len(sli_doc["slis"]) == 7, (
         "Cycle 2 / T-AA16 — exactly 7 SLIs (Z1..Z5 from ADR-036-008 + Z6/Z7 for staging promotion gates per A2-02)"
     )
 
+
 @pytest.mark.parametrize("expected_id", CANONICAL_IDS)
 def test_canonical_sli_id_present(sli_doc: dict, expected_id: str) -> None:
     ids = [s["id"] for s in sli_doc["slis"]]
     assert expected_id in ids, f"missing canonical SLI {expected_id}; got {ids}"
+
 
 def test_each_sli_has_required_fields(sli_doc: dict) -> None:
     required = {"id", "name", "window", "kql", "fr_refs"}
     for s in sli_doc["slis"]:
         missing = required - set(s.keys())
         assert not missing, f"SLI {s.get('id', '?')} missing fields {missing}"
+
 
 def test_kql_strings_reference_canonical_event_names(sli_doc: dict) -> None:
     """KQL templates must reference one of the canonical custom-event names."""
@@ -90,6 +96,7 @@ def test_kql_strings_reference_canonical_event_names(sli_doc: dict) -> None:
             f"SLI {s['id']} KQL does not reference a canonical event/source"
         )
 
+
 def test_alerts_bicep_references_each_sli() -> None:
     """The Bicep module must declare a scheduledQueryRule per SLI."""
     assert ALERTS_BICEP.is_file(), f"missing {ALERTS_BICEP}"
@@ -104,11 +111,13 @@ def test_alerts_bicep_references_each_sli() -> None:
     for name in expected_resources:
         assert name in text, f"Bicep module missing resource {name}"
 
+
 def test_thresholds_are_strict_for_life_safety_slis(sli_doc: dict) -> None:
     """SLI-Z2 (gap-free) MUST breach on ANY gap (zero-tolerance per FR-048)."""
     z2 = next(s for s in sli_doc["slis"] if s["id"] == "SLI-Z2")
     # Per ADR-036-008: 99.99% target, breach on any gap.
     assert z2["target_pct"] == pytest.approx(99.99)
+
 
 def test_promotion_gate_blocks_on_any_sli_breach(sli_doc: dict) -> None:
     """Synthetic check — a single fabricated breach blocks promotion."""
@@ -147,6 +156,7 @@ def test_promotion_gate_blocks_on_any_sli_breach(sli_doc: dict) -> None:
         assert _is_breach(s, sample), (
             f"SLI {s['id']} did not detect breach for fabricated value {sample}; check sli-kql.json thresholds"
         )
+
 
 # ────────────────────────────────────────────────────────────────────────────
 # Cycle 3 / T-AA42 — synthetic-canary refused-on-red SLI tests.
@@ -221,6 +231,7 @@ _RED_SHAPES = {
     },
 }
 
+
 def subprocess_script() -> str:
     """Subprocess wrapper that loads ``staging_gates`` via importlib."""
 
@@ -260,6 +271,7 @@ def subprocess_script() -> str:
             sys.exit(1)
         """
     ).strip()
+
 
 @pytest.mark.parametrize("shape_name", list(_RED_SHAPES.keys()))
 def test_synthetic_canary_refused_red_sli_row(shape_name: str) -> None:

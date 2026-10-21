@@ -49,6 +49,7 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_format="cap_xml",
         dedup_ttl_seconds=28800,
         enabled=False,  # bom-warnings already ingests all XML from the same FTP path
+        activation_blocker="Handled by bom-warnings FTP pipeline until dedicated CAP split is approved",
     ),
     IngestionPipelineConfig(
         pipeline_id="bom-rss",
@@ -58,6 +59,8 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_url="ftp://ftp.bom.gov.au/anon/gen/fwo/",
         endpoint_format="rss",
         dedup_ttl_seconds=28800,  # 8h
+        enabled=False,
+        activation_blocker="RSS/Atom notification path is not implemented; FTP replacement requires approved deviation evidence",  # noqa: E501
     ),
     # --- Geoscience Australia ---
     IngestionPipelineConfig(
@@ -115,6 +118,62 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_format="geojson",
         dedup_ttl_seconds=600,
         enabled=False,  # QLD QFES endpoint returns HTML (JS app), no public JSON feed
+        activation_blocker="Public QLD endpoint is HTML application content; machine-readable incident feed contract not evidenced in-repo",  # noqa: E501
+    ),
+    IngestionPipelineConfig(
+        pipeline_id="sa-cfs-fire",
+        source_class="authoritative",
+        data_source_ids=["sa-cfs"],
+        poll_interval_seconds=300,
+        endpoint_url="https://data.cfs.sa.gov.au/incidents.json",
+        endpoint_format="geojson",
+        dedup_ttl_seconds=600,
+        enabled=False,
+        activation_blocker="Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+    ),
+    IngestionPipelineConfig(
+        pipeline_id="wa-dfes-fire",
+        source_class="authoritative",
+        data_source_ids=["wa-dfes"],
+        poll_interval_seconds=300,
+        endpoint_url="https://www.dfes.wa.gov.au/data/incidents.json",
+        endpoint_format="geojson",
+        dedup_ttl_seconds=600,
+        enabled=False,
+        activation_blocker="Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+    ),
+    IngestionPipelineConfig(
+        pipeline_id="tas-tfs-fire",
+        source_class="authoritative",
+        data_source_ids=["tas-tfs"],
+        poll_interval_seconds=300,
+        endpoint_url="https://www.fire.tas.gov.au/data/incidents.json",
+        endpoint_format="geojson",
+        dedup_ttl_seconds=600,
+        enabled=False,
+        activation_blocker="Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+    ),
+    IngestionPipelineConfig(
+        pipeline_id="act-esa-fire",
+        source_class="authoritative",
+        data_source_ids=["act-esa"],
+        poll_interval_seconds=300,
+        endpoint_url="https://www.esa.act.gov.au/data/incidents.json",
+        endpoint_format="geojson",
+        dedup_ttl_seconds=600,
+        enabled=False,
+        activation_blocker="Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+    ),
+    IngestionPipelineConfig(
+        pipeline_id="nt-pfes-fire",
+        source_class="authoritative",
+        data_source_ids=["nt-pfes"],
+        poll_interval_seconds=300,
+        endpoint_url="https://www.pfes.nt.gov.au/data/incidents.json",
+        endpoint_format="geojson",
+        dedup_ttl_seconds=600,
+        enabled=False,
+        activation_blocker="Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
     ),
     IngestionPipelineConfig(
         pipeline_id="nsw-ses-flood",
@@ -124,7 +183,30 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_url="https://www.ses.nsw.gov.au/api/flood/current",
         endpoint_format="geojson",
         dedup_ttl_seconds=600,
-        enabled=False,  # NSW SES has no public JSON API (404)
+        enabled=False,
+        activation_blocker="NSW SES machine-readable flood endpoint availability and contractual access are not verified in-repo",  # noqa: E501
+    ),
+    IngestionPipelineConfig(
+        pipeline_id="vic-ses-flood",
+        source_class="authoritative",
+        data_source_ids=["vic-ses-flood"],
+        poll_interval_seconds=300,
+        endpoint_url="https://www.ses.vic.gov.au/data/flood-incidents.json",
+        endpoint_format="geojson",
+        dedup_ttl_seconds=600,
+        enabled=False,
+        activation_blocker="Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+    ),
+    IngestionPipelineConfig(
+        pipeline_id="qld-ses-flood",
+        source_class="authoritative",
+        data_source_ids=["qld-ses-flood"],
+        poll_interval_seconds=300,
+        endpoint_url="https://www.ses.qld.gov.au/data/flood-incidents.json",
+        endpoint_format="geojson",
+        dedup_ttl_seconds=600,
+        enabled=False,
+        activation_blocker="Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
     ),
     # --- Sensors ---
     IngestionPipelineConfig(
@@ -150,7 +232,7 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         source_class="sensor",
         data_source_ids=["epa-air-quality"],
         poll_interval_seconds=3600,  # published hourly; poll matches
-        endpoint_url="https://data.airquality.nsw.gov.au/api/Data/get_SiteDetails",
+        endpoint_url="https://data.airquality.nsw.gov.au/api/Data/get_Observations",
         endpoint_format="json",
         dedup_ttl_seconds=7200,  # 2h
     ),
@@ -164,6 +246,7 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_format="geotiff",
         dedup_ttl_seconds=86400,  # 24h
         enabled=False,  # Copernicus Data Space requires OAuth2 registration
+        activation_blocker="Copernicus Data Space OAuth2 registration not configured for runtime",
     ),
     IngestionPipelineConfig(
         pipeline_id="himawari-satellite",
@@ -184,6 +267,7 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_format="json",
         dedup_ttl_seconds=3600,
         enabled=False,  # Requires OAuth2 bearer token
+        activation_blocker="X API OAuth2 bearer credentials and access tier approval are required",
     ),
     IngestionPipelineConfig(
         pipeline_id="facebook-community",
@@ -194,6 +278,7 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_format="json",
         dedup_ttl_seconds=3600,
         enabled=False,  # Requires Graph API access token
+        activation_blocker="Meta Graph API token/app review approval is required",
     ),
     IngestionPipelineConfig(
         pipeline_id="reddit-australia",
@@ -204,6 +289,7 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_format="json",
         dedup_ttl_seconds=3600,
         enabled=False,  # Reddit blocks automated access (403)
+        activation_blocker="Reddit API client credentials and approved rate-limit policy are required",
     ),
     # --- Community (requires API key, disabled until configured) ---
     IngestionPipelineConfig(
@@ -215,6 +301,7 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_format="json",
         dedup_ttl_seconds=3600,
         enabled=False,  # Requires API key
+        activation_blocker="Snap Send Solve partner API key and agreement are required",
     ),
     # --- IMS (placeholder — requires org-specific endpoints) ---
     IngestionPipelineConfig(
@@ -226,6 +313,7 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_format="json",
         dedup_ttl_seconds=600,
         enabled=False,  # Placeholder — requires org-specific WebEOC instance URL
+        activation_blocker="WebEOC endpoint and credentials are tenant-specific and not yet provisioned",
     ),
     IngestionPipelineConfig(
         pipeline_id="icon-ims",
@@ -236,5 +324,6 @@ PIPELINE_CONFIGS: list[IngestionPipelineConfig] = [
         endpoint_format="json",
         dedup_ttl_seconds=600,
         enabled=False,  # Placeholder — requires org-specific ICON instance URL
+        activation_blocker="ICON endpoint and credentials are tenant-specific and not yet provisioned",
     ),
 ]

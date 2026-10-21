@@ -1,9 +1,11 @@
 from uuid import uuid4
 
 import pytest
-from app.core.tenant_context import TenantContext
+from app.core.tenant_context import TenantContext, reset_current_tenant, set_current_tenant
 from app.repositories.signal_repository import SignalRepository
 from app.services.tenant_partitioning import TenantPartitioningService
+
+pytestmark = pytest.mark.spec007_isolation
 
 
 def test_tenant_scope_differs_across_agencies() -> None:
@@ -67,3 +69,44 @@ class TestSimulationTenantIsolation:
         signal = await signal_repo.get_signal(sim_tenant, "sig-pk")
         assert signal is not None
         assert signal.get("scope") == sim_tenant
+
+    @pytest.mark.asyncio
+    async def test_request_context_rejects_caller_supplied_foreign_scope(self, signal_repo):
+        token = set_current_tenant(
+            TenantContext(
+                agency_id="ses-nsw",
+                jurisdiction_ids=("nsw",),
+                tenant_id="sim-authorized",
+            )
+        )
+        try:
+            with pytest.raises(PermissionError, match="authenticated tenant"):
+                await signal_repo.create_signal("live", {"signal_id": "sig-forged"})
+        finally:
+            reset_current_tenant(token)
+
+    @pytest.mark.asyncio
+    async def test_constructor_binding_rejects_foreign_scope(self):
+        repo = SignalRepository(tenant_id="sim-authorized")
+
+        with pytest.raises(PermissionError, match="tenant binding"):
+            await repo.list_by_tenant("sim-foreign")
+
+    @pytest.mark.asyncio
+    async def test_cosmos_point_read_propagates_service_failure(self):
+        class _Container:
+            def read_item(self, item, partition_key):  # noqa: ANN001, ANN201, ARG002
+                raise RuntimeError("cosmos unavailable")
+
+        class _Database:
+            def get_container_client(self, name):  # noqa: ANN001, ANN201, ARG002
+                return _Container()
+
+        class _Client:
+            def get_database_client(self, name):  # noqa: ANN001, ANN201, ARG002
+                return _Database()
+
+        repo = SignalRepository(cosmos_client=_Client(), tenant_id="live")
+
+        with pytest.raises(RuntimeError, match="cosmos unavailable"):
+            await repo.get_signal("live", "sig-missing", "live/nsw/source")

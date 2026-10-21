@@ -69,7 +69,7 @@ def classify(entry: dict[str, Any]) -> FilterDecision:
     raw = entry.get("mode", DEFAULT_MODE)
     if raw not in ALLOWED_MODES:
         raise ValueError(f"unknown licence mode {raw!r}; expected one of {sorted(ALLOWED_MODES)}")
-    mode: LicenceMode = raw  # type: ignore[assignment]
+    mode: LicenceMode = raw
     if mode == "excluded":
         return FilterDecision(mode=mode, chunk=False, embed=False, index=False, summary_only=False)
     if mode == "metadata-only":

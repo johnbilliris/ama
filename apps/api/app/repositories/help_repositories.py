@@ -67,8 +67,8 @@ def _cosmos_enabled() -> bool:
 
 def _container(container: str) -> Any:
     """Return the live Cosmos container client (only when configured)."""
-    from azure.cosmos import CosmosClient  # type: ignore[import-not-found]
-    from azure.identity import DefaultAzureCredential  # type: ignore[import-not-found]
+    from app.core.cosmos import create_cosmos_client as CosmosClient
+    from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]
     database = os.environ.get("COSMOS_DATABASE", "ama")
@@ -102,7 +102,7 @@ def upsert(container: str, tenant_id: str, row: dict[str, Any]) -> dict[str, Any
             c.upsert_item(body=row)
         return row
     except Exception as exc:  # noqa: BLE001
-        from azure.cosmos.exceptions import CosmosResourceNotFoundError  # type: ignore[import-not-found]
+        from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
         if isinstance(exc, CosmosResourceNotFoundError):
             return _STORE.upsert(container, tenant_id, row)
@@ -144,7 +144,7 @@ def _live_query(container: str, tenant_id: str) -> list[dict[str, Any]]:
         )
         return list(items)
     except Exception as exc:  # noqa: BLE001
-        from azure.cosmos.exceptions import CosmosResourceNotFoundError  # type: ignore[import-not-found]
+        from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
         if isinstance(exc, CosmosResourceNotFoundError):
             return []

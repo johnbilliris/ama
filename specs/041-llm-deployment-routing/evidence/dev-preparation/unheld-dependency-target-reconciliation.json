@@ -1,0 +1,34 @@
+{
+  "storage": {
+    "STORAGE_ACCOUNT_NAME": {
+      "account": "stdevw3uq6w2",
+      "network_default": "Allow",
+      "public_network": "Enabled"
+    },
+    "AMA_EVIDENCE_STORAGE_ACCOUNT_NAME": {
+      "account": "stdevw3uq6w2",
+      "network_default": "Allow",
+      "public_network": "Enabled"
+    }
+  },
+  "search": {
+    "indexes": {
+      "http_status": 200,
+      "names": []
+    },
+    "aliases": {
+      "http_status": 400,
+      "names": []
+    },
+    "configured_alias": "corpus"
+  },
+  "cosmos": {
+    "configured_databases": {
+      "COSMOS_DATABASE": "disaster-hub",
+      "AMA_EVIDENCE_COSMOS_DATABASE": "disaster-hub"
+    },
+    "actual_database_names": [
+      "disaster-hub"
+    ]
+  }
+}

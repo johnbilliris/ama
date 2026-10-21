@@ -74,9 +74,18 @@ class PyBreakerCircuitBreaker:
         try:
             import pybreaker
 
-            class _Listener(pybreaker.CircuitBreakerListener):  # type: ignore[no-untyped-call,misc]
+            class _Listener:
                 def __init__(self, owner: PyBreakerCircuitBreaker) -> None:
                     self._owner = owner
+
+                def before_call(self, cb: Any) -> None:
+                    return None
+
+                def success(self, cb: Any) -> None:
+                    return None
+
+                def failure(self, cb: Any, exc: Exception) -> None:
+                    return None
 
                 def state_change(self, cb: Any, old_state: Any, new_state: Any) -> None:
                     old_name = getattr(old_state, "name", str(old_state)).lower()
@@ -117,7 +126,7 @@ class PyBreakerCircuitBreaker:
             }
             current = str(self._impl.current_state).lower()
             return mapping.get(current, CircuitState.CLOSED)
-        return self._impl.state  # type: ignore[no-any-return]
+        return self._impl.state
 
     def can_execute(self) -> bool:
         return self.state in (CircuitState.CLOSED, CircuitState.HALF_OPEN)

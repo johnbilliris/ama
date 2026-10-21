@@ -204,6 +204,7 @@ class HitlGateExecutor:
         run_id: str,
         step_index: int,
         correlation_id: str,
+        tenant_id: str = "live",
     ) -> dict[str, Any]:
         envelope = build_approval_envelope(
             draft_alert=draft_alert,
@@ -212,6 +213,7 @@ class HitlGateExecutor:
             step_index=step_index,
             correlation_id=correlation_id,
         )
+        envelope["metadata"]["tenant_id"] = tenant_id
         request_id = envelope["request_id"]
         existing = self._existing_decision(request_id)
         if existing is not None:
@@ -224,6 +226,7 @@ class HitlGateExecutor:
             run_id,
             WorkflowRunStatus.AWAITING_APPROVAL,
             correlation_id=correlation_id,
+            tenant_id=tenant_id,
             pending_request_id=request_id,
         )
         self._publisher.publish(_APPROVAL_QUEUE, envelope)

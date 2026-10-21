@@ -400,7 +400,7 @@ def apply_precedence_tiebreak(chunks: list[Any]) -> tuple[list[Any], list[str]]:
 
     licence_priority = {"full-text": 0, "metadata-only": 1}
 
-    def sort_key(chunk: Any) -> tuple:
+    def sort_key(chunk: Any) -> tuple[str, int, str, str]:
         return (
             # Recency: descending → invert by negating the ISO string sort.
             # Use the string itself with reverse=True at sort-time.
@@ -589,7 +589,7 @@ def apply_comdisplan_activation(
                 # of the pipeline so frozen-mutation is not exercised in
                 # production paths.
                 try:
-                    chunk.precedence_rank = 1  # type: ignore[attr-defined]
+                    chunk.precedence_rank = 1
                 except AttributeError:
                     pass
                 out.append(chunk)
@@ -680,6 +680,7 @@ class AzureSearchRetrievalService:
             endpoint=self.endpoint,
             index_name=self.index_alias,
             credential=cred,
+            api_version="2024-05-01-preview",
         )
         return self.search_client
 

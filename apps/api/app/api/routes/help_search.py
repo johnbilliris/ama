@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Annotated
 
 from app.api.routes.help_deps import CallerDep
@@ -18,17 +19,21 @@ async def search(
     q: str = Query(min_length=1),
     persona: str | None = Query(default=None),
     limit: int = Query(default=20, le=100, ge=1),
-):
+) -> dict[str, object]:
     items = repos.list_articles(tenant_id=caller.tenant_id, persona=persona or caller.persona_id, limit=200)
     q_lower = q.lower()
 
-    def score(article: dict) -> int:
+    def score(article: Mapping[str, object]) -> int:
         s = 0
-        if article.get("kind") == "glossary" and q_lower in (article.get("term") or "").lower():
+        kind = article.get("kind")
+        term = article.get("term")
+        title = article.get("title")
+        summary = article.get("summary")
+        if kind == "glossary" and isinstance(term, str) and q_lower in term.lower():
             s += 100
-        if q_lower in (article.get("title") or "").lower():
+        if isinstance(title, str) and q_lower in title.lower():
             s += 50
-        if q_lower in (article.get("summary") or "").lower():
+        if isinstance(summary, str) and q_lower in summary.lower():
             s += 25
         return s
 

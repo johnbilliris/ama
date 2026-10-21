@@ -8,12 +8,12 @@ manifest cannot leak SENSITIVE content into a chat answer.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 
 ALLOWED = frozenset({"OFFICIAL"})
 
 
-def filter_by_classification(chunks: Iterable[dict]) -> list[dict]:
+def filter_by_classification(chunks: Iterable[Mapping[str, object]]) -> list[Mapping[str, object]]:
     return [c for c in chunks if (c.get("classification") or "OFFICIAL") in ALLOWED]
 
 

@@ -13,6 +13,14 @@
     "chat.useAgentsMdFile": true,
     "chat.promptFiles": true,
     "chat.subagents.allowInvocationsFromSubagents": true,
-    "python-envs.defaultEnvManager": "ms-python.python:system"
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "terminal.integrated.env.windows": {
+        "DOCKER_DEFAULT_PLATFORM": "linux/arm64"
+    },
+    "terminal.integrated.env.linux": {
+        "DOCKER_DEFAULT_PLATFORM": "linux/arm64"
+    },
+    "terminal.integrated.env.osx": {
+        "DOCKER_DEFAULT_PLATFORM": "linux/arm64"
+    }
 }
-

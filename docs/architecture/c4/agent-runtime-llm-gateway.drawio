@@ -1,4 +1,4 @@
-<mxfile host="Electron" agent="spec-001-fallback">
+<mxfile host="Electron" agent="remediation-source-updated; export=pending-drawio">
   <diagram name="BUILD-01" id="build01-fallback">
     <mxGraphModel dx="1158" dy="871" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
@@ -37,8 +37,14 @@
         <mxCell id="12" parent="9" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="Circuit Breaker" vertex="1">
           <mxGeometry height="40" width="160" x="20" y="170" as="geometry" />
         </mxCell>
-        <mxCell id="13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" value="Foundry Endpoint&#xa;(Azure AI / OpenAI)" vertex="1">
-          <mxGeometry height="70" width="170" x="860" y="225" as="geometry" />
+        <mxCell id="13" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/ai_machine_learning/Azure_OpenAI.svg;" value="Microsoft Foundry endpoint&#xa;AU deployments only (foundry-carveout.yaml)" vertex="1">
+          <mxGeometry height="64" width="64" x="900" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="14" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/ai_machine_learning/AI_Studio.svg;" value="Microsoft Foundry project&#xa;deployment registry" vertex="1">
+          <mxGeometry height="64" width="64" x="900" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="15" parent="1" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=11;verticalLabelPosition=bottom;verticalAlign=top;image=img/lib/azure2/identity/Managed_Identities.svg;" value="Managed identity&#xa;workload credential" vertex="1">
+          <mxGeometry height="64" width="64" x="640" y="430" as="geometry" />
         </mxCell>
         <mxCell id="16" edge="1" parent="1" source="2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;endFill=1;strokeColor=#FFFFFF;" target="8" value="">
           <mxGeometry relative="1" as="geometry" />

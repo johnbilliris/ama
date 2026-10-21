@@ -17,11 +17,9 @@ specs:
   - spec-009
 ---
 
-<!-- markdownlint-disable-file MD041 -->
+# C4 Model — Container View
 
 [→ Architecture index](../README.md)
-
-# C4 Model — Container View
 
 **Notation**: [C4 Model](https://c4model.com/) — Container.
 **Audience**: developers, infra, SRE, security.
@@ -40,7 +38,7 @@ C4Container
   System_Ext(aoai, "Azure OpenAI", "Private Endpoint")
   System_Ext(content_safety, "Azure AI Content Safety", "Private Endpoint")
   System_Ext(ai_search, "Azure AI Search", "Private Endpoint")
-  System_Ext(foundry_phi, "Foundry Phi (non-AU carve-out)")
+  System_Ext(foundry_phi, "Foundry carve-out endpoint (conditional non-AU)")
 
   Container_Boundary(c1, "Disaster Response Coordination Hub") {
     Container(web, "Web Dashboard", "Next.js 16.2 on App Service", "Operator UI; hosts Redoc API docs at /api-docs (FR-DOC02)")
@@ -53,10 +51,7 @@ C4Container
       Container(evacuation, "Evacuation Agent", "Python", "Phased evacuation planning")
       Container(resource, "Resource Allocation Agent", "Python", "Tracks + allocates personnel/vehicles")
       Container(comms, "Communication Agent", "Python", "Multilingual public alerts (AWS)")
-      Container(dep, "Dependency Notifier", "Python", "Cross-agency dependency-graph notifier")
     }
-
-    Container(eval_runner, "Eval Runner", "Python on Container Apps", "Runs spec-030 eval harness + Phi shadow path (gated by carve-out + classification)")
 
     ContainerDb(cosmos, "Cosmos DB", "Australia East, CMK, PE-only", "Audit segments, recommendations, jurisdiction policies, killswitches, signals")
     ContainerDb(storage, "Storage", "Australia East, CMK, PE-only", "Blobs + queues for evidence + workbooks JSON")
@@ -80,7 +75,6 @@ C4Container
   Rel(evacuation, sb, "Subscribe + publish")
   Rel(resource, sb, "Subscribe + publish")
   Rel(comms, sb, "Subscribe + publish")
-  Rel(dep, sb, "Subscribe + publish")
 
   Rel(monitoring, aoai, "LLM calls (Private Endpoint)")
   Rel(risk, aoai, "LLM calls")
@@ -88,7 +82,7 @@ C4Container
   Rel(comms, content_safety, "Output safety check")
 
   Rel(api, ai_search, "RAG retrieval for grounded prompts (FR-AI01)")
-  Rel(eval_runner, foundry_phi, "Shadow LLM calls via classification gate (ADR-033)")
+  Rel(api, foundry_phi, "Conditional model path when carve-out registry permits")
 
   Rel(web, public, "Public alerts dashboard (read-only)")
   Rel(comms, public, "SMS/push/social/email")
@@ -127,8 +121,8 @@ Each environment (dev / staging / production) is a single Azure resource group i
 - A spoke VNet per app tier (apps/api, apps/agents, apps/web, apps/ingestion, apps/eval-runner).
 - Container Apps environment + workload identity per tier.
 - Cosmos DB account + Storage account + Key Vault Premium + Log Analytics workspace + App Insights.
-- Optional: Defender for Cloud + Sentinel (T407, T408 — production only).
-- Optional: Chaos Studio targets (T806 — staging only).
+- Optional: Eval Runner and other evaluation jobs are operational tooling, not one of the five business agents shown in this C4 container view.
+- Optional: Defender for Cloud, Sentinel, and Chaos Studio remain environment-specific governance/tooling overlays.
 
 ## Component lifecycles
 

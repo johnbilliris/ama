@@ -34,8 +34,8 @@ def test_allow_list_canonical_contents() -> None:
         {
             "/api/simulations/{sim_id}/inject-telemetry",
             "/api/simulations/{sim_id}/abort",
-            "/api/simulations/{sim_id}/pause",
-            "/api/simulations/{sim_id}/resume",
+            "/api/simulations/{sim_id:uuid}/pause",
+            "/api/simulations/{sim_id:uuid}/resume",
             "/api/simulations/{sim_id}/recent-signals",
             "/api/simulations/{sim_id}/outcome",
         }

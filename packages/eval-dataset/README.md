@@ -21,11 +21,17 @@ Authoring + tooling for the AMA disaster-response evaluation dataset.
 python -m ama_eval_dataset generate \
   --seed 20251121 \
   --size 5000 \
-  --output packages/eval-dataset/data/dataset-disaster-core-1.0.0/
+  --output packages/eval-dataset/data/dataset-disaster-core-1.1.3/
 ```
 
 The generator is deterministic: the same `--seed` always produces the same `cases.jsonl`
-and the same `contentHash` in `manifest.json`. The default v1.0.0 seed is `20251121`.
+and the same `contentHash` in `manifest.json`. The v1.1.3 seed is `20251121`.
+Expected actions come from each authored prompt template, hazard requirements avoid
+irrelevant emergency-call demands, and three scenario-specific cases distinguish
+structural danger, marine weather, and environmental spills. Retrieval snippets are
+labeled by relevance. Injection refusals are sampled only from English-Australia
+prompts. Its PR-fast prefix contains Australian-English cases; multilingual cases
+remain in the remainder for separate locale-aware evaluation.
 
 ## Changing the seed
 
@@ -43,7 +49,7 @@ semver and supersede.
 
 ```bash
 python -m ama_eval_dataset validate \
-  --input packages/eval-dataset/data/dataset-disaster-core-1.0.0/cases.jsonl
+  --input packages/eval-dataset/data/dataset-disaster-core-1.1.3/cases.jsonl
 ```
 
 The validator round-trips every line through `EvaluationCase`, enforcing:

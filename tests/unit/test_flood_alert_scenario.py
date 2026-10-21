@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from common.handoffs import AgentHandoffEvent
+from communication.approval import ApprovalWorkflow
 from communication.config import CommunicationConfig
 from communication.delivery import MultiChannelDeliveryService
 from communication.models import (
@@ -17,6 +18,7 @@ from communication.models import (
     UrgencyLevel,
 )
 from communication.pipeline import CommunicationProcessingPipeline
+from communication.repository import CommunicationAlertRepository
 from communication.segmentation import AudienceSegmenter
 
 
@@ -32,6 +34,9 @@ class TestFloodAlertScenario:
             scope_key="INC-FLOOD-2025",
             confidence=0.85,
             payload={
+                "recommendationId": "rec-flood",
+                "assessmentId": "assess-flood",
+                "explanation": "Flood impact requires public warning",
                 "hazard_type": "flood",
                 "severity": "moderate",
                 "urgency": "advisory",
@@ -42,6 +47,39 @@ class TestFloodAlertScenario:
                     {"level": 3, "boundary": {}, "population_estimate": 12000},
                 ],
             },
+        )
+
+    def _pipeline(self) -> CommunicationProcessingPipeline:
+        repository = CommunicationAlertRepository()
+
+        class _Store:
+            def __init__(self, record):
+                self.record = record
+
+            def read_item(self, item, partition_key):
+                return self.record
+
+        class _Publisher:
+            async def publish(self, payload):
+                return None
+
+        approval = ApprovalWorkflow(service_bus_client=_Publisher(), alert_repository=repository)
+        return CommunicationProcessingPipeline(
+            incident_store=_Store({"id": "INC-FLOOD-2025", "tenant_id": "live", "commander_chain": ["ic-1"]}),
+            recommendation_store=_Store({"id": "rec-flood", "incident_id": "INC-FLOOD-2025", "tenant_id": "live"}),
+            assessment_store=_Store(
+                {
+                    "id": "assess-flood",
+                    "incident_id": "INC-FLOOD-2025",
+                    "tenant_id": "live",
+                    "hazard_type": "flood",
+                    "severity": "moderate",
+                    "location": "Lismore, NSW",
+                    "zones": [{"id": "zone-3", "level": 3, "boundary": {}, "population_estimate": 12000}],
+                }
+            ),
+            alert_repository=repository,
+            approval_workflow=approval,
         )
 
     @patch("communication.translator.MultilingualTranslator._generate_with_fallback")
@@ -58,7 +96,7 @@ class TestFloodAlertScenario:
             "content_safety_result": "passed",
         }
 
-        pipeline = CommunicationProcessingPipeline()
+        pipeline = self._pipeline()
         alert = pipeline.process_handoff(self._build_flood_handoff())
 
         assert alert is not None
@@ -85,12 +123,16 @@ class TestFloodAlertScenario:
         sms_mock = MagicMock()
         push_mock = MagicMock()
 
-        service = MultiChannelDeliveryService(config=config, sms_client=sms_mock, push_client=push_mock)
-
         alert = PublicAlert(
             alert_id="ca-INC-FLOOD-2025-v1",
             incident_id="INC-FLOOD-2025",
             version=1,
+            tenant_id="live",
+            status=AlertStatus.approved,
+            approval_mode="human_approved",
+            approved_by_user_id="commander-1",
+            approved_by_role="ic",
+            approved_at="2026-09-17T00:00:00Z",
             content_blocks={
                 "en-AU": ContentBlock(
                     language_code="en-AU",
@@ -100,6 +142,12 @@ class TestFloodAlertScenario:
                 ),
             },
             confidence=0.85,
+        )
+        service = MultiChannelDeliveryService(
+            config=config,
+            sms_client=sms_mock,
+            push_client=push_mock,
+            approval_resolver=lambda _tenant_id, _alert_id, _version: alert,
         )
 
         segments = [
@@ -126,12 +174,16 @@ class TestFloodAlertScenario:
         sms_mock = MagicMock()
         push_mock = MagicMock()
 
-        service = MultiChannelDeliveryService(config=config, sms_client=sms_mock, push_client=push_mock)
-
         alert = PublicAlert(
             alert_id="ca-INC-FLOOD-2025-v1",
             incident_id="INC-FLOOD-2025",
             version=1,
+            tenant_id="live",
+            status=AlertStatus.approved,
+            approval_mode="human_approved",
+            approved_by_user_id="commander-1",
+            approved_by_role="ic",
+            approved_at="2026-09-17T00:00:00Z",
             content_blocks={
                 "en-AU": ContentBlock(
                     language_code="en-AU",
@@ -141,6 +193,12 @@ class TestFloodAlertScenario:
                 ),
             },
             confidence=0.85,
+        )
+        service = MultiChannelDeliveryService(
+            config=config,
+            sms_client=sms_mock,
+            push_client=push_mock,
+            approval_resolver=lambda _tenant_id, _alert_id, _version: alert,
         )
 
         segments = [
@@ -158,6 +216,8 @@ class TestFloodAlertScenario:
         assert len(records) >= 1
         assert records[0].delivery_status in (
             DeliveryStatus.delivered,
+            DeliveryStatus.accepted,
             DeliveryStatus.failed,
+            DeliveryStatus.unconfigured,
             DeliveryStatus.retrying,
         )

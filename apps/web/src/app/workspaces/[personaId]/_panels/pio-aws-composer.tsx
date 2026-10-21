@@ -52,6 +52,7 @@ export function PioAwsComposer(props: PioAwsComposerProps): React.ReactElement {
   const [drafting, setDrafting] = React.useState(false);
   const [a11yResult, setA11yResult] = React.useState<string | null>(null);
   const [err, setErr] = React.useState<string | null>(null);
+  const approvalEnabled = Boolean(onApprovalRequest) && variants.length > 0;
 
   const draft = async () => {
     setDrafting(true);
@@ -94,13 +95,13 @@ export function PioAwsComposer(props: PioAwsComposerProps): React.ReactElement {
         };
       };
       const result = await mod.default.run(document.body, {
-        runOnly: ["wcag2a", "wcag2aa"],
+        runOnly: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"],
       });
       const issues = result.violations.length;
       setA11yResult(
         issues === 0
-          ? "WCAG 2.1 AA: 0 violations"
-          : `WCAG 2.1 AA: ${issues} violations — ${result.violations
+          ? "WCAG 2.2 AA in-page scan: 0 violations (not a conformance certification)"
+          : `WCAG 2.2 AA in-page scan: ${issues} violations (not a conformance certification) — ${result.violations
               .map((v: { id: string }) => v.id)
               .join(", ")}`,
       );
@@ -206,13 +207,19 @@ export function PioAwsComposer(props: PioAwsComposerProps): React.ReactElement {
         </button>
         <button
           type="button"
-          disabled={variants.length === 0}
+          disabled={!approvalEnabled}
           onClick={requestApproval}
           className="rounded-md bg-emerald-700 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
         >
           Request IC approval
         </button>
       </div>
+
+      {!onApprovalRequest ? (
+        <p className="mt-2 text-xs text-amber-700" role="status">
+          Approval callback is not configured for this workspace state.
+        </p>
+      ) : null}
 
       {a11yResult ? (
         <p className="mt-2 text-xs text-slate-700" role="status">

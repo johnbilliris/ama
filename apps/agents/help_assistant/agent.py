@@ -44,7 +44,7 @@ class HelpChatStreamEvent:
     """SSE event payload emitted by :func:`run_chat_turn`."""
 
     kind: str  # 'meta' | 'delta' | 'citation' | 'done' | 'refusal'
-    payload: dict
+    payload: dict[str, object]
 
 
 async def run_chat_turn(
@@ -62,10 +62,10 @@ async def run_chat_turn(
 async def run_chat_turn_offline(
     input: HelpChatTurnInput,
     *,
-    fake_chunks: list[dict] | None = None,
+    fake_chunks: list[dict[str, object]] | None = None,
     fake_answer: str = "",
     fake_refusal: RefusalReason | None = None,
-):
+) -> AsyncIterator[HelpChatStreamEvent]:
     """Deterministic offline variant for contract + integration tests."""
     redaction_occurred = "@" in input.user_input or any(
         ch.isdigit() and len(input.user_input) > 9 for ch in input.user_input
@@ -88,7 +88,10 @@ async def run_chat_turn_offline(
         for delta in fake_answer.split():
             yield HelpChatStreamEvent(kind="delta", payload={"text": delta + " "})
         for chunk in fake_chunks:
-            citation_ids.append(chunk["citation_id"])
+            citation_id = chunk.get("citation_id")
+            if not isinstance(citation_id, str):
+                raise ValueError("Citation chunks must include a string citation_id")
+            citation_ids.append(citation_id)
             yield HelpChatStreamEvent(kind="citation", payload=chunk)
         refusal_reason: RefusalReason | None = None
     else:
@@ -106,7 +109,7 @@ async def run_chat_turn_offline(
         turn_index=input.turn_index,
         user_id=input.user_id,
         persona_id=input.persona_id,
-        persona_source=input.persona_source,  # type: ignore[arg-type]
+        persona_source=input.persona_source,
         jurisdiction_codes=input.jurisdiction_codes,
         snapshot_id=input.snapshot_id,
         user_input_redacted=user_input_redacted,
@@ -314,7 +317,7 @@ async def run_chat_turn_cosmos_grounded(
     list_articles: Callable[..., list[dict[str, Any]]],
     top_k: int = 3,
     min_score: float = 1.5,
-):
+) -> AsyncIterator[HelpChatStreamEvent]:
     """Retrieve top-K matching articles from Cosmos and stream a grounded answer.
 
     No LLM, no Foundry, no AI Search. The 45-article corpus is small enough
@@ -414,7 +417,7 @@ async def run_chat_turn_cosmos_grounded(
         turn_index=input.turn_index,
         user_id=input.user_id,
         persona_id=input.persona_id,
-        persona_source=input.persona_source,  # type: ignore[arg-type]
+        persona_source=input.persona_source,
         jurisdiction_codes=input.jurisdiction_codes,
         snapshot_id=input.snapshot_id,
         user_input_redacted=user_input_redacted,

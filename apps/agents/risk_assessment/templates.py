@@ -6,10 +6,12 @@ placeholders and are pre-approved (no runtime content safety check needed).
 
 from __future__ import annotations
 
+from risk_assessment.correlation import RiskSignal
+
 
 def generate_assessment_summary(
     assessment_type: str,
-    signals: list[dict],
+    signals: list[RiskSignal],
     severity: str,
     confidence: float,
     contradiction_detected: bool = False,
@@ -71,7 +73,7 @@ def generate_assessment_summary(
 
 def generate_recommendation_explanation(
     rec_type: str,
-    signals: list[dict],
+    signals: list[RiskSignal],
     assessment_summary: str,
 ) -> str:
     """Generate a template-based recommendation explanation.

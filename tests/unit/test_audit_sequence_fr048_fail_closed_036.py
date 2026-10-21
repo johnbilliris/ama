@@ -19,17 +19,16 @@ benefits without per-route boilerplate.
 
 from __future__ import annotations
 
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
-from apps.api.app.middleware.error_handler import add_error_handler_middleware
-from apps.api.app.repositories.simulation_sequence_repository import (
+from app.middleware.error_handler import add_error_handler_middleware
+from app.repositories.simulation_sequence_repository import (
     SequenceAllocationExhausted,
 )
-from apps.api.app.services.simulation.audit_writer import (
+from app.services.simulation.audit_writer import (
     get_audit_dlq_buffer,
     reset_audit_writer_for_tests,
 )
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 
 def _build_app(handler_path: str = "/test/exhaust") -> FastAPI:
@@ -70,10 +69,10 @@ def test_sequence_allocator_exhausted_returns_problem_json_body() -> None:
 def test_dlq_buffer_holds_entry_after_exhaustion() -> None:
     """When the writer raises, the DLQ entry from T-N03 is observable."""
 
-    from apps.api.app.repositories.simulation_sequence_repository import (
+    from app.repositories.simulation_sequence_repository import (
         SimulationSequenceRepository,
     )
-    from apps.api.app.services.simulation.audit_writer import AuditWriter
+    from app.services.simulation.audit_writer import AuditWriter
 
     reset_audit_writer_for_tests()
     repo = SimulationSequenceRepository()

@@ -17,6 +17,8 @@ Design notes:
 from __future__ import annotations
 
 import logging
+import os
+from threading import Lock
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -41,6 +43,44 @@ except ImportError:  # pragma: no cover
 
 _SERVICE_NAME = "evacuation-agent"
 _SERVICE_VERSION = "0.1.0"
+_TELEMETRY_CONFIGURED = False
+_TELEMETRY_CONFIGURATION_LOCK = Lock()
+
+
+def configure_telemetry() -> bool:
+    """Configure authenticated Azure Monitor export once when available."""
+    global _TELEMETRY_CONFIGURED
+    with _TELEMETRY_CONFIGURATION_LOCK:
+        if _TELEMETRY_CONFIGURED:
+            return True
+        connection_string = os.environ.get(
+            "APPLICATIONINSIGHTS_CONNECTION_STRING",
+            "",
+        )
+        if not connection_string:
+            return False
+        try:
+            from azure.identity import DefaultAzureCredential
+            from azure.monitor.opentelemetry import configure_azure_monitor
+
+            client_id = os.environ.get("AZURE_CLIENT_ID")
+            credential = (
+                DefaultAzureCredential(managed_identity_client_id=client_id) if client_id else DefaultAzureCredential()
+            )
+            configure_azure_monitor(
+                connection_string=connection_string,
+                credential=credential,
+                resource_attributes={
+                    "service.name": _SERVICE_NAME,
+                    "service.version": _SERVICE_VERSION,
+                },
+            )
+        except Exception:
+            logger.exception("Evacuation telemetry exporter configuration failed")
+            return False
+        _TELEMETRY_CONFIGURED = True
+        return True
+
 
 if _HAS_OTEL:
     tracer = trace.get_tracer(_SERVICE_NAME, _SERVICE_VERSION)
@@ -78,6 +118,7 @@ class _GaugeTracker:
     def __init__(self, counter: Any) -> None:
         self._counter = counter
         self._values: dict[str, float] = {}  # keyed by sorted-attributes string
+        self._lock = Lock()
 
     # noinspection PyMethodMayBeStatic
     @staticmethod
@@ -88,14 +129,16 @@ class _GaugeTracker:
 
     def set(self, value: float, attributes: dict[str, str] | None = None) -> None:
         key = self._attr_key(attributes)
-        prev = self._values.get(key, 0.0)
-        delta = value - prev
-        self._values[key] = value
+        with self._lock:
+            prev = self._values.get(key, 0.0)
+            delta = value - prev
+            self._values[key] = value
         self._counter.add(delta, attributes=attributes)
 
     def add(self, delta: float, attributes: dict[str, str] | None = None) -> None:
         key = self._attr_key(attributes)
-        self._values[key] = self._values.get(key, 0.0) + delta
+        with self._lock:
+            self._values[key] = self._values.get(key, 0.0) + delta
         self._counter.add(delta, attributes=attributes)
 
 
@@ -180,6 +223,10 @@ sla_breach_count = _counter(
 replan_sla_breach_count = _counter(
     "evacuation.replan_sla_breach_count",
     "Replans exceeding 15-second SLA",
+)
+handoff_acknowledgement_latency = _histogram(
+    "evacuation.handoff_acknowledgement_latency",
+    "Time from broker receive to validated handoff acknowledgement",
 )
 
 # --- Safety ---------------------------------------------------------------
@@ -326,21 +373,33 @@ def _current_span() -> Any:
     return span
 
 
+def _emit_event(name: str, attributes: dict[str, Any]) -> None:
+    span = _current_span()
+    if span is not None:
+        span.add_event(name, attributes=attributes)
+        return
+    if tracer is None:
+        return
+    with tracer.start_as_current_span(
+        f"evacuation.event.{name}",
+        attributes={"event.name": name},
+    ) as event_span:
+        event_span.add_event(name, attributes=attributes)
+
+
 def emit_handoff_received(
     handoff_id: str,
     incident_id: str,
     tenant_id: str,
 ) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "HandoffReceived",
-            attributes={
-                "handoff_id": handoff_id,
-                "incident_id": incident_id,
-                "tenant_id": tenant_id,
-            },
-        )
+    _emit_event(
+        "HandoffReceived",
+        {
+            "handoff_id": handoff_id,
+            "incident_id": incident_id,
+            "tenant_id": tenant_id,
+        },
+    )
 
 
 def emit_plan_generated(
@@ -350,18 +409,16 @@ def emit_plan_generated(
     routes_count: int,
     generation_method: str,
 ) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "PlanGenerated",
-            attributes={
-                "plan_id": plan_id,
-                "version": version,
-                "confidence": confidence,
-                "routes_count": routes_count,
-                "generation_method": generation_method,
-            },
-        )
+    _emit_event(
+        "PlanGenerated",
+        {
+            "plan_id": plan_id,
+            "version": version,
+            "confidence": confidence,
+            "routes_count": routes_count,
+            "generation_method": generation_method,
+        },
+    )
 
 
 def emit_plan_updated(
@@ -370,17 +427,15 @@ def emit_plan_updated(
     triggers: list[str],
     change_summary: str,
 ) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "PlanUpdated",
-            attributes={
-                "plan_id": plan_id,
-                "version": version,
-                "triggers": str(triggers),
-                "change_summary": change_summary or "",
-            },
-        )
+    _emit_event(
+        "PlanUpdated",
+        {
+            "plan_id": plan_id,
+            "version": version,
+            "triggers": str(triggers),
+            "change_summary": change_summary or "",
+        },
+    )
 
 
 def emit_shelter_in_place_recommended(
@@ -389,17 +444,15 @@ def emit_shelter_in_place_recommended(
     population: int,
     hazard_type: str,
 ) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "ShelterInPlaceRecommended",
-            attributes={
-                "incident_id": incident_id,
-                "zone": zone,
-                "population": population,
-                "hazard_type": hazard_type,
-            },
-        )
+    _emit_event(
+        "ShelterInPlaceRecommended",
+        {
+            "incident_id": incident_id,
+            "zone": zone,
+            "population": population,
+            "hazard_type": hazard_type,
+        },
+    )
 
 
 def emit_shelter_to_evacuation_recovery(
@@ -407,16 +460,14 @@ def emit_shelter_to_evacuation_recovery(
     zone: str,
     new_route_id: str,
 ) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "ShelterToEvacuationRecovery",
-            attributes={
-                "plan_id": plan_id,
-                "zone": zone,
-                "new_route_id": new_route_id,
-            },
-        )
+    _emit_event(
+        "ShelterToEvacuationRecovery",
+        {
+            "plan_id": plan_id,
+            "zone": zone,
+            "new_route_id": new_route_id,
+        },
+    )
 
 
 def emit_emergency_escalation(
@@ -424,16 +475,14 @@ def emit_emergency_escalation(
     zone: str,
     population: int,
 ) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "EmergencyEscalation",
-            attributes={
-                "incident_id": incident_id,
-                "zone": zone,
-                "population": population,
-            },
-        )
+    _emit_event(
+        "EmergencyEscalation",
+        {
+            "incident_id": incident_id,
+            "zone": zone,
+            "population": population,
+        },
+    )
 
 
 def emit_override_applied(
@@ -441,30 +490,27 @@ def emit_override_applied(
     action: str,
     user_id: str,
     role: str,
+    incident_id: str = "",
+    tenant_id: str = "",
 ) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "OverrideApplied",
-            attributes={
-                "plan_id": plan_id,
-                "action": action,
-                "user_id": user_id,
-                "role": role,
-            },
-        )
+    _emit_event(
+        "OverrideApplied",
+        {
+            "plan_id": plan_id,
+            "action": action,
+            "user_id": user_id,
+            "role": role,
+            "incident_id": incident_id,
+            "tenant_id": tenant_id,
+        },
+    )
 
 
 def emit_degradation_event(component: str, tier: int) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "DegradationEvent",
-            attributes={
-                "component": component,
-                "tier": tier,
-            },
-        )
+    _emit_event(
+        "DegradationEvent",
+        {"component": component, "tier": tier},
+    )
 
 
 def emit_sla_breach(
@@ -472,28 +518,21 @@ def emit_sla_breach(
     actual_duration_ms: float,
     sla_type: str,
 ) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "SLABreach",
-            attributes={
-                "handoff_id": handoff_id,
-                "actual_duration_ms": actual_duration_ms,
-                "sla_type": sla_type,
-            },
-        )
+    _emit_event(
+        "SLABreach",
+        {
+            "handoff_id": handoff_id,
+            "actual_duration_ms": actual_duration_ms,
+            "sla_type": sla_type,
+        },
+    )
 
 
 def emit_version_conflict(incident_id: str, retry_count: int) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "VersionConflict",
-            attributes={
-                "incident_id": incident_id,
-                "retry_count": retry_count,
-            },
-        )
+    _emit_event(
+        "VersionConflict",
+        {"incident_id": incident_id, "retry_count": retry_count},
+    )
 
 
 def emit_route_conflict(
@@ -501,16 +540,14 @@ def emit_route_conflict(
     route_id: str,
     utilisation_pct: float,
 ) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "RouteConflict",
-            attributes={
-                "plan_id": plan_id,
-                "route_id": route_id,
-                "utilisation_pct": utilisation_pct,
-            },
-        )
+    _emit_event(
+        "RouteConflict",
+        {
+            "plan_id": plan_id,
+            "route_id": route_id,
+            "utilisation_pct": utilisation_pct,
+        },
+    )
 
 
 def emit_time_deficit_detected(
@@ -518,16 +555,14 @@ def emit_time_deficit_detected(
     zone: str,
     deficit_minutes: float,
 ) -> None:
-    span = _current_span()
-    if span:
-        span.add_event(
-            "TimeDeficitDetected",
-            attributes={
-                "plan_id": plan_id,
-                "zone": zone,
-                "deficit_minutes": deficit_minutes,
-            },
-        )
+    _emit_event(
+        "TimeDeficitDetected",
+        {
+            "plan_id": plan_id,
+            "zone": zone,
+            "deficit_minutes": deficit_minutes,
+        },
+    )
 
 
 # ===================================================================

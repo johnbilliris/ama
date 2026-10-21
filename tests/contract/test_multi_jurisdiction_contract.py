@@ -12,8 +12,10 @@ from app.main import create_app
 from fastapi.testclient import TestClient
 
 
-@pytest.fixture(scope="module")
-def client():
+@pytest.fixture
+def client(monkeypatch):
+    monkeypatch.setenv("AMA_ENVIRONMENT", "dev")
+    monkeypatch.setenv("AMA_ALLOW_ANONYMOUS_DEV_ACCESS", "1")
     return TestClient(create_app())
 
 

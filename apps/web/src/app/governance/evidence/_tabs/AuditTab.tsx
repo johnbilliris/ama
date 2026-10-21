@@ -1,41 +1,98 @@
-/**
- * Spec-038 Audit Trace tab — live fetch (T-AMD-15).
- * Fetches from GET /api/v1/evidence/audit/{value_id} on mount.
- */
 "use client";
-import { useEffect, useState } from "react";
 
-const DEFAULT_VALUE_ID = "demo";
+import type { AuditTrace } from "@ama/domain";
+import { useCallback, useEffect, useState } from "react";
+import { EvidenceApiError, getAuditTrace } from "../../../../lib/api/evidence";
 
-export default function AuditTab() {
-  const [data, setData] = useState<Record<string, unknown> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+interface AuditTabProps {
+  initialValueId?: string;
+}
+
+export default function AuditTab({ initialValueId = "" }: AuditTabProps) {
+  const [valueId, setValueId] = useState(initialValueId || "demo");
+  const [trace, setTrace] = useState<AuditTrace | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/v1/evidence/audit/${DEFAULT_VALUE_ID}`)
-      .then((r) => {
-        if (r.status === 404) { setError("No audit entries for this value"); return null; }
-        if (!r.ok) { setError(`HTTP ${r.status}`); return null; }
-        return r.json();
-      })
-      .then((d) => d && setData(d))
-      .catch((e) => setError(String(e)));
-  }, []);
+    if (initialValueId) setValueId(initialValueId);
+  }, [initialValueId]);
+
+  const load = useCallback(
+    (signal?: AbortSignal) => {
+      const requested = valueId.trim();
+      if (!requested) {
+        setTrace(null);
+        setError("");
+        return;
+      }
+      setLoading(true);
+      setError("");
+      void getAuditTrace(requested, signal)
+        .then(setTrace)
+        .catch((reason: unknown) => {
+          if ((reason as Error).name === "AbortError") return;
+          if (reason instanceof EvidenceApiError && reason.status === 404) {
+            setTrace(null);
+            setError("No audit entries exist for this value.");
+            return;
+          }
+          setError(String(reason));
+        })
+        .finally(() => setLoading(false));
+    },
+    [valueId],
+  );
+
+  useEffect(() => {
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
   return (
     <div data-testid="evidence-audit-tab">
-      {error && <p role="alert" className="text-gray-500 text-sm">{error}</p>}
-      {!data && !error && <p>Loading Audit Trace…</p>}
-      {data && (
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          load();
+        }}
+      >
+        <label>
+          Evidence value ID{" "}
+          <input
+            value={valueId}
+            onChange={(event) => setValueId(event.target.value)}
+            required
+          />
+        </label>
+        <button type="submit" disabled={loading}>
+          {loading ? "Loading…" : "Load trace"}
+        </button>
+      </form>
+      {error ? <p role="alert">{error}</p> : null}
+      {trace ? (
         <div>
-          {!(data.chain_complete as boolean) && (
-            <span className="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800" role="status">
-              reduced-fidelity
-            </span>
-          )}
-          <pre className="whitespace-pre-wrap text-sm mt-2">{JSON.stringify(data, null, 2)}</pre>
+          <p>
+            Chain: {trace.chain_complete ? "complete" : "incomplete"} · Source:{" "}
+            {trace.served_from_cold_archive ? "cold archive" : "hot store"}
+          </p>
+          {!trace.chain_complete ? (
+            <p role="status">
+              reduced-fidelity · Missing: {(trace.missing_references ?? []).join(", ")}
+            </p>
+          ) : null}
+          <ol aria-label="Audit timeline">
+            {trace.entries.map((entry) => (
+              <li key={entry.id}>
+                <strong>{entry.kind}</strong> by {entry.actor} at{" "}
+                <time dateTime={entry.occurred_at}>{entry.occurred_at}</time>
+                {" "}({entry.storage_source ?? "hot"})
+              </li>
+            ))}
+          </ol>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -293,10 +293,14 @@ SOURCE_ROOTS: list[tuple[str, str, str, str, list[str], str, str]] = [
 
 # Files we explicitly skip (control / build artefacts).
 SKIP_NAMES = {
-    ".gitkeep", "__init__.py", "_fixture_marker.py",
+    ".gitkeep",
+    "__init__.py",
+    "_fixture_marker.py",
     # Phase 6 generator helpers (kept out of the generator-entry catalogue
     # so the manifest enumerates the 14 actual generators T110-T123 only).
-    "_seed_contract.py", "_generator_base.py", "_xlarge_stream.py",
+    "_seed_contract.py",
+    "_generator_base.py",
+    "_xlarge_stream.py",
 }
 SKIP_SUBSTR = ("/__pycache__/",)
 
@@ -692,32 +696,77 @@ def discover_entries(repo_root: Path) -> list[dict[str, Any]]:
 # manifest overrides so every persona resolves to ≥1 entry (FR-060, SC-001).
 PERSONA_ROSTERS: dict[str, list[str]] = {
     "operational": [
-        "executive-leader", "field-coordinator", "incident-commander",
-        "logistics-officer", "observer-auditor", "operations-officer",
-        "planning-officer", "public-information-officer", "resilience-planner",
+        "executive-leader",
+        "field-coordinator",
+        "incident-commander",
+        "logistics-officer",
+        "observer-auditor",
+        "operations-officer",
+        "planning-officer",
+        "public-information-officer",
+        "resilience-planner",
         "risk-manager",
     ],
     "fire": [
-        "act-fr", "act-rfs", "bushfires-nt", "cfa-vic", "dfes-wa",
-        "frnsw", "frv", "nsw-rfs", "ntfrs", "qfd", "sacfs", "samfs", "tfs",
+        "act-fr",
+        "act-rfs",
+        "bushfires-nt",
+        "cfa-vic",
+        "dfes-wa",
+        "frnsw",
+        "frv",
+        "nsw-rfs",
+        "ntfrs",
+        "qfd",
+        "sacfs",
+        "samfs",
+        "tfs",
     ],
     "police": [
-        "act-policing", "afp-act", "afp-commonwealth", "nswpf", "ntpf",
-        "qps", "sapol", "taspol", "vicpol", "wapol",
+        "act-policing",
+        "afp-act",
+        "afp-commonwealth",
+        "nswpf",
+        "ntpf",
+        "qps",
+        "sapol",
+        "taspol",
+        "vicpol",
+        "wapol",
     ],
     "ambulance": [
-        "act-ambulance", "at", "av", "nsw-ambulance", "qas",
-        "rfds", "saas", "sja-national", "sja-nt", "sja-wa",
+        "act-ambulance",
+        "at",
+        "av",
+        "nsw-ambulance",
+        "qas",
+        "rfds",
+        "saas",
+        "sja-national",
+        "sja-nt",
+        "sja-wa",
     ],
     "ses": [
-        "act-esa", "ntes", "ses-act", "ses-nsw", "ses-qld", "ses-sa",
-        "ses-tas", "ses-vic",
+        "act-esa",
+        "ntes",
+        "ses-act",
+        "ses-nsw",
+        "ses-qld",
+        "ses-sa",
+        "ses-tas",
+        "ses-vic",
     ],
     "marine-aviation": ["abf", "asa", "mrnsw", "surf-lifesaving"],
     "commonwealth": ["adf", "arc", "bom-national", "ga-national", "nema"],
     "cross-sector": [
-        "community-ngos", "health", "local-government", "state-government",
-        "territory-government", "transport", "utility", "volunteer",
+        "community-ngos",
+        "health",
+        "local-government",
+        "state-government",
+        "territory-government",
+        "transport",
+        "utility",
+        "volunteer",
     ],
 }
 
@@ -728,8 +777,7 @@ PERSONA_ROSTERS: dict[str, list[str]] = {
 DEMO_SCENARIO_OVERRIDES: dict[str, tuple[str, list[str]]] = {
     "fixtures/sim_replays/demo_operational_v1.ndjson": (
         "operational",
-        ["incident-commander", "operations-officer", "planning-officer",
-         "logistics-officer", "executive-leader"],
+        ["incident-commander", "operations-officer", "planning-officer", "logistics-officer", "executive-leader"],
     ),
     "fixtures/sim_replays/demo_fire_v1.ndjson": (
         "fire",

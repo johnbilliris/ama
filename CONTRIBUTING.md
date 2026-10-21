@@ -40,7 +40,7 @@ Step 7 is iterative; each milestone passes through `pre-commit` + the canonical 
 ## Local quality gates (mirror CI)
 
 ```pwsh
-pip install -e ".[dev]"
+python .devcontainer/install-python-dependencies.py --python python --mode all
 pnpm -w install
 pre-commit install
 pre-commit run --all-files       # ruff, mypy, import-linter, gitleaks, bicep-lint
@@ -50,12 +50,17 @@ mypy --strict apps packages
 python -m pytest tests/unit tests/integration tests/contract -q --tb=line --cov
 ```
 
+The installer disables user-level pip and uv configuration, clears extra indexes, and uses
+`https://packagefeedproxy.microsoft.io/pypi/simple` as the sole external package index.
+Repository-local editable packages remain supported. Direct machine-global `pip` commands are
+not a supported setup path. Run `python scripts/verify_python_package_sources.py` to check source policy locally.
+
 If any gate fails, fix it locally rather than rely on CI.
 
 ## Code conventions
 
 - **Python 3.12+**, Pydantic v2 models, type hints required (`mypy --strict`).
-- **TypeScript 5.8+**, strict mode in `tsconfig.json`.
+- **TypeScript 6.0.3** (source of truth: `apps/web/package.json`), strict mode in `tsconfig.json`.
 - **Bicep** templates follow the AVM-first policy in `.github/instructions/bicep-code-best-practices.instructions.md`.
 - **Imports** must respect the boundaries in `pyproject.toml` `[tool.importlinter]` (e.g. `apps.agents` MUST NOT import from `apps.api`).
 - **Comments** only where the code isn't self-explanatory; see `.github/instructions/code-commenting.instructions.md`.

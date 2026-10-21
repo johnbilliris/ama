@@ -43,6 +43,10 @@ param appInsightsName string = ''
 @description('Required SLO alert action group resource ID for burn-rate alerts.')
 param sloAlertActionGroupId string
 
+@description('Deployment tier. The removable cold-archive immutability policy is not deployed in dev.')
+@allowed([ 'dev', 'staging', 'prod' ])
+param environmentTier string
+
 @description('Tags applied to every resource.')
 param tags object = {
   feature: '040-success-criteria'
@@ -125,10 +129,9 @@ resource coldArchive 'Microsoft.Storage/storageAccounts/blobServices/containers@
   }
 }
 
-// 7-year time-based immutability lock (FR-025 / D3, T-AMD-01).
-// 2555 days = ~7 years. Note: immutabilityPolicyState 'Locked' must be set
-// via Azure Portal or Azure CLI after initial deployment to prevent deletion.
-resource coldArchiveImmutability 'Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies@2023-05-01' = {
+// 7-year time-based retention policy (FR-025 / D3, T-AMD-01).
+// Keep it unlocked so the azd predown hook can remove it before the parent storage account.
+resource coldArchiveImmutability 'Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies@2023-05-01' = if (environmentTier != 'dev') {
   parent: coldArchive
   name: 'default'
   properties: {

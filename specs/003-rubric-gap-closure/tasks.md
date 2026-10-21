@@ -43,7 +43,7 @@
 
 **Goal**: Integrate Azure OpenAI into Risk Assessment and Communication agents with template fallback and content safety validation.
 
-**Independent Test**: Ingest mixed-provenance signals for a simulated bushfire incident and verify Risk Assessment returns LLM-generated explanation with cited signal IDs, and Communication returns 6-language alert draft, both within acceptable latency and token budgets.
+**Independent Test**: Ingest mixed-provenance signals for a simulated bushfire incident and verify Risk Assessment returns LLM-generated explanation with cited signal IDs, and Communication returns 6-language alert draft, both within SC-defined latency and token budgets.
 
 **Covers**: FR-001, FR-002, FR-003, FR-004, FR-005, FR-006 · SC-001, SC-002, SC-003
 
@@ -111,14 +111,14 @@
 
 - [X] T025 [US3] Update Monitoring agent to publish a typed AgentHandoffEvent to the Risk Assessment agent via event bus when a signal is classified as high-risk, scoped to the incident tenant in apps/agents/monitoring/agent.py (implements FR-011)
 - [X] T026 [US3] Update Risk Assessment agent to publish a typed AgentHandoffEvent to the Communication agent when a recommendation of type public_alert with high confidence is produced in apps/agents/risk_assessment/agent.py (implements FR-012)
-- [X] T027 [US3] Implement handoff delivery retry with exponential backoff (3 attempts over 5 minutes) respecting circuit breaker state, and dead-letter routing on exhaustion via dead_letter_service in apps/agents/common/handoffs.py (implements FR-014)
+- [X] T027 [US3] Implement handoff delivery retry with exponential backoff (maximum 3 total attempts over 5 minutes: initial attempt + up to 2 retries), using `attempt_count` for total calls and `retry_count` for retries after the first call, respecting circuit breaker state, and dead-letter routing on exhaustion via dead_letter_service in apps/agents/common/handoffs.py (implements FR-014)
 - [X] T028 [US3] Record a TimelineEvent for every agent-to-agent handoff capturing source agent, target agent, scope key, confidence, and payload summary in apps/api/app/services/event_bus.py (implements FR-013)
 - [X] T029 [US3] Create handoff status API route: GET /incidents/{incidentId}/handoffs listing AgentHandoffEvents with status filtering in apps/api/app/api/handoffs.py and register in apps/api/app/main.py per contracts/openapi-addendum.yaml
 
 ### Tests for User Story 3
 
 - [X] T030 [US3] Write integration test verifying full Monitoring → Risk Assessment → Communication handoff chain completes automatically within 30s with each handoff recorded as a TimelineEvent in tests/integration/test_handoff_chain.py (validates SC-005)
-- [X] T031 [US3] Write integration test verifying handoff retry on open circuit breaker (3 retries over 5 min) and dead-letter on exhaustion with correct DeadLetterEntry fields in tests/integration/test_handoff_retry.py (validates FR-014)
+- [X] T031 [US3] Write integration test verifying handoff retry on open circuit breaker (maximum 3 total attempts over 5 minutes: initial attempt + up to 2 retries), asserting consistent `attempt_count`/`retry_count` values and dead-letter on exhaustion with correct DeadLetterEntry fields in tests/integration/test_handoff_retry.py (validates FR-014)
 
 **Checkpoint**: User Story 3 complete — agents chain automatically through event-driven handoffs with audit trail
 
@@ -136,7 +136,7 @@
 
 - [X] T032 [P] [US4] Create multi-stage Dockerfile for API service with python:3.12-slim base, builder stage for dependency installation, runtime stage copying only installed packages + app code, non-root user, health check command (`curl -f http://localhost:8000/health`), and exposed port 8000 in apps/api/Dockerfile. Verify a second build after a code-only change reuses the dependency layer (faster than clean build). No embedded secrets. (implements FR-015, FR-017)
 - [X] T033 [P] [US4] Create multi-stage Dockerfile for agent runtime with python:3.12-slim base, builder stage for dependency installation, runtime stage with non-root user in apps/agents/Dockerfile. Verify a second build after a code-only change reuses the dependency layer. No embedded secrets. (implements FR-016, FR-017)
-- [X] T034 [US4] Create /health endpoint returning JSON {status: healthy|degraded, version: string, dependencies: {cosmos: status, redis: status, openai: status}} in apps/api/app/api/health.py and register route in apps/api/app/main.py. Return dependency status `stub` for in-memory backends when no real connection string is configured. Matches contracts/openapi-addendum.yaml /health schema.
+- [X] T034 [US4] Create /api/health readiness endpoint returning JSON {status: healthy|degraded, version: string, dependencies: {cosmos: status, redis: status, foundry: status}} in apps/api/app/api/health.py and register route in apps/api/app/main.py. Return dependency status `stub` for unconfigured dependencies, and return `degraded` when any configured critical dependency is unavailable. Matches contracts/openapi-addendum.yaml /health schema.
 
 **Checkpoint**: User Story 4 complete — both images build in <5min clean / <2min incremental, pass health checks, run as non-root
 

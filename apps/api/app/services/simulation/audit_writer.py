@@ -40,7 +40,6 @@ Cycle 2 additions (T-AA09 + T-AA10 + T-AA15 + T-AA21):
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import os
@@ -51,6 +50,7 @@ from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
 import rfc8785
+from app.core.async_io import run_blocking
 from app.repositories.simulation_sequence_repository import (
     DLQ_SEQUENCE_NUMBER,
     SequenceAllocationExhausted,
@@ -389,7 +389,7 @@ class AuditWriter:
         # only concurrency boundary remaining is the create_item itself,
         # which is collision-free because ``id`` is a fresh uuid4.
         document = envelope.model_dump(mode="json", by_alias=True)
-        await asyncio.to_thread(
+        await run_blocking(
             self._container.create_item,
             body=document,
         )

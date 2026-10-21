@@ -23,9 +23,13 @@ from __future__ import annotations
 import logging
 import os
 from collections import defaultdict
-from typing import Any, Final, Literal
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+if TYPE_CHECKING:
+    from azure.eventhub.aio import EventHubProducerClient
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +78,8 @@ class EventHubPublisher:
 
     def __init__(self, namespace: str | None = None) -> None:
         self._namespace = namespace
-        self._producer: Any
+        self._producer: _InMemoryProducer | None
+        self._producer_factory: Callable[[str], EventHubProducerClient] | None = None
         if namespace is None:
             self._producer = _InMemoryProducer()
             return
@@ -82,10 +87,10 @@ class EventHubPublisher:
         try:
             # Lazy import: azure-eventhub is an optional dependency. When
             # absent, fall back to in-memory mode so unit tests still run.
-            from azure.eventhub.aio import (  # type: ignore[import-not-found]
+            from azure.eventhub.aio import (
                 EventHubProducerClient,
             )
-            from azure.identity import DefaultAzureCredential
+            from azure.identity.aio import DefaultAzureCredential
 
             credential = DefaultAzureCredential()
             self._producer_factory = lambda hub: EventHubProducerClient(
@@ -116,9 +121,12 @@ class EventHubPublisher:
             return
 
         # Real-Azure path — wraps the SDK call.
-        producer = self._producer_factory(hub)
+        producer_factory = self._producer_factory
+        if producer_factory is None:
+            raise RuntimeError("Event Hub producer factory is not configured")
+        producer = producer_factory(hub)
         try:
-            from azure.eventhub import EventData  # type: ignore[import-not-found]
+            from azure.eventhub import EventData
 
             event_data = EventData(event.model_dump_json())
             await producer.send_event(event_data)
@@ -143,9 +151,12 @@ class EventHubPublisher:
             await self._producer.send_batch(hub, events)
             return
 
-        producer = self._producer_factory(hub)
+        producer_factory = self._producer_factory
+        if producer_factory is None:
+            raise RuntimeError("Event Hub producer factory is not configured")
+        producer = producer_factory(hub)
         try:
-            from azure.eventhub import EventData  # type: ignore[import-not-found]
+            from azure.eventhub import EventData
 
             batch = await producer.create_batch()
             for event in events:

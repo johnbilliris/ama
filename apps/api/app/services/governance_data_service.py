@@ -8,10 +8,30 @@ data sources, recovery catalogue) and optional Cosmos DB repositories.
 import logging
 from collections import Counter
 from datetime import UTC, datetime, timedelta
+from typing import Any, Literal, TypedDict
+
+from app.repositories.governance_repository import GovernanceRepository
 
 from packages.domain.src.domain.models.governance_health_score import ConstitutionalGateStatus
 
 logger = logging.getLogger("governance_data_service")
+
+ConstitutionalStatus = Literal["compliant", "non_compliant", "partially_compliant", "assessment_pending"]
+
+
+class RoleCoverage(TypedDict):
+    role: str
+    assigned_count: int
+    required_count: int
+    is_staffed: bool
+    coverage_pct: float
+
+
+class EmergencyPlanSummary(TypedDict):
+    lifecycle_state: str
+    count: int
+    overdue_count: int
+
 
 CONSTITUTIONAL_GATES = [
     (1, "Primacy of Life"),
@@ -54,8 +74,8 @@ class GovernanceDataService:
 
     def __init__(
         self,
-        seed_data: dict,
-        governance_repo: object | None = None,
+        seed_data: dict[str, Any],
+        governance_repo: GovernanceRepository | None = None,
     ) -> None:
         self._seed = seed_data
         self._repo = governance_repo
@@ -116,7 +136,7 @@ class GovernanceDataService:
 
         return gates
 
-    def _eval_primacy_of_life(self) -> tuple[str, int]:
+    def _eval_primacy_of_life(self) -> tuple[ConstitutionalStatus, int]:
         """Gate 1: Human-in-the-loop — all orgs assigned AIIMS functions."""
         orgs_with_aiims = sum(1 for o in self._orgs if o.get("aiims_functions"))
         if orgs_with_aiims >= len(self._orgs) * 0.8:
@@ -125,7 +145,7 @@ class GovernanceDataService:
             return "partially_compliant", orgs_with_aiims
         return "assessment_pending", 0
 
-    def _eval_national_em_principles(self) -> tuple[str, int]:
+    def _eval_national_em_principles(self) -> tuple[ConstitutionalStatus, int]:
         """Gate 2: National EM frameworks registered."""
         national_fws = [f for f in self._frameworks if f.get("type") in ("national", "national_strategy")]
         if len(national_fws) >= 3:
@@ -134,7 +154,7 @@ class GovernanceDataService:
             return "partially_compliant", len(national_fws)
         return "assessment_pending", 0
 
-    def _eval_multi_hazard_design(self) -> tuple[str, int]:
+    def _eval_multi_hazard_design(self) -> tuple[ConstitutionalStatus, int]:
         """Gate 3: Multiple hazard types covered across frameworks."""
         all_hazards: set[str] = set()
         for f in self._frameworks:
@@ -145,7 +165,7 @@ class GovernanceDataService:
             return "partially_compliant", len(all_hazards)
         return "assessment_pending", 0
 
-    def _eval_transparency_auditability(self) -> tuple[str, int]:
+    def _eval_transparency_auditability(self) -> tuple[ConstitutionalStatus, int]:
         """Gate 4: Audit trail and governance registry configured."""
         has_audit = bool(self._repo)
         has_sources = len(self._data_sources) > 0
@@ -155,7 +175,7 @@ class GovernanceDataService:
             return "partially_compliant", len(self._data_sources)
         return "assessment_pending", 0
 
-    def _eval_warning_public_info(self) -> tuple[str, int]:
+    def _eval_warning_public_info(self) -> tuple[ConstitutionalStatus, int]:
         """Gate 5: Warning-related data sources registered."""
         warning_sources = [
             s
@@ -169,7 +189,7 @@ class GovernanceDataService:
             return "partially_compliant", len(warning_sources)
         return "assessment_pending", 0
 
-    def _eval_evacuation_framework(self) -> tuple[str, int]:
+    def _eval_evacuation_framework(self) -> tuple[ConstitutionalStatus, int]:
         """Gate 6: Evacuation-related frameworks exist."""
         evac_fws = [
             f
@@ -184,7 +204,7 @@ class GovernanceDataService:
             return "partially_compliant", len(response_fws)
         return "assessment_pending", 0
 
-    def _eval_recovery_support(self) -> tuple[str, int]:
+    def _eval_recovery_support(self) -> tuple[ConstitutionalStatus, int]:
         """Gate 7: Recovery catalogue loaded with all 5 domains."""
         domains = self._recovery_catalogue.get("domains", {})
         domain_count = len(domains)
@@ -194,7 +214,7 @@ class GovernanceDataService:
             return "partially_compliant", domain_count
         return "assessment_pending", 0
 
-    def _eval_cloud_infrastructure(self) -> tuple[str, int]:
+    def _eval_cloud_infrastructure(self) -> tuple[ConstitutionalStatus, int]:
         """Gate 8: Azure-native data sources configured."""
         evidence = len(self._data_sources)
         if evidence >= 10:
@@ -203,7 +223,7 @@ class GovernanceDataService:
             return "partially_compliant", evidence
         return "assessment_pending", 0
 
-    def _eval_pprr_lifecycle(self) -> tuple[str, int]:
+    def _eval_pprr_lifecycle(self) -> tuple[ConstitutionalStatus, int]:
         """Gate 9: All 4 PPRR phases covered across assignments."""
         phases_covered: set[str] = set()
         for a in self._assignments:
@@ -216,7 +236,7 @@ class GovernanceDataService:
             return "partially_compliant", len(phases_covered)
         return "assessment_pending", 0
 
-    def _eval_governance_quality(self) -> tuple[str, int]:
+    def _eval_governance_quality(self) -> tuple[ConstitutionalStatus, int]:
         """Gate 10: Quality gates — frameworks with review cycles."""
         fws_with_review = [f for f in self._frameworks if f.get("review_cycle_years") or f.get("version")]
         if len(fws_with_review) >= len(self._frameworks) * 0.5:
@@ -227,7 +247,7 @@ class GovernanceDataService:
 
     # --- Data Source Stats (FR-003) ---
 
-    def get_data_source_stats(self, tenant_id: str) -> dict:
+    def get_data_source_stats(self, tenant_id: str) -> dict[str, int]:
         """Compute data source governance statistics from seed registry."""
         if self._repo:
             try:
@@ -250,7 +270,7 @@ class GovernanceDataService:
 
     # --- Readiness Inputs (FR-002) ---
 
-    def get_readiness_inputs(self, tenant_id: str) -> dict:
+    def get_readiness_inputs(self, tenant_id: str) -> dict[str, float]:
         """Compute operational readiness from seed data."""
         role_coverage = self.get_role_coverage(tenant_id)
         overall_coverage = sum(r["coverage_pct"] for r in role_coverage) / len(role_coverage) if role_coverage else 0.0
@@ -272,7 +292,7 @@ class GovernanceDataService:
 
     # --- Recovery Inputs (FR-004) ---
 
-    def get_recovery_inputs(self, tenant_id: str) -> dict:
+    def get_recovery_inputs(self, tenant_id: str) -> dict[str, object]:
         """Compute recovery progress from catalogue data."""
         domains = self._recovery_catalogue.get("domains", {})
         if not domains:
@@ -337,7 +357,7 @@ class GovernanceDataService:
 
     # --- AIIMS Role Coverage (FR-007) ---
 
-    def get_role_coverage(self, tenant_id: str) -> list[dict]:
+    def get_role_coverage(self, tenant_id: str) -> list[RoleCoverage]:
         """Compute AIIMS role coverage from organisation function assignments."""
         function_counts: Counter[str] = Counter()
         for org in self._orgs:
@@ -345,7 +365,7 @@ class GovernanceDataService:
                 fn_lower = func.lower().replace(" ", "_")
                 function_counts[fn_lower] += 1
 
-        coverage = []
+        coverage: list[RoleCoverage] = []
         for func in AIIMS_FUNCTIONS:
             assigned = function_counts.get(func, 0)
             required = max(1, len(self._jurisdictions))
@@ -363,7 +383,7 @@ class GovernanceDataService:
 
     # --- Emergency Plan Summaries (FR-008) ---
 
-    def get_emergency_plan_summaries(self, tenant_id: str) -> list[dict]:
+    def get_emergency_plan_summaries(self, tenant_id: str) -> list[EmergencyPlanSummary]:
         """Derive emergency plan expectations from frameworks and assignments."""
         states = [
             "Draft",
@@ -405,20 +425,22 @@ class GovernanceDataService:
             if review_years and endorsed_count > 0:
                 overdue_counts["Endorsed"] = overdue_counts.get("Endorsed", 0)
 
-        return [
-            {
-                "lifecycle_state": s,
-                "count": state_distribution.get(s, 0),
-                "overdue_count": overdue_counts.get(s, 0),
-            }
-            for s in states
-        ]
+        summaries: list[EmergencyPlanSummary] = []
+        for state in states:
+            summaries.append(
+                {
+                    "lifecycle_state": state,
+                    "count": state_distribution.get(state, 0),
+                    "overdue_count": overdue_counts.get(state, 0),
+                }
+            )
+        return summaries
 
     # --- Capability Gaps (FR-009) ---
 
-    def get_capability_gaps(self, tenant_id: str) -> list[dict]:
+    def get_capability_gaps(self, tenant_id: str) -> list[dict[str, object]]:
         """Derive capability gaps from org capabilities vs framework requirements."""
-        gaps = []
+        gaps: list[dict[str, object]] = []
 
         role_cov = self.get_role_coverage(tenant_id)
         for role_data in role_cov:
@@ -463,7 +485,7 @@ class GovernanceDataService:
 
     # --- Volunteer Readiness (FR-010) ---
 
-    def get_volunteer_readiness(self, tenant_id: str) -> dict:
+    def get_volunteer_readiness(self, tenant_id: str) -> dict[str, object]:
         """Compute volunteer readiness from organisation workforce types."""
         vol_orgs = [o for o in self._orgs if o.get("workforce_type") in ("volunteer", "mixed")]
         total = len(vol_orgs)
@@ -488,10 +510,10 @@ class GovernanceDataService:
 
     # --- Recovery Domains (FR-011, FR-012) ---
 
-    def get_recovery_domains(self, tenant_id: str, incident_id: str) -> list[dict]:
+    def get_recovery_domains(self, tenant_id: str, incident_id: str) -> list[dict[str, object]]:
         """Derive recovery domain progress from catalogue data."""
         domains = self._recovery_catalogue.get("domains", {})
-        results = []
+        results: list[dict[str, object]] = []
 
         for domain_name in ("social", "economic", "built", "natural"):
             domain_data = domains.get(domain_name, {})
@@ -519,7 +541,9 @@ class GovernanceDataService:
 
         return results
 
-    def get_recovery_domain_detail(self, domain: str, tenant_id: str, incident_id: str | None = None) -> dict | None:
+    def get_recovery_domain_detail(
+        self, domain: str, tenant_id: str, incident_id: str | None = None
+    ) -> dict[str, object] | None:
         """Get detailed recovery info for a single domain from catalogue."""
         domains = self._recovery_catalogue.get("domains", {})
         domain_data = domains.get(domain)
@@ -579,15 +603,15 @@ class GovernanceDataService:
 
     # --- Risk & Warning (FR-014-FR-016) ---
 
-    def get_risk_severity_breakdown(self, tenant_id: str) -> dict:
+    def get_risk_severity_breakdown(self, tenant_id: str) -> dict[str, int]:
         """Return actual risk severity counts — zero when no assessments exist."""
         return {"extreme": 0, "high": 0, "medium": 0, "low": 0, "total": 0}
 
-    def get_top_risks(self, tenant_id: str) -> list[dict]:
+    def get_top_risks(self, tenant_id: str) -> list[dict[str, object]]:
         """Return empty list when no hazard assessments exist."""
         return []
 
-    def get_aws_principle_compliance(self, tenant_id: str) -> list[dict]:
+    def get_aws_principle_compliance(self, tenant_id: str) -> list[dict[str, object]]:
         """Compute AWS principle compliance from data source trust tiers."""
         warning_sources = [
             s
@@ -620,7 +644,7 @@ class GovernanceDataService:
 
     # --- Compliance Matrix (FR-022, FR-023) ---
 
-    def get_compliance_entries(self, tenant_id: str) -> list[dict]:
+    def get_compliance_entries(self, tenant_id: str) -> list[dict[str, object]]:
         """Build compliance matrix from stored assessments or seed baseline."""
         if self._repo:
             try:
@@ -698,7 +722,7 @@ class GovernanceDataService:
         action_type: str | None = None,
         affected_entity: str | None = None,
         keyword: str | None = None,
-    ) -> list[dict]:
+    ) -> list[dict[str, object]]:
         """Query real audit entries from governance repository."""
         if not self._repo:
             return []

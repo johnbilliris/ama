@@ -10,7 +10,12 @@ import logging
 from datetime import UTC, datetime
 from uuid import uuid4
 
-from app.repositories.emergency_plan_repository import EmergencyPlanRepository
+from app.repositories.emergency_plan_repository import (
+    EmergencyPlanRepository,
+    PlanDocumentRecord,
+    PlanSectionRecord,
+    ProcessStepRecord,
+)
 
 from packages.domain.src.domain.models.emergency_plan import PLAN_SECTION_SLUGS, PLANNING_PRINCIPLES
 from packages.domain.src.domain.models.planning_process_record import PLANNING_STEPS
@@ -35,12 +40,12 @@ class EmergencyPlanService:
         security_rating: str = "official",
         authority: str = "",
         created_by: str = "",
-    ) -> dict:
+    ) -> PlanDocumentRecord:
         """Create a new emergency plan in draft state."""
         plan_id = uuid4().hex
         now = datetime.now(UTC).isoformat()
 
-        plan_sections: dict[str, dict] = {}
+        plan_sections: dict[str, PlanSectionRecord] = {}
         for slug in PLAN_SECTION_SLUGS:
             plan_sections[slug] = {
                 "section_slug": slug,
@@ -49,7 +54,7 @@ class EmergencyPlanService:
                 "is_complete": False,
             }
 
-        process_steps: dict[str, dict] = {}
+        process_steps: dict[str, ProcessStepRecord] = {}
         for step_num, step_name in PLANNING_STEPS.items():
             process_steps[str(step_num)] = {
                 "step_number": step_num,
@@ -57,7 +62,7 @@ class EmergencyPlanService:
                 "is_complete": False,
             }
 
-        plan_doc = {
+        plan_doc: PlanDocumentRecord = {
             "plan_id": plan_id,
             "title": title,
             "region_id": region_id,
@@ -78,7 +83,7 @@ class EmergencyPlanService:
 
         return await self._repo.create_plan(plan_doc)
 
-    async def get_plan(self, plan_id: str, region_id: str) -> dict | None:
+    async def get_plan(self, plan_id: str, region_id: str) -> PlanDocumentRecord | None:
         """Retrieve a plan by ID and region."""
         return await self._repo.get_plan(plan_id, region_id)
 
@@ -87,7 +92,7 @@ class EmergencyPlanService:
         region_id: str | None = None,
         lifecycle_state: str | None = None,
         limit: int = 50,
-    ) -> list[dict]:
+    ) -> list[PlanDocumentRecord]:
         """List plans with optional filters."""
         return await self._repo.list_plans(region_id=region_id, lifecycle_state=lifecycle_state, limit=limit)
 
@@ -98,7 +103,7 @@ class EmergencyPlanService:
         section_slug: str,
         title: str = "",
         content: str = "",
-    ) -> dict:
+    ) -> PlanDocumentRecord:
         """Update a section of a plan."""
         plan = await self._repo.get_plan(plan_id, region_id)
         if plan is None:
@@ -128,7 +133,7 @@ class EmergencyPlanService:
         region_id: str,
         target_state: str,
         user_role: str,
-    ) -> dict:
+    ) -> dict[str, object]:
         """Transition a plan to a new lifecycle state."""
         from planning.plan_lifecycle import validate_plan_transition
 
@@ -152,7 +157,7 @@ class EmergencyPlanService:
             "transitioned_by": user_role,
         }
 
-    async def get_completeness(self, plan_id: str, region_id: str) -> dict:
+    async def get_completeness(self, plan_id: str, region_id: str) -> dict[str, object]:
         """Compute completeness metrics for a plan."""
         plan = await self._repo.get_plan(plan_id, region_id)
         if plan is None:
@@ -185,6 +190,6 @@ class EmergencyPlanService:
             "unchecked_principles": unchecked_principles,
         }
 
-    async def get_hierarchy(self, region_id: str) -> list[dict]:
+    async def get_hierarchy(self, region_id: str) -> list[PlanDocumentRecord]:
         """Get plans for a region, ordered by hierarchy."""
         return await self._repo.get_hierarchy(region_id)

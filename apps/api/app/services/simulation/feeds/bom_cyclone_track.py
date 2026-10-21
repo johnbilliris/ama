@@ -7,6 +7,7 @@ Fictitious emulation of BoM IDQ-format cyclone track points. NEVER touches
 from __future__ import annotations
 
 from collections.abc import Iterator
+from random import Random
 from typing import Final
 
 from ._base import (
@@ -23,7 +24,7 @@ SOURCE_SHAPE: Final[str] = "bom.cyclone_track.v1"
 FEED_VERSION: Final[str] = "v1"
 
 
-def _ficticious_name(rng) -> str:
+def _ficticious_name(rng: Random) -> str:
     # Synthetic cyclone names — clearly fictional, no real Australian list.
     return rng.choice(
         [

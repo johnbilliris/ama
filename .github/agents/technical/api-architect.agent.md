@@ -1,5 +1,7 @@
 ---
+name: api-architect
 description: "API & Backend Architect — API design, service boundaries, resilience patterns, event-driven architecture, caching, observability, and layered service architecture for the disaster response hub."
+tools: ["search/codebase","read/changes","web/fetch","search/findTestFiles","web/githubRepo","read/problems","search","search/searchResults","read/terminalLastCommand","read/terminalSelection","execute/testFailure","search/usages","vscode/vscodeAPI","microsoft.docs.mcp"]
 handoffs:
   - label: Ask about system architecture
     agent: solution-architect

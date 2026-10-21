@@ -19,3 +19,6 @@ export * from "./extension-envelope.js";
 
 // spec-038 Help domain twins
 export * as Help from "./help/index.js";
+
+// Spec 040 evidence-harness protocol twins.
+export * from "./evidence/index.js";

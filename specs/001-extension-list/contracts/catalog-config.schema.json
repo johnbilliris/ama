@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ama:specify:contracts:catalog-config",
+  "title": "AMA Spec Kit extension catalog configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "catalogs"],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "catalogs": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/catalog"
+      }
+    }
+  },
+  "$defs": {
+    "catalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "priority"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https://[a-z0-9]{3,24}\\.blob\\.core\\.windows\\.net/[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?/[^?#\\r\\n]+$"
+        },
+        "storage_account_resource_id": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Storage/storageAccounts/[^/]+$"
+        },
+        "container_scope": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Storage/storageAccounts/[^/]+/blobServices/default/containers/[^/]+$"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "path": {}
+          },
+          "required": ["path"],
+          "not": {
+            "anyOf": [
+              { "type": "object", "properties": { "url": {} }, "required": ["url"] },
+              { "type": "object", "properties": { "storage_account_resource_id": {} }, "required": ["storage_account_resource_id"] },
+              { "type": "object", "properties": { "container_scope": {} }, "required": ["container_scope"] }
+            ]
+          }
+        },
+        {
+          "properties": {
+            "url": {}
+          },
+          "required": ["url", "storage_account_resource_id", "container_scope"],
+          "not": {
+            "properties": {
+              "path": {}
+            },
+            "required": ["path"]
+          }
+        }
+      ]
+    }
+  }
+}

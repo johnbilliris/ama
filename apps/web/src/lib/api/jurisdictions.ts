@@ -1,4 +1,5 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+import { getApiBaseUrl } from "@/lib/api/base-url";
+const API_BASE_URL = getApiBaseUrl();
 
 export interface JurisdictionSummary {
   jurisdiction_id: string;

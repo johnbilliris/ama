@@ -1,0 +1,11 @@
+{
+  "recovery_source": "Recorded tool output from shell 384; not a new observation",
+  "original_observation_timestamp": null,
+  "note": "Original timestamp was not recorded. Subsequent successful v2 observations are separate.",
+  "agents": {
+    "diagnostic_error_type": "WebSocketTimeoutException"
+  },
+  "api": {
+    "diagnostic_error_type": "WebSocketTimeoutException"
+  }
+}

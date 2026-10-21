@@ -26,6 +26,7 @@ import os
 from typing import Any
 
 from app.services import state_store
+from app.services.operational_store import current_tenant_id
 
 from packages.domain.src.domain.models.coordination_task import CoordinationTask
 
@@ -42,7 +43,7 @@ def _build_container() -> Any:
     managed identity is preferred. Returns ``None`` on any failure so the
     repository can transparently fall back to the in-memory backend.
     """
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]
@@ -53,9 +54,10 @@ def _build_container() -> Any:
     return db.get_container_client(_CONTAINER_NAME)
 
 
-def _to_doc(task: CoordinationTask) -> dict[str, Any]:
+def _to_doc(task: CoordinationTask, scope: str) -> dict[str, Any]:
     doc = task.model_dump(mode="json")
-    doc["id"] = task.task_id
+    doc["id"] = f"{scope}:{task.task_id}"
+    doc["scope"] = scope
     return doc
 
 
@@ -67,7 +69,8 @@ def _from_doc(doc: dict[str, Any]) -> CoordinationTask:
 class CoordinationTasksRepository:
     """Hybrid Cosmos / in-memory repository for ``CoordinationTask``."""
 
-    def __init__(self, container: Any | None = None) -> None:
+    def __init__(self, container: Any | None = None, tenant_id: str | None = None) -> None:
+        self._tenant_id = tenant_id
         if container is not None:
             self._container = container
         elif os.environ.get("COSMOS_ENDPOINT"):
@@ -86,24 +89,39 @@ class CoordinationTasksRepository:
     def is_cosmos_backed(self) -> bool:
         return self._container is not None
 
+    @property
+    def scope(self) -> str:
+        return self._tenant_id or current_tenant_id()
+
+    def bind(self, tenant_id: str) -> CoordinationTasksRepository:
+        return CoordinationTasksRepository(container=self._container, tenant_id=tenant_id)
+
+    def _memory_tasks(self) -> dict[str, CoordinationTask]:
+        return state_store.TASKS.bucket_for(self.scope)
+
     # ------------------------------------------------------------------
     # Reads
     # ------------------------------------------------------------------
 
     def get(self, task_id: str, organisation_id: str | None = None) -> CoordinationTask | None:
         if self._container is None:
-            return state_store.TASKS.get(task_id)
+            return self._memory_tasks().get(task_id)
         if organisation_id:
             from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
             try:
-                doc = self._container.read_item(task_id, partition_key=organisation_id)
+                doc = self._container.read_item(f"{self.scope}:{task_id}", partition_key=organisation_id)
+                if doc.get("scope") != self.scope:
+                    return None
                 return _from_doc(doc)
             except CosmosResourceNotFoundError:
                 return None
         docs = self._query(
-            "SELECT * FROM c WHERE c.task_id = @id",
-            [{"name": "@id", "value": task_id}],
+            "SELECT * FROM c WHERE c.task_id = @id AND c.scope = @scope",
+            [
+                {"name": "@id", "value": task_id},
+                {"name": "@scope", "value": self.scope},
+            ],
         )
         if not docs:
             return None
@@ -121,12 +139,14 @@ class CoordinationTasksRepository:
         if self._container is None:
             return [
                 task
-                for task in state_store.TASKS.values()
+                for task in self._memory_tasks().values()
                 if task.assigned_persona_id == persona_id or task.assigned_organisation_id == organisation_id
             ]
         docs = self._query(
-            "SELECT * FROM c WHERE c.assigned_persona_id = @pid OR c.assigned_organisation_id = @oid",
+            "SELECT * FROM c WHERE c.scope = @scope "
+            "AND (c.assigned_persona_id = @pid OR c.assigned_organisation_id = @oid)",
             [
+                {"name": "@scope", "value": self.scope},
                 {"name": "@pid", "value": persona_id},
                 {"name": "@oid", "value": organisation_id},
             ],
@@ -136,10 +156,13 @@ class CoordinationTasksRepository:
 
     def list_for_organisation(self, organisation_id: str) -> list[CoordinationTask]:
         if self._container is None:
-            return [task for task in state_store.TASKS.values() if task.assigned_organisation_id == organisation_id]
+            return [task for task in self._memory_tasks().values() if task.assigned_organisation_id == organisation_id]
         docs = self._query(
-            "SELECT * FROM c WHERE c.assigned_organisation_id = @oid",
-            [{"name": "@oid", "value": organisation_id}],
+            "SELECT * FROM c WHERE c.scope = @scope AND c.assigned_organisation_id = @oid",
+            [
+                {"name": "@scope", "value": self.scope},
+                {"name": "@oid", "value": organisation_id},
+            ],
             partition_key=organisation_id,
         )
         return [_from_doc(doc) for doc in docs]
@@ -158,16 +181,48 @@ class CoordinationTasksRepository:
             ids = set(dependency_ids)
             return [
                 task
-                for task in state_store.TASKS.values()
+                for task in self._memory_tasks().values()
                 if task.task_id in ids and task.assigned_organisation_id == organisation_id
             ]
         placeholders = ", ".join(f"@id{i}" for i in range(len(dependency_ids)))
         params: list[dict[str, object]] = [{"name": f"@id{i}", "value": tid} for i, tid in enumerate(dependency_ids)]
-        params.append({"name": "@oid", "value": organisation_id})
+        params.extend(
+            [
+                {"name": "@oid", "value": organisation_id},
+                {"name": "@scope", "value": self.scope},
+            ]
+        )
         docs = self._query(
-            f"SELECT * FROM c WHERE c.assigned_organisation_id = @oid AND c.task_id IN ({placeholders})",
+            f"SELECT * FROM c WHERE c.scope = @scope "
+            f"AND c.assigned_organisation_id = @oid AND c.task_id IN ({placeholders})",
             params,
             partition_key=organisation_id,
+        )
+        return [_from_doc(doc) for doc in docs]
+
+    def list_dependencies_for_incident(self, incident_id: str, dependency_ids: list[str]) -> list[CoordinationTask]:
+        """Resolve dependencies across organisations for a specific incident."""
+        if not dependency_ids:
+            return []
+        if self._container is None:
+            ids = set(dependency_ids)
+            return [
+                task
+                for task in self._memory_tasks().values()
+                if task.task_id in ids and task.incident_id == incident_id
+            ]
+
+        placeholders = ", ".join(f"@id{i}" for i in range(len(dependency_ids)))
+        params: list[dict[str, object]] = [{"name": f"@id{i}", "value": tid} for i, tid in enumerate(dependency_ids)]
+        params.extend(
+            [
+                {"name": "@incident", "value": incident_id},
+                {"name": "@scope", "value": self.scope},
+            ]
+        )
+        docs = self._query(
+            f"SELECT * FROM c WHERE c.scope = @scope AND c.incident_id = @incident AND c.task_id IN ({placeholders})",
+            params,
         )
         return [_from_doc(doc) for doc in docs]
 
@@ -179,17 +234,23 @@ class CoordinationTasksRepository:
         ``state_store.TASKS`` directly.
         """
         if self._container is None:
-            return [task for task in state_store.TASKS.values() if task.assigned_persona_id == persona_id]
+            return [task for task in self._memory_tasks().values() if task.assigned_persona_id == persona_id]
         docs = self._query(
-            "SELECT * FROM c WHERE c.assigned_persona_id = @pid",
-            [{"name": "@pid", "value": persona_id}],
+            "SELECT * FROM c WHERE c.scope = @scope AND c.assigned_persona_id = @pid",
+            [
+                {"name": "@scope", "value": self.scope},
+                {"name": "@pid", "value": persona_id},
+            ],
         )
         return [_from_doc(doc) for doc in docs]
 
     def list_all(self) -> list[CoordinationTask]:
         if self._container is None:
-            return list(state_store.TASKS.values())
-        docs = self._query("SELECT * FROM c", [])
+            return list(self._memory_tasks().values())
+        docs = self._query(
+            "SELECT * FROM c WHERE c.scope = @scope",
+            [{"name": "@scope", "value": self.scope}],
+        )
         return [_from_doc(doc) for doc in docs]
 
     # ------------------------------------------------------------------
@@ -198,8 +259,8 @@ class CoordinationTasksRepository:
 
     def upsert(self, task: CoordinationTask) -> CoordinationTask:
         if self._container is not None:
-            self._container.upsert_item(_to_doc(task))
-        state_store.TASKS[task.task_id] = task
+            self._container.upsert_item(_to_doc(task, self.scope))
+        self._memory_tasks()[task.task_id] = task
         return task
 
     def bulk_upsert(self, tasks: list[CoordinationTask]) -> int:

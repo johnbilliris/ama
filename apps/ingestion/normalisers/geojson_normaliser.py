@@ -2,7 +2,19 @@ import logging
 from datetime import UTC, datetime
 from typing import Any
 
+from apps.ingestion.normalisers.timestamps import (
+    TimestampParseError,
+    parse_epoch_milliseconds,
+    parse_iso_timestamp,
+    parse_local_timestamp,
+    parse_rfc822_timestamp,
+    to_utc_iso_z,
+)
+
 logger = logging.getLogger(__name__)
+
+# VicEmergency includes forecast event timestamps up to 24 hours ahead.
+VIC_CFA_MAX_FUTURE_SECONDS = 24 * 60 * 60
 
 ALERT_LEVEL_CONFIDENCE: dict[str, float] = {
     "Emergency Warning": 0.95,
@@ -66,6 +78,7 @@ def normalise_geojson_feature(
     source_kind = collection_context.get("source_kind", "authoritative")
     jurisdiction_id = collection_context.get("jurisdiction_id", feature.get("jurisdiction_id"))
     state_key = collection_context.get("state_key", "default")
+    source_timezone = str(collection_context.get("source_timezone", "Australia/Sydney"))
 
     prop_map = STATE_PROPERTY_MAPS.get(state_key, STATE_PROPERTY_MAPS["default"])
     title = props.get(prop_map["title"], props.get("title", ""))
@@ -83,9 +96,15 @@ def normalise_geojson_feature(
 
     location = _geometry_to_location(geometry)
 
-    occurred_at = props.get("pubDate", props.get("updated", props.get("created", "")))
-    if not occurred_at:
-        occurred_at = datetime.now(UTC).isoformat()
+    source_uri = str(collection_context.get("source_uri", "")).strip()
+    if not source_uri:
+        raise ValueError("GeoJSON payload missing required source_uri")
+
+    occurred_at, publication_or_update = _parse_geojson_timestamps(
+        props,
+        source_timezone=source_timezone,
+        max_future_seconds=(VIC_CFA_MAX_FUTURE_SECONDS if state_key == "vic-cfa" else 900),
+    )
 
     return {
         "source": {
@@ -104,28 +123,162 @@ def normalise_geojson_feature(
             "alertLevel": alert_level,
             "rawCategory": raw_category,
             "featureId": feature.get("id", props.get("id", "")),
+            "publicationTimestamp": publication_or_update,
+            "updateTimestamp": publication_or_update,
             "properties": props,
         },
         "confidenceScore": confidence,
-        "freshnessScore": 0.85,
         "validationStatus": "validated",
         "provenance": {
             "collectionMethod": "api_pull",
-            "sourceUri": collection_context.get("source_uri", ""),
-            "sourceTimestamp": occurred_at,
+            "sourceUri": source_uri,
+            "sourceTimestamp": publication_or_update,
         },
     }
 
 
+def _parse_geojson_timestamps(
+    properties: dict[str, Any],
+    *,
+    source_timezone: str,
+    max_future_seconds: int,
+) -> tuple[str, str]:
+    publication_or_update = _parse_one(
+        [
+            ("updated", properties.get("updated")),
+            ("pubDate", properties.get("pubDate")),
+            ("created", properties.get("created")),
+            ("load_dt", properties.get("load_dt")),
+            ("process_dt", properties.get("process_dt")),
+        ],
+        provider="geojson",
+        source_timezone=source_timezone,
+        max_future_seconds=max_future_seconds,
+    )
+
+    occurred = _parse_one(
+        [
+            ("time", properties.get("time")),
+            ("occurredAt", properties.get("occurredAt")),
+            ("eventTime", properties.get("eventTime")),
+            ("datetime", properties.get("datetime")),
+            ("start_dt", properties.get("start_dt")),
+            ("created", properties.get("created")),
+            ("pubDate", properties.get("pubDate")),
+        ],
+        provider="geojson",
+        fallback_iso=publication_or_update,
+        source_timezone=source_timezone,
+        max_future_seconds=max_future_seconds,
+    )
+    return occurred, publication_or_update
+
+
+def _parse_one(
+    candidates: list[tuple[str, Any]],
+    *,
+    provider: str,
+    fallback_iso: str | None = None,
+    source_timezone: str,
+    max_future_seconds: int,
+) -> str:
+    for field, value in candidates:
+        if value is None or str(value).strip() == "":
+            continue
+        text = str(value).strip()
+        try:
+            if field == "pubDate":
+                try:
+                    return to_utc_iso_z(
+                        parse_rfc822_timestamp(
+                            text,
+                            provider=provider,
+                            field=field,
+                            max_future_seconds=max_future_seconds,
+                        )
+                    )
+                except TimestampParseError:
+                    try:
+                        return to_utc_iso_z(
+                            parse_iso_timestamp(
+                                text,
+                                provider=provider,
+                                field=field,
+                                max_future_seconds=max_future_seconds,
+                            )
+                        )
+                    except TimestampParseError:
+                        return to_utc_iso_z(
+                            parse_local_timestamp(
+                                text,
+                                formats=("%d/%m/%Y %I:%M:%S %p",),
+                                source_timezone=source_timezone,
+                                provider=provider,
+                                field=field,
+                                max_future_seconds=max_future_seconds,
+                            )
+                        )
+            if field == "time" and text.isdigit():
+                return to_utc_iso_z(
+                    parse_epoch_milliseconds(
+                        text,
+                        provider=provider,
+                        field=field,
+                        max_future_seconds=max_future_seconds,
+                    )
+                )
+            if text.isdigit() and len(text) >= 12:
+                return to_utc_iso_z(
+                    parse_epoch_milliseconds(
+                        text,
+                        provider=provider,
+                        field=field,
+                        max_future_seconds=max_future_seconds,
+                    )
+                )
+            return to_utc_iso_z(
+                parse_iso_timestamp(
+                    text,
+                    provider=provider,
+                    field=field,
+                    max_future_seconds=max_future_seconds,
+                )
+            )
+        except TimestampParseError:
+            continue
+    if fallback_iso is not None:
+        return fallback_iso
+    raise TimestampParseError(
+        provider=provider, field="timestamp", value=None, reason="missing supported timestamp field"
+    )
+
+
+def _supported_geometries(geometry: dict[str, Any]) -> list[dict[str, Any]]:
+    if geometry.get("type") != "GeometryCollection":
+        return [geometry]
+
+    supported: list[dict[str, Any]] = []
+    for member in geometry.get("geometries", []):
+        if isinstance(member, dict):
+            supported.extend(_supported_geometries(member))
+    return supported
+
+
 def _geometry_to_location(geometry: dict[str, Any]) -> dict[str, Any]:
+    if geometry.get("type") == "GeometryCollection":
+        candidates = _supported_geometries(geometry)
+        for preferred_type in ("Point", "Polygon", "MultiPolygon"):
+            for candidate in candidates:
+                if candidate.get("type") == preferred_type and candidate.get("coordinates"):
+                    return _geometry_to_location(candidate)
+        raise ValueError("Unsupported or empty GeoJSON geometry: GeometryCollection")
     geo_type = geometry.get("type", "Point")
     coordinates = geometry.get("coordinates", [])
 
     if geo_type == "Point" and coordinates:
         return {"type": "Point", "coordinates": coordinates, "precisionMeters": 100}
-    elif geo_type == "Polygon" and coordinates:
+    if geo_type == "Polygon" and coordinates:
         return {"type": "Polygon", "coordinates": coordinates, "precisionMeters": 50}
-    elif geo_type == "MultiPolygon" and coordinates:
-        flat = coordinates[0] if coordinates else [[]]
-        return {"type": "Polygon", "coordinates": flat, "precisionMeters": 100}
-    return {"type": "Point", "coordinates": [0, 0], "precisionMeters": 100000}
+    if geo_type == "MultiPolygon" and coordinates:
+        return {"type": "MultiPolygon", "coordinates": coordinates, "precisionMeters": 100}
+    raise ValueError(f"Unsupported or empty GeoJSON geometry: {geo_type}")

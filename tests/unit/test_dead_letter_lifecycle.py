@@ -90,3 +90,22 @@ class TestDeadLetterStore:
         store.persist(entry)
         retrieved = store.get("hoff-001")
         assert retrieved.status == "redelivered"
+
+
+class TestDeadLetterRedelivery:
+    @pytest.mark.asyncio
+    async def test_permanently_failed_entry_is_not_redelivered(self):
+        delivered = False
+
+        async def deliver(_entry):
+            nonlocal delivered
+            delivered = True
+
+        from common.dead_letters import DeadLetterRedeliveryPoller
+
+        entry = _dead_letter_entry(status="permanently_failed")
+        poller = DeadLetterRedeliveryPoller(DeadLetterStore(), deliver_fn=deliver)
+        await poller._attempt_redeliver(entry)
+
+        assert delivered is False
+        assert entry.auto_redeliver_attempts == 0

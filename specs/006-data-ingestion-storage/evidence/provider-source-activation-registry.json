@@ -1,0 +1,875 @@
+{
+  "generatedAt": "2026-09-16T00:00:00Z",
+  "scope": "spec-006",
+  "externalVerificationPolicy": "never-mark-external-verified-without-evidence",
+  "records": [
+    {
+      "runtimePipelineId": "bom-warnings",
+      "catalogueDataSourceId": "bom-warnings",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "ftp://ftp.bom.gov.au/anon/gen/fwo/",
+        "owner": "Bureau of Meteorology",
+        "format": "xml_bom"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Bureau of Meteorology",
+        "effectiveProvider": "Bureau of Meteorology",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public-anonymous",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "bom-forecasts",
+      "catalogueDataSourceId": "bom-forecasts",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "ftp://ftp.bom.gov.au/anon/gen/fwo/",
+        "owner": "Bureau of Meteorology",
+        "format": "xml_bom"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Bureau of Meteorology",
+        "effectiveProvider": "Bureau of Meteorology",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public-anonymous",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "bom-radar",
+      "catalogueDataSourceId": "bom-radar",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "ftp://ftp.bom.gov.au/anon/gen/radar/",
+        "owner": "Bureau of Meteorology",
+        "format": "png"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Bureau of Meteorology",
+        "effectiveProvider": "Bureau of Meteorology",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public-anonymous",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "bom-flood-warnings",
+      "catalogueDataSourceId": "bom-flood-warnings",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "ftp://ftp.bom.gov.au/anon/gen/fwo/",
+        "owner": "Bureau of Meteorology",
+        "format": "cap_xml"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Bureau of Meteorology",
+        "effectiveProvider": "Bureau of Meteorology",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public-anonymous",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Handled by bom-warnings FTP pipeline until dedicated CAP split approval is recorded",
+      "approvedSubstitution": {
+        "status": "approved",
+        "provenance": "specs/006-data-ingestion-storage/implementation-review-tasks.md#L558"
+      }
+    },
+    {
+      "runtimePipelineId": "bom-rss",
+      "catalogueDataSourceId": "bom-warnings",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "ftp://ftp.bom.gov.au/anon/gen/fwo/",
+        "owner": "Bureau of Meteorology",
+        "format": "rss-deviation-ftp"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Bureau of Meteorology",
+        "effectiveProvider": "Bureau of Meteorology",
+        "substitution": "approved-deviation-pending"
+      },
+      "access": {
+        "authStatus": "public-anonymous",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "RSS/Atom endpoint path is not implemented; FTP replacement requires explicit approved deviation",
+      "approvedSubstitution": {
+        "status": "unverified",
+        "provenance": "apps/ingestion/pipelines/bom_rss.py"
+      }
+    },
+    {
+      "runtimePipelineId": "ga-earthquakes",
+      "catalogueDataSourceId": "ga-earthquake-alerts",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson",
+        "owner": "USGS",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Geoscience Australia",
+        "effectiveProvider": "USGS",
+        "substitution": "ga-substitution-usgs"
+      },
+      "access": {
+        "authStatus": "public",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "approved-unverified",
+        "provenance": "apps/ingestion/pipelines/ga_earthquakes.py"
+      }
+    },
+    {
+      "runtimePipelineId": "ga-tsunami",
+      "catalogueDataSourceId": "ga-tsunami-warnings",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "ftp://ftp.bom.gov.au/anon/gen/fwo/",
+        "owner": "Bureau of Meteorology / JATWC",
+        "format": "cap_xml"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Geoscience Australia",
+        "effectiveProvider": "Bureau of Meteorology / JATWC",
+        "substitution": "ga-substitution-jatwc"
+      },
+      "access": {
+        "authStatus": "public-anonymous",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "approved-unverified",
+        "provenance": "apps/ingestion/pipelines/ga_tsunami.py"
+      }
+    },
+    {
+      "runtimePipelineId": "ga-hotspots",
+      "catalogueDataSourceId": "ga-sentinel-hotspots",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://hotspots.dea.ga.gov.au/data/recent-hotspots.json",
+        "owner": "Geoscience Australia / Digital Earth Australia",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Geoscience Australia",
+        "effectiveProvider": "Geoscience Australia",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "nsw-rfs-fire",
+      "catalogueDataSourceId": "nsw-rfs-fires-near-me",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.rfs.nsw.gov.au/feeds/majorIncidents.json",
+        "owner": "NSW Rural Fire Service",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "NSW Rural Fire Service",
+        "effectiveProvider": "NSW Rural Fire Service",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "vic-cfa-fire",
+      "catalogueDataSourceId": "vic-cfa",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.emergency.vic.gov.au/public/osom-geojson.json",
+        "owner": "Victoria Emergency Management / CFA",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "CFA Victoria",
+        "effectiveProvider": "CFA Victoria",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "qld-qfes-fire",
+      "catalogueDataSourceId": "qld-qfes",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.fire.qld.gov.au/current-incidents",
+        "owner": "Queensland Fire Department",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Queensland Fire Department",
+        "effectiveProvider": "Queensland Fire Department",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Public QLD endpoint is HTML application content; machine-readable incident feed contract not evidenced in-repo",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "sa-cfs-fire",
+      "catalogueDataSourceId": "sa-cfs",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://data.cfs.sa.gov.au/incidents.json",
+        "owner": "South Australia Country Fire Service",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "South Australia Country Fire Service",
+        "effectiveProvider": "South Australia Country Fire Service",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "unverified",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "wa-dfes-fire",
+      "catalogueDataSourceId": "wa-dfes",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.dfes.wa.gov.au/data/incidents.json",
+        "owner": "WA Department of Fire and Emergency Services",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "WA Department of Fire and Emergency Services",
+        "effectiveProvider": "WA Department of Fire and Emergency Services",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "unverified",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "tas-tfs-fire",
+      "catalogueDataSourceId": "tas-tfs",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.fire.tas.gov.au/data/incidents.json",
+        "owner": "Tasmania Fire Service",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Tasmania Fire Service",
+        "effectiveProvider": "Tasmania Fire Service",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "unverified",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "act-esa-fire",
+      "catalogueDataSourceId": "act-esa",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.esa.act.gov.au/data/incidents.json",
+        "owner": "ACT Emergency Services Agency",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "ACT Emergency Services Agency",
+        "effectiveProvider": "ACT Emergency Services Agency",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "unverified",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "nt-pfes-fire",
+      "catalogueDataSourceId": "nt-pfes",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.pfes.nt.gov.au/data/incidents.json",
+        "owner": "NT Police Fire and Emergency Services",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "NT Police Fire and Emergency Services",
+        "effectiveProvider": "NT Police Fire and Emergency Services",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "unverified",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "nsw-ses-flood",
+      "catalogueDataSourceId": "nsw-ses-flood",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.ses.nsw.gov.au/api/flood/current",
+        "owner": "NSW State Emergency Service",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "NSW State Emergency Service",
+        "effectiveProvider": "NSW State Emergency Service",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "NSW SES machine-readable flood endpoint availability and contractual access are not verified in-repo",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "vic-ses-flood",
+      "catalogueDataSourceId": "vic-ses-flood",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.ses.vic.gov.au/data/flood-incidents.json",
+        "owner": "VIC State Emergency Service",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "VIC State Emergency Service",
+        "effectiveProvider": "VIC State Emergency Service",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "unverified",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "qld-ses-flood",
+      "catalogueDataSourceId": "qld-ses-flood",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.ses.qld.gov.au/data/flood-incidents.json",
+        "owner": "QLD State Emergency Service",
+        "format": "geojson"
+      },
+      "providerAttribution": {
+        "declaredProvider": "QLD State Emergency Service",
+        "effectiveProvider": "QLD State Emergency Service",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "unverified",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Endpoint ownership, auth/access, license, and rate-limit evidence are not verified in-repo",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "bom-observations-nsw",
+      "catalogueDataSourceId": "bom-observations",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "http://www.bom.gov.au/fwo/IDN60901/IDN60901.94768.json",
+        "owner": "Bureau of Meteorology",
+        "format": "json"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Bureau of Meteorology",
+        "effectiveProvider": "Bureau of Meteorology",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "bom-aws-stations",
+      "catalogueDataSourceId": "bom-aws-stations",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "http://www.bom.gov.au/fwo/IDN60901/IDN60901.94767.json",
+        "owner": "Bureau of Meteorology",
+        "format": "json"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Bureau of Meteorology",
+        "effectiveProvider": "Bureau of Meteorology",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "bom-river-gauges",
+      "catalogueDataSourceId": "bom-river-gauges",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "http://www.bom.gov.au/waterdata/services",
+        "owner": "Bureau of Meteorology",
+        "format": "json"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Bureau of Meteorology",
+        "effectiveProvider": "Bureau of Meteorology",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "epa-air-quality",
+      "catalogueDataSourceId": "epa-air-quality",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://data.airquality.nsw.gov.au/api/Data/get_SiteDetails",
+        "owner": "NSW EPA",
+        "format": "json"
+      },
+      "providerAttribution": {
+        "declaredProvider": "NSW EPA",
+        "effectiveProvider": "NSW EPA",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "himawari-satellite",
+      "catalogueDataSourceId": "himawari-satellite",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "ftp://ftp.bom.gov.au/anon/gen/gms/",
+        "owner": "Bureau of Meteorology",
+        "format": "geotiff"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Bureau of Meteorology",
+        "effectiveProvider": "Bureau of Meteorology",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "public-anonymous",
+        "accessStatus": "repo-validated",
+        "licenseStatus": "repo-validated",
+        "rateStatus": "repo-validated",
+        "externalVerification": "unverified"
+      },
+      "enabled": true,
+      "activation_blocker": null,
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "twitter-disaster",
+      "catalogueDataSourceId": "twitter-disaster",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://api.twitter.com/2/tweets/search/stream",
+        "owner": "X API",
+        "format": "json"
+      },
+      "providerAttribution": {
+        "declaredProvider": "X",
+        "effectiveProvider": "X",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "oauth2-required",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "X API OAuth2 bearer credentials and access tier approval are required",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "facebook-community",
+      "catalogueDataSourceId": "facebook-community",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://graph.facebook.com/v19.0/",
+        "owner": "Meta Graph API",
+        "format": "json"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Meta",
+        "effectiveProvider": "Meta",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "oauth2-required",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Meta Graph API token/app review approval is required",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "reddit-australia",
+      "catalogueDataSourceId": "reddit-australia",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://www.reddit.com/r/australia.json",
+        "owner": "Reddit API",
+        "format": "json"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Reddit",
+        "effectiveProvider": "Reddit",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "oauth2-required",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Reddit API client credentials and approved rate-limit policy are required",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "snap-send-solve",
+      "catalogueDataSourceId": "snap-send-solve",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://api.snapsendsolve.com/v1/reports",
+        "owner": "Snap Send Solve",
+        "format": "json"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Snap Send Solve",
+        "effectiveProvider": "Snap Send Solve",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "api-key-required",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Snap Send Solve partner API key and agreement are required",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "webeoc-ims",
+      "catalogueDataSourceId": "webeoc-ims",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://webeoc.example.com/api/boards",
+        "owner": "WebEOC",
+        "format": "json"
+      },
+      "providerAttribution": {
+        "declaredProvider": "WebEOC",
+        "effectiveProvider": "WebEOC",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "bearer-token-required",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "WebEOC endpoint and credentials are tenant-specific and not yet provisioned",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "icon-ims",
+      "catalogueDataSourceId": "icon-ims",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://icon.example.com/api/incidents",
+        "owner": "ICON",
+        "format": "json"
+      },
+      "providerAttribution": {
+        "declaredProvider": "ICON",
+        "effectiveProvider": "ICON",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "bearer-token-required",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "ICON endpoint and credentials are tenant-specific and not yet provisioned",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    },
+    {
+      "runtimePipelineId": "sentinel-satellite",
+      "catalogueDataSourceId": "sentinel-satellite",
+      "adapterSupported": true,
+      "endpoint": {
+        "url": "https://dataspace.copernicus.eu/",
+        "owner": "Copernicus Data Space",
+        "format": "geotiff"
+      },
+      "providerAttribution": {
+        "declaredProvider": "Copernicus Data Space",
+        "effectiveProvider": "Copernicus Data Space",
+        "substitution": "none"
+      },
+      "access": {
+        "authStatus": "oauth2-required",
+        "accessStatus": "blocked",
+        "licenseStatus": "unverified",
+        "rateStatus": "unverified",
+        "externalVerification": "unverified"
+      },
+      "enabled": false,
+      "activation_blocker": "Copernicus Data Space OAuth2 runtime contract is not implemented in the current adapter",
+      "approvedSubstitution": {
+        "status": "not-applicable",
+        "provenance": "none"
+      }
+    }
+  ]
+}

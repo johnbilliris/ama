@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "2026-09-16",
+  "feature": "006-data-ingestion-storage",
+  "aud": "AUD-041",
+  "revision": "UNVERIFIED",
+  "command": "python -m pytest -q tests/load/test_spec006_staging_harness.py",
+  "environment": {
+    "name": "staging",
+    "stagingOptIn": false,
+    "python": "3.14"
+  },
+  "topology": {
+    "workerReplicas": 1,
+    "apiReplicas": 1,
+    "loadUsers": 30
+  },
+  "fixtures": [
+    "packages/domain/src/domain/seed/data_sources_australia.json",
+    "tests/load/locustfile.py"
+  ],
+  "durationSeconds": 0,
+  "denominator": 0,
+  "rawSamples": [],
+  "rawSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "threshold": {
+    "metric": "sc001_latency_p95_seconds",
+    "operator": "<=",
+    "value": 90.0,
+    "computed": 0.0
+  },
+  "outcome": {
+    "status": "UNVERIFIED",
+    "measuredValue": 0.0,
+    "reason": "Not measured"
+  }
+}

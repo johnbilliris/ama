@@ -47,8 +47,10 @@
 - `handoffId`: string, unique identifier for the handoff event
 - `incidentId`: string, associated incident
 - `status`: enum (`pending`, `delivered`, `retrying`, `failed`, `dead_lettered`)
-- `retryCount`: integer, number of delivery attempts (0–3)
-- `maxRetries`: integer, default 3
+- `attemptCount`: integer, total delivery calls including the initial call (1–3)
+- `retryCount`: integer, retries after the initial call (0–2)
+- `maxAttempts`: integer, default 3
+- `maxRetries`: integer, default 2
 - `retryWindowSeconds`: integer, default 300 (5 minutes)
 - `nextRetryAt`: datetime or null, scheduled next retry
 - `timelineEventId`: string or null, reference to the recorded TimelineEvent
@@ -59,13 +61,14 @@
 - `failureReason`: string or null
 
 **Relationships**:
-- One AgentHandoffEvent creates one TimelineEvent (FR-013).
+- One logical Monitoring→Risk edge and one logical Risk→Communication edge each create one TimelineEvent (FR-013). Retries do not create additional logical handoff edges.
 - One AgentHandoffEvent may create one DeadLetterEntry on permanent failure (FR-014).
 - Many AgentHandoffEvents belong to one Incident.
 
 **Validation rules**:
 - `confidence` must be between 0.0 and 1.0 inclusive.
-- `retryCount` must not exceed `maxRetries`.
+- `attemptCount` must be between 1 and `maxAttempts` inclusive.
+- `retryCount` must equal `attemptCount - 1` and must not exceed `maxRetries`.
 - `status` can only transition: `pending` → `delivered` | `retrying`; `retrying` → `delivered` | `failed`; `failed` → `dead_lettered`.
 - `scopeKey` must match the incident's tenant scope.
 
@@ -91,7 +94,8 @@ failed ──→ dead_lettered    (stored in dead-letter store)
 - `originalPayload`: dict, the full payload that failed
 - `failureReason`: string, human-readable failure description
 - `failureCode`: string, machine-readable failure code (e.g., `CIRCUIT_OPEN`, `TIMEOUT`, `VALIDATION_ERROR`)
-- `retryCount`: integer, number of retries attempted before dead-lettering
+- `attemptCount`: integer, total attempts including initial call before dead-lettering (1–3)
+- `retryCount`: integer, retries after initial call before dead-lettering (0–2)
 - `sourceService`: string, the service or agent that produced the payload
 - `targetService`: string, the intended recipient
 - `incidentId`: string or null, associated incident if applicable

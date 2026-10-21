@@ -7,11 +7,21 @@ when signals lack explicit lat/lon.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 from datetime import UTC, datetime
+from typing import Protocol
 
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
+
+
+class NamedLocationContainer(Protocol):
+    def read_item(self, *, item: str, partition_key: str) -> dict[str, object]: ...
+
+    def upsert_item(self, *, body: dict[str, object]) -> object: ...
+
+    def query_items(self, *, query: str, enable_cross_partition_query: bool) -> Iterable[dict[str, object]]: ...
 
 
 class NamedLocation(BaseModel):
@@ -31,7 +41,7 @@ class LocationResolutionError(Exception):
 class NamedLocationRepository:
     """Cosmos DB client wrapper for named_locations collection."""
 
-    def __init__(self, cosmos_container: object | None = None) -> None:
+    def __init__(self, cosmos_container: NamedLocationContainer | None = None) -> None:
         self._container = cosmos_container
         self._local: dict[str, NamedLocation] = {}
 
@@ -61,7 +71,7 @@ class NamedLocationRepository:
                     item=location_id,
                     partition_key=location_id,
                 )
-                return NamedLocation(**doc)
+                return NamedLocation.model_validate(doc)
             except Exception:
                 return None
         return self._local.get(location_id)
@@ -84,5 +94,5 @@ class NamedLocationRepository:
                     enable_cross_partition_query=True,
                 )
             )
-            return [NamedLocation(**doc) for doc in docs]
+            return [NamedLocation.model_validate(doc) for doc in docs]
         return list(self._local.values())

@@ -1,0 +1,144 @@
+{
+  "datasetId": "disaster-response-core",
+  "version": "1.1.1",
+  "state": "published",
+  "contentHash": "sha256:3096f74a03b5d2d988a3dee8f732c42725dbf1a96cf9ef08a6e79e75da640b60",
+  "caseCount": 5000,
+  "distribution": {
+    "hazard:building-collapse": {
+      "count": 325,
+      "percentage": 0.065
+    },
+    "hazard:bushfire": {
+      "count": 400,
+      "percentage": 0.08
+    },
+    "hazard:crisis-distress": {
+      "count": 500,
+      "percentage": 0.1
+    },
+    "hazard:evacuation-order": {
+      "count": 375,
+      "percentage": 0.075
+    },
+    "hazard:fatality-report": {
+      "count": 350,
+      "percentage": 0.07
+    },
+    "hazard:flood": {
+      "count": 475,
+      "percentage": 0.095
+    },
+    "hazard:hazmat": {
+      "count": 325,
+      "percentage": 0.065
+    },
+    "hazard:mass-casualty": {
+      "count": 350,
+      "percentage": 0.07
+    },
+    "hazard:missing-person": {
+      "count": 350,
+      "percentage": 0.07
+    },
+    "hazard:public-info": {
+      "count": 475,
+      "percentage": 0.095
+    },
+    "hazard:remains-recovery": {
+      "count": 275,
+      "percentage": 0.055
+    },
+    "hazard:storm": {
+      "count": 375,
+      "percentage": 0.075
+    },
+    "hazard:structure-fire": {
+      "count": 425,
+      "percentage": 0.085
+    },
+    "language:ar-SA": {
+      "count": 499,
+      "percentage": 0.0998
+    },
+    "language:en-AU": {
+      "count": 3003,
+      "percentage": 0.6006
+    },
+    "language:en-NZ": {
+      "count": 502,
+      "percentage": 0.1004
+    },
+    "language:vi-VN": {
+      "count": 498,
+      "percentage": 0.0996
+    },
+    "language:zh-Hans-CN": {
+      "count": 498,
+      "percentage": 0.0996
+    },
+    "action:answer": {
+      "count": 4500,
+      "percentage": 0.9
+    },
+    "action:refuse": {
+      "count": 500,
+      "percentage": 0.1
+    },
+    "severity:critical": {
+      "count": 1011,
+      "percentage": 0.2022
+    },
+    "severity:high": {
+      "count": 1743,
+      "percentage": 0.3486
+    },
+    "severity:low": {
+      "count": 744,
+      "percentage": 0.1488
+    },
+    "severity:medium": {
+      "count": 1502,
+      "percentage": 0.3004
+    },
+    "sensitivity:crisis-distress": {
+      "count": 500,
+      "percentage": 0.1
+    },
+    "sensitivity:graphic-fatality": {
+      "count": 350,
+      "percentage": 0.07
+    },
+    "sensitivity:human-remains": {
+      "count": 275,
+      "percentage": 0.055
+    },
+    "sensitivity:mass-casualty": {
+      "count": 350,
+      "percentage": 0.07
+    },
+    "sensitivity:prompt-injection": {
+      "count": 500,
+      "percentage": 0.1
+    }
+  },
+  "languageScope": [
+    "ar-SA",
+    "en-AU",
+    "en-NZ",
+    "vi-VN",
+    "zh-Hans-CN"
+  ],
+  "manifestBlobUri": "file://C:/code/ama/packages/eval-dataset/data/dataset-disaster-core-1.1.1/cases.jsonl",
+  "publishedAt": "2026-10-05T22:11:33.810311Z",
+  "publishedBy": "cli-generator",
+  "approvalChain": [
+    {
+      "role": "eval-author",
+      "principal": "cli-generator",
+      "action": "approve",
+      "timestamp": "2026-10-05T22:11:33.810311Z",
+      "comment": null
+    }
+  ]
+}

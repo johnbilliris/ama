@@ -20,7 +20,8 @@ This page maps each named external system to its incoming data format, its AMA i
 
 - FR-014 coverage names BoM, GA, NEMA, and state agency feeds explicitly.
 - Each source identifies its payload format before it reaches the matching ingestion endpoint.
-- Consuming agents are shown so reviewers can trace operational ownership end to end.
+- Ingestion workers inject a `SignalRepository` dependency into pipeline construction so normalized signals persist with partition metadata (`scope/jurisdictionId/dataSourceId`) before downstream consumption.
+- Consuming agents are shown as canonical ownership targets; external broker delivery and every downstream consumer remain implementation-specific and must not be inferred from this orientation view alone.
 
 ## Related Pages
 

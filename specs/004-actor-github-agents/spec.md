@@ -143,6 +143,15 @@ A project lead or senior developer updates the agent catalogue when new organisa
 - Q: Where should the new actor agents be placed in the directory structure? → A: Nested under `.github/agents/` with tier subdirectories: `operational/`, `sectors/`, `technical/`. Existing speckit workflow agents remain in `.github/agents/` root.
 - Q: Should Meteorology/BoM be added as a sector agent? → A: Yes, add Meteorology/Bureau of Meteorology as a 14th sector agent. BoM has a unique role as the authoritative source of weather warnings and hazard intelligence with distinct coordination obligations to all other sectors. Sector count increases from 13 to 14.
 
+## Scope Evolution Snapshot (2026-09-15)
+
+- 2026-03-23 historical draft snapshot: 27 actors (9 operational + 10 sectors + 8 technical)
+- 2026-03-23 clarification snapshot: 31 actors (9 operational + 14 sectors + 8 technical)
+- 2026-03-23 SC-001 target snapshot: minimum 35 actors (9 operational + 14 sectors + 12 technical)
+- 2026-09-15 filesystem snapshot: 85 active actor files, 12 workflow agents, 6 archived sector agents
+
+Historical snapshots are retained for traceability. Current contract and registry conformance checks use the filesystem snapshot above.
+
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
@@ -159,22 +168,22 @@ A project lead or senior developer updates the agent catalogue when new organisa
 Scoped to this spec's domain (actor / GitHub agent catalogue and registry). Tagging follows `specs/027-spec-hardening` taxonomy: `[RISK]` (open externally-driven risk), `[DECISION]` (deliberate scoping decision), bare bullet (operating assumption).
 
 - **ASM-004**: The AU-v1 deployment context defined in `specs/001-disaster-response-hub/spec.md` is the operational baseline for this spec; capstone-country variants (PH / JP / BD) are deferred. `linked_gaps:` `specs/shared/gap-id-register.md` A-GAP-001..003. `status:` Open.
-- **ASM-005** [DECISION]: This spec's deliverables (actor / GitHub agent catalogue and registry) integrate with the actor catalogue (`specs/004-actor-github-agents/spec.md`); responsible technical agents - product-owner-ba - are consulted via the `agent` tool during authoring and review.
+- **ASM-005** [DECISION]: This spec's deliverables (actor / GitHub agent catalogue and registry) integrate with the catalogue artefacts (`.github/agents/AGENTS.md` and `.github/agents/**`). Human consultation evidence for this amendment is currently absent; agent/tool invocation records do not count as human consultation or approval until a named role signs off in evidence.
 - **ASM-006**: Speckit conventions (FR/SC numbering, ASM/HYP/PER/SCP families) and the persona-profile YAML schema (`specs/027-spec-hardening/contracts/persona-profile.md`) are authoritative; this spec defers to those rather than redefining them.
 
 ## Personas
 
 Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
 
-- **PER-004**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
-- **PER-005**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
+- **PER-004**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` unverified. `preconditions:` persona-validation gate pending (`validated_by` must include SME/practitioner + date + evidence link + authority_scope unilateral/countersign).
+- **PER-005**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` unverified. `preconditions:` persona-validation gate pending (`validated_by` must include SME/practitioner + date + evidence link + authority_scope unilateral/countersign).
 - **PER-006** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
 
 ## Hypotheses
 
 Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
 
-- **HYP-002**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-002.md` (created in feature 028 polish).
+- **HYP-042**: If each amendment to this spec is reviewed by a named human owner role and recorded in a consultation log that links the reviewed change and disposition, then the proportion of amendments with complete consultation records remains >= 95% over a rolling 90-day window. **Falsification**: consultation-record coverage falls below 90% in any monthly audit, or any amendment marked "consulted" lacks a resolvable reviewed-change link. **Measurement design**: compare consultation-log entries against merged change history for this spec (change-link parity + required fields), not portfolio structural rubric scores. **Evidence stub**: `specs/004-actor-github-agents/evidence/HYP-042.md`.
 
 ## Out of Scope
 
@@ -186,5 +195,3 @@ Items explicitly deferred from this spec; promotion to in-scope requires the nam
 - **SCP-006**: Constitutional-level changes (NON-NEGOTIABLE #1..#5) are not modified by this spec; any tension is documented as `[RISK]` in Assumptions, never resolved here.
 - **SCP-007**: Cross-spec authority disputes are arbitrated via `product-owner-ba` and the speckit governance flow; this spec does not unilaterally claim ownership of capabilities owned elsewhere. `defers-to:` 018 (recovery-phase indicators, triggers, phase-exit criteria); 008 (warning-tier authoring, multilingual delivery, misinformation defence) where applicable.
 - **SCP-008** [META]: This spec is delivery-hygiene / enabling infrastructure; capstone-outcome-critical-path ownership lives in specs (canonical list — see the verbatim bullet inserted by feature 028 / US4 elsewhere in this section). (See `specs/028-capstone-alignment/contracts/meta-spec-flag.contract.md`; the verbatim canonical bullet is added in US4.)
-
-

@@ -1,28 +1,20 @@
 # ---------------------------------------------------------------------------
 # CODEOWNERS — AMA monorepo
 # ---------------------------------------------------------------------------
-# Capstone specification — dual-control spec maintenance per FR-034
-# (specs/001-disaster-response-hub/spec.md § Status-transition authority).
-# Every PR touching the governed directories requires review from the
-# spec-maintainers team. A team handle is mandatory (Clarification 6).
-#
-# T005 Open Delta: if team `@johnbilliris/ama-spec-maintainers` does not yet
-# exist (verify with `gh api /orgs/johnbilliris/teams/ama-spec-maintainers`),
-# the interim individual owner below applies until the team is created. An
-# Open Delta row is carried in specs/001-disaster-response-hub/spec.md
-# § Open Deltas with target_feature=028-holistic-spec-hardening.
+# This is a user-owned repository. @johnbilliris is the only current
+# collaborator and has admin permission, so every active rule uses that valid
+# user. Team-based dual control remains an open governance requirement until a
+# second write collaborator or an organisation with real teams is provisioned.
 # ---------------------------------------------------------------------------
 
-# Primary owner — capstone spec and its shared artefacts.
-specs/001-disaster-response-hub/  @johnbilliris/ama-spec-maintainers
-specs/027-spec-hardening/         @johnbilliris/ama-spec-maintainers
-specs/028-holistic-spec-hardening/ @johnbilliris/ama-spec-maintainers
-specs/shared/                     @johnbilliris/ama-spec-maintainers
+# Repository-wide ownership baseline.
+* @johnbilliris
 
-# Interim fallback (until the spec-maintainers team is provisioned; see T005).
-# Removing the line above and relying solely on the line below is a governance
-# regression — keep both until the team exists with ≥ 2 members.
-# specs/001-disaster-response-hub/  @johnbilliris
+# Capstone specification and shared artefacts.
+specs/001-disaster-response-hub/   @johnbilliris
+specs/027-spec-hardening/          @johnbilliris
+specs/028-holistic-spec-hardening/ @johnbilliris
+specs/shared/                      @johnbilliris
 
 # ---------------------------------------------------------------------------
 # Spec 031 — Simplified branch-based CI/CD (FR-014).
@@ -40,12 +32,12 @@ apps/web/src/app/incidents/**             @johnbilliris
 
 # ---------------------------------------------------------------------------
 # spec-038 In-Product Help Documentation & Grounded Chat Assistant
-# Dual-approval gate (FR-011b / T-AA008) — every Help-content + snapshot
-# manifest PR requires sign-off from BOTH a help-content owner AND a
-# safety-or-governance lead. Path globs cover authored content, the spec
-# directory + immutable snapshots, and the ingest-runner manifest.
+# FR-011b targets dual approval. CODEOWNERS currently routes these paths to the
+# only actual repository collaborator; dual approval cannot be claimed until a
+# second eligible reviewer is provisioned. Path globs preserve the intended
+# ownership boundaries for that future delegation.
 # ---------------------------------------------------------------------------
-apps/web/src/content/help/**                       @johnbilliris/ama-help-content-owners @johnbilliris/ama-safety-or-governance-leads
-specs/038-help-docs-chat/**                        @johnbilliris/ama-help-content-owners @johnbilliris/ama-safety-or-governance-leads
-specs/038-help-docs-chat/snapshots/**              @johnbilliris/ama-help-content-owners @johnbilliris/ama-safety-or-governance-leads
-apps/ingest-runner/manifests/help-snapshot.yaml    @johnbilliris/ama-help-content-owners @johnbilliris/ama-safety-or-governance-leads
+apps/web/src/content/help/**                    @johnbilliris
+specs/038-help-docs-chat/**                     @johnbilliris
+specs/038-help-docs-chat/snapshots/**           @johnbilliris
+apps/ingest-runner/manifests/help-snapshot.yaml @johnbilliris

@@ -39,9 +39,7 @@ def test_approval_gate_metrics_invalid_window_400() -> None:
     r = _client().get("/api/workflow_runs/metrics/approval-gate?window=99h")
     assert r.status_code == 400
     body = r.json()
-    # AMA's exception middleware serialises HTTPException details into a
-    # `message` string; treat membership of the canonical token as the contract.
-    assert "invalid_window" in body.get("message", "") or body.get("detail", {}).get("error") == "invalid_window"
+    assert body.get("errorCategory") == "validation_error"
 
 
 def test_approval_gate_metrics_default_window() -> None:

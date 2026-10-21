@@ -4,9 +4,17 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from datetime import UTC, datetime, timedelta
+from typing import TypedDict
 
 from ama_domain import SupportHandoffRecord
 from app.observability.audit import emit_audit_event
+
+
+class OpenHandoff(TypedDict):
+    handoff_id: str
+    tenant_id: str
+    opened_at: datetime
+    record: SupportHandoffRecord
 
 
 def sla_for(record: SupportHandoffRecord, *, incident_mode: bool) -> timedelta:
@@ -17,7 +25,7 @@ def sla_for(record: SupportHandoffRecord, *, incident_mode: bool) -> timedelta:
 
 
 def check_open_handoffs(
-    open_handoffs: Iterable[dict],
+    open_handoffs: Iterable[OpenHandoff],
     *,
     incident_mode: bool,
     now: datetime | None = None,

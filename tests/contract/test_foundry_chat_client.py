@@ -55,6 +55,7 @@ def test_foundry_response_is_frozen_dataclass() -> None:
         "usage_completion_tokens",
         "latency_ms",
         "safety_filter_triggered",
+        "deployment_id",
         "raw",
     }
     actual = set(get_type_hints(cls).keys())
@@ -173,6 +174,7 @@ async def test_fake_implements_protocol() -> None:
                 usage_completion_tokens=1,
                 latency_ms=1,
                 safety_filter_triggered=False,
+                deployment_id="reasoning-deploy",
                 raw={},
             )
 
@@ -186,3 +188,27 @@ async def test_fake_implements_protocol() -> None:
     assert isinstance(fake, mod.FoundryChatClient), (
         "Fake satisfying chat_complete + chat_complete_stream must pass isinstance check"
     )
+
+
+def test_chat_complete_timeout_maps_to_transport_error() -> None:
+    mod = _seam_module()
+
+    class _TimeoutClient:
+        def complete(self, **kwargs):
+            _ = kwargs
+            raise TimeoutError("timed out")
+
+    live = mod.LiveFoundryChatClient(
+        endpoint="https://my-project.services.ai.azure.com/",
+        deployments={"reasoning": "reasoning-deploy"},
+        region="australiaeast",
+    )
+    live._ensure_sync_client = lambda deployment: _TimeoutClient()  # type: ignore[method-assign]
+    live._apply_gateway = lambda **kwargs: kwargs["messages"]  # type: ignore[method-assign]
+
+    with pytest.raises(mod.FoundryTransportError, match="timeout"):
+        live.chat_complete(
+            model_key="reasoning",
+            messages=[{"role": "user", "content": "hello"}],
+            timeout_s=0.01,
+        )

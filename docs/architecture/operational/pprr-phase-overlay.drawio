@@ -1,55 +1,96 @@
-<mxfile host="app.diagrams.net" modified="2026-05-11T00:00:00.000Z" agent="spec-001-fallback" version="24.0.0">
+<mxfile host="app.diagrams.net" modified="2026-09-15T00:00:00.000Z" agent="remediation-source-updated; export=pending-drawio" version="24.0.0">
   <diagram name="OPS-03" id="ops03-fallback">
-    <mxGraphModel dx="1214" dy="686" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1214" dy="686" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1000" math="0" shadow="0">
       <root>
       <mxCell id="0"/>
       <mxCell id="1" parent="0"/>
       <!-- Swim lane headers -->
       <mxCell id="2" value="Prevention" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
-        <mxGeometry x="30" y="30" width="240" height="680" as="geometry"/>
+        <mxGeometry x="30" y="30" width="240" height="690" as="geometry"/>
       </mxCell>
       <mxCell id="3" value="Preparedness" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
-        <mxGeometry x="280" y="30" width="240" height="680" as="geometry"/>
+        <mxGeometry x="280" y="30" width="240" height="690" as="geometry"/>
       </mxCell>
       <mxCell id="4" value="Response" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
-        <mxGeometry x="530" y="30" width="240" height="680" as="geometry"/>
+        <mxGeometry x="530" y="30" width="240" height="690" as="geometry"/>
       </mxCell>
       <mxCell id="5" value="Recovery" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
-        <mxGeometry x="780" y="30" width="240" height="680" as="geometry"/>
+        <mxGeometry x="780" y="30" width="240" height="690" as="geometry"/>
       </mxCell>
       <!-- monitoring-agent (all 4 phases) -->
       <mxCell id="6" value="monitoring-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
-        <mxGeometry x="50" y="120" width="980" height="45" as="geometry"/>
+        <mxGeometry x="50" y="160" width="980" height="45" as="geometry"/>
       </mxCell>
       <!-- risk-assessment-agent (Prevention, Preparedness, Response) -->
       <mxCell id="7" value="risk-assessment-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
-        <mxGeometry x="50" y="200" width="720" height="45" as="geometry"/>
+        <mxGeometry x="50" y="240" width="720" height="45" as="geometry"/>
       </mxCell>
       <!-- communication-agent (Preparedness, Response, Recovery) -->
       <mxCell id="8" value="communication-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
-        <mxGeometry x="300" y="280" width="700" height="45" as="geometry"/>
+        <mxGeometry x="300" y="320" width="700" height="45" as="geometry"/>
       </mxCell>
       <!-- resource-allocation-agent (Response, Recovery) -->
       <mxCell id="9" value="resource-allocation-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
-        <mxGeometry x="550" y="360" width="450" height="45" as="geometry"/>
+        <mxGeometry x="550" y="400" width="450" height="45" as="geometry"/>
       </mxCell>
       <!-- evacuation-agent (Response only) -->
       <mxCell id="10" value="evacuation-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
-        <mxGeometry x="550" y="440" width="220" height="45" as="geometry"/>
+        <mxGeometry x="550" y="460" width="220" height="45" as="geometry"/>
       </mxCell>
       <!-- Overlap region dashed border examples -->
       <mxCell id="11" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#FF0000;dashed=1;strokeWidth=2;fontSize=10;" vertex="1" parent="1">
-        <mxGeometry x="278" y="110" width="5" height="560" as="geometry"/>
+        <mxGeometry x="278" y="110" width="5" height="400" as="geometry"/>
       </mxCell>
       <mxCell id="12" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#FF0000;dashed=1;strokeWidth=2;fontSize=10;" vertex="1" parent="1">
-        <mxGeometry x="528" y="110" width="5" height="560" as="geometry"/>
+        <mxGeometry x="528" y="110" width="5" height="400" as="geometry"/>
       </mxCell>
       <mxCell id="13" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#FF0000;dashed=1;strokeWidth=2;fontSize=10;" vertex="1" parent="1">
-        <mxGeometry x="778" y="110" width="5" height="560" as="geometry"/>
+        <mxGeometry x="778" y="110" width="5" height="400" as="geometry"/>
       </mxCell>
       <!-- Footer note -->
-      <mxCell id="14" value="Aligns with constitution §PPRR — FR-024" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=2;" vertex="1" parent="1">
-        <mxGeometry x="250" y="740" width="550" height="30" as="geometry"/>
+      <mxCell id="14" value="Aligns with constitution §PPRR — FR-024. The five canonical agents are communication-agent, evacuation-agent, monitoring-agent, resource-allocation-agent and risk-assessment-agent; each bar spans exactly the phases in which that agent is active." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontStyle=2;" vertex="1" parent="1">
+        <mxGeometry x="40" y="930" width="980" height="40" as="geometry"/>
+      </mxCell>
+      <mxCell id="20" value="AIIMS roles: Planning Officer, Risk Manager, Resilience Planner" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+        <mxGeometry x="45" y="60" width="210" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="21" value="AIIMS roles: Planning Officer, Logistics Officer, Public Information Officer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+        <mxGeometry x="295" y="60" width="210" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="22" value="AIIMS roles: Incident Controller, Operations Officer, Field Coordinator, Public Information Officer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+        <mxGeometry x="545" y="60" width="210" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="23" value="AIIMS roles: Recovery Coordinator, Resilience Planner, Executive Leader, Observer/Auditor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+        <mxGeometry x="795" y="60" width="210" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="24" value="Key event: hazard mitigation works completed and risk treatment accepted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;dashed=1;" vertex="1" parent="1">
+        <mxGeometry x="45" y="520" width="210" height="60" as="geometry"/>
+      </mxCell>
+      <mxCell id="25" value="Key event: plans exercised, warning systems tested, evacuation centres pre-identified" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;dashed=1;" vertex="1" parent="1">
+        <mxGeometry x="295" y="520" width="210" height="60" as="geometry"/>
+      </mxCell>
+      <mxCell id="26" value="Key events: incident declared, warning issued, evacuation authorised, control handover" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;dashed=1;" vertex="1" parent="1">
+        <mxGeometry x="545" y="520" width="210" height="60" as="geometry"/>
+      </mxCell>
+      <mxCell id="27" value="Key events: recovery coordinator appointed, return certified, recovery programme closed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;dashed=1;" vertex="1" parent="1">
+        <mxGeometry x="795" y="520" width="210" height="60" as="geometry"/>
+      </mxCell>
+      <mxCell id="28" value="OVERLAP: Preparedness and Response run concurrently while warnings escalate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#FF0000;dashed=1;strokeWidth=2;fontSize=10;fontColor=#b30000;verticalAlign=bottom;" vertex="1" parent="1">
+        <mxGeometry x="430" y="600" width="200" height="90" as="geometry"/>
+      </mxCell>
+      <mxCell id="29" value="OVERLAP: Response and Recovery run concurrently during managed handover" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#FF0000;dashed=1;strokeWidth=2;fontSize=10;fontColor=#b30000;verticalAlign=bottom;" vertex="1" parent="1">
+        <mxGeometry x="680" y="600" width="200" height="90" as="geometry"/>
+      </mxCell>
+      <mxCell id="30" value="RECURRENCE: lessons from Recovery feed the next Prevention and Preparedness cycle — PPRR is continuous, not linear" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;" vertex="1" parent="1">
+        <mxGeometry x="40" y="760" width="980" height="45" as="geometry"/>
+      </mxCell>
+      <mxCell id="31" value="RECURRENCE loop" style="endArrow=block;html=1;rounded=0;strokeWidth=2;dashed=1;strokeColor=#d6b656;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=1;" edge="1" parent="1" source="5" target="2">
+        <mxGeometry relative="1" as="geometry">
+          <Array as="points">
+            <mxPoint x="900" y="850"/>
+            <mxPoint x="150" y="850"/>
+          </Array>
+        </mxGeometry>
       </mxCell>
       </root>
     </mxGraphModel>

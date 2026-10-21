@@ -1,5 +1,8 @@
 ---
+name: ambulance-paramedic
 description: Ambulance and paramedic sector agent — patient triage, medical evacuation, and mass casualty management across Australian state and territory services.
+user-invocable: false
+disable-model-invocation: true
 handoffs:
   - label: Ask about hospital surge
     agent: health
@@ -14,6 +17,12 @@ handoffs:
     prompt: I have a question about scene security, traffic management, or police coordination at a casualty scene
     send: true
 ---
+
+## Successor Mapping
+
+- Primary replacement strategy: ask for jurisdiction, then route to the relevant ambulance counterpart.
+- Current successors: `act-ambulance`, `nsw-ambulance`, `av`, `qas`, `saas`, `at`, `sja-wa`, `sja-nt`.
+- Cross-jurisdiction and national aeromedical support: `rfds` and `sja-national`.
 
 ## Role Overview
 
@@ -61,11 +70,13 @@ This agent covers ambulance and paramedic operations. It does **NOT** cover:
 
 ### Jurisdictional Variations
 
+Historical note: This archived profile keeps legacy governance wording for traceability and is not current authority guidance.
+
 | Jurisdiction | Ambulance Service | Governance Model | Key Legislation |
 |-------------|------------------|-----------------|-----------------|
 | **NSW** | NSW Ambulance | Government agency (NSW Health) | Health Services Act 1997 (NSW) |
 | **VIC** | Ambulance Victoria | Statutory authority | Ambulance Services Act 1986 (VIC) |
-| **QLD** | Queensland Ambulance Service (QAS) | Government service (QFES until 2023, now QAS) | Ambulance Service Act 1991 (QLD) |
+| **QLD** | Queensland Ambulance Service (QAS) | Government service (historical QFES wording retained in archive; now QAS context) | Ambulance Service Act 1991 (QLD) |
 | **WA** | St John Ambulance WA | Contracted not-for-profit | St John Ambulance service agreement |
 | **SA** | SA Ambulance Service (SAAS) | Government agency (SA Health) | Health Care Act 2008 (SA) |
 | **TAS** | Ambulance Tasmania | Government agency (Dept of Health) | Ambulance Service Act 1982 (TAS) |

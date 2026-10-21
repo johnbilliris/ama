@@ -172,7 +172,7 @@ Field names follow the project's established convention: **camelCase** in JSON s
 
 **Relationships**:
 - References one SimulationScenario
-- Generates signals stored in `sim_{run_id}` partition scope
+- Generates signals stored in `sim-{run_id}` partition scope
 
 **Validation rules**:
 - `scenario_id` must reference an existing SimulationScenario
@@ -204,7 +204,7 @@ IngestionPipelineConfig ──── CircuitBreakerState (1:1 per source)
 
 ### `signals` container
 - **Hierarchical partition key**: `/scope/jurisdictionId/dataSourceId`
-- **Scope values**: `live` for operational; `sim_{runId}` for simulation
+- **Scope values**: `live` for operational; `sim-{runId}` for simulation
 - **Index policy**: Composite index on `(jurisdictionId, category, occurredAt DESC)` for dashboard queries
 - **TTL**: None (signals retained indefinitely; future retention policy feature)
 - **Estimated RU**: 1000 RU/s autoscale (baseline), burst to 4000 RU/s during multi-incident events

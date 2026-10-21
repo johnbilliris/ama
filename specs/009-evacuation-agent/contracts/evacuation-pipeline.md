@@ -30,8 +30,8 @@ The Evacuation Agent processes inbound `AgentHandoffEvent` messages from the Ris
 
 ### Stage 2: Assessment Retrieval
 
-**Input**: Validated handoff with assessment ID  
-**Output**: Retrieved `HazardAssessment` with hazard map  
+**Input**: Validated handoff with primary assessment ID
+**Output**: Primary assessment plus every unexpired `active` hazard assessment in the same incident partition
 **Degradation**: If assessment cannot be retrieved, reject handoff with `handoff_rejected` audit record (FR-002, Edge Case 1).
 
 | Outcome | Action |
@@ -39,21 +39,25 @@ The Evacuation Agent processes inbound `AgentHandoffEvent` messages from the Ris
 | Assessment retrieved with hazard map | Continue to zone computation |
 | Assessment retrieved without hazard map | Reject — insufficient data for route computation |
 | Assessment not found | Reject with `handoff_rejected` audit record, log missing assessment |
+| Active-hazard query unavailable | Retain handoff for retry; do not plan from an incomplete hazard set |
+| Any active hazard has invalid/empty geometry or foreign scope | Reject the handoff atomically; do not omit that hazard |
 
 ### Stage 3: Zone Computation
 
-**Input**: HazardAssessment with affected_area GeoJSON  
-**Output**: Three concentric evacuation zones with population estimates
+**Input**: All active incident-scoped hazards with type, severity, and affected-area GeoJSON
+**Output**: Three cumulative evacuation zones, exclusive population memberships, and the merged raw affected area
 
 **Algorithm**:
-1. Parse `affected_area` GeoJSON polygon as the Zone 1 boundary (immediate danger).
-2. Compute Zone 2 by buffering Zone 1 polygon outward (buffer distance derived from hazard type characteristics).
-3. Compute Zone 3 by buffering Zone 2 polygon outward.
-4. For multi-hazard scenarios (FR-009d): compute `shapely.ops.unary_union()` of all hazard polygons before zone derivation. Highest severity (lowest zone number) applies to overlapping areas.
-5. Estimate population per zone using pre-loaded population density data for the region.
+1. Validate every source as a non-empty WGS84 Polygon/MultiPolygon; no geometry repair or omission occurs in planning.
+2. Resolve each source's metric radius from the shared hazard-type/severity radius policy (`low=1`, `moderate=2`, `high=3`, `critical=4`).
+3. Project each source to a local azimuthal-equidistant CRS centered on that geometry, derive Zone 2 and Zone 3 in metres, then transform each level back to WGS84.
+4. Union Zone 1 from all sources, union Zone 2 from all sources, and union Zone 3 from all sources. Checking levels from 1 to 3 makes the lowest zone number authoritative in overlaps and preserves disjoint MultiPolygon hazards.
+5. Derive exclusive cohort/origin memberships as Zone 1, Zone 2 minus Zone 1, and Zone 3 minus Zone 2. Apportion authoritative population and vulnerability counts once across those memberships.
+6. Persist the raw-hazard union as `affected_area`, all contributing source snapshots/hashes/resolved radii, and `per-hazard-aeqd-level-union-v1` as the geometry algorithm.
 
-**Geospatial operations** (using Shapely):
-- Zone boundary: `hazard_polygon.buffer(distance)` for concentric zones
+**Geospatial operations** (using Shapely + pyproj):
+- Zone boundary: local-AEQD `hazard_polygon.buffer(distance_metres)` followed by WGS84 transform
+- Multi-hazard boundary: level-by-level `shapely.ops.unary_union()`
 - Road segment intersection: `zone_polygon.contains(road_linestring)` for full containment, `zone_polygon.intersects(road_linestring)` for partial overlap
 - Partial overlap (CHK013): Highest-severity zone applies (conservative, Life Safety First)
 
@@ -70,24 +74,45 @@ The Evacuation Agent processes inbound `AgentHandoffEvent` messages from the Ris
 | Outside all zones | Full capacity retained |
 | Explicitly closed (closure_status = closed) | Mark closed, capacity = 0 |
 
-**Road data staleness check**: If road network data is older than `ROAD_DATA_STALENESS_HOURS` (default 6h), flag plan as degraded and reduce confidence.
+**Road data freshness** uses the validated, timezone-aware source `metadata.last_updated`, never process load time. Refresh is atomic: a failed refresh preserves the last-known-good graph. A fresh cached graph after refresh failure may support provisional routes with an immediate-review flag and confidence reduction. Once source age exceeds `ROAD_DATA_STALENESS_HOURS` (default 6h), or no usable graph exists, route/destination computation is disabled and the plan carries hazard-specific generic guidance stating that passability and capacity are unverified.
+
+Population and facility data use their shared source timestamp and `POPULATION_DATA_STALENESS_HOURS` (default 24h). Stale records remain best-available inputs, but the plan persists source age, structured gaps, confidence adjustments, and an immediate local-verification flag. Unavailable registries remain distinct from verified-empty registries.
 
 ### Stage 5: Route Computation
 
-**Input**: Prepared road network graph, zones, assembly areas  
+**Input**: Prepared road network graph, zones, assembly areas, and all persisted active-hazard source snapshots
 **Output**: List of `EvacuationRoute` records
 
 **Algorithm** (Dijkstra's variant):
 1. For each zone, identify origin nodes within the zone.
-2. For each origin, compute shortest path to each reachable assembly area using Dijkstra's with edge weights = `distance / (capacity × utilisation_factor)`.
-3. Hazard-type-aware routing: apply routing strategy modifiers per hazard type (see data-model.md mapping).
-4. Multi-path distribution (FR-007): When population exceeds single-corridor capacity, compute additional paths by penalising edges on the first path and re-running Dijkstra.
-5. Flag corridors with utilisation > 80% as congestion-risk.
-6. For each route, compute vehicle suitability based on `surface_type` and `accessibility_features` of edges in the path.
+2. Compile every active hazard into one most-restrictive deterministic policy. Hard exclusions are applied when any hazard marks an edge/destination unsafe.
+3. Screen assembly areas before pathfinding. Explicitly exposed/unsafe destinations are persisted with hazard-specific rejection reasons.
+4. For each origin, compute paths to eligible destinations with edge weight `distance / capacity × congestion_penalty × hazard_preference_penalty`.
+5. Bushfire applies the documented metric 2 km perimeter exclusion and a continuous downwind penalty when validated `wind_from_degrees` exists. Cyclone excludes explicit coastal/storm-surge exposure and requires explicit non-conflicting shelter certification. Flood excludes explicit flood exposure and prefers relative higher ground. Earthquake excludes confirmed damage and penalises suspected damage. Tsunami excludes dedicated coastal/inundation exposure and prefers relative higher ground.
+6. Multi-path discovery (FR-007): When population exceeds single-corridor capacity, compute additional candidates by penalising edges on the first path and re-running Dijkstra.
+7. After candidates for every zone are known, perform one plan-wide deterministic allocation. Apportion each zone population exactly once by available path capacity with largest-remainder rounding; odd persons are retained and no origin/destination pair receives a duplicate copy of zone demand.
+8. Convert assigned people to evacuation vehicles/hour using `AVERAGE_PERSONS_PER_VEHICLE` (default 2) and `ROUTE_ALLOCATION_WINDOW_MINUTES` (default 120). Add each route's load once to every physical edge it traverses, together with `current_traffic_load_vehicles_per_hour`.
+9. Compute uncapped edge/route utilisation from total physical-edge load. `congestion_risk` is true only when precise utilisation is strictly greater than `CONGESTION_RISK_THRESHOLD_PCT`; `capacity_overloaded` is independently true above 100%. The legacy integer display remains capped at 100.
+10. Compute each zone's usable corridor capacity with deterministic max flow over unique candidate edges. Disjoint corridors add capacity; shared choke edges contribute once. Timeline estimation consumes this value rather than summing route bottlenecks.
+11. Derive canonical route evidence from the connected path: edge and node sequences, normal and loaded float-minute estimates from named speed assumptions, bottleneck capacity/edges, typed vehicle suitability, exact allocation/utilisation, and compatibility aliases for existing clients.
+12. Generate each selection rationale only after plan-wide allocation so it states the actual origin/destination, path length, both travel estimates, assigned people, uncapped utilisation, congestion/overload, applied per-edge preferences, exclusions, mode, and data gaps.
+13. Persist every hard/zero-capacity/explicit exclusion without truncation. Unknown causes remain `unspecified`, not an invented emergency closure. The authoritative plan-level inventory and reason counts remain available even when no route exists.
+14. Allocate assembly destinations once after route discovery. Candidate arcs must already be hazard-screened and reachable, match the area's `assigned_zones`, and have known residual capacity (`capacity_persons - current_occupancy_persons`). Unknown occupancy is unresolved, never treated as zero.
+15. Reserve verified wheelchair-accessible area and route capacity for the zone's vulnerable cohort first, then allocate remaining population. Zone 1 consumes shared destination capacity before Zone 2, then Zone 3. Deterministic largest-remainder allocation preserves whole-person totals.
+16. Persist each zone/area assignment, vulnerable subset, route IDs, residual capacity before/after, and any unresolved demand (`no_reachable_destination`, `capacity_unverified`, `no_accessible_capacity`, or `capacity_exhausted`). Route/corridor load is calculated only from destination-backed assigned population.
+
+**Routing completeness**:
+- `hazard_aware`: all attributes required by every active hazard are present.
+- `hazard_constrained_degraded`: available geometry, closure, and explicit exposure constraints are still enforced, but missing wind/elevation/coast/exposure/damage/shelter facts are listed in the plan and route. Confidence is reduced and the summary requires commander review; it never claims complete hazard-safe passage.
+- Missing values are unknown, not safe. They do not silently become zero elevation or no exposure. Explicit unsafe values still exclude the edge/destination in degraded mode.
 
 **Tie-breaking** (CHK007): When two routes have equal cost, prefer the route with lower congestion risk, then shorter distance.
 
-**No viable routes**: If no routes exist for a zone, trigger shelter-in-place decision (Stage 7).
+**No viable routes/capacity**: If no route-backed verified destination capacity exists for a zone, retain its full unresolved demand and trigger shelter/emergency handling in Stage 7. Partial destination capacity caps phase movement and produces a `partial_evacuation` disposition with the remainder explicit.
+
+**Summary visibility**: Every template/fallback summary includes a bounded reason-grouped unavailable-road count, rejected destinations, overloaded routes, and zones without routes. Full edge-level evidence remains structured in the plan and is not dependent on summary length.
+
+**Conservation invariant**: For each plan, `sum(route.allocated_population) + sum(zone.unallocated_route_population) == total_population`. Excess demand is assigned and exposed as uncapped overload; absent routes remain explicitly unallocated and feed the shelter/emergency disposition.
 
 ### Stage 6: Transport Coordination
 
@@ -95,10 +120,16 @@ The Evacuation Agent processes inbound `AgentHandoffEvent` messages from the Ris
 **Output**: List of `TransportRequirement` records
 
 **Process**:
-1. Query facility registry for facilities within each zone: aged care, disability care, hospitals, schools/childcare.
-2. For each facility, create a `TransportRequirement` with appropriate vulnerability category, vehicle type, and priority level.
-3. Compute `estimated_vehicles` using vehicle capacity assumptions (see data-model.md).
-4. If population data is unavailable (FR-032), skip transport coordination, note data gap in plan assumptions.
+1. Validate every facility's stable identity (or deterministic identity fallback), positive integer capacity, WGS84 location, vulnerability category, and exclusive zone membership.
+2. For each valid Zone 1/2 facility, create one typed `TransportRequirement` carrying exact individuals, vehicle quantity, pickup, destination, compatible selected route ID, priority, phase, considerations, and count basis. IDs are deterministic from incident scope, facility, category, and vehicle type.
+3. Compute vehicles with ceiling division by the documented per-vehicle capacity. `estimated_trips=1` means each requested vehicle makes one planned trip; vehicle quantity and trip count are not conflated.
+4. Keep Zone 3 facilities in the identified inventory as `advisory_only`; never create a mandatory transport request for Phase 5.
+5. Retain outside-area, invalid-location/category/population, and no-destination facilities as typed exclusions rather than silently dropping them.
+6. Reconcile facility-identified people against each Zone 1/2 authoritative vulnerable estimate. Persist identified and uncovered counts plus contradictions where facility capacity exceeds the estimate.
+7. Preserve unavailable registry (`status=unavailable`) separately from an authoritative empty registry (`status=complete` with zero facilities). Both states remain explicit in assumptions and plan fields.
+8. Link Zone 1 requests to Phase 1 and Zone 2 requests to Phase 3 through the full typed request/requirement ID.
+9. Expose a pure camelCase Resource Allocation payload adapter with `dispatchAuthorized=false`. Plan generation does not publish a handoff or dispatch vehicles; the downstream Resource Allocation boundary preserves every typed field and derives its demand ID deterministically.
+10. A resolved request may select only an assembly area already allocated to its zone with sufficient vulnerable capacity and a selected route compatible with its vehicle type. If none exists, keep the request with `destination_resolved=false` and an explicit reason; do not duplicate it as an excluded group or drop it.
 
 **Priority mapping**:
 | Vulnerability Category | Priority Level |
@@ -108,22 +139,34 @@ The Evacuation Agent processes inbound `AgentHandoffEvent` messages from the Ris
 | `elderly_aged_care` | `immediate` |
 | `children_schools_childcare` | `high` |
 
+**Downstream payload fields**: `requirementId`, `vehicleType`, `quantity`, `pickupLocation`, `priority`, `estimatedIndividuals`, `facilityId`, `facilityName`, destination ID/name, `originZone`, `phaseNumber`, `specialConsiderations`, `countBasis`, and `dispatchAuthorized=false`.
+
 ### Stage 7: Timeline Estimation and Shelter-in-Place
 
 **Input**: Routes, transport requirements, hazard time horizon  
-**Output**: Five-phase timeline, shelter-in-place recommendations (if needed)
+**Output**: Five typed, overlapping capacity-aware phases plus reconciled movement/shelter dispositions
 
 **Timeline formula** (per FR-013):
 ```
 clearance_time = (population / road_capacity) × distance_km × 60  [minutes]
-vulnerable_time = clearance_time × 1.5  [buffer multiplier]
-phase_duration = mobilisation_time + travel_time
+effective_buffer = 1 + (VULNERABLE_POPULATION_BUFFER - 1)
+				   × resolved_transport_population / routable_phase_population
+buffered_clearance_time = clearance_time × effective_buffer
 ```
 
+`road_capacity` is the zone's unique-edge max-flow capacity in vehicles/hour. Route distance is weighted by assigned population. The legacy FR-013 dimensional formula remains unchanged pending AUD-009-036; this remediation removes duplicated people/capacity without silently redefining that formula.
+
+Mobilisation is an explicit pre-phase offset. Loaded travel time is persisted separately and is not silently added again to the legacy clearance formula. The 1.5 default applies only to the linked, resolved transport cohort in vulnerable phases; general, Zone 3, and unresolved transport populations receive no unsupported buffer.
+
 **Phase transitions** (per FR-015 + Research Task 2):
-- **Primary trigger**: Elapsed time ≥ `phase_duration × PHASE_TRANSITION_TIME_FACTOR` (default 1.2)
-- **Secondary trigger**: Estimated population departed ≥ `PHASE_TRANSITION_POPULATION_PCT`% (default 50%)
-- Whichever trigger fires first initiates the next phase
+- **Population candidate**: `start + ceil(phase_population × PHASE_TRANSITION_POPULATION_PCT / 100) / modeled_departure_rate`. It is eligible only when the modeled movement before hazard arrival can reach the threshold.
+- **Time candidate**: `start + buffered_clearance_time × PHASE_TRANSITION_TIME_FACTOR`.
+- **Completion fallback**: The modeled phase completion is also safe to advance when it precedes both configured candidates.
+- The earliest eligible candidate permits the next phase, but a shared-edge capacity check may delay its actual start until active higher-priority phases release sufficient physical corridor capacity.
+- Disjoint-corridor phases may overlap. Shared current plus phase loads may not exceed edge capacity because of overlap; unavoidable single-phase overload remains explicit in route/corridor evidence.
+- Phase order remains 1 through 5. No lower-priority phase starts before its predecessor's modeled transition.
+
+Every phase persists population type and conservation, routable population, mobilisation/travel/clearance minutes, effective capacity, departure rate, both trigger candidates and winner, transition delay, start/completion/transition offsets and timezone-aware timestamps anchored to handoff creation, linked requests, effective buffer, route edges/allocation snapshot, and empty/blocked state. Zero-population phases transition immediately with zero duration. Populated blocked phases have no completion; plan completion is `max(phase.completion_offset_minutes)` when all required phase completions are finite, otherwise `null`. Initial, replan, and commander-modified versions use the same calculation.
 
 **Shelter-in-place decision** (FR-014):
 | Condition | Action |
@@ -144,13 +187,19 @@ phase_duration = mobilisation_time + travel_time
 
 | Mode | Method |
 |------|--------|
-| Normal | LLM via `_generate_with_fallback()` — plain language summary with AIIMS terminology |
+| Normal | Deterministic fact summary plus an optional pre-approved model acknowledgement; persisted as `ai_assisted` only after content-safety validation |
 | LLM unavailable | Template fallback — structured summary from route/timeline/transport data |
 | Content safety failure | Safety fallback — template text with `generation_method=safety_fallback` |
+
+The authoritative narrative is rendered from validated routes and destinations, exclusions and capacity state, zone dispositions, phase deadlines/triggers, transport requests, data gaps, and final confidence. The model cannot add routes, numbers, directives, or safety claims; non-empty output outside the pre-approved acknowledgement set is treated as ungrounded and falls back to the deterministic template. Replans and commander-modified versions regenerate the same factual summary from their changed structured decisions.
+
+Mandatory review, shelter/escalation/partial-movement, unavailable-road, zero-route, unresolved-demand, selected-route, and urgent assumption facts are budgeted separately from explanatory body text. Full assumptions remain structured on the plan and are never appended then truncated. The final displayed confidence is rendered only after all unique adjustment reasons have been applied.
 
 **Confidence adjustment in fallback**:
 - Template fallback: `confidence × 0.8` (multiplicative, per Research Task 4)
 - Content safety failure: `confidence × 0.8` + `generation_method=safety_fallback` in audit
+
+The shared LLM mixin retains its native labels for other agents. Evacuation adapts successful `llm` responses to `ai_assisted` locally and persists validator result/method/reason/evidence reference, grounding outcome, model deployment ID, and review requirement on both the plan and final audit. Keyword-validator fallback marks otherwise safe output for human review.
 
 ### Stage 9: Plan Versioning and Persistence
 
@@ -177,9 +226,12 @@ Every stage produces one or more `EvacuationDecisionRecord` entries. The finalis
 
 **Three-tier degradation** (same as monitoring/risk assessment):
 - Tier 1: Cosmos DB `create_item()`
-- Tier 2: In-memory `deque` (10K capacity)
-- Tier 3: Local JSONL file
-- Recovery flush: memory → file → Cosmos, annotating `buffered_at` and `flush_source`
+- Tier 2: Bounded in-memory cache backed by a local JSONL write-ahead log
+- Tier 3: WAL-only overflow after the memory cache reaches `AUDIT_BUFFER_CAPACITY`
+- A buffered receipt is accepted only after metadata serialization, file flush, and `fsync`; disk, permission, or `fsync` failure returns an explicit rejected receipt
+- One process lock serializes append, flush, atomic suffix rewrite, and status reads. Recovery drains the WAL strictly oldest-first and stops at the first Cosmos failure or malformed line, retaining that exact suffix
+- A 409 retry is idempotent success only when a partition-scoped point read matches the original record identity/content; conflicting content remains pending
+- Existing WAL backlog is detected on restart and blocks newer direct writes. Status is derived from actual pending, corrupt, or rejected state and returns healthy only after complete recovery
 
 ---
 

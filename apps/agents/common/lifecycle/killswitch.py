@@ -52,14 +52,22 @@ class KillSwitchState:
 
 def is_engaged(agent_id: str | None = None) -> bool:
     """Return whether the agent (defaults to ``AMA_AGENT_ID``) has its kill-switch engaged."""
-    aid = agent_id or os.getenv("AMA_AGENT_ID", "unknown")
+    aid = agent_id
+    if aid is None:
+        aid = os.getenv("AMA_AGENT_ID")
+        if aid is None:
+            aid = "unknown"
     with _LOCK:
         state = _STATE.get(aid)
         return bool(state and state.engaged)
 
 
 def get_state(agent_id: str | None = None) -> KillSwitchState | None:
-    aid = agent_id or os.getenv("AMA_AGENT_ID", "unknown")
+    aid = agent_id
+    if aid is None:
+        aid = os.getenv("AMA_AGENT_ID")
+        if aid is None:
+            aid = "unknown"
     with _LOCK:
         return _STATE.get(aid)
 

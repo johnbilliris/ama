@@ -32,7 +32,7 @@ class GaHotspotPipeline(IngestionPipelineBase):
 
         features = data.get("features", [])
         payloads = []
-        for feature in features[:50]:
+        for feature in features:
             feature["data_source_id"] = "ga-sentinel-hotspots"
             feature["source_name"] = "Geoscience Australia — Sentinel Hotspot Data"
             feature["source_kind"] = "authoritative"

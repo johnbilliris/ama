@@ -94,6 +94,16 @@ rule:
     - Azure.Search.QuerySLA
     - Azure.Search.IndexSLA
 
+# Cosmos DB AVM generates nested deployment parameters named
+# `uniqueKeyPolicyKeys`; these are public unique-key path definitions, not
+# credentials. Suppress only SecureParameter for these four named deployments.
+suppression:
+  Azure.Deployment.SecureParameter:
+    - evacuation-container-evacuation-plans
+    - evacuation-container-evacuation-decisions
+    - evacuation-container-hazard-assessments
+    - evacuation-container-risk-recommendations
+
 # Bicep build timing — the spec-029 main.bicep + 20 modules expand a large
 # graph. Local `bicep build-params` against `infra/parameters/*.bicepparam`
 # takes ~12s on a warm cache, which trips the default 5s PSRule timeout and

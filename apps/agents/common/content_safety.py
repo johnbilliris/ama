@@ -9,9 +9,14 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from common.content_safety_circuit_breaker import ContentSafetyCircuitBreaker
+
+if TYPE_CHECKING:
+    from azure.ai.contentsafety import ContentSafetyClient
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +46,31 @@ _EMERGENCY_ESCALATION_WORDS = {
     "catastrophic",
 }
 
+_EN_STOPWORDS = {
+    "the",
+    "and",
+    "to",
+    "of",
+    "in",
+    "for",
+    "with",
+    "evacuate",
+    "warning",
+    "emergency",
+}
+
+_AR_STOPWORDS = {"من", "في", "على", "إلى", "هذا", "هذه", "يرجى", "تحذير", "طارئ"}
+_VI_STOPWORDS = {"và", "là", "trong", "cho", "hãy", "khẩn", "cấp", "cảnh", "báo", "ngay"}
+_EL_STOPWORDS = {"και", "είναι", "στο", "στη", "σε", "κίνδυνος", "άμεση", "εκκένωση", "προειδοποίηση"}
+_IT_STOPWORDS = {"e", "di", "il", "la", "per", "con", "allerta", "emergenza", "evacuazione", "subito"}
+_STIGMATISING_PHRASES = {
+    "the disabled",
+    "invalid people",
+    "foreigners",
+    "illegal residents",
+    "normal people only",
+}
+
 
 @dataclass(frozen=False)
 class ContentSafetyResult:
@@ -58,7 +88,7 @@ class ContentSafetyValidator:
     def __init__(
         self,
         circuit_breaker: ContentSafetyCircuitBreaker | None = None,
-        azure_client: object | None = None,
+        azure_client: ContentSafetyClient | None = None,
     ) -> None:
         self._circuit_breaker = circuit_breaker or ContentSafetyCircuitBreaker()
         self._azure_client = azure_client
@@ -69,7 +99,7 @@ class ContentSafetyValidator:
             self._azure_client = self._init_azure_client()
 
     @staticmethod
-    def _init_azure_client():
+    def _init_azure_client() -> ContentSafetyClient | None:
         """Initialize Azure AI Content Safety client if credentials available."""
         endpoint = os.environ.get("AZURE_CONTENT_SAFETY_ENDPOINT", "")
         if not endpoint:
@@ -92,15 +122,59 @@ class ContentSafetyValidator:
             logger.debug("Azure AI Content Safety client not available")
         return None
 
+    @staticmethod
+    def _word_tokens(text: str) -> list[str]:
+        return re.findall(r"[\w'-]+", text.lower(), flags=re.UNICODE)
+
+    def _obvious_english_substitution(self, words: list[str]) -> bool:
+        if not words:
+            return False
+        en_hits = sum(1 for word in words if word in _EN_STOPWORDS)
+        return en_hits >= max(2, len(words) // 5)
+
+    @staticmethod
+    def _script_ratio(text: str, start: int, end: int) -> float:
+        letters = [char for char in text if char.isalpha()]
+        if not letters:
+            return 0.0
+        matches = sum(1 for char in letters if start <= ord(char) <= end)
+        return matches / len(letters)
+
     def _looks_like_language(self, text: str, expected_language: str | None) -> bool:
         if not expected_language:
             return True
+        words = self._word_tokens(text)
+        english_substitution = self._obvious_english_substitution(words)
+
         if expected_language == "en-AU":
-            return all(ord(char) < 128 for char in text)
+            return not (
+                self._script_ratio(text, 0x0600, 0x06FF) > 0.2
+                or self._script_ratio(text, 0x0370, 0x03FF) > 0.2
+                or any("\u4e00" <= char <= "\u9fff" for char in text)
+            )
         if expected_language == "zh-Hans":
             return any("\u4e00" <= char <= "\u9fff" for char in text)
-        if expected_language in {"ar", "vi", "el", "it"}:
-            return len(text.strip()) > 0
+        if expected_language == "ar":
+            if english_substitution:
+                return False
+            return self._script_ratio(text, 0x0600, 0x06FF) >= 0.25 and any(w in _AR_STOPWORDS for w in words)
+        if expected_language == "vi":
+            if english_substitution:
+                return False
+            vi_hits = sum(1 for word in words if word in _VI_STOPWORDS)
+            has_vi_diacritic = bool(
+                re.search(r"[ăâđêôơưáàảãạắằẳẵặấầẩẫậéèẻẽẹếềểễệíìỉĩịóòỏõọốồổỗộớờởỡợúùủũụứừửữựýỳỷỹỵ]", text.lower())
+            )
+            return vi_hits >= 2 or has_vi_diacritic
+        if expected_language == "el":
+            if english_substitution:
+                return False
+            return self._script_ratio(text, 0x0370, 0x03FF) >= 0.25 and any(w in _EL_STOPWORDS for w in words)
+        if expected_language == "it":
+            if english_substitution:
+                return False
+            it_hits = sum(1 for word in words if word in _IT_STOPWORDS)
+            return it_hits >= 2
         return True
 
     def validate(
@@ -116,6 +190,17 @@ class ContentSafetyValidator:
 
         if len(text) > max_length:
             return ContentSafetyResult(False, "failed_with_fallback", "length_exceeded")
+
+        # Language checks must run regardless of which safety provider path succeeds.
+        if not self._looks_like_language(text, expected_language):
+            return ContentSafetyResult(
+                passed=False,
+                result="failed_with_fallback",
+                reason="language_mismatch",
+                confidence=0.5,
+                validation_method="language_check",
+                review_flag=True,
+            )
 
         # Try Azure AI Content Safety (Layer 1)
         if self._azure_client and not self._circuit_breaker.is_open:
@@ -136,17 +221,12 @@ class ContentSafetyValidator:
         from azure.ai.contentsafety.models import AnalyzeTextOptions
 
         request = AnalyzeTextOptions(text=text)
-        response = self._azure_client.analyze_text(request)
+        client = self._azure_client
+        if client is None:
+            raise RuntimeError("Azure AI Content Safety client is not configured")
+        response = client.analyze_text(request)
 
-        max_severity = 0
-        for category in (
-            response.hate_result,
-            response.self_harm_result,
-            response.sexual_result,
-            response.violence_result,
-        ):
-            if category and category.severity > max_severity:
-                max_severity = category.severity
+        max_severity = max((category.severity or 0 for category in response.categories_analysis), default=0)
 
         # Pass threshold: all categories severity <= 2
         passed = max_severity <= 2
@@ -177,16 +257,6 @@ class ContentSafetyValidator:
                 review_flag=True,
             )
 
-        if not self._looks_like_language(text, expected_language):
-            return ContentSafetyResult(
-                passed=False,
-                result="failed_with_fallback",
-                reason="language_mismatch",
-                confidence=0.5,
-                validation_method="keyword_fallback",
-                review_flag=True,
-            )
-
         return ContentSafetyResult(
             passed=True,
             result="passed",
@@ -198,23 +268,29 @@ class ContentSafetyValidator:
     def validate_factual(
         self,
         alert_message: str,
-        originating_signal: dict,
+        originating_signal: dict[str, object],
     ) -> ContentSafetyResult:
         """Validate factual consistency against originating signal data (FR-007b)."""
         alert_lower = alert_message.lower()
-        mismatches = []
+        mismatches: list[str] = []
 
         hazard_type = originating_signal.get("hazard_type", "")
-        if hazard_type and hazard_type.lower() not in alert_lower:
-            mismatches.append(f"hazard_type '{hazard_type}' not found in alert")
+        if hazard_type:
+            if not isinstance(hazard_type, str):
+                raise TypeError("Signal hazard_type must be a string")
+            if hazard_type.lower() not in alert_lower:
+                mismatches.append(f"hazard_type '{hazard_type}' not found in alert")
 
         severity = str(originating_signal.get("severity_level", ""))
         if severity and severity not in alert_message:
             mismatches.append(f"severity_level '{severity}' not found in alert")
 
         location = originating_signal.get("location_name", "")
-        if location and location.lower() not in alert_lower:
-            mismatches.append(f"location_name '{location}' not found in alert")
+        if location:
+            if not isinstance(location, str):
+                raise TypeError("Signal location_name must be a string")
+            if location.lower() not in alert_lower:
+                mismatches.append(f"location_name '{location}' not found in alert")
 
         if mismatches:
             return ContentSafetyResult(
@@ -271,4 +347,24 @@ class ContentSafetyValidator:
             result="passed",
             confidence=0.0,
             validation_method="tone",
+        )
+
+    def validate_cultural(self, alert_message: str) -> ContentSafetyResult:
+        """Reject known stigmatising audience language before retention."""
+        normalized = " ".join(alert_message.casefold().split())
+        phrase = next((item for item in _STIGMATISING_PHRASES if item in normalized), None)
+        if phrase is not None:
+            return ContentSafetyResult(
+                passed=False,
+                result="failed_with_fallback",
+                reason=f"stigmatising_language:{phrase}",
+                confidence=1.0,
+                validation_method="cultural",
+                review_flag=True,
+            )
+        return ContentSafetyResult(
+            passed=True,
+            result="passed",
+            confidence=0.0,
+            validation_method="cultural",
         )

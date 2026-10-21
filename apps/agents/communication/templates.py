@@ -15,6 +15,7 @@ import json
 import logging
 import re
 from pathlib import Path
+from typing import NotRequired, TypedDict
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,28 @@ _PLACEHOLDER_RE = re.compile(r"\{(\w+)\}")
 # Default template directory relative to repo root
 # __file__ is communication/templates.py → parents[3] is the repo root (ama/)
 _DEFAULT_TEMPLATE_DIR = Path(__file__).resolve().parents[3] / "data" / "alert-templates"
+_REQUIRED_LANGUAGES = ("en-AU", "zh-Hans", "ar", "vi", "el", "it")
+_REQUIRED_HAZARDS = ("bushfire", "flood", "cyclone", "storm", "earthquake", "tsunami", "general")
+_REQUIRED_ALERT_TYPES = ("evacuation", "shelter_in_place", "general_warning", "all_clear")
+_FALLBACK_ALIAS = {
+    "evacuation": ("general", "evacuation", "severe"),
+    "shelter_in_place": ("general", "shelter_in_place", "severe"),
+    "general_warning": ("general", "general_warning", "moderate"),
+    "all_clear": ("general", "all_clear", "severe"),
+}
+
+
+class AlertTemplate(TypedDict):
+    template_id: str
+    hazard_type: str
+    severity: str
+    alert_type: str
+    language_code: str
+    title_template: str
+    body_template: str
+    action_items_template: str
+    _operational_fallback: NotRequired[bool]
+    _translation_unavailable: NotRequired[bool]
 
 
 class TemplateLoader:
@@ -30,7 +53,7 @@ class TemplateLoader:
 
     def __init__(self, template_dir: str | Path | None = None) -> None:
         self._template_dir = Path(template_dir) if template_dir else _DEFAULT_TEMPLATE_DIR
-        self._templates: dict[str, list[dict]] = {}
+        self._templates: dict[str, list[AlertTemplate]] = {}
         self._load_all()
 
     def _load_all(self) -> None:
@@ -57,6 +80,45 @@ class TemplateLoader:
         # en-AU must exist
         if "en-AU" not in self._templates:
             raise FileNotFoundError("Required en-AU template file is missing")
+        missing_languages = sorted(set(_REQUIRED_LANGUAGES) - set(self._templates))
+        if missing_languages:
+            raise FileNotFoundError(f"Required template languages are missing: {', '.join(missing_languages)}")
+        self._validate_operational_matrix()
+
+    def _validate_operational_matrix(self) -> None:
+        required_fields = {
+            "template_id",
+            "hazard_type",
+            "severity",
+            "alert_type",
+            "language_code",
+            "title_template",
+            "body_template",
+            "action_items_template",
+        }
+        for language, templates in self._templates.items():
+            for template in templates:
+                missing_fields = required_fields - set(template)
+                if missing_fields:
+                    raise ValueError(
+                        f"Template {template.get('template_id', '<unknown>')} in {language} is missing "
+                        f"{', '.join(sorted(missing_fields))}"
+                    )
+            combinations = {(item["hazard_type"], item["alert_type"]) for item in templates}
+            for hazard in _REQUIRED_HAZARDS:
+                for alert_type in _REQUIRED_ALERT_TYPES:
+                    if (hazard, alert_type) in combinations:
+                        continue
+                    alias_hazard, alias_type, alias_severity = _FALLBACK_ALIAS[alert_type]
+                    if not any(
+                        item["hazard_type"] == alias_hazard
+                        and item["alert_type"] == alias_type
+                        and item["severity"] == alias_severity
+                        for item in templates
+                    ):
+                        raise ValueError(
+                            f"No approved template or operational fallback for {language}/{hazard}/{alert_type}"
+                        )
 
     def get_template(
         self,
@@ -64,19 +126,24 @@ class TemplateLoader:
         severity: str,
         alert_type: str,
         language_code: str,
-    ) -> dict | None:
+    ) -> AlertTemplate | None:
         """Find a matching template for the given criteria.
 
         Returns None if no exact match found.
         """
         templates = self._templates.get(language_code, [])
-        for tmpl in templates:
-            if (
-                tmpl.get("hazard_type") == hazard_type
-                and tmpl.get("severity") == severity
-                and tmpl.get("alert_type") == alert_type
-            ):
-                return tmpl
+        template = self._find_template(templates, hazard_type, severity, alert_type)
+        if template is not None:
+            return template
+
+        alias_hazard, alias_type, alias_severity = _FALLBACK_ALIAS.get(
+            alert_type,
+            ("general", "general_warning", "moderate"),
+        )
+        template = self._find_template(templates, alias_hazard, alias_severity, alias_type)
+        if template is not None:
+            fallback: AlertTemplate = {**template, "_operational_fallback": True}
+            return fallback
 
         # Try en-AU fallback per CHK008 if language not found
         if language_code != "en-AU":
@@ -91,7 +158,7 @@ class TemplateLoader:
 
         return None
 
-    def _get_en_au_fallback(self, hazard_type: str, severity: str, alert_type: str) -> dict | None:
+    def _get_en_au_fallback(self, hazard_type: str, severity: str, alert_type: str) -> AlertTemplate | None:
         """Get en-AU template as fallback with [Translation unavailable] suffix."""
         for tmpl in self._templates.get("en-AU", []):
             if (
@@ -100,10 +167,37 @@ class TemplateLoader:
                 and tmpl.get("alert_type") == alert_type
             ):
                 # Return a copy with [Translation unavailable] annotation
-                fallback = dict(tmpl)
-                fallback["_translation_unavailable"] = True
+                fallback: AlertTemplate = {**tmpl, "_translation_unavailable": True}
                 return fallback
         return None
+
+    @staticmethod
+    def _find_template(
+        templates: list[AlertTemplate],
+        hazard_type: str,
+        severity: str,
+        alert_type: str,
+    ) -> AlertTemplate | None:
+        exact = next(
+            (
+                template
+                for template in templates
+                if template.get("hazard_type") == hazard_type
+                and template.get("severity") == severity
+                and template.get("alert_type") == alert_type
+            ),
+            None,
+        )
+        if exact is not None:
+            return exact
+        return next(
+            (
+                template
+                for template in templates
+                if template.get("hazard_type") == hazard_type and template.get("alert_type") == alert_type
+            ),
+            None,
+        )
 
     @staticmethod
     def interpolate(template_text: str, values: dict[str, str]) -> str:
@@ -112,7 +206,7 @@ class TemplateLoader:
         Missing placeholder values are replaced with ``[unknown]`` per CHK006.
         """
 
-        def _replace(match: re.Match) -> str:
+        def _replace(match: re.Match[str]) -> str:
             key = match.group(1)
             value = values.get(key)
             if value is None:
@@ -154,6 +248,8 @@ class TemplateLoader:
 
         if translation_unavailable:
             title += " [Translation unavailable]"
+        if tmpl.get("_operational_fallback"):
+            title += " [Hazard-specific template unavailable]"
 
         return title, body, action_items, translation_unavailable
 
@@ -165,3 +261,6 @@ class TemplateLoader:
     def has_language(self, language_code: str) -> bool:
         """Check if templates are loaded for a specific language."""
         return language_code in self._templates
+
+    def has_operational_template(self, hazard_type: str, alert_type: str, language_code: str) -> bool:
+        return self.get_template(hazard_type, "severe", alert_type, language_code) is not None

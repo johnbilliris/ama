@@ -1,15 +1,18 @@
-"""Pillar F — Audit Entry + Trace (T-F04, FR-025 / FR-026 / FR-029)."""
-
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 AuRegion = Literal["australiaeast", "australiasoutheast"]
+StorageSource = Literal["hot", "cold", "hot+cold"]
 
 AuditKind = Literal[
     "signal_ingested",
+    "model_output_recorded",
+    "recommendation_recorded",
+    "human_decision_recorded",
+    "outcome_recorded",
     "scorecard_published",
     "ladder_version_published",
     "non_au_signal_refused",
@@ -19,27 +22,38 @@ AuditKind = Literal[
     "degraded_mode_entered",
     "small_sample_labelled",
     "divergence_flagged",
+    "audit_mutation_attempted",
     "language_fallback_used",
 ]
 
-CHAIN_STEPS = ("signal", "model_output", "recommendation", "human_decision", "outcome")
+CHAIN_REFERENCE_KEYS = (
+    "signal_id",
+    "model_output_id",
+    "recommendation_id",
+    "human_decision_id",
+    "outcome_id",
+)
 
 
 class AuditEntry(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    id: str
-    audit_id: str
-    value_id: str
+    id: str = Field(min_length=1, max_length=128)
+    audit_id: str = Field(min_length=1, max_length=128)
+    value_id: str = Field(min_length=1, max_length=128)
     kind: AuditKind
-    actor: str
+    actor: str = Field(min_length=1, max_length=256)
     occurred_at: AwareDatetime
     references: dict[str, str] = Field(default_factory=dict)
-    payload: dict = Field(default_factory=dict)
-    correlation_id: str = ""
+    payload: dict[str, Any] = Field(default_factory=dict)
+    correlation_id: str = Field(default="", max_length=128)
     region: AuRegion
-    archived_to_blob: bool = False
-    language_fallback_used: str | None = None
+    payload_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    language_fallback_used: str | None = Field(
+        default=None,
+        pattern=r"^[A-Za-z_-]+→[A-Za-z-]+$",
+    )
+    storage_source: StorageSource = "hot"
 
 
 class AuditTrace(BaseModel):
@@ -48,6 +62,7 @@ class AuditTrace(BaseModel):
     value_id: str
     entries: list[AuditEntry] = Field(min_length=1)
     chain_complete: bool
+    missing_references: list[str] = Field(default_factory=list)
     served_from_cold_archive: bool = False
 
     @classmethod
@@ -58,13 +73,17 @@ class AuditTrace(BaseModel):
         *,
         served_from_cold_archive: bool = False,
     ) -> AuditTrace:
-        keys: set[str] = set()
-        for e in entries:
-            keys.update(e.references.keys())
-        chain_complete = all(step in keys for step in CHAIN_STEPS)
+        referenced: dict[str, str] = {}
+        resolvable_ids = {entry.id for entry in entries} | {entry.value_id for entry in entries}
+        for entry in entries:
+            referenced.update(entry.references)
+        missing = [
+            key for key in CHAIN_REFERENCE_KEYS if not referenced.get(key) or referenced[key] not in resolvable_ids
+        ]
         return cls(
             value_id=value_id,
             entries=entries,
-            chain_complete=chain_complete,
+            chain_complete=not missing,
+            missing_references=missing,
             served_from_cold_archive=served_from_cold_archive,
         )

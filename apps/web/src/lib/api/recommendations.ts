@@ -1,8 +1,9 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+import { getApiBaseUrl } from "@/lib/api/base-url";
+const API_BASE_URL = getApiBaseUrl();
 
 export interface ApprovalPayload {
   approverPersonaId: string;
-  outcome: "approved" | "rejected" | "escalated";
+  outcome: "approved" | "rejected" | "escalated" | "timed_out";
   rationale: string;
   conditions?: string[];
 }

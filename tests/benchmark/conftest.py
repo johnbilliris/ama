@@ -7,7 +7,6 @@ hook that triggers regression comparison after all benchmarks complete.
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
@@ -69,6 +68,9 @@ def communication_client() -> TestClient:
 
 def pytest_sessionfinish(session, exitstatus):  # noqa: ARG001
     """Run regression comparison after all benchmarks complete."""
+    if not any(item.get_closest_marker("benchmark") for item in session.items):
+        return
+
     current = Path(".benchmarks/current.json")
     if not current.exists():
         return  # No results to compare (benchmarks were skipped or --benchmark-json not passed)
@@ -82,7 +84,6 @@ def pytest_sessionfinish(session, exitstatus):  # noqa: ARG001
     except UnicodeEncodeError:
         print(report_text.encode("ascii", errors="replace").decode("ascii"))  # noqa: T201
 
-    # Fail the session if any metric has ≥ 50% regression
-    # Skip failure on CI (runner hardware differs from baseline machine)
-    if report.has_failures and not os.environ.get("CI"):
+    # Fail the session if comparison reports any required failure.
+    if report.has_failures:
         session.exitstatus = 1

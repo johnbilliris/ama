@@ -1,0 +1,282 @@
+{
+  "operation": "041-dev-dependency-remediation",
+  "observed_at": "2026-10-20T04:22:33.228266+00:00",
+  "local_image": "ama041-api-redis:20261020",
+  "approved_config_digest": "sha256:82846c07343adebdba8298377e2f89fbbf3a0c263f7babe4cc65f2e76942c919",
+  "image_platform": "linux/amd64",
+  "search_endpoint": "https://srch-dev-w3uq6w.search.windows.net",
+  "search_definition": {
+    "name": "corpus-v1",
+    "fields": [
+      {
+        "name": "chunk_id",
+        "type": "Edm.String",
+        "key": true,
+        "searchable": false,
+        "filterable": true,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "chunk_id_original",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": false,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "corpus_entry_id",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "jurisdiction",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": true,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "topic",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": true,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "page",
+        "type": "Edm.Int32",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "tokens",
+        "type": "Edm.Int32",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "sha256_of_chunk",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "licence_mode",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": true,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "source_url",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": false,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "rendered_url",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": false,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "cross_page",
+        "type": "Edm.Boolean",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "embedding_model_id",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "corpus_build_sha",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "agency",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": true,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "agency_role",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": true,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "authority_level",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": true,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "precedence_rank",
+        "type": "Edm.Int32",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "cultural_classification",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": true,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "cultural_authority_required",
+        "type": "Edm.Boolean",
+        "key": false,
+        "searchable": false,
+        "filterable": true,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "text",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": true,
+        "filterable": false,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "summary",
+        "type": "Edm.String",
+        "key": false,
+        "searchable": true,
+        "filterable": false,
+        "facetable": false,
+        "sortable": false,
+        "retrievable": true
+      },
+      {
+        "name": "embedding",
+        "type": "Collection(Edm.Single)",
+        "searchable": true,
+        "dimensions": 3072,
+        "vectorSearchProfile": "corpus-vector-profile"
+      }
+    ],
+    "vectorSearch": {
+      "algorithms": [
+        {
+          "name": "corpus-hnsw",
+          "kind": "hnsw"
+        }
+      ],
+      "profiles": [
+        {
+          "name": "corpus-vector-profile",
+          "algorithm": "corpus-hnsw"
+        }
+      ]
+    }
+  },
+  "search_alias": {
+    "name": "corpus",
+    "indexes": [
+      "corpus-v1"
+    ]
+  },
+  "search_service_sha256": "121851bd7322a9b18460affbc43b1f708ff5367fe4cb4106e38c69a71394b59e",
+  "source_pair": "unheld-staging-v2.json",
+  "protected_comparison": {
+    "comparison": "PASS",
+    "deployments": 4,
+    "foundry_writes": 0,
+    "account_controls_identity_tags_rai_and_diagnostics": "unchanged"
+  },
+  "existing_pull_role_verification": [
+    {
+      "assignment_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w/providers/Microsoft.Authorization/roleAssignments/ead398cc-d50f-5d59-8c96-86c063718d7e",
+      "comparison": "PASS"
+    },
+    {
+      "assignment_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.ContainerRegistry/registries/crdevw3uq6w/providers/Microsoft.Authorization/roleAssignments/2da1f246-507e-53a2-bf70-304ca35f783d",
+      "comparison": "PASS"
+    }
+  ],
+  "documents_to_upload": 0,
+  "new_grants": 0,
+  "foundry_writes": 0,
+  "business_promotion": false
+}

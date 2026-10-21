@@ -8,7 +8,7 @@
  *   - SimulationChatPane sub-agent message + watermark prefix (T-I01)
  *
  * The bigger axe-core sweep against running pages lives at
- * `apps/web/tests/a11y/simulation-watermark.spec.ts` (Playwright project
+ * `tests/e2e/web-coverage/cross-cutting/simulation-watermark.spec.ts` (Playwright project
  * `web-coverage-axe`); this file is the fast in-CI gate that runs on
  * `pnpm -r run test:a11y` per the F10.4 / capstone gate.
  */

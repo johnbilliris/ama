@@ -44,16 +44,18 @@ def build_scorecard(
             if baseline_per_metric and metric_id in baseline_per_metric.get(model_key, {}):
                 regression = mean - baseline_per_metric[model_key][metric_id]
 
-            per_model[model_key][metric_id] = MetricResult(
-                mean=round(mean, 4),
-                **{"pass": pass_rate >= 0.95},
-                regression=regression,
-                distribution={
-                    "count": len(scores),
-                    "pass_rate": round(pass_rate, 4),
-                    "min": round(min(scores), 4) if scores else 0,
-                    "max": round(max(scores), 4) if scores else 0,
-                },
+            per_model[model_key][metric_id] = MetricResult.model_validate(
+                {
+                    "mean": round(mean, 4),
+                    "pass": pass_rate >= 0.95,
+                    "regression": regression,
+                    "distribution": {
+                        "count": len(scores),
+                        "pass_rate": round(pass_rate, 4),
+                        "min": round(min(scores), 4) if scores else 0,
+                        "max": round(max(scores), 4) if scores else 0,
+                    },
+                }
             )
             metric_means[metric_id][model_key] = mean
             pass_rates[metric_id][model_key] = pass_rate

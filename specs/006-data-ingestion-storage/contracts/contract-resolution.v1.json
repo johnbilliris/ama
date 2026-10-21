@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "2026-09-16",
+  "feature": "006-data-ingestion-storage",
+  "title": "Spec 006 Contract Resolution Table",
+  "notes": [
+    "This table resolves conflicting contract statements without silently widening production behavior.",
+    "Unresolved migration work remains blocked for release closure until its acceptance-impact rows are executed."
+  ],
+  "entries": [
+    {
+      "id": "SIM_SCOPE_PREFIX",
+      "owner": "spec-006 engineering",
+      "status": "accepted",
+      "decision": "Canonical simulation scope prefix is sim-{runId}. runId is a bare identifier; scope helper adds sim- exactly once.",
+      "chosenContract": {
+        "code": "apps/api/app/repositories/cosmos_scope.py::simulation_scope",
+        "spec": "specs/006-data-ingestion-storage/spec.md FR-025, FR-029"
+      },
+      "migration": "Update spec/docs references from sim_{...} to sim-{...}; route all simulation scope creation through simulation_scope helper.",
+      "acceptanceImpact": [
+        "SC-009 simulation/live isolation assertions must use sim-{runId}.",
+        "Any test fixtures with sim_ must be updated or explicitly marked legacy."
+      ]
+    },
+    {
+      "id": "SIMULATION_RUN_ID_FIELD",
+      "owner": "spec-006 engineering",
+      "status": "accepted",
+      "decision": "Canonical envelope provenance field is simulationRunId (camelCase) in v1 schema.",
+      "chosenContract": {
+        "schema": "packages/schemas/signal-envelope.schema.json",
+        "spec": "specs/006-data-ingestion-storage/spec.md FR-002a"
+      },
+      "migration": "Correct spec prose and plan/research references that still use simulation_run_id.",
+      "acceptanceImpact": [
+        "Schema validation checks must use provenance.simulationRunId.",
+        "Generated simulation signals must carry simulationRunId when collectionMethod is simulation."
+      ]
+    },
+    {
+      "id": "SIGNAL_ENVELOPE_SCHEMA_AUTHORITY",
+      "owner": "data engineer",
+      "status": "accepted",
+      "decision": "packages/schemas/signal-envelope.schema.json v1 remains the authoritative production ingestion contract for spec006. v2 is experimental and scoped to spec036 only.",
+      "chosenContract": {
+        "productionLoader": "apps/ingestion/worker.py loads only v1 schema id https://example.gov.au/schemas/signal-envelope.schema.json",
+        "compatibility": "packages/schemas/signal-envelope.schema.v2.json is not a replacement contract"
+      },
+      "migration": "Mark v2 as experimental/spec036-only and require explicit migration planning before any production adoption.",
+      "acceptanceImpact": [
+        "Production schema loader must fail closed on non-v1 schema id.",
+        "Spec036 simulation extension must use allowed v1 fields or declare an explicit future migration gate."
+      ]
+    },
+    {
+      "id": "SIMULATION_API_DELEGATION",
+      "owner": "architecture owner",
+      "status": "accepted",
+      "decision": "Spec006 scenario/run contract remains a compatibility API delegated to current 007 simulation services/models. It is not a rival state machine.",
+      "chosenContract": {
+        "resolution": "compatibility facade over current simulation service",
+        "followUp": "AUD-036 implementation alignment"
+      },
+      "migration": "Keep one canonical simulation state machine implementation and map 006 contract fields through a compatibility layer.",
+      "acceptanceImpact": [
+        "Contract tests must hit real HTTP routes, not hand-built dictionaries.",
+        "Compatibility notes must accompany max behavioral differences until facade lands."
+      ]
+    },
+    {
+      "id": "HPK_CASING",
+      "owner": "data engineer",
+      "status": "accepted",
+      "decision": "HPK casing is scope / jurisdictionId / dataSourceId; time field remains occurred_at in stored document index compatibility.",
+      "chosenContract": {
+        "wire": "packages/domain/src/domain/repositories/signal_wire.py",
+        "index": "infra/main.bicep existing index references occurred_at"
+      },
+      "migration": "Maintain camelCase HPK key fields in persisted documents and keep index-compatible occurred_at field naming without Bicep edits in this task.",
+      "acceptanceImpact": [
+        "Repository document serialization must always emit scope, jurisdictionId, dataSourceId.",
+        "Static tests enforce HPK key presence and schema authority decisions."
+      ]
+    }
+  ]
+}

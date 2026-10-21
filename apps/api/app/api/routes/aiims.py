@@ -44,7 +44,7 @@ async def assign_role(
         assignment = service.assign_role(
             incident_id=incident_id,
             agent_identifier=payload.agent_identifier,
-            aiims_function=payload.aiims_function,  # type: ignore[arg-type]
+            aiims_function=payload.aiims_function,
             assigned_by=payload.assigned_by,
         )
     except ValueError as exc:
@@ -71,7 +71,7 @@ async def update_assignment(
         raise HTTPException(status_code=404, detail="Assignment not found")
     assignment = service.update_assignment(
         assignment_id,
-        aiims_function=payload.aiims_function,  # type: ignore[arg-type]
+        aiims_function=payload.aiims_function,
         is_active=payload.is_active,
     )
     return assignment.model_dump(mode="json")

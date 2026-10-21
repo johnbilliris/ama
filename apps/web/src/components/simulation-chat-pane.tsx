@@ -133,7 +133,7 @@ export function SimulationChatPane({
     // Mirror the operator command into the parent's event log so the
     // post-exercise audit reflects every SITREP/Risk/Deploy/Alert/Escalate
     // (or freeform) instruction issued via the chat pane.
-    const quickLabel = QUICK_ACTIONS.find((qa) => qa.prompt === prompt)?.label;
+    const quickLabel = QUICK_ACTION_DEFS.find((qa) => qa.prompt === prompt)?.label;
     onEventRef.current?.(
       quickLabel
         ? `Command issued: ${quickLabel.replace(/^[^\w]+\s*/, "")}`
@@ -219,8 +219,6 @@ export function SimulationChatPane({
     URL.revokeObjectURL(url);
   }, [messages, tenantId]);
 
-  const QUICK_ACTIONS = QUICK_ACTION_DEFS;
-
   // Quick actions fire the prompt immediately rather than just pre-filling
   // the textarea — operators expect a single click on "Deploy" / "SITREP" /
   // etc. to actually issue the command (and surface the resultant
@@ -274,7 +272,7 @@ export function SimulationChatPane({
       </div>
       {/* Quick-action buttons for common operational commands */}
       <div className="sim-quick-actions border-t">
-        {QUICK_ACTIONS.map((qa) => (
+        {QUICK_ACTION_DEFS.map((qa) => (
           <button
             key={qa.label}
             type="button"

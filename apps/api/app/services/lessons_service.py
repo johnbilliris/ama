@@ -12,7 +12,7 @@ from uuid import uuid4
 
 from app.services.state_store import LESSONS
 
-from packages.domain.src.domain.models.lesson import Lesson
+from packages.domain.src.domain.models.lesson import AIIMSFunction, Lesson, LessonSeverity, PPRRPhase
 
 
 class LessonsService:
@@ -22,9 +22,9 @@ class LessonsService:
         scenario_run_id: str | None = None,
         title: str = "",
         description: str = "",
-        aiims_function: str | None = None,
-        pprr_phase: str | None = None,
-        severity: str = "medium",
+        aiims_function: AIIMSFunction | None = None,
+        pprr_phase: PPRRPhase | None = None,
+        severity: LessonSeverity = "medium",
         created_by: str = "",
         tags: list[str] | None = None,
         originating_event_id: str | None = None,
@@ -102,7 +102,7 @@ class LessonsService:
         lesson = LESSONS.get(lesson_id)
         if not lesson:
             raise KeyError(f"Lesson '{lesson_id}' not found")
-        update_data: dict = {
+        update_data: dict[str, object] = {
             "status": "resolved",
             "resolved_at": datetime.now(UTC),
             "resolution_reference": resolution_reference,
@@ -136,7 +136,7 @@ class LessonsService:
         LESSONS[lesson_id] = updated
         return updated
 
-    def get_trends(self) -> dict:
+    def get_trends(self) -> dict[str, object]:
         """Analyse trends: recurring themes, unresolved items, by-function/by-phase."""
         all_lessons = list(LESSONS.values())
         by_function: dict[str, list[str]] = {}
@@ -174,7 +174,7 @@ class LessonsService:
             "unresolved_count": total - resolved,
         }
 
-    def verify_pr(self, pr_description: str) -> dict:
+    def verify_pr(self, pr_description: str) -> dict[str, object]:
         """Check if a PR description references valid open lesson IDs."""
         referenced_ids = set(
             re.findall(r"lesson[_-]?([a-f0-9-]+)", pr_description, re.IGNORECASE),

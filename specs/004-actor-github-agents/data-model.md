@@ -22,10 +22,14 @@
 **Validation rules**:
 - `agentId` must be unique across all tiers.
 - `tier` is required.
-- `description` must be non-empty and under 200 characters.
-- `handoffs` should declare at least one relationship for operational and sector agents.
+- `description` must be non-empty and under 200 characters (max 199).
+- `handoffs` must declare at least one relationship for active actor files.
 - `contextReferences` must include at least one valid file path.
-- `filePath` must match the pattern `.github/agents/{tier}/{agentId}.agent.md`.
+- `filePath` must match one of:
+	- `.github/agents/operational/{agentId}.agent.md`
+	- `.github/agents/technical/{agentId}.agent.md`
+	- `.github/agents/sectors/{jurisdiction}/{agentId}.agent.md`
+- Canonical identity is the file stem (`agentId`); frontmatter `name` aliases are unsupported unless explicitly approved by contract.
 
 ## HandoffRelationship
 
@@ -35,14 +39,14 @@
 - `label`: string, display name for the handoff (e.g., "Ask about tactical operations")
 - `targetAgentId`: string, reference to another AgentDefinition
 - `prompt`: string, instruction text to pass to the target agent
-- `autoSend`: boolean, whether to forward current context (default: true)
+- `autoSend`: boolean, whether to auto-submit prompt after handoff click (default: false)
 
 **Relationships**:
 - Many HandoffRelationships belong to one source AgentDefinition.
 - Each HandoffRelationship references one target AgentDefinition.
 
 **Validation rules**:
-- `targetAgentId` must reference an existing AgentDefinition.
+- `targetAgentId` must reference exactly one existing AgentDefinition (case-insensitive exact actor ID resolution).
 - `label` must be non-empty.
 
 ## AgentCatalogue

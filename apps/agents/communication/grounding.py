@@ -73,7 +73,7 @@ async def gather_inclusion_chunks(
     ``jurisdictions``.
     """
     try:
-        from ama_domain import RetrievalRequest  # type: ignore[import-not-found]
+        from ama_domain import RetrievalRequest
     except ImportError:
         logger.warning("ama_domain not importable; skipping inclusion grounding")
         return []

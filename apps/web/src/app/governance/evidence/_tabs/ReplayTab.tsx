@@ -1,44 +1,182 @@
-/**
- * Spec-038 Replay Scorecard tab — live fetch (T-AMD-15).
- * Fetches replays from POST /api/v1/evidence/scenarios/{scenario_id}/replay on mount.
- */
 "use client";
-import { useEffect, useState } from "react";
 
-const DEFAULT_SCENARIO = "bushfire";
+import type { DeltaScorecard } from "@ama/domain";
+import { useCallback, useEffect, useState } from "react";
+import {
+  EvidenceApiError,
+  getLatestScorecard,
+  runReplay,
+} from "../../../../lib/api/evidence";
 
-export default function ReplayTab() {
-  const [data, setData] = useState<Record<string, unknown> | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [degraded, setDegraded] = useState(false);
-  const [smallSample, setSmallSample] = useState(false);
+const SCENARIOS = [
+  "bushfire",
+  "flood",
+  "cyclone",
+  "urban_fire",
+  "mass_casualty",
+  "hazmat",
+  "marine_sar",
+] as const;
+
+interface ReplayTabProps {
+  onScorecardSelected?: (scorecardId: string) => void;
+}
+
+export default function ReplayTab({ onScorecardSelected }: ReplayTabProps) {
+  const [scenarioId, setScenarioId] = useState<string>("bushfire");
+  const [seed, setSeed] = useState("exercise-seed");
+  const [repetitions, setRepetitions] = useState(2);
+  const [allowDegradedMode, setAllowDegradedMode] = useState(true);
+  const [scorecard, setScorecard] = useState<DeltaScorecard | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [running, setRunning] = useState(false);
+
+  const loadLatest = useCallback(
+    (signal?: AbortSignal) => {
+      setLoading(true);
+      setError("");
+      void getLatestScorecard(scenarioId, signal)
+        .then((latest) => {
+          setScorecard(latest);
+          if (latest) onScorecardSelected?.(latest.id);
+        })
+        .catch((reason: unknown) => {
+          if ((reason as Error).name === "AbortError") return;
+          if (reason instanceof EvidenceApiError && reason.status === 404) {
+            setScorecard(null);
+            return;
+          }
+          setError(String(reason));
+        })
+        .finally(() => setLoading(false));
+    },
+    [onScorecardSelected, scenarioId],
+  );
 
   useEffect(() => {
-    fetch(`/api/v1/evidence/scenarios/${DEFAULT_SCENARIO}/replay`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ seed: "default", run_pair_id: "init", repetitions: 2, allow_degraded_mode: true }),
-    })
-      .then((r) => {
-        if (!r.ok) { setError(`HTTP ${r.status}`); return null; }
-        return r.json();
-      })
-      .then((d) => {
-        if (!d) return;
-        setData(d);
-        if (d.reduced_fidelity) setDegraded(true);
-        if (Array.isArray(d.kpi_deltas) && d.kpi_deltas.some((k: { small_sample?: boolean }) => k.small_sample)) setSmallSample(true);
-      })
-      .catch((e) => setError(String(e)));
-  }, []);
+    const controller = new AbortController();
+    loadLatest(controller.signal);
+    return () => controller.abort();
+  }, [loadLatest]);
+
+  async function submitReplay() {
+    setRunning(true);
+    setError("");
+    try {
+      const created = await runReplay(scenarioId, {
+        seed,
+        run_pair_id: crypto.randomUUID(),
+        repetitions,
+        allow_degraded_mode: allowDegradedMode,
+      });
+      setScorecard(created);
+      onScorecardSelected?.(created.id);
+    } catch (reason) {
+      setError(String(reason));
+    } finally {
+      setRunning(false);
+    }
+  }
 
   return (
     <div data-testid="evidence-replay-tab">
-      {degraded && <span className="inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800" role="status">degraded</span>}
-      {smallSample && <span className="ml-1 inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800" role="status">small-sample</span>}
-      {error && <p role="alert" className="text-red-600">Failed to load: {error}</p>}
-      {!data && !error && <p>Loading Replay Scorecard…</p>}
-      {data && <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(data, null, 2)}</pre>}
+      <form
+        className="mb-4 grid gap-3 md:grid-cols-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void submitReplay();
+        }}
+      >
+        <label>
+          Scenario{" "}
+          <select value={scenarioId} onChange={(event) => setScenarioId(event.target.value)}>
+            {SCENARIOS.map((scenario) => (
+              <option key={scenario} value={scenario}>{scenario.replaceAll("_", " ")}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Seed{" "}
+          <input value={seed} onChange={(event) => setSeed(event.target.value)} required />
+        </label>
+        <label>
+          Repetitions{" "}
+          <input
+            type="number"
+            min={1}
+            max={100}
+            value={repetitions}
+            onChange={(event) => setRepetitions(Number(event.target.value))}
+          />
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={allowDegradedMode}
+            onChange={(event) => setAllowDegradedMode(event.target.checked)}
+          />{" "}
+          Permit explicit no-signal rows
+        </label>
+        <button type="submit" disabled={running}>{running ? "Running…" : "Run replay"}</button>
+      </form>
+      {loading ? <p role="status">Loading latest persisted scorecard…</p> : null}
+      {error ? (
+        <div role="alert">
+          <p>Replay failed: {error}</p>
+          <button type="button" onClick={() => loadLatest()}>Retry latest</button>
+        </div>
+      ) : null}
+      {!loading && !error && !scorecard ? (
+        <p>No persisted scorecard exists for this scenario. Run a replay to create one.</p>
+      ) : null}
+      {scorecard ? (
+        <div>
+          <p>
+            Scorecard <code>{scorecard.id}</code> · scenario version{" "}
+            {scorecard.scenario_version ?? "unavailable"}
+          </p>
+          {scorecard.reduced_fidelity ? <span role="status">reduced-fidelity</span> : null}
+          {scorecard.kpi_deltas.some((delta) => delta.small_sample) ? (
+            <span role="status" className="ml-2">small-sample</span>
+          ) : null}
+          <table aria-label="Replay delta scorecard">
+            <thead>
+              <tr>
+                <th>KPI</th>
+                <th>Baseline</th>
+                <th>AMA-assisted</th>
+                <th>Absolute delta</th>
+                <th>Percent delta</th>
+                <th>95% band</th>
+                <th>Target</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scorecard.kpi_deltas.map((delta) => (
+                <tr key={delta.kpi_id}>
+                  <td>{delta.kpi_id}</td>
+                  <td>{delta.baseline_value ?? "No signal"}</td>
+                  <td>{delta.ama_assisted_value ?? "No signal"}</td>
+                  <td>{delta.absolute_delta ?? "—"} {delta.delta_unit}</td>
+                  <td>{delta.percent_delta ?? "—"}</td>
+                  <td>
+                    {delta.confidence_band_low == null
+                      ? "Unavailable"
+                      : `${delta.confidence_band_low}–${delta.confidence_band_high}`}
+                  </td>
+                  <td>{delta.meets_target ? "Met" : "Not met"}</td>
+                  <td>{delta.measurement_status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {scorecard.determinism?.diverged ? (
+            <p role="alert">Divergence detected across same-seed KPI deltas.</p>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

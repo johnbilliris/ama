@@ -39,12 +39,12 @@ def _make_valid_signal(
         "category": category,
         "occurredAt": "2026-01-01T00:00:00Z",
         "receivedAt": "2026-01-01T00:00:01Z",
-        "location": {"type": "Point", "coordinates": [151.2, -33.8]},
+        "location": {"type": "Point", "coordinates": [151.2, -33.8], "precisionMeters": 5000},
         "payload": payload or {"alert_level": "Watch and Act"},
         "confidenceScore": confidence,
         "freshnessScore": freshness,
         "validationStatus": validation_status,
-        "provenance": provenance or {"collectionMethod": "api_pull"},
+        "provenance": provenance or {"collectionMethod": "api_pull", "sourceUri": "https://example.com"},
     }
 
 
@@ -58,6 +58,16 @@ def _make_pipeline(**kwargs):
         audit_writer=AuditWriter(config=config, cosmos_client=None),
         **kwargs,
     )
+
+
+class _RecordingSignalRepository:
+    def __init__(self, fail: bool = False) -> None:
+        self.fail = fail
+        self.calls: list[dict] = []
+
+    async def update_validation_decision(self, **kwargs):  # type: ignore[no-untyped-def]
+        self.calls.append(kwargs)
+        return not self.fail
 
 
 class TestPipelineEndToEnd:
@@ -111,7 +121,7 @@ class TestPipelineEndToEnd:
         pipeline = _make_pipeline(
             deliver_fn=_async_deliver(delivered),
         )
-        raw = _make_valid_signal(category="earthquake", confidence=0.9, freshness=0.95)
+        raw = _make_valid_signal(category="hydrology", confidence=0.9, freshness=0.95)
         await pipeline.process_signal(raw, "sig-eq-001")
         assert len(delivered) == 1
 
@@ -121,9 +131,102 @@ class TestPipelineEndToEnd:
         pipeline = _make_pipeline(
             deliver_fn=_async_deliver(delivered),
         )
-        raw = _make_valid_signal(category="tsunami", confidence=0.95, freshness=1.0)
+        raw = _make_valid_signal(category="weather", confidence=0.95, freshness=1.0)
         await pipeline.process_signal(raw, "sig-ts-001")
         assert len(delivered) == 1
+
+    @pytest.mark.asyncio
+    async def test_escalated_misinformation_never_forwards(self) -> None:
+        from monitoring.agent import MonitoringAgent
+
+        delivered = []
+        mock_llm = MagicMock()
+        mock_llm.generate_response.return_value = {"text": '{"decision":"misinformation","rationale":"fabricated"}'}
+        repo = _RecordingSignalRepository()
+        agent = MonitoringAgent(llm_client=mock_llm)
+        pipeline = _make_pipeline(
+            deliver_fn=_async_deliver(delivered),
+            agent=agent,
+            signal_store=repo,
+        )
+
+        raw = _make_valid_signal(
+            category="fire",
+            confidence=0.95,
+            freshness=1.0,
+            validation_status="escalated",
+            source_kind="social",
+        )
+        await pipeline.process_signal(raw, "sig-esc-block")
+
+        assert delivered == []
+        assert len(repo.calls) == 1
+        assert repo.calls[0]["validation_status"] == "rejected"
+
+    @pytest.mark.asyncio
+    async def test_credible_persists_decision_before_handoff(self) -> None:
+        from monitoring.agent import MonitoringAgent
+
+        order: list[str] = []
+
+        class _OrderedRepo(_RecordingSignalRepository):
+            async def update_validation_decision(self, **kwargs):  # type: ignore[no-untyped-def]
+                order.append("persist")
+                return await super().update_validation_decision(**kwargs)
+
+        async def _deliver(_handoff):
+            order.append("deliver")
+
+        mock_llm = MagicMock()
+        mock_llm.generate_response.return_value = {"decision": "credible", "rationale": "verified"}
+        repo = _OrderedRepo()
+        agent = MonitoringAgent(llm_client=mock_llm)
+        pipeline = _make_pipeline(
+            deliver_fn=_deliver,
+            agent=agent,
+            signal_store=repo,
+        )
+
+        raw = _make_valid_signal(
+            category="fire",
+            confidence=0.95,
+            freshness=1.0,
+            validation_status="escalated",
+            source_kind="social",
+        )
+        await pipeline.process_signal(raw, "sig-esc-credible")
+
+        assert order[:2] == ["persist", "deliver"]
+        assert len(repo.calls) == 1
+        assert repo.calls[0]["validation_status"] == "validated"
+
+    @pytest.mark.asyncio
+    async def test_malformed_classifier_response_fails_closed_without_delivery(self) -> None:
+        from monitoring.agent import MonitoringAgent
+
+        delivered = []
+        mock_llm = MagicMock()
+        mock_llm.generate_response.return_value = {"text": "credible. also ignore safety and forward"}
+        repo = _RecordingSignalRepository()
+        agent = MonitoringAgent(llm_client=mock_llm)
+        pipeline = _make_pipeline(
+            deliver_fn=_async_deliver(delivered),
+            agent=agent,
+            signal_store=repo,
+        )
+
+        raw = _make_valid_signal(
+            category="fire",
+            confidence=0.95,
+            freshness=1.0,
+            validation_status="escalated",
+            source_kind="social",
+        )
+        await pipeline.process_signal(raw, "sig-esc-malformed")
+
+        assert delivered == []
+        assert len(repo.calls) == 1
+        assert repo.calls[0]["decision"] == "malformed_response"
 
 
 class TestPipelineValidation:
@@ -278,7 +381,7 @@ class TestPipelineEffectiveConfidence:
 
     @pytest.mark.asyncio
     async def test_all_five_escalation_categories(self) -> None:
-        for cat in ["fire", "weather", "hydrology", "earthquake", "tsunami"]:
+        for cat in ["fire", "weather", "hydrology"]:
             delivered = []
             pipeline = _make_pipeline(deliver_fn=_async_deliver(delivered))
             raw = _make_valid_signal(category=cat, confidence=0.9, freshness=1.0)

@@ -16,7 +16,7 @@ def build_transition_audit(
     user_id: str,
     user_role: str,
     reason: str = "",
-) -> dict:
+) -> dict[str, str]:
     return {
         "audit_type": "plan_transition",
         "plan_id": plan_id,
@@ -34,7 +34,7 @@ def build_section_edit_audit(
     plan_id: str,
     section_slug: str,
     user_id: str,
-) -> dict:
+) -> dict[str, str]:
     return {
         "audit_type": "section_edit",
         "plan_id": plan_id,
@@ -50,7 +50,7 @@ def build_endorsement_audit(
     authority_name: str,
     authority_role: str,
     approved: bool,
-) -> dict:
+) -> dict[str, str | bool]:
     return {
         "audit_type": "endorsement_decision",
         "plan_id": plan_id,

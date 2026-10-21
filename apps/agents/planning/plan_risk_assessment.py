@@ -6,7 +6,7 @@ the four environments (social, built, economic, natural).
 FRs: FR-003 | Research: R-001
 """
 
-from typing import Literal
+from typing import Literal, TypedDict
 
 RiskEnvironment = Literal["social", "built", "economic", "natural"]
 ScenarioType = Literal["cascading", "concurrent", "catastrophic", "single"]
@@ -14,17 +14,32 @@ ScenarioType = Literal["cascading", "concurrent", "catastrophic", "single"]
 RISK_ENVIRONMENTS: list[str] = ["social", "built", "economic", "natural"]
 
 
+class EnvironmentRisk(TypedDict):
+    environment: str
+    risk_level: str
+    hazard_exposure: list[str]
+    cascading_risks: list[str]
+    mitigation_strategies: list[str]
+
+
+class RiskAssessment(TypedDict):
+    region_id: str
+    hazard_types: list[str]
+    scenario_type: ScenarioType
+    environments: dict[str, EnvironmentRisk]
+
+
 def assess_risks(
     *,
     hazard_types: list[str],
     region_id: str,
     scenario_type: ScenarioType = "single",
-) -> dict:
+) -> RiskAssessment:
     """Run a multi-environment risk assessment for the given hazards and region.
 
     Returns a structured risk assessment with per-environment analysis.
     """
-    assessment = {
+    assessment: RiskAssessment = {
         "region_id": region_id,
         "hazard_types": hazard_types,
         "scenario_type": scenario_type,

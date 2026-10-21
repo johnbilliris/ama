@@ -32,7 +32,7 @@ class SimulationRun(BaseModel):
                 f"Cannot transition from '{self.status}' to '{new_status}'. "
                 f"Allowed: {allowed or 'none (terminal state)'}"
             )
-        updates: dict = {"status": new_status}
+        updates: dict[str, object] = {"status": new_status}
         if new_status == "running":
             updates["started_at"] = datetime.now(UTC)
         elif new_status in ("completed", "aborted"):

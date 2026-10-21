@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ama:specify:contracts:read-only-evidence",
+  "title": "Extension list sovereign read-only evidence",
+  "description": "Closed qualifying object that exists only on verified encrypted AU temporary storage through schema and semantic validation before logical deletion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "feature",
+    "category",
+    "lifecycle",
+    "validation_id",
+    "validated_at",
+    "view",
+    "output_mode",
+    "outcome",
+    "exit_code",
+    "source_state_before_sha256",
+    "source_state_after_sha256",
+    "protected_state_before_sha256",
+    "protected_state_after_sha256",
+    "coverage_state_before_sha256",
+    "coverage_state_after_sha256",
+    "execution_mode",
+    "audit_sink",
+    "sovereign_session_id",
+    "preflight_attestation_digest",
+    "execution_vm_resource_id",
+    "audit_intent_event_id",
+    "audit_intent_event_digest",
+    "peer_authenticated",
+    "au_vm_verified",
+    "encrypted_temporary_storage",
+    "audit_transaction_complete",
+    "raw_output_deleted",
+    "repository_payload_persisted"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "feature": {"const": "001-extension-list"},
+    "category": {"const": "read-only-validation"},
+    "lifecycle": {"const": "encrypted-au-ephemeral"},
+    "validation_id": {"type": "string", "format": "uuid"},
+    "validated_at": {"type": "string", "format": "date-time"},
+    "view": {"enum": ["installed", "available", "all"]},
+    "output_mode": {"enum": ["text", "json"]},
+    "outcome": {"enum": ["succeeded", "failed", "blocked"]},
+    "exit_code": {"type": "integer", "minimum": 0, "maximum": 255},
+    "source_state_before_sha256": {"$ref": "#/$defs/sha256"},
+    "source_state_after_sha256": {"$ref": "#/$defs/sha256"},
+    "protected_state_before_sha256": {"$ref": "#/$defs/sha256"},
+    "protected_state_after_sha256": {"$ref": "#/$defs/sha256"},
+    "coverage_state_before_sha256": {"$ref": "#/$defs/sha256"},
+    "coverage_state_after_sha256": {"$ref": "#/$defs/sha256"},
+    "execution_mode": {"const": "sovereign"},
+    "audit_sink": {"const": "immutable-au"},
+    "sovereign_session_id": {"type": "string", "format": "uuid"},
+    "preflight_attestation_digest": {"$ref": "#/$defs/sha256"},
+    "execution_vm_resource_id": {
+      "type": "string",
+      "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Compute/virtualMachines/[^/]+$"
+    },
+    "audit_intent_event_id": {"type": "string", "format": "uuid"},
+    "audit_intent_event_digest": {"$ref": "#/$defs/sha256"},
+    "peer_authenticated": {"const": true},
+    "au_vm_verified": {"const": true},
+    "encrypted_temporary_storage": {"const": true},
+    "audit_transaction_complete": {"const": true},
+    "raw_output_deleted": {"const": true},
+    "repository_payload_persisted": {"const": false}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"outcome": {"const": "succeeded"}},
+        "required": ["outcome"]
+      },
+      "then": {
+        "properties": {"exit_code": {"const": 0}}
+      },
+      "else": {
+        "properties": {"exit_code": {"type": "integer", "minimum": 1, "maximum": 255}}
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

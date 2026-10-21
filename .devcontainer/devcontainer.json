@@ -1,0 +1,98 @@
+{
+  "name": "AMA Disaster Response Hub",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "options": [
+      "--platform=linux/arm64"
+    ]
+  },
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "runArgs": [
+    "--init",
+    "--platform=linux/arm64"
+  ],
+  "containerEnv": {
+    "DOCKER_DEFAULT_PLATFORM": "linux/arm64",
+    "AMA_ENABLE_PRODUCTION_AUTH": "0",
+    "AMA_ENVIRONMENT": "dev",
+    "AMA_TEST_MODE": "1",
+    "NPM_CONFIG_REGISTRY": "https://packagefeedproxy.microsoft.io/npm/"
+  },
+  "mounts": [
+    "source=ama-devcontainer-uv-cache,target=/home/vscode/.cache/uv,type=volume",
+    "source=ama-devcontainer-pnpm-store,target=/home/vscode/.local/share/pnpm,type=volume",
+    "source=ama-devcontainer-root-node-modules,target=/workspace/node_modules,type=volume",
+    "source=ama-devcontainer-web-node-modules,target=/workspace/apps/web/node_modules,type=volume",
+    "source=ama-devcontainer-domain-node-modules,target=/workspace/packages/domain/node_modules,type=volume",
+    "source=ama-devcontainer-ui-node-modules,target=/workspace/packages/ui/node_modules,type=volume",
+    "source=ama-devcontainer-web-next,target=/workspace/apps/web/.next,type=volume"
+  ],
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest",
+      "moby": true,
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers/features/azure-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/azure/azure-dev/azd:latest": {
+      "version": "stable"
+    }
+  },
+  "forwardPorts": [
+    3000,
+    8000,
+    8080,
+    8081,
+    8082
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "AMA web",
+      "onAutoForward": "openBrowser"
+    },
+    "8000": {
+      "label": "AMA API",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Agent dispatcher",
+      "onAutoForward": "silent"
+    },
+    "8081": {
+      "label": "Ingestion worker",
+      "onAutoForward": "silent"
+    },
+    "8082": {
+      "label": "Evacuation agent",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-bicep",
+        "ms-azuretools.vscode-docker",
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "eslint.workingDirectories": [
+          {
+            "mode": "auto"
+          }
+        ]
+      }
+    }
+  },
+  "postCreateCommand": "python .devcontainer/install-python-dependencies.py --python /opt/venv/bin/python --mode editables && CI=true pnpm install --frozen-lockfile && python --version && uv --version && node --version && pnpm --version && az --version && azd version"
+}
