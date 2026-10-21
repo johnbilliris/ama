@@ -13,7 +13,7 @@ This runbook covers the four common stale causes per Plan §F-A8.5:
 
 1. [Corpus repo stalled](#cause-1-corpus-repo-stalled)
 2. [Ingest pipeline failing](#cause-2-ingest-pipeline-failing)
-3. [Cron misconfigured](#cause-3-cron-misconfigured)
+3. [No recent ingest execution](#cause-3-no-recent-ingest-execution)
 4. [Parity gate blocking](#cause-4-parity-gate-blocking)
 
 ## When the page fires
@@ -43,7 +43,7 @@ You are on-call. PagerDuty has paged you with the payload from
 
 ## Cause 1 — corpus repo stalled
 
-**Symptoms**: ingest cron last ran within 48h (`last_ingest_run_age_hours < 48`)
+**Symptoms**: an ingest execution ran within 48h (`last_ingest_run_age_hours < 48`)
 but the manifest age has grown past 14 days. Ingest is succeeding but no new
 chunks are being committed.
 
@@ -66,12 +66,12 @@ chunks are being committed.
 
 ## Cause 2 — ingest pipeline failing
 
-**Symptoms**: `last_ingest_run_age_hours >= 48`. Recent ingest cron runs
-are red in `.github/workflows/corpus-ingest.yml`.
+**Symptoms**: `last_ingest_run_age_hours >= 48` or the latest ingest
+execution failed.
 
 **Diagnosis**:
-- Pull the most recent ingest workflow run; look for failures in the
-  embedder, chunker, or Cosmos sink steps.
+- Review the latest Container Apps Job execution and logs for failures in
+  the embedder, chunker, or Cosmos sink.
 - Common failures:
   - **Foundry quota exhausted** — see `docs/runbooks/036-foundry-rag-gameday.md`.
   - **`validate_chunk_metadata` rejected a chunk** — Phase F lint refuses
@@ -82,24 +82,24 @@ are red in `.github/workflows/corpus-ingest.yml`.
 
 **Remediation**:
 1. Fix the upstream cause.
-2. Re-run `Re-run failed jobs` on the workflow.
+2. Retry the deployed Container Apps Job using the approved operational procedure.
 3. Confirm `last_ingest_run_at` updates and the alert clears.
 
-## Cause 3 — cron misconfigured
+## Cause 3 — no recent ingest execution
 
-**Symptoms**: cron schedule no longer matches `"0 14 * * *"` (UTC) /
-`0100 AEST`. `last_ingest_run_age_hours` grows >24h despite the corpus
-being healthy.
+**Symptoms**: `last_ingest_run_age_hours` grows beyond 24 hours while the
+corpus is healthy.
 
 **Diagnosis**:
-- Inspect `.github/workflows/corpus-ingest.yml` — was the cron expression
-  recently edited?
-- Check the GitHub Actions cron last-run timestamp.
+- Check the deployed Container Apps Job execution history and identify
+  whether an Azure-side trigger is configured. The repository does not
+  currently schedule corpus ingestion.
 
 **Remediation**:
-1. Restore the cron to `"0 14 * * *"`.
-2. Manually trigger one nightly run to break the staleness window.
-3. Re-confirm by reviewing the next cron firing (~24h later).
+1. Start the deployed job through the approved operational procedure.
+2. If recurring ingestion is required, restore an approved scheduler for the
+   Container Apps Job.
+3. Confirm the next execution and verify the alert clears.
 
 ## Cause 4 — parity gate blocking
 
@@ -108,8 +108,8 @@ alias is NOT flipped because the parity-replay gate (T222) reported <95%
 byte-identical replay. The old alias remains pinned to the stale index.
 
 **Diagnosis**:
-- Check `tests/e2e/test_blue_green_alias_flip.py` parity-replay output in
-  the most recent CI run.
+- Check `tests/e2e/test_blue_green_alias_flip.py` parity-replay output from
+  the latest explicit test run.
 - Compare top-N retrieval results from old vs new index using
   `tests/fixtures/golden-set-v1.json`.
 - A common cause: an embedding model upgrade changes ranking enough to

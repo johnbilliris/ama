@@ -10,8 +10,8 @@ Verifies:
 from __future__ import annotations
 
 import pytest
-
-from apps.agents.common.llm_config import LLMClientConfig
+from common.foundry_chat_client import FoundryConfigurationError, LiveFoundryChatClient
+from common.llm_config import LLMClientConfig
 
 
 class TestModelRouting:
@@ -42,6 +42,32 @@ class TestModelRouting:
         )
         with pytest.raises(ValueError, match="Unknown LLM purpose"):
             config.deployment_for("unknown")
+
+    @pytest.mark.parametrize("purpose", ["reasoning", "drafting", "simulation"])
+    def test_explicit_foundry_tiers_need_no_duplicate_legacy_aliases(
+        self, purpose: str, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        for tier in ("reasoning", "drafting", "simulation"):
+            monkeypatch.setenv(f"AZURE_AI_{tier.upper()}_DEPLOYMENT", f"explicit-{tier}")
+        config = LLMClientConfig(foundry_deployments="text-embedding-3-large@1=embedding-target")
+        deployments = config.foundry_deployment_map()
+        assert purpose not in deployments
+        client = LiveFoundryChatClient(
+            endpoint="https://synthetic.cognitiveservices.azure.com",
+            region="australiaeast",
+            deployments=deployments,
+            credential=object(),
+        )
+        assert client._resolve(config.foundry_model_key_for(purpose)) == f"explicit-{purpose}"
+        assert deployments == {"text-embedding-3-large@1": "embedding-target"}
+
+    @pytest.mark.parametrize("destinations", [("a", "b"), ("b", "a")])
+    def test_foundry_config_rejects_conflicting_raw_map(self, destinations: tuple[str, str]) -> None:
+        first, second = destinations
+        config = LLMClientConfig(foundry_deployments=f"model@opaque={first},model@opaque={second}")
+        with pytest.raises(FoundryConfigurationError) as error:
+            config.foundry_deployment_map()
+        assert all(value in str(error.value) for value in ("model@opaque", repr(first), repr(second)))
 
     def test_reasoning_tier_defaults(self) -> None:
         """Risk Assessment and Evacuation agents use reasoning tier."""

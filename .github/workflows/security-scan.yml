@@ -26,9 +26,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: gitleaks
-        uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2.x
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2.x
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_VERSION: "8.24.3"
+          GITLEAKS_CONFIG: .gitleaks.toml
+      - name: Verify Gitleaks emulator exceptions
+        run: python3 scripts/verify_emulator_secret_exceptions.py gitleaks
 
   psrule-bicep:
     runs-on: ubuntu-latest
@@ -43,6 +47,28 @@ jobs:
           version: 0.48.1
       - name: Run PSRule for Azure (Bicep)
         uses: microsoft/ps-rule@46451b8f5258c41beb5ae69ed7190ccbba84112c # v2.9.0
+        # Offline compilation fixtures only; no staging or production approval or deployment.
+        env:
+          AMA_STAGING_MODEL_PARAMETERS: >-
+            {"reasoningModelName":"synthetic-chat","reasoningModelVersion":"synthetic-version",
+            "draftingModelName":"synthetic-chat","draftingModelVersion":"synthetic-version",
+            "simulationModelName":"synthetic-chat","simulationModelVersion":"synthetic-version",
+            "reasoningVersionUpgradeOption":"NoAutoUpgrade","draftingVersionUpgradeOption":"NoAutoUpgrade",
+            "simulationVersionUpgradeOption":"NoAutoUpgrade","embeddingVersionUpgradeOption":"NoAutoUpgrade",
+            "deploymentOperatingStates":{"reasoning":{"currentCapacity":30,"deploymentState":"Running"},
+            "drafting":{"currentCapacity":60,"deploymentState":"Running"},
+            "simulation":{"currentCapacity":20,"deploymentState":"Running"},
+            "embedding":{"currentCapacity":60,"deploymentState":"Running"}}}
+          AMA_PRODUCTION_MODEL_PARAMETERS: >-
+            {"reasoningModelName":"synthetic-chat","reasoningModelVersion":"synthetic-version",
+            "draftingModelName":"synthetic-chat","draftingModelVersion":"synthetic-version",
+            "simulationModelName":"synthetic-chat","simulationModelVersion":"synthetic-version",
+            "reasoningVersionUpgradeOption":"NoAutoUpgrade","draftingVersionUpgradeOption":"NoAutoUpgrade",
+            "simulationVersionUpgradeOption":"NoAutoUpgrade","embeddingVersionUpgradeOption":"NoAutoUpgrade",
+            "deploymentOperatingStates":{"reasoning":{"currentCapacity":30,"deploymentState":"Running"},
+            "drafting":{"currentCapacity":60,"deploymentState":"Running"},
+            "simulation":{"currentCapacity":20,"deploymentState":"Running"},
+            "embedding":{"currentCapacity":60,"deploymentState":"Running"}}}
         with:
           modules: PSRule.Rules.Azure
           inputType: repository
@@ -58,6 +84,8 @@ jobs:
           persist-credentials: false
       - name: Trivy filesystem scan (Dockerfile + IaC)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          TRIVY_SECRET_CONFIG: trivy-secret.yaml
         with:
           version: v0.75.0
           scan-type: fs
@@ -65,3 +93,5 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"
+      - name: Verify Trivy emulator exceptions
+        run: python3 scripts/verify_emulator_secret_exceptions.py trivy

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "openAiAccountName": {
+      "value": "cog-dev-w3uq6w"
+    },
+    "location": {
+      "value": "australiaeast"
+    },
+    "envPrefix": {
+      "value": "dev"
+    },
+    "tags": {
+      "value": {}
+    },
+    "logAnalyticsWorkspaceId": {
+      "value": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.OperationalInsights/workspaces/log-dev"
+    },
+    "reasoningDeploymentName": {
+      "value": "gpt-5.4-dev"
+    },
+    "reasoningModelName": {
+      "value": "gpt-5.4"
+    },
+    "reasoningModelVersion": {
+      "value": "2026-03-05"
+    },
+    "draftingDeploymentName": {
+      "value": "gpt-5.4-mini-dev"
+    },
+    "draftingModelName": {
+      "value": "gpt-5.4"
+    },
+    "draftingModelVersion": {
+      "value": "2026-03-05"
+    },
+    "simulationDeploymentName": {
+      "value": "gpt-5.4-sim-dev"
+    },
+    "simulationModelName": {
+      "value": "gpt-5.4"
+    },
+    "simulationModelVersion": {
+      "value": "2026-03-05"
+    },
+    "modelDeploymentSku": {
+      "value": "GlobalStandard"
+    },
+    "reasoningTpmQuota": {
+      "value": 30
+    },
+    "draftingTpmQuota": {
+      "value": 60
+    },
+    "simulationTpmQuota": {
+      "value": 20
+    },
+    "embeddingModelName": {
+      "value": "text-embedding-3-large"
+    },
+    "embeddingModelVersion": {
+      "value": "1"
+    },
+    "embeddingTpmQuota": {
+      "value": 60
+    },
+    "reasoningVersionUpgradeOption": {
+      "value": "OnceNewDefaultVersionAvailable"
+    },
+    "draftingVersionUpgradeOption": {
+      "value": "OnceNewDefaultVersionAvailable"
+    },
+    "simulationVersionUpgradeOption": {
+      "value": "OnceNewDefaultVersionAvailable"
+    },
+    "embeddingVersionUpgradeOption": {
+      "value": "OnceNewDefaultVersionAvailable"
+    }
+  }
+}

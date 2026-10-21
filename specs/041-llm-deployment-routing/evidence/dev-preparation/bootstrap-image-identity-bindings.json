@@ -1,0 +1,19 @@
+{
+  "format": "Docker containerd OCI index/platform/config identity binding",
+  "applications": {
+    "api": {
+      "smoke_tested_local_reference": "sha256:caff7fe867c17363684ed78fa652425960d74e0c32ebac2681bf4d71c38c5b98",
+      "platform_manifest_digest": "sha256:170d27a5bde8b59fba331d386828e99b55a3499b14505dc354ddba487e16e063",
+      "approved_config_digest": "sha256:c42aff32ee93a012a6bbd5869c0279ed461b6ebe4c200de147b387be0b3dd0f8",
+      "archive_sha_verification": "PASS",
+      "manifest_config_binding": "PASS"
+    },
+    "agents": {
+      "smoke_tested_local_reference": "sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "platform_manifest_digest": "sha256:05ce1eba08436789c064de0e6f007739397fd0f09bb8d1842bb586a8801ac729",
+      "approved_config_digest": "sha256:ac7290a1e0a6eb1a40788743effee0ca4335afd1c6e6e9b551196af027327a97",
+      "archive_sha_verification": "PASS",
+      "manifest_config_binding": "PASS"
+    }
+  }
+}

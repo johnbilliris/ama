@@ -28,13 +28,16 @@ COPY apps/__init__.py apps/__init__.py
 COPY apps/console_logging.py apps/console_logging.py
 COPY apps/api/__init__.py apps/api/__init__.py
 COPY apps/api/app/__init__.py apps/api/app/__init__.py
+COPY apps/api/app/core apps/api/app/core
 COPY apps/api/app/repositories/__init__.py apps/api/app/repositories/__init__.py
 COPY apps/api/app/repositories/eval apps/api/app/repositories/eval
 
 RUN pip install --upgrade pip \
  && pip install ./packages/eval-core ./apps/eval-runner
 
-ENV PYTHONPATH="/workspace"
+ENV PYTHONPATH="/workspace/apps/api:/workspace"
+
+RUN python -c "from app.core.cosmos import create_cosmos_client; from apps.api.app.repositories.eval.repositories import DatasetRepository"
 
 USER evalrunner
 

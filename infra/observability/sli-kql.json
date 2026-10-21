@@ -67,7 +67,7 @@
     {
       "id": "SLI-Z6",
       "name": "P95 sub-agent reply latency (per model deployment)",
-      "$comment": "Cycle 2 / T-AA16 / A2-02 — staging-promotion gate per sli-thresholds.md row 6. Trailing 24 h window with 30-sample CLT floor (pass-2 Q4). Thresholds are model-specific: gpt-4o ≤ 4000 ms warn / ≤ 5000 ms breach; gpt-4o-mini ≤ 1500 ms warn / ≤ 2000 ms breach. Cycle 3 / T-AA34 / A3-05 — KQL aligned with contracts/sli-thresholds.md §6a canonical body (28-series cardinality restored via `extend sub_agent` + `summarize ... by sub_agent, model_deployment`; tnt-stg-smoke isolation filter added).",
+      "$comment": "Cycle 2 / T-AA16 / A2-02 — release gate per sli-thresholds.md row 6. Trailing 24 h window with 30-sample CLT floor (pass-2 Q4). Thresholds are model-specific: gpt-4o ≤ 4000 ms warn / ≤ 5000 ms breach; gpt-4o-mini ≤ 1500 ms warn / ≤ 2000 ms breach. Cycle 3 / T-AA34 / A3-05 — KQL aligned with contracts/sli-thresholds.md §6a canonical body (28-series cardinality restored via `extend sub_agent` + `summarize ... by sub_agent, model_deployment`; tnt-stg-smoke isolation filter added).",
       "window": "P1D",
       "warn_threshold_ms_gpt4o": 4000,
       "breach_threshold_ms_gpt4o": 5000,
@@ -82,7 +82,7 @@
     {
       "id": "SLI-Z7",
       "name": "Map-overlay drift error budget (SSE delivery)",
-      "$comment": "Cycle 2 / T-AA16 / A2-02 — staging-promotion gate per sli-thresholds.md row 7. ≥ 99.5 % within 1500 ms over a trailing 24 h window with 30-sample CLT floor. Aligns with SC-013 staging-promotion gate (spec.md L2785-2797). Cycle 3 / T-AA34 / A3-06 — drift dimension corrected to `client_received_ms - server_emit_ms` per spec; breach_pct: 99.5 → 99.0 (distinct warn/breach bands); group `by model_deployment` (per A3-06 alignment with Z6 cardinality); tnt-stg-smoke isolation filter added.",
+      "$comment": "Cycle 2 / T-AA16 / A2-02 — release gate per sli-thresholds.md row 7. ≥ 99.5 % within 1500 ms over a trailing 24 h window with 30-sample CLT floor. Aligns with SC-013 release gate (spec.md L2785-2797). Cycle 3 / T-AA34 / A3-06 — drift dimension corrected to `client_received_ms - server_emit_ms` per spec; breach_pct: 99.5 → 99.0 (distinct warn/breach bands); group `by model_deployment` (per A3-06 alignment with Z6 cardinality); tnt-stg-smoke isolation filter added.",
       "window": "P1D",
       "warn_pct": 99.5,
       "breach_pct": 99.0,

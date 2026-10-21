@@ -1,0 +1,30 @@
+{
+  "complete": true,
+  "started_at": "2026-10-20T04:45:30.862345+00:00",
+  "tag": "llm041-deps-20261020t044530",
+  "approved_config_digest": "sha256:92ead4b0319461877c595728a79ca117fe31176e0d28dcabeeb4730a364228da",
+  "local_image_index": "sha256:8b974c16194de865a16e18cd77cc49c252cd374c296e3a3783c60fb3b2e0b9b2",
+  "push_requested": true,
+  "completed_at": "2026-10-20T04:46:01.948673+00:00",
+  "applications": {
+    "api": {
+      "image": "crdevw3uq6w.azurecr.io/ama/api@sha256:8b974c16194de865a16e18cd77cc49c252cd374c296e3a3783c60fb3b2e0b9b2",
+      "approved_config_digest": "sha256:92ead4b0319461877c595728a79ca117fe31176e0d28dcabeeb4730a364228da",
+      "verified_config_digest": "sha256:92ead4b0319461877c595728a79ca117fe31176e0d28dcabeeb4730a364228da",
+      "manifest_digest": "sha256:8b974c16194de865a16e18cd77cc49c252cd374c296e3a3783c60fb3b2e0b9b2",
+      "platform_manifest_digest": "sha256:e1c0258a41e05a6cab7c65810cf51dbaa5afbe9359c119f61c682bb3887831b2"
+    },
+    "agents": {
+      "tag": "llm041-held-20261020t010013",
+      "local_image_reference": "sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "approved_config_digest": "sha256:ac7290a1e0a6eb1a40788743effee0ca4335afd1c6e6e9b551196af027327a97",
+      "manifest_digest": "sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "platform_manifest_digest": "sha256:05ce1eba08436789c064de0e6f007739397fd0f09bb8d1842bb586a8801ac729",
+      "verified_config_digest": "sha256:ac7290a1e0a6eb1a40788743effee0ca4335afd1c6e6e9b551196af027327a97",
+      "image": "crdevw3uq6w.azurecr.io/ama/agents@sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "registry_manifest_verified": true
+    }
+  },
+  "new_grants": 0,
+  "foundry_writes": 0
+}

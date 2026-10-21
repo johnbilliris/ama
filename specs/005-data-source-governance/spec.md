@@ -205,23 +205,23 @@ An incident commander, executive, or auditor opens the data source governance da
 Scoped to this spec's domain (per-country PII / data-source classification). Tagging follows `specs/027-spec-hardening` taxonomy: `[RISK]` (open externally-driven risk), `[DECISION]` (deliberate scoping decision), bare bullet (operating assumption).
 
 - **ASM-007**: The AU-v1 deployment context defined in `specs/001-disaster-response-hub/spec.md` is the operational baseline for this spec; capstone-country variants (PH / JP / BD) are deferred. `linked_gaps:` `specs/shared/gap-id-register.md` A-GAP-001..003. `status:` Open.
-- **ASM-008** [DECISION]: This spec's deliverables (per-country PII / data-source classification) integrate with the actor catalogue (`specs/004-actor-github-agents/spec.md`); responsible technical agents - compliance-auditor, security-engineer, product-owner-ba - are consulted via the `agent` tool during authoring and review.
+- **ASM-008** [DECISION]: This spec's deliverables (per-country PII / data-source classification) integrate with the actor catalogue (`specs/004-actor-github-agents/spec.md`). The compliance-auditor, security-engineer, and product-owner-ba roles identify the required review scope. Agent/tool invocations do not count as human consultation or approval; a revision-bound review record is required before claiming either. `status:` unverified.
 - **ASM-009**: Speckit conventions (FR/SC numbering, ASM/HYP/PER/SCP families) and the persona-profile YAML schema (`specs/027-spec-hardening/contracts/persona-profile.md`) are authoritative; this spec defers to those rather than redefining them.
 - **ASM-010** [RISK]: AU-only data residency (constitution NON-NEGOTIABLE #2; Azure `australiaeast` / `australiasoutheast` only) is in tension with the capstone Asia framing (PH / JP / BD sovereign-data handling). Resolution requires a constitution-level amendment owned outside this feature (see `specs/028-capstone-alignment/research.md` D-009). `linked_gaps:` constitution NON-NEGOTIABLE #2. `status:` Open.
 
 ## Personas
 
-Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
+Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 persona validation is unverified for this feature; PH / JP / BD entries remain explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
 
-- **PER-007**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
-- **PER-008**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
+- **PER-007**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` unverified. `preconditions:` feature-scoped practitioner validation with a dated revision-bound record.
+- **PER-008**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` unverified. `preconditions:` feature-scoped workflow/usability review with a dated revision-bound record.
 - **PER-009** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
 
 ## Hypotheses
 
 Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
 
-- **HYP-003**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-003.md` (created in feature 028 polish).
+- **HYP-043**: If this spec records per-change governance consultation and rehearsal evidence with named reviewers and dated revision links, then the next per-spec readiness review will report zero unsupported approval claims for this feature revision window. **Falsification**: at least two unsupported approval claims within one review cycle. **Evidence stub**: `specs/005-data-source-governance/evidence/HYP-043.md`. **Status**: Not tested. This owner-scoped hypothesis replaces the historical, malformed HYP-003 cross-reference; portfolio rubric snapshots do not establish its outcome.
 
 ## Out of Scope
 

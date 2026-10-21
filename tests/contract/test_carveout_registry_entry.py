@@ -6,7 +6,7 @@ tightenings on top of the schema:
 
 - ``data_minimisation_required: true``
 - ``classification_filter_required: true``
-- ``len(approver_identities) >= 2``
+- Normal approval floors, or one approver under an explicit unexpired waiver
 - ``review_date <= today + 365 days``
 
 Spec ref: data-model.md §CarveoutRegistryEntry; spec.md FR-RAG-CV-01..02.
@@ -60,6 +60,46 @@ def test_registry_validates_against_schema(registry, schema) -> None:
     jsonschema.validate(jsonable, schema)
 
 
+@pytest.mark.parametrize(
+    "schema_path",
+    [SCHEMA_PATH, ROOT / "specs" / "036-foundry-rag-grounding" / "contracts" / "foundry-cv.schema.json"],
+)
+@pytest.mark.parametrize("environment", ["dev", "staging", "prod"])
+def test_single_approver_schema_requires_explicit_waiver(schema_path: Path, environment: str) -> None:
+    jsonschema = pytest.importorskip("jsonschema")
+    payload = {
+        "version": 2,
+        "last_reviewed": dt.date.today().isoformat(),
+        "reviewer_quorum": 2,
+        "deployments": [
+            {
+                "model_name": "gpt-5.4",
+                "region": "australiaeast",
+                "environment": environment,
+                "purpose": "evaluation",
+                "business_justification": "Synthetic registry approval for testing the explicit quorum exception.",
+                "approver_identities": ["project-lead"],
+                "review_date": (dt.date.today() + dt.timedelta(days=60)).isoformat(),
+                "data_minimisation_required": True,
+                "classification_filter_required": True,
+            }
+        ],
+    }
+    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(payload, schema)
+    payload["quorum_waiver"] = {
+        "scope": "all_environments",
+        "approved_by": "project-lead",
+        "approval_reference": "Synthetic explicit project-lead waiver for all environments.",
+        "expires_on": (dt.date.today() + dt.timedelta(days=60)).isoformat(),
+    }
+    jsonschema.validate(payload, schema)
+    del payload["quorum_waiver"]["approval_reference"]
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(payload, schema)
+
+
 def test_reviewer_quorum_at_least_two(registry) -> None:
     """Schema requires reviewer_quorum >= 2; fail fast here for human-readable message."""
     assert int(registry["reviewer_quorum"]) >= 2, (
@@ -78,12 +118,29 @@ def test_every_row_carries_data_minimisation_and_classification_flags(registry) 
         )
 
 
-def test_every_row_has_at_least_two_real_approvers(registry) -> None:
-    """approver_identities MUST have ≥ 2 non-placeholder entries (FR-RAG-CV-01)."""
+def test_every_row_has_required_real_approvers(registry) -> None:
+    """Normal quorum applies unless an explicit unexpired waiver is recorded."""
+    waiver = registry.get("quorum_waiver")
+    if waiver is not None:
+        assert waiver["scope"] == "all_environments"
+        assert waiver["approved_by"] not in ("", None)
+        assert len(waiver["approval_reference"].strip()) >= 30
+        expiry = dt.date.fromisoformat(str(waiver["expires_on"]))
+        assert expiry >= dt.datetime.now(dt.UTC).date(), "Quorum waiver expired; remove or reapprove it"
     for row in registry.get("deployments") or []:
         approvers = row.get("approver_identities") or []
-        assert len(approvers) >= 2, (
-            f"FR-RAG-CV-01 — deployment {row['model_name']!r} has {len(approvers)} approver_identities; minimum is 2"
+        minimum = (
+            1
+            if waiver
+            else int(
+                registry.get("min_approvers_prod", 3)
+                if row.get("environment") == "prod"
+                else registry.get("min_approvers_dev", 2)
+            )
+        )
+        assert len(approvers) >= minimum, (
+            f"FR-RAG-CV-01 — deployment {row['model_name']!r} has "
+            f"{len(approvers)} approver_identities; minimum is {minimum}"
         )
         for who in approvers:
             for placeholder in PLACEHOLDER_PATTERNS:

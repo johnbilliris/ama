@@ -3563,6 +3563,31 @@
     },
     {
       "category": "mock",
+      "content_hash": "99413e103ca509d5e0067a6b70f5cbd93cd11529f56683638dfd7342e914a638",
+      "created_or_updated": "2026-10-20",
+      "cultural_review_required": false,
+      "dataset_version": "n/a",
+      "domain_group": "cross-sector",
+      "fictitious": true,
+      "id": "tests-fixtures-llm-deployment-provenance-json",
+      "licence": "CC-BY-4.0",
+      "name": "tests/fixtures/llm_deployment_provenance.json",
+      "path": "tests/fixtures/llm_deployment_provenance.json",
+      "persona_bindings": [
+        "observer-auditor"
+      ],
+      "pii": false,
+      "pspf": "OFFICIAL",
+      "record_count": 0,
+      "refresh_policy": "static",
+      "residency": "AU",
+      "snapshot_date": "n/a",
+      "source_url": "n/a",
+      "version": "1.0.0",
+      "volume_tier": "small"
+    },
+    {
+      "category": "mock",
       "content_hash": "7bff17cf7b0c997430358df5769f24343c475793921b275fdef662f5215d8fa0",
       "created_or_updated": "2026-05-11",
       "cultural_review_notes": "Path matches cultural-context heuristic; cultural-authority review required before content changes (CL-6, FR-044).",

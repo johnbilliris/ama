@@ -1,0 +1,379 @@
+{
+  "observed_at": "2026-10-19T13:13:17.862389+00:00",
+  "prepared_at": "2026-10-19T14:09:17.762034+00:00",
+  "scope": {
+    "tenant": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+    "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+    "resource_group": "ama",
+    "account_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w",
+    "account_name": "cog-dev-w3uq6w",
+    "account_kind": "AIServices",
+    "account_sku": "S0",
+    "environment": "dev",
+    "region": "australiaeast",
+    "endpoint": "https://dev-aif-w3uq6w.cognitiveservices.azure.com/"
+  },
+  "approval_reference": "Current user: preserve live baseline; pinned AVM child if compatible; PREPARATION ONLY",
+  "freshness_policy": {
+    "max_observation_age_seconds": 3600,
+    "refresh_before_what_if_and_activation": true,
+    "changed_bindings_require_reconciliation_and_reapproval": true
+  },
+  "gates": {
+    "G1": "accepted for preservation authoring only; unhealthy app release unresolved",
+    "G2": "complete discovery, exact 11 refreshed assignment names/enforcement retained",
+    "G3": "pinned unchanged child compatible; local build and contract PASS",
+    "G4": "NOT APPROVED; What-If/activation NOT PERFORMED"
+  },
+  "source_digest": "e548ccab8843833450972304ec035016325a104cd329130601f073c481a19625",
+  "services": {
+    "api": {
+      "image": "sha256:5bbd6497c7c74c0aa8e11a67326c8bfffc1f68ca4c894b30344e4e8dbd6474cb",
+      "image_kind": "immutable local Docker image ID; NOT a verified ACR manifest digest",
+      "registry_manifest_digest": null,
+      "llm_environment": {
+        "AZURE_AI_PROJECT_ENDPOINT": "https://dev-aif-w3uq6w.cognitiveservices.azure.com/",
+        "AZURE_AI_PROJECT_REGION": "australiaeast",
+        "AZURE_AI_PROJECT_DEPLOYMENTS": "reasoning=gpt-5.4-dev,drafting=gpt-5.4-mini-dev,simulation=gpt-5.4-sim-dev,text-embedding-3-large=text-embedding-3-large-dev,text-embedding-3-large@1=text-embedding-3-large-dev",
+        "EMBEDDING_DEPLOYMENT_NAME": "text-embedding-3-large-dev",
+        "AZURE_AI_REASONING_DEPLOYMENT": "gpt-5.4-dev",
+        "AZURE_AI_REASONING_MODEL_ID": "gpt-5.4",
+        "AZURE_AI_REASONING_MODEL_VERSION": "2026-03-05",
+        "AZURE_AI_REASONING_MODEL_KEY": "gpt-5.4@2026-03-05",
+        "AZURE_AI_DRAFTING_DEPLOYMENT": "gpt-5.4-mini-dev",
+        "AZURE_AI_DRAFTING_MODEL_ID": "gpt-5.4",
+        "AZURE_AI_DRAFTING_MODEL_VERSION": "2026-03-05",
+        "AZURE_AI_DRAFTING_MODEL_KEY": "gpt-5.4@2026-03-05",
+        "AZURE_AI_SIMULATION_DEPLOYMENT": "gpt-5.4-sim-dev",
+        "AZURE_AI_SIMULATION_MODEL_ID": "gpt-5.4",
+        "AZURE_AI_SIMULATION_MODEL_VERSION": "2026-03-05",
+        "AZURE_AI_SIMULATION_MODEL_KEY": "gpt-5.4@2026-03-05"
+      },
+      "observed_revision": "ca-api-dev--n6l54uy",
+      "preserve_other_environment_and_secret_refs": true,
+      "preserved_nonsecret_environment_and_secret_refs": [
+        {
+          "name": "AMA_ENVIRONMENT",
+          "value": "dev"
+        },
+        {
+          "name": "AMA_ALLOW_ANONYMOUS_DEV_ACCESS",
+          "value": "1"
+        },
+        {
+          "name": "AMA_ALLOW_ANONYMOUS_INCIDENT_MAP",
+          "value": "1"
+        },
+        {
+          "name": "AMA_ENABLE_INCIDENT_MAP_AUTH",
+          "value": "0"
+        },
+        {
+          "name": "AMA_ENTRA_TENANT_ID",
+          "value": ""
+        },
+        {
+          "name": "AMA_ENTRA_AUDIENCE",
+          "value": ""
+        },
+        {
+          "name": "COSMOS_ENDPOINT",
+          "value": "https://cosmos-dev-w3uq6w.documents.azure.com:443/"
+        },
+        {
+          "name": "COSMOS_DATABASE",
+          "value": "disaster-hub"
+        },
+        {
+          "name": "STORAGE_ACCOUNT_NAME",
+          "value": "stdevw3uq6w2"
+        },
+        {
+          "name": "AMA_EVIDENCE_COSMOS_DATABASE",
+          "value": "disaster-hub"
+        },
+        {
+          "name": "AMA_EVIDENCE_STORAGE_ACCOUNT_NAME",
+          "value": "stdevw3uq6w2"
+        },
+        {
+          "name": "REDIS_HOST",
+          "value": "redis-dev-w3uq6w.australiaeast.redis.azure.net"
+        },
+        {
+          "name": "REDIS_PORT",
+          "value": "10000"
+        },
+        {
+          "name": "AZURE_AI_PROJECT_ENDPOINT",
+          "value": "https://dev-aif-w3uq6w.cognitiveservices.azure.com/"
+        },
+        {
+          "name": "AZURE_AI_PROJECT_DEPLOYMENTS",
+          "value": "gpt-5.4@2026-03-05=gpt-5.4-dev,gpt-5.4@2026-03-05=gpt-5.4-mini-dev,gpt-5.4@2026-03-05=gpt-5.4-sim-dev,text-embedding-3-large@1=text-embedding-3-large-dev"
+        },
+        {
+          "name": "AZURE_AI_REASONING_MODEL_KEY",
+          "value": "gpt-5.4@2026-03-05"
+        },
+        {
+          "name": "AZURE_AI_DRAFTING_MODEL_KEY",
+          "value": "gpt-5.4@2026-03-05"
+        },
+        {
+          "name": "AZURE_AI_SIMULATION_MODEL_KEY",
+          "value": "gpt-5.4@2026-03-05"
+        },
+        {
+          "name": "AZURE_AI_REASONING_DEPLOYMENT",
+          "value": "gpt-5.4-dev"
+        },
+        {
+          "name": "AZURE_AI_DRAFTING_DEPLOYMENT",
+          "value": "gpt-5.4-mini-dev"
+        },
+        {
+          "name": "AZURE_AI_SIMULATION_DEPLOYMENT",
+          "value": "gpt-5.4-sim-dev"
+        },
+        {
+          "name": "AZURE_SEARCH_ENDPOINT",
+          "value": "https://srch-dev-w3uq6w.search.windows.net"
+        },
+        {
+          "name": "RETRIEVAL_INDEX_ALIAS",
+          "value": "corpus"
+        },
+        {
+          "name": "AGENTS_BASE_URL",
+          "value": "https://ca-agents-dev.internal.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io"
+        },
+        {
+          "name": "OTEL_SERVICE_NAME",
+          "value": "api"
+        }
+      ],
+      "withheld_preserved_environment_names": [
+        "APPLICATIONINSIGHTS_CONNECTION_STRING"
+      ],
+      "complete_secret_bearing_configuration_digest": null,
+      "rollback_pair_healthy": false,
+      "os": "linux",
+      "architecture": "amd64",
+      "created": "2026-10-19T13:27:12.446925968Z",
+      "build_status": "local build succeeded",
+      "network_isolated_resolver_smoke": {
+        "reasoning": "gpt-5.4-dev",
+        "drafting": "gpt-5.4-mini-dev",
+        "simulation": "gpt-5.4-sim-dev"
+      }
+    },
+    "agents": {
+      "image": "sha256:2bee5de4feeb4794253f62d4769799c05a83debb0798120fab0b3bc8ffd3cd1f",
+      "image_kind": "immutable local Docker image ID; NOT a verified ACR manifest digest",
+      "registry_manifest_digest": null,
+      "llm_environment": {
+        "AZURE_AI_PROJECT_ENDPOINT": "https://dev-aif-w3uq6w.cognitiveservices.azure.com/",
+        "AZURE_AI_PROJECT_REGION": "australiaeast",
+        "AZURE_AI_PROJECT_DEPLOYMENTS": "reasoning=gpt-5.4-dev,drafting=gpt-5.4-mini-dev,simulation=gpt-5.4-sim-dev,text-embedding-3-large=text-embedding-3-large-dev,text-embedding-3-large@1=text-embedding-3-large-dev",
+        "EMBEDDING_DEPLOYMENT_NAME": "text-embedding-3-large-dev",
+        "AZURE_AI_REASONING_DEPLOYMENT": "gpt-5.4-dev",
+        "AZURE_AI_REASONING_MODEL_ID": "gpt-5.4",
+        "AZURE_AI_REASONING_MODEL_VERSION": "2026-03-05",
+        "AZURE_AI_REASONING_MODEL_KEY": "gpt-5.4@2026-03-05",
+        "AZURE_AI_DRAFTING_DEPLOYMENT": "gpt-5.4-mini-dev",
+        "AZURE_AI_DRAFTING_MODEL_ID": "gpt-5.4",
+        "AZURE_AI_DRAFTING_MODEL_VERSION": "2026-03-05",
+        "AZURE_AI_DRAFTING_MODEL_KEY": "gpt-5.4@2026-03-05",
+        "AZURE_AI_SIMULATION_DEPLOYMENT": "gpt-5.4-sim-dev",
+        "AZURE_AI_SIMULATION_MODEL_ID": "gpt-5.4",
+        "AZURE_AI_SIMULATION_MODEL_VERSION": "2026-03-05",
+        "AZURE_AI_SIMULATION_MODEL_KEY": "gpt-5.4@2026-03-05"
+      },
+      "observed_revision": "ca-agents-dev--pm412va",
+      "preserve_other_environment_and_secret_refs": true,
+      "preserved_nonsecret_environment_and_secret_refs": [
+        {
+          "name": "COSMOS_ENDPOINT",
+          "value": "https://cosmos-dev-w3uq6w.documents.azure.com:443/"
+        },
+        {
+          "name": "COSMOS_DATABASE",
+          "value": "disaster-hub"
+        },
+        {
+          "name": "STORAGE_ACCOUNT_NAME",
+          "value": "stdevw3uq6w2"
+        },
+        {
+          "name": "REDIS_HOST",
+          "value": "redis-dev-w3uq6w.australiaeast.redis.azure.net"
+        },
+        {
+          "name": "REDIS_PORT",
+          "value": "10000"
+        },
+        {
+          "name": "AZURE_AI_PROJECT_ENDPOINT",
+          "value": "https://dev-aif-w3uq6w.cognitiveservices.azure.com/"
+        },
+        {
+          "name": "AZURE_AI_PROJECT_DEPLOYMENTS",
+          "value": "gpt-5.4@2026-03-05=gpt-5.4-dev,gpt-5.4@2026-03-05=gpt-5.4-mini-dev,gpt-5.4@2026-03-05=gpt-5.4-sim-dev,text-embedding-3-large@1=text-embedding-3-large-dev"
+        },
+        {
+          "name": "AZURE_AI_REASONING_MODEL_KEY",
+          "value": "gpt-5.4@2026-03-05"
+        },
+        {
+          "name": "AZURE_AI_DRAFTING_MODEL_KEY",
+          "value": "gpt-5.4@2026-03-05"
+        },
+        {
+          "name": "AZURE_AI_SIMULATION_MODEL_KEY",
+          "value": "gpt-5.4@2026-03-05"
+        },
+        {
+          "name": "AZURE_AI_REASONING_DEPLOYMENT",
+          "value": "gpt-5.4-dev"
+        },
+        {
+          "name": "AZURE_AI_DRAFTING_DEPLOYMENT",
+          "value": "gpt-5.4-mini-dev"
+        },
+        {
+          "name": "AZURE_AI_SIMULATION_DEPLOYMENT",
+          "value": "gpt-5.4-sim-dev"
+        },
+        {
+          "name": "AZURE_SEARCH_ENDPOINT",
+          "value": "https://srch-dev-w3uq6w.search.windows.net"
+        },
+        {
+          "name": "RETRIEVAL_INDEX_ALIAS",
+          "value": "corpus"
+        },
+        {
+          "name": "FEATURE_FOUNDRY_RAG_MONITORING",
+          "value": "1"
+        },
+        {
+          "name": "FEATURE_FOUNDRY_RAG_RISK_ASSESSMENT",
+          "value": "1"
+        },
+        {
+          "name": "FEATURE_FOUNDRY_RAG_EVACUATION",
+          "value": "1"
+        },
+        {
+          "name": "FEATURE_FOUNDRY_RAG_RESOURCE_ALLOCATION",
+          "value": "1"
+        },
+        {
+          "name": "FEATURE_FOUNDRY_RAG_COMMUNICATION",
+          "value": "1"
+        },
+        {
+          "name": "API_ENDPOINT",
+          "value": "https://ca-api-dev.livelydesert-fb4108d0.australiaeast.azurecontainerapps.io"
+        },
+        {
+          "name": "OTEL_SERVICE_NAME",
+          "value": "agents"
+        }
+      ],
+      "withheld_preserved_environment_names": [
+        "APPLICATIONINSIGHTS_CONNECTION_STRING"
+      ],
+      "complete_secret_bearing_configuration_digest": null,
+      "rollback_pair_healthy": false,
+      "os": "linux",
+      "architecture": "amd64",
+      "created": "2026-10-19T14:07:57.25355658Z",
+      "build_status": "local build succeeded",
+      "network_isolated_resolver_smoke": {
+        "reasoning": "gpt-5.4-dev",
+        "drafting": "gpt-5.4-mini-dev",
+        "simulation": "gpt-5.4-sim-dev"
+      }
+    }
+  },
+  "llm_environment_digest": "bd03d12b6e86a02815b26b74e71bd1e68e4a34bda090341b8f4fde062b066a88",
+  "complete_secret_bearing_configuration_digest": null,
+  "pair_binding_digest": "a62db83018c87deb12216285df095f97291965584ff68fc5c56cca0d07f3a069",
+  "paired_application_candidate_complete": true,
+  "candidate_binding_acceptance": "not approved for release; parent review/reapproval required before use",
+  "what_if_performed": false,
+  "cloud_writes_performed": false,
+  "release_ready": false,
+  "compiled_inventory": {
+    "bounded_top_level": [
+      {
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies",
+        "name": "[format('{0}/{1}', parameters('openAiAccountName'), variables('reasoningRaiPolicyName'))]"
+      },
+      {
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies",
+        "name": "[format('{0}/{1}', parameters('openAiAccountName'), variables('draftingRaiPolicyName'))]"
+      },
+      {
+        "type": "Microsoft.CognitiveServices/accounts/raiPolicies",
+        "name": "[format('{0}/{1}', parameters('openAiAccountName'), variables('simulationRaiPolicyName'))]"
+      },
+      {
+        "type": "Microsoft.Authorization/roleAssignments",
+        "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAiAccountName')), parameters('agentPrincipalIds')[copyIndex()], variables('cognitiveServicesOpenAiUserRoleId'))]"
+      },
+      {
+        "type": "Microsoft.Insights/diagnosticSettings",
+        "name": "openai-diagnostics"
+      },
+      {
+        "type": "Microsoft.Resources/deployments",
+        "name": "reasoning-model-deployment"
+      },
+      {
+        "type": "Microsoft.Resources/deployments",
+        "name": "drafting-model-deployment"
+      },
+      {
+        "type": "Microsoft.Resources/deployments",
+        "name": "simulation-model-deployment"
+      },
+      {
+        "type": "Microsoft.Resources/deployments",
+        "name": "embedding-model-deployment"
+      }
+    ],
+    "bounded_model_identities": [
+      "gpt-5.4-dev",
+      "gpt-5.4-mini-dev",
+      "gpt-5.4-sim-dev",
+      "text-embedding-3-large-dev"
+    ],
+    "parent_account_writes": 0,
+    "role_assignment_count": 0,
+    "rai_writes": 3,
+    "diagnostic_writes": [
+      "openai-diagnostics (pre-existing definition retained)"
+    ],
+    "model_resource_changes": "none in evaluated model/version/SKU/capacity/RAI/upgrade bindings; NOT live What-If"
+  },
+  "artifact_hashes": {
+    ".gitattributes": "4822e6aa7ef470d9346121bbbc35f0a682160451ba97c6a224c5c8280a5099e3",
+    "infra/main.bicep": "0ac80eea88fa9b21b0b60a1c2c86cc6f7b3ecf46c3001f1aaea244eeeee8906e",
+    "infra/main.json": "6a57bc1929e095a578b94cc9bd81f2e15139894b8601b9bb41444e68b06d7d04",
+    "infra/modules/azure-openai.bicep": "3c1f8421ce4a1d5575ed928f216e9e9d6a4a6deb394a513cae5ebdf5983ea8c3",
+    "infra/modules/azure-openai.json": "694566b23dfeebdb32f330795b074c49f7eec2591987e92750cdc68d9c443f3c",
+    "infra/parameters/dev.bicepparam": "fda38c984bb0e8c5debb048baa82422c6daf99832280e9d1218a7bbb2da8d134",
+    "infra/main.parameters.dev.json": "2e0ecb93167905ed6237e329770e28d979a877df152aacaadeab18b8c703b896",
+    "infra/modules/vendor/avm-cognitive-services-deployment-0.18.0/main.bicep": "a0d007d0f61a143949c0d0acb771f59c9bc96f72db4d952fc03dc8a4d1834aa1",
+    "specs\\041-llm-deployment-routing\\evidence\\dev-preparation\\deployments.bicepparam": "5083c04eefcf59e5bcbb6bc940da70c120cc910d4e4509013b667dedfd9988ec",
+    "specs\\041-llm-deployment-routing\\evidence\\dev-preparation\\deployments.parameters.json": "d96c2f010bebdc04634e764e6cda5639e2df8ec05ec92cec86bf726a3c4de0d7",
+    "specs\\041-llm-deployment-routing\\evidence\\dev-preparation\\deployments.template.json": "694566b23dfeebdb32f330795b074c49f7eec2591987e92750cdc68d9c443f3c",
+    "specs\\041-llm-deployment-routing\\evidence\\dev-preparation\\main-dev.parameters.json": "039bedb5bbc62e7eefbfe029e5d0da3b4834ae164cb824984b4dc471df8c22a6",
+    "specs\\041-llm-deployment-routing\\evidence\\dev-preparation\\refresh.json": "08e487ead2454d273a7c3ac43ddd5de17699d98ffc0660cd07eba696dbe63a8e",
+    "specs\\041-llm-deployment-routing\\evidence\\dev-preparation\\protection-comparison.json": "dd3ffb71d0015a5f9386c52fb852022a07c61e96b6ab82a9cd071d49358ca6ce",
+    "specs\\041-llm-deployment-routing\\evidence\\dev-preparation\\policy-definition-refresh.json": "9ce4dd6accf2b55a64a39157ecf1536679a6665096a0a0e44439c0c0ad496739"
+  }
+}

@@ -94,7 +94,7 @@ class SubAgentInvocationRecord(BaseModel):
         description="sha256 hex over canonical LLM prompt (FR-060).",
     )
     model_deployment: str = Field(
-        description="e.g. 'gpt-4o-mini-australiaeast'.",
+        description="Observed deployment, or 'unknown' when unavailable.",
     )
     latency_ms: NonNegativeInt
     outcome: SubAgentOutcome
@@ -104,6 +104,10 @@ class SubAgentInvocationRecord(BaseModel):
     triggering_signal_id: str | None = None
     origin_cascade_id: str | None = None
     error_code: str | None = None
+    model_id: str | None = None
+    model_version: str | None = None
+    inference_attempted: bool | None = Field(default=None, strict=True)
+    inference_outcome: Literal["succeeded", "failed", "not_attempted", "unknown"] | None = None
 
     # ---- AIIMS tagging (T-T02 / FR-061 / data-model.md §8.7) ---------------
     aiims_function: AiimsFunction | None = Field(

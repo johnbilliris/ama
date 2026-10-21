@@ -275,7 +275,7 @@ class _InMemoryBackend:
 
 
 def _build_container() -> Any:
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]

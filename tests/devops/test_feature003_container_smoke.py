@@ -4,6 +4,7 @@ from pathlib import Path
 
 API_DOCKERFILE = Path("apps/api/Dockerfile")
 AGENTS_DOCKERFILE = Path("apps/agents/Dockerfile")
+INGESTION_DOCKERFILE = Path("apps/ingestion/Dockerfile")
 DEPENDENCY_INSTALLER = Path("scripts/install_pyproject_dependencies.py")
 WORKFLOW_RUNS_ROUTE = Path("apps/api/app/api/routes/workflow_runs.py")
 QUICKSTART = Path("specs/003-rubric-gap-closure/quickstart.md")
@@ -39,6 +40,15 @@ def test_agents_dockerfile_uses_manifest_first_install_order() -> None:
     assert "python - <<'PY'" not in text
 
 
+def test_ingestion_dockerfile_applies_workspace_dependency_overrides() -> None:
+    text = _text(INGESTION_DOCKERFILE)
+    assert "COPY pyproject.toml ./pyproject.toml" in text
+    assert "['tool']['uv']['override-dependencies']" in text
+    assert "uv --no-config pip install --system --no-cache" in text
+    assert "--overrides /tmp/uv-overrides.txt" in text
+    assert "./packages/eval-core ./apps/api ./apps/ingestion" in text
+
+
 def test_dependency_installer_is_copied_into_both_builders() -> None:
     assert DEPENDENCY_INSTALLER.is_file()
     for dockerfile in (API_DOCKERFILE, AGENTS_DOCKERFILE):
@@ -58,8 +68,8 @@ def test_container_images_preserve_nonroot_and_dispatcher_startup() -> None:
 
 def test_quickstart_uses_root_build_context() -> None:
     text = _text(QUICKSTART)
-    assert "docker build -f apps/api/Dockerfile -t drh-api ." in text
-    assert "docker build -f apps/agents/Dockerfile -t drh-agents ." in text
+    assert "docker build --platform linux/arm64 -f apps/api/Dockerfile -t drh-api ." in text
+    assert "docker build --platform linux/arm64 -f apps/agents/Dockerfile -t drh-agents ." in text
 
 
 def test_api_health_and_workflow_routes_are_present() -> None:

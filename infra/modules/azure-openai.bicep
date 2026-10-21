@@ -12,6 +12,20 @@
 // ADR-20 §Q-P6-03.
 // ────────────────────────────────────────────────────────────────────────────────
 
+import { deploymentOperatingState } from './cognitive-services-deployment-preservation.bicep'
+
+@export()
+@description('Explicit approved operating states for all existing deployments, including embedding.')
+type deploymentOperatingStatesType = {
+  reasoning: deploymentOperatingState
+  drafting: deploymentOperatingState
+  simulation: deploymentOperatingState
+  embedding: deploymentOperatingState
+}
+
+@description('Required observed capacities and Running/Paused states; no inferred defaults.')
+param deploymentOperatingStates deploymentOperatingStatesType
+
 @description('Name of the existing Azure OpenAI resource')
 param openAiAccountName string
 
@@ -27,22 +41,49 @@ param tags object
 
 // Model configuration
 @description('Reasoning-tier model name')
-param reasoningModelName string = 'gpt-5.4'
+@minLength(1)
+param reasoningModelName string
 
 @description('Reasoning-tier model version')
-param reasoningModelVersion string = '2026-03-05'
+@minLength(1)
+param reasoningModelVersion string
 
 @description('Drafting-tier model name')
-param draftingModelName string = 'gpt-5.4'
+@minLength(1)
+param draftingModelName string
 
 @description('Drafting-tier model version')
-param draftingModelVersion string = '2026-03-05'
+@minLength(1)
+param draftingModelVersion string
 
 @description('Simulation Controller model name (used by the Simulation chat endpoint).')
-param simulationModelName string = 'gpt-5.4'
+@minLength(1)
+param simulationModelName string
 
 @description('Simulation Controller model version.')
-param simulationModelVersion string = '2026-03-05'
+@minLength(1)
+param simulationModelVersion string
+
+@description('Existing reasoning deployment name. Purpose/environment default is for new resources only.')
+param reasoningDeploymentName string = 'reasoning-${envPrefix}'
+
+@description('Existing drafting deployment name. Purpose/environment default is for new resources only.')
+param draftingDeploymentName string = 'drafting-${envPrefix}'
+
+@description('Existing simulation deployment name. Purpose/environment default is for new resources only.')
+param simulationDeploymentName string = 'simulation-${envPrefix}'
+
+@description('Explicit approved reasoning version upgrade behavior.')
+param reasoningVersionUpgradeOption string
+
+@description('Explicit approved drafting version upgrade behavior.')
+param draftingVersionUpgradeOption string
+
+@description('Explicit approved simulation version upgrade behavior.')
+param simulationVersionUpgradeOption string
+
+@description('Explicit approved embedding version upgrade behavior.')
+param embeddingVersionUpgradeOption string
 
 // TPM quotas (in thousands)
 @description('Reasoning-tier TPM quota (K). Dev=30, Prod=120')
@@ -71,6 +112,15 @@ param embeddingTpmQuota int = 60
 @allowed(['Standard', 'GlobalStandard'])
 param modelDeploymentSku string = 'GlobalStandard'
 
+@description('Approved reasoning SKU; defaults to the explicitly selected shared SKU.')
+param reasoningDeploymentSku string = modelDeploymentSku
+
+@description('Approved drafting SKU; defaults to the explicitly selected shared SKU.')
+param draftingDeploymentSku string = modelDeploymentSku
+
+@description('Approved simulation SKU; defaults to the explicitly selected shared SKU.')
+param simulationDeploymentSku string = modelDeploymentSku
+
 // RBAC
 @description('Principal IDs to grant Cognitive Services OpenAI User role')
 param agentPrincipalIds array = []
@@ -78,6 +128,9 @@ param agentPrincipalIds array = []
 // Diagnostics
 @description('Log Analytics workspace ID for diagnostic settings')
 param logAnalyticsWorkspaceId string
+
+@description('Approved diagnostic log and metric snapshots; omitted fields retain the existing module defaults.')
+param diagnosticSettings object = {}
 
 // ────────────────────────────────────────────────────────────────────────────────
 // Reference the existing Azure OpenAI account
@@ -102,7 +155,7 @@ resource openAiAccount 'Microsoft.CognitiveServices/accounts@2024-10-01' existin
 // so that future per-tier tuning — e.g. relaxing the simulation tier further
 // without touching live-incident tiers — is a localised change.
 //
-// Reference: Microsoft.CognitiveServices/accounts/raiPolicies API 2024-10-01.
+// Reference: Microsoft.CognitiveServices/accounts/raiPolicies API 2026-05-01.
 // ────────────────────────────────────────────────────────────────────────────────
 
 var emDomainContentFilters = [
@@ -112,6 +165,7 @@ var emDomainContentFilters = [
     enabled: true
     blocking: true
     severityThreshold: 'High'
+    action: 'NONE'
   }
   {
     name: 'Violence'
@@ -119,6 +173,7 @@ var emDomainContentFilters = [
     enabled: true
     blocking: true
     severityThreshold: 'High'
+    action: 'NONE'
   }
 ]
 
@@ -133,9 +188,11 @@ var simulationRaiPolicyName = 'sim-em-domain-${envPrefix}'
 //   reasoningRaiPolicy → reasoningDeployment
 //     → draftingRaiPolicy → draftingDeployment
 //     → simulationRaiPolicy → simulationDeployment
-//     → embeddingDeployment (no RAI policy; serialised on simulationDeployment)
+//     → embeddingDeployment (existing Microsoft.DefaultV2; serialised on simulationDeployment)
 
-resource reasoningRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2024-10-01' = {
+// Preserve the observed wire action exactly; do not assume NONE/None or omission equivalence.
+#disable-next-line BCP081
+resource reasoningRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2026-05-01' = {
   parent: openAiAccount
   name: reasoningRaiPolicyName
   properties: {
@@ -145,7 +202,8 @@ resource reasoningRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@20
   }
 }
 
-resource draftingRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2024-10-01' = {
+#disable-next-line BCP081
+resource draftingRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2026-05-01' = {
   parent: openAiAccount
   name: draftingRaiPolicyName
   properties: {
@@ -156,7 +214,8 @@ resource draftingRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@202
   dependsOn: [reasoningDeployment]
 }
 
-resource simulationRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2024-10-01' = {
+#disable-next-line BCP081
+resource simulationRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2026-05-01' = {
   parent: openAiAccount
   name: simulationRaiPolicyName
   properties: {
@@ -171,78 +230,90 @@ resource simulationRaiPolicy 'Microsoft.CognitiveServices/accounts/raiPolicies@2
 // Model Deployments
 // ────────────────────────────────────────────────────────────────────────────────
 
-resource reasoningDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
-  parent: openAiAccount
-  name: 'gpt-5.4-${envPrefix}'
-  sku: {
-    name: modelDeploymentSku
-    capacity: reasoningTpmQuota
-  }
-  properties: {
+module reasoningDeployment './cognitive-services-deployment-preservation.bicep' = {
+  name: 'reasoning-model-deployment'
+  params: {
+    accountName: openAiAccountName
+    name: reasoningDeploymentName
+    sku: {
+      name: reasoningDeploymentSku
+      capacity: reasoningTpmQuota
+    }
     model: {
       format: 'OpenAI'
       name: reasoningModelName
       version: reasoningModelVersion
     }
     raiPolicyName: reasoningRaiPolicy.name
+    versionUpgradeOption: reasoningVersionUpgradeOption
+    operatingState: deploymentOperatingStates.reasoning
   }
 }
 
-resource draftingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
-  parent: openAiAccount
-  name: 'gpt-5.4-mini-${envPrefix}'
-  sku: {
-    name: modelDeploymentSku
-    capacity: draftingTpmQuota
-  }
-  properties: {
+module draftingDeployment './cognitive-services-deployment-preservation.bicep' = {
+  name: 'drafting-model-deployment'
+  params: {
+    accountName: openAiAccountName
+    name: draftingDeploymentName
+    sku: {
+      name: draftingDeploymentSku
+      capacity: draftingTpmQuota
+    }
     model: {
       format: 'OpenAI'
       name: draftingModelName
       version: draftingModelVersion
     }
     raiPolicyName: draftingRaiPolicy.name
+    versionUpgradeOption: draftingVersionUpgradeOption
+    operatingState: deploymentOperatingStates.drafting
   }
 }
 
 // Dedicated deployment for the Simulation Controller (spec 024).
-// GlobalStandard SKU isolates exercise traffic from live-incident reasoning/drafting
-// quota so a runaway simulation cannot starve real-incident agents.
-resource simulationDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
-  parent: openAiAccount
-  name: 'gpt-5.4-sim-${envPrefix}'
-  sku: {
-    name: modelDeploymentSku
-    capacity: simulationTpmQuota
-  }
-  properties: {
+// Preserve its separate existing quota so an exercise cannot starve live agents.
+module simulationDeployment './cognitive-services-deployment-preservation.bicep' = {
+  name: 'simulation-model-deployment'
+  params: {
+    accountName: openAiAccountName
+    name: simulationDeploymentName
+    sku: {
+      name: simulationDeploymentSku
+      capacity: simulationTpmQuota
+    }
     model: {
       format: 'OpenAI'
       name: simulationModelName
       version: simulationModelVersion
     }
     raiPolicyName: simulationRaiPolicy.name
+    versionUpgradeOption: simulationVersionUpgradeOption
+    operatingState: deploymentOperatingStates.simulation
   }
 }
 
 // Spec 036 FR-RAG-IDX-02 — embedding deployment for the corpus ingest pipeline
 // (apps/ingest-runner) and runtime hybrid retrieval (apps/agents/common/retrieval_client.py).
-// Embedding deployments do not require an RAI policy. Serialised behind the simulation
+// Embedding retains Microsoft.DefaultV2. Serialised behind the simulation
 // deployment so all four child operations on the parent Cognitive Services account
 // run sequentially (ARM rejects concurrent child ops with RequestConflict).
-resource embeddingDeployment 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
-  parent: openAiAccount
-  name: '${embeddingModelName}-${envPrefix}'
-  sku: {
-    name: 'Standard'
-    capacity: embeddingTpmQuota
-  }
-  properties: {
+module embeddingDeployment './cognitive-services-deployment-preservation.bicep' = {
+  name: 'embedding-model-deployment'
+  params: {
+    accountName: openAiAccountName
+    name: '${embeddingModelName}-${envPrefix}'
+    sku: {
+      name: 'Standard'
+      capacity: embeddingTpmQuota
+    }
     model: {
       format: 'OpenAI'
       name: embeddingModelName
       version: embeddingModelVersion
     }
+    raiPolicyName: 'Microsoft.DefaultV2'
+    versionUpgradeOption: embeddingVersionUpgradeOption
+    operatingState: deploymentOperatingStates.embedding
   }
   dependsOn: [simulationDeployment]
 }
@@ -277,11 +348,11 @@ resource openAiDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
   scope: openAiAccount
   properties: {
     workspaceId: logAnalyticsWorkspaceId
-    logs: [
+    logs: diagnosticSettings.?logs ?? [
       { category: 'RequestResponse', enabled: true }
       { category: 'Audit', enabled: true }
     ]
-    metrics: [
+    metrics: diagnosticSettings.?metrics ?? [
       { category: 'AllMetrics', enabled: true }
     ]
   }
@@ -291,36 +362,65 @@ resource openAiDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-pre
 // Outputs
 // ────────────────────────────────────────────────────────────────────────────────
 
-output reasoningDeploymentName string = reasoningDeployment.name
-output draftingDeploymentName string = draftingDeployment.name
-output simulationDeploymentName string = simulationDeployment.name
-output embeddingDeploymentName string = embeddingDeployment.name
+output reasoningDeploymentName string = reasoningDeployment.outputs.name
+output draftingDeploymentName string = draftingDeployment.outputs.name
+output simulationDeploymentName string = simulationDeployment.outputs.name
+output embeddingDeploymentName string = embeddingDeployment.outputs.name
 output reasoningRaiPolicyName string = reasoningRaiPolicy.name
 output draftingRaiPolicyName string = draftingRaiPolicy.name
 output simulationRaiPolicyName string = simulationRaiPolicy.name
 output openAiEndpoint string = openAiAccount.properties.endpoint
 
-// Spec 036 / ADR-20 — Foundry deployments CSV consumed by `azure-ai-inference`
-// SDK (apps/agents/maf_runtime/chat_client.py + apps/agents/common/llm_client.py +
-// apps/api/app/services/simulation/controller_service.py). Format: per-deployment
-// `<modelId>@<version>=<deploymentName>`, comma-separated.
-//
-// Spec 036 FR-RAG-IDX-02 — embedding deployment is included so the ingest-runner
-// (apps/ingest-runner) and any future retrieval consumer can resolve
-// `<embeddingModelName>@<version>` → live deployment name through the same env
-// var (``AZURE_AI_PROJECT_DEPLOYMENTS``) used by the chat seam.
-output azureAiProjectDeployments string = '${reasoningModelName}@${reasoningModelVersion}=${reasoningDeployment.name},${draftingModelName}@${draftingModelVersion}=${draftingDeployment.name},${simulationModelName}@${simulationModelVersion}=${simulationDeployment.name},${embeddingModelName}@${embeddingModelVersion}=${embeddingDeployment.name}'
+@description('Model-coordinate candidates, including unchanged embedding compatibility.')
+var selections = [
+  { model: reasoningModelName, version: reasoningModelVersion, deployment: reasoningDeploymentName }
+  { model: draftingModelName, version: draftingModelVersion, deployment: draftingDeploymentName }
+  { model: simulationModelName, version: simulationModelVersion, deployment: simulationDeploymentName }
+  { model: embeddingModelName, version: embeddingModelVersion, deployment: '${embeddingModelName}-${envPrefix}' }
+]
+
+@description('Stable tier aliases; preflight rejects collisions with unrelated model coordinates.')
+var tierAliases = [
+  'reasoning=${reasoningDeploymentName}'
+  'drafting=${draftingDeploymentName}'
+  'simulation=${simulationDeploymentName}'
+]
+
+@description('Only coordinates with exactly one distinct destination remain in the legacy map.')
+var legacyCoordinates = flatten(map(selections, selection => [
+  { key: '${selection.model}@${selection.version}', deployment: selection.deployment }
+  { key: selection.model, deployment: selection.deployment }
+]))
+
+@description('Group aliases before rendering, so a shared chat model never silently selects the first tier.')
+var coordinateGroups = groupBy(legacyCoordinates, coordinate => coordinate.key)
+
+@description('Unambiguous legacy entries, deduplicated by key and destination.')
+var uniqueCoordinates = filter(items(coordinateGroups), entry => length(union(
+  map(entry.value, coordinate => coordinate.deployment),
+  []
+)) == 1)
+
+@description('Reuse identical tier aliases; leave unrelated collisions visible to mandatory preflight validation.')
+var distinctCoordinates = filter(uniqueCoordinates, entry => !contains(
+  tierAliases,
+  '${entry.key}=${first(entry.value)!.deployment}'
+))
+
+@description('One compatibility CSV for every application consumer.')
+output azureAiProjectDeployments string = join(concat(
+  tierAliases,
+  map(distinctCoordinates, entry => '${entry.key}=${first(entry.value)!.deployment}')
+), ',')
 
 // Spec 036 — embedding model key (`<modelId>@<version>`) consumed by the
 // ingest-runner CLI. The carve-out preflight splits on `@` and looks up
 // `embeddingModelName` in `infra/parameters/foundry-carveout.yaml`.
 output embeddingModelKey string = '${embeddingModelName}@${embeddingModelVersion}'
 
-// Per-tier deployment model-key outputs — the simulation Controller and
-// agent llm clients pick the deployment by `<modelName>@<version>` from
-// the AZURE_AI_PROJECT_DEPLOYMENTS CSV. Until tiers diverge, all three
-// resolve to the same key (gpt-5.4@2026-03-05) — the CSV lookup picks
-// the first matching entry, which is the reasoning deployment.
+@description('Reasoning model identity, not a destination alias.')
 output reasoningDeploymentModelKey string = '${reasoningModelName}@${reasoningModelVersion}'
+@description('Drafting model identity, not a destination alias.')
 output draftingDeploymentModelKey string = '${draftingModelName}@${draftingModelVersion}'
+@description('Simulation model identity, not a destination alias.')
 output simulationDeploymentModelKey string = '${simulationModelName}@${simulationModelVersion}'

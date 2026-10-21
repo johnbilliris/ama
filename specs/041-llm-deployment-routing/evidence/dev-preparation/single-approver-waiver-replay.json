@@ -1,0 +1,51 @@
+{
+  "checked_at": "2026-10-19T23:45:20.948358+00:00",
+  "scope": "offline replay of unchanged captured Dev What-If; no Azure requests",
+  "authorization": {
+    "approved_by": "johnbilliris",
+    "instruction": "You are ordered to skip the second approver requirement.",
+    "confirmed_scope": "All environments",
+    "review_deadline": "2030-11-20"
+  },
+  "effective_approver_floor": 1,
+  "waiver_expiry_inclusive_utc": "2030-11-20",
+  "normal_floors_retained": {
+    "prod": 3,
+    "dev_staging": 2
+  },
+  "model_registered": "gpt-5.4",
+  "model_environment": "dev",
+  "model_approvers": [
+    "johnbilliris"
+  ],
+  "model_review_date": "2027-04-08",
+  "model_review_window_waived": false,
+  "powershell_exit_code": 0,
+  "opa_version": "0.70.0",
+  "opa_deny": [],
+  "opa_deny_after_waiver_expiry": [
+    "FR-RAG-CV-01 violation: deployment gpt-5.4 has fewer than 2 approver_identities (dev/staging requires >= 2).",
+    "Invalid or expired quorum_waiver; normal approval floors apply."
+  ],
+  "source_sha256": {
+    "scripts\\verify-carveout.ps1": "18eeec7edd1e9ee60b38b14c97ed963a6dec7e7d4c49013d95371edb29127ee4",
+    "infra\\parameters\\foundry-carveout.yaml": "45427038e20ae18754757953df1b576869adcb737e099ad0aaa18bfd32cf5979",
+    "infra\\parameters\\foundry-carveout.schema.json": "0c6ed3ffdcec9393b2a79bbd63624ce067b2ff8e14b80dab9160438ea1daaf4d",
+    "infra\\policy\\rego\\foundry_carveout.rego": "4ff6101b876a8c83d4db5e98bfc96de4eeade57a508f6f5eb45510cfa33f8c34",
+    "specs\\036-foundry-rag-grounding\\contracts\\foundry-cv.schema.json": "4f6c3895171a51a18450bec5cf918651c3b3b95272476a828f51ac012a4c174d",
+    "specs\\041-llm-deployment-routing\\evidence\\dev-preparation\\corrected-validation-what-if.json": "fa2390577409f4617c0b764d95cf03e60c3e6e088b969eaa87c07543d84e01f5"
+  },
+  "related_tests": "64 passed; unchanged test_valid_deployment_passes failure expects eastus and a 2030 model review date",
+  "release_ready": false,
+  "remaining_release_blockers": [
+    "deployment capacity/state preservation",
+    "RAI action preservation",
+    "fresh authorised live evidence and reconciled changed registry binding",
+    "immutable published image/config pair and healthy rollback/bootstrap",
+    "stage-specific release approval"
+  ],
+  "azure_calls": 0,
+  "deployments": 0,
+  "commits": 0,
+  "opa_runtime_sha256": "19d00eea60477a8f983c20af690fedcc8da52aef81922e570b27538ca88305a4"
+}
